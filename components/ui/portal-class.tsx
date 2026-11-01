@@ -4,10 +4,20 @@ import { createContext, type ReactNode, useContext } from "react";
 
 const HudPortalClass = createContext<string | null>(null);
 
+const ThemePortalClass = createContext<string | null>(null);
+
 export function HudPortalClassProvider({ value, children }: { value: string | null; children: ReactNode }) {
   return <HudPortalClass.Provider value={value}>{children}</HudPortalClass.Provider>;
 }
 
 export function useHudPortalClass(): string | undefined {
   return useContext(HudPortalClass) ?? undefined;
+}
+
+export function ThemePortalClassProvider({ value, children }: { value: string | null; children: ReactNode }) {
+  return <ThemePortalClass.Provider value={value}>{children}</ThemePortalClass.Provider>;
+}
+
+export function useThemePortalClass(): string | undefined {
+  return useContext(ThemePortalClass) ?? undefined;
 }

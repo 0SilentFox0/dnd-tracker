@@ -72,14 +72,14 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
         {exact && participant.abilities.creatureType && <div className="text-[10px] text-[var(--hud-muted)]">{creatureTypeLabel(participant.abilities.creatureType)}</div>}
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
-          {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}
+          {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-hud-text")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}
         </div>
         <HealthBar participant={participant} exact={exact} />
         <EffectLine effects={effects} />
         {participant.battleData.deathSaves && <DeathSavePips saves={participant.battleData.deathSaves} />}
         {badge && <div className="mt-1 text-xs text-[var(--hud-muted)]">{text(badge)}</div>}
       </div>
-      <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-[#b8ab95]">
+      <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-hud-soft">
         {acText}
         <Shield className="size-4 text-[var(--hud-muted)]" />
       </span>

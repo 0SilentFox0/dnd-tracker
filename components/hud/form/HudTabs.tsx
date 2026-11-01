@@ -28,7 +28,7 @@ export function HudTabs<T extends string>({ tabs, value, onValueChange, header, 
 
   return (
     <Tabs value={value} onValueChange={(v) => onValueChange(v as T)}>
-      <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-hud-rule bg-[#110e0b]/[.97]">
+      <div className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-hud-rule bg-hud-page/[.97]">
         {header}
         <TabsList className="hud-scroll-x flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none md:flex-wrap md:overflow-x-visible bg-transparent p-1.5">
           {tabs.map((tab) => (

@@ -46,7 +46,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
   return (
     <div>
-      <WorldPanelHeader badge={<HeaderIcon className="size-5 text-[#2a1d05]" aria-hidden />} title={marker.name} subtitle={t("editor.markerSubtitle", { shape: t(`shape.${marker.kind}`), map: detail?.map.name ?? "" })} />
+      <WorldPanelHeader badge={<HeaderIcon className="size-5 text-[var(--palette-primary-foreground,#2a1d05)]" aria-hidden />} title={marker.name} subtitle={t("editor.markerSubtitle", { shape: t(`shape.${marker.kind}`), map: detail?.map.name ?? "" })} />
       <HudSection title={t("editor.basic")}>
         <div className="space-y-3">
           <LabeledInput label={t("name")} maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />

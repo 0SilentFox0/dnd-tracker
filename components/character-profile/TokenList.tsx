@@ -61,7 +61,7 @@ export function TokenList() {
       {tokens.length === 0 && <p className="text-sm text-hud-muted">{t("empty")}</p>}
       <ul>
         {tokens.map((token) => (
-          <li key={token.id} className="flex items-center gap-2 border-b border-[#2a2218] py-1.5 text-sm">
+          <li key={token.id} className="flex items-center gap-2 border-b border-hud-raised py-1.5 text-sm">
             <span className={cn("size-3 shrink-0 rounded-full", TOKEN_DOT[token.color])} />
             <span className="min-w-0 flex-1 break-words">{token.label}</span>
             <span className="shrink-0 text-xs text-hud-muted">{format.dateTime(new Date(token.createdAt), { dateStyle: "short" })}</span>

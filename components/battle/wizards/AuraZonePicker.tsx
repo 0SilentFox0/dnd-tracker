@@ -19,7 +19,7 @@ export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
     <div className="space-y-2 border border-[var(--gold)]/50 bg-[var(--gold)]/5 p-3">
       <div>
         <div className="hud-sc text-lg font-bold">{t("aura.title", { name: aura.ability.name })}</div>
-        <div className="text-xs text-[#a89c88]">
+        <div className="text-xs text-hud-soft">
           {t(enemies ? "aura.hintEnemies" : "aura.hintAllies", { effects: aura.effects.map(abilityText.effect).join(", ") })}
         </div>
       </div>

@@ -5,12 +5,12 @@ import { SHOWCASE_MEDIA, type ShowcaseId, type ShowcaseMedia } from "@/component
 import { cn } from "@/lib/utils";
 
 const FRAME =
-  "overflow-hidden rounded-xl border border-hud-line bg-[#0e0b09] shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.15)] transition duration-500 hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.4),0_0_60px_-20px_rgba(230,194,90,.35)]";
+  "overflow-hidden rounded-xl border border-hud-line bg-hud-page shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.15)] transition duration-500 hover:shadow-[0_30px_70px_-20px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.4),0_0_60px_-20px_rgba(230,194,90,.35)]";
 
 export function MediaFrame({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
   return (
     <div className={cn(FRAME, className)}>
-      <div className="flex items-center gap-2 border-b border-hud-rule bg-[#15110d] px-3 py-1.5">
+      <div className="flex items-center gap-2 border-b border-hud-rule bg-hud-surface px-3 py-1.5">
         <span className="flex gap-1" aria-hidden>
           <span className="size-2 rounded-full bg-[#5a3a2a]" />
           <span className="size-2 rounded-full bg-[#5a4a2a]" />

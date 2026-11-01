@@ -8,7 +8,7 @@ const TONE = {
   bone: "text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
   accent: "text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-gold)]",
   muted: "text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
-  fact: "text-[#c9bfae] shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
+  fact: "text-hud-soft shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
 } as const;
 
 interface HudPillProps {

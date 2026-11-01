@@ -36,7 +36,7 @@ export function ActionGrid({ turn, pending, available, actions }: {
         {turn.moraleResult && <Tile icon={Hourglass} label={tm(`outcome.${turn.moraleResult}`)} used />}
       </div>
       {turn.phase !== "countdown" && (
-        <button type="button" disabled={pending} onClick={() => void turn.actions.endTurn()} className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-[#b8ab95] disabled:opacity-50">
+        <button type="button" disabled={pending} onClick={() => void turn.actions.endTurn()} className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-hud-soft disabled:opacity-50">
           {t("endTurn")}
         </button>
       )}

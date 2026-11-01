@@ -22,7 +22,7 @@ interface GrantArtifactDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const ROW = "flex min-h-11 w-full items-center gap-3 border-b border-[#2a2218] py-2 text-left disabled:opacity-50";
+const ROW = "flex min-h-11 w-full items-center gap-3 border-b border-hud-raised py-2 text-left disabled:opacity-50";
 
 function ArtifactRow({ a, subtitle, disabled, onClick }: { a: FreeArtifact; subtitle: string; disabled: boolean; onClick: () => void }) {
   return (

@@ -36,6 +36,6 @@ describe("ProfileSpellBook", () => {
     mockMatchMedia(true);
     render(<Harness />);
 
-    expect(document.querySelector(".hud-book")?.className).toContain("text-[#2a2018]");
+    expect(document.querySelector(".hud-book")?.className).toContain("text-[var(--book-ink,#2a2018)]");
   });
 });

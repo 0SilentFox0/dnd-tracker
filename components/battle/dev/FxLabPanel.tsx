@@ -112,7 +112,7 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
           data-fx-participant={u.id}
           className={cn("flex min-h-[64px] items-center gap-2.5 rounded-lg border border-white/[.08] bg-black/30 px-3 py-2 text-sm font-bold text-[var(--ink)]", hitId.ids.includes(u.id) && "animate-[hud-flash-red_.5s]")}
         >
-          <span className="flex size-10 items-center justify-center rounded-full bg-[#241d16] text-xs text-[var(--bone)]" style={{ boxShadow: `0 0 0 2px ${side === "ally" ? "var(--ally)" : "var(--enemy)"}, 0 0 0 3px #000` }}>
+          <span className="flex size-10 items-center justify-center rounded-full bg-hud-raised text-xs text-[var(--bone)]" style={{ boxShadow: `0 0 0 2px ${side === "ally" ? "var(--ally)" : "var(--enemy)"}, 0 0 0 3px #000` }}>
             {u.name.slice(0, 2)}
           </span>
           {u.name}
@@ -122,7 +122,7 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
   );
 
   return (
-    <section className="rounded-xl border border-hud-rule bg-[rgba(17,14,11,.82)] p-3">
+    <section className="rounded-xl border border-hud-rule bg-hud-panel p-3">
       <div ref={arenaRef} className="relative grid grid-cols-2 gap-x-16 gap-y-2 py-6">
         {column("ally")}
         {column("enemy")}

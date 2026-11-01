@@ -65,7 +65,7 @@ export function MobileBattleLayout() {
 
   const turnKey = hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
-  const waitingFor = <span className="italic text-[#b8ab95]">{t.rich("waitingFor", { name: current?.basicInfo.name ?? "", b: (chunks) => <b className="hud-sc not-italic text-[var(--ink)]">{chunks}</b> })}</span>;
+  const waitingFor = <span className="italic text-hud-soft">{t.rich("waitingFor", { name: current?.basicInfo.name ?? "", b: (chunks) => <b className="hud-sc not-italic text-[var(--ink)]">{chunks}</b> })}</span>;
 
   return (
     <MapStripSlotContext value={slot}>
@@ -126,10 +126,10 @@ export function MobileBattleLayout() {
       )}
       <ActionResultCard />
       {isDM && <DmPanel panel={{ open: dmOpen, onOpenChange: setDmOpen }} />}
-      <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title={t("participant")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title={t("participant")} className={cn(HUD_SURFACE, "border-white/25 bg-hud-surface")}>
         {selected && <ParticipantDetails participant={selected} />}
       </ResponsiveDialog>
-      <ResponsiveDialog open={log.open} onOpenChange={(o) => !o && closeLog()} title={t("log")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      <ResponsiveDialog open={log.open} onOpenChange={(o) => !o && closeLog()} title={t("log")} className={cn(HUD_SURFACE, "border-white/25 bg-hud-surface")}>
         <BattleLog key={log.focus ?? "latest"} />
       </ResponsiveDialog>
     </div>

@@ -1,12 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Edit, Trash2 } from "lucide-react";
 
 import { ActionsMenu } from "@/components/common/ActionsMenu";
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { ZoomableEntityIcon } from "@/components/common/ZoomableEntityIcon";
 import { HudCard } from "@/components/hud/page";
 
 interface DmEntityCardProps {
@@ -22,12 +21,12 @@ export function DmEntityCard({ href, title, accent, icon, onDelete, children }: 
   const t = useTranslations("common.actions");
 
   return (
-    <HudCard accent={accent} className="flex h-full flex-col gap-3">
+    <HudCard href={href} linkLabel={title} accent={accent} className="flex h-full flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
-        <Link href={href} className="flex min-w-0 flex-1 items-center gap-2">
-          {icon !== undefined && <EntityIcon src={icon} name={title} size={48} className="size-12 rounded-lg" />}
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          {icon !== undefined && <ZoomableEntityIcon src={icon} name={title} size={96} className="size-20 rounded-lg text-2xl" />}
           <h3 className="hud-sc truncate text-lg text-hud-ink">{title}</h3>
-        </Link>
+        </div>
         <ActionsMenu
           triggerSize="sm"
           triggerClassName="h-8 w-8 p-0"
@@ -37,9 +36,7 @@ export function DmEntityCard({ href, title, accent, icon, onDelete, children }: 
           ]}
         />
       </div>
-      <Link href={href} className="flex flex-wrap gap-2">
-        {children}
-      </Link>
+      <div className="flex flex-wrap gap-2">{children}</div>
     </HudCard>
   );
 }

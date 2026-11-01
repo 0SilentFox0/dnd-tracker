@@ -35,7 +35,7 @@ export function AbilityChips({ abilities, selectedId, invalidIds, onSelect, onAd
             onClick={() => onSelect(a.id)}
             className={cn(
               "flex h-8 shrink-0 items-center rounded-full px-3 text-[13px] text-hud-muted shadow-[inset_0_0_0_1px_var(--color-hud-line)]",
-              on && "text-[#ffd9a8] shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_8px_rgba(230,194,90,.3)]",
+              on && "text-hud-gold-bright shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_8px_var(--color-hud-glow)]",
             )}
           >
             <span className="max-w-[10rem] truncate">{a.name || t("noName")}</span>
@@ -47,7 +47,7 @@ export function AbilityChips({ abilities, selectedId, invalidIds, onSelect, onAd
         type="button"
         variant="ghost"
         onClick={onAdd}
-        className="h-8 shrink-0 rounded-full px-3 text-[13px] text-[#ffd9a8] shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)] hover:bg-transparent hover:text-[#ffd9a8]"
+        className="h-8 shrink-0 rounded-full px-3 text-[13px] text-hud-gold-bright shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)] hover:bg-transparent hover:text-hud-gold-bright"
       >
         {t("add")}
       </Button>

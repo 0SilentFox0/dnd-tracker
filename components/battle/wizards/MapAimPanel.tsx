@@ -27,7 +27,7 @@ export function MapAimPanel({ ariaLabel, title, hint, children, footer }: MapAim
         "text-[var(--ink)]",
         slot
           ? "pb-1"
-          : "fixed inset-x-0 bottom-0 z-40 border-t border-white/25 bg-[#15110e]/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:w-[300px] lg:border lg:pb-3",
+          : "fixed inset-x-0 bottom-0 z-40 border-t border-white/25 bg-hud-surface/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:w-[300px] lg:border lg:pb-3",
       )}
     >
       <div className={cn(slot && "flex items-baseline gap-3")}>

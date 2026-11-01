@@ -90,7 +90,7 @@ export function ProgressionPanel({ campaignId, characterId, canManage = false }:
               {canManage && (
                 <div className="flex flex-wrap gap-2 px-4 py-3">
                   {view.orphans.length > 0 && (
-                    <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-[#d6cbb7]" onClick={() => void actions.unlearn(view.orphans)}>
+                    <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs text-hud-text" onClick={() => void actions.unlearn(view.orphans)}>
                       {t("orphans", { count: view.orphans.length })}
                     </Button>
                   )}

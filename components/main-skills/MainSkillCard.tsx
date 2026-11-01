@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Edit, Trash2 } from "lucide-react";
 
 import { ActionsMenu } from "@/components/common/ActionsMenu";
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { ZoomableEntityIcon } from "@/components/common/ZoomableEntityIcon";
 import { HudCard } from "@/components/hud/page";
 import type { MainSkill } from "@/types/main-skills";
 
@@ -22,7 +22,7 @@ export function MainSkillCard({
   const t = useTranslations();
 
   return (
-    <HudCard accent={mainSkill.color} className="space-y-3">
+    <HudCard href={`/campaigns/${campaignId}/dm/main-skills/${mainSkill.id}`} linkLabel={mainSkill.name} accent={mainSkill.color} className="space-y-3">
       <div>
         <div className="flex items-start justify-between">
           <div className="min-w-0 flex-1">
@@ -61,7 +61,7 @@ export function MainSkillCard({
           {mainSkill.icon && (
             <div>
               <span className="text-sm font-semibold">{t("skills.mainSkills.card.icon")}</span>
-              <EntityIcon src={mainSkill.icon} name={mainSkill.name} size={32} emoji className="mt-1 size-8 rounded bg-hud-field text-xl text-inherit" />
+              <ZoomableEntityIcon src={mainSkill.icon} name={mainSkill.name} size={96} emoji className="mt-1 size-20 rounded bg-hud-field text-3xl text-inherit" />
             </div>
           )}
         </div>

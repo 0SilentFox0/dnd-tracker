@@ -20,14 +20,12 @@ const [CASTER] = PREVIEW_UNITS;
 
 function Chip({ label, book, children }: { label: string; book: boolean; children: ReactNode }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] leading-4", book ? "border-[#7a2a1f]/40 bg-[#7a2a1f]/[.06] text-[#2a2018]" : "border-white/15 bg-white/[.04]")}>
-      <span className={book ? "text-[#7a6650]" : "text-[#a8987c]"}>{label}</span>
+    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] leading-4", book ? "spell-book-preview-pill" : "border-white/15 bg-white/[.04]")}>
+      <span className={book ? "spell-book-muted" : "text-[#a8987c]"}>{label}</span>
       {children}
     </span>
   );
 }
-
-const BOOK_WASH = "radial-gradient(ellipse at 50% 45%, #3b2a1c 0%, #2a1d14 58%, rgba(42,29,20,.6) 82%, rgba(42,29,20,0) 100%)";
 
 export default function SpellBattlePreviewPanel({ spell, className, variant = "hud" }: { spell: PreviewSpell; className?: string; variant?: "hud" | "book" }) {
   const t = useTranslator("spells");
@@ -68,17 +66,17 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
       aria-label={t("fx.aria")}
       className={cn(
         "fx-preview text-[13px] not-italic",
-        book ? "text-[#2a2018]" : "rounded-xl border border-black/50 bg-[rgba(17,14,11,.94)] p-2.5 text-[#e6dccb] shadow-[inset_0_0_0_1px_rgba(230,194,90,.14)]",
+        book ? "spell-book-preview" : "rounded-xl border border-black/50 bg-[rgba(17,14,11,.94)] p-2.5 text-[#e6dccb] shadow-[inset_0_0_0_1px_rgba(230,194,90,.14)]",
         className,
       )}
     >
       {fx.userEnabled && (
-        <div className={cn(book && "mb-2 rounded-[2px] border border-[#7a2a1f] p-[3px]")}>
+        <div className={cn(book && "spell-book-border mb-2 rounded-[2px] border p-[3px]")}>
           <div
             ref={arenaRef}
             data-testid="spell-preview-arena"
-            className={cn("relative grid gap-x-6 py-3", book ? "px-7 py-5 outline outline-1 -outline-offset-[1px] outline-[#7a2a1f]/50" : "mb-2", others.length ? "grid-cols-2" : "grid-cols-1 justify-items-center")}
-            style={book ? { background: BOOK_WASH, boxShadow: "inset 0 0 22px 6px rgba(20,12,6,.55)" } : undefined}
+            className={cn("relative grid gap-x-6 py-3", book ? "px-7 py-5 outline outline-1 -outline-offset-[1px] outline-[color-mix(in_srgb,var(--book-accent,#7a2a1f)_50%,transparent)]" : "mb-2", others.length ? "grid-cols-2" : "grid-cols-1 justify-items-center")}
+            style={book ? { background: "radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--book-accent) 24%, var(--book-page)) 0%, var(--book-page) 72%)", boxShadow: "inset 0 0 22px 6px color-mix(in srgb, var(--book-ink) 15%, transparent)" } : undefined}
           >
           <div className="w-full max-w-[220px] self-center">{row(CASTER)}</div>
           {others.length > 0 && <div className="space-y-1.5">{others.map(row)}</div>}
@@ -103,7 +101,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
             onClick={replay}
             className={cn(
               "ml-auto inline-flex min-h-7 items-center gap-1 rounded-full px-2.5 text-[11px]",
-              book ? "text-[#7a2a1f] shadow-[inset_0_0_0_1px_rgba(122,42,31,.6)] hover:bg-[#7a2a1f]/10" : "text-[#e6c25a] shadow-[inset_0_0_0_1px_rgba(230,194,90,.45)] hover:bg-white/5",
+              book ? "spell-book-preview-title shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--book-accent)_60%,transparent)] hover:bg-[color-mix(in_srgb,var(--book-accent)_10%,transparent)]" : "text-[#e6c25a] shadow-[inset_0_0_0_1px_rgba(230,194,90,.45)] hover:bg-white/5",
             )}
           >
             <Play className="size-3" aria-hidden />

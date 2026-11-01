@@ -8,8 +8,8 @@ import { GripVertical, X } from "lucide-react";
 import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
 import { AbilityFlowList } from "@/components/abilities/AbilityFlow";
-import { EntityIcon } from "@/components/common/EntityIcon";
 import { MonsterStatblock } from "@/components/common/MonsterStatblock";
+import { ZoomableEntityIcon } from "@/components/common/ZoomableEntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,7 +68,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
   const primaryAttack = primaryIdx >= 0 ? attacks[primaryIdx] : null;
 
   return (
-    <HudCard className="group/card relative flex flex-col justify-between space-y-3">
+    <HudCard href={`/campaigns/${campaignId}/dm/units/${unit.id}`} linkLabel={unit.name} className="group/card relative flex flex-col justify-between space-y-3">
       <div
         draggable
         onDragStart={handleDragStart}
@@ -79,7 +79,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
       </div>
       <div className="pl-5">
         <div className="flex items-start gap-3">
-          <EntityIcon src={unit.avatar} name={unit.name} size={80} className="size-16 rounded-lg text-2xl sm:size-20" />
+          <ZoomableEntityIcon src={unit.avatar} name={unit.name} size={128} className="size-20 rounded-lg text-2xl sm:size-24" />
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-semibold text-hud-ink">
               {unit.name}

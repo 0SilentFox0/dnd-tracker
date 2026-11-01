@@ -194,7 +194,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           },
         ]}
       />
-      <ActionBar className="bg-[#110e0b]/95 px-4">
+      <ActionBar className="bg-hud-page/95 px-4">
         <Button type="button" variant="outline" onClick={onDone}>
           {tca("cancel")}
         </Button>

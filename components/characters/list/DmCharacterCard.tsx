@@ -48,7 +48,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
   const isNpc = character.type === CharacterType.NPC_HERO;
 
   return (
-    <HudCard className="space-y-3 p-3">
+    <HudCard href={`/campaigns/${campaignId}/dm/characters/${character.id}`} linkLabel={character.name} className="space-y-3 p-3">
       <HeroPortrait src={character.avatar} name={character.name} className="max-h-72" />
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1 space-y-1">

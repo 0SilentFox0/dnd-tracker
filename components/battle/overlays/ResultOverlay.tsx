@@ -36,10 +36,10 @@ export function ResultOverlay() {
     return (
       <div className={cn(shell, "bg-[radial-gradient(circle_at_50%_42%,rgba(232,199,122,.35)_0,rgba(10,8,6,.92)_55%)]")}>
         <div className="absolute left-1/2 top-[42%] size-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[repeating-conic-gradient(rgba(232,199,122,.16)_0_6deg,transparent_6deg_20deg)] [mask:radial-gradient(circle,#000_20%,transparent_65%)] animate-[hud-spin_8s_linear_infinite]" />
-        <div className={cn(die, "relative mb-5 size-[88px] bg-[#e8c77a] text-[40px] text-[#2a1d05]")}>{fx.d10}</div>
+        <div className={cn(die, "relative mb-5 size-[88px] bg-[#e8c77a] text-[40px] text-[var(--palette-primary-foreground,#2a1d05)]")}>{fx.d10}</div>
         <div className="hud-sc relative text-[40px] font-extrabold leading-[44px] tracking-[.08em] text-[#f3dc9a] [text-shadow:0_0_24px_rgba(232,199,122,.6)] animate-[hud-rise_.7s_.25s_both]">{t("extraTitle")}</div>
         <div className="relative mt-3 text-base animate-[hud-fade_.5s_.6s_both]">{t("extraText", { name: fx.name })}</div>
-        <div className="relative mt-1.5 text-sm text-[#a89c88]">{t("detail", { d10: fx.d10, morale: signed(fx.morale) })}</div>
+        <div className="relative mt-1.5 text-sm text-hud-soft">{t("detail", { d10: fx.d10, morale: signed(fx.morale) })}</div>
         <button type="button" onClick={close} className={cn(cta, "relative border border-hud-gold-strong bg-[#8a6414] text-[#fff3d1]")}>{t("toBattle")}</button>
       </div>
     );
@@ -54,7 +54,7 @@ export function ResultOverlay() {
         <div className={cn(die, "mb-5 size-[88px] bg-[#3a3a40] text-[40px] text-[#c9c9cf]")}>{fx.d10}</div>
         <div className="hud-sc text-[40px] font-extrabold tracking-[.14em] text-[#b9b9c0] animate-[hud-shake-title_.5s_.45s_both]">{t("skipTitle")}</div>
         <div className="mt-3 text-base">{t("skipText", { name: fx.name })}</div>
-        <div className="mt-1.5 text-sm text-[#a89c88]">{t("detail", { d10: fx.d10, morale: fx.morale })}</div>
+        <div className="mt-1.5 text-sm text-hud-soft">{t("detail", { d10: fx.d10, morale: fx.morale })}</div>
         <div className="mt-8 h-[3px] w-full max-w-xs bg-[#333]"><i className="block h-full bg-[var(--enemy)]" style={{ animation: `hud-countdown ${MORALE_SKIP_MS}ms 0s linear forwards` }} /></div>
       </div>
     );

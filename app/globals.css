@@ -1,23 +1,32 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./palettes.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme static {
-  --color-hud-muted: #8f8473;
-  --color-hud-gold: #c9b37a;
-  --color-hud-ink: #efe5d2;
-  --color-hud-bone: #e6dccb;
-  --color-hud-line: #4a3c2c;
-  --color-hud-field: #1a140f;
-  --color-hud-rule: #3a2e22;
-  --color-hud-danger: #d0705c;
-  --color-hud-bad: #ff8a7a;
-  --color-hud-good: #a8d48f;
-  --color-hud-good-dim: #7fa86a;
-  --color-hud-gold-bright: #ffe08a;
-  --color-hud-gold-strong: #e6c25a;
-  --color-hud-panel: rgba(17, 14, 11, 0.82);
+  --color-hud-muted: var(--hud-muted, #8f8473);
+  --color-hud-gold: var(--hud-gold, #c9b37a);
+  --color-hud-ink: var(--hud-ink, #efe5d2);
+  --color-hud-bone: var(--hud-bone, #e6dccb);
+  --color-hud-line: var(--hud-line, #4a3c2c);
+  --color-hud-field: var(--hud-field, #1a140f);
+  --color-hud-rule: var(--hud-rule, #3a2e22);
+  --color-hud-danger: var(--hud-danger, #d0705c);
+  --color-hud-bad: var(--hud-bad, #ff8a7a);
+  --color-hud-good: var(--hud-good, #a8d48f);
+  --color-hud-good-dim: var(--hud-good-dim, #7fa86a);
+  --color-hud-gold-bright: var(--hud-gold-bright, #ffe08a);
+  --color-hud-gold-strong: var(--hud-gold-strong, #e6c25a);
+  --color-hud-panel: var(--palette-panel, rgba(17, 14, 11, 0.82));
+  --color-hud-page: var(--palette-page, #0b0908);
+  --color-hud-surface: var(--palette-card, #1a140f);
+  --color-hud-raised: var(--palette-secondary, #2a2218);
+  --color-hud-soft: color-mix(in srgb, var(--hud-muted, #8f8473) 45%, var(--hud-bone, #e6dccb));
+  --color-hud-text: color-mix(in srgb, var(--hud-bone, #e6dccb) 88%, var(--hud-muted, #8f8473));
+  --color-hud-edge: color-mix(in srgb, var(--hud-gold-strong, #e6c25a) 25%, transparent);
+  --color-hud-edge-faint: color-mix(in srgb, var(--hud-gold-strong, #e6c25a) 14%, transparent);
+  --color-hud-glow: color-mix(in srgb, var(--hud-gold-strong, #e6c25a) 20%, transparent);
   --flow-when: #6aa4e0;
   --flow-if: #e0b04a;
   --flow-then: #e07a6a;
@@ -353,9 +362,14 @@
   }
   body {
     @apply text-foreground;
-    background-color: #0b0908;
+    background-color: var(--palette-page, #0b0908);
     min-height: 100vh;
     position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  body > .page-transition {
+    flex: 1 0 auto;
   }
   body::before,
   body::after {
@@ -435,3 +449,5 @@
 @supports not selector(::-webkit-scrollbar) {
   * { scrollbar-width: thin; scrollbar-color: rgb(230, 194, 90) transparent; }
 }
+
+[data-clickable] :is(a, button, [role="button"]):not([data-card-overlay], .absolute, .fixed) { position: relative; z-index: 1; }

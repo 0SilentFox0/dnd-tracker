@@ -59,10 +59,10 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
   };
 
   return (
-    <HudCard className="flex h-full flex-col gap-2">
+    <HudCard href={`/campaigns/${campaignId}/dm/spells/${spell.id}`} linkLabel={spell.name} className="flex h-full flex-col gap-2">
       <div className="flex items-start gap-3">
-        <div className="metal-bronze relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(#2c2219,#0f0c09)] shadow-[inset_0_0_0_2px_var(--m2)]">
-          <SpellIcon spell={spell} size={44} className="size-full object-cover p-0.5" />
+        <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-gold)]">
+          <SpellIcon spell={spell} size={64} className="size-full object-cover p-0.5" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
@@ -107,7 +107,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
 
       <SpellComponentsLine spell={spell} className="line-clamp-2" />
 
-      <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-hud-muted">
+      <div className="flex min-w-0 items-center gap-1.5 border-t border-hud-raised pt-1.5 text-[11px] text-hud-muted">
         <GroupIcon className="size-3 shrink-0" />
         <span className="truncate">{groupName}</span>
         {/* Тимчасово: ID заклинання та копіювання */}

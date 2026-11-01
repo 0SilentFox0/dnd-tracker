@@ -1,0 +1,124 @@
+/* Account palettes share one token surface. Battle participants and school hues remain semantic. */
+html[data-palette] {
+  --palette-panel: color-mix(in srgb, var(--palette-card) 82%, transparent);
+  --background: var(--palette-background);
+  --foreground: var(--palette-foreground);
+  --card: var(--palette-card);
+  --card-foreground: var(--palette-foreground);
+  --popover: var(--palette-card);
+  --popover-foreground: var(--palette-foreground);
+  --primary: var(--hud-gold);
+  --primary-foreground: var(--palette-primary-foreground);
+  --secondary: var(--palette-secondary);
+  --secondary-foreground: var(--palette-foreground);
+  --muted: var(--palette-secondary);
+  --muted-foreground: var(--hud-muted);
+  --accent: var(--palette-secondary);
+  --accent-foreground: var(--palette-foreground);
+  --border: var(--hud-line);
+  --input: var(--hud-line);
+  --ring: var(--hud-gold);
+  --sidebar: var(--palette-card);
+  --sidebar-foreground: var(--palette-foreground);
+  --sidebar-primary: var(--hud-gold);
+  --sidebar-primary-foreground: var(--palette-primary-foreground);
+  --sidebar-accent: var(--palette-secondary);
+  --sidebar-accent-foreground: var(--palette-foreground);
+  --sidebar-border: var(--hud-line);
+  --sidebar-ring: var(--hud-gold);
+  --palette-overlay: rgba(0, 0, 0, .76);
+  color-scheme: dark;
+}
+
+html[data-palette="tavern"] {
+  --palette-background: #110e0b; --palette-foreground: #e6dccb; --palette-card: #1a140f; --palette-secondary: #2a2218; --palette-primary-foreground: #2a1d05;
+  --palette-page: #0b0908; --palette-header: rgba(11, 9, 8, .97); --palette-overlay: rgba(0, 0, 0, .75);
+  --hud-muted: #8f8473; --hud-gold: #c9b37a; --hud-ink: #efe5d2; --hud-bone: #e6dccb; --hud-line: #4a3c2c; --hud-field: #1a140f; --hud-rule: #3a2e22; --hud-danger: #d0705c; --hud-bad: #ff8a7a; --hud-good: #a8d48f; --hud-good-dim: #7fa86a; --hud-gold-bright: #ffe08a; --hud-gold-strong: #e6c25a;
+  --book-cover: #3a2016; --book-page: #e9dec5; --book-ink: #2a2018; --book-muted: #7a6650; --book-quiet: #6b5a45; --book-rule: #2a2018; --book-accent: #7a2a1f; --book-accent-ink: #7a2a1f; --book-choice: #9c2a1d; --book-wash: #9c2a1d;
+}
+
+html[data-palette="midnight"] {
+  --palette-background: #0c1424; --palette-foreground: #e1eafa; --palette-card: #131f34; --palette-secondary: #1c2b43; --palette-primary-foreground: #0d1a2d;
+  --palette-page: #0a1020; --palette-header: rgba(10, 16, 32, .97);
+  --hud-muted: #899dbb; --hud-gold: #8dbcf4; --hud-ink: #edf4ff; --hud-bone: #d8e6fa; --hud-line: #314665; --hud-field: #131f34; --hud-rule: #273b57; --hud-danger: #ed8a83; --hud-bad: #ff9992; --hud-good: #91d5b3; --hud-good-dim: #6fb391; --hud-gold-bright: #c3ddff; --hud-gold-strong: #72a9e7;
+  --book-cover: #1b2f52; --book-page: #e3eaf5; --book-ink: #17243b; --book-muted: #52668a; --book-quiet: #43587c; --book-rule: #17243b; --book-accent: #2d5d9f; --book-accent-ink: #234f8a; --book-choice: #2d5d9f; --book-wash: #2d5d9f;
+}
+
+html[data-palette="forest"] {
+  --palette-background: #0d1913; --palette-foreground: #e1eddf; --palette-card: #15251b; --palette-secondary: #203329; --palette-primary-foreground: #102116;
+  --palette-page: #09130d; --palette-header: rgba(9, 19, 13, .97);
+  --hud-muted: #91a58f; --hud-gold: #9ec89c; --hud-ink: #eef4eb; --hud-bone: #e1eddf; --hud-line: #3c5944; --hud-field: #15251b; --hud-rule: #2b4533; --hud-danger: #e08773; --hud-bad: #ff9a83; --hud-good: #a9d48f; --hud-good-dim: #79ad6e; --hud-gold-bright: #d6edb0; --hud-gold-strong: #8cba78;
+  --book-cover: #1f3d2a; --book-page: #e4ecdd; --book-ink: #172a1d; --book-muted: #566d5a; --book-quiet: #475e4c; --book-rule: #172a1d; --book-accent: #3b6f45; --book-accent-ink: #2e5d38; --book-choice: #3b6f45; --book-wash: #3b6f45;
+}
+
+html[data-palette="parchment"] {
+  --palette-background: #f1e9d9; --palette-foreground: #30271c; --palette-card: #faf5e9; --palette-secondary: #e7dcc8; --palette-primary-foreground: #fffaf0;
+  --palette-page: #eee5d4; --palette-header: rgba(248, 242, 230, .97); --palette-overlay: rgba(239, 230, 212, .3);
+  --hud-muted: #756753; --hud-gold: #795522; --hud-ink: #352c20; --hud-bone: #30271c; --hud-line: #c6b797; --hud-field: #faf5e9; --hud-rule: #c6b797; --hud-danger: #a54332; --hud-bad: #a23227; --hud-good: #426d3b; --hud-good-dim: #58834f; --hud-gold-bright: #8a6414; --hud-gold-strong: #a97620;
+  --book-cover: #67401f; --book-page: #faf3e4; --book-ink: #30271c; --book-muted: #79674d; --book-quiet: #6e5c44; --book-rule: #806b50; --book-accent: #855334; --book-accent-ink: #784629; --book-choice: #9a5136; --book-wash: #855334;
+  --palette-overlay: rgba(243, 235, 219, .2); color-scheme: light;
+}
+
+html[data-palette="amethyst"] {
+  --palette-background: #191124; --palette-foreground: #ede2f7; --palette-card: #251a34; --palette-secondary: #342544; --palette-primary-foreground: #241432;
+  --palette-page: #120d1c; --palette-header: rgba(18, 13, 28, .97);
+  --hud-muted: #a495b6; --hud-gold: #c5a2e8; --hud-ink: #f3eaf9; --hud-bone: #ede2f7; --hud-line: #514064; --hud-field: #251a34; --hud-rule: #3f3050; --hud-danger: #e98a9d; --hud-bad: #ff9fb2; --hud-good: #a9d4b8; --hud-good-dim: #7db391; --hud-gold-bright: #e5c8ff; --hud-gold-strong: #ba8ee1;
+  --book-cover: #38214d; --book-page: #ece3f3; --book-ink: #26172f; --book-muted: #6f5d82; --book-quiet: #5f4e74; --book-rule: #26172f; --book-accent: #7a45a8; --book-accent-ink: #653793; --book-choice: #7a45a8; --book-wash: #7a45a8;
+}
+
+html[data-palette="frost"] {
+  --palette-background: #edf4fa; --palette-foreground: #203448; --palette-card: #f8fbfd; --palette-secondary: #dce8f1; --palette-primary-foreground: #f6fbff;
+  --palette-page: #e4edf5; --palette-header: rgba(245, 249, 253, .97); --palette-overlay: rgba(232, 240, 247, .27);
+  --hud-muted: #587188; --hud-gold: #275f90; --hud-ink: #233a4d; --hud-bone: #203448; --hud-line: #afc3d3; --hud-field: #f8fbfd; --hud-rule: #b6c9d8; --hud-danger: #a84048; --hud-bad: #b33242; --hud-good: #386d51; --hud-good-dim: #528365; --hud-gold-bright: #174a75; --hud-gold-strong: #397bad;
+  --book-cover: #345b7b; --book-page: #f5f9fc; --book-ink: #203448; --book-muted: #567086; --book-quiet: #49677e; --book-rule: #607d93; --book-accent: #34739c; --book-accent-ink: #27658f; --book-choice: #4385ad; --book-wash: #34739c;
+  color-scheme: light;
+}
+
+html[data-palette="parchment"], html[data-palette="frost"] { --palette-overlay: rgba(236, 240, 238, .28); }
+html[data-palette="tavern"], html[data-palette="midnight"], html[data-palette="forest"], html[data-palette="amethyst"] { --palette-overlay: rgba(0, 0, 0, .72); }
+html[data-palette="parchment"] body::before, html[data-palette="frost"] body::before { background-image: none; }
+
+html[data-palette="parchment"] *, html[data-palette="frost"] * { scrollbar-color: var(--hud-gold-strong) transparent; }
+html[data-palette="parchment"] :where(*)::-webkit-scrollbar-thumb, html[data-palette="frost"] :where(*)::-webkit-scrollbar-thumb { background: var(--hud-gold-strong); }
+html[data-palette] body { color: var(--palette-foreground); background-color: var(--palette-page); }
+html[data-palette] body::after { background-color: var(--palette-overlay); }
+html[data-palette] header.sticky { color: var(--hud-bone); background-color: var(--palette-header); }
+html[data-palette="parchment"] header.sticky, html[data-palette="frost"] header.sticky { color: var(--palette-foreground); }
+html[data-palette] .battle-hud { background-color: var(--palette-page); }
+html[data-palette] .battle-hud { --bone: var(--hud-bone); --ink: var(--hud-ink); --gold: var(--hud-gold); color: var(--hud-bone); }
+html[data-palette="parchment"] .battle-hud::before, html[data-palette="frost"] .battle-hud::before { background: linear-gradient(180deg, rgba(247, 244, 235, .3), rgba(247, 244, 235, .16) 60%, rgba(247, 244, 235, .38)); }
+html[data-palette] .hud-surface {
+  --background: var(--palette-background); --foreground: var(--palette-foreground); --card: var(--palette-card); --card-foreground: var(--palette-foreground); --popover: var(--palette-card); --popover-foreground: var(--palette-foreground);
+  --primary: var(--hud-gold); --primary-foreground: var(--palette-primary-foreground); --secondary: var(--palette-secondary); --secondary-foreground: var(--palette-foreground); --muted: var(--palette-secondary); --muted-foreground: var(--hud-muted);
+  --accent: var(--palette-secondary); --accent-foreground: var(--palette-foreground); --border: var(--hud-line); --input: var(--hud-line); --ring: var(--hud-gold);
+}
+html[data-palette] .hud-page, html[data-palette] .hud-surface { color: var(--hud-bone); }
+html[data-palette] .hud-surface [data-slot="accordion-item"] { background: color-mix(in srgb, var(--palette-card) 85%, transparent); border-color: var(--hud-line); }
+html[data-palette] .hud-surface [data-slot="skeleton-row"] { background: var(--palette-secondary); }
+html[data-palette="parchment"] .hud-form-page, html[data-palette="frost"] .hud-form-page, html[data-palette="parchment"] .skill-progression, html[data-palette="frost"] .skill-progression { background: radial-gradient(120% 80% at 50% 0, var(--palette-card), var(--palette-page)); }
+html[data-palette] .hud-form [data-slot="input"], html[data-palette] .hud-page [data-slot="input"], html[data-palette] .hud-form [data-slot="textarea"], html[data-palette] .hud-page [data-slot="textarea"], html[data-palette] .hud-form [data-slot="select-trigger"], html[data-palette] .hud-page [data-slot="select-trigger"] { background-color: var(--hud-field); color: var(--hud-ink); }
+html[data-palette] .hud-form [data-slot="input"]:focus-visible, html[data-palette] .hud-page [data-slot="input"]:focus-visible, html[data-palette] .hud-form [data-slot="textarea"]:focus-visible, html[data-palette] .hud-page [data-slot="textarea"]:focus-visible, html[data-palette] .hud-form [data-slot="select-trigger"]:focus-visible, html[data-palette] .hud-page [data-slot="select-trigger"]:focus-visible { border-color: var(--hud-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--hud-gold) 25%, transparent); }
+html[data-palette] .hud-form [data-slot="button"][data-variant="default"], html[data-palette] .hud-page [data-slot="button"][data-variant="default"] { background: var(--hud-gold); color: var(--palette-primary-foreground); }
+html[data-palette] .spellbook-dialog { --background: var(--palette-background); --foreground: var(--palette-foreground); --card: var(--palette-card); --card-foreground: var(--palette-foreground); --popover: var(--palette-card); --popover-foreground: var(--palette-foreground); --primary: var(--hud-gold); --primary-foreground: var(--palette-primary-foreground); --muted-foreground: var(--hud-muted); --border: var(--hud-line); --input: var(--hud-line); --ring: var(--hud-gold); --ink: var(--book-ink); --bone: var(--book-ink); --hud-muted: var(--book-muted); background: var(--book-cover) !important; color: var(--book-ink) !important; box-shadow: 0 30px 80px rgba(0,0,0,.55), inset 0 0 0 2px color-mix(in srgb, var(--book-ink) 28%, transparent) !important; }
+html[data-palette] .spellbook-dialog input:not([type="checkbox"]):not([type="radio"]) { border-color: var(--hud-line); background-color: color-mix(in srgb, var(--book-ink) 8%, var(--book-page)); color: var(--book-ink); }
+html[data-palette] .spellbook-dialog [class*="border-white/"] { border-color: color-mix(in srgb, var(--book-ink) 35%, transparent); }
+html[data-palette] .spellbook-dialog .spell-book-action { border-color: var(--book-accent); background: var(--book-accent); color: var(--book-page); }
+html[data-palette] .spell-book { background-color: var(--book-page); color: var(--book-ink); box-shadow: inset 14px 0 18px -10px color-mix(in srgb, var(--book-ink) 32%, transparent); }
+html[data-palette] .spell-book .spell-book-rule { background-color: color-mix(in srgb, var(--book-ink) 30%, transparent); }
+html[data-palette] .spell-book .spell-book-accent { color: var(--book-accent-ink); }
+html[data-palette] .spell-book-accent { color: var(--book-accent-ink); }
+html[data-palette] .spell-book .spell-book-muted { color: var(--book-muted); }
+html[data-palette] .spell-book .spell-book-quiet { color: var(--book-quiet); }
+html[data-palette] .spell-book .spell-book-border { border-color: color-mix(in srgb, var(--book-ink) 28%, transparent); }
+html[data-palette] .spell-book .spell-book-choice { background-color: color-mix(in srgb, var(--book-choice) 16%, transparent); box-shadow: inset 3px 0 0 var(--book-choice); }
+html[data-palette] .spell-book .spell-book-widening { color: var(--book-accent-ink); border-color: color-mix(in srgb, var(--book-accent) 55%, transparent); background-color: color-mix(in srgb, var(--book-accent) 10%, transparent); }
+html[data-palette] .spell-book .spell-book-seal { background: var(--book-accent); color: var(--book-page); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--book-page) 55%, transparent), inset 0 0 0 3px var(--book-accent); }
+html[data-palette] .spell-book .spell-book-preview { color: var(--book-ink); }
+html[data-palette] .spell-book .spell-book-preview-pill { color: var(--book-accent-ink); border-color: color-mix(in srgb, var(--book-accent) 45%, transparent); background: color-mix(in srgb, var(--book-accent) 7%, transparent); }
+html[data-palette] .spell-book .spell-book-preview-title { color: var(--book-accent-ink); }
+html[data-palette] .spell-book .spell-book-preview-row { border-color: color-mix(in srgb, var(--book-ink) 55%, transparent); background: color-mix(in srgb, var(--book-page) 88%, var(--book-accent)); color: var(--book-ink); box-shadow: 0 1px 3px rgba(0,0,0,.3), inset 0 0 0 2px color-mix(in srgb, var(--book-page) 60%, transparent); }
+html[data-palette] .spell-book .spell-book-preview-portrait { background: color-mix(in srgb, var(--book-accent) 25%, var(--book-page)); color: var(--book-ink); }
+html[data-palette] .spell-book .spell-book-preview-track { background: color-mix(in srgb, var(--book-ink) 20%, transparent); }
+html[data-palette] .profile-tab[data-state="active"] { background: var(--hud-gold); color: var(--palette-primary-foreground); }
+html[data-palette] .palette-popover { color: var(--palette-foreground); border-color: var(--hud-line); background-color: var(--palette-card); }
+html[data-palette] .battle-hud::before { background: linear-gradient(180deg, color-mix(in srgb, var(--palette-page) 96%, transparent) 0%, color-mix(in srgb, var(--palette-page) 70%, transparent) 35%, color-mix(in srgb, var(--palette-page) 80%, transparent) 65%, color-mix(in srgb, var(--palette-page) 98%, transparent) 100%); }

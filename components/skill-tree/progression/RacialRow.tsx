@@ -11,14 +11,14 @@ export function RacialRow({ states, tree, dto, onSelect }: { states: NodeState[]
   const t = useTranslations("skillTree");
 
   return (
-    <div role="group" aria-label={t("row.racialGroup", { race: dto.race })} className="flex items-center gap-2 border-b border-[rgba(230,220,203,.07)] px-3 py-2 sm:px-4">
+    <div role="group" aria-label={t("row.racialGroup", { race: dto.race })} className="flex items-center gap-2 border-b border-hud-bone/10 px-3 py-2 sm:px-4">
       <div className="metal-iron flex w-14 shrink-0 flex-col items-center gap-1">
         <span className="branch-frame hud-sc text-lg">
           {dto.raceIcon ? <OptimizedImage src={dto.raceIcon} alt="" width={52} height={52} className="h-full w-full object-cover" fallback={<span>{dto.race[0] ?? "?"}</span>} /> : (dto.race[0] ?? "?")}
         </span>
         <span className="hud-sc text-[11px] text-[var(--m2)]">{t("row.racial")}</span>
       </div>
-      <span aria-hidden className="hidden text-[#6b5f50] sm:inline">▸</span>
+      <span aria-hidden className="hidden text-hud-muted sm:inline">▸</span>
       <div className="flex">
         {states.map((state, i) => {
           const level = BRANCH_LEVELS[i];

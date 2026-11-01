@@ -7,6 +7,12 @@ import { HudCard, HudChipTabs, HudPage, HudPageHeader, HudTile } from "@/compone
 afterEach(cleanup);
 
 describe("HUD page primitives", () => {
+  it("renders asChild without a single-child error", () => {
+    const { container } = render(<HudCard asChild><a href="/x">x</a></HudCard>);
+
+    expect(container.querySelector("a")?.getAttribute("href")).toBe("/x");
+  });
+
   it("HudPage carries the HUD surface and page classes", () => {
     const { container } = render(<HudPage>x</HudPage>);
 

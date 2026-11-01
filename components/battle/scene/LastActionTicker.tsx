@@ -33,7 +33,7 @@ export const LastActionTicker = memo(function LastActionTicker({ onOpenLog }: { 
   const change = last.hpChanges?.[0]?.change ?? 0;
 
   return (
-    <button type="button" onClick={onOpenLog} className="mx-4 flex h-10 w-[calc(100%-2rem)] items-center gap-2 border-y border-white/10 text-left text-sm text-[#d9cfbd]">
+    <button type="button" onClick={onOpenLog} className="mx-4 flex h-10 w-[calc(100%-2rem)] items-center gap-2 border-y border-white/10 text-left text-sm text-hud-text">
       {actor && <Portrait participant={actor} size={24} />}
       <span className="max-w-[45%] shrink-0 truncate">{actor?.basicInfo.name ?? serviceActorName(last.actorId) ?? last.actorName}</span>
       {target && <><span className="text-[var(--hud-muted)]">→</span><Portrait participant={target} size={24} /><span className="truncate">{target.basicInfo.name}</span></>}

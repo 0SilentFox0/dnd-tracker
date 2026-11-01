@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Layers } from "lucide-react";
 
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { ZoomableEntityIcon } from "@/components/common/ZoomableEntityIcon";
 import { cn } from "@/lib/utils";
 
 export interface ArtifactSetCardIconProps {
@@ -12,8 +12,8 @@ export interface ArtifactSetCardIconProps {
 }
 
 const SIZE = {
-  md: { frame: "size-12", glyph: "size-6", px: 48 },
-  lg: { frame: "size-14", glyph: "size-7", px: 56 },
+  md: { frame: "size-14", glyph: "size-7", px: 96 },
+  lg: { frame: "size-20", glyph: "size-9", px: 96 },
 } as const;
 
 export function ArtifactSetCardIcon({ url, name, className, size = "md" }: ArtifactSetCardIconProps) {
@@ -22,7 +22,7 @@ export function ArtifactSetCardIcon({ url, name, className, size = "md" }: Artif
   const { frame, glyph, px } = SIZE[size];
 
   return (
-    <EntityIcon
+    <ZoomableEntityIcon
       src={url?.trim()}
       name={name}
       alt={t("iconAlt", { name })}

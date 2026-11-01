@@ -23,7 +23,7 @@ function Row({ label, value, lines }: { label: string; value: string; lines?: Sh
   const expandable = !!lines && lines.length > 1;
 
   return (
-    <div className="border-b border-[#2a2218] py-1.5 text-sm">
+    <div className="border-b border-hud-raised py-1.5 text-sm">
       <button type="button" disabled={!expandable} aria-expanded={expandable ? open : undefined} onClick={() => setOpen((v) => !v)} className="flex min-h-8 w-full items-center justify-between gap-3 text-left disabled:cursor-default">
         <span>{label}</span>
         <span className="tabular-nums text-hud-ink">{value}</span>
@@ -113,7 +113,7 @@ export function CombatTab() {
       <HudSection title={t("saves")}>
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.saves.map((s) => (
-            <li key={s.key} className="border-b border-[#2a2218] py-1">
+            <li key={s.key} className="border-b border-hud-raised py-1">
               {rollable(
                 { label: t("saveRoll", { ability: tg(`abilities.${s.ability}.label`) }), subject: { kind: "save", ability: s.ability } },
                 <>
@@ -132,7 +132,7 @@ export function CombatTab() {
       <HudSection title={t("skills")}>
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.skills.map((s) => (
-            <li key={s.key} className="border-b border-[#2a2218] py-1">
+            <li key={s.key} className="border-b border-hud-raised py-1">
               {rollable(
                 { label: tg(`dndSkills.${s.key as DndSkill}`), subject: { kind: "check", skill: s.key as DndSkill } },
                 <>

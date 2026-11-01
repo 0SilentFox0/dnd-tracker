@@ -12,7 +12,7 @@ export function Prep({ t }: { t: Translator }) {
       <SectionTitle eyebrow={t("prep.eyebrow")} title={t("prep.title")} text={t("prep.text")} />
       <div className="mx-auto mt-12 grid max-w-6xl gap-6 lg:grid-cols-3">
         {PREP_PANELS.map((id) => (
-          <article key={id} className="landing-reveal flex flex-col gap-4 rounded-2xl border border-hud-line bg-gradient-to-b from-[#1a140f] to-[#110e0b] p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]">
+          <article key={id} className="landing-reveal flex flex-col gap-4 rounded-2xl border border-hud-line bg-gradient-to-b from-hud-surface to-hud-page p-4 shadow-[inset_0_1px_0_rgba(230,194,90,.15)]">
             <MediaFrame title={p(id, "screen")}>
               <Screen id={id} alt={p(id, "alt")} sizes="(min-width: 1024px) 380px, 100vw" />
             </MediaFrame>

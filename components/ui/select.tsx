@@ -4,7 +4,7 @@ import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
-import { useHudPortalClass } from "@/components/ui/portal-class"
+import { useHudPortalClass, useThemePortalClass } from "@/components/ui/portal-class"
 import { cn } from "@/lib/utils"
 
 function Select({
@@ -60,6 +60,8 @@ function SelectContent({
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   const hudClass = useHudPortalClass()
 
+  const themeClass = useThemePortalClass()
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -69,6 +71,7 @@ function SelectContent({
           position === "popper" &&
             "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           hudClass,
+          themeClass,
           className
         )}
         position={position}

@@ -70,7 +70,7 @@ export function CompendiumDependencies({ wizard }: { wizard: CompendiumImportCon
 
   return <div className="space-y-3">
     <details open className="text-sm"><summary className="cursor-pointer text-hud-gold">{hiddenCount > 0 && !showAll ? t("dependencies.titleCountOf", { shown: shown.length, total: all.length }) : t("dependencies.titleCount", { shown: shown.length })}</summary>
-      <div className="my-3 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">{pager.pageItems.map(row => <div className="flex min-w-0 flex-col gap-2 break-words rounded-lg bg-[rgba(20,16,12,.85)] p-3 shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)]" key={row.key}>
+      <div className="my-3 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">{pager.pageItems.map(row => <div className="flex min-w-0 flex-col gap-2 break-words rounded-lg bg-hud-panel p-3 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]" key={row.key}>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1"><strong className="hud-sc min-w-0 text-[15px] text-hud-ink">{row.name}</strong><span className="text-xs text-hud-muted">{kindLabel(t, row.kind)}</span>{row.refs.some(ref => ref.unresolved) ? <HudPill tone="accent">{t("dependencies.needsBinding")}</HudPill> : <HudPill tone="muted">{t(row.refs.length > 0 ? "dependencies.matched" : "dependencies.noRefs")}</HudPill>}</div>
         {row.refs.filter(ref => ref.unresolved).map(refBlock)}
         <details className="mt-auto"><summary className="cursor-pointer text-xs text-hud-muted">{t("dependencies.more")}</summary>

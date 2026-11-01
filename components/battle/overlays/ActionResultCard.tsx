@@ -56,7 +56,7 @@ function AttackBody({ fx }: { fx: AttackFx }) {
       {effect && (
         <div className="mt-1 text-sm">
           <b className="hud-sc">{text(effect.name)}</b>
-          {effect.flavor && <span className="italic text-[#a89c88]"> · {text(effect.flavor)}</span>}
+          {effect.flavor && <span className="italic text-hud-soft"> · {text(effect.flavor)}</span>}
         </div>
       )}
       {fx.retaliation && <div className="mt-1 text-sm text-[#e9a08f]">{t("retaliation", { name: fx.retaliation.name, outcome: fx.retaliation.damage > 0 ? `−${fx.retaliation.damage}` : t("miss") })}</div>}
@@ -111,7 +111,7 @@ export function ActionResultCard() {
       onClick={close}
       className={cn(
         HUD_SURFACE,
-        "relative cursor-pointer border border-white/25 bg-[#15110e]/95 py-2 pl-3 pr-9 text-[var(--ink)] animate-[hud-fade_.2s]",
+        "relative cursor-pointer border border-white/25 bg-hud-surface/95 py-2 pl-3 pr-9 text-[var(--ink)] animate-[hud-fade_.2s]",
         PLACEMENT[placement],
       )}
     >

@@ -15,6 +15,7 @@ model User {
   avatar              String?
   locale              String?
   timeZone            String?              @map("time_zone")
+  palette             String?
   createdAt           DateTime             @default(now())
   campaignMembers     CampaignMember[]
   dmCampaigns         Campaign[]           @relation("DMCampaigns")

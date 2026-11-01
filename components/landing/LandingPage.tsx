@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-hud-rule/60 bg-[#0b0908]/85 backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-hud-rule/60 bg-hud-page/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <Brand locale={locale} />
         <nav aria-label={t("nav.aria")} className="hidden items-center gap-6 md:flex">
@@ -63,7 +63,7 @@ function LandingNav({ t, locale }: { t: Translator; locale: Locale }) {
 
 function LandingFooter({ t, locale }: { t: Translator; locale: Locale }) {
   return (
-    <footer className="border-t border-hud-rule px-4 py-8 text-sm text-[#b3a893]">
+    <footer className="border-t border-hud-rule px-4 py-8 text-sm text-hud-soft">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
         <Brand locale={locale} />
         <p>
@@ -91,7 +91,7 @@ export async function LandingPage({ locale }: { locale: Locale }) {
   return (
     <FixedLocaleProvider locale={locale}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildLandingJsonLd(t, locale)).replace(/</g, "\\u003c") }} />
-      <div data-landing lang={locale} className={cn(HUD_SURFACE, "min-h-screen bg-[#0b0908]")}>
+      <div data-landing lang={locale} className={cn(HUD_SURFACE, "min-h-screen bg-hud-page")}>
         <LandingNav t={t} locale={locale} />
         <main>
           <Hero t={t} />

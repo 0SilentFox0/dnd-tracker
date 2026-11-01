@@ -49,7 +49,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
     <div className={cn("my-1.5 flex gap-2.5 rounded-sm border-l-2 bg-white/[.03] px-2.5 py-2", enemy ? "border-hud-danger/70" : "border-hud-good-dim/70", entry.isCancelled && "opacity-40 line-through")}>
       <span className="relative mt-0.5 shrink-0">
         {actor ? <Portrait participant={actor} size={28} /> : <span className="flex size-7 items-center justify-center rounded-full bg-white/5 text-[var(--hud-muted)] ring-1 ring-white/10"><ScrollText className="size-3.5" /></span>}
-        <span className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-[#1a140f] text-[var(--gold)] ring-1 ring-white/15">
+        <span className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-hud-surface text-[var(--gold)] ring-1 ring-white/15">
           <Icon className="size-2.5" />
         </span>
       </span>

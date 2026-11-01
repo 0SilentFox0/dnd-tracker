@@ -20,7 +20,7 @@ export function Combat({ t }: { t: Translator }) {
               </span>
               <div>
                 <h3 className="hud-sc text-lg text-hud-ink">{t(`combat.points.${key}.title`)}</h3>
-                <p className="mt-1 text-sm text-[#b3a893]">{t(`combat.points.${key}.text`)}</p>
+                <p className="mt-1 text-sm text-hud-soft">{t(`combat.points.${key}.text`)}</p>
               </div>
             </li>
           ))}
@@ -37,7 +37,7 @@ export function Combat({ t }: { t: Translator }) {
               const name = t(`combat.fx.names.${i + 1}`);
 
               return (
-                <li key={name} className="flex flex-col items-center gap-2 rounded-xl border border-hud-rule bg-[#120e0b] p-4" style={{ boxShadow: `inset 0 -40px 60px -30px ${sprite.glow}` }}>
+                <li key={name} className="flex flex-col items-center gap-2 rounded-xl border border-hud-rule bg-hud-page p-4" style={{ boxShadow: `inset 0 -40px 60px -30px ${sprite.glow}` }}>
                   <span aria-hidden className="grid size-24 place-items-center">
                     <span className={cn("ld-sprite block", sprite.sprite, sprite.scale)} />
                   </span>
@@ -45,7 +45,7 @@ export function Combat({ t }: { t: Translator }) {
                 </li>
               );
             })}
-            <li className="flex flex-col items-center gap-2 rounded-xl border border-hud-rule bg-[#120e0b] p-4 shadow-[inset_0_-40px_60px_-30px_rgba(230,120,60,.3)]">
+            <li className="flex flex-col items-center gap-2 rounded-xl border border-hud-rule bg-hud-page p-4 shadow-[inset_0_-40px_60px_-30px_rgba(230,120,60,.3)]">
               <span aria-hidden className="grid size-24 place-items-center">
                 <D20 value="20" className="ld-d20-spin size-20" />
               </span>

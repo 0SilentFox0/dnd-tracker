@@ -76,8 +76,8 @@ function Token({ token }: { token: DemoToken }) {
 
 function DmScreen({ t }: { t: Translator }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-hud-line bg-[#0e0b09] shadow-[0_40px_100px_-30px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.18),0_0_80px_-20px_rgba(230,140,60,.25)]">
-      <div className="flex items-center gap-2 border-b border-hud-rule bg-[#15110d] px-3 py-1.5">
+    <div className="overflow-hidden rounded-xl border border-hud-line bg-hud-page shadow-[0_40px_100px_-30px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.18),0_0_80px_-20px_rgba(230,140,60,.25)]">
+      <div className="flex items-center gap-2 border-b border-hud-rule bg-hud-surface px-3 py-1.5">
         <span className="flex gap-1" aria-hidden>
           <span className="size-2 rounded-full bg-[#5a3a2a]" />
           <span className="size-2 rounded-full bg-[#5a4a2a]" />
@@ -135,22 +135,22 @@ function DmScreen({ t }: { t: Translator }) {
 
 function PlayerPhone({ t }: { t: Translator }) {
   return (
-    <div className="w-[118px] rounded-[1.4rem] border-2 border-[#3a2e22] bg-[#0b0908] p-1.5 shadow-[0_30px_60px_-10px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.25)] sm:w-[170px] sm:p-2">
-      <div className="mx-auto mb-1.5 h-1 w-8 rounded-full bg-[#2a2218]" />
-      <div className="space-y-1.5 rounded-2xl bg-gradient-to-b from-[#1a140f] to-[#110e0b] p-2">
+    <div className="w-[118px] rounded-[1.4rem] border-2 border-hud-rule bg-hud-page p-1.5 shadow-[0_30px_60px_-10px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.25)] sm:w-[170px] sm:p-2">
+      <div className="mx-auto mb-1.5 h-1 w-8 rounded-full bg-hud-raised" />
+      <div className="space-y-1.5 rounded-2xl bg-gradient-to-b from-hud-surface to-hud-page p-2">
         <div className="flex items-center gap-1.5">
           <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#2d4560] text-white ring-2 ring-[#ffe08a] sm:size-9">
             <Glyph icon="wizard" className="size-4 sm:size-6" />
           </span>
           <div className="min-w-0 leading-tight">
             <p className="hud-sc truncate text-[11px] text-hud-ink sm:text-sm">{t("combat.demo.tokens.wizard")}</p>
-            <p className="truncate text-[9px] text-[#b3a893] sm:text-[11px]">{t("combat.demo.phone.role")}</p>
+            <p className="truncate text-[9px] text-hud-soft sm:text-[11px]">{t("combat.demo.phone.role")}</p>
           </div>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-black/60">
           <div className="h-full w-[85%] bg-gradient-to-r from-[#7fa86a] to-[#a8d48f]" />
         </div>
-        <p className="text-[9px] text-[#b3a893] sm:text-[11px]">{t("combat.demo.phone.slots")}</p>
+        <p className="text-[9px] text-hud-soft sm:text-[11px]">{t("combat.demo.phone.slots")}</p>
         <div className="space-y-1">
           {listOf(t, "combat.demo.phone.spells").map((name, i) => (
             <span
@@ -162,7 +162,7 @@ function PlayerPhone({ t }: { t: Translator }) {
             >
               {i === 0 && <span aria-hidden className="ld-ripple absolute left-1/2 top-1/2 -ml-3 -mt-3 size-6 rounded-full bg-[#ffb347]/60" />}
               <span className="relative">{name}</span>
-              <span className="relative text-[#b3a893]">{SPELL_LEVELS[i]}</span>
+              <span className="relative text-hud-soft">{SPELL_LEVELS[i]}</span>
             </span>
           ))}
         </div>
@@ -187,8 +187,8 @@ export function SessionDemo({ t }: { t: Translator }) {
             <span className="ld-progress block h-full bg-gradient-to-r from-[#c9b37a] to-[#ffe08a]" />
           </span>
           {listOf(t, "combat.demoSteps").map((step, i) => (
-            <li key={step} className={cn(`ld-step-${i + 1}`, "relative flex flex-col items-center gap-2 text-center text-[#b3a893]")}>
-              <span className="hud-sc grid size-8 place-items-center rounded-full border border-current bg-[#0b0908] text-sm">{i + 1}</span>
+            <li key={step} className={cn(`ld-step-${i + 1}`, "relative flex flex-col items-center gap-2 text-center text-hud-soft")}>
+              <span className="hud-sc grid size-8 place-items-center rounded-full border border-current bg-hud-page text-sm">{i + 1}</span>
               <span className="text-xs leading-snug sm:text-sm">{step}</span>
             </li>
           ))}

@@ -26,7 +26,7 @@ export function Hero({ t }: { t: Translator }) {
             {t("hero.secondary")}
           </Link>
         </div>
-        <p className="text-sm text-[#b3a893]">{t("hero.note")}</p>
+        <p className="text-sm text-hud-soft">{t("hero.note")}</p>
       </div>
       <div className="mx-auto mt-14 max-w-5xl sm:mt-20">
         <MediaFrame title={t("hero.eyebrow")} className="shadow-[0_40px_100px_-30px_rgba(0,0,0,.95),0_0_0_1px_rgba(201,179,122,.18),0_0_80px_-20px_rgba(230,140,60,.25)]">

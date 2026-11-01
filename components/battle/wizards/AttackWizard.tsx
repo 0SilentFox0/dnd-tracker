@@ -43,7 +43,7 @@ export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
         const idx = i + (state.weaponCount > 1 ? 0 : 1);
 
         return (
-          <div key={step} className={cn("flex flex-col justify-end gap-1.5 text-xs after:h-[3px] after:content-['']", idx < current ? "text-[#a89c88] after:bg-[var(--hud-muted)]" : idx === current ? "font-bold text-[var(--ink)] after:bg-[var(--enemy)]" : "text-[#6b604f] after:bg-white/10")}>
+          <div key={step} className={cn("flex flex-col justify-end gap-1.5 text-xs after:h-[3px] after:content-['']", idx < current ? "text-hud-soft after:bg-[var(--hud-muted)]" : idx === current ? "font-bold text-[var(--ink)] after:bg-[var(--enemy)]" : "text-[#6b604f] after:bg-white/10")}>
             {t(`steps.${step}`)}
           </div>
         );
@@ -52,10 +52,10 @@ export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
   );
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={attack ? `${view.offHand ? t("titleOffHand", { name: attack.name }) : view.counter ? t("titleCounter", { n: view.counter.n, m: view.counter.m, name: attack.name }) : attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : t("title")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+    <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={attack ? `${view.offHand ? t("titleOffHand", { name: attack.name }) : view.counter ? t("titleCounter", { n: view.counter.n, m: view.counter.m, name: attack.name }) : attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : t("title")} className={cn(HUD_SURFACE, "border-white/25 bg-hud-surface")}>
       {header}
       {state.picked && view.attackKind && PICKED_STEPS.has(state.step) && (
-        <div data-attack-picked={view.attackKind} className="mb-2 flex min-h-8 items-center justify-between gap-2 text-sm text-[#cdb87e]">
+        <div data-attack-picked={view.attackKind} className="mb-2 flex min-h-8 items-center justify-between gap-2 text-sm text-hud-gold">
           <span className="flex items-center gap-1.5">
             {view.attackKind === "ranged" ? <Crosshair className="size-4" /> : <Swords className="size-4" />}
             {t(`kinds.${view.attackKind}`)}

@@ -7,7 +7,7 @@ import { Circle, Edit, Plus, Shield, Trash2 } from "lucide-react";
 import { RacePassiveBlock } from "./RaceInnateSections";
 
 import { ActionsMenu } from "@/components/common/ActionsMenu";
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { ZoomableEntityIcon } from "@/components/common/ZoomableEntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { abilityScoreTermKey } from "@/lib/constants/abilities";
@@ -50,11 +50,11 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
   const modifiedAbilities = modifiedAbilityScores(passiveAbility);
 
   return (
-    <HudCard accent={race.color ?? undefined} className="flex h-full flex-col gap-3">
+    <HudCard href={`/campaigns/${campaignId}/dm/races/${race.id}`} linkLabel={race.name} accent={race.color ?? undefined} className="flex h-full flex-col gap-3">
       <div>
         <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <EntityIcon src={race.icon} name={race.name} size={48} className="size-12 rounded-lg" />
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <ZoomableEntityIcon src={race.icon} name={race.name} size={96} className="size-20 rounded-lg text-2xl" />
             <h3 className="hud-sc truncate text-lg text-hud-ink">{race.name}</h3>
           </div>
           <ActionsMenu

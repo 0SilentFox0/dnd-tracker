@@ -32,7 +32,7 @@ function TravelEntry({ e }: { e: WorldTravelEntry }) {
   const when = Number.isNaN(date.getTime()) ? "" : format.dateTime(date, WHEN_FORMAT);
 
   return (
-    <li className="flex flex-col gap-1.5 rounded-lg bg-[rgba(20,16,12,.85)] p-2.5 shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)]">
+    <li className="flex flex-col gap-1.5 rounded-lg bg-hud-panel p-2.5 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]">
       <div className="flex flex-wrap items-center gap-1.5">
         <HudPill tone={badge.tone} icon={badge.icon}>
           {t(`kinds.${kind}`)}

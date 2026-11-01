@@ -108,6 +108,11 @@
     "switchAccount": "Switch account",
     "signOut": "Sign out",
     "watchShow": "Show",
+    "palette": {
+      "label": "Color theme",
+      "names": { "tavern": "Tavern", "midnight": "Midnight", "forest": "Forest", "parchment": "Parchment", "amethyst": "Amethyst", "frost": "Frost" },
+      "errors": { "load": "Couldn't load the theme", "save": "Couldn't save the theme" }
+    },
     "watchShowAria": "Watch the show",
     "joinBattle": "Join battle",
     "joinBattleAria": "Join the battle"
@@ -162,6 +167,7 @@
     "cancel": "Cancel",
     "add": "Add",
     "remove": "Remove",
+    "zoomIcon": "Open icon: {name}",
     "back": "Back"
   },
   "form": {

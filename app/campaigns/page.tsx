@@ -125,7 +125,7 @@ export default async function CampaignsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <h2 className="hud-sc text-lg text-hud-ink">{campaign.name}</h2>
                   {isDM && (
-                    <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[#2a1d05]">{t("roles.dm")}</span>
+                    <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[var(--palette-primary-foreground,#2a1d05)]">{t("roles.dm")}</span>
                   )}
                 </div>
                 {campaign.description && <p className="text-sm text-hud-muted">{campaign.description}</p>}
