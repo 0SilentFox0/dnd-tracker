@@ -298,5 +298,29 @@
       "roundsLeft": "{count, plural, one {# more round} other {# more rounds}}",
       "from": "from: {source}"
     }
+  },
+  "demo": {
+    "notice": "Demo battle · changes are temporary",
+    "controls": "Battle controls",
+    "modes": {
+      "move": "Move",
+      "attack": "Target",
+      "template": "Area",
+      "maze-mark": "Maze marks"
+    },
+    "nextTurn": "Next turn",
+    "reset": "Reset encounter",
+    "mazeSymbol": "Maze mark symbol",
+    "participants": "Encounter participants",
+    "hp": "{current}/{max} HP",
+    "log": "Battle log",
+    "logEntry": {
+      "mazeMark": "Maze mark {symbol} at {cell}",
+      "outOfRange": "Out of range",
+      "template": "Template at {cell}: {names}",
+      "move": "{name} moves ({cost} cells)",
+      "hit": "{name} hits {target}: -{damage}",
+      "turn": "Turn: {name}"
+    }
   }
 }

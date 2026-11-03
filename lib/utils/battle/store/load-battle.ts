@@ -5,7 +5,7 @@ import { joinParticipant } from "./split-participant";
 import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSnapshot, ParticipantState } from "./types";
 
 import { BattleStatus } from "@/lib/constants/battle";
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { CampaignRole, isDemoKind } from "@/lib/constants/campaigns";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import { parseRulesCached } from "@/lib/utils/rules/schema";
 import type { BattleAudioState } from "@/types/audio";
@@ -123,7 +123,7 @@ export async function loadBattle(
       participants: true,
       battleParticipants: { orderBy: { orderIndex: "asc" }, select: PARTICIPANT_ROW_SELECT },
       campaign: {
-        select: { friendlyFire: true, critChoiceByDm: true, members: { where: { userId: args.userId }, select: { role: true } } },
+        select: { kind: true, friendlyFire: true, critChoiceByDm: true, members: { where: { userId: args.userId }, select: { role: true } } },
       },
     },
   });
@@ -167,21 +167,22 @@ export async function loadBattle(
     pending: all.filter((p) => p.isPending).map((p) => p.participant),
     isDM: membership?.role === CampaignRole.DM,
     isMember: Boolean(membership),
+    isDemo: isDemoKind(row.campaign.kind),
   };
 }
 
 export async function loadBattleAccess(
   db: BattleDb,
   args: { battleId: string; campaignId: string; userId: string },
-): Promise<{ version: number; isMember: boolean; isDM: boolean } | null> {
+): Promise<{ version: number; isMember: boolean; isDM: boolean; isDemo: boolean } | null> {
   const row = await db.battleScene.findFirst({
     where: { id: args.battleId, campaignId: args.campaignId },
-    select: { version: true, campaign: { select: { members: { where: { userId: args.userId }, select: { role: true } } } } },
+    select: { version: true, campaign: { select: { kind: true, members: { where: { userId: args.userId }, select: { role: true } } } } },
   });
 
   if (!row) return null;
 
   const membership = row.campaign.members[0];
 
-  return { version: row.version, isMember: Boolean(membership), isDM: membership?.role === CampaignRole.DM };
+  return { version: row.version, isMember: Boolean(membership), isDM: membership?.role === CampaignRole.DM, isDemo: isDemoKind(row.campaign.kind) };
 }

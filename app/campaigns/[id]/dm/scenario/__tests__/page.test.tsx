@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({ listScenarioHandler: vi.fn(), getScenarioPageH
 
 vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
 vi.mock("@/lib/server/scenario/read-scenario", () => ({ listScenarioHandler: mocks.listScenarioHandler, getScenarioPageHandler: mocks.getScenarioPageHandler }));
-vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignDM: vi.fn(async () => ({ campaign: { name: "Кампанія" } })) }));
+vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignDMOrDemo: vi.fn(async () => ({ campaign: { name: "Кампанія" }, isDemo: false })) }));
 vi.mock("@/lib/ai/crypto", () => ({ isAiConfigured: () => true }));
 vi.mock("@/lib/server/scenario/page-store", () => ({ loadPlayedSections: mocks.loadPlayedSections }));
 vi.mock("../page-client", () => ({ ScenarioIndexPageClient: () => null }));

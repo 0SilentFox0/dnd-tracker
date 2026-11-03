@@ -4,7 +4,11 @@ import { prisma } from "@/lib/db";
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => {
+  const requireDM = vi.fn();
+
+  return { requireDM, requireCampaignDMOrDemoAccess: (id: string) => requireDM(id) };
+});
 vi.mock("@/lib/server/acquaintances/reveal", () => ({ notifyRevealForContentChange: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {

@@ -8,7 +8,11 @@ import { discardSlideFiles } from "@/lib/server/assistant/proposal-media";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/server/assistant/proposal-media", () => ({ pendingSlideUrls: vi.fn(async () => ["https://x/orphan.webp"]), discardSlideFiles: vi.fn() }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => {
+  const requireDM = vi.fn();
+
+  return { requireDM, requireCampaignDMOrDemoAccess: (id: string) => requireDM(id) };
+});
 vi.mock("@/lib/server/acquaintances/reveal", () => ({ notifyRevealForContentChange: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {

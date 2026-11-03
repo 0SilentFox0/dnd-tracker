@@ -1,4 +1,5 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
+import Link from "next/link";
 import { describe, expect, it, vi } from "vitest";
 
 import CampaignsPage from "../page";
@@ -8,8 +9,10 @@ import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 
 const findMany = vi.fn();
 
+const findFirst = vi.fn();
+
 vi.mock("@/lib/auth", () => ({ getAuthUser: async () => ({ id: "owner" }) }));
-vi.mock("@/lib/db", () => ({ prisma: { campaign: { findMany: (...args: unknown[]) => findMany(...args) } } }));
+vi.mock("@/lib/db", () => ({ prisma: { campaign: { findMany: (...args: unknown[]) => findMany(...args), findFirst: (...args: unknown[]) => findFirst(...args) } } }));
 
 function tileProps(node: ReactNode): Record<string, unknown> | null {
   if (!isValidElement(node)) return null;
@@ -32,8 +35,32 @@ describe("campaign owner template tiles", () => {
     const srd = { kind: "template", visibility: "official", name: SRD_TEMPLATE_NAME, templateKey: SRD_TEMPLATE_NAME, description: null };
 
     findMany.mockResolvedValueOnce([{ ...srd, id: "canonical", locale: null }, { ...srd, id: "legacy", locale: "uk" }, { ...srd, id: "private", visibility: "private", locale: "uk" }]).mockResolvedValueOnce([]);
+    findFirst.mockResolvedValue(null);
 
     expect(tileProps(await CampaignsPage())?.templates).toEqual([expect.objectContaining({ id: "canonical" }), expect.objectContaining({ id: "private" })]);
     expect(findMany.mock.calls[0][0].select).toMatchObject({ kind: true, visibility: true });
+  });
+
+  it("shows the one shared Demo campaign as a direct link", async () => {
+    findMany.mockReset().mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    findFirst.mockResolvedValueOnce({ id: "demo-1", name: "Demo", description: "Try the adventure", kind: "demo", maxLevel: 5 });
+
+    const tree = await CampaignsPage();
+
+    const links: Array<{ href?: string; children?: ReactNode }> = [];
+
+    const visit = (node: ReactNode) => {
+      if (!isValidElement(node)) return;
+
+      const element = node as ReactElement<{ href?: string; children?: ReactNode }>;
+
+      if (element.type === Link) links.push(element.props);
+
+      for (const child of ([] as ReactNode[]).concat(element.props.children ?? [])) visit(child);
+    };
+
+    visit(tree);
+
+    expect(links).toContainEqual(expect.objectContaining({ href: "/campaigns/demo-1" }));
   });
 });

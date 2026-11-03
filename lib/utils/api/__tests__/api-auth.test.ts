@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { requireAuth, requireAuthUser, requireCampaignAccess, requireDM } from "../api-auth";
+import { requireAuth, requireAuthUser, requireCampaignAccess, requireCampaignDMOrDemoAccess, requireDM } from "../api-auth";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignRole, type CampaignRoleValue } from "@/lib/constants/campaigns";
@@ -17,6 +17,7 @@ vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: findCampaign } } 
 
 const campaign = (role?: CampaignRoleValue) => ({
   id: "c1",
+  kind: "campaign",
   maxLevel: 20,
   members: role ? [{ userId: "u1", role }] : [],
 });
@@ -95,6 +96,23 @@ describe("api-auth", () => {
       expect(statusOf(await requireCampaignAccess("c1"))).toBe(403);
     });
 
+    it("Demo не відкриває доступ за замовчуванням", async () => {
+      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
+
+      expect(statusOf(await requireCampaignAccess("demo-id"))).toBe(403);
+    });
+
+    it("allowDemo пускає без membership, але не стає DM", async () => {
+      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
+
+      expect(await requireCampaignAccess("demo-id", false, { allowDemo: true })).toMatchObject({
+        userId: "u1",
+        isDM: false,
+        isDemo: true,
+        campaign: { id: "c1", kind: "demo", members: [] },
+      });
+    });
+
     it("isDM: true для DM, false для гравця", async () => {
       findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
       expect(await requireCampaignAccess("c1")).toMatchObject({ isDM: true });
@@ -138,6 +156,28 @@ describe("api-auth", () => {
       findCampaign.mockResolvedValue(campaign());
 
       expect(statusOf(await requireDM("c1"))).toBe(403);
+    });
+
+    it("Demo ніколи не надає доступ DM навіть без membership", async () => {
+      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
+
+      expect(statusOf(await requireDM("demo-id"))).toBe(403);
+    });
+  });
+
+  describe("requireCampaignDMOrDemoAccess", () => {
+    it("Demo can read campaign DM content without becoming a DM", async () => {
+      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
+
+      expect(await requireCampaignDMOrDemoAccess("demo-id")).toMatchObject({ isDemo: true, isDM: false });
+    });
+
+    it("campaign players remain blocked while DMs can read", async () => {
+      findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
+      expect(statusOf(await requireCampaignDMOrDemoAccess("c1"))).toBe(403);
+
+      findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
+      expect(statusOf(await requireCampaignDMOrDemoAccess("c1"))).toBe(200);
     });
   });
 

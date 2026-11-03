@@ -9,7 +9,7 @@ import type { ScenarioPageSummary } from "@/types/scenario";
 
 type Move = (id: string, dir: -1 | 1, siblings: ScenarioPageSummary[]) => void;
 
-function IndexRow({ campaignId, page, num, siblings, onMove }: { campaignId: string; page: ScenarioPageSummary; num: string; siblings: ScenarioPageSummary[]; onMove: Move }) {
+function IndexRow({ campaignId, page, num, siblings, onMove }: { campaignId: string; page: ScenarioPageSummary; num: string; siblings: ScenarioPageSummary[]; onMove?: Move }) {
   const t = useTranslations("scenario");
 
   return (
@@ -20,19 +20,21 @@ function IndexRow({ campaignId, page, num, siblings, onMove }: { campaignId: str
         {page.subtitle && <span className="d">{page.subtitle}</span>}
       </span>
       <span className={page.status === "ready" ? "st ok" : "st"}>{t(`pageStatuses.${page.status}`)}</span>
-      <span className="mv">
-        <button type="button" aria-label={t("index.up", { title: page.title })} onClick={() => onMove(page.id, -1, siblings)}>
-          <ChevronUp className="size-4" />
-        </button>
-        <button type="button" aria-label={t("index.down", { title: page.title })} onClick={() => onMove(page.id, 1, siblings)}>
-          <ChevronDown className="size-4" />
-        </button>
-      </span>
+      {onMove && (
+        <span className="mv">
+          <button type="button" aria-label={t("index.up", { title: page.title })} onClick={() => onMove(page.id, -1, siblings)}>
+            <ChevronUp className="size-4" />
+          </button>
+          <button type="button" aria-label={t("index.down", { title: page.title })} onClick={() => onMove(page.id, 1, siblings)}>
+            <ChevronDown className="size-4" />
+          </button>
+        </span>
+      )}
     </li>
   );
 }
 
-export function ScenarioIndex({ campaignId, pages, onMove }: { campaignId: string; pages: ScenarioPageSummary[]; onMove: Move }) {
+export function ScenarioIndex({ campaignId, pages, onMove }: { campaignId: string; pages: ScenarioPageSummary[]; onMove?: Move }) {
   const t = useTranslations("scenario");
 
   const groups = groupIndex(pages);

@@ -1,6 +1,6 @@
 import { describe, expect,it } from "vitest";
 
-import { isHttpUrl, isSupabaseStorageUrl, normalizeImageUrl } from "../image-url";
+import { isBundledStaticAsset, isHttpUrl, isSupabaseStorageUrl, normalizeImageUrl } from "../image-url";
 
 describe("normalizeImageUrl", () => {
   it("повертає той самий URL для не-wikia", () => {
@@ -77,5 +77,15 @@ describe("isHttpUrl", () => {
     expect(isHttpUrl("data:image/png;base64,AAAA")).toBe(false);
     expect(isHttpUrl("https://")).toBe(false);
     expect(isHttpUrl("abc")).toBe(false);
+  });
+});
+
+describe("isBundledStaticAsset", () => {
+  it("accepts bundled public images and rejects other paths and hosts", () => {
+    expect(isBundledStaticAsset("/example-demo/maps/briarwood.svg")).toBe(true);
+    expect(isBundledStaticAsset("/battle-maps/nicolas-tomb.webp")).toBe(true);
+    expect(isBundledStaticAsset("/example-demo/maps/../secret.svg")).toBe(false);
+    expect(isBundledStaticAsset("/other/map.svg")).toBe(false);
+    expect(isBundledStaticAsset("https://evil.example/example-demo/maps/a.svg")).toBe(false);
   });
 });

@@ -104,5 +104,9 @@
   },
   "validation": {
     "nothingToChange": "Nothing to change"
+  },
+  "demo": {
+    "title": "Music",
+    "subtitle": "Read-only soundtrack for the adventure"
   }
 }

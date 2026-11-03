@@ -158,6 +158,18 @@ describe("runBattleMutation", () => {
     expect(res.status).toBe(403);
   });
 
+  it("Demo battle is read-only and is rejected before mutation or save", async () => {
+    const mutate = vi.fn(noop);
+
+    const saveBattle = vi.fn();
+
+    const res = await runBattleMutation(req(), { params, access: "member", mutate }, deps({ loadBattle: vi.fn(async () => ({ ...loaded(), isMember: false, isDemo: true })), saveBattle }));
+
+    expect(res.status).toBe(403);
+    expect(mutate).not.toHaveBeenCalled();
+    expect(saveBattle).not.toHaveBeenCalled();
+  });
+
   it("dm-дія від гравця — 403", async () => {
     const res = await runBattleMutation(req(), { params, access: "dm", mutate: noop }, deps());
 

@@ -15,11 +15,13 @@ type BattleParams = { id: string; battleId: string };
 
 export interface BattleReadDeps {
   getUserId(): Promise<string | null>;
-  loadAccess(args: { battleId: string; campaignId: string; userId: string }): Promise<{ version: number; isMember: boolean } | null>;
+  loadAccess(args: { battleId: string; campaignId: string; userId: string }): Promise<{ version: number; isMember: boolean; isDemo?: boolean } | null>;
   loadEventsBefore(battleId: string, page: { before: number; limit: number }): Promise<BattleEventsPage>;
   loadAllEvents(battleId: string): Promise<BattleAction[]>;
   loadParticipants(args: { battleId: string; campaignId: string; userId: string }): Promise<BattleParticipant[]>;
 }
+
+const canRead = (access: { isMember: boolean; isDemo?: boolean }) => access.isMember || Boolean(access.isDemo);
 
 async function authorize(params: BattleParams, deps: BattleReadDeps) {
   const userId = await deps.getUserId();
@@ -30,7 +32,7 @@ async function authorize(params: BattleParams, deps: BattleReadDeps) {
 
   if (!access) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-  if (!access.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+  if (!canRead(access)) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
   return { ...access, userId };
 }
@@ -47,7 +49,7 @@ export async function readBattleScene(params: BattleParams, deps: PipelineDeps =
 
       if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-      if (!loaded.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+      if (!canRead(loaded)) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
       return NextResponse.json(await readScenePreview(userId, loaded, { includeRecentEvents: BATTLE_LOG_RECENT_EVENTS, includeKnowledge: true }, deps));
     };

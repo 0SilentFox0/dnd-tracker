@@ -9,13 +9,13 @@ import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 
 const ScenarioGraph = dynamic(() => import("@/components/scenario/graph").then((m) => m.ScenarioGraph), { ssr: false, loading: () => <LoadingState /> });
 
-export function GraphPageClient({ campaignId, campaignName }: { campaignId: string; campaignName: string }) {
+export function GraphPageClient({ campaignId, campaignName, canEdit = true }: { campaignId: string; campaignName: string; canEdit?: boolean }) {
   const t = useTranslations("dashboard.sections.graph");
 
   return (
     <HudPage className="max-w-[1800px]">
       <HudPageHeader title={t("title")} subtitle={campaignName} />
-      <OnboardingHint id="dm.graph" />
+      {canEdit && <OnboardingHint id="dm.graph" />}
       <ScenarioGraph campaignId={campaignId} />
     </HudPage>
   );

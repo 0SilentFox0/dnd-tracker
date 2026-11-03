@@ -31,7 +31,7 @@ export async function readViewerScope(campaignId: string, heroIds: string[]) {
 
 export async function viewHandler(req: Request, campaignId: string) {
   try {
-    const access = await requireCampaignAccess(campaignId);
+    const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
 
     if (access instanceof NextResponse) return access;
 
@@ -58,7 +58,7 @@ export async function viewHandler(req: Request, campaignId: string) {
       access.isDM ? null : prisma.campaignShow.findUnique({ where: { campaignId }, select: { world: true } }),
     ]);
 
-    const allowed = asHero ? new Set(allMaps.map((m) => m.id)) : known;
+    const allowed = access.isDemo || asHero ? new Set(allMaps.map((m) => m.id)) : known;
 
     const shownMapId = (shown?.world as { mapId?: string } | null | undefined)?.mapId;
 
@@ -99,7 +99,7 @@ export async function viewHandler(req: Request, campaignId: string) {
     const heroNames = new Map<string, HeroInfo>(named.map((c) => [c.id, { name: c.name, avatar: c.avatar, controlledBy: c.controlledBy }]));
 
     return NextResponse.json(
-      buildWorldView({ map: detail.map, markers: detail.markers, allMaps, positions, heroNames, reveals, notes, viewer: { userId: access.userId, heroIds, asHero } }),
+      buildWorldView({ map: detail.map, markers: detail.markers, allMaps, positions, heroNames, reveals, notes, viewer: { userId: access.userId, heroIds, asHero, isDemo: access.isDemo } }),
     );
   } catch (error) {
     return handleApiError(error, { action: "world view" });

@@ -10,6 +10,7 @@ interface BattleListCardProps {
   battle: { id: string; name: string; description: string | null; currentRound: number; participants: unknown };
   campaignId: string;
   kind: BattleStatus;
+  canEdit?: boolean;
 }
 
 const KIND = {
@@ -18,7 +19,7 @@ const KIND = {
   [BattleStatus.COMPLETED]: { tone: "muted", pill: "muted" },
 } as const;
 
-export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps) {
+export function BattleListCard({ battle, campaignId, kind, canEdit = true }: BattleListCardProps) {
   const t = useTranslations("battleSetup.list");
 
   const { isDeleting, onDelete } = useDeleteBattleCard(campaignId, battle.id);
@@ -29,11 +30,18 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
 
   const playHref = `/campaigns/${campaignId}/battles/${battle.id}`;
 
-  const deleteButton = (
+  const deleteButton = canEdit && (
     <Button variant="destructive" size="sm" disabled={isDeleting} onClick={onDelete}>
       {t("card.delete")}
     </Button>
   );
+
+  const editButton = (label: string) =>
+    canEdit && (
+      <Button asChild variant="outline" size="sm" className="flex-1">
+        <Link href={editHref}>{label}</Link>
+      </Button>
+    );
 
   return (
     <HudCard tone={KIND[kind].tone} className="space-y-3 p-4">
@@ -66,9 +74,7 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
       )}
       {kind === BattleStatus.PREPARED && (
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm" className="flex-1">
-            <Link href={editHref}>{t("card.edit")}</Link>
-          </Button>
+          {editButton(t("card.edit"))}
           <Button asChild size="sm" className="flex-1">
             <Link href={playHref}>{t("card.start")}</Link>
           </Button>
@@ -77,9 +83,7 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
       )}
       {kind === BattleStatus.COMPLETED && (
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm" className="flex-1">
-            <Link href={editHref}>{t("card.view")}</Link>
-          </Button>
+          {editButton(t("card.view"))}
           {deleteButton}
         </div>
       )}

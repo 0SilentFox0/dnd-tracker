@@ -39,14 +39,21 @@ export default async function CampaignsPage() {
 
   let templates: TemplateTile[] = [];
 
+  let demoCampaign: { id: string; name: string; description: string | null; maxLevel: number } | null = null;
+
   try {
-    templates = visibleTemplates(await prisma.campaign.findMany({
+    const templatesQuery = prisma.campaign.findMany({
       where: { kind: CampaignKind.TEMPLATE, members: { some: { userId, role: CampaignRole.DM } } },
       select: { id: true, name: true, description: true, kind: true, visibility: true, locale: true, templateKey: true },
       orderBy: { updatedAt: "desc" },
-    }));
+    });
 
-    campaigns = await prisma.campaign.findMany({
+    const demoQuery = prisma.campaign.findFirst({
+      where: { kind: CampaignKind.DEMO, status: CampaignStatus.ACTIVE },
+      select: { id: true, name: true, description: true, maxLevel: true },
+    });
+
+    const campaignsQuery = prisma.campaign.findMany({
       where: {
         members: {
           some: {
@@ -68,6 +75,12 @@ export default async function CampaignsPage() {
         updatedAt: "desc",
       },
     });
+
+    const [templateRows, campaignRows, demoRow] = await Promise.all([templatesQuery, campaignsQuery, demoQuery]);
+
+    templates = visibleTemplates(templateRows);
+    campaigns = campaignRows;
+    demoCampaign = demoRow;
   } catch (error: unknown) {
     console.error("Error fetching campaigns:", error);
 
@@ -114,6 +127,16 @@ export default async function CampaignsPage() {
       />
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {demoCampaign && (
+          <HudCard asChild tone="active" className="space-y-2">
+            <Link href={`/campaigns/${demoCampaign.id}`}>
+              <h2 className="hud-sc text-lg text-hud-ink">{t("demo.title")}</h2>
+              <p className="text-sm text-hud-muted">{t("demo.description")}</p>
+              {demoCampaign.description && <p className="text-sm text-hud-bone">{demoCampaign.description}</p>}
+              <p className="text-sm text-hud-muted">{t("card.level", { level: demoCampaign.maxLevel })}</p>
+            </Link>
+          </HudCard>
+        )}
         {campaigns.map((campaign) => {
           const userMember = campaign.members.find((m) => m.userId === userId);
 

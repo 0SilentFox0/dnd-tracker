@@ -92,7 +92,7 @@ export function BattleMapPlayground() {
           </HudPanel>
           <HudPanel className="text-sm">
             <div className="mb-1 font-semibold">Log</div>
-            {log.length === 0 ? <div className="text-hud-muted">Empty</div> : log.map((line, i) => <div key={`${i}-${line}`}>{line}</div>)}
+            {log.length === 0 ? <div className="text-hud-muted">Empty</div> : log.map((entry, i) => <div key={`${i}-${entry.key}`}>{entry.key} {Object.values(entry.params).join(" ")}</div>)}
           </HudPanel>
         </div>
         <div className="h-full min-h-0 min-w-0">

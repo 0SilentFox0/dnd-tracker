@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title">
+  <title id="title">The listening grove and three tone gate</title><rect width="1200" height="800" fill="#a8b29a"/><path d="M0 0h1200v800H0z" fill="#718875"/><ellipse cx="600" cy="404" rx="390" ry="280" fill="#c9c39d" stroke="#405c4b" stroke-width="24"/>
+  <g fill="#405c4b" stroke="#263c32" stroke-width="8"><path d="M170 340l70-250 70 250zM300 580l70-260 70 260zM770 300l70-230 70 230zM920 570l70-260 70 260z"/></g><g fill="#80958a" stroke="#35483e" stroke-width="10"><ellipse cx="450" cy="420" rx="75" ry="105"/><ellipse cx="600" cy="420" rx="75" ry="105"/><ellipse cx="750" cy="420" rx="75" ry="105"/></g>
+  <g fill="#e1bd77" stroke="#493f35" stroke-width="8"><circle cx="450" cy="420" r="23"/><path d="M600 330l28 55h-56z"/><path d="M750 390h42v60h-42z"/></g><path d="M370 640h460" stroke="#493f35" stroke-width="16"/><g font-family="serif" fill="#f2e6c9" font-size="38"><text x="600" y="700" text-anchor="middle">DROPLET · LEAF · MOUNTAIN</text></g>
+</svg>

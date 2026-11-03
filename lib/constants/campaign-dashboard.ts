@@ -68,4 +68,11 @@ export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "info", href: info, icon: BookOpen, group: "player" },
 ];
 
+const pick = (list: DashboardSection[], keys: string[]) => list.filter((s) => keys.includes(s.key));
+
+export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
+  ...pick(DM_DASHBOARD_SECTIONS, ["scenario", "graph", "battles", "music"]),
+  ...pick(PLAYER_DASHBOARD_SECTIONS, ["player-world"]),
+];
+
 export const COMPACT_GROUPS: ReadonlySet<DashboardGroupKey> = new Set<DashboardGroupKey>(["libraries"]);

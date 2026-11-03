@@ -4,11 +4,23 @@ import { useCallback, useMemo, useState } from "react";
 
 import { buildMockParticipants } from "./mock-participants";
 
-import { CombatStatus, DEFAULT_BATTLE_MAP } from "@/lib/constants/battle";
+import { CombatStatus, DEFAULT_BATTLE_MAP, MAZE_MARK_SYMBOLS } from "@/lib/constants/battle";
 import { aimView, cellKey, cellsOf, deriveTrajectory, type MapAim, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks, templateArea } from "@/lib/utils/battle/grid";
-import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
+import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, MazeMarkSymbol, SpellTemplate } from "@/types/battle";
 
-export type BattleMapPlaygroundMode = "move" | "attack" | "template";
+export type BattleMapPlaygroundMode = "move" | "attack" | "template" | "maze-mark";
+
+export type BattleMapPlaygroundLogKey = "mazeMark" | "outOfRange" | "template" | "move" | "hit" | "turn";
+
+export interface BattleMapPlaygroundLogEntry {
+  key: BattleMapPlaygroundLogKey;
+  params: Record<string, string | number>;
+}
+
+export interface BattleMapPlaygroundSnapshot {
+  map?: BattleMapConfig;
+  participants?: BattleParticipant[];
+}
 
 const DEMO_DAMAGE = 7;
 
@@ -33,18 +45,26 @@ function initial(map: BattleMapConfig): BattleParticipant[] {
   return placeParticipants(map, buildMockParticipants());
 }
 
-export function useBattleMapPlayground() {
-  const [map, setMapState] = useState<BattleMapConfig>({ ...DEFAULT_BATTLE_MAP, terrain: DEMO_TERRAIN });
+export function useBattleMapPlayground(snapshot: BattleMapPlaygroundSnapshot = {}) {
+  const authored = useMemo(() => {
+    const map = snapshot.map ?? { ...DEFAULT_BATTLE_MAP, terrain: DEMO_TERRAIN };
 
-  const [participants, setParticipants] = useState<BattleParticipant[]>(() => initial(map));
+    return { map, participants: snapshot.participants?.length ? snapshot.participants : initial(map) };
+  }, [snapshot.map, snapshot.participants]);
+
+  const [map, setMapState] = useState<BattleMapConfig>(authored.map);
+
+  const [participants, setParticipants] = useState<BattleParticipant[]>(authored.participants);
 
   const [activeId, setActiveId] = useState<string>(() => participants[0].basicInfo.id);
 
   const [mode, setMode] = useState<BattleMapPlaygroundMode>("move");
 
+  const [mazeMarkSymbol, setMazeMarkSymbol] = useState<MazeMarkSymbol>(MAZE_MARK_SYMBOLS[0]);
+
   const [hover, setHover] = useState<GridPoint | null>(null);
 
-  const [log, setLog] = useState<string[]>([]);
+  const [log, setLog] = useState<BattleMapPlaygroundLogEntry[]>([]);
 
   const active = participants.find((p) => p.basicInfo.id === activeId) ?? participants[0];
 
@@ -69,7 +89,7 @@ export function useBattleMapPlayground() {
 
   const view: BattleMapView = { selectedId: activeId, currentId: activeId, marks: aimed?.marks ?? marks, aim: aimed?.aim ?? null, trajectory, hud };
 
-  const pushLog = useCallback((line: string) => setLog((prev) => [line, ...prev].slice(0, LOG_LIMIT)), []);
+  const pushLog = useCallback((entry: BattleMapPlaygroundLogEntry) => setLog((prev) => [entry, ...prev].slice(0, LOG_LIMIT)), []);
 
   const [margin, setMarginState] = useState(0);
 
@@ -103,13 +123,22 @@ export function useBattleMapPlayground() {
     (p: GridPoint) => {
       const key = cellKey(p);
 
+      if (mode === "maze-mark") {
+        if (!map.maze) return;
+
+        setMapState((prev) => prev.maze ? { ...prev, maze: { ...prev.maze, marks: { ...prev.maze.marks, [key]: { symbol: mazeMarkSymbol, color: "#f0c75e", by: activeId } } } } : prev);
+        pushLog({ key: "mazeMark", params: { symbol: mazeMarkSymbol, cell: key } });
+
+        return;
+      }
+
       if (mode === "template") {
-        if (!aimView({ map, participants }, mapAim, p)) return pushLog("Out of range");
+        if (!aimView({ map, participants }, mapAim, p)) return pushLog({ key: "outOfRange", params: {} });
 
         const hit = templateArea(map, participants, active, DEMO_TEMPLATE, p).targets;
 
         setAim(p);
-        pushLog(`Template at ${key}: ${hit.map((q) => q.basicInfo.name).join(", ") || "nobody"}`);
+        pushLog({ key: "template", params: { cell: key, names: hit.map((q) => q.basicInfo.name).join(", ") } });
 
         return;
       }
@@ -124,7 +153,7 @@ export function useBattleMapPlayground() {
             q.basicInfo.id === activeId ? { ...q, battleData: { ...q.battleData, position: p, movementUsed: (q.battleData.movementUsed ?? 0) + cost } } : q,
           ),
         );
-        pushLog(`${active.basicInfo.name} moves (${cost} cells)`);
+        pushLog({ key: "move", params: { name: active.basicInfo.name, cost } });
 
         return;
       }
@@ -144,9 +173,9 @@ export function useBattleMapPlayground() {
           return { ...q, combatStats: { ...q.combatStats, currentHp, status: currentHp <= 0 ? CombatStatus.DEAD : q.combatStats.status } };
         }),
       );
-      pushLog(`${active.basicInfo.name} hits ${target.basicInfo.name}: -${DEMO_DAMAGE}`);
+      pushLog({ key: "hit", params: { name: active.basicInfo.name, target: target.basicInfo.name, damage: DEMO_DAMAGE } });
     },
-    [mode, marks, costs, activeId, active, participants, pushLog, map, mapAim],
+    [mode, marks, costs, activeId, active, participants, pushLog, map, mapAim, mazeMarkSymbol],
   );
 
   const nextTurn = useCallback(() => {
@@ -160,18 +189,19 @@ export function useBattleMapPlayground() {
 
     setActiveId(next.basicInfo.id);
     setParticipants((prev) => prev.map((p) => (p.basicInfo.id === next.basicInfo.id ? { ...p, battleData: { ...p.battleData, movementUsed: 0 } } : p)));
-    pushLog(`Turn: ${next.basicInfo.name}`);
+    pushLog({ key: "turn", params: { name: next.basicInfo.name } });
   }, [participants, activeId, pushLog]);
 
   const reset = useCallback(() => {
-    const fresh = initial(map);
-
-    setParticipants(fresh);
-    setActiveId(fresh[0].basicInfo.id);
+    setMapState(authored.map);
+    setParticipants(authored.participants);
+    setActiveId(authored.participants[0].basicInfo.id);
     setMode("move");
+    setMazeMarkSymbol(MAZE_MARK_SYMBOLS[0]);
     setAim(null);
+    setHover(null);
     setLog([]);
-  }, [map]);
+  }, [authored]);
 
   const actions: Omit<Required<BattleMapActions>, "onStroke" | "onReturn"> = {
     onCellClick,
@@ -179,5 +209,5 @@ export function useBattleMapPlayground() {
     onTokenClick: setActiveId,
   };
 
-  return { map, setMap, margin, setMargin, participants, activeId, active, mode, view, actions, log, controls: { nextTurn, setMode, reset } };
+  return { map, setMap, margin, setMargin, participants, activeId, active, mode, mazeMarkSymbol, view, actions, log, controls: { nextTurn, setMode, setMazeMarkSymbol, reset } };
 }

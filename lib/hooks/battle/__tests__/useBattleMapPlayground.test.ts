@@ -5,7 +5,10 @@ import { describe, expect, it } from "vitest";
 
 import { useBattleMapPlayground } from "../useBattleMapPlayground";
 
-import { occupiedBy } from "@/lib/utils/battle/grid";
+import { DEFAULT_BATTLE_MAP, MAZE_MARK_SYMBOLS } from "@/lib/constants/battle";
+import { buildMockParticipants } from "@/lib/hooks/battle/mock-participants";
+import { occupiedBy, placeParticipants } from "@/lib/utils/battle/grid";
+import type { BattleMapConfig } from "@/types/battle";
 
 type Hook = { current: ReturnType<typeof useBattleMapPlayground> };
 
@@ -20,6 +23,42 @@ function parse(key: string) {
 }
 
 describe("useBattleMapPlayground", () => {
+  it("starts from a prepared map and participants and resets local changes to that snapshot", () => {
+    const map: BattleMapConfig = { ...DEFAULT_BATTLE_MAP, cols: 12, rows: 8, maze: { walls: [], exit: null, difficulty: "easy", teleports: [], fog: [], marks: {}, dark: false } };
+
+    const participants = placeParticipants(map, buildMockParticipants().slice(0, 2));
+
+    participants[0].combatStats.currentHp = 12;
+
+    const { result } = renderHook(() => useBattleMapPlayground({ map, participants }));
+
+    expect(result.current.map).toMatchObject({ cols: 12, rows: 8, maze: { difficulty: "easy" } });
+    expect(result.current.participants).toEqual(participants);
+
+    act(() => result.current.controls.setMode("attack"));
+    act(() => result.current.controls.nextTurn());
+    act(() => result.current.controls.reset());
+
+    expect(result.current.activeId).toBe(participants[0].basicInfo.id);
+    expect(result.current.participants).toEqual(participants);
+    expect(result.current.mode).toBe("move");
+    expect(result.current.log).toEqual([]);
+  });
+
+  it("places maze marks in client state without a server action", () => {
+    const map: BattleMapConfig = { ...DEFAULT_BATTLE_MAP, maze: { walls: [], exit: null, difficulty: "easy", teleports: [], fog: [], marks: {}, dark: false } };
+
+    const participants = placeParticipants(map, buildMockParticipants().slice(0, 2));
+
+    const { result } = renderHook(() => useBattleMapPlayground({ map, participants }));
+
+    act(() => result.current.controls.setMode("maze-mark"));
+    act(() => result.current.actions.onCellClick({ x: 1, y: 1 }));
+
+    expect(result.current.map.maze?.marks["1:1"]).toMatchObject({ symbol: MAZE_MARK_SYMBOLS[0], by: result.current.activeId });
+    expect(result.current.log[0]).toMatchObject({ key: "mazeMark", params: { cell: "1:1" } });
+  });
+
   it("places every mock participant at start", () => {
     const { result } = renderHook(() => useBattleMapPlayground());
 
@@ -95,7 +134,7 @@ describe("useBattleMapPlayground", () => {
     act(() => result.current.actions.onCellClick(parse(key)));
 
     expect(result.current.participants.find((p) => p.basicInfo.id === targetId)!.combatStats.currentHp).toBe(hpBefore - 7);
-    expect(result.current.log[0]).toContain("-7");
+    expect(result.current.log[0]).toMatchObject({ key: "hit", params: { damage: 7 } });
   });
 
   it("margin blocks the edge cells and keeps everyone on playable cells", () => {

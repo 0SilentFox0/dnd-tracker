@@ -17,7 +17,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const accessResult = await requireCampaignAccess(id, false);
+    const accessResult = await requireCampaignAccess(id, false, { allowDemo: true });
 
     if (accessResult instanceof NextResponse) {
       return accessResult;

@@ -33,20 +33,24 @@ export default async function CampaignDetailPage({
 
   const t = await getTranslator(await getRequestLocale(), "dashboard");
 
-  const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
+  const { campaign, isDM, isDemo, authUser: user } = await requireCampaignWithMembers(id);
 
   const isTemplate = campaign.kind === CampaignKind.TEMPLATE;
+
+  const isPlayer = !isDM && !isDemo;
+
+  const hasMembership = !isTemplate && !isDemo;
 
   const classesEnabled = parseRules(campaign.rules).classes.enabled;
 
   const [dm, player, onboarding] = await Promise.all([
     isDM && !isTemplate ? readDmDashboard(id).catch(() => null) : null,
-    !isDM ? readPlayerDashboard(id, user.id).catch(() => null) : null,
+    isPlayer ? readPlayerDashboard(id, user.id).catch(() => null) : null,
     // онбординг не має валити сторінку кампанії
-    isTemplate ? null : readCampaignOnboarding(id, user.id, isDM).catch(() => null),
+    hasMembership ? readCampaignOnboarding(id, user.id, isDM).catch(() => null) : null,
   ]);
 
-  const hiddenKeys = dashboardHiddenKeys({ isDM, hasWorld: !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
+  const hiddenKeys = dashboardHiddenKeys({ isDM, hasWorld: isDemo || !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
 
   return (
     <HudPage>
@@ -69,19 +73,21 @@ export default async function CampaignDetailPage({
         </HudPanel>
       )}
 
+      {isDemo && <HudPanel className="border-hud-gold/60"><p className="text-sm text-hud-bone">{t("page.demoNotice")}</p></HudPanel>}
+
       {isDM && <HudPanel><a className="underline" href={`/campaigns/${id}/dm/compendium`}>{t("page.compendium.link")}</a><p>{t("page.compendium.text")}</p></HudPanel>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-4">
           {dm && <DmNextSteps campaignId={id} data={dm} />}
           {player && <PlayerHeroCard campaignId={id} data={player} />}
-          <DashboardGroups campaignId={id} isDM={isDM} pendingDrafts={dm?.pendingDrafts ?? 0} context={{ isTemplate, classesEnabled }} hiddenKeys={hiddenKeys} />
+          <DashboardGroups campaignId={id} isDM={isDM} isDemo={isDemo} pendingDrafts={dm?.pendingDrafts ?? 0} context={{ isTemplate, classesEnabled }} hiddenKeys={hiddenKeys} />
         </div>
 
         <div className="space-y-4">
           <CampaignSummaryPanel campaignId={id} campaign={{ name: campaign.name, description: campaign.description, maxLevel: campaign.maxLevel, allowPlayerEdit: campaign.allowPlayerEdit, critChoiceByDm: campaign.critChoiceByDm, acquaintancesEnabled: campaign.acquaintancesEnabled, status: campaign.status, inviteCode: campaign.inviteCode }} isDM={isDM} meta={{ createdFromId: campaign.createdFromId ?? null, isTemplate, credits: campaign.credits ?? null }} />
 
-          {!isTemplate && (
+          {hasMembership && (
             <HudPanel>
               <HudSection title={t("page.members.title")}>
                 <p className={`${LABEL} mb-2`}>
@@ -92,7 +98,7 @@ export default async function CampaignDetailPage({
             </HudPanel>
           )}
 
-          {!isTemplate && (
+          {hasMembership && (
             <PrefetchedQuery queryKey={onboardingKeys.campaign(id)} data={onboarding}>
               <OnboardingChecklist campaignId={id} />
             </PrefetchedQuery>

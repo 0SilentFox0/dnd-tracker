@@ -173,6 +173,16 @@ describe("buildWorldView", () => {
     expect(v.maps.map((m) => m.id)).toEqual(["root"]);
   });
 
+  it("Demo viewers can open every campaign map without hero reveal state", () => {
+    const child: WorldMap = { ...map, id: "child", parentMarkerId: "near", parentMapId: "root" };
+
+    const other: WorldMap = { ...map, id: "other", parentMarkerId: "far", parentMapId: "root" };
+
+    const v = buildWorldView(input({ allMaps: [summary(map), summary(child), summary(other)], viewer: { userId: "u3", heroIds: [], isDemo: true }, positions: [], reveals: [] }));
+
+    expect(v.maps.map((m) => m.id)).toEqual(["root", "child", "other"]);
+  });
+
   it("aspect 3: vertical reveal reach is shorter", () => {
     const wide: WorldMap = { ...map, width: 3000, height: 1000 };
 

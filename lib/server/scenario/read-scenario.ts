@@ -3,13 +3,13 @@ import { NextResponse } from "next/server";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { loadOwnedPage } from "@/lib/server/scenario/loaders";
 import { InvalidScenarioContentError, listPages, OWNED_WITH_CONTENT_SELECT, toPage } from "@/lib/server/scenario/page-store";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignDMOrDemoAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function listScenarioHandler(campaignId: string) {
   try {
-    const access = await requireDM(campaignId);
+    const access = await requireCampaignDMOrDemoAccess(campaignId);
 
     if (access instanceof NextResponse) return access;
 
@@ -21,7 +21,7 @@ export async function listScenarioHandler(campaignId: string) {
 
 export async function getScenarioPageHandler(campaignId: string, pageId: string) {
   try {
-    const access = await requireDM(campaignId);
+    const access = await requireCampaignDMOrDemoAccess(campaignId);
 
     if (access instanceof NextResponse) return access;
 

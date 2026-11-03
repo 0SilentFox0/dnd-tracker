@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title">
+  <title id="title">The root vault, a shifting stone maze</title><rect width="1200" height="800" fill="#766f62"/><path d="M80 80h1040v640H80z" fill="#b3a78c" stroke="#403d38" stroke-width="24"/>
+  <g fill="none" stroke="#403d38" stroke-width="30" stroke-linejoin="round"><path d="M300 100v180h190v180H310v160h210"/><path d="M600 100v130h200v180H650v130h190v150"/><path d="M900 100v220H780v170h220v220"/><path d="M100 390h200M520 290h100M400 640v70M840 410v100"/></g>
+  <g fill="#8a3f32" stroke="#382e29" stroke-width="8"><path d="M565 360l36-22 38 22v45l-38 22-36-22z"/></g><circle cx="600" cy="384" r="102" fill="none" stroke="#d9b96e" stroke-width="10" stroke-dasharray="18 16"/><g font-family="serif" fill="#342f29" font-size="32"><text x="600" y="760" text-anchor="middle">ROOT VAULT · ECHOES RETURN TO THE HEART</text></g>
+</svg>

@@ -8,7 +8,9 @@ export const CampaignStatus = { ACTIVE: "active", ARCHIVED: "archived" } as cons
 
 export type CampaignStatus = (typeof CampaignStatus)[keyof typeof CampaignStatus];
 
-export const CampaignKind = { CAMPAIGN: "campaign", TEMPLATE: "template" } as const;
+export const CampaignKind = { CAMPAIGN: "campaign", TEMPLATE: "template", DEMO: "demo" } as const;
+
+export const isDemoKind = (kind: string | null | undefined) => kind === CampaignKind.DEMO;
 
 export type CampaignKind = (typeof CampaignKind)[keyof typeof CampaignKind];
 

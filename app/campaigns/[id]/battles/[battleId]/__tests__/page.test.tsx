@@ -11,6 +11,8 @@ const getSessionUserId = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/server/battles/read-battle", () => ({ readBattleScene }));
 vi.mock("@/lib/auth", () => ({ getSessionUserId }));
+vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignMember: vi.fn(async () => ({ isDemo: false })) }));
+vi.mock("@/lib/server/battles/demo-encounter", () => ({ buildDemoEncounter: vi.fn(async () => []) }));
 vi.mock("../BattlePageClient", () => ({ BattlePageClient: () => null }));
 
 import BattlePage from "../page";

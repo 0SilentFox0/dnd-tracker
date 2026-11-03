@@ -11,7 +11,7 @@ import { CreateScenarioPageDialog, ScenarioBook, ScenarioIndex, ScenarioSearch }
 import { Button } from "@/components/ui/button";
 import { useScenarioPageActions, useScenarioPages } from "@/lib/hooks/scenario";
 
-export function ScenarioIndexPageClient({ campaignId, campaignName }: { campaignId: string; campaignName: string }) {
+export function ScenarioIndexPageClient({ campaignId, campaignName, canEdit = true }: { campaignId: string; campaignName: string; canEdit?: boolean }) {
   const t = useTranslations("scenario.indexPage");
 
   const router = useRouter();
@@ -27,16 +27,18 @@ export function ScenarioIndexPageClient({ campaignId, campaignName }: { campaign
       <div className="sb-index">
         <h1>{campaignName}</h1>
         <p className="lead">{t("lead")}</p>
-        <OnboardingHint id="dm.scenario" className="my-3 text-left" />
+        {canEdit && <OnboardingHint id="dm.scenario" className="my-3 text-left" />}
         <div className="sb-tools">
           <ScenarioSearch campaignId={campaignId} />
-          <Button onClick={() => setCreating(true)} className="gap-2">
-            <Plus className="size-4" />
-            {t("newPage")}
-          </Button>
+          {canEdit && (
+            <Button onClick={() => setCreating(true)} className="gap-2">
+              <Plus className="size-4" />
+              {t("newPage")}
+            </Button>
+          )}
         </div>
         <QueryState query={pages} empty={<EmptyState title={t("emptyTitle")} description={t("emptyDescription")} />}>
-          {(list) => <ScenarioIndex campaignId={campaignId} pages={list} onMove={(id, dir, siblings) => void actions.move(id, dir, siblings).catch(() => {})} />}
+          {(list) => <ScenarioIndex campaignId={campaignId} pages={list} onMove={canEdit ? (id, dir, siblings) => void actions.move(id, dir, siblings).catch(() => {}) : undefined} />}
         </QueryState>
       </div>
       <CreateScenarioPageDialog

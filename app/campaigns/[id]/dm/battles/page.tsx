@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
 import { battleSceneListSelect } from "@/lib/utils/battle/store/scene-list-select";
 
 export default async function DMBattlesPage({
@@ -19,7 +19,9 @@ export default async function DMBattlesPage({
 }) {
   const { id } = await params;
 
-  await requireCampaignDM(id);
+  const { isDemo } = await requireCampaignDMOrDemo(id);
+
+  const canEdit = !isDemo;
 
   const t = await getTranslator(await getRequestLocale(), "battleSetup");
 
@@ -39,17 +41,19 @@ export default async function DMBattlesPage({
         title={t("list.page.title")}
         subtitle={t("list.page.subtitle")}
         actions={
-          <>
-            <Link href={`/campaigns/${id}/dm/battles/new`} className="shrink-0">
-              <Button className="whitespace-nowrap">{t("list.page.create")}</Button>
-            </Link>
-            <DeleteAllBattlesButton campaignId={id} battlesCount={battles.length} />
-          </>
+          canEdit && (
+            <>
+              <Link href={`/campaigns/${id}/dm/battles/new`} className="shrink-0">
+                <Button className="whitespace-nowrap">{t("list.page.create")}</Button>
+              </Link>
+              <DeleteAllBattlesButton campaignId={id} battlesCount={battles.length} />
+            </>
+          )
         }
       />
-      <OnboardingHint id="dm.battles" />
+      {canEdit && <OnboardingHint id="dm.battles" />}
 
-      <BattleSections battles={battles} campaignId={id} />
+      <BattleSections battles={battles} campaignId={id} canEdit={canEdit} />
     </HudPage>
   );
 }

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { searchScenarioPages } from "@/lib/server/scenario/search";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignDMOrDemoAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function searchScenarioHandler(req: Request, campaignId: string) {
   try {
-    const access = await requireDM(campaignId);
+    const access = await requireCampaignDMOrDemoAccess(campaignId);
 
     if (access instanceof NextResponse) return access;
 

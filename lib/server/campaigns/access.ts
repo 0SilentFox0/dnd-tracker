@@ -8,7 +8,7 @@ import type { Campaign, CampaignMember } from "@prisma/client";
 
 import "server-only";
 import { getAuthUser } from "@/lib/auth";
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { CampaignRole, isDemoKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import type { PublicUser } from "@/types/campaigns";
@@ -35,6 +35,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
   userId: string;
   role: string;
   isDM: boolean;
+  isDemo: boolean;
   authUser: Awaited<ReturnType<typeof getAuthUser>>;
 }> {
   const authUser = await getAuthUser();
@@ -53,6 +54,10 @@ export async function requireCampaignMember(campaignId: string): Promise<{
 
   if (!campaign) redirect("/campaigns");
 
+  if (isDemoKind(campaign.kind)) {
+    return { campaign, userId, role: "demo", isDM: false, isDemo: true, authUser };
+  }
+
   const member = campaign.members[0];
 
   if (!member) redirect("/campaigns");
@@ -64,6 +69,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
     userId,
     role: member.role,
     isDM: member.role === CampaignRole.DM,
+    isDemo: false,
     authUser,
   };
 }
@@ -88,6 +94,20 @@ export async function requireCampaignDM(campaignId: string): Promise<{
   };
 }
 
+/** Read-only content pages available to campaign DMs and authenticated Demo visitors. */
+export async function requireCampaignDMOrDemo(campaignId: string): Promise<{
+  campaign: PublicCampaign;
+  userId: string;
+  isDemo: boolean;
+  authUser: Awaited<ReturnType<typeof getAuthUser>>;
+}> {
+  const result = await requireCampaignMember(campaignId);
+
+  if (!result.isDM && !result.isDemo) redirect(`/campaigns/${campaignId}`);
+
+  return { campaign: result.campaign, userId: result.userId, isDemo: result.isDemo, authUser: result.authUser };
+}
+
 /**
  * Завантажує campaign з усіма members + user-relation для UI рендеру.
  * Повертає role поточного користувача окремо.
@@ -104,7 +124,8 @@ export async function requireCampaignWithMembers(
   userId: string;
   role: string;
   isDM: boolean;
-  ownMembership: SlimMembership;
+  isDemo: boolean;
+  ownMembership: SlimMembership | null;
   authUser: Awaited<ReturnType<typeof getAuthUser>>;
 }> {
   const authUser = await getAuthUser();
@@ -124,6 +145,18 @@ export async function requireCampaignWithMembers(
 
   if (!campaign) redirect("/campaigns");
 
+  if (isDemoKind(campaign.kind)) {
+    return {
+      campaign: { ...campaign, members: [] },
+      userId,
+      role: "demo",
+      isDM: false,
+      isDemo: true,
+      ownMembership: null,
+      authUser,
+    };
+  }
+
   const member = campaign.members.find((m) => m.userId === userId);
 
   if (!member) redirect("/campaigns");
@@ -133,6 +166,7 @@ export async function requireCampaignWithMembers(
     userId,
     role: member.role,
     isDM: member.role === CampaignRole.DM,
+    isDemo: false,
     ownMembership: { userId: member.userId, role: member.role },
     authUser,
   };

@@ -15,7 +15,7 @@ import { useBattleListSections } from "@/lib/hooks/battles";
 
 type Battle = Parameters<typeof BattleListCard>[0]["battle"] & { status: string };
 
-export function BattleSections({ battles, campaignId }: { battles: Battle[]; campaignId: string }) {
+export function BattleSections({ battles, campaignId, canEdit = true }: { battles: Battle[]; campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("battleSetup.list");
 
   const { search, sections } = useBattleListSections(battles);
@@ -27,9 +27,11 @@ export function BattleSections({ battles, campaignId }: { battles: Battle[]; cam
         icon={Swords}
         title={t("empty.title")}
         action={
-          <Link href={`/campaigns/${campaignId}/dm/battles/new`}>
-            <Button>{t("empty.create")}</Button>
-          </Link>
+          canEdit && (
+            <Link href={`/campaigns/${campaignId}/dm/battles/new`}>
+              <Button>{t("empty.create")}</Button>
+            </Link>
+          )
         }
       />
     );
@@ -44,7 +46,7 @@ export function BattleSections({ battles, campaignId }: { battles: Battle[]; cam
           <HudSection title={title}>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {list.map((battle) => (
-                <BattleListCard key={battle.id} battle={battle} campaignId={campaignId} kind={kind} />
+                <BattleListCard key={battle.id} battle={battle} campaignId={campaignId} kind={kind} canEdit={canEdit} />
               ))}
             </div>
           </HudSection>

@@ -27,8 +27,15 @@ vi.mock("@/components/scenario", () => ({
 }));
 vi.mock("@/components/scenario/editor/VersionsDialog", () => ({ VersionsDialog: () => null }));
 vi.mock("@/components/scenario/play/ScenarioShowDock", () => ({ ScenarioShowDock: () => null }));
+vi.mock("@/components/ui/dropdown-menu", () => ({
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuItem: ({ children, onSelect }: { children: React.ReactNode; onSelect: () => void }) => <button type="button" onClick={onSelect}>{children}</button>,
+}));
 vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioPage: () => ({}),
+  useGenerateScenarioSummary: () => ({ pendingPageId: null, generate: vi.fn() }),
   useScenarioPlay: () => ({}),
   useSectionCollapse: () => ({ showPlayed: false, setShowPlayed: vi.fn(), isExpanded: () => true, expand: vi.fn() }),
   useSectionProgress: () => ({ setPlayed: vi.fn(), setRevealed: vi.fn(), isPending: false }),
@@ -53,6 +60,7 @@ describe("ScenarioPageClient AI", () => {
     expect(useAiProposals).toHaveBeenLastCalledWith("c1", "p1", expect.objectContaining({ enabled: true, full: false }));
     expect(screen.queryByTestId("ai-panel")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "AI" }));
+    fireEvent.click(screen.getByText("scenario.pageBody.openAi"));
     expect(screen.getByTestId("ai-panel")).toBeTruthy();
     expect(useAiProposals).toHaveBeenLastCalledWith("c1", "p1", expect.objectContaining({ enabled: true, full: true }));
   });

@@ -201,3 +201,5 @@ export const BATTLE_RATE_LIMITS = {
 
 /** AI на ключі DM, який викликають гравці (передісторія, портрет): 10 викликів / 10 хв на користувача й кампанію. */
 export const AI_PLAYER_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
+
+export const DEMO_READ_RATE_LIMIT = { limit: 120, windowSeconds: 60 } as const;

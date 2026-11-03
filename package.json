@@ -41,6 +41,7 @@
     "srd:build": "tsx --tsconfig tsconfig.scripts.json scripts/srd/build.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-library.ts",
     "seed-world-map": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-world-map.ts",
+    "seed:example-demo": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-example-demo.ts",
     "rename-battle-tracks": "tsx --tsconfig tsconfig.scripts.json scripts/db/rename-battle-tracks.ts",
     "seed-unit-grid-size": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-unit-grid-size.ts",
     "hero-growth-report": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/sim/hero-growth-report.ts",

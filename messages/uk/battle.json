@@ -298,5 +298,29 @@
       "roundsLeft": "ще {count, plural, one {# раунд} few {# раунди} many {# раундів} other {# раундів}}",
       "from": "від: {source}"
     }
+  },
+  "demo": {
+    "notice": "Демо-бій · зміни тимчасові",
+    "controls": "Керування боєм",
+    "modes": {
+      "move": "Рух",
+      "attack": "Ціль",
+      "template": "Область",
+      "maze-mark": "Позначки лабіринту"
+    },
+    "nextTurn": "Наступний хід",
+    "reset": "Скинути сутичку",
+    "mazeSymbol": "Символ позначки лабіринту",
+    "participants": "Учасники сутички",
+    "hp": "{current}/{max} HP",
+    "log": "Журнал бою",
+    "logEntry": {
+      "mazeMark": "Позначка лабіринту {symbol} у {cell}",
+      "outOfRange": "Поза зоною дії",
+      "template": "Шаблон у {cell}: {names}",
+      "move": "{name} рухається ({cost} клітинок)",
+      "hit": "{name} вражає {target}: -{damage}",
+      "turn": "Хід: {name}"
+    }
   }
 }

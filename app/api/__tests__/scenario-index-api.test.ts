@@ -7,7 +7,11 @@ import { GET } from "@/app/api/campaigns/[id]/scenario/index/route";
 import { loadScenarioIndex } from "@/lib/server/scenario/index-store";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => {
+  const requireDM = vi.fn();
+
+  return { requireDM, requireCampaignDMOrDemoAccess: (id: string) => requireDM(id) };
+});
 vi.mock("@/lib/server/scenario/index-store", () => ({ loadScenarioIndex: vi.fn() }));
 
 const params = { params: Promise.resolve({ id: "camp" }) };

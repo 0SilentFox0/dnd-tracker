@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 
 import "server-only";
-import { API_TOKEN_PREFIX, type ApiTokenScope, isApiTokenScope } from "@/lib/constants/ai";
+import { API_TOKEN_PREFIX, type ApiTokenScope, isApiTokenScope, READ_ONLY_API_TOKEN_SCOPES } from "@/lib/constants/ai";
+import { isDemoKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { isDmMember } from "@/lib/utils/api/is-dm";
@@ -49,7 +50,7 @@ export async function verifyApiToken(raw: string): Promise<{ id: string; campaig
 
   const row = await prisma.apiToken.findUnique({
     where: { tokenHash: hashToken(raw) },
-    select: { id: true, campaignId: true, userId: true, revokedAt: true, scopes: true },
+    select: { id: true, campaignId: true, userId: true, revokedAt: true, scopes: true, campaign: { select: { kind: true, dmUserId: true } } },
   });
 
   if (!row || row.revokedAt) return null;
@@ -59,12 +60,18 @@ export async function verifyApiToken(raw: string): Promise<{ id: string; campaig
     prisma.user.findUnique({ where: { id: row.userId }, select: { locale: true } }),
   ]);
 
-  if (!isDmMember(members)) return null;
+  const isDemo = isDemoKind(row.campaign?.kind);
+
+  const ownerOk = isDemo ? row.userId === row.campaign?.dmUserId : isDmMember(members);
+
+  if (!ownerOk) return null;
 
   await prisma.apiToken.updateMany({
     where: { id: row.id, OR: [{ lastUsedAt: null }, { lastUsedAt: { lt: new Date(Date.now() - LAST_USED_THROTTLE_MS) } }] },
     data: { lastUsedAt: new Date() },
   });
 
-  return { id: row.id, campaignId: row.campaignId, userId: row.userId, scopes: knownScopes(row.scopes), locale: isLocale(owner?.locale) ? owner.locale : "en" };
+  const scopes = knownScopes(row.scopes);
+
+  return { id: row.id, campaignId: row.campaignId, userId: row.userId, scopes: isDemo ? scopes.filter((s) => READ_ONLY_API_TOKEN_SCOPES.includes(s)) : scopes, locale: isLocale(owner?.locale) ? owner.locale : "en" };
 }

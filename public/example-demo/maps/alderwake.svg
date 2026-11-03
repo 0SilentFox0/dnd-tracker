@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title">
+  <title id="title">Alderwake, a riverside mill village</title>
+  <rect width="1200" height="800" fill="#d8c99e"/><path d="M0 540 Q180 455 360 520T720 500T1200 530V800H0Z" fill="#82a69a"/><path d="M0 625 Q190 550 370 610T740 590T1200 620" fill="none" stroke="#d8eee0" stroke-width="22"/>
+  <g fill="#6e835d" stroke="#344b42" stroke-width="6"><path d="M120 195l70-140 70 140z"/><path d="M980 210l70-145 70 145z"/><path d="M190 370l62-124 62 124z"/><path d="M890 388l65-130 65 130z"/></g>
+  <g stroke="#493f35" stroke-width="7"><path fill="#bd7952" d="M300 330h165v140H300z"/><path fill="#e3bd84" d="M280 330l103-80 103 80z"/><path fill="#a7563f" d="M530 270h200v180H530z"/><path fill="#d9aa70" d="M510 270l120-95 120 95z"/><path fill="#cf9060" d="M780 350h150v130H780z"/><path fill="#c5a36c" d="M760 350l95-70 95 70z"/></g>
+  <g fill="#332f29"><path d="M365 380h38v90h-38zM600 340h58v110h-58zM832 392h42v88h-42z"/></g><circle cx="628" cy="540" r="34" fill="#bd7952" stroke="#493f35" stroke-width="7"/><path d="M628 506v68m-34-34h68m-58-24 48 48m0-48-48 48" stroke="#493f35" stroke-width="5"/>
+  <g font-family="serif" fill="#332f29"><text x="600" y="740" text-anchor="middle" font-size="42">ALDERWAKE · MILL AND SPRING</text><text x="110" y="110" font-size="28">N</text></g><path d="M105 165l22-55 22 55-22-12z" fill="#332f29"/>
+</svg>

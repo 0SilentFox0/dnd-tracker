@@ -15,7 +15,7 @@ export interface WorldViewInput {
   heroNames: Map<string, HeroInfo>;
   reveals: { mapId: string; characterId: string; shape: RevealShape }[];
   notes: NoteRow[];
-  viewer: { userId: string; heroIds: string[]; asHero?: boolean };
+  viewer: { userId: string; heroIds: string[]; asHero?: boolean; isDemo?: boolean };
 }
 
 type MarkerVisibilityInput = Pick<WorldViewInput, "map" | "markers" | "reveals" | "viewer">;
@@ -116,7 +116,7 @@ export function buildWorldView(input: WorldViewInput): WorldView {
     markers,
     heroes,
     reveals: shapes,
-    maps: allMaps.filter((m) => withPath.has(m.id)),
+    maps: viewer.isDemo ? allMaps : allMaps.filter((m) => withPath.has(m.id)),
     notes,
     fog,
   };

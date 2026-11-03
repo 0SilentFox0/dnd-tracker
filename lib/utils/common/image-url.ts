@@ -1,3 +1,5 @@
+import { BUNDLED_STATIC_ASSET } from "@/lib/constants/storage";
+
 export function normalizeImageUrl(src: string): string {
   try {
     const url = new URL(src);
@@ -66,6 +68,10 @@ export function isHostedOnProjectStorage(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function isBundledStaticAsset(src: string): boolean {
+  return BUNDLED_STATIC_ASSET.test(src);
 }
 
 export function isSupabaseStorageUrl(src: string): boolean {

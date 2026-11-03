@@ -14,9 +14,9 @@ import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioSummaryPanel, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
-import { WorldMapLink } from "@/components/world/WorldMapLink";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { WorldMapLink } from "@/components/world/WorldMapLink";
 import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
 import { useMediaQuery } from "@/lib/hooks/common";
@@ -30,10 +30,10 @@ const ScenarioEditor = dynamic(() => import("@/components/scenario/editor"), { s
 
 type PlayedPages = { id: string; played: string[] }[];
 
-export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled }: { campaignId: string; pageId: string; playedPages: PlayedPages; aiEnabled: boolean }) {
+export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled, canEdit = true }: { campaignId: string; pageId: string; playedPages: PlayedPages; aiEnabled: boolean; canEdit?: boolean }) {
   const query = useScenarioPage(campaignId, pageId);
 
-  return <QueryState query={query}>{(page) => <ScenarioPageBody campaignId={campaignId} page={page} playedPages={playedPages} aiEnabled={aiEnabled} />}</QueryState>;
+  return <QueryState query={query}>{(page) => <ScenarioPageBody campaignId={campaignId} page={page} playedPages={playedPages} aiEnabled={aiEnabled} canEdit={canEdit} />}</QueryState>;
 }
 
 function SummarySection({ campaignId, pageId }: { campaignId: string; pageId: string }) {
@@ -52,7 +52,7 @@ function SummarySection({ campaignId, pageId }: { campaignId: string; pageId: st
   );
 }
 
-function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean }) {
+function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean; canEdit: boolean }) {
   const t = useTranslations("scenario.pageBody");
 
   const progress = useSectionProgress(campaignId, page.id);
@@ -67,7 +67,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
 
   const [editBase, setEditBase] = useState<ScenarioPage | null>(null);
 
-  const playEnabled = page.kind === "scene" && !editBase;
+  const playEnabled = page.kind === "scene" && !editBase && canEdit;
 
   const play = useScenarioPlay(campaignId, page.content, playEnabled);
 
@@ -121,7 +121,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   // edit mode leaves through the editor's own "Done" button, which awaits the last save first
   const actions = (
     <>
-      {!editBase && (
+      {!editBase && canEdit && (
         <>
           <button type="button" className="toggle is-primary" onClick={() => setEditBase(page)}>
             {t("edit")}
@@ -160,7 +160,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
 
   const menu: ActionsMenuItem[] = [
     { label: dark ? t("lightTheme") : t("darkTheme"), icon: dark ? Sun : Moon, onSelect: () => setTheme(dark ? "light" : "dark") },
-    ...(editBase ? [] : [{ label: t("versions"), icon: History, onSelect: () => setVersionsOpen(true) }]),
+    ...(editBase || !canEdit ? [] : [{ label: t("versions"), icon: History, onSelect: () => setVersionsOpen(true) }]),
     { label: collapse.showPlayed ? t("collapsePlayed") : t("expandPlayed"), icon: ChevronsUpDown, onSelect: () => collapse.setShowPlayed(!collapse.showPlayed) },
     { label: t("toIndex"), icon: BookOpen, href: `/campaigns/${campaignId}/dm/scenario`, separatorBefore: true },
   ];
@@ -180,12 +180,12 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
         <ScenarioLayout
           toc={<ScenarioToc items={tocItems(page.content.sections, page.kind === "hero", played)} {...toc} onPick={collapse.expand} />}
         >
-          {page.kind === "scene" && <SummarySection campaignId={campaignId} pageId={page.id} />}
+          {canEdit && page.kind === "scene" && <SummarySection campaignId={campaignId} pageId={page.id} />}
           <ScenarioPageView
             page={page}
             campaignId={campaignId}
             play={playEnabled ? play : undefined}
-            progress={{
+            progress={canEdit ? {
               onPlayed: (id, v) => {
                 collapse.expand(id);
                 void progress.setPlayed(id, v).catch(() => {});
@@ -196,7 +196,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
               },
               pending: progress.isPending,
               played,
-            }}
+            } : undefined}
             collapse={collapse}
           />
         </ScenarioLayout>

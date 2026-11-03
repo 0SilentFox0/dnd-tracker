@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SCENARIO_MAX_LEGEND, SECTION_ICON_KEYS } from "@/lib/constants/scenario";
 import { hexColorSchema } from "@/lib/schemas/common";
-import { isHostedOnProjectStorage } from "@/lib/utils/common/image-url";
+import { isBundledStaticAsset, isHostedOnProjectStorage } from "@/lib/utils/common/image-url";
 import type { RichNode, ScenarioContent } from "@/types/scenario";
 
 const attrsSchema = z.record(z.string(), z.unknown());
@@ -11,12 +11,14 @@ const markSchema = z.object({ type: z.enum(MARK_TYPES), attrs: attrsSchema.optio
 
 const MEDIA_ID = /^[a-f0-9]{24}$/;
 
+const srcOk = (v: unknown) => v == null || (typeof v === "string" && (isHostedOnProjectStorage(v) || isBundledStaticAsset(v)));
+
 const imageAttrsOk = (attrs: Record<string, unknown> | undefined) => {
   const { mediaId, src, alt, caption } = attrs ?? {};
 
   const short = (v: unknown) => v == null || (typeof v === "string" && v.length <= 300);
 
-  return typeof mediaId === "string" && MEDIA_ID.test(mediaId) && (src == null || (typeof src === "string" && isHostedOnProjectStorage(src))) && short(alt) && short(caption);
+  return typeof mediaId === "string" && MEDIA_ID.test(mediaId) && srcOk(src) && short(alt) && short(caption);
 };
 
 export const richNodeSchema: z.ZodType<RichNode> = z.lazy(() =>

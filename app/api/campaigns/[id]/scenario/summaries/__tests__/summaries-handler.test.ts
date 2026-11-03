@@ -11,22 +11,29 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/ai/crypto", () => ({ isAiConfigured: h.configured }));
 vi.mock("@/lib/ai/dm-model", () => ({ readDmSmartAvailability: h.available }));
 vi.mock("@/lib/server/scenario/summary-store", () => ({ loadSummaries: h.load }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignDMOrDemoAccess: vi.fn() }));
 
 describe("listSummariesHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "u1", isDM: true } as never);
+    vi.mocked(apiAuth.requireCampaignDMOrDemoAccess).mockResolvedValue({ userId: "u1", isDM: true, isDemo: false } as never);
     h.configured.mockReturnValue(true);
     h.available.mockResolvedValue(true);
     h.load.mockResolvedValue({ summaries: { p1: { version: 1, stale: true } } });
   });
 
   it("player gets 403", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }));
+    vi.mocked(apiAuth.requireCampaignDMOrDemoAccess).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }));
 
     expect((await listSummariesHandler("c1")).status).toBe(403);
     expect(h.load).not.toHaveBeenCalled();
+  });
+
+  it("returns summaries to an authenticated Demo visitor", async () => {
+    vi.mocked(apiAuth.requireCampaignDMOrDemoAccess).mockResolvedValue({ userId: "u1", isDM: false, isDemo: true } as never);
+
+    expect((await listSummariesHandler("demo")).status).toBe(200);
+    expect(h.load).toHaveBeenCalledWith("demo");
   });
 
   it("returns availability and stale entries, scoped to the campaign, no-store", async () => {

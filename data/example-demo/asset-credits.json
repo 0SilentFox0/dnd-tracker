@@ -1,0 +1,10 @@
+{
+  "maps": [
+    { "title": "Alderwake village map", "path": "/example-demo/maps/alderwake.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false },
+    { "title": "Briarwood world map", "path": "/example-demo/maps/briarwood.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false },
+    { "title": "Listening Grove map", "path": "/example-demo/maps/listening-grove.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false },
+    { "title": "Root Vault map", "path": "/example-demo/maps/root-vault.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false }
+  ],
+  "inspiration": [{ "title": "Divine Golem Expedition", "url": "https://www.worldanvil.com/w/one-shot-adventures-kefkejaco/a/divine-golem-expedition-article", "use": "Adventure hook inspiration only; no text or characters reproduced." }],
+  "music": [{ "title": "Enchanted Forest", "url": "https://www.youtube.com/watch?v=uHD_AnjCRtc", "creator": "Celestial Aeon Project", "license": "All rights reserved; linked YouTube stream only, not redistributed", "source": "https://mattipaalanen.bandcamp.com/track/enchanted-forest" }]
+}

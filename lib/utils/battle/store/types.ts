@@ -105,6 +105,7 @@ export interface LoadedBattle {
   participants: BattleParticipant[];
   pending: BattleParticipant[];
   isDM: boolean;
+  isDemo?: boolean;
 }
 
 export type ScenePatch = Partial<

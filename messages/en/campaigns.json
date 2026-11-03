@@ -19,6 +19,10 @@
       "action": "Create your first campaign"
     }
   },
+  "demo": {
+    "title": "Example Demo",
+    "description": "Read-only 5e adventure showcase"
+  },
   "card": {
     "level": "Level: up to {level}",
     "players": "Players: {count}",

@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 
 import { getSessionUserId } from "@/lib/auth";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { isDemoKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { isDmMember } from "@/lib/utils/api/is-dm";
+import { checkRateLimit, DEMO_READ_RATE_LIMIT, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import type { Ruleset } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -28,6 +30,7 @@ export interface AuthUserResult extends AuthResult {
 
 export interface CampaignAccessResult extends AuthResult {
   isDM: boolean;
+  isDemo?: boolean;
   campaign: {
     id: string;
     kind: string;
@@ -69,7 +72,8 @@ export async function requireAuthUser(): Promise<AuthUserResult | NextResponse> 
 
 export async function requireCampaignAccess(
   campaignId: string,
-  requireDM: boolean = false
+  requireDM: boolean = false,
+  options: { allowDemo?: boolean } = {},
 ): Promise<CampaignAccessResult | NextResponse> {
   const authResult = await requireAuth();
 
@@ -98,19 +102,28 @@ export async function requireCampaignAccess(
     return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
   }
 
-  if (campaign.members.length === 0) {
+  const isDemo = options.allowDemo === true && isDemoKind(campaign.kind);
+
+  if (campaign.members.length === 0 && !isDemo) {
     return errorResponse(API_ERRORS.FORBIDDEN, 403);
+  }
+
+  if (isDemo) {
+    const rate = await checkRateLimit({ userId: authResult.userId, scope: "demo-read", battleId: campaignId, ...DEMO_READ_RATE_LIMIT, memoryFallback: true });
+
+    if (!rate.allowed) return rateLimitResponse(rate);
   }
 
   const isDM = isDmMember(campaign.members);
 
-  if (requireDM && !isDM) {
+  if (requireDM && (isDemo || !isDM)) {
     return errorResponse(API_ERRORS.FORBIDDEN, 403);
   }
 
   return {
     ...authResult,
     isDM,
+    isDemo,
     campaign: {
       id: campaign.id,
       kind: campaign.kind,
@@ -129,4 +142,17 @@ export async function requireDM(
   campaignId: string
 ): Promise<CampaignAccessResult | NextResponse> {
   return requireCampaignAccess(campaignId, true);
+}
+
+/** Read campaign-DM content for its DM or an authenticated Demo visitor. */
+export async function requireCampaignDMOrDemoAccess(
+  campaignId: string,
+): Promise<CampaignAccessResult | NextResponse> {
+  const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
+
+  if (access instanceof NextResponse) return access;
+
+  if (!access.isDM && !access.isDemo) return errorResponse(API_ERRORS.FORBIDDEN, 403);
+
+  return access;
 }
