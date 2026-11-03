@@ -22,6 +22,14 @@ Server pages call the GET handler's own function (`readBattleScene`, `readCharac
 
 Supabase free tier egress is a hard constraint: avoid re-reading large rows, prefer deltas over refetches, keep polling slow, serve Storage images through `next/image` (cached by Vercel) with long `cacheControl` on immutable uploads.
 
+### Shared assets
+
+Template icons shared between campaigns are immutable. New seeder uploads go to `sets/<template-key>/<sha1><ext>` in the `*-icons` buckets (`ICON_BUCKETS`, `lib/constants/storage.ts`); the same content gives the same path, so re-uploads are skipped (`upsert: false`). Deleting objects in those buckets is forbidden (`lib/__tests__/icon-buckets-immutable.test.ts`), and existing URLs stay valid forever. A DM's local replacement is a new file under their own `{campaignId}/…` prefix and never overwrites a template file.
+
+### Connection pool
+
+`withSafePoolLimits` (`lib/db.ts`) adds `connection_limit` and `pool_timeout` to pooled URLs (Vercel, `pooler.` host or `pgbouncer=true`) without overwriting values already in the URL. Default is 5 connections per instance on Vercel (Fluid Compute serves several requests per instance; Supavisor transaction mode holds many clients) and 10 in dev. Override with `PRISMA_CONNECTION_LIMIT`. After a deploy, check the client count in Supabase → Database → Pooler.
+
 ## User palettes
 
 `User.palette` stores one of six validated IDs (`tavern`, `midnight`, `forest`, `parchment`, `amethyst`, `frost`). Authenticated `GET`/`PUT /api/theme` return private no-store responses and scope writes to `getSessionUserId()`. `lib/theme/palettes.ts` owns the allowed IDs and labels are in `messages/{uk,en}/common.json`. `ThemeProvider` uses an account-keyed local cache for first paint and cross-tab changes; the authenticated profile remains authoritative. The root layout stays static: a validated, path-aware bootstrap script applies the active cached preference before paint. Landing, authentication and print routes use their original colors. `app/palettes.css` defines the shared HUD and shadcn tokens, with `--book-*` tokens inherited by the shared spellbook used in profiles and battle. `User.palette` is nullable: null/unknown values use `tavern` during migration/backfill windows.

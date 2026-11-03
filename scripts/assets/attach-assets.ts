@@ -5,7 +5,7 @@ import * as path from "path";
 
 import { assertSeedTarget } from "../seed/seed-library-lib";
 import { readSrdData } from "../srd/lib/data-files";
-import { assertAttachAllowed, ASSET_BUCKET, ICON_FIELD, IMAGE_TYPES, isAttachKind, matchAssets, objectPath, srdSlugNames } from "./attach-lib";
+import { assertAttachAllowed, ASSET_BUCKET, ICON_FIELD, IMAGE_TYPES, isAlreadyExistsError, isAttachKind, matchAssets, objectPath, srdSlugNames } from "./attach-lib";
 
 import { prisma } from "@/lib/db";
 import { translateIssue } from "@/lib/i18n/translate-issue";
@@ -16,6 +16,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
 import type { Actor } from "@/lib/utils/api/actor";
+
+const LIST_PAGE = 1000;
 
 const USAGE = "Використання: pnpm assets:attach <campaignId> <тека> --kind units|spells|artifacts|classes|races|skills|main-skills [--allow-official] [--allow-remote]";
 
@@ -30,7 +32,7 @@ async function main() {
 
   assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
 
-  const campaign = await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId }, select: { kind: true, visibility: true, dmUserId: true } });
+  const campaign = await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId }, select: { kind: true, visibility: true, dmUserId: true, templateKey: true } });
 
   assertAttachAllowed(campaign, args.includes("--allow-official"));
 
@@ -46,6 +48,28 @@ async function main() {
 
   if (!ensured.ok) throw new Error(ensured.message);
 
+  const existing = new Map<string, Set<string>>();
+
+  const listed = async (dir: string) => {
+    const known = existing.get(dir);
+
+    if (known) return known;
+
+    const names = new Set<string>();
+
+    for (let offset = 0; ; offset += LIST_PAGE) {
+      const { data } = await admin.storage.from(bucket).list(dir, { limit: LIST_PAGE, offset });
+
+      for (const o of data ?? []) names.add(`${dir}/${o.name}`);
+
+      if ((data?.length ?? 0) < LIST_PAGE) break;
+    }
+
+    existing.set(dir, names);
+
+    return names;
+  };
+
   const rows: Record<string, unknown>[] = [];
 
   const uploadErrors: string[] = [];
@@ -55,13 +79,15 @@ async function main() {
 
     const content = fs.readFileSync(path.join(dir, m.file));
 
-    const objectName = objectPath(campaignId, kind, m.name, content, ext);
+    const objectName = objectPath(campaign.templateKey ?? campaignId, content, ext);
 
-    const { error } = await admin.storage.from(bucket).upload(objectName, content, staticAssetUploadOptions(IMAGE_TYPES[ext]));
+    if (!(await listed(path.posix.dirname(objectName))).has(objectName)) {
+      const { error } = await admin.storage.from(bucket).upload(objectName, content, { ...staticAssetUploadOptions(IMAGE_TYPES[ext]), upsert: false });
 
-    if (error) {
-      uploadErrors.push(`${m.file}: ${error.message}`);
-      continue;
+      if (error && !isAlreadyExistsError(error)) {
+        uploadErrors.push(`${m.file}: ${error.message}`);
+        continue;
+      }
     }
 
     rows.push({ name: m.name, [ICON_FIELD[kind]]: admin.storage.from(bucket).getPublicUrl(objectName).data.publicUrl });

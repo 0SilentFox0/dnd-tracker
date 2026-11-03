@@ -2,7 +2,7 @@
 
 Одне місце для відповіді на питання «що зараз у роботі». Оновлюється в кінці кожної гілки, в тому ж коміті, що й злиття.
 
-_Оновлено: 2026-10-31._
+_Оновлено: 2026-11-03._
 
 **Персональні кольорові палітри (в роботі):** шість тем у селекті футера (разом із дропдауном мови), вибір у `users.palette`, спільні HUD/сторінки/книга магії на аркуші й у бою. API `GET/PUT /api/theme`, кеш із ключем користувача та ранній bootstrap не роблять root layout динамічним. План — [user palettes](superpowers/plans/2026-10-31-user-palettes.md); дизайн — [user palettes](superpowers/specs/2026-10-31-user-palettes-design.md). Міграція expand-only; перед деплоєм потрібна звичайна production migration.
 
@@ -77,6 +77,8 @@ _Оновлено: 2026-10-31._
 
 ## Відкриті хвости
 
+- **Після деплою Part 1 (2026-11-03):** перевірити, що `DATABASE_URL` на Vercel не містить власного `connection_limit` (інакше дефолт 5 не діє — наявні параметри не перезаписуються), і подивитись Supabase → Database → Pooler на кількість клієнтів. 41+1 падіння тестів на main (demo-access моки, `join-battle`) — чужа гілка демо-турів, не Part 1. Part 4 не має трактувати `isSharedAssetUrl` як «належить шаблону»: сид кампанії без `templateKey` теж пише в `sets/<campaignId>/`.
+
 - **Невидимість, checkpoint2026-10-26:** UI-проєкція приховує чужі invisible tokens/attack marks; DM і власний контроль збережено. AoE не відсіює invisible. Handoff фіксує цільові94/94 та tsc; автоматичне зняття, FOV/Hide і нові механіки не додавалися. Окремого runtime/browser доказу механіки немає; S1 її поведінку не змінює.
 
 - **Stage6 T19 завершено локально на `feat/constructor` (2026-10-26):** локальна assistant execution integration6/6, browser18/18 на Chrome1440/390, guard unit5/5, tsc/lint clean. Guarded target: local `constructor`; migration status41 up-to-date before/after; own fixtures and browser process cleaned. Браузер запускає production AssistantWorkspace з deterministic synthetic HTTP; DB integrity доведено окремо реальною PostgreSQL. Це історичний T19 evidence; T20 завершено (див. handoff). HOMM gateway не запускався.
@@ -111,5 +113,7 @@ _Оновлено: 2026-10-31._
 **P4+P5**: Forest Guard (кущ на мапі, ворог входить у 10 фт — атака й шкода, бонусна атака кастера з кількох кущів, бій закінчується попри кущ, кущ зникає з тривалістю); Beast Transmutation (картка показує форму commoner, нокаут форми — відкат із перенесенням шкоди, закінчення тривалості, концентрація); повторний імпорт книги (два заклинання стають native); Butterfly Storm (подвійна вартість руху, заслонення, вихід з провалом тягне назад); Sand Structure (стіна блокує рух, зникає через 10 раундів); Festival King (вхід в ауру, рятівний, втрата дій); Origami на 20 і 70 фт (миттєво / через раунд на початку ходу кастера); ДМ-пензель «Складна» зберігає зони; регрес усіх 34 механічних заклинань у двох боях ДМ/гравець, десктоп і 390px; P3 — Sprout Foliage, Vegetable Blade, Crustacean Form, Mushroom Ballista, Wind Sprint, Monkey's Grasp, Rageful Nimbus.
 
 ## Нещодавно завершено
+
+**Шари контенту, Part 1 — швидкі безпечні виправлення (`fix/db-quick-wins`, змерджено 2026-11-03):** 26 відсутніх FK-індексів + `(campaignId, sourceId)` на 13 контентних таблицях (міграція `20261120000000_missing_indexes`, лише `CREATE INDEX`; guard-тест `prisma/__tests__/fk-indexes.test.ts` виводить список контентних моделей зі схеми), `withSafePoolLimits` експортовано з `connection_limit=5`/`pool_timeout=10` на Vercel і `PRISMA_CONNECTION_LIMIT` (наявні параметри URL не перезаписуються), ретеншн знімків боїв (`cleanupBattleSnapshots`: 90 днів після `completedAt` для `completed`, події/учасники лишаються; у cron `assistant-cleanup`), контракт спільних іконок (`ICON_BUCKETS` — 10 бакетів, `sets/<slug>/<sha1><ext>` для нових сидів через `attach-assets`, guard-тест на `.remove(` над icon-бакетами). Дослідження — [db structure review](superpowers/research/2026-11-03-db-structure-review.md), план — [content layers](superpowers/plans/2026-11-03-content-layers.md) (Part 2 далі). Повний `test:run`: 42 падіння, усі наявні на main до гілки (41 — demo-access API-тести без мока `requireCampaignDMOrDemoAccess`, 1 — `join-battle.test.ts` після `5b1d16828`).
 
 Онбординг (чеклісти «Перші кроки» ДМ і гравця з прогресом із фактів БД, підказки на екранах, «Що нового» в хедері, довідка `/help`; `docs/architecture/onboarding.md`), AI-асистент ДМ (власні ключі Claude/OpenAI/Gemini, співавтор сценарію з пропозиціями правок, живий чат зі сценою, постійні інструкції кампанії, MCP `/api/mcp`, генерація зображень для «Показу»; `docs/architecture/ai.md`), сценарій і його відтворення, «Показ» (слайди + музика), режими мапи й лабіринт, бойова мапа (погода, музика), 2D-ефекти заклинань і кубики. Їхні специфікації та плани — в `docs/archive/superpowers/`. Інгредієнти заклинань (2026-10-30, `feat/spell-ingredients`: інгредієнти в формі/імпорті, предмети й гаманець, перевірка й списання в бою, `persistIngredients`, каст-діалог; [battle.md](architecture/battle.md#інгредієнти-заклинань), [abilities.md](architecture/abilities.md); спек і план в `archive/superpowers/`).

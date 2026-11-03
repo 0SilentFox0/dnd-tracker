@@ -1,6 +1,6 @@
-import { describe, expect,it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { isBundledStaticAsset, isHttpUrl, isSupabaseStorageUrl, normalizeImageUrl } from "../image-url";
+import { isBundledStaticAsset, isHttpUrl, isSharedAssetUrl, isSupabaseStorageUrl, normalizeImageUrl, sharedAssetPath } from "../image-url";
 
 describe("normalizeImageUrl", () => {
   it("повертає той самий URL для не-wikia", () => {
@@ -87,5 +87,34 @@ describe("isBundledStaticAsset", () => {
     expect(isBundledStaticAsset("/example-demo/maps/../secret.svg")).toBe(false);
     expect(isBundledStaticAsset("/other/map.svg")).toBe(false);
     expect(isBundledStaticAsset("https://evil.example/example-demo/maps/a.svg")).toBe(false);
+  });
+});
+
+describe("sharedAssetPath", () => {
+  it("будує шлях sets/<slug>/<hash><ext>", () => {
+    expect(sharedAssetPath("5e SRD 5.2", "abc", ".webp")).toBe("sets/5e-srd-5-2/abc.webp");
+  });
+
+  it("порожній slug замінюється на set", () => {
+    expect(sharedAssetPath("Вогонь", "abc", ".png")).toBe("sets/set/abc.png");
+  });
+});
+
+describe("isSharedAssetUrl", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  const base = "https://proj.supabase.co/storage/v1/object/public";
+
+  it("true для public URL нашого проєкту під sets/", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proj.supabase.co");
+    expect(isSharedAssetUrl(`${base}/unit-icons/sets/5e-srd-5-2/abc.webp`)).toBe(true);
+  });
+
+  it("false для {campaignId}/… та чужого хоста", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proj.supabase.co");
+    expect(isSharedAssetUrl(`${base}/unit-icons/cmabc/units/goblin-1234.webp`)).toBe(false);
+    expect(isSharedAssetUrl("https://other.supabase.co/storage/v1/object/public/unit-icons/sets/x/a.webp")).toBe(false);
+    expect(isSharedAssetUrl("not a url")).toBe(false);
+    expect(isSharedAssetUrl(`${base}/scene-slides/sets/x/y.webp`)).toBe(false);
   });
 });

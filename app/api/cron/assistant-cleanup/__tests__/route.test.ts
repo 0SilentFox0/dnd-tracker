@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { cleanupAssistantData, cleanupReadNotifications } = vi.hoisted(() => ({
+const { cleanupAssistantData, cleanupReadNotifications, cleanupBattleSnapshots } = vi.hoisted(() => ({
   cleanupAssistantData: vi.fn(),
   cleanupReadNotifications: vi.fn(),
+  cleanupBattleSnapshots: vi.fn(),
 }));
 
 vi.mock("@/lib/server/assistant/cleanup", () => ({ cleanupAssistantData }));
 vi.mock("@/lib/server/notifications/cleanup", () => ({ cleanupReadNotifications }));
+vi.mock("@/lib/server/battles/cleanup", () => ({ cleanupBattleSnapshots }));
 
 import { GET } from "../route";
 
@@ -20,6 +22,7 @@ describe("GET /api/cron/assistant-cleanup", () => {
     vi.stubEnv("CRON_SECRET", "s3cret");
     cleanupAssistantData.mockResolvedValue({ assistant: 1 });
     cleanupReadNotifications.mockResolvedValue({ notifications: 2 });
+    cleanupBattleSnapshots.mockResolvedValue({ snapshots: 4 });
   });
 
   it("returns an error key when the secret is not configured", async () => {
@@ -41,7 +44,7 @@ describe("GET /api/cron/assistant-cleanup", () => {
   it("runs both cleanups", async () => {
     const res = await call("s3cret");
 
-    expect(await res.json()).toEqual({ ok: true, assistant: 1, notifications: 2 });
+    expect(await res.json()).toEqual({ ok: true, assistant: 1, notifications: 2, battleSnapshotsDeleted: 4 });
   });
 
   it("maps a failure to the generic internal error", async () => {

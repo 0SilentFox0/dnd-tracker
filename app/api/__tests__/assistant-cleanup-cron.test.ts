@@ -4,8 +4,11 @@ const cleanup = vi.hoisted(() => vi.fn());
 
 const cleanupNotifications = vi.hoisted(() => vi.fn());
 
+const cleanupSnapshots = vi.hoisted(() => vi.fn());
+
 vi.mock("@/lib/server/assistant/cleanup", () => ({ cleanupAssistantData: cleanup }));
 vi.mock("@/lib/server/notifications/cleanup", () => ({ cleanupReadNotifications: cleanupNotifications }));
+vi.mock("@/lib/server/battles/cleanup", () => ({ cleanupBattleSnapshots: cleanupSnapshots }));
 
 import { GET } from "@/app/api/cron/assistant-cleanup/route";
 
@@ -14,6 +17,7 @@ describe("assistant cleanup cron route", () => {
     vi.stubEnv("CRON_SECRET", "cron-test-secret");
     cleanup.mockReset().mockResolvedValue({ expired: 2, redacted: 3, receiptsDeleted: 1 });
     cleanupNotifications.mockReset().mockResolvedValue({ notificationsDeleted: 5 });
+    cleanupSnapshots.mockReset().mockResolvedValue({ snapshots: 4 });
   });
 
   it("runs cleanup only for an authorized scheduled request and reports counts", async () => {
@@ -22,7 +26,7 @@ describe("assistant cleanup cron route", () => {
     }));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ok: true, expired: 2, redacted: 3, receiptsDeleted: 1, notificationsDeleted: 5 });
+    expect(await response.json()).toEqual({ ok: true, expired: 2, redacted: 3, receiptsDeleted: 1, notificationsDeleted: 5, battleSnapshotsDeleted: 4 });
     expect(cleanup).toHaveBeenCalledOnce();
   });
 

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { assertAttachAllowed, assetKey, fileKeys, matchAssets, objectPath, srdSlugNames } from "../attach-lib";
+import { assertAttachAllowed, ASSET_BUCKET, assetKey, fileKeys, isAlreadyExistsError, matchAssets, objectPath, srdSlugNames } from "../attach-lib";
+import { IDENTITY_BUCKET } from "../tokens-5e/identity-catalog";
+
+import { ICON_BUCKETS } from "@/lib/constants/storage";
 
 const names = [
   { id: "u1", name: "Adult Red Dragon" },
@@ -77,12 +80,31 @@ describe("assertAttachAllowed", () => {
 });
 
 describe("objectPath", () => {
-  it("is stable per content and safe for Cyrillic names", () => {
-    const a = objectPath("c1", "spells", "Hunter's Mark", Buffer.from("x"), ".png");
+  it("is a shared hash path, stable per content", () => {
+    const a = objectPath("5e SRD 5.2", Buffer.from("x"), ".png");
 
-    expect(a).toMatch(/^c1\/spells\/hunter-s-mark-[0-9a-f]{8}\.png$/);
-    expect(objectPath("c1", "spells", "Hunter's Mark", Buffer.from("x"), ".png")).toBe(a);
-    expect(objectPath("c1", "spells", "Hunter's Mark", Buffer.from("y"), ".png")).not.toBe(a);
-    expect(objectPath("c1", "main-skills", "Вогняна куля", Buffer.from("x"), ".png")).toMatch(/^c1\/main-skills\/asset-[0-9a-f]{8}\.png$/);
+    expect(a).toMatch(/^sets\/5e-srd-5-2\/[0-9a-f]{40}\.png$/);
+    expect(objectPath("5e SRD 5.2", Buffer.from("x"), ".png")).toBe(a);
+    expect(objectPath("5e SRD 5.2", Buffer.from("y"), ".png")).not.toBe(a);
+  });
+});
+
+describe("isAlreadyExistsError", () => {
+  it("recognises storage duplicate errors", () => {
+    expect(isAlreadyExistsError({ message: "The resource already exists", statusCode: "409" })).toBe(true);
+    expect(isAlreadyExistsError({ message: "Duplicate" , statusCode: "409" })).toBe(true);
+    expect(isAlreadyExistsError({ message: "boom", statusCode: "500" })).toBe(false);
+  });
+});
+
+describe("ASSET_BUCKET", () => {
+  it("uses only ICON_BUCKETS members", () => {
+    expect(Object.values(ASSET_BUCKET).filter((b) => !(ICON_BUCKETS as readonly string[]).includes(b))).toEqual([]);
+  });
+});
+
+describe("IDENTITY_BUCKET", () => {
+  it("uses only ICON_BUCKETS members", () => {
+    expect(Object.values(IDENTITY_BUCKET).filter((b) => !(ICON_BUCKETS as readonly string[]).includes(b))).toEqual([]);
   });
 });

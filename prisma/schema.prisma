@@ -91,6 +91,7 @@ model Campaign {
 
   @@index([dmUserId])
   @@index([kind, visibility])
+  @@index([createdFromId])
   @@map("campaigns")
 }
 
@@ -229,6 +230,7 @@ model Unit {
 
   @@index([campaignId])
   @@index([raceId])
+  @@index([campaignId, sourceId])
   @@map("units")
 }
 
@@ -294,6 +296,7 @@ model Spell {
   @@index([campaignId])
   @@index([groupId])
   @@index([summonUnitId])
+  @@index([campaignId, sourceId])
   @@map("spells")
 }
 
@@ -312,6 +315,7 @@ model SpellGroup {
   sourceHash String?
 
   @@index([campaignId])
+  @@index([campaignId, sourceId])
   @@map("spell_groups")
 }
 
@@ -335,6 +339,7 @@ model Artifact {
 
   @@index([campaignId])
   @@index([setId])
+  @@index([campaignId, sourceId])
   @@map("artifacts")
 }
 
@@ -353,6 +358,7 @@ model ArtifactSet {
   sourceHash  String?
 
   @@index([campaignId])
+  @@index([campaignId, sourceId])
   @@map("artifact_sets")
 }
 
@@ -418,6 +424,7 @@ model SkillTree {
   sourceHash      String?
 
   @@index([campaignId, race])
+  @@index([campaignId, sourceId])
   @@map("skill_trees")
 }
 
@@ -431,6 +438,7 @@ model CharacterSkills {
   skillTree      SkillTree @relation(fields: [skillTreeId], references: [id], onDelete: Cascade)
 
   @@unique([characterId, skillTreeId])
+  @@index([skillTreeId])
   @@map("character_skills")
 }
 
@@ -477,6 +485,7 @@ model CampaignTrack {
   sourceHash  String?
 
   @@index([campaignId, sortOrder])
+  @@index([campaignId, sourceId])
   @@map("campaign_tracks")
 }
 
@@ -622,6 +631,7 @@ model Skill {
   @@index([spellId])
   @@index([grantedSpellId])
   @@index([spellNewSpellId])
+  @@index([campaignId, sourceId])
   @@map("skills")
 }
 
@@ -645,6 +655,7 @@ model Race {
   sourceHash           String?
 
   @@index([campaignId, name])
+  @@index([campaignId, sourceId])
   @@map("races")
 }
 
@@ -672,6 +683,7 @@ model GameClass {
   campaign            Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId, name])
+  @@index([campaignId, sourceId])
   @@map("classes")
 }
 
@@ -693,6 +705,7 @@ model Feat {
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId, name])
+  @@index([campaignId, sourceId])
   @@map("feats")
 }
 
@@ -716,6 +729,7 @@ model Background {
 
   @@index([campaignId, name])
   @@index([originFeatId])
+  @@index([campaignId, sourceId])
   @@map("backgrounds")
 }
 
@@ -787,6 +801,8 @@ model MainSkill {
   sourceHash          String?
 
   @@index([campaignId])
+  @@index([spellGroupId])
+  @@index([campaignId, sourceId])
   @@map("main_skills")
 }
 
@@ -912,6 +928,7 @@ model AiThread {
   proposals        AiProposal[]
 
   @@index([campaignId, userId, updatedAt])
+  @@index([scenarioPageId])
   @@map("ai_threads")
 }
 
@@ -1133,6 +1150,7 @@ model WorldPosition {
   map         WorldMap  @relation(fields: [mapId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
+  @@index([mapId])
   @@map("world_positions")
 }
 
@@ -1146,6 +1164,7 @@ model WorldReveal {
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@index([mapId, characterId])
+  @@index([characterId])
   @@map("world_reveals")
 }
 
@@ -1167,6 +1186,9 @@ model WorldTravelLog {
   byUser       User?        @relation(fields: [byUserId], references: [id], onDelete: SetNull)
 
   @@index([campaignId, createdAt])
+  @@index([mapId])
+  @@index([toMarkerId])
+  @@index([byUserId])
   @@map("world_travel_log")
 }
 
@@ -1184,6 +1206,8 @@ model WorldNote {
   character    Character?  @relation(fields: [characterId], references: [id], onDelete: SetNull)
 
   @@index([markerId])
+  @@index([authorUserId])
+  @@index([characterId])
   @@map("world_notes")
 }
 
@@ -1202,6 +1226,7 @@ model PlayerNotification {
   @@unique([userId, type, refId])
   @@index([userId, campaignId, readAt])
   @@index([readAt])
+  @@index([campaignId])
   @@map("player_notifications")
 }
 
@@ -1253,5 +1278,6 @@ model AcquaintanceNote {
   author         User         @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
 
   @@unique([acquaintanceId, authorUserId])
+  @@index([authorUserId])
   @@map("acquaintance_notes")
 }
