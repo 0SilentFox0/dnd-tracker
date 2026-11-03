@@ -289,7 +289,7 @@ async function seed(userId: string) {
 
     const groveMap = { cols: 9, rows: 12, background: MAPS.battle, opacity: 0.35 };
 
-    const mazeMap = { cols: 20, rows: 12, background: MAPS.vault, opacity: 0.35, maze: { ...emptyMaze("medium"), exit: { x: 18, y: 6 }, walls: ["3:0:e", "3:1:e", "3:2:e", "3:3:e", "6:4:e", "6:5:e", "6:6:e", "10:1:s", "11:1:s", "12:1:s", "13:1:s", "14:7:e", "14:8:e", "14:9:e"], teleports: [[{ x: 5, y: 10 }, { x: 16, y: 2 }]], fog: ["8:5", "8:6"], dark: false } };
+    const mazeMap = { cols: 20, rows: 12, background: MAPS.battle, opacity: 0.35, maze: { ...emptyMaze("medium"), exit: { x: 18, y: 6 }, walls: ["3:0:e", "3:1:e", "3:2:e", "3:3:e", "6:4:e", "6:5:e", "6:6:e", "10:1:s", "11:1:s", "12:1:s", "13:1:s", "14:7:e", "14:8:e", "14:9:e"], teleports: [[{ x: 5, y: 10 }, { x: 16, y: 2 }]], fog: ["8:5", "8:6"], dark: false } };
 
     await tx.battleScene.createMany({ data: [
       { id: DEMO_IDS.battles.grove, campaignId: campaign.id, name: "Briar Warden at the Listening Grove", description: "A standard encounter: silence the damaged fork, defend the clearing, or calm the guardian.", status: "prepared", participants: json([{ id: DEMO_IDS.characters.scout, type: "character", side: "ally" }, ...unitParticipants([{ name: "Scout", side: "ally" }, { name: "Guard Captain", side: "ally" }, { name: "Priest Acolyte", side: "ally" }, { name: "Treant", side: "enemy" }, { name: "Giant Wolf Spider", side: "enemy", quantity: 2 }])]), map: json(groveMap), rules: json(SRD_RULES) },
