@@ -33,6 +33,7 @@ vi.mock("@/lib/utils/api/api-auth", async () => {
     requireAuth: vi.fn(async () => ({ userId: m.userId.current })),
     requireAuthUser: vi.fn(async () => ({ userId: m.userId.current, authUser: { id: m.userId.current, email: "u@x.y" } })),
     requireDM: m.requireDM.mockImplementation(async () => NextResponse.json({ error: "x" }, { status: 403 })),
+    requireCampaignDMOrDemoAccess: (id: string) => m.requireDM(id),
   };
 });
 vi.mock("@/lib/server/templates/import-bundle", () => ({ importBundle: m.importBundle }));

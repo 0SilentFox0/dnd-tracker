@@ -34,7 +34,7 @@ export function DmAudioControls({ dm }: { dm: PlayerAudioDm }) {
 
   return (
     <div className="mt-2 border-t border-hud-rule pt-2">
-      <div className="flex justify-center gap-1">
+      <div data-tour="music.transport" className="flex justify-center gap-1">
         <IconButton label={t("dm.prev")} onClick={() => send({ action: "prev" })} disabled={pending || empty}>
           <SkipBack className="size-4" />
         </IconButton>

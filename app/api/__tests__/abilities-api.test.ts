@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireDM: vi.fn(async () => ({ userId: "u1" })),
   requireCampaignAccess: vi.fn(async () => ({ userId: "u1" })),
+  requireCampaignDMOrDemoAccess: vi.fn(async () => ({ userId: "u1" })),
 }));
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));

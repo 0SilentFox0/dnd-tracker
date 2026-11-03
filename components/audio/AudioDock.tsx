@@ -60,7 +60,7 @@ export function AudioDock({ placement, collapseOn = null, collapseTick = 0, defa
 
   return (
     // strip: панель стискається до висоти шару й гортається, тож заголовок із «Згорнути» не виходить за верх
-    <div data-battle-audio={placement} className={cn(strip && "pointer-events-none absolute inset-2 z-40 flex flex-col items-start justify-end")}>
+    <div data-battle-audio={placement} data-tour="music.dock" className={cn(strip && "pointer-events-none absolute inset-2 z-40 flex flex-col items-start justify-end")}>
       <div className={cn(strip && "pointer-events-auto flex min-h-0 flex-col")}>
         <div data-audio-panel={expanded ? "open" : "collapsed"} aria-hidden={!expanded || undefined} inert={!expanded} className={cn(!expanded ? "sr-only" : strip && "flex min-h-0 flex-col")}>
           <AudioPlayerPanel view={{ onCollapse: () => setChoice(false), capped: strip }}>
@@ -76,6 +76,7 @@ export function AudioDock({ placement, collapseOn = null, collapseTick = 0, defa
             {track && !sound.unlocked && <UnlockSoundButton className="px-3" />}
             <button
               type="button"
+              data-tour="music.expand"
               aria-label={t("player.expand", { title: track?.title ?? t("player.label") })}
               onClick={() => setChoice(true)}
               className="flex max-w-48 items-center gap-1.5 rounded-full border border-hud-rule bg-black/85 px-3 py-1.5 text-xs text-hud-bone shadow-lg"

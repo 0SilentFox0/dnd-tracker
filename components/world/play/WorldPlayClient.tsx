@@ -52,7 +52,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
 
           return (
             <>
-              <HudPageHeader title={t("title")} subtitle={<span data-tour="world.controls"><WorldCrumbs maps={view.maps} mapId={view.map.id} onOpen={play.openMap} /></span>} actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>} />
+              <HudPageHeader title={t("title")} subtitle={<span data-tour="world.crumbs"><WorldCrumbs maps={view.maps} mapId={view.map.id} onOpen={play.openMap} /></span>} actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>} />
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_20rem]">
                 <div className={MAP_HEIGHT} data-tour="world.map">
                   <WorldMapView
@@ -77,7 +77,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
                     <>
                       <WorldNotesPanel campaignId={campaignId} mapId={view.map.id} marker={marker} notes={view.notes} heroes={play.myHeroes} />
                       {childOpen && marker.childMapId ? (
-                        <Button type="button" variant="outline" onClick={() => play.openMap(marker.childMapId as string)}>
+                        <Button type="button" variant="outline" data-tour="world.open-map" onClick={() => play.openMap(marker.childMapId as string)}>
                           {t("play.openMap")}
                         </Button>
                       ) : null}
@@ -88,7 +88,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
                     </HudPanel>
                   )}
                   {places.length > 0 ? (
-                    <HudPanel as="div">
+                    <HudPanel as="div" data-tour="world.places">
                       <h2 className="mb-1 text-sm font-medium text-hud-ink">{t("play.places")}</h2>
                       <ul className="flex flex-col gap-1">
                         {places.map((m) => (
@@ -101,7 +101,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
                       </ul>
                     </HudPanel>
                   ) : null}
-                  <HudPanel as="div">
+                  <HudPanel as="div" data-tour="world.journal">
                     <h2 className="mb-1 text-sm font-medium text-hud-ink">{t("travel.log")}</h2>
                     <TravelLog campaignId={campaignId} />
                   </HudPanel>

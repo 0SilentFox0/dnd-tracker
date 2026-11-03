@@ -20,7 +20,7 @@ export function ScenarioBar({ title, notes, toc, actions, menu }: Props) {
 
   return (
     <div ref={ref} className="sb-bar">
-      <div className="sb-bar-in">
+      <div className="sb-bar-in" data-tour="scenario.bar">
         {toc && (
           <button type="button" className="toggle sb-bar-toc" aria-label={t("sections")} onClick={toc.onOpen}>
             <List className="size-4" /> <span className="sb-bar-toc-label">{t("sections")}</span>

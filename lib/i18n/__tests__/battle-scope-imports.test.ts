@@ -10,6 +10,9 @@ const BATTLE_CODE = /^(components\/battle\/|lib\/hooks\/battles?\/|lib\/utils\/b
 
 const BATTLE_KEY = /["'`](?:battleCommon|battleWizards|battleDm|battleSetup|battleLog|battleActions)(?:\.[^"'`]*)?["'`]|["'`]battle\.[\w.${}]+["'`]|(?:useTranslations|getTranslations|getTranslator|useTranslator)\(\s*["'`]battle["'`]/;
 
+// demo tour steps name `data-tour="battle.*"` anchors, not translation keys
+const TOUR_ANCHORS = "lib/onboarding/demo-tours.ts";
+
 // reviewed: pages outside the battle segments reach only these battle files (dice roller, FX runtime and preview, query keys); the battle namespaces are not loaded there
 const ALLOWED_BATTLE_CODE = ["components/battle/fx/dice/", "components/battle/fx/runtime/", "components/battle/fx/preview/", "components/battle/fx/animations/", "lib/hooks/battles/keys.ts"];
 
@@ -26,7 +29,7 @@ describe("battle namespaces stay inside the battle segments", () => {
     const bad = [...graph].filter(([file, text]) => {
       const source = text.replace(/["'`](?:battle\.open|battle\.scene)["'`]/g, "");
 
-      return !file.startsWith("lib/i18n/") && BATTLE_KEY.test(source);
+      return !file.startsWith("lib/i18n/") && file !== TOUR_ANCHORS && BATTLE_KEY.test(source);
     }).map(([file]) => file);
 
     expect(bad).toEqual([]);

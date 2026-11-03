@@ -1,0 +1,306 @@
+{
+  "menuTitle": "Explore the demo",
+  "menuDescription": "Choose a short guided tour. You can replay any tour at any time.",
+  "completed": "Completed",
+  "notCompleted": "Not completed",
+  "starting": "Opening…",
+  "start": "Start tour",
+  "restart": "Replay tour",
+  "tours": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Campaign sections, search and the tour panel."
+    },
+    "scenario": {
+      "title": "Scenario",
+      "description": "The scene book: contents, DM notes and the show dock."
+    },
+    "show": {
+      "title": "Slide show",
+      "description": "Slide decks and the scene preview."
+    },
+    "world": {
+      "title": "World map",
+      "description": "Markers, notes, nested maps and the travel log."
+    },
+    "music": {
+      "title": "Music",
+      "description": "The track library and the in-battle player."
+    },
+    "libraries": {
+      "title": "Libraries",
+      "description": "Filters, search and cards, using spells as the example."
+    },
+    "battle": {
+      "title": "Battle",
+      "description": "From preparation to a turn: initiative, map, actions, DM panel."
+    }
+  },
+  "steps": {
+    "dashboard": {
+      "header": {
+        "title": "Campaign",
+        "description": "Name, description and your role. In the demo you see the campaign as a DM, but the data is protected from changes."
+      },
+      "notice": {
+        "title": "What the demo allows",
+        "description": "Every section is open for browsing. Battles can be started and reset; the rest of the content is read-only."
+      },
+      "search": {
+        "title": "Find a section",
+        "description": "Start typing a section name. Enter opens the first match."
+      },
+      "group-game": {
+        "title": "Game",
+        "description": "Scenario, scene graph, battles, slide show, music and the world map — everything you need during a session."
+      },
+      "group-heroes": {
+        "title": "Heroes",
+        "description": "Player characters: sheets, levels, gear and drafts."
+      },
+      "group-libraries": {
+        "title": "Libraries",
+        "description": "Campaign references: units, spells, artifacts, races, classes, rules. Each tile opens its own list."
+      },
+      "tours": {
+        "title": "Demo tours",
+        "description": "Tours start here. Finished ones get a check mark, and any tour can be replayed."
+      },
+      "summary": {
+        "title": "Campaign settings",
+        "description": "Maximum level, player edit rights, DM crit choice and other settings."
+      }
+    },
+    "scenario": {
+      "search": {
+        "title": "Search the scenario",
+        "description": "Searches the text of every page: scenes and notes."
+      },
+      "list": {
+        "title": "Scenario pages",
+        "description": "Scenes are what you play at the table, notes are DM preparation. The status shows whether a page is ready. Let's open the scene."
+      },
+      "bar": {
+        "title": "Page bar",
+        "description": "Scene title, a button to hide DM notes and a menu: theme, collapse played sections, back to the list."
+      },
+      "toc": {
+        "title": "Contents",
+        "description": "The scene's sections. The current one is highlighted, played ones get a check mark. Click scrolls to the section."
+      },
+      "section": {
+        "title": "Section",
+        "description": "A heading with the section type icon. During play the DM marks a section as played and it collapses."
+      },
+      "bindings": {
+        "title": "Show bindings",
+        "description": "Text rows drive the show: a slide, a map marker or a battle is bound to a row. In a DM campaign the “Show” and “Call to battle” buttons live here; the demo hides them because the show is shared."
+      },
+      "notes": {
+        "title": "DM notes",
+        "description": "Margin notes are visible only to the DM. Hide them with the button in the page bar."
+      },
+      "dock": {
+        "title": "Show dock",
+        "description": "What the players see right now and the show music. In a DM campaign this also holds slide switching (N key) and the deck's slide strip."
+      }
+    },
+    "show": {
+      "decks": {
+        "title": "Slide decks",
+        "description": "Each deck is a sequence of slides for one scene."
+      },
+      "deck-card": {
+        "title": "Deck card",
+        "description": "The slide count and the scenario scene the deck is bound to."
+      },
+      "present": {
+        "title": "Open the preview",
+        "description": "In the demo a deck opens in a private preview. Let's go there."
+      },
+      "stage": {
+        "title": "Slide stage",
+        "description": "This is how players see the slide on the show screen: image and caption."
+      },
+      "nav": {
+        "title": "Paging",
+        "description": "Back and next switch slides, the counter shows the position in the deck."
+      },
+      "back": {
+        "title": "Back to decks",
+        "description": "The live show for players starts from the “Show” screen — it is disabled in the demo."
+      }
+    },
+    "world": {
+      "crumbs": {
+        "title": "Map trail",
+        "description": "The world map contains nested place maps. The crumbs show where you are and lead back."
+      },
+      "map": {
+        "title": "Map",
+        "description": "Regions are labelled, points are places. Drag the map with the mouse, the wheel zooms."
+      },
+      "marker": {
+        "title": "Marker",
+        "description": "Clicking a marker opens its panel. Let's do that now."
+      },
+      "notes": {
+        "title": "Place notes",
+        "description": "Shared notes are visible to everyone, “Mine” only to you. Writing is disabled in the demo."
+      },
+      "open-map": {
+        "title": "Nested map",
+        "description": "A marker can hold its own place map — this button opens it."
+      },
+      "zoom": {
+        "title": "Zoom",
+        "description": "Zoom in, zoom out and reset to the initial scale."
+      },
+      "places": {
+        "title": "Open places",
+        "description": "Quick jump to the place maps you have already opened."
+      },
+      "journal": {
+        "title": "Travel log",
+        "description": "Hero travel between places and rests are recorded here automatically."
+      }
+    },
+    "music": {
+      "library": {
+        "title": "Track library",
+        "description": "Campaign tracks: uploaded files or YouTube links."
+      },
+      "play": {
+        "title": "Listen",
+        "description": "The button plays the track right here, a second click pauses it."
+      },
+      "source": {
+        "title": "Source",
+        "description": "A link to the original track."
+      },
+      "battle": {
+        "title": "Music in battle",
+        "description": "The player for the party lives on the battle screen. Let's open the prepared battle."
+      },
+      "dock": {
+        "title": "Player",
+        "description": "The music panel at the bottom left. A new turn in battle collapses it automatically."
+      },
+      "transport": {
+        "title": "Controls",
+        "description": "Previous, play, next, stop. Volume and mute are above."
+      },
+      "playlist": {
+        "title": "Playlist",
+        "description": "Search the library and filter by type. Clicking a track plays it for everyone."
+      },
+      "collapse": {
+        "title": "Collapse",
+        "description": "The panel is collapsed into a “Music” chip — the sound keeps playing. Clicking the chip expands the player again."
+      }
+    },
+    "libraries": {
+      "filters": {
+        "title": "Class filter",
+        "description": "Chips narrow the list to one class's spells."
+      },
+      "search": {
+        "title": "Search",
+        "description": "Searches by name. Works together with the filter."
+      },
+      "group": {
+        "title": "Group",
+        "description": "Spells are grouped by school. The header collapses and expands the group and shows the count."
+      },
+      "level": {
+        "title": "Level",
+        "description": "Inside a group spells are laid out by level, from cantrips up."
+      },
+      "card": {
+        "title": "Spell card",
+        "description": "Name, level, tags and a short description. In a DM campaign the card opens the editor."
+      },
+      "print": {
+        "title": "Print",
+        "description": "A print version of the whole list."
+      },
+      "dashboard": {
+        "title": "Other libraries",
+        "description": "Units, artifacts, races, classes and the rest work the same way: filters, search, cards."
+      }
+    },
+    "battle": {
+      "list": {
+        "title": "Battle scenes",
+        "description": "Active battles on top, prepared ones below. Completed ones go to the archive."
+      },
+      "card": {
+        "title": "Battle card",
+        "description": "Name, description and the open button. Let's open this battle."
+      },
+      "arena": {
+        "title": "Preparation",
+        "description": "The sides before the start. Allies and enemies are already placed on the map."
+      },
+      "start": {
+        "title": "To battle",
+        "description": "The button rolls initiative and starts the battle. Let's start it now."
+      },
+      "topbar": {
+        "title": "Top bar",
+        "description": "Name, round and the animation toggle. On the right — complete, reset and next turn."
+      },
+      "initiative": {
+        "title": "Initiative",
+        "description": "The turn order. The large portrait is whose turn it is, a line with a Roman numeral is a new round. Click opens details."
+      },
+      "hero": {
+        "title": "Participant panel",
+        "description": "HP, armor class and spell slots of whoever acts under your control right now."
+      },
+      "map-tools": {
+        "title": "Map tools",
+        "description": "Place participants, paint terrain, pick weather. On the right — the “Map/Columns” switch."
+      },
+      "map": {
+        "title": "Battle map",
+        "description": "On your turn click a cell to move, click an enemy to attack. Clicking a token shows its details."
+      },
+      "log": {
+        "title": "Log",
+        "description": "Every battle event. With a participant selected, this shows their stat block, effects and a button back to the log."
+      },
+      "next-turn": {
+        "title": "Next turn",
+        "description": "Passes the turn along the order. Next we'll advance to a unit under your control."
+      },
+      "turn-controls": {
+        "title": "Actions on your turn",
+        "description": "Attack opens the attack wizard, Magic the spell book, Bonus and Actions the abilities. End turn passes the order."
+      },
+      "dm-actions": {
+        "title": "DM quick actions",
+        "description": "Battle log, add a participant, cast a spell as anyone, refresh from the library, hand out units, buff or weaken enemies."
+      },
+      "dm-participants": {
+        "title": "Participants",
+        "description": "Each row: change HP, apply conditions, legendary actions, remove from battle."
+      },
+      "audio": {
+        "title": "Music",
+        "description": "The battle player at the bottom left. More in the “Music” tour."
+      },
+      "reset": {
+        "title": "Reset the battle",
+        "description": "Returns the battle to the prepared state. Press it to leave the demo clean for the next time."
+      }
+    }
+  },
+  "controls": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip tour",
+    "close": "Close tour",
+    "last": "Finish"
+  }
+}

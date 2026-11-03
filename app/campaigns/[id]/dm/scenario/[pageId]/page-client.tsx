@@ -69,7 +69,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit, i
 
   const playEnabled = page.kind === "scene" && !editBase && (canEdit || isDemo);
 
-  const play = useScenarioPlay(campaignId, page.content, playEnabled);
+  const play = useScenarioPlay(campaignId, page.content, playEnabled, { readOnly: !canEdit });
 
   const [versionsOpen, setVersionsOpen] = useState(false);
 
@@ -199,7 +199,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit, i
             } : undefined}
             collapse={collapse}
           />
-          {!canEdit && <aside data-tour="scenario.playback" className="mt-4 rounded-lg border border-hud-gold/40 bg-hud-panel/70 p-3 text-sm text-hud-muted">{t("demoPlaybackReadOnly")}</aside>}
+          {!canEdit && <aside className="mt-4 rounded-lg border border-hud-gold/40 bg-hud-panel/70 p-3 text-sm text-hud-muted">{t("demoPlaybackReadOnly")}</aside>}
         </ScenarioLayout>
       )}
       {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}

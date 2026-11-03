@@ -15,7 +15,11 @@ const afterCallbacks = vi.hoisted(() => [] as Array<() => unknown>);
 vi.mock("server-only", () => ({}));
 vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/server")>()), after: (cb: () => unknown) => afterCallbacks.push(cb) }));
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger } }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => {
+  const requireDM = vi.fn();
+
+  return { requireDM, requireCampaignAccess: vi.fn(), requireCampaignDMOrDemoAccess: vi.fn((id: string) => requireDM(id)) };
+});
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ removeSlideFiles: vi.fn(async () => undefined), createSlideUploadTicket: vi.fn(), ensureSlidesBucket: vi.fn(async () => ({ ok: true })) }));
 vi.mock("@/lib/utils/common/image-url", async (original) => ({ ...await original<object>(), isHostedOnProjectStorage: (u: string) => u.includes(".supabase.co/") }));
 vi.mock("@/lib/supabase/image-storage", () => ({

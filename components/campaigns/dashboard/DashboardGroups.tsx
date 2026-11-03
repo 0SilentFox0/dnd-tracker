@@ -18,7 +18,7 @@ const GROUP_ORDER: DashboardGroupKey[] = ["game", "heroes", "libraries"];
 
 const GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3";
 
-const COMPACT_GRID = "grid grid-cols-2 gap-2 sm:grid-cols-3";
+const COMPACT_GRID = "grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-2";
 
 export function DashboardGroups({ campaignId, isDM, isDemo = false, pendingDrafts, context = DEFAULT_DASHBOARD_CONTEXT, hiddenKeys }: { campaignId: string; isDM: boolean; isDemo?: boolean; pendingDrafts: number; context?: DashboardContext; hiddenKeys?: string[] }) {
   const t = useTranslator("dashboard");
@@ -66,7 +66,7 @@ export function DashboardGroups({ campaignId, isDM, isDemo = false, pendingDraft
           const compact = COMPACT_GROUPS.has(g);
 
           return (
-            <section key={g} className="space-y-2">
+            <section key={g} className="space-y-2" data-tour={`dashboard.group-${g}`}>
               <h2 className="hud-sc text-sm text-hud-muted">{t(`groups.${g}`)}</h2>
               <div className={compact ? COMPACT_GRID : GRID}>{base.filter((s) => s.group === g).map((s) => tile(s, compact))}</div>
             </section>
@@ -81,7 +81,7 @@ export function DashboardGroups({ campaignId, isDM, isDemo = false, pendingDraft
       <form onSubmit={onSubmit} data-tour="dashboard.search">
         <SearchInput value={query.value} onChange={query.set} label={t("search.label")} placeholder={t("search.placeholder")} />
       </form>
-      <div data-tour="dashboard.navigation">{content}</div>
+      <div>{content}</div>
     </div>
   );
 }

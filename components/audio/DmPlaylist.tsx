@@ -115,7 +115,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
   );
 
   return (
-    <div className="mt-2">
+    <div className="mt-2" data-tour="music.playlist">
       <button type="button" aria-expanded={open} onClick={() => set(!open)} className="flex w-full items-center gap-1 text-hud-muted hover:text-hud-bone">
         {open ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
         <span className="hud-sc tracking-[.08em]">{t("music.playlist.title")}</span>

@@ -41,17 +41,19 @@ export function BattleSections({ battles, campaignId, canEdit = true }: { battle
     <>
       <SearchInput value={search.query.value} onChange={search.query.set} label={t("search")} />
       {sections.length === 0 && <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />}
-      {sections.map(({ kind, title, battles: list }) => (
-        <HudPanel key={kind}>
-          <HudSection title={title}>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {list.map((battle) => (
-                <BattleListCard key={battle.id} battle={battle} campaignId={campaignId} kind={kind} canEdit={canEdit} />
-              ))}
-            </div>
-          </HudSection>
-        </HudPanel>
-      ))}
+      <div className="space-y-3" data-tour="battle.list">
+        {sections.map(({ kind, title, battles: list }, sectionIndex) => (
+          <HudPanel key={kind}>
+            <HudSection title={title}>
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {list.map((battle, i) => (
+                  <BattleListCard key={battle.id} battle={battle} campaignId={campaignId} kind={kind} canEdit={canEdit} data-tour={sectionIndex === 0 && i === 0 ? "battle.card" : undefined} />
+                ))}
+              </div>
+            </HudSection>
+          </HudPanel>
+        ))}
+      </div>
     </>
   );
 }

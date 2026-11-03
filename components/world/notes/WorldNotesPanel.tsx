@@ -27,7 +27,7 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
   const panel = useNotesPanel({ campaignId, mapId, markerId: marker.id, notes, heroes, isDM });
 
   return (
-    <HudPanel as="div" className="flex flex-col gap-3">
+    <HudPanel as="div" className="flex flex-col gap-3" data-tour="world.notes">
       <h2 className="hud-sc text-base text-hud-ink">{marker.name}</h2>
 
       {isDM ? null : (

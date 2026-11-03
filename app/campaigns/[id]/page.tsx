@@ -56,6 +56,7 @@ export default async function CampaignDetailPage({
   return (
     <HudPage>
       <HudPageHeader
+        data-tour="dashboard.header"
         title={campaign.name}
         subtitle={campaign.description}
         actions={(
@@ -79,7 +80,7 @@ export default async function CampaignDetailPage({
         </HudPanel>
       )}
 
-      {isDemo && <HudPanel className="border-hud-gold/60"><p className="text-sm text-hud-bone">{t("page.demoNotice")}</p></HudPanel>}
+      {isDemo && <HudPanel className="border-hud-gold/60" data-tour="dashboard.notice"><p className="text-sm text-hud-bone">{t("page.demoNotice")}</p></HudPanel>}
 
       {isDM && <HudPanel><a className="underline" href={`/campaigns/${id}/dm/compendium`}>{t("page.compendium.link")}</a><p>{t("page.compendium.text")}</p></HudPanel>}
 

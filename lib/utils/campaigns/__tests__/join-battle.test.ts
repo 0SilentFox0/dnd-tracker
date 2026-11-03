@@ -23,7 +23,7 @@ describe("pickJoinBattle", () => {
     expect(pickJoinBattle([a, b], "/campaigns/c1/battles/b1")).toBeNull();
   });
 
-  it("у кампанії без активного бою — бій іншої кампанії", () => {
-    expect(pickJoinBattle([b], "/campaigns/c1")).toBe(b);
+  it("у кампанії без активного бою — не пропонує бій іншої кампанії", () => {
+    expect(pickJoinBattle([b], "/campaigns/c1")).toBeNull();
   });
 });

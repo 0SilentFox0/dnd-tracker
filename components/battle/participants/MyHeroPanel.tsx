@@ -35,7 +35,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
   const morale = effectiveMorale(hero, battle.initiativeOrder).value;
 
   return (
-    <div ref={shakeRef} className="relative">
+    <div ref={shakeRef} data-tour="battle.hero" className="relative">
       <HitFrame change={change} />
       {change && change.delta < 0 && <div key={change.id} className="pointer-events-none fixed inset-0 z-40 animate-[hud-vignette_1s]" />}
       <div className="flex items-center gap-3">

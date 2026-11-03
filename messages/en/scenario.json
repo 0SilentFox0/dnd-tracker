@@ -173,7 +173,7 @@
     "revealedAfterSection": "✓ Revealed (after the section)"
   },
   "pageBody": {
-    "demoPlaybackReadOnly": "Playback controls can affect what everyone sees. They are not available in this read-only demo.",
+    "demoPlaybackReadOnly": "Show controls affect what every player sees, so they are disabled in the demo: bindings are visible, the show buttons are hidden.",
     "collapsePlayed": "Collapse played",
     "darkTheme": "Dark theme",
     "edit": "Edit",

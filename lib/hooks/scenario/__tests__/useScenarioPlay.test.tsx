@@ -60,6 +60,21 @@ describe("useScenarioPlay", () => {
     expect(send).toHaveBeenCalledWith({ action: "open", deckId: "d1", slideId: "sl1" });
   });
 
+  it("readOnly (демо): showSlide і showMarker нічого не шлють", async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    const { result } = renderHook(() => useScenarioPlay("c", content, true, { readOnly: true }), { wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> });
+
+    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
+    act(() => {
+      result.current.showSlide(slideRow);
+      result.current.showMarker({ mapId: "w", markerId: "m" });
+    });
+
+    expect(result.current.readOnly).toBe(true);
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it("showSlide пропускає вже активний слайд", async () => {
     show = { deckId: "d1", deckTitle: "Д", slide: { id: "sl1", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1 };
 

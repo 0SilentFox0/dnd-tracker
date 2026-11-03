@@ -31,11 +31,12 @@ interface SpellCardProps {
   canEdit?: boolean;
   /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
   printMode?: boolean;
+  "data-tour"?: string;
 }
 
 const ICON_BTN = "size-7 shrink-0 text-hud-muted hover:text-hud-ink";
 
-export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, onMoveToGroup, canEdit = true, printMode = false }: SpellCardProps) {
+export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, onMoveToGroup, canEdit = true, printMode = false, "data-tour": dataTour }: SpellCardProps) {
   const t = useTranslations("spells.card");
 
   const ta = useTranslations("common.actions");
@@ -60,7 +61,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
   };
 
   return (
-    <HudCard href={canEdit ? `/campaigns/${campaignId}/dm/spells/${spell.id}` : undefined} linkLabel={spell.name} className="flex h-full flex-col gap-2">
+    <HudCard data-tour={dataTour} href={canEdit ? `/campaigns/${campaignId}/dm/spells/${spell.id}` : undefined} linkLabel={spell.name} className="flex h-full flex-col gap-2">
       <div className="flex items-start gap-3">
         <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-gold)]">
           <SpellIcon spell={spell} size={64} className="size-full object-cover p-0.5" />

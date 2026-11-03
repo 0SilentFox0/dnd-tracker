@@ -11,6 +11,7 @@ interface BattleListCardProps {
   campaignId: string;
   kind: BattleStatus;
   canEdit?: boolean;
+  "data-tour"?: string;
 }
 
 const KIND = {
@@ -19,7 +20,7 @@ const KIND = {
   [BattleStatus.COMPLETED]: { tone: "muted", pill: "muted" },
 } as const;
 
-export function BattleListCard({ battle, campaignId, kind, canEdit = true }: BattleListCardProps) {
+export function BattleListCard({ battle, campaignId, kind, canEdit = true, "data-tour": dataTour }: BattleListCardProps) {
   const t = useTranslations("battleSetup.list");
 
   const { isDeleting, onDelete } = useDeleteBattleCard(campaignId, battle.id);
@@ -43,8 +44,8 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true }: Bat
       </Button>
     );
 
-  const card = (
-    <HudCard tone={KIND[kind].tone} className="space-y-3 p-4">
+  return (
+    <HudCard tone={KIND[kind].tone} className="space-y-3 p-4" data-tour={dataTour}>
       <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
           <h3 className="hud-sc min-w-0 text-lg leading-tight text-hud-ink">{battle.name}</h3>
@@ -93,6 +94,4 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true }: Bat
       )}
     </HudCard>
   );
-
-  return <div data-tour="battle.list">{card}</div>;
 }

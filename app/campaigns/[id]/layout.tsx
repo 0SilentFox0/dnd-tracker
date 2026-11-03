@@ -4,6 +4,7 @@ import { NotificationsHost } from "@/components/notifications/NotificationsHost"
 import { DemoTourCoordinator } from "@/components/onboarding/DemoTourCoordinator";
 import { getSessionUserId } from "@/lib/auth";
 import { isDemoKind } from "@/lib/constants/campaigns";
+import { ExtendLocaleScope } from "@/lib/i18n/extend-locale-scope";
 import { getCampaignForLayout } from "@/lib/server/campaigns/access";
 
 export default async function CampaignLayout({ children, params }: { children: ReactNode; params: Promise<{ id: string }> }) {
@@ -15,7 +16,7 @@ export default async function CampaignLayout({ children, params }: { children: R
 
   return (
     <>
-      {isDemo ? <DemoTourCoordinator campaignId={id}>{children}</DemoTourCoordinator> : children}
+      {isDemo ? <ExtendLocaleScope namespaces={["demoTours"]}><DemoTourCoordinator campaignId={id}>{children}</DemoTourCoordinator></ExtendLocaleScope> : children}
       {!isDemo && <NotificationsHost campaignId={id} userId={userId} />}
     </>
   );

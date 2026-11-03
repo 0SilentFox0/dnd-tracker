@@ -27,6 +27,6 @@ describe("GET /api/campaigns/active-battles", () => {
     const res = await GET(new Request("http://x/api/campaigns/active-battles?withShows=1"));
 
     expect(await res.json()).toEqual({ battles: [{ id: "b1", campaignId: "c1" }], shows: [{ campaignId: "c2" }] });
-    expect(prisma.campaignShow.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { deckId: { not: null }, campaign: { members: { some: { userId: "u1" } } } } }));
+    expect(prisma.campaignShow.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { deckId: { not: null }, campaign: { OR: [{ members: { some: { userId: "u1" } } }, { kind: "demo" }] } } }));
   });
 });

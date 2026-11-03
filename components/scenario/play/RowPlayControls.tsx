@@ -24,7 +24,7 @@ export function MarkerPlay({ campaignId, marker, play }: { campaignId: string; m
       action={(available) =>
         onScreen ? (
           <span className="sb-bind-live">{t("onScreen")}</span>
-        ) : (
+        ) : play.readOnly ? null : (
           <button type="button" className="toggle" aria-label={t("showOnMap")} disabled={!available || play.pending} onClick={() => play.showMarker(marker)}>
             <MapPin className="size-3" /> {t("showOnMap")}
           </button>
@@ -34,7 +34,7 @@ export function MarkerPlay({ campaignId, marker, play }: { campaignId: string; m
   );
 }
 
-export function RowPlayControls({ campaignId, row, play }: { campaignId: string; row: ScenarioRow; play: ScenarioPlay }) {
+export function RowPlayControls({ campaignId, row, play, "data-tour": dataTour }: { campaignId: string; row: ScenarioRow; play: ScenarioPlay; "data-tour"?: string }) {
   const t = useTranslations("scenario.play");
 
   const tAll = useTranslator();
@@ -48,14 +48,14 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
   if (slide.kind === "none" && battle.kind === "none" && !row.marker) return null;
 
   return (
-    <div className="sb-play sans">
+    <div className="sb-play sans" data-tour={dataTour}>
       {slide.kind === "ready" && (
         <span className="sb-bind" data-on-screen={slide.active || undefined}>
           <OptimizedImage src={slide.slide.imageUrl} alt="" width={64} height={36} className="sb-thumb" />
           <span className="sb-bind-name">{slide.slide.title ?? t("slide")}</span>
           {slide.active ? (
             <span className="sb-bind-live">{t("onScreen")}</span>
-          ) : (
+          ) : play.readOnly ? null : (
             <button type="button" className="toggle" aria-label={t("showSlide")} disabled={play.pending} onClick={() => play.showSlide(row)}>
               <Play className="size-3" /> {t("show")}
             </button>
@@ -77,7 +77,7 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
           <span className="sb-bind-name">
             {battle.battle.name} <small>· {tAll.has(`dashboard.battleStatus.${battle.battle.status}`) ? tAll(`dashboard.battleStatus.${battle.battle.status}`) : battle.battle.status}</small>
           </span>
-          {action !== "none" && (
+          {action !== "none" && !play.readOnly && (
             <button type="button" className="toggle" disabled={play.pending} onClick={() => play.runBattle(row)}>
               {action === "start" ? t("startBattle") : battle.called ? t("callAgain") : t("callToBattle")}
             </button>

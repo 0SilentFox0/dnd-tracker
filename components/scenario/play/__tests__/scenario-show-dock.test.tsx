@@ -49,6 +49,13 @@ describe("ScenarioShowDock", () => {
     expect(screen.getByText("Собор")).toBeTruthy();
   });
 
+  it("readOnly — лише що на екрані, без кнопок керування", () => {
+    render(<ScenarioShowDock campaignId="c" pageId="pg" content={bound} play={{ ...play(null), readOnly: true }} />);
+
+    expect(screen.getByText("Показ не запущено")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Наступний/ })).toBeNull();
+  });
+
   it("карта в показі без прив'язок — док видно, підпис із назвою карти", () => {
     render(<ScenarioShowDock campaignId="c" pageId="pg" content={empty} play={play({ deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 1, world: { mapId: "m1" } })} />);
 

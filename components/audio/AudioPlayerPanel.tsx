@@ -36,7 +36,7 @@ export function AudioPlayerPanel({ view, children }: { view: { onCollapse(): voi
             {t("player.video")}
           </button>
         )}
-        <button type="button" aria-label={t("player.collapse")} onClick={view.onCollapse} className="text-hud-muted hover:text-hud-bone">
+        <button type="button" data-tour="music.collapse" aria-label={t("player.collapse")} onClick={view.onCollapse} className="text-hud-muted hover:text-hud-bone">
           <ChevronDown className="size-4" />
         </button>
       </header>

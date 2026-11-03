@@ -15,7 +15,11 @@ const afterCallbacks = vi.hoisted(() => [] as Array<() => unknown>);
 vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/server")>()), after: (cb: () => unknown) => afterCallbacks.push(cb) }));
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger } }));
 vi.mock("@/lib/utils/api/rate-limit", async (orig) => ({ ...(await orig<typeof import("@/lib/utils/api/rate-limit")>()), checkRateLimit: vi.fn(async () => ({ allowed: true, count: 1, limit: 20, retryAfterSeconds: 10 })) }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => {
+  const requireDM = vi.fn();
+
+  return { requireDM, requireCampaignAccess: vi.fn(), requireCampaignDMOrDemoAccess: vi.fn((id: string) => requireDM(id)) };
+});
 vi.mock("@/lib/db", () => ({
   prisma: {
     $transaction: async (callback: (tx: unknown) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),

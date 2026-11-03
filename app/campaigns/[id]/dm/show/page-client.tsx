@@ -64,7 +64,7 @@ export function DMShowPageClient({ campaignId, initialDecks, canEdit = true }: {
         <EmptyState icon={Images} title={t("decksPage.emptyTitle")} description={t("decksPage.emptyDescription")} action={canEdit && <Button onClick={() => setCreating(true)}>{t("newDeck.title")}</Button>} />
       ) : (
         <div data-tour="show.decks" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {decks.map((deck) => (
+          {decks.map((deck, i) => (
             <DeckCard
               key={deck.id}
               deck={deck}
@@ -73,6 +73,7 @@ export function DMShowPageClient({ campaignId, initialDecks, canEdit = true }: {
               pending={mutations.pending || control.pending}
               scene={pages.find((p) => p.id === deck.scenarioPageId)?.title}
               canEdit={canEdit}
+              data-tour={i === 0 ? "show.deck-card" : undefined}
             />
           ))}
         </div>

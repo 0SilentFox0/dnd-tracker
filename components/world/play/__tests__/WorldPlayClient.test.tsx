@@ -74,7 +74,7 @@ describe("WorldPlayClient", () => {
 
     expect(await screen.findByRole("button", { name: "Town" })).toBeTruthy();
     expect(document.querySelector('[data-tour="world.map"]')).toBeTruthy();
-    expect(document.querySelector('[data-tour="world.controls"]')).toBeTruthy();
+    expect(document.querySelector('[data-tour="world.crumbs"]')).toBeTruthy();
     expect(screen.getByRole("button", { name: "Aria", pressed: false })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Cellar" }));

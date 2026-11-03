@@ -35,6 +35,12 @@ describe("RowPlayControls — місце", () => {
     expect(pl.showMarker).toHaveBeenCalledWith(row.marker);
   });
 
+  it("readOnly — прив'язку видно, кнопки немає", () => {
+    render(<RowPlayControls campaignId="c" row={row} play={{ ...play(), readOnly: true }} />);
+
+    expect(screen.queryByRole("button", { name: "Показати на карті" })).toBeNull();
+  });
+
   it("на екрані — позначка замість кнопки", () => {
     render(<RowPlayControls campaignId="c" row={row} play={play({ world: { mapId: "w", focusMarkerId: "m" } })} />);
 
