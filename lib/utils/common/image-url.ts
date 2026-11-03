@@ -1,4 +1,4 @@
-import { BUNDLED_STATIC_ASSET } from "@/lib/constants/storage";
+import { BUNDLED_STATIC_ASSET, SHARED_ASSET_PREFIX } from "@/lib/constants/storage";
 
 export function normalizeImageUrl(src: string): string {
   try {
@@ -68,6 +68,22 @@ export function isHostedOnProjectStorage(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function sharedAssetPath(setKey: string, fileHash: string, ext: string): string {
+  const slug = setKey
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return `${SHARED_ASSET_PREFIX}${slug || "set"}/${fileHash}${ext}`;
+}
+
+/** Template icon on our project Storage under `sets/` (immutable, shared between campaigns). */
+export function isSharedAssetUrl(url: string): boolean {
+  const key = isHostedOnProjectStorage(url) ? parsePublicStorageUrl(url)?.key : undefined;
+
+  return !!key && key.slice(key.indexOf("/") + 1).startsWith(SHARED_ASSET_PREFIX);
 }
 
 export function isBundledStaticAsset(src: string): boolean {

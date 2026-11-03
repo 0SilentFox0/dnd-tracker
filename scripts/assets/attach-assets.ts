@@ -5,7 +5,7 @@ import * as path from "path";
 
 import { assertSeedTarget } from "../seed/seed-library-lib";
 import { readSrdData } from "../srd/lib/data-files";
-import { assertAttachAllowed, ASSET_BUCKET, ICON_FIELD, IMAGE_TYPES, isAttachKind, matchAssets, objectPath, srdSlugNames } from "./attach-lib";
+import { assertAttachAllowed, ASSET_BUCKET, ICON_FIELD, IMAGE_TYPES, isAlreadyExistsError, isAttachKind, matchAssets, objectPath, srdSlugNames } from "./attach-lib";
 
 import { prisma } from "@/lib/db";
 import { translateIssue } from "@/lib/i18n/translate-issue";
@@ -30,7 +30,7 @@ async function main() {
 
   assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
 
-  const campaign = await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId }, select: { kind: true, visibility: true, dmUserId: true } });
+  const campaign = await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId }, select: { kind: true, visibility: true, dmUserId: true, templateKey: true } });
 
   assertAttachAllowed(campaign, args.includes("--allow-official"));
 
@@ -55,11 +55,11 @@ async function main() {
 
     const content = fs.readFileSync(path.join(dir, m.file));
 
-    const objectName = objectPath(campaignId, kind, m.name, content, ext);
+    const objectName = objectPath(campaign.templateKey ?? campaignId, content, ext);
 
-    const { error } = await admin.storage.from(bucket).upload(objectName, content, staticAssetUploadOptions(IMAGE_TYPES[ext]));
+    const { error } = await admin.storage.from(bucket).upload(objectName, content, { ...staticAssetUploadOptions(IMAGE_TYPES[ext]), upsert: false });
 
-    if (error) {
+    if (error && !isAlreadyExistsError(error)) {
       uploadErrors.push(`${m.file}: ${error.message}`);
       continue;
     }

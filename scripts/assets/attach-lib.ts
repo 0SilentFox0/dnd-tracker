@@ -3,6 +3,8 @@ import { createHash } from "crypto";
 import { SRD_KINDS, type SrdData, type SrdKind } from "../srd/lib/types";
 
 import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
+import type { ICON_BUCKETS } from "@/lib/constants/storage";
+import { sharedAssetPath } from "@/lib/utils/common/image-url";
 import type { IdName } from "@/types/common";
 
 export const ATTACH_KINDS = ["units", "spells", "artifacts", "classes", "races", "skills", "main-skills"] as const;
@@ -13,7 +15,7 @@ export const isAttachKind = (v: string | undefined): v is AttachKind => !!v && (
 
 export const ICON_FIELD: Record<AttachKind, "avatar" | "icon"> = { units: "avatar", spells: "icon", artifacts: "icon", classes: "icon", races: "icon", skills: "icon", "main-skills": "icon" };
 
-export const ASSET_BUCKET: Record<AttachKind, string> = {
+export const ASSET_BUCKET: Record<AttachKind, (typeof ICON_BUCKETS)[number]> = {
   units: "unit-icons",
   spells: "spell-icons",
   artifacts: "artifact-icons",
@@ -97,15 +99,8 @@ export function matchAssets(files: readonly string[], names: readonly IdName[], 
   return { matches, unmatched, duplicates };
 }
 
-export function objectPath(campaignId: string, kind: AttachKind, name: string, content: Buffer, ext: string): string {
-  const safe =
-    assetKey(name)
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "") || "asset";
-
-  const hash = createHash("sha1").update(content).digest("hex").slice(0, 8);
-
-  return `${campaignId}/${kind}/${safe}-${hash}${ext}`;
+export function objectPath(setKey: string, content: Buffer, ext: string): string {
+  return sharedAssetPath(setKey, createHash("sha1").update(content).digest("hex"), ext);
 }
+
+export const isAlreadyExistsError = (e: { message: string; statusCode?: string | number }) => String(e.statusCode) === "409" || /already exists/i.test(e.message);
