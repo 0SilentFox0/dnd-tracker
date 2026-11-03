@@ -2,15 +2,21 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ joyrideProps: null as null | Record<string, unknown>, setFlag: vi.fn(), push: vi.fn(), pathname: "/campaigns/c" }));
+const mocks = vi.hoisted(() => ({ joyrideProps: null as null | Record<string, unknown>, setFlag: vi.fn(), push: vi.fn() }));
 
 vi.mock("react-joyride", () => ({
   ACTIONS: { COMPLETE: "complete", SKIP: "skip" },
   EVENTS: { TOUR_END: "tour:end", TOOLTIP: "tooltip", TARGET_NOT_FOUND: "error:target_not_found" },
   STATUS: { FINISHED: "finished", SKIPPED: "skipped" },
 }));
-vi.mock("next/dynamic", () => ({ default: () => (props: Record<string, unknown>) => { mocks.joyrideProps = props; return null; } }));
-vi.mock("next/navigation", () => ({ usePathname: () => mocks.pathname, useRouter: () => ({ push: mocks.push }) }));
+vi.mock("next/dynamic", () => ({
+  default: () => (props: Record<string, unknown>) => {
+    mocks.joyrideProps = props;
+
+    return null;
+  },
+}));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
 vi.mock("@/lib/hooks/onboarding", () => ({ useSetOnboardingFlag: () => mocks.setFlag }));
 vi.mock("@/lib/i18n/use-translator", () => ({ useTranslator: () => (key: string) => key }));
 
@@ -24,6 +30,12 @@ function Launcher() {
   return <button type="button" onClick={() => startTour("dashboard")}>launch</button>;
 }
 
+function ScenarioLauncher() {
+  const { startTour } = useDemoTour();
+
+  return <button type="button" onClick={() => startTour("scenario")}>launch scenario</button>;
+}
+
 function renderCoordinator() {
   return render(<DemoTourCoordinator campaignId="c"><Launcher /></DemoTourCoordinator>);
 }
@@ -34,7 +46,7 @@ function emit(type: string, index: number, status: string, action: string) {
   onEvent({ type, index, status, action, step: { id: `dashboard.${index === 1 ? "search" : "navigation"}` } });
 }
 
-afterEach(() => { cleanup(); mocks.joyrideProps = null; mocks.setFlag.mockClear(); mocks.push.mockClear(); mocks.pathname = "/campaigns/c"; });
+afterEach(() => { cleanup(); window.history.replaceState({}, "", "/"); mocks.joyrideProps = null; mocks.setFlag.mockClear(); mocks.push.mockClear(); });
 
 describe("DemoTourCoordinator", () => {
   it("starts the selected tour and supplies active-locale steps and controls", () => {
@@ -51,13 +63,37 @@ describe("DemoTourCoordinator", () => {
     expect(props.options.closeButtonAction).toBe("skip");
   });
 
-  it("keeps the tour running after navigation leaves its start route", () => {
+  it("starts a route-changing tour immediately and its first step navigates before showing", async () => {
+    render(<DemoTourCoordinator campaignId="c"><ScenarioLauncher /></DemoTourCoordinator>);
+    fireEvent.click(screen.getByRole("button", { name: "launch scenario" }));
+
+    const props = mocks.joyrideProps as { run: boolean; steps: { before?: () => Promise<void> }[] };
+
+    expect(props.run).toBe(true);
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(props.steps[0].before).toBeTypeOf("function");
+
+    mocks.push.mockImplementation((path: string) => {
+      window.history.pushState({}, "", path);
+
+      const target = document.createElement("div");
+
+      target.setAttribute("data-tour", "scenario.list");
+      document.body.append(target);
+    });
+
+    await props.steps[0].before?.();
+
+    expect(mocks.push).toHaveBeenCalledWith("/campaigns/c/dm/scenario");
+    expect(document.querySelector('[data-tour="scenario.list"]')).toBeTruthy();
+  });
+
+  it("keeps the tour running after a route change", () => {
     const view = renderCoordinator();
 
     fireEvent.click(screen.getByRole("button", { name: "launch" }));
     expect((mocks.joyrideProps as { run: boolean }).run).toBe(true);
 
-    mocks.pathname = "/campaigns/c/dm/scenario/scene-1";
     view.rerender(<DemoTourCoordinator campaignId="c"><Launcher /></DemoTourCoordinator>);
 
     expect((mocks.joyrideProps as { run: boolean }).run).toBe(true);

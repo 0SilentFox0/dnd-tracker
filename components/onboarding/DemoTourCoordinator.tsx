@@ -1,16 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { Step } from "react-joyride";
-import { usePathname, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 
+import type { DemoTourRunnerProps } from "@/components/onboarding/DemoTourRunner";
 import { useSetOnboardingFlag } from "@/lib/hooks/onboarding";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { DEMO_TOURS } from "@/lib/onboarding/demo-tours";
 import { demoTourFlagKey, type DemoTourId } from "@/lib/onboarding/flag-keys";
-import type { DemoTourRunnerProps } from "@/components/onboarding/DemoTourRunner";
 
 const DemoTourRunner = dynamic<DemoTourRunnerProps>(() => import("@/components/onboarding/DemoTourRunner").then((module) => module.DemoTourRunner), { ssr: false });
 
@@ -33,8 +33,6 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
 
   const router = useRouter();
 
-  const pathname = usePathname();
-
   const setFlag = useSetOnboardingFlag();
 
   const [activeTour, setActiveTour] = useState<DemoTourId | null>(null);
@@ -46,18 +44,12 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
   const campaignPath = `/campaigns/${campaignId}`;
 
   const startTour = useCallback((id: DemoTourId) => {
-    const tour = DEMO_TOURS.find((item) => item.id === id);
-
-    if (!tour) return;
+    if (!DEMO_TOURS.some((item) => item.id === id)) return;
 
     lastStepShown.current = false;
     setActiveTour(id);
-
-    const destination = `${campaignPath}${tour.startPath}`;
-
-    if (!pathname.endsWith(destination)) router.push(destination);
-    else setRun(true);
-  }, [campaignPath, pathname, router]);
+    setRun(true);
+  }, []);
 
   const tour = activeTour ? DEMO_TOURS.find((item) => item.id === activeTour) : null;
 
@@ -110,12 +102,6 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
   }, [activeTour, setFlag, steps.length]);
 
   const contextValue = useMemo(() => ({ startTour, activeTour }), [activeTour, startTour]);
-
-  const isOnStartPath = tour ? pathname.endsWith(`${campaignPath}${tour.startPath}`) : false;
-
-  useEffect(() => {
-    if (activeTour && isOnStartPath) setRun(true);
-  }, [activeTour, isOnStartPath]);
 
   return (
     <DemoTourContext.Provider value={contextValue}>
