@@ -25,7 +25,7 @@ export function DemoTourMenu() {
           <p className="text-xs text-hud-muted">{t("demoTours.menuDescription")}</p>
         </div>
       </div>
-      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-1">
         {DEMO_TOURS.map((tour) => {
           const completed = flags?.[demoTourFlagKey(tour.id)] === "complete";
 

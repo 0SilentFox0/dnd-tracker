@@ -16,7 +16,7 @@ export default async function CampaignLayout({ children, params }: { children: R
   return (
     <>
       {isDemo ? <DemoTourCoordinator campaignId={id}>{children}</DemoTourCoordinator> : children}
-      <NotificationsHost campaignId={id} userId={userId} />
+      {!isDemo && <NotificationsHost campaignId={id} userId={userId} />}
     </>
   );
 }
