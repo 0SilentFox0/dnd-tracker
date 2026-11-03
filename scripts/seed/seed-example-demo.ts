@@ -48,6 +48,19 @@ const targetId = (rows: readonly NamedRow[], idMap: ReadonlyMap<string, string>,
 
 const picked = (id: string, picks?: Record<string, Array<{ id: string }>>) => ({ id, ...(picks && { picks }) });
 
+function removeMissingSpellChoices(value: unknown, spellIds: ReadonlySet<string>): unknown {
+  if (Array.isArray(value)) return value.map((item) => removeMissingSpellChoices(item, spellIds));
+
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(Object.entries(value).map(([key, child]) => [
+    key,
+    key === "spells" && Array.isArray(child)
+      ? child.filter((spell) => !spell || typeof spell !== "object" || !("spellId" in spell) || typeof spell.spellId !== "string" || spellIds.has(spell.spellId))
+      : removeMissingSpellChoices(child, spellIds),
+  ]));
+}
+
 function rangerAtLevel20(bundle: Bundle, idMap: ReadonlyMap<string, string>) {
   const ranger = named(bundle.classes as NamedRow[], "Ranger", "class");
 
@@ -109,10 +122,22 @@ async function copySrdLibraries(campaignId: string, userId: string) {
 
   if (rangerSpells.length !== 15) throw new Error(`Expected 15 prepared SRD Ranger spells; found ${rangerSpells.length}.`);
 
+  const demoUnits = DEMO_UNIT_NAMES.map((name) => named(sourceBundle.units as NamedRow[], name, "unit"));
+
+  const battleSpellIds = new Set(demoUnits.flatMap((unit) => {
+    const spellcasting = unit.spellcasting as { spells?: Array<{ spellId?: string }> } | undefined;
+
+    return spellcasting?.spells?.flatMap((spell) => spell.spellId ? [spell.spellId] : []) ?? [];
+  }));
+
+  const usedSpellIds = new Set([...rangerSpells.map((spell) => spell.id), ...battleSpellIds]);
+
   const demoBundle: Bundle = {
     ...sourceBundle,
-    units: DEMO_UNIT_NAMES.map((name) => named(sourceBundle.units as NamedRow[], name, "unit")) as Bundle["units"],
-    spells: rangerSpells as Bundle["spells"],
+    units: demoUnits as Bundle["units"],
+    races: sourceBundle.races.map((race) => removeMissingSpellChoices(race, usedSpellIds)) as Bundle["races"],
+    // Include hero spells plus the spells referenced by the six seeded battle creatures.
+    spells: (sourceBundle.spells as NamedRow[]).filter((spell) => usedSpellIds.has(spell.id)) as Bundle["spells"],
     // The seeded hero has no inventory, so no artifacts are used in this demo.
     artifacts: [],
   };
