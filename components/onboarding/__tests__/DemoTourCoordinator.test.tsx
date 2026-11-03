@@ -1,13 +1,13 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ joyrideProps: null as null | Record<string, unknown>, setFlag: vi.fn(), push: vi.fn() }));
 
 vi.mock("react-joyride", () => ({
-  ACTIONS: { COMPLETE: "complete", SKIP: "skip" },
+  ACTIONS: { UPDATE: "update", SKIP: "skip" },
   EVENTS: { TOUR_END: "tour:end", TOOLTIP: "tooltip", TARGET_NOT_FOUND: "error:target_not_found" },
-  STATUS: { FINISHED: "finished", SKIPPED: "skipped" },
+  STATUS: { FINISHED: "finished", RUNNING: "running", SKIPPED: "skipped" },
 }));
 vi.mock("next/dynamic", () => ({
   default: () => (props: Record<string, unknown>) => {
@@ -57,11 +57,13 @@ describe("DemoTourCoordinator", () => {
 
     expect(props.run).toBe(true);
     expect(props.steps).toHaveLength(2);
-    expect(props.steps[0]).toMatchObject({ title: "demoTours.steps.dashboard.navigation.title", content: "demoTours.steps.dashboard.navigation.description" });
+    expect(props.steps[0]).toMatchObject({ title: "demoTours.steps.dashboard.navigation.title", content: "demoTours.steps.dashboard.navigation.description", placement: "bottom" });
     expect(props.locale.skip).toBe("demoTours.controls.skip");
     expect(props.options.overlayClickAction).toBe(false);
     expect(props.options.closeButtonAction).toBe("skip");
     expect(props.options.skipBeacon).toBe(true);
+    expect((mocks.joyrideProps as { tooltipComponent: unknown }).tooltipComponent).toBeTypeOf("function");
+    expect((mocks.joyrideProps as { styles: { overlay: { backgroundColor: string } } }).styles.overlay.backgroundColor).toBe("rgba(0, 0, 0, 0.78)");
   });
 
   it("starts a route-changing tour immediately and its first step navigates before showing", async () => {
@@ -87,6 +89,30 @@ describe("DemoTourCoordinator", () => {
 
     expect(mocks.push).toHaveBeenCalledWith("/campaigns/c/dm/scenario");
     expect(document.querySelector('[data-tour="scenario.list"]')).toBeTruthy();
+    document.querySelector('[data-tour="scenario.list"]')?.remove();
+  });
+
+  it("centers a step whose target is taller than the viewport", async () => {
+    render(<DemoTourCoordinator campaignId="c"><ScenarioLauncher /></DemoTourCoordinator>);
+    fireEvent.click(screen.getByRole("button", { name: "launch scenario" }));
+
+    window.history.pushState({}, "", "/campaigns/c/dm/scenario");
+
+    const target = document.createElement("div");
+
+    target.setAttribute("data-tour", "scenario.list");
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+    target.getBoundingClientRect = () => ({ height: 5000 } as DOMRect);
+    document.body.append(target);
+
+    const stepsBefore = (mocks.joyrideProps as { steps: { placement: string; before?: () => Promise<void> }[] }).steps;
+
+    expect(stepsBefore[0].placement).toBe("bottom");
+
+    await act(() => stepsBefore[0].before?.());
+
+    expect((mocks.joyrideProps as { steps: { placement: string }[] }).steps[0].placement).toBe("center");
+    target.remove();
   });
 
   it("keeps the tour running after a route change", () => {
@@ -103,8 +129,8 @@ describe("DemoTourCoordinator", () => {
   it("persists completion only after the last step is shown and finished", () => {
     renderCoordinator();
     fireEvent.click(screen.getByRole("button", { name: "launch" }));
-    emit(EVENTS.TOOLTIP, 1, STATUS.FINISHED, ACTIONS.COMPLETE);
-    emit(EVENTS.TOUR_END, 1, STATUS.FINISHED, ACTIONS.COMPLETE);
+    emit(EVENTS.TOOLTIP, 1, STATUS.RUNNING, ACTIONS.UPDATE);
+    emit(EVENTS.TOUR_END, 1, STATUS.FINISHED, ACTIONS.UPDATE);
 
     expect(mocks.setFlag).toHaveBeenCalledWith("demo-tour:dashboard", "complete");
   });
@@ -123,8 +149,8 @@ describe("DemoTourCoordinator", () => {
   it("does not complete when the final target is missing", () => {
     renderCoordinator();
     fireEvent.click(screen.getByRole("button", { name: "launch" }));
-    emit(EVENTS.TARGET_NOT_FOUND, 1, STATUS.FINISHED, ACTIONS.COMPLETE);
-    emit(EVENTS.TOUR_END, 1, STATUS.FINISHED, ACTIONS.COMPLETE);
+    emit(EVENTS.TARGET_NOT_FOUND, 1, STATUS.RUNNING, ACTIONS.UPDATE);
+    emit(EVENTS.TOUR_END, 1, STATUS.FINISHED, ACTIONS.UPDATE);
 
     expect(mocks.setFlag).not.toHaveBeenCalled();
   });

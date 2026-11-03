@@ -164,7 +164,7 @@
       "show": { "title": "Slide show", "description": "See how presentation decks are organized and played." },
       "world": { "title": "World map", "description": "Explore the map and its navigation controls." },
       "music": { "title": "Music", "description": "Browse the track library and listen to a sample." },
-      "libraries": { "title": "Libraries", "description": "Browse the campaign's reference libraries." },
+      "libraries": { "title": "Libraries", "description": "Browse the campaign's reference libraries, using spells as the example." },
       "battle": { "title": "Battle", "description": "Explore a sample battle and its controls." }
     },
     "steps": {
@@ -191,9 +191,8 @@
         "player": { "title": "Audio player", "description": "Preview a track with the playback controls." }
       },
       "libraries": {
-        "browse": { "title": "Campaign library", "description": "Browse example content such as skills and other reference material." },
-        "search": { "title": "Find an entry", "description": "Use the available filters or search to find a library entry." },
-        "detail": { "title": "Inspect an entry", "description": "Each card includes a short summary so you can explore example skills without editing them." }
+        "browse": { "title": "Spell library", "description": "Spells are grouped by level. Expand a group to inspect the cards and their summaries without editing." },
+        "search": { "title": "Find an entry", "description": "Use the search or the filters to quickly find the spell you need." }
       },
       "battle": {
         "list": { "title": "Sample battles", "description": "Open a prepared battle to see how an encounter is arranged." },

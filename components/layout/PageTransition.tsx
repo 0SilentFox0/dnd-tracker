@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useRef } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 interface PageTransitionProps {
@@ -17,6 +17,8 @@ export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
 
   const ref = useRef<HTMLDivElement>(null);
+
+  const lastPathname = useRef(pathname);
 
   useEffect(() => {
     const el = ref.current;
@@ -44,8 +46,20 @@ export function PageTransition({ children }: PageTransitionProps) {
     return () => observer.disconnect();
   }, []);
 
+  // Перезапуск анімації без `key={pathname}`: ремаунт скидав стан лейаутів (напр. демо-тур під час переходу).
+  useEffect(() => {
+    const el = ref.current;
+
+    if (!el || lastPathname.current === pathname) return;
+
+    lastPathname.current = pathname;
+    el.style.animation = "none";
+    void el.offsetWidth;
+    el.style.animation = "";
+  }, [pathname]);
+
   return (
-    <div ref={ref} key={pathname} className="page-transition">
+    <div ref={ref} className="page-transition">
       {children}
     </div>
   );
