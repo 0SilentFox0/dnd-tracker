@@ -1,7 +1,12 @@
+import { notFound } from "next/navigation";
+
 import { EditSkillClient } from "./edit-skill-client";
 
+import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { SkillCard } from "@/components/skills/list/SkillCard";
 import { prisma } from "@/lib/db";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
+import { readSkill } from "@/lib/server/skills/read-skills-list";
 import type { MainSkill } from "@/types/main-skills";
 
 export default async function EditSkillPage({
@@ -11,7 +16,22 @@ export default async function EditSkillPage({
 }) {
   const { id: campaignId, skillId } = await params;
 
-  await requireCampaignDM(campaignId);
+  const { isDemo } = await requireCampaignDMOrDemo(campaignId);
+
+  if (isDemo) {
+    const skill = await readSkill(campaignId, skillId);
+
+    if (!skill) notFound();
+
+    return (
+      <HudPage>
+        <HudPageHeader title={skill.name} subtitle={skill.spell?.name ?? undefined} />
+        <div className="max-w-2xl">
+          <SkillCard skill={skill} campaignId={campaignId} printMode />
+        </div>
+      </HudPage>
+    );
+  }
 
   const [spells, mainSkills] = await Promise.all([
     prisma.spell.findMany({

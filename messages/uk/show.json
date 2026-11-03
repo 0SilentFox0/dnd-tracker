@@ -125,6 +125,13 @@
     "title": "Показ сцен",
     "count": "{count, plural, one {# набір} few {# набори} many {# наборів} other {# наборів}}",
     "openShow": "Відкрити показ",
+    "preview": "Переглянути слайди",
+    "previewReadOnly": "Приватний перегляд лише для читання. Ваш вибір не передається учасникам кампанії.",
+    "previewSlideCount": "Слайд {current} з {total}",
+    "previousSlide": "Назад",
+    "nextSlide": "Далі",
+    "previewEmpty": "У цьому наборі немає слайдів для перегляду.",
+    "backToDecks": "До наборів",
     "emptyTitle": "Ще немає наборів",
     "emptyDescription": "Створіть набір слайдів із картинок і музики та покажіть його гравцям."
   },

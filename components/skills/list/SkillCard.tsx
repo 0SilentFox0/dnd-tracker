@@ -25,6 +25,7 @@ export interface SkillCardProps {
   actions?: SkillCardActions;
   /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
   printMode?: boolean;
+  canEdit?: boolean;
 }
 
 function SkillCardShell({ printMode, children }: { printMode: boolean; children: ReactNode }) {
@@ -40,6 +41,7 @@ export function SkillCard({
   campaignId,
   actions,
   printMode = false,
+  canEdit = true,
 }: SkillCardProps) {
   const t = useTranslations();
 
@@ -66,7 +68,7 @@ export function SkillCard({
       },
     });
 
-  return (
+  const card = (
     <SkillCardShell printMode={printMode}>
       <div>
         <div className={`flex items-start gap-2 ${printMode ? "mb-1.5" : "mb-3"}`}>
@@ -88,7 +90,7 @@ export function SkillCard({
               </h3>
             </div>
           </div>
-          {!printMode && (
+          {!printMode && canEdit && (
             <SkillCardActionsMenu
               currentMainSkillId={skill.mainSkillId ?? null}
               mainSkills={mainSkills}
@@ -126,9 +128,13 @@ export function SkillCard({
       </div>
       {!printMode && (
         <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
-          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>{t("common.actions.edit")}</Link>
+          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`} data-tour="libraries.open">
+            {canEdit ? t("common.actions.edit") : t("onboarding.demoTours.viewDetails")}
+          </Link>
         </Button>
       )}
     </SkillCardShell>
   );
+
+  return <div data-tour="libraries.detail">{card}</div>;
 }

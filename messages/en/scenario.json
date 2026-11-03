@@ -173,6 +173,7 @@
     "revealedAfterSection": "✓ Revealed (after the section)"
   },
   "pageBody": {
+    "demoPlaybackReadOnly": "Playback controls can affect what everyone sees. They are not available in this read-only demo.",
     "collapsePlayed": "Collapse played",
     "darkTheme": "Dark theme",
     "edit": "Edit",

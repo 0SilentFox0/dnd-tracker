@@ -18,7 +18,7 @@ import { useScenarioPages } from "@/lib/hooks/scenario";
 import { useDeckMutations, useDecks, useShowControl } from "@/lib/hooks/show";
 import type { SlideDeckSummary } from "@/types/show";
 
-export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: string; initialDecks: SlideDeckSummary[] }) {
+export function DMShowPageClient({ campaignId, initialDecks, canEdit = true }: { campaignId: string; initialDecks: SlideDeckSummary[]; canEdit?: boolean }) {
   const t = useTranslations("show");
 
   const router = useRouter();
@@ -46,37 +46,31 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
       <HudPageHeader
         title={t("decksPage.title")}
         subtitle={t("decksPage.count", { count: decks.length })}
-        actions={
-          <>
-            <Button onClick={() => setCreating(true)} className="flex items-center gap-2">
-              <Plus className="size-4" />
-              {t("newDeck.title")}
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`${base}/show`}>{t("decksPage.openShow")}</Link>
-            </Button>
-            <WorldMapLink campaignId={campaignId} variant="button" />
-          </>
-        }
+        actions={<>
+          {canEdit && <Button onClick={() => setCreating(true)} className="flex items-center gap-2"><Plus className="size-4" />{t("newDeck.title")}</Button>}
+          {canEdit && <Button asChild variant="outline"><Link href={`${base}/show`}>{t("decksPage.openShow")}</Link></Button>}
+          <WorldMapLink campaignId={campaignId} variant="button" />
+        </>}
       />
-      <OnboardingHint id="dm.show" />
+      {canEdit && <OnboardingHint id="dm.show" />}
       {decks.length === 0 ? (
-        <EmptyState icon={Images} title={t("decksPage.emptyTitle")} description={t("decksPage.emptyDescription")} />
+        <EmptyState icon={Images} title={t("decksPage.emptyTitle")} description={t("decksPage.emptyDescription")} action={canEdit && <Button onClick={() => setCreating(true)}>{t("newDeck.title")}</Button>} />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div data-tour="show.decks" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {decks.map((deck) => (
             <DeckCard
               key={deck.id}
               deck={deck}
-              href={`${base}/dm/show/${deck.id}`}
-              actions={{ start: () => void start(deck.id), remove: () => void mutations.remove(deck.id) }}
+              href={canEdit ? `${base}/dm/show/${deck.id}` : `${base}/dm/show/${deck.id}/preview`}
+              canEdit={canEdit}
+              actions={canEdit ? { start: () => void start(deck.id), remove: () => void mutations.remove(deck.id) } : undefined}
               pending={mutations.pending || control.pending}
               scene={pages.find((p) => p.id === deck.scenarioPageId)?.title}
             />
           ))}
         </div>
       )}
-      <NewDeckDialog
+      {canEdit && <NewDeckDialog
         open={creating}
         onOpenChange={setCreating}
         pending={mutations.pending}
@@ -87,7 +81,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
 
           return !!deck;
         }}
-      />
+      />}
     </HudPage>
   );
 }

@@ -16,7 +16,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useSkillsList } from "@/lib/hooks/skills";
 
-export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
+export function DMSkillsPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("skills.page");
 
   const { skills, isLoading, search, groups, actions } = useSkillsList(campaignId);
@@ -25,12 +25,31 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
 
   const newSkillHref = `/campaigns/${campaignId}/dm/skills/new`;
 
+  const searchInput = <SearchInput value={search.query.value} onChange={search.query.set} label={t("searchLabel")} placeholder={t("searchPlaceholder")} />;
+
+  const skillGroups = (
+    <Accordion key={search.isActive ? groupNames.join("|") : "all"} type="multiple" defaultValue={groupNames} className="space-y-2">
+      {groups.map((group) => (
+        <SkillGroupAccordion
+          key={group.name}
+          groupName={group.name}
+          skills={group.skills}
+          campaignId={campaignId}
+          spellGroups={[]}
+          mainSkillColor={group.color}
+          actions={{ onDelete: actions.deleteSkill, onDuplicate: actions.duplicateSkill }}
+          canEdit={canEdit}
+        />
+      ))}
+    </Accordion>
+  );
+
   return (
     <HudPage>
       <HudPageHeader
         title={t("title")}
         subtitle={t("subtitle")}
-        actions={
+        actions={canEdit && (
           <>
             <ContentTransferButtons campaignId={campaignId} kind="skills" />
             <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
@@ -54,9 +73,9 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
               actions={{ onConfirm: actions.removeAll }}
             />
           </>
-        }
+        )}
       />
-      <OnboardingHint id="dm.skills" />
+      {canEdit && <OnboardingHint id="dm.skills" />}
 
       {isLoading && skills.length === 0 ? (
         <LoadingState rows={6} label={t("loading")} />
@@ -65,31 +84,19 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
           icon={Sparkles}
           title={t("emptyTitle")}
           description={t("emptyDescription")}
-          action={
+          action={canEdit && (
             <Button asChild>
               <Link href={newSkillHref}>{t("createFirst")}</Link>
             </Button>
-          }
+          )}
         />
       ) : (
         <>
-          <SearchInput value={search.query.value} onChange={search.query.set} label={t("searchLabel")} placeholder={t("searchPlaceholder")} />
+          <div data-tour="libraries.search">{searchInput}</div>
           {groups.length === 0 ? (
             <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />
           ) : (
-            <Accordion key={search.isActive ? groupNames.join("|") : "all"} type="multiple" defaultValue={groupNames} className="space-y-2">
-              {groups.map((group) => (
-                <SkillGroupAccordion
-                  key={group.name}
-                  groupName={group.name}
-                  skills={group.skills}
-                  campaignId={campaignId}
-                  spellGroups={[]}
-                  mainSkillColor={group.color}
-                  actions={{ onDelete: actions.deleteSkill, onDuplicate: actions.duplicateSkill }}
-                />
-              ))}
-            </Accordion>
+            <div data-tour="libraries.browse">{skillGroups}</div>
           )}
         </>
       )}

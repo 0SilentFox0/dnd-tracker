@@ -26,6 +26,8 @@ describe("ScenarioIndex", () => {
 
     expect(screen.getByText("Арка перша")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Монастир Світла" }).getAttribute("href")).toBe("/campaigns/c/dm/scenario/a");
+    expect(screen.getByRole("link", { name: "Монастир Світла" }).getAttribute("data-tour")).toBe("scenario.open");
+    expect(document.querySelector('[data-tour="scenario.list"]')).toBeTruthy();
     expect(screen.getAllByText("Готова")).toHaveLength(2);
     expect(screen.getByText("Годрик")).toBeTruthy();
 

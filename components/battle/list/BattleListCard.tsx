@@ -43,7 +43,7 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true }: Bat
       </Button>
     );
 
-  return (
+  const card = (
     <HudCard tone={KIND[kind].tone} className="space-y-3 p-4">
       <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
@@ -67,7 +67,7 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true }: Bat
       {kind === BattleStatus.ACTIVE && (
         <div className="flex gap-2">
           <Button asChild size="sm" className="flex-1">
-            <Link href={playHref}>{t("card.play")}</Link>
+            <Link href={playHref} data-tour="battle.open">{t("card.play")}</Link>
           </Button>
           {deleteButton}
         </div>
@@ -76,17 +76,23 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true }: Bat
         <div className="flex gap-2">
           {editButton(t("card.edit"))}
           <Button asChild size="sm" className="flex-1">
-            <Link href={playHref}>{t("card.start")}</Link>
+            <Link href={playHref} data-tour="battle.open">{t("card.start")}</Link>
           </Button>
           {deleteButton}
         </div>
       )}
       {kind === BattleStatus.COMPLETED && (
         <div className="flex gap-2">
-          {editButton(t("card.view"))}
+          {!canEdit ? (
+            <Button asChild size="sm" className="flex-1">
+              <Link href={playHref} data-tour="battle.open">{t("card.play")}</Link>
+            </Button>
+          ) : editButton(t("card.view"))}
           {deleteButton}
         </div>
       )}
     </HudCard>
   );
+
+  return <div data-tour="battle.list">{card}</div>;
 }

@@ -35,11 +35,13 @@ const tileLinks = () => screen.getAllByRole("link");
 
 describe("DashboardGroups", () => {
   it("DM without query shows group headings and 14 links", async () => {
-    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+    const { container } = await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     for (const t of ["Гра", "Герої", "Бібліотеки"]) expect(screen.getByRole("heading", { name: t })).toBeTruthy();
 
     expect(tileLinks()).toHaveLength(14);
+    expect(container.querySelector('[data-tour="dashboard.search"]')).toBeTruthy();
+    expect(container.querySelector('[data-tour="dashboard.navigation"]')).toBeTruthy();
   });
 
   it("shows pending drafts in the characters subtitle", async () => {

@@ -4,6 +4,7 @@
  */
 
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import type { Campaign, CampaignMember } from "@prisma/client";
 
 import "server-only";
@@ -22,6 +23,19 @@ type SlimMembership = {
 };
 
 type FullMembership = CampaignMember & { user: PublicUser };
+
+const campaignWithMembership = cache((campaignId: string, userId: string) =>
+  prisma.campaign.findUnique({
+    where: { id: campaignId },
+    include: { members: { where: { userId } } },
+    omit: { aiInstructions: true },
+  }),
+);
+
+/** Shared within a server render so the layout and its page reuse the same access lookup. */
+export function getCampaignForLayout(campaignId: string, userId: string) {
+  return campaignWithMembership(campaignId, userId);
+}
 
 /**
  * Завантажує campaign + проста перевірка членства.
@@ -42,15 +56,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
 
   const userId = authUser.id;
 
-  const campaign = await prisma.campaign.findUnique({
-    where: { id: campaignId },
-    include: {
-      members: {
-        where: { userId },
-      },
-    },
-    omit: { aiInstructions: true },
-  });
+  const campaign = await getCampaignForLayout(campaignId, userId);
 
   if (!campaign) redirect("/campaigns");
 

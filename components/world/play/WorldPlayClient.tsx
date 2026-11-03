@@ -52,9 +52,9 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
 
           return (
             <>
-              <HudPageHeader title={t("title")} subtitle={<WorldCrumbs maps={view.maps} mapId={view.map.id} onOpen={play.openMap} />} actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>} />
+              <HudPageHeader title={t("title")} subtitle={<span data-tour="world.controls"><WorldCrumbs maps={view.maps} mapId={view.map.id} onOpen={play.openMap} /></span>} actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>} />
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_20rem]">
-                <div className={MAP_HEIGHT}>
+                <div className={MAP_HEIGHT} data-tour="world.map">
                   <WorldMapView
                     key={view.map.id}
                     detail={props.detail}

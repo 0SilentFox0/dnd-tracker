@@ -30,6 +30,12 @@ export async function listDecks(campaignId: string): Promise<SlideDeckSummary[]>
   return (await prisma.slideDeck.findMany({ where: { campaignId }, orderBy: DECK_ORDER })).map(toDeckSummary);
 }
 
+export async function getDeck(campaignId: string, deckId: string): Promise<SlideDeck | null> {
+  const row = await prisma.slideDeck.findFirst({ where: { id: deckId, campaignId } });
+
+  return row ? toSlideDeck(row) : null;
+}
+
 export async function loadShowDeck(campaignId: string, deckId: string): Promise<ShowDeck | null> {
   const row = await prisma.slideDeck.findFirst({ where: { id: deckId, campaignId }, select: { id: true, title: true, slides: true } });
 

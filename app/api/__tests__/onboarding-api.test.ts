@@ -52,6 +52,15 @@ describe("GET /api/onboarding", () => {
     expect(prisma.userOnboardingFlag.upsert).not.toHaveBeenCalled();
   });
 
+  it("повертає збережений прапорець демо-туру після повторного запиту", async () => {
+    vi.mocked(prisma.userOnboardingFlag.findMany).mockResolvedValue([{ key: "demo-tour:show", value: "complete" }] as never);
+    const { GET } = await import("@/app/api/onboarding/route");
+
+    const body = await (await GET()).json();
+
+    expect(body.flags["demo-tour:show"]).toBe("complete");
+  });
+
   it("запис першого візиту впав (немає рядка users) — GET однаково 200", async () => {
     vi.mocked(prisma.userOnboardingFlag.upsert).mockRejectedValueOnce(new Error("Foreign key constraint violated"));
 
@@ -78,6 +87,14 @@ describe("PUT /api/onboarding/flags", () => {
 
     expect((await PUT(json({ key: "hint:dm.races" }))).status).toBe(200);
     expect(prisma.userOnboardingFlag.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: { userId: "u1", key: "hint:dm.races", value: null } }));
+  });
+
+  it("дозволяє зберегти завершення відомого демо-туру як прапорець користувача", async () => {
+    const { PUT } = await import("@/app/api/onboarding/flags/route");
+
+    expect((await PUT(json({ key: "demo-tour:scenario", value: "complete" }))).status).toBe(200);
+    expect(prisma.userOnboardingFlag.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: { userId: "u1", key: "demo-tour:scenario", value: "complete" } }));
+    expect((await PUT(json({ key: "demo-tour:unknown", value: "complete" }))).status).toBe(400);
   });
 
   it("сміттєвий ключ або довге значення — 400", async () => {

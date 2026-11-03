@@ -125,6 +125,13 @@
     "title": "Scene show",
     "count": "{count, plural, one {# deck} other {# decks}}",
     "openShow": "Open the show",
+    "preview": "Preview slides",
+    "previewReadOnly": "Private read-only preview. Your selection is not shared with the campaign.",
+    "previewSlideCount": "Slide {current} of {total}",
+    "previousSlide": "Previous",
+    "nextSlide": "Next",
+    "previewEmpty": "This deck has no slides to preview.",
+    "backToDecks": "Back to decks",
     "emptyTitle": "No decks yet",
     "emptyDescription": "Create a slide deck from images and music and show it to the players."
   },

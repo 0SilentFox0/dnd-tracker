@@ -16,12 +16,12 @@ import type { ShowState } from "@/types/show";
 
 const imageProps = (src: string) => ({ src, fill: true, sizes: "100vw", unoptimized: !isSupabaseStorageUrl(src) });
 
-export function ShowStage({ show, campaignId, isDM = false, userId = "" }: { show: ShowState | null; campaignId: string; isDM?: boolean; userId?: string }) {
+export function ShowStage({ show, campaignId, isDM = false, userId = "", readOnlyPreview = false }: { show: ShowState | null; campaignId: string; isDM?: boolean; userId?: string; readOnlyPreview?: boolean }) {
   const current = visibleSlide(show);
 
   const layers = useSlideLayers(current);
 
-  const puzzle = stageMode(show) === "puzzle" && current?.puzzle && show?.puzzle ? { spec: current.puzzle, imageUrl: current.imageUrl, puzzle: show.puzzle } : null;
+  const puzzle = !readOnlyPreview && stageMode(show) === "puzzle" && current?.puzzle && show?.puzzle ? { spec: current.puzzle, imageUrl: current.imageUrl, puzzle: show.puzzle } : null;
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-black">

@@ -1,8 +1,18 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { formatSkillsListResponse } from "@/lib/server/skills/format-skills-response";
+import { formatSkillResponse } from "@/lib/server/skills/format-skill-response";
 
 const ID_NAME = { select: { id: true, name: true } } as const;
+
+export async function readSkill(campaignId: string, skillId: string) {
+  const skill = await prisma.skill.findFirst({
+    where: { id: skillId, campaignId },
+    include: { spell: ID_NAME, spellGroup: ID_NAME, grantedSpell: ID_NAME },
+  });
+
+  return skill ? formatSkillResponse(skill) : null;
+}
 
 export async function readSkillsList(campaignId: string) {
   const skills = await prisma.skill.findMany({

@@ -9,6 +9,7 @@ import { CreditsText } from "@/components/campaigns/templates/CreditsText";
 import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncButton";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { DemoTourMenu } from "@/components/onboarding/DemoTourMenu";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { dashboardHiddenKeys } from "@/lib/constants/campaign-dashboard";
 import { CampaignKind } from "@/lib/constants/campaigns";
@@ -85,6 +86,7 @@ export default async function CampaignDetailPage({
         </div>
 
         <div className="space-y-4">
+          {isDemo && <DemoTourMenu />}
           <CampaignSummaryPanel campaignId={id} campaign={{ name: campaign.name, description: campaign.description, maxLevel: campaign.maxLevel, allowPlayerEdit: campaign.allowPlayerEdit, critChoiceByDm: campaign.critChoiceByDm, acquaintancesEnabled: campaign.acquaintancesEnabled, status: campaign.status, inviteCode: campaign.inviteCode }} isDM={isDM} meta={{ createdFromId: campaign.createdFromId ?? null, isTemplate, credits: campaign.credits ?? null }} />
 
           {hasMembership && (

@@ -17,10 +17,12 @@ vi.mock("next/link", () => ({
   default: ({
     children,
     href,
+    ...props
   }: {
     children: React.ReactNode;
     href: string;
-  }) => <a href={href}>{children}</a>,
+    [key: string]: unknown;
+  }) => <a href={href} {...props}>{children}</a>,
 }));
 
 vi.mock("@/components/common/OptimizedImage", () => ({
@@ -65,6 +67,13 @@ describe("SkillCard", () => {
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText("Вогняна куля")).toBeInTheDocument();
+  });
+
+  it("exposes library targets without campaign-specific target props", () => {
+    const { container } = renderWithConfirm(<SkillCard skill={minimalSkill()} campaignId="c1" />);
+
+    expect(container.querySelector('[data-tour="libraries.detail"]')).toBeTruthy();
+    expect(container.querySelector('[data-tour="libraries.open"]')).toBeTruthy();
   });
 
   it("рендерить опис, якщо він є", () => {

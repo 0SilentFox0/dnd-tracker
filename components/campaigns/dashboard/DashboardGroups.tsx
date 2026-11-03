@@ -78,10 +78,10 @@ export function DashboardGroups({ campaignId, isDM, isDemo = false, pendingDraft
 
   return (
     <div className="space-y-4">
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} data-tour="dashboard.search">
         <SearchInput value={query.value} onChange={query.set} label={t("search.label")} placeholder={t("search.placeholder")} />
       </form>
-      {content}
+      <div data-tour="dashboard.navigation">{content}</div>
     </div>
   );
 }

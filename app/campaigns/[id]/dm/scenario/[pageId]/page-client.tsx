@@ -199,6 +199,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit }:
             } : undefined}
             collapse={collapse}
           />
+          {!canEdit && <aside data-tour="scenario.playback" className="mt-4 rounded-lg border border-hud-gold/40 bg-hud-panel/70 p-3 text-sm text-hud-muted">{t("demoPlaybackReadOnly")}</aside>}
         </ScenarioLayout>
       )}
       {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}

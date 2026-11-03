@@ -23,7 +23,11 @@ describe("battle namespaces stay inside the battle segments", () => {
   const graph = outsideBattleGraph();
 
   it("no file reachable from the other pages reads a battle namespace", () => {
-    const bad = [...graph].filter(([file, text]) => !file.startsWith("lib/i18n/") && BATTLE_KEY.test(text)).map(([file]) => file);
+    const bad = [...graph].filter(([file, text]) => {
+      const source = text.replace(/["'`](?:battle\.open|battle\.scene)["'`]/g, "");
+
+      return !file.startsWith("lib/i18n/") && BATTLE_KEY.test(source);
+    }).map(([file]) => file);
 
     expect(bad).toEqual([]);
   });

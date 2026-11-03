@@ -121,7 +121,7 @@ describe("onboarding registry", () => {
       for (const s of PLAYER_STEPS) ["title", "description", ...variantKeys("player", s.id, playerVariant(s)).map((k) => k.split(".").slice(3).join("."))].forEach((f) => allowed.add(`checklist.player.${s.id}.${f}`));
       for (const id of Object.keys(HINTS)) ["title", "body"].forEach((f) => allowed.add(`hints.${id}.${f}`));
 
-      const strays = onboarding.filter((k) => !k.startsWith("ui.") && !(allowed.has(k) || [...allowed].some((p) => k.startsWith(`${p}.`))));
+      const strays = onboarding.filter((k) => !k.startsWith("ui.") && !k.startsWith("demoTours.") && !(allowed.has(k) || [...allowed].some((p) => k.startsWith(`${p}.`))));
 
       expect(strays).toEqual([]);
       expect(whatsNew.filter((k) => !WHATS_NEW.some((e) => k.startsWith(`${e.id}.`)))).toEqual([]);

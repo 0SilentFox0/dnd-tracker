@@ -16,7 +16,7 @@ function IndexRow({ campaignId, page, num, siblings, onMove }: { campaignId: str
     <li className="sb-index-row">
       <span className="num">{num}</span>
       <span className="t">
-        <Link href={`/campaigns/${campaignId}/dm/scenario/${page.id}`}>{page.title}</Link>
+        <Link href={`/campaigns/${campaignId}/dm/scenario/${page.id}`} data-tour="scenario.open">{page.title}</Link>
         {page.subtitle && <span className="d">{page.subtitle}</span>}
       </span>
       <span className={page.status === "ready" ? "st ok" : "st"}>{t(`pageStatuses.${page.status}`)}</span>
@@ -42,7 +42,7 @@ export function ScenarioIndex({ campaignId, pages, onMove }: { campaignId: strin
   const flat = (list: ScenarioPageSummary[], numbers?: number[]) =>
     list.map((p, i) => <IndexRow key={p.id} campaignId={campaignId} page={p} num={numbers ? String(numbers[i]) : "·"} siblings={list} onMove={onMove} />);
 
-  return (
+  const content = (
     <>
       {groups.arcs.length > 0 && <h2>{t("index.scenes")}</h2>}
       {groups.arcs.map((g) => (
@@ -65,4 +65,6 @@ export function ScenarioIndex({ campaignId, pages, onMove }: { campaignId: strin
       )}
     </>
   );
+
+  return <div data-tour="scenario.list">{content}</div>;
 }

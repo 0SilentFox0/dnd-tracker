@@ -71,7 +71,7 @@ export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
 const pick = (list: DashboardSection[], keys: string[]) => list.filter((s) => keys.includes(s.key));
 
 export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
-  ...pick(DM_DASHBOARD_SECTIONS, ["scenario", "graph", "battles", "music"]),
+  ...pick(DM_DASHBOARD_SECTIONS, ["scenario", "graph", "battles", "show", "music", "skills"]),
   ...pick(PLAYER_DASHBOARD_SECTIONS, ["player-world"]),
 ];
 

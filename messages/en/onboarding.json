@@ -149,6 +149,61 @@
       }
     }
   },
+  "demoTours": {
+    "menuTitle": "Explore the demo",
+    "menuDescription": "Choose a short guided tour. You can replay any tour at any time.",
+    "completed": "Completed",
+    "notCompleted": "Not completed",
+    "viewDetails": "View details",
+    "starting": "Opening…",
+    "start": "Start tour",
+    "restart": "Replay tour",
+    "tours": {
+      "dashboard": { "title": "Dashboard", "description": "Find your way around the campaign." },
+      "scenario": { "title": "Scenario", "description": "Explore the campaign story and its scenes." },
+      "show": { "title": "Slide show", "description": "See how presentation decks are organized and played." },
+      "world": { "title": "World map", "description": "Explore the map and its navigation controls." },
+      "music": { "title": "Music", "description": "Browse the track library and listen to a sample." },
+      "libraries": { "title": "Libraries", "description": "Browse the campaign's reference libraries." },
+      "battle": { "title": "Battle", "description": "Explore a sample battle and its controls." }
+    },
+    "steps": {
+      "dashboard": {
+        "navigation": { "title": "Campaign sections", "description": "Use these links to explore the demo. Its content is available to view and try without changing campaign data." },
+        "search": { "title": "Find a section", "description": "Search the dashboard when you want to jump straight to a campaign section." }
+      },
+      "scenario": {
+        "list": { "title": "Scenario pages", "description": "The scenario collects story pages and notes. Open a page to read the sample campaign." },
+        "read": { "title": "Read a scene", "description": "Explore the story and its notes. Demo pages are for browsing and do not change campaign content." },
+        "playback": { "title": "Scenario playback", "description": "Live playback controls can change what everyone sees, so they are not available in this read-only demo." }
+      },
+      "show": {
+        "decks": { "title": "Presentation decks", "description": "Choose a deck to see its sample slides." },
+        "present": { "title": "Preview the slides", "description": "Open a private, read-only preview of this deck. Moving between slides here does not change the shared campaign show." },
+        "preview": { "title": "Browse the slides", "description": "Use these controls to move through the sample deck. The preview is local to this page and does not update campaign state." }
+      },
+      "world": {
+        "map": { "title": "The world map", "description": "Explore the places and regions in this sample world." },
+        "controls": { "title": "Map navigation", "description": "Use the map controls to move around and adjust your view." }
+      },
+      "music": {
+        "groups": { "title": "Track library", "description": "Browse the sample tracks in this campaign." },
+        "player": { "title": "Audio player", "description": "Preview a track with the playback controls." }
+      },
+      "libraries": {
+        "browse": { "title": "Campaign library", "description": "Browse example content such as skills and other reference material." },
+        "search": { "title": "Find an entry", "description": "Use the available filters or search to find a library entry." },
+        "detail": { "title": "Inspect an entry", "description": "Each card includes a short summary so you can explore example skills without editing them." }
+      },
+      "battle": {
+        "list": { "title": "Sample battles", "description": "Open a prepared battle to see how an encounter is arranged." },
+        "scene": { "title": "Battle scene", "description": "Review the battle map, turn order, and available controls." }
+      }
+    },
+    "controls": {
+      "next": "Next", "back": "Back", "skip": "Skip tour", "close": "Close tour", "last": "Finish"
+    }
+  },
   "ui": {
     "howTo": "How does it work?",
     "go": "Go",

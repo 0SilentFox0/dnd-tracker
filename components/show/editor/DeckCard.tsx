@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import type { SlideDeckSummary } from "@/types/show";
 
-export function DeckCard({ deck, href, actions, pending, scene }: { deck: SlideDeckSummary; href: string; actions: { start(): void; remove(): void }; pending: boolean; scene?: string }) {
+export function DeckCard({ deck, href, actions, pending = false, canEdit = true, scene }: { deck: SlideDeckSummary; href: string; actions?: { start(): void; remove(): void }; pending?: boolean; canEdit?: boolean; scene?: string }) {
   const t = useTranslations("show");
 
   const tc = useTranslations("common");
@@ -20,7 +20,7 @@ export function DeckCard({ deck, href, actions, pending, scene }: { deck: SlideD
   const askRemove = async () => {
     const ok = await confirm({ title: t("deckCard.confirmTitle", { title: deck.title }), description: t("deckCard.confirmDescription"), confirmLabel: tc("actions.delete"), destructive: true });
 
-    if (ok) actions.remove();
+    if (ok) actions?.remove();
   };
 
   return (
@@ -37,14 +37,10 @@ export function DeckCard({ deck, href, actions, pending, scene }: { deck: SlideD
       </div>
       <div className="flex flex-wrap gap-2">
         <Button asChild size="sm" variant="outline">
-          <Link href={href}>{tc("actions.edit")}</Link>
+          <Link href={href} data-tour="show.present">{canEdit ? tc("actions.edit") : t("decksPage.preview")}</Link>
         </Button>
-        <Button size="sm" disabled={deck.slideCount === 0 || pending} onClick={actions.start}>
-          {t("startShow")}
-        </Button>
-        <Button size="sm" variant="outline" disabled={pending} onClick={() => void askRemove()}>
-          {tc("actions.delete")}
-        </Button>
+        {canEdit && <Button size="sm" disabled={deck.slideCount === 0 || pending} onClick={actions?.start}>{t("startShow")}</Button>}
+        {canEdit && <Button size="sm" variant="outline" disabled={pending} onClick={() => void askRemove()}>{tc("actions.delete")}</Button>}
       </div>
     </HudCard>
   );
