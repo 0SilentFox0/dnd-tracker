@@ -6,7 +6,7 @@ import { updateCampaignSchema } from "@/lib/schemas";
 import { deleteCampaign, updateCampaignSettings } from "@/lib/server/campaigns/action-service";
 import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT } from "@/lib/server/campaigns/create-campaign";
 import { sessionDmActor } from "@/lib/utils/api/actor";
-import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
@@ -18,13 +18,11 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const authResult = await requireAuth();
+    const accessResult = await requireCampaignAccess(id, false, { allowDemo: true });
 
-    if (authResult instanceof NextResponse) {
-      return authResult;
+    if (accessResult instanceof NextResponse) {
+      return accessResult;
     }
-
-    const { userId } = authResult;
 
     const campaign = await prisma.campaign.findUnique({
       where: { id },
@@ -34,10 +32,6 @@ export async function GET(
 
     if (!campaign) {
       return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
-    }
-
-    if (!campaign.members.some((m) => m.userId === userId)) {
-      return errorResponse(API_ERRORS.FORBIDDEN, 403);
     }
 
     return NextResponse.json(campaign);
