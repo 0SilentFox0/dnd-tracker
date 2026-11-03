@@ -99,7 +99,7 @@ export function BattleScreen() {
   return (
     <BattleAudioProvider>
       {battle.status === BattleStatus.PREPARED ? (
-        <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
+        <div data-tour="battle.scene" className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
           {isDM && <OnboardingHint id="dm.battle-scene" className="mx-auto mt-3 max-w-md" />}
           <BattlePreparationView alliesCount={sideCount(battle.participants, ParticipantSide.ALLY)} enemiesCount={sideCount(battle.participants, ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onFieldCount(battle.participants) > 0} />
           <CornerStack>

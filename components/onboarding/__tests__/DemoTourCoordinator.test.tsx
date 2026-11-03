@@ -53,7 +53,7 @@ describe("DemoTourCoordinator", () => {
     renderCoordinator();
     fireEvent.click(screen.getByRole("button", { name: "launch" }));
 
-    const props = mocks.joyrideProps as { run: boolean; steps: { title: string; content: string }[]; locale: { skip: string }; options: { overlayClickAction: boolean; closeButtonAction: string } };
+    const props = mocks.joyrideProps as { run: boolean; steps: { title: string; content: string }[]; locale: { skip: string }; options: { overlayClickAction: boolean; closeButtonAction: string; skipBeacon: boolean } };
 
     expect(props.run).toBe(true);
     expect(props.steps).toHaveLength(2);
@@ -61,6 +61,7 @@ describe("DemoTourCoordinator", () => {
     expect(props.locale.skip).toBe("demoTours.controls.skip");
     expect(props.options.overlayClickAction).toBe(false);
     expect(props.options.closeButtonAction).toBe("skip");
+    expect(props.options.skipBeacon).toBe(true);
   });
 
   it("starts a route-changing tour immediately and its first step navigates before showing", async () => {
