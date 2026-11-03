@@ -7,7 +7,7 @@ import type { ShowResponse } from "@/types/show";
 
 export async function readShow(campaignId: string): Promise<NextResponse> {
   try {
-    const access = await requireCampaignAccess(campaignId);
+    const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
 
     if (access instanceof NextResponse) return access;
 

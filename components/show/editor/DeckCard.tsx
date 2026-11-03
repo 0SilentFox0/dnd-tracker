@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import type { SlideDeckSummary } from "@/types/show";
 
-export function DeckCard({ deck, href, actions, pending, scene }: { deck: SlideDeckSummary; href: string; actions: { start(): void; remove(): void }; pending: boolean; scene?: string }) {
+export function DeckCard({ deck, href, actions, pending, scene, canEdit = true }: { deck: SlideDeckSummary; href: string; actions: { start(): void; remove(): void }; pending: boolean; scene?: string; canEdit?: boolean }) {
   const t = useTranslations("show");
 
   const tc = useTranslations("common");
@@ -36,15 +36,15 @@ export function DeckCard({ deck, href, actions, pending, scene }: { deck: SlideD
         {scene && <p className="truncate text-xs text-hud-muted">{t("deckCard.scene", { scene })}</p>}
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button asChild size="sm" variant="outline">
+        {canEdit && <Button asChild size="sm" variant="outline">
           <Link href={href}>{tc("actions.edit")}</Link>
-        </Button>
-        <Button size="sm" disabled={deck.slideCount === 0 || pending} onClick={actions.start}>
+        </Button>}
+        {canEdit && <Button size="sm" disabled={deck.slideCount === 0 || pending} onClick={actions.start}>
           {t("startShow")}
-        </Button>
-        <Button size="sm" variant="outline" disabled={pending} onClick={() => void askRemove()}>
+        </Button>}
+        {canEdit && <Button size="sm" variant="outline" disabled={pending} onClick={() => void askRemove()}>
           {tc("actions.delete")}
-        </Button>
+        </Button>}
       </div>
     </HudCard>
   );

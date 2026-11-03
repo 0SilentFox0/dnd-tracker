@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { characterHandler, defineCharacterOperation, memberScope } from "../operation-runner";
@@ -7,6 +8,7 @@ import { CharacterStatus, type CharacterStatusValue, CharacterType, type Charact
 import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
+import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 
 const COMPACT_SELECT = {
   id: true,
@@ -65,4 +67,30 @@ export const listOperation = defineCharacterOperation({
 
 const list = characterHandler(listOperation);
 
-export const listCharacters = (request: Request, campaignId: string, actor?: Actor) => list(request, campaignId, undefined, actor);
+export async function listCharacters(request: Request, campaignId: string, actor?: Actor) {
+  if (actor) return list(request, campaignId, undefined, actor);
+
+  const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
+
+  if (access instanceof NextResponse) return access;
+
+  if (!access.isDemo) return list(request, campaignId);
+
+  const search = new URL(request.url).searchParams;
+
+  const type = search.get("type");
+
+  const compact = search.get("compact") === "1" || search.get("compact") === "true";
+
+  const rows = await prisma.character.findMany({
+    where: {
+      campaignId,
+      status: CharacterStatus.ACTIVE,
+      ...(type === CharacterType.PLAYER || type === CharacterType.NPC_HERO ? { type } : {}),
+    },
+    select: compact ? COMPACT_SELECT : LIST_SELECT,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json(rows);
+}

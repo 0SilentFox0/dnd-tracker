@@ -16,6 +16,7 @@ export interface SkillGroupAccordionItemProps {
   actions?: SkillCardActions;
   skills: Skill[];
   campaignId: string;
+  canEdit?: boolean;
 }
 
 export function SkillGroupAccordionItem({
@@ -26,6 +27,7 @@ export function SkillGroupAccordionItem({
   actions,
   skills,
   campaignId,
+  canEdit = true,
 }: SkillGroupAccordionItemProps) {
   const t = useTranslations();
 
@@ -47,7 +49,7 @@ export function SkillGroupAccordionItem({
     >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 px-4 sm:px-6 pb-4">
         {skills.map((skill) => (
-          <SkillCard key={skill.id} skill={skill} campaignId={campaignId} actions={actions} />
+          <SkillCard key={skill.id} skill={skill} campaignId={campaignId} actions={actions} canEdit={canEdit} />
         ))}
       </div>
     </GroupAccordionItem>

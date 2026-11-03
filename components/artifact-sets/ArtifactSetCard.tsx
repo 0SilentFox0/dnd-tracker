@@ -10,7 +10,7 @@ import type { ArtifactSetCardData } from "@/types/artifact-sets";
 import type { ArtifactCardData } from "@/types/artifacts";
 import type { IdName } from "@/types/common";
 
-type ArtifactSetCardProps = { set: ArtifactSetCardData; campaignId: string } & (
+type ArtifactSetCardProps = { set: ArtifactSetCardData; campaignId: string; canEdit?: boolean } & (
   | { variant: "withArtifacts"; artifacts: ArtifactCardData[] }
   | { variant: "summary"; artifacts: IdName[] }
 );
@@ -20,14 +20,14 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
 
   const tc = useTranslations("common.actions");
 
-  const { set, campaignId } = props;
+  const { set, campaignId, canEdit = true } = props;
 
   const editHref = `/campaigns/${campaignId}/dm/artifact-sets/${set.id}`;
 
   const count = props.artifacts.length;
 
   return (
-    <HudCard href={editHref} linkLabel={set.name} className="space-y-4 p-4">
+    <HudCard href={canEdit ? editHref : undefined} linkLabel={set.name} className="space-y-4 p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-1 gap-3">
           <ArtifactSetCardIcon url={set.icon} name={set.name} size="lg" />
@@ -41,7 +41,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
             {props.variant === "summary" && set.description && <p className="text-sm text-hud-muted">{set.description}</p>}
           </div>
         </div>
-        {props.variant === "summary" && (
+        {canEdit && props.variant === "summary" && (
           <Button size="sm" variant="outline" asChild>
             <Link href={editHref}>{tc("edit")}</Link>
           </Button>
@@ -54,12 +54,12 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
           <ArtifactSetBonusDisplay setBonus={set.setBonus} abilitySummary={set.abilitySummary} />
           <div className="grid items-stretch gap-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {props.artifacts.map((artifact) => (
-              <ArtifactCard key={artifact.id} campaignId={campaignId} artifact={artifact} variant="compact" />
+            <ArtifactCard key={artifact.id} campaignId={campaignId} artifact={artifact} variant="compact" canEdit={canEdit} />
             ))}
           </div>
-          <Button variant="outline" size="sm" className="flex w-full sm:ml-auto sm:w-fit" asChild>
+          {canEdit && <Button variant="outline" size="sm" className="flex w-full sm:ml-auto sm:w-fit" asChild>
             <Link href={editHref}>{t("editSet")}</Link>
-          </Button>
+          </Button>}
         </>
       ) : (
         <>

@@ -1,9 +1,9 @@
 {
   "maps": [
-    { "title": "Alderwake village map", "path": "/example-demo/maps/alderwake.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false },
-    { "title": "Briarwood world map", "path": "/example-demo/maps/briarwood.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false },
-    { "title": "Listening Grove map", "path": "/example-demo/maps/listening-grove.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false },
-    { "title": "Root Vault map", "path": "/example-demo/maps/root-vault.svg", "creator": "D&D Tracker Demo team", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0/", "changes": false }
+    { "title": "Global village map", "path": "/example-demo/maps/world.jpg", "sourceUrl": "https://vttrpgmanager.com/wp-content/uploads/2026/08/20240703_MAP-social-media-SMALL-dnd-village-map-2.jpg", "license": "See source" },
+    { "title": "Alderwake map", "path": "/example-demo/maps/alderwake.jpg", "sourceUrl": "https://i.pinimg.com/736x/7b/b9/06/7bb9061c0431c447c7f8f848f695a4ae.jpg", "license": "See source" },
+    { "title": "Listening Grove map", "path": "/example-demo/maps/grove.jpg", "sourceUrl": "https://i.redd.it/yb590r6t8ff81.jpg", "license": "See source" },
+    { "title": "Root Vault map", "path": "/example-demo/maps/vault.jpg", "sourceUrl": "https://www.worldanvil.com/uploads/maps/29c3383c7d2742232edc4ed0863ed57a.jpg", "license": "See source" }
   ],
   "inspiration": [{ "title": "Divine Golem Expedition", "url": "https://www.worldanvil.com/w/one-shot-adventures-kefkejaco/a/divine-golem-expedition-article", "use": "Adventure hook inspiration only; no text or characters reproduced." }],
   "music": [{ "title": "Enchanted Forest", "url": "https://www.youtube.com/watch?v=uHD_AnjCRtc", "creator": "Celestial Aeon Project", "license": "All rights reserved; linked YouTube stream only, not redistributed", "source": "https://mattipaalanen.bandcamp.com/track/enchanted-forest" }]

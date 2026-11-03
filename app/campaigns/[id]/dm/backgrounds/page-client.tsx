@@ -12,7 +12,7 @@ import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useBackgroundsList } from "@/lib/hooks/backgrounds";
 
-export function DMBackgroundsPageClient({ campaignId }: { campaignId: string }) {
+export function DMBackgroundsPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("backgrounds");
 
   const list = useBackgroundsList(campaignId);
@@ -26,11 +26,11 @@ export function DMBackgroundsPageClient({ campaignId }: { campaignId: string }) 
         subtitle={t("page.subtitle", { count: backgrounds.length })}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="backgrounds" />
-            <Button onClick={() => list.createDialog.setOpen(true)}>
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="backgrounds" />}
+            {canEdit && <Button onClick={() => list.createDialog.setOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               {t("page.create")}
-            </Button>
+            </Button>}
           </>
         }
       />
@@ -42,11 +42,11 @@ export function DMBackgroundsPageClient({ campaignId }: { campaignId: string }) 
       >
         <DmCardGrid>
           {backgrounds.map((background) => (
-            <BackgroundCard key={background.id} background={background} campaignId={campaignId} onDelete={list.remove} />
+            <BackgroundCard key={background.id} background={background} campaignId={campaignId} onDelete={canEdit ? list.remove : undefined} canEdit={canEdit} />
           ))}
         </DmCardGrid>
       </DmListBody>
-      <CreateBackgroundDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateBackground={list.create} />
+      {canEdit && <CreateBackgroundDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateBackground={list.create} />}
     </HudPage>
   );
 }

@@ -19,6 +19,7 @@ export const DEMO_IDS = {
   tracks: { ambience: "demo-track-ambience" },
   deck: "demo-deck-listening-grove",
   acquaintances: { mara: "demo-npc-mara", ivo: "demo-npc-ivo", tamsin: "demo-npc-tamsin" },
+  characters: { scout: "demo-character-scout" },
   maps: { world: "demo-world-root", alderwake: "demo-map-alderwake", grove: "demo-map-grove", vault: "demo-map-vault" },
   markers: { village: "demo-marker-village", grove: "demo-marker-grove", zoneNorth: "demo-zone-north", zoneSouth: "demo-zone-south", vault: "demo-marker-vault" },
 } as const;
@@ -26,7 +27,7 @@ export const DEMO_IDS = {
 export const DEMO_CAMPAIGN = {
   name: "Example Demo · The Bell Beneath Briarwood",
   description: "A read-only 5e adventure. Try the scenes, world map, music and two temporary encounters.",
-  credits: "Adventure hook inspired by Divine Golem Expedition (https://www.worldanvil.com/w/one-shot-adventures-kefkejaco/a/divine-golem-expedition-article); original adventure text. Original Demo maps by D&D Tracker Demo team, CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/): /example-demo/maps/briarwood.svg, /example-demo/maps/alderwake.svg, /example-demo/maps/listening-grove.svg, /example-demo/maps/root-vault.svg. Music: Enchanted Forest by Celestial Aeon Project (https://www.youtube.com/watch?v=uHD_AnjCRtc); all rights reserved, linked stream only; source https://mattipaalanen.bandcamp.com/track/enchanted-forest.",
+  credits: "Adventure hook inspired by Divine Golem Expedition (https://www.worldanvil.com/w/one-shot-adventures-kefkejaco/a/divine-golem-expedition-article); original adventure text. Maps: global map sourced from https://vttrpgmanager.com/wp-content/uploads/2026/08/20240703_MAP-social-media-SMALL-dnd-village-map-2.jpg; Alderwake map sourced from https://i.pinimg.com/736x/7b/b9/06/7bb9061c0431c447c7f8f848f695a4ae.jpg; Listening Grove map sourced from https://i.redd.it/yb590r6t8ff81.jpg; Root Vault map sourced from https://www.worldanvil.com/uploads/maps/29c3383c7d2742232edc4ed0863ed57a.jpg. Music: Enchanted Forest by Celestial Aeon Project (https://www.youtube.com/watch?v=uHD_AnjCRtc); all rights reserved, linked stream only; source https://mattipaalanen.bandcamp.com/track/enchanted-forest.",
 } as const;
 
 const melee = (name: string, damageDice: string, attackBonus: number, damageType: string) => ({ name, type: "melee", attackBonus, damageDice, damageType });
@@ -53,7 +54,7 @@ export const DEMO_SCENE_CONTENT: ScenarioContent = {
       id: DEMO_IDS.sections.village, title: "A bell that cannot ring", played: false, icon: "scene", marker: { mapId: DEMO_IDS.maps.world, markerId: DEMO_IDS.markers.village }, reveal: { mode: "manual" },
       rows: [{ id: DEMO_IDS.rows.village, story: doc(
         { type: "readAloud", content: [p(text("Alderwake's mill wheel turns in a dry creek. Three empty bell ropes sway above the square."))] },
-        { type: "image", attrs: { mediaId: "000000000000000000000001", src: "/example-demo/maps/alderwake.svg", alt: "Illustrated map of Alderwake and the surrounding wood", caption: "Alderwake sits where the old creek enters Briarwood." } },
+        { type: "image", attrs: { mediaId: "000000000000000000000001", src: "/example-demo/maps/alderwake.jpg", alt: "Map of Alderwake and the surrounding wood", caption: "Alderwake sits where the old creek enters Briarwood." } },
         p(text("Bellmaker Ivo Pell keeps a brass tuning pin in his apron. " ), mention(DEMO_IDS.acquaintances.ivo, "Ivo Pell"), text(" says the old tones name spring, branch, then stone.")),
         p(text("Courier Tamsin heard a fourth note from beyond the creek. " ), mention(DEMO_IDS.acquaintances.tamsin, "Tamsin Reed"), text(" points toward the listening grove.")),
         callout("choice", "Ask around", "Persuasion or a kind offer earns a map of the safe creek crossing."),

@@ -35,13 +35,15 @@ function primaryAttackIndex(attacks: UnitAttack[]): number {
 interface UnitCardProps {
   unit: Unit;
   campaignId: string;
-  onDelete: (unitId: string) => void;
+  onDelete?: (unitId: string) => void;
+  canEdit?: boolean;
 }
 
 export const UnitCard = memo(function UnitCard({
   unit,
   campaignId,
   onDelete,
+  canEdit = true,
 }: UnitCardProps) {
   const t = useTranslations("units.card");
 
@@ -71,13 +73,13 @@ export const UnitCard = memo(function UnitCard({
 
   return (
     <HudCard
-      href={`/campaigns/${campaignId}/dm/units/${unit.id}`}
+      href={canEdit ? `/campaigns/${campaignId}/dm/units/${unit.id}` : undefined}
       linkLabel={unit.name}
       className="group/card relative flex flex-col justify-between space-y-3"
     >
       <div
-        draggable
-        onDragStart={handleDragStart}
+        draggable={canEdit}
+        onDragStart={canEdit ? handleDragStart : undefined}
         className="absolute left-1 top-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
         title={t("dragTitle")}
       >
@@ -121,14 +123,14 @@ export const UnitCard = memo(function UnitCard({
           </div>
         </div>
 
-        <div className="mt-3 mb-3">
+        {canEdit && <div className="mt-3 mb-3">
           <UnitQuickStatsEditor
             unit={unit}
             campaignId={campaignId}
             primaryAttackIndex={primaryIdx}
             primaryAttackName={primaryAttack?.name}
           />
-        </div>
+        </div>}
 
         {unit.cr != null && unit.statblock && (
           <MonsterStatblock block={unit.statblock} />
@@ -171,7 +173,7 @@ export const UnitCard = memo(function UnitCard({
         )}
       </div>
 
-      <div className="flex gap-2 pl-5">
+      {canEdit && <div className="flex gap-2 pl-5">
         <Link
           href={`/campaigns/${campaignId}/dm/units/${unit.id}`}
           className="flex-1"
@@ -192,12 +194,12 @@ export const UnitCard = memo(function UnitCard({
                 destructive: true,
               })
             )
-              onDelete(unit.id);
+              onDelete?.(unit.id);
           }}
         >
           <X className="h-4 w-4" />
         </Button>
-      </div>
+      </div>}
     </HudCard>
   );
 });

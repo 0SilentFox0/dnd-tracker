@@ -19,6 +19,7 @@ interface SpellGroupAccordionProps {
   campaignId: string;
   spellGroups: SpellGroup[];
   spellActions: SpellGroupItemActions;
+  canEdit?: boolean;
 }
 
 export function SpellGroupAccordion({
@@ -27,6 +28,7 @@ export function SpellGroupAccordion({
   campaignId,
   spellGroups,
   spellActions,
+  canEdit = true,
 }: SpellGroupAccordionProps) {
   const t = useTranslations("spells");
 
@@ -51,7 +53,7 @@ export function SpellGroupAccordion({
   });
 
   const menuActions =
-    !isUngrouped && groupId
+    canEdit && !isUngrouped && groupId
       ? [
           { label: t("groupActions.rename"), icon: Edit, onSelect: actions.handlers.openRenameDialog },
           { label: t("groupActions.removeAll"), icon: X, onSelect: () => void actions.handlers.confirmRemoveAll() },
@@ -80,14 +82,15 @@ export function SpellGroupAccordion({
                 spells={levelSpells}
                 campaignId={campaignId}
                 spellGroups={spellGroups}
-                actions={spellActions}
+                actions={canEdit ? spellActions : undefined}
+                canEdit={canEdit}
               />
             );
           })}
         </Accordion>
       </GroupAccordionItem>
 
-      <RenameGroupDialog
+      {canEdit && <RenameGroupDialog
         groupName={groupName}
         dialog={{ open: actions.dialogs.rename.open, onOpenChange: actions.dialogs.rename.setOpen }}
         rename={{
@@ -97,7 +100,7 @@ export function SpellGroupAccordion({
           onCancel: actions.handlers.closeRenameDialog,
           isPending: actions.pending.isRenaming,
         }}
-      />
+      />}
 
     </>
   );

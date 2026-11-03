@@ -25,6 +25,7 @@ export interface SkillCardProps {
   actions?: SkillCardActions;
   /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
   printMode?: boolean;
+  canEdit?: boolean;
 }
 
 function SkillCardShell({ printMode, children }: { printMode: boolean; children: ReactNode }) {
@@ -40,6 +41,7 @@ export function SkillCard({
   campaignId,
   actions,
   printMode = false,
+  canEdit = true,
 }: SkillCardProps) {
   const t = useTranslations();
 
@@ -88,7 +90,7 @@ export function SkillCard({
               </h3>
             </div>
           </div>
-          {!printMode && (
+          {!printMode && canEdit && (
             <SkillCardActionsMenu
               currentMainSkillId={skill.mainSkillId ?? null}
               mainSkills={mainSkills}

@@ -16,7 +16,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useSkillsList } from "@/lib/hooks/skills";
 
-export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
+export function DMSkillsPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("skills.page");
 
   const { skills, isLoading, search, groups, actions } = useSkillsList(campaignId);
@@ -32,13 +32,13 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
         subtitle={t("subtitle")}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="skills" />
-            <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="skills" />}
+            {canEdit && <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/main-skills`}>{t("newMainSkill")}</Link>
-            </Button>
-            <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
+            </Button>}
+            {canEdit && <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={newSkillHref}>{t("newSkill")}</Link>
-            </Button>
+            </Button>}
             {skills.length > 0 && (
               <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
                 <Link href={`/campaigns/${campaignId}/dm/print/skills`} target="_blank" rel="noopener noreferrer">
@@ -47,16 +47,16 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
                 </Link>
               </Button>
             )}
-            <DeleteAllButton
+            {canEdit && <DeleteAllButton
               count={skills.length}
               noun={t("deleteAllNouns")}
               confirm={{ description: t("deleteAllDescription", { count: skills.length }) }}
               actions={{ onConfirm: actions.removeAll }}
-            />
+            />}
           </>
         }
       />
-      <OnboardingHint id="dm.skills" />
+      {canEdit && <OnboardingHint id="dm.skills" />}
 
       {isLoading && skills.length === 0 ? (
         <LoadingState rows={6} label={t("loading")} />
@@ -65,11 +65,11 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
           icon={Sparkles}
           title={t("emptyTitle")}
           description={t("emptyDescription")}
-          action={
+          action={canEdit ? (
             <Button asChild>
               <Link href={newSkillHref}>{t("createFirst")}</Link>
             </Button>
-          }
+          ) : undefined}
         />
       ) : (
         <>
@@ -87,6 +87,8 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
                   spellGroups={[]}
                   mainSkillColor={group.color}
                   actions={{ onDelete: actions.deleteSkill, onDuplicate: actions.duplicateSkill }}
+                  canEdit={canEdit}
+                  readOnly={!canEdit}
                 />
               ))}
             </Accordion>

@@ -19,9 +19,10 @@ import type { Unit } from "@/types/units";
 interface DMUnitsPageClientProps {
   campaignId: string;
   initialUnits: Unit[];
+  canEdit?: boolean;
 }
 
-export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClientProps) {
+export function DMUnitsPageClient({ campaignId, initialUnits, canEdit = true }: DMUnitsPageClientProps) {
   const t = useTranslations("units");
 
   const list = useUnitsList(campaignId, initialUnits);
@@ -33,14 +34,14 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
         subtitle={t("page.subtitle", { count: list.units.length })}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="units" />
-            <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="units" />}
+            {canEdit && <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/races`}>{t("page.addRace")}</Link>
-            </Button>
-            <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
+            </Button>}
+            {canEdit && <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/units/new`}>{t("page.create")}</Link>
-            </Button>
-            <DeleteAllButton
+            </Button>}
+            {canEdit && <DeleteAllButton
               count={list.units.length}
               noun={t("deleteAll.noun")}
               confirm={{
@@ -48,7 +49,7 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
                 description: t("deleteAll.description", { count: list.units.length }),
               }}
               actions={{ onConfirm: list.actions.removeAll }}
-            />
+            />}
           </>
         }
       >
@@ -62,7 +63,7 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
           />
         )}
       </HudPageHeader>
-      <OnboardingHint id="dm.units" />
+      {canEdit && <OnboardingHint id="dm.units" />}
 
       {list.isLoading && list.units.length === 0 ? (
         <LoadingState rows={6} label={t("page.loading")} />
@@ -73,7 +74,7 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
       ) : (
         <Accordion type="multiple" value={list.view.open} onValueChange={list.view.setOpen} className="space-y-2">
           {list.view.groups.map((group) => (
-            <UnitGroupAccordion key={group.key} group={group} campaignId={campaignId} onDeleteUnit={list.actions.deleteUnit} onDrop={list.actions.drop} />
+            <UnitGroupAccordion key={group.key} group={group} campaignId={campaignId} onDeleteUnit={canEdit ? list.actions.deleteUnit : undefined} onDrop={canEdit ? list.actions.drop : undefined} canEdit={canEdit} />
           ))}
         </Accordion>
       )}

@@ -30,7 +30,7 @@ const refLabel = (ref: CellRef, branchName: (id: string) => string, t: Translato
   }
 };
 
-export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
+export function SkillTreeEditor({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const { state, view, actions } = useSkillTreeEditor(campaignId);
 
   const t = useTranslations("skillTree");
@@ -63,13 +63,13 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
     <div className={`${HUD_SURFACE} skill-tree-editor rounded-xl p-4`}>
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <span className="hud-sc text-xl text-hud-ink">{t("editor.title")}</span>
-        <SelectField value={state.race ?? ""} onValueChange={(v) => void actions.setRace(v)} triggerClassName="w-40">
+        <SelectField value={state.race ?? ""} onValueChange={(v) => void actions.setRace(v)} triggerClassName="w-40" disabled={!canEdit}>
           {state.races.map((r) => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
         </SelectField>
-        {state.dirty && <span className="text-xs italic text-hud-gold">{t("editor.unsaved")}</span>}
+        {canEdit && state.dirty && <span className="text-xs italic text-hud-gold">{t("editor.unsaved")}</span>}
         <span className="flex-1" />
-        <Button variant="outline" onClick={actions.cancel} disabled={!state.dirty}>{tc("cancel")}</Button>
-        <Button onClick={() => void actions.save()} disabled={!state.dirty || state.isSaving || view.errors.length > 0}>{tc("save")}</Button>
+        {canEdit && <><Button variant="outline" onClick={actions.cancel} disabled={!state.dirty}>{tc("cancel")}</Button>
+        <Button onClick={() => void actions.save()} disabled={!state.dirty || state.isSaving || view.errors.length > 0}>{tc("save")}</Button></>}
       </div>
       {view.errors.length > 0 && (
         <ul className="mb-3 text-sm text-hud-danger">
@@ -81,6 +81,7 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
         tree={tree}
         skillsById={skillsById}
         errorIds={errorIds}
+        readOnly={!canEdit}
         actions={{
           onCell: (ref, label) => setPicking({ ref, label }),
           onMove: actions.moveBranch,

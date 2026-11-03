@@ -18,7 +18,7 @@ import { useScenarioPages } from "@/lib/hooks/scenario";
 import { useDeckMutations, useDecks, useShowControl } from "@/lib/hooks/show";
 import type { SlideDeckSummary } from "@/types/show";
 
-export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: string; initialDecks: SlideDeckSummary[] }) {
+export function DMShowPageClient({ campaignId, initialDecks, canEdit = true }: { campaignId: string; initialDecks: SlideDeckSummary[]; canEdit?: boolean }) {
   const t = useTranslations("show");
 
   const router = useRouter();
@@ -48,10 +48,10 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
         subtitle={t("decksPage.count", { count: decks.length })}
         actions={
           <>
-            <Button onClick={() => setCreating(true)} className="flex items-center gap-2">
+            {canEdit && <Button onClick={() => setCreating(true)} className="flex items-center gap-2">
               <Plus className="size-4" />
               {t("newDeck.title")}
-            </Button>
+            </Button>}
             <Button asChild variant="outline">
               <Link href={`${base}/show`}>{t("decksPage.openShow")}</Link>
             </Button>
@@ -72,11 +72,12 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
               actions={{ start: () => void start(deck.id), remove: () => void mutations.remove(deck.id) }}
               pending={mutations.pending || control.pending}
               scene={pages.find((p) => p.id === deck.scenarioPageId)?.title}
+              canEdit={canEdit}
             />
           ))}
         </div>
       )}
-      <NewDeckDialog
+      {canEdit && <NewDeckDialog
         open={creating}
         onOpenChange={setCreating}
         pending={mutations.pending}
@@ -87,7 +88,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
 
           return !!deck;
         }}
-      />
+      />}
     </HudPage>
   );
 }

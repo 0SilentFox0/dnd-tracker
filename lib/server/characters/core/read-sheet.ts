@@ -5,6 +5,7 @@ import { buildSheetFor, loadSheetCharacter } from "./sheet-handler";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { operationAccess } from "@/lib/server/characters/operation-context";
 import type { Actor } from "@/lib/utils/api/actor";
+import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -14,7 +15,9 @@ export type KnownAccess = { userId: string; isDM: boolean; maxLevel: number; rul
 /** `GET …/sheet` with its access rules; the profile pages reuse it for the first HTML (`known` skips the repeated membership query). */
 export async function readCharacterSheet({ id, characterId, known }: { id: string; characterId: string; known?: KnownAccess }, actor?: Actor): Promise<NextResponse> {
   try {
-    const access = known ? null : await operationAccess(id, false, actor);
+    const access = known ? null : actor
+      ? await operationAccess(id, false, actor)
+      : await requireCampaignAccess(id, false, { allowDemo: true });
 
     if (access instanceof NextResponse) return access;
 
@@ -24,7 +27,7 @@ export async function readCharacterSheet({ id, characterId, known }: { id: strin
 
     const userId = known?.userId ?? access?.userId;
 
-    const isDM = known ? known.isDM : access?.isDM ?? false;
+    const isDM = known ? known.isDM : access?.isDM === true || access?.isDemo === true;
 
     const isOwner = character.controlledBy === userId;
 

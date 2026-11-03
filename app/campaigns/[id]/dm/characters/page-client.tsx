@@ -26,9 +26,10 @@ interface DMCharactersClientProps {
   campaignId: string;
   type?: CharacterTypeValue;
   maxLevel: number;
+  canEdit?: boolean;
 }
 
-export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersClientProps) {
+export function DMCharactersClient({ campaignId, type, maxLevel, canEdit = true }: DMCharactersClientProps) {
   const t = useTranslations("characters.list");
 
   const page = useDmCharactersPage(campaignId, type);
@@ -46,8 +47,8 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
         subtitle={t("subtitle")}
         actions={
           <>
-            <PartyRestActions campaignId={campaignId} characters={page.query.data ?? []} />
-            <DeleteAllButton
+            {canEdit && <PartyRestActions campaignId={campaignId} characters={page.query.data ?? []} />}
+            {canEdit && <DeleteAllButton
               count={characterCount}
               noun={t("deleteAllNoun")}
               confirm={{
@@ -58,10 +59,10 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
               view={{ icon: <Trash2 className="mr-2 h-4 w-4" /> }}
               status={{ isPending: page.status.isDeletingAll }}
               actions={{ onConfirm: page.actions.removeAll }}
-            />
-            <Button className="whitespace-nowrap" asChild>
+            />}
+            {canEdit && <Button className="whitespace-nowrap" asChild>
               <Link href={newHref}>{t("create")}</Link>
-            </Button>
+            </Button>}
           </>
         }
       >
@@ -76,7 +77,7 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
         />
       </HudPageHeader>
 
-      <PendingDraftsPanel campaignId={campaignId} />
+      {canEdit && <PendingDraftsPanel campaignId={campaignId} />}
 
       <QueryState
         query={page.query}
@@ -86,11 +87,11 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
             icon={Users}
             title={t("emptyTitle")}
             description={t("emptyDescription")}
-            action={
+            action={canEdit ? (
               <Button asChild>
                 <Link href={newHref}>{t("createFirst")}</Link>
               </Button>
-            }
+            ) : undefined}
           />
         }
       >
@@ -109,6 +110,7 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
                     busy={page.status.levelingUpId === character.id}
                     maxLevel={maxLevel}
                     actions={{ onLevelUp: character.level < maxLevel ? () => page.actions.levelUp(character) : undefined, onDelete: () => void page.actions.confirmDelete(character) }}
+                    canEdit={canEdit}
                   />
                 ))}
               </div>

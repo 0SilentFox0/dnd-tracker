@@ -17,11 +17,12 @@ const COLUMNS: Array<{ circle: "outer" | "middle" | "inner"; index: number }> = 
   { circle: "inner", index: 0 },
 ];
 
-export function EditorTable({ raw, tree, skillsById, errorIds, actions }: {
+export function EditorTable({ raw, tree, skillsById, errorIds, actions, readOnly = false }: {
   raw: RawTree;
   tree: TreeNodes;
   skillsById: Map<string, { name: string; icon: string | null }>;
   errorIds: Set<string>;
+  readOnly?: boolean;
   actions: { onCell: (ref: CellRef, label: string) => void; onMove: (branchId: string, dir: -1 | 1) => void; onRemove: (branchId: string, name: string) => void; onAddBranch: () => void };
 }) {
   const t = useTranslations("skillTree");
@@ -33,7 +34,7 @@ export function EditorTable({ raw, tree, skillsById, errorIds, actions }: {
   const cell = (ref: CellRef, label: string, metal: string) => {
     const id = cellSkillId(raw, ref);
 
-    return <EditorCell label={label} skill={id ? (skillsById.get(id) ?? { name: id, icon: null }) : null} metal={metal} error={!!id && errorIds.has(id)} onClick={() => actions.onCell(ref, label)} />;
+    return <EditorCell label={label} skill={id ? (skillsById.get(id) ?? { name: id, icon: null }) : null} metal={metal} error={!!id && errorIds.has(id)} onClick={readOnly ? undefined : () => actions.onCell(ref, label)} />;
   };
 
   return (
@@ -56,11 +57,11 @@ export function EditorTable({ raw, tree, skillsById, errorIds, actions }: {
             <tr key={b.id}>
               <th scope="row" className="editor-branch">
                 <span>{b.name}</span>
-                <span className="editor-branch-actions">
+                {!readOnly && <span className="editor-branch-actions">
                   <Button type="button" variant="ghost" size="icon-sm" aria-label={t("editor.moveUp", { name: b.name })} disabled={i === 0} onClick={() => actions.onMove(b.id, -1)}><ArrowUp /></Button>
                   <Button type="button" variant="ghost" size="icon-sm" aria-label={t("editor.moveDown", { name: b.name })} disabled={i === tree.branches.length - 1} onClick={() => actions.onMove(b.id, 1)}><ArrowDown /></Button>
                   <Button type="button" variant="ghost" size="icon-sm" aria-label={t("editor.removeBranch", { name: b.name })} onClick={() => actions.onRemove(b.id, b.name)}><X /></Button>
-                </span>
+                </span>}
               </th>
               {BRANCH_LEVELS.map((l) => <td key={l}>{cell({ kind: "level", branchId: b.id, level: l }, t("cells.level", { branch: b.name, tier: tier(l) }), BRANCH_LEVEL_METAL[l])}</td>)}
               {COLUMNS.map((c) => <td key={columnTitle(c)}>{cell({ kind: "slot", branchId: b.id, circle: c.circle, index: c.index }, t("cells.column", { branch: b.name, column: columnTitle(c) }), CIRCLE_METAL[c.circle])}</td>)}
@@ -68,7 +69,7 @@ export function EditorTable({ raw, tree, skillsById, errorIds, actions }: {
           ))}
           <tr>
             <th scope="row" colSpan={1 + BRANCH_LEVELS.length + COLUMNS.length}>
-              <Button type="button" variant="ghost" className="editor-add" onClick={actions.onAddBranch}>{t("editor.addBranch")}</Button>
+              {!readOnly && <Button type="button" variant="ghost" className="editor-add" onClick={actions.onAddBranch}>{t("editor.addBranch")}</Button>}
             </th>
           </tr>
           <tr>

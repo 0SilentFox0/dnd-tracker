@@ -10,10 +10,10 @@ import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 
 const MAPS = {
-  world: "/example-demo/maps/briarwood.svg",
-  alderwake: "/example-demo/maps/alderwake.svg",
-  grove: "/example-demo/maps/listening-grove.svg",
-  vault: "/example-demo/maps/root-vault.svg",
+  world: "/example-demo/maps/world.jpg",
+  alderwake: "/example-demo/maps/alderwake.jpg",
+  grove: "/example-demo/maps/grove.jpg",
+  vault: "/example-demo/maps/vault.jpg",
 } as const;
 
 const json = (value: unknown) => value as Prisma.InputJsonValue;
@@ -54,9 +54,15 @@ async function seed(userId: string) {
 
     await tx.unit.createMany({ data: DEMO_UNITS.map((unit) => ({ ...unit, campaignId: campaign.id, attacks: json(unit.attacks), statblock: json(unit.statblock) })) });
 
+    await tx.character.upsert({
+      where: { id: DEMO_IDS.characters.scout },
+      create: { id: DEMO_IDS.characters.scout, campaignId: campaign.id, controlledBy: userId, type: "player", name: "Lark, trail scout", class: "Ranger", race: "Human", level: 3, strength: 10, dexterity: 16, constitution: 12, intelligence: 11, wisdom: 14, charisma: 10, armorClass: 14, initiative: 3, speed: 30 },
+      update: { campaignId: campaign.id, controlledBy: userId, type: "player", name: "Lark, trail scout", class: "Ranger", race: "Human", level: 3, strength: 10, dexterity: 16, constitution: 12, intelligence: 11, wisdom: 14, charisma: 10, armorClass: 14, initiative: 3, speed: 30, status: "active" },
+    });
+
     await tx.campaignTrack.create({ data: { id: DEMO_IDS.tracks.ambience, campaignId: campaign.id, title: "1 hour of Ambient Fantasy Music | Enchanted Forest", kind: "youtube", youtubeId: "uHD_AnjCRtc", url: "https://www.youtube.com/watch?v=uHD_AnjCRtc", sortOrder: 0 } });
 
-    const world = await tx.worldMap.create({ data: { id: DEMO_IDS.maps.world, campaignId: campaign.id, name: "Briarwood and Alderwake", imageUrl: MAPS.world, width: 1200, height: 800, fogEnabled: false, revealRadius: 1 } });
+    const world = await tx.worldMap.create({ data: { id: DEMO_IDS.maps.world, campaignId: campaign.id, name: "Briarwood and Alderwake", imageUrl: MAPS.world, width: 1398, height: 1080, fogEnabled: false, revealRadius: 1 } });
 
     const points = await Promise.all([
       tx.worldMarker.create({ data: { id: DEMO_IDS.markers.village, mapId: world.id, kind: "point", x: 0.22, y: 0.62, name: "Alderwake", icon: "home", alwaysVisible: true, sortOrder: 0, dmNote: "Ivo and Tamsin offer the first clues." } }),
@@ -71,7 +77,9 @@ async function seed(userId: string) {
     for (const [index, marker] of points.entries()) {
       const [name, imageUrl] = [["Alderwake", MAPS.alderwake], ["Listening Grove", MAPS.grove], ["Root Vault", MAPS.vault]][index] as [string, string];
 
-      await tx.worldMap.create({ data: { id: [DEMO_IDS.maps.alderwake, DEMO_IDS.maps.grove, DEMO_IDS.maps.vault][index], campaignId: campaign.id, parentMarkerId: marker.id, name, imageUrl, width: 1200, height: 800, fogEnabled: false } });
+      const dimensions = [[736, 823], [3000, 3256], [613, 792]][index] as [number, number];
+
+      await tx.worldMap.create({ data: { id: [DEMO_IDS.maps.alderwake, DEMO_IDS.maps.grove, DEMO_IDS.maps.vault][index], campaignId: campaign.id, parentMarkerId: marker.id, name, imageUrl, width: dimensions[0], height: dimensions[1], fogEnabled: false } });
     }
 
     const groveMap = { cols: 20, rows: 12, background: MAPS.grove, opacity: 0.35 };
@@ -91,7 +99,7 @@ async function seed(userId: string) {
     await tx.scenarioPage.createMany({ data: pageRows });
     await tx.slideDeck.create({ data: { id: DEMO_IDS.deck, campaignId: campaign.id, title: "Listening Grove · music and map", scenarioPageId: DEMO_IDS.pages.scene, slides: json([
       { id: "grove-slide", imageUrl: MAPS.grove, title: "The listening bowls", caption: "Sound the notes: droplet, leaf, mountain.", trackId: DEMO_IDS.tracks.ambience },
-      { id: "grove-puzzle", imageUrl: MAPS.grove, title: "Three-tone gate", kind: "puzzle", puzzle: { cut: "organic", count: 12, seed: 5321, imageWidth: 1200, imageHeight: 800 }, trackId: DEMO_IDS.tracks.ambience },
+      { id: "grove-puzzle", imageUrl: MAPS.grove, title: "Three-tone gate", kind: "puzzle", puzzle: { cut: "organic", count: 12, seed: 5321, imageWidth: 3000, imageHeight: 3256 }, trackId: DEMO_IDS.tracks.ambience },
     ]) } });
     await tx.acquaintance.createMany({ data: [
       { id: DEMO_IDS.acquaintances.mara, campaignId: campaign.id, kind: "npc", name: "Mara Venn", description: "A patient trail keeper who can read the old listening marks.", sourcePageId: DEMO_IDS.pages.scene, sourceSectionId: DEMO_IDS.sections.grove },
@@ -106,7 +114,9 @@ async function seed(userId: string) {
 
 async function main() {
   const userId = process.argv[2];
+
   const allowRemote = process.argv.includes("--allow-remote");
+
   const expectedHost = process.argv.find((arg) => arg.startsWith("--expected-host="))?.slice("--expected-host=".length);
 
   if (!userId) throw new Error("Usage: pnpm seed:example-demo <existing-user-id> [--allow-remote --expected-host=<production-db-host>]");
