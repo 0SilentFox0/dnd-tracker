@@ -7,13 +7,15 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { readBattleScene } from "@/lib/server/battles/read-battle";
 import { ContentError } from "@/lib/server/content/errors";
 import { sessionDmActor } from "@/lib/utils/api/actor";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignDMOrDemoAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 
 export async function battleRecordHttp(req: Request, campaignId: string, operation: RecordOperation, battleId?: string): Promise<NextResponse> {
   try {
-    const access = await requireDM(campaignId);
+    const access = operation === "audio"
+      ? await requireCampaignDMOrDemoAccess(campaignId)
+      : await requireDM(campaignId);
 
     if (access instanceof NextResponse) return access;
 
@@ -23,7 +25,12 @@ export async function battleRecordHttp(req: Request, campaignId: string, operati
 
     const actor = sessionDmActor(campaignId, access.userId);
 
-    const data = await runGuardedBattleRecordOperation(actor, () => writeBattleRecord(campaignId, access.userId, operation, battleId, prepared, undefined, true));
+    const data = await runGuardedBattleRecordOperation(
+      actor,
+      () => writeBattleRecord(campaignId, access.userId, operation, battleId, prepared, undefined, true),
+      undefined,
+      { allowDemoAudio: operation === "audio" && access.isDemo === true },
+    );
 
     return operation === "patch" ? readBattleScene({ id: campaignId, battleId: requireBattleId(battleId) }) : NextResponse.json(data);
   } catch (error) {

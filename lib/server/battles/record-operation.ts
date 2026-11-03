@@ -1,5 +1,6 @@
 import { assertWriteScope, requireDmMember } from "./guards";
 
+import { isDemoKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import type { ActionExecutionContext } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
@@ -15,6 +16,7 @@ export async function runGuardedBattleRecordOperation<T>(
   actor: Actor,
   callback: () => Promise<T>,
   execution?: ActionExecutionContext,
+  options: { allowDemoAudio?: boolean } = {},
 ): Promise<T> {
   const failure = needFailure(actor, { access: "dm", scope: "battles:write" });
 
@@ -23,7 +25,13 @@ export async function runGuardedBattleRecordOperation<T>(
   assertWriteScope(actor, execution);
 
   const run = () => withCampaignContentWrite(actor.campaignId, async () => {
-    await requireDmMember(prisma, actor);
+    if (options.allowDemoAudio && actor.via === "session") {
+      const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { kind: true } });
+
+      if (!campaign || !isDemoKind(campaign.kind)) await requireDmMember(prisma, actor);
+    } else {
+      await requireDmMember(prisma, actor);
+    }
 
     return callback();
   });
