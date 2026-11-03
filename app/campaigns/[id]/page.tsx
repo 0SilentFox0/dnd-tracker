@@ -50,7 +50,7 @@ export default async function CampaignDetailPage({
     hasMembership ? readCampaignOnboarding(id, user.id, isDM).catch(() => null) : null,
   ]);
 
-  const hiddenKeys = dashboardHiddenKeys({ isDM, hasWorld: isDemo || !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
+  const hiddenKeys = dashboardHiddenKeys({ isDM, isDemo, hasWorld: isDemo || !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
 
   return (
     <HudPage>
