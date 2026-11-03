@@ -22,7 +22,7 @@ describe("GET /api/cron/assistant-cleanup", () => {
     vi.stubEnv("CRON_SECRET", "s3cret");
     cleanupAssistantData.mockResolvedValue({ assistant: 1 });
     cleanupReadNotifications.mockResolvedValue({ notifications: 2 });
-    cleanupBattleSnapshots.mockResolvedValue({ battles: 3, snapshots: 4 });
+    cleanupBattleSnapshots.mockResolvedValue({ snapshots: 4 });
   });
 
   it("returns an error key when the secret is not configured", async () => {
@@ -44,7 +44,7 @@ describe("GET /api/cron/assistant-cleanup", () => {
   it("runs both cleanups", async () => {
     const res = await call("s3cret");
 
-    expect(await res.json()).toEqual({ ok: true, assistant: 1, notifications: 2, battleSnapshots: { battles: 3, snapshots: 4 } });
+    expect(await res.json()).toEqual({ ok: true, assistant: 1, notifications: 2, battleSnapshots: { snapshots: 4 } });
   });
 
   it("maps a failure to the generic internal error", async () => {

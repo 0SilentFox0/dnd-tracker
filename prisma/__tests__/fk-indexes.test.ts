@@ -67,21 +67,18 @@ describe("prisma schema FK indexes", () => {
     expect(missing).toEqual([]);
   });
 
-  it("content tables with sourceId have a (campaignId, sourceId) index", () => {
-    const expected = [
-      "Unit", "Spell", "SpellGroup", "Artifact", "ArtifactSet", "SkillTree", "CampaignTrack",
-      "Skill", "Race", "GameClass", "Feat", "Background", "MainSkill",
-    ];
+  it("every model with campaignId and sourceId has a (campaignId, sourceId) index", () => {
+    const content = [...parseModels(SCHEMA)].filter(([, lines]) => {
+      const has = (field: string) => lines.some((l) => new RegExp(`^${field}\\s`).test(l));
 
-    const models = parseModels(SCHEMA);
+      return has("campaignId") && has("sourceId");
+    });
 
-    const missing = expected.filter(
-      (name) =>
-        !(models.get(name) ?? []).some((l) =>
-          /^@@index\(\s*\[campaignId,\s*sourceId\]/.test(l),
-        ),
-    );
+    const missing = content
+      .filter(([, lines]) => !lines.some((l) => /^@@index\(\s*\[campaignId,\s*sourceId\]/.test(l)))
+      .map(([name]) => name);
 
+    expect(content.length).toBeGreaterThan(0);
     expect(missing).toEqual([]);
   });
 });

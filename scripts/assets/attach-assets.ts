@@ -17,6 +17,8 @@ import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
 import type { Actor } from "@/lib/utils/api/actor";
 
+const LIST_PAGE = 1000;
+
 const USAGE = "Використання: pnpm assets:attach <campaignId> <тека> --kind units|spells|artifacts|classes|races|skills|main-skills [--allow-official] [--allow-remote]";
 
 async function main() {
@@ -46,6 +48,28 @@ async function main() {
 
   if (!ensured.ok) throw new Error(ensured.message);
 
+  const existing = new Map<string, Set<string>>();
+
+  const listed = async (dir: string) => {
+    const known = existing.get(dir);
+
+    if (known) return known;
+
+    const names = new Set<string>();
+
+    for (let offset = 0; ; offset += LIST_PAGE) {
+      const { data } = await admin.storage.from(bucket).list(dir, { limit: LIST_PAGE, offset });
+
+      for (const o of data ?? []) names.add(`${dir}/${o.name}`);
+
+      if ((data?.length ?? 0) < LIST_PAGE) break;
+    }
+
+    existing.set(dir, names);
+
+    return names;
+  };
+
   const rows: Record<string, unknown>[] = [];
 
   const uploadErrors: string[] = [];
@@ -57,11 +81,13 @@ async function main() {
 
     const objectName = objectPath(campaign.templateKey ?? campaignId, content, ext);
 
-    const { error } = await admin.storage.from(bucket).upload(objectName, content, { ...staticAssetUploadOptions(IMAGE_TYPES[ext]), upsert: false });
+    if (!(await listed(path.posix.dirname(objectName))).has(objectName)) {
+      const { error } = await admin.storage.from(bucket).upload(objectName, content, { ...staticAssetUploadOptions(IMAGE_TYPES[ext]), upsert: false });
 
-    if (error && !isAlreadyExistsError(error)) {
-      uploadErrors.push(`${m.file}: ${error.message}`);
-      continue;
+      if (error && !isAlreadyExistsError(error)) {
+        uploadErrors.push(`${m.file}: ${error.message}`);
+        continue;
+      }
     }
 
     rows.push({ name: m.name, [ICON_FIELD[kind]]: admin.storage.from(bucket).getPublicUrl(objectName).data.publicUrl });

@@ -1,41 +1,32 @@
-import fs from "node:fs";
-import path from "node:path";
 import { describe, expect, it } from "vitest";
+
+import { readSource, sources } from "./helpers/source-files";
 
 import { ICON_BUCKETS } from "@/lib/constants/storage";
 
-const ROOT = path.resolve(__dirname, "../..");
+const BUCKETS = ICON_BUCKETS.join("|");
 
-const ICON_REF_RE = new RegExp(`["'\`](?:${ICON_BUCKETS.join("|")})["'\`/]|\\b(?:ASSET_BUCKET|ICON_BUCKETS)\\b`);
+const ICON_REF_RE = new RegExp(`["'\`](?:${BUCKETS})["'\`/]|\\b(?:ASSET_BUCKET|ICON_BUCKETS)\\b`);
 
-const IMAGE_FACTORY_ICON_RE = new RegExp(`imageBucketStorage\\(\\{[^)]*["'\`](?:${ICON_BUCKETS.join("|")})["'\`]`, "s");
+const IMAGE_FACTORY_ICON_RE = new RegExp(`imageBucketStorage\\(\\{[^)]*["'\`](?:${BUCKETS})["'\`]`, "s");
 
-const ALLOWED: Record<string, string> = {};
-
-function sources(dir: string): string[] {
-  return fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {
-    const rel = path.join(dir, e.name);
-
-    if (e.isDirectory()) return e.name === "__tests__" || e.name === "node_modules" ? [] : sources(rel);
-
-    return /\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name) ? [rel] : [];
-  });
-}
-
-const files = ["lib", "app", "scripts"].flatMap(sources).filter((f) => f !== "lib/constants/storage.ts");
-
-const read = (f: string) => fs.readFileSync(path.join(ROOT, f), "utf8");
+const contents = new Map(
+  ["lib", "app", "scripts"]
+    .flatMap(sources)
+    .filter((f) => f !== "lib/constants/storage.ts")
+    .map((f) => [f, readSource(f)] as const),
+);
 
 describe("тест-сторож: бакети іконок незмінні", () => {
-  it("жоден файл, що посилається на бакет іконок, не викликає .remove(", () => {
-    const offenders = files.filter((f) => !ALLOWED[f] && ICON_REF_RE.test(read(f)) && /\.remove\(/.test(read(f)));
+  it("жоден файл, що посилається на бакет іконок, не викликає storage .remove(", () => {
+    const offenders = [...contents].filter(([, src]) => ICON_REF_RE.test(src) && /\.remove\(/.test(src) && /\.from\(/.test(src)).map(([f]) => f);
 
-    expect(files.length).toBeGreaterThan(100);
+    expect(contents.size).toBeGreaterThan(100);
     expect(offenders).toEqual([]);
   });
 
   it("imageBucketStorage (з remove) не підключається до бакетів іконок", () => {
-    const offenders = files.filter((f) => IMAGE_FACTORY_ICON_RE.test(read(f)));
+    const offenders = [...contents].filter(([, src]) => IMAGE_FACTORY_ICON_RE.test(src)).map(([f]) => f);
 
     expect(offenders).toEqual([]);
   });

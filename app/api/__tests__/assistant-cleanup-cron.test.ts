@@ -17,7 +17,7 @@ describe("assistant cleanup cron route", () => {
     vi.stubEnv("CRON_SECRET", "cron-test-secret");
     cleanup.mockReset().mockResolvedValue({ expired: 2, redacted: 3, receiptsDeleted: 1 });
     cleanupNotifications.mockReset().mockResolvedValue({ notificationsDeleted: 5 });
-    cleanupSnapshots.mockReset().mockResolvedValue({ battles: 3, snapshots: 4 });
+    cleanupSnapshots.mockReset().mockResolvedValue({ snapshots: 4 });
   });
 
   it("runs cleanup only for an authorized scheduled request and reports counts", async () => {
@@ -26,7 +26,7 @@ describe("assistant cleanup cron route", () => {
     }));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ok: true, expired: 2, redacted: 3, receiptsDeleted: 1, notificationsDeleted: 5, battleSnapshots: { battles: 3, snapshots: 4 } });
+    expect(await response.json()).toEqual({ ok: true, expired: 2, redacted: 3, receiptsDeleted: 1, notificationsDeleted: 5, battleSnapshots: { snapshots: 4 } });
     expect(cleanup).toHaveBeenCalledOnce();
   });
 

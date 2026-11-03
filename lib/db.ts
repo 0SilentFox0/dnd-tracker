@@ -18,11 +18,7 @@ const VERCEL_CONNECTION_LIMIT = 5;
 
 const DEV_CONNECTION_LIMIT = 10;
 
-interface PoolEnv {
-  VERCEL?: string;
-  NODE_ENV?: string;
-  PRISMA_CONNECTION_LIMIT?: string;
-}
+type PoolEnv = Partial<Pick<NodeJS.ProcessEnv, "VERCEL" | "NODE_ENV" | "PRISMA_CONNECTION_LIMIT">>;
 
 export function withSafePoolLimits(databaseUrl?: string, env: PoolEnv = process.env) {
   if (!databaseUrl) {
