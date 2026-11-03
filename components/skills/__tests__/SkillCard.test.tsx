@@ -69,13 +69,6 @@ describe("SkillCard", () => {
     expect(screen.getByText("Вогняна куля")).toBeInTheDocument();
   });
 
-  it("exposes library targets without campaign-specific target props", () => {
-    const { container } = renderWithConfirm(<SkillCard skill={minimalSkill()} campaignId="c1" />);
-
-    expect(container.querySelector('[data-tour="libraries.detail"]')).toBeTruthy();
-    expect(container.querySelector('[data-tour="libraries.open"]')).toBeTruthy();
-  });
-
   it("рендерить опис, якщо він є", () => {
     const skill = minimalSkill({
       name: "Скіл", description: "Короткий опис скіла",

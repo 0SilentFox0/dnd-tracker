@@ -128,7 +128,7 @@ export function SkillCard({
       </div>
       {!printMode && (
         <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
-          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`} data-tour="libraries.open">
+          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>
             {canEdit ? t("common.actions.edit") : t("onboarding.demoTours.viewDetails")}
           </Link>
         </Button>
@@ -136,5 +136,5 @@ export function SkillCard({
     </SkillCardShell>
   );
 
-  return <div data-tour="libraries.detail">{card}</div>;
+  return card;
 }

@@ -93,11 +93,11 @@ export function DMSkillsPageClient({ campaignId, canEdit = true }: { campaignId:
         />
       ) : (
         <>
-          <div data-tour="libraries.search">{searchInput}</div>
+          {searchInput}
           {groups.length === 0 ? (
             <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />
           ) : (
-            <div data-tour="libraries.browse">{skillGroups}</div>
+            skillGroups
           )}
         </>
       )}

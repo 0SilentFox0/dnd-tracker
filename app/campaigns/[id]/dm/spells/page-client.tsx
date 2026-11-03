@@ -75,7 +75,9 @@ export function DMSpellsPageClient({ campaignId, canEdit = true }: { campaignId:
         <EmptyState icon={Wand2} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />
       ) : (
         <>
-          <SearchInput value={list.search.query.value} onChange={list.search.query.set} label={t("page.search")} />
+          <div data-tour="libraries.search">
+            <SearchInput value={list.search.query.value} onChange={list.search.query.set} label={t("page.search")} />
+          </div>
           {list.view.groups.length === 0 ? (
             <SearchEmptyState query={list.search.query.value} onClear={() => list.search.query.set("")} />
           ) : (
@@ -85,17 +87,21 @@ export function DMSpellsPageClient({ campaignId, canEdit = true }: { campaignId:
               defaultValue={groupNames}
               className="space-y-2"
             >
-              {list.view.groups.map(([groupName, levels]) => (
-                <SpellGroupAccordion
-                  key={groupName}
-                  groupName={groupName}
-                  levels={levels}
-                  campaignId={campaignId}
-                  spellGroups={list.view.spellGroups}
-                  spellActions={{ onRemoveFromGroup: list.actions.removeFromGroup, onMoveToGroup: list.actions.moveToGroup }}
-                  canEdit={canEdit}
-                />
-              ))}
+              {list.view.groups.map(([groupName, levels], index) => {
+                const group = (
+                  <SpellGroupAccordion
+                    key={groupName}
+                    groupName={groupName}
+                    levels={levels}
+                    campaignId={campaignId}
+                    spellGroups={list.view.spellGroups}
+                    spellActions={{ onRemoveFromGroup: list.actions.removeFromGroup, onMoveToGroup: list.actions.moveToGroup }}
+                    canEdit={canEdit}
+                  />
+                );
+
+                return index === 0 ? <div key={groupName} data-tour="libraries.browse">{group}</div> : group;
+              })}
             </Accordion>
           )}
         </>
