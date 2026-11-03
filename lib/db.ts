@@ -14,7 +14,17 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-function withSafePoolLimits(databaseUrl?: string) {
+const VERCEL_CONNECTION_LIMIT = 5;
+
+const DEV_CONNECTION_LIMIT = 10;
+
+interface PoolEnv {
+  VERCEL?: string;
+  NODE_ENV?: string;
+  PRISMA_CONNECTION_LIMIT?: string;
+}
+
+export function withSafePoolLimits(databaseUrl?: string, env: PoolEnv = process.env) {
   if (!databaseUrl) {
     return databaseUrl;
   }
@@ -22,26 +32,22 @@ function withSafePoolLimits(databaseUrl?: string) {
   try {
     const parsed = new URL(databaseUrl);
 
-    const isVercel = Boolean(process.env.VERCEL);
+    const isDev = env.NODE_ENV === "development" && !env.VERCEL;
 
-    const isDev = process.env.NODE_ENV === "development";
+    const isPooled =
+      Boolean(env.VERCEL) || parsed.hostname.includes("pooler.") || parsed.searchParams.get("pgbouncer") === "true";
 
-    const isPoolerHost = parsed.hostname.includes("pooler.");
-
-    const isPgBouncerMode = parsed.searchParams.get("pgbouncer") === "true";
-
-    const shouldLimitPool = isVercel || isPoolerHost || isPgBouncerMode;
-
-    if (!shouldLimitPool && !isDev) {
+    if (!isPooled && !isDev) {
       return databaseUrl;
     }
 
-    // Dev: 10 — refetch + next-turn + інші API паралельно (override env якщо є 5)
-    // Vercel/serverless: 1 — avoid max clients errors
-    parsed.searchParams.set(
-      "connection_limit",
-      isDev ? "10" : "1",
-    );
+    const override = Number.parseInt(env.PRISMA_CONNECTION_LIMIT ?? "", 10);
+
+    const limit = override > 0 ? override : isDev ? DEV_CONNECTION_LIMIT : VERCEL_CONNECTION_LIMIT;
+
+    if (!parsed.searchParams.has("connection_limit")) {
+      parsed.searchParams.set("connection_limit", String(limit));
+    }
 
     if (!parsed.searchParams.has("pool_timeout")) {
       parsed.searchParams.set("pool_timeout", isDev ? "20" : "10");
