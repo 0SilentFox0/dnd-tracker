@@ -39,6 +39,7 @@ export function DMSkillsPageClient({ campaignId, canEdit = true }: { campaignId:
           mainSkillColor={group.color}
           actions={{ onDelete: actions.deleteSkill, onDuplicate: actions.duplicateSkill }}
           canEdit={canEdit}
+          readOnly={!canEdit}
         />
       ))}
     </Accordion>
@@ -51,13 +52,13 @@ export function DMSkillsPageClient({ campaignId, canEdit = true }: { campaignId:
         subtitle={t("subtitle")}
         actions={canEdit && (
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="skills" />
-            <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="skills" />}
+            {canEdit && <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/main-skills`}>{t("newMainSkill")}</Link>
-            </Button>
-            <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
+            </Button>}
+            {canEdit && <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={newSkillHref}>{t("newSkill")}</Link>
-            </Button>
+            </Button>}
             {skills.length > 0 && (
               <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
                 <Link href={`/campaigns/${campaignId}/dm/print/skills`} target="_blank" rel="noopener noreferrer">
@@ -66,12 +67,12 @@ export function DMSkillsPageClient({ campaignId, canEdit = true }: { campaignId:
                 </Link>
               </Button>
             )}
-            <DeleteAllButton
+            {canEdit && <DeleteAllButton
               count={skills.length}
               noun={t("deleteAllNouns")}
               confirm={{ description: t("deleteAllDescription", { count: skills.length }) }}
               actions={{ onConfirm: actions.removeAll }}
-            />
+            />}
           </>
         )}
       />

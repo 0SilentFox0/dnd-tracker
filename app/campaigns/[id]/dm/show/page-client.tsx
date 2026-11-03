@@ -46,11 +46,18 @@ export function DMShowPageClient({ campaignId, initialDecks, canEdit = true }: {
       <HudPageHeader
         title={t("decksPage.title")}
         subtitle={t("decksPage.count", { count: decks.length })}
-        actions={<>
-          {canEdit && <Button onClick={() => setCreating(true)} className="flex items-center gap-2"><Plus className="size-4" />{t("newDeck.title")}</Button>}
-          {canEdit && <Button asChild variant="outline"><Link href={`${base}/show`}>{t("decksPage.openShow")}</Link></Button>}
-          <WorldMapLink campaignId={campaignId} variant="button" />
-        </>}
+        actions={
+          <>
+            {canEdit && <Button onClick={() => setCreating(true)} className="flex items-center gap-2">
+              <Plus className="size-4" />
+              {t("newDeck.title")}
+            </Button>}
+            {canEdit && <Button asChild variant="outline">
+              <Link href={`${base}/show`}>{t("decksPage.openShow")}</Link>
+            </Button>}
+            <WorldMapLink campaignId={campaignId} variant="button" />
+          </>
+        }
       />
       {canEdit && <OnboardingHint id="dm.show" />}
       {decks.length === 0 ? (
@@ -62,10 +69,10 @@ export function DMShowPageClient({ campaignId, initialDecks, canEdit = true }: {
               key={deck.id}
               deck={deck}
               href={canEdit ? `${base}/dm/show/${deck.id}` : `${base}/dm/show/${deck.id}/preview`}
-              canEdit={canEdit}
               actions={canEdit ? { start: () => void start(deck.id), remove: () => void mutations.remove(deck.id) } : undefined}
               pending={mutations.pending || control.pending}
               scene={pages.find((p) => p.id === deck.scenarioPageId)?.title}
+              canEdit={canEdit}
             />
           ))}
         </div>

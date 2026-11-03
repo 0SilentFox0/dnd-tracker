@@ -19,13 +19,14 @@ import type { Unit } from "@/types/units";
 interface UnitGroupAccordionProps {
   group: UnitRaceGroup<Race>;
   campaignId: string;
-  onDeleteUnit: (unitId: string) => void;
-  onDrop: (unitId: string, data: Partial<Unit>) => void;
+  onDeleteUnit?: (unitId: string) => void;
+  onDrop?: (unitId: string, data: Partial<Unit>) => void;
+  canEdit?: boolean;
 }
 
 const carriesUnit = (e: React.DragEvent) => e.dataTransfer.types.includes(UNIT_DRAG_TYPE);
 
-export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: UnitGroupAccordionProps) {
+export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop, canEdit = true }: UnitGroupAccordionProps) {
   const t = useTranslations("units.group");
 
   const [editing, setEditing] = useState(false);
@@ -53,7 +54,8 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, camp
     if (!payload || !data) return;
 
     e.preventDefault();
-    onDrop(payload.unitId, data);
+
+    if (canEdit) onDrop?.(payload.unitId, data);
   };
 
   const highlight = (key: string) => (over === key ? "bg-[rgba(230,194,90,.08)] ring-1 ring-hud-gold-strong/60" : "");
@@ -64,10 +66,10 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, camp
         <AccordionTrigger className="pl-4 pr-16 sm:pl-6 sm:pr-20">
           <div
             className={`flex w-full items-center gap-3 rounded-md text-left transition-colors sm:gap-4 ${highlight("race")}`}
-            onDragOver={raceDrop ? allowDrop : undefined}
-            onDragEnter={(e) => raceDrop && carriesUnit(e) && setOver("race")}
+            onDragOver={canEdit && raceDrop ? allowDrop : undefined}
+            onDragEnter={(e) => canEdit && raceDrop && carriesUnit(e) && setOver("race")}
             onDragLeave={() => setOver(null)}
-            onDrop={raceDrop ? dropOn({ raceId: raceIdOfGroup(group.key) }) : undefined}
+            onDrop={canEdit && raceDrop ? dropOn({ raceId: raceIdOfGroup(group.key) }) : undefined}
           >
             <EntityIcon src={group.icon} name={title} className="h-9 w-9 shrink-0" />
             <div className="min-w-0 flex-1">
@@ -76,9 +78,9 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, camp
             </div>
           </div>
         </AccordionTrigger>
-        <Button type="button" variant="ghost" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2" aria-label={t("edit", { name: title })} onClick={() => setEditing(true)}>
+        {canEdit && <Button type="button" variant="ghost" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2" aria-label={t("edit", { name: title })} onClick={() => setEditing(true)}>
           <Pencil className="h-4 w-4" />
-        </Button>
+        </Button>}
       </div>
       {editing && <UnitGroupDialog campaignId={campaignId} group={group} onClose={() => setEditing(false)} />}
       <AccordionContent>
@@ -92,10 +94,10 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, camp
                   <AccordionTrigger className="px-2 py-2 text-sm font-semibold">
                     <div
                       className={`-mx-1 w-full rounded px-1 text-left transition-colors ${highlight(`level-${tier.level}`)}`}
-                      onDragOver={allowDrop}
-                      onDragEnter={(e) => carriesUnit(e) && setOver(`level-${tier.level}`)}
+                      onDragOver={canEdit ? allowDrop : undefined}
+                      onDragEnter={(e) => canEdit && carriesUnit(e) && setOver(`level-${tier.level}`)}
                       onDragLeave={() => setOver(null)}
-                      onDrop={dropOn({ level: tier.level })}
+                      onDrop={canEdit ? dropOn({ level: tier.level }) : undefined}
                     >
                       {t("tier", { level: tier.level, count: tier.units.length })}
                     </div>
@@ -103,7 +105,7 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, camp
                   <AccordionContent>
                     <div className="grid gap-4 pt-2 md:grid-cols-2 lg:grid-cols-3">
                       {tier.units.map((unit) => (
-                        <UnitCard key={unit.id} unit={unit} campaignId={campaignId} onDelete={onDeleteUnit} />
+                      <UnitCard key={unit.id} unit={unit} campaignId={campaignId} onDelete={onDeleteUnit} canEdit={canEdit} />
                       ))}
                     </div>
                   </AccordionContent>

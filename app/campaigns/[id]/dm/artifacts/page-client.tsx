@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useArtifactsCatalog } from "@/lib/hooks/artifact-sets";
 
-export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
+export function DMArtifactsPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("artifacts");
 
   const catalog = useArtifactsCatalog(campaignId);
@@ -39,14 +39,14 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
         subtitle={t("page.subtitle")}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="artifacts" />
-            <DeleteAllArtifactsButton campaignId={campaignId} artifactsCount={catalog.count} />
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="artifacts" />}
+            {canEdit && <DeleteAllArtifactsButton campaignId={campaignId} artifactsCount={catalog.count} />}
             <Button variant="outline" className="whitespace-nowrap" asChild>
               <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>{t("page.setsLink")}</Link>
             </Button>
-            <Button className="whitespace-nowrap" asChild>
+            {canEdit && <Button className="whitespace-nowrap" asChild>
               <Link href={newHref}>{t("page.create")}</Link>
-            </Button>
+            </Button>}
           </>
         }
       />
@@ -59,11 +59,11 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
           className="bg-hud-panel"
           icon={Gem}
           title={t("page.emptyTitle")}
-          action={
+          action={canEdit ? (
             <Button asChild>
               <Link href={newHref}>{t("page.createFirst")}</Link>
             </Button>
-          }
+          ) : undefined}
         />
       ) : (
         <>
@@ -74,7 +74,7 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
               <HudSection title={t("page.setsSection")}>
                 <div className="space-y-4">
                   {catalog.view.sets.map(({ set, artifacts }) => (
-                    <ArtifactSetCard key={set.id} variant="withArtifacts" campaignId={campaignId} set={set} artifacts={artifacts} />
+                    <ArtifactSetCard key={set.id} variant="withArtifacts" campaignId={campaignId} set={set} artifacts={artifacts} canEdit={canEdit} />
                   ))}
                 </div>
               </HudSection>
@@ -98,7 +98,7 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
                       <AccordionContent className="px-3">
                         <div className="grid gap-3 pt-2 md:grid-cols-2 lg:grid-cols-3">
                           {artifacts.map((artifact) => (
-                            <ArtifactCard key={artifact.id} campaignId={campaignId} artifact={artifact} variant="full" />
+                            <ArtifactCard key={artifact.id} campaignId={campaignId} artifact={artifact} variant="full" canEdit={canEdit} />
                           ))}
                         </div>
                       </AccordionContent>

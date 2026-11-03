@@ -12,6 +12,7 @@ import type { AcquaintanceView } from "@/types/acquaintances";
 
 interface Flags {
   isDM: boolean;
+  isDemo?: boolean;
   isNew: boolean;
   focused: boolean;
 }
@@ -59,7 +60,7 @@ export function AcquaintanceCard({ campaignId, item, flags }: { campaignId: stri
             ))}
           </ul>
         )}
-        <AcquaintanceNoteEditor campaignId={campaignId} acquaintanceId={item.id} initial={own?.text ?? ""} />
+        {!flags.isDemo && <AcquaintanceNoteEditor campaignId={campaignId} acquaintanceId={item.id} initial={own?.text ?? ""} />}
       </HudCard>
     </div>
   );

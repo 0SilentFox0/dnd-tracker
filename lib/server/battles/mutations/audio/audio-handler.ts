@@ -12,7 +12,7 @@ const findAudio = (campaignId: string, battleId: string) => prisma.battleScene.f
 
 export async function readBattleAudio(campaignId: string, battleId: string): Promise<NextResponse> {
   try {
-    const access = await requireCampaignAccess(campaignId);
+    const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
 
     if (access instanceof NextResponse) return access;
 

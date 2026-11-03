@@ -40,8 +40,8 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "rules", href: dm("rules"), icon: Scale, group: "libraries" },
 ];
 
-export function dashboardHiddenKeys({ isDM, hasWorld, acquaintancesEnabled }: { isDM: boolean; hasWorld: boolean; acquaintancesEnabled: boolean }): string[] {
-  return [...(hasWorld ? [] : ["player-world"]), ...(isDM || acquaintancesEnabled ? [] : ["acquaintances"])];
+export function dashboardHiddenKeys({ isDM, isDemo = false, hasWorld, acquaintancesEnabled }: { isDM: boolean; isDemo?: boolean; hasWorld: boolean; acquaintancesEnabled: boolean }): string[] {
+  return [...(hasWorld ? [] : ["player-world"]), ...(isDM || isDemo || acquaintancesEnabled ? [] : ["acquaintances"])];
 }
 
 const CAMPAIGN_LEVEL_KEYS = new Set(["info", "acquaintances"]);
@@ -71,8 +71,8 @@ export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
 const pick = (list: DashboardSection[], keys: string[]) => list.filter((s) => keys.includes(s.key));
 
 export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
-  ...pick(DM_DASHBOARD_SECTIONS, ["scenario", "graph", "battles", "show", "music", "skills"]),
-  ...pick(PLAYER_DASHBOARD_SECTIONS, ["player-world"]),
+  ...DM_DASHBOARD_SECTIONS,
+  ...pick(PLAYER_DASHBOARD_SECTIONS, ["player-world"]).map((section) => ({ ...section, group: "game" as const })),
 ];
 
 export const COMPACT_GROUPS: ReadonlySet<DashboardGroupKey> = new Set<DashboardGroupKey>(["libraries"]);

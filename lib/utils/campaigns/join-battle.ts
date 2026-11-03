@@ -6,7 +6,8 @@ export const battleHref = (b: ActiveBattleRef) => `/campaigns/${b.campaignId}/ba
 export function pickActiveTarget<T extends { campaignId: string }>(items: T[], pathname: string | null, hrefOf: (item: T) => string): T | null {
   const campaignId = pathname?.match(/^\/campaigns\/([^/]+)/)?.[1];
 
-  const target = items.find((i) => i.campaignId === campaignId) ?? items[0] ?? null;
+  // Inside a campaign, never fall back to another campaign's live session.
+  const target = campaignId ? items.find((i) => i.campaignId === campaignId) ?? null : items[0] ?? null;
 
   return target && pathname?.startsWith(hrefOf(target)) ? null : target;
 }

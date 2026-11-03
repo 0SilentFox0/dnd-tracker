@@ -51,14 +51,19 @@ export default async function CampaignDetailPage({
     hasMembership ? readCampaignOnboarding(id, user.id, isDM).catch(() => null) : null,
   ]);
 
-  const hiddenKeys = dashboardHiddenKeys({ isDM, hasWorld: isDemo || !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
+  const hiddenKeys = dashboardHiddenKeys({ isDM, isDemo, hasWorld: isDemo || !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
 
   return (
     <HudPage>
       <HudPageHeader
         title={campaign.name}
         subtitle={campaign.description}
-        actions={<span className="self-center break-all text-sm text-hud-muted">{user.email}</span>}
+        actions={(
+          <div className="flex items-center gap-2">
+            {isDemo && <span className="rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[var(--palette-primary-foreground,#2a1d05)]">{t("page.demoDmRole")}</span>}
+            <span className="self-center break-all text-sm text-hud-muted">{user.email}</span>
+          </div>
+        )}
       />
 
       {isTemplate && (

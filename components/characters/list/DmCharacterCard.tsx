@@ -22,9 +22,10 @@ interface DmCharacterCardProps {
   busy: boolean;
   maxLevel?: number;
   actions: { onLevelUp?: () => void; onDelete: () => void };
+  canEdit?: boolean;
 }
 
-export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, actions }: DmCharacterCardProps) {
+export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, actions, canEdit = true }: DmCharacterCardProps) {
   const t = useTranslations("characters.card");
 
   const tc = useTranslations("common.actions");
@@ -64,7 +65,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
             {!isNpc && <span className="truncate text-xs text-hud-muted">{character.user?.displayName || t("unassigned")}</span>}
           </div>
         </div>
-        <ActionsMenu
+        {canEdit && <ActionsMenu
           label={t("actions")}
           triggerClassName="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
           onTriggerClick={(e) => e.preventDefault()}
@@ -75,7 +76,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
               : []),
             { label: tc("delete"), icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },
           ]}
-        />
+        />}
       </div>
       <div className="flex gap-1.5">
         <HudStatChip short={t("statLevel")} value={character.level} />

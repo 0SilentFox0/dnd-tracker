@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES, type ArtifactRarity } from "@/lib/constants/artifacts";
+import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES, type ArtifactRarity, type ArtifactSlot } from "@/lib/constants/artifacts";
 import { useUpdateArtifact } from "@/lib/hooks/artifacts";
 import { useNotify } from "@/lib/hooks/common";
 import type { ArtifactCardData } from "@/types/artifacts";
@@ -27,12 +27,14 @@ interface ArtifactCardProps {
   campaignId: string;
   artifact: ArtifactCardData;
   variant?: "full" | "compact";
+  canEdit?: boolean;
 }
 
 export function ArtifactCard({
   campaignId,
   artifact,
   variant = "full",
+  canEdit = true,
 }: ArtifactCardProps) {
   const t = useTranslations("artifacts");
 
@@ -41,6 +43,8 @@ export function ArtifactCard({
   const notify = useNotify();
 
   const rarityLabel = artifact.rarity ? ((ARTIFACT_RARITY_VALUES as readonly string[]).includes(artifact.rarity) ? t(`rarity.${artifact.rarity as ArtifactRarity}`) : artifact.rarity) : null;
+
+  const slotLabel = ARTIFACT_SLOT_VALUES.includes(artifact.slot as ArtifactSlot) ? t(`slots.${artifact.slot as ArtifactSlot}`) : artifact.slot;
 
   const update = useUpdateArtifact(campaignId);
 
@@ -97,12 +101,12 @@ export function ArtifactCard({
             <div className="flex items-start gap-1">
               <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-hud-ink [overflow-wrap:anywhere]">{artifact.name}</p>
               <div className="-mr-1 -mt-1 flex shrink-0">
-                <Button variant="ghost" size="icon" className="size-7 text-hud-muted hover:text-hud-ink" asChild>
+                {canEdit && <Button variant="ghost" size="icon" className="size-7 text-hud-muted hover:text-hud-ink" asChild>
                   <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} aria-label={tc("edit")} title={tc("edit")}>
                     <Pencil className="size-3.5" />
                   </Link>
-                </Button>
-                <ArtifactDeleteButton campaignId={campaignId} artifactId={artifact.id} className="size-7" />
+                </Button>}
+                {canEdit && <ArtifactDeleteButton campaignId={campaignId} artifactId={artifact.id} className="size-7" />}
               </div>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -116,7 +120,7 @@ export function ArtifactCard({
                   {artifact.itemKind === "property" ? t("card.kindProperty") : t("card.kindGear")}
                 </Badge>
               )}
-              {slotSelect}
+              {canEdit ? slotSelect : <Badge variant="outline">{slotLabel}</Badge>}
             </div>
           </div>
         </div>
@@ -135,7 +139,7 @@ export function ArtifactCard({
   }
 
   return (
-    <HudCard href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} linkLabel={artifact.name} className="space-y-2 p-4">
+    <HudCard href={canEdit ? `/campaigns/${campaignId}/dm/artifacts/${artifact.id}` : undefined} linkLabel={artifact.name} className="space-y-2 p-4">
       <div className="flex items-start gap-3">
         <ZoomableEntityIcon src={artifact.icon} name={artifact.name} size={96} className="size-16 rounded-lg text-xl sm:size-20" />
         <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
@@ -153,7 +157,7 @@ export function ArtifactCard({
             {artifact.itemKind === "property" ? t("card.kindProperty") : t("card.kindGear")}
           </Badge>
         )}
-        {slotSelect}
+        {canEdit ? slotSelect : <Badge variant="outline">{slotLabel}</Badge>}
         {artifact.artifactSet && (
           <Badge variant="outline">{t("card.set", { name: artifact.artifactSet.name })}</Badge>
         )}
@@ -166,7 +170,7 @@ export function ArtifactCard({
       {artifact.abilitySummary.length > 0 && (
         <AbilityFlowList lines={artifact.abilitySummary} />
       )}
-      <div className="flex gap-2">
+      {canEdit && <div className="flex gap-2">
         <Button variant="outline" size="sm" className="flex-1" asChild>
           <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>{tc("edit")}</Link>
         </Button>
@@ -174,7 +178,7 @@ export function ArtifactCard({
           campaignId={campaignId}
           artifactId={artifact.id}
         />
-      </div>
+      </div>}
     </HudCard>
   );
 }

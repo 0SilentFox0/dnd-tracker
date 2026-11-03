@@ -16,6 +16,7 @@ interface SkillGroupAccordionProps {
   mainSkillColor?: string | null;
   actions?: SkillCardActions;
   canEdit?: boolean;
+  readOnly?: boolean;
 }
 
 export function SkillGroupAccordion({
@@ -26,6 +27,7 @@ export function SkillGroupAccordion({
   mainSkillColor,
   actions: skillActions,
   canEdit = true,
+  readOnly = false,
 }: SkillGroupAccordionProps) {
   const groupId = spellGroups.find((g) => g.name === groupName)?.id;
 
@@ -44,20 +46,20 @@ export function SkillGroupAccordion({
         accent={mainSkillColor || undefined}
         totalSkills={skills.length}
         groupMenu={
-          canEdit && !isUngrouped && groupId
+          canEdit && !readOnly && !isUngrouped && groupId
             ? {
                 onRename: actions.handlers.openRenameDialog,
                 onRemoveAll: () => void actions.handlers.confirmRemoveAll(),
               }
             : undefined
         }
-        actions={canEdit ? skillActions : undefined}
+        actions={skillActions}
         skills={skills}
         campaignId={campaignId}
         canEdit={canEdit}
       />
 
-      {canEdit && <RenameGroupDialog
+      {canEdit && !readOnly && <RenameGroupDialog
         groupName={groupName}
         dialog={{ open: actions.dialogs.rename.open, onOpenChange: actions.dialogs.rename.setOpen }}
         rename={{

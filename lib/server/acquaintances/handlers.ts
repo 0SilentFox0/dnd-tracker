@@ -27,7 +27,7 @@ export function listAcquaintancesHandler(campaignId: string) {
     if (!access.isDM && !data.enabled) return errorResponse(API_ERRORS.ACQUAINTANCES_DISABLED, 403);
 
     return NextResponse.json(data);
-  });
+  }, false, true);
 }
 
 export function createAcquaintanceHandler(req: Request, campaignId: string) {

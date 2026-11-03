@@ -30,7 +30,8 @@ interface SpellLevelAccordionProps {
   spells: Spell[];
   campaignId: string;
   spellGroups: SpellGroup[];
-  actions: SpellGroupItemActions;
+  actions?: SpellGroupItemActions;
+  canEdit?: boolean;
 }
 
 export function SpellLevelAccordion({
@@ -39,6 +40,7 @@ export function SpellLevelAccordion({
   campaignId,
   spellGroups,
   actions,
+  canEdit = true,
 }: SpellLevelAccordionProps) {
   const t = useTranslations("spells.list");
 
@@ -78,7 +80,7 @@ export function SpellLevelAccordion({
               </Badge>
             </div>
           </AccordionTrigger>
-          {spells.length > 0 && (
+          {canEdit && spells.length > 0 && (
             <div
               className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-10"
               onClick={(e) => e.stopPropagation()}
@@ -104,8 +106,9 @@ export function SpellLevelAccordion({
                 spell={spell}
                 campaignId={campaignId}
                 spellGroups={spellGroups}
-                onRemoveFromGroup={actions.onRemoveFromGroup}
-                onMoveToGroup={actions.onMoveToGroup}
+                onRemoveFromGroup={actions?.onRemoveFromGroup}
+                onMoveToGroup={actions?.onMoveToGroup}
+                canEdit={canEdit}
               />
             ))}
           </div>

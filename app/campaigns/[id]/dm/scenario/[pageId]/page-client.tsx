@@ -30,10 +30,10 @@ const ScenarioEditor = dynamic(() => import("@/components/scenario/editor"), { s
 
 type PlayedPages = { id: string; played: string[] }[];
 
-export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled, canEdit = true }: { campaignId: string; pageId: string; playedPages: PlayedPages; aiEnabled: boolean; canEdit?: boolean }) {
+export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled, canEdit = true, isDemo = false }: { campaignId: string; pageId: string; playedPages: PlayedPages; aiEnabled: boolean; canEdit?: boolean; isDemo?: boolean }) {
   const query = useScenarioPage(campaignId, pageId);
 
-  return <QueryState query={query}>{(page) => <ScenarioPageBody campaignId={campaignId} page={page} playedPages={playedPages} aiEnabled={aiEnabled} canEdit={canEdit} />}</QueryState>;
+  return <QueryState query={query}>{(page) => <ScenarioPageBody campaignId={campaignId} page={page} playedPages={playedPages} aiEnabled={aiEnabled} canEdit={canEdit} isDemo={isDemo} />}</QueryState>;
 }
 
 function SummarySection({ campaignId, pageId }: { campaignId: string; pageId: string }) {
@@ -52,7 +52,7 @@ function SummarySection({ campaignId, pageId }: { campaignId: string; pageId: st
   );
 }
 
-function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean; canEdit: boolean }) {
+function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit, isDemo }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean; canEdit: boolean; isDemo: boolean }) {
   const t = useTranslations("scenario.pageBody");
 
   const progress = useSectionProgress(campaignId, page.id);
@@ -67,7 +67,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit }:
 
   const [editBase, setEditBase] = useState<ScenarioPage | null>(null);
 
-  const playEnabled = page.kind === "scene" && !editBase && canEdit;
+  const playEnabled = page.kind === "scene" && !editBase && (canEdit || isDemo);
 
   const play = useScenarioPlay(campaignId, page.content, playEnabled);
 

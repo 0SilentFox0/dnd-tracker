@@ -12,7 +12,7 @@ import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useClassesList } from "@/lib/hooks/classes";
 
-export function DMClassesPageClient({ campaignId }: { campaignId: string }) {
+export function DMClassesPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("classes");
 
   const list = useClassesList(campaignId);
@@ -26,11 +26,11 @@ export function DMClassesPageClient({ campaignId }: { campaignId: string }) {
         subtitle={t("page.subtitle", { count: classes.length })}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="classes" />
-            <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="classes" />}
+            {canEdit && <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               {t("page.newClass")}
-            </Button>
+            </Button>}
           </>
         }
       />
@@ -43,12 +43,12 @@ export function DMClassesPageClient({ campaignId }: { campaignId: string }) {
       >
         <DmCardGrid>
           {classes.map((gameClass) => (
-            <ClassCard key={gameClass.id} gameClass={gameClass} campaignId={campaignId} onDelete={list.actions.deleteClass} />
+            <ClassCard key={gameClass.id} gameClass={gameClass} campaignId={campaignId} onDelete={canEdit ? list.actions.deleteClass : undefined} canEdit={canEdit} />
           ))}
         </DmCardGrid>
       </DmListBody>
 
-      <CreateClassDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateClass={list.actions.createClass} />
+      {canEdit && <CreateClassDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateClass={list.actions.createClass} />}
     </HudPage>
   );
 }

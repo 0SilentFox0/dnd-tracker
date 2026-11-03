@@ -23,10 +23,11 @@ import type { Race } from "@/types/races";
 interface RaceCardProps {
   race: Race;
   campaignId: string;
-  onDelete: (raceId: string) => void;
+  onDelete?: (raceId: string) => void;
+  canEdit?: boolean;
 }
 
-export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
+export function RaceCard({ race, campaignId, onDelete, canEdit = true }: RaceCardProps) {
   const t = useTranslations("races");
 
   const tc = useTranslations("common");
@@ -50,21 +51,21 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
   const modifiedAbilities = modifiedAbilityScores(passiveAbility);
 
   return (
-    <HudCard href={`/campaigns/${campaignId}/dm/races/${race.id}`} linkLabel={race.name} accent={race.color ?? undefined} className="flex h-full flex-col gap-3">
+    <HudCard href={canEdit ? `/campaigns/${campaignId}/dm/races/${race.id}` : undefined} linkLabel={race.name} accent={race.color ?? undefined} className="flex h-full flex-col gap-3">
       <div>
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <ZoomableEntityIcon src={race.icon} name={race.name} size={96} className="size-20 rounded-lg text-2xl" />
             <h3 className="hud-sc truncate text-lg text-hud-ink">{race.name}</h3>
           </div>
-          <ActionsMenu
+          {canEdit && <ActionsMenu
             triggerSize="sm"
             triggerClassName="h-8 w-8 p-0"
             actions={[
               { label: tc("actions.edit"), icon: Edit, href: `/campaigns/${campaignId}/dm/races/${race.id}` },
-              { label: tc("actions.delete"), icon: Trash2, onSelect: () => onDelete(race.id), destructive: true },
+              { label: tc("actions.delete"), icon: Trash2, onSelect: () => onDelete?.(race.id), destructive: true },
             ]}
-          />
+          />}
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-3">

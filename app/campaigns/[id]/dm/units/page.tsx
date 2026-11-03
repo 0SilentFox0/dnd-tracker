@@ -1,12 +1,12 @@
 import { DMUnitsPageClient } from "./page-client";
 
 import { getCachedUnits } from "@/lib/cache/reference-data";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
 
 export default async function DMUnitsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  await requireCampaignDM(id);
+  const { isDemo } = await requireCampaignDMOrDemo(id);
 
-  return <DMUnitsPageClient campaignId={id} initialUnits={await getCachedUnits(id)} />;
+  return <DMUnitsPageClient campaignId={id} initialUnits={await getCachedUnits(id)} canEdit={!isDemo} />;
 }

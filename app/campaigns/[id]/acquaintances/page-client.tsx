@@ -14,7 +14,7 @@ import type { AcquaintanceView } from "@/types/acquaintances";
 
 const fieldsOf = (a: AcquaintanceView) => [a.name, a.description];
 
-function Grid({ campaignId, items, isDM, focusId, fresh }: { campaignId: string; items: AcquaintanceView[]; isDM: boolean; focusId?: string; fresh: ReadonlySet<string> }) {
+function Grid({ campaignId, items, isDM, isDemo, focusId, fresh }: { campaignId: string; items: AcquaintanceView[]; isDM: boolean; isDemo: boolean; focusId?: string; fresh: ReadonlySet<string> }) {
   const t = useTranslations("acquaintances");
 
   const search = useSearch(items, fieldsOf);
@@ -29,7 +29,7 @@ function Grid({ campaignId, items, isDM, focusId, fresh }: { campaignId: string;
       ) : (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {search.items.map((a) => (
-            <AcquaintanceCard key={a.id} campaignId={campaignId} item={a} flags={{ isDM, isNew: fresh.has(a.id), focused: a.id === focusId }} />
+            <AcquaintanceCard key={a.id} campaignId={campaignId} item={a} flags={{ isDM, isDemo, isNew: fresh.has(a.id), focused: a.id === focusId }} />
           ))}
         </div>
       )}
@@ -37,7 +37,7 @@ function Grid({ campaignId, items, isDM, focusId, fresh }: { campaignId: string;
   );
 }
 
-export function AcquaintancesPageClient({ campaignId, isDM, focusId }: { campaignId: string; isDM: boolean; focusId?: string }) {
+export function AcquaintancesPageClient({ campaignId, isDM, isDemo = false, focusId }: { campaignId: string; isDM: boolean; isDemo?: boolean; focusId?: string }) {
   const t = useTranslations("acquaintances");
 
   const query = useAcquaintances(campaignId);
@@ -48,7 +48,7 @@ export function AcquaintancesPageClient({ campaignId, isDM, focusId }: { campaig
     <HudPage>
       <HudPageHeader title={t("page.title")} subtitle={t("page.subtitle")} />
       {isDM && query.data && !query.data.enabled && <HudPanel>{t("page.hiddenFromPlayers")}</HudPanel>}
-      <QueryState query={query}>{(data) => <Grid campaignId={campaignId} items={data.items} isDM={isDM} focusId={focusId} fresh={fresh} />}</QueryState>
+      <QueryState query={query}>{(data) => <Grid campaignId={campaignId} items={data.items} isDM={isDM} isDemo={isDemo} focusId={focusId} fresh={fresh} />}</QueryState>
     </HudPage>
   );
 }

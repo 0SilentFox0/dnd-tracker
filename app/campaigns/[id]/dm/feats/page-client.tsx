@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { FEAT_TYPES } from "@/lib/constants/choices";
 import { useFeatsList } from "@/lib/hooks/feats";
 
-export function DMFeatsPageClient({ campaignId }: { campaignId: string }) {
+export function DMFeatsPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("feats");
 
   const list = useFeatsList(campaignId);
@@ -27,11 +27,11 @@ export function DMFeatsPageClient({ campaignId }: { campaignId: string }) {
         subtitle={t("page.subtitle", { count: all.length })}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="feats" />
-            <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="feats" />}
+            {canEdit && <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               {t("page.create")}
-            </Button>
+            </Button>}
           </>
         }
       />
@@ -51,12 +51,12 @@ export function DMFeatsPageClient({ campaignId }: { campaignId: string }) {
       >
         <DmCardGrid>
           {feats.map((feat) => (
-            <FeatCard key={feat.id} feat={feat} campaignId={campaignId} onDelete={list.actions.deleteFeat} />
+            <FeatCard key={feat.id} feat={feat} campaignId={campaignId} onDelete={canEdit ? list.actions.deleteFeat : undefined} canEdit={canEdit} />
           ))}
         </DmCardGrid>
       </DmListBody>
 
-      <CreateFeatDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateFeat={list.actions.createFeat} />
+      {canEdit && <CreateFeatDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateFeat={list.actions.createFeat} />}
     </HudPage>
   );
 }

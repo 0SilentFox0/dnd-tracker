@@ -19,6 +19,7 @@ export const DEMO_IDS = {
   tracks: { ambience: "demo-track-ambience" },
   deck: "demo-deck-listening-grove",
   acquaintances: { mara: "demo-npc-mara", ivo: "demo-npc-ivo", tamsin: "demo-npc-tamsin" },
+  characters: { scout: "demo-character-scout" },
   maps: { world: "demo-world-root", alderwake: "demo-map-alderwake", grove: "demo-map-grove", vault: "demo-map-vault" },
   markers: { village: "demo-marker-village", grove: "demo-marker-grove", zoneNorth: "demo-zone-north", zoneSouth: "demo-zone-south", vault: "demo-marker-vault" },
 } as const;
@@ -26,21 +27,8 @@ export const DEMO_IDS = {
 export const DEMO_CAMPAIGN = {
   name: "Example Demo · The Bell Beneath Briarwood",
   description: "A read-only 5e adventure. Try the scenes, world map, music and two temporary encounters.",
-  credits: "Adventure hook inspired by Divine Golem Expedition (https://www.worldanvil.com/w/one-shot-adventures-kefkejaco/a/divine-golem-expedition-article); original adventure text. Original Demo maps by D&D Tracker Demo team, CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/): /example-demo/maps/briarwood.svg, /example-demo/maps/alderwake.svg, /example-demo/maps/listening-grove.svg, /example-demo/maps/root-vault.svg. Music: Enchanted Forest by Celestial Aeon Project (https://www.youtube.com/watch?v=uHD_AnjCRtc); all rights reserved, linked stream only; source https://mattipaalanen.bandcamp.com/track/enchanted-forest.",
+  credits: "Adventure hook inspired by Divine Golem Expedition (https://www.worldanvil.com/w/one-shot-adventures-kefkejaco/a/divine-golem-expedition-article); original adventure text. Maps: global map sourced from https://vttrpgmanager.com/wp-content/uploads/2026/08/20240703_MAP-social-media-SMALL-dnd-village-map-2.jpg; Alderwake map sourced from https://i.pinimg.com/736x/7b/b9/06/7bb9061c0431c447c7f8f848f695a4ae.jpg; Listening Grove map sourced from https://i.redd.it/yb590r6t8ff81.jpg; Root Vault map sourced from https://www.worldanvil.com/uploads/maps/29c3383c7d2742232edc4ed0863ed57a.jpg; battle map sourced from https://i.redd.it/xe89fenv5orf1.jpeg. Music: Enchanted Forest by Celestial Aeon Project (https://www.youtube.com/watch?v=uHD_AnjCRtc); all rights reserved, linked stream only; source https://mattipaalanen.bandcamp.com/track/enchanted-forest.",
 } as const;
-
-const melee = (name: string, damageDice: string, attackBonus: number, damageType: string) => ({ name, type: "melee", attackBonus, damageDice, damageType });
-
-const ranged = (name: string, damageDice: string, attackBonus: number, damageType: string, range: string) => ({ name, type: "ranged", attackBonus, damageDice, damageType, range });
-
-export const DEMO_UNITS = [
-  { id: "demo-ally-scout", name: "Lark, trail scout", level: 3, strength: 10, dexterity: 16, constitution: 12, intelligence: 11, wisdom: 14, charisma: 10, armorClass: 14, maxHp: 24, speed: 30, attacks: [ranged("Shortbow", "1d6+3", 5, "piercing", "80/320 ft")], statblock: { size: "Medium", type: "humanoid", alignment: "neutral good" } },
-  { id: "demo-ally-bellkeeper", name: "Brin, bellkeeper", level: 3, strength: 14, dexterity: 10, constitution: 14, intelligence: 10, wisdom: 13, charisma: 12, armorClass: 16, maxHp: 30, speed: 30, attacks: [melee("Bell mace", "1d6+2", 4, "bludgeoning")], statblock: { size: "Medium", type: "humanoid", alignment: "lawful good" } },
-  { id: "demo-ally-mage", name: "Orla, hedge mage", level: 3, strength: 8, dexterity: 12, constitution: 11, intelligence: 16, wisdom: 12, charisma: 10, armorClass: 12, maxHp: 18, speed: 30, attacks: [ranged("Thorn bolt", "2d4+2", 5, "force", "60 ft")], statblock: { size: "Medium", type: "humanoid", alignment: "neutral" } },
-  { id: "demo-ally-guard", name: "Sen, creek guard", level: 3, strength: 15, dexterity: 11, constitution: 14, intelligence: 9, wisdom: 11, charisma: 10, armorClass: 15, maxHp: 28, speed: 30, attacks: [melee("Spear", "1d8+2", 4, "piercing")], statblock: { size: "Medium", type: "humanoid", alignment: "lawful neutral" } },
-  { id: "demo-unit-briar-warden", name: "Briar Warden", level: 3, strength: 15, dexterity: 8, constitution: 14, intelligence: 5, wisdom: 12, charisma: 6, armorClass: 15, maxHp: 42, speed: 20, attacks: [melee("Rootbound fist", "1d8+2", 4, "bludgeoning")], statblock: { size: "Large", type: "construct", alignment: "neutral" } },
-  { id: "demo-unit-rootling", name: "Thornling", level: 1, strength: 10, dexterity: 13, constitution: 11, intelligence: 5, wisdom: 10, charisma: 6, armorClass: 12, maxHp: 9, speed: 30, attacks: [melee("Thorn swipe", "1d4+1", 3, "piercing")], statblock: { size: "Small", type: "plant", alignment: "unaligned" } },
-] as const;
 
 export const DEMO_SCENE_CONTENT: ScenarioContent = {
   legend: [
@@ -53,7 +41,7 @@ export const DEMO_SCENE_CONTENT: ScenarioContent = {
       id: DEMO_IDS.sections.village, title: "A bell that cannot ring", played: false, icon: "scene", marker: { mapId: DEMO_IDS.maps.world, markerId: DEMO_IDS.markers.village }, reveal: { mode: "manual" },
       rows: [{ id: DEMO_IDS.rows.village, story: doc(
         { type: "readAloud", content: [p(text("Alderwake's mill wheel turns in a dry creek. Three empty bell ropes sway above the square."))] },
-        { type: "image", attrs: { mediaId: "000000000000000000000001", src: "/example-demo/maps/alderwake.svg", alt: "Illustrated map of Alderwake and the surrounding wood", caption: "Alderwake sits where the old creek enters Briarwood." } },
+        { type: "image", attrs: { mediaId: "000000000000000000000001", src: "/example-demo/maps/alderwake.jpg", alt: "Map of Alderwake and the surrounding wood", caption: "Alderwake sits where the old creek enters Briarwood." } },
         p(text("Bellmaker Ivo Pell keeps a brass tuning pin in his apron. " ), mention(DEMO_IDS.acquaintances.ivo, "Ivo Pell"), text(" says the old tones name spring, branch, then stone.")),
         p(text("Courier Tamsin heard a fourth note from beyond the creek. " ), mention(DEMO_IDS.acquaintances.tamsin, "Tamsin Reed"), text(" points toward the listening grove.")),
         callout("choice", "Ask around", "Persuasion or a kind offer earns a map of the safe creek crossing."),

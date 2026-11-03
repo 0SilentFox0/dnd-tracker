@@ -57,7 +57,7 @@ export function DashboardGroups({ campaignId, isDM, isDemo = false, pendingDraft
 
   if (isActive) {
     content = items.length ? <div className={GRID}>{items.map((s) => tile(s))}</div> : <SearchEmptyState query={query.value} onClear={() => query.set("")} />;
-  } else if (!isDM) {
+  } else if (!isDM && !isDemo) {
     content = <div className={GRID}>{base.map((s) => tile(s))}</div>;
   } else {
     content = (

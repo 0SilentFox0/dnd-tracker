@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { CampaignStatus } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -8,7 +8,7 @@ import type { ActiveSessions } from "@/types/campaigns";
 
 /**
  * GET /api/campaigns/active-battles
- * Повертає активні бої в кампаніях, де користувач є учасником; з ?withShows=1 — ще й активні покази.
+ * Повертає активні бої в кампаніях, де користувач є учасником, та в демо; з ?withShows=1 — ще й активні покази.
  * Використовується для кнопки Join Battle на сторінці кампаній.
  */
 export async function GET(request: Request) {
@@ -23,14 +23,16 @@ export async function GET(request: Request) {
 
     const withShows = new URL(request.url).searchParams.get("withShows") === "1";
 
+    const visibleCampaigns = { OR: [{ members: { some: { userId } } }, { kind: CampaignKind.DEMO }] };
+
     const [battles, shows] = await Promise.all([
       prisma.battleScene.findMany({
-        where: { campaign: { members: { some: { userId } } }, status: CampaignStatus.ACTIVE },
+        where: { campaign: visibleCampaigns, status: CampaignStatus.ACTIVE },
         select: { id: true, campaignId: true },
       }),
       withShows
         ? prisma.campaignShow.findMany({
-            where: { deckId: { not: null }, campaign: { members: { some: { userId } } } },
+            where: { deckId: { not: null }, campaign: visibleCampaigns },
             select: { campaignId: true },
           })
         : null,

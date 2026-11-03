@@ -8,7 +8,7 @@ import { listDecks, persistSlideImages, toSlideDeck, urlsUsedElsewhere } from "@
 import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
 import { createSlideUploadTicket, removeSlideFiles } from "@/lib/supabase/scene-slide-storage";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { withDM } from "@/lib/utils/api/as-dm";
+import { withAccess, withDM } from "@/lib/utils/api/as-dm";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { removedSlideUrls } from "@/lib/utils/show/deck-files";
@@ -66,7 +66,7 @@ async function endShowOfDeck(campaignId: string, deckId: string): Promise<ShowSt
 }
 
 export function getDecksHandler(campaignId: string) {
-  return withDM(campaignId, "list decks", async () => NextResponse.json(await listDecks(campaignId), { headers: { "Cache-Control": "no-store" } }));
+  return withAccess(campaignId, "list decks", async () => NextResponse.json(await listDecks(campaignId), { headers: { "Cache-Control": "no-store" } }), false, true);
 }
 
 export function createDeckHandler(req: Request, campaignId: string) {
@@ -82,13 +82,13 @@ export function createDeckHandler(req: Request, campaignId: string) {
 }
 
 export function getDeckHandler(campaignId: string, deckId: string) {
-  return withDM(campaignId, "get deck", async () => {
+  return withAccess(campaignId, "get deck", async () => {
     const deck = await ownedDeck(campaignId, deckId);
 
     if (deck instanceof NextResponse) return deck;
 
     return NextResponse.json(toSlideDeck(deck), { headers: { "Cache-Control": "no-store" } });
-  });
+  }, false, true);
 }
 
 export function saveDeckHandler(req: Request, campaignId: string, deckId: string) {

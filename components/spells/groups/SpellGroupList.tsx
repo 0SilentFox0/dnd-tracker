@@ -13,7 +13,7 @@ import { useSpellGroups } from "@/lib/hooks/spells";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { SpellGroup } from "@/types/spells";
 
-export function SpellGroupList({ campaignId }: { campaignId: string }) {
+export function SpellGroupList({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("common.actions");
 
   const query = useSpellGroups(campaignId);
@@ -34,9 +34,9 @@ export function SpellGroupList({ campaignId }: { campaignId: string }) {
                     <span className="h-5 w-5 shrink-0 rounded-full" style={{ backgroundColor: group.color ?? SPELL_GROUP_FALLBACK_COLOR }} />
                     <Icon className="h-5 w-5 shrink-0" />
                     <span className="min-w-0 flex-1 truncate">{group.name}</span>
-                    <Button size="sm" variant="outline" onClick={() => setEditing(group)}>
+                    {canEdit && <Button size="sm" variant="outline" onClick={() => setEditing(group)}>
                       {t("edit")}
-                    </Button>
+                    </Button>}
                   </div>
                 </HudCard>
               );
@@ -44,7 +44,7 @@ export function SpellGroupList({ campaignId }: { campaignId: string }) {
           </div>
         )}
       </QueryState>
-      {editing && <SpellGroupDialog key={editing.id} campaignId={campaignId} group={editing} onOpenChange={(open) => !open && setEditing(null)} />}
+      {canEdit && editing && <SpellGroupDialog key={editing.id} campaignId={campaignId} group={editing} onOpenChange={(open) => !open && setEditing(null)} />}
     </>
   );
 }

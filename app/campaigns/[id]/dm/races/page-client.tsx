@@ -15,7 +15,7 @@ import { RaceCard } from "@/components/races/RaceCard";
 import { Button } from "@/components/ui/button";
 import { useRacesList } from "@/lib/hooks/races";
 
-export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
+export function DMRacesPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("races");
 
   const list = useRacesList(campaignId);
@@ -31,11 +31,11 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
         subtitle={t("page.subtitle", { count: total })}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="races" />
-            <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="races" />}
+            {canEdit && <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               {t("page.create")}
-            </Button>
+            </Button>}
           </>
         }
       />
@@ -54,20 +54,20 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
           ) : (
             <DmCardGrid>
               {races.map((race) => (
-                <RaceCard key={race.id} race={race} campaignId={campaignId} onDelete={list.actions.deleteRace} />
+                <RaceCard key={race.id} race={race} campaignId={campaignId} onDelete={canEdit ? list.actions.deleteRace : undefined} canEdit={canEdit} />
               ))}
             </DmCardGrid>
           )}
         </>
       </DmListBody>
 
-      <CreateRaceDialog
+      {canEdit && <CreateRaceDialog
         open={list.createDialog.open}
         onOpenChange={list.createDialog.setOpen}
         campaignId={campaignId}
         onCreateRace={list.actions.createRace}
         status={list.createDialog.status}
-      />
+      />}
     </HudPage>
   );
 }

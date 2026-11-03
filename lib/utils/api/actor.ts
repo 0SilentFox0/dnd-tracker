@@ -4,7 +4,7 @@ import { verifyApiToken } from "@/lib/ai/api-tokens";
 import { type ActionScope, type ApiTokenScope } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { Locale } from "@/lib/i18n/config";
-import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignAccess, requireCampaignDMOrDemoAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { bearerToken } from "@/lib/utils/api/bearer";
 import { needFailure } from "@/lib/utils/api/need";
@@ -47,9 +47,17 @@ export async function resolveActor(req: Request, campaignId: string, need: Actor
 
   if (raw !== null) return authenticateToken(raw, campaignId, need);
 
-  const access = need.access === "dm" ? await requireDM(campaignId) : await requireCampaignAccess(campaignId, false);
+  const isRead = need.scope === "content:read";
+
+  const access = isRead && need.access === "dm"
+    ? await requireCampaignDMOrDemoAccess(campaignId)
+    : isRead
+      ? await requireCampaignAccess(campaignId, false, { allowDemo: true })
+      : need.access === "dm"
+        ? await requireDM(campaignId)
+        : await requireCampaignAccess(campaignId, false);
 
   if (access instanceof NextResponse) return access;
 
-  return { campaignId, userId: access.userId, isDM: need.access === "dm" || access.isDM === true, via: "session", scopes: null };
+  return { campaignId, userId: access.userId, isDM: need.access === "dm" || access.isDM === true || access.isDemo === true, via: "session", scopes: null };
 }

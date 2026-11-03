@@ -11,6 +11,7 @@ import {
   SLIDE_UPLOAD_TYPES,
 } from "@/lib/constants/show";
 import { battleAudioCommandSchema } from "@/lib/schemas/music";
+import { isBundledStaticAsset, isHttpUrl } from "@/lib/utils/common/image-url";
 import type { Slide } from "@/types/show";
 
 const optionalText = (max: number) =>
@@ -27,8 +28,7 @@ const imageUrlSchema = z
   .string()
   .trim()
   .max(2000)
-  .url()
-  .refine((v) => v.startsWith("https://") || v.startsWith("http://"), "show.validation.httpUrl");
+  .refine((v) => isBundledStaticAsset(v) || isHttpUrl(v), "show.validation.httpUrl");
 
 const puzzleSpecSchema = z.object({
   cut: z.enum(["classic", "organic", "straight"]),

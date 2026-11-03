@@ -17,7 +17,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useSpellsList } from "@/lib/hooks/spells";
 
-export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
+export function DMSpellsPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("spells");
 
   const list = useSpellsList(campaignId);
@@ -33,11 +33,11 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
         subtitle={t("page.subtitle", { count })}
         actions={
           <>
-            <ContentTransferButtons campaignId={campaignId} kind="spells" />
-            <CreateSpellGroupDialog campaignId={campaignId} />
-            <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
+            {canEdit && <ContentTransferButtons campaignId={campaignId} kind="spells" />}
+            {canEdit && <CreateSpellGroupDialog campaignId={campaignId} />}
+            {canEdit && <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/spells/new`}>{t("page.create")}</Link>
-            </Button>
+            </Button>}
             {count > 0 && (
               <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
                 <Link href={`/campaigns/${campaignId}/dm/print/spells`} target="_blank" rel="noopener noreferrer">
@@ -46,7 +46,7 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
                 </Link>
               </Button>
             )}
-            <DeleteAllButton
+            {canEdit && <DeleteAllButton
               count={count}
               noun={t("deleteAll.noun")}
               confirm={{
@@ -54,11 +54,11 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
                 description: t("deleteAll.description", { count }),
               }}
               actions={{ onConfirm: list.actions.removeAll }}
-            />
+            />}
           </>
         }
       />
-      <OnboardingHint id="dm.spells" />
+      {canEdit && <OnboardingHint id="dm.spells" />}
       {list.listFilter.tags.length > 0 && (
         <HudChipTabs
           ariaLabel={t("page.listAria")}
@@ -93,6 +93,7 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
                   campaignId={campaignId}
                   spellGroups={list.view.spellGroups}
                   spellActions={{ onRemoveFromGroup: list.actions.removeFromGroup, onMoveToGroup: list.actions.moveToGroup }}
+                  canEdit={canEdit}
                 />
               ))}
             </Accordion>

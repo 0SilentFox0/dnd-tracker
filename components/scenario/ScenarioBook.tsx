@@ -10,7 +10,7 @@ export function ScenarioBook({ children, hideNotes = false, theme = null, varian
   const { width } = useAiPanelWidth();
 
   return (
-    <div style={withAi ? ({ "--ai-panel-w": `${width}px` } as CSSProperties) : undefined} className={cn("scenario-book", scenarioFontClassName, hideNotes && "hide-notes", variant === "inline" && "scenario-book--inline", withAi && "sb-with-ai")} data-theme={theme ?? undefined}>
+    <div style={withAi ? ({ "--ai-panel-w": `${width}px` } as CSSProperties) : undefined} className={cn("scenario-book", scenarioFontClassName, variant === "page" && "scenario-book--page", hideNotes && "hide-notes", variant === "inline" && "scenario-book--inline", withAi && "sb-with-ai")} data-theme={theme ?? undefined}>
       {children}
     </div>
   );

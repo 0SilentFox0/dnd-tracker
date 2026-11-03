@@ -10,14 +10,15 @@ import type { GameClassData } from "@/types/classes";
 interface ClassCardProps {
   gameClass: GameClassData;
   campaignId: string;
-  onDelete: (classId: string) => void;
+  onDelete?: (classId: string) => void;
+  canEdit?: boolean;
 }
 
-export function ClassCard({ gameClass, campaignId, onDelete }: ClassCardProps) {
+export function ClassCard({ gameClass, campaignId, onDelete, canEdit = true }: ClassCardProps) {
   const t = useTranslations();
 
   return (
-    <DmEntityCard href={`/campaigns/${campaignId}/dm/classes/${gameClass.id}`} title={gameClass.name} accent={gameClass.color ?? undefined} icon={gameClass.icon} onDelete={() => onDelete(gameClass.id)}>
+    <DmEntityCard href={`/campaigns/${campaignId}/dm/classes/${gameClass.id}`} title={gameClass.name} accent={gameClass.color ?? undefined} icon={gameClass.icon} onDelete={() => onDelete?.(gameClass.id)} canEdit={canEdit}>
       <Badge variant="outline">d{gameClass.hitDie}</Badge>
       <Badge variant="outline">{t(`classes.casters.${gameClass.caster}`)}</Badge>
       <Badge variant="outline">{t("classes.card.subclasses", { count: gameClass.subclasses.length })}</Badge>
