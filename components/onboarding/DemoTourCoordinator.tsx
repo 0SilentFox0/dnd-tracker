@@ -114,7 +114,7 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
           scrollToFirstStep
           onEvent={onEvent}
           locale={{ back: t("demoTours.controls.back"), close: t("demoTours.controls.close"), last: t("demoTours.controls.last"), next: t("demoTours.controls.next"), nextWithProgress: t("demoTours.controls.next"), skip: t("demoTours.controls.skip") }}
-          options={{ buttons: ["back", "skip", "close", "primary"], closeButtonAction: "skip", dismissKeyAction: false, showProgress: true, targetWaitTimeout: 1000, overlayClickAction: false }}
+          options={{ buttons: ["back", "skip", "close", "primary"], closeButtonAction: "skip", dismissKeyAction: false, showProgress: true, skipBeacon: true, targetWaitTimeout: 1000, overlayClickAction: false }}
         />
       )}
     </DemoTourContext.Provider>
