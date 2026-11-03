@@ -27,7 +27,7 @@ export default async function DMScenarioPageRoute({ params }: { params: Promise<
 
   return (
     <PrefetchedQuery queryKey={scenarioKeys.page(id, pageId)} data={page}>
-      <ScenarioPageClient campaignId={id} pageId={pageId} playedPages={playedPages} aiEnabled={!isDemo && isAiConfigured()} canEdit={!isDemo} />
+      <ScenarioPageClient campaignId={id} pageId={pageId} playedPages={playedPages} aiEnabled={!isDemo && isAiConfigured()} canEdit={!isDemo} isDemo={isDemo} />
     </PrefetchedQuery>
   );
 }

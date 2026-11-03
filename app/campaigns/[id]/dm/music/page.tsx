@@ -11,5 +11,5 @@ export default async function DMMusicPage({ params }: { params: Promise<{ id: st
 
   const tracks = await listTracks(id);
 
-  return isDemo ? <ReadOnlyMusicPage tracks={tracks} /> : <DMMusicPageClient campaignId={id} initialTracks={tracks} />;
+  return isDemo ? <ReadOnlyMusicPage campaignId={id} tracks={tracks} /> : <DMMusicPageClient campaignId={id} initialTracks={tracks} />;
 }

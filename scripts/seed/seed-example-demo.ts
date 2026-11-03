@@ -22,6 +22,8 @@ const MAPS = {
   vault: "/example-demo/maps/vault.jpg",
 } as const;
 
+const DEMO_UNIT_NAMES = ["Scout", "Guard Captain", "Priest Acolyte", "Treant", "Giant Wolf Spider", "Lich"] as const;
+
 const json = (value: unknown) => value as Prisma.InputJsonValue;
 
 type NamedRow = { id: string; name: string; [key: string]: unknown };
@@ -101,9 +103,23 @@ async function copySrdLibraries(campaignId: string, userId: string) {
 
   const sourceBundle = await exportCampaign(prisma, source.id);
 
-  const campaignBundle: Bundle = {
+  const rangerSpells = (sourceBundle.spells as Array<NamedRow & { lists?: string[]; level?: number }>)
+    .filter((spell) => spell.lists?.includes("Ranger") && (spell.level ?? 0) <= 5)
+    .slice(0, 15);
+
+  if (rangerSpells.length !== 15) throw new Error(`Expected 15 prepared SRD Ranger spells; found ${rangerSpells.length}.`);
+
+  const demoBundle: Bundle = {
     ...sourceBundle,
-    settings: { ...sourceBundle.settings, maxLevel: 20, allowPlayerEdit: false },
+    units: DEMO_UNIT_NAMES.map((name) => named(sourceBundle.units as NamedRow[], name, "unit")) as Bundle["units"],
+    spells: rangerSpells as Bundle["spells"],
+    // The seeded hero has no inventory, so no artifacts are used in this demo.
+    artifacts: [],
+  };
+
+  const campaignBundle: Bundle = {
+    ...demoBundle,
+    settings: { ...demoBundle.settings, maxLevel: 20, allowPlayerEdit: false },
     rules: SRD_RULES,
   };
 
@@ -121,7 +137,7 @@ async function copySrdLibraries(campaignId: string, userId: string) {
 
     const imported = await importBundle(tx, campaignBundle, campaignId);
 
-    const classEntry = rangerAtLevel20(sourceBundle, imported.idMap);
+    const classEntry = rangerAtLevel20(demoBundle, imported.idMap);
 
     const rangerRow = await tx.gameClass.findUniqueOrThrow({ where: { id: classEntry.classId } });
 
@@ -180,7 +196,7 @@ async function copySrdLibraries(campaignId: string, userId: string) {
       },
     });
 
-    return { sourceId: source.id, unitCount: sourceBundle.units.length, spellCount: sourceBundle.spells.length, idMap: imported.idMap, bundle: sourceBundle };
+    return { sourceId: source.id, unitCount: demoBundle.units.length, spellCount: demoBundle.spells.length, artifactCount: demoBundle.artifacts.length, idMap: imported.idMap, bundle: demoBundle };
   }, { timeout: 120_000, maxWait: 10_000 });
 }
 

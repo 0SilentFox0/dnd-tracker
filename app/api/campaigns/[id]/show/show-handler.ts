@@ -3,7 +3,7 @@ import { after, NextResponse } from "next/server";
 import { showCommandSchema } from "@/lib/schemas/show";
 import { applyAndWriteShowCommand } from "@/lib/server/show/command-service";
 import { publishShow, readShowState } from "@/lib/server/show/show-store";
-import { requireDM } from "@/lib/utils/api/api-auth";
+import { requireCampaignDMOrDemoAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
@@ -11,7 +11,7 @@ import type { ShowResponse } from "@/types/show";
 
 export async function commandShow(req: Request, campaignId: string): Promise<NextResponse> {
   try {
-    const access = await requireDM(campaignId);
+    const access = await requireCampaignDMOrDemoAccess(campaignId);
 
     if (access instanceof NextResponse) return access;
 

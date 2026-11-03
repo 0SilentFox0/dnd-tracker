@@ -165,8 +165,10 @@ export async function loadBattle(
     },
     participants: all.filter((p) => !p.isPending).map((p) => p.participant),
     pending: all.filter((p) => p.isPending).map((p) => p.participant),
-    isDM: membership?.role === CampaignRole.DM,
-    isMember: Boolean(membership),
+    // A demo visitor gets the standard battle controls, while campaign content
+    // writes remain protected by their separate DM/member authorization.
+    isDM: membership?.role === CampaignRole.DM || isDemoKind(row.campaign.kind),
+    isMember: Boolean(membership) || isDemoKind(row.campaign.kind),
     isDemo: isDemoKind(row.campaign.kind),
   };
 }
@@ -184,5 +186,7 @@ export async function loadBattleAccess(
 
   const membership = row.campaign.members[0];
 
-  return { version: row.version, isMember: Boolean(membership), isDM: membership?.role === CampaignRole.DM, isDemo: isDemoKind(row.campaign.kind) };
+  const isDemo = isDemoKind(row.campaign.kind);
+
+  return { version: row.version, isMember: Boolean(membership) || isDemo, isDM: membership?.role === CampaignRole.DM || isDemo, isDemo };
 }
