@@ -20,6 +20,7 @@ const MAPS = {
   alderwake: "/example-demo/maps/alderwake.jpg",
   grove: "/example-demo/maps/grove.jpg",
   vault: "/example-demo/maps/vault.jpg",
+  battle: "/example-demo/maps/battle-bg.jpeg",
 } as const;
 
 const DEMO_UNIT_NAMES = ["Scout", "Guard Captain", "Priest Acolyte", "Treant", "Giant Wolf Spider", "Lich"] as const;
@@ -286,7 +287,7 @@ async function seed(userId: string) {
       await tx.worldMap.create({ data: { id: [DEMO_IDS.maps.alderwake, DEMO_IDS.maps.grove, DEMO_IDS.maps.vault][index], campaignId: campaign.id, parentMarkerId: marker.id, name, imageUrl, width: dimensions[0], height: dimensions[1], fogEnabled: false } });
     }
 
-    const groveMap = { cols: 20, rows: 12, background: MAPS.grove, opacity: 0.35 };
+    const groveMap = { cols: 9, rows: 12, background: MAPS.battle, opacity: 0.35 };
 
     const mazeMap = { cols: 20, rows: 12, background: MAPS.vault, opacity: 0.35, maze: { ...emptyMaze("medium"), exit: { x: 18, y: 6 }, walls: ["3:0:e", "3:1:e", "3:2:e", "3:3:e", "6:4:e", "6:5:e", "6:6:e", "10:1:s", "11:1:s", "12:1:s", "13:1:s", "14:7:e", "14:8:e", "14:9:e"], teleports: [[{ x: 5, y: 10 }, { x: 16, y: 2 }]], fog: ["8:5", "8:6"], dark: false } };
 

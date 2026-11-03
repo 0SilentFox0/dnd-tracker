@@ -65,7 +65,12 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
       {row.marker && <MarkerPlay campaignId={campaignId} marker={row.marker} play={play} />}
       {slide.kind === "loading" && <span className="sb-bind sb-missing">{t("slideLoading")}</span>}
       {slide.kind === "missing" && <span className="sb-bind sb-missing">{t("slideMissing")}</span>}
-      {battle.kind === "missing" && <span className="sb-bind sb-missing">{t("battleMissing")}</span>}
+      {(battle.kind === "loading" || battle.kind === "missing") && row.battleId && (
+        <span className="sb-bind">
+          <Swords className="size-4 shrink-0" />
+          <Link className="toggle" href={`/campaigns/${campaignId}/battles/${row.battleId}`} target="_blank" rel="noopener">{t("toBattle")}</Link>
+        </span>
+      )}
       {battle.kind === "ready" && (
         <span className="sb-bind" data-battle={battle.battle.status}>
           <Swords className="size-4 shrink-0" />
