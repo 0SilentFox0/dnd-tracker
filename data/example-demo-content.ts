@@ -30,19 +30,6 @@ export const DEMO_CAMPAIGN = {
   credits: "Adventure hook inspired by Divine Golem Expedition (https://www.worldanvil.com/w/one-shot-adventures-kefkejaco/a/divine-golem-expedition-article); original adventure text. Maps: global map sourced from https://vttrpgmanager.com/wp-content/uploads/2026/08/20240703_MAP-social-media-SMALL-dnd-village-map-2.jpg; Alderwake map sourced from https://i.pinimg.com/736x/7b/b9/06/7bb9061c0431c447c7f8f848f695a4ae.jpg; Listening Grove map sourced from https://i.redd.it/yb590r6t8ff81.jpg; Root Vault map sourced from https://www.worldanvil.com/uploads/maps/29c3383c7d2742232edc4ed0863ed57a.jpg. Music: Enchanted Forest by Celestial Aeon Project (https://www.youtube.com/watch?v=uHD_AnjCRtc); all rights reserved, linked stream only; source https://mattipaalanen.bandcamp.com/track/enchanted-forest.",
 } as const;
 
-const melee = (name: string, damageDice: string, attackBonus: number, damageType: string) => ({ name, type: "melee", attackBonus, damageDice, damageType });
-
-const ranged = (name: string, damageDice: string, attackBonus: number, damageType: string, range: string) => ({ name, type: "ranged", attackBonus, damageDice, damageType, range });
-
-export const DEMO_UNITS = [
-  { id: "demo-ally-scout", name: "Lark, trail scout", level: 3, strength: 10, dexterity: 16, constitution: 12, intelligence: 11, wisdom: 14, charisma: 10, armorClass: 14, maxHp: 24, speed: 30, attacks: [ranged("Shortbow", "1d6+3", 5, "piercing", "80/320 ft")], statblock: { size: "Medium", type: "humanoid", alignment: "neutral good" } },
-  { id: "demo-ally-bellkeeper", name: "Brin, bellkeeper", level: 3, strength: 14, dexterity: 10, constitution: 14, intelligence: 10, wisdom: 13, charisma: 12, armorClass: 16, maxHp: 30, speed: 30, attacks: [melee("Bell mace", "1d6+2", 4, "bludgeoning")], statblock: { size: "Medium", type: "humanoid", alignment: "lawful good" } },
-  { id: "demo-ally-mage", name: "Orla, hedge mage", level: 3, strength: 8, dexterity: 12, constitution: 11, intelligence: 16, wisdom: 12, charisma: 10, armorClass: 12, maxHp: 18, speed: 30, attacks: [ranged("Thorn bolt", "2d4+2", 5, "force", "60 ft")], statblock: { size: "Medium", type: "humanoid", alignment: "neutral" } },
-  { id: "demo-ally-guard", name: "Sen, creek guard", level: 3, strength: 15, dexterity: 11, constitution: 14, intelligence: 9, wisdom: 11, charisma: 10, armorClass: 15, maxHp: 28, speed: 30, attacks: [melee("Spear", "1d8+2", 4, "piercing")], statblock: { size: "Medium", type: "humanoid", alignment: "lawful neutral" } },
-  { id: "demo-unit-briar-warden", name: "Briar Warden", level: 3, strength: 15, dexterity: 8, constitution: 14, intelligence: 5, wisdom: 12, charisma: 6, armorClass: 15, maxHp: 42, speed: 20, attacks: [melee("Rootbound fist", "1d8+2", 4, "bludgeoning")], statblock: { size: "Large", type: "construct", alignment: "neutral" } },
-  { id: "demo-unit-rootling", name: "Thornling", level: 1, strength: 10, dexterity: 13, constitution: 11, intelligence: 5, wisdom: 10, charisma: 6, armorClass: 12, maxHp: 9, speed: 30, attacks: [melee("Thorn swipe", "1d4+1", 3, "piercing")], statblock: { size: "Small", type: "plant", alignment: "unaligned" } },
-] as const;
-
 export const DEMO_SCENE_CONTENT: ScenarioContent = {
   legend: [
     { kind: "read", label: "Read aloud", color: "#d8c99e" },
