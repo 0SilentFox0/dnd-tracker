@@ -1,10 +1,9 @@
+import { DAY_MS } from "@/lib/constants/time";
 import { DM_STEPS, PLAYER_STEPS } from "@/lib/onboarding/checklists";
 import { CHECKLIST_HIDDEN, HIDE_ALL_HINTS_KEY, hintKey } from "@/lib/onboarding/flag-keys";
 import type { ChecklistState, OnboardingFacts, OnboardingFlags, OnboardingRole, OnboardingStep, StepVariant, WhatsNewEntry } from "@/lib/onboarding/types";
 
 const CHECKLIST_COLLAPSED_DAYS = 7;
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface StepStatus {
   id: string;

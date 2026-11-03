@@ -25,7 +25,7 @@ export async function GET(request: Request) {
 
     const battleSnapshots = await cleanupBattleSnapshots();
 
-    return NextResponse.json({ ok: true, ...result, ...notifications, battleSnapshots });
+    return NextResponse.json({ ok: true, ...result, ...notifications, battleSnapshotsDeleted: battleSnapshots.snapshots });
   } catch (error) {
     return handleApiError(error, { action: "assistant cleanup" });
   }

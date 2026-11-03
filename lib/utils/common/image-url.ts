@@ -1,4 +1,4 @@
-import { BUNDLED_STATIC_ASSET, SHARED_ASSET_PREFIX } from "@/lib/constants/storage";
+import { BUNDLED_STATIC_ASSET, ICON_BUCKETS, SHARED_ASSET_PREFIX } from "@/lib/constants/storage";
 
 export function normalizeImageUrl(src: string): string {
   try {
@@ -83,7 +83,11 @@ export function sharedAssetPath(setKey: string, fileHash: string, ext: string): 
 export function isSharedAssetUrl(url: string): boolean {
   const key = isHostedOnProjectStorage(url) ? parsePublicStorageUrl(url)?.key : undefined;
 
-  return !!key && key.slice(key.indexOf("/") + 1).startsWith(SHARED_ASSET_PREFIX);
+  if (!key) return false;
+
+  const slash = key.indexOf("/");
+
+  return (ICON_BUCKETS as readonly string[]).includes(key.slice(0, slash)) && key.slice(slash + 1).startsWith(SHARED_ASSET_PREFIX);
 }
 
 export function isBundledStaticAsset(src: string): boolean {

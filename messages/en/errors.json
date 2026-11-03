@@ -469,7 +469,7 @@
   "battleActCurrentTurnOnly": "Only the DM or whoever has the turn right now can act",
   "battleParticipantDownCannotAct": "The participant cannot act (unconscious or dead)",
   "battleParticipantCannotAct": "The participant cannot act",
-  "battleRollbackExpired": "This action can no longer be rolled back: after the battle ends only the last {kept} states are kept",
+  "battleRollbackExpired": "This action can no longer be rolled back: after the battle ends only the last {kept} states are kept, and snapshots of long-finished battles are removed entirely",
   "battleTerrainRejected": "The cell is occupied or outside the field",
   "battleBarrierRounds": "A barrier needs a duration in rounds",
   "battleAttackRollRequired": "d20Roll, attackRoll or attackRolls is required",

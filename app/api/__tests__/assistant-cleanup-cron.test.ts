@@ -26,7 +26,7 @@ describe("assistant cleanup cron route", () => {
     }));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ ok: true, expired: 2, redacted: 3, receiptsDeleted: 1, notificationsDeleted: 5, battleSnapshots: { snapshots: 4 } });
+    expect(await response.json()).toEqual({ ok: true, expired: 2, redacted: 3, receiptsDeleted: 1, notificationsDeleted: 5, battleSnapshotsDeleted: 4 });
     expect(cleanup).toHaveBeenCalledOnce();
   });
 

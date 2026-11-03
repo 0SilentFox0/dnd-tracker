@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { assertAttachAllowed, ASSET_BUCKET, assetKey, fileKeys, isAlreadyExistsError, matchAssets, objectPath, srdSlugNames } from "../attach-lib";
+import { IDENTITY_BUCKET } from "../tokens-5e/identity-catalog";
 
 import { ICON_BUCKETS } from "@/lib/constants/storage";
 
@@ -97,7 +98,13 @@ describe("isAlreadyExistsError", () => {
 });
 
 describe("ASSET_BUCKET", () => {
-  it("uses only ICON_BUCKETS members, all of them", () => {
-    expect(new Set(Object.values(ASSET_BUCKET))).toEqual(new Set(ICON_BUCKETS));
+  it("uses only ICON_BUCKETS members", () => {
+    expect(Object.values(ASSET_BUCKET).filter((b) => !(ICON_BUCKETS as readonly string[]).includes(b))).toEqual([]);
+  });
+});
+
+describe("IDENTITY_BUCKET", () => {
+  it("uses only ICON_BUCKETS members", () => {
+    expect(Object.values(IDENTITY_BUCKET).filter((b) => !(ICON_BUCKETS as readonly string[]).includes(b))).toEqual([]);
   });
 });

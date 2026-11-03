@@ -44,7 +44,7 @@ describe("GET /api/cron/assistant-cleanup", () => {
   it("runs both cleanups", async () => {
     const res = await call("s3cret");
 
-    expect(await res.json()).toEqual({ ok: true, assistant: 1, notifications: 2, battleSnapshots: { snapshots: 4 } });
+    expect(await res.json()).toEqual({ ok: true, assistant: 1, notifications: 2, battleSnapshotsDeleted: 4 });
   });
 
   it("maps a failure to the generic internal error", async () => {

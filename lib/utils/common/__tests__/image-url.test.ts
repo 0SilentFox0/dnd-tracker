@@ -115,5 +115,6 @@ describe("isSharedAssetUrl", () => {
     expect(isSharedAssetUrl(`${base}/unit-icons/cmabc/units/goblin-1234.webp`)).toBe(false);
     expect(isSharedAssetUrl("https://other.supabase.co/storage/v1/object/public/unit-icons/sets/x/a.webp")).toBe(false);
     expect(isSharedAssetUrl("not a url")).toBe(false);
+    expect(isSharedAssetUrl(`${base}/scene-slides/sets/x/y.webp`)).toBe(false);
   });
 });

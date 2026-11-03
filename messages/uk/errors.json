@@ -469,7 +469,7 @@
   "battleActCurrentTurnOnly": "Діяти може лише DM або той, хто зараз ходить",
   "battleParticipantDownCannotAct": "Учасник не може діяти (непритомний або мертвий)",
   "battleParticipantCannotAct": "Учасник не може діяти",
-  "battleRollbackExpired": "Цю дію вже не відкотити: після завершення бою зберігаються лише останні {kept} станів",
+  "battleRollbackExpired": "Цю дію вже не відкотити: після завершення бою зберігаються лише останні {kept} станів, а для давно завершених боїв знімки видаляються повністю",
   "battleTerrainRejected": "Клітинка зайнята або поза полем",
   "battleBarrierRounds": "Барʼєру потрібна тривалість у раундах",
   "battleAttackRollRequired": "d20Roll, attackRoll або attackRolls обов'язковий",
