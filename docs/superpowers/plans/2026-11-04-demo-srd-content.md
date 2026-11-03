@@ -11,6 +11,8 @@ Make the demo campaign use the repository's official 5e SRD 5.2 content and prog
 - Enable the SRD 5e class rules and level progression up to 20 for the campaign.
 - Seed the existing demo hero at level 20 using real SRD class/race/background data, including class and subclass progression through level 20.
 - Preserve the campaign ID, read-only UI and server-side write protections.
+- Show every demo visitor a DM-view badge immediately when they open the campaign; keep demo mutations disabled.
+- Make scenario book pages fill at least the full viewport height.
 - After code is deployed, run the guarded production seed and confirm campaign-scoped record counts.
 
 ## Implementation Sequence

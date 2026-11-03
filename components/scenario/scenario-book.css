@@ -20,6 +20,7 @@
 .scenario-book a { color: inherit; }
 .scenario-book :focus-visible { outline: 2px solid var(--blood); outline-offset: 3px; }
 .scenario-book .sans { font-family: var(--font-scenario-sans), system-ui, sans-serif; }
+.scenario-book--page { min-height: 100dvh; }
 
 .scenario-book .sb-bar { position: sticky; top: var(--app-header-h, 89px); z-index: 5; background: var(--page); border-bottom: 1px solid var(--rule); }
 .scenario-book .sb-bar-in { max-width: 1460px; margin: 0 auto; padding: 8px 24px; display: flex; gap: 12px; align-items: center; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 15px; }

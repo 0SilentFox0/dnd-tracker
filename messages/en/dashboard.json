@@ -123,6 +123,7 @@
     "placeholder": "Where to? (spells, mobs, battles…)"
   },
   "page": {
+    "demoDmRole": "DM · read-only",
     "demoNotice": "This is a shared read-only demo. Your battle experiments reset when you leave or reopen an encounter.",
     "templateNotice": "This is a template: changes go into new campaigns created from it; existing campaigns are not affected.",
     "compendium": {
