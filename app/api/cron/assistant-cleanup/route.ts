@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cleanupAssistantData } from "@/lib/server/assistant/cleanup";
+import { cleanupBattleSnapshots } from "@/lib/server/battles/cleanup";
 import { cleanupReadNotifications } from "@/lib/server/notifications/cleanup";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -22,7 +23,9 @@ export async function GET(request: Request) {
 
     const notifications = await cleanupReadNotifications();
 
-    return NextResponse.json({ ok: true, ...result, ...notifications });
+    const battleSnapshots = await cleanupBattleSnapshots();
+
+    return NextResponse.json({ ok: true, ...result, ...notifications, battleSnapshots });
   } catch (error) {
     return handleApiError(error, { action: "assistant cleanup" });
   }

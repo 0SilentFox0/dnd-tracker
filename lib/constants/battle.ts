@@ -42,6 +42,8 @@ export const BattleStatus = {
 
 export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
 
+export const BATTLE_SNAPSHOT_RETENTION_DAYS = 90;
+
 export const DM_ACTOR = { actorId: "dm", actorName: "", actorSide: ParticipantSide.ALLY } as const;
 
 // service actors persist an empty name; the UI translates by actorId
