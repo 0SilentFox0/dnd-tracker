@@ -300,7 +300,7 @@
     "sectionRows": "Focus: section “{title}”, {rows, plural, one {# row} other {# rows}}"
   },
   "page": {
-    "title": "AI and API",
+    "title": "AI, API and MCP",
     "titleTemplate": "API",
     "subtitle": "Tokens for external AI clients and MCP connection.",
     "subtitleTemplate": "Tokens for accessing the template content through the API.",

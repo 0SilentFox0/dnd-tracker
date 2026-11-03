@@ -58,8 +58,8 @@ export function Breadcrumbs() {
 
     const isLastSegment = i === allSegments.length - 1;
 
-    // dm/battles stay in hrefs but only get their own crumb when they are the page itself
-    if (segment === "dm" || (segment === "battles" && !isLastSegment)) {
+    // dm/battles stay in hrefs but only get their own crumb when they are the page itself; /settings has no page
+    if (segment === "dm" || segment === "settings" || (segment === "battles" && !isLastSegment)) {
       previousDisplaySegment = segment;
       continue;
     }

@@ -196,7 +196,7 @@
     "rules": "Rules",
     "artifact-sets": "Artifact sets",
     "assistant": "Assistant",
-    "ai": "AI and API"
+    "ai": "AI, API and MCP"
   },
   "dmMenu": {
     "scenario": "Scenario",
@@ -218,7 +218,7 @@
     "rules": "Rules",
     "artifact-sets": "Artifact sets",
     "assistant": "Assistant",
-    "ai": "AI and API"
+    "ai": "AI, API and MCP"
   },
   "tabs": {
     "basic": "Basics",

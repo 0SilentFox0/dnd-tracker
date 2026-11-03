@@ -91,6 +91,11 @@
       "subtitle": "Правила кампанії",
       "keywords": "налаштування"
     },
+    "ai": {
+      "title": "AI, API і MCP",
+      "subtitle": "API-токени, підключення MCP та AI-асистент",
+      "keywords": "mcp, api, токен, claude, cursor, асистент"
+    },
     "acquaintances": {
       "title": "Знайомства",
       "subtitle": "NPC, яких зустріли герої",

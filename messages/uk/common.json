@@ -196,7 +196,7 @@
     "rules": "Правила",
     "artifact-sets": "Сети артефактів",
     "assistant": "Асистент",
-    "ai": "AI і API"
+    "ai": "AI, API і MCP"
   },
   "dmMenu": {
     "scenario": "Сценарій",
@@ -218,7 +218,7 @@
     "rules": "Правила",
     "artifact-sets": "Сети артефактів",
     "assistant": "Асистент",
-    "ai": "AI і API"
+    "ai": "AI, API і MCP"
   },
   "tabs": {
     "basic": "Основне",
