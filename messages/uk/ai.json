@@ -16,7 +16,9 @@
     "battlesRead": "Читання боїв",
     "battlesWrite": "Керування боями",
     "showRead": "Читання показу",
-    "showWrite": "Керування показом"
+    "showWrite": "Керування показом",
+    "worldRead": "Перегляд карти світу",
+    "worldWrite": "Керування картою світу"
   },
   "tools": {
     "readScenarioPage": "Читаю сторінку…",

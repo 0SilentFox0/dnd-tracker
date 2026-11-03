@@ -16,7 +16,9 @@
     "battlesRead": "Read battles",
     "battlesWrite": "Manage battles",
     "showRead": "Read show",
-    "showWrite": "Manage show"
+    "showWrite": "Manage show",
+    "worldRead": "Read world map",
+    "worldWrite": "Manage world map"
   },
   "tools": {
     "readScenarioPage": "Reading the page…",

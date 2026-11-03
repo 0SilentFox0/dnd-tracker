@@ -10,6 +10,16 @@ vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
 
 const things = vi.hoisted(() => new Map<string, Record<string, unknown>>());
 
+const mcpContext = vi.hoisted(() => ({
+  campaign: { name: "The Vale", description: "A campaign", aiInstructions: "Keep canon" },
+  pages: [{ id: "page-1", title: "Arrival", kind: "scene", arc: "A", status: "active" }],
+  maps: [{ id: "map-1", name: "The Vale" }],
+}));
+
+vi.mock("@/lib/server/assistant/authorize", () => ({ authorizeAssistant: vi.fn() }));
+vi.mock("@/lib/server/scenario/page-store", () => ({ listPages: vi.fn(async () => mcpContext.pages) }));
+vi.mock("@/lib/server/world/map-store", () => ({ listWorldMaps: vi.fn(async () => mcpContext.maps) }));
+
 vi.mock("@/lib/server/content/resources", async () => {
   const { z } = await import("zod");
 
@@ -66,6 +76,7 @@ vi.mock("@/lib/db", async () => {
 
   return { prisma: contentDatabaseDouble({
     apiToken: { create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
+    campaign: { findUnique: vi.fn(async () => mcpContext.campaign) },
     campaignMember: { findMany: vi.fn() },
     user: { findUnique: vi.fn(async () => ({ locale: "uk" as const })) },
     assistantReceipt: { findFirst: vi.fn(async () => null) },
@@ -81,6 +92,18 @@ const rpc = (method: string, id: number, params: unknown = {}, token?: string) =
   });
 
 const mcpReq = (token?: string) => rpc("tools/list", 1, {}, token);
+
+async function callProtocol(method: string, params: unknown, token = "dndt_abc") {
+  const response = await POST(rpc(method, 7, params, token));
+
+  const body = await response.text();
+
+  const data = body.split("\n").find(line => line.startsWith("data:")) ?? body;
+
+  expect(response.status).toBe(200);
+
+  return JSON.parse(data.replace(/^data:\s*/, "")) as { result?: Record<string, unknown>; error?: unknown };
+}
 
 describe("API tokens + MCP", () => {
   beforeEach(() => {
@@ -216,6 +239,27 @@ describe("API tokens + MCP", () => {
 
     expect(res.status).toBe(200);
     expect(await res.text()).not.toContain("search_reference");
+  });
+
+  it("serves scoped Resources and Prompts through the MCP JSON-RPC protocol", async () => {
+    vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: null, lastUsedAt: new Date(), scopes: ["campaign:read", "scenario:read", "world:read"] } as never);
+
+    const resourceList = await callProtocol("resources/list", {});
+
+    const promptList = await callProtocol("prompts/list", {});
+
+    const resource = await callProtocol("resources/read", { uri: "dnd://campaign/camp1/brief" });
+
+    const prompt = await callProtocol("prompts/get", { name: "prepare_session", arguments: { goal: "Next session" } });
+
+    expect(resourceList.result?.resources).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "campaign_brief" }),
+      expect.objectContaining({ name: "scenario_index" }),
+      expect.objectContaining({ name: "world_map_index" }),
+    ]));
+    expect(promptList.result?.prompts).toEqual(expect.arrayContaining([expect.objectContaining({ name: "prepare_session" }), expect.objectContaining({ name: "summarize_world_travel" }), expect.objectContaining({ name: "prepare_scene" })]));
+    expect(JSON.parse(((resource.result?.contents as Array<{ text: string }>)[0]).text)).toMatchObject({ name: "The Vale" });
+    expect(((prompt.result?.messages as Array<{ content: { text: string } }>)[0]).content.text).toContain("Next session");
   });
 
   describe("content tools over MCP", () => {

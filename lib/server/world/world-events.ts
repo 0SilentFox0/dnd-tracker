@@ -11,8 +11,12 @@ let lastSeq = 0;
 /** Монотонний у межах інстансу; клієнт лише відкидає повтор того ж seq. */
 const nextSeq = () => (lastSeq = Math.max(Date.now(), lastSeq + 1));
 
-export function publishWorldChanged(campaignId: string, mapId: string | null): void {
+export async function triggerWorldChanged(campaignId: string, mapId: string | null): Promise<void> {
   const event: WorldChangedEvent = { campaignId, mapId, seq: nextSeq() };
 
-  after(() => safePusherTrigger(pusherServer, showChannelName(campaignId), WORLD_CHANGED_EVENT, event, { action: "world changed" }));
+  await safePusherTrigger(pusherServer, showChannelName(campaignId), WORLD_CHANGED_EVENT, event, { action: "world changed" });
+}
+
+export function publishWorldChanged(campaignId: string, mapId: string | null): void {
+  after(() => triggerWorldChanged(campaignId, mapId));
 }

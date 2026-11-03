@@ -13,6 +13,7 @@ import { proposeSceneSlideTool } from "./propose-slide";
 import { readReferenceTool, searchReferenceTool } from "./reference";
 import { findScenarioMentionsTool, listScenarioPagesTool, outlineScenarioPageTool, readScenarioPageTool, searchScenarioTool } from "./scenario-read";
 import { getShowStateTool } from "./show";
+import { WORLD_TOOLS } from "./world";
 
 import "server-only";
 import { type ApiTokenScope, hasScope } from "@/lib/constants/ai";
@@ -21,6 +22,7 @@ export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesToo
   getPartyTool,
   readCharacterTool,
   getShowStateTool,
+  ...WORLD_TOOLS,
   getBattleStateTool,
   searchReferenceTool,
   readReferenceTool,

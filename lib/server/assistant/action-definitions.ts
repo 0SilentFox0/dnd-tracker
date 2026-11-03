@@ -6,6 +6,7 @@ import { CONTENT_ACTIONS } from "./actions/content";
 import { HANDOFF_ACTIONS } from "./actions/handoffs";
 import { SCENARIO_ACTIONS } from "./actions/scenario";
 import { SHOW_ACTIONS } from "./actions/show";
+import { WORLD_ACTIONS } from "./actions/world";
 
 /** The sole executable catalog, assembled from the completed domain adapters. */
-export const ASSISTANT_ACTIONS = [...CONTENT_ACTIONS, ...SCENARIO_ACTIONS, ...CAMPAIGN_ACTIONS, ...CHARACTER_ACTIONS, ...CHARACTER_PROGRESSION_ACTIONS, ...BATTLE_ACTIONS, ...SHOW_ACTIONS, ...HANDOFF_ACTIONS];
+export const ASSISTANT_ACTIONS = [...CONTENT_ACTIONS, ...SCENARIO_ACTIONS, ...CAMPAIGN_ACTIONS, ...CHARACTER_ACTIONS, ...CHARACTER_PROGRESSION_ACTIONS, ...BATTLE_ACTIONS, ...SHOW_ACTIONS, ...WORLD_ACTIONS, ...HANDOFF_ACTIONS];

@@ -105,7 +105,7 @@ export const AI_SCENARIO_READ_TOOLS = ["read_scenario_page", "outline_scenario_p
 export const AI_TOOL_OUTPUT_COMPACTED = "[tool result compacted]";
 
 export const API_TOKEN_PREFIX = "dndt_";
-export const API_TOKEN_SCOPES = ["ai", "content:read", "content:write", "campaign:read", "campaign:write", "scenario:read", "scenario:write", "characters:read", "characters:write", "battles:read", "battles:write", "show:read", "show:write"] as const;
+export const API_TOKEN_SCOPES = ["ai", "content:read", "content:write", "campaign:read", "campaign:write", "scenario:read", "scenario:write", "characters:read", "characters:write", "battles:read", "battles:write", "show:read", "show:write", "world:read", "world:write"] as const;
 
 export const READ_ONLY_API_TOKEN_SCOPES = API_TOKEN_SCOPES.filter((s) => s.endsWith(":read"));
 

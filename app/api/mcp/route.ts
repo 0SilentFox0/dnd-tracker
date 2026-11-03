@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createMcpHandler } from "mcp-handler";
 
+import { registerMcpCapabilities } from "@/lib/ai/mcp-capabilities";
 import { buildToolContext } from "@/lib/ai/mcp-context";
 import { boundMcpRequest } from "@/lib/ai/mcp-request";
 import { registerMcpTools, toolsFor } from "@/lib/ai/tools";
@@ -33,7 +34,12 @@ async function handler(req: Request): Promise<Response> {
 
   if (bounded instanceof Response) return bounded;
 
-  const mcp = createMcpHandler((server) => registerMcpTools(server, tools, buildToolContext(auth, req)), {
+  const context = buildToolContext(auth, req);
+
+  const mcp = createMcpHandler((server) => {
+    registerMcpTools(server, tools, context);
+    registerMcpCapabilities(server, context);
+  }, {
     serverInfo: { name: "dnd-tracker", version: "1.0.0" },
   });
 

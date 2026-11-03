@@ -36,10 +36,19 @@ describe("AI tool registry", () => {
     expect(toolsFor(["content:read"]).some((t) => t.name === "search_reference")).toBe(false);
   });
 
+  it("world tools are least-privilege and do not appear for pre-existing grants", () => {
+    const { toolsFor } = preloadedModule0;
+
+    expect(toolsFor(["ai"]).some((tool) => tool.name.startsWith("world_"))).toBe(false);
+    expect(toolsFor(["content:read"]).some((tool) => tool.name.startsWith("world_"))).toBe(false);
+    expect(toolsFor(["world:read"]).filter((tool) => tool.name.startsWith("world_")).map((tool) => tool.name)).toEqual(["world_maps_list", "world_map_get", "world_travel_log"]);
+    expect(toolsFor(["world:write"]).filter((tool) => tool.name.startsWith("world_")).map((tool) => tool.name)).toEqual(["world_maps_list", "world_map_get", "world_travel_log", "world_action"]);
+  });
+
   it("toAiSdkTools і registerMcpTools покривають усі інструменти", async () => {
     const { AI_TOOLS, registerMcpTools, toAiSdkTools, toolsFor } = preloadedModule0;
 
-    const ctx = { campaignId: "c", userId: "u", scopes: ["ai", "content:write", "scenario:write", "show:write"] as const, threadId: null, locale: "uk" as const };
+    const ctx = { campaignId: "c", userId: "u", scopes: ["ai", "content:write", "scenario:write", "show:write", "world:write"] as const, threadId: null, locale: "uk" as const };
 
     const chatCtx = { ...ctx, scopes: ["ai"] as const };
 

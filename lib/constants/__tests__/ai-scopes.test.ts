@@ -8,6 +8,11 @@ describe("hasScope", () => {
     expect(hasScope(["content:read"], "content:write")).toBe(false);
   });
 
+  it("world:write включає world:read, але world:read не дає права на запис", () => {
+    expect(hasScope(["world:write"], "world:read")).toBe(true);
+    expect(hasScope(["world:read"], "world:write")).toBe(false);
+  });
+
   it("ai не дає прав на контент і навпаки", () => {
     expect(hasScope(["ai"], "content:read")).toBe(false);
     expect(hasScope(["content:write"], "ai")).toBe(false);
