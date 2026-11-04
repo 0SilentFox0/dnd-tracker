@@ -23,7 +23,7 @@ import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
-const defaultDeps: SpellMutationDeps = { loadPool: getCachedSummonPool, loadSpell: (id) => prisma.spell.findUnique({ where: { id } }) };
+const defaultDeps: SpellMutationDeps = { loadPool: getCachedSummonPool, loadSpell: (id, campaignId) => prisma.spell.findFirst({ where: { id, campaignId } }) };
 
 function assertLegendaryAllowed(ctx: BattleMutationContext, actor: BattleParticipant, cost: number): void {
   const blocker = legendaryBlocker(actor, currentOf(ctx), cost);

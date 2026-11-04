@@ -20,14 +20,14 @@ type UnitRow = Parameters<typeof createBattleParticipantFromUnit>[0] & { campaig
 
 export interface RefreshSourcesDeps {
   loadCharacter(id: string): Promise<CharacterRow | null>;
-  loadUnit(id: string): Promise<UnitRow | null>;
+  loadUnit(id: string, campaignId: string): Promise<UnitRow | null>;
   fromCharacter: typeof createBattleParticipantFromCharacter;
   fromUnit: typeof createBattleParticipantFromUnit;
 }
 
 const defaultDeps: RefreshSourcesDeps = {
   loadCharacter: (id) => prisma.character.findUnique({ where: { id }, include: { inventory: true } }) as Promise<CharacterRow | null>,
-  loadUnit: (id) => prisma.unit.findUnique({ where: { id } }) as Promise<UnitRow | null>,
+  loadUnit: (id, campaignId) => prisma.unit.findFirst({ where: { id, campaignId } }) as Promise<UnitRow | null>,
   fromCharacter: createBattleParticipantFromCharacter,
   fromUnit: createBattleParticipantFromUnit,
 };
@@ -47,7 +47,7 @@ export function createRefreshSourcesMutation(deps: RefreshSourcesDeps = defaultD
 
       if (cached) return cached;
 
-      const loading = type === ParticipantSourceType.CHARACTER ? deps.loadCharacter(id) : deps.loadUnit(id);
+      const loading = type === ParticipantSourceType.CHARACTER ? deps.loadCharacter(id) : deps.loadUnit(id, campaignId);
 
       rows.set(key, loading);
 

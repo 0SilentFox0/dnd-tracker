@@ -79,9 +79,9 @@ export async function findArtifactSetInCampaign(
   });
 }
 
-export async function reloadArtifactSetDetail(setId: string) {
-  const row = await prisma.artifactSet.findUnique({
-    where: { id: setId },
+export async function reloadArtifactSetDetail(campaignId: string, setId: string) {
+  const row = await prisma.artifactSet.findFirst({
+    where: { id: setId, campaignId },
     include: includeDetail,
   });
 

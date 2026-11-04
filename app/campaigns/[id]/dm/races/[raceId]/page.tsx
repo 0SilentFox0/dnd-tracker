@@ -16,7 +16,7 @@ export default async function EditRacePage({
 
   await requireCampaignDM(id);
 
-  const raceData = await prisma.race.findUnique({
+  const raceData = await prisma.race.findFirst({
     where: {
       id: raceId,
       campaignId: id,

@@ -138,7 +138,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
         return { abilities: readAbilities(kind, row).abilities };
       }
       case "skills.duplicate": {
-        const source = await owned(await prisma.skill.findUnique({ where: { id: param("skillId") } }), actor, API_ERRORS.SKILL_NOT_FOUND);
+        const source = await owned(await prisma.skill.findFirst({ where: { id: param("skillId"), campaignId: actor.campaignId } }), actor, API_ERRORS.SKILL_NOT_FOUND);
 
         const t = await getTranslator(await localeOrRequest(locale), "assistant");
 
@@ -152,7 +152,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
  return skill;
       }
       case "spells.remove-from-group": {
-        await owned(await prisma.spell.findUnique({ where: { id: param("spellId") } }), actor);
+        await owned(await prisma.spell.findFirst({ where: { id: param("spellId"), campaignId: actor.campaignId } }), actor);
 
         const result = await prisma.spell.update({ where: { id: param("spellId") }, data: { groupId: null }, include: { spellGroup: true } });
 
@@ -161,7 +161,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
  return result;
       }
       case "spell-groups.remove-all-spells": {
-        await owned(await prisma.spellGroup.findUnique({ where: { id: param("groupId") } }), actor);
+        await owned(await prisma.spellGroup.findFirst({ where: { id: param("groupId"), campaignId: actor.campaignId } }), actor);
         await prisma.spell.updateMany({ where: { campaignId: actor.campaignId, groupId: param("groupId") }, data: { groupId: null } });
         invalidate(actor, ReferenceKind.SPELLS);
 

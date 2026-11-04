@@ -18,7 +18,7 @@ export default async function EditArtifactPage({
 
   await requireCampaignDM(id);
 
-  const artifact = await prisma.artifact.findUnique({
+  const artifact = await prisma.artifact.findFirst({
     where: { id: artifactId, campaignId: id },
     include: { artifactSet: true },
   });

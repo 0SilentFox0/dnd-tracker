@@ -13,11 +13,11 @@ export default async function EditMainSkillPage({
 
   await requireCampaignDM(id);
 
-  const mainSkill = await prisma.mainSkill.findUnique({
-    where: { id: mainSkillId },
+  const mainSkill = await prisma.mainSkill.findFirst({
+    where: { id: mainSkillId, campaignId: id },
   });
 
-  if (!mainSkill || mainSkill.campaignId !== id) {
+  if (!mainSkill) {
     notFound();
   }
 

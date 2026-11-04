@@ -55,7 +55,7 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
 
     if (data.artifactIds?.length) await syncMembers(actor.campaignId, created.id, data.artifactIds);
 
-    return reloadArtifactSetDetail(created.id);
+    return reloadArtifactSetDetail(actor.campaignId, created.id);
   },
   async update(actor, existing, data) {
     const patch = data.icon !== undefined && data.icon !== existing.icon ? { ...data, icon: await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`) } : data;
@@ -66,7 +66,7 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
 
     if (data.artifactIds !== undefined) await syncMembers(actor.campaignId, existing.id, data.artifactIds);
 
-    return reloadArtifactSetDetail(existing.id);
+    return reloadArtifactSetDetail(actor.campaignId, existing.id);
   },
   remove: (actor, existing) => deleteArtifactSetAndClearArtifacts(actor.campaignId, existing.id),
 });

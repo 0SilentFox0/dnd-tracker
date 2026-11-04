@@ -11,7 +11,7 @@ async function personalSpellIds(character: CharacterFromPrisma, context?: Campai
 
   if (!id) return [];
 
-  const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findUnique({ where: { id } });
+  const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findFirst({ where: { id, campaignId: character.campaignId } });
 
   const spellId = skill ? toSpellSkillInfo(skill).grantedSpellId : null;
 

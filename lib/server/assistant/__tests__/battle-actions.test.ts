@@ -19,7 +19,7 @@ vi.mock("@/lib/db", () => ({ prisma: {
   campaignMember: { findUnique: async () => ({ role: "dm" }) },
   campaign: { findUnique: async () => ({ rules: DEFAULT_RULES }) },
   battleScene: { findFirst: async () => fixture.row, findUnique: async () => fixture.row, findMany: async () => [fixture.row] },
-  spell: { findUnique: async () => ({ id: "s", campaignId: "c", executionMode: "manual" }), findMany: async () => [] },
+  spell: { findFirst: async () => ({ id: "s", campaignId: "c", executionMode: "manual" }), findMany: async () => [] },
   character: { findMany: async () => [] }, unit: { findMany: async () => [] },
 } }));
 vi.mock("@/lib/server/battles/pipeline-deps", () => ({ defaultPipelineDeps: {
