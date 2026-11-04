@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getLayer, invalidateCampaignLayer, setLayer } from "@/lib/db/layer/cache";
+import { invalidateCampaignLayer, isPlainCampaign, markPlainCampaign } from "@/lib/db/layer/cache";
 import { campaignRelations, layeredModels } from "@/lib/db/layer/config";
 import { compareValues, sortRows } from "@/lib/db/layer/sort";
 import { createScopedDatabase, currentTransaction } from "@/lib/server/content/write-context";
@@ -55,13 +55,13 @@ describe("union ordering", () => {
 
 describe("campaign layer cache", () => {
   it("invalidates one campaign or everything", () => {
-    setLayer("c1", null);
-    setLayer("c2", null);
+    markPlainCampaign("c1");
+    markPlainCampaign("c2");
     invalidateCampaignLayer("c1");
-    expect(getLayer("c1")).toBeUndefined();
-    expect(getLayer("c2")).toBeDefined();
+    expect(isPlainCampaign("c1")).toBe(false);
+    expect(isPlainCampaign("c2")).toBe(true);
     invalidateCampaignLayer();
-    expect(getLayer("c2")).toBeUndefined();
+    expect(isPlainCampaign("c2")).toBe(false);
   });
 });
 

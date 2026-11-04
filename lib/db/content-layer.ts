@@ -1,7 +1,7 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { AsyncLocalStorage } from "node:async_hooks";
 
-import { baseRowsCache, baseRowsKey, type CampaignLayer, getLayer, invalidateCampaignLayer, layerStats, type Overlay,overlayCache, overlayKey, setLayer } from "@/lib/db/layer/cache";
+import { baseRowsCache, baseRowsKey, type CampaignLayer, invalidateCampaignLayer, isPlainCampaign, layerStats, markPlainCampaign, type Overlay, overlayCache, overlayKey } from "@/lib/db/layer/cache";
 import { BASE_ONLY, campaignRelations, isLayered, type LayerConfig, layeredModels, otherRelationKeys, type Relation } from "@/lib/db/layer/config";
 import { orderKeys, sortRows } from "@/lib/db/layer/sort";
 import { afterContentCommit, currentContentWrite, currentTransaction, markContentDirty } from "@/lib/server/content/write-context";
@@ -30,14 +30,31 @@ interface Ctx { raw: Raw; ext: Raw }
 
 const bypass = new AsyncLocalStorage<true>();
 
-const cachingAllowed = () => !currentContentWrite();
+/** Overlays may reflect writes that are not committed (or not yet counted in contentVersion) inside a write context or open transaction. */
+const overlayCachingAllowed = () => !currentContentWrite() && !currentTransaction();
 
 const txOrWrite = (): Raw | undefined => (currentContentWrite()?.db as Raw | undefined) ?? (currentTransaction() as Raw | undefined);
 
-async function campaignLayer(ctx: Ctx, campaignId: string): Promise<CampaignLayer | null> {
-  const hit = getLayer(campaignId);
+const scopeOf = (): object | undefined => (currentContentWrite() as object | undefined) ?? (currentTransaction() as object | undefined);
 
-  if (hit) return hit.layer;
+/** One layer lookup per campaign inside a write context / transaction; outside one every call reads fresh. */
+const scoped = new WeakMap<object, Map<string, CampaignLayer | null>>();
+
+const forgetScoped = (campaignId?: string) => {
+  const memo = scoped.get(scopeOf() ?? {});
+
+  if (campaignId) memo?.delete(campaignId);
+  else memo?.clear();
+};
+
+async function campaignLayer(ctx: Ctx, campaignId: string): Promise<CampaignLayer | null> {
+  if (isPlainCampaign(campaignId)) return null;
+
+  const scope = scopeOf();
+
+  const memo = scope && scoped.get(scope);
+
+  if (memo?.has(campaignId)) return memo.get(campaignId) ?? null;
 
   layerStats.campaignLookups += 1;
 
@@ -45,7 +62,8 @@ async function campaignLayer(ctx: Ctx, campaignId: string): Promise<CampaignLaye
 
   const layer = row?.baseSourceId && row.baseVersion != null ? { sourceId: row.baseSourceId as string, version: row.baseVersion as number, contentVersion: (row.contentVersion as number) ?? 0 } : null;
 
-  setLayer(campaignId, layer);
+  if (scope) scoped.set(scope, (memo ?? new Map()).set(campaignId, layer));
+  else if (row && !layer) markPlainCampaign(campaignId);
 
   return layer;
 }
@@ -128,7 +146,7 @@ const local = (ctx: Ctx, config: LayerConfig): Raw =>
 async function overlayOf(ctx: Ctx, config: LayerConfig, campaignId: string, layer: CampaignLayer): Promise<Overlay> {
   const key = overlayKey(campaignId, layer, config.model);
 
-  const cacheable = cachingAllowed();
+  const cacheable = overlayCachingAllowed();
 
   const hit = cacheable ? overlayCache.get(key) : undefined;
 
@@ -168,7 +186,7 @@ async function baseVisible(ctx: Ctx, config: LayerConfig, layer: CampaignLayer, 
 
   const signature = ids ? "*" : stableStringify(rest);
 
-  const cacheable = cachingAllowed() && signature.length <= SIGNATURE_MAX;
+  const cacheable = signature.length <= SIGNATURE_MAX;
 
   if (!cacheable) return ctx.raw[config.base].findMany({ where: toBaseWhere(rest, layer) });
 
@@ -636,6 +654,8 @@ export function contentLayer() {
               const id = (a.where as Row | undefined)?.id;
 
               invalidateCampaignLayer(typeof id === "string" ? id : undefined);
+
+              forgetScoped(typeof id === "string" ? id : undefined);
 
               afterContentCommit(() => invalidateCampaignLayer(typeof id === "string" ? id : undefined));
 

@@ -205,17 +205,65 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
   });
 
   describe("caches", () => {
-    it("a repeated layered read costs one query (local rows); a content write invalidates through the version bump", async () => {
+    it("a repeated layered read costs the campaign lookup plus local rows; a content write invalidates through the version bump", async () => {
       invalidateCampaignLayer();
       await D.spell.findMany({ where: { campaignId: ids.latest } });
 
       queries.length = 0;
       expect(await D.spell.findMany({ where: { campaignId: ids.latest } })).toHaveLength(3);
-      expect(queries).toHaveLength(1);
+      expect(queries).toHaveLength(2);
+      expect(queries.filter((q) => q.includes('FROM "public"."campaigns"'))).toHaveLength(1);
 
       await inWrite(ids.latest, (tx) => tx.spell.delete({ where: { id: rid(FIXTURES[1], "a") } }));
       expect(await D.spell.findMany({ where: { campaignId: ids.latest } })).toHaveLength(2);
       expect((await raw.campaign.findUnique({ where: { id: ids.latest }, select: { contentVersion: true } }))?.contentVersion).toBe(1);
+    });
+
+    it("another instance bumping contentVersion or baseVersion is seen without any invalidation", async () => {
+      const id = `${marker}-stale`;
+
+      await newCampaign(id, { baseSourceId: ids.template, baseVersion: 1 });
+      invalidateCampaignLayer();
+
+      const names = async () => labels(FIXTURES[1], await D.spell.findMany({ where: { campaignId: id }, orderBy: { name: "asc" } }));
+
+      expect(await names()).toEqual(["Alpha", "Bravo", "Charlie"]);
+
+      await raw.spell.create({ data: { ...localRow(FIXTURES[1], id, "x", "Xray") } });
+      await raw.campaignContentHide.create({ data: { campaignId: id, table: "spells", id: rid(FIXTURES[1], "a") } });
+      await raw.campaign.update({ where: { id }, data: { contentVersion: { increment: 1 } } });
+
+      expect(await names()).toEqual(["Bravo", "Charlie", "Xray"]);
+
+      await raw.campaign.update({ where: { id }, data: { baseVersion: 2 } });
+
+      expect(await names()).toEqual(["Bravo", "Delta", "Xray"]);
+    });
+
+    it("a plain campaign is looked up once; a campaign created after a miss is not remembered as plain", async () => {
+      const id = `${marker}-late`;
+
+      invalidateCampaignLayer();
+      expect(await D.spell.findMany({ where: { campaignId: id } })).toEqual([]);
+
+      await newCampaign(id, { baseSourceId: ids.template, baseVersion: 1 });
+
+      expect(await D.spell.count({ where: { campaignId: id } })).toBe(3);
+    });
+
+    it("a layer read inside a rolled back transaction leaves nothing behind", async () => {
+      const id = `${marker}-rolled`;
+
+      await newCampaign(id);
+      invalidateCampaignLayer();
+
+      await expect(inWrite(id, async (tx) => {
+        await tx.campaign.update({ where: { id }, data: { baseSourceId: ids.template, baseVersion: 2 } });
+        expect(await tx.spell.count({ where: { campaignId: id } })).toBe(3);
+        throw new Error("rollback");
+      })).rejects.toThrow("rollback");
+
+      expect(await D.spell.count({ where: { campaignId: id } })).toBe(0);
     });
 
     it("base rows are shared between campaigns on one template version", async () => {
