@@ -186,6 +186,7 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
       isHit: !!hit,
       isCritical: !!hit && attackRoll.isCritical,
       isCriticalFail: attackRoll.isCriticalFail,
+      ...(attackRoll.percentile && { percentile: attackRoll.percentile }),
       ...(crit && { criticalEffect: critDetails(crit, p.critFlavor) }),
       ...(hit && {
         damageRolls: damageRollDetails(attack, hit.damageRolls),

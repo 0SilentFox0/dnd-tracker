@@ -417,6 +417,7 @@
       }
     },
     "critHit": "🩸 Критична рана для {target} (+{bonus} шкоди): {text}",
+    "critWound": "🩸 Критична рана для {target}: {text}",
     "unconscious": "💤 {name} падає на 0 Ран і втрачає свідомість"
   },
   "percentile": {

@@ -18,7 +18,6 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, DamageRow } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -84,6 +83,14 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
     put(flow, applyDamageToTarget(guardian, guarded.guardianDamage));
     applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical, p.attackRoll.percentile?.location);
+
+    if (hitDamage.afterHit && guarded.guardianDamage > 0) {
+      const applied = hitDamage.afterHit(getP(flow, guarded.guardianId), p.currentRound);
+
+      put(flow, applied.participant);
+      flow.messages.push(applied.message);
+    }
+
     flow.messages.push(textRef("battleLog.attack.guard", { guardian: guardian.basicInfo.name, damage: guarded.guardianDamage, target: getP(flow, targetId).basicInfo.name }));
     settleDowned(flow, guarded.guardianId, attackerId);
   }
@@ -134,6 +141,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
       battleId: p.battleId,
       attackKind: attackKindOf(attack.type),
       rng: flow.ctx.rng,
+      rules: flow.ctx.rules,
     });
 
     flow.ps = cast.participants;
@@ -196,7 +204,7 @@ function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, h
 
     if (amount <= 0) continue;
 
-    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size, flow.ctx.rules ?? DEFAULT_RULES);
+    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size, flow.ctx.rules);
 
     const r = dealResistedHits(flow.ps, victims.map((targetId) => ({ targetId, amount })), { actorId: attackerId, damageType: "fire", rules: flow.ctx.rules, rng: flow.ctx.rng });
 

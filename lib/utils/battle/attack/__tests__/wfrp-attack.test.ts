@@ -116,6 +116,26 @@ describe("WFRP percentile attack", () => {
     expect(lost.targetUpdated.battleData.momentum).toBe(true);
   });
 
+  it("the defender's Momentum is spent when it applies and the loser side never keeps one", () => {
+    const held = fighter("t", ParticipantSide.ENEMY, { momentum: true });
+
+    const won = strike(30, 80, { target: held });
+
+    expect(won.attackRoll.percentile?.defender?.sl).toBe(strike(30, 80).attackRoll.percentile!.defender!.sl + 1);
+    expect(won.targetUpdated.battleData.momentum).toBe(false);
+    expect(won.attackerUpdated.battleData.momentum).toBe(true);
+
+    const both = strike(30, 80, { attacker: fighter("a", ParticipantSide.ALLY, { momentum: true }), target: held });
+
+    expect(both.attackerUpdated.battleData.momentum).toBe(true);
+    expect(both.targetUpdated.battleData.momentum).toBe(false);
+
+    const defended = strike(70, 10, { target: held });
+
+    expect(defended.targetUpdated.battleData.momentum).toBe(true);
+    expect(defended.attackerUpdated.battleData.momentum).toBeFalsy();
+  });
+
   it("outnumbering adds a bonus to the attacker target", () => {
     const cell = (x: number, y: number) => ({ x, y });
 

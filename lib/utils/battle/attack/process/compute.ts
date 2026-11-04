@@ -21,7 +21,7 @@ import { effectName } from "@/lib/utils/battle/common/terms";
 import { dealsNoDamage, findEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { MitigateResult } from "@/lib/utils/rules/systems/types";
 import type { BattleAttack, BattleParticipant, DamageRow, DamageStep } from "@/types/battle";
@@ -34,7 +34,7 @@ export interface ComputeHitDamageParams {
   damageRolls: number[];
   allParticipants: BattleParticipant[];
   attackRoll: { isCritical: boolean; criticalEffect?: CriticalEffect; percentile?: PercentileAttackDetails };
-  rules?: Ruleset;
+  rules: Ruleset;
   damageMultiplier?: number;
   currentRound: number;
   actionModifiers?: StaticEffect[];
@@ -132,14 +132,16 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     attackKindOf(attack.type),
   );
 
-  const mitigated = mitigateHit({ ...params, rules: params.rules ?? DEFAULT_RULES }, { attacker: updatedAttacker, target: updatedTarget, weapon: baseDamage, amount: resistanceResult.finalDamage });
+  const mitigated = mitigateHit({ ...params, rules: params.rules }, { attacker: updatedAttacker, target: updatedTarget, weapon: baseDamage, amount: resistanceResult.finalDamage });
 
   if (mitigated) {
     state.steps = mitigated.steps;
     damageCalculation.breakdown = mitigated.rows;
   }
 
-  const unhalvedDamage = (mitigated?.amount ?? resistanceResult.finalDamage) + totalAdditionalDamage;
+  const targetDamage = mitigated ? Math.floor(mitigated.amount * dmgMult) : resistanceResult.finalDamage;
+
+  const unhalvedDamage = targetDamage + totalAdditionalDamage;
 
   const pacified = dealsNoDamage(attacker);
 
@@ -147,7 +149,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   if (pacified) damageCalculation.breakdown.push({ label: textRef("battleLog.damage.rows.pacified"), tone: "note" });
 
-  if (dmgMult !== 1) state.steps.push({ label: textRef("battleLog.damage.steps.share"), side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
+  if (dmgMult !== 1) state.steps.push({ label: textRef("battleLog.damage.steps.share"), side: "attacker", kind: "multiplier", value: dmgMult, after: mitigated ? targetDamage : physicalDamageForTarget });
 
   state.steps.push(...resistanceResult.steps);
 

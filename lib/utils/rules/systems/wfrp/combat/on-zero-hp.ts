@@ -22,7 +22,7 @@ export function wfrpOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
 
   // a doubles crit (ctx.crit) was already rolled for this blow
   if (!ctx.manual && !ctx.crit) {
-    const applied = applyWfrpCrit(next, rollCrit(ctx.location ?? "body", ctx.rng), ctx.round ?? 0);
+    const applied = applyWfrpCrit(next, { ...rollCrit(ctx.location ?? "body", ctx.rng), bonusDamage: 0 }, ctx.round ?? 0);
 
     next = applied.participant;
     messages.push(applied.message);

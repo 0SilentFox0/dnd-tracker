@@ -417,6 +417,7 @@
       }
     },
     "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
+    "critWound": "🩸 Critical wound for {target}: {text}",
     "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious"
   },
   "percentile": {

@@ -125,7 +125,7 @@ export function settleStatusChange(before: BattleParticipant, after: BattleParti
 
   const onZeroHp = ruleSystemOf(rules).combat.onZeroHp;
 
-  if (onZeroHp) return onZeroHp({ before, after, amount: 0, rules, rng: Math.random, participants, manual: true });
+  if (onZeroHp) return onZeroHp({ before, after, amount: 0, rules, rng: () => 0, participants, manual: true });
 
   let next = after;
 

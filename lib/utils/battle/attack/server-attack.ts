@@ -1,6 +1,7 @@
 import { buildOffTurnAction, type BuildOffTurnParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
 import { spendRidersOnMiss } from "./process/hit-rider";
+import { percentileLines } from "./process/percentile-log";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
 import { critDamageRolls, critDoublesDice } from "./crit-dice";
 import { applyCriticalEffect, critFlavorOf } from "./critical";
@@ -14,7 +15,6 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { parseDiceLenient, rollDie, rollGroups } from "@/lib/utils/common/dice";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { RuleSystemCombat } from "@/lib/utils/rules/systems/types";
 import type { BattleAction, BattleAttack } from "@/types/battle";
@@ -54,7 +54,9 @@ function judgeServerWfrp(flow: ActionFlow, input: Pick<ServerAttackInput, "attac
 
   const target = getP(flow, targetId);
 
-  const r = resolve({ attacker, target, attack: input.attack, participants: flow.ps, rules: flow.ctx.rules ?? DEFAULT_RULES, rng: input.rng, momentum: { attacker: false, defender: false } });
+  const r = resolve({ attacker, target, attack: input.attack, participants: flow.ps, rules: flow.ctx.rules, rng: input.rng, momentum: { attacker: false, defender: false } });
+
+  flow.messages.push(...percentileLines(r.attackRoll.percentile, r.isHit));
 
   return { roll: r.attackRoll, targetAC: r.attackRoll.percentile?.defender?.target ?? 0, isHit: r.isHit };
 }
@@ -87,7 +89,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
   const existedBefore = activeEffectIds(before);
 
-  const resolveHook = ruleSystemOf(flow.ctx.rules ?? DEFAULT_RULES).combat.resolveAttack;
+  const resolveHook = ruleSystemOf(flow.ctx.rules).combat.resolveAttack;
 
   const { roll, targetAC, isHit } = resolveHook ? judgeServerWfrp(flow, input, resolveHook) : judgeServerD20(flow, input);
 
@@ -98,7 +100,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
     const single = rollGroups(parseDiceLenient(formula).groups, rng);
 
-    const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
+    const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) && !ruleSystemOf(flow.ctx.rules).combat.mitigateDamage ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
 
     const { hitDamage } = resolveHit({
       flow,

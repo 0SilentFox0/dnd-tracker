@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { importUnitsSchema } from "@/lib/schemas/units";
+import { loadRules } from "@/lib/server/campaigns/rules";
 import { parseTable } from "@/lib/utils/content/import/table";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 import { convertCSVRowToUnit } from "@/lib/utils/units/unit-parsing";
@@ -56,7 +57,7 @@ async function main() {
 
   const { units } = importUnitsSchema.parse({ units: csvRows.map(convertCSVRowToUnit) });
 
-  const report = await importUnitsIntoCampaign(prisma, campaignId, units);
+  const report = await importUnitsIntoCampaign(prisma, campaignId, units, await loadRules(campaignId));
 
   console.log(`✅ Імпортовано: ${report.imported}`);
   console.log(`   - Пропущено (така назва вже є): ${report.skipped}`);

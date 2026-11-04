@@ -3,6 +3,7 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { spendRidersOnMiss } from "./hit-rider";
 import { handleMiss } from "./miss";
+import { percentileLines } from "./percentile-log";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -25,7 +26,6 @@ import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import { rngOf } from "@/lib/utils/common/rng";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { RuleSystemCombat } from "@/lib/utils/rules/systems/types";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -77,7 +77,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (!isAttackable(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) return abortedResult(run);
 
-  const resolveHook = ruleSystemOf(flow.ctx.rules ?? DEFAULT_RULES).combat.resolveAttack;
+  const resolveHook = ruleSystemOf(flow.ctx.rules).combat.resolveAttack;
 
   const judged = resolveHook ? judgeWfrp(run, resolveHook) : judgeD20(run, actionModifiers);
 
@@ -130,7 +130,7 @@ function spendAttackAction(run: AttackRun): void {
 
   const attacker = getP(flow, attackerId);
 
-  put(flow, params.offHand && ruleSystemOf(flow.ctx.rules ?? DEFAULT_RULES).combat.actionEconomy.bonusAction ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
+  put(flow, params.offHand && ruleSystemOf(flow.ctx.rules).combat.actionEconomy.bonusAction ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
 }
 
 function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult {
@@ -162,7 +162,7 @@ function abortedResult(run: AttackRun): ProcessAttackResult {
 function abortedRoll(run: AttackRun): AttackRollResult {
   const { flow, attackerId, params } = run;
 
-  if (ruleSystemOf(flow.ctx.rules ?? DEFAULT_RULES).combat.resolveAttack) {
+  if (ruleSystemOf(flow.ctx.rules).combat.resolveAttack) {
     return { isHit: false, isCritical: false, isCriticalFail: false, totalAttackValue: params.d20Roll, attackBonus: 0, advantageUsed: false, chosenD20: params.d20Roll };
   }
 
@@ -211,7 +211,9 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
 
   const target = getP(flow, targetId);
 
-  const rules = flow.ctx.rules ?? DEFAULT_RULES;
+  const rules = flow.ctx.rules;
+
+  const held = { attacker: momentumOf(flow.ps, attacker.basicInfo.side), defender: momentumOf(flow.ps, target.basicInfo.side) };
 
   const r = resolve({
     attacker,
@@ -221,22 +223,25 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
     rules,
     rng: flow.ctx.rng,
     manualRoll: params.d20Roll,
-    momentum: { attacker: momentumOf(flow.ps, attacker.basicInfo.side), defender: momentumOf(flow.ps, target.basicInfo.side) },
+    momentum: held,
   });
 
   if (r.momentum.spent) setMomentum(flow, attacker.basicInfo.side, false);
 
-  if (r.momentum.gainedBy) setMomentum(flow, r.momentum.gainedBy === "attacker" ? attacker.basicInfo.side : target.basicInfo.side, true);
+  if (held.defender) setMomentum(flow, target.basicInfo.side, false);
 
-  const p = r.attackRoll.percentile;
+  const winnerSide = r.momentum.gainedBy && (r.momentum.gainedBy === "attacker" ? attacker.basicInfo.side : target.basicInfo.side);
 
-  if (p) flow.messages.push(textRef(p.defender ? "battleLog.percentile.opposed" : "battleLog.percentile.test", { roll: p.roll, target: p.target, sl: p.sl, defRoll: p.defender?.roll ?? 0, defTarget: p.defender?.target ?? 0, defSl: p.defender?.sl ?? 0, defense: p.defender ? textRef(`battleLog.percentile.defense.${p.defender.kind}`) : "", netSl: p.netSl }));
+  if (winnerSide) {
+    setMomentum(flow, winnerSide, true);
+    setMomentum(flow, winnerSide === attacker.basicInfo.side ? target.basicInfo.side : attacker.basicInfo.side, false);
+  }
 
-  if (p?.doubles && !r.isHit) flow.messages.push(textRef("battleLog.percentile.doublesMiss"));
+  flow.messages.push(...percentileLines(r.attackRoll.percentile, r.isHit));
 
-  if (r.momentum.gainedBy) flow.messages.push(textRef("battleLog.percentile.momentum"));
+  if (winnerSide && !(winnerSide === attacker.basicInfo.side ? held.attacker : held.defender)) flow.messages.push(textRef("battleLog.percentile.momentum"));
 
-  return { second: undefined, targetAC: p?.defender?.target ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
+  return { second: undefined, targetAC: r.attackRoll.percentile?.defender?.target ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
 }
 
 function judgeHit(run: AttackRun, rolled: AttackRollResult, targetAC: number, actionModifiers: Modifiers): { isHit: boolean; attackRoll: AttackRollResult } {
@@ -288,7 +293,7 @@ function withRollDetails<T extends { actionDetails: BattleAction["actionDetails"
 function doubleCritDice(run: AttackRun, attackRoll: AttackRollResult, dice: DiceState): void {
   const { flow, attackerId, params } = run;
 
-  if (!critDoublesDice(flow.ctx.rules, attackRoll.isCritical) || ruleSystemOf(flow.ctx.rules ?? DEFAULT_RULES).combat.mitigateDamage) return;
+  if (!critDoublesDice(flow.ctx.rules, attackRoll.isCritical) || ruleSystemOf(flow.ctx.rules).combat.mitigateDamage) return;
 
   const doubled = critDamageRolls({ formula: heroAttackDamageParts(getP(flow, attackerId), params.attack).formula, rolls: dice.damageRolls, rng: flow.ctx.rng });
 
