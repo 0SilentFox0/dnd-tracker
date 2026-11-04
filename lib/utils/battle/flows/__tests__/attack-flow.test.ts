@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { attackFlow, type AttackFlowAction, type AttackFlowState, attackPayload, effectiveD20, initialAttackFlow, strikeMode } from "@/lib/utils/battle/flows";
+import { attackFlow, type AttackFlowAction, type AttackFlowState, attackPayload, effectiveD20, initialAttackFlow, lockedRollSource, strikeMode } from "@/lib/utils/battle/flows";
 
 const run = (...actions: AttackFlowAction[]) => actions.reduce<AttackFlowState>(attackFlow, initialAttackFlow);
 
@@ -287,5 +287,24 @@ describe("attackFlow", () => {
 
     expect(done.step).toBe("submitting");
     expect(attackPayload(done, "me")).toMatchObject({ attackRolls: [55, 100], damageRolls: [] });
+  });
+
+  it("d100: the roll source is locked by the first strike so modes cannot mix", () => {
+    const start = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" });
+
+    expect(lockedRollSource(start)).toBeUndefined();
+
+    const manual = attackFlow(start, { type: "ROLL", d20: 40, outcome: "hit", percentile: true });
+
+    expect(lockedRollSource(manual)).toBe("manual");
+
+    const server = attackFlow(start, { type: "ROLL", outcome: "hit", percentile: true });
+
+    expect(lockedRollSource(server)).toBe("server");
+
+    const done = attackFlow(manual, { type: "ROLL", d20: 12, outcome: "hit", percentile: true });
+
+    expect(attackPayload(done, "me")).toMatchObject({ attackRolls: [40, 12] });
+    expect(attackPayload(done, "me")).not.toHaveProperty("serverRoll");
   });
 });

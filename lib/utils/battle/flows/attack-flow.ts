@@ -187,6 +187,13 @@ export function forcedModeOf(p: Pick<PredictedAttack, "mode" | "forced" | "reaso
   return { mode: "normal", reason: textRef("battleWizards.flow.forced.cancelled", { advantage: joinLines(advantage, ", "), disadvantage: joinLines(disadvantage, ", ") }) };
 }
 
+/** d100: the roll source is fixed by the first strike; undefined while it is still free to choose */
+export function lockedRollSource(s: Pick<AttackFlowState, "strikes" | "index">): "server" | "manual" | undefined {
+  if (s.index === 0 || s.strikes.length === 0) return undefined;
+
+  return s.strikes[0].d20 === undefined ? "server" : "manual";
+}
+
 export function strikeMode(s: Pick<AttackFlowState, "mode">, strike: Strike | undefined): AttackMode {
   return strike?.forced?.mode ?? s.mode;
 }
