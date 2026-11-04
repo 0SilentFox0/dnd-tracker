@@ -68,7 +68,7 @@ async function campaignLayer(ctx: Ctx, campaignId: string): Promise<CampaignLaye
   const layer = row?.baseSourceId && row.baseVersion != null ? { sourceId: row.baseSourceId as string, version: row.baseVersion as number, contentVersion: (row.contentVersion as number) ?? 0 } : null;
 
   if (scope) scoped.set(scope, (memo ?? new Map()).set(campaignId, layer));
-  else if (row && !layer) markPlainCampaign(campaignId);
+  else if (row && !row.baseSourceId) markPlainCampaign(campaignId);
 
   return layer;
 }

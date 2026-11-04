@@ -112,7 +112,7 @@ export async function scanResiduals(db: object, args: { campaignId: string; remo
   const bump = (map: Map<string, number>, key: string) => map.set(key, (map.get(key) ?? 0) + 1);
 
   for (const r of REFERRERS) {
-    if (r.mode === "global" || !r.scope) continue;
+    if (r.mode === "global" || r.mode === "special" || !r.scope) continue;
 
     const rows = await bypassLayer(() => referrerRows(db, r, args.campaignId));
 
@@ -124,7 +124,7 @@ export async function scanResiduals(db: object, args: { campaignId: string; remo
       let historyHit = false;
 
       for (const [column, value] of Object.entries(row)) {
-        if (r.mode === "content" && column === "id") continue;
+        if (r.mode === "content" && (column === "id" || column === "sourceId")) continue;
 
         for (const text of stringsOf(value)) {
           for (const token of cuidTokens(text)) {

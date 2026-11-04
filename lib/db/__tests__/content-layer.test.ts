@@ -114,6 +114,23 @@ describe("plain campaign mark TTL", () => {
     expect(await read()).toBe(1);
     expect(layerStats.campaignLookups).toBe(afterFirst + 1);
   });
+
+  it("does not mark a campaign plain when baseSourceId is set but baseVersion is not", async () => {
+    const raw = { campaign: { findUnique: async () => ({ id: "half-c", baseSourceId: "tpl", baseVersion: null, contentVersion: 0 }) } };
+
+    let hook: (input: { model: string; operation: string; args: unknown; query: (args: unknown) => Promise<unknown> }) => Promise<unknown> = async () => undefined;
+
+    const client = { ...raw, $extends: (def: { query: { $allModels: { $allOperations: typeof hook } } }) => { hook = def.query.$allModels.$allOperations;
+
+ return {}; } };
+
+    (contentLayer() as unknown as (c: unknown) => unknown)(client);
+    invalidateCampaignLayer();
+
+    await hook({ model: "Spell", operation: "count", args: { where: { campaignId: "half-c" } }, query: async () => 0 }).catch(() => undefined);
+
+    expect(isPlainCampaign("half-c")).toBe(false);
+  });
 });
 
 describe("scoped transactions", () => {

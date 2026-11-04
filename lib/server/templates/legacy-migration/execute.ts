@@ -86,7 +86,7 @@ export async function writeMigration(tx: Prisma.TransactionClient, args: { input
 
   await tx.campaignSourceSync.upsert({
     where: { campaignId },
-    update: { ignored, sourceVersion: version },
+    update: { ignored, sourceVersion: version, sourceCampaignId: sourceId },
     create: { campaignId, sourceCampaignId: sourceId, sourceVersion: version, baseline: { tables: {}, rules: {} }, ignored },
   });
 

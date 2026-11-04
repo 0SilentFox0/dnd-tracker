@@ -8,12 +8,12 @@ import { referrerUpdates, writeMigration } from "@/lib/server/templates/legacy-m
 import { loadMigrationInput } from "@/lib/server/templates/legacy-migration/load";
 import { findDroppedNotifications } from "@/lib/server/templates/legacy-migration/notifications";
 import { planLegacyMigration } from "@/lib/server/templates/legacy-migration/plan";
-import { writePreImage } from "@/lib/server/templates/legacy-migration/preimage";
+import { discardPreImage, finalizePreImage, writePreImage } from "@/lib/server/templates/legacy-migration/preimage";
 import { type Referrer, REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
 import { LegacyMigrationError, type MigrationInput, type MigrationPlan, type MigrationReport, type PreImage, type ReferrerReport, type TableReport } from "@/lib/server/templates/legacy-migration/types";
 import { verifyMigration } from "@/lib/server/templates/legacy-migration/verify";
 
-export { undoMigration } from "@/lib/server/templates/legacy-migration/preimage";
+export { undoMigration } from "@/lib/server/templates/legacy-migration/undo";
 
 export type ExtendedPrisma = PrismaClient;
 
@@ -136,7 +136,9 @@ export interface MigrateSeams { registry?: readonly Referrer[]; mapPlan?: (plan:
 export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: string; preImageDir: string; seams?: MigrateSeams }): Promise<MigrationReport & { preImagePath?: string }> {
   const { campaignId, preImageDir, seams } = args;
 
-  return db.$transaction((tx) => runContentWriteContext(campaignId, tx, async () => {
+  let pending: string | undefined;
+
+  const report = await db.$transaction((tx) => runContentWriteContext(campaignId, tx, async () => {
     await lockCampaignRow(tx, campaignId, "update");
 
     const campaign = await campaignOf(tx, campaignId);
@@ -171,12 +173,18 @@ export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: st
       postContentVersion: contentVersion + 1,
     };
 
-    const preImagePath = await writePreImage(preImageDir, image);
+    pending = await writePreImage(preImageDir, image);
 
     await writeMigration(tx, { input, plan });
 
     const residuals = await verifyMigration(tx, { input, plan });
 
-    return { ...reportOf({ name, input, plan, status: "migrated" }), residuals, preImagePath };
-  }), TX_OPTIONS);
+    return { ...reportOf({ name, input, plan, status: "migrated" }), residuals };
+  }), TX_OPTIONS).catch(async (e: unknown) => {
+    if (pending) await discardPreImage(pending);
+
+    throw e;
+  });
+
+  return pending ? { ...report, preImagePath: await finalizePreImage(pending) } : report;
 }

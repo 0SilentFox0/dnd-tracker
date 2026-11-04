@@ -344,10 +344,10 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 
 1. Блокування рядка кампанії → eligibility (`ALREADY_LAYERED`, `PROTECTED`, `NO_SOURCE`, `IS_TEMPLATE`, `ACTIVE_BATTLE`, `SOURCE_*`, `LOCALIZED_CONTENT`, `HAS_DERIVED_CAMPAIGNS`) → `FOR UPDATE` для remap-посилальників.
 2. Завантаження, чистий план (`ID_COLLISION` — блокер), відкидання колізійних сповіщень.
-3. Pre-image (`.migration-backup/legacy-layers/<campaignId>-<ts>.json.gz`, у `.gitignore`) → запис (таблиці deleteMany+createMany, hides, `campaign_source_syncs`, посилання, `baseSourceId`/`baseVersion`, `contentVersion` +1).
-4. Верифікація: скан залишків (`RESIDUAL_REFS`), еквівалентність видимого контенту до/після й паритет sync (`VERIFY_MISMATCH`). Будь-яка помилка = rollback, нуль змін.
+3. Pre-image пишеться як `.migration-backup/legacy-layers/<campaignId>-<ts>.json.gz.pending` (у `.gitignore`) → запис (таблиці deleteMany+createMany, hides, `campaign_source_syncs`, посилання, `baseSourceId`/`baseVersion`, `contentVersion` +1).
+4. Верифікація: скан залишків (`RESIDUAL_REFS`), еквівалентність видимого контенту до/після й паритет sync (`VERIFY_MISMATCH`). Будь-яка помилка = rollback, нуль змін, `.pending` видаляється; після commit файл перейменовується на `.json.gz`. `--verify`/`--undo` відхиляють `.pending` (міграція не закомічена), тож невдалий apply не лишає придатного pre-image.
 
-`--verify <pre-image>` перевіряє вже закомічену кампанію; `--undo <pre-image>` відновлює legacy-стан, якщо `contentVersion` не змінився (`CONTENT_CHANGED`) і посилання не змінені після міграції (інакше список конфліктів, нуль змін).
+`--verify <pre-image>` перевіряє вже закомічену кампанію; `--undo <pre-image>` відновлює legacy-стан лише за умов (інакше відмова з кодом, нуль змін): кампанія не в `PROTECTED_CAMPAIGN_IDS` (`PROTECTED`), усе ще шарова — `baseSourceId`/`baseVersion` задані (`NOT_LAYERED`), `contentVersion` не змінився (`CONTENT_CHANGED`), переписані клітинки посилальників не змінені після міграції (список конфліктів). Після відновлення в тій самій транзакції скан залишків шукає базові id у remap/none/content-моделях (`DANGLING_REFS`, rollback): **обмеження** — запис після міграції, що поклав базовий id у клітинку, яку міграція не переписувала, робить undo неможливим (повернути такий id у legacy-id нічим). Колонка `sourceId` контентних рядків і `campaign_source_syncs` у цьому скані ігноруються.
 
 ### Кеші
 

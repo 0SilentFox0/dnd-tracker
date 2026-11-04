@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -17,7 +17,9 @@ import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { newContentId } from "@/lib/server/templates/ids";
 import { importBundle } from "@/lib/server/templates/import-bundle";
+import { PROTECTED_CAMPAIGN_IDS } from "@/lib/server/templates/legacy-migration/eligibility";
 import { readPreImage } from "@/lib/server/templates/legacy-migration/preimage";
+import { finalizePreImage, writePreImage } from "@/lib/server/templates/legacy-migration/preimage";
 import { REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
 import { dryRunCampaign, type ExtendedPrisma, migrateCampaign, undoMigration } from "@/lib/server/templates/legacy-migration/service";
 import type { MigrationPlan } from "@/lib/server/templates/legacy-migration/types";
@@ -463,5 +465,75 @@ describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
     expect(await undoMigration(asMigrate, report.preImagePath!)).toEqual({ ok: true });
     expect(JSON.stringify(await R.playerNotification.findUnique({ where: { id: colliding.id } }))).toBe(original);
     expect(await R.playerNotification.findUnique({ where: { id: kept.id } })).toMatchObject({ refId: L(T.sp2) });
+  });
+
+  it("a failed apply leaves no usable pre-image, and pending files are rejected by verify and undo", async () => {
+    const c = await clone("fail");
+
+    const dir = await mkdtemp(path.join(tmpdir(), "legacy-mig-fail-"));
+
+    try {
+      const hideSpell = (plan: MigrationPlan): MigrationPlan => ({ ...plan, hides: [...plan.hides, { table: layeredModels().Spell.hideTable, id: T.sp1 }] });
+
+      const error = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir: dir, seams: { mapPlan: hideSpell } }).catch((e) => e);
+
+      expect(error).toMatchObject({ code: "VERIFY_MISMATCH" });
+      expect(await readdir(dir)).toEqual([]);
+
+      const image = { campaignId: c.id, createdAt: new Date().toISOString(), campaign: { baseSourceId: null, baseVersion: null, contentVersion: 0 }, sourceSync: null, stored: {}, referrerCells: [], plan: { idMap: [], hides: [] }, postContentVersion: 1 } as never;
+
+      const pending = await writePreImage(dir, image);
+
+      expect(pending.endsWith(".pending")).toBe(true);
+      await expect(undoMigration(asMigrate, pending)).rejects.toThrow(/PRE_IMAGE_PENDING/);
+      await expect(verifyFromPreImage(db, pending)).rejects.toThrow(/PRE_IMAGE_PENDING/);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("undo is refused for a protected campaign id and for a campaign that is no longer layered", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "legacy-mig-guard-"));
+
+    try {
+      const base = { createdAt: new Date().toISOString(), campaign: { baseSourceId: null, baseVersion: null, contentVersion: 0 }, sourceSync: null, stored: {}, referrerCells: [], plan: { idMap: [], hides: [] }, postContentVersion: 1 };
+
+      const protectedFile = await finalizePreImage(await writePreImage(dir, { ...base, campaignId: [...PROTECTED_CAMPAIGN_IDS][0] } as never));
+
+      expect(await undoMigration(asMigrate, protectedFile)).toEqual({ ok: false, conflicts: [], reason: "PROTECTED" });
+
+      const c = await clone("nl");
+
+      const report = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir: dir });
+
+      expect(await undoMigration(asMigrate, report.preImagePath!)).toEqual({ ok: true });
+
+      const snapshot = await storedState(c.id);
+
+      expect(await undoMigration(asMigrate, report.preImagePath!)).toEqual({ ok: false, conflicts: [], reason: "NOT_LAYERED" });
+      expect(await storedState(c.id)).toBe(snapshot);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("undo is refused with DANGLING_REFS when an unrewritten cell now holds a base id, leaving the database unchanged", async () => {
+    const c = await clone("dang");
+
+    await populate(c);
+
+    const report = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir });
+
+    const character = await R.character.findFirst({ where: { campaignId: c.id } });
+
+    await R.character.update({ where: { id: character.id }, data: { feats: [T.sp1] } });
+
+    const snapshot = await storedState(c.id);
+
+    const result = await undoMigration(asMigrate, report.preImagePath!);
+
+    expect(result).toMatchObject({ ok: false, reason: "DANGLING_REFS" });
+    expect((result as { conflicts: unknown[] }).conflicts).toContainEqual({ model: "Character", pk: { rows: 1 }, column: "feats" });
+    expect(await storedState(c.id)).toBe(snapshot);
   });
 });
