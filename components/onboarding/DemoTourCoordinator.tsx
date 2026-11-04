@@ -21,12 +21,13 @@ const JOYRIDE = { FINISHED: "finished", TOOLTIP: "tooltip", TOUR_END: "tour:end"
 // запас під тултіп: якщо ціль + тултіп не вміщаються у вікно, крок центруємо
 const TOOLTIP_ROOM_PX = 220;
 
-const BEFORE_TIMEOUT_MS = 5000;
+// перше відкриття бібліотек і боїв (холодний сервер, запуск бою) буває довшим за 5 с
+const BEFORE_TIMEOUT_MS = 20000;
 
 // joyride скролить ціль до верху вікна: без запасу вона ховається під липкою шапкою (89px)
 const SCROLL_OFFSET_PX = 120;
 
-const CLICK_SOURCE_WAIT_MS = 1200;
+const CLICK_SOURCE_WAIT_MS = 4000;
 
 const CLICK_UNTIL_ATTEMPTS = 15;
 
@@ -172,7 +173,7 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
       let destination = item.route !== undefined ? `${campaignPath}${item.route}` : window.location.pathname;
 
       if (item.routeFromTarget) {
-        const source = document.querySelector(`[data-tour="${item.routeFromTarget}"]`);
+        const source = await waitFor(() => document.querySelector(`[data-tour="${item.routeFromTarget}"]`), Date.now() + BEFORE_TIMEOUT_MS - 700);
 
         const anchor = source instanceof HTMLAnchorElement ? source : source?.closest("a");
 
@@ -259,7 +260,7 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
           tooltipComponent={DemoTourTooltip}
           styles={TOUR_STYLES}
           locale={{ back: t("controls.back"), close: t("controls.close"), last: t("controls.last"), next: t("controls.next"), nextWithProgress: t("controls.next"), skip: t("controls.skip") }}
-          options={{ buttons: ["back", "skip", "close", "primary"], closeButtonAction: "skip", dismissKeyAction: false, showProgress: true, skipBeacon: true, spotlightPadding: 8, spotlightRadius: 10, arrowColor: "var(--color-hud-gold-strong)", targetWaitTimeout: 1000, overlayClickAction: false, scrollOffset: SCROLL_OFFSET_PX }}
+          options={{ buttons: ["back", "skip", "close", "primary"], closeButtonAction: "skip", dismissKeyAction: false, showProgress: true, skipBeacon: true, spotlightPadding: 8, spotlightRadius: 10, arrowColor: "var(--color-hud-gold-strong)", targetWaitTimeout: 3000, overlayClickAction: false, scrollOffset: SCROLL_OFFSET_PX }}
         />
       )}
     </DemoTourContext.Provider>
