@@ -79,6 +79,8 @@
     "yourTurn": "Your turn",
     "fxOn": "Action animations: on",
     "fxOff": "Action animations: off",
+    "playerViewOn": "Player view: on",
+    "playerViewOff": "Player view: off",
     "round": "Round {round}",
     "complete": "Complete",
     "nextTurn": "Next turn"
