@@ -67,7 +67,7 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode wall (`lineBlocked`) on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. The wizard and the map show the same result.
 - **Target limit**: `attack/max-targets.ts`, shared by client and server; auto-targets (chain, cleave, piercing, hits-all) are outside it.
 - **Chain shot**: ability flag `chainShot` (`attack/process/chain.ts`) — the player picks one target, the server jumps to the nearest enemy in range (`grid/nearest.ts`) from the previous target's cell.
-- **Cleave**: a melee attack with `maxTargets > 1` (`attack/process/cleave.ts`) also hits enemies adjacent to both attacker and target; the server rolls d20/damage for them (`attack-phase/targets.ts`).
+- **Cleave**: a melee attack with `maxTargets > 1` (`attack/process/cleave.ts`) also hits other enemies in the 3 cells of one facing (side = row of 3, diagonal = corner of 3) containing the target; the facing with the most enemies wins (1-cell attackers; larger ones hit any adjacent); the server rolls d20/damage for them (`attack-phase/targets.ts`).
 - **FX**: `originId` on a spec is where the projectile starts (chain jumps); secondary victims get a splash spec (`fx/impact.ts`); the queue is trimmed by whole actions. The result card lists every target (`view/volley-results.ts`).
 
 ## 5e: стани, рятівні кидки, смерть, концентрація
