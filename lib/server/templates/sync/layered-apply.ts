@@ -10,7 +10,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { markContentDirty } from "@/lib/server/content/write-context";
 import { delegateOf } from "@/lib/server/templates/bundle";
 import { rowHash } from "@/lib/server/templates/sync/hash";
-import { classifyLayered, type LayeredContext, type LayeredDb, type LayerRef, loadLayeredContext, tableOf } from "@/lib/server/templates/sync/layered";
+import { classifyLayered, type LayeredContext, type LayeredDb, type LayerRef, loadLayeredContext, pendingKey, tableOf } from "@/lib/server/templates/sync/layered";
 import { keyOf, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, emptyState, getEntry, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -48,13 +48,15 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
 
   const { items, ignored } = sourceSelection(all, refs);
 
-  for (const i of items) await applyItem(db, campaignId, i);
+  for (const i of items) await applyItem(db, campaignId, i, getEntry(ctx.ignored, i.scope, pendingKey(i.key)) !== undefined);
 
-  await saveIgnored(db, ctx, items, ignored);
+  const advancing = ctx.source.contentVersion > ctx.baseVersion;
 
-  if (ctx.source.contentVersion > ctx.baseVersion) {
-    await keepUnselected(db, ctx, all, new Set(items.map(keyOf)));
+  const deferred = advancing ? await keepUnselected(db, ctx, all, new Set(items.map(keyOf))) : [];
 
+  await saveIgnored(db, ctx, items, ignored, deferred);
+
+  if (advancing) {
     const { count } = await db.campaign.updateMany({ where: { id: campaignId, baseVersion: ctx.baseVersion }, data: { baseVersion: ctx.source.contentVersion } });
 
     if (count !== 1) throw new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
@@ -63,13 +65,16 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
   return { applied: items.length, ignored: ignored.length, autoAdded: [], warnings: [] };
 }
 
-async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem) {
+async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending: boolean) {
   const t = tableOf(i.scope)!;
 
   const { hideTable } = layeredModels()[t.model];
 
-  if (i.status === "deletedLocally") await db.campaignContentHide.deleteMany({ where: { campaignId, table: hideTable, id: i.key } });
-  else if (i.localId) {
+  if (i.status === "deletedLocally" || (i.status === "new" && pending)) {
+    const { count } = await db.campaignContentHide.deleteMany({ where: { campaignId, table: hideTable, id: i.key } });
+
+    if (!count) return;
+  } else if (i.localId) {
     const kind = i.status === "deletedInSource" ? DETACH_KIND_BY_TABLE[i.scope] : undefined;
 
     if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], campaignId, kind, [i.localId, i.key]);
@@ -80,8 +85,10 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem) {
   markContentDirty();
 }
 
-/** Advancing baseVersion must not apply what the DM did not select: pin changed/removed rows at the old baseline, hide new ones. */
-async function keepUnselected(db: LayeredDb, ctx: LayeredContext, all: Map<string, SyncItem>, selected: Set<string>) {
+/** Advancing baseVersion must not apply what the DM did not select: pin changed/removed rows at the old baseline, hide new ones (returned, so they stay restorable). */
+async function keepUnselected(db: LayeredDb, ctx: LayeredContext, all: Map<string, SyncItem>, selected: Set<string>): Promise<SyncItem[]> {
+  const deferred: SyncItem[] = [];
+
   const entries = new Map(ctx.entries.map((e) => [`${e.t.key}:${e.key}`, e]));
 
   for (const i of all.values()) {
@@ -91,6 +98,8 @@ async function keepUnselected(db: LayeredDb, ctx: LayeredContext, all: Map<strin
 
     if (i.status === "new") {
       await db.campaignContentHide.createMany({ data: [{ campaignId: ctx.campaignId, table: layeredModels()[e.t.model].hideTable, id: e.key }], skipDuplicates: true });
+
+      deferred.push(i);
     } else if ((i.status === "updated" || i.status === "deletedInSource") && e.baseline) {
       const { id: _id, ...columns } = Object.fromEntries(Object.entries(e.baseline).filter(([k]) => !BASE_ONLY.has(k)));
 
@@ -99,12 +108,17 @@ async function keepUnselected(db: LayeredDb, ctx: LayeredContext, all: Map<strin
 
     markContentDirty();
   }
+
+  return deferred;
 }
 
-async function saveIgnored(db: LayeredDb, ctx: LayeredContext, selected: SyncItem[], ignored: SyncItem[]) {
+async function saveIgnored(db: LayeredDb, ctx: LayeredContext, selected: SyncItem[], ignored: SyncItem[], deferred: SyncItem[]) {
   const next = cloneState(ctx.ignored);
 
-  for (const i of selected) if (getEntry(next, i.scope, i.key) !== undefined) setEntry(next, i.scope, i.key, undefined);
+  for (const i of selected)
+    for (const key of [i.key, pendingKey(i.key)]) if (getEntry(next, i.scope, key) !== undefined) setEntry(next, i.scope, key, undefined);
+
+  for (const i of deferred) setEntry(next, i.scope, pendingKey(i.key), i.sourceHash ?? IGNORED_DELETED);
 
   for (const i of ignored) setEntry(next, i.scope, i.key, i.sourceHash ?? IGNORED_DELETED);
 

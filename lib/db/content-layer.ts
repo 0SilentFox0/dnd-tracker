@@ -305,6 +305,23 @@ async function resolveRelations(ctx: Ctx, config: LayerConfig, rows: Row[], rels
   for (const [key, relArgs] of Object.entries(rels)) await resolveRelation(ctx, rows, config.relations[key], key, relArgs, campaignId);
 }
 
+/** A base row cannot be edited, so scalar references to a row the DM hid read as null (the former ON DELETE SET NULL). */
+async function nullHiddenRefs(ctx: Ctx, config: LayerConfig, rows: Row[], campaignId: string, layer: CampaignLayer) {
+  if (!rows.length) return;
+
+  const hiddenOf = new Map<string, Set<string>>();
+
+  for (const { target, fk, kind } of Object.values(config.relations)) {
+    if (kind !== "one") continue;
+
+    if (!hiddenOf.has(target)) hiddenOf.set(target, (await overlayOf(ctx, layeredModels()[target], campaignId, layer)).hidden);
+
+    const hidden = hiddenOf.get(target)!;
+
+    if (hidden.size) for (const r of rows) if (hidden.has(r[fk])) r[fk] = null;
+  }
+}
+
 /** Layered rows for (model, campaign): local rows win over base rows by id; hidden base ids are dropped. */
 async function layeredFindMany(ctx: Ctx, config: LayerConfig, args: Row, runLocal: Query, campaignId: string, rest: Row, layer: CampaignLayer): Promise<Row[]> {
   const { take, skip, orderBy } = args;
@@ -328,6 +345,8 @@ async function layeredFindMany(ctx: Ctx, config: LayerConfig, args: Row, runLoca
 
     return shaped;
   });
+
+  await nullHiddenRefs(ctx, config, baseShaped, campaignId, layer);
 
   let merged = sortRows([...locals, ...baseShaped], orderBy);
 
