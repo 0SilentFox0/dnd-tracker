@@ -64,3 +64,18 @@ describe("інструменти карти взаємовиключні", () =>
     expect(current().weatherTool?.active).toBe(false);
   });
 });
+
+describe("motion palette is exclusive", () => {
+  it("opening motion closes weather and terrain, and vice versa", () => {
+    const { current } = setup();
+
+    act(() => current().weatherTool?.toggle());
+    act(() => current().motionTool?.toggle());
+    expect(current().motionTool?.active).toBe(true);
+    expect(current().weatherTool?.active).toBe(false);
+
+    act(() => current().terrainTool?.toggle());
+    expect(current().terrainTool?.active).toBe(true);
+    expect(current().motionTool?.active).toBe(false);
+  });
+});

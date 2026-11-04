@@ -103,6 +103,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     move: mutation(),
     mapTerrain: mutation(),
     mapWeather: mutation(),
+    mapMotion: mutation(),
     reveal: mutation(),
     maze: mutation(),
     unitControl: mutation(),
