@@ -22,6 +22,8 @@ export function MapMotionPanel({ tool }: { tool: MapMotionTool }) {
 
   const { current, pending } = tool;
 
+  const sign = current && current.speed < 0 ? -1 : 1;
+
   const magnitude = current ? Math.abs(current.speed) : 0;
 
   const [local, setLocal] = useState(magnitude);
@@ -40,7 +42,7 @@ export function MapMotionPanel({ tool }: { tool: MapMotionTool }) {
   const slide = (value: number) => {
     setLocal(value);
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => tool.setSpeed(current && current.speed < 0 ? -value : value), SLIDER_DEBOUNCE_MS);
+    timer.current = setTimeout(() => tool.setSpeed(sign * value), SLIDER_DEBOUNCE_MS);
   };
 
   const off = !current;
@@ -56,7 +58,7 @@ export function MapMotionPanel({ tool }: { tool: MapMotionTool }) {
         {t("motion.reverse")}
       </button>
       {PRESET_KEYS.map((key) => (
-        <button key={key} type="button" aria-pressed={magnitude === MAP_MOTION_PRESETS[key]} disabled={pending || off} onClick={() => tool.setSpeed(MAP_MOTION_PRESETS[key] * (current && current.speed < 0 ? -1 : 1))} className={chip(magnitude === MAP_MOTION_PRESETS[key])}>
+        <button key={key} type="button" aria-pressed={magnitude === MAP_MOTION_PRESETS[key]} disabled={pending || off} onClick={() => tool.setSpeed(sign * MAP_MOTION_PRESETS[key])} className={chip(magnitude === MAP_MOTION_PRESETS[key])}>
           {t(`motion.${key}`)}
         </button>
       ))}

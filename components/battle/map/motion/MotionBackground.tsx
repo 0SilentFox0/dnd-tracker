@@ -4,27 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
-import { useReducedMotion } from "@/lib/hooks/common";
+import { usePageHidden, useReducedMotion } from "@/lib/hooks/common";
 import { mirrorTileCount, motionInMapSpace, stepMotion } from "@/lib/utils/battle/map-motion";
 import { subscribe } from "@/lib/utils/canvas/ticker";
 import type { BattleMapConfig, MapMotion } from "@/types/battle";
 
 const REST_PX_PER_S = 0.5;
-
-function useTabVisible() {
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const sync = () => setVisible(!document.hidden);
-
-    sync();
-    document.addEventListener("visibilitychange", sync);
-
-    return () => document.removeEventListener("visibilitychange", sync);
-  }, []);
-
-  return visible;
-}
 
 /** Фон, що їде під нерухомою сіткою: дзеркально зациклена доріжка тайлів, фаза крутиться локально в rAF. */
 export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map: BattleMapConfig; motion: MapMotion; cellPx: number; rotated: boolean; phone: boolean }) {
@@ -34,7 +19,7 @@ export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map:
 
   const reduced = useReducedMotion();
 
-  const visible = useTabVisible();
+  const visible = !usePageHidden();
 
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +66,7 @@ export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map:
       apply.current?.();
 
       if (target === 0 && Math.abs(state.current.speed) < REST_PX_PER_S) {
-        state.current.speed = 0;
+        state.current = { ...state.current, speed: 0 };
 
         return false;
       }

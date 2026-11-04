@@ -17,9 +17,9 @@ export const MapBackground = memo(function MapBackground({ map, cellPx, phone, r
 
   const box = backgroundBox(map, cellPx, loaded?.src === src ? loaded.aspect : null);
 
-  const px = Math.ceil(box.width);
-
   if (map.motion) return <MotionBackground map={map} motion={map.motion} cellPx={cellPx} rotated={rotated} phone={phone} />;
+
+  const px = Math.ceil(box.width);
 
   return (
     <div data-map-background className="pointer-events-none absolute inset-0 overflow-hidden">
