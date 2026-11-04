@@ -220,12 +220,12 @@ describe("searchMatches", () => {
 });
 
 describe("graph relations", () => {
-  const rel = (sceneId: string, a: string, b: string, label: string) => ({ sceneId, a, b, label });
+  const rel = (a: string, b: string, label: string) => ({ a, b, label });
 
   const withRelations = (relations: ScenarioIndex["relations"]): ScenarioIndex => ({ ...index, relations });
 
   it("merges a pair across scenes into one edge with unique labels", () => {
-    const m = buildGraphModel(withRelations([rel("s1", "unit:u1", "spell:sp1", "casts"), rel("s2", "spell:sp1", "unit:u1", "casts"), rel("s2", "unit:u1", "spell:sp1", "fears")]), defaultFilters());
+    const m = buildGraphModel(withRelations([rel("unit:u1", "spell:sp1", "casts"), rel("spell:sp1", "unit:u1", "casts"), rel("unit:u1", "spell:sp1", "fears")]), defaultFilters());
 
     expect(m.relations).toEqual([{ id: "rel:spell:sp1~unit:u1", source: "spell:sp1", target: "unit:u1", count: 1, secret: false, label: "casts; fears" }]);
   });
@@ -233,7 +233,7 @@ describe("graph relations", () => {
   it("skips relations whose end is not in the graph and leaves edges and degree unchanged", () => {
     const base = buildGraphModel(index, defaultFilters());
 
-    const m = buildGraphModel(withRelations([rel("s1", "unit:u1", "character:c1", "x"), rel("s1", "unit:u1", "spell:sp1", "y")]), defaultFilters());
+    const m = buildGraphModel(withRelations([rel("unit:u1", "unit:gone", "x"), rel("unit:u1", "spell:sp1", "y")]), defaultFilters());
 
     expect(m.relations.map((r) => r.id)).toEqual(["rel:spell:sp1~unit:u1"]);
     expect(m.edges).toEqual(base.edges);
@@ -241,8 +241,31 @@ describe("graph relations", () => {
   });
 
   it("filters relations in ego mode like sequence", () => {
-    const m = buildGraphModel(withRelations([rel("s1", "unit:u1", "spell:sp1", "y"), rel("s1", "artifact:a1", "marker:m1", "z")]), defaultFilters());
+    const m = buildGraphModel(withRelations([rel("unit:u1", "spell:sp1", "y"), rel("artifact:a1", "marker:m1", "z")]), defaultFilters());
 
     expect(egoModel(m, "scene:s2").relations.map((r) => r.id)).toEqual(["rel:spell:sp1~unit:u1"]);
+  });
+
+  it("keeps relation ends that are leaves or beyond the cap", () => {
+    const rels = withRelations([rel("character:c1", "battle:b1", "hates")]);
+
+    const m = buildGraphModel(rels, defaultFilters());
+
+    expect(ids(m)).toEqual(expect.arrayContaining(["character:c1", "battle:b1"]));
+    expect(m.relations.map((r) => r.id)).toEqual(["rel:battle:b1~character:c1"]);
+
+    const capped = buildGraphModel(rels, defaultFilters(), 1);
+
+    expect(ids(capped)).toEqual(expect.arrayContaining(["character:c1", "battle:b1"]));
+    expect(capped.relations).toHaveLength(1);
+  });
+
+  it("keeps the relation partner of an entity ego", () => {
+    const m = buildGraphModel(withRelations([rel("unit:u1", "artifact:a1", "wields")]), defaultFilters());
+
+    const ego = egoModel(m, "unit:u1");
+
+    expect(ids(ego)).toContain("artifact:a1");
+    expect(ego.relations.map((r) => r.id)).toEqual(["rel:artifact:a1~unit:u1"]);
   });
 });

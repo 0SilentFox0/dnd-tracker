@@ -55,12 +55,12 @@ describe("summary relations", () => {
     expect(lenientSummarySchema.safeParse(valid).success).toBe(false);
   });
 
-  it("clamps count and label length and drops self-relations", () => {
+  it("clips label length and drops self-relations", () => {
     const rel = (i: number) => ({ a: `unit:${i}`, b: `unit:${i + 100}`, label: "a".repeat(200) });
 
     const out = clampSummary({ ...valid, relations: [{ a: "unit:1", b: "unit:1", label: "x" }, ...Array.from({ length: 20 }, (_, i) => rel(i))] });
 
-    expect(out.relations).toHaveLength(SUMMARY_LIMITS.relations);
+    expect(out.relations).toHaveLength(20);
     expect(out.relations?.every((r) => r.a !== r.b && r.label.length === SUMMARY_LIMITS.relation)).toBe(true);
   });
 });

@@ -17,7 +17,13 @@ export const defaultFilters = (): GraphFilters => ({
 export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap = GRAPH_ENTITY_CAP, forceInclude: ReadonlySet<string> = new Set()): GraphModel {
   const candidates = index.entities.filter((e) => filters.types.has(e.type) && (!filters.onlyMissing || e.missing));
 
-  const forced = (e: (typeof candidates)[number]) => forceInclude.has(entityNodeId(e.type, e.id));
+  const related = new Set(index.relations.flatMap((r) => [r.a, r.b]));
+
+  const forced = (e: (typeof candidates)[number]) => {
+    const id = entityNodeId(e.type, e.id);
+
+    return forceInclude.has(id) || related.has(id);
+  };
 
   const isLeaf = (e: (typeof candidates)[number]) => e.degree === 1 && !e.missing && !filters.showLeaves && !forced(e);
 
@@ -150,6 +156,11 @@ export function egoModel(model: GraphModel, nodeId: string): GraphModel {
   if (!model.nodes.some((n) => n.id === nodeId)) return model;
 
   const keep = new Set(neighbors(model, nodeId).nodes);
+
+  for (const e of model.relations) {
+    if (e.source === nodeId) keep.add(e.target);
+    else if (e.target === nodeId) keep.add(e.source);
+  }
 
   for (const e of model.sequence) {
     if (e.source === nodeId) keep.add(e.target);

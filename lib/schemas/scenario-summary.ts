@@ -35,7 +35,6 @@ export function clampSummary(s: z.infer<typeof lenientSummarySchema>): PageSumma
     digest: clip(s.digest, SUMMARY_LIMITS.digest),
     relations: s.relations
       .filter((r) => r.a !== r.b)
-      .slice(0, SUMMARY_LIMITS.relations)
       .map((r) => ({ ...r, label: clip(r.label, SUMMARY_LIMITS.relation) })),
   };
 }

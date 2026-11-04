@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildSummaryInput, filterSummaryEntities } from "../input";
 
+import { SUMMARY_LIMITS } from "@/lib/schemas/scenario-summary";
 import type { RichDoc, RichNode, ScenarioContent } from "@/types/scenario";
 
 const t = (text: string, secret = false): RichNode => ({ type: "text", text, ...(secret && { marks: [{ type: "secret" }] }) });
@@ -89,5 +90,19 @@ describe("filterSummaryEntities", () => {
       { a: "unit:a", b: "unit:b", label: "rivals" },
       { a: "unit:b", b: "unit:a", label: "kin" },
     ]);
+  });
+
+  it("filters invalid relations before applying the cap", () => {
+    const keys = new Set(Array.from({ length: 30 }, (_, i) => `unit:${i}`));
+
+    const relations = [
+      ...Array.from({ length: 10 }, (_, i) => ({ a: `unit:bad${i}`, b: "unit:0", label: "x" })),
+      ...Array.from({ length: 20 }, (_, i) => ({ a: `unit:${i}`, b: `unit:${i + 1}`, label: "ok" })),
+    ];
+
+    const out = filterSummaryEntities({ overview: "o", events: [], secrets: [], digest: "d", entities: [], relations }, keys);
+
+    expect(out.relations).toHaveLength(SUMMARY_LIMITS.relations);
+    expect(out.relations?.every((r) => r.label === "ok")).toBe(true);
   });
 });

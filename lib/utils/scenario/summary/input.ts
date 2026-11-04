@@ -1,4 +1,4 @@
-import type { PageSummary } from "@/lib/schemas/scenario-summary";
+import { type PageSummary,SUMMARY_LIMITS } from "@/lib/schemas/scenario-summary";
 import { entityKey } from "@/lib/utils/scenario/index/build";
 import { extractPageFacts } from "@/lib/utils/scenario/index/extract";
 import { docToMarkdown } from "@/lib/utils/scenario/markdown";
@@ -114,7 +114,7 @@ export function filterSummaryEntities(summary: PageSummary, allowed: Set<string>
     seen.add(key);
 
     return true;
-  });
+  }).slice(0, SUMMARY_LIMITS.relations);
 
   return { ...summary, entities: [...new Set(summary.entities.filter((k) => allowed.has(k)))], relations };
 }

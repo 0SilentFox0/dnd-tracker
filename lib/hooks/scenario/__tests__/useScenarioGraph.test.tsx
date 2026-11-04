@@ -97,6 +97,17 @@ describe("useScenarioGraph", () => {
     expect(result.current.state.filters.showAll).toBe(false);
   });
 
+  it("selection highlights relation partners", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue({ ...index, relations: [{ a: "unit:u1", b: "character:c1", label: "hunts" }] });
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+    act(() => result.current.set.selected("unit:u1"));
+    expect(result.current.selection.nodes.has("character:c1")).toBe(true);
+    expect(result.current.selection.edges.size).toBe(2);
+  });
+
   it("selection exposes neighbors and detail links without relayout", async () => {
     vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue(index);
 

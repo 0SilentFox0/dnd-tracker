@@ -98,12 +98,12 @@ async function resolveEntities(campaignId: string, facts: Map<string, PageFacts>
 }
 
 export async function loadSummaryRelations(campaignId: string, pageIds: ReadonlySet<string>): Promise<IndexRelation[]> {
-  const rows = await prisma.scenarioPageSummary.findMany({ where: { campaignId }, select: { pageId: true, summary: true } });
+  const rows = await prisma.$queryRaw<{ pageId: string; relations: unknown }[]>`SELECT "pageId", summary->'relations' AS relations FROM scenario_page_summaries WHERE "campaignId" = ${campaignId}`;
 
   return rows.flatMap((row) => {
-    const parsed = pageIds.has(row.pageId) ? summaryRelationsSchema.safeParse(row.summary) : null;
+    const parsed = pageIds.has(row.pageId) ? summaryRelationsSchema.safeParse({ relations: row.relations }) : null;
 
-    return parsed?.success ? parsed.data.relations.map((r) => ({ sceneId: row.pageId, ...r })) : [];
+    return parsed?.success ? parsed.data.relations : [];
   });
 }
 

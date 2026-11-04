@@ -94,7 +94,7 @@ describe("buildScenarioIndex", () => {
 
 describe("buildScenarioIndex relations", () => {
   it("defaults to no relations and passes given ones through", () => {
-    const rel = { sceneId: "a", a: "unit:1", b: "unit:2", label: "allies" };
+    const rel = { a: "unit:1", b: "unit:2", label: "allies" };
 
     expect(buildScenarioIndex({ pages: [], facts: new Map(), resolved: new Map() }).relations).toEqual([]);
     expect(buildScenarioIndex({ pages: [], facts: new Map(), resolved: new Map(), relations: [rel] }).relations).toEqual([rel]);

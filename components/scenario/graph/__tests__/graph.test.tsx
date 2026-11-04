@@ -87,7 +87,7 @@ describe("ScenarioGraph", () => {
   });
 
   it("draws a relation with its label and lists it in the inspector", () => {
-    index = { ...FULL, relations: [{ sceneId: "a", a: "unit:g", b: "artifact:o", label: "guards" }] };
+    index = { ...FULL, relations: [{ a: "unit:g", b: "artifact:o", label: "guards" }] };
 
     render(<ScenarioGraph campaignId="c" />);
 

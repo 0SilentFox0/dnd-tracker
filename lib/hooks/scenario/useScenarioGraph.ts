@@ -80,7 +80,14 @@ export function useScenarioGraph(campaignId: string) {
       return (r.source === node.id || r.target === node.id) && other ? [{ node: other, label: r.label ?? "" }] : [];
     });
 
-    return { ...hood, detail: { node, links, relations } as GraphDetail | null };
+    const nodes = new Set(hood.nodes);
+
+    for (const r of viewModel.relations) {
+      if (r.source === node.id) nodes.add(r.target);
+      else if (r.target === node.id) nodes.add(r.source);
+    }
+
+    return { ...hood, nodes, detail: { node, links, relations } as GraphDetail | null };
   }, [viewModel, graph, selectedId]);
 
   const visibleSelectedId = selection.detail ? selectedId : null;

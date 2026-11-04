@@ -185,7 +185,6 @@ export interface IndexEdge {
 }
 
 export interface IndexRelation {
-  sceneId: string;
   a: string;
   b: string;
   label: string;
