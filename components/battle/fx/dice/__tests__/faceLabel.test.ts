@@ -10,6 +10,8 @@ describe("faceLabel", () => {
 
   it("одиниці без змін", () => {
     expect(faceLabel(10, false)).toBe("10");
+    expect(faceLabel(10, false, true)).toBe("0");
+    expect(faceLabel(7, false, true)).toBe("7");
     expect(faceLabel(7, false)).toBe("7");
   });
 });

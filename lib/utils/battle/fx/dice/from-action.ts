@@ -4,7 +4,7 @@ import type { BattleAction, DiceRollGroup, DieSides } from "@/types/battle";
 
 export interface DiceThrowSpec {
   seed: number;
-  groups: Array<Array<{ sides: DieSides; value: number; chosen?: boolean; dropped?: boolean; tens?: boolean }>>;
+  groups: Array<Array<{ sides: DieSides; value: number; chosen?: boolean; dropped?: boolean; tens?: boolean; units?: boolean }>>;
 }
 
 const toDie = (group: DiceRollGroup) => {
@@ -18,8 +18,8 @@ type RollKind = DiceRollGroup["kind"];
 // влучання і шкода в одній пачці нечитабельні — кожна фаза кидається окремо, у порядку подій
 const PHASES: RollKind[][] = [["attack"], ["save"], ["damage"], ["heal"], ["morale"], ["initiative"]];
 
-export function percentileDice(roll: number): [{ sides: 10; value: number; tens: true }, { sides: 10; value: number }] {
-  return [{ sides: 10, value: Math.floor((roll === 100 ? 0 : roll) / 10) || 10, tens: true }, { sides: 10, value: roll % 10 || 10 }];
+export function percentileDice(roll: number): [{ sides: 10; value: number; tens: true }, { sides: 10; value: number; units: true }] {
+  return [{ sides: 10, value: Math.floor((roll === 100 ? 0 : roll) / 10) || 10, tens: true }, { sides: 10, value: roll % 10 || 10, units: true }];
 }
 
 const PERCENTILE_SEED_BASE = 1_000_003;

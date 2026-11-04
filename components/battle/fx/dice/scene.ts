@@ -46,9 +46,9 @@ function atlasGrid(faceCount: number) {
   return { cols, rows: Math.ceil(faceCount / cols) };
 }
 
-export const faceLabel = (v: number, tens: boolean) => (tens ? (v === 10 ? "00" : `${v}0`) : String(v));
+export const faceLabel = (v: number, tens: boolean, units = false) => (tens ? (v === 10 ? "00" : `${v}0`) : units && v === 10 ? "0" : String(v));
 
-function createAtlasCanvas(sides: DieSides, tens: boolean) {
+function createAtlasCanvas(sides: DieSides, tens: boolean, units: boolean) {
   const { cols, rows } = atlasGrid(sides);
 
   const canvas = document.createElement("canvas");
@@ -74,7 +74,7 @@ function createAtlasCanvas(sides: DieSides, tens: boolean) {
 
     const cy = Math.floor((v - 1) / cols) * CELL_PX + CELL_PX / 2;
 
-    g.fillText(faceLabel(v, tens), cx, cy);
+    g.fillText(faceLabel(v, tens, units), cx, cy);
 
     if (v === 6 || v === 9) g.fillRect(cx - size * 0.28, cy + size * 0.46, size * 0.56, 3);
   }
@@ -204,13 +204,13 @@ function createBackend(host: HTMLElement): Backend {
       sun.shadow.camera.bottom = -span;
       sun.shadow.camera.updateProjectionMatrix();
     },
-    createDie({ sides, value, dropped = false, tens = false }): DieHandle {
-      const atlasKey = `${sides}${tens ? "t" : ""}`;
+    createDie({ sides, value, dropped = false, tens = false, units = false }): DieHandle {
+      const atlasKey = `${sides}${tens ? "t" : ""}${units ? "u" : ""}`;
 
       let atlas = atlases.get(atlasKey);
 
       if (!atlas) {
-        atlas = new CanvasTexture(createAtlasCanvas(sides, tens));
+        atlas = new CanvasTexture(createAtlasCanvas(sides, tens, units));
         atlas.colorSpace = SRGBColorSpace;
         atlas.anisotropy = 4;
         atlases.set(atlasKey, atlas);

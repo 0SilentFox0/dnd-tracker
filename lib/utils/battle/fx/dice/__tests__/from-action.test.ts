@@ -51,9 +51,10 @@ describe("diceThrowsOf", () => {
 
 describe("percentileDice", () => {
   it("ділить d100 на десятки й одиниці", () => {
-    expect(percentileDice(100)).toEqual([{ sides: 10, value: 10, tens: true }, { sides: 10, value: 10 }]);
-    expect(percentileDice(7)).toEqual([{ sides: 10, value: 10, tens: true }, { sides: 10, value: 7 }]);
-    expect(percentileDice(45)).toEqual([{ sides: 10, value: 4, tens: true }, { sides: 10, value: 5 }]);
+    expect(percentileDice(100)).toEqual([{ sides: 10, value: 10, tens: true }, { sides: 10, value: 10, units: true }]);
+    expect(percentileDice(70)).toEqual([{ sides: 10, value: 7, tens: true }, { sides: 10, value: 10, units: true }]);
+    expect(percentileDice(7)).toEqual([{ sides: 10, value: 10, tens: true }, { sides: 10, value: 7, units: true }]);
+    expect(percentileDice(45)).toEqual([{ sides: 10, value: 4, tens: true }, { sides: 10, value: 5, units: true }]);
   });
 
   it("d100-дія дає пару d10 першою пачкою", () => {
