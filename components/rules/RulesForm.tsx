@@ -75,6 +75,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
         id={FORM_ID}
         onSubmit={onSubmit}
         tabs={tabs}
+        triggerClassName="flex-none px-3"
         actions={
           <>
             <Button type="button" variant="outline" disabled={!isDirty || isSaving} onClick={reset}>

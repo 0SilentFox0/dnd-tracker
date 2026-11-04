@@ -72,7 +72,7 @@ export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
 const pick = (list: DashboardSection[], keys: string[]) => list.filter((s) => keys.includes(s.key));
 
 export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
-  ...DM_DASHBOARD_SECTIONS,
+  ...DM_DASHBOARD_SECTIONS.filter((section) => section.key !== "rules"),
   ...pick(PLAYER_DASHBOARD_SECTIONS, ["player-world"]).map((section) => ({ ...section, group: "game" as const })),
 ];
 
