@@ -130,7 +130,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   };
 
   const rollAction = (d20: number, second?: number): AttackFlowAction =>
-    dice === 100 ? { type: "ROLL", d20, outcome: "hit", percentile: true } : { type: "ROLL", d20, second, outcome: outcomeOf(d20, second) };
+    dice === 100 ? { type: "ROLL", d20, outcome: "hit", percentile: true, damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20, second) };
 
   useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 

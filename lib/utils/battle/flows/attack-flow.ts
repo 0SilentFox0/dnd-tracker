@@ -65,7 +65,7 @@ export type AttackFlowAction =
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
   | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
-  | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome; percentile?: boolean }
+  | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome; percentile?: boolean; damage?: number[] }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
   | { type: "SUBMIT" }
@@ -127,7 +127,7 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "SET_CUNNING_STRIKE":
       return { ...s, cunningStrike: a.effects.length > 0 ? a.effects : undefined };
     case "ROLL": {
-      const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: [] } : st));
+      const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: a.damage ?? [] } : st));
 
       if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1, ...(a.percentile && { percentile: true }) };
 

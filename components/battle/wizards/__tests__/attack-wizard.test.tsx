@@ -143,7 +143,7 @@ describe("AttackWizard", () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
-  it("wfrp: d100-кидок без сітки d20 і режимів, ціль і Momentum видно, ручний 73 іде без шкоди", async () => {
+  it("wfrp: d100-кидок без сітки d20 і режимів, ціль і Momentum видно, ручний 73 іде з кубиками шкоди", async () => {
     const { wrapper, me, mutateAsync } = fakeScene({ system: "wfrp", momentum: { ally: true } });
 
     render(<Harness attacker={me} />, { wrapper });
@@ -165,7 +165,8 @@ describe("AttackWizard", () => {
 
     const payload = mutateAsync.mock.calls[0][0] as Record<string, unknown>;
 
-    expect(payload).toMatchObject({ attackRoll: 73, damageRolls: [] });
+    expect(payload).toMatchObject({ attackRoll: 73 });
+    expect((payload.damageRolls as number[]).length).toBeGreaterThan(0);
   });
 
   it("wfrp: без Momentum показує «Momentum немає», авто-кидок відправляє d100", async () => {

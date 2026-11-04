@@ -259,6 +259,12 @@ describe("attackFlow", () => {
     expect(failed.index).toBe(0);
   });
 
+  it("d100: кубики шкоди з кидка потрапляють у payload", () => {
+    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", percentile: true, damage: [4] });
+
+    expect(attackPayload(s, "me")).toMatchObject({ attackRoll: 73, damageRolls: [4] });
+  });
+
   it("d100: кілька цілей — кидок на кожну, потім відправка", () => {
     const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 55, outcome: "hit", percentile: true });
 
