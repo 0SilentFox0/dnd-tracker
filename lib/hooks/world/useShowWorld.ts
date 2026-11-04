@@ -21,7 +21,7 @@ export function useShowWorld(campaignId: string, world: ShowWorld, isDM: boolean
 
   const props = useMemo<WorldViewMapProps | undefined>(() => {
     if (readOnly) {
-      if (!dm.data || (heroIds.length > 0 && party.isPending)) return undefined;
+      if (!dm.data || party.isPending) return undefined;
 
       return party.data ? mergePartyViews([party.data]) : sanitizeDmDetail(dm.data);
     }
@@ -29,7 +29,7 @@ export function useShowWorld(campaignId: string, world: ShowWorld, isDM: boolean
     if (isDM) return dm.data ? { detail: dm.data, heroes: dm.data.heroes ?? [] } : undefined;
 
     return player.data ? viewToMapProps(player.data) : undefined;
-  }, [isDM, readOnly, dm.data, player.data, party.data, party.isPending, heroIds.length]);
+  }, [isDM, readOnly, dm.data, player.data, party.data, party.isPending]);
 
   const target = world.focusMarkerId ? props?.detail.markers.find((m) => m.id === world.focusMarkerId) : undefined;
 

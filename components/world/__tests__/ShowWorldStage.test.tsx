@@ -121,7 +121,7 @@ describe("ShowWorldStage", () => {
 
     const el = await screen.findByTestId("map");
 
-    expect(getWorldView).toHaveBeenCalledWith("c1", { mapId: "m1", asHeroId: "h1" });
+    expect(getWorldView).toHaveBeenCalledWith("c1", { mapId: "m1", asParty: true });
     expect(el.textContent).not.toContain("DM-SECRET-NOTE");
     expect(el.textContent).not.toContain("HIDDEN-NAME");
     expect(el.textContent).not.toContain("NOTE");
@@ -129,6 +129,7 @@ describe("ShowWorldStage", () => {
   });
 
   it("режим гравця без героїв: лише alwaysVisible маркери під туманом, без dmNote", async () => {
+    vi.mocked(getWorldView).mockRejectedValue(new Error("400"));
     vi.mocked(getWorldMap).mockResolvedValue({
       map,
       markers: [{ ...marker("a"), name: "HIDDEN-NAME", dmNote: "DM-SECRET-NOTE", alwaysVisible: false }, { ...marker("b"), dmNote: "DM-SECRET-NOTE", alwaysVisible: true }],
@@ -142,6 +143,5 @@ describe("ShowWorldStage", () => {
     expect(el.textContent).toContain('"id":"b"');
     expect(el.textContent).not.toContain("HIDDEN-NAME");
     expect(el.textContent).not.toContain("DM-SECRET-NOTE");
-    expect(getWorldView).not.toHaveBeenCalled();
   });
 });

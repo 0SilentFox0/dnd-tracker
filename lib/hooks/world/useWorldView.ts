@@ -18,7 +18,7 @@ export function useWorldView(campaignId: string, { mapId, asHeroId, asParty = fa
 
   return useQuery<WorldView>({
     queryKey: worldKeys.view(campaignId, mapId ?? "", asParty ? "party" : asHeroId),
-    queryFn: () => getWorldView(campaignId, { mapId: mapId as string, asHeroId, asParty }),
+    queryFn: () => getWorldView(campaignId, { mapId: mapId as string, asHeroId, ...(asParty && { asParty }) }),
     enabled: !!mapId,
     placeholderData: keepPrevious ? keepPreviousData : undefined,
     staleTime: live ? PUSHER_STALE_MS : POLL_STALE_MS,
