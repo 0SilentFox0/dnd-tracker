@@ -14,8 +14,7 @@ import type { ShowWorld } from "@/types/show";
 export function ShowWorldStage({ campaignId, world, isDM, readOnly = false }: { campaignId: string; world: ShowWorld; isDM: boolean; readOnly?: boolean }) {
   const t = useTranslations("world.show");
 
-  // the player endpoint needs a hero for a DM session, so the projector reads the DM map payload
-  const scene = useShowWorld(campaignId, world, isDM || readOnly);
+  const scene = useShowWorld(campaignId, world, isDM || readOnly, readOnly);
 
   const reduced = useReducedMotion();
 

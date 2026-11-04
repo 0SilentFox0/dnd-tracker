@@ -15,7 +15,11 @@ vi.mock("@/lib/api/world", () => ({ getWorldView: vi.fn(), getWorldMap: vi.fn() 
 // eslint-disable-next-line @next/next/no-img-element
 vi.mock("next/image", () => ({ default: (p: { alt: string }) => <img alt={p.alt} /> }));
 vi.mock("@/components/world/WorldMapView", () => ({
-  WorldMapView: (p: { detail: { map: { id: string } }; fog?: unknown; focus?: unknown; selectedId?: string }) => <div data-testid="map" data-map={p.detail.map.id} data-fog={p.fog ? "1" : "0"} data-focus={p.focus ? "1" : "0"} data-selected={p.selectedId ?? ""} />,
+  WorldMapView: (p: { detail: { map: { id: string }; markers: { id: string }[]; notes?: unknown[] }; fog?: unknown; focus?: unknown; selectedId?: string }) => (
+    <div data-testid="map" data-map={p.detail.map.id} data-fog={p.fog ? "1" : "0"} data-focus={p.focus ? "1" : "0"} data-selected={p.selectedId ?? ""}>
+      {JSON.stringify({ markers: p.detail.markers, notes: p.detail.notes })}
+    </div>
+  ),
 }));
 
 afterEach(cleanup);
@@ -30,10 +34,10 @@ const view = (markers: WorldMarker[]): WorldView => ({ map, markers, heroes: [],
 
 const show = (over: Partial<ShowState> = {}) => ({ deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 1, world: { mapId: "m1" }, ...over }) as ShowState;
 
-const renderStage = (s: ShowState, isDM = false) =>
+const renderStage = (s: ShowState, isDM = false, readOnly = false) =>
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <ShowStage show={s} campaignId="c1" isDM={isDM} />
+      <ShowStage show={s} campaignId="c1" isDM={isDM} readOnly={readOnly} />
     </QueryClientProvider>,
   );
 
@@ -99,6 +103,45 @@ describe("ShowWorldStage", () => {
 
     expect(el.getAttribute("data-fog")).toBe("0");
     await waitFor(() => expect(screen.getByText("Гравці бачать карту зі своїм туманом")).toBeTruthy());
+    expect(getWorldView).not.toHaveBeenCalled();
+  });
+
+  it("режим гравця у ДМ: у DOM немає DM-only даних (dmNote, нотатки, приховані маркери)", async () => {
+    const hero = { id: "h1", name: "Геро", avatar: null, mapId: "m1", x: 0.1, y: 0.1, own: true };
+
+    vi.mocked(getWorldMap).mockResolvedValue({
+      map,
+      markers: [{ ...marker("seen"), dmNote: "DM-SECRET-NOTE", alwaysVisible: false }, { ...marker("hidden-marker"), name: "HIDDEN-NAME", alwaysVisible: false }],
+      heroes: [hero],
+      notes: [{ id: "n1", text: "DM-NOTE-TEXT" } as never],
+    });
+    vi.mocked(getWorldView).mockResolvedValue({ ...view([{ ...marker("seen"), dmNote: null }]), heroes: [hero], notes: [{ id: "n2", text: "PLAYER-NOTE" } as never] });
+
+    renderStage(show(), true, true);
+
+    const el = await screen.findByTestId("map");
+
+    expect(getWorldView).toHaveBeenCalledWith("c1", { mapId: "m1", asHeroId: "h1" });
+    expect(el.textContent).not.toContain("DM-SECRET-NOTE");
+    expect(el.textContent).not.toContain("HIDDEN-NAME");
+    expect(el.textContent).not.toContain("NOTE");
+    expect(screen.queryByText("Гравці бачать карту зі своїм туманом")).toBeNull();
+  });
+
+  it("режим гравця без героїв: лише alwaysVisible маркери під туманом, без dmNote", async () => {
+    vi.mocked(getWorldMap).mockResolvedValue({
+      map,
+      markers: [{ ...marker("a"), name: "HIDDEN-NAME", dmNote: "DM-SECRET-NOTE", alwaysVisible: false }, { ...marker("b"), dmNote: "DM-SECRET-NOTE", alwaysVisible: true }],
+      heroes: [],
+    });
+
+    renderStage(show(), true, true);
+
+    const el = await screen.findByTestId("map");
+
+    expect(el.textContent).toContain('"id":"b"');
+    expect(el.textContent).not.toContain("HIDDEN-NAME");
+    expect(el.textContent).not.toContain("DM-SECRET-NOTE");
     expect(getWorldView).not.toHaveBeenCalled();
   });
 });
