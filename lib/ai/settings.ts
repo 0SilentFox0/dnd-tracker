@@ -14,5 +14,5 @@ export async function saveAiSettings(campaignId: string, instructions: string | 
     const row = await prisma.campaign.update({ where: { id: campaignId }, data: { aiInstructions: instructions }, select: { aiInstructions: true } });
 
     return { instructions: row.aiInstructions };
-  });
+  }, { bump: false });
 }

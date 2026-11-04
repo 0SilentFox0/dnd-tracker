@@ -34,7 +34,7 @@ export async function runGuardedBattleRecordOperation<T>(
     }
 
     return callback();
-  });
+  }, { bump: false });
 
   return execution ? runContentWriteContext(actor.campaignId, execution.db, run) : run();
 }

@@ -32,6 +32,7 @@ model User {
 
 model Campaign {
   id                   String                @id @default(cuid())
+  contentVersion       Int                   @default(0)
   sourceSync           CampaignSourceSync?
   name                 String
   description          String?
@@ -989,6 +990,7 @@ model ApiToken {
 model CampaignSourceSync {
   campaignId       String   @id
   sourceCampaignId String
+  sourceVersion    Int?
   baseline         Json
   ignored          Json     @default("{}")
   syncedAt         DateTime @default(now())

@@ -32,7 +32,7 @@ function recheckAccessWith(db: Parameters<typeof loadBattleAccess>[0]): Pipeline
 }
 
 export const defaultPipelineDeps: PipelineDeps = {
-  withWrite: (campaignId, callback) => withCampaignContentWrite(campaignId, callback),
+  withWrite: (campaignId, callback) => withCampaignContentWrite(campaignId, callback, { bump: false }),
   recheckAccess: recheckAccessWith(prisma),
   getUserId: getSessionUserId,
   rateLimit: ({ userId, scope, battleId }) =>

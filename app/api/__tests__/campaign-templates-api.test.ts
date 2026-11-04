@@ -74,6 +74,7 @@ describe("campaign templates API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.userId.current = "u1";
+    m.db.campaign.update.mockResolvedValue({ contentVersion: 1 });
     m.exportCampaign.mockResolvedValue(bundle);
     m.importBundle.mockResolvedValue({ idMap: new Map(), warnings: [], hashes: {} });
     m.db.campaign.create.mockImplementation(async ({ data }: { data: object }) => ({ id: "new", ...data }));

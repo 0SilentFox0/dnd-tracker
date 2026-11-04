@@ -2,7 +2,7 @@ import { expect, it, vi } from "vitest";
 
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
-vi.mock("@/lib/db", () => ({ prisma: { $transaction: async (fn: (db: object) => unknown) => fn({ $queryRaw: async () => [{ id: "c" }] }) } }));
+vi.mock("@/lib/db", () => ({ prisma: { $transaction: async (fn: (db: object) => unknown) => fn({ $queryRaw: async () => [{ id: "c" }], campaign: { update: async () => ({ contentVersion: 1 }) } }) } }));
 it("awaits after-commit effects and logs their failures without failing the committed write", async () => {
   const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
 

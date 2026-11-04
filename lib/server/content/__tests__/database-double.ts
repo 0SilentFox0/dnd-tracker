@@ -14,6 +14,11 @@ export function contentDatabaseDouble<T extends object>(delegates: T) {
 
     return [{ id: values[0] }];
   });
+
+  const withCampaign = base as T & { campaign?: { update?: Mock } };
+
+  withCampaign.campaign ??= {};
+  withCampaign.campaign.update ??= vi.fn(async () => ({ contentVersion: 1 }));
   base.$transaction ??= vi.fn();
   base.$transaction.mockImplementation(async (callback: (tx: typeof base) => unknown) => callback(base));
 

@@ -136,7 +136,7 @@ async function writeScenarioContent(actor: Actor, id: string, raw: unknown, expe
 export async function saveScenarioContent(actor: Actor, id: string, raw: unknown, expectedVersion: number, force = true) {
   assertCan(actor, { access: "dm", scope: "scenario:write" });
 
-  return withCampaignContentWrite(actor.campaignId, () => writeScenarioContent(actor, id, raw, expectedVersion, force));
+  return withCampaignContentWrite(actor.campaignId, () => writeScenarioContent(actor, id, raw, expectedVersion, force), { bump: false });
 }
 type ScenarioRun = {
   actor: Actor;
@@ -253,5 +253,5 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
     const pageHandler = ownHandler(PAGE_HANDLERS, operation);
 
     return pageHandler ? pageHandler(run) : saveContent(run, operation);
-  });
+  }, { bump: false });
 }

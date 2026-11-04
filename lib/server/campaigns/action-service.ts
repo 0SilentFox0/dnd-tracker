@@ -234,6 +234,7 @@ export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepare
       kind: CampaignKind.TEMPLATE,
       visibility: CampaignVisibility.PRIVATE,
       createdFromId: source.id,
+      sourceVersion: source.contentVersion,
     });
 
     afterContentCommit(() => invalidateCampaignLists([actor.userId]));

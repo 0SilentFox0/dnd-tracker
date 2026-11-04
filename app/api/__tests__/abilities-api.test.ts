@@ -9,7 +9,7 @@ vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
 
 vi.mock("@/lib/db", () => ({
   prisma: {
-    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
+    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
     skill: { findFirst: vi.fn(), findMany: vi.fn(async () => [{ id: "s1", name: "Лють" }]), update: vi.fn(), create: vi.fn() },
     race: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
     artifact: { findMany: vi.fn(async () => []), findFirst: vi.fn() },

@@ -17,7 +17,7 @@ export async function createDeckRecord(campaignId: string, title: string) {
 
   return prisma.slideDeck.create({ data: { campaignId, title, sortOrder: (existing._max.sortOrder ?? -1) + 1 } });
 
-  });
+  }, { bump: false });
 }
 
 export async function saveDeckRecord(campaignId: string, deckId: string, updatedAt: Date, title: string, slides: Slide[]) {
@@ -30,7 +30,7 @@ export async function saveDeckRecord(campaignId: string, deckId: string, updated
     throw error;
   }
 
-  });
+  }, { bump: false });
 }
 
 export async function bindDeckRecord(campaignId: string, deckId: string, _updatedAt: Date, scenarioPageId: string | null) {
@@ -47,7 +47,7 @@ export async function bindDeckRecord(campaignId: string, deckId: string, _update
 
   return prisma.slideDeck.update({ where: { id: deckId }, data: { scenarioPageId, updatedAt: current.updatedAt } });
 
-  });
+  }, { bump: false });
 }
 
-export const deleteDeckRecord = (campaignId: string, deckId: string) => withCampaignContentWrite(campaignId, () => prisma.slideDeck.delete({ where: { id: deckId } }));
+export const deleteDeckRecord = (campaignId: string, deckId: string) => withCampaignContentWrite(campaignId, () => prisma.slideDeck.delete({ where: { id: deckId } }), { bump: false });

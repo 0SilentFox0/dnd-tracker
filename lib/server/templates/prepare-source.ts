@@ -9,7 +9,7 @@ import { translationsFor } from "@/lib/server/templates/srd-translations";
 import { canReadSource } from "@/lib/utils/api/is-dm";
 import { isCanonicalSrdTemplate, isLegacySrdTemplate, SRD_CONTENT_LOCALES, type SrdContentLocale, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
 
-export type PreparedCampaignSource = { id: string; bundle: Bundle; contentLocale: string | null; source: TemplateIdentity };
+export type PreparedCampaignSource = { id: string; bundle: Bundle; contentLocale: string | null; contentVersion: number; source: TemplateIdentity };
 
 type Options = {
   userId: string;
@@ -64,5 +64,5 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
 
   const bundle = await exportCampaign(db, source.id);
 
-  return { id: source.id, source: { kind: source.kind, visibility: source.visibility, templateKey: source.templateKey, locale: source.locale }, contentLocale, bundle: overlay ? localizeSrdBundle(bundle, translationsFor(contentLocale as SrdContentLocale)) : bundle };
+  return { id: source.id, contentVersion: source.contentVersion, source: { kind: source.kind, visibility: source.visibility, templateKey: source.templateKey, locale: source.locale }, contentLocale, bundle: overlay ? localizeSrdBundle(bundle, translationsFor(contentLocale as SrdContentLocale)) : bundle };
 }

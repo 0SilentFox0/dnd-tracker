@@ -101,7 +101,7 @@ export async function prepareShowAction(caller: AssistantCaller, operation: stri
     });
 
     return { summary: t("summary.show", { operation }), targets: [target], changes: [{ target, path: operation, before: operation === "decks.save" ? safeMedia(snapshot.deck && toSlideDeck(snapshot.deck)) : null, after: jsonContent(input) }], warnings: [], effects: [{ kind: operation === "generate" ? "paid" : operation === "decks.delete" || operation === "discard" || removed ? "delete" : "update", targets: [target], description: operation }], preconditions: { fingerprint: requestDigest(jsonContent(snapshot)) } };
-  });
+  }, { bump: false });
 }
 
 type ShowRun = {
@@ -263,5 +263,5 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
     return handler(showRun);
   };
 
-  return read ? run() : withCampaignContentWrite(actor.campaignId, run);
+  return read ? run() : withCampaignContentWrite(actor.campaignId, run, { bump: false });
 }

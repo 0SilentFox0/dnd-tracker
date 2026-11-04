@@ -1,15 +1,32 @@
+import type { Prisma } from "@prisma/client";
 import { AsyncLocalStorage } from "node:async_hooks";
+
+import { bumpContentVersion } from "@/lib/server/campaigns/version";
 
 export type ContentEffect = () => void | Promise<void>;
 
-export interface ContentWriteContext { campaignId: string; db: object; afterCommit: ContentEffect[]; onTrackFileRemoved?: (url: string) => void }
+export interface ContentWriteContext { campaignId: string; db: object; afterCommit: ContentEffect[]; onTrackFileRemoved?: (url: string) => void; dirty?: boolean }
 
 const context = new AsyncLocalStorage<ContentWriteContext>();
 
 export const currentContentWrite = () => context.getStore();
 
 export function runContentWriteContext<T>(campaignId: string, db: object, callback: () => Promise<T>, afterCommit: ContentEffect[] = []): Promise<T> {
-  return context.run({ campaignId, db, afterCommit }, callback);
+  const store: ContentWriteContext = { campaignId, db, afterCommit };
+
+  return context.run(store, async () => {
+    const value = await callback();
+
+    if (store.dirty) await bumpContentVersion(db as Prisma.TransactionClient, campaignId);
+
+    return value;
+  });
+}
+
+export function markContentDirty() {
+  const current = context.getStore();
+
+  if (current) current.dirty = true;
 }
 
 /** Existing domain guards must share the transaction too, including helpers importing prisma. */

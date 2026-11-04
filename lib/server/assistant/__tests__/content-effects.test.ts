@@ -22,7 +22,7 @@ describe("content durable effects", () => {
   it("file deletion records cleanup without touching Storage during the domain transaction", async () => {
     let exists = true;
 
-    const db = { campaignTrack: { findFirst: async () => exists ? row : null, deleteMany: async () => { exists = false;
+    const db = { campaign: { update: async () => ({ contentVersion: 1 }) }, campaignTrack: { findFirst: async () => exists ? row : null, deleteMany: async () => { exists = false;
 
  return { count: 1 }; } } };
 

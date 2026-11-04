@@ -344,6 +344,7 @@ async function saveState(db: SyncDb, ctx: SyncContext, selected: SyncItem[], ign
 
   const data = {
     sourceCampaignId: ctx.source.id,
+    sourceVersion: ctx.source.contentVersion,
     baseline: baseline as Prisma.InputJsonObject,
     ignored: ign as Prisma.InputJsonObject,
     syncedAt: new Date(),

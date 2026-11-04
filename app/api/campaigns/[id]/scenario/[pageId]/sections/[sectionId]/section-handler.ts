@@ -46,7 +46,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
     await refreshSummaryFreshness(pageId, page.version + 1, { title: page.title, kind: page.kind, arc: page.arc, content: next });
 
     return NextResponse.json({ version: page.version + 1, section: next.sections.find((s) => s.id === sectionId) });
-    });
+    }, { bump: false });
   } catch (error) {
     if (error instanceof InvalidScenarioContentError) return errorResponse(API_ERRORS.SCENARIO_CONTENT_INVALID, 500);
 

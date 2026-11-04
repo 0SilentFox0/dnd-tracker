@@ -31,6 +31,7 @@ interface CreateFromBundleInput {
   kind?: "campaign" | "template";
   visibility?: "private" | "official";
   createdFromId?: string | null;
+  sourceVersion?: number | null;
   contentLocale?: string | null;
   settings?: Partial<Bundle["settings"]>;
   critChoiceByDm?: boolean;
@@ -86,6 +87,7 @@ export async function createCampaignFromBundle(input: CreateFromBundleInput): Pr
               data: {
                 campaignId: campaign.id,
                 sourceCampaignId: input.createdFromId,
+                sourceVersion: input.sourceVersion ?? null,
                 baseline: baselineFromBundle(bundle, hashes) as Prisma.InputJsonObject,
               },
             });
@@ -140,6 +142,7 @@ export async function createCampaignForUser(userId: string, data: CreateCampaign
     description: data.description,
     bundle: source?.bundle ?? null,
     createdFromId: source?.id ?? null,
+    sourceVersion: source?.contentVersion ?? null,
     contentLocale: source?.contentLocale ?? null,
     settings: { maxLevel: data.maxLevel, allowPlayerEdit: data.allowPlayerEdit },
     critChoiceByDm: data.critChoiceByDm,

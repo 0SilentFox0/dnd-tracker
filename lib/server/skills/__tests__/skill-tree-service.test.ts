@@ -17,7 +17,7 @@ const actor = { campaignId: "c1", userId: "u", isDM: true, via: "token" as const
 describe("skill-tree-service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    db.$transaction.mockImplementation(async (fn) => fn({ ...db, $queryRaw: async () => [{ id: "c1" }] }));
+    db.$transaction.mockImplementation(async (fn) => fn({ ...db, $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }));
     db.mainSkill.findMany.mockResolvedValue([]);
     db.skill.findMany.mockResolvedValue([]);
   });
@@ -66,6 +66,6 @@ it("saving an existing tree reads and writes inside the shared campaign lock", a
   db.mainSkill.findMany.mockResolvedValue([]); db.skill.findMany.mockResolvedValue([]);
   db.skillTree.findFirst.mockResolvedValue({ id: "tree", campaignId: "c1", race: "Люди", skills: {} });
   db.skillTree.update.mockImplementation(async () => ({ id: "tree", race: currentContentWrite()?.campaignId ?? "unlocked", skills: {} }));
-  db.$transaction.mockImplementation(async (fn) => fn({ ...db, $queryRaw: async () => [{ id: "c1" }] }));
+  db.$transaction.mockImplementation(async (fn) => fn({ ...db, $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }));
   expect(await saveSkillTree(actor, { race: "Люди", skills: {} })).toMatchObject({ race: "c1" });
 });

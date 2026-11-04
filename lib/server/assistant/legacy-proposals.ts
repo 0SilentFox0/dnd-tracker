@@ -53,7 +53,7 @@ export async function linkLegacyProposal(caller: AssistantCaller, proposalId: st
     const row = await tx.assistantIntent.create({ data: { campaignId: caller.actor.campaignId, userId: caller.actor.userId, channel: "chat", originKey, requestId: proposalId, requestHash: requestDigest({ actionId: "scenario.legacy-proposal", input: payload }), actionId: "scenario.legacy-proposal", legacyProposalId: proposalId, summary: preview.summary, targets: preview.targets, payload, preview: preview as Prisma.InputJsonValue, expected: preview.preconditions as Prisma.InputJsonValue, status: "pending", expiresAt: new Date(Date.now() + 15 * 60_000) } });
 
     return intentSummary(row);
-  });
+  }, { bump: false });
 }
 export async function reconcileLegacyProposal(tx: Prisma.TransactionClient, campaignId: string, proposalId: string, status: "applied" | "rejected" | "stale", result: ActionResult | null = null, executingIntentId?: string) {
   const linked = await tx.assistantIntent.findUnique({ where: { legacyProposalId: proposalId } });

@@ -23,5 +23,5 @@ export function withCharacterOperation<T>(campaignId: string, operation: string,
     await lockCharacters(tx, ids);
 
     return callback(tx);
-  });
+  }, { bump: false });
 }

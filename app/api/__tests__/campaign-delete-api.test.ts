@@ -13,7 +13,7 @@ vi.mock("@/lib/cache/kv", () => ({ kvDel: vi.fn(), kvGet: vi.fn(), kvSet: vi.fn(
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<typeof import("@/lib/cache/tags")>()), invalidateAllReference: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
-    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
+    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
     campaign: { delete: vi.fn() },
     campaignMember: { findMany: vi.fn() },
   },

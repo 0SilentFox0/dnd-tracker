@@ -208,7 +208,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
 }
 
 export function prepareBattleAction(caller: AssistantCaller, operation: string, raw: unknown): Promise<ActionPreview> {
-  return withCampaignContentWrite(caller.actor.campaignId, () => prepared(caller, operation, raw)).catch(error => {
+  return withCampaignContentWrite(caller.actor.campaignId, () => prepared(caller, operation, raw), { bump: false }).catch(error => {
     if (error instanceof BattleRuleError) throw new ContentError(error.message, 422, undefined, error.params);
 
     if (error instanceof BattleAccessError) throw new ContentError(error.message, error.status);
@@ -226,7 +226,7 @@ export async function runBattleAction(actor: Actor, operation: string, raw: unkn
     if (requestDigest(fresh.preconditions) !== requestDigest(expected)) throw new ContentError(API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN, 409);
 
     return executeBattleOperation(actor, { operation, battleId: value.battleId ?? "", input: value.body, expectedVersion: (fresh.preconditions as { version: number }).version, serverDice: value.dice === "server" }, execution);
-  });
+  }, { bump: false });
 
   assertWriteScope(actor, execution);
 

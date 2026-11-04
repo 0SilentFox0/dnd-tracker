@@ -37,5 +37,5 @@ export async function applyAndWriteShowCommand(campaignId: string, prev: ShowSta
   if (result.value !== prev && !(await writeShowState(campaignId, prev, result.value))) throw new ContentError(API_ERRORS.SHOW_CONFLICT, 409);
 
   return result.value;
-  });
+  }, { bump: false });
 }

@@ -42,7 +42,7 @@ export const SCENARIO_ACTIONS: readonly AssistantActionDef[] = [LEGACY_PROPOSAL_
       const target = { domain: "scenario", id: String(value.id ?? "new"), name: state.page?.title ?? t("results.newPage") };
 
       return { summary: t("summary.scenario", { operation }), targets: [target], changes: [{ target, path: operation, before: jsonContent(state.page ?? null), after: jsonContent(value) }], warnings: [], effects: [{ kind: operation.includes("delete") ? "delete" : operation === "section.patch" && value.played === false ? "erase-progress" : operation === "create" ? "create" : "update", targets: [target], description: operation }], preconditions: { fingerprint: scenarioFingerprint(state) } };
-    }),
+    }, { bump: false }),
     execute: (ctx, value) => runScenarioOperation(ctx.caller.actor, operation, value as Record<string, unknown>, (ctx.expected as { fingerprint: string }).fingerprint, ctx.caller.locale),
   };
 })];

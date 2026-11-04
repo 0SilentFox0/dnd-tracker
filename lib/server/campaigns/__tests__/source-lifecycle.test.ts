@@ -82,7 +82,7 @@ describe("source lifecycle through the database boundary", () => {
 
     const reads = BUNDLE_TABLES.map((t) => vi.spyOn(f.db[t.delegate], "findMany"));
 
-    const created = await createCampaignForUser("dm", { name: "N" }, { source: { id: "canonical", bundle, contentLocale: "uk", source: official }, defer: () => {} });
+    const created = await createCampaignForUser("dm", { name: "N" }, { source: { id: "canonical", bundle, contentLocale: "uk", contentVersion: 0, source: official }, defer: () => {} });
 
     expect(created.ok).toBe(true);
     expect(reads.every((spy) => spy.mock.calls.every(([args]) => (args as { where: { campaignId?: string } }).where.campaignId !== "canonical"))).toBe(true);

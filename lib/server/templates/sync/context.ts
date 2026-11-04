@@ -34,14 +34,14 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   const found = await db.campaign.findUnique({
     where: { id: campaign.createdFromId },
-    select: { id: true, name: true, kind: true, visibility: true, templateKey: true, locale: true, members: { where: { userId: access?.userId ?? "" }, select: { role: true } } },
+    select: { id: true, name: true, kind: true, contentVersion: true, visibility: true, templateKey: true, locale: true, members: { where: { userId: access?.userId ?? "" }, select: { role: true } } },
   });
 
   if (!found) throw new ContentError(API_ERRORS.SOURCE_NOT_FOUND, 404);
 
   if (access && !canReadSource(found.visibility, found.members)) throw new ContentError(API_ERRORS.SOURCE_FORBIDDEN, 403);
 
-  const source = { id: found.id, name: found.name, kind: found.kind };
+  const source = { id: found.id, name: found.name, kind: found.kind, contentVersion: found.contentVersion };
 
   const [rawSourceBundle, rows, state] = await Promise.all([
     exportCampaign(db, source.id),

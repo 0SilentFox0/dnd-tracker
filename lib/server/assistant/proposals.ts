@@ -98,7 +98,7 @@ export async function applyProposal(campaignId: string, userId: string, proposal
     await tx.aiProposal.updateMany({ where: { id: proposalId }, data: { status: "pending" } });
 
     return result;
-  });
+  }, { bump: false });
 }
 
 // a failure with `settled` has already persisted its terminal status; any other failure hands the claim back
@@ -247,5 +247,5 @@ export async function rejectProposal(campaignId: string, proposalId: string): Pr
   if (row) afterContentCommit(() => discardSlideFiles(campaignId, slideUrls(row.ops as unknown as AiProposalOp[])));
 
   return row && toProposal(row);
-  });
+  }, { bump: false });
 }
