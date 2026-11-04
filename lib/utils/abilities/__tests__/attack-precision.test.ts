@@ -35,7 +35,7 @@ const hero = (abilities = [reckless, steady], movementUsed?: number): BattlePart
   return { ...p, abilities: { ...p.abilities, damageModel: "5e" }, battleData: { ...p.battleData, ...(movementUsed !== undefined && { movementUsed }) } };
 };
 
-const use = (p: BattleParticipant, key: string) => runAbilities([p], { type: "bonusAction", actorId: "h", abilityKey: key, targetIds: [] }, { round: 1, rng: seq(0.5) }).participants[0];
+const use = (p: BattleParticipant, key: string) => runAbilities([p], { type: "bonusAction", actorId: "h", abilityKey: key, targetIds: [] }, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) }).participants[0];
 
 const sword: BattleAttack = { id: "s", name: "Меч", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d8", damageType: "slashing" };
 

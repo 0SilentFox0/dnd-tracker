@@ -23,7 +23,7 @@ describe("processStartOfTurn", () => {
       battleData: { ...base.battleData, activeEffects: [debuff("no_bonus_action", 1), debuff("no_reaction", 1)] },
     });
 
-    const out = processStartOfTurn(p, 2, [p]);
+    const out = processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES);
 
     expect(out.participant.actionFlags.hasUsedBonusAction).toBe(true);
     expect(out.participant.actionFlags.hasUsedReaction).toBe(true);
@@ -34,7 +34,7 @@ describe("processStartOfTurn", () => {
   it("без обмежень — дії доступні", () => {
     const p = createMockParticipant();
 
-    const out = processStartOfTurn(p, 2, [p]);
+    const out = processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES);
 
     expect(out.participant.actionFlags).toMatchObject({ hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false });
   });
@@ -46,7 +46,7 @@ describe("рух на початку ходу", () => {
 
     const p = createMockParticipant({ battleData: { ...base.battleData, movementUsed: 4 } });
 
-    expect(processStartOfTurn(p, 2, [p]).participant.battleData.movementUsed).toBe(0);
+    expect(processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES).participant.battleData.movementUsed).toBe(0);
   });
 
   it("запамʼятовує стартову клітинку ходу і скидає прапорець повернення", () => {
@@ -54,7 +54,7 @@ describe("рух на початку ходу", () => {
 
     const p = createMockParticipant({ battleData: { ...base.battleData, position: { x: 3, y: 1 }, returnedThisTurn: true } });
 
-    const { battleData } = processStartOfTurn(p, 2, [p]).participant;
+    const { battleData } = processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES).participant;
 
     expect(battleData.turnStartPosition).toEqual({ x: 3, y: 1 });
     expect(battleData.returnedThisTurn).toBeUndefined();
@@ -63,13 +63,13 @@ describe("рух на початку ходу", () => {
   it("без позиції на карті стартової клітинки немає", () => {
     const p = createMockParticipant();
 
-    expect(processStartOfTurn(p, 2, [p]).participant.battleData.turnStartPosition).toBeUndefined();
+    expect(processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES).participant.battleData.turnStartPosition).toBeUndefined();
   });
 
   it("без пройденого руху поле не зʼявляється", () => {
     const p = createMockParticipant();
 
-    expect(processStartOfTurn(p, 2, [p]).participant.battleData.movementUsed).toBeUndefined();
+    expect(processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES).participant.battleData.movementUsed).toBeUndefined();
   });
 });
 
@@ -81,20 +81,20 @@ describe("critical effects at the start of turn", () => {
   it("lose_action takes the action on the next turn", () => {
     const p = hit("lose_action");
 
-    expect(processStartOfTurn(p, 2, [p], () => 0.5).participant.actionFlags.hasUsedAction).toBe(true);
+    expect(processStartOfTurn(p, 2, [p], () => 0.5, undefined, DEFAULT_RULES).participant.actionFlags.hasUsedAction).toBe(true);
   });
 
   it("lose_reaction is spent at once and restored next turn", () => {
     const p = hit("lose_reaction");
 
     expect(p.actionFlags.hasUsedReaction).toBe(true);
-    expect(processStartOfTurn(p, 2, [p]).participant.actionFlags.hasUsedReaction).toBe(false);
+    expect(processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES).participant.actionFlags.hasUsedReaction).toBe(false);
   });
 
   it("block_bonus_action takes the bonus action on the next turn", () => {
     const p = hit("block_bonus_action");
 
-    expect(processStartOfTurn(p, 2, [p]).participant.actionFlags.hasUsedBonusAction).toBe(true);
+    expect(processStartOfTurn(p, 2, [p], undefined, undefined, DEFAULT_RULES).participant.actionFlags.hasUsedBonusAction).toBe(true);
   });
 });
 
@@ -105,7 +105,7 @@ describe("processStartOfRound", () => {
     const make = (id: string, baseInitiative: number, dexterity: number) =>
       createMockParticipant({ basicInfo: { ...base.basicInfo, id }, abilities: { ...base.abilities, initiative: baseInitiative + 3, baseInitiative, dexterity } });
 
-    const out = processStartOfRound([make("a", 10, 12), make("b", 15, 10), make("c", 10, 16)], 2);
+    const out = processStartOfRound([make("a", 10, 12), make("b", 15, 10), make("c", 10, 16)], 2, undefined, undefined, undefined, DEFAULT_RULES);
 
     expect(out.updatedInitiativeOrder.map((p) => p.basicInfo.id)).toEqual(["a", "b", "c"]);
     expect(out.updatedInitiativeOrder.map((p) => p.abilities.initiative)).toEqual([13, 18, 13]);
@@ -116,7 +116,7 @@ describe("processStartOfRound", () => {
 
     const make = (id: string, slot = false) => createMockParticipant({ basicInfo: { ...base.basicInfo, id, isExtraTurnSlot: slot } });
 
-    const ids = processStartOfRound([make("a"), make("x", true), make("b")], 2, [make("s")]).updatedInitiativeOrder.map((p) => p.basicInfo.id);
+    const ids = processStartOfRound([make("a"), make("x", true), make("b")], 2, [make("s")], undefined, undefined, DEFAULT_RULES).updatedInitiativeOrder.map((p) => p.basicInfo.id);
 
     expect(ids).toEqual(["a", "b", "s"]);
   });
@@ -131,7 +131,7 @@ it("processStartOfRound додає саммонів, але не резерв", 
 
   const imp = createMockParticipant({ basicInfo: { ...b.basicInfo, id: "imp" }, battleData: { ...b.battleData, reserved: true } });
 
-  const ids = processStartOfRound([hero], 2, [wolf, imp]).updatedInitiativeOrder.map((p) => p.basicInfo.id);
+  const ids = processStartOfRound([hero], 2, [wolf, imp], undefined, undefined, DEFAULT_RULES).updatedInitiativeOrder.map((p) => p.basicInfo.id);
 
   expect(ids).toContain("wolf");
   expect(ids).not.toContain("imp");
@@ -149,7 +149,7 @@ describe("небезпека на початку ходу", () => {
   it("завдає шкоди й повертає її окремо від damageMessages", () => {
     const p = standing();
 
-    const out = processStartOfTurn(p, 2, [p], () => 0, map);
+    const out = processStartOfTurn(p, 2, [p], () => 0, map, DEFAULT_RULES);
 
     expect(out.damageMessages).toEqual([]);
     expect(out.hazard && { ...out.hazard, message: textOf(out.hazard.message) }).toEqual({ message: "Тест: 5 fire шкоди від «Вогонь»", damage: 5, hpBefore: 20, label: "Вогонь", damageType: "fire" });
@@ -160,7 +160,7 @@ describe("небезпека на початку ходу", () => {
   it("DoT і небезпека: damageMessages лише DoT, hpBefore небезпеки — HP після DoT", () => {
     const p = standing(20, { activeEffects: [makeEffect("burn", { name: "Опік", type: "debuff", dotDamage: { damagePerRound: 3, damageType: "fire" } })] });
 
-    const out = processStartOfTurn(p, 2, [p], () => 0, map);
+    const out = processStartOfTurn(p, 2, [p], () => 0, map, DEFAULT_RULES);
 
     expect(textsOf(out.damageMessages)).toEqual(["Тест: 3 fire шкоди від Опік"]);
     expect(out.hazard).toMatchObject({ hpBefore: 17, damage: 5 });
@@ -170,11 +170,11 @@ describe("небезпека на початку ходу", () => {
   it("уже отримав шкоду в цьому раунді або без карти — нічого", () => {
     const hit = standing(20, { hazardHitRound: 2 });
 
-    expect(processStartOfTurn(hit, 2, [hit], () => 0, map).hazard).toBeUndefined();
+    expect(processStartOfTurn(hit, 2, [hit], () => 0, map, DEFAULT_RULES).hazard).toBeUndefined();
 
     const p = standing();
 
-    expect(processStartOfTurn(p, 2, [p], () => 0).hazard).toBeUndefined();
+    expect(processStartOfTurn(p, 2, [p], () => 0, undefined, DEFAULT_RULES).hazard).toBeUndefined();
   });
 
   it("імунітет до заклинання, що створило зону, — шкоди немає", () => {
@@ -182,7 +182,7 @@ describe("небезпека на початку ходу", () => {
 
     const p = grantPassive(standing(), [{ kind: "flag", flag: "spellImmunity" }]);
 
-    const out = processStartOfTurn(p, 2, [p], () => 0, wall);
+    const out = processStartOfTurn(p, 2, [p], () => 0, wall, DEFAULT_RULES);
 
     expect(out.hazard).toBeUndefined();
     expect(out.participant.combatStats.currentHp).toBe(20);
@@ -191,7 +191,7 @@ describe("небезпека на початку ходу", () => {
   it("смерть від небезпеки обробляється як від DoT", () => {
     const p = standing(3);
 
-    const out = processStartOfTurn(p, 2, [p], () => 0, map);
+    const out = processStartOfTurn(p, 2, [p], () => 0, map, DEFAULT_RULES);
 
     expect(out.statusChanged).toBe(true);
     expect(out.participant.combatStats).toMatchObject({ currentHp: 0, status: "unconscious" });
@@ -210,13 +210,13 @@ describe("приземлення після піке", () => {
   it("у раунд піке лишається в повітрі", () => {
     const g = flying(2);
 
-    expect(processStartOfTurn(g, 2, [g], () => 0.5, map).participant.battleData.airborne).toBeDefined();
+    expect(processStartOfTurn(g, 2, [g], () => 0.5, map, DEFAULT_RULES).participant.battleData.airborne).toBeDefined();
   });
 
   it("у наступний раунд приземляється", () => {
     const g = flying(1);
 
-    const out = processStartOfTurn(g, 2, [g], () => 0.5, map).participant;
+    const out = processStartOfTurn(g, 2, [g], () => 0.5, map, DEFAULT_RULES).participant;
 
     expect(out.battleData.airborne).toBeUndefined();
     expect(out.battleData.position).toEqual({ x: 4, y: 4 });
@@ -288,7 +288,7 @@ describe("зона заклинання на початку ходу", () => {
 
     const p = createMockParticipant({ battleData: { ...base.battleData, position: { x: 1, y: 1 } } });
 
-    const out = processStartOfTurn(p, 2, [p, owner], () => 0, map);
+    const out = processStartOfTurn(p, 2, [p, owner], () => 0, map, DEFAULT_RULES);
 
     expect(out.participant.combatStats.currentHp).toBe(16);
     expect(textsOf(out.damageMessages).join(" ")).toContain("Спори");
@@ -312,7 +312,7 @@ describe("аура на учаснику на початку ходу", () => {
 
     const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3 };
 
-    const out = processStartOfTurn(p, 2, [p, bearer], () => 0, map);
+    const out = processStartOfTurn(p, 2, [p, bearer], () => 0, map, DEFAULT_RULES);
 
     expect(out.participant.combatStats.currentHp).toBe(16);
   });

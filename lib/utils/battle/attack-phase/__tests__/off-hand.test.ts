@@ -6,6 +6,7 @@ import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const main: BattleAttack = { id: "m", name: "Кинджал", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d4", damageType: "piercing", traits: ["light"] };
@@ -33,7 +34,7 @@ const hero = (o: Opts = {}): BattleParticipant => {
 const foe = makeParticipant({ id: "f", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50 });
 
 const run = (h: BattleParticipant, data: Partial<AttackPhaseInput["data"]> = {}) =>
-  runAttackPhase({
+  runAttackPhase({ rules: DEFAULT_RULES,
     battle: { initiativeOrder: [{ ...h, actionFlags: { ...h.actionFlags, hasUsedAction: true } }, foe], currentRound: 1, currentTurnIndex: 0 },
     data: { attackerId: "a", targetId: "f", attackId: "m:off", offHand: true, d20Roll: 15, damageRolls: [3], ...data },
     battleId: "b",

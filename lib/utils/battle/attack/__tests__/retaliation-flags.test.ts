@@ -5,6 +5,7 @@ import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/consta
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { FlagKey } from "@/lib/utils/abilities/schema";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -23,7 +24,7 @@ function unit(id: string, side: ParticipantSide, flag?: FlagKey, usedReaction = 
 }
 
 const run = (a: BattleParticipant, d: BattleParticipant) =>
-  resolveRetaliation({ participants: [a, d], attackerId: "a", defenderId: "d", attack: sword, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85) });
+  resolveRetaliation({ rules: DEFAULT_RULES, participants: [a, d], attackerId: "a", defenderId: "d", attack: sword, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85) });
 
 describe("прапори відсічі", () => {
   it("без відповіді: атакувальник з noRetaliation не отримує відсічі", () => {
@@ -48,7 +49,7 @@ describe("прапори відсічі", () => {
     };
 
     const shoot = (d: BattleParticipant) =>
-      resolveRetaliation({ participants: [shooter("a", ParticipantSide.ALLY), d], attackerId: "a", defenderId: "d", attack: bow, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85) });
+      resolveRetaliation({ rules: DEFAULT_RULES, participants: [shooter("a", ParticipantSide.ALLY), d], attackerId: "a", defenderId: "d", attack: bow, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85) });
 
     expect(shoot(shooter("d", ParticipantSide.ENEMY, [resolved(rangedRetaliation("Відповідний постріл"))]))).not.toBeNull();
     expect(shoot(shooter("d", ParticipantSide.ENEMY))).toBeNull();

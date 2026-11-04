@@ -4,6 +4,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const bow = { id: "bow", name: "Лук", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d8", damageType: "piercing" };
 
@@ -23,7 +24,7 @@ describe("Стріла сили", () => {
 
     const behind = makeParticipant({ id: "b", side: ParticipantSide.ENEMY, hp: 100, maxHp: 100 });
 
-    const r = processAttack({ attacker: archer, target, attack: bow, d20Roll: 15, damageRolls: [8], allParticipants: [archer, target, behind], currentRound: 1, battleId: "b1", rng: seq(0) });
+    const r = processAttack({ rules: DEFAULT_RULES, attacker: archer, target, attack: bow, d20Roll: 15, damageRolls: [8], allParticipants: [archer, target, behind], currentRound: 1, battleId: "b1", rng: seq(0) });
 
     const hp = (id: string) => r.allParticipantsUpdated?.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 0;
 
@@ -40,7 +41,7 @@ describe("Стріла сили", () => {
 
     const [target, ...rest] = opts.enemies;
 
-    const r = processAttack({ attacker: archer, target, attack: bow, d20Roll: 15, damageRolls: [8], allParticipants: [archer, ...opts.enemies], currentRound: 1, battleId: "b1", rng: seq(0), map: opts.map });
+    const r = processAttack({ rules: DEFAULT_RULES, attacker: archer, target, attack: bow, d20Roll: 15, damageRolls: [8], allParticipants: [archer, ...opts.enemies], currentRound: 1, battleId: "b1", rng: seq(0), map: opts.map });
 
     const hp = (id: string) => r.allParticipantsUpdated?.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 0;
 

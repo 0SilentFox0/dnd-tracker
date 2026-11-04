@@ -45,6 +45,7 @@ import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participa
 import { stableStringify } from "@/lib/utils/battle/store/stable-json";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
 import { rollDiceList } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { branchLevelNodeId, buildTreeJson, racialNodeId } from "@/lib/utils/skills/progression";
 import { racePassiveData } from "@/scripts/seed/seed-library-lib";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
@@ -342,7 +343,7 @@ async function racePassivesCheck() {
 
     if (race.key === "elves") check("Ельфи: +1 до влучання всіх атак", collectModifiers([p], p.basicInfo.id, { stat: "attackBonus" }).flat === 1);
 
-    if (race.key === "humans") check("Люди: +1 мораль союзникам на 2 раунди на старті", effectiveMorale(runAbilities([p], { type: "battleStart" }, { round: 1, rng: () => 0.5 }).participants[0], [p]).value === 1);
+    if (race.key === "humans") check("Люди: +1 мораль союзникам на 2 раунди на старті", effectiveMorale(runAbilities([p], { type: "battleStart" }, { round: 1, rng: () => 0.5, rules: DEFAULT_RULES }).participants[0], [p]).value === 1);
   }
 }
 

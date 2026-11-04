@@ -157,11 +157,11 @@ describe("grantCast", () => {
 
     const pool = caster.spellcasting.grants?.[0].pool as string;
 
-    const alive = processStartOfTurn(caster, 4, [caster, goblin], () => 0.5);
+    const alive = processStartOfTurn(caster, 4, [caster, goblin], () => 0.5, undefined, DEFAULT_RULES);
 
     expect(alive.participant.spellcasting.grants).toHaveLength(1);
 
-    const gone = processStartOfTurn(caster, 5, [caster, goblin], () => 0.5);
+    const gone = processStartOfTurn(caster, 5, [caster, goblin], () => 0.5, undefined, DEFAULT_RULES);
 
     expect(gone.participant.spellcasting.grants).toHaveLength(0);
     expect(gone.participant.battleData.pools?.[pool]).toBeUndefined();

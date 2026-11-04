@@ -115,7 +115,7 @@ describe("виклики rollSave", () => {
     const cast = (s: CastableSpell, target: BattleParticipant) => {
       const c = caster();
 
-      return castSpell({ caster: c, spell: s, targetIds: [target.basicInfo.id], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3], saveRolls: [{ participantId: target.basicInfo.id, roll: 1 }], rng: seq(0.5) });
+      return castSpell({ rules: DEFAULT_RULES, caster: c, spell: s, targetIds: [target.basicInfo.id], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3], saveRolls: [{ participantId: target.basicInfo.id, roll: 1 }], rng: seq(0.5) });
     };
 
     it("ворог: провалений кидок стає успіхом (половина шкоди)", () => {

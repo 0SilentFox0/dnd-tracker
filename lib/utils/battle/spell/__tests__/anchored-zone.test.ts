@@ -67,7 +67,7 @@ const walk = (ps: BattleParticipant[], from: number, to: number, id = "walker", 
 
   const moved = at(w, { x: to, y });
 
-  return zoneMove({ map, participants: ps.map((p) => (p.basicInfo.id === id ? moved : p)), moved, from: { x: from, y }, path, round, rng: () => 0.5 });
+  return zoneMove({ rules: DEFAULT_RULES, map, participants: ps.map((p) => (p.basicInfo.id === id ? moved : p)), moved, from: { x: from, y }, path, round, rng: () => 0.5 });
 };
 
 describe("anchoredZone", () => {
@@ -138,13 +138,13 @@ describe("anchoredZone", () => {
   it("початок ходу поза аурою знімає накладене, всередині — лишає", () => {
     const hit = walk(cast(aura(), [walker(16)]), 16, 12).participants;
 
-    const inside = zoneTurnStart(map, hit, "walker", { round: 2, rng: () => 0.5 });
+    const inside = zoneTurnStart(map, hit, "walker", { rules: DEFAULT_RULES, round: 2, rng: () => 0.5 });
 
     expect(hasEffectMarker(get(inside.participants, "walker"), "skip_action")).toBe(true);
 
     const away = hit.map((p) => (p.basicInfo.id === "walker" ? at(p, { x: 25, y: 5 }) : p));
 
-    const outside = zoneTurnStart(map, away, "walker", { round: 2, rng: () => 0.5 });
+    const outside = zoneTurnStart(map, away, "walker", { rules: DEFAULT_RULES, round: 2, rng: () => 0.5 });
 
     expect(hasEffectMarker(get(outside.participants, "walker"), "skip_action")).toBe(false);
   });
@@ -152,9 +152,9 @@ describe("anchoredZone", () => {
   it("onTurnStart спрацьовує щоходу для істот у радіусі", () => {
     const ps = cast(aura({ onEnter: undefined, onTurnStart: { effects: [{ ...damage, amount: 3 } as never] } }), [walker(12)]);
 
-    const t1 = zoneTurnStart(map, ps, "walker", { round: 2, rng: () => 0.5 });
+    const t1 = zoneTurnStart(map, ps, "walker", { rules: DEFAULT_RULES, round: 2, rng: () => 0.5 });
 
-    const t2 = zoneTurnStart(map, t1.participants, "walker", { round: 3, rng: () => 0.5 });
+    const t2 = zoneTurnStart(map, t1.participants, "walker", { rules: DEFAULT_RULES, round: 3, rng: () => 0.5 });
 
     expect(get(t2.participants, "walker").combatStats.currentHp).toBe(94);
   });

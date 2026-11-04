@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { enterChangedTurn } from "@/lib/utils/battle/turn/enter-turn";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const spent = (id: string) => {
   const p = makeParticipant({ id });
@@ -15,7 +16,7 @@ describe("enterChangedTurn", () => {
 
     const after = [before[1], before[0]];
 
-    const res = enterChangedTurn({ before, after, fromIndex: 0, toIndex: 0, round: 2, rng: () => 0.99 });
+    const res = enterChangedTurn({ rules: DEFAULT_RULES, before, after, fromIndex: 0, toIndex: 0, round: 2, rng: () => 0.99 });
 
     expect(res.turnIndex).toBe(0);
     expect(res.participants[0].basicInfo.id).toBe("b");
@@ -26,7 +27,7 @@ describe("enterChangedTurn", () => {
   it("changes nothing when the same actor stays current", () => {
     const before = [spent("a"), makeParticipant({ id: "b" })];
 
-    const res = enterChangedTurn({ before, after: before, fromIndex: 0, toIndex: 0, round: 2 });
+    const res = enterChangedTurn({ rules: DEFAULT_RULES, before, after: before, fromIndex: 0, toIndex: 0, round: 2 });
 
     expect(res.participants[0].actionFlags.hasUsedAction).toBe(true);
   });

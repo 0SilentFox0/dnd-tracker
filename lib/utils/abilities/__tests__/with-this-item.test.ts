@@ -5,6 +5,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { ConditionSchema } from "@/lib/utils/abilities/schema/conditions";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
 const rider = resolved(
@@ -16,7 +17,7 @@ const scene = () => [makeParticipant({ id: "f", abilities: [rider] }), makeParti
 
 const hit = (source?: string): AbilityEvent => ({ type: "hit", actorId: "f", targetId: "t", attackKind: "melee", damage: 5, ...(source && { attackSourceId: source }) });
 
-const hpAfter = (event: AbilityEvent) => runAbilities(scene(), event, { round: 1, rng: seq(0.5) }).participants.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp;
+const hpAfter = (event: AbilityEvent) => runAbilities(scene(), event, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) }).participants.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp;
 
 describe("withThisItem", () => {
   it("rider fires only for an attack made with its item", () => {

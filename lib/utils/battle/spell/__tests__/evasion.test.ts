@@ -7,6 +7,7 @@ import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-partici
 import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -35,7 +36,7 @@ const rogue = (incapacitated = false): BattleParticipant => {
 const hpAfter = (target: BattleParticipant, roll: number, spell = spellOf()) => {
   const c = caster();
 
-  const r = castSpell({ caster: c, spell, targetIds: ["e"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3], saveRolls: [{ participantId: "e", roll }], rng: seq(0.5) });
+  const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds: ["e"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3], saveRolls: [{ participantId: "e", roll }], rng: seq(0.5) });
 
   return r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e")?.combatStats.currentHp;
 };

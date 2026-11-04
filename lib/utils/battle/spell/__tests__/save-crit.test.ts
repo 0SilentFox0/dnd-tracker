@@ -10,6 +10,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const fire: Effect = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };
@@ -41,7 +42,7 @@ function cast(spell: CastableSpell, rolls: Record<string, number>, crit?: CritPi
 
   const ids = Object.keys(rolls);
 
-  return castSpell({
+  return castSpell({ rules: DEFAULT_RULES,
     caster: c,
     spell,
     targetIds: ids,
@@ -135,7 +136,7 @@ describe("криті на рятівних кидках заклинань", () 
 
     const target = { ...boss, battleData: { ...boss.battleData, legendary: { actions: 0, actionsLeft: 0, resistLeft: 1 } } };
 
-    const r = castSpell({ caster: c, spell, targetIds: ["e1"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3], saveRolls: [{ participantId: "e1", roll: 1 }], rng: seq(0.5), crit });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds: ["e1"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3], saveRolls: [{ participantId: "e1", roll: 1 }], rng: seq(0.5), crit });
 
     expect(get(r as ReturnType<typeof cast>, "e1").battleData.legendary?.resistLeft).toBe(0);
     expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("success");

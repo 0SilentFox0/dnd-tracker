@@ -5,12 +5,13 @@ import { makeParticipant, resolved, seq } from "./fixtures";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
 const guard = resolved({ trigger: { event: "bonusAction" }, effects: [{ kind: "guard", percent: 50, duration: { rounds: 2 }, target: "eventTarget" }] });
 
 const cast = (targetId: string, others = [makeParticipant({ id: "ally" }), makeParticipant({ id: "foe", side: ParticipantSide.ENEMY })]) =>
-  runAbilities([makeParticipant({ id: "g", abilities: [guard] }), ...others], { type: "bonusAction", actorId: "g", abilityKey: guard.key, targetIds: [targetId] } as AbilityEvent, { round: 1, rng: seq(0) });
+  runAbilities([makeParticipant({ id: "g", abilities: [guard] }), ...others], { type: "bonusAction", actorId: "g", abilityKey: guard.key, targetIds: [targetId] } as AbilityEvent, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
 
 const guardsOn = (r: ReturnType<typeof cast>, id: string) => r.participants.find((p) => p.basicInfo.id === id)?.battleData.activeEffects.filter((e) => e.abilityKey === "guard").length;
 

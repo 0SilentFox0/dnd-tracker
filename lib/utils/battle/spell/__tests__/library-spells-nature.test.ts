@@ -67,7 +67,7 @@ function cast(key: string, order: BattleParticipant[], targetIds: string[], opts
 
   if (!resolved.ok) throw new Error(textOf(resolved.error));
 
-  return castSpell({
+  return castSpell({ rules: DEFAULT_RULES,
     caster,
     spell: def,
     targetIds: resolved.targetIds,
@@ -89,7 +89,7 @@ function toTurnOf(id: string, ps: BattleParticipant[], s: BattleSceneState = sce
   let st = s;
 
   for (let i = 0; i < 20; i++) {
-    const out = advanceTurn({ participants: order, pending: [], scene: st, rng: seq(0.99) });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: st, rng: seq(0.99) });
 
     order = out.participants;
     st = { ...st, ...out.scene };
@@ -101,7 +101,7 @@ function toTurnOf(id: string, ps: BattleParticipant[], s: BattleSceneState = sce
 }
 
 function meleeBy(attackerId: string, targetId: string, order: BattleParticipant[], turnIndex: number) {
-  return runAttackPhase({
+  return runAttackPhase({ rules: DEFAULT_RULES,
     battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: turnIndex },
     data: { attackerId, targetId, attackId: "claw", d20Roll: 15, damageRolls: [3] },
     battleId: "b1",
@@ -391,7 +391,7 @@ describe("Відродження лісу (forest-rebirth)", () => {
     expect(byId(ps, "s1").combatStats).toMatchObject({ currentHp: 15, status: "active" });
     expect(byId(ps, "e2").combatStats.status).toBe("dead");
 
-    const after = advanceTurn({ participants: ps, pending: [], scene, rng: seq(0.99) });
+    const after = advanceTurn({ rules: DEFAULT_RULES, participants: ps, pending: [], scene, rng: seq(0.99) });
 
     expect(after.participants[after.scene.turnIndex ?? -1].basicInfo.id).toBe("a1");
   });

@@ -23,8 +23,8 @@ export function processStartOfRound(
   currentRound: number,
   pendingSummons: BattleParticipant[] = [],
   rng: Rng = Math.random,
-  map?: BattleMapConfig | null,
-  rules?: Ruleset,
+  map: BattleMapConfig | null | undefined,
+  rules: Ruleset,
 ): {
   updatedInitiativeOrder: BattleParticipant[];
   message: LogLine;

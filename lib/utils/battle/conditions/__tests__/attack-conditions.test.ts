@@ -86,7 +86,7 @@ describe("5e стани в кидку атаки", () => {
 
 describe("крит з 5 фт", () => {
   const strike = (ps: BattleParticipant[], attack: BattleAttack) =>
-    processAttack({
+    processAttack({ rules: DEFAULT_RULES,
       attacker: ps[0],
       target: ps[1],
       attack,

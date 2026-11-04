@@ -5,6 +5,7 @@ import { makeParticipant, resolved, seq } from "./fixtures";
 import { textOf } from "@/lib/i18n/test/text";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
 const bonusAction = (key: string) => ({ type: "bonusAction", actorId: "a", abilityKey: key, targetIds: ["t"] }) as AbilityEvent;
@@ -28,7 +29,7 @@ describe("timed morale", () => {
     const immune = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "conditionImmunity", conditions: ["fear"] }] }, { id: "i" });
 
     const run = (target: ReturnType<typeof makeParticipant>) =>
-      runAbilities([makeParticipant({ id: "a", abilities: [ability] }), target], bonusAction(ability.key), { round: 1, rng: seq(0) });
+      runAbilities([makeParticipant({ id: "a", abilities: [ability] }), target], bonusAction(ability.key), { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
 
     const hit = run(makeParticipant({ id: "t" }));
 

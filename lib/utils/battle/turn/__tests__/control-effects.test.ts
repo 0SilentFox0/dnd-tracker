@@ -9,6 +9,7 @@ import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const claw = { id: "claw", name: "Кіготь", type: "melee", attackBonus: 20, damageDice: "1d6", damageType: "slashing", targetType: "single" } as unknown as BattleParticipant["battleData"]["attacks"][number];
@@ -34,7 +35,7 @@ function cast(effect: Effect, target: BattleParticipant, ps: BattleParticipant[]
     effect,
     targetIds: [target.basicInfo.id],
     event: { type: "action", actorId: "mage", abilityKey: "k" },
-    ctx: { round: 1, rng: seq(0.5) },
+    ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
   });
 }
 
@@ -64,7 +65,7 @@ describe("berserk", () => {
 
     const order = [caster(), raged[1], goblin];
 
-    const out = runAdvanceTurnLoop({
+    const out = runAdvanceTurnLoop({ rules: DEFAULT_RULES,
       initiativeOrder: order,
       currentTurnIndex: 0,
       currentRound: 1,
@@ -87,7 +88,7 @@ describe("berserk", () => {
 
     const raged = cast(berserk, ogre).participants[1];
 
-    const out = runAdvanceTurnLoop({
+    const out = runAdvanceTurnLoop({ rules: DEFAULT_RULES,
       initiativeOrder: [caster(), raged],
       currentTurnIndex: 0,
       currentRound: 1,
@@ -128,13 +129,13 @@ describe("charm", () => {
 
     const charmed = cast(charm, ogre, [mage, ogre]).participants[1];
 
-    const afterMage = advanceTurn({ participants: [mage, charmed], pending: [], scene });
+    const afterMage = advanceTurn({ rules: DEFAULT_RULES, participants: [mage, charmed], pending: [], scene });
 
     const ogreTurn = afterMage.participants[1];
 
     expect(ogreTurn.basicInfo.side).toBe(ParticipantSide.ALLY);
 
-    const after = advanceTurn({ participants: afterMage.participants, pending: [], scene: { ...scene, turnIndex: 1 } });
+    const after = advanceTurn({ rules: DEFAULT_RULES, participants: afterMage.participants, pending: [], scene: { ...scene, turnIndex: 1 } });
 
     const back = after.participants[1];
 
@@ -151,7 +152,7 @@ describe("charm", () => {
 
     const dead = { ...charmed, combatStats: { ...charmed.combatStats, currentHp: 0, status: "unconscious" as const } };
 
-    const out = resolveDowned([caster(), dead], { victimId: "ogre", actorId: null }, { round: 1, rng: seq(0.5) });
+    const out = resolveDowned([caster(), dead], { victimId: "ogre", actorId: null }, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
     expect(out.participants[1].basicInfo.side).toBe(ParticipantSide.ENEMY);
   });
@@ -203,7 +204,7 @@ describe("автоматичний хід шалу", () => {
   const run = (ogre: BattleParticipant, rng = seq(0, 0.9)) => {
     const victim = unitOf("victim", ParticipantSide.ENEMY);
 
-    const out = runAdvanceTurnLoop({ initiativeOrder: [caster(), ogre, victim], currentTurnIndex: 0, currentRound: 1, battleId: "b1", currentBattleLogLength: 0, pendingSummons: [], rng });
+    const out = runAdvanceTurnLoop({ rules: DEFAULT_RULES, initiativeOrder: [caster(), ogre, victim], currentTurnIndex: 0, currentRound: 1, battleId: "b1", currentBattleLogLength: 0, pendingSummons: [], rng });
 
     return { out, victimHp: out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "victim")?.combatStats.currentHp as number };
   };
@@ -239,7 +240,7 @@ describe("saveEnds у кінці ходу", () => {
 
     const withState: BattleParticipant = { ...victim, battleData: { ...victim.battleData, activeEffects: [{ id: "custom:pacified", name: "Умиротворений", type: "condition", duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [{ type: "custom:pacified", value: 1 }], saveEnds: { ability: "wisdom", dc: 10 } }] } };
 
-    const out = advanceTurn({ participants: [withState, caster()], pending: [], scene, rng: seq(0.99) });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [withState, caster()], pending: [], scene, rng: seq(0.99) });
 
     expect(out.actions.some((a) => eventTextOf(a).includes("рятівний кидок") && eventTextOf(a).includes("Умиротворений"))).toBe(true);
   });

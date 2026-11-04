@@ -7,6 +7,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { castSpell } from "@/lib/utils/battle/spell";
 import { expandChosen, needsOption, optionInRange } from "@/lib/utils/battle/spell/cast/state";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { SpellDefinitionSchema,type SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -31,7 +32,7 @@ const cast = (spell: CastableSpell, targetId: string, optionIndex?: number, dice
 
   const target = targetId === "a" ? ally() : foe();
 
-  return castSpell({ caster: c, spell, targetIds: [targetId], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls, rng: seq(0.5), optionIndex });
+  return castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds: [targetId], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls, rng: seq(0.5), optionIndex });
 };
 
 const of = (r: { allParticipantsUpdated: BattleParticipant[] }, id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id) as BattleParticipant;

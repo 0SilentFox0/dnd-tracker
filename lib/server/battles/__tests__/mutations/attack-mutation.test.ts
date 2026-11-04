@@ -11,6 +11,7 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { diceSlots, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const base = createMockParticipant();
 
@@ -29,7 +30,7 @@ const ctx = {
   scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
   participants: [hero, goblin],
   pending: [],
-  meta: { map: null },
+  meta: { map: null, rules: DEFAULT_RULES },
   userId: "user-1",
   isDM: false,
 } as unknown as BattleMutationContext;
@@ -137,7 +138,7 @@ describe("attack mutation", () => {
     ];
 
     it("на карті ближня атака по далекій цілі відхиляється", async () => {
-      const onMap = { ...ctx, participants: placed, meta: { map } } as unknown as BattleMutationContext;
+      const onMap = { ...ctx, participants: placed, meta: { map, rules: DEFAULT_RULES } } as unknown as BattleMutationContext;
 
       expect(await errorCode(attackMutation(onMap, body()))).toBe("action_rejected");
     });
@@ -151,7 +152,7 @@ describe("attack mutation", () => {
         },
       };
 
-      const onMap = { ...ctx, participants: [sweeper, placed[1]], meta: { map } } as unknown as BattleMutationContext;
+      const onMap = { ...ctx, participants: [sweeper, placed[1]], meta: { map, rules: DEFAULT_RULES } } as unknown as BattleMutationContext;
 
       expect(await errorCode(attackMutation(onMap, body()))).toBe("action_rejected");
     });
@@ -169,13 +170,13 @@ describe("attack mutation", () => {
 
       const far = { ...goblin, basicInfo: { ...goblin.basicInfo, id: "gob-far" }, battleData: { ...goblin.battleData, position: { x: 9, y: 4 } } };
 
-      const onMap = { ...ctx, participants: [sweeper, fallen, far], meta: { map } } as unknown as BattleMutationContext;
+      const onMap = { ...ctx, participants: [sweeper, fallen, far], meta: { map, rules: DEFAULT_RULES } } as unknown as BattleMutationContext;
 
       await expect(attackMutation(onMap, body())).rejects.toMatchObject({ code: "action_rejected", message: REJECT.noEnemyInReach });
     });
 
     it("без карти та сама атака проходить як раніше", async () => {
-      const noMap = { ...ctx, participants: placed, meta: { map: null } } as unknown as BattleMutationContext;
+      const noMap = { ...ctx, participants: placed, meta: { map: null, rules: DEFAULT_RULES } } as unknown as BattleMutationContext;
 
       expect(await errorCode(attackMutation(noMap, body()))).toBeUndefined();
     });

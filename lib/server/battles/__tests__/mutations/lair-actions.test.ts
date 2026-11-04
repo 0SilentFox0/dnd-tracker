@@ -13,6 +13,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { processStartOfRound } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const a = resolved({ id: "quake", name: "Землетрус", trigger: { event: "action" }, limits: { lair: true }, effects: [{ kind: "changeMorale", delta: 1 }] });
@@ -58,7 +59,7 @@ describe("lair actions", () => {
   it("round start announces available lair actions and does not fire them", () => {
     const p = dragon();
 
-    const out = processStartOfRound([p], 2);
+    const out = processStartOfRound([p], 2, undefined, undefined, undefined, DEFAULT_RULES);
 
     expect(textsOf(out.lairMessages)).toEqual(["🏰 Ініціатива 20: дія лігва — Дракон"]);
     expect(out.updatedInitiativeOrder[0].combatStats.morale).toBe(0);

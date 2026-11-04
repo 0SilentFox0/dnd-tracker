@@ -52,7 +52,7 @@ function cast(over: { roll?: number; rules?: typeof DEFAULT_RULES; targets?: str
     dice: { count: 2, sides: 6 },
     attackRolls: over.roll === undefined ? undefined : targets.map((participantId) => ({ participantId, roll: over.roll as number })),
     rng: over.rng ?? seq(0.5),
-    rules: over.rules,
+    rules: over.rules ?? DEFAULT_RULES,
     map: over.map,
   });
 }

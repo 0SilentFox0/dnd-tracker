@@ -36,7 +36,7 @@ const rider = (speed: number, extraMovement = 0): BattleParticipant => {
 };
 
 const budgetAfterCast = (caster: BattleParticipant): number => {
-  const r = castSpell({ caster, spell: vehicle, targetIds: ["c"], allParticipants: [caster], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4, map });
+  const r = castSpell({ rules: DEFAULT_RULES, caster, spell: vehicle, targetIds: ["c"], allParticipants: [caster], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4, map });
 
   return moveBudget({ rules: DEFAULT_RULES, map, dmUserId: null }, r.allParticipantsUpdated.find((p) => p.basicInfo.id === "c") as BattleParticipant);
 };

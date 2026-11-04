@@ -6,7 +6,6 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 import { footprint, footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { isOnMap, sizeOf } from "@/lib/utils/battle/grid/occupancy";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { ActiveEffect, AnchoredZoneState, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -67,9 +66,9 @@ export function anchorMove({ participants, moved, from, path, ctx }: { participa
       const bearerAt = bearer.battleData.position;
 
       const reach = (step: GridPoint) => {
-        if (mover) return !!otherAt && inRadius(moved, step, other, otherAt, anchor.state.radiusFeet, ctx.rules ?? DEFAULT_RULES);
+        if (mover) return !!otherAt && inRadius(moved, step, other, otherAt, anchor.state.radiusFeet, ctx.rules);
 
-        return !!bearerAt && inRadius(bearer, bearerAt, other, step, anchor.state.radiusFeet, ctx.rules ?? DEFAULT_RULES);
+        return !!bearerAt && inRadius(bearer, bearerAt, other, step, anchor.state.radiusFeet, ctx.rules);
       };
 
       let inside = reach(from);
@@ -109,7 +108,7 @@ export function anchorTurnStart(participants: BattleParticipant[], targetId: str
 
     if (!target || !bearer || !at || !bearerAt || !isOnMap(target)) continue;
 
-    const inside = inRadius(bearer, bearerAt, target, at, anchor.state.radiusFeet, ctx.rules ?? DEFAULT_RULES);
+    const inside = inRadius(bearer, bearerAt, target, at, anchor.state.radiusFeet, ctx.rules);
 
     if (!inside && anchor.state.endsWhenStartOutside) {
       const out = removeEffects(target, (e) => e.anchorOf === anchor.effect.id);

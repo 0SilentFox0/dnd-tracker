@@ -11,6 +11,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { forgoDice } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const SWORD: BattleAttack = { id: "s", name: "Кинджал", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d4", damageType: "piercing" };
@@ -33,7 +34,7 @@ function foe(conMod: number, dexMod = conMod): BattleParticipant {
 }
 
 function strike(ps: BattleParticipant[], cunningStrike?: CunningStrikeEffect[]) {
-  const flow = { ps, messages: [] as string[], summons: [], ctx: { round: 1, rng: seq(0.5) } };
+  const flow = { ps, messages: [] as string[], summons: [], ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES } };
 
   resolveHit({ flow, attackerId: "r", targetId: "t", attack: SWORD, damageRolls: [1], attackRoll: calculateAttackRoll(ps[0], SWORD, 15), currentRound: 1, battleId: "b", cunningStrike });
 

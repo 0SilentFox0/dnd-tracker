@@ -8,7 +8,6 @@ import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { pushAway } from "@/lib/utils/battle/grid/push";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { LogLine } from "@/types/text";
 
 type PushEffect = Extract<Effect, { kind: "push" }>;
@@ -24,7 +23,7 @@ export function applyPush(input: EffectApplyInput<PushEffect>): EffectApplyResul
 
   const map = ctx.map;
 
-  const cellFeet = cellFeetOf(ctx.rules ?? DEFAULT_RULES);
+  const cellFeet = cellFeetOf(ctx.rules);
 
   const origin = owner?.battleData.position;
 

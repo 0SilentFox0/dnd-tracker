@@ -9,7 +9,6 @@ import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { isGrantLive, withInlineDefinition } from "@/lib/utils/battle/spell/inline-grant";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import { rollDiceList } from "@/lib/utils/common/dice";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
@@ -46,7 +45,7 @@ export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targe
 
     if (holderId === attackerId || attacker.basicInfo.side === holder.basicInfo.side) continue;
 
-    if (!canReact(holder, flow.ctx.rules ?? DEFAULT_RULES) || !anchoredOn(target, holderId, grant.inline.anchorMarkId) || !inRange(grant, target, attacker, !!flow.ctx.map, flow.ctx.rules ?? DEFAULT_RULES)) continue;
+    if (!canReact(holder, flow.ctx.rules) || !anchoredOn(target, holderId, grant.inline.anchorMarkId) || !inRange(grant, target, attacker, !!flow.ctx.map, flow.ctx.rules)) continue;
 
     const spell = withInlineDefinition({ id: grant.spellId, name: typeof grant.label === "string" ? grant.label : grant.spellId, level: 0, groupId: null, definition: { dice: 0, cost: "reaction", targeting: { kind: "self" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [] } }, grant);
 

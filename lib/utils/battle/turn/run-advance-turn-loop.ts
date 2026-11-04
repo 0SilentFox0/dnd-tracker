@@ -25,7 +25,7 @@ export interface AdvanceTurnLoopParams {
   pendingSummons: BattleParticipant[];
   rng?: () => number;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface AdvanceTurnLoopResult {
@@ -52,7 +52,7 @@ interface LoopEnv {
   logBase: number;
   pendingSummons: BattleParticipant[];
   rng: () => number;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 const stateBeforeForEntry = () => undefined;

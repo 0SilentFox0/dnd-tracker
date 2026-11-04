@@ -41,7 +41,7 @@ export interface CastSpellParams {
   rng?: () => number;
   crit?: CritPicker;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface CastSpellResult {

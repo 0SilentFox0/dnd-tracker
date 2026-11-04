@@ -24,13 +24,13 @@ const goblin = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "gob"
 
 describe("advanceTurn", () => {
   it("передає хід наступному живому учаснику", () => {
-    const out = advanceTurn({ participants: [hero, goblin], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [], scene });
 
     expect(out.scene).toMatchObject({ turnIndex: 1, round: 1, pendingMoraleCheck: null });
   });
 
   it("після останнього — новий раунд", () => {
-    const out = advanceTurn({ participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
 
     expect(out.scene.round).toBe(2);
   });
@@ -41,16 +41,16 @@ describe("advanceTurn", () => {
       terrain: { "1:1": { kind: "barrier", untilRound: 1 }, "2:2": { kind: "barrier", untilRound: 2 } },
     };
 
-    const sameRound = advanceTurn({ participants: [hero, goblin], pending: [], scene, map });
+    const sameRound = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [], scene, map });
 
     expect(sameRound.scene.map).toBeUndefined();
 
-    const out = advanceTurn({ participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
 
     expect(out.scene.round).toBe(2);
     expect(out.scene.map?.terrain).toEqual({ "2:2": { kind: "barrier", untilRound: 2 } });
 
-    const nothing = advanceTurn({ participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map: null });
+    const nothing = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map: null });
 
     expect(nothing.scene.map).toBeUndefined();
   });
@@ -58,7 +58,7 @@ describe("advanceTurn", () => {
   it("саммони з pending входять у бій у новому раунді", () => {
     const wolf = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "wolf" } });
 
-    const out = advanceTurn({ participants: [hero, goblin], pending: [wolf], scene: { ...scene, turnIndex: 1 } });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [wolf], scene: { ...scene, turnIndex: 1 } });
 
     expect(out.participants.map((p) => p.basicInfo.id)).toContain("wolf");
     expect(out.pending).toEqual([]);
@@ -67,13 +67,13 @@ describe("advanceTurn", () => {
   it("усі вороги впали — бій завершено", () => {
     const dead = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
 
-    const out = advanceTurn({ participants: [hero, dead], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, dead], pending: [], scene });
 
     expect(out.scene.status).toBe("completed");
   });
 
   it("невикористаний pendingMoraleCheck застосовується і скидається", () => {
-    const out = advanceTurn({
+    const out = advanceTurn({ rules: DEFAULT_RULES,
       participants: [hero, goblin],
       pending: [],
       scene: {
@@ -103,7 +103,7 @@ describe("advanceTurn", () => {
 
     const wolf = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "wolf" }, abilities: { ...base.abilities, initiative: 30, baseInitiative: 30 } });
 
-    const out = advanceTurn({ participants: [deadFirst, mid, enemy], pending: [wolf], scene: { ...scene, turnIndex: 2 } });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [deadFirst, mid, enemy], pending: [wolf], scene: { ...scene, turnIndex: 2 } });
 
     expect(out.scene.round).toBe(2);
     expect(out.participants[out.scene.turnIndex ?? -1].basicInfo.id).toBe("wolf");
@@ -127,7 +127,7 @@ describe("advanceTurn", () => {
     });
 
     it("мораль не створює клона, а позначає учасника", () => {
-      const out = advanceTurn({ participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 0, pendingMoraleCheck: moraleExtra } });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [], scene: { ...scene, turnIndex: 0, pendingMoraleCheck: moraleExtra } });
 
       expect(out.participants).toHaveLength(2);
       expect(out.participants[0].actionFlags.hasExtraTurn).toBe(true);
@@ -137,7 +137,7 @@ describe("advanceTurn", () => {
     it("наприкінці раунду учасник із додатковим ходом ходить ще раз у тому ж раунді, без повторного DoT і тривалостей", () => {
       const marked = poisoned({ ...hero, actionFlags: { ...hero.actionFlags, hasUsedAction: true, hasExtraTurn: true } });
 
-      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
 
       const extra = out.participants[0];
 
@@ -150,7 +150,7 @@ describe("advanceTurn", () => {
     it("додатковий хід скидає витрачений рух", () => {
       const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, movementUsed: 6 } };
 
-      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
 
       expect(out.participants[0].battleData.movementUsed).toBe(0);
     });
@@ -160,7 +160,7 @@ describe("advanceTurn", () => {
 
       const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 1, percent: 200, name: "Пікірування" } } };
 
-      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map });
 
       expect(out.scene).toMatchObject({ turnIndex: 0, round: 2 });
       expect(out.participants[0].actionFlags.hasExtraTurn).toBe(false);
@@ -174,7 +174,7 @@ describe("advanceTurn", () => {
 
       const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true }, battleData: { ...hero.battleData, airborne: { landAt: { x: 4, y: 4 }, since: 2, percent: 200, name: "Пікірування" } } };
 
-      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, round: 2, turnIndex: 0 }, map });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [marked, goblin], pending: [], scene: { ...scene, round: 2, turnIndex: 0 }, map });
 
       expect(out.scene).toMatchObject({ turnIndex: 1, round: 2 });
       expect(out.participants[0].battleData.airborne).toBeDefined();
@@ -183,19 +183,19 @@ describe("advanceTurn", () => {
     it("додатковий хід без руху не додає movementUsed", () => {
       const marked = { ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true } };
 
-      const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
 
       expect(out.participants[0].battleData.movementUsed).toBeUndefined();
     });
 
     it("після додаткового ходу починається новий раунд", () => {
-      const first = advanceTurn({
+      const first = advanceTurn({ rules: DEFAULT_RULES,
         participants: [{ ...hero, actionFlags: { ...hero.actionFlags, hasExtraTurn: true } }, goblin],
         pending: [],
         scene: { ...scene, turnIndex: 1 },
       });
 
-      const second = advanceTurn({ participants: first.participants, pending: [], scene: { ...scene, ...first.scene, turnIndex: 0 } as typeof scene });
+      const second = advanceTurn({ rules: DEFAULT_RULES, participants: first.participants, pending: [], scene: { ...scene, ...first.scene, turnIndex: 0 } as typeof scene });
 
       expect(second.scene.round).toBe(2);
       expect(second.participants.every((p) => p.actionFlags.hasExtraTurn === false)).toBe(true);
@@ -204,7 +204,7 @@ describe("advanceTurn", () => {
     it("успішна мораль у самому додатковому ході не дає ще одного — раунд закінчується", () => {
       const inExtra = { ...hero, battleData: { ...hero.battleData, extraTurnActive: true } };
 
-      const out = advanceTurn({ participants: [inExtra, goblin], pending: [], scene: { ...scene, turnIndex: 0, pendingMoraleCheck: moraleExtra } });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [inExtra, goblin], pending: [], scene: { ...scene, turnIndex: 0, pendingMoraleCheck: moraleExtra } });
 
       expect(out.scene.round).toBe(2);
       expect(out.participants.every((p) => !p.actionFlags.hasExtraTurn)).toBe(true);
@@ -214,14 +214,14 @@ describe("advanceTurn", () => {
   it("expireAtTurnEnd effects end with the owner's first full turn, not the turn they were applied in", () => {
     const withE = (armed: boolean) => ({ ...hero, battleData: { ...hero.battleData, activeEffects: [makeEffect("x", { type: "debuff", duration: 2, expireAtTurnEnd: true, armed })] } });
 
-    expect(advanceTurn({ participants: [withE(true), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toEqual([]);
-    expect(advanceTurn({ participants: [withE(false), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toHaveLength(1);
+    expect(advanceTurn({ rules: DEFAULT_RULES, participants: [withE(true), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toEqual([]);
+    expect(advanceTurn({ rules: DEFAULT_RULES, participants: [withE(false), goblin], pending: [], scene }).participants[0].battleData.activeEffects).toHaveLength(1);
   });
 
   it("timed effects count down at the end of the owner's turn and log the expiry", () => {
     const withE = { ...hero, battleData: { ...hero.battleData, activeEffects: [makeEffect("a", { name: "Кам'яна шкіра", duration: 1, armed: true }), makeEffect("b", { duration: 2, armed: true })] } };
 
-    const out = advanceTurn({ participants: [withE, goblin], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [withE, goblin], pending: [], scene });
 
     expect(out.participants[0].battleData.activeEffects.map((e) => [e.id, e.duration])).toEqual([["b", 1]]);
     expect(out.actions.some((a) => eventTextOf(a).includes("Кам'яна шкіра"))).toBe(true);
@@ -232,7 +232,7 @@ describe("резерв", () => {
   const imp = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "imp", side: ParticipantSide.ENEMY, controlledBy: "dm" }, battleData: { ...base.battleData, reserved: true } });
 
   it("резерв не входить у чергу на новому раунді й лишається в pending", () => {
-    const out = advanceTurn({ participants: [hero, goblin], pending: [imp], scene: { ...scene, turnIndex: 1 } });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, goblin], pending: [imp], scene: { ...scene, turnIndex: 1 } });
 
     expect(out.scene.round).toBe(2);
     expect(out.participants.map((p) => p.basicInfo.id)).not.toContain("imp");
@@ -242,7 +242,7 @@ describe("резерв", () => {
   it("видимі вороги мертві, ворог у резерві — бій не завершується", () => {
     const dead = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
 
-    const out = advanceTurn({ participants: [hero, dead], pending: [imp], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, dead], pending: [imp], scene });
 
     expect(out.scene.status).toBe("active");
     expect(out.scene.completedAt).toBeUndefined();
@@ -252,7 +252,7 @@ describe("резерв", () => {
   it("знімає revealPending з учасника, чий хід почався", () => {
     const revealed = { ...imp, battleData: { ...base.battleData, revealPending: true } };
 
-    const out = advanceTurn({ participants: [hero, revealed, goblin], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, revealed, goblin], pending: [], scene });
 
     expect(out.scene.turnIndex).toBe(1);
     expect(out.participants[1].battleData.revealPending).toBeUndefined();
@@ -261,7 +261,7 @@ describe("резерв", () => {
   it("revealPending знімається з пропущеного (непритомного) учасника", () => {
     const down = { ...imp, combatStats: { ...base.combatStats, currentHp: 0, status: "unconscious" as const }, battleData: { ...base.battleData, revealPending: true } };
 
-    const out = advanceTurn({ participants: [hero, down, goblin], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, down, goblin], pending: [], scene });
 
     expect(out.scene.turnIndex).toBe(2);
     expect(out.participants[1].battleData.revealPending).toBeUndefined();
@@ -270,7 +270,7 @@ describe("резерв", () => {
   it("revealPending знімається з усіх при новому раунді", () => {
     const stale = { ...goblin, battleData: { ...goblin.battleData, revealPending: true } };
 
-    const out = advanceTurn({ participants: [hero, stale], pending: [], scene: { ...scene, turnIndex: 1 } });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, stale], pending: [], scene: { ...scene, turnIndex: 1 } });
 
     expect(out.scene.round).toBe(2);
     expect(out.participants.every((p) => !p.battleData.revealPending)).toBe(true);
@@ -281,7 +281,7 @@ describe("резерв", () => {
 
     const revealed = { ...imp, battleData: { ...base.battleData, revealPending: true } };
 
-    const out = advanceTurn({ participants: [extra, revealed, goblin], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [extra, revealed, goblin], pending: [], scene });
 
     expect(out.scene.round).toBe(scene.round + 1);
     expect(out.participants.every((p) => !p.battleData.revealPending)).toBe(true);
@@ -295,7 +295,7 @@ describe("резерв", () => {
     it("новий раунд не починається з мертвого учасника", () => {
       const ally2 = withInit(createMockParticipant({ basicInfo: { ...base.basicInfo, id: "ally2" } }), 5);
 
-      const out = advanceTurn({ participants: [deadGob, withInit(hero, 10), ally2], pending: [imp], scene: { ...scene, turnIndex: 2 } });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [deadGob, withInit(hero, 10), ally2], pending: [imp], scene: { ...scene, turnIndex: 2 } });
 
       expect(out.scene.round).toBe(2);
       expect(out.scene.status).toBe("active");
@@ -307,7 +307,7 @@ describe("резерв", () => {
 
       const rager = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "rager" }, battleData: { ...base.battleData, activeEffects: [berserk] } });
 
-      const out = advanceTurn({ participants: [withInit(hero, 20), withInit(rager, 10), deadGob], pending: [imp], scene });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [withInit(hero, 20), withInit(rager, 10), deadGob], pending: [imp], scene });
 
       expect(out.scene.turnIndex).toBe(1);
       expect(out.actions.filter((a) => a.id.startsWith("berserk"))).toEqual([]);
@@ -316,14 +316,14 @@ describe("резерв", () => {
     it("обидві сторони на полі полягли, у резерві хтось є — цикл не крутить раунди", () => {
       const deadHero = { ...withInit(hero, 10), combatStats: { ...hero.combatStats, currentHp: 0, status: "dead" as const } };
 
-      const out = advanceTurn({ participants: [deadGob, deadHero], pending: [imp], scene });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [deadGob, deadHero], pending: [imp], scene });
 
       expect(out.scene.round).toBeLessThanOrEqual(2);
       expect(out.actions.filter((a) => a.id.startsWith("triggers-round"))).toEqual([]);
     });
 
     it("перемога під час циклу зупиняє бій", () => {
-      const out = advanceTurn({ participants: [hero, deadGob], pending: [], scene });
+      const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, deadGob], pending: [], scene });
 
       expect(out.scene.status).toBe("completed");
     });
@@ -338,7 +338,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
   const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3, terrain: { "1:1": fire } };
 
   it("шкода потрапляє в журнал з hpChanges", () => {
-    const out = advanceTurn({ participants: [hero, placed(goblin)], pending: [], scene, map, rng: () => 0 });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, placed(goblin)], pending: [], scene, map, rng: () => 0 });
 
     const entry = out.actions.find((a) => eventTextOf(a).includes("«Вогонь»"));
 
@@ -347,7 +347,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
   });
 
   it("лише небезпека — окремий запис з actionDetails.hazard, без запису DOT", () => {
-    const out = advanceTurn({ participants: [hero, placed(goblin)], pending: [], scene, map, rng: () => 0 });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, placed(goblin)], pending: [], scene, map, rng: () => 0 });
 
     expect(out.actions.some((a) => a.actionDetails.damageRolls?.[0]?.dice === "DOT")).toBe(false);
     expect(out.actions.find((a) => a.actionDetails.hazard)?.actionDetails.hazard).toEqual({ label: "Вогонь", damageType: "fire", damage: 5 });
@@ -356,7 +356,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
   it("DoT і небезпека — два записи, сума змін HP дорівнює загальній втраті", () => {
     const burning = { ...placed(goblin), battleData: { ...placed(goblin).battleData, activeEffects: [makeEffect("burn", { name: "Опік", type: "debuff" as const, dotDamage: { damagePerRound: 3, damageType: "fire" } })] } };
 
-    const out = advanceTurn({ participants: [hero, burning], pending: [], scene, map, rng: () => 0 });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, burning], pending: [], scene, map, rng: () => 0 });
 
     const dot = out.actions.find((a) => a.actionDetails.damageRolls?.[0]?.dice === "DOT");
 
@@ -375,7 +375,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
   it("HoT після небезпеки входить у запис небезпеки", () => {
     const healing = { ...placed(goblin), battleData: { ...placed(goblin).battleData, activeEffects: [makeEffect("regen", { name: "Регенерація", hotHeal: { healPerRound: 2 } })] } };
 
-    const out = advanceTurn({ participants: [hero, healing], pending: [], scene, map, rng: () => 0 });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, healing], pending: [], scene, map, rng: () => 0 });
 
     const hazard = out.actions.find((a) => a.actionDetails.hazard);
 
@@ -388,7 +388,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
 
     const tough = { ...placed(goblin, 3), battleData: { ...placed(goblin, 3).battleData, resolvedAbilities: [survive] } };
 
-    const out = advanceTurn({ participants: [hero, tough], pending: [], scene, map, rng: () => 0 });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, tough], pending: [], scene, map, rng: () => 0 });
 
     const hazard = out.actions.find((a) => a.actionDetails.hazard);
 
@@ -398,7 +398,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
   });
 
   it("смертельна шкода валить учасника", () => {
-    const out = advanceTurn({ participants: [hero, placed(goblin, 3)], pending: [], scene, map, rng: () => 0 });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero, placed(goblin, 3)], pending: [], scene, map, rng: () => 0 });
 
     expect(out.participants[1].combatStats.status).toBe("unconscious");
   });
@@ -406,7 +406,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
   it("небезпека, що скінчилася з минулим раундом, у новому не шкодить", () => {
     const expiring: BattleMapConfig = { ...map, terrain: { "1:1": { ...fire, untilRound: 1 } } };
 
-    const out = advanceTurn({ participants: [placed(hero), goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map: expiring, rng: () => 0 });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [placed(hero), goblin], pending: [], scene: { ...scene, turnIndex: 1 }, map: expiring, rng: () => 0 });
 
     expect(out.scene.round).toBe(2);
     expect(out.participants[0].combatStats.currentHp).toBe(20);

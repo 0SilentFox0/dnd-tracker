@@ -8,6 +8,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { expandChosen, flatEffects, inputDiceOf } from "@/lib/utils/battle/spell/cast/state";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { SpellDefinitionSchema, type SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -37,7 +38,7 @@ const spellOf = (effects: SpellEffect[], over: Partial<CastableSpell["definition
 const cast = (spell: CastableSpell, target: BattleParticipant, extra: Partial<Parameters<typeof castSpell>[0]> = {}) => {
   const c = caster();
 
-  return castSpell({ caster: c, spell, targetIds: ["f"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4, map, ...extra });
+  return castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds: ["f"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4, map, ...extra });
 };
 
 const hpLost = (r: ReturnType<typeof castSpell>) => 200 - (r.allParticipantsUpdated.find((p) => p.basicInfo.id === "f")?.combatStats.currentHp ?? 0);

@@ -45,7 +45,7 @@ const cast = (key: string, ps: BattleParticipant[]) => {
 
   const caster = spell.definition.targeting.kind === "ally" ? ALLY_CASTER : ENEMY_CASTER;
 
-  const out = castSpell({ caster, spell, targetIds: ["t"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [1, 1, 1], saveRolls: [{ participantId: "t", roll: 1 }], rng: seq(0.01) });
+  const out = castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: ["t"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [1, 1, 1], saveRolls: [{ participantId: "t", roll: 1 }], rng: seq(0.01) });
 
   if (!out.success) throw new Error(key);
 

@@ -7,6 +7,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -22,7 +23,7 @@ const semgrun = resolved({
 
 const attackEvent = { type: "attack", phase: "before", actorId: "a", targetId: "s", attackKind: "melee" } as AbilityEvent;
 
-const fire = (ps: BattleParticipant[]) => runAbilities(ps, attackEvent, { round: 1, rng: seq(0) });
+const fire = (ps: BattleParticipant[]) => runAbilities(ps, attackEvent, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
 
 describe("hasMark / not", () => {
   it("Семгрун: first attack per round is hindered, second is not, next round again", () => {
@@ -40,7 +41,7 @@ describe("hasMark / not", () => {
 
     const attacker = ps.find((p) => p.basicInfo.id === "a") as BattleParticipant;
 
-    ps = processStartOfTurn(attacker, 2, ps).participants;
+    ps = processStartOfTurn(attacker, 2, ps, undefined, undefined, DEFAULT_RULES).participants;
 
     expect(fire(ps).actionModifiers.a?.length).toBeGreaterThan(0);
   });

@@ -59,7 +59,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
 
   // хід був на видаленому — наступний отримує повний початок ходу (а з кінця черги — новий раунд)
   if (removedIndex === current && participants.length > 0) {
-    const advanced = advanceAfterRemoval({ participants, pending: ctx.pending, scene: ctx.scene, map: ctx.meta.map, before: removedIndex });
+    const advanced = advanceAfterRemoval({ participants, pending: ctx.pending, scene: ctx.scene, map: ctx.meta.map, rules: ctx.meta.rules, before: removedIndex });
 
     return {
       participants: advanced.participants,

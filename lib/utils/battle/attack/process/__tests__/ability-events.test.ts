@@ -4,12 +4,13 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
 
 function attack(attacker: BattleParticipant, target: BattleParticipant, d20 = 15, others: BattleParticipant[] = []) {
-  return processAttack({ attacker: { ...attacker, battleData: { ...attacker.battleData, attacks: [sword] } }, target, attack: sword, d20Roll: d20, damageRolls: [4], allParticipants: [attacker, target, ...others], currentRound: 1, battleId: "b1", rng: seq(0) });
+  return processAttack({ rules: DEFAULT_RULES, attacker: { ...attacker, battleData: { ...attacker.battleData, attacks: [sword] } }, target, attack: sword, d20Roll: d20, damageRolls: [4], allParticipants: [attacker, target, ...others], currentRound: 1, battleId: "b1", rng: seq(0) });
 }
 
 describe("ability events in attack", () => {

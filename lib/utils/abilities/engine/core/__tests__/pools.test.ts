@@ -4,6 +4,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { poolAffordable, poolLeft, recordUse, resetUsage, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { abilityOptions, poolViews } from "@/lib/utils/battle/view";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const KEY = "pool:monk:focus-points";
@@ -18,7 +19,7 @@ function monk(max = 5, used = 0): BattleParticipant {
   return { ...p, battleData: { ...p.battleData, pools: { [KEY]: { label: "Focus Points", max, rest: "short" } }, abilityUsage: used ? { [KEY]: { battle: used, round: 0, turn: 0 } } : {} } };
 }
 
-const use = (p: BattleParticipant, key: string) => runAbilities([p], { type: "bonusAction", actorId: "m", abilityKey: key, targetIds: [] }, { round: 1, rng: seq(0.5) });
+const use = (p: BattleParticipant, key: string) => runAbilities([p], { type: "bonusAction", actorId: "m", abilityKey: key, targetIds: [] }, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
 describe("shared pools", () => {
   it("spending a cost lowers the shared pool for every ability", () => {

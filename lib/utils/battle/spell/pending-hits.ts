@@ -12,7 +12,7 @@ import type { LogLine } from "@/types/text";
 interface PendingCtx {
   round: number;
   rng: Rng;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 /** Відкладені удари кастера, що прибули (atRound ≤ round): число вже кинуте при касті, rng лише для наслідків шкоди. */

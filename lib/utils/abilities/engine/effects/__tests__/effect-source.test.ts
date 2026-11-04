@@ -5,6 +5,7 @@ import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/ef
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const owner = (() => {
   const b = createMockParticipant();
@@ -49,7 +50,7 @@ describe("джерело ефекту", () => {
       definition: { dice: 0, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [{ kind: "dot", damagePerRound: 3, damageType: "poison", duration: { rounds: 2 } }], raceModifiers: [] },
     };
 
-    const r = castSpell({ caster, spell, targetIds: ["t"], allParticipants: [caster, target], currentRound: 1, battleId: "b", diceRolls: [] });
+    const r = castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: ["t"], allParticipants: [caster, target], currentRound: 1, battleId: "b", diceRolls: [] });
 
     const t = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "t");
 

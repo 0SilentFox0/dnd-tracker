@@ -56,7 +56,7 @@ function cast(key: string, caster: BattleParticipant, targetIds: string[], all: 
 
   if (!resolved.ok) throw new Error(textOf(resolved.error));
 
-  return castSpell({ caster, spell, targetIds: resolved.targetIds, allParticipants: all, currentRound: o.round ?? 1, battleId: "b", diceRolls: o.dice ?? [], saveRolls: o.saveRolls, rng: seq(0.5) });
+  return castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: resolved.targetIds, allParticipants: all, currentRound: o.round ?? 1, battleId: "b", diceRolls: o.dice ?? [], saveRolls: o.saveRolls, rng: seq(0.5) });
 }
 
 /** Ходить по колу, повертає учасника на початку кожного його ходу. */
@@ -68,7 +68,7 @@ function turnsOf(ps: BattleParticipant[], id: string, count: number, start = sce
   const seen: BattleParticipant[] = [];
 
   for (let i = 0; i < count * order.length * 2 && seen.length < count; i++) {
-    const out = advanceTurn({ participants: order, pending: [], scene: s, rng: seq(0.99) });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: s, rng: seq(0.99) });
 
     order = out.participants;
     s = { ...s, ...out.scene };
@@ -86,7 +86,7 @@ const bow: BattleAttack = { id: "bw", name: "Лук", type: AttackType.RANGED, a
 const armed = (p: BattleParticipant) => ({ ...p, battleData: { ...p.battleData, attacks: [sword, bow] } });
 
 function attack(attacker: BattleParticipant, target: BattleParticipant, weapon: BattleAttack, d20: number, dmg = 8) {
-  return processAttack({ attacker, target, attack: weapon, d20Roll: d20, damageRolls: [dmg], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.99) });
+  return processAttack({ rules: DEFAULT_RULES, attacker, target, attack: weapon, d20Roll: d20, damageRolls: [dmg], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.99) });
 }
 
 const hits = (r: ReturnType<typeof attack>) => !eventTextOf(r.battleAction).includes("промах");
@@ -132,7 +132,7 @@ describe("Поспіх (+3 ініціативи, +10 фт швидкості, 3 
 
     const ps = cast("haste", c, ["a"], [c, foe, slow]).allParticipantsUpdated;
 
-    const out = advanceTurn({ participants: ps, pending: [], scene: scene(1, 2), rng: seq(0.99) });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: ps, pending: [], scene: scene(1, 2), rng: seq(0.99) });
 
     expect(out.scene.round).toBe(2);
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["c", "e", "a"]);

@@ -8,6 +8,7 @@ import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const info = { source: "attack", kind: "success", actorId: "a", targetId: "t" } as const;
@@ -80,7 +81,7 @@ describe("crit picker plumbing", () => {
 
     const crit = vi.fn(() => critEffectsFor("attack", "fail")[0]);
 
-    resolveRetaliation({
+    resolveRetaliation({ rules: DEFAULT_RULES,
       participants: [unit("a", ParticipantSide.ALLY), unit("d", ParticipantSide.ENEMY)],
       attackerId: "a",
       defenderId: "d",

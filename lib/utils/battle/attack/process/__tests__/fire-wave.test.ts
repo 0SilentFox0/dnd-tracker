@@ -44,7 +44,7 @@ describe("fireWaveVictims", () => {
 
 describe("Вогняна хвиля при влучанні", () => {
   const hit = (ps: BattleParticipant[], map?: BattleMapConfig) => {
-    const flow = { ps, messages: [] as string[], summons: [], ctx: { round: 1, rng: () => 0.5, ...(map && { map }) } };
+    const flow = { ps, messages: [] as string[], summons: [], ctx: { round: 1, rng: () => 0.5, rules: DEFAULT_RULES, ...(map && { map }) } };
 
     const attacker = ps[0];
 

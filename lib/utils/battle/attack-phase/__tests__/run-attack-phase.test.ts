@@ -18,6 +18,7 @@ import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function meleeAttack(over: Partial<BattleAttack> = {}): BattleAttack {
@@ -85,6 +86,7 @@ function makeInput(over: Partial<AttackPhaseInput> = {}): AttackPhaseInput {
     battleId: "b1",
     userId: "user-1",
     isDM: false,
+    rules: DEFAULT_RULES,
     ...over,
   };
 }
@@ -381,7 +383,7 @@ describe("runAttackPhase — happy path smoke", () => {
     };
 
     expect(() =>
-      runAttackPhase({
+      runAttackPhase({ rules: DEFAULT_RULES,
         battle: {
           initiativeOrder: [attacker, t1, t2],
           currentRound: 1,
@@ -437,7 +439,7 @@ describe("runAttackPhase — відсіч", () => {
 
     const attacker = { ...base, battleData: { ...base.battleData, attacks: [aoe] } };
 
-    const r = runAttackPhase({
+    const r = runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "atk", targetIds: ["t1", "t2"], d20Roll: 15, damageRolls: [3] },
       battleId: "b1",
@@ -465,7 +467,7 @@ describe("runAttackPhase — відсіч", () => {
 
     const t2 = armed("t2", [bowAttack]);
 
-    const r = runAttackPhase({
+    const r = runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: [attacker, t1, t2], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "atk", targetIds: ["t1", "t2"], attackRolls: [12, 14], damageRolls: [4, 5] },
       battleId: "b1",
@@ -485,7 +487,7 @@ describe("runAttackPhase — відсіч", () => {
 
     const attacker = { ...base, battleData: { ...base.battleData, attacks: [aoe] } };
 
-    const r = runAttackPhase({
+    const r = runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: [attacker, armed("t1", [meleeAttack()]), armed("t2", [meleeAttack()])], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "atk", targetIds: ["t1", "t2"], attackRolls: [15, 1], damageRolls: [3, 3] },
       battleId: "b1",

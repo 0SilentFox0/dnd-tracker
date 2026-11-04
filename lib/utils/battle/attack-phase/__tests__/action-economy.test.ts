@@ -8,6 +8,7 @@ import { doubleStrike as unitDoubleStrike } from "@/data/library/unit-abilities"
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -31,7 +32,7 @@ const hero = (opts: { abilities?: ReturnType<typeof resolved>[]; pending?: numbe
 const foe = (id: string, hp = 50) => makeParticipant({ id, side: ParticipantSide.ENEMY, hp, maxHp: 50 });
 
 const attack = (order: BattleParticipant[], data: Partial<AttackPhaseInput["data"]>) =>
-  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", attackId: "sw", damageRolls: [6], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
+  runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", attackId: "sw", damageRolls: [6], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
 
 const self = (r: ReturnType<typeof attack>) => r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a") as BattleParticipant;
 

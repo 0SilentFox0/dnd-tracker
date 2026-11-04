@@ -8,6 +8,7 @@ import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const scene: BattleSceneState = {
@@ -31,7 +32,7 @@ describe("maze: пропуск ходів", () => {
   it("сплячий і escaped пропускаються", () => {
     const order = [hero("h1"), foe("sleep", { dormant: true }), hero("gone", { escaped: true }), hero("h2")];
 
-    const out = advanceTurn({ participants: order, pending: [], scene, map });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene, map });
 
     expect(out.scene.turnIndex).toBe(3);
     expect(out.scene.round).toBe(1);
@@ -44,7 +45,7 @@ describe("maze: пропуск ходів", () => {
 
     const hp = sleeper.combatStats.currentHp;
 
-    const out = advanceTurn({ participants: [hero("h1"), sleeper, hero("h2")], pending: [], scene, map });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero("h1"), sleeper, hero("h2")], pending: [], scene, map });
 
     expect(out.participants.find((p) => p.basicInfo.id === "sleep")?.combatStats.currentHp).toBe(hp);
   });
@@ -52,11 +53,11 @@ describe("maze: пропуск ходів", () => {
   it("прокинутий із mazeWakeRound 3 не ходить у раунді 2, ходить у 3", () => {
     const order = [hero("h"), foe("w", { mazeWakeRound: 3 })];
 
-    const r2 = advanceTurn({ participants: order, pending: [], scene: { ...scene, round: 2 }, map });
+    const r2 = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: { ...scene, round: 2 }, map });
 
     expect(r2.scene).toMatchObject({ round: 3, turnIndex: 0 });
 
-    const r3 = advanceTurn({ participants: order, pending: [], scene: { ...scene, round: 3 }, map });
+    const r3 = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: { ...scene, round: 3 }, map });
 
     expect(r3.scene.turnIndex).toBe(1);
   });
@@ -64,7 +65,7 @@ describe("maze: пропуск ходів", () => {
   it("усі поза грою, крім одного героя: ходить лише він", () => {
     const order = [foe("a", { dormant: true }), hero("h"), foe("b", { dormant: true }), hero("x", { escaped: true })];
 
-    const out = advanceTurn({ participants: order, pending: [], scene: { ...scene, turnIndex: 1 }, map });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: { ...scene, turnIndex: 1 }, map });
 
     expect(out.scene).toMatchObject({ round: 2, turnIndex: 1 });
   });
@@ -72,7 +73,7 @@ describe("maze: пропуск ходів", () => {
   it("ніхто не ходить: раунд +1, без нескінченного циклу", () => {
     const order = [hero("h", { escaped: true }), foe("a", { dormant: true })];
 
-    const out = advanceTurn({ participants: order, pending: [], scene, map });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene, map });
 
     expect(out.scene.round).toBe(2);
     expect(out.scene.turnIndex).toBe(0);

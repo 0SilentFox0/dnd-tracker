@@ -4,6 +4,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -35,7 +36,7 @@ describe("guard in a hit", () => {
 
     const guardian = makeParticipant({ id: "g", side: ParticipantSide.ENEMY, hp: 1, maxHp: 20 });
 
-    const r = processAttack({ attacker, target, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [attacker, target, guardian], currentRound: 1, battleId: "b1", rng: seq(0) });
+    const r = processAttack({ rules: DEFAULT_RULES, attacker, target, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [attacker, target, guardian], currentRound: 1, battleId: "b1", rng: seq(0) });
 
     const g = r.allParticipantsUpdated?.find((p) => p.basicInfo.id === "g");
 

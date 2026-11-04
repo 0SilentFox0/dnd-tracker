@@ -7,6 +7,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { spellTerrainEffects, spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { sweepDeadZones, zoneMove, zonesAt, zoneTurnStart } from "@/lib/utils/battle/spell/zone-triggers";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SpellDefinition, SpellZone } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -74,7 +75,7 @@ describe("zoneMove", () => {
   const walk = (from: GridPoint, path: GridPoint[], mover = foe(from), over: Partial<Parameters<typeof zoneMove>[0]> = {}) => {
     const moved = { ...mover, battleData: { ...mover.battleData, position: path.at(-1) } };
 
-    return zoneMove({ map, participants: [caster, moved], moved, from, path, round: 1, rng: () => 0, ...over });
+    return zoneMove({ rules: DEFAULT_RULES, map, participants: [caster, moved], moved, from, path, round: 1, rng: () => 0, ...over });
   };
 
   it("невдалий рятівний при виході тягне до вільної клітинки найближчої до центру й забирає решту руху", () => {
@@ -117,7 +118,7 @@ describe("zoneMove", () => {
 
     const moved = { ...mover, battleData: { ...mover.battleData, position: { x: 3, y: 4 } } };
 
-    const out = zoneMove({ map: burning, participants: [caster, moved], moved, from: { x: 2, y: 4 }, path: [{ x: 3, y: 4 }], round: 1, rng: () => 0 });
+    const out = zoneMove({ rules: DEFAULT_RULES, map: burning, participants: [caster, moved], moved, from: { x: 2, y: 4 }, path: [{ x: 3, y: 4 }], round: 1, rng: () => 0 });
 
     expect(out.moved.combatStats.currentHp).toBe(13);
   });
@@ -127,11 +128,11 @@ describe("zoneTurnStart", () => {
   it("на початку ходу в зоні спрацьовує onTurnStart, поза зоною — ні", () => {
     const map = zoneMap({ rounds: 5, onTurnStart: { effects: [{ kind: "dealDamage", amount: 4, damageType: "poison", target: "eventTarget" }] } });
 
-    const inside = zoneTurnStart(map, [caster, foe({ x: 4, y: 4 })], "foe", { round: 2, rng: () => 0 });
+    const inside = zoneTurnStart(map, [caster, foe({ x: 4, y: 4 })], "foe", { rules: DEFAULT_RULES, round: 2, rng: () => 0 });
 
     expect(inside.participants.find((p) => p.basicInfo.id === "foe")?.combatStats.currentHp).toBe(16);
 
-    const outside = zoneTurnStart(map, [caster, foe({ x: 10, y: 10 })], "foe", { round: 2, rng: () => 0 });
+    const outside = zoneTurnStart(map, [caster, foe({ x: 10, y: 10 })], "foe", { rules: DEFAULT_RULES, round: 2, rng: () => 0 });
 
     expect(outside.messages).toEqual([]);
   });

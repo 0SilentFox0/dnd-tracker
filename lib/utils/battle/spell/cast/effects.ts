@@ -16,7 +16,6 @@ import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { computeSpellPower } from "@/lib/utils/battle/spell/power";
 import { objectsNear } from "@/lib/utils/battle/summon/objects-near";
 import { rollDice } from "@/lib/utils/common/dice";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
 const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;
@@ -69,7 +68,7 @@ function scheduleHit(state: SpellCastState, delay: { feet: number; perRoundFeet:
 
   if (!bothOnMap(flow.ctx.map, me, target)) return false;
 
-  const feet = footprintDistance(cellsOf(me), cellsOf(target)) * cellFeetOf(flow.ctx.rules ?? DEFAULT_RULES);
+  const feet = footprintDistance(cellsOf(me), cellsOf(target)) * cellFeetOf(flow.ctx.rules);
 
   const { feet: near, perRoundFeet } = delay;
 
@@ -90,7 +89,7 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
 
   const target = getP(flow, id);
 
-  const rolls = state.spell.definition.perObjectFeet ? objectsNear(flow.ps, casterIdOf(state), spell.id, target, state.spell.definition.perObjectFeet, flow.ctx.rules ?? DEFAULT_RULES).length : 1;
+  const rolls = state.spell.definition.perObjectFeet ? objectsNear(flow.ps, casterIdOf(state), spell.id, target, state.spell.definition.perObjectFeet, flow.ctx.rules).length : 1;
 
   const raw = Array.from({ length: rolls }).reduce<number>((sum) => sum + resolveAmount(effect.amount, { owner: getP(flow, casterIdOf(state)), target, spellRoll: roll, rng: state.rng, participants: flow.ps }), 0);
 
@@ -140,7 +139,7 @@ function distanceDamage(state: SpellCastState, ranges: NonNullable<Extract<Effec
 
   const onMap = bothOnMap(flow.ctx.map, me, target);
 
-  const feet = onMap ? footprintDistance(cellsOf(me), cellsOf(target)) * cellFeetOf(flow.ctx.rules ?? DEFAULT_RULES) : 0;
+  const feet = onMap ? footprintDistance(cellsOf(me), cellsOf(target)) * cellFeetOf(flow.ctx.rules) : 0;
 
   if (!onMap) flow.messages.push(textRef("battleLog.spellFx.noMapRange", { spell: state.spell.name }));
 

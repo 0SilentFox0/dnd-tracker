@@ -39,7 +39,7 @@ const spellOf = (effects: SpellEffect[]): CastableSpell => ({
 const armed = (effects: SpellEffect[], dc?: number) => {
   const c = caster(dc);
 
-  const r = castSpell({ caster: c, spell: spellOf(effects), targetIds: [], allParticipants: [c, foe()], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map });
+  const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: spellOf(effects), targetIds: [], allParticipants: [c, foe()], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map });
 
   return r.allParticipantsUpdated;
 };
@@ -138,7 +138,7 @@ describe("moveSelf", () => {
 
     const spell = { ...spellOf([{ kind: "moveSelf", to: "adjacentToTarget" }]), definition: { ...spellOf([]).definition, targeting: { kind: "enemy" as const }, effects: [{ kind: "moveSelf", to: "adjacentToTarget" }] as SpellEffect[] } };
 
-    const r = castSpell({ caster: c, spell, targetIds: ["f"], allParticipants: [c, target, ...extra], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds: ["f"], allParticipants: [c, target, ...extra], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map });
 
     return { r, me: r.allParticipantsUpdated.find((p) => p.basicInfo.id === "c") as BattleParticipant };
   };

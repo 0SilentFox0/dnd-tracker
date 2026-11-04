@@ -1,6 +1,7 @@
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -13,7 +14,7 @@ export function swordUnit(id: string, side: ParticipantSide, abilities?: Resolve
 }
 
 export function retaliate(ps: BattleParticipant[], map?: BattleMapConfig, rng: () => number = seq(0.85)) {
-  return resolveRetaliation({ participants: ps, attackerId: "a", defenderId: "d", attack: SWORD, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng, ...(map && { map }) });
+  return resolveRetaliation({ rules: DEFAULT_RULES, participants: ps, attackerId: "a", defenderId: "d", attack: SWORD, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng, ...(map && { map }) });
 }
 
 export function retaliateTimes(ps: BattleParticipant[], tries: number): boolean[] {

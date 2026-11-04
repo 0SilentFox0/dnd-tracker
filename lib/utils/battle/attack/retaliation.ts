@@ -31,7 +31,7 @@ export interface RetaliationInput {
   rng: Rng;
   crit?: CritPicker;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface RetaliationResult {

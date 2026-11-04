@@ -7,6 +7,7 @@ import { advanceTurn } from "@/lib/utils/battle/turn/advance-turn";
 import { applyPendingMoraleCheck } from "@/lib/utils/battle/turn/apply-pending-morale";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 describe("turn events", () => {
   it("turnStart лікує, perTurn скидається", () => {
@@ -14,7 +15,7 @@ describe("turn events", () => {
 
     const p = makeParticipant({ id: "a", hp: 10, abilities: [regen] });
 
-    const r = processStartOfTurn(p, 1, [p], seq(0));
+    const r = processStartOfTurn(p, 1, [p], seq(0), undefined, DEFAULT_RULES);
 
     expect(r.participants[0].combatStats.currentHp).toBe(13);
     expect(textOf(r.abilityMessages[0])).toContain("💚");
@@ -30,7 +31,7 @@ describe("turn events", () => {
 
     const ally = makeParticipant({ id: "b", abilities: [mourn] });
 
-    const r = processStartOfTurn(dying, 1, [dying, ally], seq(0));
+    const r = processStartOfTurn(dying, 1, [dying, ally], seq(0), undefined, DEFAULT_RULES);
 
     expect(r.participants.find((p) => p.basicInfo.id === "b")?.combatStats.morale).toBe(-1);
   });
@@ -44,7 +45,7 @@ describe("turn events", () => {
 
     const b = makeParticipant({ id: "b", abilities: [tired] });
 
-    const r = runAdvanceTurnLoop({ initiativeOrder: [a, b], currentTurnIndex: 1, currentRound: 1, battleId: "b1", currentBattleLogLength: 0, pendingSummons: [] });
+    const r = runAdvanceTurnLoop({ rules: DEFAULT_RULES, initiativeOrder: [a, b], currentTurnIndex: 1, currentRound: 1, battleId: "b1", currentBattleLogLength: 0, pendingSummons: [] });
 
     expect(r.updatedInitiativeOrder.find((p) => p.basicInfo.id === "a")?.combatStats.morale).toBe(1);
     expect(r.updatedInitiativeOrder.find((p) => p.basicInfo.id === "b")?.combatStats.morale).toBe(-1);
@@ -55,7 +56,7 @@ describe("turn events", () => {
 
     const a = makeParticipant({ id: "a", hp: 10, abilities: [proud] });
 
-    const r = applyPendingMoraleCheck([a, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], { participantId: "a", d10Roll: 10, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "Мораль тримається", moralePositive: true } }, 1, "b1", 0);
+    const r = applyPendingMoraleCheck([a, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], { participantId: "a", d10Roll: 10, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "Мораль тримається", moralePositive: true } }, 1, "b1", 0, undefined, DEFAULT_RULES);
 
     expect(r.updatedInitiativeOrder[0].combatStats.currentHp).toBe(12);
   });
@@ -65,7 +66,7 @@ describe("turn events", () => {
 
     const veteran = { ...makeParticipant({ id: "a", abilities: [rally] }) };
 
-    const r = processStartOfRound([veteran], 2, []);
+    const r = processStartOfRound([veteran], 2, [], undefined, undefined, DEFAULT_RULES);
 
     expect(r.updatedInitiativeOrder[0].combatStats.morale).toBe(0);
   });
@@ -79,7 +80,7 @@ describe("turn events", () => {
 
     const scene = { id: "b1", campaignId: "c1", status: "active" as const, round: 1, turnIndex: 1, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null };
 
-    const r = advanceTurn({ participants: [a, b], pending: [], scene });
+    const r = advanceTurn({ rules: DEFAULT_RULES, participants: [a, b], pending: [], scene });
 
     expect(r.scene.turnIndex).toBe(0);
     expect(r.participants.find((p) => p.basicInfo.id === "b")?.combatStats.morale).toBe(-1);

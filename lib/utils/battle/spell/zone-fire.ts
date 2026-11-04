@@ -19,7 +19,7 @@ export interface ZoneCtx {
   map: BattleMapConfig;
   round: number;
   rng: Rng;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 /** Джерело тригера: зона на мапі або аура на учаснику. */

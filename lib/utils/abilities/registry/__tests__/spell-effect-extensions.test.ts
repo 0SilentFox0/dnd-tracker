@@ -7,6 +7,7 @@ import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { applyEffect, describeEffect as describeEffectSegments } from "@/lib/utils/abilities/registry/effects";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { renderSegments } from "@/lib/utils/abilities/segments";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const t = await ukT();
 
@@ -38,7 +39,7 @@ describe("dealDamage falloff", () => {
       effect,
       targetIds: ids,
       event: { type: "action", actorId: "o", abilityKey: "k" },
-      ctx: { round: 1, rng: seq(0.5) },
+      ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
     }).participants.slice(1).map((p) => 200 - p.combatStats.currentHp);
   };
 

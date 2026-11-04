@@ -4,6 +4,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { eventTextOf, rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -13,7 +14,7 @@ const crit = () => {
 
   const target = makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50 });
 
-  return processAttack({ attacker, target, attack: sword, d20Roll: 20, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
+  return processAttack({ rules: DEFAULT_RULES, attacker, target, attack: sword, d20Roll: 20, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
 };
 
 describe("the attack log reads in the viewer's language", () => {

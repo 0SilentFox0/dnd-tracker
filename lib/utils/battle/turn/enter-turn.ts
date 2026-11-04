@@ -15,7 +15,7 @@ export interface EnterTurnInput {
   round: number;
   rng?: Rng;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface EnterTurnResult {

@@ -7,6 +7,7 @@ import { poolAffordable, poolLeft } from "@/lib/utils/abilities/engine/core/usag
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
 import { type ItemStats,itemStatsColumns } from "@/lib/utils/items/item-stats";
 import { itemPools, withItemPool } from "@/lib/utils/items/pools";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 const EXPEND = { id: "charge", name: "Expend a charge", trigger: { event: "action" }, limits: { pool: { key: "charges", cost: 1 } }, effects: [{ kind: "note", text: "charge" }] };
@@ -48,7 +49,7 @@ describe("item charges pool", () => {
 
     expect(ability.limits?.pool?.key).toBe("pool:item:wand");
 
-    const after = runAbilities([p], { type: "action", actorId: p.basicInfo.id, abilityKey: ability.key, targetIds: [] }, { round: 1, rng: seq(0.5) }).participants[0];
+    const after = runAbilities([p], { type: "action", actorId: p.basicInfo.id, abilityKey: ability.key, targetIds: [] }, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) }).participants[0];
 
     expect(poolLeft(after, "pool:item:wand")).toBe(6);
   });

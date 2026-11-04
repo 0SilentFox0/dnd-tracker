@@ -5,6 +5,7 @@ import type { Effect } from "@/lib/utils/abilities/schema";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { SpellDefinitionSchema } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -31,7 +32,7 @@ const caster = (over: { hp?: number; resist?: boolean } = {}): BattleParticipant
   return withSlots;
 };
 
-const run = (c: BattleParticipant, ally: BattleParticipant) => castSpell({ caster: c, spell, targetIds: ["a"], allParticipants: [c, ally], currentRound: 1, battleId: "b", diceRolls: [10, 10], rng: seq(0.5) });
+const run = (c: BattleParticipant, ally: BattleParticipant) => castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds: ["a"], allParticipants: [c, ally], currentRound: 1, battleId: "b", diceRolls: [10, 10], rng: seq(0.5) });
 
 const hp = (r: { allParticipantsUpdated: BattleParticipant[] }, id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.currentHp as number;
 

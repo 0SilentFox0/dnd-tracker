@@ -6,6 +6,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { triggerMatches } from "@/lib/utils/abilities/registry/triggers";
 import { AbilitySchema, ConditionSchema, TriggerSchema } from "@/lib/utils/abilities/schema";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -46,7 +47,7 @@ describe("hit whose: ally", () => {
   });
 
   it("Шипи: союзники відбивають 15 % ближньої шкоди нападнику", () => {
-    const r = runAbilities(ps, hit("ally"), { round: 1, rng: seq(0.5) });
+    const r = runAbilities(ps, hit("ally"), { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
     expect(r.participants.find((p) => p.basicInfo.id === "e")?.combatStats.currentHp).toBe(97);
   });
@@ -81,9 +82,9 @@ describe("умова actorIsEnemy", () => {
 
     const friendly = makeParticipant({ id: "friend" });
 
-    const fromEnemy = runAbilities([holder, friendly, enemy], hit("owner", "e"), { round: 1, rng: seq(0.5) });
+    const fromEnemy = runAbilities([holder, friendly, enemy], hit("owner", "e"), { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
-    const fromFriend = runAbilities([holder, friendly, enemy], hit("owner", "friend"), { round: 1, rng: seq(0.5) });
+    const fromFriend = runAbilities([holder, friendly, enemy], hit("owner", "friend"), { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
     expect(fromEnemy.participants[0].combatStats.morale).toBe(1);
     expect(fromFriend.participants[0].combatStats.morale).toBe(0);

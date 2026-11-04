@@ -6,6 +6,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import battleTerms from "@/messages/uk/battleTerms.json";
 import type { BattleAttack } from "@/types/battle";
 
@@ -21,7 +22,7 @@ describe("крок влучання", () => {
 
     const target = { ...base, battleData: { ...base.battleData, attacks: [sword] } };
 
-    const r = processAttack({ attacker, target, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0) });
+    const r = processAttack({ rules: DEFAULT_RULES, attacker, target, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0) });
 
     expect(r.attackerUpdated.combatStats.currentHp).toBe(20);
     expect(r.targetUpdated.actionFlags.hasUsedReaction).toBe(false);
@@ -32,7 +33,7 @@ describe("крок влучання", () => {
 
     const t = makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50 });
 
-    const input = { attacker: a, target: t, attack: sword, damageRolls: [4], allParticipants: [a, t], attackRoll: { isCritical: false }, currentRound: 1 };
+    const input = { attacker: a, target: t, attack: sword, damageRolls: [4], allParticipants: [a, t], attackRoll: { isCritical: false }, currentRound: 1, rules: DEFAULT_RULES };
 
     const plain = computeHitDamage(input);
 
@@ -57,9 +58,9 @@ describe("крок влучання", () => {
 
     const input = { target: t, attack: sword, damageRolls: [8], attackRoll: { isCritical: false }, currentRound: 1 };
 
-    const plain = computeHitDamage({ ...input, attacker: a, allParticipants: [a, t] });
+    const plain = computeHitDamage({ rules: DEFAULT_RULES, ...input, attacker: a, allParticipants: [a, t] });
 
-    const halved = computeHitDamage({ ...input, attacker: weak, allParticipants: [weak, t] });
+    const halved = computeHitDamage({ rules: DEFAULT_RULES, ...input, attacker: weak, allParticipants: [weak, t] });
 
     expect(halved.physicalDamage).toBe(Math.floor(plain.physicalDamage * 0.5));
     expect(halved.damageSteps).toContainEqual(expect.objectContaining({ label: "Зброя вислизає", kind: "multiplier", value: 0.5 }));
@@ -82,7 +83,7 @@ describe("крок влучання", () => {
     it("крит-влучання: фраза в деталях і в тексті", () => {
       const { attacker, target } = setup();
 
-      const r = processAttack({ attacker, target, attack: sword, d20Roll: 20, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
+      const r = processAttack({ rules: DEFAULT_RULES, attacker, target, attack: sword, d20Roll: 20, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
 
       const flavor = phrases("success", names(attacker, target))[(r.battleAction.actionDetails.criticalEffect?.flavorIndex ?? 0) - 1];
 
@@ -95,7 +96,7 @@ describe("крок влучання", () => {
     it("крит-невдача: фраза в деталях і в тексті", () => {
       const { attacker, target } = setup();
 
-      const r = processAttack({ attacker, target, attack: sword, d20Roll: 1, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
+      const r = processAttack({ rules: DEFAULT_RULES, attacker, target, attack: sword, d20Roll: 1, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
 
       const flavor = phrases("fail", names(attacker, target))[(r.battleAction.actionDetails.criticalEffect?.flavorIndex ?? 0) - 1];
 

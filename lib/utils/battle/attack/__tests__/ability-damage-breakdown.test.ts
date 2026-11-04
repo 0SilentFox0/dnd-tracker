@@ -4,6 +4,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const dagger = { id: "dg", name: "Кинджал", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d4", damageType: "piercing" };
 
@@ -17,7 +18,7 @@ describe("додаткова шкода вмінь при влучанні (Snea
 
     const target = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50 });
 
-    const r = processAttack({ attacker: rogue, target, attack: dagger, d20Roll: 15, damageRolls: [3], allParticipants: [rogue, target], currentRound: 1, battleId: "b1", rng: seq(0.5) });
+    const r = processAttack({ rules: DEFAULT_RULES, attacker: rogue, target, attack: dagger, d20Roll: 15, damageRolls: [3], allParticipants: [rogue, target], currentRound: 1, battleId: "b1", rng: seq(0.5) });
 
     return { r, hp: r.allParticipantsUpdated?.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp ?? 0 };
   };

@@ -141,10 +141,10 @@ export function hasDisadvantage(
 // Тригери з шансом < 100 % не передбачаємо — їх кидає сервер.
 const CERTAIN_ONLY = () => 0.9999;
 
-function previewBefore(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], round: number) {
+function previewBefore(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], round: number, rules: Ruleset) {
   const ps = withSelf(withSelf(participants, target), attacker);
 
-  const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type), ...attackSourceOf(attack) }, { round, rng: CERTAIN_ONLY });
+  const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type), ...attackSourceOf(attack) }, { round, rng: CERTAIN_ONLY, rules });
 
   const self = findParticipant(r.participants, attacker.basicInfo.id) ?? attacker;
 
@@ -161,7 +161,7 @@ export function predictAttack(
   participants: BattleParticipant[],
   { round = 1, map, ...opts }: { rules: Ruleset; round?: number; map?: BattleMapConfig | null; inspiration?: boolean },
 ): PredictedAttack {
-  const { ps, self, extra, targetExtra } = previewBefore(attacker, target, attack, participants, round);
+  const { ps, self, extra, targetExtra } = previewBefore(attacker, target, attack, participants, round, opts.rules);
 
   const reasons = rollModeReasons(self, attack, ps, { extra, targetId: target.basicInfo.id, targetExtra, map, inspiration: opts.inspiration, rules: opts.rules });
 

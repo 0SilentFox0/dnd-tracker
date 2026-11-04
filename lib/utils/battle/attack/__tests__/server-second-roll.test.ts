@@ -25,7 +25,7 @@ const semgrun = resolved({
 const marked = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "advantageForAttackers" }] });
 
 const strike = (target: BattleParticipant, rng: () => number, d20 = 18) =>
-  processAttack({ attacker: attacker(), target, attack: sword, d20Roll: d20, damageRolls: [4], allParticipants: [attacker(), target], currentRound: 1, battleId: "b", rng });
+  processAttack({ rules: DEFAULT_RULES, attacker: attacker(), target, attack: sword, d20Roll: d20, damageRolls: [4], allParticipants: [attacker(), target], currentRound: 1, battleId: "b", rng });
 
 describe("server-rolled second d20", () => {
   it("Семгрун-style disadvantage without a client roll uses the server roll and logs it", () => {

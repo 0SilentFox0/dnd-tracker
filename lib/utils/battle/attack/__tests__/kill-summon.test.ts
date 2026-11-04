@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -21,7 +22,7 @@ function strike(targetHp: number) {
 
   const target = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, hp: targetHp, maxHp: targetHp });
 
-  return processAttack({ attacker, target, attack: sword, d20Roll: 15, damageRolls: [6], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.5) });
+  return processAttack({ rules: DEFAULT_RULES, attacker, target, attack: sword, d20Roll: 15, damageRolls: [6], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.5) });
 }
 
 describe("summon on kill trigger", () => {

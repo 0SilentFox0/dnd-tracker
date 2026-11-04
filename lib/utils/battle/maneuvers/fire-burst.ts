@@ -8,7 +8,6 @@ import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -25,7 +24,7 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 
   const full = attackShare(actor, ps, input.percentOfAttack, input.rng);
 
-  const dc = spellSaveDc(actor, undefined, (input.rules ?? DEFAULT_RULES).formulas.saveDcBase);
+  const dc = spellSaveDc(actor, undefined, input.rules.formulas.saveDcBase);
 
   const notes = new Map<string, LogLine>();
 

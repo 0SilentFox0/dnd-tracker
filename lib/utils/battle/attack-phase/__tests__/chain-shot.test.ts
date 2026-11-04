@@ -7,6 +7,7 @@ import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const bow: BattleAttack = { id: "b", name: "Ланцюговий постріл", type: AttackType.RANGED, attackBonus: 30, damageDice: "1d6", damageType: "necrotic" };
@@ -18,7 +19,7 @@ const demoness = placed("d", { side: ParticipantSide.ALLY, at: { x: 0, y: 0 }, a
 const foes = [placed("t", { at: { x: 5, y: 5 }, hp: 100 }), placed("n1", { at: { x: 6, y: 6 }, hp: 100 }), placed("n2", { at: { x: 8, y: 6 }, hp: 100 }), placed("n3", { at: { x: 9, y: 9 }, hp: 100 })];
 
 const run = (order: BattleParticipant[], d20: number, rng = seq(0.9)) =>
-  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "d", targetIds: ["t"], attackRoll: d20, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng, map: testMap(20) });
+  runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "d", targetIds: ["t"], attackRoll: d20, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng, map: testMap(20) });
 
 const strikes = (r: ReturnType<typeof run>) => r.allBattleActions.filter((e) => e.actionType === "attack");
 
@@ -45,7 +46,7 @@ describe("chain shot", () => {
 
   it("гравець не може обрати дві цілі", () => {
     expect(() =>
-      runAttackPhase({ battle: { initiativeOrder: [demoness, ...foes], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "d", targetIds: ["t", "n1"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.9), map: testMap(20) }),
+      runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: [demoness, ...foes], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "d", targetIds: ["t", "n1"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.9), map: testMap(20) }),
     ).toThrow(REJECT.tooManyTargets);
   });
 

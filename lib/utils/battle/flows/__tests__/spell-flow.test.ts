@@ -589,7 +589,7 @@ it("AoE preview і server cast вражають невидимого учасн�
 
   if (!resolution.ok) throw new Error(textOf(resolution.error));
 
-  const result = castSpell({ caster, spell, targetIds: resolution.targetIds, allParticipants: participants, currentRound: 1, battleId: "b", diceRolls: [4], map, rng: () => 0.5 });
+  const result = castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: resolution.targetIds, allParticipants: participants, currentRound: 1, battleId: "b", diceRolls: [4], map, rng: () => 0.5 });
 
   expect(result.success).toBe(true);
   expect(result.allParticipantsUpdated.find((p) => p.basicInfo.id === "invisible")?.combatStats.currentHp).toBe(16);

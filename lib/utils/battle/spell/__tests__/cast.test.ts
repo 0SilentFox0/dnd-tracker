@@ -7,6 +7,7 @@ import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -38,7 +39,7 @@ const hp = (r: { allParticipantsUpdated: BattleParticipant[] }, id: string) => r
 function cast(spell: CastableSpell, targetIds: string[], others: BattleParticipant[], over: { caster?: BattleParticipant; saveRolls?: { participantId: string; roll: number }[]; diceRolls?: number[] } = {}) {
   const c = over.caster ?? caster();
 
-  return castSpell({ caster: c, spell, targetIds, allParticipants: [c, ...others], currentRound: 1, battleId: "b", diceRolls: over.diceRolls ?? [3, 3], saveRolls: over.saveRolls, rng: seq(0.5) });
+  return castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds, allParticipants: [c, ...others], currentRound: 1, battleId: "b", diceRolls: over.diceRolls ?? [3, 3], saveRolls: over.saveRolls, rng: seq(0.5) });
 }
 
 describe("кантрипи", () => {
@@ -127,7 +128,7 @@ describe("castSpell", () => {
 
     const first = makeParticipant({ id: "a" });
 
-    const r = castSpell({ caster: c, spell: spellOf(), targetIds: ["e1"], allParticipants: [first, enemy("e1"), c], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: spellOf(), targetIds: ["e1"], allParticipants: [first, enemy("e1"), c], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) });
 
     expect(r.allParticipantsUpdated.map((p) => p.basicInfo.id)).toEqual(["a", "e1", "c"]);
   });
@@ -287,7 +288,7 @@ describe("castSpell", () => {
     let target = enemy("e1");
 
     for (let i = 0; i < 4; i++) {
-      const r = castSpell({ caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: i + 1, battleId: "b", diceRolls: [], rng: seq(0.5) });
+      const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: i + 1, battleId: "b", diceRolls: [], rng: seq(0.5) });
 
       target = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1") as BattleParticipant;
     }
@@ -303,7 +304,7 @@ describe("castSpell", () => {
     let target = enemy("e1");
 
     for (let i = 0; i < 3; i++) {
-      target = castSpell({ caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5) }).allParticipantsUpdated.find((p) => p.basicInfo.id === "e1") as BattleParticipant;
+      target = castSpell({ rules: DEFAULT_RULES, caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5) }).allParticipantsUpdated.find((p) => p.basicInfo.id === "e1") as BattleParticipant;
     }
 
     expect(target.battleData.activeEffects).toHaveLength(1);
@@ -316,7 +317,7 @@ describe("castSpell", () => {
 
     const wounded = { ...caster(), combatStats: { ...caster().combatStats, currentHp: 10 } };
 
-    const hit = (c: BattleParticipant) => 200 - hp(castSpell({ caster: c, spell: retribution, targetIds: ["e1"], allParticipants: [c, enemy("e1")], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) }), "e1");
+    const hit = (c: BattleParticipant) => 200 - hp(castSpell({ rules: DEFAULT_RULES, caster: c, spell: retribution, targetIds: ["e1"], allParticipants: [c, enemy("e1")], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) }), "e1");
 
     expect(hit(full)).toBe(6);
     expect(hit(wounded)).toBe(Math.floor((6 * 150) / 100));

@@ -8,6 +8,7 @@ import { processAttack } from "@/lib/utils/battle/attack/process";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { applyObstacle } from "@/lib/utils/battle/damage/obstacle";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" };
@@ -27,7 +28,7 @@ const strike = (opts: { d20: number; rolls: number[]; obstacle?: boolean; disadv
 
   const a = attacker();
 
-  return processAttack({
+  return processAttack({ rules: DEFAULT_RULES,
     attacker: opts.disadvantageRoll ? { ...a, battleData: { ...a.battleData, resolvedAbilities: [cursed] } } : a,
     target,
     attack: sword,
@@ -79,7 +80,7 @@ describe("Перешкода в атаці", () => {
 
   it("мінімум 1, коли без перешкоди шкода ≥ 1", () => {
     const hit = (obstacle: boolean) =>
-      processAttack({
+      processAttack({ rules: DEFAULT_RULES,
         attacker: attacker(),
         target: enemy(),
         attack: sword,
@@ -125,7 +126,7 @@ describe("auto cover", () => {
   const archer = placed("a", { side: ParticipantSide.ALLY, at: { x: 0, y: 5 }, attacks: [bow] });
 
   const run = (order: BattleParticipant[], targetIds: string[], map: BattleMapConfig | null = testMap()) =>
-    runAttackPhase({
+    runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "a", targetIds, attackRolls: targetIds.map(() => 15), damageRolls: targetIds.map(() => 6) },
       battleId: "b",

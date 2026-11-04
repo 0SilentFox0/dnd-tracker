@@ -88,7 +88,7 @@ function applyStartOfTurnDamage(
   currentRound: number,
   rng: Rng,
   map: BattleMapConfig | null | undefined,
-  rules: Ruleset | undefined,
+  rules: Ruleset,
 ): StartOfTurnDamage {
   let updatedParticipant = participant;
 
@@ -216,8 +216,8 @@ export function processStartOfTurn(
   currentRound: number,
   allParticipants: BattleParticipant[],
   rng: Rng = Math.random,
-  map?: BattleMapConfig | null,
-  rules?: Ruleset,
+  map: BattleMapConfig | null | undefined,
+  rules: Ruleset,
 ): StartOfTurnResult {
   const recharged = rechargePools({ ...participant }, rng);
 

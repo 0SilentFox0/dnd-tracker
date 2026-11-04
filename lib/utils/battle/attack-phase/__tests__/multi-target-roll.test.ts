@@ -7,6 +7,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d6", damageType: "piercing" };
@@ -22,7 +23,7 @@ const hindering = resolved({ trigger: { event: "passive" }, effects: [{ kind: "f
 const foe = (id: string, abilities: ReturnType<typeof resolved>[] = []) => makeParticipant({ id, side: ParticipantSide.ENEMY, abilities, hp: 50, maxHp: 50 });
 
 const run = (order: BattleParticipant[], data: Partial<AttackPhaseInput["data"]>) =>
-  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
+  runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
 
 const hits = (r: ReturnType<typeof run>) => r.allBattleActions.filter((e) => e.actionType === "attack").map((e) => e.actionDetails.isHit);
 
@@ -89,7 +90,7 @@ describe("multi-target advantage resolution", () => {
 
       const order = [at(sweeper(true), 0), at(foe("t1"), 1), at(foe("t2"), 1), at(foe("t3"), 9)];
 
-      const r = runAttackPhase({
+      const r = runAttackPhase({ rules: DEFAULT_RULES,
         battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 },
         data: { attackerId: "a", targetIds: ["t1"], attackRolls: [17], damageRolls: Array(12).fill(4) },
         battleId: "b",
@@ -123,7 +124,7 @@ describe("multi-target advantage resolution", () => {
 
     const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), placed("x", { at: { x: 6, y: 4 }, hp: 50 }), placed("y", { at: { x: 6, y: 6 }, hp: 50 })];
 
-    const r = runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
+    const r = runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
 
     const attacks = r.allBattleActions.filter((e) => e.actionType === "attack");
 
@@ -143,7 +144,7 @@ describe("multi-target advantage resolution", () => {
 
     const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), hindered("x", { x: 6, y: 4 }), hindered("y", { x: 6, y: 6 })];
 
-    const r = runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, disadvantageRoll: 1, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
+    const r = runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, disadvantageRoll: 1, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
 
     const attacks = r.allBattleActions.filter((e) => e.actionType === "attack");
 
@@ -159,7 +160,7 @@ describe("multi-target advantage resolution", () => {
     const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), placed("x", { at: { x: 6, y: 4 }, hp: 50 })];
 
     expect(() =>
-      runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t", "x"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() }),
+      runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t", "x"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() }),
     ).toThrow(REJECT.tooManyTargets);
   });
 
@@ -184,7 +185,7 @@ describe("multi-target advantage resolution", () => {
 
 describe("free attack crit on a multi-target attack", () => {
   it("critical effect 6 on the first target leaves the attacker an action", () => {
-    const r = runAttackPhase({
+    const r = runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 5] },
       battleId: "b",
@@ -201,7 +202,7 @@ describe("crit effects on the attacker are for the next attack", () => {
   const effectsOf = (r: ReturnType<typeof run>) => r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects ?? [];
 
   const volley = (critRng: number) =>
-    runAttackPhase({
+    runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 15] },
       battleId: "b",
@@ -249,7 +250,7 @@ describe("effects from the attacker's own abilities stay active during the volle
   });
 
   it("two crits in one volley get distinct effect ids", () => {
-    const r = runAttackPhase({
+    const r = runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 20] },
       battleId: "b",

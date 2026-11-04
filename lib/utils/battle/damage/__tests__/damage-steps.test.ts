@@ -12,6 +12,7 @@ import { applyResistance } from "@/lib/utils/battle/resistance";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { battleActionToEvent, eventToBattleAction } from "@/lib/utils/battle/store";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -98,7 +99,7 @@ describe("кроки шкоди в подіях", () => {
 
     const t = wall("e", "physical", 50);
 
-    const r = processAttack({ attacker: { ...a, battleData: { ...a.battleData, attacks: [sword] } }, target: t, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [a, t], currentRound: 1, battleId: "b1", rng: seq(0) });
+    const r = processAttack({ rules: DEFAULT_RULES, attacker: { ...a, battleData: { ...a.battleData, attacks: [sword] } }, target: t, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [a, t], currentRound: 1, battleId: "b1", rng: seq(0) });
 
     const steps = r.battleAction.actionDetails.damageSteps?.e ?? [];
 
@@ -113,7 +114,7 @@ describe("кроки шкоди в подіях", () => {
 
     const t = wall("e", "physical", 100);
 
-    const r = processAttack({ attacker: { ...a, battleData: { ...a.battleData, attacks: [sword] } }, target: t, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [a, t], currentRound: 1, battleId: "b1", rng: seq(0) });
+    const r = processAttack({ rules: DEFAULT_RULES, attacker: { ...a, battleData: { ...a.battleData, attacks: [sword] } }, target: t, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [a, t], currentRound: 1, battleId: "b1", rng: seq(0) });
 
     expect(eventTextOf(r.battleAction)).toContain("a → e: 0 шкоди | ⛔ e: Кам'яна шкіра");
   });
@@ -133,7 +134,7 @@ describe("кроки шкоди в подіях", () => {
       definition: { dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [] },
     };
 
-    const r = castSpell({ caster, spell, targetIds: ["e"], allParticipants: [caster, t], currentRound: 1, battleId: "b1", diceRolls: [8], rng: seq(0) });
+    const r = castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: ["e"], allParticipants: [caster, t], currentRound: 1, battleId: "b1", diceRolls: [8], rng: seq(0) });
 
     expect(r.battleAction.actionDetails.damageSteps?.e?.[0]).toMatchObject({ side: "target", label: "Кам'яна шкіра", value: -50 });
   });

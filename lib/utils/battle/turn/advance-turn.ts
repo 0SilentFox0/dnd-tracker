@@ -23,7 +23,7 @@ export interface AdvanceTurnInput {
   pending: BattleParticipant[];
   scene: BattleSceneState;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface AdvanceTurnOutput {

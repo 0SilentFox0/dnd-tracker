@@ -5,6 +5,7 @@ import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import { AbilitySchema, type Effect } from "@/lib/utils/abilities/schema";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const immune = (flag: Effect) => resolved({ trigger: { event: "passive" }, effects: [flag] }, { id: "imm" });
 
@@ -13,7 +14,7 @@ function apply(effect: Effect, target = makeParticipant({ id: "t", side: Partici
 
   const ability = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [effect] });
 
-  return applyEffect({ participants: ps, ability, effectIndex: 0, ownerId: "o", effect, targetIds: ["t"], event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 5 }, ctx: { round: 1, rng: seq(0.5) } });
+  return applyEffect({ participants: ps, ability, effectIndex: 0, ownerId: "o", effect, targetIds: ["t"], event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 5 }, ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES } });
 }
 
 describe("immunities", () => {

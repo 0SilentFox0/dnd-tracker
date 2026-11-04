@@ -23,7 +23,7 @@ const exposed = resolved({ name: "Мітка мисливця", trigger: { event
 const foe = (id: string, abilities: ReturnType<typeof resolved>[] = []) => makeParticipant({ id, side: ParticipantSide.ENEMY, abilities, hp: 50, maxHp: 50 });
 
 const run = (order: BattleParticipant[], data: Partial<AttackPhaseInput["data"]>) =>
-  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
+  runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
 
 const chosen = (r: ReturnType<typeof run>, i = 0) => r.allBattleActions.filter((e) => e.actionType === "attack")[i].actionDetails as { chosenD20?: number; secondRoll?: { mode: string; value: number; serverRolled: boolean } };
 
