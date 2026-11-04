@@ -34,7 +34,7 @@ export function ShowPageClient({ campaignId, isDM, userId }: { campaignId: strin
 
   useShowKeys(effectiveDM ? control : null);
 
-  const host = useShowAudioHost({ campaignId, isDM: effectiveDM, onFailure: notify });
+  const host = useShowAudioHost({ campaignId, isDM: effectiveDM, silent: readOnly, onFailure: notify });
 
   return (
     <AudioPlayerProvider host={host}>
