@@ -4,6 +4,7 @@ import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { GameClassData } from "@/types/classes";
 
 const surge = resolved({ trigger: { event: "action" }, limits: { perRest: { rest: "short", uses: 1 } }, effects: [{ kind: "note", text: "x" }] } as never, { type: "class", id: "fighter" });
@@ -71,5 +72,15 @@ describe("buildRestBlock", () => {
     expect(buildRestBlock({ participant: p, character: { level: 1, experience: 300, inspiration: true }, rules: rules({ xp: true, inspiration: true }), maxLevel: 20 })).toMatchObject({
       persist: false, hp: null, hitDice: [], charges: [], inspiration: true, xp: { value: 300, next: 300, levelUp: true },
     });
+  });
+});
+
+describe("buildRestBlock without levels", () => {
+  it("wfrp keeps XP but has no next threshold or level-up", () => {
+    const wfrp = { ...WFRP_RULES, outOfCombat: { ...WFRP_RULES.outOfCombat, xp: true } };
+
+    const block = buildRestBlock({ participant: p, character: { level: 1, experience: 999999 }, rules: wfrp, maxLevel: 20 });
+
+    expect(block?.xp).toEqual({ value: 999999, next: null, levelUp: false });
   });
 });

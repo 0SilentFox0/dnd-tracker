@@ -6,8 +6,11 @@ import { type Bundle, BUNDLE_TABLES, emptyBundle } from "@/lib/server/templates/
 import { classify } from "@/lib/server/templates/sync/classify";
 import { baselineFromBundle, rowHash } from "@/lib/server/templates/sync/hash";
 import type { LocalRow, SyncContext } from "@/lib/server/templates/sync/types";
+import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 
 const spells = BUNDLE_TABLES.find((t) => t.key === "spells")!;
+
+const units = BUNDLE_TABLES.find((t) => t.key === "units")!;
 
 // джерело: S1 Fireball; клон: L1 (sourceId S1)
 const S1 = id("a"), S2 = id("b"), L1 = id("x"), L2 = id("y"), U1 = id("u"), LU = id("v");
@@ -37,6 +40,19 @@ const local = (lid: string, sid: string | null, name: string, extra: Record<stri
 const visible = (c: SyncContext) => visibleItems(classify(c));
 
 describe("classify", () => {
+  it("unit with a locally stored empty/default characteristics does not conflict with a source that lacks it", () => {
+    const unit = { id: U1, name: "Imp" };
+
+    const localUnit = (extra: Record<string, unknown>): LocalRow => ({ table: "units", row: { id: LU, sourceId: U1, name: "Imp", ...extra } });
+
+    for (const characteristics of [{}, null, DEFAULT_CHARACTERISTICS]) {
+      expect(visible(ctx({ units: [unit] }, [localUnit({ characteristics })], { units: [unit] }))).toEqual([]);
+    }
+
+    expect(rowHash({ ...unit, characteristics: {} }, units)).toBe(rowHash(unit, units));
+    expect(rowHash({ ...unit, characteristics: { ...DEFAULT_CHARACTERISTICS, fate: 2 } }, units)).not.toBe(rowHash(unit, units));
+  });
+
   it("fresh clone has no visible changes", () => {
     expect(visible(ctx({ spells: [spell(S1, "Fireball")] }, [local(L1, S1, "Fireball")], { spells: [spell(S1, "Fireball")] }))).toEqual([]);
   });

@@ -6,12 +6,13 @@ import { getResponseJson } from "./helpers";
 import { prisma } from "@/lib/db";
 import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn() }, race: { findFirst: vi.fn() } } }));
 
-const dm = (maxLevel = 20) => ({ userId: "dm", isDM: true, campaign: { id: "camp", maxLevel, members: [{ userId: "dm", role: "dm" }] } }) as never;
+const dm = (maxLevel = 20) => ({ userId: "dm", isDM: true, campaign: { id: "camp", rules: DEFAULT_RULES, maxLevel, members: [{ userId: "dm", role: "dm" }] } }) as never;
 
 const CHARACTER = {
   id: "ch", campaignId: "camp", race: "Ельф", level: 3, seenLevel: 3,

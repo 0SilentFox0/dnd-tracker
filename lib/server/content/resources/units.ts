@@ -12,8 +12,16 @@ import { defineResource } from "@/lib/server/content/define-resource";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { toJsonInput } from "@/lib/server/content/errors";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
+import { parseRules } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import { toUnit } from "@/lib/utils/units/to-unit";
 import { unitCreateData } from "@/lib/utils/units/unit-create-data";
+
+async function keepsCharacteristics(campaignId: string): Promise<boolean> {
+  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
+
+  return !!campaign && ruleSystemOf(parseRules(campaign.rules)).characteristics.kind === "wfrp";
+}
 
 export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSchema>, z.infer<typeof updateUnitSchema>>({
   kind: "units",
@@ -32,7 +40,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
   async create(actor, data) {
     await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(data.knownSpells ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...(data.abilities ?? []).flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])] });
 
-    const unit = await prisma.unit.create({ data: unitCreateData(actor.campaignId, data) });
+    const unit = await prisma.unit.create({ data: unitCreateData(actor.campaignId, (await keepsCharacteristics(actor.campaignId)) ? data : { ...data, characteristics: undefined }) });
 
     return unit;
   },
@@ -73,7 +81,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
         saveProficiencies: toJsonInput(data.saveProficiencies),
         statblock: toJsonInput(data.statblock),
         spellcasting: toJsonInput(data.spellcasting),
-        characteristics: toJsonInput(data.characteristics),
+        characteristics: (await keepsCharacteristics(actor.campaignId)) ? toJsonInput(data.characteristics) : undefined,
       },
     });
 

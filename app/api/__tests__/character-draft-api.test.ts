@@ -5,6 +5,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
 
@@ -31,7 +32,7 @@ vi.mock("ai", async (orig) => ({ ...(await orig<typeof import("ai")>()), generat
 vi.mock("@/lib/ai/dm-model", () => ({ pickDmTextModel: gen.pickDmTextModel }));
 vi.mock("@/lib/utils/api/rate-limit", async (orig) => ({ ...(await orig<typeof import("@/lib/utils/api/rate-limit")>()), checkRateLimit: gen.checkRateLimit }));
 
-const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", maxLevel: 20, allowPlayerEdit: true, members: [{ userId, role }] } }) as never;
+const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", rules: DEFAULT_RULES, maxLevel: 20, allowPlayerEdit: true, members: [{ userId, role }] } }) as never;
 
 const scores = { strength: 15, dexterity: 14, constitution: 13, intelligence: 12, wisdom: 10, charisma: 8 };
 

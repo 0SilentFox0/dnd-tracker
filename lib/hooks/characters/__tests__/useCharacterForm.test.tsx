@@ -40,6 +40,7 @@ describe("useCharacterForm", () => {
     const { result } = renderHook(() => useCharacterForm({ onSubmit, requireRace: false }));
 
     act(() => result.current.basicInfo.set("class", "Воїн"));
+    act(() => result.current.basicInfo.set("controlledBy", "u1"));
     await act(() => result.current.actions.handleSubmit({ preventDefault: vi.fn() } as unknown as React.FormEvent));
     expect(result.current.status.error).toBeNull();
     expect(onSubmit).toHaveBeenCalled();

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { buildUnitCreatePayload, buildUnitFormData, buildUnitUpdatePayload, emptyUnitFormDefaults } from "@/lib/utils/units/unit-form";
 import type { Unit } from "@/types/units";
 
@@ -11,6 +12,13 @@ describe("unit form", () => {
 
     expect(buildUnitUpdatePayload(buildUnitFormData(monster), monster)).toMatchObject({ statblock: monster.statblock, spellcasting: monster.spellcasting });
   });
+  it("does not resend unchanged characteristics", () => {
+    const f = buildUnitFormData({ ...unit, characteristics: DEFAULT_CHARACTERISTICS });
+
+    expect(buildUnitUpdatePayload(f, { ...unit, characteristics: DEFAULT_CHARACTERISTICS })).not.toHaveProperty("characteristics");
+    expect(buildUnitUpdatePayload({ ...f, characteristics: { ...DEFAULT_CHARACTERISTICS, fate: 1 } }, { ...unit, characteristics: DEFAULT_CHARACTERISTICS })).toHaveProperty("characteristics");
+  });
+
   it("бере raceId юніта й нормалізує масиви", () => {
     const f = buildUnitFormData(unit);
 

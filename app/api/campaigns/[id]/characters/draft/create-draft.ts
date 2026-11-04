@@ -6,12 +6,14 @@ import { draftFields } from "./draft-data";
 import { resolveDraftParts } from "./draft-resolve";
 import { draftRejection } from "./draft-rules";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus, CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { deriveCharacterDefaults, EMPTY_INVENTORY } from "@/lib/server/characters/core/derive-character-defaults";
 import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import type { CharacterClassEntry } from "@/types/classes";
 
 export async function createDraft(request: Request, campaignId: string): Promise<NextResponse> {
@@ -20,6 +22,8 @@ export async function createDraft(request: Request, campaignId: string): Promise
   if (access instanceof NextResponse) return access;
 
   const { campaign } = access;
+
+  if (ruleSystemOf(campaign.rules).characteristics.kind !== "d20") return errorResponse(API_ERRORS.SYSTEM_DRAFTS_UNSUPPORTED, 409);
 
   const parsed = await parseDraftBody(request, campaign);
 

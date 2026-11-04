@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const db = vi.hoisted(() => ({
   race: { count: vi.fn() },
   spell: { count: vi.fn(), updateMany: vi.fn() },
+  campaign: { findUnique: vi.fn(async () => ({ rules: {} })) },
   unit: { create: vi.fn(), update: vi.fn(), deleteMany: vi.fn(), findFirst: vi.fn() },
 }));
 
@@ -11,9 +12,12 @@ vi.mock("@/lib/db", () => ({ prisma: db }));
 vi.mock("@/lib/cache/reference-data", () => ({ getCachedUnits: vi.fn(async () => []) }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { createUnitSchema } from "@/lib/schemas/units";
 import { ContentError } from "@/lib/server/content/errors";
 import { unitsResource } from "@/lib/server/content/resources/units";
 import type { Actor } from "@/lib/utils/api/actor";
+import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
 const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
 
@@ -21,6 +25,24 @@ describe("unitsResource", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     db.unit.deleteMany.mockResolvedValue({ count: 2 });
+  });
+
+  it("drops characteristics for d20 campaigns, keeps them for wfrp", async () => {
+    db.unit.create.mockResolvedValue({ id: "u1" });
+    db.unit.update.mockResolvedValue({ id: "u1" });
+
+    const input = createUnitSchema.parse({ name: "X", characteristics: DEFAULT_CHARACTERISTICS }) as never;
+
+    await unitsResource.create(actor, input);
+    await unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input);
+    expect(db.unit.create.mock.calls[0][0].data).not.toHaveProperty("characteristics");
+    expect(db.unit.update.mock.calls[0][0].data.characteristics).toBeUndefined();
+
+    db.campaign.findUnique.mockResolvedValue({ rules: WFRP_RULES });
+    await unitsResource.create(actor, input);
+    await unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input);
+    expect(db.unit.create.mock.calls[1][0].data.characteristics).toEqual(DEFAULT_CHARACTERISTICS);
+    expect(db.unit.update.mock.calls[1][0].data.characteristics).toEqual(DEFAULT_CHARACTERISTICS);
   });
 
   it("find scopes to the actor campaign", async () => {

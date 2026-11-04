@@ -22,11 +22,14 @@ import { hasPicks } from "@/lib/utils/characters/choices/read";
 import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import { levelNotificationEvents } from "@/lib/utils/notifications/events";
+import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 
 type Gate = Exclude<Awaited<ReturnType<typeof requireCharacterRecord>>, NextResponse>;
 
 async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
   const { campaign } = access;
+
+  if (!ruleSystemOf(campaign.rules).progression.levels) throw new ContentError(API_ERRORS.SYSTEM_LEVELS_UNSUPPORTED, 409);
 
   const id = character.campaignId;
 

@@ -10,7 +10,7 @@
 |---|---|---|
 | `distance { unit, perCell }` | одиниця й масштаб клітинки (ft/5, yd/2); у 5a лише декларація | UI одиниць, `gameTerms.distanceUnit`; шов у grid-хелперах — 5b |
 | `balance { kind }` | `fair` / `none`; wfrp = `none` | `useBattleSetup` (ховає перемикач), `balance-post`, `start-battle-handler` |
-| `progression.levels` / `maxHp` | level-up/XP-пороги; формула максимуму HP (wfrp = Wounds); `null` → d20-розрахунок | `characterBaseHp` (`hero-hp.ts`: лист і бій — одне число), `HeroStats`, rest-блок |
+| `progression.levels` / `maxHp` | level-up/XP-пороги (`levels: false` → rest-блок без `xp.next`/`levelUp`, `level-up` → 409 `SYSTEM_LEVELS_UNSUPPORTED`); формула максимуму HP (wfrp = Wounds); `null` → d20-розрахунок | `characterBaseHp` (`hero-hp.ts`: лист і бій — одне число), `HeroStats`, rest-блок |
 | `characteristics { kind, sheetBlock }` | `d20` або `wfrp`; блок листа (характеристики, Wounds, Move, навички, Fate/Fortune) | `build-sheet.ts`, `resources-handler`, `system-fields.ts` (чужі поля відкидаються), `create`/`patch` |
 | `sheetTest { accepts, roll }` | тест з листа: d20 `check/save` або d100 `test` | `roll-handler`, `SheetRollDialog` (тіло діалогу — `SystemUi.RollDialogBody`) |
 | `rest.onSession` | дія ДМ «Нова сесія»: `Fortune = Fate`; відсутній → 409 `REST_KIND_UNSUPPORTED` | `rest-handler`, меню відпочинку партії |
@@ -35,7 +35,7 @@
 | `wfrp/sheet-test.ts`, `session.ts` | `sheetTest.roll` і `rest.onSession` |
 | `components/systems/wfrp/` | `HeroStats`, `StatsTab`, `StatsFields`, `UnitStatsFields`, `RollDialogBody`, редактори характеристик і навичок |
 
-Тексти: `gameTerms.ruleSystem|characteristics|wfrpSkills|wfrpSpecs|difficulty|testOutcome|distanceUnit`, `rules.system.*`, `rest.log.test|session`, `rest.party.session`; динамічні ключі покриває `lib/i18n/__tests__/label-keys-rule-systems.test.ts`. Дані: JSON `characteristics` у `characters` і `units` (6 колонок d20 лишаються), Wounds = `resources.hp`, `resources.fortune`.
+Тексти: `gameTerms.ruleSystem|characteristics|wfrpSkills|wfrpSpecs|difficulty|testOutcome|distanceUnit`, `rules.system.*`, `rest.log.test|session`, `rest.party.session`; динамічні ключі покриває `lib/i18n/__tests__/label-keys-rule-systems.test.ts`. Дані: JSON `characteristics` у `characters` і `units` (6 колонок d20 лишаються; для d20 сервер не пише `characteristics` ні персонажів, ні юнітів, а `rowHash` синку шаблонів трактує порожнє/дефолтне `units.characteristics` як відсутнє), Wounds = `resources.hp`, `resources.fortune`.
 
 ## Як додати систему або хук
 
@@ -45,4 +45,4 @@
 
 ## Межі 5a
 
-Є: реєстр, блокування системи, d100-тест, характеристики/навички/Wounds/Fate, тести з листа, «Нова сесія», порожній шаблон Grim d100. Немає: бою (старт 409), масштабу клітинки в grid-хелперах, магії, бестіарію й бібліотек — частини 5b–5h.
+Є: реєстр, блокування системи, d100-тест, характеристики/навички/Wounds/Fate, тести з листа, «Нова сесія», порожній шаблон Grim d100. Немає: чернеток гравців (`createDraft` у не-d20 системі → 409 `SYSTEM_DRAFTS_UNSUPPORTED`), бою (старт 409), масштабу клітинки в grid-хелперах, магії, бестіарію й бібліотек — частини 5b–5h.

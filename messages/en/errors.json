@@ -500,6 +500,8 @@
   "srdNameReferences": "Select the related name and reference updates together: {rows}",
   "systemLocked": "The rule system cannot be changed while the campaign has characters or units",
   "systemBattleUnsupported": "This rule system does not support battles yet",
+  "systemLevelsUnsupported": "This rule system has no levels",
+  "systemDraftsUnsupported": "This rule system does not support player drafts yet",
   "rollKindMismatch": "This roll type does not fit the campaign rule system",
   "skillUntrained": "The skill is untrained, so the test is not possible",
   "restKindUnsupported": "This kind of rest is not available in the campaign rule system",
