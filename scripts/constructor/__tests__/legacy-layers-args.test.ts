@@ -7,6 +7,10 @@ describe("parseArgs", () => {
     expect(parseArgs(["--campaign", "c1"])).toEqual({ mode: "dry-run", campaigns: ["c1"], all: false, allowRemote: false });
   });
 
+  it("ignores the pnpm `--` separator", () => {
+    expect(parseArgs(["--", "--all"])).toMatchObject({ mode: "dry-run", all: true });
+  });
+
   it("accepts --all with dry-run, --json and --allow-remote", () => {
     expect(parseArgs(["--all", "--dry-run", "--json", "out.json", "--allow-remote"])).toMatchObject({ mode: "dry-run", all: true, json: "out.json", allowRemote: true });
   });
