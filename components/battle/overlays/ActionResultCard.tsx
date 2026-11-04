@@ -9,7 +9,7 @@ import { PercentileResultLines } from "./PercentileResultLines";
 import { useInCornerStack } from "@/components/battle/scene/CornerStack";
 import { useMapStripSlot, useNoticeStack } from "@/components/battle/scene/MapStrip";
 import { HUD_SURFACE } from "@/components/hud";
-import { useActionResult } from "@/lib/hooks/battle";
+import { useActionResult, useBattleRules } from "@/lib/hooks/battle";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import type { ActionResultFx } from "@/types/battle-scene";
@@ -31,6 +31,8 @@ function AttackBody({ fx }: { fx: AttackFx }) {
 
   const text = useText();
 
+  const { dice } = useBattleRules();
+
   const critFail = fx.kind === "miss" ? fx.critFail : undefined;
 
   const effect = fx.kind === "miss" ? critFail : fx.critEffect;
@@ -48,10 +50,10 @@ function AttackBody({ fx }: { fx: AttackFx }) {
           ))}
         </ul>
       ) : fx.kind === "miss" ? (
-        fx.percentile ? (
+        dice === 100 ? (
           <>
             <div className="mt-1 text-sm">{fx.targetName}</div>
-            <PercentileResultLines p={fx.percentile} hit={false} />
+            {fx.percentile && <PercentileResultLines p={fx.percentile} hit={false} />}
           </>
         ) : (
           <div className="mt-1 text-sm">{fx.targetName} · d20 {fx.d20} · AC {fx.known}</div>

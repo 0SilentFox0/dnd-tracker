@@ -40,7 +40,7 @@ describe("ActionResultCard", () => {
     [{ kind: "spell", spellName: "Вогняна куля", changes: [{ name: "Гоблін", change: 12 }, { name: "Годрік", change: -5 }], targetCount: 2 }, ["Вогняна куля", "Гоблін", "−12", "Годрік", "+5"]],
     [{ kind: "spell", spellName: "Благословення", changes: [], targetCount: 3 }, ["Благословення", "Застосовано · цілей: 3"]],
   ])("%o", (fx, parts) => {
-    const { wrapper } = fakeScene({ result: fx });
+    const { wrapper } = fakeScene({ result: fx, system: "percentile" in fx && fx.percentile ? "wfrp" : undefined });
 
     render(<ActionResultCard />, { wrapper });
 
@@ -48,13 +48,23 @@ describe("ActionResultCard", () => {
   });
 
   it("d100 без захисника не показує «захист» і промах без локації", () => {
-    const { wrapper } = fakeScene({ result: { kind: "miss", targetName: "Гоблін", d20: 80, known: "?", percentile: { roll: 80, target: 45, sl: -1, netSl: -1, location: "head", doubles: false } } });
+    const { wrapper } = fakeScene({ system: "wfrp", result: { kind: "miss", targetName: "Гоблін", d20: 80, known: "?", percentile: { roll: 80, target: 45, sl: -1, netSl: -1, location: "head", doubles: false } } });
 
     render(<ActionResultCard />, { wrapper });
 
     expect(card().textContent).not.toContain("захист");
     expect(card().textContent).not.toContain("Локація");
     expect(card().textContent).not.toContain("d20");
+  });
+
+  it("wfrp: промах без percentile-даних не падає в d20-вигляд", () => {
+    const { wrapper } = fakeScene({ system: "wfrp", result: { kind: "miss", targetName: "Гоблін", d20: 80, known: "?" } });
+
+    render(<ActionResultCard />, { wrapper });
+
+    expect(card().textContent).toContain("Гоблін");
+    expect(card().textContent).not.toContain("d20");
+    expect(card().textContent).not.toContain("AC");
   });
 
   it("мораль — не для картки", () => {
