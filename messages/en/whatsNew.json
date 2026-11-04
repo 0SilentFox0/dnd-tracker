@@ -1,4 +1,8 @@
 {
+  "2026-11-04-player-view": {
+    "title": "Player view",
+    "body": "The DM can switch a battle or the show page to the player view (button in the corner or the P key) and show exactly what players see, without any controls. The mode is per window, so keep one window as the DM and share the other. Enemy traits you see may be incomplete, because the DM has no observed knowledge of them."
+  },
   "2026-10-31-user-palettes": {
     "title": "Color palettes",
     "body": "Choose your theme from the menu at the top of the page: Tavern, Midnight, Forest, Parchment, Amethyst, or Frost. Your selection is saved to your profile and themes your spellbook on character sheets and in battle."

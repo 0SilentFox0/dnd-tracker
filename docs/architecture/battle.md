@@ -47,6 +47,17 @@ One engine: `lib/utils/battle/turn/advanceTurn` (used by next-turn and attack wi
 
 Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows` driven by hooks in `lib/hooks/battle`. What a player may see (health states instead of enemy HP, AC known from attacks, observed traits from `actionDetails.damageSteps`, turn queue with morale extra turns) is `lib/utils/battle/view`. Hiding is client-side.
 
+### Player view (DM window)
+
+`usePlayerView({kind:"battle",id})` (`lib/hooks/common`) is a **per-window** flag in `sessionStorage` (key `player-view:<battleId>`), not shared between tabs and not persisted across sessions; toggle button (`BattlePlayerViewToggle`) and `P` key (`usePlayerViewKey`), DM only. When on, `useBattleScene` forces `deriveScene` to the player branch (`effectiveDM = isDM && !playerView`) and exposes `viewer.readOnly`.
+
+- Pure visualization: no controls at all (turn, start, reset, wizards, DM drawer, map tools, quick actions are not rendered). Dice FX (`DiceStage`) stay, they are view-only.
+- Maze mode renders in the spectator role (no party fog).
+- Hiding is **UI only**: the DM client still holds the DM payload (`pendingSummons`, `damageBreakdown`, hidden participants, enemy HP) in the network response and memory. It is not a security boundary; the mode is for showing the screen. A guard test greps components/hooks/app for raw `isDM`/`battle` reads outside `useBattleScene`.
+- Enemy observed traits may be incomplete: the DM has no `knowledge` rows.
+- The DM window in the mode does not host battle music (`isDM` is false there); the working DM window keeps hosting it.
+- Demo tours reset the mode on start (`resetPlayerViews`).
+
 ## Attack: cover, chain shot, cleave
 
 - **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode wall (`lineBlocked`) on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. The wizard and the map show the same result.
