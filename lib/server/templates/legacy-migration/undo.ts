@@ -5,11 +5,11 @@ import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 import { markContentDirty, runContentWriteContext } from "@/lib/server/content/write-context";
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
 import { PROTECTED_CAMPAIGN_IDS } from "@/lib/server/templates/legacy-migration/eligibility";
+import { chunks, type Delegate, delegateName, differs } from "@/lib/server/templates/legacy-migration/execute";
 import { readPreImage } from "@/lib/server/templates/legacy-migration/preimage";
 import { REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
 import type { Row } from "@/lib/server/templates/legacy-migration/types";
 import { scanResiduals } from "@/lib/server/templates/legacy-migration/verify";
-import { stableStringify } from "@/lib/utils/battle/store/stable-json";
 
 export interface UndoConflict { model: string; pk: Record<string, unknown>; column: string }
 
@@ -22,12 +22,6 @@ class UndoRefused extends Error {
     super("UNDO_REFUSED");
   }
 }
-
-type Delegate = Record<string, (args: unknown) => Promise<unknown>>;
-
-const CHUNK = 200;
-
-const delegateName = (model: string) => `${model[0].toLowerCase()}${model.slice(1)}`;
 
 const fieldsOf = (model: string) => new Map((Prisma.dmmf.datamodel.models.find((m) => m.name === model)?.fields ?? []).map((f) => [f.name, f]));
 
@@ -45,8 +39,6 @@ function revive(model: string, row: Record<string, unknown>): Record<string, unk
     return [column, value];
   }));
 }
-
-const differs = (a: unknown, b: unknown) => stableStringify(a ?? null) !== stableStringify(b ?? null);
 
 export async function undoMigration(db: PrismaClient, file: string): Promise<UndoResult> {
   const image = await readPreImage(file);
@@ -85,7 +77,7 @@ export async function undoMigration(db: PrismaClient, file: string): Promise<Und
 
       await bypassLayer(() => delegate.deleteMany({ where: { campaignId } }));
 
-      for (let i = 0; i < rows.length; i += CHUNK) await bypassLayer(() => delegate.createMany({ data: rows.slice(i, i + CHUNK).map((row) => revive(def.model, row)) }));
+      for (const part of chunks(rows)) await bypassLayer(() => delegate.createMany({ data: part.map((row) => revive(def.model, row)) }));
     }
 
     await tx.campaignContentHide.deleteMany({ where: { campaignId } });

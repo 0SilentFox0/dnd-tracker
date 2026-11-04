@@ -11,13 +11,13 @@ const CHUNK = 200;
 
 export interface ReferrerUpdate { model: string; pk: Record<string, unknown>; data: Record<string, unknown>; cells: PreImageCell[] }
 
-type Delegate = Record<string, (args: unknown) => Promise<unknown>>;
+export type Delegate = Record<string, (args: unknown) => Promise<unknown>>;
 
-const delegateName = (model: string) => `${model[0].toLowerCase()}${model.slice(1)}`;
+export const delegateName = (model: string) => `${model[0].toLowerCase()}${model.slice(1)}`;
 
-const differs = (a: unknown, b: unknown) => stableStringify(a ?? null) !== stableStringify(b ?? null);
+export const differs = (a: unknown, b: unknown) => stableStringify(a ?? null) !== stableStringify(b ?? null);
 
-const chunks = <T>(items: readonly T[]): T[][] => Array.from({ length: Math.ceil(items.length / CHUNK) }, (_, i) => items.slice(i * CHUNK, (i + 1) * CHUNK));
+export const chunks = <T>(items: readonly T[]): T[][] => Array.from({ length: Math.ceil(items.length / CHUNK) }, (_, i) => items.slice(i * CHUNK, (i + 1) * CHUNK));
 
 export function referrerUpdates(args: { input: MigrationInput; idMap: ReadonlyMap<string, string> }): ReferrerUpdate[] {
   const { input, idMap } = args;
