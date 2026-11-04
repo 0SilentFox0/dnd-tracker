@@ -9,7 +9,10 @@ const db = vi.hoisted(() => ({
   campaign: { findUnique: vi.fn() },
 }));
 
+const latestPublishedVersion = vi.hoisted(() => vi.fn());
+
 vi.mock("@/lib/db", () => ({ prisma: db }));
+vi.mock("@/lib/server/templates/publish", () => ({ latestPublishedVersion }));
 
 import { readDmDashboard, readPlayerDashboard, sourceUpdateState } from "@/lib/server/campaigns/dashboard";
 
@@ -137,6 +140,31 @@ describe("sourceUpdateState", () => {
     setup({ createdFromId: "s1", source: 1, sync });
 
     expect(await sourceUpdateState("c1")).toEqual({ sourceVersion: 1, hasUpdates: true });
+  });
+
+  describe("layered campaign", () => {
+    const layered = (published: number | null) => {
+      latestPublishedVersion.mockResolvedValue(published);
+      db.campaign.findUnique.mockImplementation(async ({ where }: { where: { id: string } }) => (where.id === "c1" ? { createdFromId: null, baseSourceId: "s1", baseVersion: 5, sourceSync: null } : { contentVersion: 9 }));
+    };
+
+    it("ignores edits of the template that were never published", async () => {
+      layered(5);
+
+      expect(await sourceUpdateState("c1")).toEqual({ sourceVersion: 9, hasUpdates: false });
+    });
+
+    it("has updates once a newer version is published", async () => {
+      layered(7);
+
+      expect(await sourceUpdateState("c1")).toEqual({ sourceVersion: 9, hasUpdates: true });
+    });
+
+    it("has none for a template that was never published", async () => {
+      layered(null);
+
+      expect(await sourceUpdateState("c1")).toMatchObject({ hasUpdates: false });
+    });
   });
 
   it("readDmDashboard exposes the version only when updates exist", async () => {

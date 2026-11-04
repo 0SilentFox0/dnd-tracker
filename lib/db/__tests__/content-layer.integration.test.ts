@@ -113,11 +113,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
       await expect(D[f.delegate].findFirstOrThrow({ where: { ...where, id: rid(f, "d") } })).rejects.toMatchObject({ code: "P2025" });
     });
 
-    it("reads a base id with no campaign in the filter without a campaignId on the result", async () => {
-      const row = await D[f.delegate].findUnique({ where: { id: rid(f, "b") } });
-
-      expect(row).toMatchObject({ [f.label]: "Bravo" });
-      expect(row.campaignId).toBeUndefined();
+    it("never returns a base row for a by-id read without a campaign", async () => {
+      expect(await D[f.delegate].findUnique({ where: { id: rid(f, "b") } })).toBeNull();
+      await expect(D[f.delegate].findUniqueOrThrow({ where: { id: rid(f, "b") } })).rejects.toMatchObject({ code: "P2025" });
+      expect(await D[f.delegate].findUnique({ where: { id: rid(f, "p") } })).toMatchObject({ campaignId: ids.plain });
     });
 
     it("supports select with orderBy fields that are not selected", async () => {

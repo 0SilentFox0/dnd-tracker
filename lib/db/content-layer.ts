@@ -402,37 +402,19 @@ async function layeredAggregate(ctx: Ctx, config: LayerConfig, args: Row, campai
 
 const notFound = () => new Prisma.PrismaClientKnownRequestError("No record found", { code: "P2025", clientVersion: Prisma.prismaVersion.client });
 
-/** By-id reads without a campaign: local row first, then the newest open base row. Carries no `campaignId`. */
-async function readWithoutCampaign(ctx: Ctx, config: LayerConfig, operation: string, args: Row, query: Query) {
-  const throwing = operation.endsWith("OrThrow");
+/** By-id reads without a campaign see stored rows only: a base row belongs to a template version and is never addressed without a campaign. */
+async function readWithoutCampaign(operation: string, args: Row, query: Query) {
+  if (!operation.endsWith("OrThrow")) return query(args);
 
-  const found = await query(args).catch((e: unknown) => {
-    if (throwing && (e as { code?: string })?.code === "P2025") return null;
-
-    throw e;
+  return query(args).catch((e: unknown) => {
+    throw (e as { code?: string })?.code === "P2025" ? notFound() : e;
   });
-
-  const id = (args.where as Row | undefined)?.id;
-
-  if (found || typeof id !== "string" || operation === "findMany" || operation === "count" || operation === "aggregate") {
-    if (!found && throwing) throw notFound();
-
-    return found;
-  }
-
-  const base = await ctx.raw[config.base].findFirst({ where: { id, validTo: null } });
-
-  if (base) return asLocalShape(base, undefined);
-
-  if (throwing) throw notFound();
-
-  return null;
 }
 
 async function read(ctx: Ctx, config: LayerConfig, operation: string, args: Row, query: Query) {
   const { campaignId, rest } = splitWhere(args.where);
 
-  if (!campaignId) return readWithoutCampaign(ctx, config, operation, args, query);
+  if (!campaignId) return readWithoutCampaign(operation, args, query);
 
   const layer = await campaignLayer(ctx, campaignId);
 

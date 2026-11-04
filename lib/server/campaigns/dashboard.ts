@@ -2,6 +2,7 @@ import "server-only";
 import { BattleStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { latestPublishedVersion } from "@/lib/server/templates/publish";
 import type { DmDashboardData, PlayerDashboardData } from "@/types/campaigns";
 
 export async function sourceUpdateState(campaignId: string): Promise<{ sourceVersion: number; hasUpdates: boolean } | null> {
@@ -17,7 +18,7 @@ export async function sourceUpdateState(campaignId: string): Promise<{ sourceVer
 
   if (!source) return null;
 
-  if (layered) return { sourceVersion: source.contentVersion, hasUpdates: source.contentVersion > campaign.baseVersion! };
+  if (layered) return { sourceVersion: source.contentVersion, hasUpdates: ((await latestPublishedVersion(prisma, sourceId)) ?? 0) > campaign.baseVersion! };
 
   const sync = campaign!.sourceSync;
 
