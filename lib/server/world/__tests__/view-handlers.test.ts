@@ -48,3 +48,34 @@ describe("world view Demo access", () => {
     expect((await response.json()).maps.map((map: { id: string }) => map.id)).toEqual(["root", "child"]);
   });
 });
+
+describe("world view asParty", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.listMaps.mockResolvedValue([root, child]);
+    mocks.positions.mockResolvedValue([]);
+    mocks.reveals.mockResolvedValue([]);
+    mocks.heroes.mockResolvedValue([{ id: "h1", name: "A", avatar: null, controlledBy: null }, { id: "h2", name: "B", avatar: null, controlledBy: null }]);
+    mocks.show.mockResolvedValue(null);
+    mocks.notes.mockResolvedValue([]);
+    mocks.detail.mockResolvedValue({ map: root, markers: [] });
+  });
+
+  const call = () => viewHandler(new Request("http://localhost/api/campaigns/c/world/view?mapId=root&asParty=1"), "c");
+
+  it("builds one view from the reveals of every active hero for the DM", async () => {
+    mocks.access.mockResolvedValue({ userId: "u1", isDM: true, isDemo: false });
+
+    const response = await call();
+
+    expect(response.status).toBe(200);
+    expect(mocks.heroes).toHaveBeenCalledWith("c", {});
+    expect(mocks.reveals).toHaveBeenCalledWith(expect.objectContaining({ where: { characterId: { in: ["h1", "h2"] } } }));
+  });
+
+  it("is DM only", async () => {
+    mocks.access.mockResolvedValue({ userId: "u1", isDM: false, isDemo: false });
+
+    expect((await call()).status).toBe(403);
+  });
+});

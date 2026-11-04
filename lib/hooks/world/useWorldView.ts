@@ -13,12 +13,12 @@ const POLL_MS = 30_000;
 
 const PUSHER_STALE_MS = 60_000;
 
-export function useWorldView(campaignId: string, { mapId, asHeroId, keepPrevious = false }: { mapId: string | null; asHeroId?: string; keepPrevious?: boolean }) {
+export function useWorldView(campaignId: string, { mapId, asHeroId, asParty = false, keepPrevious = false }: { mapId: string | null; asHeroId?: string; asParty?: boolean; keepPrevious?: boolean }) {
   const live = !!process.env.NEXT_PUBLIC_PUSHER_KEY;
 
   return useQuery<WorldView>({
-    queryKey: worldKeys.view(campaignId, mapId ?? "", asHeroId),
-    queryFn: () => getWorldView(campaignId, { mapId: mapId as string, asHeroId }),
+    queryKey: worldKeys.view(campaignId, mapId ?? "", asParty ? "party" : asHeroId),
+    queryFn: () => getWorldView(campaignId, { mapId: mapId as string, asHeroId, asParty }),
     enabled: !!mapId,
     placeholderData: keepPrevious ? keepPreviousData : undefined,
     staleTime: live ? PUSHER_STALE_MS : POLL_STALE_MS,

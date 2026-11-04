@@ -39,15 +39,15 @@ export async function viewHandler(req: Request, campaignId: string) {
 
     if (!parsed.success) return errorResponse(API_ERRORS.INVALID_BODY, 400, parsed.error.issues);
 
-    const { mapId, asHeroId } = parsed.data;
+    const { mapId, asHeroId, asParty } = parsed.data;
 
-    if (asHeroId && !access.isDM) return errorResponse(API_ERRORS.WORLD_AS_HERO_DM_ONLY, 403);
+    if ((asHeroId || asParty) && !access.isDM) return errorResponse(API_ERRORS.WORLD_AS_HERO_DM_ONLY, 403);
 
-    if (access.isDM && !asHeroId) return errorResponse(API_ERRORS.INVALID_BODY, 400);
+    if (access.isDM && !asHeroId && !asParty) return errorResponse(API_ERRORS.INVALID_BODY, 400);
 
-    const asHero = !!asHeroId;
+    const asHero = !!asHeroId || !!asParty;
 
-    const heroes = await activePlayerHeroes(campaignId, asHeroId ? { id: { in: [asHeroId] } } : { controlledBy: access.userId });
+    const heroes = await activePlayerHeroes(campaignId, asParty ? {} : asHeroId ? { id: { in: [asHeroId] } } : { controlledBy: access.userId });
 
     if (asHero && heroes.length === 0) return errorResponse(API_ERRORS.WORLD_HERO_INVALID, 400);
 
