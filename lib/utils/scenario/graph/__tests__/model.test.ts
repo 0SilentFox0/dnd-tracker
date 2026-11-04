@@ -240,6 +240,15 @@ describe("graph relations", () => {
     expect(m.nodes.map((n) => n.degree)).toEqual(base.nodes.map((n) => n.degree));
   });
 
+  it("neighbors include relation partners and relation edge ids", () => {
+    const m = buildGraphModel(withRelations([rel("unit:u1", "spell:sp1", "y")]), defaultFilters());
+
+    const n = neighbors(m, "spell:sp1");
+
+    expect(n.nodes.has("unit:u1")).toBe(true);
+    expect(n.edges.has("rel:spell:sp1~unit:u1")).toBe(true);
+  });
+
   it("filters relations in ego mode like sequence", () => {
     const m = buildGraphModel(withRelations([rel("unit:u1", "spell:sp1", "y"), rel("artifact:a1", "marker:m1", "z")]), defaultFilters());
 

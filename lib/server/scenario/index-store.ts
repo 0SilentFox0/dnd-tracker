@@ -2,7 +2,7 @@ import "server-only";
 import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { pageFactsSchema } from "@/lib/schemas/scenario-index";
-import { summaryRelationsSchema } from "@/lib/schemas/scenario-summary";
+import { relationsSchema } from "@/lib/schemas/scenario-summary";
 import { listPages, readContent } from "@/lib/server/scenario/page-store";
 import { buildScenarioIndex, entityKey } from "@/lib/utils/scenario/index/build";
 import { extractPageFacts } from "@/lib/utils/scenario/index/extract";
@@ -101,9 +101,9 @@ export async function loadSummaryRelations(campaignId: string, pageIds: Readonly
   const rows = await prisma.$queryRaw<{ pageId: string; relations: unknown }[]>`SELECT "pageId", summary->'relations' AS relations FROM scenario_page_summaries WHERE "campaignId" = ${campaignId}`;
 
   return rows.flatMap((row) => {
-    const parsed = pageIds.has(row.pageId) ? summaryRelationsSchema.safeParse({ relations: row.relations }) : null;
+    const parsed = pageIds.has(row.pageId) ? relationsSchema.safeParse(row.relations) : null;
 
-    return parsed?.success ? parsed.data.relations : [];
+    return parsed?.success ? parsed.data : [];
   });
 }
 

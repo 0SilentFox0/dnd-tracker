@@ -4,7 +4,7 @@ export const SUMMARY_LIMITS = { overview: 600, events: 8, event: 160, secrets: 5
 
 const relationSchema = z.object({ a: z.string(), b: z.string(), label: z.string().max(SUMMARY_LIMITS.relation) });
 
-export const summaryRelationsSchema = z.object({ relations: z.array(relationSchema).max(SUMMARY_LIMITS.relations) });
+export const relationsSchema = z.array(relationSchema).max(SUMMARY_LIMITS.relations);
 
 export const pageSummarySchema = z.object({
   overview: z.string().max(SUMMARY_LIMITS.overview),
@@ -12,7 +12,7 @@ export const pageSummarySchema = z.object({
   secrets: z.array(z.string().max(SUMMARY_LIMITS.secret)).max(SUMMARY_LIMITS.secrets),
   entities: z.array(z.string()).max(SUMMARY_LIMITS.entities),
   digest: z.string().max(SUMMARY_LIMITS.digest),
-  relations: z.array(relationSchema).max(SUMMARY_LIMITS.relations).optional(),
+  relations: relationsSchema.optional(),
 });
 
 export const lenientSummarySchema = z.object({

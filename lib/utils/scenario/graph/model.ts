@@ -2,6 +2,7 @@ import { MENTION_TYPES } from "@/lib/constants/scenario";
 import { GRAPH_ENTITY_CAP } from "@/lib/constants/scenario-graph";
 import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { GraphEdge, GraphFilters, GraphModel, GraphNode } from "@/lib/utils/scenario/graph/types";
+import { relationPairKey } from "@/lib/utils/scenario/index/build";
 import type { MentionType, ScenarioIndex } from "@/types/scenario";
 
 export const sceneNodeId = (id: string) => `scene:${id}`;
@@ -116,13 +117,13 @@ export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap
   for (const r of index.relations) {
     if (!keptIds.has(r.a) || !keptIds.has(r.b)) continue;
 
-    const [a, b] = r.a < r.b ? [r.a, r.b] : [r.b, r.a];
+    const key = relationPairKey(r.a, r.b);
 
-    const entry = merged.get(`${a}~${b}`) ?? { a, b, labels: [] };
+    const entry = merged.get(key) ?? { a: r.a < r.b ? r.a : r.b, b: r.a < r.b ? r.b : r.a, labels: [] };
 
     if (r.label && !entry.labels.includes(r.label)) entry.labels.push(r.label);
 
-    merged.set(`${a}~${b}`, entry);
+    merged.set(key, entry);
   }
 
   const relations: GraphEdge[] = [...merged.entries()].map(([key, r]) => ({ id: `rel:${key}`, source: r.a, target: r.b, count: 1, secret: false, label: r.labels.join("; ") }));
@@ -143,6 +144,14 @@ export function neighbors(model: GraphModel, nodeId: string): { nodes: Set<strin
     nodes.add(e.target);
   }
 
+  for (const r of model.relations) {
+    if (r.source !== nodeId && r.target !== nodeId) continue;
+
+    edges.add(r.id);
+    nodes.add(r.source);
+    nodes.add(r.target);
+  }
+
   return { nodes, edges };
 }
 
@@ -156,11 +165,6 @@ export function egoModel(model: GraphModel, nodeId: string): GraphModel {
   if (!model.nodes.some((n) => n.id === nodeId)) return model;
 
   const keep = new Set(neighbors(model, nodeId).nodes);
-
-  for (const e of model.relations) {
-    if (e.source === nodeId) keep.add(e.target);
-    else if (e.target === nodeId) keep.add(e.source);
-  }
 
   for (const e of model.sequence) {
     if (e.source === nodeId) keep.add(e.target);

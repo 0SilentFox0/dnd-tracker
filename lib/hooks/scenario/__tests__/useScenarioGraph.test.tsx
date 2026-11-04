@@ -105,7 +105,7 @@ describe("useScenarioGraph", () => {
     await waitFor(() => expect(result.current.state.graph).not.toBeNull());
     act(() => result.current.set.selected("unit:u1"));
     expect(result.current.selection.nodes.has("character:c1")).toBe(true);
-    expect(result.current.selection.edges.size).toBe(2);
+    expect(result.current.selection.edges.size).toBe(3);
   });
 
   it("selection exposes neighbors and detail links without relayout", async () => {

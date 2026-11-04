@@ -287,7 +287,7 @@ export function ScenarioGraphView({ graph, selection, selectedId, focus, showSeq
 
             if (!from || !to) return null;
 
-            const touched = selectedId === edge.source || selectedId === edge.target;
+            const touched = selection.edges.has(edge.id);
 
             return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} color="var(--color-hud-gold-bright)" relation dimmed={!!selectedId && !touched} highlighted={touched} secretLabel="" />;
           })}

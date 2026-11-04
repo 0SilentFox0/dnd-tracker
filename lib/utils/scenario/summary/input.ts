@@ -1,5 +1,5 @@
 import { type PageSummary,SUMMARY_LIMITS } from "@/lib/schemas/scenario-summary";
-import { entityKey } from "@/lib/utils/scenario/index/build";
+import { entityKey, relationPairKey } from "@/lib/utils/scenario/index/build";
 import { extractPageFacts } from "@/lib/utils/scenario/index/extract";
 import { docToMarkdown } from "@/lib/utils/scenario/markdown";
 import type { IndexRef, RichDoc, ScenarioContent } from "@/types/scenario";
@@ -107,7 +107,7 @@ export function filterSummaryEntities(summary: PageSummary, allowed: Set<string>
   const relations = (summary.relations ?? []).filter((r) => {
     if (!allowed.has(r.a) || !allowed.has(r.b)) return false;
 
-    const key = `${[r.a, r.b].sort().join("~")}|${r.label}`;
+    const key = `${relationPairKey(r.a, r.b)}|${r.label}`;
 
     if (seen.has(key)) return false;
 

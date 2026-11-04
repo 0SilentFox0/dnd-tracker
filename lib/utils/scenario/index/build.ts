@@ -2,6 +2,8 @@ import type { IndexEdge, IndexEntityNode, IndexRelation, IndexSceneNode, Mention
 
 export const entityKey = (type: MentionType, id: string) => `${type}:${id}`;
 
+export const relationPairKey = (a: string, b: string) => (a < b ? `${a}~${b}` : `${b}~${a}`);
+
 interface BuildInput {
   pages: ScenarioPageSummary[];
   facts: Map<string, PageFacts>;
