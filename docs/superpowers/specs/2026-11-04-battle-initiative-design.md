@@ -42,7 +42,7 @@ DM під час бою може (a) одним натисканням кину�
 - `lib/utils/battle/turn/roll-initiative.ts` (чиста): для кожного учасника на мапі (не резерв, не `object`) кидає d20 через `rngOf(ctx)`, значення = d20 + мод. DEX + `initiativeBonus` + `collectModifiers(stat: "initiative")`; ≥1000 лишається `baseInitiative`. Повертає `{ participants, rolls: { id, d20, total }[] }`.
 - Порядок: сортування `compareInitiative`, нічия вирішується випадковим ключем з `rngOf` (спочатку `initiative`, далі `baseInitiative`, `dexterity`, потім випадковий). Морально-додаткові слоти (`isExtraTurnSlot`) прибираються й не повертаються (їх додає наступний раунд).
 - `scene.turnIndex = 0`; раунд, ефекти й лічильники не чіпаємо. Учасники з `revealPending` стають звичайними.
-- Подія `dmEvent` з рядком `battleLog.dm.initiativeRolled` і `details.initiativeRoll: { id, d20, total }[]` (для FX).
+- Подія з рядком `battleLog.dm.initiativeRolled` і `actionDetails.diceRolls` (по групі `kind: "initiative"` на учасника, один d20), з яких `diceThrowsOf` будує FX. `dmEvent` отримує необов'язковий аргумент `diceRolls`.
 
 ### `initiative-reorder`
 - `POST …/initiative-reorder`, тіло `{ order: string[] }`, ті самі обмеження доступу.
@@ -57,12 +57,12 @@ DM під час бою може (a) одним натисканням кину�
 
 ## Дельта й Pusher
 
-Без змін протоколу: `order` і `patched.initiative` вже в `ClientBattleDelta`. Подія з `details.initiativeRoll` приходить у `log`, клієнт будує FX з нових подій (`new-events.ts`).
+Без змін протоколу: `order` і `patched.initiative` вже в `ClientBattleDelta`. Подія з `actionDetails.diceRolls` приходить у `log`, клієнт будує FX з нових подій (`new-events.ts` → `diceThrowsOf`).
 
 ## Клієнт
 
 - Реєстр `battleOps`: два рядки; хуки `useInitiativeRoll`, `useInitiativeReorder` (`makeBattleHook`) у `lib/hooks/battles`, експорт з барелю.
-- `lib/utils/battle/fx/dice/from-initiative.ts`: з події будує `DiceThrowSpec` (`seed` з ключа `round:seq`, `groups` по одному d20 на учасника, до ~12 кубиків; більше — перші за порядком, решта лише в лозі). Підписи кубиків: портрет/ім'я через існуючу `labels.ts`.
+- `diceThrowsOf` (`lib/utils/battle/fx/dice/from-action.ts`): новий `kind: "initiative"` у `PHASES`, одна група з усіма d20 (до `MAX_INITIATIVE_DICE = 12`, решта лише в лозі). Окремого `from-initiative.ts` немає.
 - UI DM: кнопка «Кинути ініціативу» у `DmQuickActionsPanel` (після підтвердження, бо це міняє порядок); режим «Порядок» у треку: перетягування портретів (pointer events, без нових залежностей) і запасний діалог зі списком і кнопками вгору/вниз для мобільного. Підтвердити зміну → одна операція `initiative-reorder`.
 - Гравці бачать FX і оновлений `InitiativeTrack`; ніяких нових елементів.
 - `data-tour="battle.initiative-roll"` для підказки DM.
