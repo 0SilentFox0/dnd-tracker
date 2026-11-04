@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { HAZARD_DICE_PATTERN, MAZE_DIFFICULTIES, MAZE_LIMITS, MAZE_MARK_SYMBOLS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { MAP_MOTION_MAX_SPEED } from "@/lib/constants/battle-motion";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { hexColorSchema } from "@/lib/schemas/common";
@@ -210,6 +211,10 @@ export const mapTerrainSchema = z.object({
 });
 
 export const mapWeatherSchema = z.object({ weather: weatherKindSchema.nullable() });
+
+export const mapMotionSchema = z.object({
+  motion: z.object({ axis: z.enum(["x", "y"]), speed: z.number().min(-MAP_MOTION_MAX_SPEED).max(MAP_MOTION_MAX_SPEED) }).nullable(),
+});
 
 export const castSpellSchema = z.object({
   casterId: z.string(),
