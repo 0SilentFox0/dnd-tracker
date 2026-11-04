@@ -43,6 +43,9 @@ const isLiveHero = (p: BattleParticipant) => p.basicInfo.side === ParticipantSid
 // непритомний герой живий: гравець лишається гравцем зі своїм полем зору, а не глядачем
 const isOwnOnField = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status !== CombatStatus.DEAD && !isEscaped(p) && isPlaced(p);
 
+/** Heroes whose fog the DM can project in the player view. */
+export const mazeViewHeroes = (participants: BattleParticipant[]): BattleParticipant[] => participants.filter(isOwnOnField);
+
 export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: DeriveArgs): MazeView | null {
   const grid = mazeGridOf(map);
 

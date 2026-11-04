@@ -2,9 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const TYPING = "input, textarea, select, [contenteditable]";
-
-const DIALOG = '[role="dialog"]';
+import { shortcutBlocked } from "./shortcut-guard";
 
 /** P toggles the player view; matched by e.code so it works on any keyboard layout. */
 export function usePlayerViewKey(onToggle: () => void, active: boolean): void {
@@ -18,13 +16,7 @@ export function usePlayerViewKey(onToggle: () => void, active: boolean): void {
     if (!active) return;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.code !== "KeyP" || e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-
-      const target = e.target as HTMLElement | null;
-
-      if (target?.closest?.(TYPING) || target?.isContentEditable) return;
-
-      if (document.querySelector(DIALOG)) return;
+      if (e.code !== "KeyP" || e.repeat || shortcutBlocked(e)) return;
 
       e.preventDefault();
       latest.current();

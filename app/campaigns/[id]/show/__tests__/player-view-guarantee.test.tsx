@@ -34,7 +34,7 @@ const DM_KEYS = ["transport", "deckStrip", "sceneSelect"] as const;
 
 const leaves = (node: unknown): string[] => (typeof node === "string" ? [node] : node && typeof node === "object" ? Object.values(node).flatMap(leaves) : []);
 
-const dmTexts = [...DM_KEYS.flatMap((k) => leaves(show[k])), show.puzzle.releaseAll, show.puzzle.reset, show.puzzle.resetConfirm].filter((v) => v.length >= 4 && !v.includes("{"));
+const dmTexts = [...DM_KEYS.flatMap((k) => leaves(show[k])), show.puzzle.releaseAll, show.puzzle.reset, ...leaves(show.puzzle.resetConfirm)].filter((v) => v.length >= 4 && !v.includes("{"));
 
 const ALLOWED = [/^Вигляд гравця/, /^(На весь екран|Вийти з повноекранного)/];
 

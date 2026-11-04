@@ -10,6 +10,7 @@ import { MazeFogOfWar } from "./MazeFogOfWar";
 import { MazeMarkPicker } from "./MazeMarkPicker";
 import { MazePartyVision } from "./MazePartyVision";
 import { MazeEditPalette, MazeToolbar } from "./MazeToolbar";
+import { MazeViewerSwitch } from "./MazeViewerSwitch";
 import { MazeToolStateProvider, MazeViewProvider } from "./MazeViewProvider";
 import { MazeWallsLayer } from "./MazeWallsLayer";
 
@@ -39,7 +40,12 @@ export const MAZE_UI: MapModeUi = {
       </>
     );
   },
-  MapOverlay: ({ view, participants }) => (view?.dark ? <MazeDarkScreen own={participants.filter((p) => view.ownIds.has(p.basicInfo.id))} /> : null),
+  MapOverlay: ({ view, participants }) => (
+    <>
+      {view?.dark && <MazeDarkScreen own={participants.filter((p) => view.ownIds.has(p.basicInfo.id))} />}
+      <MazeViewerSwitch />
+    </>
+  ),
   Toolbar: ({ tools, tall }) => <MazeToolbar tools={tools as MazeTools} tall={tall} />,
   EditPalette: ({ tools }) => <MazeEditPalette tools={tools as MazeTools} />,
   TurnControls: MazeMarkPicker,

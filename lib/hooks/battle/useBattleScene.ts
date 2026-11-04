@@ -15,7 +15,7 @@ import { usePusherBattleSync } from "./usePusherBattleSync";
 import { BattleStatus } from "@/lib/constants/battle";
 import type { BattleSceneData, BattleSceneValue } from "@/lib/hooks/battle/types";
 import { battleQueryKey, useBattle } from "@/lib/hooks/battles";
-import { useHydrated, usePlayerView } from "@/lib/hooks/common";
+import { usePlayerView } from "@/lib/hooks/common";
 import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { deriveScene, NO_ORDER } from "@/lib/utils/battle/view";
@@ -108,8 +108,6 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const flag = usePlayerView({ kind: "battle", id: battleId });
 
-  const hydrated = useHydrated();
-
   const realIsDM = battle?.isDM === true;
 
   const playerViewOn = realIsDM && flag.enabled;
@@ -150,8 +148,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   if (attackIntent && battle && isIntentStale(attackIntent, { round: battle.currentRound, turnIndex: battle.currentTurnIndex })) setAttackIntent(null);
 
-  // the session flag is unknown in the server HTML: hold the DM on the skeleton so the DM chrome never flashes in player view
-  if (!battle || !derived || (realIsDM && !hydrated)) return { value: null, loading: isLoading || !!battle };
+  if (!battle || !derived) return { value: null, loading: isLoading };
 
   const value: BattleSceneValue = {
     campaignId,

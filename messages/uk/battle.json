@@ -81,6 +81,7 @@
     "fxOff": "Анімації дій: вимк.",
     "playerViewOn": "Вигляд гравця: увімк.",
     "playerViewOff": "Вигляд гравця: вимк.",
+    "playerViewHero": "Бачить",
     "round": "Раунд {round}",
     "complete": "Завершити",
     "nextTurn": "Наступний хід"

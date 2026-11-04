@@ -1,14 +1,16 @@
 // @vitest-environment happy-dom
 import { type ReactNode, useContext } from "react";
-import { cleanup, renderHook, screen } from "@testing-library/react";
+import { act, cleanup, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { MazeViewerSwitch } from "../MazeViewerSwitch";
 import { MazeViewProvider } from "../MazeViewProvider";
 
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneContext, BattleSceneDataContext, ModeViewContext, useModeView } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { useMazeView } from "@/lib/hooks/battle/modes/maze";
 import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
 import { render } from "@/lib/i18n/test/render-uk";
@@ -25,8 +27,8 @@ const entry = (actorId: string, targets: string[] = []): BattleAction =>
   ({ id: actorId, actorId, actorName: actorId, actionIndex: 1, round: 1, actionType: "attack", targets: targets.map((id) => ({ participantId: id, participantName: id })), actionDetails: {}, resultText: `${actorId} діє`, hpChanges: [], isCancelled: false }) as unknown as BattleAction;
 
 /** Фрейда (0,0) дивиться на схід; гоблін (0,5) — позаду поля зору; Годрік (7,5) — далеко. */
-function mazeScene({ isDM = false, maze = true } = {}) {
-  const s = fakeScene({ isDM, isMyTurn: false, map: maze ? mazeMap({ exit: { x: 7, y: 0 } }, 8, 6) : testMap(8, 6) });
+function mazeScene({ isDM = false, maze = true, playerView = false } = {}) {
+  const s = fakeScene({ isDM, playerView, isMyTurn: false, map: maze ? mazeMap({ exit: { x: 7, y: 0 } }, 8, 6) : testMap(8, 6) });
 
   s.me.basicInfo.controlledBy = "u";
   s.me.battleData.position = { x: 0, y: 0 };
@@ -171,5 +173,57 @@ describe("маска лабіринту для гравця під MazeViewProvi
       expect(result.current.value?.battle).toBe(result.current.data?.battle);
       expect(ids(outer?.data?.roster.enemies)).toEqual(["gob"]);
     }
+  });
+});
+
+describe("вигляд гравця ДМ у лабіринті", () => {
+  const ownIds = (view: { ownIds: ReadonlySet<string> } | null | undefined) => [...(view?.ownIds ?? [])];
+
+  it("з туманом: роль гравця для першого героя, а не глядач", () => {
+    const { Wrapper } = mazeScene({ isDM: true, playerView: true });
+
+    const { result } = renderHook(() => useMazeView(), { wrapper: Wrapper });
+
+    expect(result.current.view?.role).toBe("player");
+    expect(result.current.view?.showFog).toBe(true);
+    expect(ownIds(result.current.view)).toEqual(["me"]);
+  });
+
+  it("перемикання героя змінює туман, ворог поза полем зору лишається прихованим", () => {
+    const { Wrapper } = mazeScene({ isDM: true, playerView: true });
+
+    const { result } = renderHook(() => ({ maze: useMazeView(), data: useBattleSceneData() }), { wrapper: Wrapper });
+
+    act(() => result.current.maze.asHero.set("ally"));
+
+    expect(ownIds(result.current.maze.view)).toEqual(["ally"]);
+    expect(result.current.maze.view?.role).toBe("player");
+    expect(result.current.data.roster.enemies).toEqual([]);
+  });
+
+  it("зниклий герой з вибору повертає перший доступний", () => {
+    const { Wrapper } = mazeScene({ isDM: true, playerView: true });
+
+    const { result } = renderHook(() => useMazeView(), { wrapper: Wrapper });
+
+    act(() => result.current.asHero.set("ghost"));
+
+    expect(ownIds(result.current.view)).toEqual(["me"]);
+  });
+
+  it("перемикач героїв показано лише у вигляді гравця", () => {
+    const pv = mazeScene({ isDM: true, playerView: true });
+
+    render(<MazeViewerSwitch />, { wrapper: pv.Wrapper });
+
+    expect(screen.getByText("Бачить")).toBeTruthy();
+
+    cleanup();
+
+    const dm = mazeScene({ isDM: true });
+
+    render(<MazeViewerSwitch />, { wrapper: dm.Wrapper });
+
+    expect(screen.queryByText("Бачить")).toBeNull();
   });
 });
