@@ -292,12 +292,12 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 - `create` із шаблону: якщо `latestPublishedVersion` (`publish.ts`, максимум `validFrom`/`validTo` по 13 `*_base` джерела) не `null` і немає SRD-перекладу, то `layer = { sourceId: шаблон, baseVersion: остання публікація }`, а bundle — `exportSkeleton` (налаштування, правила, credits, compendium без рядків контентних таблиць). Кампанія бачить опубліковану версію, а не незбережені правки шаблону. `campaign_source_syncs` не створюється, `createdFromId = baseSourceId = шаблон`.
 - `clone` / `template.save` кампанії з `baseSourceId`: та сама база й `baseVersion`, а `exportLocalLayer` читає лише збережені рядки (`bypassLayer`): локальні (нові id, `sourceId = null`), override-и (у bundle — під базовим id; у кампанії — новий власний id, `sourceId` = базовий id, `sourceHash` копіюється, «осиротілі» override-и теж) і `campaign_content_hides`. `createdFromId` = кампанія-джерело (лінійка), sync іде за `baseSourceId`.
 - `importBundle(tx, bundle, campaignId, layer)`: `layer.overrides` лишає базові id у посиланнях; посилання на id поза bundle вважаються базовими (не обнуляються), перевірка чужих id, `backgroundReferenceError` і provenance-перевірка compendium для не-сторінок пропускаються; `assertNoLeak` перевіряє лише переписані id. `createCampaignFromBundle` дописує hides і скидає кеш шару нової кампанії.
-- Шаблон без опублікованої версії, SRD-оверлей з непорожнім перекладом (`uk`: шар ще не локалізує) і кампанії без бази (HOMM5, legacy-клони) йдуть шляхом бандла без змін до Part 5.
+- Шаблон без опублікованої версії, SRD-оверлей з непорожнім перекладом (`uk`: шар ще не локалізує) і кампанії без бази (HOMM5, клони неопублікованих джерел) йдуть шляхом бандла.
 - `exportCampaign` шарової кампанії віддає злитий вигляд (override під базовим id, без дублікатів, «осиротілий» override присутній). Публікація такої кампанії-шаблону заборонена: `publishTemplate` повертає 409 `TEMPLATE_PUBLISH_LAYERED` (ланцюжки шарів поза обсягом; PK `*_base` `(id, validFrom)` глобальний, тож базові id інакше конфліктували б), кнопка «Опублікувати версію» на сторінці шаблону з базою прихована.
 
 ## Sync поверх шарів
 
-Кампанія з `baseSourceId/baseVersion` синхронізується окремим шляхом (`sync/layered*.ts`); кампанії без бази (legacy-клони, HOMM5) лишаються на копійному sync (`context/classify/apply`) до Part 5. Розгалуження — у `applySourceChanges`/`applySafeSourceChanges`/`previewSourceSelection`/`getSourceDiff`/`sourceUpdateState` через `layerOf`.
+Кампанія з `baseSourceId/baseVersion` синхронізується окремим шляхом (`sync/layered*.ts`); кампанії без бази (HOMM5, клони неопублікованих джерел) лишаються на копійному sync (`context/classify/apply`). Розгалуження — у `applySourceChanges`/`applySafeSourceChanges`/`previewSourceSelection`/`getSourceDiff`/`sourceUpdateState` через `layerOf`.
 
 - Baseline: базовий рядок — рядок на `baseVersion`; override — `sourceHash` локального рядка (хеш колонок бандла, `hashColumns` шару = `BundleTableDef.columns`); `ignored` — як раніше в `campaign_source_syncs.ignored`.
 - Класифікуються лише рядки, змінені після `baseVersion` (`validFrom > bv` або `validTo > bv`), плюс усі override і hide-и таких рядків. Базовий рядок, закритий upstream без override, має статус `deletedInSource` (з `usage`, як у legacy: `apply-safe` його не чіпає, лише явний вибір).
@@ -308,51 +308,14 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 
 ## Кеші шару та FK
 
-- Шар кампанії (`baseSourceId`/`baseVersion`/`contentVersion`) читається свіжим PK-запитом на кожен виклик поза транзакцією і раз на транзакцію/write-context всередині (пам'ять у `WeakMap` за контекстом, скидається при `campaign` update). Глобально кешується лише «кампанія без бази» (`baseSourceId` не змінюється після create; не кешується, якщо рядка немає або відповідь отримано всередині транзакції) — HOMM5 і legacy-клони не роблять жодного запиту. TTL немає: версії іншого інстанса видно одразу.
+- Шар кампанії (`baseSourceId`/`baseVersion`/`contentVersion`) читається свіжим PK-запитом на кожен виклик поза транзакцією і раз на транзакцію/write-context всередині (пам'ять у `WeakMap` за контекстом, скидається при `campaign` update). Глобально кешується лише «кампанія без бази» (`baseSourceId` не змінюється після create; не кешується, якщо рядка немає або відповідь отримано всередині транзакції) — HOMM5 і клони без бази не роблять жодного запиту. TTL немає: версії іншого інстанса видно одразу.
 - Базові рядки (`baseRowsCache`, ключ `source|version|model|query`) незмінні за версією, тож кешуються й у write-context. Overlay (hides + shadowed, ключ `campaign|baseVersion|contentVersion|model`) читається з кешу лише поза write-context і відкритою транзакцією і лише там заповнюється.
 - `create`/`createMany` беруть кампанію з `data.campaignId` (змішані кампанії в одному `createMany` — `LAYER_MIXED_CAMPAIGNS`), ніколи з write-context; `contentVersion` бампиться лише для кампанії, що володіє write-context (клон/`template.save` не бампить джерело).
 - Читання за id без `campaignId` повертає лише збережені рядки, базові — ніколи.
-- Міграція `20261121000001_content_base` зняла 12 FK, разом із ними `ON DELETE SET NULL`: `detachRefs` (`lib/server/content/detach-refs.ts`) обнуляє посилання на видалені spell-groups/races/main-skills/spells/units у `remove`/`removeAll` ресурсів, `spells.delete-by-level` і legacy-sync `deleteRemoved` (через `bypassLayer`, тож шарова кампанія не створює override-ів). Нову залежність між контентними таблицями додавати в `REFERRERS` там само.
+- Міграція `20261121000001_content_base` зняла 12 FK, разом із ними `ON DELETE SET NULL`: `detachRefs` (`lib/server/content/detach-refs.ts`) обнуляє посилання на видалені spell-groups/races/main-skills/spells/units у `remove`/`removeAll` ресурсів, `spells.delete-by-level` і legacy-sync `deleteRemoved` (через `bypassLayer`, тож шарова кампанія не створює override-ів).
 - Шаровий sync: невибраний (або проігнорований) `new` при просуванні `baseVersion` ховається в `campaign_content_hides` і позначається в `campaign_source_syncs.ignored` ключем `pending:<id>` (`pendingKey`, `layered.ts`). `classifyLayered` показує такий рядок як видимий `new` (прапорець `ignored` — лише за явним ignore), apply знімає hide і маркер; зміна рядка в шаблоні його не скидає.
 - Базовий рядок із скалярним посиланням на прихований DM рядок (`spell.groupId`, `skill.spellId`, `unit.raceId`, …) читається з `null` (`nullHiddenRefs` у `content-layer.ts`, колонки беруться з `config.relations`): базовий рядок не редагується, override-копій не створюється, рядок у БД лишається як є. Локальні рядки обнуляє `detachRefs` у момент видалення.
 
-## Міграція legacy-клонів
+## Міграція legacy-клонів (історія)
 
-`lib/server/templates/legacy-migration/` переводить кампанії з `baseSourceId = null` (копії шаблону) на шари. Код: `eligibility` → `load` → `plan` (чиста) → `execute` → `verify`; сервіс — `dryRunCampaign`/`migrateCampaign`/`undoMigration`/`verifyFromPreImage` (`service.ts`). CLI — `pnpm constructor:legacy-layers` (`scripts/constructor/legacy-layers.ts`), спека — `docs/superpowers/specs/2026-11-04-legacy-layer-migration-design.md`.
-
-**Стан:** код готовий; репетиція на `prodcopy` і прод **не виконувались**. HOMM5 захищений (`PROTECTED_CAMPAIGN_IDS`, плюс `NO_SOURCE`): жодний шлях коду в нього не пише.
-
-### Таблиця рішень (на рядок, `k` = `sourceId`, `Lh`/`Bh` — хеші локального/базового рядка, `b` — baseline)
-
-| Вхід | Рішення | Статус sync після |
-|---|---|---|
-| `k` у базі, `Lh = Bh` | base-ref: локальну копію видалено | немає |
-| `k` у базі, `Lh ≠ Bh`, `b` є | override (старий `id`, `sourceHash = b`) | `updated`/`conflict`/немає за `pairStatus` |
-| `k` у базі, `Lh ≠ Bh`, `b` немає | override з `sourceHash = "legacy:unknown"` | `conflict` |
-| `k` немає в базі | orphan override | `deletedInSource` |
-| `sourceId = null` | local, id той самий | немає |
-| `k` у базі, локального рядка немає, `b` є | hide | немає (відома втрата для `deletedLocally` з `s ≠ b`) |
-| те саме, `b` немає | hide + `pending:<k>` в `ignored` | `new` |
-
-Усі посилання переписуються картою `localId → sourceId`. Дублікати `sourceId` усуваються (попередження `DUPLICATE_SOURCE_ID`); попередження: `SYNC_STATE_FALLBACK`, `PENDING_RULES_SETTINGS`, `DROPPED_NOTIFICATIONS`.
-
-### Реєстр посилальників (`referrers.ts`, `REFERRERS`)
-
-Кожна модель має режим: `content` (13 контентних таблиць), `remap` (id у стовпцях переписуються; `Character`, інвентар, `CharacterSkills`, логи, підготовлені бої та учасники, показ, сценарій, compendium, сповіщення, `AiProposal` у `pending`), `history` (журнали, завершені бої — не переписуються, лише скан і звіт), `none`, `global` (у т.ч. `*Base`), `special` (`campaign_source_syncs`, `campaign_content_hides`). Парність реєстру зі схемою перевіряє тест; **нова модель або JSON-стовпець із посиланнями на контент мусить потрапити в реєстр**, інакше скан залишків дасть `RESIDUAL_REFS`. `PlayerNotification` має унікальний `(userId, type, refId)` між кампаніями, тож колізії після remap відкидаються (рядки лежать у pre-image й повертаються `--undo`).
-
-### Порядок однієї міграції (одна інтерактивна транзакція)
-
-1. Блокування рядка кампанії → eligibility (`ALREADY_LAYERED`, `PROTECTED`, `NO_SOURCE`, `IS_TEMPLATE`, `ACTIVE_BATTLE`, `SOURCE_*`, `LOCALIZED_CONTENT`, `HAS_DERIVED_CAMPAIGNS`) → `FOR UPDATE` для remap-посилальників.
-2. Завантаження, чистий план (`ID_COLLISION` — блокер), відкидання колізійних сповіщень.
-3. Pre-image пишеться як `.migration-backup/legacy-layers/<campaignId>-<ts>.json.gz.pending` (у `.gitignore`) → запис (таблиці deleteMany+createMany, hides, `campaign_source_syncs`, посилання, `baseSourceId`/`baseVersion`, `contentVersion` +1).
-4. Верифікація: скан залишків (`RESIDUAL_REFS`), еквівалентність видимого контенту до/після й паритет sync (`VERIFY_MISMATCH`). Будь-яка помилка = rollback, нуль змін, `.pending` видаляється; після commit файл перейменовується на `.json.gz`. `--verify`/`--undo` відхиляють `.pending` (міграція не закомічена), тож невдалий apply не лишає придатного pre-image.
-
-`--verify <pre-image>` перевіряє вже закомічену кампанію; `--undo <pre-image>` відновлює legacy-стан лише за умов (інакше відмова з кодом, нуль змін): кампанія не в `PROTECTED_CAMPAIGN_IDS` (`PROTECTED`), усе ще шарова — `baseSourceId`/`baseVersion` задані (`NOT_LAYERED`), `contentVersion` не змінився (`CONTENT_CHANGED`), переписані клітинки посилальників не змінені після міграції (список конфліктів). Після відновлення в тій самій транзакції скан залишків шукає базові id у remap/none/content-моделях (`DANGLING_REFS`, rollback): **обмеження** — запис після міграції, що поклав базовий id у клітинку, яку міграція не переписувала, робить undo неможливим (повернути такий id у legacy-id нічим). Колонка `sourceId` контентних рядків і `campaign_source_syncs` у цьому скані ігноруються.
-
-### Кеші
-
-Скрипт не може викликати `revalidateTag` поза Next. Після `--apply`/`--undo` чекати **не менше 6 хв**: референс-кеш 300 с + TTL позначки `plain`. Шар кампанії читається свіжим PK-запитом (див. «Кеші шару та FK»).
-
-### CLI
-
-`legacy-layers (--campaign <id> | --all) [--dry-run] [--json <file>] [--allow-remote]`; `--campaign <id> --apply`; `--verify <file>`; `--undo <file>`. `--all` лише з dry-run, `--apply` — рівно одна кампанія. Коди виходу: 0 успіх, 1 блокер/невдала перевірка/конфлікт undo, 2 помилка аргументів. Для віддаленої БД: `DATABASE_URL="$DIRECT_URL"` і `--allow-remote`.
+Інструмент переводу клонів без бази на шари (`lib/server/templates/legacy-migration/`, CLI `constructor:legacy-layers`) використано на проді 2026-11-04: придатних кампаній не лишилось (0 eligible), HOMM5 не чіпали. Код видалено в Part 6; відновити можна з git (останній коміт з ним — `692852992`, спека й план — у `docs/archive/superpowers/`).
