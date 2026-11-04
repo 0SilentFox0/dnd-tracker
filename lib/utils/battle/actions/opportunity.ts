@@ -33,7 +33,7 @@ export interface OpportunityResult {
   messages: LogLine[];
 }
 
-const canProvoke = (e: BattleParticipant, moverId: string) => canReact(e) && isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
+const canProvoke = (e: BattleParticipant, moverId: string, rules: Ruleset) => canReact(e, rules) && isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
 
 /** `stopAt` — клітинка, де мувер упав. */
 export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityResult {
@@ -79,7 +79,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
     for (const { id, reach } of enemies) {
       const e = findParticipant(flow.ps, id);
 
-      if (!e || !canProvoke(e, moverId)) continue;
+      if (!e || !canProvoke(e, moverId, rules)) continue;
 
       const { attack, range } = meleeOf(e);
 

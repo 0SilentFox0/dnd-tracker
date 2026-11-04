@@ -97,6 +97,12 @@ export interface MitigateResult {
 
 export type ZeroHpCtx = DamageConsequencesInput & { rules: Ruleset; manual?: boolean };
 
+export interface InitiativeScore {
+  total: number;
+  roll: number | null;
+  die: number | null;
+}
+
 export interface RuleSystemCombat {
   dice: 20 | 100;
   participantFields?(row: { characteristics?: unknown }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
@@ -104,7 +110,10 @@ export interface RuleSystemCombat {
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
   mitigateDamage?(ctx: MitigateCtx): MitigateResult;
   onZeroHp?(ctx: ZeroHpCtx): DamageConsequencesResult;
-  initiative?(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng }): { total: number; roll: number | null; die: number };
+  /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
+  initiative?(p: BattleParticipant, ctx: { rules: Pick<Ruleset, "initiative">; rng: Rng }): InitiativeScore;
+  /** Starting values the participant builders use instead of the d20 sheet columns */
+  baseStats?(row: { characteristics?: unknown }): { initiative: number; speed: number };
   hitModel?: { offense(p: BattleParticipant): number; defense(p: BattleParticipant): number; winChance(off: number, def: number): number };
 }
 

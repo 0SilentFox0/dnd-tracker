@@ -153,10 +153,12 @@ function unitLegendary(unit: UnitFromPrisma, monster: boolean, statblock: UnitSt
 function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, monster: boolean, statblock: UnitStatblock): BattleParticipant["abilities"] {
   const saveProficiencies = monster ? readSaveProficiencies(unit.saveProficiencies) : [];
 
+  const baseStats = ruleSystemOf(rules).combat.baseStats?.(unit);
+
   return {
     level: unit.level,
-    initiative: unit.initiative,
-    baseInitiative: unit.initiative,
+    initiative: baseStats?.initiative ?? unit.initiative,
+    baseInitiative: baseStats?.initiative ?? unit.initiative,
     strength: unit.strength,
     dexterity: unit.dexterity,
     constitution: unit.constitution,
@@ -176,13 +178,13 @@ function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, mon
   };
 }
 
-function unitCombatStats(unit: UnitFromPrisma): BattleParticipant["combatStats"] {
+function unitCombatStats(unit: UnitFromPrisma, rules: Ruleset): BattleParticipant["combatStats"] {
   return {
     maxHp: unit.maxHp,
     currentHp: unit.maxHp,
     tempHp: 0,
     armorClass: unit.armorClass,
-    speed: unit.speed,
+    speed: ruleSystemOf(rules).combat.baseStats?.(unit).speed ?? unit.speed,
     gridSize: unit.gridSize ?? 1,
     morale: (unit as { morale?: number }).morale || 0,
     status: CombatStatus.ACTIVE,
@@ -250,7 +252,7 @@ export async function createBattleParticipantFromUnit(
       ...(xp !== null && { xp }),
     },
     abilities: unitAbilities(unit, race, rules, monster, statblock),
-    combatStats: unitCombatStats(unit),
+    combatStats: unitCombatStats(unit, rules),
     spellcasting,
     battleData: unitBattleData(unit, race, monster, statblock, pools),
     actionFlags: {

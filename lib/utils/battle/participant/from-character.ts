@@ -229,6 +229,8 @@ export async function createBattleParticipantFromCharacter(
 
   const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...grantPools };
 
+  const baseStats = ruleSystemOf(rules).combat.baseStats?.(character);
+
   const participant: BattleParticipant = {
     basicInfo: {
       id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
@@ -244,8 +246,8 @@ export async function createBattleParticipantFromCharacter(
     },
     abilities: {
       level: character.level,
-      initiative: character.initiative,
-      baseInitiative: character.initiative,
+      initiative: baseStats?.initiative ?? character.initiative,
+      baseInitiative: baseStats?.initiative ?? character.initiative,
       strength: character.strength,
       dexterity: character.dexterity,
       constitution: character.constitution,
@@ -275,7 +277,7 @@ export async function createBattleParticipantFromCharacter(
       currentHp: computedMaxHp,
       tempHp: 0,
       armorClass: character.armorClass,
-      speed: character.speed,
+      speed: baseStats?.speed ?? character.speed,
       morale: (character as { morale?: number }).morale || 0,
       status: computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
       minTargets: character.minTargets ?? 1,

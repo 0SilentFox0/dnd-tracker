@@ -130,7 +130,7 @@ function spendAttackAction(run: AttackRun): void {
 
   const attacker = getP(flow, attackerId);
 
-  put(flow, params.offHand ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
+  put(flow, params.offHand && ruleSystemOf(flow.ctx.rules ?? DEFAULT_RULES).combat.actionEconomy.bonusAction ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
 }
 
 function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult {

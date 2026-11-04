@@ -2,6 +2,8 @@
   "reject": {
     "actionUsed": "Action already used",
     "bonusUsed": "Bonus action already used",
+    "noBonusAction": "This system has no bonus actions",
+    "noReaction": "This system has no reactions",
     "targetMissing": "The target is not in the battle",
     "readiedMissing": "No attack has been readied",
     "enemyRequired": "The target must be a living enemy",

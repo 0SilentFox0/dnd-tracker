@@ -222,7 +222,7 @@ function assertActionAvailable(ctx: BattleMutationContext, caster: BattlePartici
   const { definition } = spell;
 
   if (definition.cost === "reaction" && !free) {
-    const blocker = reactionBlocker(caster);
+    const blocker = reactionBlocker(caster, ctx.meta.rules);
 
     if (blocker) throw ruleErrorOf("action_rejected", blocker);
   } else assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });

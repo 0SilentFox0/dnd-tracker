@@ -1,22 +1,25 @@
-import { calculateInitiative, compareInitiative } from "./initiative";
+import { compareInitiative, scoreInitiative } from "./initiative";
 
 import { isObject } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBattleFlag } from "@/lib/utils/battle/participant/reserve";
-import { rollDie } from "@/lib/utils/common/dice";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface InitiativeRollEntry {
   id: string;
+  /** The rolled die value (a d20 unless `sides` says otherwise) */
   d20: number;
+  /** Die sides when the system rolls something other than a d20 */
+  sides?: number;
   total: number;
 }
 
-const ROLL_RULES = { initiative: { ...DEFAULT_RULES.initiative, mode: "roll" as const } };
+const rollRules = (rules: Ruleset = DEFAULT_RULES) => ({ ...rules, initiative: { ...rules.initiative, mode: "roll" as const } });
 
-/** Rolls d20 + modifiers for everyone and sorts; pinned (always-first) participants keep their static value. */
-export function rollInitiative(participants: BattleParticipant[], rng: Rng): { participants: BattleParticipant[]; rolls: InitiativeRollEntry[] } {
+/** Rolls the system initiative (d20 + modifiers by default) for everyone and sorts; pinned (always-first) participants keep their static value. */
+export function rollInitiative(participants: BattleParticipant[], rng: Rng, rules?: Ruleset): { participants: BattleParticipant[]; rolls: InitiativeRollEntry[] } {
   const all = participants.filter((p) => !p.basicInfo.isExtraTurnSlot);
 
   const objects = all.filter(isObject);
@@ -28,8 +31,8 @@ export function rollInitiative(participants: BattleParticipant[], rng: Rng): { p
   const scored = rollers.map((p) => {
     let raw: number | null = null;
 
-    const total = calculateInitiative(p, all, {
-      rules: ROLL_RULES,
+    const score = scoreInitiative(p, all, {
+      rules: rollRules(rules),
       rng: () => {
         raw ??= rng();
 
@@ -37,7 +40,9 @@ export function rollInitiative(participants: BattleParticipant[], rng: Rng): { p
       },
     });
 
-    if (raw !== null) rolls.push({ id: p.basicInfo.id, d20: rollDie(20, () => raw as number), total });
+    const { total } = score;
+
+    if (score.roll !== null) rolls.push({ id: p.basicInfo.id, d20: score.roll, ...(score.die !== 20 && score.die !== null && { sides: score.die }), total });
 
     return { p: { ...dropBattleFlag(p, "revealPending"), abilities: { ...p.abilities, initiative: total } }, key: 0 };
   });

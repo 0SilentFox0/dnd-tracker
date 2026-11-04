@@ -8,6 +8,7 @@ import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { bothOnMap, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -68,6 +69,8 @@ export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant,
 
 export function coreActionAvailability(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, rules: Ruleset): CoreActionAvailability {
   const cost = coreActionCost(key, actor, participants);
+
+  if (cost === "bonusAction" && !ruleSystemOf(rules).combat.actionEconomy.bonusAction) return { ok: false, reason: actionReason("noBonusAction") };
 
   if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) return { ok: false, reason: actionReason("bonusUsed") };
 

@@ -27,8 +27,16 @@ describe("participant: WFRP characteristics", () => {
   it("SB/TB/move from characteristics; AP zero for every location", async () => {
     const p = await build({ characteristics: { base: { s: 45, t: 38 }, advances: { s: 5 }, move: 5 } });
 
-    expect(p.abilities.wfrp).toEqual({ sb: 5, tb: 3, ap: { head: 0, arm: 0, body: 0, leg: 0 }, moveYd: 20 });
+    expect(p.abilities.wfrp).toEqual({ sb: 5, ag: 30, tb: 3, ap: { head: 0, arm: 0, body: 0, leg: 0 }, moveYd: 20 });
     expect(p.abilities.characteristics?.move).toBe(5);
+  });
+
+  it("initiative is the I characteristic and speed is walk yards * 3 ft", async () => {
+    const p = await build({ characteristics: { base: { i: 41 }, advances: { i: 4 }, move: 4 } });
+
+    expect(p.abilities.baseInitiative).toBe(45);
+    expect(p.abilities.initiative).toBe(45);
+    expect(p.combatStats.speed).toBe(24);
   });
 
   it("empty characteristics fall back to defaults", async () => {

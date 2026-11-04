@@ -2,6 +2,8 @@
   "reject": {
     "actionUsed": "Дію вже витрачено",
     "bonusUsed": "Бонусну дію вже використано",
+    "noBonusAction": "У цій системі немає бонусних дій",
+    "noReaction": "У цій системі немає реакцій",
     "targetMissing": "Цілі немає в бою",
     "readiedMissing": "Атаку не підготовлено",
     "enemyRequired": "Ціллю має бути живий ворог",

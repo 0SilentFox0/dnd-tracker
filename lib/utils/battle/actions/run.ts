@@ -24,6 +24,7 @@ import { baseMovement } from "@/lib/utils/battle/grid/path";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -68,6 +69,8 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
   const name = actor.basicInfo.name;
 
   const cost = coreActionCost(body.action, actor, participants);
+
+  if (cost === "bonusAction" && !ruleSystemOf(rules).combat.actionEconomy.bonusAction) throw ruleErrorOf("action_rejected", actionReason("noBonusAction"));
 
   if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) throw ruleErrorOf("action_used", actionReason("bonusUsed"));
 
@@ -140,11 +143,11 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 }
 
 function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targetId: string): RunCoreActionResult {
-  const { participants, map, round, rng } = input;
+  const { participants, map, round, rng, rules } = input;
 
   if (!actor.battleData.readied) return reject(actionReason("readiedMissing"));
 
-  const blocker = reactionBlocker(actor);
+  const blocker = reactionBlocker(actor, rules);
 
   if (blocker) return reject(blocker);
 
