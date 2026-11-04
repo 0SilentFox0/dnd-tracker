@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero } from "./fixtures";
 
@@ -6,9 +6,12 @@ import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battl
 import { attackBodySchema } from "@/lib/schemas/battles";
 import { type AttackBody, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { initiativeRollMutation } from "@/lib/server/battles/mutations/initiative/initiative-roll-mutation";
+import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
+import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
@@ -117,6 +120,32 @@ describe("wfrp battle end to end (engine)", () => {
 
       expect(lost.scene?.momentum).toEqual({ enemy: true });
       expect(lost.scene?.turnIndex).toBeDefined();
+    });
+
+    it("player attack wins the token, the enemy attack takes it, rollback to the snapshot restores {ally:true}", async () => {
+      const start = wfrpCtx();
+
+      const won = await attackMutation({ ...start, rng: firstThen(0.295, 0.795) }, body());
+
+      expect(won.scene?.momentum).toEqual({ ally: true });
+
+      const afterWin = { ...start, participants: won.participants, scene: { ...start.scene, ...won.scene } };
+
+      const enemyTurn = { ...afterWin, scene: { ...afterWin.scene, turnIndex: 1 } };
+
+      const stolen = await attackMutation({ ...enemyTurn, rng: firstThen(0.295, 0.795) }, body({ attackerId: "t", targetId: "a" }));
+
+      expect(stolen.scene?.momentum).toEqual({ enemy: true });
+
+      const parts = afterWin.participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false }));
+
+      const snapshot = { seq: 4, state: buildSnapshotState({ ...afterWin.scene, status: "active" }, parts, diffParticipants(parts, parts)) };
+
+      const now = { ...enemyTurn, participants: stolen.participants, scene: { ...enemyTurn.scene, ...stolen.scene } };
+
+      const restored = await createRollbackMutation(vi.fn(async () => [snapshot]), vi.fn(async () => true))(now, { actionIndex: 5 });
+
+      expect(restored.scene?.momentum).toEqual({ ally: true });
     });
 
     const swordHero = { ...hero, battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Sword", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" } as BattleAttack] } };
