@@ -44,6 +44,18 @@ describe("useWorldView", () => {
     await waitFor(() => expect(result.current.data).toBe(view));
     expect(getWorldView).toHaveBeenCalledWith("c1", { mapId: "m1", asHeroId: "h1" });
   });
+
+  it("does not retry or refetch the party view after an error", async () => {
+    client = new QueryClient({ defaultOptions: { queries: { retry: 3, retryDelay: 1 } } });
+    vi.mocked(getWorldView).mockRejectedValue(new Error("400"));
+
+    const { result } = renderHook(() => useWorldView("c1", { mapId: "m1", asParty: true }), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    await act(async () => void (await result.current.refetch().catch(() => undefined)));
+    expect(getWorldView).toHaveBeenCalledTimes(2);
+    expect(client.getQueryCache().find({ queryKey: worldKeys.partyView("c1", "m1") })).toBeDefined();
+  });
 });
 
 describe("useWorldTravel", () => {

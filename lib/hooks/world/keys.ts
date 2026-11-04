@@ -4,5 +4,6 @@ export const worldKeys = {
   map: (campaignId: string, mapId: string) => ["world-map", campaignId, mapId] as const,
   viewAll: (campaignId: string) => ["world-view", campaignId] as const,
   view: (campaignId: string, mapId: string, asHeroId?: string) => ["world-view", campaignId, mapId, asHeroId ?? null] as const,
+  partyView: (campaignId: string, mapId: string) => ["world-view", campaignId, mapId, "party"] as const,
   log: (campaignId: string) => ["world-log", campaignId] as const,
 };
