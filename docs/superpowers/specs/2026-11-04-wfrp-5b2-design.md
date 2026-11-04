@@ -36,7 +36,7 @@
 
 ### 2. Рушій
 - Чиста утиліта `lib/utils/battle/momentum.ts`: `heldBy(state, side): boolean`; `settle(state, {attackerSide, targetSide, held, resolved}) → { next: SceneMomentum; gained: boolean }` (спожите, виграш, скидання іншої сторони). Єдина реалізація для `judgeWfrp` (`attack/process/run.ts`) і `judgeServerWfrp` (`attack/server-attack.ts`); `momentumOf`/`setMomentum` видаляються.
-- `ActionFlow.momentum: SceneMomentum` (+ `ctx` лишається незмінним). П'ять місць, що судять атаку, беруть жетон зі сцени й повертають зміну: `attack/process/run.ts` (через `runAttackPhase`, разом з `retaliation.ts`), `actions/opportunity.ts` (через `resolveMovement5e`), `actions/legendary.ts`, `actions/run.ts` (readied). `spell/cast/index.ts` теж створює `ActionFlow`, але Momentum не використовує (магія wfrp — 5d): передає константу `NO_MOMENTUM`; `berserk` (d20) так само. Мутація-власник кладе `flow.momentum` у `MutationResult.scene.momentum` лише коли воно змінилося.
+- `ActionFlow.momentum: SceneMomentum` (+ `ctx` лишається незмінним). П'ять місць, що судять атаку, беруть жетон зі сцени й повертають зміну: `attack/process/run.ts` (через `runAttackPhase`, разом з `retaliation.ts`), `actions/opportunity.ts` (через `resolveMovement5e`), `actions/legendary.ts`, `actions/run.ts` (readied). `spell/cast/index.ts` теж створює `ActionFlow`, але Momentum не використовує (магія wfrp — 5d): передає константу `NO_MOMENTUM`; `berserk` так само (кидає `combat.dice` із серверним rng). Мутація-власник кладе `flow.momentum` у `MutationResult.scene.momentum` лише коли воно змінилося.
 - Лог-рядок `battleLog.percentile.momentum` лишається (виводиться за `gained`).
 - Для d20 `momentum` завжди `{}`, нічого не пишеться й не відправляється в дельті.
 
@@ -46,7 +46,7 @@
 - `abilities.wfrp.moveYd` видаляється (`wfrp/combat/participant.ts`, тести `from-character-wfrp`, `balance`); бюджет руху береться зі `speed`.
 
 ## Поза межами (відкладено)
-UI бою (5b-3); щит/броня (5f); стани, крит-маркери, психологія (5c); `berserk` на d20; d100 у `diceRolls`; смуги дальності; звірка еталонів `refHit`, `DIFFICULTY_SL`, Momentum з книгою; решта хвостів 5a (клас у wfrp, `readCharacteristics`, egress `list-templates` тощо).
+UI бою (5b-3); щит/броня (5f); стани, крит-маркери, психологія (5c); d100 у `diceRolls`; смуги дальності; звірка еталонів `refHit`, `DIFFICULTY_SL`, Momentum з книгою; решта хвостів 5a (клас у wfrp, `readCharacteristics`, egress `list-templates` тощо).
 
 ## Тестування
 - `momentum.test.ts` (settle: виграш, витрата, захисник, дубль-подія, обидві сторони).
