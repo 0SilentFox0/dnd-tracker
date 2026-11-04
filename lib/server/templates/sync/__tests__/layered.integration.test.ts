@@ -42,7 +42,7 @@ const inWrite = <T>(campaignId: string, run: (tx: any) => Promise<T>): Promise<T
 
 const asLayeredDb = (tx: unknown) => tx as LayeredDb;
 
-const apply = (campaignId: string, body?: { apply: Array<{ scope: any; key: string; sourceHash: string | null; status: any }>; ignore: [] }) =>
+const apply = (campaignId: string, body?: { apply: Array<{ scope: any; key: string; sourceHash: string | null; status: any }>; ignore: Array<{ scope: any; key: string; sourceHash: string | null; status: any }> }) =>
   inWrite(campaignId, (tx) => (body ? applySourceChanges(asLayeredDb(tx), campaignId, body) : applySafeSourceChanges(asLayeredDb(tx), campaignId)));
 
 const diffOf = async (campaignId: string) => {
@@ -166,13 +166,12 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
 
     await apply(campaignId, { apply: [ref(hidden)], ignore: [] });
 
-    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo", "Charlie"]);
+    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo"]);
   });
 
-  it("a row deleted upstream under an override is kept as an orphan override with its base id", async () => {
+  it("accepting a row deleted upstream under an override removes the override", async () => {
     const campaignId = await fresh();
 
-    await raw.character.create({ data: { campaignId, type: "player", controlledBy: marker, name: "Hero", class: "wizard", race: "human", knownSpells: [spellId("b")] } });
     await inWrite(campaignId, (tx) => tx.spell.update({ where: { id: spellId("b") }, data: { name: "Mine" } }));
     await raw.spellBase.updateMany({ where: { id: spellId("b") }, data: { validTo: 2 } });
     await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
@@ -183,14 +182,79 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
 
     await apply(campaignId, { apply: [ref(gone)], ignore: [] });
 
-    expect(await names(campaignId)).toEqual(["Alpha", "Mine"]);
-    expect(await raw.spell.findMany({ where: { campaignId }, select: { sourceId: true } })).toEqual([{ sourceId: spellId("b") }]);
+    expect(await names(campaignId)).toEqual(["Alpha"]);
+    expect(await raw.spell.count({ where: { campaignId } })).toBe(0);
     expect(await raw.campaignContentHide.count({ where: { campaignId } })).toBe(0);
     expect(await diffOf(campaignId)).toEqual([]);
+  });
 
-    const known = (await raw.character.findFirst({ where: { campaignId } }))!.knownSpells as string[];
+  it("an unselected updated row stays at the old version", async () => {
+    const campaignId = await fresh();
 
-    expect((await getCachedSpells(campaignId)).find((s) => s.id === known[0])?.name).toBe("Mine");
+    await patch();
+
+    const created = (await diffOf(campaignId)).find((i) => i.key === spellId("c"))!;
+
+    await apply(campaignId, { apply: [ref(created)], ignore: [] });
+
+    expect(await names(campaignId)).toEqual(["Alpha", "Bravo", "Charlie"]);
+    expect((await raw.campaign.findUnique({ where: { id: campaignId } }))?.baseVersion).toBe(2);
+    expect(await diffOf(campaignId)).toContainEqual(expect.objectContaining({ key: spellId("a"), status: "updated" }));
+
+    const later = (await diffOf(campaignId)).find((i) => i.key === spellId("a"))!;
+
+    await apply(campaignId, { apply: [ref(later)], ignore: [] });
+
+    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo", "Charlie"]);
+    expect(await raw.spell.count({ where: { campaignId } })).toBe(0);
+  });
+
+  it("an unselected new row is hidden and does not come back as new", async () => {
+    const campaignId = await fresh();
+
+    await patch();
+
+    const updated = (await diffOf(campaignId)).find((i) => i.key === spellId("a"))!;
+
+    await apply(campaignId, { apply: [ref(updated)], ignore: [] });
+
+    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo"]);
+    expect(await raw.campaignContentHide.count({ where: { campaignId } })).toBe(1);
+    expect((await diffOf(campaignId)).filter((i) => i.visible)).toEqual([]);
+  });
+
+  it("ignoring new and updated rows keeps the campaign as it was", async () => {
+    const campaignId = await fresh();
+
+    await patch();
+
+    const items = (await diffOf(campaignId)).filter((i) => i.key === spellId("a") || i.key === spellId("c"));
+
+    await apply(campaignId, { apply: [], ignore: items.map(ref) });
+
+    expect(await names(campaignId)).toEqual(["Alpha", "Bravo"]);
+    expect((await raw.campaign.findUnique({ where: { id: campaignId } }))?.baseVersion).toBe(2);
+  });
+
+  it("apply-safe leaves a row deleted upstream in place until it is accepted", async () => {
+    const campaignId = await fresh();
+
+    await raw.spellBase.updateMany({ where: { id: spellId("b") }, data: { validTo: 2 } });
+    await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
+
+    const gone = (await diffOf(campaignId)).find((i) => i.key === spellId("b"))!;
+
+    expect(gone).toMatchObject({ status: "deletedInSource", localId: null });
+
+    await apply(campaignId);
+
+    expect(await names(campaignId)).toEqual(["Alpha", "Bravo"]);
+    expect(await diffOf(campaignId)).toContainEqual(expect.objectContaining({ key: spellId("b"), status: "deletedInSource" }));
+
+    await apply(campaignId, { apply: [ref((await diffOf(campaignId)).find((i) => i.key === spellId("b"))!)], ignore: [] });
+
+    expect(await names(campaignId)).toEqual(["Alpha"]);
+    expect(await raw.spell.count({ where: { campaignId } })).toBe(0);
   });
 
   it("a character's knownSpells on a base id still resolves after the upgrade", async () => {

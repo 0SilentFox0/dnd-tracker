@@ -3,11 +3,12 @@ import type { Prisma } from "@prisma/client";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SYNC_DEFAULT_ON } from "@/lib/constants/source-sync";
 import { bypassLayer } from "@/lib/db/content-layer";
-import { layeredModels } from "@/lib/db/layer/config";
+import { BASE_ONLY, layeredModels } from "@/lib/db/layer/config";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import { ContentError } from "@/lib/server/content/errors";
 import { markContentDirty } from "@/lib/server/content/write-context";
 import { delegateOf } from "@/lib/server/templates/bundle";
+import { rowHash } from "@/lib/server/templates/sync/hash";
 import { classifyLayered, type LayeredContext, type LayeredDb, type LayerRef, loadLayeredContext, tableOf } from "@/lib/server/templates/sync/layered";
 import { keyOf, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, emptyState, getEntry, setEntry } from "@/lib/server/templates/sync/state";
@@ -51,6 +52,8 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
   await saveIgnored(db, ctx, items, ignored);
 
   if (ctx.source.contentVersion > ctx.baseVersion) {
+    await keepUnselected(db, ctx, all, new Set(items.map(keyOf)));
+
     const { count } = await db.campaign.updateMany({ where: { id: campaignId, baseVersion: ctx.baseVersion }, data: { baseVersion: ctx.source.contentVersion } });
 
     if (count !== 1) throw new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
@@ -65,10 +68,31 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem) {
   const { hideTable } = layeredModels()[t.model];
 
   if (i.status === "deletedLocally") await db.campaignContentHide.deleteMany({ where: { campaignId, table: hideTable, id: i.key } });
-  else if (i.status !== "deletedInSource" && i.localId) await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
+  else if (i.localId) await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
   else return;
 
   markContentDirty();
+}
+
+/** Advancing baseVersion must not apply what the DM did not select: pin changed/removed rows at the old baseline, hide new ones. */
+async function keepUnselected(db: LayeredDb, ctx: LayeredContext, all: Map<string, SyncItem>, selected: Set<string>) {
+  const entries = new Map(ctx.entries.map((e) => [`${e.t.key}:${e.key}`, e]));
+
+  for (const i of all.values()) {
+    if (selected.has(keyOf(i)) || i.localId) continue;
+
+    const e = entries.get(keyOf(i))!;
+
+    if (i.status === "new") {
+      await db.campaignContentHide.createMany({ data: [{ campaignId: ctx.campaignId, table: layeredModels()[e.t.model].hideTable, id: e.key }], skipDuplicates: true });
+    } else if ((i.status === "updated" || i.status === "deletedInSource") && e.baseline) {
+      const { id: _id, ...columns } = Object.fromEntries(Object.entries(e.baseline).filter(([k]) => !BASE_ONLY.has(k)));
+
+      await bypassLayer(() => delegateOf(db, e.t).createMany({ data: [{ ...columns, campaignId: ctx.campaignId, sourceId: e.key, sourceHash: rowHash(e.baseline!, e.t) }] }));
+    } else continue;
+
+    markContentDirty();
+  }
 }
 
 async function saveIgnored(db: LayeredDb, ctx: LayeredContext, selected: SyncItem[], ignored: SyncItem[]) {
