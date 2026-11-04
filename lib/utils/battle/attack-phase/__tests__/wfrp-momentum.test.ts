@@ -38,6 +38,16 @@ const run = (targetIds: string[], strikes: number[], rng: () => number, momentum
 
 const used = (r: ReturnType<typeof run>) => r.allBattleActions.map((a) => a.actionDetails.percentile?.momentumUsed === true);
 
+describe("wfrp server-rolled d100", () => {
+  it("rolls the strike on the server when serverRoll is set, ignoring any client value", () => {
+    const rng = byCall(0.295, MISS, HIT);
+
+    const r = runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetId: "t", serverRoll: true, attackRoll: 99, damageRolls: [4] }, battleId: "b", userId: "u", isDM: true, rng });
+
+    expect(r.allBattleActions[0].actionDetails.percentile?.roll).toBe(30);
+  });
+});
+
 describe("wfrp scene momentum in the attack phase", () => {
   it("a second strike of the same action sees the Momentum won by the first", () => {
     const r = run(["t", "u"], [30, 30], byCall(MISS, MISS, HIT, HIT, 0.5, 0.5, MISS));

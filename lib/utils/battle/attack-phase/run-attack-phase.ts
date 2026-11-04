@@ -160,7 +160,7 @@ function rollStrike(ctx: PhaseCtx, target: BattleParticipant, i: number, opts: S
 
   const sides = ruleSystemOf(input.rules).combat.dice;
 
-  const serverD20 = input.serverRolls || opts.serverRolled;
+  const serverD20 = input.serverRolls || opts.serverRolled || data.serverRoll;
 
   const strike = serverD20 ? { value: rollDie(sides, rng), serverRolled: true } : strikeRoll(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng, sides);
 

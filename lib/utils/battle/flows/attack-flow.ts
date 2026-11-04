@@ -65,7 +65,7 @@ export type AttackFlowAction =
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
   | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
-  | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome; percentile?: boolean; damage?: number[] }
+  | { type: "ROLL"; d20?: number; second?: number; outcome: RollOutcome; percentile?: boolean; damage?: number[] }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
   | { type: "SUBMIT" }
@@ -200,6 +200,8 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
 }
 
 export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
+  const serverRoll = s.strikes.some((st) => st.d20 === undefined);
+
   const manual = s.mode !== "normal" && s.strikes.some((st) => !st.forced);
 
   const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(s.inspiration && { useInspiration: true }), ...(s.cunningStrike && { cunningStrike: s.cunningStrike }), ...(manual && { rollMode: s.mode }), endTurn: false };
@@ -212,7 +214,7 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
     return {
       ...base,
       targetIds: [st.targetId],
-      attackRoll: st.d20,
+      ...(serverRoll ? { serverRoll } : { attackRoll: st.d20 }),
       ...(st.second !== undefined && mode === "advantage" && { advantageRoll: st.second }),
       ...(st.second !== undefined && mode === "disadvantage" && { disadvantageRoll: st.second }),
       damageRolls: isHit(st) ? st.damage : [],
@@ -225,7 +227,7 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
   return {
     ...base,
     targetIds: s.strikes.map((st) => st.targetId),
-    attackRolls: s.strikes.map((st) => st.d20 ?? 0),
+    ...(serverRoll ? { serverRoll } : { attackRolls: s.strikes.map((st) => st.d20 ?? 0) }),
     ...(s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };

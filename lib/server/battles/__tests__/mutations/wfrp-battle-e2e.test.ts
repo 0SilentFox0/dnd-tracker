@@ -99,6 +99,19 @@ describe("wfrp battle end to end (engine)", () => {
     expect(server.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp).toBe(20);
   });
 
+  it("serverRoll: the body needs no client roll and the server rolls the d100", async () => {
+    const base = context({ participants: [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });
+
+    const ctx: BattleMutationContext = { ...base, meta: { ...base.meta, rules: WFRP_RULES }, scene: { ...base.scene, turnIndex: 0 } };
+
+    const body = attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", serverRoll: true, damageRolls: [4] });
+
+    const out = await attackMutation({ ...ctx, rng: firstThen(0.295, 0.795) }, body);
+
+    expect(out.events[0]).toBeDefined();
+    expect(hp({ ...ctx, participants: out.participants }, "t")).toBeLessThan(20);
+  });
+
   describe("scene momentum", () => {
     const wfrpCtx = (over: Partial<BattleMutationContext["scene"]> = {}, metaOver: Partial<BattleMutationContext["meta"]> = {}): BattleMutationContext => {
       const base = context({ participants: [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });

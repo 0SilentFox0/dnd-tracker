@@ -24,6 +24,7 @@ export interface AttackRequest {
   attackRoll?: number;
   /** Один кидок на ціль (для multi-target); якщо length === targets.length, використовується для кожної цілі */
   attackRolls?: number[];
+  serverRoll?: boolean;
   /** Сирі другі d20 на ціль (null — без другого); сервер вирішує перевагу/недолік сам */
   secondRolls?: (number | null)[];
   advantageRoll?: number;
@@ -105,7 +106,7 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest, ru
 
   const usePerTargetRolls = Array.isArray(data.attackRolls) && data.attackRolls.length === chosenTargets.length;
 
-  if (!singleRoll && !usePerTargetRolls) {
+  if (!singleRoll && !usePerTargetRolls && !data.serverRoll) {
     throw new BattleRuleError("action_rejected", REJECT.rollRequired);
   }
 

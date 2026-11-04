@@ -157,6 +157,8 @@ export const attackBodySchema = z
     d20Roll: z.number().int().min(1).max(100).optional(),
     attackRoll: z.number().int().min(1).max(100).optional(),
     attackRolls: z.array(z.number().int().min(1).max(100)).optional(),
+    /** сервер кидає d20/d100 сам; кидки клієнта не потрібні й ігноруються */
+    serverRoll: z.boolean().optional(),
     /** другий d20 на ціль у порядку attackRolls; сервер сам вирішує перевагу/недолік */
     secondRolls: z.array(z.number().min(1).max(20).nullable()).optional(),
     advantageRoll: z.number().min(1).max(20).optional(),
@@ -171,7 +173,7 @@ export const attackBodySchema = z
     endTurn: z.boolean().default(false),
   })
   .refine(
-    (d) => d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
+    (d) => d.serverRoll === true || d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
     { message: REJECT.rollsRequired, path: ["d20Roll"] },
   )
   .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {

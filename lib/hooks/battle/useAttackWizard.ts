@@ -129,8 +129,8 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     return rollOutcomeOf(attacker, target, attack, attackCtx, { d20, second, mode: currentMode });
   };
 
-  const rollAction = (d20: number, second?: number): AttackFlowAction =>
-    dice === 100 ? { type: "ROLL", d20, outcome: "hit", percentile: true, damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20, second) };
+  const rollAction = (d20?: number, second?: number): AttackFlowAction =>
+    dice === 100 ? { type: "ROLL", d20, outcome: "hit", percentile: true, damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20 ?? 0, second) };
 
   useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
@@ -216,9 +216,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     roll: (d20: number, second?: number) => dispatch(rollAction(d20, second)),
     aiRoll: () => {
+      if (dice === 100) return dispatch(rollAction());
+
       const d20 = rollDie(dice, cryptoRandom);
 
-      const second = dice === 100 || currentMode === "normal" ? undefined : rollDie(20, cryptoRandom);
+      const second = currentMode === "normal" ? undefined : rollDie(20, cryptoRandom);
 
       dispatch(rollAction(d20, second));
     },

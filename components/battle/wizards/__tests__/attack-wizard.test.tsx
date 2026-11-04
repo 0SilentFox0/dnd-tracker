@@ -182,6 +182,10 @@ describe("AttackWizard", () => {
     fireEvent.click(screen.getByRole("button", { name: /Авто-кидок/ }));
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
-    expect((mutateAsync.mock.calls[0][0] as { attackRoll: number }).attackRoll).toBeLessThanOrEqual(100);
+
+    const payload = mutateAsync.mock.calls[0][0] as Record<string, unknown>;
+
+    expect(payload).toMatchObject({ serverRoll: true });
+    expect(payload).not.toHaveProperty("attackRoll");
   });
 });

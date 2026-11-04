@@ -265,6 +265,19 @@ describe("attackFlow", () => {
     expect(attackPayload(s, "me")).toMatchObject({ attackRoll: 73, damageRolls: [4] });
   });
 
+  it("d100: авто-кидок не має d20 і йде прапорцем serverRoll без attackRoll", () => {
+    const one = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", percentile: true, damage: [4] });
+
+    expect(attackPayload(one, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a"], serverRoll: true, damageRolls: [4], endTurn: false });
+
+    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", percentile: true }, { type: "ROLL", outcome: "hit", percentile: true });
+
+    const payload = attackPayload(s, "me");
+
+    expect(payload).toMatchObject({ serverRoll: true, targetIds: ["a", "b"] });
+    expect(payload).not.toHaveProperty("attackRolls");
+  });
+
   it("d100: кілька цілей — кидок на кожну, потім відправка", () => {
     const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 55, outcome: "hit", percentile: true });
 
