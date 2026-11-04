@@ -246,4 +246,27 @@ describe("attackFlow", () => {
       expect(attackFlow(run(...submitted, { type: "WAIT_CRIT" }), { type: "FAIL", error: "x" }).waitingCrit).toBe(false);
     });
   });
+
+  it("d100: ROLL одразу відправляє без кроку шкоди; помилка повертає на кидок", () => {
+    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", percentile: true });
+
+    expect(s.step).toBe("submitting");
+    expect(attackPayload(s, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 73, damageRolls: [], endTurn: false });
+
+    const failed = attackFlow(s, { type: "FAIL", error: "x" });
+
+    expect(failed.step).toBe("roll");
+    expect(failed.index).toBe(0);
+  });
+
+  it("d100: кілька цілей — кидок на кожну, потім відправка", () => {
+    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 55, outcome: "hit", percentile: true });
+
+    expect(s).toMatchObject({ step: "roll", index: 1 });
+
+    const done = attackFlow(s, { type: "ROLL", d20: 100, outcome: "hit", percentile: true });
+
+    expect(done.step).toBe("submitting");
+    expect(attackPayload(done, "me")).toMatchObject({ attackRolls: [55, 100], damageRolls: [] });
+  });
 });

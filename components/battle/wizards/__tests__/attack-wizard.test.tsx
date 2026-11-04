@@ -142,4 +142,45 @@ describe("AttackWizard", () => {
     expect(screen.getByText("Кидок атаки · d20")).toBeTruthy();
     expect(mutateAsync).not.toHaveBeenCalled();
   });
+
+  it("wfrp: d100-кидок без сітки d20 і режимів, ціль і Momentum видно, ручний 73 іде без шкоди", async () => {
+    const { wrapper, me, mutateAsync } = fakeScene({ system: "wfrp", momentum: { ally: true } });
+
+    render(<Harness attacker={me} />, { wrapper });
+
+    fireEvent.click(await screen.findByRole("button", { name: /Гоблін/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Далі · кидок/ }));
+
+    expect(screen.getByText("Кидок атаки · d100")).toBeTruthy();
+    expect(screen.getByText(/Ціль \d+%/)).toBeTruthy();
+    expect(screen.getByText("Momentum: ваша сторона")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Перевага" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "14" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Ручний" }));
+    fireEvent.change(screen.getByLabelText("1–100"), { target: { value: "73" } });
+    fireEvent.click(screen.getByRole("button", { name: "Кинути" }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+
+    const payload = mutateAsync.mock.calls[0][0] as Record<string, unknown>;
+
+    expect(payload).toMatchObject({ attackRoll: 73, damageRolls: [] });
+  });
+
+  it("wfrp: без Momentum показує «Momentum немає», авто-кидок відправляє d100", async () => {
+    const { wrapper, me, mutateAsync } = fakeScene({ system: "wfrp" });
+
+    render(<Harness attacker={me} />, { wrapper });
+
+    fireEvent.click(await screen.findByRole("button", { name: /Гоблін/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Далі · кидок/ }));
+
+    expect(screen.getByText("Momentum немає")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: /Авто-кидок/ }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect((mutateAsync.mock.calls[0][0] as { attackRoll: number }).attackRoll).toBeLessThanOrEqual(100);
+  });
 });

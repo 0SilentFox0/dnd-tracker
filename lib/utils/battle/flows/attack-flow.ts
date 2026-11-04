@@ -50,6 +50,8 @@ export interface AttackFlowState {
   picked?: boolean;
   offHand?: boolean;
   inspiration?: boolean;
+  /** d100: the server decides hit/miss, so there is no damage step */
+  percentile?: boolean;
   cunningStrike?: CunningStrikeEffect[];
 }
 
@@ -63,7 +65,7 @@ export type AttackFlowAction =
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
   | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
-  | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
+  | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome; percentile?: boolean }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
   | { type: "SUBMIT" }
@@ -127,7 +129,9 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "ROLL": {
       const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: [] } : st));
 
-      if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1 };
+      if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1, ...(a.percentile && { percentile: true }) };
+
+      if (a.percentile) return { ...s, strikes, step: "submitting", percentile: true, error: undefined };
 
       const first = nextHit(strikes, 0);
 
@@ -161,8 +165,11 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
       return s.step === "submitting" ? { ...s, waitingCrit: true } : s;
     case "SUCCESS":
       return { ...s, step: "result", results: a.results, error: undefined, waitingCrit: false };
-    case "FAIL":
-      return { ...s, waitingCrit: false, step: s.strikes.some(isHit) ? "summary" : "roll", index: s.strikes.some(isHit) ? s.index : s.strikes.length - 1, error: a.error };
+    case "FAIL": {
+      const toSummary = s.strikes.some(isHit) && !s.percentile;
+
+      return { ...s, waitingCrit: false, step: toSummary ? "summary" : "roll", index: toSummary ? s.index : s.strikes.length - 1, error: a.error };
+    }
     case "CLOSE":
       return initialAttackFlow;
   }

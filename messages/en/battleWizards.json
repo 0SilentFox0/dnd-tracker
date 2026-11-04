@@ -21,7 +21,8 @@
     "weapon": {
       "melee": "melee",
       "ranged": "ranged",
-      "toHit": "{kind} · {bonus} to hit"
+      "toHit": "{kind} · {bonus} to hit",
+      "toHitPercent": "{kind} · {target}% to hit"
     },
     "target": {
       "cover": "There is an obstacle between the attacker and the target",
@@ -39,6 +40,19 @@
         "normal": "Normal",
         "advantage": "Advantage",
         "disadvantage": "Disadvantage"
+      },
+      "d100": {
+        "title": "Attack roll · d100",
+        "mode": {
+          "server": "Auto",
+          "manual": "Manual"
+        },
+        "target": "Target {target}% · {label}",
+        "momentum": {
+          "held": "Momentum: {side}",
+          "none": "No Momentum",
+          "side": "your side"
+        }
       }
     },
     "damage": {

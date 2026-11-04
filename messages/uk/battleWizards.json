@@ -21,7 +21,8 @@
     "weapon": {
       "melee": "ближній",
       "ranged": "дальній",
-      "toHit": "{kind} · {bonus} до влучання"
+      "toHit": "{kind} · {bonus} до влучання",
+      "toHitPercent": "{kind} · {target}% до влучання"
     },
     "target": {
       "cover": "Між стрільцем і ціллю є перешкода",
@@ -39,6 +40,19 @@
         "normal": "Звичайний",
         "advantage": "Перевага",
         "disadvantage": "Недолік"
+      },
+      "d100": {
+        "title": "Кидок атаки · d100",
+        "mode": {
+          "server": "Авто",
+          "manual": "Ручний"
+        },
+        "target": "Ціль {target}% · {label}",
+        "momentum": {
+          "held": "Momentum: {side}",
+          "none": "Momentum немає",
+          "side": "ваша сторона"
+        }
       }
     },
     "damage": {

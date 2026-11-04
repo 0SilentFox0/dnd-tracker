@@ -4,6 +4,7 @@ import { useMemo, useReducer } from "react";
 
 import { useAttackSubmit } from "./useAttackSubmit";
 import { useAttackTargets } from "./useAttackTargets";
+import { useBattleRules } from "./useBattleRules";
 import { useBattleScene } from "./useBattleScene";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -17,7 +18,7 @@ import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
-import { attackFlow, type AttackMode, forcedFor, initialAttackFlow, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
+import { attackFlow, type AttackFlowAction, type AttackMode, forcedFor, initialAttackFlow, percentileTargetOf, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { canSeeExactStats, strikeDamageSteps, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
@@ -25,6 +26,8 @@ import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();
+
+  const { dice, momentum } = useBattleRules();
 
   const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
 
@@ -80,6 +83,12 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     [attacker, attacks, order, isOpen],
   );
 
+  const percentile = {
+    target: dice === 100 && attacker && attack ? percentileTargetOf(attacker, attack, scene.battle.rules) : null,
+    momentum: !!attacker && !!momentum[attacker.basicInfo.side],
+    weaponTargets: dice === 100 && attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, percentileTargetOf(attacker, a, scene.battle.rules)?.target])) : {},
+  };
+
   const unknownDefense = state.strikes.some((s) => {
     const t = byId(s.targetId);
 
@@ -120,6 +129,9 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     return rollOutcomeOf(attacker, target, attack, attackCtx, { d20, second, mode: currentMode });
   };
 
+  const rollAction = (d20: number, second?: number): AttackFlowAction =>
+    dice === 100 ? { type: "ROLL", d20, outcome: "hit", percentile: true } : { type: "ROLL", d20, second, outcome: outcomeOf(d20, second) };
+
   useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
   const cunningOffer = useMemo(() => (attacker && !state.offHand && isOpen ? cunningStrikeOffer(attacker, scene.battle.currentRound) : null), [attacker, state.offHand, isOpen, scene.battle.currentRound]);
@@ -130,7 +142,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       maxEffects: cunningOffer.maxEffects,
       sneakDice: cunningOffer.sneakDice,
     },
-    attack, attacks, targets, steps, estimate, cover, unknownDefense, previews,
+    attack, attacks, targets, steps, estimate, cover, unknownDefense, previews, dice, percentile,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
     reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
@@ -202,13 +214,13 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       dispatch({ type: "SET_INSPIRATION", value, forced });
     },
-    roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
+    roll: (d20: number, second?: number) => dispatch(rollAction(d20, second)),
     aiRoll: () => {
-      const d20 = rollDie(20, cryptoRandom);
+      const d20 = rollDie(dice, cryptoRandom);
 
-      const second = currentMode === "normal" ? undefined : rollDie(20, cryptoRandom);
+      const second = dice === 100 || currentMode === "normal" ? undefined : rollDie(20, cryptoRandom);
 
-      dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) });
+      dispatch(rollAction(d20, second));
     },
     damage: (values: number[]) => dispatch({ type: "DAMAGE", values }),
     back: () => dispatch({ type: "BACK" }),
