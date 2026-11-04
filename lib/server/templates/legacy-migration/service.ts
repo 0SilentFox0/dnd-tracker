@@ -12,6 +12,8 @@ import { type Referrer, REFERRERS } from "@/lib/server/templates/legacy-migratio
 import { LegacyMigrationError, type MigrationInput, type MigrationPlan, type MigrationReport, type PreImage, type ReferrerReport, type TableReport } from "@/lib/server/templates/legacy-migration/types";
 import { verifyMigration } from "@/lib/server/templates/legacy-migration/verify";
 
+export { undoMigration } from "@/lib/server/templates/legacy-migration/preimage";
+
 export type ExtendedPrisma = PrismaClient;
 
 const TX_OPTIONS = { timeout: 120_000, maxWait: 10_000 };

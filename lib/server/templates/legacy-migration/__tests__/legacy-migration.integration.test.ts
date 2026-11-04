@@ -11,6 +11,7 @@ vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn, revalidateTa
 
 import { contentLayer, invalidateCampaignLayer } from "@/lib/db/content-layer";
 import { layeredModels } from "@/lib/db/layer/config";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
 import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
@@ -18,10 +19,12 @@ import { newContentId } from "@/lib/server/templates/ids";
 import { importBundle } from "@/lib/server/templates/import-bundle";
 import { readPreImage } from "@/lib/server/templates/legacy-migration/preimage";
 import { REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
-import { dryRunCampaign, type ExtendedPrisma, migrateCampaign } from "@/lib/server/templates/legacy-migration/service";
+import { dryRunCampaign, type ExtendedPrisma, migrateCampaign, undoMigration } from "@/lib/server/templates/legacy-migration/service";
 import type { MigrationPlan } from "@/lib/server/templates/legacy-migration/types";
 import { verifyFromPreImage } from "@/lib/server/templates/legacy-migration/verify";
 import { latestPublishedVersion, publishTemplateVersion } from "@/lib/server/templates/publish";
+import { classify } from "@/lib/server/templates/sync/classify";
+import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { classifyLayered, loadLayeredContext } from "@/lib/server/templates/sync/layered";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
@@ -132,6 +135,19 @@ async function storedState(campaignId: string) {
     participants: await R.battleParticipant.findMany({ where: { battle: { campaignId } }, orderBy: { id: "asc" } }),
   });
 }
+
+const comparable = (state: string) => {
+  const parsed = JSON.parse(state);
+
+  delete parsed.campaign.contentVersion;
+  delete parsed.campaign.updatedAt;
+
+  for (const row of [...parsed.characters, ...parsed.participants]) delete row.updatedAt;
+
+  return parsed;
+};
+
+const legacyItems = async (campaignId: string) => classify(await loadSyncContext(raw as never, campaignId)).map((i) => `${i.scope}:${i.key}:${i.status}:${i.ignored}`).sort();
 
 describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
   beforeAll(async () => {
@@ -374,6 +390,53 @@ describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
 
     expect(error).toMatchObject({ code: "VERIFY_MISMATCH" });
     expect(error.details.exposed).toContainEqual({ table: "spells", id: T.sp2, kind: "changed" });
+    expect(await storedState(c.id)).toBe(snapshot);
+  });
+
+  it("undo after a migration restores stored rows, referrers and sync state exactly", async () => {
+    const c = clones.rb;
+
+    const snapshot = await storedState(c.id);
+
+    const itemsBefore = await legacyItems(c.id);
+
+    const report = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir });
+
+    expect(report.status).toBe("migrated");
+    expect(await undoMigration(asMigrate, report.preImagePath!)).toEqual({ ok: true });
+
+    const after = await storedState(c.id);
+
+    expect(comparable(after)).toEqual(comparable(snapshot));
+    expect(JSON.parse(after).campaign.contentVersion).toBe(JSON.parse(snapshot).campaign.contentVersion + 2);
+    expect(await legacyItems(c.id)).toEqual(itemsBefore);
+  });
+
+  it("undo is refused with CONTENT_CHANGED after a content write", async () => {
+    const c = clones.rb;
+
+    const report = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir });
+
+    await withCampaignContentWrite(c.id, (tx) => tx.campaign.update({ where: { id: c.id }, data: { name: `${c.id}` } }));
+
+    const snapshot = await storedState(c.id);
+
+    expect(await undoMigration(asMigrate, report.preImagePath!)).toEqual({ ok: false, conflicts: [], reason: "CONTENT_CHANGED" });
+    expect(await storedState(c.id)).toBe(snapshot);
+  });
+
+  it("undo is refused with a conflict when a player changed a rewritten cell", async () => {
+    const c = clones.main;
+
+    const character = await R.character.findFirst({ where: { campaignId: c.id } });
+
+    await R.character.update({ where: { id: character.id }, data: { knownSpells: [T.sp1] } });
+
+    const snapshot = await storedState(c.id);
+
+    const result = await undoMigration(asMigrate, mainPreImage);
+
+    expect(result).toMatchObject({ ok: false, conflicts: [{ model: "Character", pk: { id: character.id }, column: "knownSpells" }] });
     expect(await storedState(c.id)).toBe(snapshot);
   });
 });
