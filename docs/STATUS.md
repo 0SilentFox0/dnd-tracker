@@ -2,7 +2,7 @@
 
 Одне місце для відповіді на питання «що зараз у роботі». Оновлюється в кінці кожної гілки, в тому ж коміті, що й злиття.
 
-_Оновлено: 2026-11-03._
+_Оновлено: 2026-11-04._
 
 **Персональні кольорові палітри (в роботі):** шість тем у селекті футера (разом із дропдауном мови), вибір у `users.palette`, спільні HUD/сторінки/книга магії на аркуші й у бою. API `GET/PUT /api/theme`, кеш із ключем користувача та ранній bootstrap не роблять root layout динамічним. План — [user palettes](superpowers/plans/2026-10-31-user-palettes.md); дизайн — [user palettes](superpowers/specs/2026-10-31-user-palettes-design.md). Міграція expand-only; перед деплоєм потрібна звичайна production migration.
 
@@ -13,6 +13,8 @@ _Оновлено: 2026-11-03._
 **Передзлиттєве ревю, частина 2 закрита (2026-10-28, `feat/constructor`):** виправлено 86 знахідок реєстру (76 повністю, 8 частково, A22 і B27 у backlog, B04 довгостроково - epic D3), [Disposition і відкриті пункти](archive/superpowers/plans/2026-10-27-constructor-premerge-findings.md); фінальне Opus-ревю без critical, I1-I3 виправлено. tsc, lint (0 errors), `test:run` 8475/8477 (2 таймаути під навантаженням, окремо зелені), integration 138/138, build пройшли. **Не виконано:** battle-sweep на prodcopy (потрібна перебудована prodcopy, рішення користувача), браузерна перевірка a11y діалогів, реальний Chrome `assistant-check --run`. Далі виконано частину 3 (HOMM-шлюз): [звіт](archive/superpowers/plans/2026-10-27-homm-gate-report.md).
 
 ## У роботі
+
+**Ініціатива в бою (`feat/battle-initiative`, `../dnd-tracker-initiative`, не змерджено):** порядок ходів персистентний на весь бій; DM кидає ініціативу заново (`initiative-roll`, d20 для всіх із 3D-кубиками через `diceRolls`) або виставляє порядок вручну (`initiative-reorder`: перетягування на треку, діалог зі стрілками на мобільному); `reordered` дозволяє зміну `turn-order-guard`. Tasks 1–6 готові; лишається повний suite/lint, `/simplify`, фінальне ревю й merge. Спека — [battle initiative](superpowers/specs/2026-11-04-battle-initiative-design.md), план — [battle initiative](superpowers/plans/2026-11-04-battle-initiative.md). Деталі: [battle.md](architecture/battle.md).
 
 **Демо-тури (локально в main, 2026-11-03):** 7 турів поглиблено до покрокових інструкцій (6–16 кроків кожен; бій — підготовка → старт → ініціатива/мапа/дії/панель DM → скидання), рушій кроків отримав `clickFromTarget`/`clickUntilTarget`/`placement`/`anchor`, ~45 нових `data-tour`-якорів, журнал подорожей відкрито демо-відвідувачу (+3 записи в сіді), компактні плитки «Бібліотеки» — auto-fill 9rem; команди показу (`POST /show`) знову лише для DM — демо-відвідувач бачить прив’язки й док у read-only (`useScenarioPlay(..., { readOnly })`); селект «Керує» у рядках панелі DM винесено під ім’я. Деталі: `docs/architecture/onboarding.md` («Демо-тури»). Старі моки `api-auth` без `requireCampaignDMOrDemoAccess` в API-тестах (42 падіння з 27715faac) виправлено в цій же роботі.
 
