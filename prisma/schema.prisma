@@ -468,6 +468,7 @@ model BattleScene {
   currentTurnIndex   Int                 @default(0)
   pendingMoraleCheck Json?
   pendingCritChoice  Json?
+  momentum           Json?
   map                Json?
   audio              Json?
   rules              Json?

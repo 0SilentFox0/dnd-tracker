@@ -87,6 +87,20 @@ describe("rollback mutation", () => {
     });
   });
 
+  it("momentum зі знімка відновлюється; старий знімок без нього — порожній", async () => {
+    const now = { ...ctx, scene: { ...ctx.scene, momentum: { enemy: true as const } } };
+
+    const withTokens = buildSnapshotState({ ...ctx.scene, status: "active", momentum: { ally: true } }, s, diffParticipants(s, s));
+
+    const restored = await createRollbackMutation(vi.fn(async () => [{ seq: 4, state: withTokens }]), vi.fn(async () => true))(now, { actionIndex: 5 });
+
+    expect(restored.scene?.momentum).toEqual({ ally: true });
+
+    const legacy = await createRollbackMutation(vi.fn(async () => [snapshot]), vi.fn(async () => true))(now, { actionIndex: 5 });
+
+    expect(legacy.scene?.momentum).toEqual({});
+  });
+
   it("немає знімків — action_rejected", async () => {
     await expect(createRollbackMutation(vi.fn(async () => []), vi.fn(async () => true))(ctx, { actionIndex: 1 })).rejects.toMatchObject({
       code: "action_rejected",

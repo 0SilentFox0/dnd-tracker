@@ -14,7 +14,7 @@ const scene: BattleSceneState = {
   turnIndex: 1,
   version: 5,
   eventSeq: 9,
-  pendingMoraleCheck: null, pendingCritChoice: null,
+  pendingMoraleCheck: null, pendingCritChoice: null, momentum: {},
   startedAt: null,
   completedAt: null,
 };
@@ -32,6 +32,15 @@ describe("buildSnapshotState", () => {
     expect(state.participants[0]).not.toHaveProperty("snapshot");
     expect(state.changedSnapshots).toBeUndefined();
     expect(state.removed).toBeUndefined();
+  });
+
+  it("momentum сцени потрапляє у знімок; порожній — ключа немає", () => {
+    const before = [splitParticipant(createMockParticipant(), { orderIndex: 0, isPending: false })];
+
+    const withTokens = buildSnapshotState({ ...scene, momentum: { ally: true } }, before, diffParticipants(before, before));
+
+    expect(withTokens.scene.momentum).toEqual({ ally: true });
+    expect("momentum" in buildSnapshotState(scene, before, diffParticipants(before, before)).scene).toBe(false);
   });
 
   it("бій із картою — зберігає місцевість (без фону); порожня місцевість — null", () => {

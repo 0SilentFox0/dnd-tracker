@@ -25,7 +25,7 @@ const ogre = (): BattleParticipant => {
 const ON: Ruleset = { ...DEFAULT_RULES, outOfCombat: { ...DEFAULT_RULES.outOfCombat, xp: true }, encounters: { ...DEFAULT_RULES.encounters, autoXp: true } };
 
 const loaded = (rules: Ruleset, participants: BattleParticipant[]): LoadedBattle => ({
-  scene: { id: "b1", campaignId: "c1", status: BattleStatus.ACTIVE, round: 3, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
+  scene: { id: "b1", campaignId: "c1", status: BattleStatus.ACTIVE, round: 3, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null },
   meta: { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, rules, map: null, createdAt: new Date() },
   participants,
   pending: [],

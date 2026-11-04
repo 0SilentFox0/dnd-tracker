@@ -10,7 +10,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0,
-  version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
+  version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null,
 };
 
 const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date() };

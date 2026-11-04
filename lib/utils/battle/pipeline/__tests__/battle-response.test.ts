@@ -8,7 +8,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 3,
-  eventSeq: 4, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
+  eventSeq: 4, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null,
 };
 
 const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date() };

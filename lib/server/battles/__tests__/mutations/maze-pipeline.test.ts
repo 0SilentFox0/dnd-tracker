@@ -32,7 +32,7 @@ const mapOf = (over: Partial<MazeConfig> = {}, size = 8): BattleMapConfig => maz
 
 const scene0: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
 };
 
 /** Сховище в пам'яті з тими самими split/join, prepareSave і знімками, що й saveBattle, плюс карта бою */

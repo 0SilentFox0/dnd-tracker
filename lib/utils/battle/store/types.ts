@@ -3,7 +3,7 @@ import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/typ
 import type { Ruleset } from "@/lib/utils/rules";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleAudioState } from "@/types/audio";
-import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, IngredientStock, PendingHit } from "@/types/battle";
+import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, IngredientStock, PendingHit, SceneMomentum } from "@/types/battle";
 
 export interface BattleSceneState {
   id: string;
@@ -15,6 +15,7 @@ export interface BattleSceneState {
   eventSeq: number;
   pendingMoraleCheck: unknown | null;
   pendingCritChoice: StoredPendingCritChoice | null;
+  momentum: SceneMomentum;
   startedAt: Date | null;
   completedAt: Date | null;
 }
@@ -109,7 +110,7 @@ export interface LoadedBattle {
 }
 
 export type ScenePatch = Partial<
-  Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "startedAt" | "completedAt">
+  Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "momentum" | "startedAt" | "completedAt">
 > & { map?: BattleMapConfig | null; rules?: Ruleset };
 
 export interface BattleMutationOutcome {
@@ -125,7 +126,7 @@ export interface BattleMutationOutcome {
 export interface BattleDelta {
   battleId: string;
   version: number;
-  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice">;
+  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "momentum">;
   upserted: BattleParticipant[];
   /** нові учасники й ті, чий знімок змінився */
   fullIds: string[];

@@ -16,7 +16,7 @@ const p = (id: string, hp = 10, side = ParticipantSide.ALLY): BattleParticipant 
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 2, turnIndex: 1, version: 7,
-  eventSeq: 10, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: new Date("2026-01-01"), completedAt: null,
+  eventSeq: 10, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: new Date("2026-01-01"), completedAt: null,
 };
 
 const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date() };
@@ -42,6 +42,24 @@ describe("buildClientDelta", () => {
     expect(d.order).toBeUndefined();
     expect(d.pending).toBeUndefined();
     expect(d.scene).toMatchObject({ status: "active", round: 2, turnIndex: 0, startedAt: "2026-01-01T00:00:00.000Z" });
+  });
+
+  it("momentum у scene лише коли є жетони", () => {
+    const a = p("a");
+
+    const run = (momentum: BattleSceneState["momentum"]) =>
+      buildClientDelta({
+        before: { scene, meta, participants: [a], pending: [] },
+        after: { ...scene, version: 8, momentum },
+        participants: [a],
+        pending: [],
+        stored: [],
+        fullIds: [],
+        log: [],
+      });
+
+    expect(run({ enemy: true }).scene.momentum).toEqual({ enemy: true });
+    expect("momentum" in run({}).scene).toBe(false);
   });
 
   it("карта чи зміни місцевості в scene лише тоді, коли вона змінилась", () => {

@@ -172,6 +172,20 @@ describe("applyBattleDelta — відкат завершеного бою", () =
   });
 });
 
+describe("applyBattleDelta — momentum", () => {
+  const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null };
+
+  it("кладе momentum у кеш, наступна дельта без нього очищає", () => {
+    const withTokens = applyBattleDelta(cached, delta({ scene: { ...scene, momentum: { ally: true } } })) as BattleScene;
+
+    expect(withTokens.momentum).toEqual({ ally: true });
+
+    const cleared = applyBattleDelta(withTokens, delta({ version: (withTokens.version ?? 0) + 1, scene })) as BattleScene;
+
+    expect(cleared.momentum).toBeUndefined();
+  });
+});
+
 describe("acceptFullBattle", () => {
   it("зберігає isDM/userRole/campaign, якщо у відповіді їх немає; ігнорує старішу версію", () => {
     const incoming = { ...cached, version: 9, isDM: undefined, userRole: undefined, campaign: undefined };

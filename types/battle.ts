@@ -20,6 +20,8 @@ import type { LogLine } from "@/types/text";
 
 export type { CriticalEffect };
 export { AttackType, ParticipantSide };
+
+export type SceneMomentum = Partial<Record<ParticipantSide, true>>;
 export { SkillLevel };
 
 /**

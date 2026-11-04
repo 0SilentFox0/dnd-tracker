@@ -62,6 +62,7 @@ export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActi
         status: scene.status,
         pendingMoraleCheck: scene.pendingMoraleCheck,
         pendingCritChoice: null,
+        momentum: scene.momentum ?? {},
         ...(scene.status !== BattleStatus.COMPLETED && { completedAt: null }),
         ...(map && { map }),
       },
