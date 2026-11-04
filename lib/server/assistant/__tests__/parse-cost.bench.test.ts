@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/server/campaigns/rules", () => ({ readCampaignRules: vi.fn(), updateCampaignRules: vi.fn(async () => ({ ok: true })) }));
 vi.mock("@/lib/utils/api/actor", async (original) => ({ ...(await original<object>()), resolveActor: vi.fn(async () => ({ campaignId: "c", userId: "u", isDM: true, via: "session", scopes: null })) }));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: () => Promise<unknown>) => fn() }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: () => Promise<unknown>) => fn(), withCampaignRuntimeWrite: async (_id: string, fn: () => Promise<unknown>) => fn() }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";

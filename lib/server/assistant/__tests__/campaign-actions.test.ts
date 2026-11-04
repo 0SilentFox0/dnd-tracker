@@ -6,6 +6,7 @@ import { SCENARIO_ACTIONS } from "@/lib/server/assistant/actions/scenario";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { emptyBundle } from "@/lib/server/templates/bundle";
+import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
 import { hashText } from "@/lib/srd/i18n/catalog";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 
@@ -36,7 +37,7 @@ const actor = { campaignId: "c", userId: "dm", isDM: true, via: "session" as con
 const row = { id: "c", name: "Кампанія", description: null, kind: "campaign", visibility: "private", maxLevel: 10, allowPlayerEdit: false, status: "active", aiInstructions: "Пиши українською", inviteCode: "SECRET", updatedAt: new Date(1), members: [{ role: "dm" }] };
 
 describe("campaign action guards", () => {
-  beforeEach(() => { vi.clearAllMocks(); h.campaign.findUnique.mockResolvedValue(row); h.campaign.update.mockImplementation(async ({ data }) => ({ ...row, ...data })); h.create.mockResolvedValue({ campaign: { id: "new", name: "Нова", inviteCode: "CREATED_SECRET" }, warnings: [] }); });
+  beforeEach(() => { vi.clearAllMocks(); clearBundleCache(); h.campaign.findUnique.mockResolvedValue(row); h.campaign.update.mockImplementation(async ({ data }) => ({ ...row, ...data })); h.create.mockResolvedValue({ campaign: { id: "new", name: "Нова", inviteCode: "CREATED_SECRET" }, warnings: [] }); });
   it("cannotRemoveDm", async () => {
     h.campaignMember.findUnique.mockResolvedValue({ campaignId: "c", userId: "dm", role: "dm" });
     await expect(runCampaignOperation(actor, "members.remove", { memberId: "member" })).rejects.toMatchObject({ status: 400 });
@@ -49,6 +50,15 @@ describe("campaign action guards", () => {
   it("inviteNeverInToolOutput", async () => {
     expect(JSON.stringify(await runCampaignOperation(actor, "status", {}))).not.toContain("SECRET");
     expect(JSON.stringify(await runCampaignOperation(actor, "clone", { name: "Нова" }))).not.toContain("CREATED_SECRET");
+  });
+  it("read, instructions and member operations do not bump the content version", async () => {
+    await runCampaignOperation(actor, "status", {});
+    await runCampaignOperation(actor, "instructions.set", { instructions: "Нова" });
+    expect(h.campaign.update.mock.calls.filter(([args]) => "contentVersion" in ((args as { data: object }).data ?? {}))).toEqual([]);
+  });
+  it("settings change bumps the content version", async () => {
+    await runCampaignOperation(actor, "settings", { patch: { name: "Моя" } });
+    expect(h.campaign.update).toHaveBeenCalledWith(expect.objectContaining({ data: { contentVersion: { increment: 1 } } }));
   });
   it("cloneDoesNotGrantTokenNewScope", async () => {
     const result = await runCampaignOperation(actor, "clone", { name: "Нова" });
@@ -114,7 +124,7 @@ describe("campaign action guards", () => {
 });
 
 describe("campaign export reads", () => {
-  beforeEach(() => { vi.clearAllMocks(); h.campaign.findUnique.mockResolvedValue(row); h.create.mockResolvedValue({ campaign: { id: "new", name: "Нова" }, warnings: [] }); });
+  beforeEach(() => { vi.clearAllMocks(); clearBundleCache(); h.campaign.findUnique.mockResolvedValue(row); h.create.mockResolvedValue({ campaign: { id: "new", name: "Нова" }, warnings: [] }); });
   it("clone exports once and reuses the hashed bundle for the write", async () => {
     await runCampaignOperation(actor, "clone", { name: "Нова" });
     expect(h.export).toHaveBeenCalledTimes(1);
@@ -133,6 +143,7 @@ describe("campaign export reads", () => {
   it("clone precondition is stale when the campaign changed after preview", async () => {
     const expected = requestDigest(await campaignState(actor, "clone", { name: "Нова" }));
 
+    clearBundleCache();
     h.export.mockResolvedValueOnce({ settings: { changed: true }, formatVersion: 1 } as never);
     await expect(runCampaignOperation(actor, "clone", { name: "Нова" }, expected)).rejects.toMatchObject({ status: 409 });
     expect(h.create).not.toHaveBeenCalled();
@@ -147,6 +158,7 @@ describe("localized campaign action sources", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    clearBundleCache();
     canonical = "canonical";
     h.dictionary = { [hashText("n", "Bless")]: "Благословення" };
     h.campaign.findMany.mockImplementation(async () => [{ id: canonical }]);
@@ -160,6 +172,7 @@ describe("localized campaign action sources", () => {
     const state = await campaignState(actor, "create", input);
 
     h.export.mockClear();
+    clearBundleCache();
     await runCampaignOperation(actor, "create", input, requestDigest(state));
     expect(h.export).toHaveBeenCalledExactlyOnceWith(expect.anything(), "canonical");
     expect(h.create).toHaveBeenCalledWith(expect.objectContaining({ createdFromId: "canonical", contentLocale: "uk", bundle: expect.objectContaining({ spells: [expect.objectContaining({ name: "Благословення" })] }) }));

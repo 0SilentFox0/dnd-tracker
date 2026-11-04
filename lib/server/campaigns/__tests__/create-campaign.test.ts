@@ -79,6 +79,16 @@ describe("createCampaignFromBundle", () => {
     );
   });
 
+  it("sourceVersion записується в стан синхронізації", async () => {
+    m.tx.campaign.create.mockResolvedValue({ id: "c1" });
+
+    await createCampaignFromBundle({ userId: "u1", name: "N", bundle, createdFromId: "t1", sourceVersion: 4 });
+
+    expect(m.tx.campaignSourceSync.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ sourceVersion: 4 }) }),
+    );
+  });
+
   it("без createdFromId стан синхронізації не створюється", async () => {
     m.tx.campaign.create.mockResolvedValue({ id: "c1" });
 

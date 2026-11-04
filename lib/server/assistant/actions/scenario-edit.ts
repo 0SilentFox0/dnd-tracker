@@ -6,7 +6,7 @@ import { proposeScenarioEditSchema } from "@/lib/schemas/ai";
 import { readAcquaintancesEnabled } from "@/lib/server/acquaintances/store";
 import { applyProposal,createProposal } from "@/lib/server/assistant/proposals";
 import { ContentError } from "@/lib/server/content/errors";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { scenarioFingerprint, scenarioResult, scenarioState } from "@/lib/server/scenario/action-service";
 import { readContentStrict } from "@/lib/server/scenario/page-store";
 import { jsonContent } from "@/lib/utils/common/json";
@@ -16,7 +16,7 @@ import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
   id: "scenario.propose-edit", title: "Edit scenario", description: "Edits the scenario through the existing proposal writer after review", input: proposeScenarioEditSchema,
   need: { access: "dm", scope: "scenario:write" }, effect: "write", confirmation: "always",
-  prepare: (caller, raw) => withCampaignContentWrite(caller.actor.campaignId, async () => {
+  prepare: (caller, raw) => withCampaignRuntimeWrite(caller.actor.campaignId, async () => {
     const input = proposeScenarioEditSchema.parse(raw);
 
     const state = await scenarioState(caller.actor, input.pageId);

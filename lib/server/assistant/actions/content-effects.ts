@@ -7,7 +7,7 @@ import "server-only";
 import { ALL_REFERENCE_KINDS, invalidateReference, type ReferenceKindValue } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
-import { currentContentWrite } from "@/lib/server/content/write-context";
+import { currentContentWrite, markContentDirty } from "@/lib/server/content/write-context";
 import { removeTrackFile, trackObjectPath, trackPathOwnedBy } from "@/lib/supabase/battle-music-storage";
 
 export const CONTENT_EFFECT_HANDLERS: EffectHandlers = {
@@ -37,6 +37,8 @@ export async function withContentEffects<T>(ctx: ActionExecutionContext, kinds: 
   current.onTrackFileRemoved = (url) => ctx.afterCommit({ key: `${ctx.intentId}:track-file`, kind: "media-cleanup", payload: { campaignId: current.campaignId, url } });
   try {
     const result = await work();
+
+    markContentDirty();
 
     if (kinds.length) ctx.afterCommit({ key: `${ctx.intentId}:content`, kind: "invalidate", payload: { campaignId: current.campaignId, kinds: [...kinds] } });
 

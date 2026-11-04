@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateCampaignQueries } from "./invalidate";
 import { campaignKeys } from "./keys";
 
 import { ApiError } from "@/lib/api/client";
-import { applySourceChanges, getSourceDiff } from "@/lib/api/source-sync";
+import { applySafeSourceChanges, applySourceChanges, getSourceDiff } from "@/lib/api/source-sync";
 import { autoAddedPreview, defaultSelection, itemKey, toRefs } from "@/lib/utils/campaigns/source-sync";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { SourceApplyBody, SourceApplyResult, SourceDiffItem, SourceSyncScope } from "@/types/campaigns";
@@ -24,22 +25,31 @@ export function useSourceDiff(campaignId: string, enabled: boolean) {
   });
 }
 
+const invalidateAfterApply = (queryClient: QueryClient, campaignId: string, applied: boolean) =>
+  void (applied ? invalidateCampaignQueries(queryClient, campaignId) : queryClient.invalidateQueries({ queryKey: campaignKeys.sourceDiff(campaignId) }));
+
 export function useApplySourceChanges(campaignId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (body: SourceApplyBody) => applySourceChanges(campaignId, body),
-    onSuccess: (_result, body) => {
-      if (body.apply.length === 0) {
-        void queryClient.invalidateQueries({ queryKey: campaignKeys.sourceDiff(campaignId) });
-
-        return;
-      }
-
-      void invalidateCampaignQueries(queryClient, campaignId);
-    },
+    onSuccess: (_result, body) => invalidateAfterApply(queryClient, campaignId, body.apply.length > 0),
     onError: (err) => {
       if (err instanceof ApiError && err.status === 409) void queryClient.invalidateQueries({ queryKey: campaignKeys.sourceDiff(campaignId) });
+    },
+  });
+}
+
+export function useApplySafeSourceChanges(campaignId: string) {
+  const queryClient = useQueryClient();
+
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: () => applySafeSourceChanges(campaignId),
+    onSuccess: () => {
+      invalidateAfterApply(queryClient, campaignId, true);
+      router.refresh();
     },
   });
 }

@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 import "server-only";
 import { invalidateAllReference } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
@@ -8,10 +10,10 @@ import { assertCan } from "@/lib/server/content/access";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
-import { applySourceChanges } from "@/lib/server/templates/sync/apply";
+import { applySafeSourceChanges, applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { buildDiff } from "@/lib/server/templates/sync/diff";
-import type { Actor } from "@/lib/utils/api/actor";
+import type { Actor, ActorNeed } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import type { SourceApplyResult, SourceDiff, SourceSyncScope } from "@/types/campaigns";
 
@@ -25,13 +27,17 @@ export async function getSourceDiff(actor: Actor, scope?: SourceSyncScope, local
   return buildDiff(prisma, await loadSyncContext(prisma, actor.campaignId, actor), scope, (key) => t(`mechanics.${key}.label`));
 }
 
-export async function applySource(actor: Actor, body: SourceSyncApplyInput): Promise<SourceApplyResult> {
-  assertCan(actor, CONTENT_OPERATIONS["source.apply"].need);
+async function runApply(actor: Actor, need: ActorNeed, run: (tx: Prisma.TransactionClient) => Promise<SourceApplyResult>): Promise<SourceApplyResult> {
+  assertCan(actor, need);
 
   // NO KEY UPDATE serialises applies without blocking inserts that reference the campaign
-  const result = await withCampaignContentWrite(actor.campaignId, tx => applySourceChanges(tx, actor.campaignId, body, actor), { lock: "no-key-update", ...APPLY_TX_OPTIONS });
+  const result = await withCampaignContentWrite(actor.campaignId, run, { lock: "no-key-update", ...APPLY_TX_OPTIONS });
 
   afterContentCommit(() => invalidateAllReference(actor.campaignId));
 
   return result;
 }
+
+export const applySource = (actor: Actor, body: SourceSyncApplyInput) => runApply(actor, CONTENT_OPERATIONS["source.apply"].need, tx => applySourceChanges(tx, actor.campaignId, body, actor));
+
+export const applySafeSource = (actor: Actor) => runApply(actor, CONTENT_OPERATIONS["source.apply-safe"].need, tx => applySafeSourceChanges(tx, actor.campaignId, actor));

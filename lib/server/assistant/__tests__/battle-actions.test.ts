@@ -33,7 +33,7 @@ vi.mock("@/lib/server/battles/pipeline-deps", () => ({ defaultPipelineDeps: {
 
  return 0.5; },
 }, defaultReadDeps: {} }));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, callback: () => unknown) => callback() }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, callback: () => unknown) => callback(), withCampaignRuntimeWrite: async (_id: string, callback: () => unknown) => callback() }));
 
 const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null, locale: "uk" as const };
 
@@ -63,7 +63,7 @@ describe("T11 battle adapters", () => {
       expect(BATTLE_ACTIONS.find(action => action.id === row.actionId), row.actionId).toBeDefined();
     }
 
-    const names = ["list", "active", "get", "version", "summary", "events", "balance.get", "balance", "create", "patch", "delete", "clear-history", "audio.get", "audio", "start", "complete", "reset", "rollback", "add-participant", "participants.patch", "reveal-participant", "unit-control", "refresh-sources", "scale-units", "next-turn", "attack", "spell", "bonus-action", "core-action", "ability-action", "aura-zone", "conditions", "morale-check", "move", "map-terrain", "map-weather", "maze", "maze-mark"];
+    const names = ["list", "active", "get", "version", "summary", "events", "balance.get", "balance", "create", "patch", "delete", "clear-history", "audio.get", "audio", "start", "complete", "reset", "rollback", "add-participant", "participants.patch", "reveal-participant", "unit-control", "refresh-sources", "scale-units", "next-turn", "attack", "spell", "bonus-action", "core-action", "ability-action", "aura-zone", "conditions", "initiative-reorder", "initiative-roll", "morale-check", "move", "map-terrain", "map-weather", "maze", "maze-mark"];
 
     for (const name of names) expect(BATTLE_ACTIONS.find(a => a.id === `battles.${name}`), name).toBeDefined();
   });

@@ -3,7 +3,7 @@ import type { NewBattleEvent, StoredBattleEvent } from "./types";
 import { DM_ACTOR, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { decodeLog } from "@/lib/utils/battle/log/codec";
 import { logFields } from "@/lib/utils/battle/log/lines";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleParticipant, DiceRollGroup } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 type EventDetails = {
@@ -58,7 +58,7 @@ export function actorEvent(
   };
 }
 
-export function dmEvent(round: number, text: EventText, targets?: BattleAction["targets"], hpChanges?: BattleAction["hpChanges"]): NewBattleEvent {
+export function dmEvent(round: number, text: EventText, targets?: BattleAction["targets"], hpChanges?: BattleAction["hpChanges"], diceRolls?: DiceRollGroup[]): NewBattleEvent {
   const { resultText, log } = logFields(text);
 
   return {
@@ -68,7 +68,7 @@ export function dmEvent(round: number, text: EventText, targets?: BattleAction["
     ...(targets && { targets }),
     ...(hpChanges && { hpChanges }),
     resultText,
-    details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: {}, ...(log && { log }) },
+    details: { actorName: DM_ACTOR.actorName, actorSide: DM_ACTOR.actorSide, actionDetails: diceRolls ? { diceRolls } : {}, ...(log && { log }) },
   };
 }
 

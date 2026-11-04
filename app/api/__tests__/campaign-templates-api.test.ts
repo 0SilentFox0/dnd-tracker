@@ -47,6 +47,7 @@ import { POST as joinPost } from "@/app/api/campaigns/join/route";
 import { POST as createPost } from "@/app/api/campaigns/route";
 import { GET as templatesGet } from "@/app/api/templates/route";
 import { BundleInvalidError } from "@/lib/server/templates/bundle";
+import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
 
 const bundle = {
   formatVersion: 1,
@@ -73,8 +74,10 @@ const asDM = () => m.requireDM.mockImplementation(async (id: string) => ({ userI
 
 describe("campaign templates API", () => {
   beforeEach(() => {
+    clearBundleCache();
     vi.clearAllMocks();
     m.userId.current = "u1";
+    m.db.campaign.update.mockResolvedValue({ contentVersion: 1 });
     m.exportCampaign.mockResolvedValue(bundle);
     m.importBundle.mockResolvedValue({ idMap: new Map(), warnings: [], hashes: {} });
     m.db.campaign.create.mockImplementation(async ({ data }: { data: object }) => ({ id: "new", ...data }));

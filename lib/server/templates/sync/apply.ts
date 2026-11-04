@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { SYNC_DEFAULT_ON } from "@/lib/constants/source-sync";
 import { getTranslator } from "@/lib/i18n/translator";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import type { CompendiumBundleDb } from "@/lib/server/compendium-import/bundle";
@@ -28,11 +29,7 @@ const keyOf = (i: { scope: string; key: string }) => `${i.scope}:${i.key}`;
 
 const sourceChanged = () => new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
 
-async function sourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
-  const ctx = await loadSyncContext(db, campaignId, access);
-
-  const all = new Map(classify(ctx).map((i) => [keyOf(i), i]));
-
+function sourceSelection(ctx: SyncContext, all: Map<string, SyncItem>, body: SourceSyncApplyInput) {
   const pickItems = (refs: SyncRef[]) =>
     refs.map((r) => {
       const item = all.get(keyOf(r));
@@ -50,11 +47,19 @@ async function sourceSelection(db: SyncDb, campaignId: string, body: SourceSyncA
 
   const items = [...selected.values()];
 
-  return { ctx, selected, autoAdded, items, ignored };
+  return { selected, autoAdded, items, ignored };
+}
+
+async function loadClassified(db: SyncDb, campaignId: string, access?: { userId: string }) {
+  const ctx = await loadSyncContext(db, campaignId, access);
+
+  return { ctx, all: new Map(classify(ctx).map((i) => [keyOf(i), i])) };
 }
 
 export async function previewSourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
-  const { ctx, items, ignored, autoAdded } = await sourceSelection(db, campaignId, body, access);
+  const { ctx, all } = await loadClassified(db, campaignId, access);
+
+  const { items, ignored, autoAdded } = sourceSelection(ctx, all, body);
 
   const index = indexOf(ctx);
 
@@ -66,8 +71,8 @@ export async function previewSourceSelection(db: SyncDb, campaignId: string, bod
   };
 }
 
-export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
-  const { ctx, selected, autoAdded, items, ignored } = await sourceSelection(db, campaignId, body, access);
+async function applySelection(db: SyncDb, ctx: SyncContext, all: Map<string, SyncItem>, body: SourceSyncApplyInput): Promise<SourceApplyResult> {
+  const { selected, autoAdded, items, ignored } = sourceSelection(ctx, all, body);
 
   const warnings = await writeTables(db, ctx, selected);
 
@@ -76,6 +81,43 @@ export async function applySourceChanges(db: SyncDb, campaignId: string, body: S
   await saveState(db, ctx, items, ignored);
 
   return { applied: items.length, ignored: ignored.length, autoAdded: autoAdded.map(({ scope, key, name }) => ({ scope, key, name })), warnings };
+}
+
+export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
+  const { ctx, all } = await loadClassified(db, campaignId, access);
+
+  return applySelection(db, ctx, all, body);
+}
+
+export async function applySafeSourceChanges(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SourceApplyResult> {
+  const { ctx, all } = await loadClassified(db, campaignId, access);
+
+  const safe = [...all.values()].filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status) && !needsBlockedDependency(i, all));
+
+  return applySelection(db, ctx, all, { apply: safe.map(({ scope, key, sourceHash, status }) => ({ scope, key, sourceHash, status })), ignore: [] });
+}
+
+function needsBlockedDependency(item: SyncItem, all: Map<string, SyncItem>) {
+  const seen = new Set<string>();
+
+  const queue = [item];
+
+  while (queue.length > 0) {
+    for (const req of queue.pop()!.requires) {
+      const k = keyOf(req);
+
+      const dep = all.get(k);
+
+      if (seen.has(k) || !dep || (dep.status !== "new" && dep.status !== "deletedLocally")) continue;
+
+      if (dep.ignored || dep.status === "deletedLocally") return true;
+
+      seen.add(k);
+      queue.push(dep);
+    }
+  }
+
+  return false;
 }
 
 function closeOverRequires(chosen: SyncItem[], all: Map<string, SyncItem>) {
@@ -344,6 +386,7 @@ async function saveState(db: SyncDb, ctx: SyncContext, selected: SyncItem[], ign
 
   const data = {
     sourceCampaignId: ctx.source.id,
+    sourceVersion: ctx.source.contentVersion,
     baseline: baseline as Prisma.InputJsonObject,
     ignored: ign as Prisma.InputJsonObject,
     syncedAt: new Date(),

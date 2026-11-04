@@ -123,6 +123,7 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
     step("battle", "next-turn"),
     step("battle", "turn-controls", { clickFromTarget: "battle.next-turn", clickUntilTarget: true, placement: "right" }),
     step("battle", "dm-actions", { clickFromTarget: "battle.dm-open", placement: "left" }),
+    step("battle", "initiative-roll", { placement: "left" }),
     step("battle", "dm-participants", { placement: "left" }),
     step("battle", "audio", { clickFromTarget: "battle.dm-close", anchor: "music.dock", placement: "right" }),
     step("battle", "reset"),

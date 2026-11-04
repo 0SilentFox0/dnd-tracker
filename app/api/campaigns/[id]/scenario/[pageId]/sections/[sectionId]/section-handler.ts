@@ -4,7 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { scenarioSectionPatchSchema } from "@/lib/schemas/scenario";
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { loadOwnedPage } from "@/lib/server/scenario/loaders";
 import { InvalidScenarioContentError, OWNED_WITH_CONTENT_SELECT, readContentStrict, toJson } from "@/lib/server/scenario/page-store";
 import { refreshSummaryFreshness } from "@/lib/server/scenario/summary-store";
@@ -24,7 +24,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
 
     if (body instanceof NextResponse) return body;
 
-    return await withCampaignContentWrite(campaignId, async () => {
+    return await withCampaignRuntimeWrite(campaignId, async () => {
     const page = await loadOwnedPage(campaignId, pageId, OWNED_WITH_CONTENT_SELECT);
 
     if (page instanceof NextResponse) return page;

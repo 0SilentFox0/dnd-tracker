@@ -26,6 +26,8 @@ const EXPECTED_PATHS: Record<keyof typeof battleOps, string> = {
   addParticipant: "add-participant",
   reveal: "reveal-participant",
   conditions: "conditions",
+  initiativeReorder: "initiative-reorder",
+  initiativeRoll: "initiative-roll",
   coreAction: "core-action",
   scaleUnits: "scale-units",
   unitControl: "unit-control",

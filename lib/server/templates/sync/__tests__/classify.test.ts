@@ -21,7 +21,7 @@ function ctx(source: Partial<Bundle>, local: LocalRow[], baselineRows: Partial<B
 
   return {
     campaignId: "camp",
-    source: { id: "src", name: "HOMM5", kind: "template" },
+    source: { id: "src", name: "HOMM5", kind: "template", contentVersion: 0 },
     sourceBundle,
     target: { settings: emptyBundle().settings, rules: {}, rows: local },
     baseline: baselineFromBundle(base, tables),

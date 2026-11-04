@@ -7,7 +7,7 @@ import { buildDiff } from "@/lib/server/templates/sync/diff";
 import { applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import type { Actor } from "@/lib/utils/api/actor";
 
-const tx = vi.hoisted(() => ({ $queryRaw: vi.fn() }));
+const tx = vi.hoisted(() => ({ $queryRaw: vi.fn(), campaign: { update: vi.fn(async () => ({ contentVersion: 1 })) } }));
 
 vi.mock("@/lib/db", () => ({ prisma: { $transaction: vi.fn() } }));
 vi.mock("@/lib/cache/tags", () => ({ ReferenceKind: { SPELLS: "spells" }, invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));

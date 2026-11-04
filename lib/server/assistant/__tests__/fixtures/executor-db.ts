@@ -10,6 +10,7 @@ export function executorDatabase() {
   const matches = (row: Record<string, unknown>, where: Record<string, unknown> = {}) => Object.entries(where).every(([k, v]) => row[k] === v);
 
   const db = {
+    campaign: { update: async () => ({ contentVersion: 1 }) },
     campaignMember: { findMany: async () => state.isDM ? [{ role: "dm" }] : [] },
     apiToken: { findUnique: async () => state.tokenActive ? { id: "token", userId: "dm", campaignId: "campaign", scopes: ["characters:write"], revokedAt: null, executionMode: "review" } : null },
     aiThread: { findFirst: async () => ({ executionMode: "review" }) },

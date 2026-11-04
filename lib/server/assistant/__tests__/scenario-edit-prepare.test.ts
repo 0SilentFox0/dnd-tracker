@@ -8,7 +8,7 @@ vi.mock("server-only", () => ({}));
 const db = vi.hoisted(() => ({ campaign: { findUnique: vi.fn() } }));
 
 vi.mock("@/lib/db", () => ({ prisma: db }));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb() }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb(), withCampaignRuntimeWrite: async (_id: string, cb: () => unknown) => cb() }));
 vi.mock("@/lib/server/assistant/proposals", () => ({ applyProposal: vi.fn(), createProposal: vi.fn() }));
 vi.mock("@/lib/server/scenario/action-service", () => ({
   scenarioFingerprint: () => "fp",

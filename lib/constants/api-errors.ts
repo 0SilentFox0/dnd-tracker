@@ -58,6 +58,7 @@ export const API_ERRORS = {
   BATTLE_RESERVE_NOT_FOUND: "errors.battleReserveNotFound",
   BATTLE_MORALE_DISABLED: "errors.battleMoraleDisabled",
   BATTLE_AWAITING_DM: "errors.battleAwaitingDm",
+  BATTLE_INITIATIVE_ORDER_INVALID: "errors.battleInitiativeOrderInvalid",
   INVALID_BODY: "errors.invalidBody",
   INVALID_QUERY: "errors.invalidQuery",
   INITIATIVE_OUT_OF_RANGE: "errors.initiativeOutOfRange",

@@ -4,8 +4,26 @@ import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import type { DmDashboardData, PlayerDashboardData } from "@/types/campaigns";
 
+export async function sourceUpdateState(campaignId: string): Promise<{ sourceVersion: number; hasUpdates: boolean } | null> {
+  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { createdFromId: true, sourceSync: { select: { sourceCampaignId: true, sourceVersion: true } } } });
+
+  const sourceId = campaign?.createdFromId;
+
+  if (!sourceId) return null;
+
+  const source = await prisma.campaign.findUnique({ where: { id: sourceId }, select: { contentVersion: true } });
+
+  if (!source) return null;
+
+  const sync = campaign.sourceSync;
+
+  const syncedVersion = sync?.sourceCampaignId === sourceId ? sync.sourceVersion : null;
+
+  return { sourceVersion: source.contentVersion, hasUpdates: syncedVersion === null || source.contentVersion > syncedVersion };
+}
+
 export async function readDmDashboard(campaignId: string): Promise<DmDashboardData> {
-  const [pendingDrafts, scenarioPages, battles] = await Promise.all([
+  const [pendingDrafts, scenarioPages, battles, update] = await Promise.all([
     prisma.character.count({ where: { campaignId, status: CharacterStatus.PENDING } }),
     prisma.scenarioPage.findMany({ where: { campaignId }, orderBy: { updatedAt: "desc" }, take: 3, select: { id: true, title: true } }),
     prisma.battleScene.findMany({
@@ -14,11 +32,12 @@ export async function readDmDashboard(campaignId: string): Promise<DmDashboardDa
       take: 6,
       select: { id: true, name: true, status: true },
     }),
+    sourceUpdateState(campaignId),
   ]);
 
   const activeFirst = [...battles].sort((a, b) => Number(b.status === BattleStatus.ACTIVE) - Number(a.status === BattleStatus.ACTIVE));
 
-  return { pendingDrafts, scenarioPages, battles: activeFirst.slice(0, 3) as DmDashboardData["battles"] };
+  return { pendingDrafts, scenarioPages, battles: activeFirst.slice(0, 3) as DmDashboardData["battles"], sourceUpdate: update?.hasUpdates ? { sourceVersion: update.sourceVersion } : null };
 }
 
 export async function readPlayerDashboard(campaignId: string, userId: string): Promise<PlayerDashboardData> {

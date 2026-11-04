@@ -16,6 +16,6 @@ export { useJoinBattle } from "./useJoinBattle";
 export { useRemoveCustomCondition } from "./useRemoveCustomCondition";
 export { HERO_LEVELS, type RulesFormState, useRulesForm } from "./useRulesForm";
 export { useSaveAsTemplate } from "./useSaveAsTemplate";
-export { useApplySourceChanges, useSourceDiff, useSourceSyncApply, useSourceSyncSelection } from "./useSourceSync";
+export { useApplySafeSourceChanges, useApplySourceChanges, useSourceDiff, useSourceSyncApply, useSourceSyncSelection } from "./useSourceSync";
 export { useTemplates, useTemplateSelection } from "./useTemplates";
 export { useWatchShow } from "./useWatchShow";

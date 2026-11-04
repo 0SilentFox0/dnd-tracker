@@ -6,7 +6,7 @@ import { SCENARIO_EDIT_ACTION } from "./scenario-edit";
 
 import { getTranslator } from "@/lib/i18n/translator";
 import { createScenarioPageSchema, scenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { runScenarioOperation, scenarioFingerprint, scenarioState } from "@/lib/server/scenario/action-service";
 import { jsonContent } from "@/lib/utils/common/json";
 
@@ -32,7 +32,7 @@ export const SCENARIO_ACTIONS: readonly AssistantActionDef[] = [LEGACY_PROPOSAL_
   if (read) return { ...base, effect: "read", execute: (caller, value) => runScenarioOperation(caller.actor, operation, value as Record<string, unknown>, undefined, caller.locale) };
 
   return { ...base, effect: "write", confirmation: ["save", "restore", "delete", "section.delete", "row.delete"].includes(operation) ? "always" : "standard",
-    prepare: (caller, raw) => withCampaignContentWrite(caller.actor.campaignId, async () => {
+    prepare: (caller, raw) => withCampaignRuntimeWrite(caller.actor.campaignId, async () => {
       const value = input.parse(raw) as Record<string, unknown>;
 
       const state = await scenarioState(caller.actor, value.id as string | undefined);

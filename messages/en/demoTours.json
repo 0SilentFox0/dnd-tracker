@@ -290,6 +290,10 @@
         "title": "DM quick actions",
         "description": "Battle log, add a participant, cast a spell as anyone, refresh from the library, hand out units, buff or weaken enemies."
       },
+      "initiative-roll": {
+        "title": "Initiative",
+        "description": "“Roll initiative” re-rolls a d20 for everyone on the field and builds a new order for the whole battle; “Initiative order” lets you drag participants by hand."
+      },
       "dm-participants": {
         "title": "Participants",
         "description": "Each row: change HP, apply conditions, legendary actions, remove from battle."

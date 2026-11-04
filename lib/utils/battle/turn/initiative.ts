@@ -31,6 +31,13 @@ export function compareInitiative(a: BattleParticipant, b: BattleParticipant): n
   return b.abilities.dexterity - a.abilities.dexterity;
 }
 
+/** Index at which `p` fits into `order` (first slot it outranks at or after `from`), or `order.length`. */
+export function initiativeSlot(order: BattleParticipant[], p: BattleParticipant, from = 0): number {
+  const at = order.findIndex((other, i) => i >= from && compareInitiative(p, other) < 0);
+
+  return at === -1 ? order.length : at;
+}
+
 /** Порядок: initiative (desc) → baseInitiative (desc) → dexterity (desc). */
 export function sortByInitiative(participants: BattleParticipant[]): BattleParticipant[] {
   return [...participants].sort(compareInitiative);

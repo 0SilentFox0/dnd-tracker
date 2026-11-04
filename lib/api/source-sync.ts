@@ -3,5 +3,7 @@ import type { SourceApplyBody, SourceApplyResult, SourceDiff } from "@/types/cam
 
 export const getSourceDiff = (campaignId: string) => campaignGet<SourceDiff>(campaignId, "/source-sync");
 
+export const applySafeSourceChanges = (campaignId: string) => campaignPost<SourceApplyResult>(campaignId, "/source-sync/apply-safe", {});
+
 export const applySourceChanges = (campaignId: string, body: SourceApplyBody) =>
   campaignPost<SourceApplyResult>(campaignId, "/source-sync", body);

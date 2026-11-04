@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf, SETTINGS_SELECT, settingsOf, type TemplateDb } from "@/lib/server/templates/bundle";
-import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { cachedExport } from "@/lib/server/templates/bundle-cache";
 import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
 import { translationsFor } from "@/lib/server/templates/srd-translations";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
@@ -34,17 +34,17 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   const found = await db.campaign.findUnique({
     where: { id: campaign.createdFromId },
-    select: { id: true, name: true, kind: true, visibility: true, templateKey: true, locale: true, members: { where: { userId: access?.userId ?? "" }, select: { role: true } } },
+    select: { id: true, name: true, kind: true, contentVersion: true, visibility: true, templateKey: true, locale: true, members: { where: { userId: access?.userId ?? "" }, select: { role: true } } },
   });
 
   if (!found) throw new ContentError(API_ERRORS.SOURCE_NOT_FOUND, 404);
 
   if (access && !canReadSource(found.visibility, found.members)) throw new ContentError(API_ERRORS.SOURCE_FORBIDDEN, 403);
 
-  const source = { id: found.id, name: found.name, kind: found.kind };
+  const source = { id: found.id, name: found.name, kind: found.kind, contentVersion: found.contentVersion };
 
   const [rawSourceBundle, rows, state] = await Promise.all([
-    exportCampaign(db, source.id),
+    cachedExport(db, source.id, source.contentVersion),
     loadTargetRows(db, campaignId),
     db.campaignSourceSync.findUnique({ where: { campaignId } }),
   ]);

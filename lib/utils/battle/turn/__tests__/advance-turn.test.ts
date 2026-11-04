@@ -90,7 +90,7 @@ describe("advanceTurn", () => {
     expect(out.actions.some((a) => eventTextOf(a).length > 0)).toBe(true);
   });
 
-  it("новий раунд починається з першого в пересортованому порядку (саммон не пропускає хід)", () => {
+  it("новий раунд вставляє саммона за ініціативою (саммон не пропускає хід)", () => {
     const deadFirst = {
       ...hero,
       abilities: { ...hero.abilities, initiative: 20, baseInitiative: 20 },
@@ -107,6 +107,7 @@ describe("advanceTurn", () => {
 
     expect(out.scene.round).toBe(2);
     expect(out.participants[out.scene.turnIndex ?? -1].basicInfo.id).toBe("wolf");
+    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["wolf", "hero", "mid", "gob"]);
   });
 
 

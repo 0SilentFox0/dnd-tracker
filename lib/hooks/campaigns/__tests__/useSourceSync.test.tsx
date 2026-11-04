@@ -5,15 +5,15 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "@/lib/api/client";
-import { applySourceChanges } from "@/lib/api/source-sync";
-import { useApplySourceChanges, useSourceSyncApply, useSourceSyncSelection } from "@/lib/hooks/campaigns";
+import { applySafeSourceChanges, applySourceChanges } from "@/lib/api/source-sync";
+import { useApplySafeSourceChanges, useApplySourceChanges, useSourceSyncApply, useSourceSyncSelection } from "@/lib/hooks/campaigns";
 import { campaignKeys } from "@/lib/hooks/campaigns/keys";
 import type { SourceApplyResult, SourceDiffItem } from "@/types/campaigns";
 
 const refresh = vi.fn();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
-vi.mock("@/lib/api/source-sync", () => ({ applySourceChanges: vi.fn(), getSourceDiff: vi.fn() }));
+vi.mock("@/lib/api/source-sync", () => ({ applySafeSourceChanges: vi.fn(), applySourceChanges: vi.fn(), getSourceDiff: vi.fn() }));
 
 const item = (over: Partial<SourceDiffItem>): SourceDiffItem => ({
   scope: "spells",
@@ -25,6 +25,22 @@ const item = (over: Partial<SourceDiffItem>): SourceDiffItem => ({
   sourceHash: "h",
   requires: [],
   ...over,
+});
+
+describe("useApplySafeSourceChanges", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("refreshes server data so the dashboard tile goes away", async () => {
+    vi.mocked(applySafeSourceChanges).mockResolvedValue({ applied: 2 } as SourceApplyResult);
+
+    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>;
+
+    const { result } = renderHook(() => useApplySafeSourceChanges("c1"), { wrapper });
+
+    await act(async () => { await result.current.mutateAsync(); });
+
+    expect(refresh).toHaveBeenCalledOnce();
+  });
 });
 
 describe("useApplySourceChanges", () => {

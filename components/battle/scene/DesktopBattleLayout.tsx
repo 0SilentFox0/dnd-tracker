@@ -22,7 +22,7 @@ import { ReserveGroup } from "@/components/battle/participants/ReservePanel";
 import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
 import { HudChipTabs } from "@/components/hud/page/HudChipTabs";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useBattleViewMode, useSelectedParticipant } from "@/lib/hooks/battle";
+import { useBattleScene, useBattleViewMode, useSelectedParticipant, useTrackReorder } from "@/lib/hooks/battle";
 import { myTurnKey } from "@/lib/utils/battle/view";
 
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
@@ -52,6 +52,8 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
 
   const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM }, select, log, intents } = useBattleScene();
 
+  const onReorder = useTrackReorder();
+
   const [storedMode, setViewMode] = useBattleViewMode(battleId);
 
   // наведення шаблону тимчасово показує карту, не змінюючи збережений вибір
@@ -68,7 +70,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
       {battle.status === BattleStatus.COMPLETED && <BattleOverBanner />}
       {awaiting && <AwaitingDmBanner />}
       <div className="flex h-20 items-center border-y border-white/[.08]">
-        <div className="min-w-0 flex-1"><InitiativeTrack /></div>
+        <div className="min-w-0 flex-1"><InitiativeTrack onReorder={onReorder} /></div>
         <div className="w-[420px] shrink-0"><LastActionTicker /></div>
       </div>
       <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_280px]">

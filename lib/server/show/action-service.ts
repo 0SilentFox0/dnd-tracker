@@ -11,7 +11,7 @@ import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller, JsonValue } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError } from "@/lib/server/content/errors";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { applyAndWriteShowCommand } from "@/lib/server/show/command-service";
 import { bindDeckRecord, createDeckRecord, deleteDeckRecord, saveDeckRecord } from "@/lib/server/show/deck-operations";
@@ -73,7 +73,7 @@ async function state(actor: Actor, input: ShowInput) {
 }
 
 export async function prepareShowAction(caller: AssistantCaller, operation: string, input: ShowInput): Promise<ActionPreview> {
-  return withCampaignContentWrite(caller.actor.campaignId, async () => {
+  return withCampaignRuntimeWrite(caller.actor.campaignId, async () => {
     await access(caller.actor);
 
     const snapshot = await state(caller.actor, input);
@@ -263,5 +263,5 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
     return handler(showRun);
   };
 
-  return read ? run() : withCampaignContentWrite(actor.campaignId, run);
+  return read ? run() : withCampaignRuntimeWrite(actor.campaignId, run);
 }

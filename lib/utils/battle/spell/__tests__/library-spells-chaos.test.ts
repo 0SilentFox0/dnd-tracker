@@ -195,7 +195,7 @@ describe("Хаос: заклинання", () => {
     expect(hasDisadvantage(P(ps, "e"), melee, ps)).toBe(true);
   });
 
-  it("Блискавка: шкода + −2 ініціативи, що переставляє ворога в черзі наступного раунду", () => {
+  it("Блискавка: шкода + −2 ініціативи, що не переставляє чергу в наступному раунді", () => {
     const c = hero("c", 20);
 
     const order = [c, enemy("e", 11), hero("b", 10)];
@@ -209,7 +209,7 @@ describe("Хаос: заклинання", () => {
     const next = advanceTo(ps, sc, "c");
 
     expect(next.scene.round).toBe(2);
-    expect(next.ps.map((p) => p.basicInfo.id)).toEqual(["c", "b", "e"]);
+    expect(next.ps.map((p) => p.basicInfo.id)).toEqual(["c", "e", "b"]);
   });
 
   it("Вогняна куля: рятівний кидок Спритності, успіх — половина, провал — повна", () => {
@@ -260,7 +260,7 @@ describe("Хаос: заклинання", () => {
     expect(P(r.allParticipantsUpdated, "e2").battleData.activeEffects).toHaveLength(0);
   });
 
-  it("Коло зими: −2 ініціативи на 1 раунд реально переставляє ворога в черзі наступного раунду", () => {
+  it("Коло зими: −2 ініціативи на 1 раунд не переставляє чергу в наступному раунді", () => {
     const c = hero("c", 20);
 
     const order = [c, enemy("e", 11), hero("b", 10)];
@@ -269,10 +269,10 @@ describe("Хаос: заклинання", () => {
 
     const next = advanceTo(r.allParticipantsUpdated, scene(0), "c");
 
-    expect(next.ps.map((p) => p.basicInfo.id)).toEqual(["c", "b", "e"]);
+    expect(next.ps.map((p) => p.basicInfo.id)).toEqual(["c", "e", "b"]);
   });
 
-  it("Коло зими: ворог, що вже походив, теж переставляється в наступному раунді, а в наступному за ним — повертається", () => {
+  it("Коло зими: черга лишається незмінною протягом раундів", () => {
     const c = hero("c", 10);
 
     const order = [enemy("e", 11), c, hero("b", 9)];
@@ -281,7 +281,7 @@ describe("Хаос: заклинання", () => {
 
     const round2 = advanceTo(r.allParticipantsUpdated, scene(1), "c");
 
-    expect(round2.ps.map((p) => p.basicInfo.id)).toEqual(["c", "e", "b"]);
+    expect(round2.ps.map((p) => p.basicInfo.id)).toEqual(["e", "c", "b"]);
 
     const endOfRound2 = advanceTo(round2.ps, round2.scene, "b");
 

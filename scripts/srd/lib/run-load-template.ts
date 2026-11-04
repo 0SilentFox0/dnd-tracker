@@ -9,6 +9,7 @@ import { makeTemplateStore } from "./template-store";
 import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
 import { getTranslator } from "@/lib/i18n/translator";
+import { bumpContentVersion } from "@/lib/server/campaigns/version";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
 import type { Actor } from "@/lib/utils/api/actor";
 
@@ -43,6 +44,8 @@ export async function loadSrdTemplate({ owner, locale, allowRemote }: SrdSeedArg
     );
 
     for (const { column, names } of staleSpellColumns(data.spells)) await prisma.spell.updateMany({ where: { campaignId: template.id, name: { in: names } }, data: { [column]: null } });
+
+    await bumpContentVersion(prisma, template.id);
 
     for (const line of formatImportSummary(results, await getTranslator("uk"))) console.info(line);
 

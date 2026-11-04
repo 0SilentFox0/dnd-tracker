@@ -278,3 +278,15 @@ it("defers import invalidation until outer transaction commits", async () => {
   for (const callback of callbacks) callback();
   expect(invalidateReference).toHaveBeenCalledWith(["units"], "c1");
 });
+
+it("bumps the content version once when an executor-context import writes rows", async () => {
+  const { runContentWriteContext } = await import("@/lib/server/content/write-context");
+
+  const tx = { $executeRaw: vi.fn(async () => 1), campaign: { update: vi.fn(async () => ({ contentVersion: 1 })) } };
+
+  const report = await runContentWriteContext("c1", tx, () => importContent(actor, "units", { rows: [{ name: "Біс" }, { name: "Імп" }], mode: "create", dryRun: false }, { ...deps, transactional: true }));
+
+  expect(report.counts.created).toBe(2);
+  expect(tx.campaign.update).toHaveBeenCalledOnce();
+  expect(tx.campaign.update).toHaveBeenCalledWith(expect.objectContaining({ data: { contentVersion: { increment: 1 } } }));
+});

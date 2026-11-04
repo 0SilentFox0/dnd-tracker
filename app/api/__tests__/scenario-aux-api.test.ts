@@ -16,6 +16,7 @@ vi.mock("@/lib/db", () => ({
     $queryRaw: vi.fn(),
     scenarioPage: { findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), update: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), findMany: vi.fn(async () => []), create: vi.fn(), deleteMany: vi.fn() },
+    compendiumEntry: { count: vi.fn().mockResolvedValue(0) },
     unit: { findMany: vi.fn(async () => [{ id: "u1", name: "Біс" }]) },
     artifact: { findMany: vi.fn(async () => []) },
     character: { findMany: vi.fn(async () => [{ id: "c1", name: "Біара" }]) },

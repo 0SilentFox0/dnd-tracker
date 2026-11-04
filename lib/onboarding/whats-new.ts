@@ -5,6 +5,8 @@ export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   { id: "2026-11-04-player-view", date: "2026-11-04", audience: "dm" },
+  { id: "2026-11-04-template-updates", date: "2026-11-04", audience: "dm" },
+  { id: "2026-11-04-battle-initiative", date: "2026-11-04", audience: "dm", href: "/help/dm-battle" },
   { id: "2026-10-31-user-palettes", date: "2026-10-31", audience: "all" },
   { id: "2026-10-31-identity-icons", date: "2026-10-31", audience: "all" },
   { id: "2026-10-30-template-languages", date: "2026-10-30", audience: "dm" },

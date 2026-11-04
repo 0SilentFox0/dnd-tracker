@@ -9,7 +9,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { scenarioState } from "@/lib/server/scenario/action-service";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { jsonContent } from "@/lib/utils/common/json";
@@ -33,7 +33,7 @@ export async function linkLegacyProposal(caller: AssistantCaller, proposalId: st
   // Old proposals have no trusted originating token identity. Only a real DM session may claim them.
   if (caller.actor.via !== "session") throw new ContentError(API_ERRORS.ASSISTANT_DM_SESSION_REQUIRED, 403);
 
-  return withCampaignContentWrite(caller.actor.campaignId, async tx => {
+  return withCampaignRuntimeWrite(caller.actor.campaignId, async tx => {
     await authorizeAssistant(caller, need, "execute", tx);
 
     const existing = await tx.assistantIntent.findUnique({ where: { legacyProposalId: proposalId } });

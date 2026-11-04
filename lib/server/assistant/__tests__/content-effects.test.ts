@@ -22,7 +22,9 @@ describe("content durable effects", () => {
   it("file deletion records cleanup without touching Storage during the domain transaction", async () => {
     let exists = true;
 
-    const db = { campaignTrack: { findFirst: async () => exists ? row : null, deleteMany: async () => { exists = false;
+    const bump = vi.fn(async () => ({ contentVersion: 1 }));
+
+    const db = { campaign: { update: bump }, campaignTrack: { findFirst: async () => exists ? row : null, deleteMany: async () => { exists = false;
 
  return { count: 1 }; } } };
 
@@ -40,6 +42,7 @@ describe("content durable effects", () => {
 
     await runContentWriteContext("camp", db, () => action.execute(ctx, { id: "track" }));
     expect(exists).toBe(false);
+    expect(bump).toHaveBeenCalledOnce();
     expect(storage.removeTrackFile).not.toHaveBeenCalled();
     expect(effects).toEqual([expect.objectContaining({ kind: "media-cleanup", payload: { campaignId: "camp", url } })]);
     await CONTENT_EFFECT_HANDLERS["media-cleanup"]!(effects[0].payload, effects[0].key);

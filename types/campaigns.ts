@@ -126,6 +126,7 @@ export interface DmDashboardData {
   pendingDrafts: number;
   scenarioPages: { id: string; title: string }[];
   battles: { id: string; name: string; status: BattleStatus }[];
+  sourceUpdate: { sourceVersion: number } | null;
 }
 
 export interface DashboardHero {

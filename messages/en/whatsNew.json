@@ -3,6 +3,10 @@
     "title": "Player view",
     "body": "The DM can switch a battle or the show page to the player view (button in the corner or the P key) and show exactly what players see, without any controls. The mode is per window, so keep one window as the DM and share the other. Enemy traits you see may be incomplete, because the DM has no observed knowledge of them."
   },
+  "2026-11-04-battle-initiative": {
+    "title": "Initiative in battle",
+    "body": "The DM can re-roll initiative at any moment: everyone sees the d20 rolls, and the new order stays for the rest of the battle without changing between rounds. The order can also be set by hand by dragging portraits on the track, or through a dialog with up/down arrows on a phone."
+  },
   "2026-10-31-user-palettes": {
     "title": "Color palettes",
     "body": "Choose your theme from the menu at the top of the page: Tavern, Midnight, Forest, Parchment, Amethyst, or Frost. Your selection is saved to your profile and themes your spellbook on character sheets and in battle."
@@ -196,6 +200,10 @@
   "2026-10-30-scenario-graph": {
     "title": "Scenario graph",
     "body": "The \"Graph\" section shows how scenario pages, units, artifacts, spells and heroes are connected by mentions. Click a node to see its connections and jump to the source; type filters keep a large plot readable."
+  },
+  "2026-11-04-template-updates": {
+    "title": "Template updates on the dashboard",
+    "body": "When the template your campaign was made from changes, the dashboard shows it. Apply all safe updates in one click; changes that clash with your edits stay for review."
   },
   "2026-10-31-identity-icons": {
     "title": "Icons in libraries",

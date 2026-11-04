@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
-  $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "campaign" }] }),
+  $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "campaign" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
   spell: {
     create: vi.fn(),
     createMany: vi.fn(),

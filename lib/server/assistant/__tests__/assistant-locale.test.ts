@@ -27,7 +27,7 @@ const callerOf = (locale: "uk" | "en"): AssistantCaller => ({ actor, channel: "c
 const row = { id: "c", name: "Camp", description: null, kind: "campaign", visibility: "private", maxLevel: 10, allowPlayerEdit: false, status: "active", aiInstructions: null, inviteCode: "X", updatedAt: new Date(0), createdAt: new Date(0) };
 
 describe("assistant results follow the caller's locale", () => {
-  beforeEach(() => { vi.clearAllMocks(); h.campaign.findUnique.mockResolvedValue(row); });
+  beforeEach(() => { vi.clearAllMocks(); h.campaign.findUnique.mockResolvedValue(row); h.campaign.update.mockResolvedValue({ contentVersion: 1 }); });
 
   it.each([
     ["en", "Campaign: delete", "The campaign and all dependent records will be deleted."],

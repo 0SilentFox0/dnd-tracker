@@ -2,8 +2,9 @@
 
 import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, type LucideIcon, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
+import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, ListOrdered, type LucideIcon, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
+import { InitiativeOrderDialog } from "./dialogs/InitiativeOrderDialog";
 import { ConditionsDialog } from "./ConditionsDialog";
 import { DmBattleLog } from "./DmBattleLog";
 import { DmParticipantRow } from "./DmParticipantRow";
@@ -75,7 +76,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const closePanel = () => setOpen(false);
 
-  const { row, refreshSources, randomUnits, conditions, legendary } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
+  const { row, refreshSources, randomUnits, conditions, legendary, initiative } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
 
   if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 
@@ -152,6 +153,13 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
               />
             )}
 
+            {isActive && (
+              <div data-tour="battle.initiative-roll" className="space-y-2">
+                <QuickAction icon={Dices} tone="text-[#8fd0e8]" label={t("panel.rollInitiative")} disabled={initiative.isRolling} onClick={initiative.roll} />
+                <QuickAction icon={ListOrdered} label={t("panel.reorderInitiative")} onClick={initiative.openOrder} />
+              </div>
+            )}
+
             {canScale && (
               <PanelSection title={t("panel.enemyUnits")} className="grid grid-cols-2 gap-2 pt-2">
                 <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t("panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
@@ -185,6 +193,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
       </div>
 
       <ConditionsDialog participant={conditions.target} custom={conditions.custom} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
+      <InitiativeOrderDialog participants={initiative.orderTarget} onClose={initiative.closeOrder} onSubmit={initiative.submitOrder} isPending={initiative.isReordering} />
       <LegendaryActionDialog participant={legendary.target} onClose={legendary.close} />
 
       {open && (

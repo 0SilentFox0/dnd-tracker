@@ -20,7 +20,7 @@ vi.mock("@/lib/db", () => ({
     scenarioPage: { findMany: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), create: vi.fn(), aggregate: vi.fn(), updateMany: vi.fn(), update: vi.fn(), delete: vi.fn() },
     scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
     character: { findFirst: vi.fn() },
-    compendiumEntry: { deleteMany: vi.fn() },
+    compendiumEntry: { deleteMany: vi.fn(), count: vi.fn().mockResolvedValue(0) },
   },
 }));
 

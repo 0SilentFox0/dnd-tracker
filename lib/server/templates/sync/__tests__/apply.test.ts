@@ -184,6 +184,15 @@ describe("fallback baseline (no sync row)", () => {
     expect(await visible()).toEqual([]);
   });
 
+  it("apply records the source contentVersion", async () => {
+    f.campaigns.find((c) => c.id === SRC)!.contentVersion = 7;
+    f.patchRow("spell", SPELL, { name: "Bless II" });
+
+    await applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] });
+
+    expect(f.syncs.get(TGT)).toMatchObject({ sourceVersion: 7 });
+  });
+
   it("first apply creates the sync row", async () => {
     f.patchRow("spell", SPELL, { name: "Bless II" });
 

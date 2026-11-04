@@ -31,6 +31,6 @@ export const makeTemplateStore = (name: string, locale: string = DEFAULT_TEMPLAT
     return { id: campaign.id, dmUserId: campaign.dmUserId };
   },
   update: async (id, { rules, credits, description }) => {
-    await prisma.campaign.update({ where: { id }, data: { rules: rules as Prisma.InputJsonObject, credits, description, locale, templateKey: name } });
+    await prisma.campaign.update({ where: { id }, data: { rules: rules as Prisma.InputJsonObject, credits, description, locale, templateKey: name, contentVersion: { increment: 1 } } });
   },
 });
