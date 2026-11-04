@@ -2,7 +2,7 @@
 
 Дата: 2026-11-04. Гілка `feat/wfrp`. Частина епіку WFRP; декомпозиція та рішення — [research](../research/2026-11-03-wfrp-rule-system.md) (§4.2, §6, §8), реєстр систем — [rule-systems.md](../../architecture/rule-systems.md), попередня частина — [5a](2026-11-03-wfrp-5a-design.md).
 
-5b поділено: **5b-1 — серверний рушій бою** (цей spec), **5b-2 — UI** (AttackWizard-варіант, HUD, масштаб клітинки yd/2 у grid-хелперах, live-run).
+5b поділено: **5b-1 — серверний рушій бою** (цей spec), **5b-2 — UI** (AttackWizard-варіант, HUD, підписи одиниць yd на карті, live-run).
 
 ## Мета й успіх
 
@@ -55,7 +55,8 @@
 ### 5. Хід
 
 - Ініціатива: `characteristics.i` (статична) або `i + d10` за `rules.initiative.mode`; тай-брейк за Ag (розширення `compareInitiative`); `InitiativeRollEntry` отримує поле розміру кубика (замість жорсткого `d20`).
-- Раунд = Move + Action: бонусна дія й реакція не пропонуються (`availability.ts`), off-hand не витрачає бонус-дію. Бюджет руху: `moveYd / distance.perCell` клітин (спрощення; повний перехід grid-хелперів на `distance` — 5b-2).
+- Раунд = Move + Action: бонусна дія й реакція не пропонуються (`availability.ts`), off-hand не витрачає бонус-дію. Бюджет руху: `moveYd / distance.perCell` клітин.
+- **Масштаб клітинки.** Хелпер `cellFeet(rules)` (з `distance.perCell`; d20 → 5) замінює `CELL_FEET` у `attack/bonus.ts`, `grid/{path,template,attack-reach}.ts`, `spell/{anchored-zone,cast/effects,auto-reaction}.ts`, `summon/objects-near.ts`, `abilities/registry/effects/push.ts`, `useAbilityMapAim.ts`; дальність, досяжність і рух узгоджені в рушії. wfrp: 1 клітинка = 2 ярди (рішення 5a). Тест паритету: для d20 `cellFeet` = 5 скрізь.
 
 ### 6. Баланс і шлюз
 
@@ -64,7 +65,7 @@
 
 ## Поза межами 5b-1
 
-UI-варіанти (AttackWizard, HUD, `useRuleSystem` під час вантаження — хвіст 5a), масштаб клітинки в grid-хелперах (5b-2); стани, психологія, травми, Fate/Fortune у бою (5c); магія (5d); content kind `tables` (5c/5g); якості зброї/reach (5f); бестіарій/Traits (5h). `DIFFICULTY_SL` і формули шкоди — окрема звірка з книгою.
+UI-варіанти (AttackWizard, HUD, `useRuleSystem` під час вантаження — хвіст 5a), підписи одиниць і відображення масштабу на карті (5b-2); стани, психологія, травми, Fate/Fortune у бою (5c); магія (5d); content kind `tables` (5c/5g); якості зброї/reach (5f); бестіарій/Traits (5h). `DIFFICULTY_SL` і формули шкоди — окрема звірка з книгою.
 
 ## Тестування
 
@@ -76,4 +77,4 @@ UI-варіанти (AttackWizard, HUD, `useRuleSystem` під час ванта
 ## Ризики
 
 - Хуки торкаються гарячого d20-шляху: обгортки без зміни виразів, паритет перевіряється.
-- Розмір: 4 хуки + opposed + баланс; план ділиться на задачі «хуки+d20-обгортки», «учасник», «атака/шкода», «крит/Wounds», «хід», «баланс/шлюз».
+- Розмір: 4 хуки + opposed + баланс; план ділиться на задачі «хуки+d20-обгортки», «cellFeet», «учасник», «атака/шкода», «крит/Wounds», «хід», «баланс/шлюз».
