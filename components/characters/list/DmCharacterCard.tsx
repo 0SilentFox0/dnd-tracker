@@ -40,7 +40,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const ooc = rules?.outOfCombat;
 
-  const maxHp = characterBaseHp(character, { entries, formula: rules && heroHpFormula(rules.heroScaling) }).total;
+  const maxHp = characterBaseHp(character, { entries, formula: rules && heroHpFormula(rules.heroScaling), rules, characteristics: character.characteristics }).total;
 
   const hp = ooc?.persistResources && character.resources ? currentHp(character.resources, maxHp) : maxHp;
 

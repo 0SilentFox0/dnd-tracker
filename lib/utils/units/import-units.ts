@@ -59,6 +59,7 @@ export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId
     legendaryActions: unit.legendaryActions,
     legendaryResistances: unit.legendaryResistances,
     saveProficiencies: unit.saveProficiencies as Prisma.InputJsonValue,
+    ...(unit.characteristics && { characteristics: unit.characteristics as Prisma.InputJsonObject }),
   };
 }
 

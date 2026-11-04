@@ -73,6 +73,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
         saveProficiencies: toJsonInput(data.saveProficiencies),
         statblock: toJsonInput(data.statblock),
         spellcasting: toJsonInput(data.spellcasting),
+        characteristics: toJsonInput(data.characteristics),
       },
     });
 

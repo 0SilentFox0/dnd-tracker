@@ -39,6 +39,7 @@ export function unitCreateData(campaignId: string, data: CreateUnitData): Prisma
     legendaryActions: data.legendaryActions,
     legendaryResistances: data.legendaryResistances,
     saveProficiencies: data.saveProficiencies as Prisma.InputJsonValue,
+    ...(data.characteristics && { characteristics: data.characteristics as Prisma.InputJsonObject }),
     ...(Object.keys(data.statblock).length > 0 && { statblock: data.statblock as Prisma.InputJsonValue }),
     ...((data.spellcasting.spells.length > 0 || data.spellcasting.ability !== undefined || data.spellcasting.dc !== undefined || data.spellcasting.attackBonus !== undefined) && { spellcasting: data.spellcasting as Prisma.InputJsonValue }),
   };

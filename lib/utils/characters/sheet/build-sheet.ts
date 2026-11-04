@@ -50,6 +50,7 @@ export interface SheetInput {
     proficiencies: unknown;
     spellcastingAbility: string | null;
     archetype: string | null;
+    characteristics?: unknown;
     primaryAbility: string | null;
     background: string | null;
     goals: unknown;
@@ -113,7 +114,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const showSubrace = !!input.choices && (!!classEntries || input.choices.selections.lineage !== null);
 
-  const hp = characterBaseHp(c, { entries: input.classes, formula: input.rules && heroHpFormula(input.rules.heroScaling) });
+  const hp = characterBaseHp(c, { entries: input.classes, formula: input.rules && heroHpFormula(input.rules.heroScaling), rules: input.rules, characteristics: c.characteristics });
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 

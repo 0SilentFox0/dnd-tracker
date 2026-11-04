@@ -6,6 +6,7 @@ import { getResponseJson } from "./helpers";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
@@ -27,7 +28,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (userId: string, role: "dm" | "player") =>
-  ({ userId, isDM: role === "dm", campaign: { id: "camp", maxLevel: 20, members: [{ userId, role }] } }) as never;
+  ({ userId, isDM: role === "dm", campaign: { id: "camp", rules: DEFAULT_RULES, maxLevel: 20, members: [{ userId, role }] } }) as never;
 
 const CHAR = { id: "ch", level: 3, race: "Ельф", skillTreeProgress: { "json-id": { unlockedSkills: ["attack_basic_level"] } }, seenLevel: 2, controlledBy: "owner" };
 

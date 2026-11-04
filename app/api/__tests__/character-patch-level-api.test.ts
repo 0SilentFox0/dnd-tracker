@@ -5,6 +5,7 @@ import { RACES } from "@/data/library/races";
 import { prisma } from "@/lib/db";
 import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({
@@ -21,7 +22,7 @@ vi.mock("@/lib/db", () => ({
 }));
 
 const access = (role: "dm" | "player", maxLevel = 20) =>
-  ({ userId: role === "dm" ? "dm" : "owner", isDM: role === "dm", campaign: { id: "camp", maxLevel, allowPlayerEdit: true, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
+  ({ userId: role === "dm" ? "dm" : "owner", isDM: role === "dm", campaign: { id: "camp", rules: DEFAULT_RULES, maxLevel, allowPlayerEdit: true, members: [{ userId: role === "dm" ? "dm" : "owner", role }] } }) as never;
 
 const CHARACTER = {
   id: "ch", campaignId: "camp", controlledBy: "owner", type: "player", race: "Ельф", level: 3, seenLevel: 3,

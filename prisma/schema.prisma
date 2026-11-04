@@ -146,6 +146,7 @@ model Character {
   languages           Json                @default("[]")
   proficiencies       Json                @default("{}")
   skillTreeProgress   Json                @default("{}")
+  characteristics     Json                @default("{}")
   seenLevel           Int?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
@@ -226,6 +227,7 @@ model Unit {
   saveProficiencies    Json     @default("[]")
   statblock            Json     @default("{}")
   spellcasting         Json     @default("{}")
+  characteristics      Json     @default("{}")
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   race                 Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
   spellsSummoning      Spell[]  @relation("SpellSummonUnit")

@@ -15,7 +15,7 @@ describe("character profile labels have translations", () => {
   expectLabelKeys("characterProfile", "goals.status", ["active", "done", "failed"]);
   expectLabelKeys("characterProfile", "tokens.colors", ["red", "green"]);
   expectLabelKeys("characterProfile", "tokens.counters", ["red", "green"]);
-  expectLabelKeys("characterProfile", "sheet.lines", ["base", "proficiency", "weapon", "weaponDice", "levelDice", "dmMultiplier", "noArmor", "dexterityCapped", "hitDice", "bonuses"]);
+  expectLabelKeys("characterProfile", "sheet.lines", ["base", "proficiency", "weapon", "weaponDice", "levelDice", "dmMultiplier", "noArmor", "dexterityCapped", "hitDice", "wounds", "bonuses"]);
   expectLabelKeys("characterProfile", "sheet.spellOrigin", ["lineage", "feat", "race", "background", "class"]);
   expectLabelKeys("characterProfile", "sheet.heroHp", ["formula", "total"]);
   expectLabelKeys("characterProfile", "sheet.from", ["background", "classLevel", "origin", "dm"]);

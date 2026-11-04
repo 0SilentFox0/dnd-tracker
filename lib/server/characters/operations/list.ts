@@ -33,6 +33,7 @@ const LIST_SELECT = {
   experience: true,
   inspiration: true,
   resources: true,
+  characteristics: true,
   user: { select: { displayName: true } },
 } as const;
 

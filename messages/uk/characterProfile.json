@@ -200,7 +200,8 @@
       "noArmor": "Без броні",
       "dexterityCapped": "Спритність (межа {cap})",
       "hitDice": "Кістки хітів: {dice}",
-      "bonuses": "Бонуси"
+      "bonuses": "Бонуси",
+      "wounds": "БС {sb} + 2 × БСт {tb} + БВл {wpb}{extra, plural, =0 {} other { + {extra}}}"
     },
     "abilityPick": "+{n} {ability, select, strength {СИЛ} dexterity {СПР} constitution {ТІЛ} intelligence {ІНТ} wisdom {МУД} charisma {ХАР} other {}}",
     "spellOrigin": {

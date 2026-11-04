@@ -10,6 +10,7 @@ import { resolveCharacterChoices } from "@/lib/server/characters/choices/resolve
 import { type CreateCharacterInput, createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
 import { deriveCharacterDefaults } from "@/lib/server/characters/core/derive-character-defaults";
 import { resolveCharacterOwner } from "@/lib/server/characters/core/resolve-character-owner";
+import { characteristicsJson,normalizeCharacterInput } from "@/lib/server/characters/core/system-fields";
 import { ContentError } from "@/lib/server/content/errors";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
@@ -18,6 +19,7 @@ import { toBackgroundData } from "@/lib/utils/backgrounds/row";
 import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import { classSkillIssues, skillIdsInPicks } from "@/lib/utils/characters/choices/class-skills";
 import { hasPicks } from "@/lib/utils/characters/choices/read";
+import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { CharacterClassEntry, GameClassData } from "@/types/classes";
 
 async function assertClassSkills({ campaignId, data, entries, byId }: { campaignId: string; data: CreateCharacterInput; entries: CharacterClassEntry[]; byId: Record<string, GameClassData> | undefined }) {
@@ -34,12 +36,16 @@ async function assertClassSkills({ campaignId, data, entries, byId }: { campaign
   if (issues.length > 0) throw new ContentError(issues[0].message, 422, issues);
 }
 
-async function createCharacterCore({ access, campaignId }: CampaignScope, data: CreateCharacterInput) {
-  const { heroMin, heroMax } = access.campaign.rules.initiative;
+async function createCharacterCore({ access, campaignId }: CampaignScope, input: CreateCharacterInput) {
+  const { campaign } = access;
+
+  const system = ruleSystemOf(campaign.rules);
+
+  const data = normalizeCharacterInput(system, input, campaign.rules, "create");
+
+  const { heroMin, heroMax } = campaign.rules.initiative;
 
   if (data.initiative < heroMin || data.initiative > heroMax) throw new ContentError(API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL, 400, undefined, { min: heroMin, max: heroMax });
-
-  const { campaign } = access;
 
   const applied = await applyClasses({
     campaignId,
@@ -126,6 +132,8 @@ async function createCharacterCore({ access, campaignId }: CampaignScope, data: 
         primaryAbility: data.primaryAbility ?? null,
 
         skillTreeProgress: {},
+        characteristics: characteristicsJson(data.characteristics ?? DEFAULT_CHARACTERISTICS),
+        ...(system.characteristics.kind === "wfrp" && data.characteristics && { resources: { fortune: data.characteristics.fate } }),
         ...(choices?.ok && choices.fields),
       },
       include: { user: { select: PUBLIC_USER_SELECT } },

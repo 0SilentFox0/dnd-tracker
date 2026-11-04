@@ -12,6 +12,7 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
+import type { Characteristics } from "@/lib/utils/rules/systems";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
 
@@ -40,6 +41,7 @@ export interface CharacterGoal {
  * Згрупована структура даних персонажа (як використовується в формі)
  */
 export interface CharacterFormData {
+  characteristics?: Characteristics;
   basicInfo: {
     name: string;
     type: CharacterTypeValue;
@@ -143,6 +145,7 @@ export interface Character {
   primaryAbility?: AbilityKey | null;
   goals?: CharacterGoal[];
   archetype?: string | null;
+  characteristics?: Characteristics;
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<
     string,
@@ -166,7 +169,7 @@ export interface Character {
 /** Рядок списку персонажів кампанії (GET /characters). */
 export type CharacterListItem = Pick<
   Character,
-  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "classes" | "armorClass" | "initiative"
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "classes" | "armorClass" | "initiative" | "characteristics"
 > & { user?: { displayName: string } | null; reviewNote?: string | null; experience?: number; inspiration?: boolean; resources?: CharacterResources };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";

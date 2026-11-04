@@ -200,7 +200,8 @@
       "noArmor": "No armor",
       "dexterityCapped": "Dexterity (cap {cap})",
       "hitDice": "Hit dice: {dice}",
-      "bonuses": "Bonuses"
+      "bonuses": "Bonuses",
+      "wounds": "SB {sb} + 2 × TB {tb} + WPB {wpb}{extra, plural, =0 {} other { + {extra}}}"
     },
     "abilityPick": "+{n} {ability, select, strength {STR} dexterity {DEX} constitution {CON} intelligence {INT} wisdom {WIS} charisma {CHA} other {}}",
     "spellOrigin": {

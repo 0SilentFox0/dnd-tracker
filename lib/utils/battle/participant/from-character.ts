@@ -27,9 +27,9 @@ import { classProficiencies, withGrantedProficiencies } from "@/lib/utils/battle
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { choiceSelections, selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
-import { classHp, classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
+import { classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
 import { applyClassArmor } from "@/lib/utils/characters/classes/armor-class";
-import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
+import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { applyCharacterResources, storedCharacterState } from "@/lib/utils/characters/resources/battle";
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -209,7 +209,7 @@ export async function createBattleParticipantFromCharacter(
     ? DND_SKILLS.filter((k) => (rawSkills as Record<string, unknown>)[k] === true)
     : [];
 
-  const computedMaxHp = resolvedClasses ? classHp(resolvedClasses, character.constitution) : heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
+  const computedMaxHp = characterBaseHp(character, { entries: resolvedClasses, formula: heroHpFormula(rules.heroScaling), rules, characteristics: character.characteristics }).total;
 
   const resolvedAbilities = [
     ...collectCharacterAbilities({

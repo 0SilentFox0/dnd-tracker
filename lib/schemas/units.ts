@@ -5,6 +5,7 @@ import { AttackType, RECHARGE_THRESHOLDS } from "@/lib/constants/battle";
 import { isChallengeRating } from "@/lib/constants/challenge";
 import { WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
+import { CharacteristicsSchema } from "@/lib/utils/rules/systems";
 
 export const unitAttackSchema = z.object({
   name: z.string(),
@@ -109,6 +110,7 @@ export const createUnitSchema = z.object({
   spellcasting: UnitSpellcastingSchema.default({ spells: [] }),
   morale: z.number().min(-10).max(10).default(0),
   avatar: unitAvatarSchema,
+  characteristics: CharacteristicsSchema.optional(),
   ...monsterCreateFields,
 });
 
@@ -138,6 +140,7 @@ export const updateUnitSchema = z.object({
   maxTargets: z.number().min(1).optional(),
   morale: z.number().min(-10).max(10).optional(),
   avatar: unitAvatarSchema,
+  characteristics: CharacteristicsSchema.optional(),
   ...monsterFields,
   multiattack: multiattack.optional(),
   legendaryActions: legendaryActions.optional(),
@@ -176,6 +179,7 @@ export const importUnitSchema = z.object({
   statblock: UnitStatblockSchema.default({}),
   spellcasting: UnitSpellcastingSchema.default({ spells: [] }),
   avatar: unitAvatarSchema,
+  characteristics: CharacteristicsSchema.optional(),
   ...monsterCreateFields,
 });
 
