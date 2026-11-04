@@ -114,6 +114,10 @@
         "title": "Deck card",
         "description": "The slide count and the scenario scene the deck is bound to."
       },
+      "start": {
+        "title": "Start the show",
+        "description": "This button puts the deck on the players’ show screen. It is disabled in the demo."
+      },
       "present": {
         "title": "Open the preview",
         "description": "In the demo a deck opens in a private preview. Let's go there."
@@ -129,6 +133,10 @@
       "back": {
         "title": "Back to decks",
         "description": "The live show for players starts from the “Show” screen — it is disabled in the demo."
+      },
+      "header": {
+        "title": "“Show” button",
+        "description": "While a live show is running, this button in the header takes players to the show screen. In the demo it is a placeholder."
       }
     },
     "world": {

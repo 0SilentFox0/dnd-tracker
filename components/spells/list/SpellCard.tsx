@@ -7,6 +7,7 @@ import { Copy, Move, Pencil, Sparkles, X } from "lucide-react";
 
 import { SpellPrintCard } from "./SpellPrintCard";
 
+import { ZoomableEntityIcon } from "@/components/common/ZoomableEntityIcon";
 import { HudCard, HudPill } from "@/components/hud/page";
 import { SpellComponentsLine } from "@/components/spells/SpellComponentsLine";
 import { SpellIcon } from "@/components/spells/SpellIcon";
@@ -64,7 +65,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
     <HudCard data-tour={dataTour} href={canEdit ? `/campaigns/${campaignId}/dm/spells/${spell.id}` : undefined} linkLabel={spell.name} className="flex h-full flex-col gap-2">
       <div className="flex items-start gap-3">
         <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[radial-gradient(var(--color-hud-raised),var(--color-hud-page))] shadow-[inset_0_0_0_2px_var(--color-hud-gold)]">
-          <SpellIcon spell={spell} size={64} className="size-full object-cover p-0.5" />
+          <ZoomableEntityIcon src={spell.icon} name={spell.name} size={128} className="size-16 rounded-none bg-transparent" fallback={<SpellIcon spell={spell} size={64} />} />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>

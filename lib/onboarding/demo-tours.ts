@@ -73,10 +73,12 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
   tour("show", "/dm/show", [
     step("show", "decks", { route: "/dm/show" }),
     step("show", "deck-card"),
+    step("show", "start"),
     step("show", "present"),
     step("show", "stage", { routeFromTarget: "show.present" }),
     step("show", "nav", { placement: "top" }),
     step("show", "back"),
+    step("show", "header", { placement: "bottom" }),
   ]),
   tour("world", "/world", [
     step("world", "crumbs", { route: "/world" }),

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Step } from "react-joyride";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ import type { DemoTourRunnerProps } from "@/components/onboarding/DemoTourRunner
 import { DemoTourTooltip } from "@/components/onboarding/DemoTourTooltip";
 import { useSetOnboardingFlag } from "@/lib/hooks/onboarding";
 import { useTranslator } from "@/lib/i18n/use-translator";
+import { setActiveDemoTour } from "@/lib/onboarding/active-demo-tour";
 import { DEMO_TOURS } from "@/lib/onboarding/demo-tours";
 import { demoTourFlagKey, type DemoTourId } from "@/lib/onboarding/flag-keys";
 
@@ -135,6 +136,12 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
   const [activeTour, setActiveTour] = useState<DemoTourId | null>(null);
 
   const [run, setRun] = useState(false);
+
+  useEffect(() => {
+    setActiveDemoTour(run ? activeTour : null);
+
+    return () => setActiveDemoTour(null);
+  }, [run, activeTour]);
 
   const lastStepShown = useRef(false);
 

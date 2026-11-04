@@ -39,7 +39,7 @@ export function DeckCard({ deck, href, actions, pending = false, canEdit = true,
         <Button asChild size="sm" variant="outline">
           <Link href={href} data-tour="show.present">{canEdit ? tc("actions.edit") : t("decksPage.preview")}</Link>
         </Button>
-        {canEdit && <Button size="sm" disabled={deck.slideCount === 0 || pending} onClick={actions?.start}>{t("startShow")}</Button>}
+        {canEdit && <Button size="sm" data-tour={dataTour ? "show.start" : undefined} disabled={deck.slideCount === 0 || pending} onClick={actions?.start}>{t("startShow")}</Button>}
         {canEdit && <Button size="sm" variant="outline" disabled={pending} onClick={() => void askRemove()}>{tc("actions.delete")}</Button>}
       </div>
     </HudCard>
