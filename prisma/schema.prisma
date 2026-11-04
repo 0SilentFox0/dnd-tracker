@@ -1335,6 +1335,7 @@ model UnitBase {
   saveProficiencies    Json     @default("[]")
   statblock            Json     @default("{}")
   spellcasting         Json     @default("{}")
+  characteristics      Json     @default("{}")
   sourceCampaignId     String
   validFrom            Int
   validTo              Int?
