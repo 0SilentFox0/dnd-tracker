@@ -29,11 +29,11 @@
 
 ### 1. Хуки (`RuleSystemDefinition`)
 
-Нові поля: `resolveAttack(ctx)`, `mitigateDamage(ctx)`, `onZeroHp(ctx)`, `initiative(p, ctx)`, `combat` (економіка дій: `bonusAction: false`, `reaction: false`). d20-реалізація — обгортки наявного коду (`calculateAttackRoll`+`getEffectiveArmorClass`+`judgeHit`; `applyResistance`-крок; `heroGoesDown`/`unitDiesAtZero`; `calculateInitiative`) без зміни результатів. Виклик — лише через `ruleSystemOf(flow.ctx.rules)`.
+Нові поля: `resolveAttack(ctx)`, `mitigateDamage(ctx)`, `onZeroHp(ctx)`, `initiative(p, ctx)`, `combat` (економіка дій: `bonusAction: false`, `reaction: false`). Хуки необов'язкові й живуть у `combat`: у d20 їх немає, місця виклику роблять `if (hook) … else <наявний код>` — d20-шлях не змінюється взагалі (замість обгорток). Виклик — лише через `ruleSystemOf(flow.ctx.rules)`.
 
 Точки підключення: `attack/process/run.ts:72-93` і `server-attack.ts:48-62` (замість `calculateAttackRoll`/`judgeHit`); `damage/compute.ts` між `applyResistance` і `totalFinalDamage`; `damage/consequences.ts` поруч із `heroGoesDown`/`unitDiesAtZero`, плюс `settleStatusChange`; `turn/initiative.ts`, `turn/roll-initiative.ts`; `actions/availability.ts`.
 
-`AttackRollResult` стає union: `{kind:"d20",…}` (наявна форма) | `{kind:"percentile", roll, target, sl, reversed, location, opposed?:{defenderRoll, defenderSl, defenseKind}, momentum?}`. `strikeD20` (відкидає >20) і `rollStrike` отримують розмір кубика від системи.
+`AttackRollResult` лишається, отримує необов'язкове поле `percentile?: {roll, target, sl, location, defender?:{kind, roll, sl}, momentumUsed?}` (замість union — менший радіус змін). `strikeD20` (відкидає >20) і `rollStrike` отримують розмір кубика від системи.
 
 ### 2. Учасник
 
