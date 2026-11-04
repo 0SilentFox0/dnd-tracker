@@ -23,7 +23,7 @@ export const InitiativeTrack = memo(function InitiativeTrack() {
   useFlip(track, queue);
 
   return (
-    <div ref={track} className="relative flex h-[72px] items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
+    <div ref={track} data-tour="battle.initiative" className="relative flex h-[72px] items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
       {queue.map((e, i) =>
         e.kind === "round" ? (
           <span key="round" data-flip="round" className="relative mx-0.5 h-12 w-px shrink-0 bg-white/30">

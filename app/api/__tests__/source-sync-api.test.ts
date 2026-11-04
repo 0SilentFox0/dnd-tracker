@@ -7,7 +7,11 @@ import { ContentError } from "@/lib/server/content/errors";
 import { applySafeSource, applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => {
+  const requireDM = vi.fn();
+
+  return { requireDM, requireCampaignAccess: vi.fn(), requireCampaignDMOrDemoAccess: vi.fn((id: string) => requireDM(id)) };
+});
 vi.mock("@/lib/ai/api-tokens", () => ({ verifyApiToken: vi.fn() }));
 vi.mock("@/lib/server/templates/sync/service", () => ({ getSourceDiff: vi.fn(), applySource: vi.fn(), applySafeSource: vi.fn() }));
 

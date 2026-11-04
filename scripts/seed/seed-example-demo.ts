@@ -287,6 +287,19 @@ async function seed(userId: string) {
       await tx.worldMap.create({ data: { id: [DEMO_IDS.maps.alderwake, DEMO_IDS.maps.grove, DEMO_IDS.maps.vault][index], campaignId: campaign.id, parentMarkerId: marker.id, name, imageUrl, width: dimensions[0], height: dimensions[1], fogEnabled: false } });
     }
 
+    // журнал подорожей для туру: прибуття, перехід і відпочинок
+    const village = { mapId: world.id, x: 0.22, y: 0.62 };
+
+    const grove = { mapId: world.id, x: 0.56, y: 0.43 };
+
+    const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000);
+
+    await tx.worldTravelLog.createMany({ data: [
+      { campaignId: campaign.id, mapId: world.id, characterIds: [DEMO_IDS.characters.scout], to: json(village), toMarkerId: DEMO_IDS.markers.village, rest: "none", kind: "enter", byUserId: userId, createdAt: hoursAgo(6) },
+      { campaignId: campaign.id, mapId: world.id, characterIds: [DEMO_IDS.characters.scout], from: json(village), to: json(grove), toMarkerId: DEMO_IDS.markers.grove, rest: "short", kind: "travel", byUserId: userId, createdAt: hoursAgo(3) },
+      { campaignId: campaign.id, mapId: world.id, characterIds: [DEMO_IDS.characters.scout], from: json(grove), to: json(grove), toMarkerId: null, rest: "long", kind: "rest", byUserId: userId, createdAt: hoursAgo(1) },
+    ] });
+
     const groveMap = { cols: 9, rows: 12, background: MAPS.battle, opacity: 0.35 };
 
     const mazeMap = { cols: 9, rows: 12, background: MAPS.battle, opacity: 0.35, maze: { ...emptyMaze("medium"), exit: { x: 8, y: 6 }, walls: ["3:0:e", "3:1:e", "3:2:e", "3:3:e", "6:4:e", "6:5:e", "6:6:e", "1:8:s", "2:8:s", "3:8:s", "5:9:e", "5:10:e"], teleports: [[{ x: 5, y: 10 }, { x: 7, y: 2 }]], fog: ["4:5", "4:6"], dark: false } };

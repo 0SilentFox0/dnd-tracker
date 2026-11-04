@@ -46,9 +46,9 @@ function QuickAction({ icon: Icon, label, onClick, closeAfter, tone = "text-[var
   );
 }
 
-function PanelSection({ title, className, children }: { title: string; className?: string; children: ReactNode }) {
+function PanelSection({ title, className, children, "data-tour": dataTour }: { title: string; className?: string; children: ReactNode; "data-tour"?: string }) {
   return (
-    <section className="pt-2">
+    <section className="pt-2" data-tour={dataTour}>
       <h4 className="hud-sc flex h-7 items-center border-b border-white/[.14] text-[13px] tracking-[.08em] text-[var(--hud-muted)]">{title}</h4>
       <div className={className}>{children}</div>
     </section>
@@ -96,6 +96,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
           "transition-all duration-200",
           open && "pointer-events-none opacity-0",
         )}
+        data-tour="battle.dm-open"
         aria-label={t("panel.open")}
       >
         <ChevronLeft className="size-6" />
@@ -120,6 +121,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
             type="button"
             className="flex size-8 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]"
             onClick={closePanel}
+            data-tour="battle.dm-close"
             aria-label={t("panel.close")}
           >
             <ChevronLeft className="size-5 rotate-180" />
@@ -127,36 +129,38 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         </div>
 
         <div className="flex-1 space-y-2 overflow-y-auto p-4">
-          <QuickAction icon={ScrollText} label={dialogs.log.open ? t("panel.logOpen") : t("panel.openLog")} onClick={dialogs.log.show} />
+          <div data-tour="battle.dm-actions" className="space-y-2">
+            <QuickAction icon={ScrollText} label={dialogs.log.open ? t("panel.logOpen") : t("panel.openLog")} onClick={dialogs.log.show} />
 
-          {dialogs.log.open && <DmBattleLog onClose={() => dialogs.log.setOpen(false)} />}
+            {dialogs.log.open && <DmBattleLog onClose={() => dialogs.log.setOpen(false)} />}
 
-          <QuickAction icon={UserPlus} label={t("panel.addParticipant")} onClick={dialogs.addParticipant.show} closeAfter={closePanel} />
+            <QuickAction icon={UserPlus} label={t("panel.addParticipant")} onClick={dialogs.addParticipant.show} closeAfter={closePanel} />
 
-          <QuickAction icon={Sparkles} tone="text-[#8fd0e8]" label={t("panel.castSpell")} onClick={onOpenCastSpell} closeAfter={closePanel} />
+            <QuickAction icon={Sparkles} tone="text-[#8fd0e8]" label={t("panel.castSpell")} onClick={onOpenCastSpell} closeAfter={closePanel} />
 
-          {isActive && (
-            <QuickAction icon={RefreshCw} label={t("panel.refreshSources")} disabled={refreshSources.isPending} onClick={refreshSources.run} />
-          )}
+            {isActive && (
+              <QuickAction icon={RefreshCw} label={t("panel.refreshSources")} disabled={refreshSources.isPending} onClick={refreshSources.run} />
+            )}
 
-          {isActive && (
-            <QuickAction
-              icon={Dices}
-              label={t("panel.randomUnits")}
-              disabled={!randomUnits.can || randomUnits.isPending}
-              title={t("panel.randomUnitsHint")}
-              onClick={randomUnits.run}
-            />
-          )}
+            {isActive && (
+              <QuickAction
+                icon={Dices}
+                label={t("panel.randomUnits")}
+                disabled={!randomUnits.can || randomUnits.isPending}
+                title={t("panel.randomUnitsHint")}
+                onClick={randomUnits.run}
+              />
+            )}
 
-          {canScale && (
-            <PanelSection title={t("panel.enemyUnits")} className="grid grid-cols-2 gap-2 pt-2">
-              <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t("panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
-              <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t("panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
-            </PanelSection>
-          )}
+            {canScale && (
+              <PanelSection title={t("panel.enemyUnits")} className="grid grid-cols-2 gap-2 pt-2">
+                <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t("panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
+                <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t("panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
+              </PanelSection>
+            )}
+          </div>
 
-          <PanelSection title={t("panel.participants")}>
+          <PanelSection title={t("panel.participants")} data-tour="battle.dm-participants">
             {participants.length === 0 ? (
               <p className="py-2 text-sm italic text-[var(--hud-muted)]">{t("panel.nobody")}</p>
             ) : (

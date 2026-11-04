@@ -4,6 +4,7 @@ import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Input } from "@/components/ui/input";
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/lib/hooks/common";
 import { useTracks } from "@/lib/hooks/music";
 import { cn } from "@/lib/utils";
 import { filterTracks, groupTracks } from "@/lib/utils/audio/playlist-groups";
@@ -23,7 +24,9 @@ export function TrackPicker({ campaignId, value, onChange }: { campaignId: strin
 
   const [query, setQuery] = useState("");
 
-  const groups = groupTracks(filterTracks(tracks, { query, group: null, kind: null }));
+  const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+
+  const groups = groupTracks(filterTracks(tracks, { query: debouncedQuery, group: null, kind: null }));
 
   return (
     <div className="space-y-2">

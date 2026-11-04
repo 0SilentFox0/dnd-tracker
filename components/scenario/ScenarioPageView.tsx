@@ -22,6 +22,22 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
 
   const isHero = page.kind === "hero";
 
+  let bindingsId: string | undefined;
+
+  let notesId: string | undefined;
+
+  for (const s of page.content.sections) {
+    if (!!collapse && sectionDone(s, isHero, progress?.played).done && !collapse.isExpanded(s.id)) continue;
+
+    if (!bindingsId && play && s.marker) bindingsId = `s-${s.id}`;
+
+    for (const r of s.rows) {
+      if (!bindingsId && play && (r.slide || r.battleId || r.marker)) bindingsId = `r-${r.id}`;
+
+      if (!notesId && !isDocEmpty(r.notes)) notesId = r.id;
+    }
+  }
+
   return (
     <>
       <header className="title">
@@ -30,7 +46,7 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
         <ScenarioLegend legend={page.content.legend} />
       </header>
       <main>
-        {page.content.sections.map((s) => {
+        {page.content.sections.map((s, si) => {
           const { done, byPlay } = sectionDone(s, isHero, progress?.played);
 
           const collapsed = !!collapse && done && !collapse.isExpanded(s.id);
@@ -56,14 +72,14 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
                   {playedButton}
                 </div>
               )}
-              <div className="sb-sec-head">
+              <div className="sb-sec-head" data-tour={si === 0 ? "scenario.section" : undefined}>
                 <div className="sb-sec-orn">
                   <SectionIcon name={icon} className="sb-sec-icon" />
                 </div>
                 <h2>{s.title}</h2>
                 {!collapsed && playedButton}
                 {play && s.marker && !collapsed && (
-                  <div className="sb-play sans">
+                  <div className="sb-play sans" data-tour={bindingsId === `s-${s.id}` ? "scenario.bindings" : undefined}>
                     <MarkerPlay campaignId={campaignId} marker={s.marker} play={play} />
                   </div>
                 )}
@@ -92,10 +108,10 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
                       }
                     >
                       <div className="story">
-                        {play && <RowPlayControls campaignId={campaignId} row={r} play={play} />}
+                        {play && <RowPlayControls campaignId={campaignId} row={r} play={play} data-tour={bindingsId === `r-${r.id}` ? "scenario.bindings" : undefined} />}
                         <ScenarioRichText doc={r.story} campaignId={campaignId} linkMentions />
                       </div>
-                      <aside className="notes">{!isDocEmpty(r.notes) && <ScenarioRichText doc={r.notes} campaignId={campaignId} linkMentions />}</aside>
+                      <aside className="notes" data-tour={notesId === r.id ? "scenario.notes" : undefined}>{!isDocEmpty(r.notes) && <ScenarioRichText doc={r.notes} campaignId={campaignId} linkMentions />}</aside>
                     </div>
                   );
                 })}

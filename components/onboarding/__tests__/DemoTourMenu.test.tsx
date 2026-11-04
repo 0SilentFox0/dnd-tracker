@@ -21,6 +21,7 @@ describe("DemoTourMenu", () => {
     render(<DemoTourMenu />);
 
     const list = screen.getByRole("list");
+
     expect(list.className).toContain("grid-cols-1");
     expect(list.className).not.toContain("sm:grid-cols-2");
     expect(screen.getAllByRole("listitem")).toHaveLength(7);

@@ -49,7 +49,7 @@ function TocList({ items, onPick }: { items: TocItem[]; onPick: (id: string, eve
 export function ScenarioToc({ items, inline, drawer, onPick }: Props) {
   const t = useTranslations("scenario.toc");
 
-  if (inline) return <aside className="sb-toc"><TocList items={items} onPick={(id) => onPick?.(id)} /></aside>;
+  if (inline) return <aside className="sb-toc" data-tour="scenario.toc"><TocList items={items} onPick={(id) => onPick?.(id)} /></aside>;
 
   // на iOS vaul фіксує body і при закритті повертає стару прокрутку — переходимо вже після закриття
   const pick = (id: string, event: MouseEvent<HTMLAnchorElement>) => {

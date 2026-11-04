@@ -41,7 +41,7 @@ describe("DashboardGroups", () => {
 
     expect(tileLinks()).toHaveLength(14);
     expect(container.querySelector('[data-tour="dashboard.search"]')).toBeTruthy();
-    expect(container.querySelector('[data-tour="dashboard.navigation"]')).toBeTruthy();
+    for (const g of ["game", "heroes", "libraries"]) expect(container.querySelector(`[data-tour="dashboard.group-${g}"]`)).toBeTruthy();
   });
 
   it("shows pending drafts in the characters subtitle", async () => {

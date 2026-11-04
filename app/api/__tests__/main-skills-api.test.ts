@@ -8,10 +8,11 @@ const db = vi.hoisted(() => ({
 
 const revalidateTag = vi.hoisted(() => vi.fn());
 
-const auth = vi.hoisted(() => ({
-  requireDM: vi.fn(),
-  requireCampaignAccess: vi.fn(),
-}));
+const auth = vi.hoisted(() => {
+  const requireDM = vi.fn();
+
+  return { requireDM, requireCampaignAccess: vi.fn(), requireCampaignDMOrDemoAccess: vi.fn((id: string) => requireDM(id)) };
+});
 
 vi.mock("@/lib/db", async () => {
   const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
@@ -24,6 +25,7 @@ vi.mock("@/lib/utils/api/api-auth", async (orig) => ({
   ...(await orig<object>()),
   requireDM: auth.requireDM,
   requireCampaignAccess: auth.requireCampaignAccess,
+  requireCampaignDMOrDemoAccess: auth.requireCampaignDMOrDemoAccess,
 }));
 
 import * as one from "@/app/api/campaigns/[id]/main-skills/[mainSkillId]/route";

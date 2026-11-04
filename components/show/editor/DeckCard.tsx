@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import type { SlideDeckSummary } from "@/types/show";
 
-export function DeckCard({ deck, href, actions, pending = false, canEdit = true, scene }: { deck: SlideDeckSummary; href: string; actions?: { start(): void; remove(): void }; pending?: boolean; canEdit?: boolean; scene?: string }) {
+export function DeckCard({ deck, href, actions, pending = false, canEdit = true, scene, "data-tour": dataTour }: { deck: SlideDeckSummary; href: string; actions?: { start(): void; remove(): void }; pending?: boolean; canEdit?: boolean; scene?: string; "data-tour"?: string }) {
   const t = useTranslations("show");
 
   const tc = useTranslations("common");
@@ -24,7 +24,7 @@ export function DeckCard({ deck, href, actions, pending = false, canEdit = true,
   };
 
   return (
-    <HudCard className="flex flex-col gap-2">
+    <HudCard className="flex flex-col gap-2" data-tour={dataTour}>
       <div className="flex aspect-video items-center justify-center overflow-hidden rounded bg-black/50">
         {deck.coverUrl ? <OptimizedImage src={deck.coverUrl} alt="" width={480} height={270} className="size-full object-cover" /> : <Images className="size-8 text-hud-muted" aria-hidden />}
       </div>
@@ -39,7 +39,7 @@ export function DeckCard({ deck, href, actions, pending = false, canEdit = true,
         <Button asChild size="sm" variant="outline">
           <Link href={href} data-tour="show.present">{canEdit ? tc("actions.edit") : t("decksPage.preview")}</Link>
         </Button>
-        {canEdit && <Button size="sm" disabled={deck.slideCount === 0 || pending} onClick={actions?.start}>{t("startShow")}</Button>}
+        {canEdit && <Button size="sm" data-tour={dataTour ? "show.start" : undefined} disabled={deck.slideCount === 0 || pending} onClick={actions?.start}>{t("startShow")}</Button>}
         {canEdit && <Button size="sm" variant="outline" disabled={pending} onClick={() => void askRemove()}>{tc("actions.delete")}</Button>}
       </div>
     </HudCard>

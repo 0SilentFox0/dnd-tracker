@@ -24,7 +24,6 @@ describe("BattleListCard", () => {
     expect(screen.getByText("На тракті")).toBeTruthy();
     expect(hrefOf("battleSetup.list.card.play")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getByRole("link", { name: "battleSetup.list.card.play" }).getAttribute("data-tour")).toBe("battle.open");
-    expect(container.querySelector('[data-tour="battle.list"]')).toBeTruthy();
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.getAllByRole("button")).toHaveLength(1);
   });
@@ -33,7 +32,6 @@ describe("BattleListCard", () => {
     render(<BattleListCard battle={battle} campaignId="c1" kind="completed" canEdit={false} />);
 
     expect(screen.getByRole("link", { name: "battleSetup.list.card.play" }).getAttribute("data-tour")).toBe("battle.open");
-    expect(document.querySelector('[data-tour="battle.list"]')).toBeTruthy();
     expect(screen.queryByRole("button", { name: "battleSetup.list.card.delete" })).toBeNull();
   });
 

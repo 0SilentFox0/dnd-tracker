@@ -126,7 +126,10 @@
     "ally": "Ally",
     "quantity": "Quantity:",
     "alreadyEnemy": "Already an enemy",
-    "toEnemies": "To enemies"
+    "toEnemies": "To enemies",
+    "search": "Search units",
+    "raceFilter": "Filter by race",
+    "noMatches": "No units match"
   },
   "autopick": {
     "title": "Enemy picker",

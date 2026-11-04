@@ -17,15 +17,17 @@ interface HudCardProps {
   href?: string;
   linkLabel?: string;
   className?: string;
+  "data-tour"?: string;
   children: ReactNode;
 }
 
-export function HudCard({ tone = "default", accent, asChild = false, href, linkLabel, className, children }: HudCardProps) {
+export function HudCard({ tone = "default", accent, asChild = false, href, linkLabel, className, "data-tour": dataTour, children }: HudCardProps) {
   const Comp = asChild ? Slot : "div";
 
   return (
     <Comp
       data-tone={tone}
+      data-tour={dataTour}
       data-clickable={href ? "" : undefined}
       style={accent ? { borderLeftColor: accent } : undefined}
       className={cn(href && "relative cursor-pointer", "block rounded-lg bg-hud-panel p-3 text-hud-bone transition-shadow", accent && "border-l-[3px]", TONE[tone], className)}

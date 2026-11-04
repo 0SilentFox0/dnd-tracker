@@ -29,7 +29,7 @@ export function BattlePreparationView({
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-12 animate-in fade-in duration-1000 relative">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
 
-      <div className="max-w-2xl w-full space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-300">
+      <div data-tour="battle.arena" className="max-w-2xl w-full space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-300">
         <div className="space-y-4">
           <span className="hud-sc inline-flex h-8 items-center border-y border-[var(--gold)]/60 bg-[var(--gold)]/[.08] px-5 text-sm tracking-[.2em] text-[var(--gold)]">
             {t("badge")}
@@ -78,6 +78,7 @@ export function BattlePreparationView({
           {isDM ? (
             <button
               type="button"
+              data-tour="battle.start"
               className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] shadow-[0_0_40px_rgba(230,194,90,.35)] transition-transform active:scale-95 disabled:opacity-70 sm:w-80 sm:text-2xl"
               onClick={onStartBattle}
               disabled={isStarting || !canStart}

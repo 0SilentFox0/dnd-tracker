@@ -11,6 +11,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
   requireDM: vi.fn(),
+  requireCampaignAccess: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -29,7 +30,7 @@ describe("GET /api/campaigns/[id]", () => {
   });
 
   it("повертає 401, якщо користувач не авторизований", async () => {
-    vi.mocked(apiAuth.requireAuth).mockResolvedValue(
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
       NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
     );
 
@@ -49,9 +50,7 @@ describe("GET /api/campaigns/[id]", () => {
   });
 
   it("повертає 404, якщо кампанію не знайдено", async () => {
-    vi.mocked(apiAuth.requireAuth).mockResolvedValue({
-      userId: "user-1",
-    });
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "user-1" } as never);
     vi.mocked(prisma.campaign.findUnique).mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/campaigns/[id]/route");
@@ -70,24 +69,7 @@ describe("GET /api/campaigns/[id]", () => {
   });
 
   it("повертає 403, якщо користувач не учасник кампанії", async () => {
-    vi.mocked(apiAuth.requireAuth).mockResolvedValue({
-      userId: "user-1",
-    });
-    vi.mocked(prisma.campaign.findUnique).mockResolvedValue({
-      id: "c1",
-      name: "Test",
-      description: null,
-      inviteCode: "invite-1",
-      dmUserId: "dm-1",
-      maxLevel: 20,
-      allowPlayerEdit: true,
-      status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      friendlyFire: false,
-      members: [], // немає поточного юзера
-      dm: { id: "dm-1", email: "dm@test.com", displayName: "DM", avatar: null, createdAt: new Date() },
-    } as never);
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(NextResponse.json({ error: API_ERRORS.FORBIDDEN }, { status: 403 }));
 
     const { GET } = await import("@/app/api/campaigns/[id]/route");
 
@@ -107,9 +89,7 @@ describe("GET /api/campaigns/[id]", () => {
   it("повертає 200 та кампанію, якщо користувач — учасник", async () => {
     const campaignId = "c1";
 
-    vi.mocked(apiAuth.requireAuth).mockResolvedValue({
-      userId: "user-1",
-    });
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "user-1" } as never);
 
     const campaign = {
       id: campaignId,

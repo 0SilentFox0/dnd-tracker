@@ -166,11 +166,11 @@ export function exitHandler(req: Request, campaignId: string) {
 
 export async function logHandler(campaignId: string) {
   try {
-    const access = await requireCampaignAccess(campaignId);
+    const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
 
     if (access instanceof NextResponse) return access;
 
-    if (access.isDM) return NextResponse.json(await readTravelLog(campaignId, TRAVEL_LOG_LIMIT));
+    if (access.isDM || access.isDemo) return NextResponse.json(await readTravelLog(campaignId, TRAVEL_LOG_LIMIT));
 
     const mine = await activePlayerHeroes(campaignId, { controlledBy: access.userId });
 

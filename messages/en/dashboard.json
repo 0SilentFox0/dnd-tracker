@@ -91,6 +91,11 @@
       "subtitle": "Campaign rules",
       "keywords": "settings"
     },
+    "ai": {
+      "title": "AI, API and MCP",
+      "subtitle": "API tokens, MCP connection and AI assistant",
+      "keywords": "mcp, api, token, claude, cursor, assistant"
+    },
     "acquaintances": {
       "title": "Acquaintances",
       "subtitle": "NPCs the heroes have met",

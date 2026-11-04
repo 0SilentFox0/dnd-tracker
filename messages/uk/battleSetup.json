@@ -126,7 +126,10 @@
     "ally": "Союзник",
     "quantity": "Кількість:",
     "alreadyEnemy": "Вже ворог",
-    "toEnemies": "До ворогів"
+    "toEnemies": "До ворогів",
+    "search": "Пошук юнітів",
+    "raceFilter": "Фільтр за расою",
+    "noMatches": "Нічого не знайдено"
   },
   "autopick": {
     "title": "Підбір ворогів",

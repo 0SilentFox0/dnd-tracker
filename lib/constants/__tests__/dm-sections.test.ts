@@ -32,11 +32,11 @@ describe("dmSectionsFor", () => {
     expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))).toEqual(expect.arrayContaining(["characters", "battles", "scenario", "assistant", "ai"]));
   });
 
-  it("menu and page tiles agree on a template except menu-only entries", () => {
+  it("menu and page tiles agree on a template", () => {
     for (const classesEnabled of [false, true]) {
       const ctx = { isTemplate: true, classesEnabled };
 
-      expect(paths(dmSectionsFor(ctx)).filter((p) => !paths(dmTilesFor(ctx)).includes(p))).toEqual(["ai"]);
+      expect(paths(dmSectionsFor(ctx)).filter((p) => !paths(dmTilesFor(ctx)).includes(p))).toEqual([]);
     }
   });
 

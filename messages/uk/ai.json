@@ -300,7 +300,7 @@
     "sectionRows": "Фокус: розділ «{title}», {rows, plural, one {# рядок} few {# рядки} many {# рядків} other {# рядків}}"
   },
   "page": {
-    "title": "AI і API",
+    "title": "AI, API і MCP",
     "titleTemplate": "API",
     "subtitle": "Токени для зовнішніх AI-клієнтів і підключення MCP.",
     "subtitleTemplate": "Токени для доступу до контенту шаблону через API.",

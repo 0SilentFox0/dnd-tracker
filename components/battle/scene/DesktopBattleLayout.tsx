@@ -81,7 +81,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         </aside>
         {battle.map ? (
           <main className="flex min-h-0 flex-col">
-            <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 pt-2">
+            <div data-tour="battle.map-tools" className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 pt-2">
               <div ref={setToolsSlot} className="flex min-w-0 items-center" />
               <HudChipTabs
                 ariaLabel={t("viewMode")}
@@ -102,7 +102,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         ) : (
           <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4"><BattleColumns /></main>
         )}
-        <aside className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
+        <aside data-tour="battle.log" className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
           <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
             {selected ? t("participant") : t("log")}
             {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]">{t("backToLog")}</button>}

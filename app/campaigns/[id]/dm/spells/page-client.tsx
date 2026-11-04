@@ -40,7 +40,7 @@ export function DMSpellsPageClient({ campaignId, canEdit = true }: { campaignId:
             </Button>}
             {count > 0 && (
               <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
-                <Link href={`/campaigns/${campaignId}/dm/print/spells`} target="_blank" rel="noopener noreferrer">
+                <Link data-tour="libraries.print" href={`/campaigns/${campaignId}/dm/print/spells`} target="_blank" rel="noopener noreferrer">
                   <Printer className="h-4 w-4 mr-1" />
                   {t("page.print")}
                 </Link>
@@ -60,13 +60,15 @@ export function DMSpellsPageClient({ campaignId, canEdit = true }: { campaignId:
       />
       {canEdit && <OnboardingHint id="dm.spells" />}
       {list.listFilter.tags.length > 0 && (
-        <HudChipTabs
-          ariaLabel={t("page.listAria")}
-          items={[
-            { key: "all", label: t("page.filterAll"), active: list.listFilter.value === null, onSelect: () => list.listFilter.set(null) },
-            ...list.listFilter.tags.map((tag) => ({ key: tag, label: tag, active: list.listFilter.value === tag, onSelect: () => list.listFilter.set(tag) })),
-          ]}
-        />
+        <div data-tour="libraries.filters">
+          <HudChipTabs
+            ariaLabel={t("page.listAria")}
+            items={[
+              { key: "all", label: t("page.filterAll"), active: list.listFilter.value === null, onSelect: () => list.listFilter.set(null) },
+              ...list.listFilter.tags.map((tag) => ({ key: tag, label: tag, active: list.listFilter.value === tag, onSelect: () => list.listFilter.set(tag) })),
+            ]}
+          />
+        </div>
       )}
 
       {list.isLoading && count === 0 ? (
@@ -88,7 +90,7 @@ export function DMSpellsPageClient({ campaignId, canEdit = true }: { campaignId:
               className="space-y-2"
             >
               {list.view.groups.map(([groupName, levels], index) => {
-                const group = (
+                return (
                   <SpellGroupAccordion
                     key={groupName}
                     groupName={groupName}
@@ -97,10 +99,9 @@ export function DMSpellsPageClient({ campaignId, canEdit = true }: { campaignId:
                     spellGroups={list.view.spellGroups}
                     spellActions={{ onRemoveFromGroup: list.actions.removeFromGroup, onMoveToGroup: list.actions.moveToGroup }}
                     canEdit={canEdit}
+                    tour={index === 0}
                   />
                 );
-
-                return index === 0 ? <div key={groupName} data-tour="libraries.browse">{group}</div> : group;
               })}
             </Accordion>
           )}

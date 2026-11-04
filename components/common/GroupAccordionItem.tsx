@@ -18,6 +18,7 @@ interface GroupAccordionItemProps {
   className?: string;
   icon?: ComponentType<{ className?: string }>;
   menuActions?: ActionsMenuItem[];
+  "data-tour"?: string;
   children: ReactNode;
 }
 
@@ -29,6 +30,7 @@ export function GroupAccordionItem({
   className,
   icon: Icon,
   menuActions,
+  "data-tour": dataTour,
   children,
 }: GroupAccordionItemProps) {
   return (
@@ -38,7 +40,7 @@ export function GroupAccordionItem({
       style={accent ? { borderLeftColor: accent } : undefined}
     >
       <div className="relative">
-        <AccordionTrigger className="px-4 sm:px-6">
+        <AccordionTrigger className="px-4 sm:px-6" data-tour={dataTour}>
           <div className="flex items-center gap-3 sm:gap-4 text-left w-full">
             {Icon && <Icon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 text-hud-gold" />}
             <div className="flex-1 min-w-0">

@@ -26,7 +26,7 @@ export function ActionGrid({ turn, pending, available, actions }: {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-2 pt-3">
+      <div data-tour="battle.turn-controls" className="grid grid-cols-2 gap-2 pt-3">
         <Tile icon={Swords} label={t("attack")} used={(turn.status.actionUsed && !turn.status.attackLeft) || turn.status.skipped || pending} primary onClick={actions.attack} />
         <Tile icon={BookOpen} label={t("magic")} used={(turn.status.actionUsed && !turn.status.bonusSpellReady) || turn.status.skipped || !available.magic || pending} onClick={actions.magic} />
         {available.ability && <Tile icon={Zap} label={t("ability")} used={turn.status.actionUsed || turn.status.skipped || pending} onClick={actions.ability} />}

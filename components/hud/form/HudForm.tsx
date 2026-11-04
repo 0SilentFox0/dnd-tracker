@@ -18,9 +18,10 @@ interface HudFormProps<T extends string> {
   actions: ReactNode;
   error?: string | null;
   className?: string;
+  triggerClassName?: string;
 }
 
-export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange, children, actions, error, className }: HudFormProps<T>) {
+export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange, children, actions, error, className, triggerClassName }: HudFormProps<T>) {
   const [innerTab, setInnerTab] = useState<T | undefined>(tabs?.[0]?.id);
 
   const active = tab ?? innerTab ?? tabs?.[0]?.id;
@@ -34,7 +35,7 @@ export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange
 
   return (
     <form id={id} onSubmit={onSubmit} onInvalidCapture={onInvalidCapture} className={cn("flex flex-1 flex-col", className)}>
-      {tabs && active ? <HudTabs tabs={tabs} value={active} onValueChange={setActive} keepMounted /> : <div className="px-4 py-3">{children}</div>}
+      {tabs && active ? <HudTabs tabs={tabs} value={active} onValueChange={setActive} triggerClassName={triggerClassName} keepMounted /> : <div className="px-4 py-3">{children}</div>}
       <ActionBar error={error} className="mt-auto flex-wrap [&>*]:min-w-fit border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
     </form>
   );

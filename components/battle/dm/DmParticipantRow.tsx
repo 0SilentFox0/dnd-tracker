@@ -59,20 +59,23 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
   const legendaryLabel = t("legendary", { left: legendary?.actionsLeft ?? 0, max: legendary?.actions ?? 0 });
 
   return (
-    <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
-      <SideDot side={participant.basicInfo.side} />
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</div>
-        {label && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</div>}
-        {badge && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="legendary-badge">{text(badge)}</div>}
+    <div className={cn("flex flex-col gap-1 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
+      {/* ім’я цілком + селект «Керує» зверху (селект переноситься на новий рядок, коли не вміщується), усі іконки під ними */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <SideDot side={participant.basicInfo.side} />
+        <div className="min-w-0 flex-1 basis-32">
+          <div className="break-words text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</div>
+          {label && <div className="break-words text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</div>}
+          {badge && <div className="break-words text-xs text-[var(--hud-muted)]" data-testid="legendary-badge">{text(badge)}</div>}
+        </div>
         {unitControl?.isAssignable(participant) && (
-          <label className="flex items-center gap-1.5 pt-1 text-xs text-[var(--hud-muted)]">
+          <label className="ml-auto flex items-center gap-1.5 text-xs text-[var(--hud-muted)]">
             {t("controls")}
-            <SelectField value={unitControl.valueOf(participant)} options={unitControl.options} onValueChange={(v) => unitControl.assign(participant, v)} triggerClassName="h-7 text-xs" />
+            <SelectField value={unitControl.valueOf(participant)} options={unitControl.options} onValueChange={(v) => unitControl.assign(participant, v)} triggerClassName="h-7 w-28 text-xs" />
           </label>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-0.5">
+      <div className="flex items-center gap-0.5 pl-5">
         <button
           type="button"
           className={cn(ICON, "text-hud-good hover:border-hud-good/40")}

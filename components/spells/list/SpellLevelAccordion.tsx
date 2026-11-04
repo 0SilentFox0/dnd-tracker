@@ -32,6 +32,7 @@ interface SpellLevelAccordionProps {
   spellGroups: SpellGroup[];
   actions?: SpellGroupItemActions;
   canEdit?: boolean;
+  tour?: boolean;
 }
 
 export function SpellLevelAccordion({
@@ -41,6 +42,7 @@ export function SpellLevelAccordion({
   spellGroups,
   actions,
   canEdit = true,
+  tour = false,
 }: SpellLevelAccordionProps) {
   const t = useTranslations("spells.list");
 
@@ -67,7 +69,7 @@ export function SpellLevelAccordion({
     <>
       <AccordionItem value={String(level)}>
         <div className="relative">
-          <AccordionTrigger className="px-3 sm:px-5 pr-12 sm:pr-14">
+          <AccordionTrigger className="px-3 sm:px-5 pr-12 sm:pr-14" data-tour={tour ? "libraries.level" : undefined}>
             <div className="flex items-center justify-between w-full min-w-0 gap-2 sm:gap-3">
               <span className="flex min-w-0 items-center gap-3">
                 <span aria-hidden className={cn("metal-fill flex size-6 shrink-0 rotate-45 items-center justify-center rounded-[3px]", spellLevelMetal(level))}>
@@ -100,7 +102,7 @@ export function SpellLevelAccordion({
         </div>
         <AccordionContent>
           <div className="grid auto-rows-fr grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-            {spells.map((spell) => (
+            {spells.map((spell, i) => (
               <SpellCard
                 key={spell.id}
                 spell={spell}
@@ -109,6 +111,7 @@ export function SpellLevelAccordion({
                 onRemoveFromGroup={actions?.onRemoveFromGroup}
                 onMoveToGroup={actions?.onMoveToGroup}
                 canEdit={canEdit}
+                data-tour={tour && i === 0 ? "libraries.card" : undefined}
               />
             ))}
           </div>

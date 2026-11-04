@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Award, BookOpen, Contact, Gem, GitBranch, GraduationCap, Images, Map as MapIcon, Music, Network, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
+import { Award, BookOpen, Contact, Cpu, Gem, GitBranch, GraduationCap, Images, Map as MapIcon, Music, Network, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
 
 import { dmTilesFor } from "@/lib/constants/campaigns";
 
@@ -25,6 +25,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "show", href: dm("show"), icon: Images, group: "game" },
   { key: "music", href: dm("music"), icon: Music, group: "game" },
   { key: "acquaintances", href: acquaintances, icon: Contact, group: "game" },
+  { key: "ai", href: dm("ai"), icon: Cpu, group: "game" },
   { key: "characters", href: dm("characters"), icon: Users, group: "heroes" },
   { key: "info", href: info, icon: BookOpen, group: "heroes" },
   { key: "units", href: dm("units"), icon: Skull, group: "libraries" },
@@ -71,7 +72,7 @@ export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
 const pick = (list: DashboardSection[], keys: string[]) => list.filter((s) => keys.includes(s.key));
 
 export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
-  ...DM_DASHBOARD_SECTIONS,
+  ...DM_DASHBOARD_SECTIONS.filter((section) => section.key !== "rules"),
   ...pick(PLAYER_DASHBOARD_SECTIONS, ["player-world"]).map((section) => ({ ...section, group: "game" as const })),
 ];
 

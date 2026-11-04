@@ -4,6 +4,7 @@ import { CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 vi.mock("@/lib/cache/kv", () => ({ kvGet: vi.fn(async () => null), kvSet: vi.fn(), kvDel: vi.fn() }));
+vi.mock("@/lib/auth", async (orig) => ({ ...(await orig<object>()), getSessionUserId: vi.fn(async () => "player") }));
 vi.mock("@/lib/utils/api/api-auth", async (orig) => ({
   ...(await orig<object>()),
   requireAuth: vi.fn(async () => ({ userId: "player", authUser: {} })),

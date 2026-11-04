@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useGroupLabel } from "./useGroupLabel";
 import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnit } from "./useUnits";
 
 import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { groupUnitsByRace, raceChips } from "@/lib/utils/units/group-units";
 import type { Unit } from "@/types/units";
@@ -27,6 +28,8 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const [query, setQuery] = useState("");
 
+  const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+
   const [raceFilter, setRaceFilter] = useState<string[]>([]);
 
   const [open, setOpen] = useState<string[]>([]);
@@ -35,16 +38,15 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const allGroups = useMemo(() => groupUnitsByRace(units, races, "", appearances), [units, races, appearances]);
 
-  const found = useMemo(() => groupUnitsByRace(units, races, query, appearances), [units, races, query, appearances]);
+  const found = useMemo(() => groupUnitsByRace(units, races, debouncedQuery, appearances), [units, races, debouncedQuery, appearances]);
 
   const activeRaceFilter = raceFilter.filter((key) => allGroups.some((group) => group.key === key));
 
   const groups = activeRaceFilter.length > 0 ? found.filter((g) => activeRaceFilter.includes(g.key)) : found;
 
-  const search = (next: string) => {
-    setQuery(next);
-    setOpen(next.trim() ? groupUnitsByRace(units, races, next).map((g) => g.key) : []);
-  };
+  useEffect(() => {
+    setOpen(debouncedQuery.trim() ? groupUnitsByRace(units, races, debouncedQuery).map((g) => g.key) : []);
+  }, [debouncedQuery, units, races]);
 
   const toggleRace = (key: string) =>
     setRaceFilter((current) => (current.includes(key) ? current.filter((k) => k !== key) : [...current, key]));
@@ -61,7 +63,7 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
     units,
     isLoading,
     view: { groups, chips: raceChips(allGroups, labelOf), open, setOpen },
-    filter: { query, search, raceFilter: activeRaceFilter, toggleRace },
+    filter: { query, search: setQuery, raceFilter: activeRaceFilter, toggleRace },
     actions: {
       deleteUnit,
       removeAll,

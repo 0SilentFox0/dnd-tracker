@@ -37,12 +37,12 @@ const IMP = { ...base, basicInfo: { ...base.basicInfo, id: "imp", name: "Біс"
 describe("BattleScreen", () => {
   afterEach(cleanup);
 
-  it("exposes the demo tour target on the standard prepared battle screen", () => {
+  it("no longer exposes the retired scene tour target on the prepared screen", () => {
     const { wrapper } = fakeScene({ status: "prepared", isDM: false });
 
     const { container } = render(<BattleScreen />, { wrapper });
 
-    expect(container.querySelector('[data-tour="battle.scene"]')).not.toBeNull();
+    expect(container.querySelector('[data-tour="battle.scene"]')).toBeNull();
   });
 
   it("десктоп з картою: карта замість списків, журнал праворуч", async () => {

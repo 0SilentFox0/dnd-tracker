@@ -168,7 +168,7 @@
       },
       "s3": {
         "heading": "MCP and API tokens",
-        "b0": "The same tools are available to external AI clients (Claude Desktop, Cursor) through MCP. A token is created on the campaign's \"AI and API\" page and shown only once."
+        "b0": "The same tools are available to external AI clients (Claude Desktop, Cursor) through MCP. A token is created on the campaign's \"AI, API and MCP\" page and shown only once."
       },
       "s4": {
         "heading": "Large scenarios and micro NPCs",

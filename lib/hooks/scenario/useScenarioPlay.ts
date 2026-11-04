@@ -28,9 +28,11 @@ export interface ScenarioPlay {
   runBattle(row: ScenarioRow): void;
   pending: boolean;
   control: ShowControl;
+  /** Демо: прив'язки видно, але команди показу не надсилаються. */
+  readOnly: boolean;
 }
 
-export function useScenarioPlay(campaignId: string, content: ScenarioContent, enabled = true): ScenarioPlay {
+export function useScenarioPlay(campaignId: string, content: ScenarioContent, enabled = true, { readOnly = false }: { readOnly?: boolean } = {}): ScenarioPlay {
   const queryClient = useQueryClient();
 
   const notify = useNotify();
@@ -97,13 +99,14 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent, en
     showSlide: (row) => {
       const state = rowSlideState(row, lookup);
 
-      if (row.slide && state.kind === "ready" && !state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
+      if (!readOnly && row.slide && state.kind === "ready" && !state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
     },
-    showMarker: ({ mapId, markerId }) => void control.send({ action: "world", mapId, focusMarkerId: markerId }),
+    showMarker: ({ mapId, markerId }) => { if (!readOnly) void control.send({ action: "world", mapId, focusMarkerId: markerId }); },
     currentRow: currentSlideRow(content, lookup),
     nextRow: nextSlideRow(content, lookup),
-    runBattle: (row) => battleRun.mutate(row),
+    runBattle: (row) => { if (!readOnly) battleRun.mutate(row); },
     pending: control.pending || battleRun.isPending,
     control,
+    readOnly,
   };
 }

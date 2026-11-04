@@ -14,7 +14,7 @@ export function ScenarioSearch({ campaignId }: { campaignId: string }) {
   const { hits, isFetching } = useScenarioSearch(campaignId, query);
 
   return (
-    <div>
+    <div data-tour="scenario.search">
       <input type="search" aria-label={t("label")} placeholder={t("placeholder")} value={query} onChange={(e) => setQuery(e.target.value)} />
       {query.trim().length >= 2 && (
         <ul className="sb-hits">

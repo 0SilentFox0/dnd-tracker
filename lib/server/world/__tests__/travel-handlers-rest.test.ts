@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   commitTravel: vi.fn(),
   readPositions: vi.fn(),
   activePlayerHeroes: vi.fn(),
+  readTravelLog: vi.fn(),
   publishWorldChanged: vi.fn(),
   ownedMap: vi.fn(),
   findMarker: vi.fn(),
@@ -26,12 +27,14 @@ vi.mock("@/lib/server/world/travel-store", () => ({
   activePlayerHeroes: m.activePlayerHeroes,
   commitTravel: m.commitTravel,
   readPositions: m.readPositions,
-  readTravelLog: vi.fn(),
+  readTravelLog: m.readTravelLog,
   toDmHeroes: vi.fn(() => []),
   writeRestLog: m.writeRestLog,
 }));
 
-import { enterHandler, exitHandler, restHandler, travelHandler } from "../travel-handlers";
+import { enterHandler, exitHandler, logHandler, restHandler, travelHandler } from "../travel-handlers";
+
+import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 
 const req = (body: unknown) => new Request("http://x", { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json" } });
 
@@ -157,5 +160,27 @@ describe("exitHandler rest", () => {
 
     expect(res.status).toBe(409);
     expect(m.commitTravel).not.toHaveBeenCalled();
+  });
+});
+
+describe("logHandler", () => {
+  it("lets a demo visitor read the whole campaign log like a DM", async () => {
+    vi.mocked(requireCampaignAccess).mockResolvedValueOnce({ userId: "u1", campaign: { id: "c1" }, isDM: false, isDemo: true } as never);
+    m.readTravelLog.mockResolvedValueOnce([{ id: "l1" }]);
+
+    const res = await logHandler("c1");
+
+    expect(requireCampaignAccess).toHaveBeenCalledWith("c1", false, { allowDemo: true });
+    expect(m.readTravelLog).toHaveBeenCalledWith("c1", expect.any(Number));
+    expect(await res.json()).toEqual([{ id: "l1" }]);
+  });
+
+  it("limits a player to entries of their own heroes", async () => {
+    vi.mocked(requireCampaignAccess).mockResolvedValueOnce({ userId: "u1", campaign: { id: "c1" }, isDM: false, isDemo: false } as never);
+    m.readTravelLog.mockResolvedValueOnce([]);
+
+    await logHandler("c1");
+
+    expect(m.readTravelLog).toHaveBeenCalledWith("c1", expect.any(Number), ["h1"]);
   });
 });

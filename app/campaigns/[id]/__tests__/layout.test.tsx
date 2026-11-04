@@ -8,6 +8,7 @@ vi.mock("@/lib/server/campaigns/access", () => ({ getCampaignForLayout: () => Pr
 vi.mock("@/components/onboarding/DemoTourCoordinator", () => ({
   DemoTourCoordinator: ({ children }: { children: React.ReactNode }) => <div data-testid="tour-coordinator">{children}</div>,
 }));
+vi.mock("@/lib/i18n/extend-locale-scope", () => ({ ExtendLocaleScope: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 vi.mock("@/components/notifications/NotificationsHost", () => ({
   NotificationsHost: () => <div data-testid="notifications-host" />,
 }));

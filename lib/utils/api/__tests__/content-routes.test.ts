@@ -15,6 +15,7 @@ vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireDM: vi.fn(async () => ({ userId: "dm" })),
   requireCampaignAccess: vi.fn(async () => ({ userId: "p", isDM: false })),
+  requireCampaignDMOrDemoAccess: vi.fn(async () => ({ userId: "dm" })),
 }));
 
 import { verifyApiToken } from "@/lib/ai/api-tokens";
@@ -67,14 +68,14 @@ describe("content routes", () => {
   it("GET списку — доступ учасника, private no-store", async () => {
     const res = await col.GET(req("GET"), ctx);
 
-    expect(apiAuth.requireCampaignAccess).toHaveBeenCalledWith("c1", false);
+    expect(apiAuth.requireCampaignAccess).toHaveBeenCalledWith("c1", false, { allowDemo: true });
     expect(res.headers.get("Cache-Control")).toBe("private, no-store");
     expect(await res.json()).toEqual([{ id: "a" }]);
   });
 
   it("GET запису з access.item = dm вимагає ДМ", async () => {
     await one.GET(req("GET"), ctxOne("a"));
-    expect(apiAuth.requireDM).toHaveBeenCalledWith("c1");
+    expect(apiAuth.requireCampaignDMOrDemoAccess).toHaveBeenCalledWith("c1");
   });
 
   it("відмова доступу повертається як є", async () => {

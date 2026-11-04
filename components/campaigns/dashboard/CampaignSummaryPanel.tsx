@@ -17,7 +17,7 @@ export function CampaignSummaryPanel({ campaignId, campaign, isDM, meta }: { cam
   const t = useTranslations("dashboard.summary");
 
   return (
-    <HudPanel>
+    <HudPanel data-tour="dashboard.summary">
       <HudSection
         title={t("title")}
         action={

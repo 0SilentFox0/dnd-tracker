@@ -20,6 +20,7 @@ interface SpellGroupAccordionProps {
   spellGroups: SpellGroup[];
   spellActions: SpellGroupItemActions;
   canEdit?: boolean;
+  tour?: boolean;
 }
 
 export function SpellGroupAccordion({
@@ -29,6 +30,7 @@ export function SpellGroupAccordion({
   spellGroups,
   spellActions,
   canEdit = true,
+  tour = false,
 }: SpellGroupAccordionProps) {
   const t = useTranslations("spells");
 
@@ -68,13 +70,14 @@ export function SpellGroupAccordion({
         countLabel={t("list.count", { count: totalSpells })}
         icon={GroupIcon}
         menuActions={menuActions}
+        data-tour={tour ? "libraries.group" : undefined}
       >
         <Accordion
           type="multiple"
           defaultValue={levels.map(([level]) => String(level))}
           className="space-y-2"
         >
-          {levels.map(([level, levelSpells]) => {
+          {levels.map(([level, levelSpells], levelIndex) => {
             return (
               <SpellLevelAccordion
                 key={level}
@@ -84,6 +87,7 @@ export function SpellGroupAccordion({
                 spellGroups={spellGroups}
                 actions={canEdit ? spellActions : undefined}
                 canEdit={canEdit}
+                tour={tour && levelIndex === 0}
               />
             );
           })}

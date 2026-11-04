@@ -78,7 +78,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
   );
 
   return (
-    <div className={cn("relative h-full", phone && "flex flex-col")}>
+    <div data-tour="battle.map" className={cn("relative h-full", phone && "flex flex-col")}>
       {phone && tools}
       <BattleMap map={scene.map} participants={scene.participants} view={scene.view} actions={scene.actions} editing={{ strokeTool: terrainTool?.active, mode: modeTools }} phone={phone} className={phone ? "min-h-0 flex-1" : "h-full"} />
       {!phone && (inRow ? tools && createPortal(tools, slot) : tools)}

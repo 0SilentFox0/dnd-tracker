@@ -25,6 +25,7 @@ import type compendium from "./messages/uk/compendium.json";
 import type compendiumReport from "./messages/uk/compendiumReport.json";
 import type contentImport from "./messages/uk/contentImport.json";
 import type dashboard from "./messages/uk/dashboard.json";
+import type demoTours from "./messages/uk/demoTours.json";
 import type editors from "./messages/uk/editors.json";
 import type errors from "./messages/uk/errors.json";
 import type feats from "./messages/uk/feats.json";
@@ -59,6 +60,7 @@ declare module "next-intl" {
       auth: typeof auth;
       landing: typeof landing;
       onboarding: typeof onboarding;
+      demoTours: typeof demoTours;
       whatsNew: typeof whatsNew;
       help: typeof help;
       races: typeof races;

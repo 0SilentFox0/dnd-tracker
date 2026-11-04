@@ -10,7 +10,7 @@ export function RulesSection({ mechanic, children }: { mechanic: keyof typeof ME
   return (
     <HudSection title={t(`mechanics.${mechanic}.label`)}>
       <p className="mb-3 text-sm text-hud-muted">{t(`mechanics.${mechanic}.description`)}</p>
-      {children}
+      <div className="space-y-4">{children}</div>
     </HudSection>
   );
 }

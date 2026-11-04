@@ -28,7 +28,7 @@ export function DemoBattleSandbox({ scene }: { scene: BattleScene }) {
         {scene.description && <p className="text-sm text-hud-muted">{scene.description}</p>}
         <p className="text-sm text-hud-gold">{t("notice")}</p>
       </header>
-      <nav data-tour="battle.scene" aria-label={t("controls")} className="flex flex-wrap gap-2">
+      <nav aria-label={t("controls")} className="flex flex-wrap gap-2">
         {modes.map((key) => <Button key={key} variant={mode === key ? "default" : "outline"} aria-pressed={mode === key} onClick={() => controls.setMode(key)}>{t(`modes.${key}`)}</Button>)}
         <Button variant="outline" onClick={controls.nextTurn}>{t("nextTurn")}</Button>
         <Button variant="outline" onClick={controls.reset}>{t("reset")}</Button>

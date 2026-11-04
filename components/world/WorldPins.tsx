@@ -67,6 +67,7 @@ export function WorldPins({ markers, zoom, compact = false, selectedId, dragging
             key={m.id}
             type="button"
             aria-label={m.name}
+            data-tour={m.id === points[0]?.id ? "world.marker" : undefined}
             data-selected={m.id === selectedId}
             data-labels={zoom >= (compact ? WORLD_LABEL_ZOOM_COMPACT : WORLD_LABEL_ZOOM)}
             data-dragging={dragging?.id === m.id}
@@ -81,7 +82,11 @@ export function WorldPins({ markers, zoom, compact = false, selectedId, dragging
               e.stopPropagation();
               e.currentTarget.dataset.startX = String(e.clientX);
               e.currentTarget.dataset.startY = String(e.clientY);
-              e.currentTarget.setPointerCapture?.(e.pointerId);
+              try {
+                e.currentTarget.setPointerCapture?.(e.pointerId);
+              } catch {
+                // synthetic pointer events from the tour have no active pointer
+              }
             }}
             onPointerMove={(e) => {
               if (!draggable || e.currentTarget.dataset.startX === undefined) return;

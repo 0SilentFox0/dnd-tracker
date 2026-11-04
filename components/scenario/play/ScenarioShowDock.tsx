@@ -71,27 +71,31 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
 
   const current = play.currentRow;
 
-  useShowKeys(play.control, { KeyN: nextRow });
+  useShowKeys(play.control, play.readOnly ? {} : { KeyN: nextRow });
 
   return (
     <AudioPlayerProvider host={host}>
-      <div className="sb-show-dock">
+      <div className="sb-show-dock" data-tour="scenario.dock">
         <div className="sb-show-bar sans">
           <OnScreen campaignId={campaignId} show={show} onLocate={current ? () => scrollToRow(current.id) : undefined} />
           <div className="sb-show-controls">
             <div className="sb-show-audio">
               <AudioDock placement="corner" defaultExpanded={false} />
             </div>
-            <ShowTransport campaignId={campaignId} show={show} control={play.control} />
-            <ShowButton aria-label={t("nextRow")} title={play.nextRow ? t("nextRowHint") : t("noMoreSlides")} disabled={play.pending || !play.nextRow} onClick={nextRow}>
-              <SkipForward className="size-4" />
-            </ShowButton>
-            <ShowButton aria-expanded={expanded} aria-label={expanded ? t("collapse") : t("expand")} title={expanded ? t("hideSlides") : t("slides")} onClick={() => setExpanded(!expanded)}>
-              {expanded ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
-            </ShowButton>
+            {!play.readOnly && (
+              <>
+                <ShowTransport campaignId={campaignId} show={show} control={play.control} />
+                <ShowButton aria-label={t("nextRow")} title={play.nextRow ? t("nextRowHint") : t("noMoreSlides")} disabled={play.pending || !play.nextRow} onClick={nextRow}>
+                  <SkipForward className="size-4" />
+                </ShowButton>
+                <ShowButton aria-expanded={expanded} aria-label={expanded ? t("collapse") : t("expand")} title={expanded ? t("hideSlides") : t("slides")} onClick={() => setExpanded(!expanded)}>
+                  {expanded ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
+                </ShowButton>
+              </>
+            )}
           </div>
         </div>
-        {expanded && (
+        {expanded && !play.readOnly && (
           <div className="sb-show-body sans">
             <ShowDeckStrip campaignId={campaignId} show={show} control={play.control} sceneId={pageId} />
             <ShowWorldControls campaignId={campaignId} show={show} control={play.control} />

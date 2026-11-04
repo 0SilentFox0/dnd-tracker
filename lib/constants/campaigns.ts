@@ -55,7 +55,7 @@ export const DM_SECTIONS: readonly DmSection[] = [
   { path: "rules", icon: Scale, templateVisible: true, tile: "template" },
   { path: "artifact-sets", icon: Gem, templateVisible: false, tile: "none" },
   { path: "assistant", icon: Bot, templateVisible: false, tile: "none" },
-  { path: "ai", icon: Cpu, templateVisible: true, tile: "none" },
+  { path: "ai", icon: Cpu, templateVisible: true, tile: "all" },
 ];
 
 interface DmSectionContext {
