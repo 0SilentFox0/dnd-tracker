@@ -11,7 +11,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { loadNames } from "@/lib/server/content/import/names";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
-import { afterContentCommit, currentContentWrite } from "@/lib/server/content/write-context";
+import { afterContentCommit, currentContentWrite, markContentDirty } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -255,6 +255,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
           await tx.$executeRaw`SAVEPOINT assistant_import_row`;
           try {
             await writePlan(resource, actor, plan);
+            markContentDirty();
             await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
           } catch (error) {
             await tx.$executeRaw`ROLLBACK TO SAVEPOINT assistant_import_row`;

@@ -92,9 +92,32 @@ export async function applySourceChanges(db: SyncDb, campaignId: string, body: S
 export async function applySafeSourceChanges(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SourceApplyResult> {
   const { ctx, all } = await loadClassified(db, campaignId, access);
 
-  const safe = [...all.values()].filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status));
+  const safe = [...all.values()].filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status) && !needsBlockedDependency(i, all));
 
   return applySelection(db, ctx, all, { apply: safe.map(({ scope, key, sourceHash, status }) => ({ scope, key, sourceHash, status })), ignore: [] });
+}
+
+function needsBlockedDependency(item: SyncItem, all: Map<string, SyncItem>) {
+  const seen = new Set<string>();
+
+  const queue = [item];
+
+  while (queue.length > 0) {
+    for (const req of queue.pop()!.requires) {
+      const k = keyOf(req);
+
+      const dep = all.get(k);
+
+      if (seen.has(k) || !dep || (dep.status !== "new" && dep.status !== "deletedLocally")) continue;
+
+      if (dep.ignored || dep.status === "deletedLocally") return true;
+
+      seen.add(k);
+      queue.push(dep);
+    }
+  }
+
+  return false;
 }
 
 function closeOverRequires(chosen: SyncItem[], all: Map<string, SyncItem>) {

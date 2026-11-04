@@ -15,7 +15,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import { type ContentOperationId, contentOperationSchema, runContentOperation } from "@/lib/server/content/operation-service";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { previewSourceSelection } from "@/lib/server/templates/sync/apply";
 import { pageSourceDiff } from "@/lib/server/templates/sync/page-diff";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -34,7 +34,7 @@ type Deps = {
 export function createContentOperationActions(deps: Deps = {}): AssistantActionDef[] {
   const invoke = deps.invoke ?? runContentOperation;
 
-  const guard = deps.guard ?? ((id, fn) => withCampaignContentWrite(id, fn));
+  const guard = deps.guard ?? ((id, fn) => withCampaignRuntimeWrite(id, fn));
 
   const snapshot = deps.snapshot ?? contentSnapshot;
 

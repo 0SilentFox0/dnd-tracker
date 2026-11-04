@@ -16,7 +16,7 @@ import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { createContent, getContent, listContent, removeAllContent, removeContent, updateContent } from "@/lib/server/content/service";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 import { windowOf } from "@/lib/utils/api/page-of";
@@ -57,7 +57,7 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
 
   const preview = deps.preview ?? (deps.snapshot ? async (_actor: Actor, state: unknown) => state : (actor: Actor, _state: unknown, kind: string, id: string | undefined, body: unknown) => contentPreviewState(actor, kind, id, body));
 
-  const guard = deps.guard ?? ((campaignId, callback) => withCampaignContentWrite(campaignId, callback));
+  const guard = deps.guard ?? ((campaignId, callback) => withCampaignRuntimeWrite(campaignId, callback));
 
   const actions: AssistantActionDef[] = [];
 

@@ -21,7 +21,7 @@ import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
-import { afterContentCommit } from "@/lib/server/content/write-context";
+import { afterContentCommit, markContentDirty } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
@@ -127,10 +127,15 @@ async function writeScenarioContent(actor: Actor, id: string, raw: unknown, expe
 
   if (!changed.count) throw new ContentError(API_ERRORS.SCENARIO_CONFLICT, 409);
 
+  await markIfCompendiumBound(actor.campaignId, id);
   await notifyRevealForContentChange(actor.campaignId, id, readContent(page.content), content);
   await refreshSummaryFreshness(id, expectedVersion + 1, { title: page.title, kind: page.kind, arc: page.arc, content });
 
   return toPage({ ...page, content, version: expectedVersion + 1, updatedAt: new Date() });
+}
+
+async function markIfCompendiumBound(campaignId: string, pageId: string) {
+  if (await prisma.compendiumEntry.count({ where: { campaignId, kind: "scenarioPages", localId: pageId } })) markContentDirty();
 }
 
 export async function saveScenarioContent(actor: Actor, id: string, raw: unknown, expectedVersion: number, force = true) {
@@ -168,6 +173,8 @@ async function createPage({ actor, input, locale, result }: Omit<ScenarioRun, "p
 async function deletePage({ actor, page, id, result }: ScenarioRun): Promise<ActionResult> {
   const orphanUrls = await pendingSlideUrls(actor.campaignId, page.id);
 
+  await markIfCompendiumBound(actor.campaignId, page.id);
+
   afterContentCommit(() => discardSlideFiles(actor.campaignId, orphanUrls));
   await prisma.scenarioPage.delete({ where: { id: page.id } });
   await prisma.compendiumEntry.deleteMany({ where: { campaignId: actor.campaignId, kind: "scenarioPages", localId: page.id } });
@@ -196,6 +203,7 @@ const PAGE_HANDLERS: Record<string, PageHandler> = {
     const body = parseInput(updateScenarioMetaSchema, input.patch);
 
     await characterOk(actor, body.characterId);
+    await markIfCompendiumBound(actor.campaignId, page.id);
 
     return result(toSummary(await prisma.scenarioPage.update({ where: { id: page.id }, data: { ...body, ...contentWrite(body.title ?? page.title, readContentStrict(page.content)) }, select: SUMMARY_SELECT })), id);
   },

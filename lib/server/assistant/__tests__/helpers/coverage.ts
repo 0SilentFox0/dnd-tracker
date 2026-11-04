@@ -202,6 +202,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/skills/[skillId]/duplicate', methods: ['POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/skills/[skillId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/skills', methods: ['DELETE', 'GET', 'POST'], task: 5, adapter: 'content', state: "active" },
+  { route: 'campaigns/[id]/source-sync/apply-safe', methods: ['POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/source-sync', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells/[spellId]/remove-from-group', methods: ['POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells/[spellId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },

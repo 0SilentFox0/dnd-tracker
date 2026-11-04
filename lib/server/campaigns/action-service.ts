@@ -343,7 +343,7 @@ async function onboardingResult({ result, actor, locale }: Omit<CampaignRun, "lo
   );
 }
 
-const NO_BUMP_OPERATIONS = new Set(["create", "clone", "template.save"]);
+const NO_BUMP_OPERATIONS = new Set(["create", "clone", "delete", "template.save", "instructions.set", "members.remove"]);
 
 export async function runCampaignOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
   const campaignResult = actionResult("campaign", resultLabel(locale, "campaign"));
@@ -370,5 +370,5 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
     if (!handler) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
 
     return handler({ ...base, loaded });
-  }, { bump: !NO_BUMP_OPERATIONS.has(operation) });
+  }, { bump: !read && !NO_BUMP_OPERATIONS.has(operation) });
 }

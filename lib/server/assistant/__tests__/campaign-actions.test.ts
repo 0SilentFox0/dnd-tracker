@@ -51,6 +51,15 @@ describe("campaign action guards", () => {
     expect(JSON.stringify(await runCampaignOperation(actor, "status", {}))).not.toContain("SECRET");
     expect(JSON.stringify(await runCampaignOperation(actor, "clone", { name: "Нова" }))).not.toContain("CREATED_SECRET");
   });
+  it("read, instructions and member operations do not bump the content version", async () => {
+    await runCampaignOperation(actor, "status", {});
+    await runCampaignOperation(actor, "instructions.set", { instructions: "Нова" });
+    expect(h.campaign.update.mock.calls.filter(([args]) => "contentVersion" in ((args as { data: object }).data ?? {}))).toEqual([]);
+  });
+  it("settings change bumps the content version", async () => {
+    await runCampaignOperation(actor, "settings", { patch: { name: "Моя" } });
+    expect(h.campaign.update).toHaveBeenCalledWith(expect.objectContaining({ data: { contentVersion: { increment: 1 } } }));
+  });
   it("cloneDoesNotGrantTokenNewScope", async () => {
     const result = await runCampaignOperation(actor, "clone", { name: "Нова" });
 

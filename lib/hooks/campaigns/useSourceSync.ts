@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -42,9 +43,14 @@ export function useApplySourceChanges(campaignId: string) {
 export function useApplySafeSourceChanges(campaignId: string) {
   const queryClient = useQueryClient();
 
+  const router = useRouter();
+
   return useMutation({
     mutationFn: () => applySafeSourceChanges(campaignId),
-    onSuccess: () => invalidateAfterApply(queryClient, campaignId, true),
+    onSuccess: () => {
+      invalidateAfterApply(queryClient, campaignId, true);
+      router.refresh();
+    },
   });
 }
 

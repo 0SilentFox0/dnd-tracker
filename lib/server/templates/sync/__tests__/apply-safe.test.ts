@@ -59,6 +59,30 @@ describe("applySafeSourceChanges", () => {
     expect(rows("race").map((r) => r.name)).toEqual(["Haven"]);
   });
 
+  it("does not resurrect a locally deleted dependency through an updated row", async () => {
+    f.addRow("race", { id: NEW_RACE, campaignId: SRC, name: "Keep" });
+    f.patchRow("unit", UNIT, { raceId: NEW_RACE });
+    await applySafeSourceChanges(f.db, TGT);
+    f.removeRow("race", rows("race").find((r) => r.name === "Haven")!.id as string);
+    f.patchRow("unit", UNIT, { name: "Archer III", raceId: RACE });
+
+    expect(await applySafeSourceChanges(f.db, TGT)).toMatchObject({ applied: 0, autoAdded: [] });
+    expect(rows("race").map((r) => r.name)).toEqual(["Keep"]);
+    expect(rows("unit")[0].name).toBe("Archer");
+  });
+
+  it("does not clear the ignore mark of a new dependency", async () => {
+    f.addRow("race", { id: IGNORED_RACE, campaignId: SRC, name: "Fort" });
+    f.patchRow("unit", UNIT, { name: "Archer II", raceId: IGNORED_RACE });
+
+    const fort = (await visible()).find((i) => i.scope === "races")!;
+
+    await applySourceChanges(f.db, TGT, { apply: [], ignore: [{ scope: fort.scope, key: fort.key, sourceHash: fort.sourceHash, status: fort.status }] });
+
+    expect(await applySafeSourceChanges(f.db, TGT)).toMatchObject({ applied: 0 });
+    expect(rows("race").map((r) => r.name)).toEqual(["Haven"]);
+  });
+
   it("does nothing on a clean clone", async () => {
     expect(await applySafeSourceChanges(f.db, TGT)).toMatchObject({ applied: 0 });
   });

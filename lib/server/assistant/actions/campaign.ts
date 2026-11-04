@@ -8,7 +8,7 @@ import { aiSettingsSchema } from "@/lib/schemas/ai";
 import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
 import { cloneCampaignSchema, saveAsTemplateSchema } from "@/lib/schemas/templates";
 import { campaignState, campaignWindowSchema, runCampaignOperation } from "@/lib/server/campaigns/action-service";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { jsonContent } from "@/lib/utils/common/json";
 
@@ -32,7 +32,7 @@ export const CAMPAIGN_ACTIONS: readonly AssistantActionDef[] = Object.entries(de
   if (read) return { ...base, effect: "read", execute: (caller, raw) => runCampaignOperation(caller.actor, operation, input.parse(raw) as Record<string, unknown>, undefined, caller.locale) };
 
   return { ...base, effect: "write", confirmation: ["delete", "members.remove", "template.update"].includes(operation) ? "always" : "standard",
-    prepare: (caller, raw) => withCampaignContentWrite(caller.actor.campaignId, async () => {
+    prepare: (caller, raw) => withCampaignRuntimeWrite(caller.actor.campaignId, async () => {
       const value = input.parse(raw) as Record<string, unknown>;
 
       const state = await campaignState(caller.actor, operation, value);
