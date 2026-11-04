@@ -6,6 +6,7 @@ import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { CLAWS, placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { applyCondition5e, type Condition5eKey } from "@/lib/utils/battle/conditions";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const sensed = (sense: string, range = 30) => placed("monster", { at: { x: 0, y: 0 }, abilities: [resolved({ name: "Чуття", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "sense", sense, range } as never] })] });
@@ -13,7 +14,7 @@ const sensed = (sense: string, range = 30) => placed("monster", { at: { x: 0, y:
 const condition = (ps: BattleParticipant[], id: string, key: Condition5eKey) => applyCondition5e(ps, id, { key, rounds: 5, source: { participantId: "src", name: "X" }, sourceName: "X", timedKey: key, round: 1 }).participants;
 
 const reasons = (ps: BattleParticipant[]) => {
-  const r = rollModeReasons(ps[0], CLAWS, ps, { targetId: ps[1].basicInfo.id });
+  const r = rollModeReasons(ps[0], CLAWS, ps, { rules: DEFAULT_RULES, targetId: ps[1].basicInfo.id });
 
   return { advantage: r.advantage.map((l) => textOf(l)), disadvantage: r.disadvantage.map((l) => textOf(l)) };
 };

@@ -73,7 +73,7 @@ export function useCoreActions(participant: BattleParticipant, onDone?: () => vo
 
   const readied = useReadiedAttack(participant, onDone);
 
-  const items = useMemo(() => CORE_ACTION_KEYS.map((key) => ({ key, def: CORE_ACTION_REGISTRY[key], cost: coreActionCost(key, participant, initiativeOrder), ...coreActionAvailability(key, participant, initiativeOrder, map) })), [participant, initiativeOrder, map]);
+  const items = useMemo(() => CORE_ACTION_KEYS.map((key) => ({ key, def: CORE_ACTION_REGISTRY[key], cost: coreActionCost(key, participant, initiativeOrder), ...coreActionAvailability(key, participant, initiativeOrder, map, battle.rules) })), [participant, initiativeOrder, map, battle.rules]);
 
   return {
     enabled: !!battle.rules?.actions.enabled,

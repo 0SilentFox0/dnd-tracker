@@ -2,6 +2,7 @@ import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
+import type { DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
@@ -44,6 +45,48 @@ export interface SheetTestInput {
 
 export type SheetTestResult = SheetRollResult;
 
+export interface ResolveAttackCtx {
+  attacker: BattleParticipant;
+  target: BattleParticipant;
+  rules: Ruleset;
+  rng: Rng;
+  [extra: string]: unknown;
+}
+
+export interface ResolvedAttack {
+  hit: boolean;
+  [extra: string]: unknown;
+}
+
+export interface DamageStep {
+  key: string;
+  value: number;
+}
+
+export interface MitigateCtx {
+  target: BattleParticipant;
+  amount: number;
+  rules: Ruleset;
+  [extra: string]: unknown;
+}
+
+export interface ZeroHpCtx {
+  participant: BattleParticipant;
+  rules: Ruleset;
+  rng: Rng;
+  [extra: string]: unknown;
+}
+
+export interface RuleSystemCombat {
+  dice: 20 | 100;
+  actionEconomy: { bonusAction: boolean; reaction: boolean };
+  resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
+  mitigateDamage?(ctx: MitigateCtx): { amount: number; steps: DamageStep[] };
+  onZeroHp?(ctx: ZeroHpCtx): DamageConsequencesResult;
+  initiative?(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng }): { total: number; roll: number | null; die: number };
+  hitModel?: { offense(p: BattleParticipant): number; defense(p: BattleParticipant): number; winChance(off: number, def: number): number };
+}
+
 export interface RuleSystemDefinition {
   key: RuleSystemKey;
   distance: { unit: "ft" | "yd"; perCell: number };
@@ -56,6 +99,7 @@ export interface RuleSystemDefinition {
   sheetTest: { accepts(body: { kind: string }): boolean; roll(input: SheetTestInput): SheetTestResult };
   rest: { kinds: boolean; onSession?(resources: CharacterResources, characteristics: Characteristics): CharacterResources };
   battle: { supported: boolean };
+  combat: RuleSystemCombat;
   lineage: boolean;
   attacks: boolean;
   spells: boolean;

@@ -11,6 +11,7 @@ import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const spellOf = (key: string): CastableSpell => {
@@ -65,7 +66,7 @@ describe("протилежні заклинання знімають одне о
 
     expect(names(ps)).toEqual(["Сповільнення"]);
     expect(calculateInitiative(target(ps), ps)).toBe(7);
-    expect(movementBudget(target(ps))).toBe(movementBudget(base) - 2);
+    expect(movementBudget(target(ps), DEFAULT_RULES)).toBe(movementBudget(base, DEFAULT_RULES) - 2);
   });
 
   it("Сповільнення → Поспіх: лишається тільки Поспіх, у журналі — зняття", () => {

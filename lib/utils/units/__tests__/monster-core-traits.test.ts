@@ -4,6 +4,7 @@ import { battleSpeed, coreTrait } from "../monster-core-traits";
 
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { baseMovement } from "@/lib/utils/battle/grid/path";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 describe("battleSpeed", () => {
   it("takes the fastest of walk/fly, else swim, climb, burrow", () => {
@@ -17,7 +18,7 @@ describe("battleSpeed", () => {
   it("a fly-only unit has movement cells in battle", () => {
     const p = makeParticipant({ id: "f" });
 
-    expect(baseMovement({ ...p, combatStats: { ...p.combatStats, speed: battleSpeed({ walk: 0, fly: 30 }) } })).toBe(6);
+    expect(baseMovement({ ...p, combatStats: { ...p.combatStats, speed: battleSpeed({ walk: 0, fly: 30 }) } }, DEFAULT_RULES)).toBe(6);
   });
 });
 

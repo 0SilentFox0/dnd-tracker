@@ -32,6 +32,7 @@ import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/sto
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { categoryInventory, projectInput } from "@/lib/utils/compendium-import/flow";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const FILE = process.env.COMPENDIUM_REAL_FILE;
 
@@ -183,7 +184,7 @@ describe.skipIf(!FILE)("real file import", () => {
       for (const p of P().filter((x) => x.basicInfo.sourceType === "unit")) {
         const flying = JSON.stringify(units.find((u) => u.id === p.basicInfo.sourceId)?.statblock ?? {}).includes('"fly"');
 
-        stats.set(p.basicInfo.id, { attacks: p.battleData.attacks?.length ?? 0, baseCells: baseMovement(p), moved: 0, attacked: 0, turns: 0, flying, name: p.basicInfo.name });
+        stats.set(p.basicInfo.id, { attacks: p.battleData.attacks?.length ?? 0, baseCells: baseMovement(p, DEFAULT_RULES), moved: 0, attacked: 0, turns: 0, flying, name: p.basicInfo.name });
       }
 
       for (let step = 0; step < 200 && state.status === "active" && state.currentRound <= 4; step++) {
@@ -216,8 +217,8 @@ describe.skipIf(!FILE)("real file import", () => {
             if (foe && attacks.length) {
               const reach = Math.max(1, ...attacks.map((a) => Math.ceil((parseInt(String(a.range ?? "5"), 10) || 5) / 5)));
 
-              if (dist(me(), foe) > reach && remainingMovement(me()) > 0) {
-                const cells = reachable(state.map ?? { cols: 20, rows: 14 }, P(), me(), remainingMovement(me()));
+              if (dist(me(), foe) > reach && remainingMovement(me(), DEFAULT_RULES) > 0) {
+                const cells = reachable(state.map ?? { cols: 20, rows: 14 }, P(), me(), remainingMovement(me(), DEFAULT_RULES));
 
                 const best = [...cells.keys()].map(parseCellKey).sort((a, b) => cellDistance(a, pos(foe)) - cellDistance(b, pos(foe)))[0];
 

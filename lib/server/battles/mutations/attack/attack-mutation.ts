@@ -41,7 +41,7 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
 
   const targets = targetIds.flatMap((id) => findParticipant(ctx.participants, id) ?? []);
 
-  const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets);
+  const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets, ctx.meta.rules);
 
   if (reach) throw ruleErrorOf("action_rejected", reach);
 }

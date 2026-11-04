@@ -16,6 +16,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   },
   rest: { kinds: false, onSession },
   battle: { supported: false },
+  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false } },
   lineage: false,
   attacks: false,
   spells: false,

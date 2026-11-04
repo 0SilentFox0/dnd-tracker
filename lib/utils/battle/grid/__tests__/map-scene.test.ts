@@ -6,6 +6,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -36,6 +37,7 @@ type InputOverride = Partial<Pick<MapSceneInput, "map" | "participants" | "selec
 function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
   return {
     map,
+    rules: DEFAULT_RULES,
     participants: [hero, near, far, reserved],
     selectedId: null,
     actor: { current: hero, viewer: { userId: "u1", isDM: false, readOnly: false, canSeeEnemyHp: false }, canAct: true, isDM: false, attackReady: true, ...actor },
@@ -190,7 +192,7 @@ describe("deriveMapScene", () => {
 
     const { view } = deriveMapScene(input({ actor: { current: archer }, participants }));
 
-    const scene = { map, participants, marks: view.marks, current: archer };
+    const scene = { map, participants, marks: view.marks, current: archer, rules: DEFAULT_RULES };
 
     expect(deriveTrajectory(scene, { x: 1, y: 0 })).toEqual({ fromId: "h", targetId: "e1", to: { x: 1, y: 0 }, kind: "melee" });
     expect(deriveTrajectory(scene, { x: 0, y: 1 })).toBeNull();
@@ -200,7 +202,7 @@ describe("deriveMapScene", () => {
 
     const open = deriveMapScene(input({ actor: { current: archer }, participants: free }));
 
-    expect(deriveTrajectory({ map, participants: free, marks: open.view.marks, current: archer }, { x: 5, y: 0 })).toMatchObject({ targetId: "e2", kind: "ranged" });
+    expect(deriveTrajectory({ rules: DEFAULT_RULES, map, participants: free, marks: open.view.marks, current: archer }, { x: 5, y: 0 })).toMatchObject({ targetId: "e2", kind: "ranged" });
   });
 
   it("клік по сусіду з луком першим у списку — ближня атака", () => {
@@ -285,7 +287,7 @@ describe("deriveMapScene: наведення шаблону", () => {
   });
 
   it("aimView: поза дальністю — null; конус без дальності — від заклинателя", () => {
-    const scene = { map, participants: [hero, near, far] };
+    const scene = { map, participants: [hero, near, far], rules: DEFAULT_RULES };
 
     expect(aimView(scene, aim(), { x: 5, y: 0 })).toBeNull();
 
@@ -297,7 +299,7 @@ describe("deriveMapScene: наведення шаблону", () => {
   });
 
   it("aimView: пульс кола — від точки прицілу; кільце не підсвічує центр і не малює точку", () => {
-    const scene = { map, participants: [hero, near, far] };
+    const scene = { map, participants: [hero, near, far], rules: DEFAULT_RULES };
 
     const circle = aimView(scene, aim({ template: { shape: "circle", size: 10 } }), { x: 2, y: 2 });
 
@@ -321,7 +323,7 @@ describe("deriveMapScene: наведення шаблону", () => {
 
       expect(s.cellClick({ x: 0, y: 0 })).toEqual({ kind: "reject", reason: textRef(REJECT.pickDirection) });
       expect(s.tokenClick("h")).toEqual({ kind: "reject", reason: textRef(REJECT.pickDirection) });
-      expect(aimView({ map, participants: [hero, near, far] }, mapAim, { x: 0, y: 0 })).toBeNull();
+      expect(aimView({ rules: DEFAULT_RULES, map, participants: [hero, near, far] }, mapAim, { x: 0, y: 0 })).toBeNull();
       expect(s.cellClick({ x: 3, y: 0 })).toEqual({ kind: "aim", cell: { x: 3, y: 0 } });
     }
   });

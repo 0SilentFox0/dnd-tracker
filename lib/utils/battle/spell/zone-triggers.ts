@@ -6,6 +6,7 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { canStand, cellDistance, cellKey, footprint, movementBudget, parseCellKey, sizeOf } from "@/lib/utils/battle/grid";
 import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -126,7 +127,7 @@ function spellZonesMove(args: Parameters<typeof zoneMove>[0]): ZoneMoveResult {
       if (fired.failed && map.spellZones[zoneId].triggers.onExit?.pull) {
         const stop = pullTarget(map, ps, moved, zoneId, map.spellZones[zoneId].centre, last);
 
-        moved = { ...moved, battleData: { ...moved.battleData, position: stop, movementUsed: Math.max(moved.battleData.movementUsed ?? 0, movementBudget(moved)) } };
+        moved = { ...moved, battleData: { ...moved.battleData, position: stop, movementUsed: Math.max(moved.battleData.movementUsed ?? 0, movementBudget(moved, args.rules ?? DEFAULT_RULES)) } };
 
         return { participants: replaceParticipant(ps, moved), moved, messages: [...messages, textRef("battleLog.spellFx.zonePull", { name: moved.basicInfo.name, spell: map.spellZones[zoneId].spellName })] };
       }

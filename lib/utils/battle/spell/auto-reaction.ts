@@ -4,25 +4,26 @@ import { markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { canReact } from "@/lib/utils/battle/actions/reaction";
 import { type ActionFlow, getP } from "@/lib/utils/battle/common/action-flow";
 import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
+import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { isGrantLive, withInlineDefinition } from "@/lib/utils/battle/spell/inline-grant";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import { rollDiceList } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
-
-const CELL_FEET = 5;
 
 const anchoredOn = (target: BattleParticipant, holderId: string, markId: string) =>
   target.battleData.activeEffects.some((e) => e.abilityKey === markKey(markId) && e.source?.participantId === holderId);
 
-const inRange = (grant: SpellGrant, target: BattleParticipant, attacker: BattleParticipant, hasMap: boolean) => {
+const inRange = (grant: SpellGrant, target: BattleParticipant, attacker: BattleParticipant, hasMap: boolean, rules: Ruleset) => {
   const targeting = grant.inline?.targeting;
 
   const range = targeting && "range" in targeting ? targeting.range : undefined;
 
   if (range === undefined || !hasMap || !isOnMap(target) || !isOnMap(attacker)) return true;
 
-  return footprintDistance(cellsOf(target), cellsOf(attacker)) * CELL_FEET <= range;
+  return footprintDistance(cellsOf(target), cellsOf(attacker)) * cellFeetOf(rules) <= range;
 };
 
 export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targetHpBefore }: { attackerId: string; targetId: string; targetHpBefore: number }, cast: (params: CastSpellParams) => CastSpellResult): void {
@@ -45,7 +46,7 @@ export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targe
 
     if (holderId === attackerId || attacker.basicInfo.side === holder.basicInfo.side) continue;
 
-    if (!canReact(holder) || !anchoredOn(target, holderId, grant.inline.anchorMarkId) || !inRange(grant, target, attacker, !!flow.ctx.map)) continue;
+    if (!canReact(holder) || !anchoredOn(target, holderId, grant.inline.anchorMarkId) || !inRange(grant, target, attacker, !!flow.ctx.map, flow.ctx.rules ?? DEFAULT_RULES)) continue;
 
     const spell = withInlineDefinition({ id: grant.spellId, name: typeof grant.label === "string" ? grant.label : grant.spellId, level: 0, groupId: null, definition: { dice: 0, cost: "reaction", targeting: { kind: "self" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [] } }, grant);
 

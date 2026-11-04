@@ -15,8 +15,8 @@ describe("inspiration in attacks", () => {
   it("adds an advantage reason only when asked", () => {
     const p = createMockParticipant();
 
-    expect(rollModeReasons(p, sword, [p], { inspiration: true }).advantage).toEqual([INSPIRATION_LABEL]);
-    expect(rollModeReasons(p, sword, [p]).advantage).toEqual([]);
+    expect(rollModeReasons(p, sword, [p], { rules: DEFAULT_RULES, inspiration: true }).advantage).toEqual([INSPIRATION_LABEL]);
+    expect(rollModeReasons(p, sword, [p], { rules: DEFAULT_RULES }).advantage).toEqual([]);
   });
 
   it("canUseInspiration needs the rule and the flag", () => {

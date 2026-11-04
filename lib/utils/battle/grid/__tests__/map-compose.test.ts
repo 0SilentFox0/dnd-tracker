@@ -6,6 +6,7 @@ import type { MapScene } from "../map-scene";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { AttackType } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleMapMark, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -35,7 +36,7 @@ const scene = (marks?: Map<string, BattleMapMark | number>): MapScene => ({
 const overlay = (over: Partial<Parameters<typeof composeMapView>[0]["overlay"]> = {}) => ({ pendingStroke: new Set<string>(), round: 2, ...over });
 
 const compose = (s: MapScene, hover: Parameters<typeof composeMapView>[0]["hover"] = { cell: null, preview: null }, o = overlay()) =>
-  composeMapView({ scene: s, map, current: hero, hover, overlay: o });
+  composeMapView({ rules: DEFAULT_RULES, scene: s, map, current: hero, hover, overlay: o });
 
 describe("composeMapView", () => {
   it("passes the scene view through with overlay fields and no trajectory without a hover", () => {

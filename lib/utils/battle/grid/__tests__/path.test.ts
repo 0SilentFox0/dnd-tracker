@@ -6,6 +6,7 @@ import { movementBudget, reachable, remainingMovement } from "../path";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 6, rows: 3, background: null, opacity: 0.3 };
@@ -25,8 +26,8 @@ describe("рух по сітці", () => {
   it("бюджет = speed / 5 мінус пройдене", () => {
     const hero = at("h", { x: 0, y: 0 });
 
-    expect(movementBudget(hero)).toBe(6);
-    expect(remainingMovement({ ...hero, battleData: { ...hero.battleData, movementUsed: 4 } })).toBe(2);
+    expect(movementBudget(hero, DEFAULT_RULES)).toBe(6);
+    expect(remainingMovement({ ...hero, battleData: { ...hero.battleData, movementUsed: 4 } }, DEFAULT_RULES)).toBe(2);
   });
 
   it("ворожа стіна блокує, союзник прохідний, але стати на нього не можна", () => {
@@ -76,7 +77,7 @@ describe("рух по сітці", () => {
       },
     };
 
-    expect(movementBudget(rooted)).toBe(0);
+    expect(movementBudget(rooted, DEFAULT_RULES)).toBe(0);
   });
 
   it("2×2: власні клітинки не блокують і не зникають з позначок руху", () => {

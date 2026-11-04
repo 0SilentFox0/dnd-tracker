@@ -3,10 +3,12 @@ import type { ManeuverInput, ManeuverResult } from "./types";
 
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { canStand, cellKey, feetToCells, footprint, participantsInCells, rayCells, sizeOf } from "@/lib/utils/battle/grid";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
-function flightPath(map: BattleMapConfig, start: GridPoint, aim: GridPoint, rangeFeet: number | undefined): GridPoint[] {
-  return rayCells(map, start, aim, { maxCells: rangeFeet === undefined ? Math.max(map.cols, map.rows) : feetToCells(rangeFeet), stopAtTarget: true });
+function flightPath(map: BattleMapConfig, start: GridPoint, aim: GridPoint, rangeFeet: number | undefined, rules: Ruleset): GridPoint[] {
+  return rayCells(map, start, aim, { maxCells: rangeFeet === undefined ? Math.max(map.cols, map.rows) : feetToCells(rangeFeet, rules), stopAtTarget: true });
 }
 
 export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
@@ -28,7 +30,7 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
 
   const map = input.map;
 
-  const path = flightPath(map, start, input.targetCell, input.range);
+  const path = flightPath(map, start, input.targetCell, input.range, input.rules ?? DEFAULT_RULES);
 
   const swept = new Set(path.flatMap((c) => footprint(c, sizeOf(actor))).map(cellKey));
 

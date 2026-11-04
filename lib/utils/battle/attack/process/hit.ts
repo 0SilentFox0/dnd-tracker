@@ -18,6 +18,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, DamageRow } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -187,7 +188,7 @@ function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, h
 
     if (amount <= 0) continue;
 
-    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size);
+    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size, flow.ctx.rules ?? DEFAULT_RULES);
 
     const r = dealResistedHits(flow.ps, victims.map((targetId) => ({ targetId, amount })), { actorId: attackerId, damageType: "fire", rules: flow.ctx.rules, rng: flow.ctx.rng });
 

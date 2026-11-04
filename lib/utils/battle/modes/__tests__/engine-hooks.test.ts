@@ -8,6 +8,7 @@ import type { MapModeDefinition } from "@/lib/utils/battle/modes";
 import { registerTestMode } from "@/lib/utils/battle/modes";
 import { modeEngages, modeSightedTargets } from "@/lib/utils/battle/modes/engine";
 import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -69,10 +70,10 @@ describe("хуки рушія в ядрі", () => {
   it("attackReachError: текст блокування ближньої та прихованої цілі", () => {
     off = registerTestMode(fake as MapModeDefinition<unknown>);
 
-    expect(attackReachError(withMode, ps, hero, sword, [seen])).toBe("блок");
-    expect(attackReachError(withMode, ps, hero, bow, [hidden])).toBe("ціль закрита");
-    expect(attackReachError(withMode, ps, hero, bow, [seen])).toBeNull();
-    expect(attackReachError(plain, ps, hero, sword, [seen])).toBeNull();
+    expect(attackReachError(withMode, ps, hero, sword, [seen], DEFAULT_RULES)).toBe("блок");
+    expect(attackReachError(withMode, ps, hero, bow, [hidden], DEFAULT_RULES)).toBe("ціль закрита");
+    expect(attackReachError(withMode, ps, hero, bow, [seen], DEFAULT_RULES)).toBeNull();
+    expect(attackReachError(plain, ps, hero, sword, [seen], DEFAULT_RULES)).toBeNull();
   });
 
   it("engages з режиму: сусід не зв'язує стрільця", () => {
@@ -80,7 +81,7 @@ describe("хуки рушія в ядрі", () => {
 
     expect(modeEngages(withMode, hero, seen)).toBe(false);
     expect(modeEngages(plain, hero, seen)).toBe(true);
-    expect(attackReachError(withMode, ps, hero, bow, [hidden])).toBe("ціль закрита");
+    expect(attackReachError(withMode, ps, hero, bow, [hidden], DEFAULT_RULES)).toBe("ціль закрита");
   });
 
   it("assertAbilityAim кидає з текстом режиму", () => {
@@ -88,8 +89,8 @@ describe("хуки рушія в ядрі", () => {
 
     const ability = { aim: { range: 60 } } as ResolvedAbility;
 
-    expect(() => assertAbilityAim(ability, withMode, hero, { x: 2, y: 2 })).toThrow("приціл закритий");
-    expect(assertAbilityAim(ability, plain, hero, { x: 2, y: 2 })).toEqual({ x: 2, y: 2 });
+    expect(() => assertAbilityAim(ability, withMode, hero, { x: 2, y: 2 }, DEFAULT_RULES)).toThrow("приціл закритий");
+    expect(assertAbilityAim(ability, plain, hero, { x: 2, y: 2 }, DEFAULT_RULES)).toEqual({ x: 2, y: 2 });
   });
 
   it("modeSightedTargets відсіює лише невидимих ворогів", () => {

@@ -167,7 +167,7 @@ describe("exhaustion speed", () => {
 
     const r = apply(cond("exhaustion", { levels: 2 }), { target: base });
 
-    expect(movementBudget(target(r))).toBeLessThan(movementBudget(base));
+    expect(movementBudget(target(r), DEFAULT_RULES)).toBeLessThan(movementBudget(base, DEFAULT_RULES));
   });
 });
 

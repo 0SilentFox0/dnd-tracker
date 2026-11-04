@@ -25,7 +25,7 @@ export function calculateAttackRoll(
 
   const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
 
-  const forced = forcedRollMode(rollModeReasons(attacker, attack, participants, opts));
+  const forced = forcedRollMode(rollModeReasons(attacker, attack, participants, { ...opts, rules: opts.rules ?? DEFAULT_RULES }));
 
   // вибір гравця діє лише тоді, коли навички нічого не вирішують
   const mode = forced.forced ? forced.mode : (opts.manualMode ?? "normal");

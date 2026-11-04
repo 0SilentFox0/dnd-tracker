@@ -15,6 +15,7 @@ import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine
 import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -57,6 +58,7 @@ export interface MapSceneMode {
 
 export interface MapSceneInput {
   map: BattleMapConfig;
+  rules: Ruleset;
   participants: BattleParticipant[];
   selectedId: string | null;
   actor: MapSceneActor;
@@ -103,14 +105,15 @@ export interface TrajectoryInput {
   participants: BattleParticipant[];
   marks: BattleMapView["marks"];
   current: BattleParticipant | null;
+  rules: Ruleset;
 }
 
-export function deriveTrajectory({ map, participants, marks, current }: TrajectoryInput, hover: GridPoint | null): BattleMapView["trajectory"] {
+export function deriveTrajectory({ map, participants, marks, current, rules }: TrajectoryInput, hover: GridPoint | null): BattleMapView["trajectory"] {
   if (!current || !hover || marks?.get(cellKey(hover)) !== "target") return null;
 
   const target = enemyAt(participants, current, cellKey(hover));
 
-  const attack = target && pickAttack(map, participants, current, current.battleData.attacks ?? [], target).attack;
+  const attack = target && pickAttack(map, participants, current, current.battleData.attacks ?? [], target, rules).attack;
 
   if (!target || !attack) return null;
 
@@ -124,15 +127,16 @@ export function deriveTrajectory({ map, participants, marks, current }: Trajecto
 export interface AimScene {
   map: BattleMapConfig;
   participants: BattleParticipant[];
+  rules: Ruleset;
 }
 
 /** Клітинки шаблону в точці `at`; null — заклинатель поза картою, точка поза дальністю або шаблон без клітинок. Пульс іде від центру кола/куба або від вершини конуса/лінії. */
-export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint | null; pulseFrom: GridPoint } | null {
+export function aimView({ map, participants, rules }: AimScene, aim: MapAim, at: GridPoint): { marks: Map<string, CellMark>; aim: GridPoint | null; pulseFrom: GridPoint } | null {
   const caster = findParticipant(participants, aim.casterId);
 
-  if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range) || modeAimHiddenText(map, caster, at)) return null;
+  if (!caster || !isOnMap(caster) || !templateAimAllowed(cellsOf(caster), aim.template, at, aim.range, rules) || modeAimHiddenText(map, caster, at)) return null;
 
-  const { cells } = templateArea(map, participants, caster, aim.template, at);
+  const { cells } = templateArea(map, participants, caster, aim.template, at, rules);
 
   if (cells.length === 0) return null;
 
@@ -143,11 +147,11 @@ export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPo
   return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: hollow ? null : at, pulseFrom };
 }
 
-function outOfRangeMarks(map: BattleMapConfig, origin: GridPoint[], rangeFeet: number): Map<string, CellMark> {
+function outOfRangeMarks(map: BattleMapConfig, origin: GridPoint[], rangeFeet: number, rules: Ruleset): Map<string, CellMark> {
   const out = new Map<string, CellMark>();
 
   for (let y = 0; y < map.rows; y++) {
-    for (let x = 0; x < map.cols; x++) if (!aimInRange(origin, { x, y }, rangeFeet)) out.set(cellKey({ x, y }), "out-of-range");
+    for (let x = 0; x < map.cols; x++) if (!aimInRange(origin, { x, y }, rangeFeet, rules)) out.set(cellKey({ x, y }), "out-of-range");
   }
 
   return out;
@@ -160,14 +164,15 @@ interface MoveZoneInput {
   mover: BattleParticipant;
   view: ModeView | null | undefined;
   dmUserId: string | null;
+  rules: Ruleset;
 }
 
 type MoveZone = ModeMoveZone;
 
-function openMoveZone({ map, participants, mover, dmUserId }: MoveZoneInput): MoveZone {
-  const steps = moveSteps(map, participants, mover, { dmUserId });
+function openMoveZone({ map, participants, mover, dmUserId, rules }: MoveZoneInput): MoveZone {
+  const steps = moveSteps(map, participants, mover, { dmUserId, rules });
 
-  return { steps, marks: moveZoneMarks(map, participants, mover, { dmUserId, steps }) };
+  return { steps, marks: moveZoneMarks(map, participants, mover, { dmUserId, rules, steps }) };
 }
 
 const moveZone = (input: MoveZoneInput): MoveZone => modeMoveZone(input.map, input) ?? openMoveZone(input);
@@ -196,10 +201,10 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
   const canAttack = attackReady && canStartAttack(current);
 
   if (aim && aimCaster && aim.range !== undefined && isCenteredTemplate(aim.template)) {
-    for (const [key, mark] of outOfRangeMarks(map, cellsOf(aimCaster), aim.range)) marks.set(key, mark);
+    for (const [key, mark] of outOfRangeMarks(map, cellsOf(aimCaster), aim.range, input.rules)) marks.set(key, mark);
   }
 
-  const aimed = aim?.aim ? aimView({ map, participants }, aim, aim.aim) : null;
+  const aimed = aim?.aim ? aimView({ map, participants, rules: input.rules }, aim, aim.aim) : null;
 
   if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
@@ -209,14 +214,14 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
 
   const canMove = !aim && !pick && !placing && !tool && canAct && current?.battleData.position;
 
-  const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: modeView, dmUserId: isDM ? viewer.userId : null }) : null;
+  const zone = canMove && current ? moveZone({ map, participants, seen, mover: current, view: modeView, dmUserId: isDM ? viewer.userId : null, rules: input.rules }) : null;
 
   const steps = zone?.steps ?? null;
 
   if (zone && current) {
     for (const [key, mark] of zone.marks) marks.set(key, mark);
 
-    if (canAttack) for (const [key, mark] of targetMarks(map, seen, current, attacks)) marks.set(key, mark);
+    if (canAttack) for (const [key, mark] of targetMarks(map, seen, current, attacks, input.rules)) marks.set(key, mark);
   }
 
   if (pick) {
@@ -245,13 +250,13 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
   };
 
   function aimAt(p: GridPoint): MapClick {
-    if (!aim || !aimCaster || !templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range)) return { kind: "reject", reason: textRef(REJECT.outOfRange) };
+    if (!aim || !aimCaster || !templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range, input.rules)) return { kind: "reject", reason: textRef(REJECT.outOfRange) };
 
     const hidden = modeAimHiddenText(map, aimCaster, p);
 
     if (hidden) return { kind: "reject", reason: hidden };
 
-    return aimView({ map, participants }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: textRef(REJECT.pickDirection) };
+    return aimView({ map, participants, rules: input.rules }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: textRef(REJECT.pickDirection) };
   }
 
   function pickAt(id: string): MapClick {
@@ -277,12 +282,12 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
       const mark = marks.get(cellKey(cellsOf(target)[0]));
 
       if (mark === "target") {
-        const { attack } = pickAttack(map, participants, current, attacks, target);
+        const { attack } = pickAttack(map, participants, current, attacks, target, input.rules);
 
         return { kind: "attack", targetId: id, ...(attack && { attackId: attack.id ?? attack.name }) };
       }
 
-      if (mark === "invalid-target") return { kind: "reject", reason: pickAttack(map, participants, current, attacks, target).error ?? textRef(REJECT.targetUnreachable) };
+      if (mark === "invalid-target") return { kind: "reject", reason: pickAttack(map, participants, current, attacks, target, input.rules).error ?? textRef(REJECT.targetUnreachable) };
     }
 
     return { kind: "select", id };

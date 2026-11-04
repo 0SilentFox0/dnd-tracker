@@ -5,6 +5,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { resolveSpellTargets, type SpellMapContext } from "@/lib/utils/battle/spell/spell-targeting";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -40,7 +41,7 @@ describe("resolveSpellTargets на карті", () => {
 
     const edge = at("edge", { x: 4, y: 4 }, ParticipantSide.ENEMY);
 
-    const r = resolve({ kind: "template", shape: "emanation", size: 5, side: "enemy", maxTargets: 10 }, [], { map }, [large, edge, far], large);
+    const r = resolve({ kind: "template", shape: "emanation", size: 5, side: "enemy", maxTargets: 10 }, [], { rules: DEFAULT_RULES, map }, [large, edge, far], large);
 
     expect(r).toMatchObject({ ok: true, targetIds: ["edge"] });
     expect(r.ok && r.cells).toHaveLength(12);
@@ -49,7 +50,7 @@ describe("resolveSpellTargets на карті", () => {
   });
 
   it("коло зачіпає союзника й ворогів, обраних ігнорує, порядок — від точки", () => {
-    const r = resolve(fireball, ["far"], { map, targetCell: { x: 6, y: 3 } });
+    const r = resolve(fireball, ["far"], { rules: DEFAULT_RULES, map, targetCell: { x: 6, y: 3 } });
 
     expect(r.ok).toBe(true);
     expect(r.ok && r.targetIds).toEqual(["e2", "a", "e1"]);
@@ -57,17 +58,17 @@ describe("resolveSpellTargets на карті", () => {
   });
 
   it("коло біля заклинателя зачіпає й заклинателя", () => {
-    expect(resolve(fireball, [], { map, targetCell: { x: 3, y: 2 } })).toMatchObject({ ok: true, targetIds: ["c"] });
+    expect(resolve(fireball, [], { rules: DEFAULT_RULES, map, targetCell: { x: 3, y: 2 } })).toMatchObject({ ok: true, targetIds: ["c"] });
 
     const quake: SpellTargeting = { ...fireball, size: 20 };
 
-    expect(resolve(quake, [], { map, targetCell: { x: 3, y: 2 } })).toMatchObject({ ok: true, targetIds: ["c", "a"] });
+    expect(resolve(quake, [], { rules: DEFAULT_RULES, map, targetCell: { x: 3, y: 2 } })).toMatchObject({ ok: true, targetIds: ["c", "a"] });
   });
 
   it("кільце: учасник у центральній клітинці не ціль, сусіди — цілі", () => {
     const ring: SpellTargeting = { ...fireball, hollow: true };
 
-    const r = resolve(ring, [], { map, targetCell: { x: 6, y: 3 } });
+    const r = resolve(ring, [], { rules: DEFAULT_RULES, map, targetCell: { x: 6, y: 3 } });
 
     expect(r.ok && r.targetIds).toEqual(["a", "e1"]);
     expect(r.ok && r.cells).not.toContain("6:3");
@@ -77,25 +78,25 @@ describe("resolveSpellTargets на карті", () => {
   it("лінія: falloff іде за відстанню від вершини", () => {
     const line: SpellTargeting = { kind: "template", shape: "line", size: 60, side: "enemy", maxTargets: 3 };
 
-    const r = resolve(line, [], { map, targetCell: { x: 10, y: 2 } });
+    const r = resolve(line, [], { rules: DEFAULT_RULES, map, targetCell: { x: 10, y: 2 } });
 
     expect(r.ok && r.targetIds).toEqual(["a", "e1"]);
   });
 
   it("без точки — відмова", () => {
-    expect(resolve(fireball, [], { map })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickPoint") });
+    expect(resolve(fireball, [], { rules: DEFAULT_RULES, map })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickPoint") });
   });
 
   it("точка поза дальністю — відмова", () => {
-    expect(resolve(fireball, [], { map, targetCell: { x: 15, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pointOutOfRange") });
+    expect(resolve(fireball, [], { rules: DEFAULT_RULES, map, targetCell: { x: 15, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pointOutOfRange") });
   });
 
   it("порожній шаблон — каст у порожнечу з aimCell; із zone теж", () => {
-    expect(resolve(fireball, [], { map, targetCell: { x: 2, y: 8 } })).toMatchObject({ ok: true, targetIds: [], centre: { x: 2, y: 8 } });
+    expect(resolve(fireball, [], { rules: DEFAULT_RULES, map, targetCell: { x: 2, y: 8 } })).toMatchObject({ ok: true, targetIds: [], centre: { x: 2, y: 8 } });
 
     const wall: SpellTargeting = { kind: "template", shape: "line", size: 30, side: "enemy", maxTargets: 6, zone: { rounds: 2 } };
 
-    const r = resolve(wall, [], { map, targetCell: { x: 2, y: 10 } });
+    const r = resolve(wall, [], { rules: DEFAULT_RULES, map, targetCell: { x: 2, y: 10 } });
 
     expect(r.ok && r.targetIds).toEqual([]);
     expect(r.ok && r.cells?.length).toBe(6);
@@ -106,37 +107,37 @@ describe("resolveSpellTargets на карті", () => {
 
     const cone: SpellTargeting = { kind: "template", shape: "cone", size: 15, side: "enemy", maxTargets: 6 };
 
-    expect(resolve(wall, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickDirection") });
-    expect(resolve(cone, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickDirection") });
+    expect(resolve(wall, [], { rules: DEFAULT_RULES, map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickDirection") });
+    expect(resolve(cone, [], { rules: DEFAULT_RULES, map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickDirection") });
   });
 
   it("без карти або без позиції заклинателя шаблон — ручний вибір як area", () => {
     expect(resolve(fireball, ["e1", "e2"])).toEqual({ ok: true, targetIds: ["e1", "e2"] });
-    expect(resolve(fireball, ["e1", "e2"], { map: null, targetCell: { x: 6, y: 2 } })).toEqual({ ok: true, targetIds: ["e1", "e2"] });
+    expect(resolve(fireball, ["e1", "e2"], { rules: DEFAULT_RULES, map: null, targetCell: { x: 6, y: 2 } })).toEqual({ ok: true, targetIds: ["e1", "e2"] });
 
     const unplaced = at("c", undefined);
 
-    expect(resolve(fireball, ["e1"], { map, targetCell: { x: 6, y: 2 } }, [unplaced, ally, e1], unplaced)).toEqual({ ok: true, targetIds: ["e1"] });
+    expect(resolve(fireball, ["e1"], { rules: DEFAULT_RULES, map, targetCell: { x: 6, y: 2 } }, [unplaced, ally, e1], unplaced)).toEqual({ ok: true, targetIds: ["e1"] });
     expect(resolve(fireball, ["a"]).ok).toBe(false);
   });
 
   it("одиночна ціль поза range — відмова, у межах — ок, без range — ок", () => {
     const bolt: SpellTargeting = { kind: "enemy", range: 20 };
 
-    expect(resolve(bolt, ["far"], { map })).toEqual({ ok: false, error: textRef("battleActions.spell.target.targetOutOfRange") });
-    expect(resolve(bolt, ["e2"], { map })).toEqual({ ok: true, targetIds: ["e2"] });
-    expect(resolve({ kind: "enemy" }, ["far"], { map })).toEqual({ ok: true, targetIds: ["far"] });
+    expect(resolve(bolt, ["far"], { rules: DEFAULT_RULES, map })).toEqual({ ok: false, error: textRef("battleActions.spell.target.targetOutOfRange") });
+    expect(resolve(bolt, ["e2"], { rules: DEFAULT_RULES, map })).toEqual({ ok: true, targetIds: ["e2"] });
+    expect(resolve({ kind: "enemy" }, ["far"], { rules: DEFAULT_RULES, map })).toEqual({ ok: true, targetIds: ["far"] });
     expect(resolve(bolt, ["far"])).toEqual({ ok: true, targetIds: ["far"] });
   });
 
   it("area з range перевіряє кожну обрану ціль; ціль без позиції не перевіряється", () => {
     const area: SpellTargeting = { kind: "area", side: "enemy", maxTargets: 3, range: 30 };
 
-    expect(resolve(area, ["e1", "far"], { map }).ok).toBe(false);
+    expect(resolve(area, ["e1", "far"], { rules: DEFAULT_RULES, map }).ok).toBe(false);
 
     const unplacedEnemy = at("u", undefined, ParticipantSide.ENEMY);
 
-    expect(resolve(area, ["e1", "u"], { map }, [...ps, unplacedEnemy])).toEqual({ ok: true, targetIds: ["e1", "u"] });
+    expect(resolve(area, ["e1", "u"], { rules: DEFAULT_RULES, map }, [...ps, unplacedEnemy])).toEqual({ ok: true, targetIds: ["e1", "u"] });
   });
 });
 
@@ -160,22 +161,22 @@ describe("заклинання, розширене вмінням, на карт
   it("area: коло 10 футів, лише вороги, найближчі до точки, не більше maxTargets; обрані ігноруються", () => {
     const c = widened("area", 2);
 
-    expect(resolve(bolt, ["far"], { map, targetCell: { x: 7, y: 3 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["n1", "n2"] });
+    expect(resolve(bolt, ["far"], { rules: DEFAULT_RULES, map, targetCell: { x: 7, y: 3 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: ["n1", "n2"] });
   });
 
   it("all: уся ворожа сторона — без точки, дальності й зони; союзник не зачеплений", () => {
     const c = widened("all");
 
-    const r = resolve(bolt, [], { map }, scene(c), c);
+    const r = resolve(bolt, [], { rules: DEFAULT_RULES, map }, scene(c), c);
 
     expect(r).toEqual({ ok: true, targetIds: ["n1", "n2", "n3", "far"] });
-    expect(resolve(bolt, ["n1"], { map, targetCell: { x: 2, y: 2 } }, scene(c), c)).toEqual(r);
+    expect(resolve(bolt, ["n1"], { rules: DEFAULT_RULES, map, targetCell: { x: 2, y: 2 } }, scene(c), c)).toEqual(r);
   });
 
   it("all: союзне заклинання — усі союзники разом із заклинателем, не вороги", () => {
     const c = widened("all");
 
-    expect(resolve({ kind: "ally", range: 5 }, [], { map }, scene(c), c)).toEqual({ ok: true, targetIds: ["c", "a"] });
+    expect(resolve({ kind: "ally", range: 5 }, [], { rules: DEFAULT_RULES, map }, scene(c), c)).toEqual({ ok: true, targetIds: ["c", "a"] });
   });
 
   it("all: без карти — так само вся сторона", () => {
@@ -187,9 +188,9 @@ describe("заклинання, розширене вмінням, на карт
   it("точка поза дальністю, без точки — відмова; порожній радіус — каст у порожнечу", () => {
     const c = widened("area");
 
-    expect(resolve(bolt, ["n1"], { map, targetCell: { x: 12, y: 3 } }, scene(c), c)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pointOutOfRange") });
-    expect(resolve(bolt, ["n1"], { map }, scene(c), c)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickPoint") });
-    expect(resolve(bolt, [], { map, targetCell: { x: 2, y: 8 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: [], centre: { x: 2, y: 8 } });
+    expect(resolve(bolt, ["n1"], { rules: DEFAULT_RULES, map, targetCell: { x: 12, y: 3 } }, scene(c), c)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pointOutOfRange") });
+    expect(resolve(bolt, ["n1"], { rules: DEFAULT_RULES, map }, scene(c), c)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickPoint") });
+    expect(resolve(bolt, [], { rules: DEFAULT_RULES, map, targetCell: { x: 2, y: 8 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: [], centre: { x: 2, y: 8 } });
   });
 
   it("без карти чи без позиції заклинателя — ручний вибір як раніше", () => {
@@ -199,11 +200,11 @@ describe("заклинання, розширене вмінням, на карт
 
     const unplaced = { ...c, battleData: { ...c.battleData, position: undefined } };
 
-    expect(resolve(bolt, ["n1", "n3"], { map, targetCell: { x: 7, y: 3 } }, scene(unplaced), unplaced)).toEqual({ ok: true, targetIds: ["n1", "n3"] });
+    expect(resolve(bolt, ["n1", "n3"], { rules: DEFAULT_RULES, map, targetCell: { x: 7, y: 3 } }, scene(unplaced), unplaced)).toEqual({ ok: true, targetIds: ["n1", "n3"] });
   });
 
   it("без вміння одиночне заклинання на карті лишається вибором цілі", () => {
-    expect(resolve(bolt, ["e2"], { map, targetCell: { x: 6, y: 3 } })).toEqual({ ok: true, targetIds: ["e2"] });
+    expect(resolve(bolt, ["e2"], { rules: DEFAULT_RULES, map, targetCell: { x: 6, y: 3 } })).toEqual({ ok: true, targetIds: ["e2"] });
   });
 });
 
@@ -229,7 +230,7 @@ describe("ланцюг на карті", () => {
   const list = [caster, k5, k4, k3, k2, k1, friend, dead, unplaced];
 
   it("від першої цілі — до найближчого живого ворога на карті від попередньої, без повторів, до maxTargets", () => {
-    expect(resolve(chain, ["k1"], { map }, list)).toEqual({ ok: true, targetIds: ["k1", "k2", "k3", "k4"] });
+    expect(resolve(chain, ["k1"], { rules: DEFAULT_RULES, map }, list)).toEqual({ ok: true, targetIds: ["k1", "k2", "k3", "k4"] });
   });
 
   it("рівна відстань — за порядком ініціативи; ворогів менше за ліміт — коротший ланцюг", () => {
@@ -239,19 +240,19 @@ describe("ланцюг на карті", () => {
 
     const mid = at("m", { x: 6, y: 2 }, ParticipantSide.ENEMY);
 
-    expect(resolve(chain, ["m"], { map }, [caster, right, left, mid])).toEqual({ ok: true, targetIds: ["m", "r", "l"] });
+    expect(resolve(chain, ["m"], { rules: DEFAULT_RULES, map }, [caster, right, left, mid])).toEqual({ ok: true, targetIds: ["m", "r", "l"] });
   });
 
   it("без обмеження довжини стрибка", () => {
     const farFoe = at("far", { x: 19, y: 19 }, ParticipantSide.ENEMY);
 
-    expect(resolve(chain, ["k1"], { map }, [caster, k1, farFoe])).toEqual({ ok: true, targetIds: ["k1", "far"] });
+    expect(resolve(chain, ["k1"], { rules: DEFAULT_RULES, map }, [caster, k1, farFoe])).toEqual({ ok: true, targetIds: ["k1", "far"] });
   });
 
   it("на карті рівно одна перша ціль у межах дальності", () => {
-    expect(resolve(chain, ["k1", "k2"], { map }, list)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickChainFirst") });
-    expect(resolve(chain, ["k5"], { map }, list)).toEqual({ ok: false, error: textRef("battleActions.spell.target.targetOutOfRange") });
-    expect(resolve(chain, ["a"], { map }, list).ok).toBe(false);
+    expect(resolve(chain, ["k1", "k2"], { rules: DEFAULT_RULES, map }, list)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickChainFirst") });
+    expect(resolve(chain, ["k5"], { rules: DEFAULT_RULES, map }, list)).toEqual({ ok: false, error: textRef("battleActions.spell.target.targetOutOfRange") });
+    expect(resolve(chain, ["a"], { rules: DEFAULT_RULES, map }, list).ok).toBe(false);
   });
 
   it("без карти чи без позиції заклинателя — ручний вибір у порядку вибору", () => {
@@ -259,6 +260,6 @@ describe("ланцюг на карті", () => {
 
     const off = at("c", undefined);
 
-    expect(resolve(chain, ["k3", "k1"], { map }, [off, ...list.slice(1)], off)).toEqual({ ok: true, targetIds: ["k3", "k1"] });
+    expect(resolve(chain, ["k3", "k1"], { rules: DEFAULT_RULES, map }, [off, ...list.slice(1)], off)).toEqual({ ok: true, targetIds: ["k3", "k1"] });
   });
 });

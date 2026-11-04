@@ -22,7 +22,7 @@ import type { ProcessAttackResult } from "@/lib/utils/battle/types/attack-proces
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
-import type { Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -88,7 +88,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff", "chainShot"]);
 
-  const { targets, expanded, piercing, volley, falloff, serverRolledFrom, chain } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
+  const { targets, expanded, piercing, volley, falloff, serverRolledFrom, chain } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags, rules: input.rules ?? DEFAULT_RULES });
 
   const fractions = damageFractions(targets, attack, { volley, falloff });
 
@@ -128,7 +128,7 @@ function runChain(ctx: PhaseCtx, st: PhaseState, first: BattleParticipant, chain
   let from = liveOf(st, first);
 
   for (let jump = 1; jump <= chain.jumps && isActive(st.attacker); jump++) {
-    const next = nextChainTarget({ map: ctx.input.map, order: st.order, attacker: st.attacker, attack, from, hit });
+    const next = nextChainTarget({ map: ctx.input.map, order: st.order, attacker: st.attacker, attack, from, hit, rules: ctx.input.rules ?? DEFAULT_RULES });
 
     if (!next) break;
 

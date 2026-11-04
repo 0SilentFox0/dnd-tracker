@@ -109,8 +109,8 @@ describe("extra attack", () => {
   it("pool keeps the turn open", () => {
     const used = spendAttack(fighter, [fighter], sword);
 
-    expect(turnExhausted(used, [])).toBe(false);
-    expect(turnExhausted(spendAttack(used, [used], sword), [])).toBe(true);
+    expect(turnExhausted(used, [], DEFAULT_RULES)).toBe(false);
+    expect(turnExhausted(spendAttack(used, [used], sword), [], DEFAULT_RULES)).toBe(true);
   });
 
   it("validateAttackRequest allows a second attack via the pool and rejects a third", () => {

@@ -1,16 +1,17 @@
+import { cellFeetOf } from "./cell-feet";
 import { cellKey, cellLine, closestCell, footprintDistance, isPlayable, parseCellKey } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 
-import { CELL_FEET } from "@/lib/constants/battle";
 import { isTargetable } from "@/lib/utils/abilities/engine/core/participants";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
 const CONE_TAN = 0.5;
 
 const EPS = 1e-9;
 
-export function feetToCells(feet: number): number {
-  return Math.max(1, Math.floor(feet / CELL_FEET));
+export function feetToCells(feet: number, rules: Ruleset): number {
+  return Math.max(1, Math.floor(feet / cellFeetOf(rules)));
 }
 
 /** Коло на карті — квадрат 3×3 до 15 фт і 5×5 від 20 фт, щоб площа читалася на сітці. */
@@ -114,16 +115,18 @@ export function rayCells(map: BattleMapConfig, from: GridPoint, through: GridPoi
   return out;
 }
 
-export function templateCells(map: BattleMapConfig, template: SpellTemplate, origin: GridPoint[], aim: GridPoint): string[] {
-  const r = feetToCells(template.size);
+export function templateCells(map: BattleMapConfig, template: SpellTemplate, origin: GridPoint[], aim: GridPoint, rules: Ruleset): string[] {
+  const r = feetToCells(template.size, rules);
+
+  const cellFeet = cellFeetOf(rules);
 
   const own = new Set(origin.map(cellKey));
 
   let raw: GridPoint[];
 
-  if (template.shape === "circle") raw = (template.exact ? exactCircleCells(Math.round(template.size / CELL_FEET), aim) : circleCells(areaRadiusCells(template.size), aim)).filter((c) => !template.hollow || cellKey(c) !== cellKey(aim));
+  if (template.shape === "circle") raw = (template.exact ? exactCircleCells(Math.round(template.size / cellFeet), aim) : circleCells(areaRadiusCells(template.size), aim)).filter((c) => !template.hollow || cellKey(c) !== cellKey(aim));
 
-  else if (template.shape === "emanation") raw = emanationCells(Math.round(template.size / CELL_FEET), origin).filter((c) => !own.has(cellKey(c)));
+  else if (template.shape === "emanation") raw = emanationCells(Math.round(template.size / cellFeet), origin).filter((c) => !own.has(cellKey(c)));
   else if (template.shape === "cube") raw = cubeCells(r, aim);
   else if (template.shape === "cross") raw = crossCells(r, aim);
   else if (origin.length === 0) raw = [];
@@ -169,20 +172,20 @@ export function templateCentre(template: SpellTemplate, aim: GridPoint, cells: s
 }
 
 /** Конус і лінія задають лише напрямок, тож дальність стосується тільки кола, куба й хреста. */
-export function templateAimAllowed(origin: GridPoint[], template: SpellTemplate, aim: GridPoint, rangeFeet: number | undefined): boolean {
-  return !isCenteredTemplate(template) || aimInRange(origin, aim, rangeFeet);
+export function templateAimAllowed(origin: GridPoint[], template: SpellTemplate, aim: GridPoint, rangeFeet: number | undefined, rules: Ruleset): boolean {
+  return !isCenteredTemplate(template) || aimInRange(origin, aim, rangeFeet, rules);
 }
 
-export function templateArea(map: BattleMapConfig, participants: BattleParticipant[], caster: BattleParticipant, template: SpellTemplate, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
+export function templateArea(map: BattleMapConfig, participants: BattleParticipant[], caster: BattleParticipant, template: SpellTemplate, aim: GridPoint, rules: Ruleset): { cells: string[]; targets: BattleParticipant[] } {
   const origin = cellsOf(caster);
 
-  const cells = templateCells(map, template, origin, aim);
+  const cells = templateCells(map, template, origin, aim, rules);
 
   return { cells, targets: participantsInCells(participants, cells, isCenteredTemplate(template) || origin.length === 0 ? aim : apexOf(origin, aim)) };
 }
 
-export function aimInRange(origin: GridPoint[], aim: GridPoint, rangeFeet: number | undefined): boolean {
+export function aimInRange(origin: GridPoint[], aim: GridPoint, rangeFeet: number | undefined, rules: Ruleset): boolean {
   if (rangeFeet === undefined) return true;
 
-  return footprintDistance(origin, [aim]) <= feetToCells(rangeFeet);
+  return footprintDistance(origin, [aim]) <= feetToCells(rangeFeet, rules);
 }

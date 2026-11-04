@@ -101,7 +101,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const preselectAll = (chosen: BattleAttack) => {
     if (!hitsAll) return;
 
-    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen).filter(visible) : enemyTargets;
+    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen, scene.battle.rules).filter(visible) : enemyTargets;
 
     dispatch({ type: "SET_TARGETS", ids: inReach.map((p) => p.basicInfo.id) });
   };

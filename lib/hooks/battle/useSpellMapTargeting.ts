@@ -4,12 +4,14 @@ import { type Dispatch, useCallback, useEffect, useRef, useState } from "react";
 
 import { spellAimTargets, type SpellFlowAction, type SpellFlowState } from "@/lib/utils/battle/flows";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface MapTargetingContext {
   caster: BattleParticipant | null;
   order: BattleParticipant[];
   map: BattleMapConfig | null;
+  rules: Ruleset;
   active: boolean;
   candidates: BattleParticipant[];
   inRange(t: BattleParticipant): boolean;
@@ -47,7 +49,7 @@ function createAimHoverStore(): AimHoverStore {
 
 /** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер пишеться у стор, щоб прев'ю перемальовувало лише своїх підписників, Escape скасовує. */
 export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlowAction>, ctx: MapTargetingContext): AimHoverStore {
-  const { caster, order, map, active, candidates, inRange, filteredOut, setMapAim, setMapPick } = ctx;
+  const { caster, order, map, rules, active, candidates, inRange, filteredOut, setMapAim, setMapPick } = ctx;
 
   const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
 
@@ -62,7 +64,7 @@ export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<S
     aimAt.current = (cell) => {
       if (!map || !caster || !state.pick) return;
 
-      const ids = spellAimTargets({ map, participants: order, caster }, state.pick, cell).map((p) => p.basicInfo.id);
+      const ids = spellAimTargets({ map, participants: order, caster, rules }, state.pick, cell).map((p) => p.basicInfo.id);
 
       dispatch({ type: "SET_AIM", aim: cell, targetIds: ids });
       // клік у межах дальності і є підтвердженням, навіть якщо зона нікого не зачепила

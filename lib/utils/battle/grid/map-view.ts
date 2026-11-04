@@ -5,12 +5,13 @@ import { moveBudget, reachable } from "./path";
 import { hazardCells, threatCells } from "./terrain";
 
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleAttack, BattleMapConfig, BattleMapMark, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type CellMark = BattleMapMark;
 
-export function moveMarks(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, opts: { dmUserId?: string | null } = {}): Map<string, number> {
-  return reachable(map, participants, mover, moveBudget({ map, dmUserId: opts.dmUserId ?? null }, mover));
+export function moveMarks(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, opts: { rules: Ruleset; dmUserId?: string | null }): Map<string, number> {
+  return reachable(map, participants, mover, moveBudget({ map, dmUserId: opts.dmUserId ?? null, rules: opts.rules }, mover));
 }
 
 export const isMoveMark = (m: CellMark | number | undefined): boolean => typeof m === "number" || m === "move" || m === "move-danger";
@@ -33,7 +34,7 @@ function closerStep(a: MoveStep, b: MoveStep, from: GridPoint): boolean {
 }
 
 /** Клітинка зони → якір, куди ставити токен: велика істота клікає будь-яку клітинку нового footprint, а не лише його лівий верхній кут. */
-export function moveSteps(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, opts: { dmUserId?: string | null } = {}): Map<string, MoveStep> {
+export function moveSteps(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, opts: { rules: Ruleset; dmUserId?: string | null }): Map<string, MoveStep> {
   const anchors = moveMarks(map, participants, mover, opts);
 
   const size = sizeOf(mover);
@@ -69,7 +70,7 @@ export function moveZoneMarks(
   map: BattleMapConfig,
   participants: BattleParticipant[],
   mover: BattleParticipant,
-  opts: { dmUserId?: string | null; steps?: Map<string, MoveStep> } = {},
+  opts: { rules: Ruleset; dmUserId?: string | null; steps?: Map<string, MoveStep> },
 ): Map<string, CellMark | number> {
   const danger = new Set([...threatCells(map, participants, mover), ...hazardCells(map)]);
 
@@ -80,13 +81,13 @@ export function moveZoneMarks(
   return marks;
 }
 
-export function targetMarks(map: BattleMapConfig, participants: BattleParticipant[], attacker: BattleParticipant, attacks: BattleAttack[]): Map<string, CellMark> {
+export function targetMarks(map: BattleMapConfig, participants: BattleParticipant[], attacker: BattleParticipant, attacks: BattleAttack[], rules: Ruleset): Map<string, CellMark> {
   const marks = new Map<string, CellMark>();
 
   for (const t of participants) {
     if (t.basicInfo.side === attacker.basicInfo.side || !isOnMap(t) || !isActive(t)) continue;
 
-    const mark: CellMark = pickAttack(map, participants, attacker, attacks, t).attack ? "target" : "invalid-target";
+    const mark: CellMark = pickAttack(map, participants, attacker, attacks, t, rules).attack ? "target" : "invalid-target";
 
     for (const c of cellsOf(t)) marks.set(cellKey(c), mark);
   }

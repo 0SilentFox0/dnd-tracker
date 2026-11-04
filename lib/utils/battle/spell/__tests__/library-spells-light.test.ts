@@ -14,6 +14,7 @@ import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const spellOf = (key: string): CastableSpell => {
@@ -143,11 +144,11 @@ describe("Поспіх (+3 ініціативи, +10 фт швидкості, 3 
 
     const a = unit("a");
 
-    const before = movementBudget(a);
+    const before = movementBudget(a, DEFAULT_RULES);
 
     const ps = cast("haste", c, ["a"], [c, a]).allParticipantsUpdated;
 
-    expect(movementBudget(get(ps, "a"))).toBe(before + 2);
+    expect(movementBudget(get(ps, "a"), DEFAULT_RULES)).toBe(before + 2);
   });
 });
 

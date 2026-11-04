@@ -28,7 +28,7 @@ export function validateAttackPreview(ctx: BattleMutationContext, body: Record<s
 
   const checked = validateAttackRequest(ctx, request);
 
-  const reach = attackReachError(ctx.meta.map, ctx.participants, checked.attacker, checked.attack, checked.chosenTargets);
+  const reach = attackReachError(ctx.meta.map, ctx.participants, checked.attacker, checked.attack, checked.chosenTargets, ctx.meta.rules);
 
   if (reach) throw ruleErrorOf("action_rejected", reach);
 }

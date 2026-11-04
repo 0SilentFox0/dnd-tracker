@@ -23,6 +23,7 @@ import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const spell = (key: string): CastableSpell => {
@@ -150,7 +151,7 @@ describe("Темрява — бібліотечні заклинання", () =>
     const ps = cast("slow", ["orc"], [hero(), fast, slowGob]).allParticipantsUpdated;
 
     expect(calculateInitiative(find(ps, "orc"), ps)).toBe(9);
-    expect(movementBudget(find(ps, "orc"))).toBe(movementBudget(fast) - 2);
+    expect(movementBudget(find(ps, "orc"), DEFAULT_RULES)).toBe(movementBudget(fast, DEFAULT_RULES) - 2);
 
     const loop = runAdvanceTurnLoop({ initiativeOrder: ps, currentTurnIndex: 2, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99) });
 

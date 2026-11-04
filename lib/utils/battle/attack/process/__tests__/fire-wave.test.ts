@@ -9,6 +9,7 @@ import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const MAP = testMap();
@@ -27,17 +28,17 @@ describe("fireWaveVictims", () => {
   it("конус за ціллю: ворог одразу позаду так, збоку від атакуючого ні", () => {
     const ps = [jarl, at("v", { x: 2, y: 5 }), at("behind", { x: 3, y: 5 }), at("side", { x: 0, y: 8 }), at("ally", { x: 3, y: 5 }, ParticipantSide.ALLY)];
 
-    expect(fireWaveVictims(MAP, ps, jarl, "v", 15)).toEqual(["behind"]);
+    expect(fireWaveVictims(MAP, ps, jarl, "v", 15, DEFAULT_RULES)).toEqual(["behind"]);
   });
 
   it("ворог за межею конуса не страждає", () => {
-    expect(fireWaveVictims(MAP, [jarl, at("v", { x: 2, y: 5 }), at("far", { x: 8, y: 5 })], jarl, "v", 15)).toEqual([]);
+    expect(fireWaveVictims(MAP, [jarl, at("v", { x: 2, y: 5 }), at("far", { x: 8, y: 5 })], jarl, "v", 15, DEFAULT_RULES)).toEqual([]);
   });
 
   it("без карти — до двох інших активних ворогів за порядком", () => {
     const ps = [at("a", undefined, ParticipantSide.ALLY, [wave]), at("v", undefined), at("e1", undefined), at("ally", undefined, ParticipantSide.ALLY), at("e2", undefined), at("e3", undefined)];
 
-    expect(fireWaveVictims(undefined, ps, ps[0], "v", 15)).toEqual(["e1", "e2"]);
+    expect(fireWaveVictims(undefined, ps, ps[0], "v", 15, DEFAULT_RULES)).toEqual(["e1", "e2"]);
   });
 });
 

@@ -151,6 +151,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
       map: ctx.meta.map,
+      rules: ctx.meta.rules,
       targetCell: data.targetCell,
       castLevel,
       upcastTargets: definition.upcastTargets,
@@ -164,7 +165,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       const orphan = resolution.targetIds.some((id) => {
         const t = findParticipant(order, id);
 
-        return !t || objectsNear(order, caster.basicInfo.id, spell.id, t, reach).length === 0;
+        return !t || objectsNear(order, caster.basicInfo.id, spell.id, t, reach, ctx.meta.rules).length === 0;
       });
 
       if (orphan) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_SPELL_NO_OBJECT_NEAR);

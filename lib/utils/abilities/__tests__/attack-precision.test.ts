@@ -8,6 +8,7 @@ import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const reckless = resolved({
@@ -46,8 +47,8 @@ describe("Reckless Attack accuracy", () => {
   it("gives advantage on Strength attacks only", () => {
     const p = use(hero(), "skill:s1:reckless");
 
-    expect(rollModeReasons(p, sword, [p]).advantage).toHaveLength(1);
-    expect(rollModeReasons(p, finesse, [p]).advantage).toHaveLength(1);
+    expect(rollModeReasons(p, sword, [p], { rules: DEFAULT_RULES }).advantage).toHaveLength(1);
+    expect(rollModeReasons(p, finesse, [p], { rules: DEFAULT_RULES }).advantage).toHaveLength(1);
   });
 
   it("a ranged finesse (thrown) attack resolving to Strength gets advantage, a Dexterity ranged attack does not", () => {
@@ -57,12 +58,12 @@ describe("Reckless Attack accuracy", () => {
 
     const str = { ...base, abilities: { ...base.abilities, dexterity: 10, strength: 18 } };
 
-    expect(rollModeReasons(str, thrown, [str]).advantage).toHaveLength(1);
-    expect(rollModeReasons(str, bow, [str]).advantage).toHaveLength(0);
+    expect(rollModeReasons(str, thrown, [str], { rules: DEFAULT_RULES }).advantage).toHaveLength(1);
+    expect(rollModeReasons(str, bow, [str], { rules: DEFAULT_RULES }).advantage).toHaveLength(0);
 
     const dex = { ...base, abilities: { ...base.abilities, dexterity: 18, strength: 10 } };
 
-    expect(rollModeReasons(dex, thrown, [dex]).advantage).toHaveLength(0);
+    expect(rollModeReasons(dex, thrown, [dex], { rules: DEFAULT_RULES }).advantage).toHaveLength(0);
   });
 
   it("a Dexterity finesse attack gets none", () => {
@@ -70,7 +71,7 @@ describe("Reckless Attack accuracy", () => {
 
     const p = { ...base, abilities: { ...base.abilities, dexterity: 18, strength: 10 } };
 
-    expect(rollModeReasons(p, finesse, [p]).advantage).toHaveLength(0);
+    expect(rollModeReasons(p, finesse, [p], { rules: DEFAULT_RULES }).advantage).toHaveLength(0);
   });
 
   it("schema accepts attackAbility on the advantage flag", () => {
@@ -83,11 +84,11 @@ describe("Steady Aim accuracy", () => {
   it("advantage is spent by the first attack", () => {
     const p = use(hero(), "skill:s1:steady");
 
-    expect(rollModeReasons(p, bow, [p]).advantage).toHaveLength(1);
+    expect(rollModeReasons(p, bow, [p], { rules: DEFAULT_RULES }).advantage).toHaveLength(1);
 
     const [after] = consumeAttackEffects([p], { attackerId: "h", targetId: "t", hit: false, existedBefore: activeEffectIds([p]) });
 
-    expect(rollModeReasons(after, bow, [after]).advantage).toHaveLength(0);
+    expect(rollModeReasons(after, bow, [after], { rules: DEFAULT_RULES }).advantage).toHaveLength(0);
   });
 
   it("expires at the end of the Rogue's turn, so an opportunity attack later has no advantage", () => {
@@ -97,7 +98,7 @@ describe("Steady Aim accuracy", () => {
 
     const later = { ...p, battleData: { ...p.battleData, activeEffects: updatedEffects } };
 
-    expect(rollModeReasons(later, bow, [later]).advantage).toHaveLength(0);
+    expect(rollModeReasons(later, bow, [later], { rules: DEFAULT_RULES }).advantage).toHaveLength(0);
   });
 
   it("the speed lock is a turn-end effect too and is gone after the turn", () => {

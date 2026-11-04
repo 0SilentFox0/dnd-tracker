@@ -20,6 +20,7 @@ import { advanceTurn } from "@/lib/utils/battle/turn";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const spell = (key: string): CastableSpell => {
@@ -203,7 +204,7 @@ describe("Місячний промінь (moonbeam)", () => {
     const ps = r.allParticipantsUpdated;
 
     expect(byId(ps, "e1").combatStats.currentHp).toBe(85);
-    expect(hasAdvantage(byId(ps, "mage"), claw, ps, undefined, { targetId: "e1" })).toBe(true);
+    expect(hasAdvantage(byId(ps, "mage"), claw, ps, undefined, { rules: DEFAULT_RULES, targetId: "e1" })).toBe(true);
   });
 
   it("підсвічування тримається 2 ходи цілі, на третьому знімається", () => {

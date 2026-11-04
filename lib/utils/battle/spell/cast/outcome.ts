@@ -50,7 +50,7 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   const pseudoAttack: BattleAttack = { name: spell.name, type: adjacent ? "melee" : "ranged", attackBonus: 0, damageDice: "", damageType: "magic", ...(range !== undefined && { range: String(range) }) };
 
-  const { mode } = forcedRollMode(rollModeReasons(caster, pseudoAttack, flow.ps, { targetId: id, map: flow.ctx.map }));
+  const { mode } = forcedRollMode(rollModeReasons(caster, pseudoAttack, flow.ps, { targetId: id, map: flow.ctx.map, rules: flow.ctx.rules ?? DEFAULT_RULES }));
 
   const { roll, rolls } = rollD20WithMode(mode, state.rng, state.attackRolls.find((a) => a.participantId === id)?.roll);
 

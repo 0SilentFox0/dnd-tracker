@@ -4,6 +4,7 @@ import { moveMarks, targetMarks } from "../map-view";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -20,7 +21,7 @@ describe("підсвітка карти", () => {
   it("рух — клітинки в межах залишку руху", () => {
     const hero = at("h", { x: 0, y: 0 }, ParticipantSide.ALLY);
 
-    const marks = moveMarks(map, [hero], hero);
+    const marks = moveMarks(map, [hero], hero, { rules: DEFAULT_RULES });
 
     expect(marks.get("2:2")).toBe(2);
     expect(marks.has("3:0")).toBe(false);
@@ -35,7 +36,7 @@ describe("підсвітка карти", () => {
 
     const ally = at("a", { x: 0, y: 1 }, ParticipantSide.ALLY);
 
-    const marks = targetMarks(map, [hero, near, far, ally], hero, [sword]);
+    const marks = targetMarks(map, [hero, near, far, ally], hero, [sword], DEFAULT_RULES);
 
     expect(marks.get("1:0")).toBe("target");
     expect(marks.get("5:0")).toBe("invalid-target");
@@ -49,7 +50,7 @@ describe("підсвітка карти", () => {
 
     const far = at("e2", { x: 5, y: 0 }, ParticipantSide.ENEMY);
 
-    expect(targetMarks(map, [hero, far], hero, [sword]).get("5:0")).toBe("invalid-target");
-    expect(targetMarks(map, [hero, far], hero, [sword, bow]).get("5:0")).toBe("target");
+    expect(targetMarks(map, [hero, far], hero, [sword], DEFAULT_RULES).get("5:0")).toBe("invalid-target");
+    expect(targetMarks(map, [hero, far], hero, [sword, bow], DEFAULT_RULES).get("5:0")).toBe("target");
   });
 });

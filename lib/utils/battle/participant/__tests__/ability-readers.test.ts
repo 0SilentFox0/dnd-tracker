@@ -7,6 +7,7 @@ import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantag
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { applyResistance } from "@/lib/utils/battle/resistance";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const bow: BattleAttack = { name: "Лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d8", damageType: "piercing" };
@@ -32,8 +33,8 @@ describe("readers", () => {
     const base = calculateAttackBonus(makeParticipant({ id: "z" }), bow);
 
     expect(calculateAttackBonus(archer, bow) - base).toBe(1);
-    expect(hasAdvantage(archer, bow)).toBe(true);
-    expect(hasDisadvantage(archer, bow, [archer, shade], { targetId: "s" })).toBe(true);
+    expect(hasAdvantage(archer, bow, [archer], undefined, { rules: DEFAULT_RULES })).toBe(true);
+    expect(hasDisadvantage(archer, bow, [archer, shade], { rules: DEFAULT_RULES, targetId: "s" })).toBe(true);
   });
 
   it("поріг криту з пасивки", () => {
@@ -82,7 +83,7 @@ describe("readers", () => {
 
     const archer = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1 }] })] });
 
-    const r = predictAttack(archer, target, bow, [archer, target]);
+    const r = predictAttack(archer, target, bow, [archer, target], { rules: DEFAULT_RULES });
 
     expect(r.targetAC).toBe(16);
     expect(r.totalBonus).toBe(calculateAttackBonus(makeParticipant({ id: "z" }), bow) + 1);

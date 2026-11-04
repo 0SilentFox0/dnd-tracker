@@ -8,6 +8,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 type AttackFlags = ReturnType<typeof findFlagsMany<"attackHitsAllEnemies" | "piercingShot" | "multiTargetFalloff" | "chainShot">>;
@@ -20,6 +21,7 @@ export interface AttackTargetsInput {
   targetIds: string[];
   map?: BattleMapConfig | null;
   flags: AttackFlags;
+  rules: Ruleset;
 }
 
 export interface AttackTargets {
@@ -37,7 +39,7 @@ export interface AttackTargets {
 
 const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.basicInfo.side !== attacker.basicInfo.side && isAttackable(t);
 
-export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags }: AttackTargetsInput): AttackTargets {
+export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags, rules }: AttackTargetsInput): AttackTargets {
   const isAoe = attack.targetType === "aoe";
 
   const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
@@ -54,7 +56,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const byId = (ids: string[]) => ids.flatMap((id) => findParticipant(order, id) ?? []);
 
-  const reachable = (): BattleParticipant[] => (onMap ? enemiesInReach(map, order, attacker, attack) : order.filter(enemyOf(attacker)));
+  const reachable = (): BattleParticipant[] => (onMap ? enemiesInReach(map, order, attacker, attack, rules) : order.filter(enemyOf(attacker)));
 
   const isChain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
 

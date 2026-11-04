@@ -39,7 +39,7 @@ export function legendaryAttack(input: LegendaryAttackInput): { participants: Ba
 
   assertAttackAllowed(actor, attack, [target]);
 
-  const reach = attackReachError(map, participants, actor, attack, [target]);
+  const reach = attackReachError(map, participants, actor, attack, [target], rules);
 
   if (reach) return reject(reach);
 

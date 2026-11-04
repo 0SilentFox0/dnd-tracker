@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { deriveTrajectory, targetMarks } from "@/lib/utils/battle/grid";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const bow: BattleAttack = { id: "b", name: "Лук", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d8", damageType: "piercing", range: "80/320" };
@@ -17,7 +18,7 @@ describe("deriveTrajectory cover", () => {
   const run = (extra: ReturnType<typeof placed>[]) => {
     const participants = [archer, target, ...extra];
 
-    return deriveTrajectory({ map, participants, marks: targetMarks(map, participants, archer, [bow]), current: archer }, { x: 6, y: 5 });
+    return deriveTrajectory({ rules: DEFAULT_RULES, map, participants, marks: targetMarks(map, participants, archer, [bow], DEFAULT_RULES), current: archer }, { x: 6, y: 5 });
   };
 
   it("союзник на лінії — cover з його клітинкою", () => {

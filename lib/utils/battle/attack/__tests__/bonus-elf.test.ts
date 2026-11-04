@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { rollModeReasons } from "@/lib/utils/battle/attack/bonus";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { ELF_EYE_ABILITY } from "@/scripts/constructor/backfill/elf-eye";
 import type { BattleAttack } from "@/types/battle";
 
@@ -20,13 +21,13 @@ describe("elf eye", () => {
   it("a race named elf without the ability gets no advantage", () => {
     const elf = withRace("elf");
 
-    expect(rollModeReasons(elf, ranged).advantage).toEqual([]);
+    expect(rollModeReasons(elf, ranged, [elf], { rules: DEFAULT_RULES }).advantage).toEqual([]);
   });
 
   it("the ability gives advantage on ranged, not on melee", () => {
     const anyone = withRace("human", [resolved(ELF_EYE_ABILITY)]);
 
-    expect(rollModeReasons(anyone, ranged).advantage).toContain("Ельфійське око");
-    expect(rollModeReasons(anyone, melee).advantage).toEqual([]);
+    expect(rollModeReasons(anyone, ranged, [anyone], { rules: DEFAULT_RULES }).advantage).toContain("Ельфійське око");
+    expect(rollModeReasons(anyone, melee, [anyone], { rules: DEFAULT_RULES }).advantage).toEqual([]);
   });
 });

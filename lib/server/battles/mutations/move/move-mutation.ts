@@ -61,7 +61,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   assertCanAct(ctx, mover.basicInfo.id);
 
-  const budget = moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null }, mover);
+  const budget = moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null, rules }, mover);
 
   const search = searchPaths(map, participants, mover, budget);
 

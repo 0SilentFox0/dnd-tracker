@@ -4,14 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
-import { CELL_FEET } from "@/lib/constants/battle";
 import { aimInRange, cellsOf, sizeOf } from "@/lib/utils/battle/grid";
+import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 /** Наведення вміння на клітинку карти: шаблон — слід учасника, Escape або «Скасувати» прибирають наведення. */
 export function useAbilityMapAim(participant: BattleParticipant, onAim: (ability: ResolvedAbility, cell: GridPoint) => void) {
-  const { intents: { setMapAim } } = useBattleScene();
+  const { intents: { setMapAim }, battle: { rules } } = useBattleScene();
 
   const [ability, setAbility] = useState<ResolvedAbility | null>(null);
 
@@ -26,7 +26,7 @@ export function useAbilityMapAim(participant: BattleParticipant, onAim: (ability
 
   const casterId = participant.basicInfo.id;
 
-  const size = sizeOf(participant) * CELL_FEET;
+  const size = sizeOf(participant) * cellFeetOf(rules);
 
   useEffect(() => {
     if (!ability?.aim) return;
@@ -38,7 +38,7 @@ export function useAbilityMapAim(participant: BattleParticipant, onAim: (ability
       casterId,
       range,
       onAim: (cell) => {
-        if (kind === "direction" && !aimInRange(origin.current, cell, range)) return;
+        if (kind === "direction" && !aimInRange(origin.current, cell, range, rules)) return;
 
         setAbility(null);
         fire.current(ability, cell);
@@ -55,7 +55,7 @@ export function useAbilityMapAim(participant: BattleParticipant, onAim: (ability
       window.removeEventListener("keydown", onKey);
       setMapAim(null);
     };
-  }, [ability, casterId, size, setMapAim]);
+  }, [ability, casterId, size, setMapAim, rules]);
 
   const cancel = useCallback(() => setAbility(null), []);
 

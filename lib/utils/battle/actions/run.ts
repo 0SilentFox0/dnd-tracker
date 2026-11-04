@@ -73,7 +73,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   const spent = cost === "action" ? spendAction(actor, participants, body.action) : cost === "bonusAction" ? { ...actor, actionFlags: { ...actor.actionFlags, hasUsedBonusAction: true } } : actor;
 
-  const invalid = validateCoreAction(body.action, actor, participants, map, "targetId" in body ? body.targetId : undefined);
+  const invalid = validateCoreAction(body.action, actor, participants, map, rules, "targetId" in body ? body.targetId : undefined);
 
   if (invalid) return reject(invalid);
 
@@ -87,7 +87,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   switch (body.action) {
     case "dash": {
-      const gained = baseMovement(spent);
+      const gained = baseMovement(spent, rules);
 
       return done("🏃", { ...spent, battleData: { ...spent.battleData, extraMovement: (spent.battleData.extraMovement ?? 0) + gained } }, textRef("battleActions.core.dashTail", { gained }));
     }
@@ -112,7 +112,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
     case "standUp": {
       const { participant } = removeEffects(actor, (e) => e.effects.some((m) => m.type === "prone"));
 
-      return done("🧍", { ...participant, battleData: { ...participant.battleData, movementUsed: (participant.battleData.movementUsed ?? 0) + standUpCost(actor) } });
+      return done("🧍", { ...participant, battleData: { ...participant.battleData, movementUsed: (participant.battleData.movementUsed ?? 0) + standUpCost(actor, rules) } });
     }
 
     case "hide": {
@@ -160,7 +160,7 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   assertAttackAllowed(actor, attack, [target]);
 
-  const reach = attackReachError(map, participants, actor, attack, [target]);
+  const reach = attackReachError(map, participants, actor, attack, [target], input.rules);
 
   if (reach) return reject(reach);
 

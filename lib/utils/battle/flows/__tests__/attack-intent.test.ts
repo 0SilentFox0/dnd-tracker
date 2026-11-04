@@ -4,6 +4,7 @@ import { canConsumeIntent, isIntentStale, participantAttackIntent, type Particip
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const intent = { targetId: "e", actorId: "h1", round: 2, turnIndex: 3 };
@@ -44,7 +45,7 @@ function unit(id: string, side: ParticipantSide, over: Partial<BattleParticipant
 
 function clickScene(over: Partial<ParticipantClickScene> = {}, order = [unit("h", ParticipantSide.ALLY), unit("e", ParticipantSide.ENEMY), unit("a", ParticipantSide.ALLY)]): ParticipantClickScene {
   return {
-    battle: { map: null, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 },
+    battle: { map: null, rules: DEFAULT_RULES, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 },
     turn: { current: order[0], isMyTurn: true },
     anyPending: false,
     attackReady: true,
@@ -82,7 +83,7 @@ describe("participantAttackIntent", () => {
 
     const map = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
-    expect(participantAttackIntent(clickScene({ battle: { map, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 } }, order), "e")).toBeNull();
+    expect(participantAttackIntent(clickScene({ battle: { map, rules: DEFAULT_RULES, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 } }, order), "e")).toBeNull();
   });
 });
 

@@ -73,7 +73,7 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   if (ability.condition && conditionRequiresStill(ability.condition) && !evaluateCondition(ability.condition, { owner: participant, event: null, participants: ctx.participants })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
-  const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, req.targetCell);
+  const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, req.targetCell, ctx.meta.rules);
 
   const targetIds = assertAbilityTargets(ability, ctx.participants, req.targetIds, { owner: participant, onMap: abilityOnMap(ctx.meta.map, participant) });
 

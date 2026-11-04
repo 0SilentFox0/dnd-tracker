@@ -41,26 +41,26 @@ describe("core actions", () => {
   it("dash подвоює залишок руху і витрачає дію", () => {
     const a = mk("a");
 
-    const before = remainingMovement(a);
+    const before = remainingMovement(a, DEFAULT_RULES);
 
     const out = get(run([a], { action: "dash", participantId: "a" }), "a");
 
     expect(out.actionFlags.hasUsedAction).toBe(true);
-    expect(remainingMovement(out)).toBe(before * 2);
+    expect(remainingMovement(out, DEFAULT_RULES)).toBe(before * 2);
     expect(resetTurnState(out).extraMovement).toBeUndefined();
   });
 
   it("повторний dash додає базову швидкість, а не накопичений бюджет", () => {
     const a = mk("a");
 
-    const base = baseMovement(a);
+    const base = baseMovement(a, DEFAULT_RULES);
 
     const first = get(run([a], { action: "dash", participantId: "a" }), "a");
 
     const again = get(run([{ ...first, actionFlags: { ...first.actionFlags, hasUsedAction: false } }], { action: "dash", participantId: "a" }), "a");
 
     expect(again.battleData.extraMovement).toBe(base * 2);
-    expect(remainingMovement(again)).toBe(base * 3);
+    expect(remainingMovement(again, DEFAULT_RULES)).toBe(base * 3);
   });
 
   it("відмова, якщо дію вже витрачено", () => {
@@ -147,10 +147,10 @@ describe("core actions", () => {
 
     const stuck = get({ participants: held }, "a");
 
-    expect(baseMovement(stuck)).toBe(0);
+    expect(baseMovement(stuck, DEFAULT_RULES)).toBe(0);
     expect(() => run(held, { action: "standUp", participantId: "a" })).toThrow(expect.objectContaining({ message: "battleActions.reject.standSpeedZero" }));
-    expect(canStandUp(stuck)).toBe(false);
-    expect(coreActionAvailability("standUp", stuck, held, null)).toEqual({ ok: false, reason: textRef("battleActions.reject.standSpeedZero") });
+    expect(canStandUp(stuck, DEFAULT_RULES)).toBe(false);
+    expect(coreActionAvailability("standUp", stuck, held, null, DEFAULT_RULES)).toEqual({ ok: false, reason: textRef("battleActions.reject.standSpeedZero") });
   });
 });
 
@@ -262,6 +262,6 @@ describe("Cunning Action", () => {
 
     expect(out.actionFlags.hasUsedBonusAction).toBe(true);
     expect(out.actionFlags.hasUsedAction).toBe(false);
-    expect(coreActionAvailability("dash", out, [out], null).ok).toBe(false);
+    expect(coreActionAvailability("dash", out, [out], null, DEFAULT_RULES).ok).toBe(false);
   });
 });

@@ -3,13 +3,14 @@ import { describe, expect, it } from "vitest";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { CLAWS, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { rollModeReasons } from "@/lib/utils/battle/attack/bonus";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const fog = (...keys: string[]): BattleMapConfig => testMap(10, 10, { terrain: Object.fromEntries(keys.map((k) => [k, { kind: "hazard" as const, obscured: true }])) });
 
 const sense = (sense: string) => resolved({ name: "Чуття", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "sense", sense, range: 30 } as never] });
 
-const reasons = (ps: BattleParticipant[], map: BattleMapConfig) => rollModeReasons(ps[0], CLAWS, ps, { targetId: ps[1].basicInfo.id, map });
+const reasons = (ps: BattleParticipant[], map: BattleMapConfig) => rollModeReasons(ps[0], CLAWS, ps, { rules: DEFAULT_RULES, targetId: ps[1].basicInfo.id, map });
 
 const pair = (abilities = [] as ReturnType<typeof sense>[]) => [placed("a", { at: { x: 0, y: 0 }, abilities }), placed("t", { at: { x: 1, y: 0 } })];
 
@@ -37,7 +38,7 @@ describe("заслонена клітинка", () => {
 
   it("без заслонення чи без мапи нічого не змінюється", () => {
     expect(reasons(pair(), testMap())).toEqual({ advantage: [], disadvantage: [] });
-    expect(rollModeReasons(pair()[0], CLAWS, pair(), { targetId: "t" })).toEqual({ advantage: [], disadvantage: [] });
+    expect(rollModeReasons(pair()[0], CLAWS, pair(), { rules: DEFAULT_RULES, targetId: "t" })).toEqual({ advantage: [], disadvantage: [] });
   });
 
   it("істинний зір нападника знімає його перешкоду", () => {

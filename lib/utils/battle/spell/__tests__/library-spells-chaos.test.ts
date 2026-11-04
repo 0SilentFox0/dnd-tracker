@@ -14,6 +14,7 @@ import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const CHAOS = "chaos";
@@ -180,7 +181,7 @@ describe("Хаос: заклинання", () => {
 
     const { ps } = advanceTo(r.allParticipantsUpdated, scene(0), "e");
 
-    expect(hasDisadvantage(P(ps, "e"), melee, ps)).toBe(true);
+    expect(hasDisadvantage(P(ps, "e"), melee, ps, { rules: DEFAULT_RULES })).toBe(true);
   });
 
   it("Крижаний болт: невигідність у наступний хід ворога, який уже ходив цього раунду", () => {
@@ -192,7 +193,7 @@ describe("Хаос: заклинання", () => {
 
     const { ps } = advanceTo(r.allParticipantsUpdated, scene(1), "e");
 
-    expect(hasDisadvantage(P(ps, "e"), melee, ps)).toBe(true);
+    expect(hasDisadvantage(P(ps, "e"), melee, ps, { rules: DEFAULT_RULES })).toBe(true);
   });
 
   it("Блискавка: шкода + −2 ініціативи, що не переставляє чергу в наступному раунді", () => {

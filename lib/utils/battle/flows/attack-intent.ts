@@ -36,7 +36,7 @@ export function canConsumeIntent(intent: AttackIntent, turn: TurnPoint & TurnAtt
 }
 
 export interface ParticipantClickScene {
-  battle: Pick<BattleScene, "map" | "initiativeOrder" | "currentRound" | "currentTurnIndex">;
+  battle: Pick<BattleScene, "map" | "rules" | "initiativeOrder" | "currentRound" | "currentTurnIndex">;
   turn: { current: BattleParticipant | null; isMyTurn: boolean };
   anyPending: boolean;
   /** Фаза ходу героя дозволяє атаку (не мораль і не кінець ходу) — інакше намір ніхто не підхопить */
@@ -53,7 +53,7 @@ export function participantAttackIntent({ battle, turn: { current, isMyTurn }, a
 
   if (!target || target.basicInfo.side === current.basicInfo.side || !isAttackable(target)) return null;
 
-  const { attack } = pickAttack(battle.map ?? null, order, current, current.battleData.attacks, target);
+  const { attack } = pickAttack(battle.map ?? null, order, current, current.battleData.attacks, target, battle.rules);
 
   return attack ? { targetId, attackId: attack.id ?? attack.name, actorId: current.basicInfo.id, round: battle.currentRound, turnIndex: battle.currentTurnIndex } : null;
 }
