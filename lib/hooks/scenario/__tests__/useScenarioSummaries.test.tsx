@@ -31,7 +31,7 @@ describe("scenario summaries hooks", () => {
     expect(scenarioApi.getScenarioSummaries).toHaveBeenCalledWith("c1");
   });
 
-  it("invalidates only the summaries key after generate", async () => {
+  it("invalidates the summaries and index keys after generate", async () => {
     vi.mocked(scenarioApi.generateScenarioSummary).mockResolvedValue({ summary: { overview: "", events: [], secrets: [], entities: [], digest: "" }, version: 1, stale: false, truncated: false });
 
     const { client, wrapper } = setup();
@@ -43,8 +43,9 @@ describe("scenario summaries hooks", () => {
     act(() => result.current.generate("p1", true));
     await waitFor(() => expect(spy).toHaveBeenCalled());
     expect(scenarioApi.generateScenarioSummary).toHaveBeenCalledWith("c1", "p1", true);
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toHaveBeenCalledWith({ queryKey: scenarioKeys.summaries("c1") });
+    expect(spy).toHaveBeenCalledWith({ queryKey: scenarioKeys.index("c1") });
   });
 
   it("exposes the error message", async () => {

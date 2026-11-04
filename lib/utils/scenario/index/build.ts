@@ -1,4 +1,4 @@
-import type { IndexEdge, IndexEntityNode, IndexSceneNode, MentionType, PageFacts, ScenarioIndex, ScenarioPageSummary } from "@/types/scenario";
+import type { IndexEdge, IndexEntityNode, IndexRelation, IndexSceneNode, MentionType, PageFacts, ScenarioIndex, ScenarioPageSummary } from "@/types/scenario";
 
 export const entityKey = (type: MentionType, id: string) => `${type}:${id}`;
 
@@ -6,6 +6,7 @@ interface BuildInput {
   pages: ScenarioPageSummary[];
   facts: Map<string, PageFacts>;
   resolved: Map<string, { label: string; image?: string | null }>;
+  relations?: IndexRelation[];
 }
 
 interface EntityAcc {
@@ -18,7 +19,7 @@ interface EntityAcc {
 const byOrder = (a: ScenarioPageSummary, b: ScenarioPageSummary) =>
   a.sortOrder - b.sortOrder || a.title.localeCompare(b.title) || a.id.localeCompare(b.id);
 
-export function buildScenarioIndex({ pages, facts, resolved }: BuildInput): ScenarioIndex {
+export function buildScenarioIndex({ pages, facts, resolved, relations = [] }: BuildInput): ScenarioIndex {
   const ordered = [...pages].sort(byOrder);
 
   const scenes: IndexSceneNode[] = [];
@@ -85,6 +86,7 @@ export function buildScenarioIndex({ pages, facts, resolved }: BuildInput): Scen
     scenes,
     entities: nodes,
     edges,
+    relations,
     counts: { scenes: scenes.length, entities: nodes.length, edges: edges.length, byType, missing: nodes.filter((n) => n.missing).length },
   };
 }

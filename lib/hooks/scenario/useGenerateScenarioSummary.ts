@@ -12,7 +12,7 @@ export function useGenerateScenarioSummary(campaignId: string) {
 
   const mutation = useMutation({
     mutationFn: ({ pageId, force }: { pageId: string; force?: boolean }) => generateScenarioSummary(campaignId, pageId, force),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: scenarioKeys.summaries(campaignId) }),
+    onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: scenarioKeys.summaries(campaignId) }), queryClient.invalidateQueries({ queryKey: scenarioKeys.index(campaignId) })]),
   });
 
   return {

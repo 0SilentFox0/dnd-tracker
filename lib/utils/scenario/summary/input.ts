@@ -102,5 +102,19 @@ export function buildSummaryInput(page: SummaryInputPage, maxChars: number) {
 }
 
 export function filterSummaryEntities(summary: PageSummary, allowed: Set<string>): PageSummary {
-  return { ...summary, entities: [...new Set(summary.entities.filter((k) => allowed.has(k)))] };
+  const seen = new Set<string>();
+
+  const relations = (summary.relations ?? []).filter((r) => {
+    if (!allowed.has(r.a) || !allowed.has(r.b)) return false;
+
+    const key = `${[r.a, r.b].sort().join("~")}|${r.label}`;
+
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+
+    return true;
+  });
+
+  return { ...summary, entities: [...new Set(summary.entities.filter((k) => allowed.has(k)))], relations };
 }

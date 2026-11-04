@@ -26,6 +26,7 @@ describe("buildScenarioIndex", () => {
       scenes: [],
       entities: [],
       edges: [],
+      relations: [],
       counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 },
     });
   });
@@ -88,5 +89,14 @@ describe("buildScenarioIndex", () => {
     expect(byId.gone?.image).toBeNull();
     expect(byId.gone).toMatchObject({ label: "Old", missing: true });
     expect(index.counts).toEqual({ scenes: 1, entities: 3, edges: 3, byType: { unit: 1, spell: 1, battle: 1 }, missing: 1 });
+  });
+});
+
+describe("buildScenarioIndex relations", () => {
+  it("defaults to no relations and passes given ones through", () => {
+    const rel = { sceneId: "a", a: "unit:1", b: "unit:2", label: "allies" };
+
+    expect(buildScenarioIndex({ pages: [], facts: new Map(), resolved: new Map() }).relations).toEqual([]);
+    expect(buildScenarioIndex({ pages: [], facts: new Map(), resolved: new Map(), relations: [rel] }).relations).toEqual([rel]);
   });
 });

@@ -184,10 +184,18 @@ export interface IndexEdge {
   secret: boolean;
 }
 
+export interface IndexRelation {
+  sceneId: string;
+  a: string;
+  b: string;
+  label: string;
+}
+
 export interface ScenarioIndex {
   scenes: IndexSceneNode[];
   entities: IndexEntityNode[];
   edges: IndexEdge[];
+  relations: IndexRelation[];
   counts: { scenes: number; entities: number; edges: number; byType: Partial<Record<MentionType, number>>; missing: number };
 }
 

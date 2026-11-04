@@ -73,4 +73,21 @@ describe("filterSummaryEntities", () => {
 
     expect(filterSummaryEntities(s, new Set(["unit:a", "unit:b"])).entities).toEqual(["unit:b", "unit:a"]);
   });
+
+  it("keeps relations between allowed keys and dedupes unordered pairs with the same label", () => {
+    const s = {
+      overview: "o", events: [], secrets: [], digest: "d", entities: [],
+      relations: [
+        { a: "unit:a", b: "unit:b", label: "rivals" },
+        { a: "unit:b", b: "unit:a", label: "rivals" },
+        { a: "unit:b", b: "unit:a", label: "kin" },
+        { a: "unit:a", b: "unit:x", label: "unknown" },
+      ],
+    };
+
+    expect(filterSummaryEntities(s, new Set(["unit:a", "unit:b"])).relations).toEqual([
+      { a: "unit:a", b: "unit:b", label: "rivals" },
+      { a: "unit:b", b: "unit:a", label: "kin" },
+    ]);
+  });
 });
