@@ -23,7 +23,7 @@ export interface DieHandle {
 
 export interface Backend {
   resize: (width: number, height: number, rig: Rig) => void;
-  createDie: (die: { sides: DieSides; value: number; dropped?: boolean }) => DieHandle;
+  createDie: (die: { sides: DieSides; value: number; dropped?: boolean; tens?: boolean }) => DieHandle;
   render: () => void;
   dispose: () => void;
 }
