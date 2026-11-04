@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({ data: undefined as unknown }));
@@ -37,7 +37,7 @@ describe("AcquaintancesPageClient", () => {
     type("Бор");
 
     expect(await screen.findByText("Борис")).toBeTruthy();
-    expect(screen.queryByText("Ярема")).toBeNull();
+    await waitFor(() => expect(screen.queryByText("Ярема")).toBeNull());
   });
 
   it("shows the search empty state when nothing matches", async () => {
