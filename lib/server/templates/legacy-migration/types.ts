@@ -104,4 +104,5 @@ export interface MigrationReport {
   referrers: ReferrerReport[];
   blockers: MigrationPlan["blockers"];
   warnings: Array<{ code: string; table?: BundleTable; id?: string; count?: number }>;
+  residuals?: { composite: Array<{ model: string; count: number }>; history: Array<{ model: string; count: number }> };
 }

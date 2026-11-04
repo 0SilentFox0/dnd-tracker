@@ -17,9 +17,13 @@ import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { newContentId } from "@/lib/server/templates/ids";
 import { importBundle } from "@/lib/server/templates/import-bundle";
 import { readPreImage } from "@/lib/server/templates/legacy-migration/preimage";
+import { REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
 import { dryRunCampaign, type ExtendedPrisma, migrateCampaign } from "@/lib/server/templates/legacy-migration/service";
+import type { MigrationPlan } from "@/lib/server/templates/legacy-migration/types";
+import { verifyFromPreImage } from "@/lib/server/templates/legacy-migration/verify";
 import { latestPublishedVersion, publishTemplateVersion } from "@/lib/server/templates/publish";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
+import { classifyLayered, loadLayeredContext } from "@/lib/server/templates/sync/layered";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 import { hashJson } from "@/lib/utils/battle/store/stable-json";
 import { itemRef } from "@/lib/utils/items/ref";
@@ -53,6 +57,10 @@ const clones = {} as Record<"main" | "rb", Clone>;
 let preImageDir = "";
 
 let published = 0;
+
+let mainPreImage = "";
+
+const asMigrate = db as unknown as ExtendedPrisma;
 
 async function clone(name: string): Promise<Clone> {
   const id = `${marker}-${name}`;
@@ -107,7 +115,7 @@ async function populate(c: Clone) {
     },
   });
 
-  await R.playerNotification.create({ data: { userId: marker, campaignId: c.id, type: "spell", refId: L(T.sp1), href: "stale" } });
+  await R.playerNotification.create({ data: { userId: c === clones.rb ? `${marker}-u2` : marker, campaignId: c.id, type: "spell", refId: L(T.sp1), href: "stale" } });
   await R.campaignShow.create({ data: { campaignId: c.id, audio: { trackId: L(T.trk) } } });
   await R.compendiumEntry.create({ data: { campaignId: c.id, canonicalKey: "k", kind: "spells", localId: L(T.sp1), edition: "e", sourceJson: "{}", originalName: "o", inputHash: "h", adapterVersion: "1", baseline: {} } });
 }
@@ -132,6 +140,8 @@ describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
 
     await R.user.create({ data: { id: marker, email: `${marker}@example.invalid`, displayName: marker } });
     await R.campaign.create({ data: { id: tpl, name: tpl, dmUserId: marker, inviteCode: randomUUID(), kind: "template", contentVersion: 1 } });
+
+    await R.user.create({ data: { id: `${marker}-u2`, email: `${marker}-u2@example.invalid`, displayName: marker } });
 
     const own = { campaignId: tpl };
 
@@ -176,7 +186,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
     }
 
     await raw.campaign.deleteMany({ where: { id: { startsWith: marker } } });
-    await raw.user.deleteMany({ where: { id: marker } });
+    await raw.user.deleteMany({ where: { id: { startsWith: marker } } });
     await raw.$disconnect();
     await rm(preImageDir, { recursive: true, force: true });
   });
@@ -214,6 +224,8 @@ describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
     const report = await migrateCampaign(db as unknown as ExtendedPrisma, { campaignId: c.id, preImageDir });
 
     expect(report.status).toBe("migrated");
+    mainPreImage = report.preImagePath!;
+    expect(report.residuals).toBeDefined();
     expect(existsSync(report.preImagePath!)).toBe(true);
 
     const campaign = await R.campaign.findUnique({ where: { id: c.id } });
@@ -312,5 +324,56 @@ describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
 
     expect(await storedState(c.id)).toBe(snapshot);
     await expect(latestPublishedVersion(raw, tpl)).resolves.toBe(published);
+  });
+
+  it("the layered sync items cover updated, conflict, deletedInSource and new after migration, and verifyFromPreImage agrees", async () => {
+    const c = clones.main;
+
+    invalidateCampaignLayer();
+
+    const ctx = await loadLayeredContext(db as never, c.id, { sourceId: tpl, baseVersion: published });
+
+    const statuses = new Map(classifyLayered(ctx).map((i) => [`${i.scope}:${i.key}`, i.status]));
+
+    expect(statuses.get(`spells:${T.sp1}`)).toBe("updated");
+    expect(statuses.get(`spells:${T.sp2}`)).toBe("conflict");
+    expect(statuses.get(`spells:${T.sp4}`)).toBe("new");
+    expect(statuses.get(`artifacts:${T.art2}`)).toBe("deletedInSource");
+
+    const verdict = await verifyFromPreImage(db, mainPreImage);
+
+    expect(verdict).toMatchObject({ ok: true, mismatches: [] });
+    expect(verdict.residuals.exact).toEqual([]);
+  });
+
+  it("a registry that misses a column fails with RESIDUAL_REFS and leaves the database untouched", async () => {
+    const c = clones.rb;
+
+    const snapshot = await storedState(c.id);
+
+    const broken = REFERRERS.map((r) => (r.model === "Character" && r.mode === "remap" ? { ...r, columns: r.columns!.filter((x) => x !== "knownSpells") } : r));
+
+    const error = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir, seams: { registry: broken } }).catch((e) => e);
+
+    expect(error).toMatchObject({ code: "RESIDUAL_REFS" });
+    expect(error.details.exact).toContainEqual({ model: "Character", column: "knownSpells", count: 1 });
+    expect(await storedState(c.id)).toBe(snapshot);
+  });
+
+  it("a corrupted plan fails with VERIFY_MISMATCH and leaves the database untouched", async () => {
+    const c = clones.rb;
+
+    const snapshot = await storedState(c.id);
+
+    const dropOverride = (plan: MigrationPlan): MigrationPlan => ({
+      ...plan,
+      rows: { ...plan.rows, spells: plan.rows.spells.filter((r) => r.sourceId !== T.sp2) },
+    });
+
+    const error = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir, seams: { mapPlan: dropOverride } }).catch((e) => e);
+
+    expect(error).toMatchObject({ code: "VERIFY_MISMATCH" });
+    expect(error.details.exposed).toContainEqual({ table: "spells", id: T.sp2, kind: "changed" });
+    expect(await storedState(c.id)).toBe(snapshot);
   });
 });

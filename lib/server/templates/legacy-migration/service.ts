@@ -8,8 +8,9 @@ import { referrerUpdates, writeMigration } from "@/lib/server/templates/legacy-m
 import { loadMigrationInput } from "@/lib/server/templates/legacy-migration/load";
 import { planLegacyMigration } from "@/lib/server/templates/legacy-migration/plan";
 import { writePreImage } from "@/lib/server/templates/legacy-migration/preimage";
-import { REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
+import { type Referrer, REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
 import { LegacyMigrationError, type MigrationInput, type MigrationPlan, type MigrationReport, type PreImage, type ReferrerReport, type TableReport } from "@/lib/server/templates/legacy-migration/types";
+import { verifyMigration } from "@/lib/server/templates/legacy-migration/verify";
 
 export type ExtendedPrisma = PrismaClient;
 
@@ -109,8 +110,11 @@ export async function dryRunCampaign(db: object, campaignId: string): Promise<Mi
   return reportOf({ name, input, plan: planLegacyMigration(input), status: "eligible" });
 }
 
-export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: string; preImageDir: string }): Promise<MigrationReport & { preImagePath?: string }> {
-  const { campaignId, preImageDir } = args;
+export interface MigrateSeams { registry?: readonly Referrer[]; mapPlan?: (plan: MigrationPlan) => MigrationPlan }
+
+/** `seams` exist for tests that corrupt the registry or the plan to prove the verifier rolls back. */
+export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: string; preImageDir: string; seams?: MigrateSeams }): Promise<MigrationReport & { preImagePath?: string }> {
+  const { campaignId, preImageDir, seams } = args;
 
   return db.$transaction((tx) => runContentWriteContext(campaignId, tx, async () => {
     await lockCampaignRow(tx, campaignId, "update");
@@ -125,9 +129,9 @@ export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: st
 
     for (const r of REFERRERS) if (r.mode === "remap" && r.lockSql) await tx.$queryRaw(r.lockSql(campaignId));
 
-    const input = await loadMigrationInput(tx, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version });
+    const input = await loadMigrationInput(tx, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version, registry: seams?.registry });
 
-    const plan = planLegacyMigration(input);
+    const plan = (seams?.mapPlan ?? ((p: MigrationPlan) => p))(planLegacyMigration(input));
 
     if (plan.blockers.length > 0) throw new LegacyMigrationError("ID_COLLISION", plan.blockers);
 
@@ -148,8 +152,8 @@ export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: st
 
     await writeMigration(tx, { input, plan });
 
-    // Task 7 seam: verify visible-content equivalence and residual references here; throw to roll back.
+    const residuals = await verifyMigration(tx, { input, plan });
 
-    return { ...reportOf({ name, input, plan, status: "migrated" }), preImagePath };
+    return { ...reportOf({ name, input, plan, status: "migrated" }), residuals, preImagePath };
   }), TX_OPTIONS);
 }

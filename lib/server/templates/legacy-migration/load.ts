@@ -1,7 +1,7 @@
 import { bypassLayer } from "@/lib/db/content-layer";
 import { layeredModels } from "@/lib/db/layer/config";
 import { BUNDLE_TABLES, type BundleTable } from "@/lib/server/templates/bundle";
-import { referrerRows,REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
+import { type Referrer, referrerRows, REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
 import type { MigrationInput, Row } from "@/lib/server/templates/legacy-migration/types";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
@@ -10,7 +10,7 @@ interface FindMany { findMany(args: unknown): Promise<Row[]> }
 
 const TABLE_KEYS: ReadonlySet<string> = new Set(BUNDLE_TABLES.map((t) => t.key));
 
-export async function loadMigrationInput(db: object, args: { campaignId: string; sourceId: string; version: number }): Promise<MigrationInput> {
+export async function loadMigrationInput(db: object, args: { campaignId: string; sourceId: string; version: number; registry?: readonly Referrer[] }): Promise<MigrationInput> {
   const { campaignId, sourceId, version } = args;
 
   const d = db as Record<string, FindMany>;
@@ -35,7 +35,7 @@ export async function loadMigrationInput(db: object, args: { campaignId: string;
 
   const referrers: MigrationInput["referrers"] = [];
 
-  for (const r of REFERRERS) if (r.mode === "remap") referrers.push({ r, rows: (await referrerRows(db, r, campaignId)) as Row[] });
+  for (const r of args.registry ?? REFERRERS) if (r.mode === "remap") referrers.push({ r, rows: (await referrerRows(db, r, campaignId)) as Row[] });
 
   const sync = (await (db as { campaignSourceSync: { findUnique(args: unknown): Promise<Row | null> } }).campaignSourceSync.findUnique({ where: { campaignId } })) ?? null;
 
