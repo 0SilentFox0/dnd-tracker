@@ -56,6 +56,24 @@ describe("D100Input", () => {
     fireEvent.click(rollButton());
     expect(onRoll).toHaveBeenCalledWith(47);
   });
+
+  it("fallback field highlights the pair and clearing resets it", () => {
+    render(<D100Input onRoll={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "40" }));
+    fireEvent.change(screen.getByLabelText("1–100"), { target: { value: "73" } });
+    expect(screen.getByRole("button", { name: "70" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "3" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "40" })).toHaveAttribute("aria-pressed", "false");
+    fireEvent.change(screen.getByLabelText("1–100"), { target: { value: "" } });
+    expect(screen.getByRole("button", { name: "70" })).toHaveAttribute("aria-pressed", "false");
+    expect(rollButton()).toBeDisabled();
+  });
+
+  it("fallback field ignores 101", () => {
+    render(<D100Input onRoll={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText("1–100"), { target: { value: "101" } });
+    expect(rollButton()).toBeDisabled();
+  });
 });
 
 function within0() {
