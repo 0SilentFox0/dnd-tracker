@@ -32,7 +32,7 @@ class RO {
 
 const base: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
-function panel(map: BattleMapConfig = base, isDM = true) {
+function panel(map: BattleMapConfig = base, { isDM = true, open = true } = {}) {
   vi.stubGlobal("ResizeObserver", RO);
 
   const scene = fakeScene({ isDM, map });
@@ -49,7 +49,7 @@ function panel(map: BattleMapConfig = base, isDM = true) {
 
   const mutate = (scene.value.actions.mapMotion as unknown as { mutate: ReturnType<typeof vi.fn> }).mutate;
 
-  fireEvent.click(view.getByRole("button", { name: "Рух" }));
+  if (open) fireEvent.click(view.getByRole("button", { name: "Рух" }));
 
   return { ...view, mutate };
 }
@@ -58,19 +58,7 @@ const moving: BattleMapConfig = { ...base, motion: { axis: "x", speed: 2.5 } };
 
 describe("MapMotionPanel", () => {
   it("is hidden from players", () => {
-    vi.stubGlobal("ResizeObserver", RO);
-
-    const scene = fakeScene({ isDM: false, map: base });
-
-    const Wrapper = scene.wrapper;
-
-    const { queryByRole } = render(
-      <Wrapper>
-        <TooltipProvider>
-          <BattleMapPanel />
-        </TooltipProvider>
-      </Wrapper>,
-    );
+    const { queryByRole } = panel(base, { isDM: false, open: false });
 
     expect(queryByRole("button", { name: "Рух" })).toBeNull();
   });

@@ -23,9 +23,7 @@ const map: BattleMapConfig = { cols: 10, rows: 5, background: "/battle-maps/a.we
 const CELL = 50;
 
 function mount(motion: MapMotion, opts: { rotated?: boolean } = {}) {
-  const view = render(<MotionBackground map={map} motion={motion} cellPx={CELL} rotated={opts.rotated ?? false} phone={false} />);
-
-  return view;
+  return render(<MotionBackground map={map} motion={motion} cellPx={CELL} rotated={opts.rotated ?? false} phone={false} />);
 }
 
 async function loadImage(container: HTMLElement) {
