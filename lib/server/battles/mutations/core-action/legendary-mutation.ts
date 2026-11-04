@@ -13,6 +13,7 @@ import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary }
 import type { LegendaryActionBody } from "@/lib/utils/battle/actions/schema";
 import { currentOf } from "@/lib/utils/battle/common/control";
 import { logFields } from "@/lib/utils/battle/log/lines";
+import { momentumPatch } from "@/lib/utils/battle/momentum";
 import { abilityRunContext } from "@/lib/utils/battle/pipeline/ability-use";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, ruleErrorOf, systemEvent } from "@/lib/utils/battle/store";
@@ -20,7 +21,7 @@ import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { abilityOnMap } from "@/lib/utils/battle/view";
 import { rngOf } from "@/lib/utils/common/rng";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, SceneMomentum } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 const defaultDeps: SpellMutationDeps = { loadPool: getCachedSummonPool, loadSpell: (id, campaignId) => prisma.spell.findFirst({ where: { id, campaignId } }) };
@@ -32,6 +33,12 @@ function assertLegendaryAllowed(ctx: BattleMutationContext, actor: BattlePartici
 }
 
 const counter = (p: BattleParticipant) => `${p.battleData.legendary?.actionsLeft ?? 0}/${p.battleData.legendary?.actions ?? 0}`;
+
+const sceneOf = (ctx: BattleMutationContext, momentum: SceneMomentum): Pick<MutationResult, "scene"> => {
+  const patch = momentumPatch(ctx.scene.momentum, momentum);
+
+  return Object.keys(patch).length > 0 ? { scene: patch } : {};
+};
 
 type Option = LegendaryActionBody["option"];
 
@@ -72,13 +79,13 @@ function runBasicAttack(ctx: BattleMutationContext, actor: BattleParticipant, op
 
   assertLegendaryAllowed(ctx, actor, 1);
 
-  const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex: option.attackIndex, targetId: option.targetId, map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
+  const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex: option.attackIndex, targetId: option.targetId, map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id, momentum: ctx.scene.momentum });
 
   const participants = updateParticipant(out.participants, id, (p) => spendLegendary(p, 1));
 
   const after = findParticipant(participants, id) ?? actor;
 
-  return { participants, pending: ctx.pending, events: [systemEvent(round, textRef("battleLog.legendary.action", { name, attack: out.attackName, counter: counter(after) })), battleActionToEvent(out.action)] };
+  return { participants, pending: ctx.pending, ...sceneOf(ctx, out.momentum), events: [systemEvent(round, textRef("battleLog.legendary.action", { name, attack: out.attackName, counter: counter(after) })), battleActionToEvent(out.action)] };
 }
 
 async function runAbilityOption(ctx: BattleMutationContext, actor: BattleParticipant, option: AbilityOption, deps: AbilityRun["deps"]): Promise<MutationResult> {
@@ -136,11 +143,11 @@ function performAttack({ ctx, actor, option, ability, lair, spend }: AbilityRun,
 
   if (option.targetIds?.length !== 1) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_LEGENDARY_ONE_TARGET);
 
-  const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
+  const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id, momentum: ctx.scene.momentum });
 
   const participants = updateParticipant(out.participants, id, (p) => spend(recordUse(p, ability.key, round, ability.limits?.pool)));
 
-  return { participants, pending: ctx.pending, events: [systemEvent(round, textRef(lair ? "battleLog.legendary.useLair" : "battleLog.legendary.use", { name, ability: ability.name, attack: out.attackName })), battleActionToEvent(out.action)] };
+  return { participants, pending: ctx.pending, ...sceneOf(ctx, out.momentum), events: [systemEvent(round, textRef(lair ? "battleLog.legendary.useLair" : "battleLog.legendary.use", { name, ability: ability.name, attack: out.attackName })), battleActionToEvent(out.action)] };
 }
 
 async function performAbility({ ctx, actor, option, ability, lair, spend, deps }: AbilityRun): Promise<MutationResult> {

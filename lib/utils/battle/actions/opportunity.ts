@@ -11,7 +11,7 @@ import { meleeReachCells } from "@/lib/utils/battle/grid/attack-reach";
 import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint, SceneMomentum } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export interface OpportunityInput {
@@ -24,6 +24,7 @@ export interface OpportunityInput {
   battleId: string;
   rules: Ruleset;
   rng: () => number;
+  momentum?: SceneMomentum;
 }
 
 export interface OpportunityResult {
@@ -32,6 +33,7 @@ export interface OpportunityResult {
   cost: number;
   actions: BattleAction[];
   messages: LogLine[];
+  momentum: SceneMomentum;
 }
 
 const canProvoke = (e: BattleParticipant, moverId: string, rules: Ruleset) => canReact(e, rules) && isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
@@ -40,7 +42,7 @@ const canProvoke = (e: BattleParticipant, moverId: string, rules: Ruleset) => ca
 export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityResult {
   const { moverId, path, start, round, battleId, rules, rng } = input;
 
-  const flow: ActionFlow = { ps: input.participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules }, momentum: NO_MOMENTUM };
+  const flow: ActionFlow = { ps: input.participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules }, momentum: input.momentum ?? NO_MOMENTUM };
 
   const actions: BattleAction[] = [];
 
@@ -48,7 +50,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
   const mover0 = findParticipant(flow.ps, moverId);
 
-  if (!mover0 || hasEffectMarker(mover0, EffectMarker.DISENGAGED)) return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages };
+  if (!mover0 || hasEffectMarker(mover0, EffectMarker.DISENGAGED)) return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages, momentum: flow.momentum };
 
   const size = sizeOf(mover0);
 
@@ -106,7 +108,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
       if (!after || !isActive(after)) {
         messages.push(...flow.messages);
 
-        return { participants: flow.ps, stopAt: from, cost: i, actions, messages };
+        return { participants: flow.ps, stopAt: from, cost: i, actions, messages, momentum: flow.momentum };
       }
     }
 
@@ -115,5 +117,5 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
   messages.push(...flow.messages);
 
-  return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages };
+  return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages, momentum: flow.momentum };
 }

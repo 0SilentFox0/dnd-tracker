@@ -26,7 +26,7 @@ import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant, SceneMomentum } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export interface RunCoreActionInput {
@@ -37,12 +37,14 @@ export interface RunCoreActionInput {
   round: number;
   rng: () => number;
   battleId: string;
+  momentum?: SceneMomentum;
 }
 
 export interface RunCoreActionResult {
   participants: BattleParticipant[];
   messages: LogLine[];
   actions?: BattleAction[];
+  momentum?: SceneMomentum;
 }
 
 const TIMED_ACTIONS = {
@@ -168,7 +170,7 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   if (reach) return reject(reach);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules }, momentum: NO_MOMENTUM };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules }, momentum: input.momentum ?? NO_MOMENTUM };
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: actor.basicInfo.id, targetId, attack, currentRound: round, battleId: input.battleId, rng, label: "readied" });
 
@@ -176,5 +178,5 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   const spent = { ...fresh, battleData: { ...fresh.battleData, readied: undefined }, actionFlags: { ...fresh.actionFlags, hasUsedReaction: true } };
 
-  return { participants: replaceParticipant(flow.ps, spent), messages: [], actions: [battleAction] };
+  return { participants: replaceParticipant(flow.ps, spent), messages: [], actions: [battleAction], momentum: flow.momentum };
 }

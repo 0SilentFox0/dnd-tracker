@@ -3,6 +3,7 @@ import { runCoreAction } from "@/lib/utils/battle/actions/run";
 import type { CoreActionBody } from "@/lib/utils/battle/actions/schema";
 import { currentOf, requireActor } from "@/lib/utils/battle/common/control";
 import { lineText } from "@/lib/utils/battle/log/lines";
+import { momentumPatch } from "@/lib/utils/battle/momentum";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
@@ -39,9 +40,12 @@ export function coreActionMutation(ctx: BattleMutationContext, body: CoreActionB
     round: ctx.scene.round,
     rng: rngOf(ctx),
     battleId: ctx.scene.id,
+    momentum: ctx.scene.momentum,
   });
 
   const events = [...(out.messages.length ? [systemEvent(ctx.scene.round, lineText(out.messages, "; "))] : []), ...(out.actions ?? []).map(battleActionToEvent)];
 
-  return { participants: out.participants, pending: ctx.pending, events };
+  const patch = out.momentum ? momentumPatch(ctx.scene.momentum, out.momentum) : {};
+
+  return { participants: out.participants, pending: ctx.pending, events, ...(Object.keys(patch).length > 0 && { scene: patch }) };
 }
