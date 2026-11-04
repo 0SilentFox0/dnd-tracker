@@ -16,6 +16,14 @@
 | `rest.kinds` / `rest.onSession` | `kinds: false` ховає UI короткого/довгого відпочинку (кнопки партії, пілюля вікна відпочинку, панелі хіт-кісток і відновлення), сервер і далі приймає kinds; `onSession` — дія ДМ «Нова сесія»: `Fortune = Fate`, відсутній → 409 `REST_KIND_UNSUPPORTED` | `rest-handler`, `PartyRestActions`, `RestBadges`, `ProfileHero` |
 | `spells` / `items` | вкладки «Магія» і «Інвентар» у перегляді листа та редакторі ДМ (`?tab=magic` для wfrp → бойова) | `CharacterProfile`, `ProfileEditor` |
 | `d20Stats` | d20-рядки: AC/ініціатива/швидкість і мораль у «Бою», бейджі виснаження/натхнення, поля тимчасових HP та виснаження в діалозі ресурсів, перемикач натхнення | `CombatTab`, `RestBadges`, `DmRestActions`, `ResourcesDialog` |
+| `combat.dice` / `actionEconomy` | розмір основного кубика (d20 / d100) і прапорці дій (`bonusAction`/`reaction`); d20 = {20, true/true}, wfrp = {100, false/false}; шов для `rollInitiative`, `reactionBlocker`/`canReact`, off-hand (wfrp → основна дія) | `turn/initiative.ts`, `turn/reaction`, `strikeRoll(max)` |
+| `combat.resolveAttack` | відкрита перевірка d100 (WS/BS проти захисту, SL, Momentum, дублети, локація за відвернутим кидком); `undefined` у d20 → старий `judgeD20` | `attack/run.ts` (`judgeWfrp`), `server-attack.ts` |
+| `combat.mitigateDamage` | зброя + SB + чистий SL − TB − AP (мін. 1), крит від дублетів (`rollCrit`) з `afterHit()`; викликається в `compute.ts` між опором і `totalFinalDamage` | `attack/process/compute.ts` |
+| `combat.onZeroHp` | 0 Wounds → непритомність + один крит; після `revertOnZero` у `applyDamageConsequences` і в `settleStatusChange` (ручна зміна ДМ — без крита) | `damage/consequences.ts` |
+| `combat.initiative` / `baseStats` | `I` (+d10) замість d20 + Dex (`InitiativeScore {total, roll, die}`), тай-брейк за `abilities.wfrp.ag`; початкові `initiative`/`speed` (Move × 3 ft) | `scoreInitiative`, `from-character`/`from-unit` |
+| `combat.hitModel` | `offense/defense/winChance/damage/refHit` для чесного балансу (замість d20 to-hit/AC) | `balance/hit-model.ts`, `heroPower`, `loadUnitLibraryStats` |
+| `combat.participantFields` | додаткові поля учасника при створенні з персонажа/юніта (`abilities.characteristics`, `abilities.wfrp`: стати, AP = 0); d20 не додає ключів; `refreshFromSource` копіює | `from-character`, `from-unit`, `refresh-from-source` |
+| `cellFeetOf(rules)` | розмір клітинки в футах (`grid/cell-feet.ts`): homm/dnd5e 5, wfrp 6 (2 yd); `CELL_FEET` видалено, `rules` — обов'язковий параметр grid-хелперів (рух, шаблони, досяжність, цілі) | `lib/utils/battle/grid/*` |
 | `battle.supported` | wfrp = `true` (5b-1); `false` → старт бою 409 `SYSTEM_BATTLE_UNSUPPORTED` | `start-mutation`, setup UI |
 | `unusedMechanics` | механіки, що ховаються на сторінці правил | `RulesForm` |
 
@@ -45,9 +53,24 @@
 - Новий хук: поле в `RuleSystemDefinition`, реалізація в обох `d20/` і `wfrp/` (d20 — нейтральна/делегуюча), виклик лише через `ruleSystemOf`; додати рядок у таблицю вище.
 - Нові ключі з динамічною назвою — у `label-keys-rule-systems.test.ts`.
 
+## Межі 5b-1
+
+Бій wfrp працює на рівні рушія (без UI — 5b-2). Свідомі межі:
+
+- Momentum зберігається по учаснику (`battleData.momentum`, дублюється на всю сторону), а не на сцені; серверні атаки (реакції, нагоди) його не витрачають і не набирають; дальній бій Momentum не використовує.
+- Щита й броні немає (AP = 0, щит не моделюється): 5f.
+- Крит-маркери (bleeding, stunned, …) лише інертні ефекти-мітки; стани й механіки — 5c; head.5 «unconscious» не змінює статус.
+- d100 не пишеться в `diceRolls` (`DieSides` не має 100); значення лежить в `actionDetails.percentile`. `attackBodySchema` обмежує `d20Roll` до 20, тож кидок d100 клієнта потребує розширення схеми в 5b-2 (до того — кидки сервера).
+- Дальня атака без смуг дальності (складність challenging, ціль захисту 0).
+- Еталони балансу (`refHit`) припущені, не звірені з книгою.
+- `berserk` (turn/berserk.ts) і далі кидає d20 (у wfrp немає вмінь).
+- Off-hand у wfrp списує основну дію; бонусної дії й реакції немає.
+- Небойові джерела шкоди на 0 Wounds дають крит у «body»; опір у wfrp = лише імунітет; stat-модифікатор d20 у шкоді ігнорується.
+- `ctx.rules` у `flow`/`EffectCtx`/`ZoneCtx`/`ManeuverInput`/фазі атаки лишається необов'язковим: `rules ?? DEFAULT_RULES` (d20, 5 ft) — для wfrp ці шляхи мовчки дають 5 ft, поки поле не стане обов'язковим.
+
 ## Межі 5a
 
-Є: реєстр, блокування системи, d100-тест, характеристики/навички/Wounds/Fate, тести з листа, «Нова сесія», порожній шаблон Grim d100; d20-вкладки (магія, інвентар), кнопки короткого/довгого відпочинку й d20-рядки листа сховані прапорцями `spells`/`items`/`rest.kinds`/`d20Stats`. Немає: чернеток гравців (`createDraft` у не-d20 системі → 409 `SYSTEM_DRAFTS_UNSUPPORTED`), бою (старт 409), масштабу клітинки в grid-хелперах, магії, бестіарію й бібліотек — частини 5b–5h.
+Є: реєстр, блокування системи, d100-тест, характеристики/навички/Wounds/Fate, тести з листа, «Нова сесія», порожній шаблон Grim d100; d20-вкладки (магія, інвентар), кнопки короткого/довгого відпочинку й d20-рядки листа сховані прапорцями `spells`/`items`/`rest.kinds`/`d20Stats`. Немає: чернеток гравців (`createDraft` у не-d20 системі → 409 `SYSTEM_DRAFTS_UNSUPPORTED`), магії, бестіарію й бібліотек — частини 5b–5h.
 
 ## Відкриті хвости 5a (фінальне рев'ю 2026-11-04)
 
@@ -56,7 +79,7 @@
 - `readCharacteristics` (`keys.ts`) дублює межі `CharacteristicsSchema`: винести спільні константи й табличний тест на граничні значення.
 - `wfrp/sheet-test.ts` кидає `ContentError` (серверний шар) із чистої утиліти.
 - `useRuleSystem` повертає `homm`, поки правила вантажаться; `systemLocked` у кеші не інвалідується при створенні першого персонажа/юніта.
-- `importUnitsIntoCampaign` пише `characteristics` без перевірки системи кампанії.
+- ~~`importUnitsIntoCampaign` пише `characteristics` без перевірки системи кампанії~~ — закрито в 5b-1 (приймає `rules`, пише лише для wfrp).
 - `list-templates.ts` / `app/campaigns/page.tsx` тягнуть увесь JSON `rules` заради ключа системи (egress).
 - `SkillAdvancesEditor`: спеціалізація з пробілом мовчки блокує кнопку.
 - `templateKey` = назва шаблону (конвенція store), spec казав `grim-d100-empty`.
