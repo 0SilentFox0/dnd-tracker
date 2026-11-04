@@ -59,6 +59,6 @@
 - `importUnitsIntoCampaign` пише `characteristics` без перевірки системи кампанії.
 - `list-templates.ts` / `app/campaigns/page.tsx` тягнуть увесь JSON `rules` заради ключа системи (egress).
 - `SkillAdvancesEditor`: спеціалізація з пробілом мовчки блокує кнопку.
-- Міграцію `20261120000000_characteristics` перейменувати при rebase на main (збіг префікса з `missing_indexes`, порядок після `20261121000000_content_version`).
+- Міграцію `20261122000000_characteristics` перейменувати при rebase на main (збіг префікса з `missing_indexes`, порядок після `20261121000000_content_version`).
 - `templateKey` = назва шаблону (конвенція store), spec казав `grim-d100-empty`.
 - Складність: `DIFFICULTY_SL` зсуває SL, а не ціль — так у WFRP 5e (research §1; у 4e це модифікатор цілі). Значення таблиці звірити з книгою 5e; чи обрізається SL за результатом — теж звірити.
