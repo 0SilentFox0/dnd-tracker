@@ -64,7 +64,7 @@ describe("battleOps", () => {
 
     const retrying = Object.entries(battleOps).filter(([, o]) => "retryOnConflict" in o).map(([k]) => k);
 
-    expect(retrying).toEqual(["mapTerrain", "mapMotion", "mapBackground", "mapWeather"]);
+    expect(retrying).toEqual(["mapTerrain", "mapMotion", "mapWeather"]);
   });
 
   it("only attack and castSpell map the response to hpChanges", () => {

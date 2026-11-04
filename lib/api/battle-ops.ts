@@ -87,7 +87,7 @@ export const battleOps = {
   maze: op<MazeActionData>({ path: "/maze" }),
   mazeMark: op<MazeMarkData>({ path: "/maze-mark" }),
   mapMotion: op<MapMotionData>({ path: "/map-motion", retryOnConflict: true }),
-  mapBackground: op<MapBackgroundData>({ path: "/map-background", retryOnConflict: true }),
+  mapBackground: op<MapBackgroundData>({ path: "/map-background" }),
   mapWeather: op<MapWeatherData>({ path: "/map-weather", retryOnConflict: true }),
   bonusAction: op<BonusActionData>({ path: "/bonus-action" }),
   castSpell: op<SpellCastData, AttackResponse>({ path: "/spell", mapResponse: withHpChanges }),

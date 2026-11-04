@@ -15,6 +15,7 @@ export function createMapBackgroundMutation(campaignId: string) {
 
     if (!resolved.ok) throw new ContentError(resolved.message, 400);
 
+    // нова картинка має інше вирівнювання — повертаємо типове
     const { backgroundCols: _cols, gridOffset: _offset, ...rest } = map;
 
     return {
