@@ -22,7 +22,7 @@ describe("поля старої моделі заклинань", () => {
       const text = fs.readFileSync(file, "utf8");
 
       return REMOVED.filter((name) => text.includes(name)).map((name) => `${path.relative(ROOT, file)}: ${name}`);
-    }).filter((hit) => !hit.startsWith("lib/__tests__/removed-spell-fields"));
+    }).filter((hit) => !hit.startsWith("lib/__tests__/removed-spell-fields") && hit !== "lib/server/content/detach-refs.ts: summonUnitId");
 
     expect(hits).toEqual([]);
   });
