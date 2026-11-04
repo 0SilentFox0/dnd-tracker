@@ -147,6 +147,16 @@ export const sourceApplyTool = defineTool({
   handler: aliasHandler("source_apply"),
 });
 
+export const sourceApplySafeTool = defineTool({
+  name: "source_apply_safe",
+  title: "Apply safe source updates",
+  description:
+    "Takes all new and updated items from the source in one step. Conflicts (local edits), deletions and ignored items are skipped — review those with source_diff and source_apply. Returns how many items were applied.",
+  scopes: ["content:write"],
+  input: z.object({}),
+  handler: aliasHandler("source_apply_safe"),
+});
+
 export const contentImportTool = defineTool({
   name: "content_import",
   title: "Import content",
@@ -177,6 +187,7 @@ export const CONTENT_TOOLS = [
   saveSkillTreeTool,
   sourceDiffTool,
   sourceApplyTool,
+  sourceApplySafeTool,
 ];
 
 // T14 connects these aliases together with trusted caller identity and catalog.

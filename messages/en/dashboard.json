@@ -154,7 +154,10 @@
   },
   "sourceUpdate": {
     "text": "Template updated (v{version})",
-    "review": "Review changes"
+    "review": "Review changes",
+    "applySafe": "Apply safe updates",
+    "applied": "{count, plural, =0 {Nothing to apply automatically} one {# update applied} other {# updates applied}}. Items with local edits stay in \"Review changes\".",
+    "failed": "Could not apply updates"
   },
   "battleStatus": {
     "prepared": "prepared",

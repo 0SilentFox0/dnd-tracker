@@ -21,7 +21,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { listSkillTrees, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
-import { applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
+import { applySafeSource, applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import { abilitiesJson, OwnerKind, readAbilities, skillAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
@@ -100,6 +100,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "rules.condition-usage": return readCustomConditionUsage(actor, param("slug"));
       case "campaign.export": return exportCampaign(prisma, actor.campaignId);
       case "source.diff": return getSourceDiff(actor, CONTENT_OPERATIONS["source.diff"].query.parse(input.query ?? {}).scope, locale);
+      case "source.apply-safe": return applySafeSource(actor);
       case "source.apply": return applySource(actor, bodyOf("source.apply", body));
       case "skill-trees.list": return listSkillTrees(actor);
       case "skill-trees.save": return saveSkillTree(actor, { ...bodyOf("skill-trees.save", body), ...(input.treeId ? { treeId: String(input.treeId) } : {}) });

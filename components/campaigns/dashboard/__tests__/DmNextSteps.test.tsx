@@ -10,6 +10,10 @@ afterEach(cleanup);
 
 const empty: DmDashboardData = { pendingDrafts: 0, scenarioPages: [], battles: [], sourceUpdate: null };
 
+const safe = vi.hoisted(() => ({ mutate: vi.fn(), data: undefined as { applied: number } | undefined }));
+
+vi.mock("@/lib/hooks/campaigns", () => ({ useApplySafeSourceChanges: () => ({ mutate: safe.mutate, data: safe.data, isPending: false, isError: false }) }));
+
 vi.mock("@/components/campaigns/templates/SourceSyncDialog", () => ({
   SourceSyncDialog: ({ open }: { open: boolean }) => (open ? <div>sync-dialog-open</div> : null),
 }));
@@ -47,5 +51,16 @@ describe("DmNextSteps", () => {
     fireEvent.click(screen.getByRole("button", { name: "dashboard.sourceUpdate.review" }));
 
     expect(screen.getByText("sync-dialog-open")).toBeTruthy();
+  });
+
+  it("apply safe button runs the mutation and shows the applied count", () => {
+    safe.data = { applied: 2 };
+
+    render(<DmNextSteps campaignId="c1" data={{ ...empty, sourceUpdate: { sourceVersion: 7 } }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "dashboard.sourceUpdate.applySafe" }));
+
+    expect(safe.mutate).toHaveBeenCalled();
+    expect(screen.getByRole("status").textContent).toContain("dashboard.sourceUpdate.applied");
   });
 });

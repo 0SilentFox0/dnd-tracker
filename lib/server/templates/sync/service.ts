@@ -8,7 +8,7 @@ import { assertCan } from "@/lib/server/content/access";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
-import { applySourceChanges } from "@/lib/server/templates/sync/apply";
+import { applySafeSourceChanges, applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { buildDiff } from "@/lib/server/templates/sync/diff";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -30,6 +30,16 @@ export async function applySource(actor: Actor, body: SourceSyncApplyInput): Pro
 
   // NO KEY UPDATE serialises applies without blocking inserts that reference the campaign
   const result = await withCampaignContentWrite(actor.campaignId, tx => applySourceChanges(tx, actor.campaignId, body, actor), { lock: "no-key-update", ...APPLY_TX_OPTIONS });
+
+  afterContentCommit(() => invalidateAllReference(actor.campaignId));
+
+  return result;
+}
+
+export async function applySafeSource(actor: Actor): Promise<SourceApplyResult> {
+  assertCan(actor, CONTENT_OPERATIONS["source.apply-safe"].need);
+
+  const result = await withCampaignContentWrite(actor.campaignId, tx => applySafeSourceChanges(tx, actor.campaignId, actor), { lock: "no-key-update", ...APPLY_TX_OPTIONS });
 
   afterContentCommit(() => invalidateAllReference(actor.campaignId));
 

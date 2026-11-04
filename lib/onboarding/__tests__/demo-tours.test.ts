@@ -28,6 +28,7 @@ describe("demo visual tours", () => {
   it("provides every tour and step string in both supported locales", () => {
     for (const messages of [english.demoTours, ukrainian.demoTours] as const) {
       const lookup = (...keys: string[]) => keys.reduce<unknown>((value, key) => value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined, messages);
+
       for (const tour of DEMO_TOURS) {
         const [, , id, field] = tour.titleKey.split(".");
 

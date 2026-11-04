@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { SYNC_DEFAULT_ON } from "@/lib/constants/source-sync";
 import { getTranslator } from "@/lib/i18n/translator";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import type { CompendiumBundleDb } from "@/lib/server/compendium-import/bundle";
@@ -76,6 +77,12 @@ export async function applySourceChanges(db: SyncDb, campaignId: string, body: S
   await saveState(db, ctx, items, ignored);
 
   return { applied: items.length, ignored: ignored.length, autoAdded: autoAdded.map(({ scope, key, name }) => ({ scope, key, name })), warnings };
+}
+
+export async function applySafeSourceChanges(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SourceApplyResult> {
+  const safe = classify(await loadSyncContext(db, campaignId, access)).filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status));
+
+  return applySourceChanges(db, campaignId, { apply: safe.map(({ scope, key, sourceHash, status }) => ({ scope, key, sourceHash, status })), ignore: [] }, access);
 }
 
 function closeOverRequires(chosen: SyncItem[], all: Map<string, SyncItem>) {

@@ -8,7 +8,7 @@ import { invalidateCampaignQueries } from "./invalidate";
 import { campaignKeys } from "./keys";
 
 import { ApiError } from "@/lib/api/client";
-import { applySourceChanges, getSourceDiff } from "@/lib/api/source-sync";
+import { applySafeSourceChanges, applySourceChanges, getSourceDiff } from "@/lib/api/source-sync";
 import { autoAddedPreview, defaultSelection, itemKey, toRefs } from "@/lib/utils/campaigns/source-sync";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { SourceApplyBody, SourceApplyResult, SourceDiffItem, SourceSyncScope } from "@/types/campaigns";
@@ -41,6 +41,15 @@ export function useApplySourceChanges(campaignId: string) {
     onError: (err) => {
       if (err instanceof ApiError && err.status === 409) void queryClient.invalidateQueries({ queryKey: campaignKeys.sourceDiff(campaignId) });
     },
+  });
+}
+
+export function useApplySafeSourceChanges(campaignId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => applySafeSourceChanges(campaignId),
+    onSuccess: () => void invalidateCampaignQueries(queryClient, campaignId),
   });
 }
 

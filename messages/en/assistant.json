@@ -72,7 +72,8 @@
     },
     "source": {
       "diff": "Source changes",
-      "apply": "Apply source changes"
+      "apply": "Apply source changes",
+      "apply-safe": "Apply safe source updates"
     },
     "skill-trees": {
       "list": "Skill trees",

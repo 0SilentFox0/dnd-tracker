@@ -39,6 +39,7 @@ export async function dispatchContentAlias(
     case "content_import": actionId = input.dryRun === true ? "content.import-preview" : "content.import"; payload = { kind, body: { rows: input.rows, mode: input.mode ?? "create", dryRun: input.dryRun ?? false } }; break;
     case "update_rules": actionId = "rules.update"; payload = { body: input.patch }; break;
     case "save_skill_tree": actionId = "skill-trees.save"; payload = { treeId: input.treeId, body: { race: input.race, skills: input.skills } }; break;
+    case "source_apply_safe": actionId = "source.apply-safe"; payload = {}; break;
     case "source_apply": actionId = "source.apply"; payload = { body: input }; break;
     default: throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CONTENT_ALIAS, 404);
   }

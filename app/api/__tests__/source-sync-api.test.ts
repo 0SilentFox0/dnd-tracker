@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { POST as POST_SAFE } from "@/app/api/campaigns/[id]/source-sync/apply-safe/route";
 import { GET, POST } from "@/app/api/campaigns/[id]/source-sync/route";
 import { verifyApiToken } from "@/lib/ai/api-tokens";
 import { ContentError } from "@/lib/server/content/errors";
-import { applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
+import { applySafeSource, applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/ai/api-tokens", () => ({ verifyApiToken: vi.fn() }));
-vi.mock("@/lib/server/templates/sync/service", () => ({ getSourceDiff: vi.fn(), applySource: vi.fn() }));
+vi.mock("@/lib/server/templates/sync/service", () => ({ getSourceDiff: vi.fn(), applySource: vi.fn(), applySafeSource: vi.fn() }));
 
 const params = { params: Promise.resolve({ id: "c1" }) };
 
@@ -83,5 +84,24 @@ describe("source-sync API", () => {
 
     expect(res.status).toBe(403);
     expect(applySource).not.toHaveBeenCalled();
+  });
+
+  it("apply-safe: 200 з результатом сервісу", async () => {
+    vi.mocked(applySafeSource).mockResolvedValue({ applied: 2 } as never);
+
+    const res = await POST_SAFE(new Request("http://x", { method: "POST" }), params);
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ applied: 2 });
+    expect(applySafeSource).toHaveBeenCalledWith(expect.objectContaining({ campaignId: "c1", userId: "u" }));
+  });
+
+  it("apply-safe: токен без content:write: 403", async () => {
+    vi.mocked(verifyApiToken).mockResolvedValue({ campaignId: "c1", userId: "u", scopes: ["content:read"] } as never);
+
+    const res = await POST_SAFE(new Request("http://x", { method: "POST", headers: { authorization: "Bearer dndt_abc" } }), params);
+
+    expect(res.status).toBe(403);
+    expect(applySafeSource).not.toHaveBeenCalled();
   });
 });
