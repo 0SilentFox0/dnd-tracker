@@ -54,7 +54,7 @@ describe("бонус зброї «+N» у damageDice", () => {
   it("клієнтський розклад збігається з сервером; крит не подвоює бонус", () => {
     const attack = weapon("3d8+15");
 
-    const params = { attacker, target, attack, damageRolls: [4, 5, 6], allParticipants: [attacker, target] };
+    const params = { rules: DEFAULT_RULES, attacker, target, attack, damageRolls: [4, 5, 6], allParticipants: [attacker, target] };
 
     const server = hit(attack, [4, 5, 6]);
 

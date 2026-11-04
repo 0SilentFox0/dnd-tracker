@@ -39,7 +39,7 @@ describe("winChance", () => {
 const wfrpP = (characteristics: unknown, dice = "1d6"): BattleParticipant =>
   ({
     combatStats: { maxHp: 12, currentHp: 12 },
-    abilities: { level: 1, modifiers: {}, characteristics, wfrp: { sb: 3, tb: 3, ap: {}, moveYd: 4 } },
+    abilities: { level: 1, modifiers: {}, characteristics, wfrp: { sb: 3, tb: 3, ap: {} } },
     battleData: { attacks: [{ name: "x", type: "melee", damageDice: dice }] },
   }) as unknown as BattleParticipant;
 

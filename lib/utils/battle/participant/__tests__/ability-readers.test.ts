@@ -40,8 +40,8 @@ describe("readers", () => {
   it("поріг криту з пасивки", () => {
     const p = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "critThreshold", flat: -1 }] })] });
 
-    expect(calculateAttackRoll(p, bow, 19).isCritical).toBe(true);
-    expect(calculateAttackRoll(makeParticipant({ id: "b" }), bow, 19).isCritical).toBe(false);
+    expect(calculateAttackRoll(p, bow, 19, undefined, undefined, { rules: DEFAULT_RULES }).isCritical).toBe(true);
+    expect(calculateAttackRoll(makeParticipant({ id: "b" }), bow, 19, undefined, undefined, { rules: DEFAULT_RULES }).isCritical).toBe(false);
   });
 
   it("шкода: пасивка + extra дії, подійний скіл не рахується", () => {
@@ -102,7 +102,7 @@ describe("calculateAttackRoll: rng", () => {
 
     const bow = { id: "b", name: "Лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d6", damageType: "piercing" } as BattleAttack;
 
-    const pick = (v: number) => calculateAttackRoll(p, bow, 20, undefined, undefined, { rng: () => v }).criticalEffect?.id;
+    const pick = (v: number) => calculateAttackRoll(p, bow, 20, undefined, undefined, { rules: DEFAULT_RULES, rng: () => v }).criticalEffect?.id;
 
     expect(pick(0)).toBe(1);
     expect(pick(0.999)).not.toBe(1);

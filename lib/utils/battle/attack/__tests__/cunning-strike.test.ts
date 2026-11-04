@@ -36,7 +36,7 @@ function foe(conMod: number, dexMod = conMod): BattleParticipant {
 function strike(ps: BattleParticipant[], cunningStrike?: CunningStrikeEffect[]) {
   const flow = { ps, messages: [] as string[], summons: [], ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES }, momentum: {} };
 
-  resolveHit({ flow, attackerId: "r", targetId: "t", attack: SWORD, damageRolls: [1], attackRoll: calculateAttackRoll(ps[0], SWORD, 15), currentRound: 1, battleId: "b", cunningStrike });
+  resolveHit({ flow, attackerId: "r", targetId: "t", attack: SWORD, damageRolls: [1], attackRoll: calculateAttackRoll(ps[0], SWORD, 15, undefined, undefined, { rules: DEFAULT_RULES }), currentRound: 1, battleId: "b", cunningStrike });
 
   const get = (id: string) => flow.ps.find((p) => p.basicInfo.id === id) as BattleParticipant;
 

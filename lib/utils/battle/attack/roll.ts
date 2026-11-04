@@ -8,24 +8,24 @@ import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { rollDie } from "@/lib/utils/common/dice";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { type Ruleset } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackRoll(
   attacker: BattleParticipant,
   attack: BattleAttack,
   d20Roll: number,
-  advantageRoll?: number,
-  disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset; map?: BattleMapConfig | null; inspiration?: boolean; crit?: CritPicker } = {},
+  advantageRoll: number | undefined,
+  disadvantageRoll: number | undefined,
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules: Ruleset; map?: BattleMapConfig | null; inspiration?: boolean; crit?: CritPicker },
 ): AttackRollResult {
-  const c = (opts.rules ?? DEFAULT_RULES).criticals;
+  const c = opts.rules.criticals;
 
   const participants = withSelf(opts.participants ?? [], attacker);
 
   const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
 
-  const forced = forcedRollMode(rollModeReasons(attacker, attack, participants, { ...opts, rules: opts.rules ?? DEFAULT_RULES }));
+  const forced = forcedRollMode(rollModeReasons(attacker, attack, participants, opts));
 
   // вибір гравця діє лише тоді, коли навички нічого не вирішують
   const mode = forced.forced ? forced.mode : (opts.manualMode ?? "normal");

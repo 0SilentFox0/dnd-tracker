@@ -23,7 +23,7 @@ export function pickedEnemies(ps: BattleParticipant[], actor: BattleParticipant,
   return [...new Set(ids)].slice(0, max).flatMap((id) => findParticipant(ps, id) ?? []).filter(isEnemyOf(actor));
 }
 
-export function strikeAll(acc: ManeuverResult, hits: ResistedHit[], hit: { actorId: string; damageType: string; name: string; note?: (id: string) => LogLine; rules?: Ruleset; rng?: Rng }): ManeuverResult {
+export function strikeAll(acc: ManeuverResult, hits: ResistedHit[], hit: { actorId: string; damageType: string; name: string; note?: (id: string) => LogLine; rules: Ruleset; rng?: Rng }): ManeuverResult {
   const r = dealResistedHits(acc.participants, hits, hit);
 
   const lines = r.results.map(({ targetId, dealt }) => textRef("battleLog.maneuver.damage", { ability: hit.name, target: findParticipant(r.participants, targetId)?.basicInfo.name ?? "", dealt, note: hit.note?.(targetId) ?? "" }));

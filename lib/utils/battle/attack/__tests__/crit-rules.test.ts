@@ -18,7 +18,7 @@ const attack = SWORD;
 
 const rulesWith = (criticals: Partial<typeof DEFAULT_RULES.criticals>) => parseRules({ criticals });
 
-const roll = (d20: number, rules?: ReturnType<typeof parseRules>, rng?: () => number) => calculateAttackRoll(attacker, attack, d20, undefined, undefined, { rules, rng });
+const roll = (d20: number, rules: ReturnType<typeof parseRules> = DEFAULT_RULES, rng?: () => number) => calculateAttackRoll(attacker, attack, d20, undefined, undefined, { rules, rng });
 
 describe("calculateAttackRoll: правила критів", () => {
   it("без rules і з DEFAULT_RULES: 20 крит, 19 ні, 1 провал", () => {

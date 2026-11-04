@@ -17,5 +17,5 @@ export interface ComputeDamageBreakdownParams {
   damageRolls: number[];
   allParticipants: BattleParticipant[];
   isCritical?: boolean;
-  rules?: Ruleset;
+  rules: Ruleset;
 }

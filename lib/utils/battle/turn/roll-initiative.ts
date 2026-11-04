@@ -9,10 +9,8 @@ import type { BattleParticipant } from "@/types/battle";
 
 export interface InitiativeRollEntry {
   id: string;
-  /** The rolled die value (a d20 unless `sides` says otherwise) */
-  d20: number;
-  /** Die sides when the system rolls something other than a d20 */
-  sides?: number;
+  roll: number;
+  sides: number;
   total: number;
 }
 
@@ -42,7 +40,7 @@ export function rollInitiative(participants: BattleParticipant[], rng: Rng, rule
 
     const { total } = score;
 
-    if (score.roll !== null) rolls.push({ id: p.basicInfo.id, d20: score.roll, ...(score.die !== 20 && score.die !== null && { sides: score.die }), total });
+    if (score.roll !== null) rolls.push({ id: p.basicInfo.id, roll: score.roll, sides: score.die ?? 20, total });
 
     return { p: { ...dropBattleFlag(p, "revealPending"), abilities: { ...p.abilities, initiative: total } }, key: 0 };
   });

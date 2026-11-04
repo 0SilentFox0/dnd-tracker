@@ -3,7 +3,7 @@ import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library"
 import { buildPartyPower, computeFairScaling, heroMember, type Power, unitMember } from "@/lib/utils/battle/balance";
 import { heroPower } from "@/lib/utils/battle/balance/hero-power";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -12,14 +12,14 @@ export type StartSlot =
   | { type: typeof ParticipantSourceType.UNIT; unit: { id: string }; side: ParticipantSide };
 
 /** Enemy units get HP and damage multipliers from the final roster; heroes and later summons stay as built. */
-export async function scaleEnemiesForFairBattle(campaignId: string, slots: StartSlot[], built: BattleParticipant[], campaignContext: CampaignSpellContext | undefined): Promise<BattleParticipant[]> {
+export async function scaleEnemiesForFairBattle(campaignId: string, slots: StartSlot[], built: BattleParticipant[], campaignContext: CampaignSpellContext | undefined, rules: Ruleset): Promise<BattleParticipant[]> {
   const isEnemyUnit = (s: StartSlot) => s.type === ParticipantSourceType.UNIT && s.side === ParticipantSide.ENEMY;
 
   if (!slots.some(isEnemyUnit)) return built;
 
-  const model = ruleSystemOf(campaignContext?.rules ?? DEFAULT_RULES).combat.hitModel;
+  const model = ruleSystemOf(rules).combat.hitModel;
 
-  const library = await loadUnitLibraryStats(campaignId, campaignContext?.rules);
+  const library = await loadUnitLibraryStats(campaignId, rules);
 
   const byId = new Map(library.map((u) => [u.unitId, u]));
 

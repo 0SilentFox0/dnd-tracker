@@ -61,14 +61,14 @@ describe("crit picker plumbing", () => {
   it("calculateAttackRoll кличе picker на 20 і 1, не кличе на 10", () => {
     const crit = vi.fn(() => critEffectsFor("attack", "success")[0]);
 
-    calculateAttackRoll(attacker, sword, 20, undefined, undefined, { targetId: "t", crit });
+    calculateAttackRoll(attacker, sword, 20, undefined, undefined, { rules: DEFAULT_RULES, targetId: "t", crit });
     expect(crit).toHaveBeenLastCalledWith({ source: "attack", kind: "success", actorId: "a", targetId: "t" });
 
-    calculateAttackRoll(attacker, sword, 1, undefined, undefined, { targetId: "t", crit });
+    calculateAttackRoll(attacker, sword, 1, undefined, undefined, { rules: DEFAULT_RULES, targetId: "t", crit });
     expect(crit).toHaveBeenLastCalledWith({ source: "attack", kind: "fail", actorId: "a", targetId: "t" });
 
     crit.mockClear();
-    calculateAttackRoll(attacker, sword, 10, undefined, undefined, { targetId: "t", crit });
+    calculateAttackRoll(attacker, sword, 10, undefined, undefined, { rules: DEFAULT_RULES, targetId: "t", crit });
     expect(crit).not.toHaveBeenCalled();
   });
 

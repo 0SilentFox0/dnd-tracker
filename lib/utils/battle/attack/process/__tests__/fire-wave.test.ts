@@ -48,7 +48,7 @@ describe("Вогняна хвиля при влучанні", () => {
 
     const attacker = ps[0];
 
-    const r = resolveHit({ flow, attackerId: "a", targetId: "v", attack: SWORD, damageRolls: [6], attackRoll: calculateAttackRoll(attacker, SWORD, 15), currentRound: 1, battleId: "b" });
+    const r = resolveHit({ flow, attackerId: "a", targetId: "v", attack: SWORD, damageRolls: [6], attackRoll: calculateAttackRoll(attacker, SWORD, 15, undefined, undefined, { rules: DEFAULT_RULES }), currentRound: 1, battleId: "b" });
 
     return { flow, total: r.hitDamage.totalFinalDamage };
   };

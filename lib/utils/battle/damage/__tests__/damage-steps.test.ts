@@ -69,7 +69,7 @@ describe("кроки шкоди", () => {
   it("computeDamageBreakdown повертає кроки обох сторін, останній after = finalDamage", () => {
     const attack = { name: "Рапіра", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" };
 
-    const r = computeDamageBreakdown({ attacker, target, attack, damageRolls: [6], allParticipants: [attacker, target] });
+    const r = computeDamageBreakdown({ rules: DEFAULT_RULES, attacker, target, attack, damageRolls: [6], allParticipants: [attacker, target] });
 
     expect(r.steps.some((s) => s.side === "target" && textOf(s.label) === "Експертний захист")).toBe(true);
     expect(r.steps.at(-1)?.after).toBe(r.finalDamage);

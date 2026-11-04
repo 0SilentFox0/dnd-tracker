@@ -132,7 +132,7 @@ export async function buildStartOrder(
     ),
   );
 
-  const built = rules.encounters.balance === "xp" || ruleSystemOf(rules).balance.kind === "none" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
+  const built = rules.encounters.balance === "xp" || ruleSystemOf(rules).balance.kind === "none" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext, rules);
 
   const { field, reserve } = partitionReserve(slots, built);
 

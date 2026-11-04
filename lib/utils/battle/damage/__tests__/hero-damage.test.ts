@@ -34,7 +34,7 @@ const hit = (attacker: BattleParticipant, attack: BattleAttack, rolls: number[],
   }).physicalDamage;
 
 const preview = (attacker: BattleParticipant, rolls: number[]) =>
-  computeDamageBreakdown({ attacker, target, attack: sword, damageRolls: rolls, allParticipants: [attacker, target] }).finalDamage;
+  computeDamageBreakdown({ rules: DEFAULT_RULES, attacker, target, attack: sword, damageRolls: rolls, allParticipants: [attacker, target] }).finalDamage;
 
 describe("шкода атаки: числа до дедупу", () => {
   it("герой 5 рівня, один кидок — кубики рівня середнім: 5 + 7 + 5 + 2 + 2 (бонус зброї)", () => {

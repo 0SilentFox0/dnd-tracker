@@ -29,7 +29,7 @@ export function initiativeRollMutation(ctx: BattleMutationContext, _body: z.infe
 
   const targets = rolls.map((r) => ({ participantId: r.id, participantName: nameOf.get(r.id) ?? "" }));
 
-  const diceRolls: DiceRollGroup[] = rolls.map((r) => ({ kind: "initiative", rollerId: r.id, dice: [{ sides: (r.sides ?? 20) as DieSides, value: r.d20 }] }));
+  const diceRolls: DiceRollGroup[] = rolls.map((r) => ({ kind: "initiative", rollerId: r.id, dice: [{ sides: r.sides as DieSides, value: r.roll }] }));
 
   return {
     participants,

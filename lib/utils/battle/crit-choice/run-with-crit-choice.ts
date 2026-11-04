@@ -4,7 +4,6 @@ import type { CritPicker, CritResume } from "./types";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { Rng } from "@/lib/utils/common/rng";
 import { mulberry32 } from "@/lib/utils/common/rng";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 interface RunWithCritChoiceOptions {
   action: "attack" | "spell";
@@ -22,7 +21,7 @@ export async function runWithCritChoice(ctx: BattleMutationContext, opts: RunWit
   // скриптовий ctx.rng (тести, sweep) діє напряму; повтор після паузи завжди йде за seed
   const rng = !opts.resume && ctx.rng ? ctx.rng : mulberry32(seed);
 
-  const { criticals } = ctx.meta.rules ?? DEFAULT_RULES;
+  const { criticals } = ctx.meta.rules;
 
   const gate = createCritGate({ rng, choices: opts.resume?.choices, disabled: { success: criticals.disabledSuccess, fail: criticals.disabledFail } });
 

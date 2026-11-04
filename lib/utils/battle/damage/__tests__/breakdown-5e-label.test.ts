@@ -4,6 +4,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import type { BattleAttack } from "@/types/battle";
 
 const base = createMockParticipant();
@@ -16,7 +17,7 @@ const rapier: BattleAttack = { id: "r", name: "Рапіра", type: AttackType.M
 
 describe("computeDamageBreakdown 5e stat label", () => {
   it("labels the finesse modifier as Dexterity", () => {
-    const r = computeDamageBreakdown({ attacker: fiveE, target, attack: rapier, damageRolls: [5], allParticipants: [fiveE, target] });
+    const r = computeDamageBreakdown({ rules: DEFAULT_RULES, attacker: fiveE, target, attack: rapier, damageRolls: [5], allParticipants: [fiveE, target] });
 
     expect(r.steps?.some((s) => textOf(s.label) === "Спритність" && s.value === 4)).toBe(true);
   });

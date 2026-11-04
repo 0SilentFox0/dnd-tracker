@@ -10,6 +10,7 @@ import {
   computeDamageBreakdown,
 } from "@/lib/utils/battle/damage";
 import { rowLines,textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattleParticipant {
@@ -97,6 +98,7 @@ describe("battle-damage-breakdown", () => {
       });
 
       const result = computeDamageBreakdown({
+      rules: DEFAULT_RULES,
         attacker,
         target,
         attack: createMeleeAttack(),
@@ -126,6 +128,7 @@ describe("battle-damage-breakdown", () => {
       });
 
       const normal = computeDamageBreakdown({
+      rules: DEFAULT_RULES,
         attacker,
         target,
         attack: createMeleeAttack(),
@@ -134,6 +137,7 @@ describe("battle-damage-breakdown", () => {
       });
 
       const critical = computeDamageBreakdown({
+      rules: DEFAULT_RULES,
         attacker,
         target,
         attack: createMeleeAttack(),
@@ -164,6 +168,7 @@ describe("battle-damage-breakdown", () => {
       });
 
       const result = computeDamageBreakdown({
+      rules: DEFAULT_RULES,
         attacker,
         target,
         attack: createMeleeAttack(),
@@ -192,6 +197,7 @@ describe("battle-damage-breakdown", () => {
       grantPassive(target, [{ kind: "flag", flag: "resistance", damageType: "physical", percent: 50 }]);
 
       const result = computeDamageBreakdown({
+      rules: DEFAULT_RULES,
         attacker,
         target,
         attack: createMeleeAttack(),

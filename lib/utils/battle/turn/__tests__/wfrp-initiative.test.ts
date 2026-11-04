@@ -46,8 +46,8 @@ describe("wfrp initiative", () => {
     const out = rollInitiative([wfrp("a", { i: 42 }), wfrp("b", { i: 30 })], () => 0.95, rollRules);
 
     expect(out.rolls).toEqual([
-      { id: "a", d20: 10, sides: 10, total: 52 },
-      { id: "b", d20: 10, sides: 10, total: 40 },
+      { id: "a", roll: 10, sides: 10, total: 52 },
+      { id: "b", roll: 10, sides: 10, total: 40 },
     ]);
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["a", "b"]);
   });
@@ -63,7 +63,7 @@ describe("wfrp initiative", () => {
   it("d20 path is unchanged", () => {
     const out = rollInitiative([createMockParticipant()], () => 0.5, DEFAULT_RULES);
 
-    expect(out.rolls[0].sides).toBeUndefined();
+    expect(out.rolls[0].sides).toBe(20);
   });
 });
 

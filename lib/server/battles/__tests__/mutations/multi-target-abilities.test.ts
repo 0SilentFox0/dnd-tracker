@@ -7,6 +7,7 @@ import { bonusActionMutation } from "@/lib/server/battles/mutations/bonus-action
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const hunt = resolved({
@@ -52,7 +53,7 @@ describe("multi-target abilities", () => {
 
     const ally = participant("ally", { side: ParticipantSide.ALLY }, {});
 
-    const roll = (attacker: BattleParticipant) => calculateAttackRoll(attacker, sword, 5, 17, 3, { participants: marked, targetId: "f1", rng: seq(0) });
+    const roll = (attacker: BattleParticipant) => calculateAttackRoll(attacker, sword, 5, 17, 3, { rules: DEFAULT_RULES, participants: marked, targetId: "f1", rng: seq(0) });
 
     expect(target.battleData.activeEffects).toHaveLength(1);
     expect(roll(ally).advantageUsed).toBe(true);
