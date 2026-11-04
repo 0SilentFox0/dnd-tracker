@@ -160,9 +160,9 @@ export const attackBodySchema = z
     /** сервер кидає d20/d100 сам; кидки клієнта не потрібні й ігноруються */
     serverRoll: z.boolean().optional(),
     /** другий d20 на ціль у порядку attackRolls; сервер сам вирішує перевагу/недолік */
-    secondRolls: z.array(z.number().min(1).max(20).nullable()).optional(),
-    advantageRoll: z.number().min(1).max(20).optional(),
-    disadvantageRoll: z.number().min(1).max(20).optional(),
+    secondRolls: z.array(z.number().int().min(1).max(20).nullable()).optional(),
+    advantageRoll: z.number().int().min(1).max(20).optional(),
+    disadvantageRoll: z.number().int().min(1).max(20).optional(),
     /** вибір гравця; сервер застосовує, лише коли навички не задають режим */
     rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
     damageRolls: z.array(z.number()).default([]),

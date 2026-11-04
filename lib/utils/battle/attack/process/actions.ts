@@ -8,6 +8,8 @@ import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { immunityNote } from "@/lib/utils/battle/resistance";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -161,6 +163,7 @@ export interface BuildOffTurnParams {
   currentRound: number;
   critFlavor?: CritFlavor;
   title?: LogLine;
+  rules: Ruleset;
 }
 
 export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
@@ -176,7 +179,7 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
 
   const plainCritText = !crit && attackRoll.isCritical ? plainCrit : "";
 
-  const pct = attackRoll.percentile;
+  const pct = ruleSystemOf(p.rules).combat.dice === 20 ? undefined : attackRoll.percentile;
 
   const summary = pct
     ? hit

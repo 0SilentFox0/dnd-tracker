@@ -145,6 +145,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
     currentRound: round,
     critFlavor,
     title: LABELS[label].title,
+    rules: flow.ctx.rules,
   });
 
   appendHpChanges(battleAction, before, flow.ps);

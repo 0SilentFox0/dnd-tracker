@@ -95,7 +95,7 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest, ru
   const maxRoll = ruleSystemOf(rules).combat.dice;
 
   if ([data.d20Roll, data.attackRoll, ...(data.attackRolls ?? [])].some((roll) => roll != null && roll > maxRoll)) {
-    throw new BattleRuleError("action_rejected", API_ERRORS.ROLL_OUT_OF_RANGE);
+    throw new BattleRuleError("invalid_dice", API_ERRORS.ROLL_OUT_OF_RANGE);
   }
 
   const singleRoll = data.d20Roll ?? data.attackRoll;

@@ -312,6 +312,7 @@ describe("runAttackPhase — error path validation", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
       expect((e as Error).message).toBe(API_ERRORS.ROLL_OUT_OF_RANGE);
+      expect((e as BattleRuleError).code).toBe("invalid_dice");
     }
   });
 
