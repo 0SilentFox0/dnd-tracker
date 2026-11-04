@@ -185,6 +185,8 @@ export const BATTLE_RATE_LIMITS = {
   maze: { limit: 60, windowSeconds: 10 },
   /** Мітка гравця в лабіринті. */
   mazeMark: { limit: 30, windowSeconds: 10 },
+  /** Рух карти (ДМ). */
+  mapMotion: { limit: 20, windowSeconds: 10 },
   /** Погода на карті (ДМ) — рідко. */
   mapWeather: { limit: 10, windowSeconds: 10 },
   /** Музика бою (ДМ): перемикання треків. */

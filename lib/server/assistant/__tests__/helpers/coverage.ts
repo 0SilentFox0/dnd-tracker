@@ -88,6 +88,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/battles/[battleId]/initiative-reorder', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/initiative-roll', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/map-terrain', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
+  { route: 'campaigns/[id]/battles/[battleId]/map-motion', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/map-weather', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/maze', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/maze-mark', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },

@@ -23,6 +23,7 @@ export {
   useDeleteAllBattles,
   useInitiativeReorder,
   useInitiativeRoll,
+  useMapMotion,
   useMapTerrain,
   useMapWeather,
   useMazeAction,
