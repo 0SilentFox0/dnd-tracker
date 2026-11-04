@@ -40,5 +40,6 @@ export function applyRest(action: RestAction, r: CharacterResources, opts: { poo
     hitDiceSpent: restoreHitDice(r.hitDiceSpent, opts.pool, opts.longRestHitDice),
     exhaustion: Math.max(0, (r.exhaustion ?? 0) - 1),
     charges: withoutKey(r.charges, (_k, c) => c.rest !== null),
+    fortune: r.fortune,
   });
 }

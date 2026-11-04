@@ -1,5 +1,6 @@
 import type { RuleSystemDefinition } from "../types";
 import { woundsBreakdown, woundsMax } from "./characteristics/derive";
+import { wfrpSheetBlock } from "./characteristics/sheet-block";
 import { onSession } from "./session";
 import { rollWfrpSheetTest } from "./sheet-test";
 
@@ -8,7 +9,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   distance: { unit: "yd", perCell: 2 },
   balance: { kind: "none" },
   progression: { levels: false, maxHp: ({ characteristics }) => ({ total: woundsMax(characteristics), breakdown: woundsBreakdown(characteristics) }) },
-  characteristics: { kind: "wfrp", sheetBlock: () => undefined },
+  characteristics: { kind: "wfrp", sheetBlock: wfrpSheetBlock },
   sheetTest: {
     accepts: (body) => body.kind === "test",
     roll: rollWfrpSheetTest,

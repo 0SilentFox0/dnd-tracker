@@ -48,4 +48,13 @@ describe("applyRest", () => {
   it("close only closes the window", () => {
     expect(applyRest("close", { hp: 3, shortRestOpen: true }, opts)).toEqual({ hp: 3 });
   });
+
+  it("short, long and close keep fortune", () => {
+    for (const action of ["short", "long", "close"] as const) {
+      expect(applyRest(action, { ...tired, fortune: 2 }, opts).fortune).toBe(2);
+      expect(applyRest(action, { ...tired, fortune: 0 }, opts).fortune).toBe(0);
+    }
+
+    expect(applyRest("long", tired, opts)).not.toHaveProperty("fortune");
+  });
 });

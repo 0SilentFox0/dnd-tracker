@@ -12,7 +12,7 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
-import type { CharacteristicKey, Characteristics, DifficultyKey } from "@/lib/utils/rules/systems";
+import type { CharacteristicKey, Characteristics, DifficultyKey, RuleSystemKey, SheetWfrpBlock } from "@/lib/utils/rules/systems";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
 
@@ -234,6 +234,8 @@ export interface SetProgress {
 }
 
 export interface CharacterSheet {
+  system: RuleSystemKey;
+  wfrp?: SheetWfrpBlock;
   viewer: { isDM: boolean; isOwner: boolean };
   review: { pending: boolean; note: string | null };
   maxLevel: number;
