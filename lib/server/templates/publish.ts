@@ -17,7 +17,18 @@ interface BaseDelegate {
 
 const CHUNK = 200;
 
-const baseDelegate = (db: Prisma.TransactionClient, t: BundleTableDef) => (db as unknown as Record<string, BaseDelegate>)[layeredModels()[t.model].base];
+const baseDelegate = (db: object, t: BundleTableDef) => (db as unknown as Record<string, BaseDelegate>)[layeredModels()[t.model].base];
+
+interface VersionWindow { _max: { validFrom: number | null; validTo: number | null } }
+
+/** Newest version at which the template's base rows changed; null while it was never published. */
+export async function latestPublishedVersion(db: object, templateId: string): Promise<number | null> {
+  const windows = await Promise.all(BUNDLE_TABLES.map((t) => (db as unknown as Record<string, { aggregate(args: unknown): Promise<VersionWindow> }>)[layeredModels()[t.model].base].aggregate({ where: { sourceCampaignId: templateId }, _max: { validFrom: true, validTo: true } })));
+
+  const versions = windows.flatMap((w) => [w._max.validFrom, w._max.validTo]).filter((v): v is number => v != null);
+
+  return versions.length ? Math.max(...versions) : null;
+}
 
 /** Writes the template's current rows as the next base version; unchanged rows keep their open window. */
 export async function publishTemplateVersion(db: Prisma.TransactionClient, templateId: string): Promise<PublishResult> {

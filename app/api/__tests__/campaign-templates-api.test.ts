@@ -38,6 +38,7 @@ vi.mock("@/lib/utils/api/api-auth", async () => {
 });
 vi.mock("@/lib/server/templates/import-bundle", () => ({ importBundle: m.importBundle }));
 vi.mock("@/lib/server/templates/export-campaign", () => ({ exportCampaign: m.exportCampaign }));
+vi.mock("@/lib/server/templates/publish", () => ({ latestPublishedVersion: async () => null }));
 
 import { GET as exportGet } from "@/app/api/campaigns/[id]/export/route";
 import { PATCH } from "@/app/api/campaigns/[id]/route";

@@ -44,6 +44,15 @@ describe("SRD source preparation", () => {
     expect(await prepare("uk")).toMatchObject({ id: "en", contentLocale: "uk", bundle: { spells: [expect.objectContaining({ name: "Благословення" })] } });
     expect(await prepare("uk", { contentLocale: "en" })).toMatchObject({ id: "en", contentLocale: "en", bundle: { spells: [expect.objectContaining({ name: "Bless" })] } });
   });
+  it("a published template is prepared as a layer over itself with an empty content bundle", async () => {
+    f.publish("en", 4);
+
+    const result = await prepare("en", { contentLocale: "en" });
+
+    expect(result.layer).toEqual({ sourceId: "en", baseVersion: 4, overrides: {}, hides: [] });
+    expect(result.bundle.spells).toEqual([]);
+    expect((await prepare("en", { contentLocale: "uk" })).layer).toBeUndefined();
+  });
   it("rejects missing and duplicate canonical candidates", async () => {
     f.patchCampaign("en", { locale: "uk" });
     await expect(prepare("uk")).rejects.toMatchObject({ status: 409 });

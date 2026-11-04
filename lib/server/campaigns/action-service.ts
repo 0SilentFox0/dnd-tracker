@@ -136,7 +136,7 @@ async function loadCampaignState(actor: Actor, operation: string, input: Record<
     });
   }
 
-  if (source) sourceHash = requestDigest({ id: source.id, contentLocale: source.contentLocale, bundle: source.bundle });
+  if (source) sourceHash = requestDigest({ id: source.id, contentLocale: source.contentLocale, bundle: source.bundle, ...(source.layer && { layer: source.layer }) });
 
   const state = {
     settings: safeSettings(row),
@@ -236,6 +236,7 @@ export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepare
       visibility: CampaignVisibility.PRIVATE,
       createdFromId: source.id,
       sourceVersion: source.contentVersion,
+      layer: source.layer,
     });
 
     afterContentCommit(() => invalidateCampaignLists([actor.userId]));

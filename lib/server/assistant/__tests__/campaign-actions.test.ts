@@ -31,6 +31,7 @@ vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), invalidateAllReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
 vi.mock("@/lib/server/campaigns/create-campaign", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/server/campaigns/create-campaign")>(), createCampaignFromBundle: h.create, createCampaignForUser: async (userId: string, data: object, options: { source?: { bundle: unknown; id: string; contentLocale: string | null } } = {}) => ({ ok: true, ...await h.create({ userId, ...data, bundle: options.source?.bundle ?? null, createdFromId: options.source?.id ?? null, contentLocale: options.source?.contentLocale ?? null }) }) }));
 vi.mock("@/lib/server/templates/export-campaign", () => ({ exportCampaign: h.export }));
+vi.mock("@/lib/server/templates/publish", () => ({ latestPublishedVersion: async () => null }));
 vi.mock("@/lib/server/templates/list-templates", () => ({ listTemplates: vi.fn(async () => ({ official: [], mine: [] })) }));
 
 const actor = { campaignId: "c", userId: "dm", isDM: true, via: "session" as const, scopes: null };

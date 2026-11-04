@@ -285,6 +285,16 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 - Сидер SRD (`scripts/srd/lib/run-load-template.ts`) публікує версію наприкінці прогону.
 - `updatedAt` у базових таблицях (там, де є) ставиться часом публікації: бандл його не містить.
 
+## Створення кампанії без копіювання
+
+`prepareCampaignSource` (`lib/server/templates/prepare-source.ts`) повертає `PreparedCampaignSource`; поле `layer` (`PreparedLayer`: `sourceId`, `baseVersion`, `overrides`, `hides`) означає, що `bundle` містить лише те, що нова кампанія зберігає сама, а решту читає шар.
+
+- `create` із шаблону: якщо `latestPublishedVersion` (`publish.ts`, максимум `validFrom`/`validTo` по 13 `*_base` джерела) не `null` і немає SRD-перекладу, то `layer = { sourceId: шаблон, baseVersion: остання публікація }`, а bundle — `exportSkeleton` (налаштування, правила, credits, compendium без рядків контентних таблиць). Кампанія бачить опубліковану версію, а не незбережені правки шаблону. `campaign_source_syncs` не створюється, `createdFromId = baseSourceId = шаблон`.
+- `clone` / `template.save` кампанії з `baseSourceId`: та сама база й `baseVersion`, а `exportLocalLayer` читає лише збережені рядки (`bypassLayer`): локальні (нові id, `sourceId = null`), override-и (у bundle — під базовим id; у кампанії — новий власний id, `sourceId` = базовий id, `sourceHash` копіюється, «осиротілі» override-и теж) і `campaign_content_hides`. `createdFromId` = кампанія-джерело (лінійка), sync іде за `baseSourceId`.
+- `importBundle(tx, bundle, campaignId, layer)`: `layer.overrides` лишає базові id у посиланнях; посилання на id поза bundle вважаються базовими (не обнуляються), перевірка чужих id, `backgroundReferenceError` і provenance-перевірка compendium для не-сторінок пропускаються; `assertNoLeak` перевіряє лише переписані id. `createCampaignFromBundle` дописує hides і скидає кеш шару нової кампанії.
+- Шаблон без опублікованої версії, SRD-оверлей з непорожнім перекладом (`uk`: шар ще не локалізує) і кампанії без бази (HOMM5, legacy-клони) йдуть шляхом бандла без змін до Part 5.
+- `exportCampaign` шарової кампанії віддає злитий вигляд (override під базовим id, без дублікатів, «осиротілий» override присутній). Увага: `publishTemplateVersion` такої кампанії пише в її `*_base` рядки з базовими id, а PK `(id, validFrom)` глобальний, тож збіг номера версії з базовим шаблоном дає unique violation; потрібне рішення до публікації похідних шаблонів.
+
 ## Sync поверх шарів
 
 Кампанія з `baseSourceId/baseVersion` синхронізується окремим шляхом (`sync/layered*.ts`); кампанії без бази (legacy-клони, HOMM5) лишаються на копійному sync (`context/classify/apply`) до Part 5. Розгалуження — у `applySourceChanges`/`applySafeSourceChanges`/`previewSourceSelection`/`getSourceDiff`/`sourceUpdateState` через `layerOf`.

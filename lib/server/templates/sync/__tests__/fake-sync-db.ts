@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 
+import { layeredModels } from "@/lib/db/layer/config";
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
 import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
@@ -27,6 +28,10 @@ export function createFakeSyncDb() {
 
   const updates: Array<{ delegate: string; data: Row }> = [];
 
+  const published = new Map<string, number>();
+
+  const hides: Row[] = [];
+
   const db: Record<string, unknown> = {
     campaign: {
       findMany: async () => campaigns.filter((r) => r.kind === "template" && r.visibility === "official" && r.templateKey === "5e SRD 5.2" && (r.locale == null || r.locale === "en")).map(copy),
@@ -40,6 +45,10 @@ export function createFakeSyncDb() {
 
         return c;
       },
+    },
+    campaignContentHide: {
+      findMany: async ({ where }: { where: { campaignId: string } }) => hides.filter((h) => h.campaignId === where.campaignId).map(copy),
+      createMany: async ({ data }: { data: Row[] }) => void hides.push(...data.map(copy)),
     },
     campaignSourceSync: {
       findUnique: async ({ where }: { where: { campaignId: string } }) => readCopy(syncs.get(where.campaignId)),
@@ -104,6 +113,8 @@ export function createFakeSyncDb() {
     };
   }
 
+  for (const t of BUNDLE_TABLES) db[layeredModels()[t.model].base] = { aggregate: async ({ where }: { where: { sourceCampaignId: string } }) => ({ _max: { validFrom: published.get(where.sourceCampaignId) ?? null, validTo: null } }) };
+
   const rowsOf = (delegate: string) => {
     const rows = store.get(delegate);
 
@@ -120,6 +131,8 @@ export function createFakeSyncDb() {
     campaigns,
     syncs,
     updates,
+    hides,
+    publish: (sourceId: string, version: number) => void published.set(sourceId, version),
     campaign,
     addCampaign: (c: Row) => (clearBundleCache(), campaigns.push({ name: "C", visibility: "private", maxLevel: 20, xpMultiplier: 2.5, allowPlayerEdit: true, friendlyFire: false, rules: {}, ...c })),
     addRow: (delegate: string, row: Row) => (clearBundleCache(), rowsOf(delegate).push(row)),

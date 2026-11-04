@@ -4,12 +4,13 @@ import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { invalidateCampaignLayer } from "@/lib/db/content-layer";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
 import { type Bundle, TemplateLeakError } from "@/lib/server/templates/bundle";
 import { importBundle } from "@/lib/server/templates/import-bundle";
-import { prepareCampaignSource, type PreparedCampaignSource } from "@/lib/server/templates/prepare-source";
+import { prepareCampaignSource, type PreparedCampaignSource, type PreparedLayer } from "@/lib/server/templates/prepare-source";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { canReadSource } from "@/lib/utils/api/is-dm";
@@ -32,6 +33,7 @@ interface CreateFromBundleInput {
   visibility?: "private" | "official";
   createdFromId?: string | null;
   sourceVersion?: number | null;
+  layer?: PreparedLayer | null;
   contentLocale?: string | null;
   settings?: Partial<Bundle["settings"]>;
   critChoiceByDm?: boolean;
@@ -52,6 +54,7 @@ function campaignData(input: CreateFromBundleInput): Prisma.CampaignCreateInput 
     visibility: input.visibility ?? CampaignVisibility.PRIVATE,
     createdFromId: input.createdFromId ?? null,
     locale: input.contentLocale ?? null,
+    ...(input.layer && { baseSourceId: input.layer.sourceId, baseVersion: input.layer.baseVersion }),
     ...(s.maxLevel !== undefined && { maxLevel: s.maxLevel }),
     ...(s.xpMultiplier !== undefined && { xpMultiplier: s.xpMultiplier }),
     ...(s.allowPlayerEdit !== undefined && { allowPlayerEdit: s.allowPlayerEdit }),
@@ -76,13 +79,15 @@ export async function createCampaignFromBundle(input: CreateFromBundleInput): Pr
         return { campaign, warnings: [] };
       }
 
-      return await prisma.$transaction(
+      const created = await prisma.$transaction(
         async (tx) => {
           const campaign = await tx.campaign.create({ data: campaignData(input), include: { members: true }, omit: { aiInstructions: true } });
 
-          const { warnings, hashes } = await importBundle(tx, bundle, campaign.id);
+          const { warnings, hashes } = await importBundle(tx, bundle, campaign.id, input.layer ?? undefined);
 
-          if (input.createdFromId) {
+          if (input.layer?.hides.length) await tx.campaignContentHide.createMany({ data: input.layer.hides.map((hide) => ({ campaignId: campaign.id, table: hide.table, id: hide.id })) });
+
+          if (input.createdFromId && !input.layer) {
             await tx.campaignSourceSync.create({
               data: {
                 campaignId: campaign.id,
@@ -97,6 +102,10 @@ export async function createCampaignFromBundle(input: CreateFromBundleInput): Pr
         },
         { timeout: 60_000, maxWait: 10_000 },
       );
+
+      if (input.layer) invalidateCampaignLayer(created.campaign.id);
+
+      return created;
     } catch (error) {
       if (attempt >= INVITE_CODE_ATTEMPTS || !isInviteCodeClash(error)) throw error;
     }
@@ -143,6 +152,7 @@ export async function createCampaignForUser(userId: string, data: CreateCampaign
     bundle: source?.bundle ?? null,
     createdFromId: source?.id ?? null,
     sourceVersion: source?.contentVersion ?? null,
+    layer: source?.layer,
     contentLocale: source?.contentLocale ?? null,
     settings: { maxLevel: data.maxLevel, allowPlayerEdit: data.allowPlayerEdit },
     critChoiceByDm: data.critChoiceByDm,
