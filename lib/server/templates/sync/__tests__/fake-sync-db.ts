@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
+import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { importBundle } from "@/lib/server/templates/import-bundle";
 import type { SyncDb } from "@/lib/server/templates/sync/context";
@@ -14,7 +15,10 @@ const copy = <T>(v: T): T => structuredClone(v);
 
 const readCopy = <T>(v: T | undefined): T | null => (v ? copy(v) : null);
 
+// the fake does not bump contentVersion, so any write drops the bundle cache like a version bump would
 export function createFakeSyncDb() {
+  clearBundleCache();
+
   const store = new Map<string, Row[]>([...BUNDLE_TABLES.map((t) => [t.delegate, [] as Row[]] as const), ["character", []]]);
 
   const campaigns: Row[] = [];
@@ -28,6 +32,8 @@ export function createFakeSyncDb() {
       findMany: async () => campaigns.filter((r) => r.kind === "template" && r.visibility === "official" && r.templateKey === "5e SRD 5.2" && (r.locale == null || r.locale === "en")).map(copy),
       findUnique: async ({ where }: { where: { id: string } }) => readCopy(campaigns.find((r) => r.id === where.id)),
       update: async ({ where, data }: { where: { id: string }; data: Row }) => {
+        clearBundleCache();
+
         const c = campaigns.find((r) => r.id === where.id)!;
 
         Object.assign(c, copy(data));
@@ -66,6 +72,7 @@ export function createFakeSyncDb() {
 
     db[t.delegate] = {
       createMany: async ({ data }: { data: Row[] }) => {
+        clearBundleCache();
         rows.push(...data.map((r) => copy(dbNullToNull(r))));
       },
       findMany: async ({ where }: { where: { campaignId?: string; id?: { in: string[] } } }) => {
@@ -74,6 +81,7 @@ export function createFakeSyncDb() {
         return rows.filter((r) => r.campaignId === where.campaignId).map(copy);
       },
       updateMany: async ({ where, data }: { where: { id: string; campaignId: string }; data: Row }) => {
+        clearBundleCache();
         updates.push({ delegate: t.delegate, data });
 
         const row = rows.find((r) => r.id === where.id && r.campaignId === where.campaignId);
@@ -83,6 +91,8 @@ export function createFakeSyncDb() {
         return { count: row ? 1 : 0 };
       },
       deleteMany: async ({ where }: { where: { id: string; campaignId: string } }) => {
+        clearBundleCache();
+
         const before = rows.length;
 
         const kept = rows.filter((r) => !(r.id === where.id && r.campaignId === where.campaignId));
@@ -111,15 +121,17 @@ export function createFakeSyncDb() {
     syncs,
     updates,
     campaign,
-    addCampaign: (c: Row) => campaigns.push({ name: "C", visibility: "private", maxLevel: 20, xpMultiplier: 2.5, allowPlayerEdit: true, friendlyFire: false, rules: {}, ...c }),
-    addRow: (delegate: string, row: Row) => rowsOf(delegate).push(row),
-    patchRow: (delegate: string, id: string, patch: Row) => Object.assign(rowsOf(delegate).find((r) => r.id === id)!, patch),
+    addCampaign: (c: Row) => (clearBundleCache(), campaigns.push({ name: "C", visibility: "private", maxLevel: 20, xpMultiplier: 2.5, allowPlayerEdit: true, friendlyFire: false, rules: {}, ...c })),
+    addRow: (delegate: string, row: Row) => (clearBundleCache(), rowsOf(delegate).push(row)),
+    patchRow: (delegate: string, id: string, patch: Row) => (clearBundleCache(), Object.assign(rowsOf(delegate).find((r) => r.id === id)!, patch)),
     removeRow: (delegate: string, id: string) => {
+      clearBundleCache();
+
       const rows = rowsOf(delegate);
 
       rows.splice(0, rows.length, ...rows.filter((r) => r.id !== id));
     },
-    patchCampaign: (id: string, patch: Row) => Object.assign(campaign(id), patch),
+    patchCampaign: (id: string, patch: Row) => (clearBundleCache(), Object.assign(campaign(id), patch)),
   };
 }
 

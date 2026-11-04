@@ -4,6 +4,7 @@ import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { BUNDLE_TABLES, emptyBundle } from "@/lib/server/templates/bundle";
+import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
 import { createFakeSyncDb } from "@/lib/server/templates/sync/__tests__/fake-sync-db";
 import { id } from "@/lib/server/templates/sync/__tests__/helpers";
 import { classify } from "@/lib/server/templates/sync/classify";
@@ -63,6 +64,8 @@ describe("source lifecycle through the database boundary", () => {
 
     vi.mocked(h.base.$transaction as ReturnType<typeof vi.fn>).mockClear();
 
+    clearBundleCache();
+
     const reads = vi.spyOn(f.db.spell, "findMany");
 
     const result = await runCampaignOperation(actor, "create", input, expected, "en");
@@ -107,5 +110,15 @@ describe("source lifecycle through the database boundary", () => {
       expect(created.campaign).toMatchObject({ locale, createdFromId: savedId });
       expect((f.store.get("spell") ?? []).filter((r) => r.campaignId === created.campaign.id).every((r) => r.name === "Bless")).toBe(true);
     }
+  });
+  it("save, clone and create do not bump the source version the new campaign records", async () => {
+    const update = vi.spyOn(f.db.campaign, "update");
+
+    f.patchCampaign("home", { contentVersion: 4 });
+
+    const saved = await runCampaignOperation(actor, "template.save", { name: "Saved" });
+
+    expect(update.mock.calls.filter(([args]) => (args as { data: object }).data && "contentVersion" in (args as { data: object }).data)).toEqual([]);
+    expect(f.syncs.get((saved.data as { id: string }).id)).toMatchObject({ sourceCampaignId: "home", sourceVersion: 4 });
   });
 });

@@ -152,6 +152,10 @@
     "world": "World map",
     "music": "Music"
   },
+  "sourceUpdate": {
+    "text": "Template updated (v{version})",
+    "review": "Review changes"
+  },
   "battleStatus": {
     "prepared": "prepared",
     "active": "in progress",

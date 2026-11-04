@@ -240,7 +240,7 @@ export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepare
     afterContentCommit(() => invalidateCampaignLists([actor.userId]));
 
     return created;
-  });
+  }, { bump: false });
 }
 type CampaignRun = {
   actor: Actor;
@@ -343,6 +343,8 @@ async function onboardingResult({ result, actor, locale }: Omit<CampaignRun, "lo
   );
 }
 
+const SOURCE_ONLY_OPERATIONS = new Set(["create", "clone", "template.save"]);
+
 export async function runCampaignOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
   const campaignResult = actionResult("campaign", resultLabel(locale, "campaign"));
 
@@ -368,5 +370,5 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
     if (!handler) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
 
     return handler({ ...base, loaded });
-  });
+  }, { bump: !SOURCE_ONLY_OPERATIONS.has(operation) });
 }

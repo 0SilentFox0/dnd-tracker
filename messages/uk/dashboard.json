@@ -152,6 +152,10 @@
     "world": "Глобальна карта",
     "music": "Музика"
   },
+  "sourceUpdate": {
+    "text": "Шаблон оновлено (v{version})",
+    "review": "Переглянути зміни"
+  },
   "battleStatus": {
     "prepared": "підготовлений",
     "active": "йде",

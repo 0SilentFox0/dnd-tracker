@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf, SETTINGS_SELECT, settingsOf, type TemplateDb } from "@/lib/server/templates/bundle";
-import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { cachedExport } from "@/lib/server/templates/bundle-cache";
 import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
 import { translationsFor } from "@/lib/server/templates/srd-translations";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
@@ -44,7 +44,7 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
   const source = { id: found.id, name: found.name, kind: found.kind, contentVersion: found.contentVersion };
 
   const [rawSourceBundle, rows, state] = await Promise.all([
-    exportCampaign(db, source.id),
+    cachedExport(db, source.id, source.contentVersion),
     loadTargetRows(db, campaignId),
     db.campaignSourceSync.findUnique({ where: { campaignId } }),
   ]);

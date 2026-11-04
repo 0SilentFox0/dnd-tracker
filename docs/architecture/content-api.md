@@ -268,3 +268,9 @@ Class/feat writers перевіряють нові nested choice spell refs че
 `abilities.sources/get` обслуговує всі OwnerKind, включно з class/feat, у межах кампанії. Class projection збирає прямі abilities base/subclass features через `toGameClassData`, не вибирає option grants і не застосовує їх персонажу; feat використовує чинний `readAbilities`.
 
 Compendium orchestration — `adapt.ts`, nested class/optional feature resolution — `feature-resolution.ts`, без іншого adapter registry. SQL export→import→source-update roundtrip і5warm/30sample measurements — [S9 checkpoint](../archive/superpowers/plans/2026-10-26-constructor-refactor-s9-progress.md). Реальна source contention підтверджує NOWAIT refusal до intent; tool transport повертає sanitized500. API/MCP ids/payloads і persisted JSON сумісні; writer validation defects виправлено окремо від extraction.
+
+## Версії контенту та кеш джерела
+
+- `Campaign.contentVersion` росте на кожному контентному записі (`withCampaignContentWrite`); `bump: false` — для операцій, що лише читають джерело (`create`, `clone`, `template.save`), інакше новий клон бачить джерело на версію попереду.
+- `CampaignSourceSync.sourceVersion` — версія джерела на момент клонування/останнього apply; `sourceUpdateState` (`lib/server/campaigns/dashboard.ts`) порівнює їх для плитки «Шаблон оновлено» на дашборді DM.
+- `cachedExport` (`lib/server/templates/bundle-cache.ts`) — LRU на 4 сирі бандли за `${sourceId}:${contentVersion}`; бандл не мутувати, SRD-локалізація йде після кешу. Тести з мутацією джерела без bump викликають `clearBundleCache()`.

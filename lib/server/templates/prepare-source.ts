@@ -3,7 +3,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Bundle, TemplateDb } from "@/lib/server/templates/bundle";
-import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { cachedExport } from "@/lib/server/templates/bundle-cache";
 import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
 import { translationsFor } from "@/lib/server/templates/srd-translations";
 import { canReadSource } from "@/lib/utils/api/is-dm";
@@ -62,7 +62,7 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
 
   const contentLocale = overlay ? options.contentLocale ?? (isLegacySrdTemplate(requested) ? "uk" : "en") : source.locale ?? null;
 
-  const bundle = await exportCampaign(db, source.id);
+  const bundle = await cachedExport(db, source.id, source.contentVersion);
 
   return { id: source.id, contentVersion: source.contentVersion, source: { kind: source.kind, visibility: source.visibility, templateKey: source.templateKey, locale: source.locale }, contentLocale, bundle: overlay ? localizeSrdBundle(bundle, translationsFor(contentLocale as SrdContentLocale)) : bundle };
 }

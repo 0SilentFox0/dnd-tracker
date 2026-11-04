@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ScrollText } from "lucide-react";
 
+import { SourceUpdateTile } from "@/components/campaigns/dashboard/SourceUpdateTile";
 import { HudSection } from "@/components/hud/form";
 import { HudPanel, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export function DmNextSteps({ campaignId, data }: { campaignId: string; data: Dm
   return (
     <HudPanel className="shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]">
       <HudSection title={t("nextSteps.title")}>
+        {data.sourceUpdate && <SourceUpdateTile campaignId={campaignId} version={data.sourceUpdate.sourceVersion} />}
         {hasPrep && (
           <div className="mb-3">
             <h3 className="hud-sc mb-1 text-xs text-hud-muted">{t("nextSteps.prep")}</h3>
