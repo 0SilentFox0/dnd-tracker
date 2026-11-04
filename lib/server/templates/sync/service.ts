@@ -12,7 +12,8 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { applySafeSourceChanges, applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
-import { buildDiff } from "@/lib/server/templates/sync/diff";
+import { buildDiff, buildLayeredDiff } from "@/lib/server/templates/sync/diff";
+import { type LayeredDb,layerOf, loadLayeredContext } from "@/lib/server/templates/sync/layered";
 import type { Actor, ActorNeed } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import type { SourceApplyResult, SourceDiff, SourceSyncScope } from "@/types/campaigns";
@@ -21,6 +22,10 @@ const APPLY_TX_OPTIONS = { timeout: 60_000, maxWait: 10_000 };
 
 export async function getSourceDiff(actor: Actor, scope?: SourceSyncScope, locale?: Locale | null): Promise<SourceDiff> {
   assertCan(actor, CONTENT_OPERATIONS["source.diff"].need);
+
+  const layer = await layerOf(prisma, actor.campaignId);
+
+  if (layer) return buildLayeredDiff(prisma, await loadLayeredContext(prisma as LayeredDb, actor.campaignId, layer, actor), scope);
 
   const t = await getTranslator(await localeOrRequest(locale), "rules");
 

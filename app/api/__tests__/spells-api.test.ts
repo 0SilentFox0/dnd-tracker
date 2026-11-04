@@ -15,6 +15,8 @@ const db = vi.hoisted(() => ({
     delete: vi.fn(),
     deleteMany: vi.fn(),
   },
+  skill: { updateMany: vi.fn() },
+  mainSkill: { updateMany: vi.fn() },
   spellGroup: { count: vi.fn(), create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
 }));
 

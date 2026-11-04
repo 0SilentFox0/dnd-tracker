@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
   race: { count: vi.fn() },
-  spell: { count: vi.fn() },
+  spell: { count: vi.fn(), updateMany: vi.fn() },
   unit: { create: vi.fn(), update: vi.fn(), deleteMany: vi.fn(), findFirst: vi.fn() },
 }));
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@prisma/client", () => ({ PrismaClient: class {} }));
+vi.mock("@prisma/client", async (importOriginal) => ({ ...(await importOriginal<typeof import("@prisma/client")>()), PrismaClient: class { $extends() { return this; } } }));
 vi.mock("@/lib/server/content/write-context", () => ({ createScopedDatabase: (db: unknown) => db }));
 
 import { withSafePoolLimits } from "../db";

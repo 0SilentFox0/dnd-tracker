@@ -6,6 +6,7 @@ import { getTranslator } from "@/lib/i18n/translator";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import type { CompendiumBundleDb } from "@/lib/server/compendium-import/bundle";
 import { syncCompendiumProvenance } from "@/lib/server/compendium-import/sync";
+import { DETACH_KIND_BY_TABLE, detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError } from "@/lib/server/content/errors";
 import { moveSkillTreeProgress } from "@/lib/server/skills/progress-move";
 import { assertNoLeak, findForeignContentIds } from "@/lib/server/templates/assert-no-leak";
@@ -15,7 +16,10 @@ import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-id
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
 import { indexOf } from "@/lib/server/templates/sync/index";
+import { type LayeredDb,layerOf } from "@/lib/server/templates/sync/layered";
+import { applyLayered, previewLayeredSelection } from "@/lib/server/templates/sync/layered-apply";
 import { assertSrdNameReferences } from "@/lib/server/templates/sync/name-references";
+import { keyOf, sourceChanged, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
@@ -25,31 +29,6 @@ import { parseRules } from "@/lib/utils/rules/schema";
 import { readTreeJson } from "@/lib/utils/skills/progression";
 import type { SourceApplyResult, SyncRef } from "@/types/campaigns";
 
-const keyOf = (i: { scope: string; key: string }) => `${i.scope}:${i.key}`;
-
-const sourceChanged = () => new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
-
-function sourceSelection(ctx: SyncContext, all: Map<string, SyncItem>, body: SourceSyncApplyInput) {
-  const pickItems = (refs: SyncRef[]) =>
-    refs.map((r) => {
-      const item = all.get(keyOf(r));
-
-      if (!item || item.sourceHash !== r.sourceHash || item.status !== r.status) throw sourceChanged();
-
-      return item;
-    });
-
-  const chosen = pickItems(body.apply);
-
-  const ignored = pickItems(body.ignore);
-
-  const { selected, autoAdded } = closeOverRequires(chosen, all);
-
-  const items = [...selected.values()];
-
-  return { selected, autoAdded, items, ignored };
-}
-
 async function loadClassified(db: SyncDb, campaignId: string, access?: { userId: string }) {
   const ctx = await loadSyncContext(db, campaignId, access);
 
@@ -57,9 +36,13 @@ async function loadClassified(db: SyncDb, campaignId: string, access?: { userId:
 }
 
 export async function previewSourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
+  const layer = await layerOf(db, campaignId);
+
+  if (layer) return previewLayeredSelection(db as LayeredDb, campaignId, layer, body, access);
+
   const { ctx, all } = await loadClassified(db, campaignId, access);
 
-  const { items, ignored, autoAdded } = sourceSelection(ctx, all, body);
+  const { items, ignored, autoAdded } = sourceSelection(all, body);
 
   const index = indexOf(ctx);
 
@@ -72,7 +55,7 @@ export async function previewSourceSelection(db: SyncDb, campaignId: string, bod
 }
 
 async function applySelection(db: SyncDb, ctx: SyncContext, all: Map<string, SyncItem>, body: SourceSyncApplyInput): Promise<SourceApplyResult> {
-  const { selected, autoAdded, items, ignored } = sourceSelection(ctx, all, body);
+  const { selected, autoAdded, items, ignored } = sourceSelection(all, body);
 
   const warnings = await writeTables(db, ctx, selected);
 
@@ -84,12 +67,20 @@ async function applySelection(db: SyncDb, ctx: SyncContext, all: Map<string, Syn
 }
 
 export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
+  const layer = await layerOf(db, campaignId);
+
+  if (layer) return applyLayered(db as LayeredDb, campaignId, layer, body, access);
+
   const { ctx, all } = await loadClassified(db, campaignId, access);
 
   return applySelection(db, ctx, all, body);
 }
 
 export async function applySafeSourceChanges(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SourceApplyResult> {
+  const layer = await layerOf(db, campaignId);
+
+  if (layer) return applyLayered(db as LayeredDb, campaignId, layer, "safe", access);
+
   const { ctx, all } = await loadClassified(db, campaignId, access);
 
   const safe = [...all.values()].filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status) && !needsBlockedDependency(i, all));
@@ -118,30 +109,6 @@ function needsBlockedDependency(item: SyncItem, all: Map<string, SyncItem>) {
   }
 
   return false;
-}
-
-function closeOverRequires(chosen: SyncItem[], all: Map<string, SyncItem>) {
-  const selected = new Map(chosen.map((i) => [keyOf(i), i]));
-
-  const autoAdded: SyncItem[] = [];
-
-  const queue = [...chosen];
-
-  while (queue.length > 0) {
-    for (const req of queue.pop()!.requires) {
-      const k = keyOf(req);
-
-      const dep = all.get(k);
-
-      if (selected.has(k) || !dep || (dep.status !== "new" && dep.status !== "deletedLocally")) continue;
-
-      selected.set(k, dep);
-      autoAdded.push(dep);
-      queue.push(dep);
-    }
-  }
-
-  return { selected, autoAdded };
 }
 
 function cleanRow(t: BundleTableDef, src: Record<string, unknown>, item: SyncItem, map: Map<string, string>, warnings: string[]) {
@@ -181,6 +148,10 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
 
         if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
       }
+
+      const kind = DETACH_KIND_BY_TABLE[t.key];
+
+      if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], ctx.campaignId, kind, [i.localId]);
 
       await delegateOf(db, t).deleteMany({ where: { id: i.localId, campaignId: ctx.campaignId } });
     }

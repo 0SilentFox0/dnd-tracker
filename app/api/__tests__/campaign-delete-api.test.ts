@@ -15,6 +15,7 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
     campaign: { delete: vi.fn() },
+    campaignContentHide: { deleteMany: vi.fn() },
     campaignMember: { findMany: vi.fn() },
   },
 }));

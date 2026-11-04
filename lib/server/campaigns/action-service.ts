@@ -136,7 +136,7 @@ async function loadCampaignState(actor: Actor, operation: string, input: Record<
     });
   }
 
-  if (source) sourceHash = requestDigest({ id: source.id, contentLocale: source.contentLocale, bundle: source.bundle });
+  if (source) sourceHash = requestDigest({ id: source.id, contentLocale: source.contentLocale, bundle: source.bundle, ...(source.layer && { layer: source.layer }) });
 
   const state = {
     settings: safeSettings(row),
@@ -208,6 +208,7 @@ export async function deleteCampaign(actor: Actor) {
   return withCampaignRuntimeWrite(actor.campaignId, async () => {
     const members = await prisma.campaignMember.findMany({ where: { campaignId: actor.campaignId }, select: { userId: true } });
 
+    await prisma.campaignContentHide.deleteMany({ where: { campaignId: actor.campaignId } });
     await prisma.campaign.delete({ where: { id: actor.campaignId } });
     afterContentCommit(async () => {
       await invalidateCampaignLists(members.map(m => m.userId));
@@ -235,6 +236,7 @@ export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepare
       visibility: CampaignVisibility.PRIVATE,
       createdFromId: source.id,
       sourceVersion: source.contentVersion,
+      layer: source.layer,
     });
 
     afterContentCommit(() => invalidateCampaignLists([actor.userId]));

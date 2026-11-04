@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db";
 import { createRaceSchema, updateRaceSchema } from "@/lib/schemas";
 import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
+import { detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError } from "@/lib/server/content/errors";
 import { raceNameTaken } from "@/lib/server/races/race-name";
 import { updateRaceCascade } from "@/lib/server/races/update-race";
@@ -68,6 +69,7 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
     return updateRaceCascade(actor.campaignId, existing, data);
   },
   async remove(actor, existing) {
+    await detachRefs(prisma, actor.campaignId, "race", [existing.id]);
     await prisma.race.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
   },
 });

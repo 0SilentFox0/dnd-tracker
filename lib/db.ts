@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
+import { contentLayer } from "@/lib/db/content-layer";
 import { createScopedDatabase } from "@/lib/server/content/write-context";
 
 /**
@@ -73,4 +74,4 @@ const basePrisma =
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = basePrisma;
 
-export const prisma = createScopedDatabase(basePrisma);
+export const prisma = createScopedDatabase(basePrisma.$extends(contentLayer()) as unknown as PrismaClient);

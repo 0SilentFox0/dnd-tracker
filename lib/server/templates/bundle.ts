@@ -135,7 +135,7 @@ export function emptyBundle(): Bundle {
 export type TemplateDb = Pick<
   Prisma.TransactionClient,
   "spellGroup" | "race" | "gameClass" | "feat" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
-> & Partial<CompendiumBundleDb>;
+> & Partial<CompendiumBundleDb> & Partial<Pick<Prisma.TransactionClient, "campaignContentHide">>;
 
 export class TemplateLeakError extends Error {}
 

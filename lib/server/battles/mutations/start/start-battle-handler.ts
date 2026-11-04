@@ -68,7 +68,7 @@ export async function buildStartOrder(
       : [],
     unitIds.length > 0
       ? prisma.unit.findMany({
-          where: { id: { in: unitIds } },
+          where: { id: { in: unitIds }, campaignId },
         })
       : [],
   ]);

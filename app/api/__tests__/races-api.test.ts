@@ -7,6 +7,7 @@ const db = vi.hoisted(() => {
   const m = {
     race: { findFirst: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
     character: { updateMany: vi.fn() },
+    unit: { updateMany: vi.fn() },
     skillTree: { updateMany: vi.fn() },
     $transaction: vi.fn(),
   };

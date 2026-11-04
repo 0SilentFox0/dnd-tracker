@@ -201,6 +201,10 @@
     "title": "Scenario graph",
     "body": "The \"Graph\" section shows how scenario pages, units, artifacts, spells and heroes are connected by mentions. Click a node to see its connections and jump to the source; type filters keep a large plot readable."
   },
+  "2026-11-04-template-publish": {
+    "title": "Publish template versions",
+    "body": "A template owner can publish a version. Campaigns created from it share the published content instead of copying it, keep their own edits on top, and pick up new versions from the dashboard when they choose. A published version is permanent."
+  },
   "2026-11-04-template-updates": {
     "title": "Template updates on the dashboard",
     "body": "When the template your campaign was made from changes, the dashboard shows it. Apply all safe updates in one click; changes that clash with your edits stay for review."

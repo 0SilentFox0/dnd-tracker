@@ -120,6 +120,8 @@ export type SourceDiffItem = {
 
 export type SourceDiff = { source: { id: string; name: string; kind: string }; syncedAt: string | null; items: SourceDiffItem[] };
 
+export type TemplatePublishResult = { version: number; added: number; changed: number; removed: number };
+
 export type SourceApplyResult = { applied: number; ignored: number; autoAdded: Array<{ scope: SourceSyncScope; key: string; name: string }>; warnings: string[] };
 
 export interface DmDashboardData {

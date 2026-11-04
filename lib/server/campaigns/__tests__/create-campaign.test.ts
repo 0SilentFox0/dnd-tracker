@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const m = vi.hoisted(() => {
-  const tx = { campaign: { create: vi.fn() }, campaignSourceSync: { create: vi.fn() } };
+  const tx = { campaign: { create: vi.fn() }, campaignSourceSync: { create: vi.fn() }, campaignContentHide: { createMany: vi.fn() } };
 
   return {
     tx,
@@ -73,10 +73,32 @@ describe("createCampaignFromBundle", () => {
 
     expect(res.warnings).toEqual(["w"]);
     expect(m.tx.campaign.create.mock.calls[0][0].data).toMatchObject({ maxLevel: 12, xpMultiplier: 3, friendlyFire: true, createdFromId: "t1" });
-    expect(m.importBundle).toHaveBeenCalledWith(m.tx, bundle, "c1");
+    expect(m.importBundle).toHaveBeenCalledWith(m.tx, bundle, "c1", undefined);
     expect(m.tx.campaignSourceSync.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ campaignId: "c1", sourceCampaignId: "t1" }) }),
     );
+  });
+
+  it("з layer: база в кампанії, hides копіюються, стан синхронізації не створюється", async () => {
+    m.tx.campaign.create.mockResolvedValue({ id: "c1" });
+
+    const layer = { sourceId: "t1", baseVersion: 3, overrides: { a: "h" }, hides: [{ table: "spells", id: "x" }] };
+
+    await createCampaignFromBundle({ userId: "u1", name: "N", bundle, createdFromId: "t1", sourceVersion: 9, layer });
+
+    expect(m.tx.campaign.create.mock.calls[0][0].data).toMatchObject({ baseSourceId: "t1", baseVersion: 3, createdFromId: "t1" });
+    expect(m.importBundle).toHaveBeenCalledWith(m.tx, bundle, "c1", layer);
+    expect(m.tx.campaignContentHide.createMany).toHaveBeenCalledWith({ data: [{ campaignId: "c1", table: "spells", id: "x" }] });
+    expect(m.tx.campaignSourceSync.create).not.toHaveBeenCalled();
+  });
+
+  it("без layer база не записується і hides не чіпаються", async () => {
+    m.tx.campaign.create.mockResolvedValue({ id: "c1" });
+
+    await createCampaignFromBundle({ userId: "u1", name: "N", bundle, createdFromId: "t1" });
+
+    expect(m.tx.campaign.create.mock.calls[0][0].data).not.toHaveProperty("baseSourceId");
+    expect(m.tx.campaignContentHide.createMany).not.toHaveBeenCalled();
   });
 
   it("sourceVersion записується в стан синхронізації", async () => {

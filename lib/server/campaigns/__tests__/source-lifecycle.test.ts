@@ -121,4 +121,86 @@ describe("source lifecycle through the database boundary", () => {
     expect(update.mock.calls.filter(([args]) => (args as { data: object }).data && "contentVersion" in (args as { data: object }).data)).toEqual([]);
     expect(f.syncs.get((saved.data as { id: string }).id)).toMatchObject({ sourceCampaignId: "home", sourceVersion: 4 });
   });
+
+  describe("content layers", () => {
+    const contentWrites = () => BUNDLE_TABLES.map((t) => vi.spyOn(f.db[t.delegate], "createMany"));
+
+    const stored = (campaignId: string, delegate = "spell") => (f.store.get(delegate) ?? []).filter((r) => r.campaignId === campaignId);
+
+    const layeredHome = () => {
+      f.patchCampaign("home", { baseSourceId: "canonical", baseVersion: 2, locale: "en" });
+      f.addRow("spell", { id: id("l"), campaignId: "home", name: "Local", sourceId: null, sourceHash: null });
+      f.addRow("spell", { id: id("o"), campaignId: "home", name: "Override", sourceId: id("s"), sourceHash: "h-1" });
+      f.hides.push({ campaignId: "home", table: "spells", id: id("h") });
+    };
+
+    it("create from a published template copies nothing: base is recorded, no sync row, template rows are not read", async () => {
+      f.publish("canonical", 3);
+
+      const writes = contentWrites();
+
+      const reads = BUNDLE_TABLES.map((t) => vi.spyOn(f.db[t.delegate], "findMany"));
+
+      const created = await createCampaignForUser("dm", { name: "N", templateId: "canonical", contentLocale: "en" }, { defer: () => {} });
+
+      if (!created.ok) throw new Error("Creation failed");
+
+      expect(created.campaign).toMatchObject({ baseSourceId: "canonical", baseVersion: 3, createdFromId: "canonical", locale: "en" });
+      expect(writes.every((spy) => spy.mock.calls.length === 0)).toBe(true);
+      expect(reads.every((spy) => spy.mock.calls.length === 0)).toBe(true);
+      expect(f.syncs.size).toBe(0);
+    });
+
+    it("create from a template without a published version keeps the copy path", async () => {
+      const created = await createCampaignForUser("dm", { name: "N", templateId: "canonical", contentLocale: "en" }, { defer: () => {} });
+
+      if (!created.ok) throw new Error("Creation failed");
+
+      expect(created.campaign.baseSourceId).toBeUndefined();
+      expect(stored(created.campaign.id)).toHaveLength(1);
+      expect(f.syncs.get(created.campaign.id)).toMatchObject({ sourceCampaignId: "canonical" });
+    });
+
+    it("create with a translation overlay keeps the copy path even when published", async () => {
+      f.publish("canonical", 3);
+
+      const created = await createCampaignForUser("dm", { name: "N", templateId: "canonical", contentLocale: "uk" }, { defer: () => {} });
+
+      if (!created.ok) throw new Error("Creation failed");
+
+      expect(created.campaign.baseSourceId).toBeUndefined();
+      expect(stored(created.campaign.id)).toEqual([expect.objectContaining({ name: "Благословення" })]);
+    });
+
+    it("clone of a campaign without a base behaves as before", async () => {
+      f.addRow("spell", { id: id("l"), campaignId: "home", name: "Local" });
+
+      const result = await runCampaignOperation(actor, "clone", { name: "Copy" });
+
+      const createdId = (result.data as { id: string }).id;
+
+      expect(f.campaign(createdId).baseSourceId).toBeUndefined();
+      expect(stored(createdId)).toEqual([expect.objectContaining({ name: "Local", sourceId: id("l") })]);
+      expect(f.syncs.get(createdId)).toMatchObject({ sourceCampaignId: "home" });
+    });
+
+    it.each(["clone", "template.save"] as const)("%s of a layered campaign copies only local rows, overrides and hides", async (operation) => {
+      layeredHome();
+
+      const result = await runCampaignOperation(actor, operation, { name: "Copy" });
+
+      const createdId = (result.data as { id: string }).id;
+
+      const [local, override] = stored(createdId);
+
+      expect(f.campaign(createdId)).toMatchObject({ baseSourceId: "canonical", baseVersion: 2, createdFromId: "home" });
+      expect(stored(createdId)).toHaveLength(2);
+      expect(local).toMatchObject({ name: "Local", sourceId: null, sourceHash: null });
+      expect(local.id).not.toBe(id("l"));
+      expect(override).toMatchObject({ name: "Override", sourceId: id("s"), sourceHash: "h-1" });
+      expect(override.id).not.toBe(id("o"));
+      expect(f.hides.filter((h) => h.campaignId === createdId)).toEqual([{ campaignId: createdId, table: "spells", id: id("h") }]);
+      expect(f.syncs.has(createdId)).toBe(false);
+    });
+  });
 });

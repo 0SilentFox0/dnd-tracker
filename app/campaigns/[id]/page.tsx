@@ -6,6 +6,7 @@ import { DmNextSteps } from "@/components/campaigns/dashboard/DmNextSteps";
 import { PlayerHeroCard } from "@/components/campaigns/dashboard/PlayerHeroCard";
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CreditsText } from "@/components/campaigns/templates/CreditsText";
+import { PublishTemplateButton } from "@/components/campaigns/templates/PublishTemplateButton";
 import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncButton";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
@@ -72,9 +73,10 @@ export default async function CampaignDetailPage({
           <Info className="mt-0.5 size-4 shrink-0 text-hud-gold" />
           <p className="min-w-0 flex-1 text-sm text-hud-bone">{t("page.templateNotice")}</p>
           {campaign.credits && <CreditsText credits={campaign.credits} className="basis-full" />}
-          {isDM && campaign.createdFromId && (
-            <div className="ml-auto">
-              <SourceSyncButton campaignId={id} isTemplate />
+          {isDM && (
+            <div className="ml-auto flex flex-wrap gap-2">
+              {campaign.createdFromId && <SourceSyncButton campaignId={id} isTemplate />}
+              {!campaign.baseSourceId && <PublishTemplateButton campaignId={id} />}
             </div>
           )}
         </HudPanel>

@@ -96,7 +96,7 @@ type CommandCheck = (caller: AssistantCaller, ctx: Parameters<typeof validateAtt
 const COMMAND_CHECKS: Record<string, CommandCheck> = {
   attack: (_caller, ctx, parsed) => validateAttackPreview(ctx, parsed),
   spell: async (caller, _ctx, parsed) => {
-    const spell = await prisma.spell.findUnique({ where: { id: String(parsed.spellId) } });
+    const spell = await prisma.spell.findFirst({ where: { id: String(parsed.spellId), campaignId: caller.actor.campaignId } });
 
     if (!spell || spell.campaignId !== caller.actor.campaignId) throw new ContentError(API_ERRORS.BATTLE_SPELL_NOT_FOUND, 404);
 

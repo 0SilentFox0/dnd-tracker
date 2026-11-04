@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
   spellGroup: { count: vi.fn(async () => 1) },
+  skill: { updateMany: vi.fn() },
   mainSkill: { create: vi.fn(), findFirst: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
 }));
 

@@ -36,7 +36,7 @@ type UnitRow = Parameters<typeof createBattleParticipantFromUnit>[0] & { campaig
 
 export interface AddParticipantDeps {
   loadCharacter(id: string): Promise<CharacterRow | null>;
-  loadUnit(id: string): Promise<UnitRow | null>;
+  loadUnit(id: string, campaignId: string): Promise<UnitRow | null>;
   fromCharacter: typeof createBattleParticipantFromCharacter;
   fromUnit: typeof createBattleParticipantFromUnit;
 }
@@ -47,7 +47,7 @@ const defaultDeps: AddParticipantDeps = {
       where: { id },
       include: { inventory: true },
     }) as Promise<CharacterRow | null>,
-  loadUnit: (id) => prisma.unit.findUnique({ where: { id } }) as Promise<UnitRow | null>,
+  loadUnit: (id, campaignId) => prisma.unit.findFirst({ where: { id, campaignId } }) as Promise<UnitRow | null>,
   fromCharacter: createBattleParticipantFromCharacter,
   fromUnit: createBattleParticipantFromUnit,
 };
@@ -106,7 +106,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
 
       added.push(await deps.fromCharacter(character, battleId, side, undefined, undefined, { rules: ctx.meta.rules }));
     } else {
-      const unit = await deps.loadUnit(data.sourceId);
+      const unit = await deps.loadUnit(data.sourceId, ctx.scene.campaignId);
 
       if (!unit || unit.campaignId !== ctx.scene.campaignId) {
         throw new BattleAccessError(404, API_ERRORS.BATTLE_UNIT_NOT_FOUND);

@@ -11,7 +11,7 @@ async function personalSpellIds(character: CharacterFromPrisma, context?: Campai
 
   if (!id) return [];
 
-  const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findUnique({ where: { id } });
+  const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findFirst({ where: { id, campaignId: character.campaignId } });
 
   const spellId = skill ? toSpellSkillInfo(skill).grantedSpellId : null;
 
@@ -49,7 +49,7 @@ export async function resolveLearnedSpellsAndMastery(
       : await Promise.all([
           prisma.skill.findMany({ where: { campaignId: character.campaignId, id: { in: skillIds } } }),
           prisma.spell.findMany({ where: { campaignId: character.campaignId }, select: { id: true, level: true, spellGroup: { select: { id: true } } } }),
-          prisma.mainSkill.findMany({ where: { id: { in: branchIds } }, select: { id: true, spellGroupId: true } }),
+          prisma.mainSkill.findMany({ where: { campaignId: character.campaignId, id: { in: branchIds } }, select: { id: true, spellGroupId: true } }),
         ]);
 
     const branchSpellGroup = Object.fromEntries(tree.branches.map((b) => [b.id, mainSkills.find((m) => m.id === b.id)?.spellGroupId ?? b.spellGroupId]));

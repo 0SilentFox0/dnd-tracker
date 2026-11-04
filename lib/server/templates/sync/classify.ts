@@ -15,7 +15,7 @@ type ItemFields = Pick<SyncItem, "scope" | "key" | "name" | "status" | "changedF
 export const rowName = (row: Record<string, unknown>): string => String(row.name ?? row.title ?? row.race ?? row.id);
 
 // S/B/L present → status; null = no change
-function pairStatus(s: string, b: string | undefined, l: string): SourceSyncStatus | null {
+export function pairStatus(s: string, b: string | undefined, l: string): SourceSyncStatus | null {
   if (s === l || s === b) return null;
 
   if (b === undefined) return "conflict";
@@ -23,9 +23,9 @@ function pairStatus(s: string, b: string | undefined, l: string): SourceSyncStat
   return l === b ? "updated" : "conflict";
 }
 
-const changed = (a: Record<string, unknown>, b: Record<string, unknown>, keys: readonly string[]) => keys.filter((k) => k !== "id" && hashJson(a[k] ?? null) !== hashJson(b[k] ?? null));
+export const changed = (a: Record<string, unknown>, b: Record<string, unknown>, keys: readonly string[]) => keys.filter((k) => k !== "id" && hashJson(a[k] ?? null) !== hashJson(b[k] ?? null));
 
-function item(ctx: SyncContext, fields: ItemFields): SyncItem {
+export function item(ctx: Pick<SyncContext, "ignored">, fields: ItemFields): SyncItem {
   const ignoredHash = getEntry(ctx.ignored, fields.scope, fields.key);
 
   return { localId: null, requires: [], visible: true, ...fields, ignored: ignoredHash !== undefined && ignoredHash === (fields.sourceHash ?? IGNORED_DELETED) };

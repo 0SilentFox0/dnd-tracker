@@ -13,12 +13,18 @@ export async function readDraftPortraits(campaignId: string, race?: string): Pro
 
   if (access instanceof NextResponse) return access;
 
-  const units = await prisma.unit.findMany({
-    where: { avatar: { not: "" }, race: { campaignId, ...(race ? { name: race } : {}) } },
-    select: { avatar: true, race: { select: { name: true } } },
+  const races = await prisma.race.findMany({ where: { campaignId, ...(race ? { name: race } : {}) }, select: { id: true, name: true } });
+
+  const raceById = new Map(races.map((r) => [r.id, r]));
+
+  const found = await prisma.unit.findMany({
+    where: { campaignId, avatar: { not: "" }, raceId: { in: [...raceById.keys()] } },
+    select: { avatar: true, raceId: true },
     orderBy: { id: "asc" },
     take: race ? PORTRAITS_PER_RACE : ALL_RACES_ROW_LIMIT,
   });
+
+  const units = found.map((u) => ({ avatar: u.avatar, race: u.raceId ? (raceById.get(u.raceId) ?? null) : null }));
 
   if (race) return NextResponse.json({ portraits: units.flatMap((u) => (u.avatar ? [u.avatar] : [])) });
 

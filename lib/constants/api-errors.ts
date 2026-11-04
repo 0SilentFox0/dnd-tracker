@@ -14,6 +14,7 @@ export const API_ERRORS = {
   SOURCE_NOT_FOUND: "errors.sourceNotFound",
   SOURCE_FORBIDDEN: "errors.sourceForbidden",
   SOURCE_CHANGED: "errors.sourceChanged",
+  TEMPLATE_PUBLISH_LAYERED: "errors.templatePublishLayered",
   SOURCE_LEAK: "errors.sourceLeak",
   SOURCE_FOREIGN_IDS: "errors.sourceForeignIds",
   ARCANE_RECOVERY_UNAVAILABLE: "errors.arcaneRecoveryUnavailable",

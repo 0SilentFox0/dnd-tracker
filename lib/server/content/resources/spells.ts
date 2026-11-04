@@ -9,6 +9,7 @@ import { listSpellsQuerySchema } from "@/lib/schemas";
 import { type CreateSpellInput, createSpellSchema, type UpdateSpellInput,updateSpellSchema } from "@/lib/schemas";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
+import { detachRefs } from "@/lib/server/content/detach-refs";
 import { parseInput, toJsonInput } from "@/lib/server/content/errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
@@ -102,7 +103,12 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
     });
   },
   async remove(actor, existing) {
+    await detachRefs(prisma, actor.campaignId, "spell", [existing.id]);
     await prisma.spell.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
   },
-  removeAll: async (actor) => (await prisma.spell.deleteMany({ where: { campaignId: actor.campaignId } })).count,
+  removeAll: async (actor) => {
+    await detachRefs(prisma, actor.campaignId, "spell", "all");
+
+    return (await prisma.spell.deleteMany({ where: { campaignId: actor.campaignId } })).count;
+  },
 });

@@ -11,18 +11,23 @@ import { backgroundReferenceError } from "@/lib/utils/backgrounds/integrity";
 
 const idCandidates = (bundle: Bundle) => new Set([...collectKeysAndStrings(bundle)].filter((s) => CONTENT_ID_RE.test(s)));
 
-export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId: string) {
+/** `overrides` (base id → sourceHash): rows that shadow a base row; any other id missing from the bundle is a base row too. */
+export interface ImportLayer { overrides: Readonly<Record<string, string | null>> }
+
+export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId: string, layer?: ImportLayer) {
   const parsed = BundleSchema.safeParse(raw);
 
   if (!parsed.success) throw new BundleInvalidError(API_ERRORS.IMPORT_BUNDLE_BAD_FORMAT, parsed.error.issues);
 
   const bundle = parsed.data;
 
-  for (const background of bundle.backgrounds) {
+  for (const background of layer ? [] : bundle.backgrounds) {
     const error = backgroundReferenceError({ originFeatId: background.originFeatId, choices: background.choices }, bundle.feats, new Set(bundle.spells.map((s) => s.id)));
 
     if (error) throw new BundleInvalidError(error);
   }
+
+  const isOverride = (id: string) => !!layer && Object.hasOwn(layer.overrides, id);
 
   const warnings: string[] = [];
 
@@ -35,7 +40,7 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
       if (seen.has(row.id)) throw new BundleInvalidError(API_ERRORS.BUNDLE_DUPLICATE_ID, undefined, { key: t.key, id: row.id });
 
       seen.add(row.id);
-      idMap.set(row.id, newContentId());
+      idMap.set(row.id, isOverride(row.id) ? row.id : newContentId());
     }
   }
 
@@ -50,11 +55,17 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
     for (const entry of bundle.compendium.entries) {
       const target = entry.kind === "scenarioPages" ? bundle.compendium.pages : bundle[entry.kind === "spell-groups" ? "spellGroups" : entry.kind];
 
+      if (layer && entry.kind !== "scenarioPages") {
+        if (!idMap.has(entry.localId)) idMap.set(entry.localId, entry.localId);
+
+        continue;
+      }
+
       if (!target?.some((row) => row.id === entry.localId)) throw new BundleInvalidError(API_ERRORS.IMPORT_BUNDLE_PROVENANCE_KIND);
     }
   }
 
-  const foreign = await findForeignContentIds(tx, idCandidates(bundle), new Set(idMap.keys()));
+  const foreign = layer ? [] : await findForeignContentIds(tx, idCandidates(bundle), new Set(idMap.keys()));
 
   if (foreign.length > 0) throw new BundleInvalidError(API_ERRORS.BUNDLE_FOREIGN_CONTENT, undefined, { ids: foreign.slice(0, 5).join(", ") });
 
@@ -71,7 +82,7 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
       for (const [col, target] of Object.entries(t.fks)) {
         const ref = clean[col];
 
-        if (typeof ref === "string" && !idsByTable.get(target!)!.has(ref)) {
+        if (typeof ref === "string" && !layer && !idsByTable.get(target!)!.has(ref)) {
           warnings.push(`${t.key} ${row.id}: ${col} → null`);
           clean[col] = null;
         }
@@ -85,13 +96,15 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
 
       (hashes[t.key] ??= {})[row.id] = sourceHash;
 
-      return toPrismaJson({ ...remapped, id: idMap.get(row.id)!, campaignId: targetCampaignId, sourceId: row.id, sourceHash }, t);
+      const stored = !layer ? { id: idMap.get(row.id)!, sourceId: row.id, sourceHash } : isOverride(row.id) ? { id: newContentId(), sourceId: row.id, sourceHash: layer.overrides[row.id] } : { id: idMap.get(row.id)!, sourceId: null, sourceHash: null };
+
+      return toPrismaJson({ ...remapped, ...stored, campaignId: targetCampaignId }, t);
     });
 
     return { t, rows };
   });
 
-  assertNoLeak(remappedRows, new Set(idMap.keys()));
+  assertNoLeak(remappedRows, new Set([...idMap].filter(([from, to]) => from !== to).map(([from]) => from)));
 
   for (const { t, rows } of writes) if (rows.length > 0) await delegateOf(tx, t).createMany({ data: rows });
 

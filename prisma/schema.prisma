@@ -90,6 +90,9 @@ model Campaign {
   playerNotifications  PlayerNotification[]
   acquaintances        Acquaintance[]
 
+  baseSourceId String?
+  baseVersion  Int?
+
   @@index([dmUserId])
   @@index([kind, visibility])
   @@index([createdFromId])
@@ -299,6 +302,15 @@ model Spell {
   @@index([summonUnitId])
   @@index([campaignId, sourceId])
   @@map("spells")
+}
+
+model CampaignContentHide {
+  campaignId String
+  table      String
+  id         String
+
+  @@id([campaignId, table, id])
+  @@map("campaign_content_hides")
 }
 
 model SpellGroup {
@@ -1283,3 +1295,332 @@ model AcquaintanceNote {
   @@index([authorUserId])
   @@map("acquaintance_notes")
 }
+
+// BEGIN GENERATED BASE MODELS (scripts/db/gen-base-models.ts)
+
+model UnitBase {
+  id                   String
+  name                 String
+  raceId               String?
+  level                Int      @default(1)
+  strength             Int      @default(10)
+  dexterity            Int      @default(10)
+  constitution         Int      @default(10)
+  intelligence         Int      @default(10)
+  wisdom               Int      @default(10)
+  charisma             Int      @default(10)
+  armorClass           Int      @default(10)
+  initiative           Int      @default(0)
+  speed                Int      @default(30)
+  gridSize             Int      @default(1)
+  maxHp                Int      @default(10)
+  proficiencyBonus     Int      @default(2)
+  attacks              Json     @default("[]")
+  knownSpells          Json     @default("[]")
+  avatar               String?
+  createdAt            DateTime @default(now())
+  immunities           Json     @default("[]")
+  morale               Int      @default(0)
+  maxTargets           Int      @default(1)
+  minTargets           Int      @default(1)
+  abilities            Json     @default("[]")
+  levelScaling         Json?
+  cr                   Float?
+  xp                   Int?
+  multiattack          Int      @default(1)
+  legendaryActions     Int      @default(0)
+  legendaryResistances Int      @default(0)
+  saveProficiencies    Json     @default("[]")
+  statblock            Json     @default("{}")
+  spellcasting         Json     @default("{}")
+  sourceCampaignId     String
+  validFrom            Int
+  validTo              Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("units_base")
+}
+
+model SpellBase {
+  id                    String
+  name                  String
+  executionMode         String   @default("native")
+  level                 Int      @default(0)
+  type                  String
+  damageType            String
+  castingTime           String?
+  range                 String?
+  components            String?
+  duration              String?
+  concentration         Boolean  @default(false)
+  ritual                Boolean  @default(false)
+  savingThrow           Json?
+  hitCheck              Json? // spell attack: { ability, dc } — заклинання застосовується якщо (кидок + мод. кастера) >= dc
+  description           String?
+  effects               Json? // array of effect strings (like skills)
+  effectDetails         Json? // { duration, effects: [{ type, value, isPercentage? }] } from test assertions
+  groupId               String?
+  createdAt             DateTime @default(now())
+  damageElement         String?
+  icon                  String?
+  target                String?
+  damageModifier        String?
+  healModifier          String?
+  diceCount             Int?
+  diceType              String?
+  appearanceDescription String? // опис вигляду для довідника гравців (редагує DM)
+  fx                    Json?
+  damageDistribution    Json? // [100, 75, 50, 25] — % шкоди на кожну ціль для AoE спелів. Default: усі цілі 100%.
+  dice                  Int      @default(0)
+  cost                  String   @default("action")
+  casting               Json?
+  targeting             Json     @default("{\"kind\":\"enemy\"}")
+  resolution            Json     @default("{\"kind\":\"auto\"}")
+  spellEffects          Json     @default("[]")
+  raceModifiers         Json     @default("[]")
+  stackable             Boolean  @default(false)
+  maxStacks             Int?
+  dieSides              Int?
+  upcastDice            Int?
+  upcastTargets         Int?
+  addAbilityMod         Boolean?
+  fixedDice             Boolean?
+  damageBonus           Int?
+  lists                 Json     @default("[]")
+  ingredients           Json     @default("[]")
+  componentFlags        Json?
+  summonUnitId          String?
+  sourceCampaignId      String
+  validFrom             Int
+  validTo               Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("spells_base")
+}
+
+model SpellGroupBase {
+  id               String
+  name             String
+  color            String?
+  icon             String?
+  createdAt        DateTime @default(now())
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("spell_groups_base")
+}
+
+model ArtifactBase {
+  id               String
+  name             String
+  description      String?
+  rarity           String?
+  slot             String
+  bonuses          Json     @default("{}")
+  modifiers        Json     @default("[]")
+  setId            String?
+  icon             String?
+  createdAt        DateTime @default(now())
+  abilities        Json     @default("[]")
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("artifacts_base")
+}
+
+model ArtifactSetBase {
+  id               String
+  name             String
+  description      String?
+  setBonus         Json?
+  icon             String?
+  createdAt        DateTime @default(now())
+  abilities        Json     @default("[]")
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("artifact_sets_base")
+}
+
+model SkillTreeBase {
+  id               String
+  race             String
+  skills           Json     @default("[]")
+  createdAt        DateTime @default(now())
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("skill_trees_base")
+}
+
+model CampaignTrackBase {
+  id               String
+  title            String
+  kind             String
+  url              String?
+  youtubeId        String?
+  durationSec      Int?
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("campaign_tracks_base")
+}
+
+model SkillBase {
+  id                      String
+  name                    String   @default("")
+  description             String?
+  spellId                 String?
+  spellGroupId            String?
+  createdAt               DateTime @default(now())
+  icon                    String?
+  image                   String?
+  mainSkillId             String?
+  spellEnhancementTypes   Json     @default("[]")
+  spellEffectIncrease     Int?
+  spellTargetChange       Json?
+  spellAdditionalModifier Json?
+  spellNewSpellId         String?
+  grantedSpellId          String? // скіл додає це заклинання персонажу
+  spellEnhancementData    Json     @default("{}")
+  appearanceDescription   String? // опис вигляду для довідника гравців (редагує DM)
+  abilities               Json     @default("[]")
+  sourceCampaignId        String
+  validFrom               Int
+  validTo                 Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("skills_base")
+}
+
+model RaceBase {
+  id                   String
+  name                 String
+  availableSkills      Json     @default("[]")
+  disabledSkills       Json     @default("[]")
+  passiveAbility       Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime
+  spellSlotProgression Json     @default("[]")
+  abilities            Json     @default("[]")
+  choices              Json     @default("[]")
+  icon                 String?
+  color                String?
+  sourceCampaignId     String
+  validFrom            Int
+  validTo              Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("races_base")
+}
+
+model GameClassBase {
+  id                  String
+  name                String
+  icon                String?
+  color               String?
+  hitDie              Int      @default(8)
+  savingThrows        Json     @default("[]")
+  proficiencies       Json     @default("{}")
+  skillChoices        Json     @default("{}")
+  caster              String   @default("none")
+  spellcastingAbility String?
+  features            Json     @default("[]")
+  subclassLevel       Int?
+  subclasses          Json     @default("[]")
+  columns             Json     @default("[]")
+  spellList           String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime
+  sourceCampaignId    String
+  validFrom           Int
+  validTo             Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("classes_base")
+}
+
+model FeatBase {
+  id               String
+  name             String
+  icon             String?
+  type             String   @default("general")
+  prerequisite     Json     @default("{}")
+  repeatable       Boolean  @default(false)
+  description      String?
+  abilities        Json     @default("[]")
+  choices          Json     @default("[]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("feats_base")
+}
+
+model BackgroundBase {
+  id                 String
+  name               String
+  icon               String?
+  description        String?
+  choices            Json     @default("[]")
+  skillProficiencies Json     @default("[]")
+  toolProficiencies  Json     @default("[]")
+  originFeatId       String?
+  equipmentText      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime
+  sourceCampaignId   String
+  validFrom          Int
+  validTo            Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("backgrounds_base")
+}
+
+model MainSkillBase {
+  id                  String
+  name                String
+  color               String
+  icon                String?
+  isEnableInSkillTree Boolean  @default(false)
+  spellGroupId        String?
+  role                String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime
+  sourceCampaignId    String
+  validFrom           Int
+  validTo             Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("main_skills_base")
+}
+
+// END GENERATED BASE MODELS

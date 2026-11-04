@@ -10,6 +10,7 @@ import { listTracks } from "@/lib/server/audio/track-store";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
 import { assertCan } from "@/lib/server/content/access";
+import { detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { exampleCsv } from "@/lib/server/content/import/example";
 import { DEFAULT_DEPS as EXPORT_DEFAULT_DEPS, exportCsv } from "@/lib/server/content/import/export";
@@ -21,6 +22,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { listSkillTrees, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { publishTemplate } from "@/lib/server/templates/publish-service";
 import { applySafeSource, applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import { abilitiesJson, OwnerKind, readAbilities, skillAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -102,6 +104,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "source.diff": return getSourceDiff(actor, CONTENT_OPERATIONS["source.diff"].query.parse(input.query ?? {}).scope, locale);
       case "source.apply-safe": return applySafeSource(actor);
       case "source.apply": return applySource(actor, bodyOf("source.apply", body));
+      case "template.publish": return publishTemplate(actor);
       case "skill-trees.list": return listSkillTrees(actor);
       case "skill-trees.save": return saveSkillTree(actor, { ...bodyOf("skill-trees.save", body), ...(input.treeId ? { treeId: String(input.treeId) } : {}) });
       case "content.import": {
@@ -138,7 +141,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
         return { abilities: readAbilities(kind, row).abilities };
       }
       case "skills.duplicate": {
-        const source = await owned(await prisma.skill.findUnique({ where: { id: param("skillId") } }), actor, API_ERRORS.SKILL_NOT_FOUND);
+        const source = await owned(await prisma.skill.findFirst({ where: { id: param("skillId"), campaignId: actor.campaignId } }), actor, API_ERRORS.SKILL_NOT_FOUND);
 
         const t = await getTranslator(await localeOrRequest(locale), "assistant");
 
@@ -152,7 +155,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
  return skill;
       }
       case "spells.remove-from-group": {
-        await owned(await prisma.spell.findUnique({ where: { id: param("spellId") } }), actor);
+        await owned(await prisma.spell.findFirst({ where: { id: param("spellId"), campaignId: actor.campaignId } }), actor);
 
         const result = await prisma.spell.update({ where: { id: param("spellId") }, data: { groupId: null }, include: { spellGroup: true } });
 
@@ -161,7 +164,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
  return result;
       }
       case "spell-groups.remove-all-spells": {
-        await owned(await prisma.spellGroup.findUnique({ where: { id: param("groupId") } }), actor);
+        await owned(await prisma.spellGroup.findFirst({ where: { id: param("groupId"), campaignId: actor.campaignId } }), actor);
         await prisma.spell.updateMany({ where: { campaignId: actor.campaignId, groupId: param("groupId") }, data: { groupId: null } });
         invalidate(actor, ReferenceKind.SPELLS);
 
@@ -169,6 +172,10 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       }
       case "spells.delete-by-level": {
         const { level } = bodyOf("spells.delete-by-level", body);
+
+        const doomed = await prisma.spell.findMany({ where: { campaignId: actor.campaignId, level }, select: { id: true } });
+
+        await detachRefs(prisma, actor.campaignId, "spell", doomed.map((s) => s.id));
 
         const result = await prisma.spell.deleteMany({ where: { campaignId: actor.campaignId, level } });
 

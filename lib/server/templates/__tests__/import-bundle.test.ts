@@ -186,6 +186,41 @@ describe("importBundle", () => {
     for (const t of BUNDLE_TABLES) expect(rowsOf(store, t.delegate)).toHaveLength(0);
   });
 
+  describe("over a base layer", () => {
+    const BASE = id("x"), BASE_RACE = id("y");
+
+    it("keeps base ids, stores overrides under a new id with sourceId = base id, local rows get no provenance", async () => {
+      const bundle = fullBundle();
+
+      bundle.spells = [{ id: BASE, name: "edited", groupId: G }, { id: SP, name: "mine", groupId: G, summonUnitId: BASE_RACE }];
+      bundle.spellGroups = [{ id: G, name: "g" }];
+
+      const { db, store } = createFakeDb();
+
+      const { idMap, warnings } = await importBundle(db, bundle, "target", { overrides: { [BASE]: "hash-1" } });
+
+      const [override, local] = rowsOf(store, "spell");
+
+      expect(idMap.get(BASE)).toBe(BASE);
+      expect(override).toMatchObject({ name: "edited", sourceId: BASE, sourceHash: "hash-1", campaignId: "target" });
+      expect(override.id).not.toBe(BASE);
+      expect(local).toMatchObject({ name: "mine", sourceId: null, sourceHash: null, summonUnitId: BASE_RACE });
+      expect(local.id).not.toBe(SP);
+      expect(local.groupId).toBe(idMap.get(G));
+      expect(warnings).toEqual([]);
+    });
+
+    it("an empty bundle writes no content rows", async () => {
+      const bundle = Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, []]));
+
+      const { db, store } = createFakeDb();
+
+      await importBundle(db, { formatVersion: 1, settings, rules: {}, ...bundle } as unknown as Bundle, "target", { overrides: {} });
+
+      for (const t of BUNDLE_TABLES) expect(rowsOf(store, t.delegate)).toHaveLength(0);
+    });
+  });
+
   it("imports an empty bundle", async () => {
     const bundle = Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, []]));
 

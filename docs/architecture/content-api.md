@@ -276,3 +276,40 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 - Скрипти, що пишуть контент шаблону, мусять викликати `bumpContentVersion` (або `contentVersion: { increment: 1 }` в тому ж `update`).
 - `CampaignSourceSync.sourceVersion` — версія джерела на момент клонування/останнього apply; `sourceUpdateState` (`lib/server/campaigns/dashboard.ts`) порівнює їх для плитки «Шаблон оновлено» на дашборді DM.
 - `cachedExport` (`lib/server/templates/bundle-cache.ts`) — кеш на 3 сирі бандли (LRU) за `${sourceId}:${contentVersion}`, нова версія того самого джерела витісняє старі; бандл не мутувати, SRD-локалізація йде після кешу. Тести з мутацією джерела без bump викликають `clearBundleCache()`.
+
+## Публікація версії шаблону
+
+- `publishTemplateVersion(tx, templateId)` (`lib/server/templates/publish.ts`) експортує поточні рядки шаблону через `exportCampaign` і порівнює з відкритими базовими рядками (`<Model>Base`, `sourceCampaignId = templateId`, `validTo = null`) за `rowHash` (`sync/hash.ts`, той самий, що для source-sync). Новий або змінений рядок: старий закривається (`validTo = v`), новий вставляється з `validFrom = v` і тим самим id; зниклий лише закривається. Усі 13 моделей, `v = contentVersion` після бампу.
+- Бамп робить сама функція і лише коли є зміни: повторна публікація без змін повертає нулі й поточну версію, `contentVersion` не росте. Відповідь: `{ version, added, changed, removed }`.
+- Операція `template.publish` (`POST /template/publish`, `NEED.writeAll`, лише сесія, лише для `kind = template`): `publishTemplate` у `publish-service.ts` виконує публікацію в одній транзакції (`withCampaignContentWrite`, `bump: false`). ДМ шаблону = власник official-шаблону. UI: кнопка «Опублікувати версію» на сторінці шаблону (`PublishTemplateButton`, `usePublishTemplate`).
+- Сидер SRD (`scripts/srd/lib/run-load-template.ts`) публікує версію наприкінці прогону.
+- `updatedAt` у базових таблицях (там, де є) ставиться часом публікації: бандл його не містить.
+
+## Створення кампанії без копіювання
+
+`prepareCampaignSource` (`lib/server/templates/prepare-source.ts`) повертає `PreparedCampaignSource`; поле `layer` (`PreparedLayer`: `sourceId`, `baseVersion`, `overrides`, `hides`) означає, що `bundle` містить лише те, що нова кампанія зберігає сама, а решту читає шар.
+
+- `create` із шаблону: якщо `latestPublishedVersion` (`publish.ts`, максимум `validFrom`/`validTo` по 13 `*_base` джерела) не `null` і немає SRD-перекладу, то `layer = { sourceId: шаблон, baseVersion: остання публікація }`, а bundle — `exportSkeleton` (налаштування, правила, credits, compendium без рядків контентних таблиць). Кампанія бачить опубліковану версію, а не незбережені правки шаблону. `campaign_source_syncs` не створюється, `createdFromId = baseSourceId = шаблон`.
+- `clone` / `template.save` кампанії з `baseSourceId`: та сама база й `baseVersion`, а `exportLocalLayer` читає лише збережені рядки (`bypassLayer`): локальні (нові id, `sourceId = null`), override-и (у bundle — під базовим id; у кампанії — новий власний id, `sourceId` = базовий id, `sourceHash` копіюється, «осиротілі» override-и теж) і `campaign_content_hides`. `createdFromId` = кампанія-джерело (лінійка), sync іде за `baseSourceId`.
+- `importBundle(tx, bundle, campaignId, layer)`: `layer.overrides` лишає базові id у посиланнях; посилання на id поза bundle вважаються базовими (не обнуляються), перевірка чужих id, `backgroundReferenceError` і provenance-перевірка compendium для не-сторінок пропускаються; `assertNoLeak` перевіряє лише переписані id. `createCampaignFromBundle` дописує hides і скидає кеш шару нової кампанії.
+- Шаблон без опублікованої версії, SRD-оверлей з непорожнім перекладом (`uk`: шар ще не локалізує) і кампанії без бази (HOMM5, legacy-клони) йдуть шляхом бандла без змін до Part 5.
+- `exportCampaign` шарової кампанії віддає злитий вигляд (override під базовим id, без дублікатів, «осиротілий» override присутній). Публікація такої кампанії-шаблону заборонена: `publishTemplate` повертає 409 `TEMPLATE_PUBLISH_LAYERED` (ланцюжки шарів поза обсягом; PK `*_base` `(id, validFrom)` глобальний, тож базові id інакше конфліктували б), кнопка «Опублікувати версію» на сторінці шаблону з базою прихована.
+
+## Sync поверх шарів
+
+Кампанія з `baseSourceId/baseVersion` синхронізується окремим шляхом (`sync/layered*.ts`); кампанії без бази (legacy-клони, HOMM5) лишаються на копійному sync (`context/classify/apply`) до Part 5. Розгалуження — у `applySourceChanges`/`applySafeSourceChanges`/`previewSourceSelection`/`getSourceDiff`/`sourceUpdateState` через `layerOf`.
+
+- Baseline: базовий рядок — рядок на `baseVersion`; override — `sourceHash` локального рядка (хеш колонок бандла, `hashColumns` шару = `BundleTableDef.columns`); `ignored` — як раніше в `campaign_source_syncs.ignored`.
+- Класифікуються лише рядки, змінені після `baseVersion` (`validFrom > bv` або `validTo > bv`), плюс усі override і hide-и таких рядків. Базовий рядок, закритий upstream без override, має статус `deletedInSource` (з `usage`, як у legacy: `apply-safe` його не чіпає, лише явний вибір).
+- Просування `baseVersion` не застосовує того, що ДМ не вибрав (`keepUnselected` у `layered-apply.ts`): невибраний/проігнорований `updated` і `deletedInSource` без override фіксуються override-ом на старому baseline (рядок на старому `baseVersion`, `sourceHash` = його хеш), невибраний/проігнорований `new` отримує hide. Вибране записів не потребує. Після цього такий рядок лишається `updated`/`deletedInSource`, поки ДМ не вирішить.
+- Override + зміна upstream → `conflict`/`updated` за `pairStatus`; прийняття upstream видаляє override. Прийняте `deletedInSource` з override теж видаляє override (базовий рядок уже закритий, hide не потрібен); неприйняте лишає override видимим зі статусом `deletedInSource`. Hide + зміна → `deletedLocally`; лишається прихованим, apply знімає hide.
+- Apply просуває `baseVersion` до поточної версії джерела; незастосовані conflict/override лишаються видимими, бо override завжди в наборі класифікації. Правила/налаштування/credits/компендіум на шарах поки не синхронізуються.
+- Сервісний `runApply` додатково бампить `contentVersion` кампанії (звичайний content-write); сам `applySafeSourceChanges` робить один UPDATE `campaigns`.
+
+## Кеші шару та FK
+
+- Шар кампанії (`baseSourceId`/`baseVersion`/`contentVersion`) читається свіжим PK-запитом на кожен виклик поза транзакцією і раз на транзакцію/write-context всередині (пам'ять у `WeakMap` за контекстом, скидається при `campaign` update). Глобально кешується лише «кампанія без бази» (`baseSourceId` не змінюється після create; не кешується, якщо рядка немає або відповідь отримано всередині транзакції) — HOMM5 і legacy-клони не роблять жодного запиту. TTL немає: версії іншого інстанса видно одразу.
+- Базові рядки (`baseRowsCache`, ключ `source|version|model|query`) незмінні за версією, тож кешуються й у write-context. Overlay (hides + shadowed, ключ `campaign|baseVersion|contentVersion|model`) читається з кешу лише поза write-context і відкритою транзакцією і лише там заповнюється.
+- `create`/`createMany` беруть кампанію з `data.campaignId` (змішані кампанії в одному `createMany` — `LAYER_MIXED_CAMPAIGNS`), ніколи з write-context; `contentVersion` бампиться лише для кампанії, що володіє write-context (клон/`template.save` не бампить джерело).
+- Читання за id без `campaignId` повертає лише збережені рядки, базові — ніколи.
+- Міграція `20261121000001_content_base` зняла 12 FK, разом із ними `ON DELETE SET NULL`: `detachRefs` (`lib/server/content/detach-refs.ts`) обнуляє посилання на видалені spell-groups/races/main-skills/spells/units у `remove`/`removeAll` ресурсів, `spells.delete-by-level` і legacy-sync `deleteRemoved` (через `bypassLayer`, тож шарова кампанія не створює override-ів). Нову залежність між контентними таблицями додавати в `REFERRERS` там само.

@@ -54,11 +54,11 @@ const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
 };
 
 export interface SpellMutationDeps extends SummonDeps {
-  loadSpell(spellId: string): Promise<Spell | null>;
+  loadSpell(spellId: string, campaignId: string): Promise<Spell | null>;
 }
 
 const defaultDeps: SpellMutationDeps = {
-  loadSpell: (id) => prisma.spell.findUnique({ where: { id } }),
+  loadSpell: (id, campaignId) => prisma.spell.findFirst({ where: { id, campaignId } }),
   loadPool: getCachedSummonPool,
 };
 
@@ -206,7 +206,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 }
 
 async function loadCastableSpell(deps: SpellMutationDeps, ctx: BattleMutationContext, data: SpellRequestData, order: BattleParticipant[]): Promise<Spellcast> {
-  const spellRow = await deps.loadSpell(data.spellId);
+  const spellRow = await deps.loadSpell(data.spellId, ctx.scene.campaignId);
 
   if (!spellRow || spellRow.campaignId !== ctx.scene.campaignId) throw new BattleAccessError(404, API_ERRORS.BATTLE_SPELL_NOT_FOUND);
 
