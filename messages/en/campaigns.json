@@ -93,6 +93,12 @@
     "removing": "Removing...",
     "confirmRemove": "Are you sure you want to remove this member from the campaign?"
   },
+  "publishTemplate": {
+    "button": "Publish version",
+    "published": "Version {version} published: {added} added, {changed} changed, {removed} removed.",
+    "unchanged": "Nothing to publish: the template matches version {version}.",
+    "failed": "Failed to publish the version"
+  },
   "saveAsTemplate": {
     "title": "Save as template",
     "description": "The campaign library (without heroes and battles) becomes a template for new campaigns",

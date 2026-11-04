@@ -276,3 +276,11 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 - Скрипти, що пишуть контент шаблону, мусять викликати `bumpContentVersion` (або `contentVersion: { increment: 1 }` в тому ж `update`).
 - `CampaignSourceSync.sourceVersion` — версія джерела на момент клонування/останнього apply; `sourceUpdateState` (`lib/server/campaigns/dashboard.ts`) порівнює їх для плитки «Шаблон оновлено» на дашборді DM.
 - `cachedExport` (`lib/server/templates/bundle-cache.ts`) — кеш на 3 сирі бандли (LRU) за `${sourceId}:${contentVersion}`, нова версія того самого джерела витісняє старі; бандл не мутувати, SRD-локалізація йде після кешу. Тести з мутацією джерела без bump викликають `clearBundleCache()`.
+
+## Публікація версії шаблону
+
+- `publishTemplateVersion(tx, templateId)` (`lib/server/templates/publish.ts`) експортує поточні рядки шаблону через `exportCampaign` і порівнює з відкритими базовими рядками (`<Model>Base`, `sourceCampaignId = templateId`, `validTo = null`) за `rowHash` (`sync/hash.ts`, той самий, що для source-sync). Новий або змінений рядок: старий закривається (`validTo = v`), новий вставляється з `validFrom = v` і тим самим id; зниклий лише закривається. Усі 13 моделей, `v = contentVersion` після бампу.
+- Бамп робить сама функція і лише коли є зміни: повторна публікація без змін повертає нулі й поточну версію, `contentVersion` не росте. Відповідь: `{ version, added, changed, removed }`.
+- Операція `template.publish` (`POST /template/publish`, `NEED.writeAll`, лише сесія, лише для `kind = template`): `publishTemplate` у `publish-service.ts` виконує публікацію в одній транзакції (`withCampaignContentWrite`, `bump: false`). ДМ шаблону = власник official-шаблону. UI: кнопка «Опублікувати версію» на сторінці шаблону (`PublishTemplateButton`, `usePublishTemplate`).
+- Сидер SRD (`scripts/srd/lib/run-load-template.ts`) публікує версію наприкінці прогону.
+- `updatedAt` у базових таблицях (там, де є) ставиться часом публікації: бандл його не містить.

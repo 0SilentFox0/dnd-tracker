@@ -215,6 +215,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/spells/groups/[groupId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells/groups', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/spells', methods: ['DELETE', 'GET', 'POST'], task: 5, adapter: 'content', state: "active" },
+  { route: 'campaigns/[id]/template/publish', methods: ['POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/tracks/[trackId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/tracks/order', methods: ['PUT'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/tracks', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },

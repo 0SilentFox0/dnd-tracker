@@ -11,6 +11,7 @@ import { prisma } from "@/lib/db";
 import { getTranslator } from "@/lib/i18n/translator";
 import { bumpContentVersion } from "@/lib/server/campaigns/version";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
+import { publishTemplate } from "@/lib/server/templates/publish-service";
 import type { Actor } from "@/lib/utils/api/actor";
 
 export async function loadSrdTemplate({ owner, locale, allowRemote }: SrdSeedArgs) {
@@ -46,6 +47,10 @@ export async function loadSrdTemplate({ owner, locale, allowRemote }: SrdSeedArg
     for (const { column, names } of staleSpellColumns(data.spells)) await prisma.spell.updateMany({ where: { campaignId: template.id, name: { in: names } }, data: { [column]: null } });
 
     await bumpContentVersion(prisma, template.id);
+
+    const published = await publishTemplate(actor);
+
+    console.info(`Версія шаблону ${published.version}: +${published.added} ~${published.changed} -${published.removed}`);
 
     for (const line of formatImportSummary(results, await getTranslator("uk"))) console.info(line);
 

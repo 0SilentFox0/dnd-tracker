@@ -75,6 +75,9 @@
       "apply": "Apply source changes",
       "apply-safe": "Apply safe source updates"
     },
+    "template": {
+      "publish": "Publish template version"
+    },
     "skill-trees": {
       "list": "Skill trees",
       "save": "Save skill tree"
