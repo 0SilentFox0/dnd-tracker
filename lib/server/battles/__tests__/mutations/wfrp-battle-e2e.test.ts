@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { context } from "./fixtures";
 
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { attackBodySchema } from "@/lib/schemas/battles";
 import { type AttackBody, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { initiativeRollMutation } from "@/lib/server/battles/mutations/initiative/initiative-roll-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -27,6 +28,12 @@ const fighter = (id: string, side: ParticipantSide): BattleParticipant => {
   };
 };
 
+const firstThen = (first: number, rest: number) => {
+  let calls = 0;
+
+  return () => (calls++ === 0 ? first : rest);
+};
+
 const crits = (p: BattleParticipant) => p.battleData.activeEffects.filter((e) => e.name.startsWith("crit.wfrp."));
 
 const hp = (c: BattleMutationContext, id: string) => c.participants.find((p) => p.basicInfo.id === id)!.combatStats.currentHp;
@@ -42,13 +49,12 @@ describe("wfrp battle end to end (engine)", () => {
     expect(rolled.participants).toHaveLength(2);
     ctx = { ...ctx, participants: [...rolled.participants].sort((x, y) => (x.basicInfo.id === "a" ? -1 : y.basicInfo.id === "a" ? 1 : 0)), scene: { ...ctx.scene, turnIndex: 0 } };
 
-    // attackBodySchema caps d20Roll at 20, so a preset d100 roll bypasses the zod parse here
-    const hit = (attackerId: string, targetId: string, d20Roll: number): AttackBody => ({ attackerId, targetId, attackId: "sw", d20Roll, damageRolls: [4], endTurn: true });
+    const hit = (attackerId: string, targetId: string): AttackBody => attackBodySchema.parse({ attackerId, targetId, attackId: "sw", d20Roll: 10, damageRolls: [4], endTurn: true });
 
     const rolls: number[] = [];
 
     const step = async (attackerId: string, targetId: string, attackerRoll = 30) => {
-      const out = await attackMutation({ ...ctx, rng: seq(0.795) }, hit(attackerId, targetId, attackerRoll));
+      const out = await attackMutation({ ...ctx, rng: firstThen((attackerRoll - 0.5) / 100, 0.795) }, hit(attackerId, targetId));
 
       rolls.push(out.events.length);
       ctx = { ...ctx, participants: out.participants, pending: out.pending ?? ctx.pending, scene: { ...ctx.scene, ...out.scene } };
@@ -71,5 +77,17 @@ describe("wfrp battle end to end (engine)", () => {
     expect(target.combatStats).toMatchObject({ currentHp: 0, status: CombatStatus.UNCONSCIOUS });
     expect(crits(target)).toHaveLength(1);
     expect(rolls.every((n) => n > 0)).toBe(true);
+  });
+
+  it("ignores client d20 rolls: the server rolls the d100 attack", async () => {
+    const base = context({ participants: [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });
+
+    const ctx: BattleMutationContext = { ...base, meta: { ...base.meta, rules: WFRP_RULES }, scene: { ...base.scene, turnIndex: 0 } };
+
+    const body = attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", d20Roll: 1, damageRolls: [4] });
+
+    const out = await attackMutation({ ...ctx, rng: seq(0.995, 0.01) }, body);
+
+    expect(out.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp).toBe(20);
   });
 });

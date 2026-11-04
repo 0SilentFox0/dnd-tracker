@@ -9,6 +9,7 @@ import { logFields, withPrefix } from "@/lib/utils/battle/log/lines";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { pickOne, rollDiceList, rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -27,7 +28,7 @@ interface BerserkTurnParams {
   actionIndex: number;
   rng: () => number;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 function note(p: BattleParticipant, params: BerserkTurnParams, text: LogLine | LogLine[]): BattleAction {
@@ -91,7 +92,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
     attacker: berserker,
     target,
     attack,
-    d20Roll: rollDie(20, rng),
+    d20Roll: rollDie(ruleSystemOf(params.rules).combat.dice, rng),
     damageRolls: rollDiceList(heroAttackDamageParts(berserker, attack).formula, rng),
     allParticipants: participants,
     currentRound: params.round,
@@ -101,6 +102,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
     rng,
     map: params.map,
     rules: params.rules,
+    serverRolled: { d20: true },
   });
 
   const updated = new Map((result.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));

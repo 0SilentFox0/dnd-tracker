@@ -43,8 +43,6 @@ export function strikeRoll(
   return { value: d20, serverRolled };
 }
 
-export const strikeD20 = (...args: [Parameters<typeof strikeRoll>[0], Parameters<typeof strikeRoll>[1], Parameters<typeof strikeRoll>[2], Parameters<typeof strikeRoll>[3]]) => strikeRoll(...args, 20);
-
 export interface StrikeDice {
   rolls: number[];
   /** Кубики, яких клієнт не надіслав і які докинув сервер; null — сервер нічого не кидав */
