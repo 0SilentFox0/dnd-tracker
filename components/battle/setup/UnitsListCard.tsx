@@ -4,7 +4,9 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { SetupEntityCard } from "./SetupEntityCard";
 
+import { SearchInput } from "@/components/common/SearchInput";
 import { HudSection } from "@/components/hud/form";
+import { HudChipTabs } from "@/components/hud/page";
 import {
   Accordion,
   AccordionContent,
@@ -16,8 +18,7 @@ import { Input } from "@/components/ui/input";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { clampUnitQuantity, UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { groupDisplayName } from "@/lib/constants/ungrouped";
-import type { ParticipantActions, ParticipantSelection } from "@/lib/hooks/battles";
-import { groupUnitsByRaceName } from "@/lib/utils/units/group-units";
+import { type ParticipantActions, type ParticipantSelection, useSetupUnitsFilter } from "@/lib/hooks/battles";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
 interface UnitsListCardProps {
@@ -86,6 +87,8 @@ export function UnitsListCard({ units, entityStats, selection, actions }: UnitsL
 
   const locale = useLocale();
 
+  const filter = useSetupUnitsFilter(units);
+
   if (units.length === 0) {
     return (
       <HudSection title={t("title")}>
@@ -99,20 +102,31 @@ export function UnitsListCard({ units, entityStats, selection, actions }: UnitsL
     );
   }
 
-  const byRace = groupUnitsByRaceName(units);
+  const byRace = filter.groups;
 
   const raceLabel = (key: string) => groupDisplayName(key, tGame("race"));
 
-  const raceOrder = [...byRace.keys()].sort((a, b) =>
-    raceLabel(a).localeCompare(raceLabel(b), locale),
-  );
+  const byLabel = (a: string, b: string) => raceLabel(a).localeCompare(raceLabel(b), locale);
+
+  const raceOrder = [...byRace.keys()].sort(byLabel);
+
+  const chips = [...filter.chips].sort((a, b) => byLabel(a.key, b.key));
 
   return (
     <HudSection title={t("title")} className="mt-0 max-h-[600px] space-y-4 overflow-y-auto">
       <p className="text-xs text-muted-foreground">
         {t("hint")}
       </p>
+      <div className="space-y-2">
+        <SearchInput value={filter.query.value} onChange={filter.query.set} label={t("search")} />
+        <HudChipTabs
+          ariaLabel={t("raceFilter")}
+          items={chips.map((chip) => ({ key: chip.key, active: chip.active, onSelect: () => filter.toggleRace(chip.key), label: `${raceLabel(chip.key)} · ${chip.count}` }))}
+        />
+      </div>
+      {raceOrder.length === 0 && <p className="py-4 text-center text-sm text-muted-foreground">{t("noMatches")}</p>}
         <Accordion
+          key={raceOrder.join("|")}
           type="multiple"
           defaultValue={raceOrder}
           className="space-y-2"
