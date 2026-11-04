@@ -29,7 +29,7 @@ export async function resolveCharacterSkillEntries(
 
   const byId = new Map(rows.map((r) => [r.id, r]));
 
-  const groups = preloadedMainSkillGroups ?? (await loadMainSkillSpellGroups(rows));
+  const groups = preloadedMainSkillGroups ?? (await loadMainSkillSpellGroups(campaignId, rows));
 
   const entries: SkillRowEntry[] = [];
 
@@ -61,6 +61,7 @@ export async function resolveCharacterSkillEntries(
  * Робимо одним додатковим запитом, щоб не міняти контракт preloadedSkillsById.
  */
 async function loadMainSkillSpellGroups(
+  campaignId: string,
   fetchedSkills: Prisma.SkillGetPayload<object>[],
 ): Promise<Map<string, string | null>> {
   const mainSkillIdsToResolve = new Set<string>();
@@ -74,7 +75,7 @@ async function loadMainSkillSpellGroups(
   if (mainSkillIdsToResolve.size === 0) return mainSkillSpellGroupById;
 
   const mainSkills = await prisma.mainSkill.findMany({
-    where: { id: { in: Array.from(mainSkillIdsToResolve) } },
+    where: { campaignId, id: { in: Array.from(mainSkillIdsToResolve) } },
     select: { id: true, spellGroupId: true },
   });
 
