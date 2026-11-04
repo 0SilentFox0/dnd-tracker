@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useBattleScene } from "./useBattleScene";
 
 import { BattleStatus } from "@/lib/constants/battle";
-import { moveId } from "@/lib/utils/battle/turn";
+import { moveId } from "@/lib/utils/battle/turn/move-id";
 
 export function useInitiativeOrder(ids: string[]) {
   const [order, setOrder] = useState(ids);

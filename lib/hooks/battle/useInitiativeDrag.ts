@@ -2,7 +2,7 @@
 
 import { type MouseEvent, type PointerEvent, useRef } from "react";
 
-import { moveId } from "@/lib/utils/battle/turn";
+import { moveId } from "@/lib/utils/battle/turn/move-id";
 
 const THRESHOLD = 6;
 

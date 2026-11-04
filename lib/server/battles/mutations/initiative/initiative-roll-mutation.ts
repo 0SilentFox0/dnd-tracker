@@ -3,7 +3,7 @@ import { z } from "zod";
 import { textRef } from "@/lib/i18n/text-ref";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { dmEvent } from "@/lib/utils/battle/store";
-import { rollInitiative } from "@/lib/utils/battle/turn";
+import { rollInitiative } from "@/lib/utils/battle/turn/roll-initiative";
 import { rngOf } from "@/lib/utils/common/rng";
 import type { DiceRollGroup } from "@/types/battle";
 
