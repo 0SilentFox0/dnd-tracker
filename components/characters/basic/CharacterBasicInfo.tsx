@@ -21,6 +21,7 @@ interface CharacterBasicInfoProps {
   races?: Race[];
   isPlayerView?: boolean;
   hideProgression?: boolean;
+  hideLineage?: boolean;
   classMode?: { classes: GameClassData[]; byId: Record<string, GameClassData> };
 }
 
@@ -30,6 +31,7 @@ export function CharacterBasicInfo({
   races = [],
   isPlayerView = false,
   hideProgression = false,
+  hideLineage = false,
   classMode,
 }: CharacterBasicInfoProps) {
   const t = useTranslations("characters.form.basic");
@@ -89,6 +91,8 @@ export function CharacterBasicInfo({
         </div>
       )}
 
+      {!hideLineage && (
+        <>
       <div className="w-full min-w-0">
         <Label htmlFor="race">{t("race")}</Label>
         <SelectField
@@ -112,6 +116,8 @@ export function CharacterBasicInfo({
         containerClassName="w-full min-w-0"
         className="w-full"
       />
+        </>
+      )}
       {classMode ? (
         <CharacterClassesField value={data.classes ?? []} classes={classMode.classes} onChange={setClasses} />
       ) : (
@@ -152,6 +158,7 @@ export function CharacterBasicInfo({
         </div>
       )}
 
+      {!hideLineage && (
       <div className="w-full min-w-0">
         <Label htmlFor="alignment">{t("alignment")}</Label>
         <SelectField
@@ -164,6 +171,7 @@ export function CharacterBasicInfo({
           triggerClassName="w-full"
         />
       </div>
+      )}
 
       {!classMode && !hideProgression && (
         <div className="col-span-2 grid grid-cols-3 gap-2">

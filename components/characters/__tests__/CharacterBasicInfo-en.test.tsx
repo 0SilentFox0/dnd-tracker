@@ -24,6 +24,17 @@ describe("characters in en", () => {
     expect(screen.getByText("Character portrait")).toBeInTheDocument();
   });
 
+  it("hideLineage hides race, subrace and alignment", async () => {
+    const basicInfo = { data: { ...defaultCharacterFormData.basicInfo, type: "player" }, set: vi.fn() };
+
+    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} hideLineage />, { locale: "en", namespaces: ["common", "characters"] });
+
+    expect(screen.queryByText("Race *")).toBeNull();
+    expect(screen.queryByText("Create a race in the Races section first")).toBeNull();
+    expect(screen.queryByLabelText("Alignment")).toBeNull();
+    expect(screen.getByText("Controlled by *")).toBeInTheDocument();
+  });
+
   it("DraftBanner interpolates the DM comment", async () => {
     await renderWithIntl(<DraftBanner campaignId="c1" note="Add a goal" isOwner={false} />, { locale: "en", namespaces: ["common", "characters"] });
 

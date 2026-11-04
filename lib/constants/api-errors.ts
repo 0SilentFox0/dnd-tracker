@@ -29,6 +29,7 @@ export const API_ERRORS = {
   CLASSES_DISABLED: "errors.classesDisabled",
   SUBCLASS_REQUIRED: "errors.subclassRequired",
   CLASS_REQUIRED: "errors.classRequired",
+  RACE_REQUIRED: "errors.raceRequired",
   SUBCLASS_NOT_FOUND: "errors.subclassNotFound",
   SUBCLASS_ALREADY_SET: "errors.subclassAlreadySet",
   CONVERT_TO_CLASSES_FIRST: "errors.convertToClassesFirst",

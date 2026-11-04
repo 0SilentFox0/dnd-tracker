@@ -7,6 +7,7 @@ import { useCharacter, useUpdateCharacter } from "./useCharacters";
 
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useRaces } from "@/lib/hooks/races";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import type { EquippedItems } from "@/types/inventory";
 
@@ -23,7 +24,10 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const [equipped, setEquipped] = useState<EquippedItems>({});
 
+  const { system } = useRuleSystem({ campaignId });
+
   const form = useCharacterForm({
+    requireRace: system.lineage,
     onSubmit: async (data) => {
       const saved = await update.mutateAsync(data);
 

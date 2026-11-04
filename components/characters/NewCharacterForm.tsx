@@ -37,7 +37,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
 
   const classMode = useClassMode(id);
 
-  const { key: systemKey } = useRuleSystem({ campaignId: id });
+  const { key: systemKey, system } = useRuleSystem({ campaignId: id });
 
   const Ui = systemUiOf(systemKey);
 
@@ -53,6 +53,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     ...bindings
   } = useCharacterForm({
     type: characterType,
+    requireRace: system.lineage,
     recommendScores: classMode.byId,
     onSubmit: async (data) => {
       await create.mutateAsync(refsRef.current?.ready ? pruneFormChoices(data, refsRef.current) : data);
@@ -74,7 +75,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     {
       id: CHARACTER_FORM_TAB.basic,
       label: tc("tabs.basic"),
-      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={Ui.hideProgression} classMode={classMode.enabled && !Ui.hideProgression ? classMode : undefined} />,
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={Ui.hideProgression} hideLineage={!system.lineage} classMode={classMode.enabled && !Ui.hideProgression ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,

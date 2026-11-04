@@ -16,5 +16,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   },
   rest: { onSession },
   battle: { supported: false },
+  lineage: false,
+  attacks: false,
   unusedMechanics: ["morale", "criticals", "formulas", "heroScaling", "initiative", "saves", "deathSaves", "concentration", "conditions", "actions", "classes", "encounters"],
 };

@@ -28,6 +28,7 @@ describe("rule system registry", () => {
       expect(s.balance.kind).toBe("fair");
       expect(s.distance).toEqual({ unit: "ft", perCell: 5 });
       expect(s.progression.levels).toBe(true);
+      expect(s).toMatchObject({ lineage: true, attacks: true });
       expect(s.unusedMechanics).toEqual([]);
     }
   });
@@ -41,6 +42,7 @@ describe("rule system registry", () => {
     expect(s.balance.kind).toBe("none");
     expect(s.distance).toEqual({ unit: "yd", perCell: 2 });
     expect(s.progression.levels).toBe(false);
+    expect(s).toMatchObject({ lineage: false, attacks: false });
     expect(s.unusedMechanics).toContain("classes");
   });
 });

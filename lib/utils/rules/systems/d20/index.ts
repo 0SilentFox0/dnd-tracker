@@ -15,5 +15,7 @@ export const d20System = (key: Extract<RuleSystemKey, "homm" | "dnd5e">): RuleSy
   },
   rest: {},
   battle: { supported: true },
+  lineage: true,
+  attacks: true,
   unusedMechanics: [],
 });

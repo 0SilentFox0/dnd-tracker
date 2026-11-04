@@ -17,6 +17,12 @@ const d20 = RULE_SYSTEM_REGISTRY.dnd5e;
 const create = (extra: Record<string, unknown> = {}) => createCharacterSchema.parse({ name: "Hero", type: "player", controlledBy: "u", class: "x", race: "human", ...extra });
 
 describe("normalizeCharacterInput", () => {
+  it("d20 create without race is a 400, wfrp create accepts an empty race", () => {
+    expect(() => normalizeCharacterInput(d20, create({ race: "" }), DEFAULT_RULES, "create")).toThrow(expect.objectContaining({ status: 400, message: API_ERRORS.RACE_REQUIRED }));
+    expect(createCharacterSchema.parse({ name: "H", type: "player", controlledBy: "u", class: "x", characteristics: {} }).race).toBe("");
+    expect(normalizeCharacterInput(wfrp, create({ race: "", characteristics: {} }), WFRP_RULES, "create").race).toBe("");
+  });
+
   it("wfrp create without characteristics is a 400", () => {
     try {
       normalizeCharacterInput(wfrp, create(), WFRP_RULES, "create");

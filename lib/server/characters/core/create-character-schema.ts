@@ -19,7 +19,7 @@ export const createCharacterSchema = z.object({
   raceChoices: PicksSchema.optional(),
   feats: CharacterFeatsSchema.optional(),
   archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
-  race: z.string().min(1),
+  race: z.string().default(""),
   subrace: z.string().optional(),
   alignment: z.string().optional(),
   background: z.string().optional(),

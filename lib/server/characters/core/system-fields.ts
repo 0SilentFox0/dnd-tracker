@@ -13,6 +13,8 @@ const FOREIGN_FIELDS = ["strength", "dexterity", "constitution", "intelligence",
 const omit = <T extends object>(data: T, keys: readonly string[]): T => Object.fromEntries(Object.entries(data).filter(([k]) => !keys.includes(k))) as T;
 
 export function normalizeCharacterInput<T extends CreateCharacterInput | UpdateCharacterInput>(system: RuleSystemDefinition, data: T, rules: Ruleset, mode: "create" | "update"): T {
+  if (mode === "create" && system.lineage && !(data as CreateCharacterInput).race) throw new ContentError(API_ERRORS.RACE_REQUIRED, 400);
+
   if (system.characteristics.kind !== "wfrp") return omit(data, ["characteristics"]);
 
   if (mode === "update") return omit(data, FOREIGN_FIELDS);

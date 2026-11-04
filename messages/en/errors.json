@@ -48,6 +48,7 @@
   "sourceForeignIds": "The source record references content of another campaign",
   "characterNotFound": "Character not found",
   "raceNotFound": "Race not found",
+  "raceRequired": "Choose a race",
   "classNotFound": "Class not found",
   "abilityPoolEmpty": "Not enough points in the pool for this ability",
   "classColumnUnknown": "The class ability refers to an unknown class table column",

@@ -131,6 +131,15 @@ describe("CharacterProfile — перегляд", () => {
     expect(screen.getByLabelText("characterProfile.hero.toHit")).toHaveTextContent("—");
   });
 
+  it("wfrp: блок атак і «Цілей за атаку» сховані", () => {
+    h.sheetQuery.data = withSheet({ system: "wfrp" });
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.queryByRole("button", { name: /Довгий лук/ })).toBeNull();
+    expect(screen.queryByText("characterProfile.combat.attacks")).toBeNull();
+    expect(screen.queryByText("characterProfile.combat.targets")).toBeNull();
+  });
+
   it("гравець не бачить «Редагувати», ДМ бачить", () => {
     const { unmount } = renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 

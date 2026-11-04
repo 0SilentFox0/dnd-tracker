@@ -14,6 +14,7 @@ import { systemUiOf } from "@/components/systems";
 import { AttackType } from "@/lib/constants/battle";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { signed } from "@/lib/utils/common/format";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import type { SheetLine } from "@/types/characters";
 
 function Row({ label, value, lines }: { label: string; value: string; lines?: SheetLine[] }) {
@@ -45,6 +46,8 @@ export function CombatTab() {
 
   const wfrp = sheet.system === "wfrp";
 
+  const { attacks: showAttacks } = RULE_SYSTEM_REGISTRY[sheet.system];
+
   const [openAttack, setOpenAttack] = useState<string | null>(null);
 
   const [rollRequest, setRollRequest] = useState<SheetRollRequest | null>(null);
@@ -54,6 +57,7 @@ export function CombatTab() {
   return (
     <>
       <Ui.StatsTab section="top" onRoll={setRollRequest} canRoll={canRoll} />
+      {showAttacks && (
       <HudSection title={t("attacks")}>
         {sheet.attacks.length === 0 ? (
           <EmptyState title={t("noAttacks")} className="border-hud-rule py-6 text-hud-muted" />
@@ -81,6 +85,7 @@ export function CombatTab() {
           ))
         )}
       </HudSection>
+      )}
       <HudSection title={t("defense")}>
         {!wfrp && (
           <>
@@ -90,7 +95,7 @@ export function CombatTab() {
           </>
         )}
         {rules?.morale.enabled !== false && <Row label={tg("stats.moral")} value={signed(sheet.morale)} />}
-        <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
+        {showAttacks && <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />}
         {sheet.immunities.length > 0 && <Row label={t("immunities")} value={sheet.immunities.join(", ")} />}
       </HudSection>
       <Ui.StatsTab section="bottom" onRoll={setRollRequest} canRoll={canRoll} />

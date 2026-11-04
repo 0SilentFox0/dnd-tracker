@@ -56,5 +56,7 @@ export interface RuleSystemDefinition {
   sheetTest: { accepts(body: { kind: string }): boolean; roll(input: SheetTestInput): SheetTestResult };
   rest: { onSession?(resources: CharacterResources, characteristics: Characteristics): CharacterResources };
   battle: { supported: boolean };
+  lineage: boolean;
+  attacks: boolean;
   unusedMechanics: readonly MechanicKey[];
 }

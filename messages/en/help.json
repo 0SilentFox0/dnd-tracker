@@ -378,25 +378,25 @@
   },
   "dm-rule-systems": {
     "title": "Rule systems",
-    "summary": "How to pick a campaign system (HoMM, D&D 5e, Warhammer d100), what changes on the sheet and when the system can no longer be changed.",
+    "summary": "How to pick a campaign system (HoMM, D&D 5e, Grim d100), what changes on the sheet and when the system can no longer be changed.",
     "sections": {
       "s0": {
         "heading": "What a rule system is",
-        "b0": "The system defines how dice, characteristics and combat work in the campaign. HoMM and D&D 5e play on a d20 and six ability scores. Warhammer Fantasy (d100) uses percentile tests: roll a d100 and try to roll no higher than the target number."
+        "b0": "The system defines how dice, characteristics and combat work in the campaign. HoMM and D&D 5e play on a d20 and six ability scores. Grim d100 uses percentile tests: roll a d100 and try to roll no higher than the target number."
       },
       "s1": {
         "heading": "How to pick one and when it locks",
-        "b0": "Pick the system in the campaign rules, the \"System\" section. A template sets the initial value, so a campaign made from the Grim d100 template plays by Warhammer right away. Once the campaign has its first character or unit, the system is locked: changing it would break sheets that already exist."
+        "b0": "Pick the system in the campaign rules, the \"System\" section. A template sets the initial value, so a campaign made from the Grim d100 template plays by Grim d100 right away. Once the campaign has its first character or unit, the system is locked: changing it would break sheets that already exist."
       },
       "s2": {
         "heading": "Characteristics, skills, Wounds and Fate",
-        "b0": "In Warhammer a character has ten characteristics, skills with advances and specializations, Wounds instead of hit points, Move, and Fate and Fortune. Level and archetype are hidden. The sheet shows a characteristics grid and a skills list; Wounds and Move are derived from the characteristics.",
-        "b1": "Warhammer units carry the same characteristics field."
+        "b0": "In Grim d100 a character has ten characteristics, skills with advances and specializations, Wounds instead of hit points, Move, and Fate and Fortune. Level and archetype are hidden. The sheet shows a characteristics grid and a skills list; Wounds and Move are derived from the characteristics.",
+        "b1": "Grim d100 units carry the same characteristics field."
       },
       "s3": {
         "heading": "Sheet tests, new session and battles",
         "b0": "Click a characteristic or skill to open the test dialog: choose a difficulty and roll a d100. The log records the result, the target number and success levels (SL), and a critical success or failure. The \"New session\" button in the party rest menu restores Fortune to the Fate value.",
-        "b1": "Battles in Warhammer are not ready yet: trying to start one returns an error. They arrive in the next part."
+        "b1": "Battles in Grim d100 are not ready yet: trying to start one returns an error. They arrive in the next part."
       }
     }
   }
