@@ -37,6 +37,8 @@ export function parseArgs(argv: string[]): Args {
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
 
+    if (flag === "--") continue;
+
     if (flag === "--campaign") args.campaigns.push(value(i++, flag));
     else if (flag === "--all") args.all = true;
     else if (flag === "--dry-run") modes.add("dry-run");
