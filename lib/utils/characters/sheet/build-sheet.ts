@@ -13,11 +13,11 @@ import type { ChoiceSelections } from "@/lib/utils/characters/choices/selections
 import { buildClassProgression, hitDiceLabel } from "@/lib/utils/characters/classes";
 import { classTableLines } from "@/lib/utils/characters/classes/columns";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
+import { readResources } from "@/lib/utils/characters/resources/schema";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
-import { readResources } from "@/lib/utils/characters/resources/schema";
 import { heroHpFormula, type Ruleset } from "@/lib/utils/rules";
 import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
