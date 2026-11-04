@@ -11,10 +11,11 @@ import { useShowWorld, useWorldDive } from "@/lib/hooks/world";
 import { cn } from "@/lib/utils";
 import type { ShowWorld } from "@/types/show";
 
-export function ShowWorldStage({ campaignId, world, isDM }: { campaignId: string; world: ShowWorld; isDM: boolean }) {
+export function ShowWorldStage({ campaignId, world, isDM, readOnly = false }: { campaignId: string; world: ShowWorld; isDM: boolean; readOnly?: boolean }) {
   const t = useTranslations("world.show");
 
-  const scene = useShowWorld(campaignId, world, isDM);
+  // the player endpoint needs a hero for a DM session, so the projector reads the DM map payload
+  const scene = useShowWorld(campaignId, world, isDM || readOnly);
 
   const reduced = useReducedMotion();
 
@@ -52,7 +53,7 @@ export function ShowWorldStage({ campaignId, world, isDM }: { campaignId: string
           className="rounded-none border-0"
         />
       </div>
-      {isDM && <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded bg-black/70 px-3 py-1 text-sm text-hud-bone">{t("dmNotice")}</p>}
+      {isDM && !readOnly && <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded bg-black/70 px-3 py-1 text-sm text-hud-bone">{t("dmNotice")}</p>}
     </div>
   );
 }
