@@ -2,6 +2,7 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
+import { type HitLocation, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -36,12 +37,12 @@ export function fire(flow: ActionFlow, event: AbilityEvent): AbilityRunResult {
   return r;
 }
 
-export function applyFlowDamage(flow: ActionFlow, before: BattleParticipant, amount: number, crit?: boolean): void {
+export function applyFlowDamage(flow: ActionFlow, before: BattleParticipant, amount: number, crit?: boolean, location?: HitLocation): void {
   const { rules } = flow.ctx;
 
-  if (!rules || amount <= 0 || !(rules.deathSaves.enabled || rules.concentration.enabled || before.battleData.transform)) return;
+  if (!rules || amount <= 0 || !(rules.deathSaves.enabled || rules.concentration.enabled || before.battleData.transform || ruleSystemOf(rules).combat.onZeroHp)) return;
 
-  const r = applyDamageConsequences({ before, after: getP(flow, before.basicInfo.id), amount, crit, rules: flow.ctx.rules, rng: flow.ctx.rng, participants: flow.ps });
+  const r = applyDamageConsequences({ before, after: getP(flow, before.basicInfo.id), amount, crit, rules: flow.ctx.rules, rng: flow.ctx.rng, participants: flow.ps, location, round: flow.ctx.round });
 
   flow.ps = r.participants;
   flow.messages.push(...r.messages);

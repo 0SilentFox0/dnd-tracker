@@ -59,23 +59,31 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     offTurn: p.offTurn,
     obstacle: p.obstacle,
     rng: flow.ctx.rng,
+    rules: flow.ctx.rules,
   });
 
   put(flow, hitDamage.updatedAttacker);
   put(flow, hitDamage.updatedTarget);
+
+  if (hitDamage.afterHit) {
+    const applied = hitDamage.afterHit(getP(flow, targetId), p.currentRound);
+
+    put(flow, applied.participant);
+    flow.messages.push(applied.message);
+  }
 
   const guarded = splitGuardedDamage(flow.ps, targetId, hitDamage.totalFinalDamage);
 
   const targetBefore = getP(flow, targetId);
 
   put(flow, applyDamageToTarget(targetBefore, guarded.targetDamage));
-  applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical);
+  applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical, p.attackRoll.percentile?.location);
 
   if (guarded.guardianId) {
     const guardian = getP(flow, guarded.guardianId);
 
     put(flow, applyDamageToTarget(guardian, guarded.guardianDamage));
-    applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical);
+    applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical, p.attackRoll.percentile?.location);
     flow.messages.push(textRef("battleLog.attack.guard", { guardian: guardian.basicInfo.name, damage: guarded.guardianDamage, target: getP(flow, targetId).basicInfo.name }));
     settleDowned(flow, guarded.guardianId, attackerId);
   }

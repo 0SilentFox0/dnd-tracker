@@ -1,6 +1,8 @@
 import type { RuleSystemDefinition } from "../types";
 import { woundsBreakdown, woundsMax } from "./characteristics/derive";
 import { wfrpSheetBlock } from "./characteristics/sheet-block";
+import { mitigateWfrpDamage } from "./combat/mitigate";
+import { wfrpOnZeroHp } from "./combat/on-zero-hp";
 import { wfrpParticipantFields } from "./combat/participant";
 import { resolveWfrpAttack } from "./combat/resolve-attack";
 import { onSession } from "./session";
@@ -18,7 +20,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   },
   rest: { kinds: false, onSession },
   battle: { supported: false },
-  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, resolveAttack: resolveWfrpAttack },
+  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, resolveAttack: resolveWfrpAttack, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp },
   lineage: false,
   attacks: false,
   spells: false,

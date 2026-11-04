@@ -25,7 +25,8 @@
       "abilityTotal": "Abilities: +{total}",
       "spellMod": "{label} mod",
       "spellBonus": "Spell bonus",
-      "pacified": "🕊 condition: deals no damage = 0"
+      "pacified": "🕊 condition: deals no damage = 0",
+      "wfrpTotal": "Total damage"
     },
     "steps": {
       "dice": "Dice",
@@ -39,7 +40,16 @@
       "weaponBonus": "Weapon bonus",
       "obstacle": "Obstacle",
       "resistance": "Resistance",
-      "berserk": "Berserk"
+      "berserk": "Berserk",
+      "wfrp": {
+        "weapon": "Weapon",
+        "sb": "Strength bonus",
+        "netSl": "Net SL",
+        "tb": "Toughness bonus",
+        "ap": "Armour",
+        "minimum": "Minimum damage",
+        "crit": "Critical wound"
+      }
     },
     "sources": {
       "skill": "Skill bonus",
@@ -405,7 +415,9 @@
         "4": "Tendon severed, the foe falls screaming.",
         "5": "The knee is shattered, no more walking."
       }
-    }
+    },
+    "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
+    "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious"
   },
   "percentile": {
     "test": "🎲 Test: {roll} vs {target} (SL {sl})",

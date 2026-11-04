@@ -288,7 +288,7 @@ function withRollDetails<T extends { actionDetails: BattleAction["actionDetails"
 function doubleCritDice(run: AttackRun, attackRoll: AttackRollResult, dice: DiceState): void {
   const { flow, attackerId, params } = run;
 
-  if (!critDoublesDice(flow.ctx.rules, attackRoll.isCritical)) return;
+  if (!critDoublesDice(flow.ctx.rules, attackRoll.isCritical) || ruleSystemOf(flow.ctx.rules ?? DEFAULT_RULES).combat.mitigateDamage) return;
 
   const doubled = critDamageRolls({ formula: heroAttackDamageParts(getP(flow, attackerId), params.attack).formula, rolls: dice.damageRolls, rng: flow.ctx.rng });
 

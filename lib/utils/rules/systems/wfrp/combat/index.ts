@@ -1,7 +1,10 @@
 export * from "./constants";
+export { applyWfrpCrit } from "./crit-effect";
 export { type CritResult, rollCrit } from "./crit-table";
 export { computeWfrpDamage } from "./damage";
 export { hitLocation } from "./location";
+export { mitigateWfrpDamage } from "./mitigate";
+export { wfrpOnZeroHp } from "./on-zero-hp";
 export { resolveOpposed } from "./opposed";
 export { wfrpAbilitiesOf, type WfrpParticipantFields, wfrpParticipantFields,type WfrpParticipantStats } from "./participant";
 export { resolveWfrpAttack } from "./resolve-attack";

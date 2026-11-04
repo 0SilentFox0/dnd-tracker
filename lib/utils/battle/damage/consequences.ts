@@ -5,6 +5,7 @@ import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentr
 import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle/death-saves";
 import { revertOnZero } from "@/lib/utils/battle/transform/revert";
 import type { Ruleset } from "@/lib/utils/rules";
+import { type HitLocation, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -17,6 +18,8 @@ export interface DamageConsequencesInput {
   rules?: Ruleset;
   rng: () => number;
   participants: BattleParticipant[];
+  location?: HitLocation;
+  round?: number;
 }
 
 export interface DamageConsequencesResult {
@@ -95,6 +98,10 @@ export function applyDamageConsequences(input: DamageConsequencesInput): DamageC
 
   if (!rules) return { participant: after, participants, messages: [] };
 
+  const onZeroHp = ruleSystemOf(rules).combat.onZeroHp;
+
+  if (onZeroHp) return onZeroHp({ ...input, rules });
+
   const hero = heroGoesDown(input, rules);
 
   const downed = unitDiesAtZero(hero.participant, rules);
@@ -115,6 +122,10 @@ export function settleStatusChange(before: BattleParticipant, after: BattleParti
   const none = { participant: after, participants, messages: [] as string[] };
 
   if (!rules) return none;
+
+  const onZeroHp = ruleSystemOf(rules).combat.onZeroHp;
+
+  if (onZeroHp) return onZeroHp({ before, after, amount: 0, rules, rng: Math.random, participants, manual: true });
 
   let next = after;
 
