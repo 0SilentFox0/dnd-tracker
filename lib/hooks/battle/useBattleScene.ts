@@ -116,6 +116,13 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const derived = useMemo(() => (battle ? deriveScene(battle, userId, dmControlledId, { playerView: playerViewOn }) : null), [battle, userId, dmControlledId, playerViewOn]);
 
+  if (playerViewOn && (attackIntent || mapAim || mapPick || attackReadyId)) {
+    setAttackIntent(null);
+    setMapAim(null);
+    setMapPick(null);
+    setAttackReady(null);
+  }
+
   const playerView = useMemo(() => ({ available: realIsDM, enabled: playerViewOn, toggle: flag.toggle }), [realIsDM, playerViewOn, flag.toggle]);
 
   const awaitingDm = useAwaitingDmDialog(!!derived?.viewer.isDM, derived?.awaiting ?? null);

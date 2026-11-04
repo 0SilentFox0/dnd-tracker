@@ -3,6 +3,7 @@
 import { type ComponentType, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
+import { BattlePlayerViewToggle } from "./BattlePlayerViewToggle";
 import { BattleToast } from "./BattleToast";
 import { CornerStack } from "./CornerStack";
 import { NoticeStackContext } from "./MapStrip";
@@ -67,7 +68,7 @@ const sideCount = (participants: BattlePreparationParticipant[], side: string) =
 const onFieldCount = (participants: BattlePreparationParticipant[]) => participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
 
 export function BattleScreen() {
-  const { battle, viewer: { isDM }, actions, turn: { isMyTurn }, roster: { hero }, playerView } = useBattleScene();
+  const { battle, viewer: { isDM, readOnly }, actions, turn: { isMyTurn }, roster: { hero }, playerView } = useBattleScene();
 
   usePlayerViewKey(playerView.toggle, playerView.available);
 
@@ -79,6 +80,10 @@ export function BattleScreen() {
   const Desktop = useDesktopLayout(wide);
 
   const [completeOpen, setCompleteOpen] = useState(false);
+
+  useEffect(() => {
+    if (readOnly) setCompleteOpen(false);
+  }, [readOnly]);
 
   // як на телефоні: новий хід згортає плеєр, інакше розгорнута панель лежить на кнопках моралі й дій
   const turnKey = hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
@@ -104,6 +109,7 @@ export function BattleScreen() {
         <div className={cn("battle-hud below-header overflow-y-auto", hudFontClassName)}>
           {isDM && <OnboardingHint id="dm.battle-scene" className="mx-auto mt-3 max-w-md" />}
           <BattlePreparationView alliesCount={sideCount(battle.participants, ParticipantSide.ALLY)} enemiesCount={sideCount(battle.participants, ParticipantSide.ENEMY)} isDM={isDM} onStartBattle={() => actions.start.mutate({})} isStarting={actions.start.isPending} canStart={onFieldCount(battle.participants) > 0} />
+          <BattlePlayerViewToggle className="fixed right-3 top-3 z-50" />
           <CornerStack>
             <AudioDock placement="corner" />
           </CornerStack>
@@ -127,7 +133,7 @@ export function BattleScreen() {
           )}
           {isDM && <DmRevivePrompt />}
           <CritChoiceDialog dialog={critChoice} />
-          {Desktop && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
+          {Desktop && isDM && <CompleteBattleDialog open={completeOpen} onOpenChange={setCompleteOpen} />}
           <BattleFxLayer />
         </div>
       )}

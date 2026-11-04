@@ -103,7 +103,7 @@ describe("deriveScene: playerView", () => {
   it("DM + playerView: не DM, readOnly, без резерву, без свого ходу і героя", () => {
     const out = deriveScene(scene(0), "dm-user", "gob", { playerView: true });
 
-    expect(out.viewer).toMatchObject({ isDM: false, readOnly: true, canSeeEnemyHp: false });
+    expect(out.viewer).toMatchObject({ userId: null, isDM: false, readOnly: true, canSeeEnemyHp: false });
     expect(out.roster.reserve).toEqual([]);
     expect(out.turn.isMyTurn).toBe(false);
     expect(out.roster.hero).toBeNull();

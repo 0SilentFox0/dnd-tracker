@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
+import { BattlePlayerViewToggle } from "@/components/battle/scene/BattlePlayerViewToggle";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { QueryState } from "@/components/common/states";
 import { useBattleScene, useFxBusy } from "@/lib/hooks/battle";
@@ -47,7 +48,7 @@ function HeroCard({ hero }: { hero: BattleSummaryHero }) {
 export function BattleResultScreen() {
   const t = useTranslations("battle.resultScreen");
 
-  const { campaignId, battleId, battle, viewer: { isDM }, dialogs: { resultScreen } } = useBattleScene();
+  const { campaignId, battleId, battle, viewer: { isDM, readOnly }, dialogs: { resultScreen } } = useBattleScene();
 
   const summary = useBattleSummary(campaignId, battleId, resultScreen.open);
 
@@ -76,7 +77,7 @@ export function BattleResultScreen() {
           </QueryState>
         </div>
         <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
-          <Link href={exitHref} className="hud-sc flex h-[52px] items-center justify-center border border-hud-gold-strong bg-[#8a6414] text-[17px] font-bold tracking-[.06em] text-[#fff3d1]">{t("exit")}</Link>
+          {readOnly ? <BattlePlayerViewToggle className="mx-auto" /> : <Link href={exitHref} className="hud-sc flex h-[52px] items-center justify-center border border-hud-gold-strong bg-[#8a6414] text-[17px] font-bold tracking-[.06em] text-[#fff3d1]">{t("exit")}</Link>}
           <button type="button" onClick={() => resultScreen.setOpen(false)} className="hud-sc flex h-11 items-center justify-center border border-white/[.25] text-[15px] tracking-[.06em] text-[var(--ink)]">{t("review")}</button>
         </div>
       </div>

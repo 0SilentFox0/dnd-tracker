@@ -7,6 +7,7 @@ import { Settings2 } from "lucide-react";
 
 import { AwaitingDmBanner } from "./AwaitingDmBanner";
 import { BattleOverBanner } from "./BattleOverBanner";
+import { BattlePlayerViewToggle } from "./BattlePlayerViewToggle";
 import { BattleTopBar } from "./BattleTopBar";
 import { ConnectionBanner } from "./ConnectionBanner";
 import { LastActionTicker } from "./LastActionTicker";
@@ -94,6 +95,7 @@ export function MobileBattleLayout() {
           {tabBtn(ParticipantSide.ENEMY, ts("enemies"), enemies.length)}
         </div>
         {mapTab && <ReserveSheetButton />}
+        {mapTab && <BattlePlayerViewToggle className="shrink-0" />}
         {isDM && battle.status !== BattleStatus.PREPARED && (
           <button type="button" onClick={() => setDmOpen(true)} aria-label={t("openDmActions")} className="flex w-11 items-center justify-center text-[var(--gold)]">
             <Settings2 className="size-5" />

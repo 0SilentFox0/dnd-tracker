@@ -26,7 +26,7 @@ export function deriveScene(battle: BattleScene, userId: string | null, dmContro
   const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, readOnly ? null : userId, isDM, readOnly ? null : dmControlledId, awaiting !== null, queue);
 
   return {
-    viewer: { userId, isDM, readOnly, canSeeEnemyHp: canSeeEnemyHp(hero, order) },
+    viewer: { userId: readOnly ? null : userId, isDM, readOnly, canSeeEnemyHp: canSeeEnemyHp(hero, order) },
     turn: { current, isMyTurn, queue },
     roster: {
       allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
