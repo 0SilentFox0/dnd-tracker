@@ -14,7 +14,7 @@ export function StoryChapters({ chapters, campaignId }: { chapters: StoryChapter
 
   return (
     <HudSection title={t("chapters")}>
-      <ScenarioBook variant="inline" theme="dark">
+      <ScenarioBook variant="inline">
         {chapters.map((c) => (
           <section key={c.id} className="!mt-6 first:!mt-0">
             <h3>{c.title}</h3>

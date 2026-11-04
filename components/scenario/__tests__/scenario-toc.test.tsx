@@ -46,7 +46,7 @@ describe("ScenarioToc", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it("у висувній панелі перехід робиться після закриття (iOS vaul повертає прокрутку), панель — темна", () => {
+  it("у висувній панелі перехід робиться після закриття (iOS vaul повертає прокрутку), панель наслідує палітру теми", () => {
     const onOpenChange = vi.fn();
 
     const target = document.createElement("section");
@@ -63,7 +63,7 @@ describe("ScenarioToc", () => {
 
     render(<ScenarioToc items={tocItems(sections, false)} inline={false} drawer={{ open: true, onOpenChange }} onPick={vi.fn()} />);
 
-    expect(document.querySelector(".sb-toc-drawer")?.getAttribute("data-theme")).toBe("dark");
+    expect(document.querySelector(".sb-toc-drawer")?.hasAttribute("data-theme")).toBe(false);
 
     const link = screen.getByRole("link", { name: /2\.0 Два листи/ });
 

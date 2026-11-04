@@ -66,7 +66,7 @@ export function ScenarioToc({ items, inline, drawer, onPick }: Props) {
 
   return (
     <ResponsiveDialog hud open={drawer.open} onOpenChange={drawer.onOpenChange} title={t("sections")} size="sm">
-      <div className={cn("scenario-book sb-toc-drawer", scenarioFontClassName)} data-theme="dark"><TocList items={items} onPick={pick} /></div>
+      <div className={cn("scenario-book sb-toc-drawer", scenarioFontClassName)}><TocList items={items} onPick={pick} /></div>
     </ResponsiveDialog>
   );
 }

@@ -122,3 +122,21 @@ html[data-palette] .spell-book .spell-book-preview-track { background: color-mix
 html[data-palette] .profile-tab[data-state="active"] { background: var(--hud-gold); color: var(--palette-primary-foreground); }
 html[data-palette] .palette-popover { color: var(--palette-foreground); border-color: var(--hud-line); background-color: var(--palette-card); }
 html[data-palette] .battle-hud::before { background: linear-gradient(180deg, color-mix(in srgb, var(--palette-page) 96%, transparent) 0%, color-mix(in srgb, var(--palette-page) 70%, transparent) 35%, color-mix(in srgb, var(--palette-page) 80%, transparent) 65%, color-mix(in srgb, var(--palette-page) 98%, transparent) 100%); }
+
+/* Scenario follows the account palette unless the reader forced a theme. */
+html[data-palette] body .scenario-book:not([data-theme]) {
+  --page: var(--palette-page); --ink: var(--hud-ink); --ink-soft: color-mix(in srgb, var(--hud-muted) 70%, var(--hud-ink)); --margin: var(--palette-secondary); --rule: color-mix(in srgb, var(--hud-line) 75%, transparent);
+  --blood: var(--hud-danger); --verdigris: var(--hud-good); --rust: color-mix(in srgb, var(--hud-danger) 65%, var(--hud-gold)); --gold: var(--hud-gold); --night: var(--hud-info); --shade: color-mix(in srgb, var(--hud-info) 55%, var(--hud-danger));
+  --tint-blood: color-mix(in srgb, var(--blood) 10%, transparent); --tint-verd: color-mix(in srgb, var(--verdigris) 10%, transparent); --tint-gold: color-mix(in srgb, var(--gold) 10%, transparent);
+  --tint-night: color-mix(in srgb, var(--night) 10%, transparent); --tint-shade: color-mix(in srgb, var(--shade) 10%, transparent); --tint-rust: color-mix(in srgb, var(--rust) 10%, transparent);
+}
+
+/* Dark glass chips/panels hard-code bg-black with palette text, which is dark-on-dark in light palettes. */
+html[data-palette="parchment"] [class*="bg-black/"]:is([class*="text-hud-"], [class*="text-[var(--ink"], [class*="text-[var(--bone"]),
+html[data-palette="frost"] [class*="bg-black/"]:is([class*="text-hud-"], [class*="text-[var(--ink"], [class*="text-[var(--bone"]) {
+  background-color: color-mix(in srgb, var(--palette-card) 92%, transparent);
+}
+html[data-palette="parchment"] [class*="border-white/"]:is([class*="bg-black/"]),
+html[data-palette="frost"] [class*="border-white/"]:is([class*="bg-black/"]) {
+  border-color: color-mix(in srgb, var(--hud-line) 70%, transparent);
+}
