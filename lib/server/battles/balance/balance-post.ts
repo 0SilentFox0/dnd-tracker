@@ -32,7 +32,7 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
   const [library, heroes] = await Promise.all([
     loadUnitLibraryStats(campaignId, rules),
-    allyParticipants.characterIds.length > 0 ? loadCharacterBalanceStats(campaignId, allyParticipants.characterIds) : [],
+    allyParticipants.characterIds.length > 0 ? loadCharacterBalanceStats(campaignId, allyParticipants.characterIds, rules) : [],
   ]);
 
   const members: Parameters<typeof buildPartyPower>[0] = heroes.map(({ stats }) => ({ stats: heroMember(stats), hero: true }));
@@ -50,7 +50,7 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
     allyCount += quantity;
   }
 
-  const party = buildPartyPower(members);
+  const party = buildPartyPower(members, rules ? ruleSystemOf(rules).combat.hitModel : undefined);
 
   const allyStats: AllyStats = {
     dpr: round1(party.dpr),

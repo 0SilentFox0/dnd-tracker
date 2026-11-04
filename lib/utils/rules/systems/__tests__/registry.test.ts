@@ -33,13 +33,14 @@ describe("rule system registry", () => {
     }
   });
 
-  it("wfrp accepts tests only and is not battle-ready", () => {
+  it("wfrp accepts tests only and is battle-ready", () => {
     const s = RULE_SYSTEM_REGISTRY.wfrp;
 
     expect(s.sheetTest.accepts({ kind: "test" })).toBe(true);
     expect(s.sheetTest.accepts({ kind: "check" })).toBe(false);
-    expect(s.battle.supported).toBe(false);
-    expect(s.balance.kind).toBe("none");
+    expect(s.battle.supported).toBe(true);
+    expect(s.balance.kind).toBe("fair");
+    expect(s.combat.hitModel).toBeDefined();
     expect(s.distance).toEqual({ unit: "yd", perCell: 2 });
     expect(s.progression.levels).toBe(false);
     expect(s).toMatchObject({ lineage: false, attacks: false });

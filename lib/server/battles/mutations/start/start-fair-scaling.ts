@@ -3,6 +3,8 @@ import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library"
 import { buildPartyPower, computeFairScaling, heroMember, type Power, unitMember } from "@/lib/utils/battle/balance";
 import { heroPower } from "@/lib/utils/battle/balance/hero-power";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 
 export type StartSlot =
@@ -14,6 +16,8 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
   const isEnemyUnit = (s: StartSlot) => s.type === ParticipantSourceType.UNIT && s.side === ParticipantSide.ENEMY;
 
   if (!slots.some(isEnemyUnit)) return built;
+
+  const model = ruleSystemOf(campaignContext?.rules ?? DEFAULT_RULES).combat.hitModel;
 
   const library = await loadUnitLibraryStats(campaignId, campaignContext?.rules);
 
@@ -34,7 +38,7 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
 
     if (slot.side !== ParticipantSide.ALLY) {
       if (slot.type === ParticipantSourceType.CHARACTER) {
-        const { dpr, hp } = heroPower(built[i], slot.character, campaignContext).stats;
+        const { dpr, hp } = heroPower(built[i], slot.character, campaignContext, model).stats;
 
         fixed.dpr += dpr;
         fixed.hp += hp;
@@ -44,7 +48,7 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
     }
 
     if (slot.type === ParticipantSourceType.CHARACTER) {
-      members.push({ stats: heroMember(heroPower(built[i], slot.character, campaignContext).stats), hero: true });
+      members.push({ stats: heroMember(heroPower(built[i], slot.character, campaignContext, model).stats), hero: true });
 
       return;
     }
@@ -54,7 +58,7 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
     if (unit) members.push({ stats: unitMember(unit), hero: false });
   });
 
-  const party = buildPartyPower(members);
+  const party = buildPartyPower(members, model);
 
   const scaling = computeFairScaling(party, [...roster].map(([unitId, quantity]) => ({ unitId, quantity })), library, library, fixed);
 

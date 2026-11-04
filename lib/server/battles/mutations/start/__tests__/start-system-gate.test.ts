@@ -2,6 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 
+const unsupported = vi.hoisted(() => ({ on: false }));
+
+vi.mock("@/lib/utils/rules/systems", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/utils/rules/systems")>();
+
+  return { ...actual, ruleSystemOf: (rules: Parameters<typeof actual.ruleSystemOf>[0]) => (unsupported.on ? { battle: { supported: false } } : actual.ruleSystemOf(rules)) };
+});
+
 import { createStartMutation } from "../start-mutation";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -16,8 +24,19 @@ describe("start battle system gate", () => {
   it("rejects a system without battle support before building", async () => {
     const build = vi.fn();
 
+    unsupported.on = true;
+
     await expect(createStartMutation(build)(ctxOf(WFRP_RULES))).rejects.toSatisfy((e) => e instanceof ContentError && e.status === 409 && e.message === API_ERRORS.SYSTEM_BATTLE_UNSUPPORTED);
     expect(build).not.toHaveBeenCalled();
+    unsupported.on = false;
+  });
+
+  it("builds for wfrp", async () => {
+    const build = vi.fn().mockResolvedValue({ order: [{ basicInfo: { id: "p1" } }], reserve: [], triggerLogEntries: [] });
+
+    await createStartMutation(build)(ctxOf(WFRP_RULES));
+
+    expect(build).toHaveBeenCalledOnce();
   });
 
   it("builds for d20 systems", async () => {

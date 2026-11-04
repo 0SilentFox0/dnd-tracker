@@ -40,13 +40,18 @@ export interface FactorParty {
   saves?: Partial<Record<string, number>>;
   /** Середній опір партії до шкоди заклять за типом, %. */
   spellResist?: Record<string, number>;
+  /** Системна модель влучання замість d20 (offense/defense замість to-hit/AC) і її еталон. */
+  hit?: HitFn;
+  refHit?: number;
 }
+
+export type HitFn = (toHit: number, ac: number) => number;
 
 const taken = (resist: Record<string, number> | undefined, key: string) => 1 - (resist?.[key] ?? 0) / 100;
 
 /** Share of the party's damage that lands on the unit relative to an average matchup: weapons feel AC and their damage type/kind, spells only `spell` resistance. */
 function landedDamage(unit: FactorUnit, party: FactorParty): number | null {
-  const hit = unit.ac !== undefined && party.toHit !== undefined ? hitChance(party.toHit, unit.ac) / REF_HERO_HIT : null;
+  const hit = unit.ac !== undefined && party.toHit !== undefined ? (party.hit ?? hitChance)(party.toHit, unit.ac) / (party.refHit ?? REF_HERO_HIT) : null;
 
   const resist = unit.resist && Object.keys(unit.resist).length > 0 ? unit.resist : undefined;
 
@@ -82,7 +87,7 @@ export function armorFactors(unit: FactorUnit, party: FactorParty): ArmorFactors
 }
 
 function unitHitFactor(attackBonus: number | undefined, party: FactorParty): number {
-  return attackBonus !== undefined && party.ac !== undefined ? clamp(hitChance(attackBonus, party.ac) / REF_UNIT_HIT, ARMOR_FACTOR_MIN, ARMOR_FACTOR_MAX) : 1;
+  return attackBonus !== undefined && party.ac !== undefined ? clamp((party.hit ?? hitChance)(attackBonus, party.ac) / (party.refHit ?? REF_UNIT_HIT), ARMOR_FACTOR_MIN, ARMOR_FACTOR_MAX) : 1;
 }
 
 function failedSaveShare(save: UnitSpellPower["save"], party: FactorParty): number {

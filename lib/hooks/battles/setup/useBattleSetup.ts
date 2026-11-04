@@ -48,7 +48,7 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
 
   const enemyRaceId = useMemo(() => sharedEnemyRace(participants.list, entityStats), [participants.list, entityStats]);
 
-  const fair = useFairBalance(participants.list, entityStats, battleId ? enemyRaceId : balance.race);
+  const fair = useFairBalance(participants.list, entityStats, battleId ? enemyRaceId : balance.race, ruleSystem.combat.hitModel);
 
   const xp = useXpBalance(participants.list, entityStats, encounters);
 

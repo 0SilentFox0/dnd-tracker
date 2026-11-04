@@ -1,4 +1,5 @@
 import { buildPartyPower, computeFairScaling, type FairScaling, type PartyMember, type PartyPower, type Power, unitMember } from "./fair";
+import type { HitModel } from "./hit-model";
 import type { UnitStats } from "./stats";
 import { computeXpBudget, type XpBudgetResult, type XpEdition } from "./xp-budget";
 
@@ -34,7 +35,7 @@ function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]): UnitSt
   }));
 }
 
-function setupPartyPower(participants: SetupBalanceParticipant[], stats: SetupBalanceStats): PartyPower {
+function setupPartyPower(participants: SetupBalanceParticipant[], stats: SetupBalanceStats, model?: HitModel): PartyPower {
   const members: Parameters<typeof buildPartyPower>[0] = [];
 
   for (const p of participants) {
@@ -51,14 +52,14 @@ function setupPartyPower(participants: SetupBalanceParticipant[], stats: SetupBa
     }
   }
 
-  return buildPartyPower(members);
+  return buildPartyPower(members, model);
 }
 
 /** The same function the battle start runs, over the lobby roster. */
-export function setupFairScaling(participants: SetupBalanceParticipant[], stats: SetupBalanceStats, raceId?: string | null): { party: PartyPower; scaling: FairScaling } {
+export function setupFairScaling(participants: SetupBalanceParticipant[], stats: SetupBalanceStats, raceId?: string | null, model?: HitModel): { party: PartyPower; scaling: FairScaling } {
   const library = unitLibraryFromStats(stats.unitStats);
 
-  const party = setupPartyPower(participants, stats);
+  const party = setupPartyPower(participants, stats, model);
 
   const roster = participants.filter((p) => p.side === ParticipantSide.ENEMY && p.type === ParticipantSourceType.UNIT).map((p) => ({ unitId: p.id, quantity: p.quantity ?? 1 }));
 

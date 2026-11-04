@@ -12,6 +12,7 @@ export type {
 } from "./fair";
 export { buildPartyPower, computeFairScaling, effectiveUnit, heroMember, targetEnemyPower, unitMember } from "./fair";
 export { armorFactors, hitChance } from "./hit-chance";
+export { type HitModel, hitModelHeroStats, hitModelUnitStats } from "./hit-model";
 export type { LiveScaleDirection } from "./live-scale";
 export { isLiveScalable, liveScaleEnemyUnits } from "./live-scale";
 export { magicMainSkillIds } from "./magic-school";

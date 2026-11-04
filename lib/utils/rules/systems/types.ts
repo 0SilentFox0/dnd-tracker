@@ -114,7 +114,15 @@ export interface RuleSystemCombat {
   initiative?(p: BattleParticipant, ctx: { rules: Pick<Ruleset, "initiative">; rng: Rng }): InitiativeScore;
   /** Starting values the participant builders use instead of the d20 sheet columns */
   baseStats?(row: { characteristics?: unknown }): { initiative: number; speed: number };
-  hitModel?: { offense(p: BattleParticipant): number; defense(p: BattleParticipant): number; winChance(off: number, def: number): number };
+  /** Balance: hit chance from offense/defense numbers (instead of d20 to-hit vs AC) and expected damage per hit against a reference target */
+  hitModel?: {
+    offense(p: BattleParticipant): number;
+    defense(p: BattleParticipant): number;
+    winChance(off: number, def: number): number;
+    damage(p: BattleParticipant): number;
+    /** Hit chance of an average matchup; party/unit factors are relative to it */
+    refHit: number;
+  };
 }
 
 export interface RuleSystemDefinition {

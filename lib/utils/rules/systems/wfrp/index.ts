@@ -1,6 +1,7 @@
 import type { RuleSystemDefinition } from "../types";
 import { woundsBreakdown, woundsMax } from "./characteristics/derive";
 import { wfrpSheetBlock } from "./characteristics/sheet-block";
+import { wfrpHitModel } from "./combat/hit-model";
 import { wfrpInitiative } from "./combat/initiative";
 import { mitigateWfrpDamage } from "./combat/mitigate";
 import { wfrpOnZeroHp } from "./combat/on-zero-hp";
@@ -12,7 +13,7 @@ import { rollWfrpSheetTest } from "./sheet-test";
 export const WFRP_SYSTEM: RuleSystemDefinition = {
   key: "wfrp",
   distance: { unit: "yd", perCell: 2 },
-  balance: { kind: "none" },
+  balance: { kind: "fair" },
   progression: { levels: false, maxHp: ({ characteristics }) => ({ total: woundsMax(characteristics), breakdown: woundsBreakdown(characteristics) }) },
   characteristics: { kind: "wfrp", sheetBlock: wfrpSheetBlock },
   sheetTest: {
@@ -20,8 +21,8 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
     roll: rollWfrpSheetTest,
   },
   rest: { kinds: false, onSession },
-  battle: { supported: false },
-  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp },
+  battle: { supported: true },
+  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
   attacks: false,
   spells: false,

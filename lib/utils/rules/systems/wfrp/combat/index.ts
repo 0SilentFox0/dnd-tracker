@@ -2,6 +2,7 @@ export * from "./constants";
 export { applyWfrpCrit } from "./crit-effect";
 export { type CritResult, rollCrit } from "./crit-table";
 export { computeWfrpDamage } from "./damage";
+export { wfrpHitModel } from "./hit-model";
 export { hitLocation } from "./location";
 export { mitigateWfrpDamage } from "./mitigate";
 export { wfrpOnZeroHp } from "./on-zero-hp";

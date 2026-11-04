@@ -1,3 +1,4 @@
+import { type HitModel, hitModelHeroStats } from "./hit-model";
 import { getCharacterStats, magicMainSkillIds } from "./index";
 
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -6,7 +7,9 @@ import { branchLevels, normalizeTree, resolveLearned } from "@/lib/utils/skills/
 import type { BattleParticipant } from "@/types/battle";
 
 /** Same numbers for the setup UI and the battle start: the participant as built from the character, auras baked alone. */
-export function heroPower(built: BattleParticipant, character: { race: string; skillTreeProgress?: unknown }, campaignContext: CampaignSpellContext | undefined) {
+export function heroPower(built: BattleParticipant, character: { race: string; skillTreeProgress?: unknown }, campaignContext: CampaignSpellContext | undefined, model?: HitModel) {
+  if (model) return { levels: {}, stats: hitModelHeroStats(built, model) };
+
   const [participant] = applyBakedAuras([built], new Set([built.basicInfo.id]));
 
   const treeRow = campaignContext?.skillTreeByRace[character.race];

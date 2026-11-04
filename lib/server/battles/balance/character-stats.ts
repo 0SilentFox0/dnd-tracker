@@ -4,9 +4,11 @@ import { prisma } from "@/lib/db";
 import { buildCampaignContextForStart } from "@/lib/server/battles/mutations/start/start-build-context";
 import { heroPower } from "@/lib/utils/battle/balance/hero-power";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 
 /** Same participants as at battle start, from one context load (no per-character queries). */
-export async function loadCharacterBalanceStats(campaignId: string, characterIds?: string[]) {
+export async function loadCharacterBalanceStats(campaignId: string, characterIds?: string[], rules: Ruleset = DEFAULT_RULES) {
   const characters = await prisma.character.findMany({
     where: { campaignId, ...ACTIVE_CHARACTER, ...(characterIds && { id: { in: characterIds } }) },
     include: { inventory: true },
@@ -20,7 +22,7 @@ export async function loadCharacterBalanceStats(campaignId: string, characterIds
     characters.map(async (character) => {
       const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, campaignContext);
 
-      return { character, ...heroPower(built, character, campaignContext) };
+      return { character, ...heroPower(built, character, campaignContext, ruleSystemOf(rules).combat.hitModel) };
     }),
   );
 }
