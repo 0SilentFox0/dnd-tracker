@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -37,7 +37,9 @@ const FIXTURES: Fixture[] = [
 
 const rid = (f: Fixture) => `${marker}-${f.delegate}`;
 
-const publish = (campaignId = ids.template) => db.$transaction((tx) => runContentWriteContext(campaignId, tx, () => publishTemplateVersion(tx, campaignId)), { timeout: 60_000 });
+const publish = (campaignId = ids.template) => db.$transaction((extended) => { const tx = extended as unknown as Prisma.TransactionClient;
+
+ return runContentWriteContext(campaignId, tx, () => publishTemplateVersion(tx, campaignId)); }, { timeout: 60_000 });
 
 const history = (f: Fixture) => R[f.base].findMany({ where: { sourceCampaignId: ids.template, id: rid(f) }, orderBy: { validFrom: "asc" } });
 
