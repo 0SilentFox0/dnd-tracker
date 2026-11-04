@@ -25,7 +25,7 @@ export { offsetPager, type Pager, type PagerControls, usePager } from "./usePage
 export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useReducedMotion } from "./useReducedMotion";
 export { useRowKeys } from "./useRowKeys";
-export { type SearchState, useSearch } from "./useSearch";
+export { SEARCH_DEBOUNCE_MS, type SearchState, useSearch } from "./useSearch";
 export { useSetLocale } from "./useSetLocale";
 export { useSingleFlight } from "./useSingleFlight";
 export { useTimeZoneSetting } from "./useTimeZoneSetting";

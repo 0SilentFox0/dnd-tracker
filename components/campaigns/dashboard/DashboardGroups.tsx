@@ -35,7 +35,7 @@ export function DashboardGroups({ campaignId, isDM, isDemo = false, pendingDraft
 
   const fieldsOf = useCallback((s: DashboardSection) => [t(`sections.${s.key}.title`), ...t(`sections.${s.key}.keywords`).split(",").map((k) => k.trim())], [t]);
 
-  const { query, items, isActive } = useSearch(base, fieldsOf);
+  const { query, items, isActive } = useSearch(base, fieldsOf, 0);
 
   const tile = (s: DashboardSection, compact = false) => {
     const Icon = s.icon;

@@ -1,8 +1,12 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+
+import { useDebouncedValue } from "./useDebouncedValue";
 
 import { matchesQuery } from "@/lib/utils/common/text-search";
+
+export const SEARCH_DEBOUNCE_MS = 250;
 
 export interface SearchState<T> {
   query: { value: string; set: (value: string) => void };
@@ -10,10 +14,12 @@ export interface SearchState<T> {
   isActive: boolean;
 }
 
-export function useSearch<T>(items: T[], fieldsOf: (item: T) => (string | null | undefined)[]): SearchState<T> {
+export function useSearch<T>(items: T[], fieldsOf: (item: T) => (string | null | undefined)[], debounceMs = SEARCH_DEBOUNCE_MS): SearchState<T> {
   const [value, set] = useState("");
 
-  const deferred = useDeferredValue(value);
+  const debounced = useDebouncedValue(value, debounceMs);
+
+  const deferred = debounceMs > 0 ? debounced : value;
 
   const isActive = deferred.trim() !== "";
 

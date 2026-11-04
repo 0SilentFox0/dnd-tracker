@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MarkerPickerDialog } from "../MarkerPickerDialog";
@@ -52,13 +52,13 @@ describe("MarkerPickerDialog", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it("пошук фільтрує маркери за назвою", () => {
+  it("пошук фільтрує маркери за назвою", async () => {
     render(<MarkerPickerDialog campaignId="c" open onOpenChange={vi.fn()} onPick={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Світ" }));
     fireEvent.change(screen.getByRole("searchbox", { name: "Пошук місця" }), { target: { value: "рин" } });
 
+    await waitFor(() => expect(screen.queryByRole("button", { name: /Вежа/ })).toBeNull());
     expect(screen.getByRole("button", { name: /Ринок/ })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /Вежа/ })).toBeNull();
   });
 });
 
