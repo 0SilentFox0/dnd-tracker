@@ -5,6 +5,7 @@ import { bypassLayer } from "@/lib/db/content-layer";
 import { layeredModels } from "@/lib/db/layer/config";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, type BundleTable, type BundleTableDef, delegateOf } from "@/lib/server/templates/bundle";
+import { collectKeysAndStrings } from "@/lib/server/templates/remap-ids";
 import { changed, item, pairStatus, rowName } from "@/lib/server/templates/sync/classify";
 import type { SyncDb } from "@/lib/server/templates/sync/context";
 import { rowHash } from "@/lib/server/templates/sync/hash";
@@ -154,7 +155,24 @@ export function classifyLayered(ctx: Pick<LayeredContext, "entries" | "ignored">
     out.push(item(ctx, { scope: e.t.key, key: e.key, localId: e.override?.localId ?? null, name: rowName(e.source ?? e.override?.row ?? e.baseline!), status, changedFields, sourceHash: s, visible }));
   }
 
-  return out;
+  return withRequires(ctx.entries, out);
+}
+
+/** A selected row drags in the new/hidden rows it references (closeOverRequires keeps only those), so the layer never points at a hidden row. */
+function withRequires(entries: LayeredEntry[], items: SyncItem[]): SyncItem[] {
+  const byKey = new Map(items.map((i) => [i.key, i]));
+
+  const sources = new Map(entries.filter((e) => e.source).map((e) => [`${e.t.key}:${e.key}`, e.source!]));
+
+  return items.map((i) => {
+    const src = i.status === "deletedInSource" ? undefined : sources.get(`${i.scope}:${i.key}`);
+
+    if (!src) return i;
+
+    const requires: SyncItem["requires"] = [...collectKeysAndStrings(src)].filter((v) => v !== i.key && byKey.has(v)).map((v) => ({ scope: byKey.get(v)!.scope as SyncItem["requires"][number]["scope"], key: v, name: byKey.get(v)!.name }));
+
+    return requires.length ? { ...i, requires } : i;
+  });
 }
 
 export const tableOf = (scope: string): BundleTableDef | undefined => BUNDLE_TABLES.find((t) => t.key === (scope as BundleTable));

@@ -188,6 +188,21 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     expect(await diffOf(campaignId)).toEqual([]);
   });
 
+  it("accepting a row deleted upstream nulls references to its override", async () => {
+    const campaignId = await fresh();
+
+    await inWrite(campaignId, (tx) => tx.spell.update({ where: { id: spellId("b") }, data: { name: "Mine" } }));
+    await raw.skill.create({ data: { id: `${marker}-sk-${campaignId}`, campaignId, name: "K", spellId: spellId("b") } as never });
+    await raw.spellBase.updateMany({ where: { id: spellId("b") }, data: { validTo: 2 } });
+    await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
+
+    const gone = (await diffOf(campaignId)).find((i) => i.key === spellId("b"))!;
+
+    await apply(campaignId, { apply: [ref(gone)], ignore: [] });
+
+    expect((await raw.skill.findFirstOrThrow({ where: { campaignId } })).spellId).toBeNull();
+  });
+
   it("an unselected updated row stays at the old version", async () => {
     const campaignId = await fresh();
 

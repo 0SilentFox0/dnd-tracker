@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn, revalidateTag: vi.fn() }));
 
+import { detachRefs } from "@/lib/server/content/detach-refs";
 import { mainSkillsResource } from "@/lib/server/content/resources/main-skills";
 import { racesResource } from "@/lib/server/content/resources/races";
 import { spellGroupsResource } from "@/lib/server/content/resources/spell-groups";
@@ -84,6 +85,25 @@ describe.skipIf(!isLocalDevDatabaseEnv())("removing content nulls former ON DELE
     await run(async () => spellsResource.remove(actor, (await raw.spell.findUniqueOrThrow({ where: { id: id("s") } })) as never));
 
     expect(await skill()).toMatchObject({ spellId: null, spellNewSpellId: null, grantedSpellId: null });
+  });
+
+  it("artifact set: artifacts.setId; skill tree: character_skills rows go away", async () => {
+    await raw.artifactSet.create({ data: { id: id("as"), campaignId: cid, name: "AS" } as never });
+    await raw.artifact.create({ data: { id: id("a"), campaignId: cid, name: "A", slot: "ring", setId: id("as") } as never });
+    await raw.skillTree.create({ data: { id: id("t"), campaignId: cid, race: "R2" } as never });
+    await raw.character.create({ data: { id: id("ch"), campaign: { connect: { id: cid } }, user: { connect: { id: marker } }, name: "Ch", type: "npc", class: "x", race: "R2" } as never });
+    await raw.characterSkills.create({ data: { id: id("cs"), characterId: id("ch"), skillTreeId: id("t") } });
+
+    await detachRefs(raw, cid, "artifactSet", [id("as")]);
+    await detachRefs(raw, cid, "skillTree", [id("t")]);
+
+    expect((await raw.artifact.findUniqueOrThrow({ where: { id: id("a") } })).setId).toBeNull();
+    expect(await raw.characterSkills.count({ where: { id: id("cs") } })).toBe(0);
+
+    await raw.character.delete({ where: { id: id("ch") } });
+    await raw.artifact.delete({ where: { id: id("a") } });
+    await raw.artifactSet.delete({ where: { id: id("as") } });
+    await raw.skillTree.delete({ where: { id: id("t") } });
   });
 
   it("a layered campaign does not materialize overrides when a base group is removed", async () => {

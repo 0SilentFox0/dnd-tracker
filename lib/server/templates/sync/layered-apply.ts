@@ -5,6 +5,7 @@ import { SYNC_DEFAULT_ON } from "@/lib/constants/source-sync";
 import { bypassLayer } from "@/lib/db/content-layer";
 import { BASE_ONLY, layeredModels } from "@/lib/db/layer/config";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
+import { DETACH_KIND_BY_TABLE, detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError } from "@/lib/server/content/errors";
 import { markContentDirty } from "@/lib/server/content/write-context";
 import { delegateOf } from "@/lib/server/templates/bundle";
@@ -68,8 +69,13 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem) {
   const { hideTable } = layeredModels()[t.model];
 
   if (i.status === "deletedLocally") await db.campaignContentHide.deleteMany({ where: { campaignId, table: hideTable, id: i.key } });
-  else if (i.localId) await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
-  else return;
+  else if (i.localId) {
+    const kind = i.status === "deletedInSource" ? DETACH_KIND_BY_TABLE[i.scope] : undefined;
+
+    if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], campaignId, kind, [i.localId, i.key]);
+
+    await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
+  } else return;
 
   markContentDirty();
 }
