@@ -22,7 +22,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
 
   const { battle, turn: { queue, isMyTurn }, effects } = useBattleSceneData();
 
-  const { d20Stats, woundsLabel } = useBattleRules();
+  const { d20Stats, woundsLabel, spells } = useBattleRules();
 
   const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
@@ -63,7 +63,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
           )}
         </div>
       </div>
-      {!compact && <SlotGrid participant={hero} />}
+      {!compact && spells && <SlotGrid participant={hero} />}
       {!compact && (charges.length > 0 || pools.length > 0) && (
         <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-hud-text">
           {charges.map((c) => <span key={c.key}>{c.name}{c.limit !== null && ` ${c.left}/${c.limit}`}{c.cooldownLeft > 0 && ` · ${t("cooldown", { count: c.cooldownLeft })}`}</span>)}

@@ -36,7 +36,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const { anyPending, battle, intents } = useBattleScene();
 
-  const { actionEconomy } = useBattleRules();
+  const { actionEconomy, spells } = useBattleRules();
 
   const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, mapPick, setAttackReady } = intents;
 
@@ -107,7 +107,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
         <ActionGrid
           turn={turn}
           pending={anyPending}
-          available={{ magic: hasMagic, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
+          available={{ magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
           actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
         />
       )}

@@ -18,13 +18,14 @@ const render = (key: RuleSystemKey, momentum?: { ally?: true }) => {
 
 describe("useBattleRules", () => {
   it("homm: d20 flags", () => {
-    expect(render("homm")).toMatchObject({ dice: 20, d20Stats: true, woundsLabel: "hp", momentum: {}, distance: { unit: "ft", perCell: 5 } });
+    expect(render("homm")).toMatchObject({ dice: 20, d20Stats: true, spells: true, woundsLabel: "hp", momentum: {}, distance: { unit: "ft", perCell: 5 } });
   });
 
   it("wfrp: d100 flags", () => {
     expect(render("wfrp", { ally: true })).toMatchObject({
       dice: 100,
       d20Stats: false,
+      spells: false,
       actionEconomy: { bonusAction: false, reaction: false },
       distance: { unit: "yd", perCell: 2 },
       woundsLabel: "wounds",

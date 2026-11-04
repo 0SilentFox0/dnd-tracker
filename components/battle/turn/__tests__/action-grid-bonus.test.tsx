@@ -18,4 +18,9 @@ describe("ActionGrid: плитка бонусної дії", () => {
     render(<ActionGrid turn={turn} pending={false} available={{ magic: true, bonus: true, bonusTile }} actions={actions} />);
     expect(!!screen.queryByRole("button", { name: /Бонус/ })).toBe(shown);
   });
+
+  it.each([[true, true], [undefined, true], [false, false]])("magicTile=%s -> видима=%s", (magicTile, shown) => {
+    render(<ActionGrid turn={turn} pending={false} available={{ magic: true, magicTile, bonus: true }} actions={actions} />);
+    expect(!!screen.queryByRole("button", { name: /Магія/ })).toBe(shown);
+  });
 });
