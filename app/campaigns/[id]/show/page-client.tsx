@@ -41,7 +41,7 @@ export function ShowPageClient({ campaignId, isDM, userId }: { campaignId: strin
       <div className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col">
         <div className="relative min-h-[60dvh] flex-1">
           <ShowStage show={show} campaignId={campaignId} isDM={effectiveDM} readOnly={readOnly} userId={userId} />
-          {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} />}
+          {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} playerView={readOnly} />}
           <div className="absolute right-3 top-3 z-20 flex gap-2">
             {!isDM && <DiceRoller />}
             {isDM && <PlayerViewToggle enabled={playerView.enabled} onToggle={playerView.toggle} labels={{ on: t("playerView.on"), off: t("playerView.off") }} className="rounded bg-black/50" />}

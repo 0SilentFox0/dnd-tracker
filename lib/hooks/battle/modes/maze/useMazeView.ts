@@ -52,8 +52,32 @@ function useDerivedMazeView(battle: BattleScene | null, viewer: { userId: string
   }, [map, order, viewer.userId, viewer.isDM, readOnly, picks, asHeroId]);
 }
 
+/** Pins the first hero shown in player view, so fog does not jump when initiative order changes. */
+export function pinFirstHero(pinned: string | null, heroIds: string[]): string | null {
+  if (pinned && heroIds.includes(pinned)) return pinned;
+
+  return heroIds[0] ?? null;
+}
+
 export function useMazeAsHeroValue(): MazeAsHero {
   const [id, set] = useState<string | null>(null);
+
+  const { battle, viewer } = useBattleSceneData();
+
+  const readOnly = viewer.readOnly === true;
+
+  const order = battle.map?.maze ? battle.initiativeOrder : undefined;
+
+  const pinned = readOnly ? pinFirstHero(id, mazeViewHeroes(order ?? []).map((p) => p.basicInfo.id)) : id;
+
+  const [wasReadOnly, setWasReadOnly] = useState(readOnly);
+
+  if (wasReadOnly !== readOnly) {
+    setWasReadOnly(readOnly);
+    set(readOnly ? pinned : null);
+  } else if (readOnly && pinned !== id) {
+    set(pinned);
+  }
 
   return useMemo(() => ({ id, set }), [id]);
 }
