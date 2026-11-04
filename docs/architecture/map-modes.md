@@ -23,3 +23,10 @@ Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they
 - Мобільний поворот карти (`rotated`): вісь і знак перераховує `motionInMapSpace`, тож напрям лишається екранним.
 - Чиста математика (clamp, розгін, обгортання фази, кількість тайлів) — `lib/utils/battle/map-motion/`; панель ДМ — `MapMotionPanel`, хук `useMapMotionTool` (палітра взаємовиключна з режимом/місцевістю/погодою).
 - Налаштування при створенні бою: `useBattleMapEditor` тримає `map.motion` і віддає `motionTool` (той самий `useMapMotionTool` з локальною мутацією), `BattleFormMap` рендерить `MapMotionPanel`; прев'ю їде вживу, `battleMapSchema.motion` зберігається в бою, а `resetMutation` не чіпає `motion` (покрито тестом).
+
+## Зміна фону в бою
+
+- Операція `map-background` (`mutations/map-background`, лише ДМ, активний бій): пише `map.background` і скидає `backgroundCols`/`gridOffset` (як `setBackground` у налаштуванні). Файл/data-URL вантажиться в bucket `battle-maps` через `resolveMapBackgroundForPersistence` у самій мутації (`campaignId` береться з `params.id`), у сцені лежить лише URL.
+- Для гравців перехід робить `MapBackground`: старий шар лишається, новий монтується з `opacity: 0` і з'являється після `onLoad` (800 мс, `BACKGROUND_FADE_MS`), старий одночасно зникає й знімається. `prefers-reduced-motion` — миттєва заміна. Те саме працює з `map.motion` (`MotionBackground.onReady`).
+- Панель ДМ — `MapBackgroundPanel`, хук `useMapBackgroundTool` (палітра `background` у `palettes.ts` взаємовиключна з рештою). У реєстрі асистента — `handoff` (потрібне завантаження файлу).
+

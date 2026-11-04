@@ -1,8 +1,8 @@
-export type PaletteKey = "mode" | "terrain" | "weather" | "motion";
+export type PaletteKey = "mode" | "terrain" | "weather" | "motion" | "background";
 
 export type PaletteState = Record<PaletteKey, boolean>;
 
-const KEYS: readonly PaletteKey[] = ["mode", "terrain", "weather", "motion"];
+const KEYS: readonly PaletteKey[] = ["mode", "terrain", "weather", "motion", "background"];
 
 /** Щойно відкрита палітра витісняє решту відкритих. */
 export function palettesToClose(prev: PaletteState, next: PaletteState): PaletteKey[] {

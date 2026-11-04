@@ -12,7 +12,7 @@ import type { BattleMapConfig, MapMotion } from "@/types/battle";
 const REST_PX_PER_S = 0.5;
 
 /** Фон, що їде під нерухомою сіткою: дзеркально зациклена доріжка тайлів, фаза крутиться локально в rAF. */
-export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map: BattleMapConfig; motion: MapMotion; cellPx: number; rotated: boolean; phone: boolean }) {
+export function MotionBackground({ map, motion, cellPx, rotated, phone, onReady }: { map: BattleMapConfig; motion: MapMotion; cellPx: number; rotated: boolean; phone: boolean; onReady?: () => void }) {
   const src = map.background ?? DEFAULT_MAP_BACKGROUND;
 
   const [loaded, setLoaded] = useState<{ src: string; aspect: number } | null>(null);
@@ -87,7 +87,10 @@ export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map:
             const img = e.currentTarget;
 
             if (img.naturalWidth > 0) setLoaded({ src, aspect: img.naturalHeight / img.naturalWidth });
+
+            onReady?.();
           }}
+          onError={onReady}
         />
       </div>
     );

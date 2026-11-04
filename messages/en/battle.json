@@ -97,8 +97,11 @@
       "place": "Place",
       "terrain": "Terrain",
       "weather": "Weather",
-      "motion": "Motion"
+      "motion": "Motion",
+      "background": "Background"
     },
+    "backgroundLabel": "Map background",
+    "defaultBackground": "Default background",
     "motion": {
       "axisX": "Horizontal",
       "axisY": "Vertical",

@@ -25,6 +25,7 @@ export {
   useInitiativeRoll,
   useMapMotion,
   useMapTerrain,
+  useMapBackground,
   useMapWeather,
   useMazeAction,
   useMazeMark,

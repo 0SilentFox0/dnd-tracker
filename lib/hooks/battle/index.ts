@@ -34,6 +34,7 @@ export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
 export { useInitiativeDrag } from "./useInitiativeDrag";
 export { useInitiativeOrder, useTrackReorder } from "./useInitiativeOrder";
 export { type LegendaryChoice, useLegendaryAction } from "./useLegendaryAction";
+export { type MapBackgroundTool, useMapBackgroundTool } from "./useMapBackgroundTool";
 export { type MapMotionTool, useMapMotionTool } from "./useMapMotionTool";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
 export { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";

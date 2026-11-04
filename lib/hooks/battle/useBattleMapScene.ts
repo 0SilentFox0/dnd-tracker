@@ -8,6 +8,7 @@ import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 import { useExclusivePalettes } from "./useExclusivePalettes";
 import { useFxImpacts } from "./useFxImpacts";
+import { type MapBackgroundTool, useMapBackgroundTool } from "./useMapBackgroundTool";
 import { useMapCellActions } from "./useMapCellActions";
 import { type MapMotionTool, useMapMotionTool } from "./useMapMotionTool";
 import { useMapPlacing } from "./useMapPlacing";
@@ -30,6 +31,7 @@ export interface BattleMapScene {
   modeTools: ModeTools | null;
   weatherTool: MapWeatherTool | null;
   motionTool: MapMotionTool | null;
+  backgroundTool: MapBackgroundTool | null;
 }
 
 export function useBattleMapScene(): BattleMapScene | null {
@@ -151,14 +153,16 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const motionTool = useMapMotionTool({ isDM, current: map?.motion ?? null, mutation: actions.mapMotion });
 
+  const backgroundTool = useMapBackgroundTool({ isDM, current: map?.background ?? null, mutation: actions.mapBackground });
+
   useExclusivePalettes(
-    { mode: !!modeTools?.paletteOpen, terrain: terrainTool.active, weather: !!weatherTool?.active, motion: !!motionTool?.active },
-    { mode: closeModeTool, terrain: closeTerrain, weather: weatherTool?.close, motion: motionTool?.close },
+    { mode: !!modeTools?.paletteOpen, terrain: terrainTool.active, weather: !!weatherTool?.active, motion: !!motionTool?.active, background: !!backgroundTool?.active },
+    { mode: closeModeTool, terrain: closeTerrain, weather: weatherTool?.close, motion: motionTool?.close, background: backgroundTool?.close },
   );
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 
   if (!map || !scene || !view) return null;
 
-  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, modeTools, weatherTool, motionTool };
+  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, modeTools, weatherTool, motionTool, backgroundTool };
 }
