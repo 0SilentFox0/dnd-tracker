@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas";
 import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
+import { detachRefs } from "@/lib/server/content/detach-refs";
 import { toJsonInput } from "@/lib/server/content/errors";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
 import { toUnit } from "@/lib/utils/units/to-unit";
@@ -78,7 +79,12 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
     return unit;
   },
   async remove(actor, existing) {
+    await detachRefs(prisma, actor.campaignId, "unit", [existing.id]);
     await prisma.unit.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
   },
-  removeAll: async (actor) => (await prisma.unit.deleteMany({ where: { campaignId: actor.campaignId } })).count,
+  removeAll: async (actor) => {
+    await detachRefs(prisma, actor.campaignId, "unit", "all");
+
+    return (await prisma.unit.deleteMany({ where: { campaignId: actor.campaignId } })).count;
+  },
 });

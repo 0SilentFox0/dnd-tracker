@@ -6,10 +6,11 @@ import { getTranslator } from "@/lib/i18n/translator";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import type { CompendiumBundleDb } from "@/lib/server/compendium-import/bundle";
 import { syncCompendiumProvenance } from "@/lib/server/compendium-import/sync";
+import { type DetachKind,detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError } from "@/lib/server/content/errors";
 import { moveSkillTreeProgress } from "@/lib/server/skills/progress-move";
 import { assertNoLeak, findForeignContentIds } from "@/lib/server/templates/assert-no-leak";
-import { BUNDLE_TABLES, type BundleTableDef, delegateOf, pick, settingsOf, TemplateLeakError, toPrismaJson } from "@/lib/server/templates/bundle";
+import { BUNDLE_TABLES, type BundleTable, type BundleTableDef, delegateOf, pick, settingsOf, TemplateLeakError, toPrismaJson } from "@/lib/server/templates/bundle";
 import { newContentId } from "@/lib/server/templates/ids";
 import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-ids";
 import { classify } from "@/lib/server/templates/sync/classify";
@@ -131,6 +132,8 @@ function cleanRow(t: BundleTableDef, src: Record<string, unknown>, item: SyncIte
   return data;
 }
 
+const DETACH_KIND: Partial<Record<BundleTable, DetachKind>> = { spellGroups: "spellGroup", races: "race", mainSkills: "mainSkill", spells: "spell", units: "unit" };
+
 async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>) {
   for (const t of [...BUNDLE_TABLES].reverse()) {
     for (const i of selected.values()) {
@@ -147,6 +150,10 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
 
         if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
       }
+
+      const kind = DETACH_KIND[t.key];
+
+      if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], ctx.campaignId, kind, [i.localId]);
 
       await delegateOf(db, t).deleteMany({ where: { id: i.localId, campaignId: ctx.campaignId } });
     }

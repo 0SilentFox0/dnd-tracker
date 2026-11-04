@@ -10,6 +10,7 @@ import { listTracks } from "@/lib/server/audio/track-store";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
 import { assertCan } from "@/lib/server/content/access";
+import { detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { exampleCsv } from "@/lib/server/content/import/example";
 import { DEFAULT_DEPS as EXPORT_DEFAULT_DEPS, exportCsv } from "@/lib/server/content/import/export";
@@ -171,6 +172,10 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       }
       case "spells.delete-by-level": {
         const { level } = bodyOf("spells.delete-by-level", body);
+
+        const doomed = await prisma.spell.findMany({ where: { campaignId: actor.campaignId, level }, select: { id: true } });
+
+        await detachRefs(prisma, actor.campaignId, "spell", doomed.map((s) => s.id));
 
         const result = await prisma.spell.deleteMany({ where: { campaignId: actor.campaignId, level } });
 

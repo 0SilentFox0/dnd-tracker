@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { createMainSkillSchema, updateMainSkillSchema } from "@/lib/schemas";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
+import { detachRefs } from "@/lib/server/content/detach-refs";
 
 export const mainSkillsResource = defineResource<MainSkillRow, z.infer<typeof createMainSkillSchema>, z.infer<typeof updateMainSkillSchema>>({
   kind: "main-skills",
@@ -54,6 +55,7 @@ export const mainSkillsResource = defineResource<MainSkillRow, z.infer<typeof cr
     });
   },
   async remove(actor, existing) {
+    await detachRefs(prisma, actor.campaignId, "mainSkill", [existing.id]);
     await prisma.mainSkill.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
   },
 });

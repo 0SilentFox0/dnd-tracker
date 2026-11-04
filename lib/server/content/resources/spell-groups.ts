@@ -7,6 +7,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createSpellGroupSchema, updateSpellGroupSchema } from "@/lib/schemas";
 import { defineResource } from "@/lib/server/content/define-resource";
+import { detachRefs } from "@/lib/server/content/detach-refs";
 
 export const spellGroupsResource = defineResource<SpellGroupRow, z.infer<typeof createSpellGroupSchema>, z.infer<typeof updateSpellGroupSchema>>({
   kind: "spell-groups",
@@ -24,7 +25,7 @@ export const spellGroupsResource = defineResource<SpellGroupRow, z.infer<typeof 
   create: (actor, data) => prisma.spellGroup.create({ data: { campaignId: actor.campaignId, name: data.name, color: data.color ?? null, icon: data.icon ?? null } }),
   update: (_actor, existing, data) => prisma.spellGroup.update({ where: { id: existing.id }, data: { name: data.name, color: data.color, icon: data.icon } }),
   async remove(actor, existing) {
-    // spells of the group stay: onDelete SetNull
+    await detachRefs(prisma, actor.campaignId, "spellGroup", [existing.id]);
     await prisma.spellGroup.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
   },
 });
