@@ -60,3 +60,10 @@
 **Етап 4 — передісторія** (спек `docs/superpowers/specs/2026-10-30-character-path-stage4-design.md`). Міграцій і нових API нема.
 - Крок `background` у `wizardSteps` (`WizardStep.kind: "background"`, `path: "backgroundId"`) з'являється лише при явному `keep` (`startAt: "background"`), у `classMode` і коли в кампанії є передісторії; `withStepBackground` = `mergeBackground`, тож заміна скидає `backgroundChoices`/`backgroundFeatPicks`. `BackgroundPicker` — radio-картки `ChoiceCard`; `ChoiceWizard` попереджає при заміні вже збереженої.
 - `sheet.choices.background` (`SheetBackground`): опис, навички, інструменти, origin feat, `open` і `openKey` (перший відкритий крок власників `background`/`backgroundFeat`, `backgroundOpenCount` у `choices/pending.ts`). `BackgroundSection` над `ClassesHeader`: «Обрати/Змінити» (`openChoices("background")`) лише при `canEdit`; бейдж відкритих виборів веде на `openKey`. Блок передісторії з `FeatsBlock` прибрано.
+
+## Характеристики WFRP, Wounds, тести з листа, сесія
+
+Лише для кампаній із `rules.system.key = "wfrp"` (реєстр — [rule-systems.md](rule-systems.md)). JSON `characteristics` живе в `characters` і `units`; для d20 `system-fields.ts` його відкидає, для wfrp ховає шість d20-колонок, рівень і архетип. Wounds = `resources.hp` (максимум — `progression.maxHp` через `characterBaseHp`, тож лист і бій читають одне число), Fortune — `resources.fortune`.
+
+Лист: `build-sheet.ts` додає блок `sheet.wfrp` (`SheetWfrpBlock`: характеристики з advances/bonus, Wounds із breakdown, Move у клітинках і ярдах, навички з цільовим числом) через `characteristics.sheetBlock`; UI — `components/systems/wfrp/`. Тест з листа: `POST .../roll` з `{ kind: "test", characteristic | skill, spec? }` → `sheetTest.roll` → `SheetPercentileRollResult` (d100, складність, SL, результат), лог `rest.log.test`. Дія ДМ «Нова сесія» — `RestAction.kind = "session"` (`rest.onSession`: `Fortune = Fate`; довгий відпочинок Fortune не чіпає), лог `rest.log.session`. Бій і баланс на wfrp — частина 5b.
+

@@ -1,0 +1,64 @@
+import type { WhatsNewEntry } from "@/lib/onboarding/types";
+
+/** Newest entries shown in the UI and bundled into the root chunk; older ones stay in the catalog as history. */
+export const WHATS_NEW_BUNDLED = 15;
+
+export const WHATS_NEW: WhatsNewEntry[] = [
+<<<<<<< HEAD
+  { id: "2026-11-04-player-view", date: "2026-11-04", audience: "dm" },
+  { id: "2026-11-04-template-updates", date: "2026-11-04", audience: "dm" },
+  { id: "2026-11-04-battle-initiative", date: "2026-11-04", audience: "dm", href: "/help/dm-battle" },
+=======
+  { id: "2026-11-04-rule-system-wfrp", date: "2026-11-04", audience: "dm", href: "/help/dm-rule-systems" },
+>>>>>>> db8c86523 (docs(wfrp): rule systems architecture, what's new, help; i18n fixes)
+  { id: "2026-10-31-user-palettes", date: "2026-10-31", audience: "all" },
+  { id: "2026-10-31-identity-icons", date: "2026-10-31", audience: "all" },
+  { id: "2026-10-30-template-languages", date: "2026-10-30", audience: "dm" },
+  { id: "2026-10-30-character-path-background", date: "2026-10-30", audience: "all" },
+  { id: "2026-10-30-character-path-multiclass", date: "2026-10-30", audience: "all" },
+  { id: "2026-10-30-character-path-choices", date: "2026-10-30", audience: "all" },
+  { id: "2026-10-30-time-zone", date: "2026-10-30", audience: "all", href: "/settings/preferences" },
+  { id: "2026-10-30-character-path", date: "2026-10-30", audience: "all" },
+  { id: "2026-10-30-scenario-summaries", date: "2026-10-30", audience: "dm", href: "/help/dm-scenario-show" },
+  { id: "2026-10-30-srd-completeness", date: "2026-10-30", audience: "dm" },
+  { id: "2026-10-30-spell-ingredients", date: "2026-10-30", audience: "all" },
+  { id: "2026-10-30-scenario-graph", date: "2026-10-30", audience: "dm", href: "/help/dm-scenario-show" },
+  { id: "2026-10-30-empty-5e", date: "2026-10-30", audience: "dm" },
+  { id: "2026-10-30-ability-recipes", date: "2026-10-30", audience: "dm" },
+  { id: "2026-10-30-ai-reading", date: "2026-10-30", audience: "dm", href: "/settings/ai" },
+  { id: "2026-10-29-compendium-images", date: "2026-10-29", audience: "dm", href: "/help/compendium-import" },
+  { id: "2026-10-29-compendium-import-guide", date: "2026-10-29", audience: "dm", href: "/help/compendium-import" },
+  { id: "2026-10-29-spell-editor-forms", date: "2026-10-29", audience: "dm" },
+  { id: "2026-10-29-spell-attack-crits", date: "2026-10-29", audience: "dm" },
+  { id: "2026-10-29-summons-and-transform", date: "2026-10-29", audience: "all" },
+  { id: "2026-10-29-spell-zones", date: "2026-10-29", audience: "all" },
+  { id: "2026-10-29-temporary-spell-actions", date: "2026-10-29", audience: "all" },
+  { id: "2026-10-28-acquaintances", date: "2026-10-28", audience: "all", href: "/help/player-acquaintances" },
+  { id: "2026-10-28-notifications", date: "2026-10-28", audience: "player" },
+  { id: "2026-10-28-arcane-recovery", date: "2026-10-28", audience: "all" },
+  { id: "2026-10-28-cunning-strike", date: "2026-10-28", audience: "all" },
+  { id: "2026-10-28-reckless-steady", date: "2026-10-28", audience: "all" },
+  { id: "2026-10-28-proficiencies", date: "2026-10-28", audience: "all" },
+  { id: "2026-10-28-class-map", date: "2026-10-28", audience: "all" },
+  { id: "2026-10-28-official-templates", date: "2026-10-28", audience: "dm" },
+  { id: "2026-10-28-tokens-5e", date: "2026-10-28", audience: "dm" },
+  { id: "2026-10-28-world-rest", date: "2026-10-28", audience: "dm" },
+  { id: "2026-10-28-puzzle", date: "2026-10-28", audience: "all" },
+  { id: "2026-10-28-world-map", date: "2026-10-28", audience: "all", href: "/help/player-world-map" },
+  { id: "2026-10-28-crit-choice", date: "2026-10-28", audience: "dm" },
+  { id: "2026-10-28-book-conditions", date: "2026-10-28", audience: "dm" },
+  { id: "2026-10-28-spell-options", date: "2026-10-28", audience: "all" },
+  { id: "2026-10-27-dashboard", date: "2026-10-27", audience: "all" },
+  { id: "2026-10-27-inventory", date: "2026-10-27", audience: "all" },
+  { id: "2026-10-27-search", date: "2026-10-27", audience: "dm" },
+  { id: "2026-10-23-monsters-full", date: "2026-10-23", audience: "dm" },
+  { id: "2026-10-23-feats-choices", date: "2026-10-23", audience: "all" },
+  { id: "2026-10-23-magic-items", date: "2026-10-23", audience: "dm" },
+  { id: "2026-10-22-onboarding", date: "2026-10-22", audience: "all", href: "/help" },
+  { id: "2026-10-22-player-drafts", date: "2026-10-22", audience: "all" },
+  { id: "2026-10-21-ranged", date: "2026-10-21", audience: "all" },
+  { id: "2026-10-21-manuscript", date: "2026-10-21", audience: "dm" },
+  { id: "2026-10-20-ai", date: "2026-10-20", audience: "dm", href: "/settings/ai" },
+];
+
+export const WHATS_NEW_SHOWN: WhatsNewEntry[] = WHATS_NEW.slice(0, WHATS_NEW_BUNDLED);

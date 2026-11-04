@@ -19,6 +19,10 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `ge
 
 `lib/server/battles/action-service.ts` — таблиці замість ланцюжків `if`: `COMMAND_CHECKS` (передперевірки команд `attack`/`spell`; пошук лише через `Object.hasOwn`), `OPERATIONS` (`operations.ts`, доступ `BattleAccess.*`). Нова команда з передперевіркою = рядок у `COMMAND_CHECKS`.
 
+## Рульова система в бою
+
+`RuleSystemDefinition.battle.supported` (див. [rule-systems.md](rule-systems.md)): для wfrp `false` → `start-mutation` кидає 409 `SYSTEM_BATTLE_UNSUPPORTED`, setup UI показує причину; `balance.kind = "none"` ховає перемикач балансу й не масштабує ворогів. `distance { unit, perCell }` у 5a лише декларується (wfrp: ярди, 1 клітинка = 2 yd); шов у grid-хелперах і бій wfrp — частина 5b. d20-шлях (homm/dnd5e) не змінений.
+
 ## Mutation pipeline
 
 Every battle route is a Zod schema + `runBattleMutation` (`lib/server/battles/run-mutation.ts`, pure engine in `lib/utils/battle/pipeline/`) with a `<action>-mutation.ts` in `lib/server/battles/mutations/<action>/`. The pipeline:

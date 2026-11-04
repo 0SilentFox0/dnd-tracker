@@ -96,4 +96,14 @@ export const DM_ARTICLES: HelpArticleDef[] = [
       { blocks: [{ kind: "p" }] },
     ],
   },
+  {
+    slug: "dm-rule-systems",
+    audience: "dm",
+    sections: [
+      { blocks: [{ kind: "p" }] },
+      { blocks: [{ kind: "p" }] },
+      { blocks: [{ kind: "p" }, { kind: "p" }] },
+      { blocks: [{ kind: "p" }, { kind: "p" }] },
+    ],
+  },
 ];
