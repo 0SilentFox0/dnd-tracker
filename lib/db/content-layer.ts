@@ -9,6 +9,9 @@ import { hashJson, stableStringify } from "@/lib/utils/battle/store/stable-json"
 
 export { invalidateCampaignLayer, layerStats };
 
+/** Runs `run` against the stored tables only: no base rows, no hides, no id exposure. */
+export const bypassLayer = <T>(run: () => Promise<T>): Promise<T> => bypass.run(true, async () => run());
+
 const READS = new Set(["findMany", "findFirst", "findUnique", "findFirstOrThrow", "findUniqueOrThrow", "count", "aggregate"]);
 
 const WRITES = new Set(["update", "updateMany", "delete", "deleteMany"]);
@@ -452,7 +455,7 @@ async function materialize(ctx: Ctx, config: LayerConfig, campaignId: string, la
   await local(ctx, config).createMany({ data: bases.map((b) => {
     const { id: _id, ...shaped } = asLocalShape(b, campaignId);
 
-    return { ...shaped, sourceHash: hashJson(b) };
+    return { ...shaped, sourceHash: hashJson(Object.fromEntries(config.hashColumns.filter((c) => c in b).map((c) => [c, b[c]]))) };
   }) });
 
   markContentDirty();

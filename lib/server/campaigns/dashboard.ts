@@ -5,9 +5,11 @@ import { prisma } from "@/lib/db";
 import type { DmDashboardData, PlayerDashboardData } from "@/types/campaigns";
 
 export async function sourceUpdateState(campaignId: string): Promise<{ sourceVersion: number; hasUpdates: boolean } | null> {
-  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { createdFromId: true, sourceSync: { select: { sourceCampaignId: true, sourceVersion: true } } } });
+  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { createdFromId: true, baseSourceId: true, baseVersion: true, sourceSync: { select: { sourceCampaignId: true, sourceVersion: true } } } });
 
-  const sourceId = campaign?.createdFromId;
+  const layered = campaign?.baseSourceId && campaign.baseVersion != null;
+
+  const sourceId = layered ? campaign.baseSourceId : campaign?.createdFromId;
 
   if (!sourceId) return null;
 
@@ -15,7 +17,9 @@ export async function sourceUpdateState(campaignId: string): Promise<{ sourceVer
 
   if (!source) return null;
 
-  const sync = campaign.sourceSync;
+  if (layered) return { sourceVersion: source.contentVersion, hasUpdates: source.contentVersion > campaign.baseVersion! };
+
+  const sync = campaign!.sourceSync;
 
   const syncedVersion = sync?.sourceCampaignId === sourceId ? sync.sourceVersion : null;
 

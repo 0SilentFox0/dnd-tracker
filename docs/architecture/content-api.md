@@ -284,3 +284,12 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 - Операція `template.publish` (`POST /template/publish`, `NEED.writeAll`, лише сесія, лише для `kind = template`): `publishTemplate` у `publish-service.ts` виконує публікацію в одній транзакції (`withCampaignContentWrite`, `bump: false`). ДМ шаблону = власник official-шаблону. UI: кнопка «Опублікувати версію» на сторінці шаблону (`PublishTemplateButton`, `usePublishTemplate`).
 - Сидер SRD (`scripts/srd/lib/run-load-template.ts`) публікує версію наприкінці прогону.
 - `updatedAt` у базових таблицях (там, де є) ставиться часом публікації: бандл його не містить.
+
+## Sync поверх шарів
+
+Кампанія з `baseSourceId/baseVersion` синхронізується окремим шляхом (`sync/layered*.ts`); кампанії без бази (legacy-клони, HOMM5) лишаються на копійному sync (`context/classify/apply`) до Part 5. Розгалуження — у `applySourceChanges`/`applySafeSourceChanges`/`previewSourceSelection`/`getSourceDiff`/`sourceUpdateState` через `layerOf`.
+
+- Baseline: базовий рядок — рядок на `baseVersion`; override — `sourceHash` локального рядка (хеш колонок бандла, `hashColumns` шару = `BundleTableDef.columns`); `ignored` — як раніше в `campaign_source_syncs.ignored`.
+- Класифікуються лише рядки, змінені після `baseVersion` (`validFrom > bv` або `validTo > bv`), плюс усі override і hide-и таких рядків. `new`/`updated` без override і hide — прозорі: apply нічого не пише в контентні таблиці, лише `UPDATE campaigns SET baseVersion = contentVersion` (кеш шару скидає `invalidateCampaignLayer` через розширення).
+- Override + зміна upstream → `conflict`/`updated` за `pairStatus`; прийняття upstream видаляє override. `deletedInSource` з override → локальний рядок (`sourceId = null`) + hide базового id. Hide + зміна → `deletedLocally`; лишається прихованим, apply знімає hide.
+- Будь-який apply просуває `baseVersion` до поточної версії; незастосовані conflict/override лишаються видимими, бо override завжди в наборі класифікації. Правила/налаштування/credits/компендіум на шарах поки не синхронізуються.

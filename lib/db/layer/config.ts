@@ -16,11 +16,15 @@ export interface LayerConfig {
   local: string;
   hideTable: string;
   baseFields: Set<string>;
+  /** Scalar columns of the local model that make up a row's content hash (same set as the template bundle). */
+  hashColumns: string[];
   relations: Record<string, Relation>;
 }
 
 /** Fields that only exist on `<Model>Base` (version window); they never leak into the local shape. */
 export const BASE_ONLY = new Set(["sourceCampaignId", "validFrom", "validTo"]);
+
+const NOT_HASHED = new Set(["campaignId", "createdAt", "updatedAt", "sourceId", "sourceHash"]);
 
 const lower = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
 
@@ -60,7 +64,7 @@ export function layeredModels(): Record<Model, LayerConfig> {
 
       const baseModel = byName.get(`${name}Base`)!;
 
-      return [name, { model: name, base: `${lower(name)}Base`, local: lower(name), hideTable: model.dbName ?? name, baseFields: new Set(baseModel.fields.map((f) => f.name)), relations }];
+      return [name, { model: name, base: `${lower(name)}Base`, local: lower(name), hideTable: model.dbName ?? name, baseFields: new Set(baseModel.fields.map((f) => f.name)), hashColumns: model.fields.filter((f) => f.kind !== "object" && !NOT_HASHED.has(f.name)).map((f) => f.name), relations }];
     }),
   );
 
