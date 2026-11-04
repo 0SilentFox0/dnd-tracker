@@ -157,7 +157,7 @@ async function apply(args: Args): Promise<number> {
 }
 
 async function verify(args: Args): Promise<number> {
-  const result = await verifyFromPreImage(prisma, args.preImage!);
+  const result = await verifyFromPreImage(prisma, (args.preImage ?? ""));
 
   console.info(JSON.stringify(result, null, 2));
 
@@ -165,7 +165,7 @@ async function verify(args: Args): Promise<number> {
 }
 
 async function undo(args: Args): Promise<number> {
-  const result = await undoMigration(prisma as unknown as ExtendedPrisma, args.preImage!);
+  const result = await undoMigration(prisma as unknown as ExtendedPrisma, (args.preImage ?? ""));
 
   if (result.ok) {
     console.info("undo: ok");
