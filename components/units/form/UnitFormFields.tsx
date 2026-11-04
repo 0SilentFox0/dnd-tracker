@@ -28,7 +28,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues, t }: UnitFormF
 
   const { races, spells, fiveE, system } = editor.options;
 
-  const Ui = systemUiOf(system);
+  const Ui = system && systemUiOf(system);
 
   return [
     {
@@ -44,7 +44,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues, t }: UnitFormF
             onChange={(avatar) => change({ avatar: avatar || null })}
             fallbackText={formData.name || "?"}
           />
-          <Ui.UnitStatsFields formData={formData} onChange={change} fiveE={fiveE} />
+          {Ui && <Ui.UnitStatsFields formData={formData} onChange={change} fiveE={fiveE} />}
         </div>
       ),
     },

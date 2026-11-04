@@ -5,10 +5,12 @@ import { RULE_SYSTEM_REGISTRY, type RuleSystemDefinition, type RuleSystemKey } f
 
 type Source = { key: RuleSystemKey } | { campaignId: string };
 
-export function useRuleSystem(source: Source): { key: RuleSystemKey; system: RuleSystemDefinition; ready: boolean } {
+type RuleSystemState = { key: RuleSystemKey; system: RuleSystemDefinition; ready: true } | { key: undefined; system: undefined; ready: false };
+
+export function useRuleSystem(source: Source): RuleSystemState {
   const rules = useCampaignRules("campaignId" in source ? source.campaignId : "");
 
-  const key = "key" in source ? source.key : (rules.data?.system.key ?? "homm");
+  const key = "key" in source ? source.key : rules.data?.system.key;
 
-  return { key, system: RULE_SYSTEM_REGISTRY[key], ready: "key" in source || !!rules.data };
+  return key ? { key, system: RULE_SYSTEM_REGISTRY[key], ready: true } : { key: undefined, system: undefined, ready: false };
 }

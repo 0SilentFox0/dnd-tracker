@@ -6,6 +6,7 @@ import { Pencil, Trash2, TrendingUp } from "lucide-react";
 import { HeroPortrait } from "@/components/character-profile/HeroPortrait";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard, HudPill, HudStatChip } from "@/components/hud/page";
+import { systemUiOf } from "@/components/systems";
 import { CharacterType } from "@/lib/constants/characters";
 import { levelUpAvailable } from "@/lib/constants/experience";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
@@ -35,9 +36,13 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const classMode = useClassMode(campaignId);
 
-  const { system } = useRuleSystem({ campaignId });
+  const { key: systemKey, system } = useRuleSystem({ campaignId });
 
-  const wfrp = system.key === "wfrp";
+  const d20Stats = !!system?.d20Stats;
+
+  const hideProgression = !!systemKey && systemUiOf(systemKey).hideProgression;
+
+  const wounds = system?.characteristics.kind === "wfrp";
 
   const classPick = classMode.enabled && !!character.classes?.length;
 
@@ -49,7 +54,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const hp = ooc?.persistResources && character.resources ? currentHp(character.resources, maxHp) : maxHp;
 
-  const levelReady = !wfrp && !!ooc?.xp && levelUpAvailable({ level: character.level, experience: character.experience ?? 0 }, maxLevel);
+  const levelReady = !hideProgression && !!ooc?.xp && levelUpAvailable({ level: character.level, experience: character.experience ?? 0 }, maxLevel);
 
   const isNpc = character.type === CharacterType.NPC_HERO;
 
@@ -76,7 +81,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
           onTriggerClick={(e) => e.preventDefault()}
           actions={[
             { label: tc("edit"), icon: Pencil, href: `/campaigns/${campaignId}/dm/characters/${character.id}` },
-            ...(actions.onLevelUp && !classPick && !wfrp
+            ...(actions.onLevelUp && !classPick && !hideProgression
               ? [{ label: t("levelUp"), icon: TrendingUp, onSelect: actions.onLevelUp, disabled: busy }]
               : []),
             { label: tc("delete"), icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },
@@ -84,10 +89,10 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
         />}
       </div>
       <div className="flex gap-1.5">
-        {!wfrp && <HudStatChip short={t("statLevel")} value={character.level} />}
-        <HudStatChip short={wfrp ? t("wounds") : "HP"} label={wfrp ? t("wounds") : "HP"} value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />
-        {!wfrp && <HudStatChip short="AC" value={character.armorClass} />}
-        {!wfrp && <HudStatChip short={t("statInitiative")} value={character.initiative} />}
+        {!hideProgression && <HudStatChip short={t("statLevel")} value={character.level} />}
+        <HudStatChip short={wounds ? t("wounds") : "HP"} label={wounds ? t("wounds") : "HP"} value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />
+        {d20Stats && <HudStatChip short="AC" value={character.armorClass} />}
+        {d20Stats && <HudStatChip short={t("statInitiative")} value={character.initiative} />}
       </div>
     </HudCard>
   );

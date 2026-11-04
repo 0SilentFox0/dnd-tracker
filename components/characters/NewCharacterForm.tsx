@@ -39,7 +39,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
 
   const { key: systemKey, system } = useRuleSystem({ campaignId: id });
 
-  const Ui = systemUiOf(systemKey);
+  const Ui = systemKey && systemUiOf(systemKey);
 
   const refsRef = useRef<ChoiceRefsView | null>(null);
 
@@ -53,7 +53,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     ...bindings
   } = useCharacterForm({
     type: characterType,
-    requireRace: system.lineage,
+    requireRace: system?.lineage,
     recommendScores: classMode.byId,
     onSubmit: async (data) => {
       await create.mutateAsync(refsRef.current?.ready ? pruneFormChoices(data, refsRef.current) : data);
@@ -75,19 +75,19 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     {
       id: CHARACTER_FORM_TAB.basic,
       label: tc("tabs.basic"),
-      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={Ui.hideProgression} hideLineage={!system.lineage} classMode={classMode.enabled && !Ui.hideProgression ? classMode : undefined} />,
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system?.lineage} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,
       label: t("form.tabs.combat"),
-      content: <Ui.StatsFields bindings={{ basicInfo, skills, abilities, ...bindings }} campaignId={id} mode="create" classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />,
+      content: Ui && <Ui.StatsFields bindings={{ basicInfo, skills, abilities, ...bindings }} campaignId={id} mode="create" classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.skills,
       label: tc("tabs.abilities"),
       content: (
         <>
-          {!Ui.hideProgression && <CharacterSkillsSection skills={skills} />}
+          {Ui && !Ui.hideProgression && <CharacterSkillsSection skills={skills} />}
           <HudSection title={t("form.sections.personalAbility")}>
             <CharacterAbilitiesSection campaignId={id} abilities={abilities} />
           </HudSection>
