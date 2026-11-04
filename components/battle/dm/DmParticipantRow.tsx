@@ -6,7 +6,7 @@ import { Crown, Heart, LogIn, ShieldAlert, Skull, Trash2 } from "lucide-react";
 import { SideDot } from "@/components/battle/hud";
 import { SelectField } from "@/components/ui/select-field";
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
-import type { DmParticipantActions } from "@/lib/hooks/battle";
+import { type DmParticipantActions, useBattleRules } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
@@ -15,12 +15,12 @@ import { hasLegendaryActions, legendaryBadge } from "@/lib/utils/battle/actions/
 import { mult } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
-function scaleLabel({ battleData }: BattleParticipant, t: ReturnType<typeof useTranslations<"battleDm.row">>): string | null {
+function scaleLabel({ battleData }: BattleParticipant, t: ReturnType<typeof useTranslations<"battleDm.row">>, wounds: boolean): string | null {
   const parts = [battleData.hpMultiplier, battleData.damageMultiplier].map((m) => (m !== undefined && m !== 1 ? m : null));
 
   if (parts[0] === null && parts[1] === null) return null;
 
-  return [parts[0] !== null && t("scaleHp", { value: mult(parts[0]) }), parts[1] !== null && t("scaleDamage", { value: mult(parts[1]) })].filter(Boolean).join(" · ");
+  return [parts[0] !== null && t(wounds ? "scaleWounds" : "scaleHp", { value: mult(parts[0]) }), parts[1] !== null && t("scaleDamage", { value: mult(parts[1]) })].filter(Boolean).join(" · ");
 }
 
 const ICON = "flex size-8 items-center justify-center border border-transparent bg-black/40 transition-colors";
@@ -42,7 +42,9 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
 
   const close = () => onDone?.();
 
-  const label = scaleLabel(participant, t);
+  const { woundsLabel } = useBattleRules();
+
+  const label = scaleLabel(participant, t, woundsLabel === "wounds");
 
   const canKill = onKill && participant.basicInfo.sourceType === ParticipantSourceType.UNIT && participant.combatStats.status !== CombatStatus.DEAD;
 

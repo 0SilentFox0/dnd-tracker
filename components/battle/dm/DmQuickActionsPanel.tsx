@@ -12,7 +12,7 @@ import { LegendaryActionDialog } from "./LegendaryActionDialog";
 
 import { HUD_SURFACE } from "@/components/hud";
 import { BattleStatus } from "@/lib/constants/battle";
-import { type BattlePageDialogs, useBattleScene, useDmParticipantActions } from "@/lib/hooks/battle";
+import { type BattlePageDialogs, useBattleRules, useBattleScene, useDmParticipantActions } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isLiveScalable } from "@/lib/utils/battle/balance/live-scale";
 import type { BattleParticipant } from "@/types/battle";
@@ -67,6 +67,8 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
   const t = useTranslations("battleDm");
 
   const { battle, viewer, dmControl, actions } = useBattleScene();
+
+  const { woundsLabel } = useBattleRules();
 
   const [ownOpen, setOwnOpen] = useState(false);
 
@@ -162,8 +164,8 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
             {canScale && (
               <PanelSection title={t("panel.enemyUnits")} className="grid grid-cols-2 gap-2 pt-2">
-                <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t("panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
-                <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t("panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
+                <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t(woundsLabel === "wounds" ? "panel.buffHintWounds" : "panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
+                <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t(woundsLabel === "wounds" ? "panel.debuffHintWounds" : "panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
               </PanelSection>
             )}
           </div>
