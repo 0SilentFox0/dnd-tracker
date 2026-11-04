@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 
 import { BattleMap } from "./BattleMap";
+import { MapMotionPanel } from "./MapMotionPanel";
 import { MapTerrainToolbar } from "./MapTerrainToolbar";
 import { useMapToolsSlot } from "./MapToolsSlot";
 import { MapWeatherPicker } from "./MapWeatherPicker";
@@ -39,7 +40,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
 
   if (!scene) return null;
 
-  const { placement, terrainTool, weatherTool } = scene;
+  const { placement, terrainTool, weatherTool, motionTool } = scene;
 
   const modeTools = phone ? null : scene.modeTools;
 
@@ -47,7 +48,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
 
   const inRow = !phone && !!slot;
 
-  const tools = placement && terrainTool && weatherTool && (
+  const tools = placement && terrainTool && weatherTool && motionTool && (
     // на телефоні карта займає всю ширину, тож кнопки йдуть рядком над нею, а не поверх клітинок
     <div className={cn("z-20 flex flex-col items-start gap-1.5", phone ? "shrink-0 px-1 pb-1" : !inRow && "absolute left-2 top-2")}>
       <div className="flex flex-wrap gap-1.5">
@@ -61,12 +62,16 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
         <ModeButton active={weatherTool.active} onClick={weatherTool.toggle} tall={inRow}>
           {t("weather")}
         </ModeButton>
+        <ModeButton active={motionTool.active} onClick={motionTool.toggle} tall={inRow}>
+          {t("motion")}
+        </ModeButton>
       </div>
-      {(terrainTool.active || weatherTool.active) && (
+      {(terrainTool.active || weatherTool.active || motionTool.active) && (
         // у рядку над картою палітра звисає вниз на карту, не зсуваючи й не перекриваючи перемикач вигляду
         <div className={cn("flex flex-col items-start gap-1.5", inRow && "absolute inset-x-3 top-full z-30 mt-1")}>
           {terrainTool.active && <MapTerrainToolbar tool={terrainTool} />}
           {weatherTool.active && <MapWeatherPicker tool={weatherTool} />}
+          {motionTool.active && <MapMotionPanel tool={motionTool} />}
         </div>
       )}
       {modeTools?.paletteOpen && ui?.EditPalette && (

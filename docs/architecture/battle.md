@@ -271,3 +271,7 @@ Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection �
 - `rollSave`/`rollCheck`/`passivePerception` make one `collectModifiers` flags pass each; broken grapples are released by the pipeline (`withPlacement`) on every mutation, and the release is a separate system event, not part of the move message.
 - `lib/server/battles/guards.ts` (`runGuardedBattleOperationCore`, used by the assistant): actor/tx mismatch is a `ContentError` 409 (was 403); on `dryRun` it returns `delta: null` plus a preview.
 - `createBattleParticipantFromCharacter` without `context` takes artifacts only from `preloaded.artifactRows` (no DB fallback); all production callers pass a context.
+
+## Map motion
+
+Поле `map.motion` і операція `map-motion` — див. [map-modes.md](map-modes.md#map-motion-рух). Мутація — копія шаблону `map-weather`: пише лише `scene.map`, відповідь — дельта.

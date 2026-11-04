@@ -96,7 +96,21 @@
     "tools": {
       "place": "Place",
       "terrain": "Terrain",
-      "weather": "Weather"
+      "weather": "Weather",
+      "motion": "Motion"
+    },
+    "motion": {
+      "axisX": "Horizontal",
+      "axisY": "Vertical",
+      "reverse": "Reverse",
+      "speed": "Speed",
+      "slow": "Slow",
+      "medium": "Medium",
+      "fast": "Fast",
+      "pause": "Pause",
+      "resume": "Resume",
+      "off": "Turn off",
+      "reducedHint": "Your system asks for reduced motion — the background stays still"
     },
     "terrain": {
       "brushes": {

@@ -14,6 +14,7 @@ const EXPECTED_PATHS: Record<keyof typeof battleOps, string> = {
   mapTerrain: "map-terrain",
   maze: "maze",
   mazeMark: "maze-mark",
+  mapMotion: "map-motion",
   mapWeather: "map-weather",
   bonusAction: "bonus-action",
   moraleCheck: "morale-check",
@@ -62,7 +63,7 @@ describe("battleOps", () => {
 
     const retrying = Object.entries(battleOps).filter(([, o]) => "retryOnConflict" in o).map(([k]) => k);
 
-    expect(retrying).toEqual(["mapTerrain", "mapWeather"]);
+    expect(retrying).toEqual(["mapTerrain", "mapMotion", "mapWeather"]);
   });
 
   it("only attack and castSpell map the response to hpChanges", () => {

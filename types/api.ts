@@ -11,6 +11,7 @@ import type {
   bonusActionSchema,
   castSpellSchema,
   critChoiceSchema,
+  mapMotionSchema,
   mapTerrainSchema,
   mapWeatherSchema,
   mazeActionSchema,
@@ -183,6 +184,8 @@ export type MazeActionData = z.infer<typeof mazeActionSchema>;
 export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
 
 export type MapWeatherData = z.infer<typeof mapWeatherSchema>;
+
+export type MapMotionData = z.infer<typeof mapMotionSchema>;
 
 export type AbilityActionData = z.infer<typeof abilityActionSchema>;
 

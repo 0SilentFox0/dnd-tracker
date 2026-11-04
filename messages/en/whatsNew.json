@@ -1,4 +1,8 @@
 {
+  "2026-11-04-map-motion": {
+    "title": "Map motion",
+    "body": "In battle the DM can turn on the Motion tool: the map background scrolls endlessly under the fixed grid, as if the heroes were running. Pick the axis, direction and speed, pause and resume; players see changes at once. Motion is purely visual and does not affect turns or range."
+  },
   "2026-11-04-player-view": {
     "title": "Player view",
     "body": "The DM can switch a battle or the show page to the player view (button in the corner or the P key) and show exactly what players see, without any controls. The mode is per window, so keep one window as the DM and share the other. Enemy traits you see may be incomplete, because the DM has no observed knowledge of them."

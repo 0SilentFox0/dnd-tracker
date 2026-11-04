@@ -1,6 +1,6 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema, mapTerrainSchema, mapWeatherSchema, mazeActionSchema, mazeMarkSchema, moveSchema, patchParticipantSchema } from "@/lib/schemas/battles";
+import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema, mapMotionSchema, mapTerrainSchema, mapWeatherSchema, mazeActionSchema, mazeMarkSchema, moveSchema, patchParticipantSchema } from "@/lib/schemas/battles";
 import { ContentError } from "@/lib/server/content/errors";
 import { BattleAccess, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
@@ -137,6 +137,15 @@ const OPERATIONS: Record<string, Loader> = {
       const { mapTerrainMutation } = await import("@/lib/server/battles/mutations/map-terrain/map-terrain-mutation");
 
       return { schema: mapTerrainSchema, mutate: mapTerrainMutation };
+    },
+  }),
+  "map-motion": operation({
+    access: DM,
+    rateLimitScope: "mapMotion",
+    load: async () => {
+      const { mapMotionMutation } = await import("@/lib/server/battles/mutations/map-motion/map-motion-mutation");
+
+      return { schema: mapMotionSchema, mutate: mapMotionMutation };
     },
   }),
   "map-weather": operation({

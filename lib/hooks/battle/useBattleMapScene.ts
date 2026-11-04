@@ -9,6 +9,7 @@ import { useBattleScene } from "./useBattleScene";
 import { useExclusivePalettes } from "./useExclusivePalettes";
 import { useFxImpacts } from "./useFxImpacts";
 import { useMapCellActions } from "./useMapCellActions";
+import { type MapMotionTool, useMapMotionTool } from "./useMapMotionTool";
 import { useMapPlacing } from "./useMapPlacing";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
@@ -28,6 +29,7 @@ export interface BattleMapScene {
   terrainTool: MapTerrainTool | null;
   modeTools: ModeTools | null;
   weatherTool: MapWeatherTool | null;
+  motionTool: MapMotionTool | null;
 }
 
 export function useBattleMapScene(): BattleMapScene | null {
@@ -147,14 +149,16 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const weatherTool = useMapWeatherTool({ isDM, current: map?.weather ?? null, mutation: actions.mapWeather });
 
+  const motionTool = useMapMotionTool({ isDM, current: map?.motion ?? null, mutation: actions.mapMotion });
+
   useExclusivePalettes(
-    { mode: !!modeTools?.paletteOpen, terrain: terrainTool.active, weather: !!weatherTool?.active },
-    { mode: closeModeTool, terrain: closeTerrain, weather: weatherTool?.close },
+    { mode: !!modeTools?.paletteOpen, terrain: terrainTool.active, weather: !!weatherTool?.active, motion: !!motionTool?.active },
+    { mode: closeModeTool, terrain: closeTerrain, weather: weatherTool?.close, motion: motionTool?.close },
   );
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 
   if (!map || !scene || !view) return null;
 
-  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, modeTools, weatherTool };
+  return { map, participants: scene.participants, view, actions: mapActions, placement, terrainTool: isDM ? terrainTool : null, modeTools, weatherTool, motionTool };
 }

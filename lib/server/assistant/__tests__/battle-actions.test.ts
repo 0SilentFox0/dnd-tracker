@@ -63,7 +63,7 @@ describe("T11 battle adapters", () => {
       expect(BATTLE_ACTIONS.find(action => action.id === row.actionId), row.actionId).toBeDefined();
     }
 
-    const names = ["list", "active", "get", "version", "summary", "events", "balance.get", "balance", "create", "patch", "delete", "clear-history", "audio.get", "audio", "start", "complete", "reset", "rollback", "add-participant", "participants.patch", "reveal-participant", "unit-control", "refresh-sources", "scale-units", "next-turn", "attack", "spell", "bonus-action", "core-action", "ability-action", "aura-zone", "conditions", "initiative-reorder", "initiative-roll", "morale-check", "move", "map-terrain", "map-weather", "maze", "maze-mark"];
+    const names = ["list", "active", "get", "version", "summary", "events", "balance.get", "balance", "create", "patch", "delete", "clear-history", "audio.get", "audio", "start", "complete", "reset", "rollback", "add-participant", "participants.patch", "reveal-participant", "unit-control", "refresh-sources", "scale-units", "next-turn", "attack", "spell", "bonus-action", "core-action", "ability-action", "aura-zone", "conditions", "initiative-reorder", "initiative-roll", "morale-check", "move", "map-terrain", "map-motion", "map-weather", "maze", "maze-mark"];
 
     for (const name of names) expect(BATTLE_ACTIONS.find(a => a.id === `battles.${name}`), name).toBeDefined();
   });
@@ -99,7 +99,7 @@ describe("T11 battle adapters", () => {
   });
   it("mapWeatherMazeAndReserveUseSameGuards", async () => {
     fixture.loaded.isDM = false;
-    for (const operation of ["map-weather", "maze", "add-participant"]) {
+    for (const operation of ["map-weather", "map-motion", "maze", "add-participant"]) {
       await expect(prepareBattleAction(caller, operation, input)).rejects.toMatchObject({ status: 403 });
     }
     expect(fixture.saves).toEqual([]);

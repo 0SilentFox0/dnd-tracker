@@ -284,6 +284,14 @@ export interface SpellTemplate {
   exact?: boolean;
 }
 
+export type MapMotionAxis = "x" | "y";
+
+/** speed — клітинки/с зі знаком; 0 — зупинено, відсутнє або null — вимкнено */
+export interface MapMotion {
+  axis: MapMotionAxis;
+  speed: number;
+}
+
 export type WeatherKind = (typeof WEATHER_KINDS)[number];
 
 /** Карта бою: сітка поверх фону; клітинка = 5 футів */
@@ -306,6 +314,7 @@ export interface BattleMapConfig {
   maze?: MazeConfig | null;
   /** Атмосфера без механіки; відсутня або null — ясно */
   weather?: WeatherKind | null;
+  motion?: MapMotion | null;
 }
 
 /** difficult — лише пензель ДМ (прохідна складна місцевість); зони заклинань ставлять прапорці на hazard */
