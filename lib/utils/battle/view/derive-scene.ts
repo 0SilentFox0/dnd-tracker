@@ -10,8 +10,10 @@ import type { BattleParticipant } from "@/types/battle";
 
 export const NO_ORDER: BattleParticipant[] = [];
 
-export function deriveScene(battle: BattleScene, userId: string | null, dmControlledId: string | null) {
-  const isDM = battle.isDM === true;
+export function deriveScene(battle: BattleScene, userId: string | null, dmControlledId: string | null, opts: { playerView?: boolean } = {}) {
+  const readOnly = opts.playerView === true;
+
+  const isDM = battle.isDM === true && !readOnly;
 
   const order = battle.initiativeOrder ?? [];
 
@@ -21,10 +23,10 @@ export function deriveScene(battle: BattleScene, userId: string | null, dmContro
 
   const queue = turnQueue(order, battle.currentTurnIndex, battle.currentRound);
 
-  const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null, queue);
+  const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, readOnly ? null : userId, isDM, readOnly ? null : dmControlledId, awaiting !== null, queue);
 
   return {
-    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(hero, order) },
+    viewer: { userId, isDM, readOnly, canSeeEnemyHp: canSeeEnemyHp(hero, order) },
     turn: { current, isMyTurn, queue },
     roster: {
       allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),

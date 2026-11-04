@@ -9,6 +9,7 @@ import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle
 export interface Viewer {
   userId: string | null;
   isDM: boolean;
+  readOnly: boolean;
   canSeeEnemyHp: boolean;
 }
 

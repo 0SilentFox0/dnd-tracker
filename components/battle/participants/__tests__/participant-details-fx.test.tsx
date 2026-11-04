@@ -36,7 +36,7 @@ const p = (id: string, hp: number) => {
 function sceneValue(participants: ReturnType<typeof p>[]) {
   return {
     battle: { initiativeOrder: participants, currentTurnIndex: 0, currentRound: 1, battleLog: [] } as unknown as BattleScene,
-    viewer: { userId: "u", isDM: true, canSeeEnemyHp: true },
+    viewer: { userId: "u", isDM: true, readOnly: false, canSeeEnemyHp: true },
     effects: buildDisplayEffects(participants),
   } as unknown as BattleSceneValue;
 }

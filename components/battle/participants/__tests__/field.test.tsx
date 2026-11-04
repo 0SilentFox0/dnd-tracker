@@ -46,7 +46,7 @@ function scene(isDM = false) {
   const battle = { initiativeOrder: [gob, hero], currentTurnIndex: 0, currentRound: 3, battleLog: log } as unknown as BattleScene;
 
   return {
-    battle, viewer: { userId: "u", isDM, canSeeEnemyHp: false },
+    battle, viewer: { userId: "u", isDM, readOnly: false, canSeeEnemyHp: false },
     turn: { queue: turnQueue([gob, hero], 0, 3) }, roster: { hero, myParticipants: [hero], allies: [hero], enemies: [gob], reserve: [] }, awaiting: null, effects: buildDisplayEffects([gob, hero]), select: vi.fn(), selectedId: null, log: { open: false, focus: null },
     logHistory: { canLoadEarlier: false, isLoading: false, loadEarlier: vi.fn() },
   } as unknown as BattleSceneValue;

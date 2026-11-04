@@ -120,7 +120,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     campaignId: "c1",
     battleId: "b1",
     battle,
-    viewer: { userId: "u", isDM: opts.isDM ?? false, canSeeEnemyHp: false },
+    viewer: { userId: "u", isDM: opts.isDM ?? false, readOnly: false, canSeeEnemyHp: false },
     turn: { current: isMyTurn ? me : gob, isMyTurn, queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound) },
     roster: { myParticipants: [me], hero: me, allies: [me, ally], enemies: [gob], reserve: opts.reserve ?? [] },
     awaiting: null,
