@@ -52,6 +52,13 @@ const MODE_IMPORT_PATTERN = {
   message: "Режим карти — лише через реєстр (@/lib/utils/battle/modes, @/components/battle/modes).",
 };
 
+const SYSTEM_IMPORT_PATTERN = {
+  group: ["@/lib/utils/rules/systems/wfrp*", "@/lib/utils/rules/systems/d20*", "@/lib/hooks/systems/wfrp*", "@/components/systems/wfrp*"],
+  message: "Рульова система — лише через реєстр (@/lib/utils/rules/systems, @/components/systems).",
+};
+
+const SYSTEM_OWNED_FILES = ["lib/utils/rules/systems/**", "lib/hooks/systems/**", "components/systems/**"];
+
 const MODE_OWNED_FILES = [
   "lib/utils/battle/modes/**",
   "lib/hooks/battle/modes/**",
@@ -204,7 +211,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
       "no-restricted-globals": [
@@ -227,7 +234,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -239,20 +246,20 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
   },
   {
     files: ["lib/utils/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...DB_IN_UTILS_EXEMPT, ...MODE_OWNED_FILES.filter((g) => g.startsWith("lib/utils"))],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...DB_IN_UTILS_EXEMPT, ...MODE_OWNED_FILES.filter((g) => g.startsWith("lib/utils")), ...SYSTEM_OWNED_FILES.filter((g) => g.startsWith("lib/utils"))],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -265,7 +272,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN, AI_IN_ASSISTANT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN, AI_IN_ASSISTANT_PATTERN],
         },
       ],
     },
@@ -292,6 +299,33 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: SYSTEM_OWNED_FILES.filter((g) => g.startsWith("lib/")).map((glob) => `${glob}/*.{ts,tsx}`),
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
+    files: ["lib/utils/rules/systems/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH], patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
+    files: ["components/systems/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: RESTRICTED_PATHS,
+          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+        },
+      ],
+    },
+  },
+  {
     files: ["components/battle/modes/**/*.{ts,tsx}"],
     ignores: ["**/__tests__/**"],
     rules: {
@@ -311,7 +345,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: DIALOG_RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN],
         },
       ],
     },

@@ -166,5 +166,10 @@
     "description": "What the ability and stat abbreviations mean",
     "main": "Core abilities:",
     "other": "Other stats:"
+  },
+  "ruleSystem": {
+    "homm": "HoMM (simplified d20)",
+    "dnd5e": "D&D 5e",
+    "wfrp": "Warhammer Fantasy RP (d100)"
   }
 }

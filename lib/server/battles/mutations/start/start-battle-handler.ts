@@ -23,6 +23,7 @@ import {
   sortByInitiative,
 } from "@/lib/utils/battle/turn/initiative";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAction, BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export async function buildStartOrder(
@@ -131,7 +132,7 @@ export async function buildStartOrder(
     ),
   );
 
-  const built = rules.encounters.balance === "xp" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
+  const built = rules.encounters.balance === "xp" || ruleSystemOf(rules).balance.kind === "none" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
 
   const { field, reserve } = partitionReserve(slots, built);
 

@@ -1,6 +1,6 @@
 import type { Ruleset } from "./schema";
 
-export type MechanicKey = keyof Ruleset;
+export type MechanicKey = Exclude<keyof Ruleset, "system">;
 
 export const MECHANIC_REGISTRY = {
   morale: true,

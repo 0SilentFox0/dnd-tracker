@@ -8,6 +8,7 @@ import type { UnitStats } from "@/lib/utils/battle/balance";
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster, unitMember } from "@/lib/utils/battle/balance";
 import { pickXpRoster, resolveXpDifficulty, type XpEdition } from "@/lib/utils/battle/balance/xp-budget";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
@@ -59,6 +60,8 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
   };
 
   const response: { allyStats: AllyStats; suggestedEnemies?: SuggestedEnemy[] } = { allyStats };
+
+  if (rules && ruleSystemOf(rules).balance.kind === "none") return response;
 
   if (suggest && rules?.encounters.balance === "xp") {
     response.suggestedEnemies = xpSuggestion(heroes.map((h) => h.character.level), library, byId, data, rules.encounters.edition);

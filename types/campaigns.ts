@@ -1,6 +1,7 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { SYNC_SCOPES, SYNC_STATUSES } from "@/lib/constants/source-sync";
 import type { SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
+import type { Ruleset } from "@/lib/utils/rules";
 
 export interface Campaign {
   id: string;
@@ -168,3 +169,5 @@ export interface ConditionUsage {
   feats: { id: string; name: string }[];
   statusEffects: { id: string; name: string }[];
 }
+
+export type CampaignRulesView = Ruleset & { systemLocked?: boolean };

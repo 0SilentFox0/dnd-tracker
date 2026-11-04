@@ -13,7 +13,7 @@ import { UnitsListCard } from "./UnitsListCard";
 import { XpBalanceSummary } from "./XpBalanceSummary";
 
 import { BATTLE_FORM_TAB, type BattleFormTabId } from "@/components/battle/setup/battle-form-tabs";
-import { LoadingState } from "@/components/common/states";
+import { FormAlert, LoadingState } from "@/components/common/states";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,10 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
   const setup = useBattleSetup(campaignId, battleId, initial);
 
   const tActions = useTranslations("common.actions");
+
+  const tBalance = useTranslations("battleSetup.balance");
+
+  const tSystem = useTranslations("battleSetup.system");
 
   const isEdit = !!battleId;
 
@@ -89,7 +93,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: t("tabs.units"),
       content: (
         <div className="space-y-4">
-          {!isEdit && (
+          {!isEdit && setup.balanceKind !== "none" && (
             <AutopickCard hasAllies={participants.allies.exists} races={data.races} balance={balance} />
           )}
           <UnitsListCard units={data.units} entityStats={data.entityStats?.unitStats ?? null} selection={participants.selection} actions={participants.actions} />
@@ -101,7 +105,9 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: t("tabs.roster", { count: participants.list.length }),
       content: (
         <div>
-          {setup.encounters.balance === "xp" ? <XpBalanceSummary xp={setup.xp} units={data.units} /> : <BalanceSummary fair={setup.fair} />}
+          {setup.balanceKind === "xp" && <XpBalanceSummary xp={setup.xp} units={data.units} />}
+          {setup.balanceKind === "fair" && <BalanceSummary fair={setup.fair} />}
+          {setup.balanceKind === "none" && <p className="mb-3 text-sm text-hud-muted">{tBalance("none")}</p>}
           <div className="grid gap-4 md:grid-cols-2">
             {sidePanel(ParticipantSide.ALLY)}
             {sidePanel(ParticipantSide.ENEMY)}
@@ -118,6 +124,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       className={PAGE_CLASS}
     >
       <OnboardingHint id="dm.battle-setup" className="mb-3" />
+      {!setup.battleSupported && <FormAlert className="mb-3">{tSystem("unsupported")}</FormAlert>}
       <HudForm
         id={isEdit ? "battle-edit-form" : "battle-form"}
         onSubmit={form.actions.submit}

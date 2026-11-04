@@ -4,7 +4,8 @@
   },
   "form": {
     "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",
-    "saveFailed": "Could not save the rules"
+    "saveFailed": "Could not save the rules",
+    "unusedInSystem": "This system does not use this mechanic; its settings have no effect."
   },
   "diceTable": {
     "reset": "Reset to defaults",
@@ -190,5 +191,10 @@
     "meleeAttack": "Unarmed Strike",
     "rangedAttack": "Ranged Attack",
     "weapon": "Weapon"
+  },
+  "system": {
+    "label": "Rule system",
+    "description": "Defines how the campaign rolls tests, computes hit points and balances encounters.",
+    "lockedHint": "The system cannot be changed while the campaign has characters or units."
   }
 }

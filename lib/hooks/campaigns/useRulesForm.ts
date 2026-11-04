@@ -87,6 +87,7 @@ export function useRulesForm(campaignId: string) {
     save,
     isSaving: update.isPending,
     isDirty: dirtyKeys.length > 0,
+    systemLocked: query.data?.systemLocked ?? false,
     isLoading: query.isLoading,
     loadError: query.isError ? query.error : null,
     reload: () => void query.refetch(),

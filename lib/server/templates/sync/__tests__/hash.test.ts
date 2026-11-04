@@ -5,6 +5,7 @@ import { baselineFromBundle, rowHash, rulesHashes, settingsHash } from "@/lib/se
 import { hashJson } from "@/lib/utils/battle/store/stable-json";
 import { MECHANIC_REGISTRY } from "@/lib/utils/rules/registry";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
 const spells = BUNDLE_TABLES.find((t) => t.key === "spells")!;
 
@@ -30,6 +31,10 @@ describe("sync hashes", () => {
 
     expect(Object.keys(h).sort()).toEqual(Object.keys(MECHANIC_REGISTRY).sort());
     expect(h.morale).toBe(hashJson(parseRules({}).morale));
+  });
+
+  it("rulesHashes does not treat system as a mechanic", () => {
+    expect(Object.keys(rulesHashes(WFRP_RULES))).not.toContain("system");
   });
 
   it("settingsHash depends only on the four settings", () => {

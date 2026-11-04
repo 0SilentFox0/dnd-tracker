@@ -18,13 +18,15 @@ import { MoraleSection } from "./sections/MoraleSection";
 import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
 import { SpellIngredientsSection } from "./sections/SpellIngredientsSection";
+import { SystemSection } from "./sections/SystemSection";
 
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useRulesForm } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { MECHANIC_REGISTRY, type Ruleset } from "@/lib/utils/rules";
+import { MECHANIC_REGISTRY,type MechanicKey } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 
 const FORM_ID = "campaign-rules-form";
 
@@ -45,23 +47,34 @@ const SECTIONS = {
   encounters: EncountersSection,
   items: ItemsSection,
   spellIngredients: SpellIngredientsSection,
-} satisfies Record<keyof Ruleset, unknown>;
+} satisfies Record<MechanicKey, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {
   const t = useTranslator("rules");
 
   const tc = useTranslator("common");
 
-  const { form, save, reset, isSaving, isDirty, isLoading, loadError, reload } = useRulesForm(campaignId);
+  const { form, save, reset, isSaving, isDirty, isLoading, loadError, reload, systemLocked } = useRulesForm(campaignId);
 
   if (loadError) return <ErrorState error={loadError} onRetry={reload} />;
 
   if (isLoading) return <LoadingState />;
 
-  const tabs: HudTab<keyof Ruleset>[] = (Object.keys(MECHANIC_REGISTRY) as (keyof Ruleset)[]).map((key) => {
+  const unused = ruleSystemOf(form.data).unusedMechanics;
+
+  const tabs: HudTab<MechanicKey>[] = (Object.keys(MECHANIC_REGISTRY) as MechanicKey[]).map((key) => {
     const Section = SECTIONS[key];
 
-    return { id: key, label: t(`mechanics.${key}.label`), content: <Section form={form} /> };
+    return {
+      id: key,
+      label: t(`mechanics.${key}.label`),
+      content: (
+        <>
+          {unused.includes(key) && <p className="mb-3 text-xs text-hud-muted">{t("form.unusedInSystem")}</p>}
+          <Section form={form} />
+        </>
+      ),
+    };
   });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -71,6 +84,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   return (
     <>
+      <SystemSection form={form} locked={systemLocked} />
       <HudForm
         id={FORM_ID}
         onSubmit={onSubmit}
