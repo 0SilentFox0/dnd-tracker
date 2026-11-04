@@ -1,5 +1,4 @@
 import { countDownRoundEffects } from "./effects";
-import { calculateInitiative, sortByInitiative } from "./initiative";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -59,9 +58,7 @@ export function processStartOfRound(
 
   messages.push(...round.messages);
 
-  const sortedOrder = sortByInitiative(
-    round.participants.map((p) => ({ ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, round.participants) } })),
-  );
+  const sortedOrder = round.participants;
 
   return {
     updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),
