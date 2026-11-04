@@ -24,7 +24,7 @@ function counted<P extends object>(original: FunctionComponent<P> | MemoExoticCo
     return inner(props);
   };
 
-  return "type" in original ? memo(Counted, original.compare ?? undefined) : Counted;
+  return "type" in original ? memo(Counted, (original as { compare?: ((a: P, b: P) => boolean) | null }).compare ?? undefined) : Counted;
 }
 
 vi.mock("@/components/battle/participants/ParticipantList", async (orig) => {

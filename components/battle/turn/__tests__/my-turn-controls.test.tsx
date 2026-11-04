@@ -10,7 +10,7 @@ vi.unmock("next-intl");
 const rules = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 
 vi.mock("next/dynamic", () => ({
-  default: (loader: () => Promise<React.ComponentType<never>>) => {
+  default: (loader: () => Promise<React.ComponentType<object>>) => {
     const Lazy = lazy(() => loader().then((c) => ({ default: c })));
 
     return (props: object) => createElement(Suspense, { fallback: null }, createElement(Lazy as React.ComponentType<object>, props));
