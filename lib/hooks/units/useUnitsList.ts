@@ -9,12 +9,16 @@ import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { groupUnitsByRace, raceChips } from "@/lib/utils/units/group-units";
+import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
+
+// a fresh [] default each render re-fires the setOpen effect forever while races load
+const NO_RACES: Race[] = [];
 
 export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
   const { data: units = initialUnits, isLoading } = useUnits(campaignId, initialUnits);
 
-  const { data: races = [] } = useRaces(campaignId);
+  const { data: races = NO_RACES } = useRaces(campaignId);
 
   const { data: rules } = useCampaignRules(campaignId);
 

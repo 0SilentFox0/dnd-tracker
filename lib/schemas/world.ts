@@ -140,4 +140,4 @@ export const updateWorldNoteSchema = z
   .strict()
   .refine((o) => Object.keys(o).length > 0, "world.validation.nothingToUpdate");
 
-export const worldViewQuerySchema = z.object({ mapId: z.string().min(1), asHeroId: z.string().min(1).optional() });
+export const worldViewQuerySchema = z.object({ mapId: z.string().min(1), asHeroId: z.string().min(1).optional(), asParty: z.literal("1").optional() });

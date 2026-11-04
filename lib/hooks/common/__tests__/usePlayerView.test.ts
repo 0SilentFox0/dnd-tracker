@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createSessionFlag } from "@/lib/hooks/common/storage-value";
 import { resetPlayerViews, usePlayerView } from "@/lib/hooks/common/usePlayerView";
+import { PLAYER_VIEW_PENDING_ATTR } from "@/lib/utils/common/player-view";
 
 afterEach(() => {
   window.sessionStorage.clear();
@@ -113,5 +114,17 @@ describe("resetPlayerViews", () => {
     expect(result.current.enabled).toBe(false);
     expect(window.sessionStorage.getItem("player-view:other")).toBeNull();
     expect(window.sessionStorage.getItem("keep")).toBe("on");
+  });
+});
+
+describe("usePlayerView guard reveal", () => {
+  it("clears the pending attribute once the consumer has read the flag", () => {
+    window.sessionStorage.setItem("player-view:rv1", "on");
+    document.documentElement.setAttribute(PLAYER_VIEW_PENDING_ATTR, "1");
+
+    const { result } = renderHook(() => usePlayerView({ kind: "battle", id: "rv1" }));
+
+    expect(result.current.enabled).toBe(true);
+    expect(document.documentElement.hasAttribute(PLAYER_VIEW_PENDING_ATTR)).toBe(false);
   });
 });

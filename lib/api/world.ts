@@ -57,8 +57,8 @@ export async function uploadWorldMapImage(campaignId: string, blob: Blob, upload
 /** Best-effort: прибирає щойно завантажений файл, якщо створення/оновлення карти не вдалося. */
 export const discardWorldMapUpload = (campaignId: string, imageUrl: string) => campaignPost<{ ok: true }>(campaignId, "/world/discard-upload", { imageUrl });
 
-export const getWorldView = (campaignId: string, { mapId, asHeroId }: { mapId: string; asHeroId?: string }) => {
-  const query = new URLSearchParams({ mapId, ...(asHeroId ? { asHeroId } : {}) });
+export const getWorldView = (campaignId: string, { mapId, asHeroId, asParty }: { mapId: string; asHeroId?: string; asParty?: boolean }) => {
+  const query = new URLSearchParams({ mapId, ...(asHeroId ? { asHeroId } : {}), ...(asParty ? { asParty: "1" } : {}) });
 
   return campaignGet<WorldView>(campaignId, `/world/view?${query}`, { cache: "no-store" });
 };

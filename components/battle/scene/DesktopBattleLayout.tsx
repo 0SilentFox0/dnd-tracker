@@ -50,7 +50,7 @@ function BattleColumns() {
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
   const t = useTranslations("battle.scene");
 
-  const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM }, select, log, intents } = useBattleScene();
+  const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM, readOnly }, select, log, intents } = useBattleScene();
 
   const onReorder = useTrackReorder();
 
@@ -77,7 +77,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5 pb-20">
           {hero && <MyHeroPanel hero={hero} />}
           {isMyTurn && hero && <MyTurnControls key={myTurnKey(hero, battle.currentRound)} hero={hero} />}
-          {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">{t("actionsWait")}</div>}
+          {!isMyTurn && !isDM && !readOnly && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">{t("actionsWait")}</div>}
           {isDM && <DmPanel />}
           {battle.map && viewMode === "map" && <ReserveGroup />}
         </aside>

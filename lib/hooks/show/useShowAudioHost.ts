@@ -12,7 +12,7 @@ import type { AudioHost } from "@/lib/hooks/audio";
 import type { BattleAudioCommand } from "@/types/audio";
 import type { ShowSnapshot } from "@/types/show";
 
-export function useShowAudioHost({ campaignId, isDM, onFailure }: { campaignId: string; isDM: boolean; onFailure(message: string): void }): AudioHost {
+export function useShowAudioHost({ campaignId, isDM, silent, onFailure }: { campaignId: string; isDM: boolean; silent?: boolean; onFailure(message: string): void }): AudioHost {
   const queryClient = useQueryClient();
 
   const { show } = useShowState(campaignId);
@@ -29,11 +29,12 @@ export function useShowAudioHost({ campaignId, isDM, onFailure }: { campaignId: 
     return {
       campaignId,
       isDM,
+      silent,
       queryKey: showKeys.audio(campaignId),
       seed: show?.audio,
       fetch: () => apply(getShow(campaignId)),
       send: (cmd: BattleAudioCommand) => apply(sendShow(campaignId, { action: "audio", command: cmd })),
       onFailure,
     };
-  }, [campaignId, isDM, show?.audio, queryClient, onFailure]);
+  }, [campaignId, isDM, silent, show?.audio, queryClient, onFailure]);
 }

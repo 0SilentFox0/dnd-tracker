@@ -6,6 +6,8 @@ import type { BattleAudioCommand, BattleAudioSnapshot, BattleAudioState } from "
 export interface AudioHost {
   campaignId: string;
   isDM: boolean;
+  /** Вікно DM у режимі «вигляд гравців»: стан синхронізується, але звук вимкнено, щоб не дублювати вікно гравців. */
+  silent?: boolean;
   queryKey: QueryKey;
   seed: BattleAudioState | null | undefined;
   fetch(): Promise<BattleAudioSnapshot>;

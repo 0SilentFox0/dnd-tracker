@@ -36,7 +36,7 @@ const NO_TRACKS: CampaignTrack[] = [];
 
 /** audioRef — єдиний <audio> сторінки в AudioPlayerProvider: iOS розблоковує саме елемент, тож він не мусить перемонтовуватися разом із панеллю. */
 export function usePlayerAudioValue(host: AudioHost): { value: PlayerAudioValue; audioRef: (el: HTMLAudioElement | null) => void } {
-  const { campaignId, isDM, onFailure } = host;
+  const { campaignId, isDM, silent = false, onFailure } = host;
 
   const t = useTranslator();
 
@@ -45,7 +45,9 @@ export function usePlayerAudioValue(host: AudioHost): { value: PlayerAudioValue;
 
   const { audio, clockOffsetMs } = useAudioState({ host, unlocked });
 
-  const prefs = useAudioPrefs();
+  const basePrefs = useAudioPrefs();
+
+  const prefs = useMemo(() => (silent ? { ...basePrefs, muted: true } : basePrefs), [silent, basePrefs]);
 
   const control = useAudioControl(host);
 

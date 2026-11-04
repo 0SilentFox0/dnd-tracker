@@ -81,11 +81,12 @@ describe("mid-battle turn entry", () => {
   it("roll: the new current actor gets a fresh turn", () => {
     const ps = [spent("a"), spent("b"), spent("c")];
 
-    const out = initiativeRollMutation(context({ participants: ps, isDM: true, scene: scene(2) }), {});
+    const out = initiativeRollMutation(context({ participants: ps, isDM: true, scene: scene(2), rng: () => 0.5 }), {});
 
     const fresh = out.participants.filter((p) => !p.actionFlags.hasUsedAction);
 
-    expect(fresh.map((p) => p.basicInfo.id)).toEqual([out.participants[out.scene?.turnIndex ?? 0].basicInfo.id]);
+    expect(out.participants[0].basicInfo.id).toBe("a");
+    expect(fresh.map((p) => p.basicInfo.id)).toEqual(["a"]);
     expect(out.events.length).toBeGreaterThan(0);
   });
 
