@@ -171,5 +171,14 @@
     "homm": "HoMM (simplified d20)",
     "dnd5e": "D&D 5e",
     "wfrp": "Warhammer Fantasy RP (d100)"
+  },
+  "difficulty": {
+    "veryEasy": "Very easy",
+    "easy": "Easy",
+    "average": "Average",
+    "challenging": "Challenging",
+    "difficult": "Difficult",
+    "hard": "Hard",
+    "veryHard": "Very hard"
   }
 }
