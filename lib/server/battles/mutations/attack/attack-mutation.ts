@@ -14,6 +14,7 @@ import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
 import { withLines } from "@/lib/utils/battle/log/lines";
+import { momentumPatch } from "@/lib/utils/battle/momentum";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
@@ -108,6 +109,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
           map: ctx.meta.map,
           rules: ctx.meta.rules,
           hitSpells,
+          momentum: ctx.scene.momentum,
         });
 
         const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
@@ -118,14 +120,16 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
 
         const events = actions.map(battleActionToEvent);
 
-        if (!endTurn) return { participants: order, pending: ctx.pending, events };
+        const patch = momentumPatch(ctx.scene.momentum, phase.momentum);
+
+        if (!endTurn) return { participants: order, pending: ctx.pending, events, ...(Object.keys(patch).length > 0 && { scene: patch }) };
 
         const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng, map: ctx.meta.map, rules: ctx.meta.rules });
 
         return {
           participants: advanced.participants,
           pending: advanced.pending,
-          scene: advanced.scene,
+          scene: { ...patch, ...advanced.scene },
           events: [...events, ...advanced.actions.map(battleActionToEvent)],
         };
       },

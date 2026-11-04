@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { context } from "./fixtures";
+import { context, goblin, hero } from "./fixtures";
 
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
 import { type AttackBody, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { initiativeRollMutation } from "@/lib/server/battles/mutations/initiative/initiative-roll-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
@@ -89,5 +90,65 @@ describe("wfrp battle end to end (engine)", () => {
     const out = await attackMutation({ ...ctx, rng: seq(0.995, 0.01) }, body);
 
     expect(out.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp).toBe(20);
+  });
+
+  describe("scene momentum", () => {
+    const wfrpCtx = (over: Partial<BattleMutationContext["scene"]> = {}, metaOver: Partial<BattleMutationContext["meta"]> = {}): BattleMutationContext => {
+      const base = context({ participants: [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });
+
+      return { ...base, meta: { ...base.meta, rules: WFRP_RULES, ...metaOver }, scene: { ...base.scene, turnIndex: 0, ...over } };
+    };
+
+    const body = (over: Record<string, unknown> = {}) => attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", d20Roll: 10, damageRolls: [4], ...over });
+
+    it("a won attack writes the side token to the scene, the next attack of that side spends it", async () => {
+      const won = await attackMutation({ ...wfrpCtx(), rng: firstThen(0.295, 0.795) }, body());
+
+      expect(won.scene?.momentum).toEqual({ ally: true });
+
+      const next = await attackMutation({ ...wfrpCtx({ momentum: { ally: true } }), rng: firstThen(0.295, 0.795) }, body());
+
+      expect(next.events.length).toBeGreaterThan(0);
+      expect(next.scene?.momentum).toBeUndefined();
+    });
+
+    it("a lost attack hands the token to the defender", async () => {
+      const lost = await attackMutation({ ...wfrpCtx({ momentum: { ally: true } }), rng: firstThen(0.795, 0.295) }, body({ endTurn: true }));
+
+      expect(lost.scene?.momentum).toEqual({ enemy: true });
+      expect(lost.scene?.turnIndex).toBeDefined();
+    });
+
+    const swordHero = { ...hero, battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Sword", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" } as BattleAttack] } };
+
+    const d20Body = (roll: number) => attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: roll, damageRolls: [4] });
+
+    it("a d20 battle never emits scene.momentum", async () => {
+      const out = await attackMutation(context({ participants: [swordHero, goblin], isDM: true }), d20Body(15));
+
+      expect(out.scene?.momentum).toBeUndefined();
+    });
+
+    it("a crit-choice pause leaves scene momentum alone and the resume equals an unpaused run", async () => {
+      const base = context({ participants: [swordHero, goblin], isDM: true, userId: "dm" });
+
+      const on: BattleMutationContext = { ...base, meta: { ...base.meta, critChoiceByDm: true }, scene: { ...base.scene, momentum: { enemy: true } } };
+
+      const paused = await attackMutation(on, d20Body(20));
+
+      expect(paused.scene?.pendingCritChoice).toBeTruthy();
+      expect(paused.scene).not.toHaveProperty("momentum");
+
+      const { seed } = paused.scene?.pendingCritChoice as unknown as { seed: number };
+
+      const resume: CritResume = { seed, choices: {} };
+
+      const resumed = await attackMutation(on, d20Body(20), resume);
+
+      const plain = await attackMutation({ ...on, meta: { ...on.meta, critChoiceByDm: false } }, d20Body(20), resume);
+
+      expect(resumed.scene?.momentum).toEqual(plain.scene?.momentum);
+      expect(resumed.participants.map((p) => p.combatStats.currentHp)).toEqual(plain.participants.map((p) => p.combatStats.currentHp));
+    });
   });
 });
