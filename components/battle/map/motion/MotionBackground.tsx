@@ -49,7 +49,7 @@ export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map:
 
       if (!track) return;
 
-      const offset = state.current.phase - period;
+      const offset = (((state.current.phase % period) + period) % period) - period;
 
       track.style.transform = horizontal ? `translate3d(${offset}px,0,0)` : `translate3d(0,${offset}px,0)`;
     };

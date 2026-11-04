@@ -111,3 +111,13 @@ describe("battleMapSchema: id зон і концентрації реально�
     expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "hazard", zoneId: "x".repeat(201) } } }).success).toBe(false);
   });
 });
+
+describe("battleMapSchema.motion", () => {
+  it("keeps motion through parsing (setup patch must not strip it), accepts null, rejects bad values", () => {
+    const parsed = battleMapSchema.parse({ ...map, motion: { axis: "y", speed: -2 } });
+
+    expect(parsed.motion).toEqual({ axis: "y", speed: -2 });
+    expect(battleMapSchema.safeParse({ ...map, motion: null }).success).toBe(true);
+    expect(battleMapSchema.safeParse({ ...map, motion: { axis: "x", speed: 7 } }).success).toBe(false);
+  });
+});

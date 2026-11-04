@@ -130,4 +130,36 @@ describe("MotionBackground", () => {
 
     expect(container.querySelector("img")).not.toBeNull();
   });
+
+  it("does not animate while the tab is hidden", async () => {
+    Object.defineProperty(document, "hidden", { value: true, configurable: true });
+
+    try {
+      const { container } = mount({ axis: "x", speed: 2 });
+
+      await loadImage(container);
+
+      expect(subscribe).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(document, "hidden", { value: false, configurable: true });
+    }
+  });
+
+  it("keeps the track covering the map after the period shrinks while stopped", async () => {
+    const { container, rerender } = mount({ axis: "x", speed: 2 });
+
+    await loadImage(container);
+
+    act(() => {
+      for (let i = 0; i < 5; i++) ticker.fns.at(-1)!(0, 1);
+    });
+
+    rerender(<MotionBackground map={map} motion={{ axis: "x", speed: 0 }} cellPx={10} rotated={false} phone={false} />);
+
+    const track = container.querySelector("[data-motion-track]") as HTMLElement;
+
+    const offset = Number(/translate3d\((-?[\d.]+)px/.exec(track.style.transform)?.[1]);
+
+    expect(offset).toBeLessThanOrEqual(0);
+  });
 });

@@ -70,6 +70,8 @@ export const mazeMarkSchema = z.object({
   symbol: mazeMarkSymbolSchema,
 });
 
+const motionConfigSchema = z.object({ axis: z.enum(["x", "y"]), speed: z.number().min(-MAP_MOTION_MAX_SPEED).max(MAP_MOTION_MAX_SPEED) });
+
 export const battleMapSchema = z.object({
   cols: z.number().int().min(4).max(60),
   rows: z.number().int().min(4).max(60),
@@ -118,6 +120,7 @@ export const battleMapSchema = z.object({
   gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),
   maze: mazeSchema.nullable().optional(),
   weather: weatherKindSchema.nullable().optional(),
+  motion: motionConfigSchema.nullable().optional(),
 }).refine((m) => hasPlayableArea(m), { message: "battleSetup.validation.playableAreaTooSmall", path: ["blocked"] });
 
 export const createBattleSchema = z.object({
@@ -212,9 +215,7 @@ export const mapTerrainSchema = z.object({
 
 export const mapWeatherSchema = z.object({ weather: weatherKindSchema.nullable() });
 
-export const mapMotionSchema = z.object({
-  motion: z.object({ axis: z.enum(["x", "y"]), speed: z.number().min(-MAP_MOTION_MAX_SPEED).max(MAP_MOTION_MAX_SPEED) }).nullable(),
-});
+export const mapMotionSchema = z.object({ motion: motionConfigSchema.nullable() });
 
 export const castSpellSchema = z.object({
   casterId: z.string(),
