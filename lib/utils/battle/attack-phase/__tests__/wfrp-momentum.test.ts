@@ -33,8 +33,8 @@ const MISS = 0.795;
 
 const order = () => [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY), fighter("u", ParticipantSide.ENEMY)];
 
-const run = (targetIds: string[], strikes: number[], rng: () => number, momentum?: SceneMomentum) =>
-  runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds, attackRolls: strikes, damageRolls: targetIds.map(() => 4) }, battleId: "b", userId: "u", isDM: true, rng, momentum });
+const run = (targetIds: string[], strikes: number[], rng: () => number, momentum?: SceneMomentum, damageRolls = targetIds.map(() => 4)) =>
+  runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds, attackRolls: strikes, damageRolls }, battleId: "b", userId: "u", isDM: true, rng, momentum });
 
 const used = (r: ReturnType<typeof run>) => r.allBattleActions.map((a) => a.actionDetails.percentile?.momentumUsed === true);
 
@@ -45,6 +45,30 @@ describe("wfrp server-rolled d100", () => {
     const r = runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetId: "t", serverRoll: true, attackRoll: 99, damageRolls: [4] }, battleId: "b", userId: "u", isDM: true, rng });
 
     expect(r.allBattleActions[0].actionDetails.percentile?.roll).toBe(30);
+  });
+});
+
+describe("wfrp multi-target damage pool", () => {
+  const lost = (r: ReturnType<typeof run>) => ["t", "u"].map((id) => 40 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 0));
+
+  const hits = (r: ReturnType<typeof run>) => r.allBattleActions.filter((a) => a.actionDetails.isHit).length;
+
+  const rng = () => byCall(MISS, MISS, HIT, HIT, 0.5, 0.5, MISS);
+
+  it("a partial hit shares only the hit dice, like d20: one block over two targets", () => {
+    const full = run(["t", "u"], [30, 80], rng());
+
+    const asD20 = run(["t", "u"], [30, 80], rng(), undefined, [4]);
+
+    expect(hits(full)).toBe(1);
+    expect(lost(full)).toEqual(lost(asD20));
+  });
+
+  it("every target hit keeps the whole pool", () => {
+    const full = run(["t", "u"], [30, 30], rng());
+
+    expect(hits(full)).toBe(2);
+    expect(lost(full)).toEqual(lost(run(["t", "u"], [30, 30], rng(), undefined, [4, 4])));
   });
 });
 

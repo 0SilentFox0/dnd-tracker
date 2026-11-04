@@ -1,5 +1,5 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
-import { type AttackRequest, validateAttackRequest } from "./request";
+import { type AttackRequest, requestedTargetIds, validateAttackRequest } from "./request";
 import { damageDiceCursor, damageFractions, strikeRoll } from "./strike-rolls";
 import { resolveAttackTargets } from "./targets";
 
@@ -79,8 +79,31 @@ interface StrikeOpts {
 
 const liveOf = (st: PhaseState, p: BattleParticipant) => findParticipant(st.order, p.basicInfo.id) ?? p;
 
-// Фаза атаки: валідація, processAttack на ціль, відповідний удар по основній цілі.
+// d100: сервер сам вирішує влучання, а клієнт шле кубики на кожну ціль; пул, як у d20, — лише за влучання.
+// Пробний прогін записує rng, повторний програє запис, тож влучання збігаються.
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
+  const targets = requestedTargetIds(input.data).length;
+
+  const pool = input.data.damageRolls;
+
+  if (ruleSystemOf(input.rules).combat.dice === 20 || targets < 2 || pool.length === 0 || pool.length % targets !== 0) return runPhase(input);
+
+  const source = rngOf(input);
+
+  const tape: number[] = [];
+
+  const dry = runPhase({ ...input, crit: undefined, rng: () => tape[tape.push(source()) - 1] });
+
+  const hits = dry.allBattleActions.filter((a) => a.actionType === "attack" && a.actionDetails.isHit).length;
+
+  let at = 0;
+
+  const replay = () => (at < tape.length ? tape[at++] : source());
+
+  return runPhase({ ...input, rng: replay, data: { ...input.data, damageRolls: pool.slice(0, (hits * pool.length) / targets) } });
+}
+
+function runPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, isDM, userId } = input;
 
   const rng = rngOf(input);
