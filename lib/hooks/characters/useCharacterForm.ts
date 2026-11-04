@@ -15,6 +15,7 @@ interface UseCharacterFormOptions {
   type?: CharacterTypeValue;
   recommendScores?: Record<string, GameClassData>;
   requireRace?: boolean;
+  requireClass?: boolean;
   onSubmit: (data: CharacterFormData) => Promise<CharacterFormData | void>;
   onCancel?: () => void;
 }
@@ -80,6 +81,8 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
 
   const requireRace = options.requireRace ?? true;
 
+  const requireClass = options.requireClass ?? true;
+
   const setWithRecommendation = useCallback<typeof setFormData>(
     (update) =>
       setFormData((prev) => {
@@ -101,7 +104,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
         return;
       }
 
-      if (!formData.basicInfo.class.trim()) {
+      if (requireClass && !formData.basicInfo.class.trim()) {
         setError(t("classRequired"));
 
         return;
@@ -127,7 +130,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
         setIsLoading(false);
       }
     },
-    [formData, options, requireRace, t],
+    [formData, options, requireRace, requireClass, t],
   );
 
   const handleCancel = useCallback(() => {

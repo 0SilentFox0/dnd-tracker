@@ -45,6 +45,23 @@ describe("normalizeCharacterInput", () => {
     expect(data).toEqual({ name: "N" });
   });
 
+  it("wfrp create and update pass without a class and drop a sent one", () => {
+    const body = { name: "Hero", type: "player", controlledBy: "u", characteristics: {} };
+
+    expect(normalizeCharacterInput(wfrp, createCharacterSchema.parse(body), WFRP_RULES, "create")).toMatchObject({ class: "", classes: [] });
+    expect(normalizeCharacterInput(wfrp, createCharacterSchema.parse({ ...body, class: "Warrior" }), WFRP_RULES, "create").class).toBe("");
+    expect(normalizeCharacterInput(wfrp, updateCharacterSchema.parse({ name: "N", class: "" }), WFRP_RULES, "update")).toEqual({ name: "N" });
+  });
+
+  it("d20 still requires a class on create and forbids clearing it on update", () => {
+    const bad = { name: "H", type: "player", controlledBy: "u", race: "human" };
+
+    expect(() => normalizeCharacterInput(d20, createCharacterSchema.parse(bad), DEFAULT_RULES, "create")).toThrow(expect.objectContaining({ status: 400, message: API_ERRORS.HERO_CLASS_REQUIRED }));
+    expect(() => normalizeCharacterInput(d20, updateCharacterSchema.parse({ class: "" }), DEFAULT_RULES, "update")).toThrow(expect.objectContaining({ message: API_ERRORS.HERO_CLASS_REQUIRED }));
+    expect(normalizeCharacterInput(d20, createCharacterSchema.parse({ ...bad, classes: [{ classId: "c", level: 1 }] }), DEFAULT_RULES, "create").classes).toHaveLength(1);
+    expect(normalizeCharacterInput(d20, updateCharacterSchema.parse({ name: "N" }), DEFAULT_RULES, "update")).toEqual({ name: "N" });
+  });
+
   it("d20 drops characteristics", () => {
     const data = normalizeCharacterInput(d20, create({ characteristics: {} }), DEFAULT_RULES, "create");
 

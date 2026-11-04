@@ -66,7 +66,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
           <p className="hud-sc truncate text-lg leading-6 text-hud-ink">{character.name}</p>
           <p className="truncate text-xs text-hud-muted">
             {character.race}
-            {character.subrace ? ` (${character.subrace})` : ""} · {character.class}
+            {character.subrace ? ` (${character.subrace})` : ""}{system?.classes && ` · ${character.class}`}
           </p>
           <div className="flex min-w-0 items-center gap-1.5">
             <HudPill tone={isNpc ? "silver" : "gold"}>{isNpc ? t("npcHero") : t("player")}</HudPill>

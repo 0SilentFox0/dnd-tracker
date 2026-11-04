@@ -49,6 +49,7 @@
   "characterNotFound": "Персонажа не знайдено",
   "raceNotFound": "Расу не знайдено",
   "raceRequired": "Оберіть расу",
+  "heroClassRequired": "Вкажіть клас",
   "classNotFound": "Клас не знайдено",
   "abilityPoolEmpty": "У пулі недостатньо очок для цього вміння",
   "classColumnUnknown": "Вміння класу посилається на невідому колонку таблиці класу",

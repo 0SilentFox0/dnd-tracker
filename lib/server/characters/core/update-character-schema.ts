@@ -67,8 +67,6 @@ export const updateCharacterSchema = z.object({
 
   archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
   characteristics: CharacteristicsSchema.optional(),
-}).superRefine((value, ctx) => {
-  if (value.class === "" && !value.classes?.length) ctx.addIssue({ code: "custom", path: ["class"], message: "Required" });
 });
 
 export type UpdateCharacterInput = z.infer<typeof updateCharacterSchema>;

@@ -64,6 +64,30 @@ describe("DmCharacterCard before the rules load", () => {
   });
 });
 
+describe("DmCharacterCard class line", () => {
+  afterEach(cleanup);
+
+  const setup = (key: "dnd5e" | "wfrp" | undefined) => {
+    mocks.rules.mockReturnValue({ data: undefined });
+    mocks.classMode.mockReturnValue({ enabled: false, byId: {} });
+    mocks.system.mockReturnValue(key ? { key, system: RULE_SYSTEM_REGISTRY[key], ready: true } : { key: undefined, system: undefined, ready: false });
+    renderCard(character);
+  };
+
+  it("d20 shows the class", () => {
+    setup("dnd5e");
+    expect(screen.getByText(/Людина · Воїн/)).toBeTruthy();
+  });
+
+  it("wfrp and not-ready rules hide the class", () => {
+    setup("wfrp");
+    expect(screen.queryByText(/Воїн/)).toBeNull();
+    cleanup();
+    setup(undefined);
+    expect(screen.queryByText(/Воїн/)).toBeNull();
+  });
+});
+
 describe("DmCharacterCard level-up menu", () => {
   beforeEach(() => {
     mocks.rules.mockReturnValue({ data: undefined });

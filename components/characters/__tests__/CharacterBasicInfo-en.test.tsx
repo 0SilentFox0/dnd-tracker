@@ -35,6 +35,18 @@ describe("characters in en", () => {
     expect(screen.getByText("Controlled by *")).toBeInTheDocument();
   });
 
+  it("hideClass hides class and subclass, d20 keeps the required class field", async () => {
+    const basicInfo = { data: { ...defaultCharacterFormData.basicInfo, type: "player" }, set: vi.fn() };
+
+    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />, { locale: "en", namespaces: ["common", "characters"] });
+    expect(document.getElementById("class")).toBeRequired();
+    cleanup();
+
+    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} hideClass />, { locale: "en", namespaces: ["common", "characters"] });
+    expect(document.getElementById("class")).toBeNull();
+    expect(document.getElementById("subclass")).toBeNull();
+  });
+
   it("DraftBanner interpolates the DM comment", async () => {
     await renderWithIntl(<DraftBanner campaignId="c1" note="Add a goal" isOwner={false} />, { locale: "en", namespaces: ["common", "characters"] });
 

@@ -24,6 +24,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   battle: { supported: true },
   combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
+  classes: false,
   attacks: false,
   spells: false,
   items: false,

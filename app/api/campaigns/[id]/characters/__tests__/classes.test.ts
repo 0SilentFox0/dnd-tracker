@@ -146,7 +146,6 @@ describe("PATCH character classes", () => {
     const { updateCharacterSchema } = await import("@/lib/server/characters/core/update-character-schema");
 
     expect(updateCharacterSchema.safeParse({ class: "", classes: [{ classId: "c1", level: 1 }] }).success).toBe(true);
-    expect(updateCharacterSchema.safeParse({ class: "", classes: [] }).success).toBe(false);
   });
 });
 

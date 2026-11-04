@@ -28,6 +28,7 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const form = useCharacterForm({
     requireRace: system?.lineage,
+    requireClass: system?.classes,
     onSubmit: async (data) => {
       const saved = await update.mutateAsync(data);
 

@@ -22,6 +22,7 @@ interface CharacterBasicInfoProps {
   isPlayerView?: boolean;
   hideProgression?: boolean;
   hideLineage?: boolean;
+  hideClass?: boolean;
   classMode?: { classes: GameClassData[]; byId: Record<string, GameClassData> };
 }
 
@@ -32,6 +33,7 @@ export function CharacterBasicInfo({
   isPlayerView = false,
   hideProgression = false,
   hideLineage = false,
+  hideClass = false,
   classMode,
 }: CharacterBasicInfoProps) {
   const t = useTranslations("characters.form.basic");
@@ -118,7 +120,7 @@ export function CharacterBasicInfo({
       />
         </>
       )}
-      {classMode ? (
+      {hideClass ? null : classMode ? (
         <CharacterClassesField value={data.classes ?? []} classes={classMode.classes} onChange={setClasses} />
       ) : (
         <>

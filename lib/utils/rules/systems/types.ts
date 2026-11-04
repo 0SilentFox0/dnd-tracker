@@ -141,6 +141,7 @@ export interface RuleSystemDefinition {
   battle: { supported: boolean };
   combat: RuleSystemCombat;
   lineage: boolean;
+  classes: boolean;
   attacks: boolean;
   spells: boolean;
   items: boolean;

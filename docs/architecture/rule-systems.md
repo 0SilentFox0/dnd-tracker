@@ -33,6 +33,7 @@
 - `system` не механіка: `MechanicKey` без неї, sync шаблон→кампанія й вкладки правил її не бачать.
 - Блокування: `updateCampaignRules` рахує `characters` + `units`; якщо >0 і патч змінює `system.key` → 409 `SYSTEM_LOCKED`. `rules.get` повертає `systemLocked`.
 - Відсутня секція `system` у збережених правилах: `parseRules` виводить `dnd5e` (якщо `classes.enabled`) або `homm`; бекфіла БД нема.
+- Прапорець `classes` реєстру (d20 `true`, wfrp `false`): форма/редагування ховають клас і підклас (`CharacterBasicInfo.hideClass`, `useCharacterForm.requireClass`), лист/ДМ-картка/дашборд гравця не друкують клас; сервер (`normalizeCharacterInput`) вимагає клас лише в системах з `classes` (`HERO_CLASS_REQUIRED`), у wfrp пише `class: ""` і відкидає надісланий клас/підклас. Зведена перевірка «клас або `classes`» перенесена зі Zod-схем у `normalizeCharacterInput`.
 - Пресети: `SRD_RULES` = `dnd5e`; `WFRP_RULES` (`wfrp/rules-preset.ts`) вимикає класи, рятунки від смерті, концентрацію, мораль, стани й дії; шаблон «Grim d100 (empty)» (`templateKey: grim-d100-empty`).
 
 ## Що де лежить (wfrp)
@@ -86,7 +87,7 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 - Гард літералів відстані: `battle-log-distance-unit.test.ts`.
 - Панель героя: плитка «Magic» (`ActionGrid.available.magicTile`) і слоти заклинань ховаються прапорцем `spells` з `useBattleRules()`; `ActionResultCard` обирає d100-вигляд за `combat.dice`.
 - Live-run у браузері виконано (d100 пара/запасне поле, багатоцільова, регрес d20); ручна перевірка ролі гравця (не-exact ціль) не робилась — немає другого акаунта.
-- Відкрито: ручна перевірка ролі гравця з не-exact ціллю (немає другого акаунта); клас «Воїн» у wfrp ще d20-лексика (лише зафіксовано).
+- Відкрито: ручна перевірка ролі гравця з не-exact ціллю (немає другого акаунта).
 
 ## Межі 5a
 
@@ -95,7 +96,7 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 ## Відкриті хвости 5a (фінальне рев'ю 2026-11-04)
 
 - Складність: `DIFFICULTY_SL` зсуває SL і не змінює ціль кидка (за spec); за правилами d100 складність зсуває саму ціль — рішення користувача.
-- Клас у wfrp ще видимий і обов'язковий (spec: сховати); частковий PATCH `characteristics` скидає решту до дефолтів; зниження Fate не обрізає `resources.fortune`.
+- Частковий PATCH `characteristics` скидає решту до дефолтів; зниження Fate не обрізає `resources.fortune`.
 - `readCharacteristics` (`keys.ts`) дублює межі `CharacteristicsSchema`: винести спільні константи й табличний тест на граничні значення.
 - `wfrp/sheet-test.ts` кидає `ContentError` (серверний шар) із чистої утиліти.
 - ~~`useRuleSystem` повертає `homm`, поки правила вантажаться; `systemLocked` не інвалідується~~ — закрито в 5b-3.

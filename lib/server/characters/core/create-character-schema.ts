@@ -64,8 +64,6 @@ export const createCharacterSchema = z.object({
   personalSkillId: z.string().optional().nullable(),
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
   characteristics: CharacteristicsSchema.optional(),
-}).superRefine((value, ctx) => {
-  if (!value.class && !value.classes?.length) ctx.addIssue({ code: "custom", path: ["class"], message: "Required" });
 });
 
 export type CreateCharacterInput = z.infer<typeof createCharacterSchema>;

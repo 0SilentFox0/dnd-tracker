@@ -30,6 +30,7 @@ export const API_ERRORS = {
   SUBCLASS_REQUIRED: "errors.subclassRequired",
   CLASS_REQUIRED: "errors.classRequired",
   RACE_REQUIRED: "errors.raceRequired",
+  HERO_CLASS_REQUIRED: "errors.heroClassRequired",
   SUBCLASS_NOT_FOUND: "errors.subclassNotFound",
   SUBCLASS_ALREADY_SET: "errors.subclassAlreadySet",
   CONVERT_TO_CLASSES_FIRST: "errors.convertToClassesFirst",
