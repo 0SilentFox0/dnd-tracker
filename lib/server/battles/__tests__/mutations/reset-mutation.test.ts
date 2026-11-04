@@ -26,4 +26,12 @@ describe("reset mutation", () => {
     expect(out.scene?.map).toEqual({ ...map, terrain: { "2:2": { kind: "wall" } } });
     expect(resetMutation({ ...ctx, meta: { ...ctx.meta, map } }).scene).not.toHaveProperty("map");
   });
+
+  it("зберігає motion і weather карти", () => {
+    const map = { cols: 8, rows: 8, background: null, opacity: 0.3, motion: { axis: "y" as const, speed: -2.5 }, weather: "rain" as const };
+
+    const ctx = context();
+
+    expect(resetMutation({ ...ctx, meta: { ...ctx.meta, map: { ...map, terrain: { "1:1": { kind: "barrier" as const, untilRound: 5 } } } } }).scene?.map).toEqual(map);
+  });
 });

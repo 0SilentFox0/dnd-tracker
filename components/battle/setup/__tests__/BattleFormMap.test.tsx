@@ -246,4 +246,19 @@ describe("BattleFormMap", () => {
     typeIn("battleSetup.map.margins.top", "1");
     expect(blocked(container)[0].getAttribute("fill")).not.toBe("transparent");
   });
+
+  it("motion panel sets and clears map.motion", () => {
+    render(<Harness />);
+
+    expect(screen.queryByRole("group", { name: "battle.map.tools.motion" })).toBeNull();
+    enable();
+    fireEvent.click(screen.getByRole("button", { name: "battle.map.motion.axisY" }));
+    expect(seen.editor.state.value?.motion).toEqual({ axis: "y", speed: 2.5 });
+
+    fireEvent.click(screen.getByRole("button", { name: "battle.map.motion.fast" }));
+    expect(seen.editor.state.value?.motion).toEqual({ axis: "y", speed: 5 });
+
+    fireEvent.click(screen.getByRole("button", { name: "battle.map.motion.off" }));
+    expect(seen.editor.state.value?.motion).toBeNull();
+  });
 });

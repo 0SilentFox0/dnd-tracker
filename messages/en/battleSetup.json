@@ -76,6 +76,7 @@
     "cellSize": "Cell size · {size} · {cols} × {rows}",
     "offsetX": "Grid offset X · {value}",
     "offsetY": "Grid offset Y · {value}",
+    "motion": "Motion",
     "opacity": "Grid opacity · {value}",
     "margins": {
       "title": "Margins (unplayable cells)",

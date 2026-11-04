@@ -76,6 +76,7 @@
     "cellSize": "Розмір клітинки · {size} · {cols} × {rows}",
     "offsetX": "Зсув сітки X · {value}",
     "offsetY": "Зсув сітки Y · {value}",
+    "motion": "Рух",
     "opacity": "Прозорість сітки · {value}",
     "margins": {
       "title": "Поля (неігрові клітинки)",

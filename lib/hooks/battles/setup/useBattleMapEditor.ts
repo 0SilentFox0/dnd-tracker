@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { useMapMotionTool } from "@/lib/hooks/battle";
 import { useImageSize } from "@/lib/hooks/common";
 import { textRef } from "@/lib/i18n/text-ref";
 import {
@@ -20,7 +21,7 @@ import {
   type SetupTool,
 } from "@/lib/utils/battle/grid";
 import { MAP_MODE_REGISTRY, type MapModeDefinition, type MapModeKey } from "@/lib/utils/battle/modes";
-import type { BattleMapConfig, GridPoint } from "@/types/battle";
+import type { BattleMapConfig, GridPoint, MapMotion } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
@@ -128,6 +129,12 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     if (on) setToolState(null);
   }, []);
 
+  const setMotion = useCallback((motion: MapMotion | null) => setMap((m) => ({ ...m, motion })), []);
+
+  const motionMutation = useMemo(() => ({ mutate: ({ motion }: { motion: MapMotion | null }) => setMotion(motion), isPending: false }), [setMotion]);
+
+  const motionTool = useMapMotionTool({ isDM: true, current: map.motion ?? null, mutation: motionMutation });
+
   const onStroke = useCallback(
     (cells: GridPoint[]) => {
       if (!tool || cells.length === 0) return;
@@ -147,6 +154,7 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
   return {
     state: { enabled, map, mode: MODE_KEYS.find((key) => modeOf(key).configOf(map) !== null) ?? null, margins, tool, notice, value: enabled ? map : null, cellPx: image ? impliedCellPx(map, image) : null },
     brush,
+    motionTool,
     actions: { setEnabled, setSize, setCellSize, setGridOffset, setOpacity, setMargins, setTool, setBackground, setBrush, setMode, onStroke },
   };
 }

@@ -142,4 +142,29 @@ describe("useBattleMapEditor", () => {
     act(() => result.current.actions.setEnabled(false));
     expect(result.current.state.notice).toBeNull();
   });
+
+  it("рух: вісь вмикає з типовою швидкістю, реверс, пауза, вимкнення; змінa фону не губить рух", () => {
+    const { result } = renderHook(() => useBattleMapEditor(null));
+
+    act(() => result.current.actions.setEnabled(true));
+    expect(result.current.state.map.motion ?? null).toBeNull();
+
+    act(() => result.current.motionTool?.setAxis("y"));
+    expect(result.current.state.map.motion).toEqual({ axis: "y", speed: 2.5 });
+
+    act(() => result.current.motionTool?.reverse());
+    expect(result.current.state.map.motion).toEqual({ axis: "y", speed: -2.5 });
+
+    act(() => result.current.actions.setBackground("https://x.test/a.png"));
+    expect(result.current.state.map.motion).toEqual({ axis: "y", speed: -2.5 });
+
+    act(() => result.current.motionTool?.turnOff());
+    expect(result.current.state.map.motion).toBeNull();
+  });
+
+  it("початкова карта з motion лишається у value", () => {
+    const { result } = renderHook(() => useBattleMapEditor({ ...DEFAULT_BATTLE_MAP, motion: { axis: "x", speed: 1 } }));
+
+    expect(result.current.state.value?.motion).toEqual({ axis: "x", speed: 1 });
+  });
 });

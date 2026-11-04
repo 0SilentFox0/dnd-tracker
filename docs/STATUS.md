@@ -16,6 +16,8 @@ _Оновлено: 2026-11-04._
 
 ## У роботі
 
+**Рух карти при створенні бою (feat/motion-setup, 2026-11-05):** блок «Рух» у редакторі карти налаштувань бою (вісь/напрям/швидкість/вимк.) на тих самих `MapMotionPanel`+`useMapMotionTool`; reset зберігає `motion`.
+
 **Рух карти (змерджено 2026-11-04):** режим «Рух» у бою — фон дзеркально зациклено їде під нерухомою сіткою; ДМ міняє вісь/напрям/швидкість, зупиняє, вимикає. `map.motion` (не режим реєстру), фаза локальна на клієнті, по мережі `axis`+`speed`. Браузерна перевірка DM пройдена (Pusher між двома DM-вкладками, повернута карта на 390px через iframe); справжній телефон і гравець не перевірені. Відкладені мінори: напрям на паузі для пресетів, скидання відкладеного повзунка при закритті, перехід осі при повороті під час руху. Деталі — [map-modes.md](architecture/map-modes.md#map-motion-рух); спека й план — [архів](archive/superpowers/specs/2026-11-04-map-motion-design.md).
 
 **Ініціатива в бою (`feat/battle-initiative`, `../dnd-tracker-initiative`, не змерджено):** порядок ходів персистентний на весь бій; DM кидає ініціативу заново (`initiative-roll`, d20 для всіх із 3D-кубиками через `diceRolls`) або виставляє порядок вручну (`initiative-reorder`: перетягування на треку, діалог зі стрілками на мобільному); `reordered` дозволяє зміну `turn-order-guard`. Tasks 1–6 готові; лишається повний suite/lint, `/simplify`, фінальне ревю й merge. Спека — [battle initiative](superpowers/specs/2026-11-04-battle-initiative-design.md), план — [battle initiative](superpowers/plans/2026-11-04-battle-initiative.md). Деталі: [battle.md](architecture/battle.md).
