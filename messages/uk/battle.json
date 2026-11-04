@@ -97,8 +97,11 @@
       "place": "Розставити",
       "terrain": "Місцевість",
       "weather": "Погода",
-      "motion": "Рух"
+      "motion": "Рух",
+      "background": "Фон"
     },
+    "backgroundLabel": "Фон карти",
+    "defaultBackground": "Стандартний фон",
     "motion": {
       "axisX": "Горизонтально",
       "axisY": "Вертикально",

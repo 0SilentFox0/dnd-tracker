@@ -14,6 +14,7 @@ const EXPECTED_PATHS: Record<keyof typeof battleOps, string> = {
   mapTerrain: "map-terrain",
   maze: "maze",
   mazeMark: "maze-mark",
+  mapBackground: "map-background",
   mapMotion: "map-motion",
   mapWeather: "map-weather",
   bonusAction: "bonus-action",

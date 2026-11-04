@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { type PaletteState,palettesToClose } from "../palettes";
 
-const state = (open: Partial<PaletteState> = {}): PaletteState => ({ mode: false, terrain: false, weather: false, motion: false, ...open });
+const state = (open: Partial<PaletteState> = {}): PaletteState => ({ mode: false, terrain: false, weather: false, motion: false, background: false, ...open });
 
 describe("palettesToClose", () => {
   it("opening motion closes the others", () => {

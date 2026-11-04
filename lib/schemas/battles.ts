@@ -70,16 +70,18 @@ export const mazeMarkSchema = z.object({
   symbol: mazeMarkSymbolSchema,
 });
 
+export const mapBackgroundSchema = z
+  .string()
+  .max(7_000_000)
+  .refine((v) => MAP_BACKGROUND_PATTERN.test(v), "battleSetup.validation.background")
+  .nullable();
+
 const motionConfigSchema = z.object({ axis: z.enum(["x", "y"]), speed: z.number().min(-MAP_MOTION_MAX_SPEED).max(MAP_MOTION_MAX_SPEED) });
 
 export const battleMapSchema = z.object({
   cols: z.number().int().min(4).max(60),
   rows: z.number().int().min(4).max(60),
-  background: z
-    .string()
-    .max(7_000_000)
-    .refine((v) => MAP_BACKGROUND_PATTERN.test(v), "battleSetup.validation.background")
-    .nullable(),
+  background: mapBackgroundSchema,
   opacity: z.number().min(0).max(1),
   blocked: z.array(z.string().regex(/^\d+:\d+$/)).max(3600).optional(),
   terrain: z
@@ -214,6 +216,8 @@ export const mapTerrainSchema = z.object({
 });
 
 export const mapWeatherSchema = z.object({ weather: weatherKindSchema.nullable() });
+
+export const mapBackgroundBodySchema = z.object({ background: mapBackgroundSchema });
 
 export const mapMotionSchema = z.object({ motion: motionConfigSchema.nullable() });
 

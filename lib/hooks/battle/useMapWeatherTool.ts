@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+
+import { usePaletteToggle } from "./usePaletteToggle";
 
 import type { MapWeatherData } from "@/types/api";
 import type { WeatherKind } from "@/types/battle";
@@ -25,19 +27,15 @@ export function useMapWeatherTool(args: {
     mutation: { mutate, isPending },
   } = args;
 
-  const [active, setActive] = useState(false);
-
-  const close = useCallback(() => setActive(false), []);
-
-  const toggle = useCallback(() => setActive((o) => !o), []);
+  const { active, toggle, close } = usePaletteToggle();
 
   const choose = useCallback(
     (kind: WeatherKind | null) => {
-      setActive(false);
+      close();
 
       if (kind !== current) mutate({ weather: kind });
     },
-    [current, mutate],
+    [current, mutate, close],
   );
 
   const tool = useMemo(() => ({ active, toggle, close, current, pending: isPending, choose }), [active, toggle, close, current, isPending, choose]);

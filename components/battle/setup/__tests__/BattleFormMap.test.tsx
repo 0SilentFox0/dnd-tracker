@@ -230,13 +230,13 @@ describe("BattleFormMap", () => {
 
     enable();
     act(() => seen.editor.actions.setBackground("h"));
-    expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
+    expect(container.querySelector("[data-background-layer=current] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
 
     act(() => seen.editor.actions.setBackground("https://evil.example/a.png"));
-    expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
+    expect(container.querySelector("[data-background-layer=current] [data-bg]")?.getAttribute("data-bg")).toBe("/battle-maps/nicolas-tomb.webp");
 
     act(() => seen.editor.actions.setBackground("data:image/webp;base64,AAAA"));
-    expect(container.querySelector("[data-fx-clip] [data-bg]")?.getAttribute("data-bg")).toBe("data:image/webp;base64,AAAA");
+    expect(container.querySelector("[data-background-layer=current] [data-bg]")?.getAttribute("data-bg")).toBe("data:image/webp;base64,AAAA");
   });
 
   it("blocked cells are tinted in the editor preview", () => {

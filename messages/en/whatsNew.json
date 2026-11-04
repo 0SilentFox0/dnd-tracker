@@ -1,4 +1,8 @@
 {
+  "2026-11-05-map-background": {
+    "title": "Change the map background mid-battle",
+    "body": "The DM can now swap the map background during a battle with the new Background tool on the map panel (file or link). Players see it fade smoothly: the old background dissolves while the new one appears."
+  },
   "2026-11-05-map-motion-setup": {
     "title": "Map motion in battle setup",
     "body": "The map editor in battle setup now has a Motion block: pick the axis, direction and speed, or leave it off, and the preview scrolls right away. The settings are kept when the battle is reset; during the fight you can still change them."

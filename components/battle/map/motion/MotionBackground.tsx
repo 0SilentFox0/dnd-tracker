@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 
 import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { useLoadedAspect } from "@/lib/hooks/battle";
 import { usePageHidden, useReducedMotion } from "@/lib/hooks/common";
 import { mirrorTileCount, motionInMapSpace, stepMotion } from "@/lib/utils/battle/map-motion";
 import { subscribe } from "@/lib/utils/canvas/ticker";
@@ -12,10 +13,10 @@ import type { BattleMapConfig, MapMotion } from "@/types/battle";
 const REST_PX_PER_S = 0.5;
 
 /** Фон, що їде під нерухомою сіткою: дзеркально зациклена доріжка тайлів, фаза крутиться локально в rAF. */
-export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map: BattleMapConfig; motion: MapMotion; cellPx: number; rotated: boolean; phone: boolean }) {
+export function MotionBackground({ map, motion, cellPx, rotated, phone, onReady }: { map: BattleMapConfig; motion: MapMotion; cellPx: number; rotated: boolean; phone: boolean; onReady?: () => void }) {
   const src = map.background ?? DEFAULT_MAP_BACKGROUND;
 
-  const [loaded, setLoaded] = useState<{ src: string; aspect: number } | null>(null);
+  const { aspect, imgProps } = useLoadedAspect(src, onReady);
 
   const reduced = useReducedMotion();
 
@@ -30,8 +31,6 @@ export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map:
   const m = motionInMapSpace(motion, rotated);
 
   const horizontal = m.axis === "x";
-
-  const aspect = loaded?.src === src ? loaded.aspect : null;
 
   const tileLen = aspect ? (horizontal ? mapH / aspect : mapW * aspect) : 0;
 
@@ -83,11 +82,7 @@ export function MotionBackground({ map, motion, cellPx, rotated, phone }: { map:
           sizes={phone && mapW > 0 ? `${Math.ceil(mapW)}px` : "100vw"}
           className="object-contain object-left-top"
           priority
-          onLoad={(e) => {
-            const img = e.currentTarget;
-
-            if (img.naturalWidth > 0) setLoaded({ src, aspect: img.naturalHeight / img.naturalWidth });
-          }}
+          {...imgProps}
         />
       </div>
     );

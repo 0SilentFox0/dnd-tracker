@@ -11,6 +11,7 @@ import type {
   bonusActionSchema,
   castSpellSchema,
   critChoiceSchema,
+  mapBackgroundBodySchema,
   mapMotionSchema,
   mapTerrainSchema,
   mapWeatherSchema,
@@ -182,6 +183,8 @@ export interface MapTerrainResponse {
 export type MazeActionData = z.infer<typeof mazeActionSchema>;
 
 export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
+
+export type MapBackgroundData = z.infer<typeof mapBackgroundBodySchema>;
 
 export type MapWeatherData = z.infer<typeof mapWeatherSchema>;
 
