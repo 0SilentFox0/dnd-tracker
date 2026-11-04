@@ -15,7 +15,7 @@ import { slidesSchema } from "@/lib/schemas/show";
 import { createAcquaintance, findAcquaintancesByNames } from "@/lib/server/acquaintances/service";
 import { chatCaller } from "@/lib/server/assistant/caller";
 import { legacyPreview, reconcileLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { scenarioResult } from "@/lib/server/scenario/action-service";
 import { contentWrite, OWNED_WITH_CONTENT_SELECT, readContentStrict, toPage } from "@/lib/server/scenario/page-store";
@@ -53,7 +53,7 @@ export async function listProposalSummaries(campaignId: string, filter: { pageId
 type ApplyResult = { ok: true; page: ScenarioPage } | { ok: true; deck: SlideDeck } | { ok: false; status: 400 | 403 | 404 | 409 | 413; error: string };
 
 export async function applyProposal(campaignId: string, userId: string, proposalId: string, executingIntentId?: string, locale: Locale = DEFAULT_LOCALE): Promise<ApplyResult> {
-  return withCampaignContentWrite(campaignId, async (tx): Promise<ApplyResult> => {
+  return withCampaignRuntimeWrite(campaignId, async (tx): Promise<ApplyResult> => {
     const proposal = await tx.aiProposal.findFirst({ where: { id: proposalId, campaignId }, select: SELECT });
 
     if (!proposal) return { ok: false, status: 404, error: API_ERRORS.AI_PROPOSAL_NOT_FOUND };
@@ -98,7 +98,7 @@ export async function applyProposal(campaignId: string, userId: string, proposal
     await tx.aiProposal.updateMany({ where: { id: proposalId }, data: { status: "pending" } });
 
     return result;
-  }, { bump: false });
+  });
 }
 
 // a failure with `settled` has already persisted its terminal status; any other failure hands the claim back
@@ -235,7 +235,7 @@ async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id
 export { discardSlideFiles, pendingSlideUrls } from "./proposal-media";
 
 export async function rejectProposal(campaignId: string, proposalId: string): Promise<AiProposal | null> {
-  return withCampaignContentWrite(campaignId, async (tx) => {
+  return withCampaignRuntimeWrite(campaignId, async (tx) => {
   const { count } = await tx.aiProposal.updateMany({ where: { id: proposalId, campaignId, status: { in: ["pending", "stale"] } }, data: { status: "rejected" } });
 
   if (count === 0) return null;
@@ -247,5 +247,5 @@ export async function rejectProposal(campaignId: string, proposalId: string): Pr
   if (row) afterContentCommit(() => discardSlideFiles(campaignId, slideUrls(row.ops as unknown as AiProposalOp[])));
 
   return row && toProposal(row);
-  }, { bump: false });
+  });
 }

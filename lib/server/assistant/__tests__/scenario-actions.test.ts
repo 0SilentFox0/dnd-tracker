@@ -8,7 +8,7 @@ import type { ScenarioContent } from "@/types/scenario";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: { scenarioPage: { findFirst: vi.fn(async () => null) }, scenarioPageVersion: { findMany: vi.fn() } } }));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb() }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb(), withCampaignRuntimeWrite: async (_id: string, cb: () => unknown) => cb() }));
 
 const content: ScenarioContent = { legend: [], sections: [{ id: "s", title: "Сцена", played: false, rows: [{ id: "r", story: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Історія", marks: [{ type: "bold" }] }] }] }, notes: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Секрет" }] }] }, battleId: "battle", slide: { deckId: "deck", slideId: "slide" } }] }, { id: "s2", title: "Друга", played: false, rows: [] }] };
 

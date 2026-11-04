@@ -17,7 +17,7 @@ import { getBattleOperation } from "@/lib/server/battles/operations";
 import { defaultPipelineDeps } from "@/lib/server/battles/pipeline-deps";
 import { battleRecord, type RecordOperation, recordSchemas, requireBattleId } from "@/lib/server/battles/record-service";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { needFailure } from "@/lib/utils/api/need";
@@ -208,7 +208,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
 }
 
 export function prepareBattleAction(caller: AssistantCaller, operation: string, raw: unknown): Promise<ActionPreview> {
-  return withCampaignContentWrite(caller.actor.campaignId, () => prepared(caller, operation, raw), { bump: false }).catch(error => {
+  return withCampaignRuntimeWrite(caller.actor.campaignId, () => prepared(caller, operation, raw)).catch(error => {
     if (error instanceof BattleRuleError) throw new ContentError(error.message, 422, undefined, error.params);
 
     if (error instanceof BattleAccessError) throw new ContentError(error.message, error.status);
@@ -220,13 +220,13 @@ export function prepareBattleAction(caller: AssistantCaller, operation: string, 
 export async function runBattleAction(actor: Actor, operation: string, raw: unknown, expected: unknown, execution?: ActionExecutionContext): Promise<ActionResult> {
   const value = parseInput(battleActionInput, raw);
 
-  const run = () => withCampaignContentWrite(actor.campaignId, async () => {
+  const run = () => withCampaignRuntimeWrite(actor.campaignId, async () => {
     const fresh = await prepareBattleAction({ actor, channel: execution?.caller.channel ?? "chat", threadId: null, tokenId: null, locale: execution?.caller.locale ?? DEFAULT_LOCALE }, operation, value);
 
     if (requestDigest(fresh.preconditions) !== requestDigest(expected)) throw new ContentError(API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN, 409);
 
     return executeBattleOperation(actor, { operation, battleId: value.battleId ?? "", input: value.body, expectedVersion: (fresh.preconditions as { version: number }).version, serverDice: value.dice === "server" }, execution);
-  }, { bump: false });
+  });
 
   assertWriteScope(actor, execution);
 

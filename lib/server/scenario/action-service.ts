@@ -20,7 +20,7 @@ import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
@@ -136,7 +136,7 @@ async function writeScenarioContent(actor: Actor, id: string, raw: unknown, expe
 export async function saveScenarioContent(actor: Actor, id: string, raw: unknown, expectedVersion: number, force = true) {
   assertCan(actor, { access: "dm", scope: "scenario:write" });
 
-  return withCampaignContentWrite(actor.campaignId, () => writeScenarioContent(actor, id, raw, expectedVersion, force), { bump: false });
+  return withCampaignRuntimeWrite(actor.campaignId, () => writeScenarioContent(actor, id, raw, expectedVersion, force));
 }
 type ScenarioRun = {
   actor: Actor;
@@ -225,7 +225,7 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
 
   if (read) return result(await read(actor, input));
 
-  return withCampaignContentWrite(actor.campaignId, async () => {
+  return withCampaignRuntimeWrite(actor.campaignId, async () => {
     const state = expected ? await scenarioState(actor, id) : { page: id ? await prisma.scenarioPage.findFirst({ where: { id, campaignId: actor.campaignId }, select: OWNED_WITH_CONTENT_SELECT }) : undefined };
 
     if (expected && scenarioFingerprint(state) !== expected) throw new ContentError(API_ERRORS.SCENARIO_CONFLICT, 409);
@@ -253,5 +253,5 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
     const pageHandler = ownHandler(PAGE_HANDLERS, operation);
 
     return pageHandler ? pageHandler(run) : saveContent(run, operation);
-  }, { bump: false });
+  });
 }

@@ -4,25 +4,22 @@ import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import type { DmDashboardData, PlayerDashboardData } from "@/types/campaigns";
 
-export type SourceUpdateState = { sourceId: string; sourceVersion: number; syncedVersion: number | null; hasUpdates: boolean };
+export async function sourceUpdateState(campaignId: string): Promise<{ sourceVersion: number; hasUpdates: boolean } | null> {
+  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { createdFromId: true, sourceSync: { select: { sourceCampaignId: true, sourceVersion: true } } } });
 
-export async function sourceUpdateState(db: Pick<typeof prisma, "campaign" | "campaignSourceSync">, campaignId: string): Promise<SourceUpdateState | null> {
-  const campaign = await db.campaign.findUnique({ where: { id: campaignId }, select: { createdFromId: true } });
+  const sourceId = campaign?.createdFromId;
 
-  if (!campaign?.createdFromId) return null;
+  if (!sourceId) return null;
 
-  const sourceId = campaign.createdFromId;
-
-  const [source, sync] = await Promise.all([
-    db.campaign.findUnique({ where: { id: sourceId }, select: { contentVersion: true } }),
-    db.campaignSourceSync.findUnique({ where: { campaignId }, select: { sourceCampaignId: true, sourceVersion: true } }),
-  ]);
+  const source = await prisma.campaign.findUnique({ where: { id: sourceId }, select: { contentVersion: true } });
 
   if (!source) return null;
 
+  const sync = campaign.sourceSync;
+
   const syncedVersion = sync?.sourceCampaignId === sourceId ? sync.sourceVersion : null;
 
-  return { sourceId, sourceVersion: source.contentVersion, syncedVersion, hasUpdates: syncedVersion === null || source.contentVersion > syncedVersion };
+  return { sourceVersion: source.contentVersion, hasUpdates: syncedVersion === null || source.contentVersion > syncedVersion };
 }
 
 export async function readDmDashboard(campaignId: string): Promise<DmDashboardData> {
@@ -35,7 +32,7 @@ export async function readDmDashboard(campaignId: string): Promise<DmDashboardDa
       take: 6,
       select: { id: true, name: true, status: true },
     }),
-    sourceUpdateState(prisma, campaignId),
+    sourceUpdateState(campaignId),
   ]);
 
   const activeFirst = [...battles].sort((a, b) => Number(b.status === BattleStatus.ACTIVE) - Number(a.status === BattleStatus.ACTIVE));

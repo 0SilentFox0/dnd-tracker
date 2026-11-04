@@ -7,7 +7,7 @@ import { getSessionUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { afterContentCommit, createScopedDatabase } from "@/lib/server/content/write-context";
 import { clearShowBattle } from "@/lib/server/show/show-store";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
@@ -32,7 +32,7 @@ function recheckAccessWith(db: Parameters<typeof loadBattleAccess>[0]): Pipeline
 }
 
 export const defaultPipelineDeps: PipelineDeps = {
-  withWrite: (campaignId, callback) => withCampaignContentWrite(campaignId, callback, { bump: false }),
+  withWrite: (campaignId, callback) => withCampaignRuntimeWrite(campaignId, callback),
   recheckAccess: recheckAccessWith(prisma),
   getUserId: getSessionUserId,
   rateLimit: ({ userId, scope, battleId }) =>

@@ -37,18 +37,27 @@ describe("cachedExport", () => {
     expect(exportMock).toHaveBeenCalledTimes(1);
   });
 
-  it("evicts the least recently used entry beyond four", async () => {
-    for (const v of [1, 2, 3, 4]) await cachedExport(db, "s", v);
-
-    await cachedExport(db, "s", 1);
-    await cachedExport(db, "s", 5);
+  it("a new version supersedes the older one of the same source", async () => {
+    await cachedExport(db, "s1", 3);
+    await cachedExport(db, "s1", 4);
     exportMock.mockClear();
 
-    await cachedExport(db, "s", 1);
-    await cachedExport(db, "s", 2);
+    await cachedExport(db, "s1", 3);
 
-    expect(exportMock.mock.calls.map((c) => c[1])).toEqual(["s"]);
     expect(exportMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("evicts the least recently used entry beyond three", async () => {
+    for (const id of ["a", "b", "c"]) await cachedExport(db, id, 1);
+
+    await cachedExport(db, "a", 1);
+    await cachedExport(db, "d", 1);
+    exportMock.mockClear();
+
+    await cachedExport(db, "a", 1);
+    await cachedExport(db, "b", 1);
+
+    expect(exportMock.mock.calls.map((c) => c[1])).toEqual(["b"]);
   });
 
   it("does not cache failures", async () => {

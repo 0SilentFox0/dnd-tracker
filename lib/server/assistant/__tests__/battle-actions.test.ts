@@ -33,7 +33,7 @@ vi.mock("@/lib/server/battles/pipeline-deps", () => ({ defaultPipelineDeps: {
 
  return 0.5; },
 }, defaultReadDeps: {} }));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, callback: () => unknown) => callback() }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, callback: () => unknown) => callback(), withCampaignRuntimeWrite: async (_id: string, callback: () => unknown) => callback() }));
 
 const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null, locale: "uk" as const };
 

@@ -29,11 +29,7 @@ const keyOf = (i: { scope: string; key: string }) => `${i.scope}:${i.key}`;
 
 const sourceChanged = () => new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
 
-async function sourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
-  const ctx = await loadSyncContext(db, campaignId, access);
-
-  const all = new Map(classify(ctx).map((i) => [keyOf(i), i]));
-
+function sourceSelection(ctx: SyncContext, all: Map<string, SyncItem>, body: SourceSyncApplyInput) {
   const pickItems = (refs: SyncRef[]) =>
     refs.map((r) => {
       const item = all.get(keyOf(r));
@@ -51,11 +47,19 @@ async function sourceSelection(db: SyncDb, campaignId: string, body: SourceSyncA
 
   const items = [...selected.values()];
 
-  return { ctx, selected, autoAdded, items, ignored };
+  return { selected, autoAdded, items, ignored };
+}
+
+async function loadClassified(db: SyncDb, campaignId: string, access?: { userId: string }) {
+  const ctx = await loadSyncContext(db, campaignId, access);
+
+  return { ctx, all: new Map(classify(ctx).map((i) => [keyOf(i), i])) };
 }
 
 export async function previewSourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
-  const { ctx, items, ignored, autoAdded } = await sourceSelection(db, campaignId, body, access);
+  const { ctx, all } = await loadClassified(db, campaignId, access);
+
+  const { items, ignored, autoAdded } = sourceSelection(ctx, all, body);
 
   const index = indexOf(ctx);
 
@@ -67,8 +71,8 @@ export async function previewSourceSelection(db: SyncDb, campaignId: string, bod
   };
 }
 
-export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
-  const { ctx, selected, autoAdded, items, ignored } = await sourceSelection(db, campaignId, body, access);
+async function applySelection(db: SyncDb, ctx: SyncContext, all: Map<string, SyncItem>, body: SourceSyncApplyInput): Promise<SourceApplyResult> {
+  const { selected, autoAdded, items, ignored } = sourceSelection(ctx, all, body);
 
   const warnings = await writeTables(db, ctx, selected);
 
@@ -79,10 +83,18 @@ export async function applySourceChanges(db: SyncDb, campaignId: string, body: S
   return { applied: items.length, ignored: ignored.length, autoAdded: autoAdded.map(({ scope, key, name }) => ({ scope, key, name })), warnings };
 }
 
-export async function applySafeSourceChanges(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SourceApplyResult> {
-  const safe = classify(await loadSyncContext(db, campaignId, access)).filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status));
+export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
+  const { ctx, all } = await loadClassified(db, campaignId, access);
 
-  return applySourceChanges(db, campaignId, { apply: safe.map(({ scope, key, sourceHash, status }) => ({ scope, key, sourceHash, status })), ignore: [] }, access);
+  return applySelection(db, ctx, all, body);
+}
+
+export async function applySafeSourceChanges(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SourceApplyResult> {
+  const { ctx, all } = await loadClassified(db, campaignId, access);
+
+  const safe = [...all.values()].filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status));
+
+  return applySelection(db, ctx, all, { apply: safe.map(({ scope, key, sourceHash, status }) => ({ scope, key, sourceHash, status })), ignore: [] });
 }
 
 function closeOverRequires(chosen: SyncItem[], all: Map<string, SyncItem>) {

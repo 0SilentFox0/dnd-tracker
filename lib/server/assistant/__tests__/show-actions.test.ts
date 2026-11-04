@@ -29,7 +29,7 @@ vi.mock("@/lib/db", () => ({ prisma: {
 
  return { count: 1 }; } },
 } }));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb() }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb(), withCampaignRuntimeWrite: async (_id: string, cb: () => unknown) => cb() }));
 vi.mock("@/lib/server/show/show-store", async (original) => ({ ...await original<object>(), publishShow: vi.fn() }));
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ ownedSlidePath: (_c: string, url: string) => url.startsWith("https://owned/c/") ? "c/x.webp" : null, removeSlideFiles: async (_c: string, urls: string[]) => { f.deleted.push(...urls); } }));
 vi.mock("@/lib/utils/common/image-url", async (original) => ({ ...await original<object>(), isHostedOnProjectStorage: (url: string) => url.startsWith("https://owned/") }));

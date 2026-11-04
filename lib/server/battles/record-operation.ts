@@ -4,7 +4,7 @@ import { isDemoKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import type { ActionExecutionContext } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { needFailure } from "@/lib/utils/api/need";
@@ -24,7 +24,7 @@ export async function runGuardedBattleRecordOperation<T>(
 
   assertWriteScope(actor, execution);
 
-  const run = () => withCampaignContentWrite(actor.campaignId, async () => {
+  const run = () => withCampaignRuntimeWrite(actor.campaignId, async () => {
     if (options.allowDemoAudio && actor.via === "session") {
       const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { kind: true } });
 
@@ -34,7 +34,7 @@ export async function runGuardedBattleRecordOperation<T>(
     }
 
     return callback();
-  }, { bump: false });
+  });
 
   return execution ? runContentWriteContext(actor.campaignId, execution.db, run) : run();
 }

@@ -9,7 +9,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }), withCampaignRuntimeWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
 vi.mock("@/lib/server/characters/access", () => ({ requireCharacterAccess: vi.fn() }));
 
 const ability = resolved({ trigger: { event: "passive" }, effects: [{ kind: "restoreSpellSlotLevels", budget: { formula: "ceil(5 / 2)" }, maxSlotLevel: 5 }] }, { type: "class", id: "wizard" });

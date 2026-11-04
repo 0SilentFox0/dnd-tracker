@@ -13,10 +13,12 @@ export interface ContentWriteOptions { lock?: "update" | "no-key-update"; timeou
 export async function withCampaignContentWrite<T>(campaignId: string, callback: (tx: Prisma.TransactionClient) => Promise<T>, options: ContentWriteOptions = {}): Promise<T> {
   const current = currentContentWrite();
 
+  const bump = options.bump !== false;
+
   if (current) {
     if (current.campaignId !== campaignId) throw new ContentError(API_ERRORS.CONTENT_CROSS_CAMPAIGN_WRITE, 403);
 
-    if (options.bump !== false) markContentDirty();
+    if (bump) markContentDirty();
 
     return callback(current.db as Prisma.TransactionClient);
   }
@@ -29,7 +31,7 @@ export async function withCampaignContentWrite<T>(campaignId: string, callback: 
     if (rows.length !== 1) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
     return runContentWriteContext(campaignId, tx, () => {
-      if (options.bump !== false) markContentDirty();
+      if (bump) markContentDirty();
 
       return callback(tx);
     }, afterCommit);
@@ -39,3 +41,5 @@ export async function withCampaignContentWrite<T>(campaignId: string, callback: 
 
   return result;
 }
+
+export const withCampaignRuntimeWrite = <T>(campaignId: string, callback: (tx: Prisma.TransactionClient) => Promise<T>, options: Omit<ContentWriteOptions, "bump"> = {}) => withCampaignContentWrite(campaignId, callback, { ...options, bump: false });

@@ -7,7 +7,6 @@ const db = vi.hoisted(() => ({
   battleParticipant: { findFirst: vi.fn() },
   worldMap: { count: vi.fn() },
   campaign: { findUnique: vi.fn() },
-  campaignSourceSync: { findUnique: vi.fn() },
 }));
 
 vi.mock("@/lib/db", () => ({ prisma: db }));
@@ -102,33 +101,32 @@ describe("readPlayerDashboard", () => {
 describe("sourceUpdateState", () => {
   const setup = (opts: { createdFromId?: string | null; source?: number | null; sync?: { sourceCampaignId: string; sourceVersion: number | null } | null }) => {
     db.campaign.findUnique.mockImplementation(async ({ where }: { where: { id: string } }) =>
-      where.id === "c1" ? { createdFromId: opts.createdFromId ?? null } : opts.source == null ? null : { contentVersion: opts.source });
-    db.campaignSourceSync.findUnique.mockResolvedValue(opts.sync ?? null);
+      where.id === "c1" ? { createdFromId: opts.createdFromId ?? null, sourceSync: opts.sync ?? null } : opts.source == null ? null : { contentVersion: opts.source });
   };
 
   it("is null without a source", async () => {
     setup({});
 
-    expect(await sourceUpdateState(db as never, "c1")).toBeNull();
-    expect(db.campaignSourceSync.findUnique).not.toHaveBeenCalled();
+    expect(await sourceUpdateState("c1")).toBeNull();
+    expect(db.campaign.findUnique).toHaveBeenCalledTimes(1);
   });
 
   it("is null when the source is gone", async () => {
     setup({ createdFromId: "s1", source: null });
 
-    expect(await sourceUpdateState(db as never, "c1")).toBeNull();
+    expect(await sourceUpdateState("c1")).toBeNull();
   });
 
   it("has updates when the source is ahead of the synced version", async () => {
     setup({ createdFromId: "s1", source: 5, sync: { sourceCampaignId: "s1", sourceVersion: 3 } });
 
-    expect(await sourceUpdateState(db as never, "c1")).toEqual({ sourceId: "s1", sourceVersion: 5, syncedVersion: 3, hasUpdates: true });
+    expect(await sourceUpdateState("c1")).toEqual({ sourceVersion: 5, hasUpdates: true });
   });
 
   it("has no updates when versions match", async () => {
     setup({ createdFromId: "s1", source: 3, sync: { sourceCampaignId: "s1", sourceVersion: 3 } });
 
-    expect(await sourceUpdateState(db as never, "c1")).toMatchObject({ hasUpdates: false });
+    expect(await sourceUpdateState("c1")).toMatchObject({ hasUpdates: false });
   });
 
   it.each([
@@ -138,7 +136,7 @@ describe("sourceUpdateState", () => {
   ])("treats %s as having updates", async (_n, sync) => {
     setup({ createdFromId: "s1", source: 1, sync });
 
-    expect(await sourceUpdateState(db as never, "c1")).toMatchObject({ syncedVersion: null, hasUpdates: true });
+    expect(await sourceUpdateState("c1")).toEqual({ sourceVersion: 1, hasUpdates: true });
   });
 
   it("readDmDashboard exposes the version only when updates exist", async () => {
