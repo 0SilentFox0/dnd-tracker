@@ -12,6 +12,7 @@ export { useBattleFxQueue } from "./useBattleFxQueue";
 export { type BattleMapScene, useBattleMapScene } from "./useBattleMapScene";
 export { type BattlePageDialogs, useBattlePageDialogs } from "./useBattlePageDialogs";
 export { RESYNC_AFTER_HIDDEN_MS, useBattleResync } from "./useBattleResync";
+export { useBattleRules } from "./useBattleRules";
 export {
   BattleSceneContext,
   BattleSceneDataContext,
