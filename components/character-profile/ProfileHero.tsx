@@ -13,6 +13,7 @@ import { useProfile } from "./ProfileContext";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { systemUiOf } from "@/components/systems";
 import { signed } from "@/lib/utils/common/format";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 
 export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badge?: ReactNode; ref?: Ref<HTMLElement> }) {
   const { sheet, canEdit } = useProfile();
@@ -24,6 +25,8 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
   const id = sheet.identity;
 
   const Ui = systemUiOf(sheet.system);
+
+  const system = RULE_SYSTEM_REGISTRY[sheet.system];
 
   const hpKey = Ui.hideProgression ? ({ current: "woundsCurrent", total: "woundsTotal" } as const) : ({ current: "hpCurrent", total: "hpTotal" } as const);
 
@@ -55,8 +58,8 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
                 <p key={line} className="text-xs text-hud-muted">{line}</p>
               ))}
               {sheet.rest && <RestBadges />}
-              {sheet.rest && <HitDicePanel />}
-              {sheet.rest && <ArcaneRecoveryPanel />}
+              {sheet.rest && system.rest.kinds && <HitDicePanel />}
+              {sheet.rest && system.rest.kinds && <ArcaneRecoveryPanel />}
             </div>
             {actions && <div className="flex shrink-0 flex-col gap-1.5">{actions}</div>}
           </div>

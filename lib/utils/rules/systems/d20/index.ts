@@ -13,9 +13,12 @@ export const d20System = (key: Extract<RuleSystemKey, "homm" | "dnd5e">): RuleSy
     accepts: (body) => body.kind !== "test",
     roll: (i) => rollFromSheet(i.participant, i.body as SheetRollSubject, i),
   },
-  rest: {},
+  rest: { kinds: true },
   battle: { supported: true },
   lineage: true,
   attacks: true,
+  spells: true,
+  items: true,
+  d20Stats: true,
   unusedMechanics: [],
 });

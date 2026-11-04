@@ -30,6 +30,22 @@ describe("PartyRestActions new session", () => {
     expect(RULE_SYSTEM_REGISTRY.wfrp.rest.onSession).toBeTypeOf("function");
   });
 
+  it("wfrp: no short/long rest or close-rest buttons", () => {
+    h.system = "wfrp";
+    render(<PartyRestActions campaignId="c" characters={[{ ...hero("a"), resources: { shortRestOpen: true } } as CharacterListItem]} />);
+
+    expect(screen.queryByRole("button", { name: "rest.party.rest" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "rest.party.closeRest" })).toBeNull();
+    expect(screen.getByRole("button", { name: "rest.party.session" })).toBeTruthy();
+  });
+
+  it("d20: close-rest button shows while a short rest is open", () => {
+    h.system = "homm";
+    render(<PartyRestActions campaignId="c" characters={[{ ...hero("a"), resources: { shortRestOpen: true } } as CharacterListItem]} />);
+
+    expect(screen.getByRole("button", { name: "rest.party.closeRest" })).toBeTruthy();
+  });
+
   it("d20: no session button", () => {
     h.system = "homm";
     render(<PartyRestActions campaignId="c" characters={[hero("a")]} />);

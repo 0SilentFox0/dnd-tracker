@@ -44,9 +44,7 @@ export function CombatTab() {
 
   const Ui = systemUiOf(sheet.system);
 
-  const wfrp = sheet.system === "wfrp";
-
-  const { attacks: showAttacks } = RULE_SYSTEM_REGISTRY[sheet.system];
+  const { attacks: showAttacks, d20Stats } = RULE_SYSTEM_REGISTRY[sheet.system];
 
   const [openAttack, setOpenAttack] = useState<string | null>(null);
 
@@ -87,14 +85,14 @@ export function CombatTab() {
       </HudSection>
       )}
       <HudSection title={t("defense")}>
-        {!wfrp && (
+        {d20Stats && (
           <>
             <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
             <Row label={tg("stats.initiative")} value={String(sheet.initiative)} />
             <Row label={tg("stats.speed")} value={String(sheet.speed)} />
           </>
         )}
-        {rules?.morale.enabled !== false && <Row label={tg("stats.moral")} value={signed(sheet.morale)} />}
+        {d20Stats && rules?.morale.enabled !== false && <Row label={tg("stats.moral")} value={signed(sheet.morale)} />}
         {showAttacks && <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />}
         {sheet.immunities.length > 0 && <Row label={t("immunities")} value={sheet.immunities.join(", ")} />}
       </HudSection>

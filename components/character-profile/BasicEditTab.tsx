@@ -44,7 +44,7 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
   return (
     <div className="space-y-6">
       <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={options.members} races={options.races} hideProgression={systemUiOf(sheet.system).hideProgression} hideLineage={!RULE_SYSTEM_REGISTRY[sheet.system].lineage} classMode={classUi ? classMode : undefined} />
-      {classMode.enabled && !classUi && sheet.system !== "wfrp" && (
+      {classMode.enabled && !classUi && !systemUiOf(sheet.system).hideProgression && (
         <Button type="button" variant="outline" size="sm" onClick={() => setConverting(true)}>
           {t("toClasses")}
         </Button>

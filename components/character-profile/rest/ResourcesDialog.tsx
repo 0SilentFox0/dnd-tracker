@@ -13,12 +13,15 @@ import { useEditResources } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
 import { MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
 import { GRANT_POOL_PREFIX, ITEM_POOL_PREFIX } from "@/lib/utils/items/pools";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import type { ResourcesEditBody, SheetRest } from "@/types/characters";
 
 const FORM_ID = "resources-edit-form";
 
 export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest; open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { campaignId, characterId } = useProfile();
+  const { campaignId, characterId, sheet } = useProfile();
+
+  const { d20Stats } = RULE_SYSTEM_REGISTRY[sheet.system];
 
   const t = useTranslations("rest.resources");
 
@@ -75,14 +78,18 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
           <Label htmlFor="res-hp">{t("hp", { max: rest.hp?.max ?? "—" })}</Label>
           <Input id="res-hp" type="number" min={0} value={hp} onChange={(e) => setHp(e.target.value)} />
         </div>
-        <div>
-          <Label htmlFor="res-temp">{t("tempHp")}</Label>
-          <Input id="res-temp" type="number" min={0} value={temp} onChange={(e) => setTemp(e.target.value)} />
-        </div>
-        <div>
-          <Label htmlFor="res-exh">{t("exhaustion")}</Label>
-          <Input id="res-exh" type="number" min={0} max={MAX_EXHAUSTION} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
-        </div>
+        {d20Stats && (
+          <>
+            <div>
+              <Label htmlFor="res-temp">{t("tempHp")}</Label>
+              <Input id="res-temp" type="number" min={0} value={temp} onChange={(e) => setTemp(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="res-exh">{t("exhaustion")}</Label>
+              <Input id="res-exh" type="number" min={0} max={MAX_EXHAUSTION} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
+            </div>
+          </>
+        )}
         {itemCharges.map((c) => (
           <div key={c.key} className="col-span-3 grid grid-cols-[1fr_6rem] items-center gap-2">
             <Label htmlFor={`res-charge-${c.key}`}>{t("charge", { name: c.name, uses: c.uses })}</Label>

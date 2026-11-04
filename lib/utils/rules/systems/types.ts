@@ -54,9 +54,12 @@ export interface RuleSystemDefinition {
   };
   characteristics: { kind: "d20" | "wfrp"; sheetBlock(input: SheetBlockInput): SheetWfrpBlock | undefined };
   sheetTest: { accepts(body: { kind: string }): boolean; roll(input: SheetTestInput): SheetTestResult };
-  rest: { onSession?(resources: CharacterResources, characteristics: Characteristics): CharacterResources };
+  rest: { kinds: boolean; onSession?(resources: CharacterResources, characteristics: Characteristics): CharacterResources };
   battle: { supported: boolean };
   lineage: boolean;
   attacks: boolean;
+  spells: boolean;
+  items: boolean;
+  d20Stats: boolean;
   unusedMechanics: readonly MechanicKey[];
 }

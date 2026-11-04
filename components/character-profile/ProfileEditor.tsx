@@ -30,6 +30,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { SPELLCASTING_ABILITIES, toSpellcastingAbility } from "@/lib/constants/abilities";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useCharacterRoster, useDmCharacterEditor } from "@/lib/hooks/characters";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const { campaignId, characterId, sheet } = useProfile();
@@ -71,6 +72,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const { formData, abilityScores, skills, abilities, spellcasting } = form;
 
   const Ui = systemUiOf(sheet.system);
+
+  const system = RULE_SYSTEM_REGISTRY[sheet.system];
 
   const heroClasses = (formData.basicInfo.classes ?? []).filter((e) => e.classId);
 
@@ -146,8 +149,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                 },
               ]
             : []),
-          {
-            id: "magic",
+          ...(system.spells ? [{
+            id: "magic" as const,
             label: t("tabs.magic"),
             content: (
               <div className="space-y-4">
@@ -166,9 +169,9 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                 <MagicTab />
               </div>
             ),
-          },
-          {
-            id: "items",
+          }] : []),
+          ...(system.items ? [{
+            id: "items" as const,
             label: t("tabs.things"),
             content: (
               <div className="space-y-4">
@@ -187,7 +190,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                 )}
               </div>
             ),
-          },
+          }] : []),
           {
             id: "story",
             label: t("tabs.story"),

@@ -44,12 +44,12 @@ export function PartyRestActions({ campaignId, characters }: { campaignId: strin
 
   return (
     <>
-      {ooc.persistResources && (
+      {ooc.persistResources && system.rest.kinds && (
         <Button type="button" variant="outline" onClick={() => setOpen("rest")}>
           {t("rest")}
         </Button>
       )}
-      {ooc.persistResources && resting.length > 0 && (
+      {ooc.persistResources && system.rest.kinds && resting.length > 0 && (
         <Button type="button" variant="outline" disabled={rest.isPending} onClick={() => void rest.mutateOk({ kind: "close", characterIds: resting })}>
           {t("closeRest")}
         </Button>
@@ -64,7 +64,7 @@ export function PartyRestActions({ campaignId, characters }: { campaignId: strin
           {t("xp")}
         </Button>
       )}
-      {open === "rest" && <RestDialog campaignId={campaignId} characters={characters} open onOpenChange={(o) => !o && setOpen(null)} />}
+      {open === "rest" && system.rest.kinds && <RestDialog campaignId={campaignId} characters={characters} open onOpenChange={(o) => !o && setOpen(null)} />}
       {open === "xp" && <ExperienceDialog campaignId={campaignId} characters={characters} open onOpenChange={(o) => !o && setOpen(null)} />}
     </>
   );

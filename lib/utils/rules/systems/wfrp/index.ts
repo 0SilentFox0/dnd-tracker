@@ -14,9 +14,12 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
     accepts: (body) => body.kind === "test",
     roll: rollWfrpSheetTest,
   },
-  rest: { onSession },
+  rest: { kinds: false, onSession },
   battle: { supported: false },
   lineage: false,
   attacks: false,
+  spells: false,
+  items: false,
+  d20Stats: false,
   unusedMechanics: ["morale", "criticals", "formulas", "heroScaling", "initiative", "saves", "deathSaves", "concentration", "conditions", "actions", "classes", "encounters"],
 };

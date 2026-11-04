@@ -29,17 +29,18 @@ import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
 import { useSeenOnOpen } from "@/lib/hooks/notifications";
 import { cn } from "@/lib/utils";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 
 const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
 
 const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story", "log"];
 
-function viewTabs({ withLog, withPath }: { withLog: boolean; withPath: boolean }, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
+function viewTabs({ withLog, withPath, withMagic, withItems }: { withLog: boolean; withPath: boolean; withMagic: boolean; withItems: boolean }, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
   const tabs: ProfileTab[] = [
     { id: "combat", label: t("combat"), content: <CombatTab /> },
     ...(withPath ? [{ id: "skills" as const, label: t("path"), content: <SkillsTab /> }] : []),
-    { id: "magic", label: t("magic"), content: <MagicTab /> },
-    { id: "items", label: t("items"), content: <InventoryTab /> },
+    ...(withMagic ? [{ id: "magic" as const, label: t("magic"), content: <MagicTab /> }] : []),
+    ...(withItems ? [{ id: "items" as const, label: t("items"), content: <InventoryTab /> }] : []),
     { id: "story", label: t("story"), content: <StoryTab /> },
   ];
 
@@ -117,7 +118,12 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
 
   return (
     <QueryState query={query}>
-      {(sheet) => (
+      {(sheet) => {
+        const system = RULE_SYSTEM_REGISTRY[sheet.system];
+
+        const tabs = viewTabs({ withLog: !!sheet.rest, withPath: !systemUiOf(sheet.system).hideProgression, withMagic: system.spells, withItems: system.items }, (id) => t(`tabs.${id}`));
+
+        return (
         <ProfileProvider campaignId={campaignId} characterId={characterId} sheet={sheet} canEdit={canEdit && sheet.viewer.isDM}>
           <ProfileShell>
             <LevelSeen />
@@ -147,13 +153,14 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                 {sheet.viewer.isOwner && !sheet.viewer.isDM && !sheet.review.pending && <PlayerSheetHint className="mx-3 my-2" />}
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
                 {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
-                <ProfileTabs value={(tab === "log" && !sheet.rest) || (tab === "skills" && systemUiOf(sheet.system).hideProgression) ? "combat" : tab} onValueChange={setTab} tabs={viewTabs({ withLog: !!sheet.rest, withPath: !systemUiOf(sheet.system).hideProgression }, (id) => t(`tabs.${id}`))} header={hero.past ? <CompactHero /> : null} />
+                <ProfileTabs value={tabs.some((x) => x.id === tab) ? tab : "combat"} onValueChange={setTab} tabs={tabs} header={hero.past ? <CompactHero /> : null} />
                 {!systemUiOf(sheet.system).hideProgression && <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
               </>
             )}
           </ProfileShell>
         </ProfileProvider>
-      )}
+        );
+      }}
     </QueryState>
   );
 }
