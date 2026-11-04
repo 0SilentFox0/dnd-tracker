@@ -36,7 +36,12 @@ describe("BattlePage (server)", () => {
     expect(el.type).toBe(PrefetchedQuery);
     expect(el.props.queryKey).toEqual(battleQueryKey("c1", "b1"));
     expect(el.props.data).toEqual(scene);
-    expect(isValidElement(el.props.children) && el.props.children.props.userId).toBe("u1");
+
+    const guard = el.props.children;
+
+    const client = isValidElement<{ children: unknown }>(guard) ? guard.props.children : null;
+
+    expect(isValidElement<{ userId: string }>(client) && client.props.userId).toBe("u1");
   });
 
   it("помилка доступу — без даних, клієнт покаже свій стан як раніше", async () => {
