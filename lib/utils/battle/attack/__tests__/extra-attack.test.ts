@@ -25,7 +25,7 @@ const validate = (p: BattleParticipant): string => {
   const target = makeParticipant({ id: "t", side: "enemy" as never });
 
   try {
-    validateAttackRequest({ userId: "u", isDM: true, participants: [{ ...p, battleData: { ...p.battleData, attacks: [sword] } }, target], scene: { turnIndex: 0 } }, { attackerId: "f", targetId: "t", d20Roll: 10, damageRolls: [1] });
+    validateAttackRequest({ userId: "u", isDM: true, participants: [{ ...p, battleData: { ...p.battleData, attacks: [sword] } }, target], scene: { turnIndex: 0 } }, { attackerId: "f", targetId: "t", d20Roll: 10, damageRolls: [1] }, DEFAULT_RULES);
 
     return "ok";
   } catch (e) {

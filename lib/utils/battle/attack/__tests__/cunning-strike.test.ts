@@ -98,8 +98,8 @@ describe("Підступний удар: пропозиція й вартіст�
 
     const scope = { userId: "u", isDM: true, participants: [attacker, foe(0)], scene: { turnIndex: 0 } };
 
-    expect(() => validateAttackRequest(scope, { attackerId: "r", targetId: "t", d20Roll: 15, damageRolls: [1], cunningStrike: ["trip"] })).toThrow(REJECT.cunningUnavailable);
-    expect(() => validateAttackRequest({ ...scope, participants: [rogue(), foe(0)] }, { attackerId: "r", targetId: "t", d20Roll: 15, damageRolls: [1], cunningStrike: ["trip"] })).not.toThrow();
+    expect(() => validateAttackRequest(scope, { attackerId: "r", targetId: "t", d20Roll: 15, damageRolls: [1], cunningStrike: ["trip"] }, DEFAULT_RULES)).toThrow(REJECT.cunningUnavailable);
+    expect(() => validateAttackRequest({ ...scope, participants: [rogue(), foe(0)] }, { attackerId: "r", targetId: "t", d20Roll: 15, damageRolls: [1], cunningStrike: ["trip"] }, DEFAULT_RULES)).not.toThrow();
   });
 });
 

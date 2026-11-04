@@ -26,7 +26,7 @@ export function schemaDiceInput(operation: string, body: Record<string, unknown>
 export function validateAttackPreview(ctx: BattleMutationContext, body: Record<string, unknown>) {
   const request = { ...body, attackerId: String(body.attackerId), damageRolls: (body.damageRolls ?? []) as number[] };
 
-  const checked = validateAttackRequest(ctx, request);
+  const checked = validateAttackRequest(ctx, request, ctx.meta.rules);
 
   const reach = attackReachError(ctx.meta.map, ctx.participants, checked.attacker, checked.attack, checked.chosenTargets, ctx.meta.rules);
 

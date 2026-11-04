@@ -311,7 +311,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toBe(REJECT.badStrikeRoll);
+      expect((e as Error).message).toBe(API_ERRORS.ROLL_OUT_OF_RANGE);
     }
   });
 

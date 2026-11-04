@@ -33,14 +33,14 @@ const MISS = 0.795;
 
 const order = () => [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY), fighter("u", ParticipantSide.ENEMY)];
 
-const run = (targetIds: string[], rng: () => number, momentum?: SceneMomentum) =>
-  runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds, attackRolls: targetIds.map(() => 10), damageRolls: targetIds.map(() => 4) }, battleId: "b", userId: "u", isDM: true, rng, momentum });
+const run = (targetIds: string[], strikes: number[], rng: () => number, momentum?: SceneMomentum) =>
+  runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds, attackRolls: strikes, damageRolls: targetIds.map(() => 4) }, battleId: "b", userId: "u", isDM: true, rng, momentum });
 
 const used = (r: ReturnType<typeof run>) => r.allBattleActions.map((a) => a.actionDetails.percentile?.momentumUsed === true);
 
 describe("wfrp scene momentum in the attack phase", () => {
   it("a second strike of the same action sees the Momentum won by the first", () => {
-    const r = run(["t", "u"], byCall(HIT, MISS, MISS, HIT, HIT, 0.5, 0.5, MISS));
+    const r = run(["t", "u"], [30, 30], byCall(MISS, MISS, HIT, HIT, 0.5, 0.5, MISS));
 
     expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation", "attack"]);
     expect(used(r)).toEqual([false, false, true]);
@@ -48,19 +48,19 @@ describe("wfrp scene momentum in the attack phase", () => {
   });
 
   it("starts from the momentum passed in and spends it on the first strike", () => {
-    const r = run(["t"], byCall(HIT, MISS), { ally: true });
+    const r = run(["t"], [30], byCall(MISS), { ally: true });
 
     expect(used(r)[0]).toBe(true);
   });
 
   it("a won retaliation hands Momentum to the other side and drops the earlier token", () => {
-    const r = run(["t"], byCall(HIT, MISS, HIT, MISS));
+    const r = run(["t"], [30], byCall(MISS, HIT, MISS));
 
     expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
     expect(r.momentum).toEqual({ enemy: true });
   });
 
   it("a lost strike gives the defending side the Momentum when none is passed in", () => {
-    expect(run(["t"], byCall(MISS, HIT, HIT, MISS)).momentum).toEqual({ enemy: true });
+    expect(run(["t"], [80], byCall(HIT, HIT, MISS)).momentum).toEqual({ enemy: true });
   });
 });

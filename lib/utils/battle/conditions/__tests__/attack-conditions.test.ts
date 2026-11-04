@@ -120,7 +120,7 @@ describe("зачарований", () => {
     const ps = withCondition([ally(), foe(), placed("other")], "a", "charmed", "e");
 
     expect(requestedTargetIds({ targetId: "e" })).toEqual(["e"]);
-    expect(() => validateAttackRequest(scope(ps), { attackerId: "a", targetId: "e", d20Roll: 10, damageRolls: [1] })).toThrow(REJECT.charmedTarget);
+    expect(() => validateAttackRequest(scope(ps), { attackerId: "a", targetId: "e", d20Roll: 10, damageRolls: [1] }, DEFAULT_RULES)).toThrow(REJECT.charmedTarget);
   });
 
   it("ворожі заклинання: джерело викидається, інша ціль ок", () => {

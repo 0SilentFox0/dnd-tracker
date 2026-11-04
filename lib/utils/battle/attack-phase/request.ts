@@ -11,6 +11,8 @@ import { type ActorScope, requireActor } from "@/lib/utils/battle/common/control
 import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
 import { BattleAccessError, BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export interface AttackRequest {
@@ -86,8 +88,14 @@ export interface ValidatedAttackRequest {
   usePerTargetRolls: boolean;
 }
 
-export function validateAttackRequest(scope: ActorScope, data: AttackRequest): ValidatedAttackRequest {
+export function validateAttackRequest(scope: ActorScope, data: AttackRequest, rules: Ruleset): ValidatedAttackRequest {
   const order = scope.participants;
+
+  const maxRoll = ruleSystemOf(rules).combat.dice;
+
+  if ([data.d20Roll, data.attackRoll, ...(data.attackRolls ?? [])].some((roll) => roll != null && roll > maxRoll)) {
+    throw new BattleRuleError("action_rejected", API_ERRORS.ROLL_OUT_OF_RANGE);
+  }
 
   const singleRoll = data.d20Roll ?? data.attackRoll;
 

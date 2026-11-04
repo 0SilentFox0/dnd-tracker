@@ -4,7 +4,7 @@ import { context, goblin, hero } from "./fixtures";
 
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
-import { type AttackBody, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { type AttackBody, attackMutation, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { initiativeRollMutation } from "@/lib/server/battles/mutations/initiative/initiative-roll-mutation";
 import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -53,12 +53,12 @@ describe("wfrp battle end to end (engine)", () => {
     expect(rolled.participants).toHaveLength(2);
     ctx = { ...ctx, participants: [...rolled.participants].sort((x, y) => (x.basicInfo.id === "a" ? -1 : y.basicInfo.id === "a" ? 1 : 0)), scene: { ...ctx.scene, turnIndex: 0 } };
 
-    const hit = (attackerId: string, targetId: string): AttackBody => attackBodySchema.parse({ attackerId, targetId, attackId: "sw", d20Roll: 10, damageRolls: [4], endTurn: true });
+    const hit = (attackerId: string, targetId: string, roll: number): AttackBody => attackBodySchema.parse({ attackerId, targetId, attackId: "sw", d20Roll: roll, damageRolls: [4], endTurn: true });
 
     const rolls: number[] = [];
 
     const step = async (attackerId: string, targetId: string, attackerRoll = 30) => {
-      const out = await attackMutation({ ...ctx, rng: firstThen((attackerRoll - 0.5) / 100, 0.795) }, hit(attackerId, targetId));
+      const out = await attackMutation({ ...ctx, rng: () => 0.795 }, hit(attackerId, targetId, attackerRoll));
 
       rolls.push(out.events.length);
       ctx = { ...ctx, participants: out.participants, pending: out.pending ?? ctx.pending, scene: { ...ctx.scene, ...out.scene } };
@@ -83,16 +83,20 @@ describe("wfrp battle end to end (engine)", () => {
     expect(rolls.every((n) => n > 0)).toBe(true);
   });
 
-  it("ignores client d20 rolls: the server rolls the d100 attack", async () => {
+  it("takes the client d100 and ignores it in server-roll mode", async () => {
     const base = context({ participants: [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });
 
     const ctx: BattleMutationContext = { ...base, meta: { ...base.meta, rules: WFRP_RULES }, scene: { ...base.scene, turnIndex: 0 } };
 
-    const body = attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", d20Roll: 1, damageRolls: [4] });
+    const body = attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", d20Roll: 100, damageRolls: [4] });
 
-    const out = await attackMutation({ ...ctx, rng: seq(0.995, 0.01) }, body);
+    const client = await attackMutation({ ...ctx, rng: seq(0.5, 0.5) }, body);
 
-    expect(out.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp).toBe(20);
+    expect(client.events.length).toBeGreaterThan(0);
+
+    const server = await createAttackMutation(undefined, { serverRolls: true })({ ...ctx, rng: seq(0.995, 0.01) }, attackBodySchema.parse({ ...body, d20Roll: 1 }));
+
+    expect(server.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp).toBe(20);
   });
 
   describe("scene momentum", () => {
@@ -102,7 +106,7 @@ describe("wfrp battle end to end (engine)", () => {
       return { ...base, meta: { ...base.meta, rules: WFRP_RULES, ...metaOver }, scene: { ...base.scene, turnIndex: 0, ...over } };
     };
 
-    const body = (over: Record<string, unknown> = {}) => attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", d20Roll: 10, damageRolls: [4], ...over });
+    const body = (over: Record<string, unknown> = {}) => attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", d20Roll: 30, damageRolls: [4], ...over });
 
     it("a won attack writes the side token to the scene, the next attack of that side spends it", async () => {
       const won = await attackMutation({ ...wfrpCtx(), rng: firstThen(0.295, 0.795) }, body());
@@ -116,7 +120,7 @@ describe("wfrp battle end to end (engine)", () => {
     });
 
     it("a lost attack hands the token to the defender", async () => {
-      const lost = await attackMutation({ ...wfrpCtx({ momentum: { ally: true } }), rng: firstThen(0.795, 0.295) }, body({ endTurn: true }));
+      const lost = await attackMutation({ ...wfrpCtx({ momentum: { ally: true } }), rng: firstThen(0.795, 0.295) }, body({ endTurn: true, d20Roll: 80 }));
 
       expect(lost.scene?.momentum).toEqual({ enemy: true });
       expect(lost.scene?.turnIndex).toBeDefined();
@@ -179,5 +183,53 @@ describe("wfrp battle end to end (engine)", () => {
       expect(resumed.scene?.momentum).toEqual(plain.scene?.momentum);
       expect(resumed.participants.map((p) => p.combatStats.currentHp)).toEqual(plain.participants.map((p) => p.combatStats.currentHp));
     });
+  });
+});
+
+describe("attack roll bounds", () => {
+  const wfrp = (): BattleMutationContext => {
+    const archer = fighter("a", ParticipantSide.ALLY);
+
+    const multi = { ...archer, battleData: { ...archer.battleData, attacks: [{ ...sword, maxTargets: 2 }] } };
+
+    const base = context({ participants: [multi, fighter("t", ParticipantSide.ENEMY), fighter("u", ParticipantSide.ENEMY)], isDM: true });
+
+    return { ...base, meta: { ...base.meta, rules: WFRP_RULES }, scene: { ...base.scene, turnIndex: 0 } };
+  };
+
+  const parse = (over: Record<string, unknown>) => attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", damageRolls: [], ...over });
+
+  it("rejects 101, 0 and fractions in the schema", () => {
+    for (const d20Roll of [101, 0, 12.5]) expect(attackBodySchema.safeParse({ attackerId: "a", targetId: "t", d20Roll }).success).toBe(false);
+
+    expect(attackBodySchema.safeParse({ attackerId: "a", targetId: "t", attackRolls: [55, 101] }).success).toBe(false);
+  });
+
+  it("wfrp takes d20Roll 100 with empty damageRolls and reports it in the percentile", async () => {
+    const out = await attackMutation({ ...wfrp(), rng: () => 0.5 }, parse({ d20Roll: 100 }));
+
+    expect(JSON.stringify(out.events)).toMatch(/"percentile":\{[^}]*"roll":100/);
+    expect(out.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp).toBe(20);
+  });
+
+  it("wfrp takes one roll per target and ignores the advantage mode", async () => {
+    const body = parse({ targetId: undefined, targetIds: ["t", "u"], attackRolls: [55, 100] });
+
+    const normal = await attackMutation({ ...wfrp(), rng: () => 0.5 }, body);
+
+    const advantage = await attackMutation({ ...wfrp(), rng: () => 0.5 }, { ...body, rollMode: "advantage" });
+
+    expect(normal.participants.map((p) => p.combatStats.currentHp)).toEqual(advantage.participants.map((p) => p.combatStats.currentHp));
+  });
+
+  it("dnd5e rejects a roll above 20 in the handler and accepts 20", async () => {
+    const hero5 = { ...hero, battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Sword", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" } as BattleAttack] } };
+
+    const ctx = context({ participants: [hero5, goblin], isDM: true });
+
+    const body = (d20Roll: number) => attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll, damageRolls: [4] });
+
+    await expect(attackMutation(ctx, body(21))).rejects.toMatchObject({ message: "errors.rollOutOfRange" });
+    await expect(attackMutation(ctx, body(20))).resolves.toBeDefined();
   });
 });

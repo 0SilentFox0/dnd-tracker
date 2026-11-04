@@ -87,7 +87,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const initiativeOrder = battle.initiativeOrder;
 
-  const request = validateAttackRequest({ participants: initiativeOrder, scene: { turnIndex: battle.currentTurnIndex }, userId, isDM }, data);
+  const request = validateAttackRequest({ participants: initiativeOrder, scene: { turnIndex: battle.currentTurnIndex }, userId, isDM }, data, input.rules);
 
   const { attacker, attack, chosenTargets, targetIds } = request;
 
@@ -160,7 +160,7 @@ function rollStrike(ctx: PhaseCtx, target: BattleParticipant, i: number, opts: S
 
   const sides = ruleSystemOf(input.rules).combat.dice;
 
-  const serverD20 = input.serverRolls || opts.serverRolled || sides !== 20;
+  const serverD20 = input.serverRolls || opts.serverRolled;
 
   const strike = serverD20 ? { value: rollDie(sides, rng), serverRolled: true } : strikeRoll(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng, sides);
 
@@ -168,7 +168,7 @@ function rollStrike(ctx: PhaseCtx, target: BattleParticipant, i: number, opts: S
 
   const strikeDice = serverDamage ? { rolls: serverDamage, serverRolled: serverDamage } : ctx.dice.next();
 
-  const second = serverD20 ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
+  const second = serverD20 || sides !== 20 ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
 
   return { strike, strikeDice, second };
 }

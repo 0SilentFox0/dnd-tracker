@@ -154,9 +154,9 @@ export const attackBodySchema = z
     targetId: z.string().optional(),
     targetIds: z.array(z.string()).optional(),
     attackId: z.string().optional(),
-    d20Roll: z.number().min(1).max(20).optional(),
-    attackRoll: z.number().min(1).max(20).optional(),
-    attackRolls: z.array(z.number().min(1).max(20)).optional(),
+    d20Roll: z.number().int().min(1).max(100).optional(),
+    attackRoll: z.number().int().min(1).max(100).optional(),
+    attackRolls: z.array(z.number().int().min(1).max(100)).optional(),
     /** другий d20 на ціль у порядку attackRolls; сервер сам вирішує перевагу/недолік */
     secondRolls: z.array(z.number().min(1).max(20).nullable()).optional(),
     advantageRoll: z.number().min(1).max(20).optional(),

@@ -503,6 +503,7 @@
   "systemLevelsUnsupported": "This rule system has no levels",
   "systemDraftsUnsupported": "This rule system does not support player drafts yet",
   "rollKindMismatch": "This roll type does not fit the campaign rule system",
+  "rollOutOfRange": "Roll is outside the system die range",
   "skillUntrained": "The skill is untrained, so the test is not possible",
   "restKindUnsupported": "This kind of rest is not available in the campaign rule system",
   "characteristicsRequired": "This rule system requires characteristics"

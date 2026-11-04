@@ -70,6 +70,7 @@ export const API_ERRORS = {
   SYSTEM_LEVELS_UNSUPPORTED: "errors.systemLevelsUnsupported",
   SYSTEM_DRAFTS_UNSUPPORTED: "errors.systemDraftsUnsupported",
   ROLL_KIND_MISMATCH: "errors.rollKindMismatch",
+  ROLL_OUT_OF_RANGE: "errors.rollOutOfRange",
   SKILL_UNTRAINED: "errors.skillUntrained",
   REST_KIND_UNSUPPORTED: "errors.restKindUnsupported",
   CHARACTERISTICS_REQUIRED: "errors.characteristicsRequired",
