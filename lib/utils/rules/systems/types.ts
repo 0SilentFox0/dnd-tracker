@@ -108,6 +108,8 @@ export interface RuleSystemCombat {
   participantFields?(row: { characteristics?: unknown }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
+  /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
+  attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { characteristic: CharacteristicKey; target: number };
   mitigateDamage?(ctx: MitigateCtx): MitigateResult;
   onZeroHp?(ctx: ZeroHpCtx): DamageConsequencesResult;
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */

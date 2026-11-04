@@ -6,7 +6,7 @@ import { wfrpInitiative } from "./combat/initiative";
 import { mitigateWfrpDamage } from "./combat/mitigate";
 import { wfrpOnZeroHp } from "./combat/on-zero-hp";
 import { wfrpBaseStats, wfrpParticipantFields } from "./combat/participant";
-import { resolveWfrpAttack } from "./combat/resolve-attack";
+import { resolveWfrpAttack, wfrpAttackTarget } from "./combat/resolve-attack";
 import { onSession } from "./session";
 import { rollWfrpSheetTest } from "./sheet-test";
 
@@ -22,7 +22,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   },
   rest: { kinds: false, onSession },
   battle: { supported: true },
-  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
+  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
   attacks: false,
   spells: false,

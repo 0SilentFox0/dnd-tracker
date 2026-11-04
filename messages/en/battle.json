@@ -16,6 +16,12 @@
     "waitingNote": "The DM is choosing the critical roll effect…"
   },
   "hud": {
+    "d100": {
+      "tens": "Tens",
+      "units": "Units",
+      "field": "1–100",
+      "roll": "Roll"
+    },
     "dieLabel": "Die {n} (d{sides})",
     "autoRoll": "Auto roll",
     "zoomAvatar": "{name}: full-size avatar",

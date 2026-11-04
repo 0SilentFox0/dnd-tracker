@@ -12,9 +12,15 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
 import type { ResolveAttackCtx,ResolvedAttack } from "@/lib/utils/rules/systems/types";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const charsOf = (p: BattleParticipant) => readCharacteristics({ characteristics: p.abilities.characteristics });
+
+const attackCharacteristicOf = (attack: BattleAttack) => (attackKindOf(attack.type) === AttackType.RANGED ? "bs" : "ws") as "bs" | "ws";
+
+const attackBaseTargetOf = (attacker: BattleParticipant, attack: BattleAttack): number => value(charsOf(attacker), attackCharacteristicOf(attack));
+
+export const wfrpAttackTarget = (attacker: BattleParticipant, attack: BattleAttack) => ({ characteristic: attackCharacteristicOf(attack), target: attackBaseTargetOf(attacker, attack) });
 
 // Positions are required: without a map nobody counts as outnumbering.
 function isOutnumbering(attacker: BattleParticipant, target: BattleParticipant, participants: BattleParticipant[]): boolean {
@@ -58,10 +64,8 @@ const detailsOf = (t: PercentileTestResult, netSl: number, extra: Partial<Percen
 export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
   const { attacker, target, attack, participants, rng, manualRoll } = ctx;
 
-  const a = charsOf(attacker);
-
   if (attackKindOf(attack.type) === AttackType.RANGED) {
-    const test = resolvePercentileTest({ target: value(a, "bs"), slModifier: DIFFICULTY_SL.challenging, doubles: true, rng, presetRoll: manualRoll });
+    const test = resolvePercentileTest({ target: attackBaseTargetOf(attacker, attack), slModifier: DIFFICULTY_SL.challenging, doubles: true, rng, presetRoll: manualRoll });
 
     const isHit = test.outcome === "success" || test.outcome === "critical";
 
@@ -75,7 +79,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
   const spent = ctx.momentum.attacker;
 
   const result = resolveOpposed({
-    attackerTarget: value(a, "ws") + (isOutnumbering(attacker, target, participants) ? OUTNUMBERING_BONUS : 0),
+    attackerTarget: attackBaseTargetOf(attacker, attack) + (isOutnumbering(attacker, target, participants) ? OUTNUMBERING_BONUS : 0),
     defenderTargets: [
       { kind: "parry", target: value(d, "ws") },
       { kind: "dodge", target: dodge },
