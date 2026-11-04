@@ -55,12 +55,12 @@
 
 ## Межі 5b-2
 
-Бій wfrp працює на рівні рушія (UI — 5b-3). Свідомі межі:
+Бій wfrp працює на рівні рушія (UI — див. «Межі 5b-3»). Свідомі межі:
 
 - Momentum — жетон сцени `{ ally?, enemy? }` (`battle_scenes.momentum`, у знімку, дельті й rollback; `lib/utils/battle/momentum.ts`: `settle`, `heldBy`, `momentumPatch`), спільний для гравецьких і серверних атак (фаза атаки, помста, нагода, рух, легендарні дії, підготовлена атака); `spell/cast` і `berserk` його не чіпають (`NO_MOMENTUM`). У d20 `scene.momentum` ніколи не з'являється в дельті. У wfrp немає реакцій, тож нагода/підготовлена атака за реальних правил недосяжні; крит-вибір ДМ (`pendingCritChoice`) атаками wfrp не запускається. Дальній бій Momentum не використовує.
 - Щита й броні немає (AP = 0, щит не моделюється): 5f.
 - Крит-маркери (bleeding, stunned, …) лише інертні ефекти-мітки; стани й механіки — 5c; head.5 «unconscious» не змінює статус.
-- d100 не пишеться в `diceRolls` (`DieSides` не має 100); значення лежить в `actionDetails.percentile`. `attackBodySchema` обмежує `d20Roll` до 20, тож кидок d100 клієнта потребує розширення схеми в 5b-3 (до того — кидки сервера).
+- d100 не пишеться в `diceRolls` (`DieSides` не має 100); значення лежить в `actionDetails.percentile`. Схема атаки приймає `d20Roll`/`attackRoll`/`attackRolls` до 100, а верхню межу задає `combat.dice` (закрито в 5b-3).
 - Дальня атака без смуг дальності (складність challenging, ціль захисту 0).
 - Еталони балансу (`refHit`) припущені, не звірені з книгою.
 - `berserk` (turn/berserk.ts) і далі кидає d20 (у wfrp немає вмінь).
@@ -68,6 +68,21 @@
 - Небойові джерела шкоди на 0 Wounds дають крит у «body»; опір у wfrp = лише імунітет; stat-модифікатор d20 у шкоді ігнорується.
 - Підписи відстані: літерал «фт/ft» лишився лише в `battleLog.spellFx.{anchoredAura,delayed,distanceDice}` (магія/ауры, недосяжні при `spells: false`); гард — `lib/i18n/__tests__/battle-log-distance-unit.test.ts`. Описи 5e-дій і станів (`battle.json` «shove», `battleCommon` conditions) недосяжні в wfrp (`actions`/`conditions` вимкнені). Нова wfrp-досяжна відстань у тексті — через `{unit}` із `ruleSystemOf(rules).distance.unit`.
 - `rules` стало обов'язковим на шляхах, досяжних у wfrp (фаза атаки, flow, ефекти, зони, маневри). Необов'язковий `rules?` лишається в `roll-check`, `saves`, `conditions`, кидках смерті й `balance-*` — вони d20-лише за задумом.
+
+## Межі 5b-3
+
+UI бою wfrp без d20-артефактів. Свідомі межі:
+
+- Прапорці UI лише через `useBattleRules()` (`lib/hooks/battle`, читає `scene.battle.rules`, без запиту й без `ready`): `d20Stats` ховає AC/бонус атаки, `actionEconomy.bonusAction`/`reaction` — бонусну плитку, off-hand, реакції, `combat.dice` — d100-вигляд. `HpFigure` показує «Wounds cur / max».
+- `useRuleSystem` — дискримінований стан: поки правила вантажаться, `ready: false` і `key`/`system` не задані; споживачі не рендерять d20-вигляд. `invalidateCampaignRules` викликається після створення першого юніта/персонажа (оновлює `systemLocked`).
+- `RuleSystemCombat.attackTarget` — необов'язковий хук цілі d100 (лише базові WS/BS, без перевищення чисельності й Momentum); UI бере його через реєстр (`percentileTargetOf`), прямий імпорт wfrp заборонений ESLint.
+- Кидок d100: пара d10 (десятки 00–90 + одиниці 0–9, «00»+«0» = 100) або запасне поле 1–100 (`composePercentile`); режим «Авто» (ключ `mode.server`) = той самий клієнтський автокидок `rollDie(100)`, окремого серверного прапорця для гравецьких атак немає. Payload завжди містить `attackRoll`.
+- Крок шкоди для d100 пропущено (`damageRolls: []`), підсумок — `ActionResultCard` (SL, локація, Momentum), не `SummaryStep`; багатоцільова атака: кожен `attackRolls[i]` ≤ 100, `advantage`/`disadvantage` примусово `normal`.
+- Сервер: `validateAttackRequest(scope, data, rules)` кидає `ROLL_OUT_OF_RANGE`, коли кидок > `combat.dice` (у dnd5e/homm `d20Roll` > 20 — теж 400); другий кидок ігнорується, коли `sides != 20`.
+- Приватність: якщо глядач бачить ціль не «exact» (`canSeeExactStats`), `buildAttackResultFx` прибирає `defender`, а `sl` стає `netSl` — Momentum/SL захисника не витікають.
+- 3D-кубики: пара d10 будується з `actionDetails.percentile` у `from-action.ts` (seed `1_000_003 + actionIndex`), у `diceRolls` не пишеться; `DieSlot.tens` — грань «00…90». Кубик одиниць у юнітів підписаний «10», не «0» (косметика).
+- Гард літералів відстані: `battle-log-distance-unit.test.ts`.
+- Відкрито: покриття `MyTurnControls` сценним тестом (gating перевірено на рівні `ActionGrid`); live-run у браузері; запасне поле «101» парситься як 1 (`parseDieInput` бере останні цифри).
 
 ## Межі 5a
 
@@ -79,7 +94,7 @@
 - Клас у wfrp ще видимий і обов'язковий (spec: сховати); частковий PATCH `characteristics` скидає решту до дефолтів; зниження Fate не обрізає `resources.fortune`.
 - `readCharacteristics` (`keys.ts`) дублює межі `CharacteristicsSchema`: винести спільні константи й табличний тест на граничні значення.
 - `wfrp/sheet-test.ts` кидає `ContentError` (серверний шар) із чистої утиліти.
-- `useRuleSystem` повертає `homm`, поки правила вантажаться; `systemLocked` у кеші не інвалідується при створенні першого персонажа/юніта.
+- ~~`useRuleSystem` повертає `homm`, поки правила вантажаться; `systemLocked` не інвалідується~~ — закрито в 5b-3.
 - ~~`importUnitsIntoCampaign` пише `characteristics` без перевірки системи кампанії~~ — закрито в 5b-1 (приймає `rules`, пише лише для wfrp).
 - `list-templates.ts` / `app/campaigns/page.tsx` тягнуть увесь JSON `rules` заради ключа системи (egress).
 - `SkillAdvancesEditor`: спеціалізація з пробілом мовчки блокує кнопку.
