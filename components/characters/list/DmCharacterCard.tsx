@@ -36,11 +36,11 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const classMode = useClassMode(campaignId);
 
-  const { key: systemKey, system } = useRuleSystem({ campaignId });
+  const { key: systemKey, system, ready } = useRuleSystem({ campaignId });
 
   const d20Stats = !!system?.d20Stats;
 
-  const hideProgression = !!systemKey && systemUiOf(systemKey).hideProgression;
+  const hideProgression = !ready || systemUiOf(systemKey).hideProgression;
 
   const wounds = system?.characteristics.kind === "wfrp";
 
@@ -90,7 +90,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
       </div>
       <div className="flex gap-1.5">
         {!hideProgression && <HudStatChip short={t("statLevel")} value={character.level} />}
-        <HudStatChip short={wounds ? t("wounds") : "HP"} label={wounds ? t("wounds") : "HP"} value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />
+        {ready && <HudStatChip short={wounds ? t("wounds") : "HP"} label={wounds ? t("wounds") : "HP"} value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />}
         {d20Stats && <HudStatChip short="AC" value={character.armorClass} />}
         {d20Stats && <HudStatChip short={t("statInitiative")} value={character.initiative} />}
       </div>
