@@ -4,6 +4,8 @@ export interface Overlay { hidden: Set<string>; shadowed: Set<string> }
 
 const PLAIN_MAX = 4096;
 
+export const PLAIN_TTL_MS = 60_000;
+
 const BASE_ROWS_MAX = 128;
 
 const OVERLAYS_MAX = 512;
@@ -44,8 +46,8 @@ class Lru<V> {
   }
 }
 
-/** Campaigns known to have no base. `baseSourceId` never changes after create, so this answer is final. */
-const plain = new Lru<true>(PLAIN_MAX);
+/** Campaigns known to have no base (value = time marked). baseSourceId changes once, at legacy migration (Part 5); TTL bounds stale marks on other instances. */
+const plain = new Lru<number>(PLAIN_MAX);
 
 /** Shared by every campaign on the same published version: key = `source|version|model|query`. Rows are immutable per version. */
 const baseRows = new Lru<Array<Record<string, unknown>>>(BASE_ROWS_MAX);
@@ -55,9 +57,21 @@ const overlays = new Lru<Overlay>(OVERLAYS_MAX);
 
 export const layerStats = { campaignLookups: 0 };
 
-export const isPlainCampaign = (campaignId: string) => plain.get(campaignId) === true;
+export function isPlainCampaign(campaignId: string, now = Date.now()): boolean {
+  const markedAt = plain.get(campaignId);
 
-export const markPlainCampaign = (campaignId: string) => plain.set(campaignId, true);
+  if (markedAt === undefined) return false;
+
+  if (now - markedAt < PLAIN_TTL_MS) return true;
+
+  plain.delete(campaignId);
+
+  return false;
+}
+
+export function markPlainCampaign(campaignId: string, now = Date.now()): void {
+  plain.set(campaignId, now);
+}
 
 export const baseRowsKey = (layer: CampaignLayer, model: string, signature: string) => `${layer.sourceId}|${layer.version}|${model}|${signature}`;
 
