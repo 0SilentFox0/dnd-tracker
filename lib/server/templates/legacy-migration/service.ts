@@ -1,0 +1,155 @@
+import type { PrismaClient } from "@prisma/client";
+
+import { lockCampaignRow } from "@/lib/server/campaigns/lock";
+import { runContentWriteContext } from "@/lib/server/content/write-context";
+import { BUNDLE_TABLES, type BundleTable } from "@/lib/server/templates/bundle";
+import { checkEligibility } from "@/lib/server/templates/legacy-migration/eligibility";
+import { referrerUpdates, writeMigration } from "@/lib/server/templates/legacy-migration/execute";
+import { loadMigrationInput } from "@/lib/server/templates/legacy-migration/load";
+import { planLegacyMigration } from "@/lib/server/templates/legacy-migration/plan";
+import { writePreImage } from "@/lib/server/templates/legacy-migration/preimage";
+import { REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
+import { LegacyMigrationError, type MigrationInput, type MigrationPlan, type MigrationReport, type PreImage, type ReferrerReport, type TableReport } from "@/lib/server/templates/legacy-migration/types";
+
+export type ExtendedPrisma = PrismaClient;
+
+const TX_OPTIONS = { timeout: 120_000, maxWait: 10_000 };
+
+const emptyTable = (): TableReport => ({ stored: 0, baseRef: 0, override: { updated: 0, conflict: 0, own: 0, orphan: 0 }, local: 0, hide: 0, hidePending: 0 });
+
+function tablesOf(input: MigrationInput, plan: MigrationPlan): Partial<Record<BundleTable, TableReport>> {
+  const tables = Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, { ...emptyTable(), stored: input.stored[t.key].length }])) as Record<BundleTable, TableReport>;
+
+  for (const d of plan.decisions) {
+    const row = tables[d.table];
+
+    if (d.kind === "baseRef") row.baseRef += 1;
+    else if (d.kind === "local") row.local += 1;
+    else if (d.kind === "hide") {
+      row.hide += 1;
+
+      if (d.pending) row.hidePending += 1;
+    } else if (d.reason === "templateChanged") row.override.updated += 1;
+    else if (d.reason === "dmEdited") row.override.own += 1;
+    else if (d.reason === "orphan") row.override.orphan += 1;
+    else row.override.conflict += 1;
+  }
+
+  return tables;
+}
+
+function referrersOf(input: MigrationInput, plan: MigrationPlan): ReferrerReport[] {
+  const updates = referrerUpdates({ input, idMap: plan.idMap });
+
+  return input.referrers.map(({ r, rows }) => {
+    const pkColumn = r.pk ?? "id";
+
+    const mine = updates.filter((u) => u.model === r.model && rows.some((row) => row[pkColumn] === u.pk[pkColumn]));
+
+    const cells: Record<string, number> = {};
+
+    for (const u of mine) for (const c of u.cells) cells[c.column] = (cells[c.column] ?? 0) + 1;
+
+    return { model: r.model, rows: rows.length, changedRows: mine.length, cells };
+  });
+}
+
+function warningsOf(input: MigrationInput, plan: MigrationPlan): MigrationReport["warnings"] {
+  const counted = (code: string, count: number) => (count > 0 ? [{ code, count }] : []);
+
+  return [
+    ...plan.warnings,
+    ...counted("PENDING_RULES_SETTINGS", input.pendingRulesSettings),
+    ...(input.syncStateFallback ? [{ code: "SYNC_STATE_FALLBACK" }] : []),
+  ];
+}
+
+function reportOf(args: { name: string | null; input: MigrationInput; plan: MigrationPlan; status: MigrationReport["status"] }): MigrationReport {
+  const { input, plan } = args;
+
+  return {
+    campaignId: input.campaignId,
+    name: args.name,
+    sourceId: input.sourceId,
+    version: input.version,
+    status: args.status,
+    tables: tablesOf(input, plan),
+    referrers: referrersOf(input, plan),
+    blockers: plan.blockers,
+    warnings: warningsOf(input, plan),
+  };
+}
+
+const ineligible = (args: { campaignId: string; name: string | null; reason: MigrationReport["status"]; detail?: string }): MigrationReport => ({
+  campaignId: args.campaignId,
+  name: args.name,
+  sourceId: null,
+  version: null,
+  status: args.reason,
+  ...(args.detail && { detail: args.detail }),
+  tables: {},
+  referrers: [],
+  blockers: [],
+  warnings: [],
+});
+
+type Reader = { campaign: { findUnique(args: unknown): Promise<{ name: string; contentVersion: number } | null> } };
+
+const campaignOf = (db: object, campaignId: string) => (db as Reader).campaign.findUnique({ where: { id: campaignId }, select: { name: true, contentVersion: true } });
+
+export async function dryRunCampaign(db: object, campaignId: string): Promise<MigrationReport> {
+  const name = (await campaignOf(db, campaignId))?.name ?? null;
+
+  const eligibility = await checkEligibility(db, campaignId);
+
+  if (!eligibility.ok) return ineligible({ campaignId, name, reason: eligibility.reason, detail: eligibility.detail });
+
+  const input = await loadMigrationInput(db, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version });
+
+  return reportOf({ name, input, plan: planLegacyMigration(input), status: "eligible" });
+}
+
+export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: string; preImageDir: string }): Promise<MigrationReport & { preImagePath?: string }> {
+  const { campaignId, preImageDir } = args;
+
+  return db.$transaction((tx) => runContentWriteContext(campaignId, tx, async () => {
+    await lockCampaignRow(tx, campaignId, "update");
+
+    const campaign = await campaignOf(tx, campaignId);
+
+    const name = campaign?.name ?? null;
+
+    const eligibility = await checkEligibility(tx, campaignId);
+
+    if (!eligibility.ok) return ineligible({ campaignId, name, reason: eligibility.reason, detail: eligibility.detail });
+
+    for (const r of REFERRERS) if (r.mode === "remap" && r.lockSql) await tx.$queryRaw(r.lockSql(campaignId));
+
+    const input = await loadMigrationInput(tx, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version });
+
+    const plan = planLegacyMigration(input);
+
+    if (plan.blockers.length > 0) throw new LegacyMigrationError("ID_COLLISION", plan.blockers);
+
+    const contentVersion = campaign!.contentVersion;
+
+    const image: PreImage = {
+      campaignId,
+      createdAt: new Date().toISOString(),
+      campaign: { baseSourceId: null, baseVersion: null, contentVersion },
+      sourceSync: input.sourceSync,
+      stored: input.stored,
+      referrerCells: referrerUpdates({ input, idMap: plan.idMap }).flatMap((u) => u.cells),
+      plan: { idMap: [...plan.idMap], hides: plan.hides },
+      postContentVersion: contentVersion + 1,
+    };
+
+    const preImagePath = await writePreImage(preImageDir, image);
+
+    await writeMigration(tx, { input, plan });
+
+    // Task 7 seam: verify visible-content equivalence and residual references here; throw to roll back.
+
+    return { ...reportOf({ name, input, plan, status: "migrated" }), preImagePath };
+  }), TX_OPTIONS);
+}

@@ -30,7 +30,7 @@ const preparedBattle = (campaignId: string) => ({ campaignId, status: PREPARED }
 
 const finishedBattle = (campaignId: string) => ({ campaignId, status: { not: PREPARED } });
 
-const lockOwn = (model: Prisma.ModelName, extra?: Prisma.Sql) => (campaignId: string) => Prisma.sql`SELECT id FROM ${Prisma.raw(`"${tableOf(model)}"`)} WHERE "campaignId" = ${campaignId}${extra ?? Prisma.empty} FOR UPDATE`;
+const lockOwn = (model: Prisma.ModelName, extra?: Prisma.Sql, pk = "id") => (campaignId: string) => Prisma.sql`SELECT ${Prisma.raw(`"${pk}"`)} FROM ${Prisma.raw(`"${tableOf(model)}"`)} WHERE "campaignId" = ${campaignId}${extra ?? Prisma.empty} FOR UPDATE`;
 
 const lockVia = (model: Prisma.ModelName, fk: string, parent: Prisma.ModelName, extra?: Prisma.Sql) => (campaignId: string) =>
   Prisma.sql`SELECT id FROM ${Prisma.raw(`"${tableOf(model)}"`)} WHERE ${Prisma.raw(`"${fk}"`)} IN (SELECT id FROM ${Prisma.raw(`"${tableOf(parent)}"`)} WHERE "campaignId" = ${campaignId}${extra ?? Prisma.empty}) FOR UPDATE`;
@@ -66,10 +66,10 @@ export const REFERRERS: readonly Referrer[] = [
   history("BattleParticipant", (id) => ({ battle: finishedBattle(id) })),
   history("BattleEvent", viaBattle),
   history("BattleSnapshot", viaBattle),
-  remap("CampaignShow", ["audio", "battle", "slide", "cover", "world"], { lockSql: lockOwn("CampaignShow") }),
+  remap("CampaignShow", ["audio", "battle", "slide", "cover", "world"], { pk: "campaignId", lockSql: lockOwn("CampaignShow", undefined, "campaignId") }),
   remap("SlideDeck", ["slides"], { lockSql: lockOwn("SlideDeck") }),
   remap("ScenarioPage", ["content"], { lockSql: lockOwn("ScenarioPage") }),
-  remap("ScenarioPageIndex", ["facts"], { lockSql: lockOwn("ScenarioPageIndex") }),
+  remap("ScenarioPageIndex", ["facts"], { pk: "pageId", lockSql: lockOwn("ScenarioPageIndex", undefined, "pageId") }),
   history("ScenarioPageVersion", viaPage),
   history("ScenarioPageSummary"),
   remap("CompendiumEntry", ["localId", "bindings", "baseline", "locator"], { lockSql: lockOwn("CompendiumEntry") }),
