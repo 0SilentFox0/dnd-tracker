@@ -30,13 +30,13 @@
 
 ### 1. Дані
 - Prisma: `BattleScene.momentum Json?` (expand-only міграція; `battle_scenes` уже має RLS, нової таблиці немає). Форма `SceneMomentum = { ally?: true; enemy?: true }` (`types/battle.ts`).
-- `BattleSceneState.momentum: SceneMomentum` (порожній об'єкт = жетонів немає); `load-battle`, `save-battle` (`ScenePatch.momentum`), публічна форма в `battle-response.ts`, `client-delta.ts` (`scene.momentum` лише за зміни), `apply-delta.ts`, `types/api.ts`.
+- `BattleSceneState.momentum: SceneMomentum` (порожній об'єкт = жетонів немає); `load-battle`, `save-battle` (`ScenePatch.momentum`), публічна форма в `battle-response.ts`, `client-delta.ts` (`scene.momentum` присутнє лише коли не порожнє; відсутнє = порожнє), `apply-delta.ts`, `types/api.ts`.
 - `battleData.momentum` видаляється з `types/battle.ts` і з рушія; старі значення не мігруються (wfrp-боїв на prod немає).
 - Життєвий цикл: `start`, `reset` — `{}`; `complete` — `{}`; знімок сцени (`snapshot-state.ts`) отримує `momentum`, `rollback-mutation` відновлює його поряд з `pendingMoraleCheck` (раніше жетон відкочувався разом з учасниками — не втратити).
 
 ### 2. Рушій
 - Чиста утиліта `lib/utils/battle/momentum.ts`: `heldBy(state, side): boolean`; `settle(state, {attackerSide, targetSide, held, resolved}) → { next: SceneMomentum; gained: boolean }` (спожите, виграш, скидання іншої сторони). Єдина реалізація для `judgeWfrp` (`attack/process/run.ts`) і `judgeServerWfrp` (`attack/server-attack.ts`); `momentumOf`/`setMomentum` видаляються.
-- `ActionFlow.momentum: SceneMomentum` (+ `ctx` лишається незмінним). Шість місць створення потоку заповнюють його зі сцени й повертають зміну: `attack/process/run.ts`, `spell/cast/index.ts`, `attack/retaliation.ts`, `actions/opportunity.ts`, `actions/legendary.ts`, `actions/run.ts`. Мутація-власник кладе `flow.momentum` у `MutationResult.scene.momentum` лише коли воно змінилося.
+- `ActionFlow.momentum: SceneMomentum` (+ `ctx` лишається незмінним). П'ять місць, що судять атаку, беруть жетон зі сцени й повертають зміну: `attack/process/run.ts` (через `runAttackPhase`, разом з `retaliation.ts`), `actions/opportunity.ts` (через `resolveMovement5e`), `actions/legendary.ts`, `actions/run.ts` (readied). `spell/cast/index.ts` теж створює `ActionFlow`, але Momentum не використовує (магія wfrp — 5d): передає константу `NO_MOMENTUM`; `berserk` (d20) так само. Мутація-власник кладе `flow.momentum` у `MutationResult.scene.momentum` лише коли воно змінилося.
 - Лог-рядок `battleLog.percentile.momentum` лишається (виводиться за `gained`).
 - Для d20 `momentum` завжди `{}`, нічого не пишеться й не відправляється в дельті.
 
@@ -56,5 +56,5 @@ UI бою (5b-3); щит/броня (5f); стани, крит-маркери, �
 - Перед деплоєм епіку: `battle-sweep` homm/dnd5e на prodcopy (ще не запускався); міграція `battle_scenes.momentum` + попередні дві (`characteristics`, `units_base`).
 
 ## Ризики
-- Прокидання `flow.momentum` через шість точок — основна кількість змін; забути одну = серверна атака мовчки не бачить жетона. Тест на кожну точку.
+- Прокидання `flow.momentum` через п'ять точок — основна кількість змін; забути одну = серверна атака мовчки не бачить жетона. Тест на кожну точку.
 - Нагода/реакція тепер можуть забрати жетон: свідома зміна балансу, значення констант без змін.
