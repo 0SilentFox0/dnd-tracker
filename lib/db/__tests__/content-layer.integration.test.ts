@@ -139,7 +139,22 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
       expect(await D[f.delegate].count({ where: { ...campaign(ids.layered), [f.label]: "Alpha" } })).toBe(0);
       expect(await D[f.delegate].count({ where: campaign(ids.layered) })).toBe(4);
       expect(await R[f.base].findFirst({ where: { id: rid(f, "a") } })).toMatchObject({ [f.label]: "Alpha" });
-      expect(await R[f.delegate].findUnique({ where: { id: rid(f, "a") } })).toMatchObject({ sourceId: rid(f, "a"), campaignId: ids.layered });
+
+      const stored = await R[f.delegate].findFirst({ where: { campaignId: ids.layered, sourceId: rid(f, "a") } });
+
+      expect(stored).toMatchObject({ sourceId: rid(f, "a"), campaignId: ids.layered });
+      expect(stored.id).not.toBe(rid(f, "a"));
+
+      const exposed = await D[f.delegate].findMany({ where: { campaignId: ids.layered, [f.label]: "Alpha2" } });
+
+      expect(exposed.map((r: { id: string }) => r.id)).toEqual([rid(f, "a")]);
+      expect(await D[f.delegate].findUnique({ where: { id: rid(f, "a"), campaignId: ids.layered } })).toMatchObject({ [f.label]: "Alpha2", id: rid(f, "a") });
+      expect(await D[f.delegate].count({ where: { campaignId: ids.layered, id: { in: [rid(f, "a"), rid(f, "b")] } } })).toBe(2);
+      expect((await D[f.delegate].findMany({ where: { campaignId: ids.layered, id: { notIn: [rid(f, "a")] } } })).map((r: { id: string }) => r.id).sort()).toEqual([rid(f, "b"), rid(f, "c"), rid(f, "l")]);
+      expect(await D[f.delegate].count({ where: { campaignId: ids.layered, id: { not: rid(f, "a") } } })).toBe(3);
+
+      await inWrite(ids.layered, (tx) => tx[f.delegate].update({ where: { id: rid(f, "a") }, data: { [f.label]: "Alpha2" } }));
+      expect(await R[f.delegate].count({ where: { campaignId: ids.layered, sourceId: rid(f, "a") } })).toBe(1);
       expect(labels(f, await D[f.delegate].findMany({ where: campaign(ids.other), orderBy: { [f.label]: "asc" } }))).toEqual(["Alpha", "Bravo", "Charlie"]);
     });
 
@@ -148,7 +163,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
         await runContentWriteContext(ids.layered, tx, () => (tx as any)[f.delegate].update({ where: { id: rid(f, "b") }, data: { [f.label]: "Bravo2" } }));
         throw new Error("ROLLBACK");
       })).rejects.toThrow("ROLLBACK");
-      expect(await R[f.delegate].findUnique({ where: { id: rid(f, "b") } })).toBeNull();
+      expect(await R[f.delegate].findFirst({ where: { campaignId: ids.layered, sourceId: rid(f, "b") } })).toBeNull();
     });
 
     it("updateMany materialises matching base rows first", async () => {
@@ -358,7 +373,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
         await runContentWriteContext(ids.latest, tx, () => (tx as any).race.update({ where: { id: rid(FIXTURES[8], "a") }, data: { name: "Gone" } }));
         throw new Error("ROLLBACK");
       })).rejects.toThrow("ROLLBACK");
-      expect(await R.race.findUnique({ where: { id: rid(FIXTURES[8], "a") } })).toBeNull();
+      expect(await R.race.findFirst({ where: { campaignId: ids.latest, sourceId: rid(FIXTURES[8], "a") } })).toBeNull();
     });
   });
 
@@ -377,10 +392,50 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
     });
   });
 
-  describe("known limitation", () => {
-    it.fails("two campaigns overriding the same base row collide on the global primary key", async () => {
-      await inWrite(ids.other, (tx) => tx.unit.update({ where: { id: rid(FIXTURES[0], "a") }, data: { name: "Mine" } }));
-      await inWrite(ids.latest, (tx) => tx.unit.update({ where: { id: rid(FIXTURES[0], "a") }, data: { name: "Theirs" } }));
+  describe("two campaigns overriding the same base row", () => {
+    it("each gets its own override with a fresh id and sees only its own values; the base id stays the public id", async () => {
+      const f = FIXTURES[0];
+
+      await inWrite(ids.other, (tx) => tx.unit.update({ where: { id: rid(f, "a") }, data: { name: "Mine" } }));
+      await inWrite(ids.latest, (tx) => tx.unit.update({ where: { id: rid(f, "a") }, data: { name: "Theirs" } }));
+
+      const mine = await R.unit.findFirst({ where: { campaignId: ids.other, sourceId: rid(f, "a") } });
+
+      const theirs = await R.unit.findFirst({ where: { campaignId: ids.latest, sourceId: rid(f, "a") } });
+
+      expect(mine.id).not.toBe(theirs.id);
+      expect(await D.unit.findUnique({ where: { id: rid(f, "a"), campaignId: ids.other } })).toMatchObject({ name: "Mine", id: rid(f, "a") });
+      expect(await D.unit.findUnique({ where: { id: rid(f, "a"), campaignId: ids.latest } })).toMatchObject({ name: "Theirs", id: rid(f, "a") });
+      expect(await D.unit.findUnique({ where: { id: rid(f, "a"), campaignId: ids.layered } })).toBeNull();
+      expect(await R.unitBase.findFirst({ where: { id: rid(f, "a") } })).toMatchObject({ name: "Alpha" });
+    });
+
+    it("references by base id keep resolving to the override, and deleting an override hides the base id", async () => {
+      const [, spell, , , , , , skill] = FIXTURES;
+
+      await newCampaign(`${marker}-refs`, { baseSourceId: ids.template, baseVersion: 1 });
+      await R.skillBase.update({ where: { id_validFrom: { id: rid(skill, "a"), validFrom: 1 } }, data: { spellId: rid(spell, "a") } });
+      invalidateCampaignLayer();
+
+      const refs = `${marker}-refs`;
+
+      await inWrite(refs, (tx) => tx.spell.update({ where: { id: rid(spell, "a") }, data: { name: "Overridden" } }));
+
+      const row = await D.skill.findFirst({ where: { campaignId: refs, id: rid(skill, "a") }, include: { spell: { select: { id: true, name: true } } } });
+
+      expect(row.spell).toEqual({ id: rid(spell, "a"), name: "Overridden" });
+      expect(row.spellId).toBe(rid(spell, "a"));
+      expect((await D.spell.findMany({ where: { campaignId: refs, id: { in: [row.spellId] } } })).map((r: { name: string }) => r.name)).toEqual(["Overridden"]);
+
+      await inWrite(refs, (tx) => tx.spell.delete({ where: { id: rid(spell, "a") } }));
+
+      expect(await D.spell.findUnique({ where: { id: rid(spell, "a"), campaignId: refs } })).toBeNull();
+      expect(await R.spell.count({ where: { campaignId: refs } })).toBe(0);
+      expect(await raw.campaignContentHide.count({ where: { campaignId: refs, table: "spells", id: rid(spell, "a") } })).toBe(1);
+    });
+
+    it("a local row cannot be created with an id that is a visible base id", async () => {
+      await expect(inWrite(ids.other, (tx) => tx.spell.create({ data: { id: rid(FIXTURES[1], "b"), campaignId: ids.other, name: "Dup", type: "damage", damageType: "fire" } }))).rejects.toThrow("LAYER_ID_COLLISION");
     });
   });
 });

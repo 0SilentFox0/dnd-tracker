@@ -81,6 +81,43 @@ function asLocalShape(row: Row, campaignId: string | undefined): Row {
   return { ...out, campaignId, sourceId: row.id, sourceHash: null };
 }
 
+/** In a layered campaign an override row (sourceId set) is addressed by its base id; its own cuid never leaves the layer. */
+const expose = (row: Row): Row => (row && row.sourceId != null ? { ...row, id: row.sourceId } : row);
+
+/** Local-table filter for a public `id` condition: an override matches by `sourceId`, an ordinary local row by `id`. */
+function publicIdFilter(cond: unknown, model: string): Row {
+  const c = cond as Row;
+
+  if (typeof cond === "string") return { OR: [{ id: cond }, { sourceId: cond }] };
+
+  if (c && typeof c === "object") {
+    const keys = Object.keys(c);
+
+    if (keys.length === 1 && (keys[0] === "equals" || keys[0] === "in")) return { OR: [{ id: cond }, { sourceId: cond }] };
+
+    if (keys.length === 1 && (keys[0] === "notIn" || (keys[0] === "not" && typeof c.not === "string"))) {
+      const list = keys[0] === "notIn" ? c.notIn : [c.not];
+
+      return { AND: [{ id: { notIn: list } }, { OR: [{ sourceId: null }, { sourceId: { notIn: list } }] }] };
+    }
+  }
+
+  throw new Error(`LAYER_UNSUPPORTED_FILTER:${model}.id`);
+}
+
+function localWhere(config: LayerConfig, rest: Row, campaignId: string): Row {
+  const { id, ...others } = rest;
+
+  return id === undefined ? { ...rest, campaignId } : { campaignId, AND: [others, publicIdFilter(id, config.model)] };
+}
+
+/** The stored row (override or ordinary) that a public id refers to in this campaign. */
+async function localByPublicId(ctx: Ctx, config: LayerConfig, campaignId: string, id: string): Promise<{ id: string } | null> {
+  const rows: Array<{ id: string; sourceId: string | null }> = await local(ctx, config).findMany({ where: { campaignId, OR: [{ sourceId: id }, { id }] }, select: { id: true, sourceId: true } });
+
+  return rows.find((r) => r.sourceId === id) ?? rows[0] ?? null;
+}
+
 /** Internal queries on the layered tables themselves (a tx client is also extended) must not re-enter the layer. */
 const local = (ctx: Ctx, config: LayerConfig): Raw =>
   new Proxy({}, { get: (_t, op: string) => async (args: Row) => bypass.run(true, async () => ctx.raw[config.local][op](args)) });
@@ -96,9 +133,9 @@ async function overlayOf(ctx: Ctx, config: LayerConfig, campaignId: string, laye
 
   const hidden: Array<{ id: string }> = await ctx.raw.campaignContentHide.findMany({ where: { campaignId, table: config.hideTable }, select: { id: true } });
 
-  const shadowed: Array<{ id: string }> = await local(ctx, config).findMany({ where: { campaignId, sourceId: { not: null } }, select: { id: true } });
+  const shadowed: Array<{ sourceId: string }> = await local(ctx, config).findMany({ where: { campaignId, sourceId: { not: null } }, select: { sourceId: true } });
 
-  const overlay = { hidden: new Set(hidden.map((r) => r.id)), shadowed: new Set(shadowed.map((r) => r.id)) };
+  const overlay = { hidden: new Set(hidden.map((r) => r.id)), shadowed: new Set(shadowed.map((r) => r.sourceId)) };
 
   if (cacheable) overlayCache.set(key, overlay);
 
@@ -179,7 +216,7 @@ function planArgs(config: LayerConfig, args: Row, extraSelect: string[] = []): P
 
   const foreignKeys = Object.keys(rels).filter((k) => config.relations[k].kind === "one").map((k) => config.relations[k].fk);
 
-  const forced = Object.fromEntries([...extraSelect, "id", ...foreignKeys].map((k) => [k, true]));
+  const forced = Object.fromEntries([...extraSelect, "id", "sourceId", ...foreignKeys].map((k) => [k, true]));
 
   const select = args.select ? { ...strip(args.select), ...forced } : undefined;
 
@@ -248,7 +285,7 @@ async function layeredFindMany(ctx: Ctx, config: LayerConfig, args: Row, runLoca
 
   const plan = planArgs(config, args, orderKeys(orderBy).map(([k]) => k));
 
-  const locals: Row[] = await runLocal({ ...plan.localArgs, where: { ...rest, campaignId }, take: undefined, skip: undefined });
+  const locals: Row[] = (await runLocal({ ...plan.localArgs, where: localWhere(config, rest, campaignId), take: undefined, skip: undefined })).map(expose);
 
   const overlay = await overlayOf(ctx, config, campaignId, layer);
 
@@ -280,7 +317,7 @@ async function layeredFindMany(ctx: Ctx, config: LayerConfig, args: Row, runLoca
 }
 
 async function layeredCount(ctx: Ctx, config: LayerConfig, campaignId: string, rest: Row, layer: CampaignLayer): Promise<number> {
-  const locals: Row[] = await local(ctx, config).findMany({ where: { ...rest, campaignId }, select: { id: true } });
+  const locals: Row[] = (await local(ctx, config).findMany({ where: localWhere(config, rest, campaignId), select: { id: true, sourceId: true } })).map(expose);
 
   const overlay = await overlayOf(ctx, config, campaignId, layer);
 
@@ -392,12 +429,13 @@ async function read(ctx: Ctx, config: LayerConfig, operation: string, args: Row,
   return rows[0] ?? null;
 }
 
+/** Public ids among `ids` that already have a local row (an override, or an ordinary row carrying that id). */
 async function localIdsAmong(ctx: Ctx, config: LayerConfig, campaignId: string, ids: string[]): Promise<Set<string>> {
   if (!ids.length) return new Set();
 
-  const rows: Array<{ id: string }> = await local(ctx, config).findMany({ where: { campaignId, id: { in: ids } }, select: { id: true } });
+  const rows: Array<{ id: string; sourceId: string | null }> = await local(ctx, config).findMany({ where: { campaignId, OR: [{ sourceId: { in: ids } }, { id: { in: ids } }] }, select: { id: true, sourceId: true } });
 
-  return new Set(rows.map((r) => r.id));
+  return new Set(rows.map((r) => r.sourceId ?? r.id));
 }
 
 async function materialize(ctx: Ctx, config: LayerConfig, campaignId: string, layer: CampaignLayer, where: Row) {
@@ -411,7 +449,11 @@ async function materialize(ctx: Ctx, config: LayerConfig, campaignId: string, la
 
   if (!bases.length) return;
 
-  await local(ctx, config).createMany({ data: bases.map((b) => ({ ...asLocalShape(b, campaignId), sourceHash: hashJson(b) })) });
+  await local(ctx, config).createMany({ data: bases.map((b) => {
+    const { id: _id, ...shaped } = asLocalShape(b, campaignId);
+
+    return { ...shaped, sourceHash: hashJson(b) };
+  }) });
 
   markContentDirty();
 }
@@ -427,7 +469,7 @@ async function hideBase(ctx: Ctx, config: LayerConfig, campaignId: string, ids: 
 async function removeMany(ctx: Ctx, config: LayerConfig, campaignId: string, layer: CampaignLayer, where: Row, args: Row, query: Query) {
   const overlay = await overlayOf(ctx, config, campaignId, layer);
 
-  const matchingLocals: Array<{ id: string }> = await local(ctx, config).findMany({ where: { ...where, campaignId }, select: { id: true } });
+  const matchingLocals: Array<{ id: string; sourceId: string | null }> = await local(ctx, config).findMany({ where: localWhere(config, where, campaignId), select: { id: true, sourceId: true } });
 
   const candidates = (await baseVisible(ctx, config, layer, where)).filter((b) => !overlay.hidden.has(b.id));
 
@@ -435,11 +477,11 @@ async function removeMany(ctx: Ctx, config: LayerConfig, campaignId: string, lay
 
   const baseOnly = candidates.filter((b) => !shadowed.has(b.id)).map((b) => b.id);
 
-  const overridden = (await baseVisible(ctx, config, layer, { id: { in: matchingLocals.map((r) => r.id) } })).map((b) => b.id as string);
+  const overridden = matchingLocals.flatMap((r) => (r.sourceId ? [r.sourceId] : []));
 
   await hideBase(ctx, config, campaignId, [...new Set([...baseOnly, ...overridden])]);
 
-  const result = (await query(args)) as { count: number };
+  const result = (await query({ ...args, where: localWhere(config, where, campaignId) })) as { count: number };
 
   return { count: result.count + baseOnly.length };
 }
@@ -447,11 +489,11 @@ async function removeMany(ctx: Ctx, config: LayerConfig, campaignId: string, lay
 async function withRelations(ctx: Ctx, config: LayerConfig, args: Row, campaignId: string, query: Query) {
   const plan = planArgs(config, args);
 
-  if (!Object.keys(plan.rels).length) return query(args);
+  const found = await query({ ...args, include: plan.localArgs.include, select: plan.localArgs.select });
 
-  const row = await query({ ...args, include: plan.localArgs.include, select: plan.localArgs.select });
+  if (!found) return found;
 
-  if (!row) return row;
+  const row = expose(found);
 
   await resolveRelations(ctx, config, [row], plan.rels, campaignId);
 
@@ -478,9 +520,9 @@ async function onWrite(ctx: Ctx, config: LayerConfig, operation: string, args: R
 
     if (base) await hideBase(ctx, config, campaignId, [base.id]);
 
-    const localRow = await local(ctx, config).findFirst({ where: { id: rest.id, campaignId }, select: { id: true } });
+    const localRow = await localByPublicId(ctx, config, campaignId, rest.id as string);
 
-    if (localRow) return withRelations(ctx, config, args, campaignId, query);
+    if (localRow) return withRelations(ctx, config, { ...args, where: { ...args.where, id: localRow.id } }, campaignId, query);
 
     if (base) {
       const shaped = asLocalShape(base, campaignId);
@@ -495,7 +537,11 @@ async function onWrite(ctx: Ctx, config: LayerConfig, operation: string, args: R
 
   await materialize(ctx, config, campaignId, layer, rest);
 
-  return withRelations(ctx, config, args, campaignId, query);
+  if (operation === "updateMany") return query({ ...args, where: localWhere(config, rest, campaignId) });
+
+  const target = typeof rest.id === "string" ? await localByPublicId(ctx, config, campaignId, rest.id) : null;
+
+  return withRelations(ctx, config, target ? { ...args, where: { ...args.where, id: target.id } } : args, campaignId, query);
 }
 
 async function onOther(ctx: Ctx, config: LayerConfig, operation: string, args: Row, query: Query) {
@@ -507,10 +553,14 @@ async function onOther(ctx: Ctx, config: LayerConfig, operation: string, args: R
 
   if (UNSUPPORTED_OPS.has(operation)) throw new Error(`LAYER_UNSUPPORTED_OPERATION:${config.model}.${operation}`);
 
-  if (operation === "create") {
+  if (operation === "create" || operation === "createMany") {
+    const given = (operation === "create" ? [args.data] : Array.isArray(args.data) ? args.data : [args.data]).flatMap((d: Row) => (typeof d?.id === "string" ? [d.id] : []));
+
+    if (given.length && (await baseVisible(ctx, config, layer, { id: { in: given } })).length) throw new Error(`LAYER_ID_COLLISION:${config.model}`);
+
     markContentDirty();
 
-    return withRelations(ctx, config, args, campaignId, query);
+    return operation === "create" ? withRelations(ctx, config, args, campaignId, query) : query(args);
   }
 
   return query(args);
