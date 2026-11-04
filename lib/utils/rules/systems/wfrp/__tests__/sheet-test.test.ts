@@ -47,8 +47,8 @@ describe("rollWfrpSheetTest", () => {
     });
   });
 
-  it("difficulty modifies SL", () => {
-    expect(rollWfrpSheetTest(input({ kind: "test", characteristic: "ws", difficulty: "hard" }))).toMatchObject({ sl: 0 + Math.max(0, 4 - 3 - 2), difficulty: "hard" });
+  it("difficulty modifies the target", () => {
+    expect(rollWfrpSheetTest(input({ kind: "test", characteristic: "ws", difficulty: "hard" }))).toMatchObject({ target: 25, outcome: "failure", sl: -1, difficulty: "hard" });
   });
 
   it("skill uses skillTarget", () => {

@@ -1,7 +1,7 @@
 import type { SheetTestInput } from "../types";
 import { skillTarget, value } from "./characteristics/derive";
 import { readCharacteristics } from "./characteristics/keys";
-import { DIFFICULTY_SL } from "./percentile/difficulty";
+import { DIFFICULTY_MODIFIER } from "./percentile/difficulty";
 import { resolvePercentileTest } from "./percentile/resolve";
 import { skillDef } from "./skills/catalog";
 
@@ -36,7 +36,7 @@ export function rollWfrpSheetTest({ body, character, rng, t, presetRoll }: Sheet
     target = skill.target;
   }
 
-  const r = resolvePercentileTest({ target, slModifier: DIFFICULTY_SL[difficulty], doubles: false, mode: "normal", rng, presetRoll });
+  const r = resolvePercentileTest({ target, modifier: DIFFICULTY_MODIFIER[difficulty], doubles: false, mode: "normal", rng, presetRoll });
 
   return { kind: "percentile", label, rawRoll: r.rawRoll, roll: r.roll, reversed: r.reversed, target: r.target, sl: r.sl, outcome: r.outcome, auto: r.auto, difficulty, mode: r.mode };
 }
