@@ -40,3 +40,17 @@ describe("readCharacteristics", () => {
     expect(readCharacteristics({ characteristics: 5 })).toEqual(DEFAULT_CHARACTERISTICS);
   });
 });
+
+describe("readCharacteristics matches schema", () => {
+  const valid = [{}, { base: { ws: 40 }, advances: { s: 5 }, move: 5, fate: 2, extraWounds: 1, skillAdvances: { "melee:basic": 10 } }];
+
+  it.each(valid)("valid input %#", (characteristics) => {
+    expect(readCharacteristics({ characteristics })).toEqual(CharacteristicsSchema.parse(characteristics));
+  });
+
+  it("invalid fields fall back individually", () => {
+    const c = readCharacteristics({ characteristics: { base: { ws: 0 }, advances: { zz: 1 }, move: 99, skillAdvances: { Melee: 1 }, fate: 3 } });
+
+    expect(c).toEqual({ ...DEFAULT_CHARACTERISTICS, fate: 3 });
+  });
+});

@@ -1,2 +1,2 @@
 export * from "./derive";
-export * from "./schema";
+export * from "./keys";

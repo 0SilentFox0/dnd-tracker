@@ -1,7 +1,7 @@
 import type { SheetBlockInput, SheetWfrpBlock } from "../../types";
 import { parseSkillAdvanceKey, SKILL_CATALOG, skillAdvanceKey, skillDef } from "../skills/catalog";
 import { bonus, runYards, skillTarget, value, walkYards, woundsBreakdown, woundsMax } from "./derive";
-import { CHARACTERISTIC_KEYS } from "./schema";
+import { CHARACTERISTIC_KEYS } from "./keys";
 
 export function wfrpSheetBlock({ characteristics: c, resources }: SheetBlockInput): SheetWfrpBlock {
   const entries = new Map<string, { key: string; spec?: string }>();

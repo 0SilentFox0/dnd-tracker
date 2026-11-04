@@ -1,4 +1,4 @@
-import type { CharacteristicKey } from "../characteristics/schema";
+import type { CharacteristicKey } from "../characteristics/keys";
 
 export interface SkillDef {
   key: string;

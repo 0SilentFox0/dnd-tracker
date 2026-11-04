@@ -1,4 +1,4 @@
-import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/schema";
+import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";

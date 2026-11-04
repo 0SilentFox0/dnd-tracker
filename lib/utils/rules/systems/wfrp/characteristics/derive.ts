@@ -1,5 +1,5 @@
 import { skillAdvanceKey, skillDef } from "../skills/catalog";
-import { type CharacteristicKey, type Characteristics, SKILL_ADVANCE_KEY_RE, SPEC_RE } from "./schema";
+import { type CharacteristicKey, type Characteristics, SKILL_ADVANCE_KEY_RE, SPEC_RE } from "./keys";
 
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";

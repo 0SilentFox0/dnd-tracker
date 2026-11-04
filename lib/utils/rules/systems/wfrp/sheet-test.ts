@@ -1,6 +1,6 @@
 import type { SheetTestInput } from "../types";
 import { skillTarget, value } from "./characteristics/derive";
-import { readCharacteristics } from "./characteristics/schema";
+import { readCharacteristics } from "./characteristics/keys";
 import { DIFFICULTY_SL } from "./percentile/difficulty";
 import { resolvePercentileTest } from "./percentile/resolve";
 import { skillDef } from "./skills/catalog";
