@@ -16,7 +16,7 @@ import { hudFontClassName } from "@/components/hud";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useCritChoiceDialog, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
-import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
+import { DESKTOP_QUERY, useMediaQuery, usePlayerViewKey } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { myTurnKey } from "@/lib/utils/battle/view";
 import type { BattlePreparationParticipant } from "@/types/battle";
@@ -67,7 +67,9 @@ const sideCount = (participants: BattlePreparationParticipant[], side: string) =
 const onFieldCount = (participants: BattlePreparationParticipant[]) => participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
 
 export function BattleScreen() {
-  const { battle, viewer: { isDM }, actions, turn: { isMyTurn }, roster: { hero } } = useBattleScene();
+  const { battle, viewer: { isDM }, actions, turn: { isMyTurn }, roster: { hero }, playerView } = useBattleScene();
+
+  usePlayerViewKey(playerView.toggle, playerView.available);
 
   const critChoice = useCritChoiceDialog();
 

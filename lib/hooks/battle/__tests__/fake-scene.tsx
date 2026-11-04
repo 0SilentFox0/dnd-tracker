@@ -127,6 +127,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     dialogs: { awaitingDm: { open: false, setOpen: vi.fn() }, resultScreen: { open: false, setOpen: vi.fn() } },
     effects: buildDisplayEffects(order),
     connection: "connected",
+    playerView: { available: opts.isDM ?? false, enabled: false, toggle: vi.fn() },
     dmControl: { id: null, set: vi.fn() },
     selectedId: null,
     select: vi.fn(),

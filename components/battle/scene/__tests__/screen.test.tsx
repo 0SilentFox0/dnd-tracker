@@ -273,3 +273,38 @@ describe("BattleScreen", () => {
     expect(screen.getByRole("dialog")).toHaveTextContent("Журнал");
   });
 });
+
+describe("BattleScreen: вигляд гравця", () => {
+  afterEach(cleanup);
+
+  it("клавіша P перемикає режим лише для ДМ", () => {
+    media.wide = false;
+
+    const dm = fakeScene({ isDM: true });
+
+    render(<BattleScreen />, { wrapper: dm.wrapper });
+    fireEvent.keyDown(window, { code: "KeyP" });
+    expect(dm.value.playerView.toggle).toHaveBeenCalledTimes(1);
+    cleanup();
+
+    const player = fakeScene({ isDM: false });
+
+    render(<BattleScreen />, { wrapper: player.wrapper });
+    fireEvent.keyDown(window, { code: "KeyP" });
+    expect(player.value.playerView.toggle).not.toHaveBeenCalled();
+  });
+
+  it("FX-шар кидків лишається в режимі гравця (readOnly його не вимикає)", async () => {
+    media.wide = false;
+    fx.on = true;
+
+    const s = fakeScene({ isDM: true });
+
+    s.value.viewer = { ...s.value.viewer, isDM: false, readOnly: true };
+    s.value.playerView = { available: true, enabled: true, toggle: vi.fn() };
+
+    const { container } = render(<BattleScreen />, { wrapper: s.wrapper });
+
+    await vi.waitFor(() => expect(container.querySelector(".fx-layer")).not.toBeNull());
+  });
+});
