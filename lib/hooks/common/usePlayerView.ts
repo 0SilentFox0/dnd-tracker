@@ -38,3 +38,13 @@ export function usePlayerView(scope: PlayerViewScope | null): { enabled: boolean
 
   return { enabled, toggle, set };
 }
+
+export function resetPlayerViews() {
+  stores.forEach((store) => store.set(false));
+
+  try {
+    Object.keys(window.sessionStorage).filter((k) => k.startsWith("player-view:")).forEach((k) => window.sessionStorage.removeItem(k));
+  } catch {
+    // storage unavailable
+  }
+}

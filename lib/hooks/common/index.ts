@@ -22,7 +22,7 @@ export { useNavigateFresh } from "./useNavigateFresh";
 export { useNotify, useOptionalNotify } from "./useNotify";
 export { usePageHidden } from "./usePageHidden";
 export { offsetPager, type Pager, type PagerControls, usePager } from "./usePager";
-export { type PlayerViewScope, usePlayerView } from "./usePlayerView";
+export { type PlayerViewScope, resetPlayerViews, usePlayerView } from "./usePlayerView";
 export { usePlayerViewKey } from "./usePlayerViewKey";
 export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useReducedMotion } from "./useReducedMotion";

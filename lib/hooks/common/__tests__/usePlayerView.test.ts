@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createSessionFlag } from "@/lib/hooks/common/storage-value";
-import { usePlayerView } from "@/lib/hooks/common/usePlayerView";
+import { resetPlayerViews, usePlayerView } from "@/lib/hooks/common/usePlayerView";
 
 afterEach(() => {
   window.sessionStorage.clear();
@@ -97,5 +97,21 @@ describe("usePlayerView", () => {
     expect(result.current.enabled).toBe(false);
     expect(getItem).not.toHaveBeenCalled();
     expect(setItem).not.toHaveBeenCalled();
+  });
+});
+
+describe("resetPlayerViews", () => {
+  it("turns off live stores and clears stored player-view keys only", () => {
+    const { result } = renderHook(() => usePlayerView({ kind: "battle", id: "rb1" }));
+
+    act(() => result.current.set(true));
+    window.sessionStorage.setItem("player-view:other", "on");
+    window.sessionStorage.setItem("keep", "on");
+
+    act(() => resetPlayerViews());
+
+    expect(result.current.enabled).toBe(false);
+    expect(window.sessionStorage.getItem("player-view:other")).toBeNull();
+    expect(window.sessionStorage.getItem("keep")).toBe("on");
   });
 });
