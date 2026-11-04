@@ -39,16 +39,26 @@ function DeathSavePips({ saves }: { saves: NonNullable<BattleParticipant["battle
   );
 }
 
-export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, exact, acText, wounds, current, impact, onSelect }: {
-  participant: BattleParticipant;
-  effects: readonly ActiveEffect[];
+export interface ParticipantRowView {
   exact: boolean;
   acText: string | null;
   wounds: boolean;
   current: boolean;
+}
+
+interface ParticipantRowProps {
+  participant: BattleParticipant;
+  effects: readonly ActiveEffect[];
+  view: ParticipantRowView;
   impact: FxImpact | null;
   onSelect: (id: string) => void;
-}) {
+}
+
+const sameView = (a: ParticipantRowView, b: ParticipantRowView) => a.exact === b.exact && a.acText === b.acText && a.wounds === b.wounds && a.current === b.current;
+
+const sameProps = (a: ParticipantRowProps, b: ParticipantRowProps) => a.participant === b.participant && a.effects === b.effects && a.impact === b.impact && a.onSelect === b.onSelect && sameView(a.view, b.view);
+
+export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, view: { exact, acText, wounds, current }, impact, onSelect }: ParticipantRowProps) {
   const text = useText();
 
   const creatureTypeLabel = useCreatureTypeLabel();
@@ -86,4 +96,4 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
       )}
     </div>
   );
-});
+}, sameProps);

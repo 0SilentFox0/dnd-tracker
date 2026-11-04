@@ -92,6 +92,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   const details = detailsOf(result.attacker, result.netSl, {
     defender: { kind: result.defender.kind, roll: result.defender.roll, sl: result.defender.sl, target: result.defender.target },
+    opposed: true,
     ...(spent && { momentumUsed: true }),
   });
 

@@ -12,7 +12,7 @@ export function PercentileResultLines({ p, hit }: { p: PercentileAttackDetails; 
       <div>{p.defender ? t("sl", { sl: p.sl, defSl: p.defender.sl, net: p.netSl }) : t("net", { net: p.netSl })}</div>
       {hit && <div>{t("location", { location: t(`locations.${p.location}`) })}</div>}
       {p.momentumUsed && <div className="text-hud-gold">{t("momentum.spent")}</div>}
-      {hit && p.defender && <div className="text-hud-gold">{t("momentum.gained")}</div>}
+      {hit && (p.opposed ?? !!p.defender) && <div className="text-hud-gold">{t("momentum.gained")}</div>}
     </div>
   );
 }

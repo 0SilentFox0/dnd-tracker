@@ -206,7 +206,7 @@ describe("поле бою", () => {
     const renderRow = () => {
       const onSelect = vi.fn();
 
-      render(<TooltipProvider><ParticipantRow impact={null} participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" wounds={false} current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
+      render(<TooltipProvider><ParticipantRow impact={null} participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} view={{ exact: true, acText: "15", wounds: false, current: false }} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
 
       return onSelect;
     };
@@ -231,7 +231,7 @@ describe("поле бою", () => {
     describe("декорації удару фіксуються в момент зміни HP", () => {
       const hit: FxImpact = { element: "fire", kind: "damage", delayMs: 600 };
 
-      const row = (hp: number, impact: FxImpact | null) => <TooltipProvider><ParticipantRow impact={impact} participant={p("gob", "Гоблін", ParticipantSide.ENEMY, hp)} effects={[]} exact acText="15" wounds={false} current={false} onSelect={vi.fn()} /></TooltipProvider>;
+      const row = (hp: number, impact: FxImpact | null) => <TooltipProvider><ParticipantRow impact={impact} participant={p("gob", "Гоблін", ParticipantSide.ENEMY, hp)} effects={[]} view={{ exact: true, acText: "15", wounds: false, current: false }} onSelect={vi.fn()} /></TooltipProvider>;
 
       const portrait = (container: HTMLElement) => container.querySelector('[data-fx-participant="gob"]') as HTMLElement;
 

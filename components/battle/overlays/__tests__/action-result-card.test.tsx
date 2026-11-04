@@ -47,6 +47,15 @@ describe("ActionResultCard", () => {
     for (const part of parts) expect(card().textContent).toContain(part);
   });
 
+  it("d100: Momentum отримано видно й коли захисника сховано (не-exact ціль)", () => {
+    const { wrapper } = fakeScene({ system: "wfrp", result: { kind: "hit", targetName: "Циклоп", damage: 6, downed: false, d20: 30, percentile: { roll: 30, target: 45, sl: 3, netSl: 3, location: "arm", doubles: false, opposed: true } } });
+
+    render(<ActionResultCard />, { wrapper });
+
+    expect(card().textContent).toContain("Momentum отримано");
+    expect(card().textContent).not.toContain("захист");
+  });
+
   it("d100 без захисника не показує «захист» і промах без локації", () => {
     const { wrapper } = fakeScene({ system: "wfrp", result: { kind: "miss", targetName: "Гоблін", d20: 80, known: "?", percentile: { roll: 80, target: 45, sl: -1, netSl: -1, location: "head", doubles: false } } });
 

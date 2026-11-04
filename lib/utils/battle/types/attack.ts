@@ -12,6 +12,8 @@ export interface PercentileAttackDetails {
   doubles: boolean;
   defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
   momentumUsed?: boolean;
+  /** Opposed melee test; survives the privacy strip of `defender`. */
+  opposed?: boolean;
 }
 
 export interface AttackRollResult {
