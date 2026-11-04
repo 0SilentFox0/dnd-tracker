@@ -41,4 +41,14 @@ describe("InitiativeOrderDialog", () => {
 
     expect(onSubmit).toHaveBeenCalledWith(["b", "a", "c"]);
   });
+
+  it("reseeds the draft when the participant set changes while open", () => {
+    const { rerender } = render(<InitiativeOrderDialog participants={people} onClose={vi.fn()} onSubmit={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Вище: Борис" }));
+
+    rerender(<InitiativeOrderDialog participants={[...people, mk("d", "Грім")]} onClose={vi.fn()} onSubmit={vi.fn()} />);
+
+    expect(screen.getAllByRole("listitem").map((li) => li.textContent)).toEqual(["1Аня", "2Борис", "3Віра", "4Грім"]);
+  });
 });

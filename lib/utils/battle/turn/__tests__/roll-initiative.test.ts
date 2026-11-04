@@ -68,6 +68,17 @@ describe("rollInitiative", () => {
     expect(out.participants.every((p) => p.battleData.revealPending === undefined)).toBe(true);
   });
 
+  it("objects are not rolled and stay at the end", () => {
+    const obj = mk("obj");
+
+    obj.battleData = { ...obj.battleData, object: { spellId: "s" } };
+
+    const out = rollInitiative([obj, mk("a"), mk("b")], mulberry32(3));
+
+    expect(out.participants[2].basicInfo.id).toBe("obj");
+    expect(out.rolls.map((r) => r.id).sort()).toEqual(["a", "b"]);
+  });
+
   it("works for a single participant", () => {
     const out = rollInitiative([mk("a", { dex: 12 })], seq(d20(7), 0.3));
 

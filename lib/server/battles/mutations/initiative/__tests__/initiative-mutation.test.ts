@@ -72,3 +72,44 @@ describe("initiativeReorderMutation", () => {
     expect(initiativeReorderSchema.safeParse({ order: [] }).success).toBe(false);
   });
 });
+
+describe("mid-battle turn entry", () => {
+  const spent = (id: string, battleData: Record<string, unknown> = {}) => participant(id, {}, { actionFlags: { hasUsedAction: true, hasUsedBonusAction: true, hasUsedReaction: false, hasExtraTurn: false } , battleData: { ...participant(id).battleData, ...battleData } });
+
+  const scene = (turnIndex: number, round = 2) => ({ ...context().scene, round, turnIndex });
+
+  it("roll: the new current actor gets a fresh turn", () => {
+    const ps = [spent("a"), spent("b"), spent("c")];
+
+    const out = initiativeRollMutation(context({ participants: ps, isDM: true, scene: scene(2) }), {});
+
+    const fresh = out.participants.filter((p) => !p.actionFlags.hasUsedAction);
+
+    expect(fresh.map((p) => p.basicInfo.id)).toEqual([out.participants[out.scene?.turnIndex ?? 0].basicInfo.id]);
+    expect(out.events.length).toBeGreaterThan(0);
+  });
+
+  it("reorder: the actor swapped into the current slot gets a fresh turn, the rest keep their state", () => {
+    const out = initiativeReorderMutation(context({ participants: [spent("a"), spent("b"), spent("c")], isDM: true, scene: scene(1) }), { order: ["c", "a", "b"] });
+
+    expect(out.participants.map((p) => p.actionFlags.hasUsedAction)).toEqual([true, false, true]);
+    expect(out.scene).toBeUndefined();
+  });
+
+  it("reorder: a dormant actor in the current slot is skipped", () => {
+    const out = initiativeReorderMutation(context({ participants: [spent("a"), spent("b"), spent("c")], isDM: true, scene: scene(1) }), { order: ["a", "b", "c"].reverse() });
+
+    const dormant = initiativeReorderMutation(context({ participants: [spent("a"), spent("b"), spent("c", { dormant: true })], isDM: true, scene: scene(1) }), { order: ["a", "c", "b"] });
+
+    expect(out.scene).toBeUndefined();
+    expect(dormant.scene).toEqual({ turnIndex: 2 });
+    expect(dormant.participants.map((p) => p.actionFlags.hasUsedAction)).toEqual([true, true, false]);
+  });
+
+  it("reorder before the first turn does not run start-of-turn", () => {
+    const out = initiativeReorderMutation(context({ participants: [spent("a"), spent("b")], isDM: true, scene: scene(0, 1) }), { order: ["b", "a"] });
+
+    expect(out.participants.map((p) => p.actionFlags.hasUsedAction)).toEqual([true, true]);
+    expect(out.events).toHaveLength(1);
+  });
+});

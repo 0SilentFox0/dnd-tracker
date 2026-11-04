@@ -18,7 +18,7 @@ interface InitiativeOrderDialogProps {
 export function InitiativeOrderDialog({ participants, ...rest }: InitiativeOrderDialogProps) {
   if (!participants) return null;
 
-  return <InitiativeOrderBody participants={participants} {...rest} />;
+  return <InitiativeOrderBody key={participants.map((p) => p.basicInfo.id).join(",")} participants={participants} {...rest} />;
 }
 
 function InitiativeOrderBody({ participants, onClose, onSubmit, isPending }: InitiativeOrderDialogProps & { participants: BattleParticipant[] }) {

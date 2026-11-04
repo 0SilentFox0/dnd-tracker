@@ -16,7 +16,7 @@ import {
 import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
-import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
+import { calculateInitiative, compareInitiative, initiativeSlot } from "@/lib/utils/battle/turn/initiative";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export const addParticipantSchema = z.object({
@@ -148,7 +148,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
 
       if (current && compareInitiative(p, current) < 0) {
         // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
-        at = order.findIndex((other) => compareInitiative(p, other) < 0);
+        at = initiativeSlot(order, p);
         turnIndex++;
       } else {
         // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
@@ -156,9 +156,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
 
         while (order[afterRun]?.battleData.revealPending) afterRun++;
 
-        const next = order.findIndex((other, i) => i >= afterRun && compareInitiative(p, other) < 0);
-
-        at = next === -1 ? order.length : next;
+        at = initiativeSlot(order, p, afterRun);
       }
 
       order = [...order.slice(0, at), p, ...order.slice(at)];

@@ -91,7 +91,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
     initiative: {
       roll: rollInitiative,
       isRolling: actions.initiativeRoll.isPending,
-      orderTarget: orderOpen ? ((battle.initiativeOrder ?? []) as BattleParticipant[]) : null,
+      orderTarget: orderOpen ? battle.initiativeOrder : null,
       openOrder: () => setOrderOpen(true),
       closeOrder: () => setOrderOpen(false),
       submitOrder: (order: string[]) => actions.initiativeReorder.mutate({ order }),
