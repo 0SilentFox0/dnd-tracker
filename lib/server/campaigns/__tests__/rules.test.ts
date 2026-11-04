@@ -19,7 +19,10 @@ vi.mock("@/lib/db", () => ({
     },
   },
 }));
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: (_id: string, fn: (tx: unknown) => unknown) => fn({}), withCampaignRuntimeWrite: (_id: string, fn: (tx: unknown) => unknown) => fn({}) }));
+vi.mock("@/lib/server/content/write", () => ({
+  withCampaignContentWrite: (_id: string, fn: (tx: unknown) => unknown) => fn({ character: { count: async () => 0 }, unit: { count: async () => 0 } }),
+  withCampaignRuntimeWrite: (_id: string, fn: (tx: unknown) => unknown) => fn({}),
+}));
 vi.mock("../condition-usage", async (orig) => ({ ...(await orig<typeof import("../condition-usage")>()), findCustomConditionUsage: h.usage }));
 
 import { readCustomConditionUsage, updateCampaignRules } from "../rules";
