@@ -313,3 +313,46 @@ Compendium orchestration — `adapt.ts`, nested class/optional feature resolutio
 - `create`/`createMany` беруть кампанію з `data.campaignId` (змішані кампанії в одному `createMany` — `LAYER_MIXED_CAMPAIGNS`), ніколи з write-context; `contentVersion` бампиться лише для кампанії, що володіє write-context (клон/`template.save` не бампить джерело).
 - Читання за id без `campaignId` повертає лише збережені рядки, базові — ніколи.
 - Міграція `20261121000001_content_base` зняла 12 FK, разом із ними `ON DELETE SET NULL`: `detachRefs` (`lib/server/content/detach-refs.ts`) обнуляє посилання на видалені spell-groups/races/main-skills/spells/units у `remove`/`removeAll` ресурсів, `spells.delete-by-level` і legacy-sync `deleteRemoved` (через `bypassLayer`, тож шарова кампанія не створює override-ів). Нову залежність між контентними таблицями додавати в `REFERRERS` там само.
+- Шаровий sync: невибраний (або проігнорований) `new` при просуванні `baseVersion` ховається в `campaign_content_hides` і позначається в `campaign_source_syncs.ignored` ключем `pending:<id>` (`pendingKey`, `layered.ts`). `classifyLayered` показує такий рядок як видимий `new` (прапорець `ignored` — лише за явним ignore), apply знімає hide і маркер; зміна рядка в шаблоні його не скидає.
+- Базовий рядок із скалярним посиланням на прихований DM рядок (`spell.groupId`, `skill.spellId`, `unit.raceId`, …) читається з `null` (`nullHiddenRefs` у `content-layer.ts`, колонки беруться з `config.relations`): базовий рядок не редагується, override-копій не створюється, рядок у БД лишається як є. Локальні рядки обнуляє `detachRefs` у момент видалення.
+
+## Міграція legacy-клонів
+
+`lib/server/templates/legacy-migration/` переводить кампанії з `baseSourceId = null` (копії шаблону) на шари. Код: `eligibility` → `load` → `plan` (чиста) → `execute` → `verify`; сервіс — `dryRunCampaign`/`migrateCampaign`/`undoMigration`/`verifyFromPreImage` (`service.ts`). CLI — `pnpm constructor:legacy-layers` (`scripts/constructor/legacy-layers.ts`), спека — `docs/superpowers/specs/2026-11-04-legacy-layer-migration-design.md`.
+
+**Стан:** код готовий; репетиція на `prodcopy` і прод **не виконувались**. HOMM5 захищений (`PROTECTED_CAMPAIGN_IDS`, плюс `NO_SOURCE`): жодний шлях коду в нього не пише.
+
+### Таблиця рішень (на рядок, `k` = `sourceId`, `Lh`/`Bh` — хеші локального/базового рядка, `b` — baseline)
+
+| Вхід | Рішення | Статус sync після |
+|---|---|---|
+| `k` у базі, `Lh = Bh` | base-ref: локальну копію видалено | немає |
+| `k` у базі, `Lh ≠ Bh`, `b` є | override (старий `id`, `sourceHash = b`) | `updated`/`conflict`/немає за `pairStatus` |
+| `k` у базі, `Lh ≠ Bh`, `b` немає | override з `sourceHash = "legacy:unknown"` | `conflict` |
+| `k` немає в базі | orphan override | `deletedInSource` |
+| `sourceId = null` | local, id той самий | немає |
+| `k` у базі, локального рядка немає, `b` є | hide | немає (відома втрата для `deletedLocally` з `s ≠ b`) |
+| те саме, `b` немає | hide + `pending:<k>` в `ignored` | `new` |
+
+Усі посилання переписуються картою `localId → sourceId`. Дублікати `sourceId` усуваються (попередження `DUPLICATE_SOURCE_ID`); попередження: `SYNC_STATE_FALLBACK`, `PENDING_RULES_SETTINGS`, `DROPPED_NOTIFICATIONS`.
+
+### Реєстр посилальників (`referrers.ts`, `REFERRERS`)
+
+Кожна модель має режим: `content` (13 контентних таблиць), `remap` (id у стовпцях переписуються; `Character`, інвентар, `CharacterSkills`, логи, підготовлені бої та учасники, показ, сценарій, compendium, сповіщення, `AiProposal` у `pending`), `history` (журнали, завершені бої — не переписуються, лише скан і звіт), `none`, `global` (у т.ч. `*Base`), `special` (`campaign_source_syncs`, `campaign_content_hides`). Парність реєстру зі схемою перевіряє тест; **нова модель або JSON-стовпець із посиланнями на контент мусить потрапити в реєстр**, інакше скан залишків дасть `RESIDUAL_REFS`. `PlayerNotification` має унікальний `(userId, type, refId)` між кампаніями, тож колізії після remap відкидаються (рядки лежать у pre-image й повертаються `--undo`).
+
+### Порядок однієї міграції (одна інтерактивна транзакція)
+
+1. Блокування рядка кампанії → eligibility (`ALREADY_LAYERED`, `PROTECTED`, `NO_SOURCE`, `IS_TEMPLATE`, `ACTIVE_BATTLE`, `SOURCE_*`, `LOCALIZED_CONTENT`, `HAS_DERIVED_CAMPAIGNS`) → `FOR UPDATE` для remap-посилальників.
+2. Завантаження, чистий план (`ID_COLLISION` — блокер), відкидання колізійних сповіщень.
+3. Pre-image пишеться як `.migration-backup/legacy-layers/<campaignId>-<ts>.json.gz.pending` (у `.gitignore`) → запис (таблиці deleteMany+createMany, hides, `campaign_source_syncs`, посилання, `baseSourceId`/`baseVersion`, `contentVersion` +1).
+4. Верифікація: скан залишків (`RESIDUAL_REFS`), еквівалентність видимого контенту до/після й паритет sync (`VERIFY_MISMATCH`). Будь-яка помилка = rollback, нуль змін, `.pending` видаляється; після commit файл перейменовується на `.json.gz`. `--verify`/`--undo` відхиляють `.pending` (міграція не закомічена), тож невдалий apply не лишає придатного pre-image.
+
+`--verify <pre-image>` перевіряє вже закомічену кампанію; `--undo <pre-image>` відновлює legacy-стан лише за умов (інакше відмова з кодом, нуль змін): кампанія не в `PROTECTED_CAMPAIGN_IDS` (`PROTECTED`), усе ще шарова — `baseSourceId`/`baseVersion` задані (`NOT_LAYERED`), `contentVersion` не змінився (`CONTENT_CHANGED`), переписані клітинки посилальників не змінені після міграції (список конфліктів). Після відновлення в тій самій транзакції скан залишків шукає базові id у remap/none/content-моделях (`DANGLING_REFS`, rollback): **обмеження** — запис після міграції, що поклав базовий id у клітинку, яку міграція не переписувала, робить undo неможливим (повернути такий id у legacy-id нічим). Колонка `sourceId` контентних рядків і `campaign_source_syncs` у цьому скані ігноруються.
+
+### Кеші
+
+Скрипт не може викликати `revalidateTag` поза Next. Після `--apply`/`--undo` чекати **не менше 6 хв**: референс-кеш 300 с + TTL позначки `plain`. Шар кампанії читається свіжим PK-запитом (див. «Кеші шару та FK»).
+
+### CLI
+
+`legacy-layers (--campaign <id> | --all) [--dry-run] [--json <file>] [--allow-remote]`; `--campaign <id> --apply`; `--verify <file>`; `--undo <file>`. `--all` лише з dry-run, `--apply` — рівно одна кампанія. Коди виходу: 0 успіх, 1 блокер/невдала перевірка/конфлікт undo, 2 помилка аргументів. Для віддаленої БД: `DATABASE_URL="$DIRECT_URL"` і `--allow-remote`.

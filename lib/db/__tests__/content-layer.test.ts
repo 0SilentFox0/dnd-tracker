@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { invalidateCampaignLayer, isPlainCampaign, markPlainCampaign } from "@/lib/db/layer/cache";
+import { contentLayer, layerStats } from "@/lib/db/content-layer";
+import { invalidateCampaignLayer, isPlainCampaign, markPlainCampaign, PLAIN_TTL_MS } from "@/lib/db/layer/cache";
 import { campaignRelations, layeredModels } from "@/lib/db/layer/config";
 import { compareValues, sortRows } from "@/lib/db/layer/sort";
 import { createScopedDatabase, currentTransaction } from "@/lib/server/content/write-context";
@@ -62,6 +63,73 @@ describe("campaign layer cache", () => {
     expect(isPlainCampaign("c2")).toBe(true);
     invalidateCampaignLayer();
     expect(isPlainCampaign("c2")).toBe(false);
+  });
+});
+
+describe("plain campaign mark TTL", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    invalidateCampaignLayer();
+  });
+
+  it("is valid until now + TTL - 1 and expires after", () => {
+    markPlainCampaign("t1", 1000);
+    expect(isPlainCampaign("t1", 1000 + PLAIN_TTL_MS - 1)).toBe(true);
+    expect(isPlainCampaign("t1", 1000 + PLAIN_TTL_MS)).toBe(false);
+    expect(isPlainCampaign("t1", 1000 + PLAIN_TTL_MS - 1)).toBe(false);
+  });
+
+  it("re-reads the campaign after expiry and sees a base set in the database", async () => {
+    let campaign: Record<string, unknown> = { id: "ttl-c", baseSourceId: null, baseVersion: null, contentVersion: 0 };
+
+    const raw = {
+      campaign: { findUnique: async () => campaign },
+      spellBase: { findMany: async () => [{ id: "base-spell", sourceCampaignId: "tpl", validFrom: 1, validTo: null }] },
+      campaignContentHide: { findMany: async () => [] },
+      spell: { findMany: async () => [] },
+    };
+
+    let hook: (input: { model: string; operation: string; args: unknown; query: (args: unknown) => Promise<unknown> }) => Promise<unknown> = async () => undefined;
+
+    const client = { ...raw, $extends: (def: { query: { $allModels: { $allOperations: typeof hook } } }) => { hook = def.query.$allModels.$allOperations;
+
+ return {}; } };
+
+    (contentLayer() as unknown as (c: unknown) => unknown)(client);
+
+    vi.useFakeTimers({ toFake: ["Date"], now: 5_000_000 });
+    invalidateCampaignLayer();
+
+    const read = () => hook({ model: "Spell", operation: "count", args: { where: { campaignId: "ttl-c" } }, query: async () => 0 });
+
+    expect(await read()).toBe(0);
+
+    const afterFirst = layerStats.campaignLookups;
+
+    campaign = { id: "ttl-c", baseSourceId: "tpl", baseVersion: 1, contentVersion: 0 };
+    expect(await read()).toBe(0);
+    expect(layerStats.campaignLookups).toBe(afterFirst);
+
+    vi.setSystemTime(5_000_000 + PLAIN_TTL_MS);
+    expect(await read()).toBe(1);
+    expect(layerStats.campaignLookups).toBe(afterFirst + 1);
+  });
+
+  it("does not mark a campaign plain when baseSourceId is set but baseVersion is not", async () => {
+    const raw = { campaign: { findUnique: async () => ({ id: "half-c", baseSourceId: "tpl", baseVersion: null, contentVersion: 0 }) } };
+
+    let hook: (input: { model: string; operation: string; args: unknown; query: (args: unknown) => Promise<unknown> }) => Promise<unknown> = async () => undefined;
+
+    const client = { ...raw, $extends: (def: { query: { $allModels: { $allOperations: typeof hook } } }) => { hook = def.query.$allModels.$allOperations;
+
+ return {}; } };
+
+    (contentLayer() as unknown as (c: unknown) => unknown)(client);
+    invalidateCampaignLayer();
+
+    await hook({ model: "Spell", operation: "count", args: { where: { campaignId: "half-c" } }, query: async () => 0 }).catch(() => undefined);
+
+    expect(isPlainCampaign("half-c")).toBe(false);
   });
 });
 

@@ -224,7 +224,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     expect(await raw.spell.count({ where: { campaignId } })).toBe(0);
   });
 
-  it("an unselected new row is hidden and does not come back as new", async () => {
+  it("an unselected new row stays out of the campaign but is listed as new and can be restored through sync", async () => {
     const campaignId = await fresh();
 
     await patch();
@@ -235,7 +235,58 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
 
     expect(await names(campaignId)).toEqual(["Alpha2", "Bravo"]);
     expect(await raw.campaignContentHide.count({ where: { campaignId } })).toBe(1);
+
+    const pending = (await diffOf(campaignId)).filter((i) => i.visible);
+
+    expect(pending).toEqual([expect.objectContaining({ key: spellId("c"), status: "new", ignored: false })]);
+
+    await apply(campaignId, { apply: [ref(pending[0])], ignore: [] });
+
+    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo", "Charlie"]);
+    expect(await raw.campaignContentHide.count({ where: { campaignId } })).toBe(0);
     expect((await diffOf(campaignId)).filter((i) => i.visible)).toEqual([]);
+    expect(await raw.campaignSourceSync.findUnique({ where: { campaignId } }).then((s) => JSON.stringify(s?.ignored ?? {}))).not.toContain(spellId("c"));
+  });
+
+  it("an ignored new row can be un-ignored and restored later", async () => {
+    const campaignId = await fresh();
+
+    await patch();
+
+    const items = await diffOf(campaignId);
+
+    await apply(campaignId, { apply: [ref(items.find((i) => i.key === spellId("a"))!)], ignore: [ref(items.find((i) => i.key === spellId("c"))!)] });
+
+    const ignored = (await diffOf(campaignId)).find((i) => i.key === spellId("c"))!;
+
+    expect(ignored).toMatchObject({ status: "new", visible: true, ignored: true });
+    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo"]);
+
+    await apply(campaignId, { apply: [ref(ignored)], ignore: [] });
+
+    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo", "Charlie"]);
+  });
+
+  it("a deferred new row stays restorable after the template changes it again", async () => {
+    const campaignId = await fresh();
+
+    await patch();
+
+    const updated = (await diffOf(campaignId)).find((i) => i.key === spellId("a"))!;
+
+    await apply(campaignId, { apply: [ref(updated)], ignore: [] });
+
+    await raw.spellBase.updateMany({ where: { id: spellId("c"), validTo: null }, data: { validTo: 3 } });
+    await raw.spellBase.create({ data: base("c", "Charlie2", { validFrom: 3 }) });
+    await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 3 } });
+
+    const pending = (await diffOf(campaignId)).find((i) => i.key === spellId("c"))!;
+
+    expect(pending).toMatchObject({ status: "new", visible: true });
+
+    await apply(campaignId, { apply: [ref(pending)], ignore: [] });
+
+    expect(await names(campaignId)).toEqual(["Alpha2", "Bravo", "Charlie2"]);
   });
 
   it("ignoring new and updated rows keeps the campaign as it was", async () => {
