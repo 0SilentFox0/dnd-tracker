@@ -9,9 +9,10 @@ import { collectKeysAndStrings } from "@/lib/server/templates/remap-ids";
 import { changed, item, pairStatus, rowName } from "@/lib/server/templates/sync/classify";
 import type { SyncDb } from "@/lib/server/templates/sync/context";
 import { rowHash } from "@/lib/server/templates/sync/hash";
-import { emptyState } from "@/lib/server/templates/sync/state";
+import { emptyState, getEntry } from "@/lib/server/templates/sync/state";
 import type { SyncContext, SyncItem, SyncState } from "@/lib/server/templates/sync/types";
 import { canReadSource } from "@/lib/utils/api/is-dm";
+import type { SourceSyncScope } from "@/types/campaigns";
 
 export type LayeredDb = SyncDb & Pick<Prisma.TransactionClient, "campaignContentHide">;
 
@@ -43,6 +44,11 @@ interface BaseDelegate { findMany(args: unknown): Promise<Array<Row & Window>> }
 
 const baseDelegate = (db: object, t: BundleTableDef) => (db as Record<string, BaseDelegate>)[layeredModels()[t.model].base];
 
+/** Ignored-state key marking a base row hidden only because the DM did not take it while `baseVersion` advanced (not a DM deletion). */
+const PENDING_PREFIX = "pending:";
+
+export const pendingKey = (key: string) => `${PENDING_PREFIX}${key}`;
+
 const visibleAt = (version: number) => (r: Window) => r.validFrom <= version && (r.validTo === null || r.validTo > version);
 
 export async function layerOf(db: Pick<Prisma.TransactionClient, "campaign">, campaignId: string): Promise<LayerRef | null> {
@@ -67,9 +73,15 @@ export async function loadLayeredContext(db: LayeredDb, campaignId: string, laye
 
   const entries: LayeredEntry[] = [];
 
-  for (const t of BUNDLE_TABLES) entries.push(...(await loadTable(db, campaignId, layer, version, t, new Set(hides.filter((h) => h.table === layeredModels()[t.model].hideTable).map((h) => h.id)))));
-
   const ignored = (state?.ignored ?? emptyState()) as Partial<SyncState>;
+
+  for (const t of BUNDLE_TABLES) {
+    const hidden = new Set(hides.filter((h) => h.table === layeredModels()[t.model].hideTable).map((h) => h.id));
+
+    const pending = Object.keys(ignored.tables?.[t.key] ?? {}).filter((k) => k.startsWith(PENDING_PREFIX)).map((k) => k.slice(PENDING_PREFIX.length));
+
+    entries.push(...(await loadTable(db, campaignId, layer, version, t, hidden, pending)));
+  }
 
   return {
     campaignId,
@@ -81,7 +93,7 @@ export async function loadLayeredContext(db: LayeredDb, campaignId: string, laye
   };
 }
 
-async function loadTable(db: LayeredDb, campaignId: string, layer: LayerRef, version: number, t: BundleTableDef, hidden: Set<string>): Promise<LayeredEntry[]> {
+async function loadTable(db: LayeredDb, campaignId: string, layer: LayerRef, version: number, t: BundleTableDef, hidden: Set<string>, pending: string[]): Promise<LayeredEntry[]> {
   const base = baseDelegate(db, t);
 
   const bv = layer.baseVersion;
@@ -94,7 +106,7 @@ async function loadTable(db: LayeredDb, campaignId: string, layer: LayerRef, ver
 
   for (const r of changedRows) byKey.set(r.id, [...(byKey.get(r.id) ?? []), r]);
 
-  const unchanged = overrides.map((o) => o.sourceId).filter((id) => !byKey.has(id));
+  const unchanged = [...new Set([...overrides.map((o) => o.sourceId), ...pending])].filter((id) => !byKey.has(id));
 
   const unchangedRows = unchanged.length ? await base.findMany({ where: { sourceCampaignId: layer.sourceId, id: { in: unchanged } } }) : [];
 
@@ -134,7 +146,8 @@ export function classifyLayered(ctx: Pick<LayeredContext, "entries" | "ignored">
 
     let changedFields: string[] = [];
 
-    if (e.hidden) {
+    if (e.hidden && s && getEntry(ctx.ignored, e.t.key as SourceSyncScope, pendingKey(e.key)) !== undefined) status = "new";
+    else if (e.hidden) {
       if (!s || b === undefined) continue;
 
       status = "deletedLocally";

@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn, revalidateTag: vi.fn() }));
 
+import { prisma } from "@/lib/db";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { mainSkillsResource } from "@/lib/server/content/resources/main-skills";
 import { racesResource } from "@/lib/server/content/resources/races";
@@ -120,6 +121,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("removing content nulls former ON DELE
 
     expect(await raw.spell.count({ where: { campaignId: layered } })).toBe(0);
     expect(await raw.campaignContentHide.count({ where: { campaignId: layered } })).toBe(1);
+    expect(await prisma.spell.findMany({ where: { campaignId: layered }, select: { id: true, groupId: true } })).toEqual([{ id: id("bs"), groupId: null }]);
 
     await raw.campaignContentHide.deleteMany({ where: { campaignId: layered } });
     await raw.campaign.deleteMany({ where: { id: { in: [layered, tpl] } } });
