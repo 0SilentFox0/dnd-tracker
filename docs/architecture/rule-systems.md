@@ -66,6 +66,7 @@
 - `berserk` (turn/berserk.ts) і далі кидає d20 (у wfrp немає вмінь).
 - Off-hand у wfrp списує основну дію; бонусної дії й реакції немає.
 - Небойові джерела шкоди на 0 Wounds дають крит у «body»; опір у wfrp = лише імунітет; stat-модифікатор d20 у шкоді ігнорується.
+- Підписи відстані: літерал «фт/ft» лишився лише в `battleLog.spellFx.{anchoredAura,delayed,distanceDice}` (магія/ауры, недосяжні при `spells: false`); гард — `lib/i18n/__tests__/battle-log-distance-unit.test.ts`. Описи 5e-дій і станів (`battle.json` «shove», `battleCommon` conditions) недосяжні в wfrp (`actions`/`conditions` вимкнені). Нова wfrp-досяжна відстань у тексті — через `{unit}` із `ruleSystemOf(rules).distance.unit`.
 - `rules` стало обов'язковим на шляхах, досяжних у wfrp (фаза атаки, flow, ефекти, зони, маневри). Необов'язковий `rules?` лишається в `roll-check`, `saves`, `conditions`, кидках смерті й `balance-*` — вони d20-лише за задумом.
 
 ## Межі 5a
