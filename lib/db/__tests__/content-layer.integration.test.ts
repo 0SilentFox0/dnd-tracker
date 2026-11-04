@@ -228,7 +228,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
 
       expect(await names()).toEqual(["Alpha", "Bravo", "Charlie"]);
 
-      await raw.spell.create({ data: { ...localRow(FIXTURES[1], id, "x", "Xray") } });
+      await R.spell.create({ data: localRow(FIXTURES[1], id, "x", "Xray") });
       await raw.campaignContentHide.create({ data: { campaignId: id, table: "spells", id: rid(FIXTURES[1], "a") } });
       await raw.campaign.update({ where: { id }, data: { contentVersion: { increment: 1 } } });
 

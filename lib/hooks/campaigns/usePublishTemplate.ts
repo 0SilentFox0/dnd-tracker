@@ -5,13 +5,15 @@ import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 
 import { publishTemplate } from "@/lib/api/templates";
-import { useNotify } from "@/lib/hooks/common";
+import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
 
 export function usePublishTemplate(campaignId: string) {
   const t = useTranslations("campaigns");
 
   const notify = useNotify();
+
+  const confirm = useConfirm();
 
   const router = useRouter();
 
@@ -26,5 +28,9 @@ export function usePublishTemplate(campaignId: string) {
     onError: (error) => void notify(errorMessage(error, t("publishTemplate.failed"))),
   });
 
-  return { publish: () => mutation.mutate(), isPending: mutation.isPending };
+  const publish = async () => {
+    if (await confirm({ title: t("publishTemplate.confirmTitle"), description: t("publishTemplate.confirmDescription"), confirmLabel: t("publishTemplate.confirmLabel") })) mutation.mutate();
+  };
+
+  return { publish, isPending: mutation.isPending };
 }

@@ -95,6 +95,9 @@
   },
   "publishTemplate": {
     "button": "Publish version",
+    "confirmTitle": "Publish a new version?",
+    "confirmDescription": "Campaigns created from this template will be able to update to it. A published version is permanent and cannot be withdrawn.",
+    "confirmLabel": "Publish",
     "published": "Version {version} published: {added} added, {changed} changed, {removed} removed.",
     "unchanged": "Nothing to publish: the template matches version {version}.",
     "failed": "Failed to publish the version"
