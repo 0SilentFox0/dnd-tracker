@@ -88,6 +88,7 @@
   },
   "revive": {
     "message": "<b>{name}</b> has fallen. Revive with 1 HP?",
+    "messageWounds": "<b>{name}</b> has fallen. Revive with 1 Wound?",
     "action": "Revive",
     "hide": "Hide"
   },

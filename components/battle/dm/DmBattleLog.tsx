@@ -6,7 +6,7 @@ import { ScrollText, Trash2 } from "lucide-react";
 
 import { BattleLogLoadEarlier } from "@/components/battle/log/BattleLogLoadEarlier";
 import { LogTimeline } from "@/components/battle/log/LogTimeline";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleRules, useBattleScene } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { canRollbackEntry } from "@/lib/utils/battle/view";
 import type { BattleAction } from "@/types/battle";
@@ -15,6 +15,8 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
   const t = useTranslations("battleDm.log");
 
   const { battle, viewer, actions } = useBattleScene();
+
+  const { woundsLabel } = useBattleRules();
 
   const confirm = useConfirm();
 
@@ -52,7 +54,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
         {entries.length === 0 ? (
           <p className="py-2 text-sm italic text-[var(--hud-muted)]">{t("empty")}</p>
         ) : (
-          <LogTimeline entries={entries} participants={battle.initiativeOrder ?? []} renderActions={renderActions} />
+          <LogTimeline entries={entries} participants={battle.initiativeOrder ?? []} renderActions={renderActions} wounds={woundsLabel === "wounds"} />
         )}
         <BattleLogLoadEarlier />
       </div>

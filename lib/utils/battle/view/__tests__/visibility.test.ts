@@ -29,6 +29,22 @@ describe("видимість", () => {
     expect(sanitizeLogEntry(e, { ...player, isDM: true })).toBe(e);
   });
 
+  it("захист цілі в percentile-записі прибирається для гравця, DM бачить усе", () => {
+    const opposed = { message: "battleLog.percentile.opposed", params: { roll: 30, target: 45, sl: 1, defRoll: 52, defTarget: 40, defSl: -1, defense: "x", netSl: 2 } };
+
+    const percentile = { roll: 30, target: 45, sl: 1, netSl: 2, location: "arm", doubles: false, defender: { kind: "parry", roll: 52, sl: -1, target: 40 } };
+
+    const e = { actionDetails: { percentile }, log: ["head", opposed] } as unknown as BattleAction;
+
+    const seen = sanitizeLogEntry(e, player);
+
+    expect(seen.actionDetails.percentile?.defender).toBeUndefined();
+    expect(seen.log?.[0]).toBe("head");
+    expect(seen.log?.[1]).toEqual({ message: "battleLog.percentile.opposedHidden", params: { roll: 30, target: 45, sl: 1, netSl: 2 } });
+    expect(JSON.stringify(seen)).not.toContain("52");
+    expect(sanitizeLogEntry(e, { ...player, isDM: true })).toBe(e);
+  });
+
   it("кроки цілі ховаються, доки не помічені в журналі", () => {
     const steps: DamageStep[] = [
       { label: "Кубики", side: "attacker", kind: "dice", value: 6, after: 6 },

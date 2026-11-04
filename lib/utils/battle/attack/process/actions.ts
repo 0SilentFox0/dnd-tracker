@@ -174,9 +174,17 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
 
   const head = { title: p.title ?? textRef("battleLog.offTurn.titles.retaliation"), attacker: retaliator.basicInfo.name, target: target.basicInfo.name, d20, crit: critText };
 
-  const summary = hit
-    ? textRef("battleLog.offTurn.hit", { ...head, damage: hit.hitDamage.totalFinalDamage, plainCrit: !crit && attackRoll.isCritical ? plainCrit : "" })
-    : textRef("battleLog.offTurn.miss", head);
+  const plainCritText = !crit && attackRoll.isCritical ? plainCrit : "";
+
+  const pct = attackRoll.percentile;
+
+  const summary = pct
+    ? hit
+      ? textRef("battleLog.offTurn.hitPercentile", { ...head, roll: pct.roll, damage: hit.hitDamage.totalFinalDamage, plainCrit: plainCritText })
+      : textRef("battleLog.offTurn.missPercentile", { ...head, roll: pct.roll })
+    : hit
+      ? textRef("battleLog.offTurn.hit", { ...head, damage: hit.hitDamage.totalFinalDamage, plainCrit: plainCritText })
+      : textRef("battleLog.offTurn.miss", head);
 
   const immune = hit && hit.hitDamage.totalFinalDamage === 0 ? immunityNote(target.basicInfo.name, hit.hitDamage.damageSteps) : "";
 

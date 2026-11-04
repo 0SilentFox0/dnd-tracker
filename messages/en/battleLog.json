@@ -92,7 +92,9 @@
     "spell": "Spell",
     "spellLevel": "{name} (level {level})",
     "healing": "Healing",
-    "d10": "d10 roll"
+    "d10": "d10 roll",
+    "hpChange": "{value} HP",
+    "woundsChange": "{value} Wounds"
   },
   "attack": {
     "critHit": "Critical hit — {name}!{flavor}",
@@ -112,6 +114,8 @@
     "obstacle": "🧱 obstacle: damage ×0.5 → {damage}"
   },
   "offTurn": {
+    "hitPercentile": "{title}: {attacker} → {target}: d100 {roll}, {damage} damage{plainCrit}{crit}",
+    "missPercentile": "{title}: {attacker} → {target}: d100 {roll}, miss{crit}",
     "hit": "{title}: {attacker} → {target}: d20 {d20}, {damage} damage{plainCrit}{crit}",
     "miss": "{title}: {attacker} → {target}: d20 {d20}, miss{crit}",
     "second": "🎲 {noun}, {mode}: second d20 = {value}",
@@ -422,6 +426,7 @@
   },
   "percentile": {
     "test": "🎲 Test: {roll} vs {target} (SL {sl})",
+    "opposedHidden": "🎲 Opposed: {roll} vs {target} (SL {sl}), net {netSl}",
     "opposed": "🎲 Opposed: {roll} vs {target} (SL {sl}) — defence {defense}: {defRoll} vs {defTarget} (SL {defSl}), net {netSl}",
     "doublesMiss": "🎲 Doubles on a miss — no critical applied",
     "momentum": "⚡ Momentum goes to the winner",

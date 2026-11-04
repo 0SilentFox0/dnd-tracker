@@ -1,10 +1,11 @@
 import { type BattleKnowledge, resolveObservedTraits } from "./knowledge";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { lineKey } from "@/lib/i18n/text-ref";
+import { lineKey, textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface Viewer {
   userId: string | null;
@@ -30,12 +31,22 @@ export function alwaysSeesEnemyStats(order: BattleParticipant[], userId: string)
   return mine.length > 0 && mine.every((p) => canSeeEnemyHp(p, order));
 }
 
+function hideDefense(line: LogLine): LogLine {
+  if (typeof line === "string" || line.message !== "battleLog.percentile.opposed") return line;
+
+  const { roll, target, sl, netSl } = line.params ?? {};
+
+  return textRef("battleLog.percentile.opposedHidden", { roll: roll ?? 0, target: target ?? 0, sl: sl ?? 0, netSl: netSl ?? 0 });
+}
+
 export function sanitizeLogEntry(e: BattleAction, viewer: Viewer): BattleAction {
   if (viewer.isDM) return e;
 
-  const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, ...rest } = e.actionDetails ?? {};
+  const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = e.actionDetails ?? {};
 
-  return { ...e, actionDetails: rest };
+  const hidden: BattleAction = { ...e, actionDetails: percentile ? { ...rest, percentile: { ...percentile, defender: undefined } } : rest };
+
+  return e.log ? { ...hidden, log: e.log.map(hideDefense) } : hidden;
 }
 
 export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: BattleAction[], exact: boolean, knowledge?: BattleKnowledge): DamageStep[] {

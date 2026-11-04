@@ -33,10 +33,10 @@ function DamageTable({ rows }: { rows: DamageBreakdownRow[] }) {
   );
 }
 
-export function LogEntryDetails({ action }: { action: BattleAction }) {
+export function LogEntryDetails({ action, wounds = false }: { action: BattleAction; wounds?: boolean }) {
   const text = useText();
 
-  const items = getLogEntryDetailItems(action);
+  const items = getLogEntryDetailItems(action, wounds);
 
   if (items.length === 0) return null;
 

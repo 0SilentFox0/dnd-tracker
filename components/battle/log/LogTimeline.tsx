@@ -8,11 +8,12 @@ import { groupLogByRound } from "@/lib/utils/battle/view";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 /** Записи від нових до старих, згруповані по раундах; `renderActions` — слот дій на картці (відкіт для DM). */
-export function LogTimeline({ entries, participants, focus = null, renderActions }: {
+export function LogTimeline({ entries, participants, focus = null, renderActions, wounds }: {
   entries: BattleAction[];
   participants: BattleParticipant[];
   focus?: number | null;
   renderActions?: (entry: BattleAction) => ReactNode;
+  wounds?: boolean;
 }) {
   const t = useTranslations("battle.log");
 
@@ -61,7 +62,7 @@ export function LogTimeline({ entries, participants, focus = null, renderActions
           <RoundHeader round={g.round} count={g.entries.length} collapsed={collapsed.has(g.round)} onToggle={toggleRound} />
           {!collapsed.has(g.round) && g.entries.map((e) => (
             <div key={e.actionIndex} ref={e.actionIndex === focus ? focused : undefined}>
-              <LogEntryCard entry={e} actor={byId.get(e.actorId)} open={expanded === e.actionIndex} onToggle={toggleEntry} actions={renderActions?.(e)} />
+              <LogEntryCard entry={e} actor={byId.get(e.actorId)} open={expanded === e.actionIndex} onToggle={toggleEntry} actions={renderActions?.(e)} wounds={wounds} />
             </div>
           ))}
         </div>
