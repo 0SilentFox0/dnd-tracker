@@ -4,6 +4,8 @@ export const MAX_DICE = 12;
 
 export const MAX_SAVES_SHOWN = 6;
 
+export const MAX_INITIATIVE_DICE = 12;
+
 const ROW_MAX = 6;
 
 export interface DieSlot {

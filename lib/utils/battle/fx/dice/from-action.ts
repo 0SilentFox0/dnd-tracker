@@ -1,4 +1,4 @@
-import { MAX_SAVES_SHOWN } from "./layout";
+import { MAX_INITIATIVE_DICE, MAX_SAVES_SHOWN } from "./layout";
 
 import type { BattleAction, DiceRollGroup, DieSides } from "@/types/battle";
 
@@ -16,7 +16,7 @@ const toDie = (group: DiceRollGroup) => {
 type RollKind = DiceRollGroup["kind"];
 
 // влучання і шкода в одній пачці нечитабельні — кожна фаза кидається окремо, у порядку подій
-const PHASES: RollKind[][] = [["attack"], ["save"], ["damage"], ["heal"], ["morale"]];
+const PHASES: RollKind[][] = [["attack"], ["save"], ["damage"], ["heal"], ["morale"], ["initiative"]];
 
 export function diceThrowsOf(action: BattleAction): DiceThrowSpec[] {
   const rolls = action.actionDetails.diceRolls;
@@ -28,7 +28,9 @@ export function diceThrowsOf(action: BattleAction): DiceThrowSpec[] {
 
     if (!own.length) return [];
 
-    const groups = kinds.includes("save") ? [own.slice(0, MAX_SAVES_SHOWN).flatMap(toDie)] : own.map(toDie);
+    const pooled = (cap: number) => [own.flatMap(toDie).slice(0, cap)];
+
+    const groups = kinds.includes("save") ? [own.slice(0, MAX_SAVES_SHOWN).flatMap(toDie)] : kinds.includes("initiative") ? pooled(MAX_INITIATIVE_DICE) : own.map(toDie);
 
     return [{ seed: action.actionIndex * PHASES.length + phase, groups }];
   });
