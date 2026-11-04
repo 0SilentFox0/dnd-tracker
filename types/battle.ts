@@ -10,6 +10,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
+import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
 import type { Characteristics, WfrpParticipantStats } from "@/lib/utils/rules/systems";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
@@ -528,6 +529,8 @@ export interface BattleParticipantBattleData {
   pendingExtraActions?: number;
   /** Атаки дії «Атака», що лишилися цього ходу */
   attacksLeft?: number;
+  /** WFRP: жетон Momentum сторони (однаковий в усіх учасників сторони) */
+  momentum?: boolean;
   inspiration?: boolean;
   /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
   inspirationSpent?: boolean;
@@ -713,6 +716,7 @@ export interface BattleAction {
     /** Другий d20 (перевага/недолік) і кубик, що пішов у розрахунок */
     secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
     chosenD20?: number;
+    percentile?: PercentileAttackDetails;
     // Для урону:
     damageRolls?: Array<{
       dice: string;

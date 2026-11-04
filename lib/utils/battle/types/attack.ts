@@ -1,6 +1,18 @@
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { DefenseKind, HitLocation } from "@/lib/utils/rules/systems/wfrp/combat/constants";
 import type { DamageRow } from "@/types/battle";
 import type { LogLine } from "@/types/text";
+
+export interface PercentileAttackDetails {
+  roll: number;
+  target: number;
+  sl: number;
+  netSl: number;
+  location: HitLocation;
+  doubles: boolean;
+  defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
+  momentumUsed?: boolean;
+}
 
 export interface AttackRollResult {
   isHit: boolean;
@@ -14,6 +26,7 @@ export interface AttackRollResult {
   chosenD20: number;
   /** другий d20 для переваги/недоліку; serverRolled — якщо клієнт його не надіслав */
   secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean; manual?: boolean };
+  percentile?: PercentileAttackDetails;
 }
 
 export interface AttackResult {

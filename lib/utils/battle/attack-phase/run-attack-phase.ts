@@ -1,6 +1,6 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 import { type AttackRequest, validateAttackRequest } from "./request";
-import { damageDiceCursor, damageFractions, strikeD20 } from "./strike-rolls";
+import { damageDiceCursor, damageFractions, strikeRoll } from "./strike-rolls";
 import { resolveAttackTargets } from "./targets";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -23,6 +23,7 @@ import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -154,7 +155,9 @@ function rollStrike(ctx: PhaseCtx, target: BattleParticipant, i: number, opts: S
 
   const serverD20 = input.serverRolls || opts.serverRolled;
 
-  const strike = serverD20 ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng);
+  const sides = ruleSystemOf(input.rules ?? DEFAULT_RULES).combat.dice;
+
+  const strike = serverD20 ? { value: rollDie(sides, rng), serverRolled: true } : strikeRoll(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng, sides);
 
   const serverDamage = input.serverRolls ? damageDiceSlots(attacker, attack).map(sides => rollDie(sides, rng)) : null;
 

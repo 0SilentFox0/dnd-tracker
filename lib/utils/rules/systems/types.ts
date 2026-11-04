@@ -1,14 +1,16 @@
 import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
+import type { HitLocation } from "./wfrp/combat/constants";
 import type { WfrpParticipantStats } from "./wfrp/combat/participant";
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
 import type { DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 
 export type { RuleSystemKey };
@@ -49,14 +51,20 @@ export type SheetTestResult = SheetRollResult;
 export interface ResolveAttackCtx {
   attacker: BattleParticipant;
   target: BattleParticipant;
+  attack: BattleAttack;
+  participants: BattleParticipant[];
   rules: Ruleset;
   rng: Rng;
-  [extra: string]: unknown;
+  manualRoll?: number;
+  momentum: { attacker: boolean; defender: boolean };
 }
 
 export interface ResolvedAttack {
-  hit: boolean;
-  [extra: string]: unknown;
+  isHit: boolean;
+  attackRoll: AttackRollResult;
+  netSl: number;
+  location: HitLocation;
+  momentum: { spent: boolean; gainedBy: "attacker" | "defender" | null };
 }
 
 export interface DamageStep {

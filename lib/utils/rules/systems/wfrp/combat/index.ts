@@ -4,3 +4,4 @@ export { computeWfrpDamage } from "./damage";
 export { hitLocation } from "./location";
 export { resolveOpposed } from "./opposed";
 export { wfrpAbilitiesOf, type WfrpParticipantFields, wfrpParticipantFields,type WfrpParticipantStats } from "./participant";
+export { resolveWfrpAttack } from "./resolve-attack";

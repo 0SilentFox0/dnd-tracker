@@ -406,5 +406,16 @@
         "5": "The knee is shattered, no more walking."
       }
     }
+  },
+  "percentile": {
+    "test": "🎲 Test: {roll} vs {target} (SL {sl})",
+    "opposed": "🎲 Opposed: {roll} vs {target} (SL {sl}) — defence {defense}: {defRoll} vs {defTarget} (SL {defSl}), net {netSl}",
+    "doublesMiss": "🎲 Doubles on a miss — no critical applied",
+    "momentum": "⚡ Momentum goes to the winner",
+    "defense": {
+      "parry": "parry",
+      "dodge": "dodge",
+      "shield": "shield"
+    }
   }
 }

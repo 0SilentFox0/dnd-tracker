@@ -21,11 +21,12 @@ export function damageFractions(targets: BattleParticipant[], attack: BattleAtta
   return sum > 0 ? dist.map((p) => p / sum) : even();
 }
 
-export function strikeD20(
+export function strikeRoll(
   data: AttackRequest,
   request: Pick<ValidatedAttackRequest, "singleRoll" | "usePerTargetRolls">,
   strike: { index: number; chosenAt: number; expanded: boolean },
   rng: Rng,
+  max = 20,
 ): { value: number; serverRolled: boolean } {
   const { singleRoll, usePerTargetRolls } = request;
 
@@ -33,14 +34,16 @@ export function strikeD20(
 
   const serverRolled = strike.expanded && sent == null;
 
-  const d20 = serverRolled ? rollDie(20, rng) : sent;
+  const d20 = serverRolled ? rollDie(max, rng) : sent;
 
-  if (d20 == null || d20 < 1 || d20 > 20) {
+  if (d20 == null || d20 < 1 || d20 > max) {
     throw new BattleRuleError("action_rejected", REJECT.badStrikeRoll, { target: strike.index + 1 });
   }
 
   return { value: d20, serverRolled };
 }
+
+export const strikeD20 = (...args: [Parameters<typeof strikeRoll>[0], Parameters<typeof strikeRoll>[1], Parameters<typeof strikeRoll>[2], Parameters<typeof strikeRoll>[3]]) => strikeRoll(...args, 20);
 
 export interface StrikeDice {
   rolls: number[];
