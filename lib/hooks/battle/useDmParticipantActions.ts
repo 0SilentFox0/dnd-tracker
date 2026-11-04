@@ -47,6 +47,16 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
   const update = (p: BattleParticipant, data: { removeFromBattle: true } | { kill: true }) =>
     actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data });
 
+  const [orderOpen, setOrderOpen] = useState(false);
+
+  const tInit = useTranslations("battleDm.initiative");
+
+  const rollInitiative = async () => {
+    const ok = await confirm({ title: tInit("confirmTitle"), description: tInit("confirmDescription"), confirmLabel: tInit("confirm") });
+
+    if (ok) actions.initiativeRoll.mutate({});
+  };
+
   const refreshSources = async () => {
     const ok = await confirm({
       title: t("title"),
@@ -78,6 +88,15 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
     row,
     conditions: { target: conditionsTarget, custom: battle.rules?.conditions.custom, close: () => setConditionsId(null), submit: actions.conditions.mutate, isPending: actions.conditions.isPending },
     legendary: { target: legendaryTarget, close: () => setLegendaryId(null) },
+    initiative: {
+      roll: rollInitiative,
+      isRolling: actions.initiativeRoll.isPending,
+      orderTarget: orderOpen ? ((battle.initiativeOrder ?? []) as BattleParticipant[]) : null,
+      openOrder: () => setOrderOpen(true),
+      closeOrder: () => setOrderOpen(false),
+      submitOrder: (order: string[]) => actions.initiativeReorder.mutate({ order }),
+      isReordering: actions.initiativeReorder.isPending,
+    },
     refreshSources: { run: refreshSources, isPending: actions.refreshSources.isPending },
     randomUnits: unitControl.random,
   };

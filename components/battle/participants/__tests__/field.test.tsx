@@ -87,6 +87,35 @@ describe("поле бою", () => {
     expect(screen.getAllByText("+").length).toBe(1);
   });
 
+  it("DM drag over the track reorders by participant id; a click without movement does not", () => {
+    const onReorder = vi.fn();
+
+    const elementFromPoint = vi.fn();
+
+    document.elementFromPoint = elementFromPoint;
+
+    const { container } = render(<InitiativeTrack onReorder={onReorder} />, { wrapper: wrap(scene(true)) });
+
+    const [gob, me] = ["gob", "me"].map((id) => container.querySelector(`[data-pid="${id}"]`) as HTMLElement);
+
+    fireEvent.pointerDown(me, { clientX: 100, clientY: 10 });
+    fireEvent.pointerUp(me, { clientX: 100, clientY: 10 });
+    expect(onReorder).not.toHaveBeenCalled();
+
+    elementFromPoint.mockReturnValue(gob);
+    fireEvent.pointerDown(me, { clientX: 100, clientY: 10 });
+    fireEvent.pointerMove(me, { clientX: 20, clientY: 10 });
+    fireEvent.pointerUp(me, { clientX: 20, clientY: 10 });
+
+    expect(onReorder).toHaveBeenCalledWith(["me", "gob"]);
+  });
+
+  it("track has no drag handles without onReorder", () => {
+    const { container } = render(<InitiativeTrack />, { wrapper: wrap(scene(true)) });
+
+    expect(container.querySelector("[data-pid]")).toBeNull();
+  });
+
   it("журнал гравця не показує розбивку DM", () => {
     render(<BattleLog />, { wrapper: wrap(scene()) });
 
