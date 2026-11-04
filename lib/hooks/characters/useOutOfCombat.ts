@@ -33,7 +33,7 @@ export function useSpendHitDie(campaignId: string, characterId: string) {
 export function useSheetRoll(campaignId: string, characterId: string) {
   return useCrudMutation({
     mutationFn: (body: SheetRollBody) => postSheetRoll(campaignId, characterId, body),
-    invalidateKeys: (_r, body) => (body.useInspiration ? heroKeys(campaignId, characterId) : [characterKeys.log(campaignId, characterId)]),
+    invalidateKeys: (_r, body) => ("useInspiration" in body && body.useInspiration ? heroKeys(campaignId, characterId) : [characterKeys.log(campaignId, characterId)]),
   });
 }
 

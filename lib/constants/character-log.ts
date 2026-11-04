@@ -1,6 +1,8 @@
 export const CharacterLogKind = {
   CHECK: "check",
   SAVE: "save",
+  TEST: "test",
+  SESSION: "session",
   SHORT_REST: "short_rest",
   LONG_REST: "long_rest",
   REST_CLOSED: "rest_closed",

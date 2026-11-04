@@ -14,7 +14,8 @@
   },
   "rollLabel": {
     "save": "Saving throw: {ability}",
-    "check": "Check: {ability}"
+    "check": "Check: {ability}",
+    "test": "Test: {label}"
   },
   "restDialog": {
     "title": "Rest",
@@ -98,6 +99,8 @@
     "more": "Show more",
     "system": "System",
     "roll": "🎲 {hasLabel, select, yes {{label}} other {Roll}}: {autoFail, select, yes {automatic failure} other {{rolls} → {total}{mode, select, advantage { (advantage)} disadvantage { (disadvantage)} other {}}}}{inspiration, select, yes { · inspiration} other {}}",
+    "test": "🎲 {label}: {roll} vs {target} · {outcome, select, critical {critical success} success {success} failure {failure} other {fumble}}, SL {sl}{reversed, select, yes { · reversed} other {}}{auto, select, success { · auto success} failure { · auto failure} other {}}",
+    "session": "🎭 New session: Fortune restored",
     "shortRest": "☕ Short rest",
     "longRest": "🛏 Long rest",
     "restClosed": "Rest ended",

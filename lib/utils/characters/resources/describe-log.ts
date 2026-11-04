@@ -27,6 +27,22 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
           inspiration: yes(d.inspiration),
         },
       };
+    case "test":
+      return {
+        key: "rest.log.test",
+        params: {
+          label: String(d.label ?? ""),
+          roll: num("roll"),
+          target: num("target"),
+          sl: num("sl"),
+          outcome: String(d.outcome),
+          reversed: yes(d.reversed),
+          auto: d.auto === "success" || d.auto === "failure" ? d.auto : "none",
+          difficulty: String(d.difficulty),
+        },
+      };
+    case "session":
+      return { key: "rest.log.session" };
     case "short_rest":
       return { key: "rest.log.shortRest" };
     case "long_rest":

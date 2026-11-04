@@ -1,5 +1,7 @@
 import type { RuleSystemDefinition } from "../types";
 import { woundsBreakdown, woundsMax } from "./characteristics/derive";
+import { onSession } from "./session";
+import { rollWfrpSheetTest } from "./sheet-test";
 
 export const WFRP_SYSTEM: RuleSystemDefinition = {
   key: "wfrp",
@@ -9,11 +11,9 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   characteristics: { kind: "wfrp", sheetBlock: () => undefined },
   sheetTest: {
     accepts: (body) => body.kind === "test",
-    roll: () => {
-      throw new Error("wfrp sheet test lands in Task 4");
-    },
+    roll: rollWfrpSheetTest,
   },
-  rest: {},
+  rest: { onSession },
   battle: { supported: false },
   unusedMechanics: ["morale", "criticals", "formulas", "heroScaling", "initiative", "saves", "deathSaves", "concentration", "conditions", "actions", "classes", "encounters"],
 };

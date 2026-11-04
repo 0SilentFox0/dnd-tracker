@@ -1,5 +1,5 @@
 import { skillAdvanceKey, skillDef } from "../skills/catalog";
-import { type CharacteristicKey, type Characteristics, SKILL_ADVANCE_KEY_RE } from "./schema";
+import { type CharacteristicKey, type Characteristics, SKILL_ADVANCE_KEY_RE, SPEC_RE } from "./schema";
 
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
@@ -13,8 +13,6 @@ export const woundsMax = (c: Characteristics) => bonus(c, "s") + 2 * bonus(c, "t
 export const walkYards = (c: Characteristics) => c.move * 2;
 
 export const runYards = (c: Characteristics) => c.move * 4;
-
-const SPEC_RE = /^[a-z0-9-]{1,40}$/;
 
 export function skillTarget(c: Characteristics, skillKey: string, spec?: string): { target: number; trained: boolean; characteristic: CharacteristicKey; advances: number } | null {
   const def = skillDef(skillKey);

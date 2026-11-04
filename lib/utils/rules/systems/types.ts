@@ -3,10 +3,11 @@ import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
+import type { Rng } from "@/lib/utils/common/rng";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
-import type { CharacterResources, SheetRollResult } from "@/types/characters";
+import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 
 export type { RuleSystemKey };
 
@@ -32,14 +33,16 @@ export interface SheetWfrpBlock {
 
 export interface SheetTestInput {
   participant: BattleParticipant;
-  body: { kind: string };
+  character: { characteristics?: unknown };
+  body: SheetRollBody;
   rules: Ruleset;
-  rng: () => number;
+  rng: Rng;
   inspiration: boolean;
   t: Translator;
+  presetRoll?: number;
 }
 
-export type SheetTestResult = SheetRollResult & { kind: "d20" };
+export type SheetTestResult = SheetRollResult;
 
 export interface RuleSystemDefinition {
   key: RuleSystemKey;

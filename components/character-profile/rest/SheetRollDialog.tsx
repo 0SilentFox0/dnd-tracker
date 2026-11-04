@@ -53,7 +53,8 @@ export function SheetRollDialog({ request, onClose }: { request: SheetRollReques
 
       setResult(r);
       setUseInspiration(false);
-      void stage.current?.play({ seed: Math.floor(cryptoRandom() * 2 ** 31), groups: [r.rolls.map((value) => ({ sides: 20 as const, value }))] });
+
+      if (r.kind === "d20") void stage.current?.play({ seed: Math.floor(cryptoRandom() * 2 ** 31), groups: [r.rolls.map((value) => ({ sides: 20 as const, value }))] });
     } catch (e) {
       setError(e instanceof Error ? e.message : t("errors.rollFailed"));
     }
@@ -74,7 +75,7 @@ export function SheetRollDialog({ request, onClose }: { request: SheetRollReques
       {sheet.rest?.inspiration && !result && (
         <SwitchField id="sheet-roll-inspiration" ariaLabel={t("sheetRoll.inspirationAria")} label={t("sheetRoll.inspiration")} checked={useInspiration} onCheckedChange={setUseInspiration} />
       )}
-      {result && (
+      {result?.kind === "d20" && (
         <div aria-live="polite" className="text-center">
           <div className="text-4xl font-bold tabular-nums text-hud-gold-bright">{result.autoFail ? "✕" : result.total}</div>
           <div className="text-xs text-hud-muted">

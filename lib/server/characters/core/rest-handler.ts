@@ -12,10 +12,11 @@ import { ContentError } from "@/lib/server/content/errors";
 import type { CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { loadClassesById } from "@/lib/utils/battle/participant/load-classes";
 import { hitDicePoolFor } from "@/lib/utils/characters/resources/hit-dice";
-import { applyRest } from "@/lib/utils/characters/resources/rest";
+import { applyRest, type RestAction } from "@/lib/utils/characters/resources/rest";
 import { readResources } from "@/lib/utils/characters/resources/schema";
+import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 
-const LOG_KIND = { short: CharacterLogKind.SHORT_REST, long: CharacterLogKind.LONG_REST, close: CharacterLogKind.REST_CLOSED } as const;
+const LOG_KIND = { short: CharacterLogKind.SHORT_REST, long: CharacterLogKind.LONG_REST, close: CharacterLogKind.REST_CLOSED, session: CharacterLogKind.SESSION } as const;
 
 export async function restParty(access: CampaignAccessResult, body: RestInput) {
   const { campaign } = access;
@@ -24,9 +25,13 @@ export async function restParty(access: CampaignAccessResult, body: RestInput) {
 
   if (!outOfCombat.persistResources) throw new ContentError(API_ERRORS.OOC_RESOURCES_DISABLED, 409);
 
+  const onSession = body.kind === "session" ? ruleSystemOf(campaign.rules).rest.onSession : undefined;
+
+  if (body.kind === "session" && !onSession) throw new ContentError(API_ERRORS.REST_KIND_UNSUPPORTED, 409);
+
   const ids = [...new Set(body.characterIds)];
 
-  const characters = await prisma.character.findMany({ where: { id: { in: ids }, campaignId: campaign.id, status: CharacterStatus.ACTIVE }, select: { id: true, classes: true, resources: true } });
+  const characters = await prisma.character.findMany({ where: { id: { in: ids }, campaignId: campaign.id, status: CharacterStatus.ACTIVE }, select: { id: true, classes: true, resources: true, characteristics: true } });
 
   if (characters.length !== ids.length) throw new ContentError(API_ERRORS.REST_CHARACTERS_INVALID, 400);
 
@@ -42,7 +47,9 @@ export async function restParty(access: CampaignAccessResult, body: RestInput) {
 
       const pool = hitDicePoolFor(c.classes, classesById);
 
-      return { id: c.id, resources: applyRest(body.kind, current, { pool, longRestHitDice: outOfCombat.longRestHitDice }), dead: !!current.dead };
+      if (onSession) return { id: c.id, resources: onSession(current, readCharacteristics(c)), dead: !!current.dead };
+
+      return { id: c.id, resources: applyRest(body.kind as RestAction, current, { pool, longRestHitDice: outOfCombat.longRestHitDice }), dead: !!current.dead };
     });
 
     for (const u of rested) await tx.character.update({ where: { id: u.id }, data: { resources: u.resources as Prisma.InputJsonValue } });

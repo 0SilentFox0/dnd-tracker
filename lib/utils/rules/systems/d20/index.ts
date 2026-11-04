@@ -11,7 +11,7 @@ export const d20System = (key: Extract<RuleSystemKey, "homm" | "dnd5e">): RuleSy
   characteristics: { kind: "d20", sheetBlock: () => undefined },
   sheetTest: {
     accepts: (body) => body.kind !== "test",
-    roll: (i) => ({ kind: "d20", ...rollFromSheet(i.participant, i.body as SheetRollSubject, i) }),
+    roll: (i) => rollFromSheet(i.participant, i.body as SheetRollSubject, i),
   },
   rest: {},
   battle: { supported: true },

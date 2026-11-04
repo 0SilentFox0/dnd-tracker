@@ -11,7 +11,7 @@ import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { SheetRest } from "@/types/characters";
 
-const h = vi.hoisted(() => ({ roll: { mutateAsync: vi.fn(async () => ({ label: "Скритність", rolls: [11, 20], roll: 20, mod: 4, bonus: 2, total: 26, mode: "advantage", autoFail: false, inspirationUsed: true })), isPending: false } }));
+const h = vi.hoisted(() => ({ roll: { mutateAsync: vi.fn(async () => ({ kind: "d20", label: "Скритність", rolls: [11, 20], roll: 20, mod: 4, bonus: 2, total: 26, mode: "advantage", autoFail: false, inspirationUsed: true })), isPending: false } }));
 
 vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useSheetRoll: () => h.roll }));
 vi.mock("@/components/battle/fx/dice/DiceStage", () => ({ DiceStage: () => null }));

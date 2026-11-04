@@ -12,7 +12,7 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
-import type { Characteristics } from "@/lib/utils/rules/systems";
+import type { CharacteristicKey, Characteristics, DifficultyKey } from "@/lib/utils/rules/systems";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
 
@@ -316,15 +316,35 @@ export interface CharacterResources {
   charges?: Record<string, { used: number; rest: RestKindValue | null; /** uses restored by a short rest even though `rest` is long */ regain?: number }>;
   exhaustion?: number;
   shortRestOpen?: boolean;
+  fortune?: number;
 }
 
-export type RestBody = { kind: "short" | "long" | "close"; characterIds: string[] };
+export type RestBody = { kind: "short" | "long" | "close" | "session"; characterIds: string[] };
 
 export type SheetRollSubject = { kind: "check"; skill: DndSkill } | { kind: "check"; ability: AbilityKey } | { kind: "save"; ability: AbilityKey };
 
-export type SheetRollBody = SheetRollSubject & { useInspiration?: boolean };
+export type SheetTestSubject = { kind: "test"; characteristic: CharacteristicKey } | { kind: "test"; skill: string; spec?: string };
 
-export interface SheetRollResult {
+export type SheetRollBody = (SheetRollSubject & { useInspiration?: boolean }) | (SheetTestSubject & { difficulty?: DifficultyKey });
+
+export type SheetRollResult = SheetD20RollResult | SheetPercentileRollResult;
+
+export interface SheetPercentileRollResult {
+  kind: "percentile";
+  label: string;
+  rawRoll: number;
+  roll: number;
+  reversed: boolean;
+  target: number;
+  sl: number;
+  outcome: "critical" | "success" | "failure" | "fumble";
+  auto: "success" | "failure" | null;
+  difficulty: DifficultyKey;
+  mode: "normal" | "advantage" | "disadvantage";
+}
+
+export interface SheetD20RollResult {
+  kind: "d20";
   label: string;
   rolls: number[];
   roll: number;
@@ -347,7 +367,7 @@ export interface HitDieResult {
 
 export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
 
-export type ResourcesEditBody = { hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
+export type ResourcesEditBody = { fortune?: number; hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
 
 export interface SheetRest {
   persist: boolean;
