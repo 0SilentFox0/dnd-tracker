@@ -154,6 +154,7 @@ describe("AttackWizard", () => {
     expect(screen.getByText("Кидок атаки · d100")).toBeTruthy();
     expect(screen.getByText(/Ціль \d+%/)).toBeTruthy();
     expect(screen.getByText("Momentum: ваша сторона")).toBeTruthy();
+    expect(screen.getByText(/Шкода зброї: d\d+/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Перевага" })).toBeNull();
     expect(screen.queryByRole("button", { name: "14" })).toBeNull();
 

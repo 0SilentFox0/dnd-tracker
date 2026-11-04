@@ -48,6 +48,7 @@
           "manual": "Manual"
         },
         "target": "Target {target}% · {label}",
+        "damageDice": "Weapon damage: {dice} (rolled automatically)",
         "momentum": {
           "held": "Momentum: {side}",
           "none": "No Momentum",

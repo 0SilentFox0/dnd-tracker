@@ -12,7 +12,7 @@ type RollSource = "server" | "manual";
 
 const SOURCES: RollSource[] = ["server", "manual"];
 
-export function D100RollBody({ wizard: { view, actions } }: { wizard: AttackWizardModel }) {
+export function D100RollBody({ wizard: { state, view, actions } }: { wizard: AttackWizardModel }) {
   const t = useTranslations("battleWizards.attack.roll.d100");
 
   const tc = useTranslations("common.actions");
@@ -26,6 +26,7 @@ export function D100RollBody({ wizard: { view, actions } }: { wizard: AttackWiza
   return (
     <>
       {percentile.target && <div className="mt-2 text-sm text-hud-gold">{t("target", { target: percentile.target.target, label: text(percentile.target.label) })}</div>}
+      {state.diceSlots.length > 0 && <div className="mt-1 text-sm text-[var(--hud-muted)]">{t("damageDice", { dice: state.diceSlots.map((sides) => `d${sides}`).join(" + ") })}</div>}
       <div className="mt-1 text-sm text-[var(--hud-muted)]">{percentile.momentum ? t("momentum.held", { side: t("momentum.side") }) : t("momentum.none")}</div>
       <div className="mt-3 grid h-10 grid-cols-2 border border-white/20">
         {SOURCES.map((m) => (

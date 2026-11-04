@@ -48,6 +48,7 @@
           "manual": "Ручний"
         },
         "target": "Ціль {target}% · {label}",
+        "damageDice": "Шкода зброї: {dice} (кидається автоматично)",
         "momentum": {
           "held": "Momentum: {side}",
           "none": "Momentum немає",
