@@ -34,6 +34,7 @@ import { runContentWriteContext } from "@/lib/server/content/write-context";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { newContentId } from "@/lib/server/templates/ids";
 import { latestPublishedVersion, publishTemplateVersion } from "@/lib/server/templates/publish";
+import { publishTemplate } from "@/lib/server/templates/publish-service";
 import { isLocalDevDatabaseEnv } from "@/lib/server/test-support/local-db";
 
 const raw = () => h.raw as unknown as Record<string, any>;
@@ -161,14 +162,14 @@ describe.skipIf(!isLocalDevDatabaseEnv())("campaign creation over content layers
     }
   });
 
-  it("an orphan override (base row closed upstream) exports under its base id once and publishes without duplicates", async () => {
+  it("an orphan override (base row closed upstream) exports under its base id once, and a template with a base cannot be published", async () => {
     const orphan = `${marker}-orphan`;
 
     created.push(orphan);
 
     const published = (await latestPublishedVersion(raw(), tpl))!;
 
-    await raw().campaign.create({ data: { id: orphan, name: "Orphan", dmUserId: marker, inviteCode: randomUUID(), kind: "template", baseSourceId: tpl, baseVersion: published, contentVersion: 100 } });
+    await raw().campaign.create({ data: { id: orphan, name: "Orphan", dmUserId: marker, inviteCode: randomUUID(), kind: "template", baseSourceId: tpl, baseVersion: published } });
     invalidateCampaignLayer();
 
     await inWrite(orphan, (tx) => tx.spell.update({ where: { id: ids.s2 }, data: { name: "Bravo mine" } }));
@@ -182,13 +183,8 @@ describe.skipIf(!isLocalDevDatabaseEnv())("campaign creation over content layers
     expect(bundle.spells.map((s) => [s.id, s.name]).sort()).toEqual([[ids.s1, "Alpha"], [ids.s2, "Bravo mine"]].sort());
     expect(new Set(bundle.spells.map((s) => s.id)).size).toBe(bundle.spells.length);
 
-    const result = await publish(orphan);
-
-    expect(result.version).toBeGreaterThan(0);
-
-    const rows = await raw().spellBase.findMany({ where: { sourceCampaignId: orphan, validTo: null } });
-
-    expect(rows.map((r: any) => [r.id, r.name]).sort()).toEqual([[ids.s1, "Alpha"], [ids.s2, "Bravo mine"]].sort());
+    await expect(publishTemplate(actorOf(orphan))).rejects.toMatchObject({ status: 409 });
+    expect(await raw().spellBase.count({ where: { sourceCampaignId: orphan } })).toBe(0);
 
     await raw().spellBase.updateMany({ where: { sourceCampaignId: tpl, id: ids.s2 }, data: { validTo: null } });
   });

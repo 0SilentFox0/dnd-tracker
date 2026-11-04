@@ -43,6 +43,7 @@
   "sourceNotFound": "Update source unavailable",
   "sourceForbidden": "No access to the update source",
   "sourceChanged": "The source changed — refresh the diff",
+  "templatePublishLayered": "A template built on another template cannot be published",
   "sourceLeak": "The source record has links that cannot be carried into the campaign",
   "sourceForeignIds": "The source record references content of another campaign",
   "characterNotFound": "Character not found",

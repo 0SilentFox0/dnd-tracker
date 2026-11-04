@@ -76,7 +76,7 @@ export default async function CampaignDetailPage({
           {isDM && (
             <div className="ml-auto flex flex-wrap gap-2">
               {campaign.createdFromId && <SourceSyncButton campaignId={id} isTemplate />}
-              <PublishTemplateButton campaignId={id} />
+              {!campaign.baseSourceId && <PublishTemplateButton campaignId={id} />}
             </div>
           )}
         </HudPanel>
