@@ -93,7 +93,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         onClick={() => setOpen(true)}
         className={cn(
           "fixed right-0 top-1/2 z-50 flex h-24 w-10 -translate-y-1/2 items-center justify-center",
-          "border border-r-0 border-hud-line bg-[#14100c]/90 text-[var(--gold)] shadow-[0_0_18px_rgba(0,0,0,.6)] hover:border-[var(--gold)]/60",
+          "border border-r-0 border-hud-line bg-hud-field/90 text-[var(--gold)] shadow-[0_0_18px_rgba(0,0,0,.6)] hover:border-[var(--gold)]/60",
           "transition-all duration-200",
           open && "pointer-events-none opacity-0",
         )}
@@ -108,7 +108,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         className={cn(
           HUD_SURFACE,
           "fixed bottom-0 right-0 top-0 z-50 flex max-w-full flex-col",
-          "border-l border-hud-line bg-[#14100c]/[.97] shadow-[-12px_0_40px_rgba(0,0,0,.7)]",
+          "border-l border-hud-line bg-hud-field/[.97] shadow-[-12px_0_40px_rgba(0,0,0,.7)]",
           "transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}

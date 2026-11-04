@@ -60,7 +60,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
         </div>
         <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{text(view.headline)}</div>
         {view.lines.map((line, n) => (
-          <div key={n} className="mt-0.5 text-[12.5px] leading-[17px] text-[#b3a791]">{text(line)}</div>
+          <div key={n} className="mt-0.5 text-[12.5px] leading-[17px] text-hud-muted">{text(line)}</div>
         ))}
         <HpChips hp={view.hp} />
         {view.hasDetails && (

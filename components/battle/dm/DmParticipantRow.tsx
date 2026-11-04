@@ -23,7 +23,7 @@ function scaleLabel({ battleData }: BattleParticipant, t: ReturnType<typeof useT
   return [parts[0] !== null && t("scaleHp", { value: mult(parts[0]) }), parts[1] !== null && t("scaleDamage", { value: mult(parts[1]) })].filter(Boolean).join(" · ");
 }
 
-const ICON = "flex size-8 items-center justify-center border border-transparent bg-black/40 transition-colors";
+const ICON = "flex size-8 items-center justify-center border border-transparent bg-[color-mix(in_srgb,var(--hud-bone)_5%,transparent)] transition-colors";
 
 interface DmParticipantRowProps {
   participant: BattleParticipant;

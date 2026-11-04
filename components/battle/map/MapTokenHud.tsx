@@ -123,7 +123,7 @@ function MapTokenHudImpl({ participant: live, placement, exact, raised, impact =
             <i key={m} aria-hidden data-hud-fx={m} className="map-hud-fx" />
           ))}
           {showText && (
-            <div data-map-hud-name className={cn("hud-sc relative truncate whitespace-nowrap text-center font-bold leading-tight text-[var(--ink)]", down && "line-through")} style={{ fontSize: nameFont }}>
+            <div data-map-hud-name className={cn("hud-sc relative truncate whitespace-nowrap text-center font-bold leading-tight text-[#fffaf0]", down && "line-through")} style={{ fontSize: nameFont }}>
               {participant.basicInfo.name}
             </div>
           )}

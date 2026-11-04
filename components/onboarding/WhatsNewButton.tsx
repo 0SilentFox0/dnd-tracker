@@ -33,7 +33,7 @@ export function WhatsNewButton() {
       <Button variant="ghost" size="icon" className="relative h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong" onClick={() => onOpenChange(true)}>
         <Gift className="h-4 w-4" />
         <span className="sr-only">{t("ui.button")}</span>
-        {unseen.length > 0 && <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-hud-gold-strong px-1 text-[10px] leading-4 text-black">{unseen.length}</span>}
+        {unseen.length > 0 && <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-hud-gold-strong px-1 text-[10px] leading-4 text-[var(--palette-primary-foreground,black)]">{unseen.length}</span>}
       </Button>
       <ResponsiveDialog open={open} onOpenChange={onOpenChange} title={t("ui.title")} hud>
         <ul className="space-y-4">

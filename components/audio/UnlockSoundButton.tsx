@@ -12,7 +12,7 @@ export function UnlockSoundButton({ className }: { className?: string }) {
   const { sound } = usePlayerAudio();
 
   return (
-    <button type="button" className={cn("hud-sc flex h-8 items-center justify-center bg-[var(--enemy)] text-sm text-[var(--ink)]", className)} onClick={sound.unlock}>
+    <button type="button" className={cn("hud-sc flex h-8 items-center justify-center bg-[var(--enemy)] text-sm text-[#fffaf0]", className)} onClick={sound.unlock}>
       {t("player.unlock")}
     </button>
   );

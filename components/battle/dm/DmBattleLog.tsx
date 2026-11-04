@@ -48,7 +48,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
           {t("close")}
         </button>
       </div>
-      <div className="custom-scrollbar h-[min(50vh,400px)] overflow-y-auto border border-hud-rule bg-black/40 px-2">
+      <div className="custom-scrollbar h-[min(50vh,400px)] overflow-y-auto border border-hud-rule bg-[color-mix(in_srgb,var(--hud-bone)_5%,transparent)] px-2">
         {entries.length === 0 ? (
           <p className="py-2 text-sm italic text-[var(--hud-muted)]">{t("empty")}</p>
         ) : (

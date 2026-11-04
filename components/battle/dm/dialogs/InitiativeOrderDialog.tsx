@@ -44,7 +44,7 @@ function InitiativeOrderBody({ participants, onClose, onSubmit, isPending }: Ini
     >
       <ol className="space-y-1">
         {order.map((id, i) => (
-          <li key={id} className="flex items-center gap-2 border border-white/15 bg-black/40 px-2 py-1">
+          <li key={id} className="flex items-center gap-2 border border-white/15 bg-[color-mix(in_srgb,var(--hud-bone)_5%,transparent)] px-2 py-1">
             <span className="hud-sc w-6 text-right text-[13px] text-[var(--hud-muted)]">{i + 1}</span>
             <span className="min-w-0 flex-1 truncate text-[15px]">{names.get(id)}</span>
             <button type="button" className="p-1 text-[var(--gold)] disabled:opacity-30" disabled={i === 0} aria-label={t("up", { name: names.get(id) ?? "" })} onClick={() => move(id, i - 1)}><ChevronUp className="size-4" /></button>

@@ -15,7 +15,7 @@ export function MapWeatherPicker({ tool }: { tool: MapWeatherTool }) {
   const tw = useTranslations("battleCommon.weather");
 
   return (
-    <div role="group" aria-label={t("tools.weather")} className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
+    <div role="group" aria-label={t("tools.weather")} className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs text-hud-bone">
       {OPTIONS.map((value) => (
         <button
           key={value ?? "clear"}
