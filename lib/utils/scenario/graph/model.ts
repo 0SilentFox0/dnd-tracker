@@ -105,7 +105,23 @@ export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap
     if (prev) sequence.push({ id: `seq:${prev.refId}>${n.refId}`, source: prev.id, target: n.id, count: 1, secret: false });
   });
 
-  return { nodes: [...sceneNodes, ...entityNodes], edges, sequence, truncated, entityTotal: candidates.length };
+  const merged = new Map<string, { a: string; b: string; labels: string[] }>();
+
+  for (const r of index.relations) {
+    if (!keptIds.has(r.a) || !keptIds.has(r.b)) continue;
+
+    const [a, b] = r.a < r.b ? [r.a, r.b] : [r.b, r.a];
+
+    const entry = merged.get(`${a}~${b}`) ?? { a, b, labels: [] };
+
+    if (r.label && !entry.labels.includes(r.label)) entry.labels.push(r.label);
+
+    merged.set(`${a}~${b}`, entry);
+  }
+
+  const relations: GraphEdge[] = [...merged.entries()].map(([key, r]) => ({ id: `rel:${key}`, source: r.a, target: r.b, count: 1, secret: false, label: r.labels.join("; ") }));
+
+  return { nodes: [...sceneNodes, ...entityNodes], edges, sequence, relations, truncated, entityTotal: candidates.length };
 }
 
 export function neighbors(model: GraphModel, nodeId: string): { nodes: Set<string>; edges: Set<string> } {
@@ -145,5 +161,6 @@ export function egoModel(model: GraphModel, nodeId: string): GraphModel {
     nodes: model.nodes.filter((n) => keep.has(n.id)),
     edges: model.edges.filter((e) => keep.has(e.source) && keep.has(e.target)),
     sequence: model.sequence.filter((e) => keep.has(e.source) && keep.has(e.target)),
+    relations: model.relations.filter((e) => keep.has(e.source) && keep.has(e.target)),
   };
 }

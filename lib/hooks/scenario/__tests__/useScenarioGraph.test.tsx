@@ -36,10 +36,11 @@ const index: ScenarioIndex = {
   scenes: [scene("s1", "Таверна", 0), scene("s2", "Ліс", 1)],
   entities: [entity("unit", "u1", "Вовк", ["s1", "s2"]), entity("character", "c1", "Вовкулака", ["s1", "s2"])],
   edges: [edge("s1", "unit", "u1"), edge("s2", "unit", "u1", true), edge("s1", "character", "c1"), edge("s2", "character", "c1")],
+  relations: [],
   counts: { scenes: 2, entities: 2, edges: 4, byType: { unit: 1, character: 1 }, missing: 0 },
 };
 
-const empty: ScenarioIndex = { scenes: [], entities: [], edges: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
+const empty: ScenarioIndex = { scenes: [], entities: [], edges: [], relations: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
 
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });

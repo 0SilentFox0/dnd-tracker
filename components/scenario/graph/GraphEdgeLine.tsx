@@ -17,6 +17,7 @@ interface GraphEdgeLineProps {
   to: Point;
   color: string;
   sequence?: boolean;
+  relation?: boolean;
   dimmed: boolean;
   highlighted: boolean;
   secretLabel: string;
@@ -34,7 +35,7 @@ function curve(a: Point, b: Point, bend: number) {
   return { d: `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`, x: 0.25 * a.x + 0.5 * cx + 0.25 * b.x, y: 0.25 * a.y + 0.5 * cy + 0.25 * b.y };
 }
 
-function GraphEdgeLineImpl({ edge, from, to, color, sequence = false, dimmed, highlighted, secretLabel }: GraphEdgeLineProps) {
+function GraphEdgeLineImpl({ edge, from, to, color, sequence = false, relation = false, dimmed, highlighted, secretLabel }: GraphEdgeLineProps) {
   if (sequence) {
     const half = GRAPH_SCENE_W / 2;
 
@@ -43,6 +44,18 @@ function GraphEdgeLineImpl({ edge, from, to, color, sequence = false, dimmed, hi
     return (
       <g data-edge-id={edge.id} data-sequence="true" data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.12 : 0.8 }} pointerEvents="none">
         <path d={d} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" markerEnd={`url(#${SEQUENCE_MARKER_ID})`} />
+      </g>
+    );
+  }
+
+  if (relation) {
+    const { d } = curve(from, to, -0.1);
+
+    return (
+      <g data-edge-id={edge.id} data-relation="true" data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.05 : highlighted ? 0.95 : 0.4 }}>
+        <title>{edge.label}</title>
+        <path d={d} fill="none" stroke={color} strokeWidth={highlighted ? 2.2 : 1.2} strokeLinecap="round" pointerEvents="none" />
+        <path d={d} fill="none" stroke="transparent" strokeWidth={12} pointerEvents="stroke" />
       </g>
     );
   }

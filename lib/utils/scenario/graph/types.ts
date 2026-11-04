@@ -21,6 +21,7 @@ export interface GraphEdge {
   target: string;
   count: number;
   secret: boolean;
+  label?: string;
 }
 
 export interface GraphFilters {
@@ -34,6 +35,7 @@ export interface GraphModel {
   nodes: GraphNode[];
   edges: GraphEdge[];
   sequence: GraphEdge[];
+  relations: GraphEdge[];
   truncated: number;
   entityTotal: number;
 }
@@ -41,4 +43,5 @@ export interface GraphModel {
 export interface GraphDetail {
   node: GraphNode & { x: number; y: number };
   links: { node: GraphNode; count: number; secret: boolean }[];
+  relations: { node: GraphNode; label: string }[];
 }

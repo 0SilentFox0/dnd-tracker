@@ -74,7 +74,13 @@ export function useScenarioGraph(campaignId: string) {
       return (e.source === node.id || e.target === node.id) && other ? [{ node: other, count: e.count, secret: e.secret }] : [];
     });
 
-    return { ...hood, detail: { node, links } as GraphDetail | null };
+    const relations = viewModel.relations.flatMap((r) => {
+      const other = byId.get(r.source === node.id ? r.target : r.source);
+
+      return (r.source === node.id || r.target === node.id) && other ? [{ node: other, label: r.label ?? "" }] : [];
+    });
+
+    return { ...hood, detail: { node, links, relations } as GraphDetail | null };
   }, [viewModel, graph, selectedId]);
 
   const visibleSelectedId = selection.detail ? selectedId : null;

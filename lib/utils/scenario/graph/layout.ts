@@ -9,6 +9,7 @@ export interface PositionedGraph {
   nodes: PositionedNode[];
   edges: GraphEdge[];
   sequence: GraphEdge[];
+  relations: GraphEdge[];
   bounds: { minX: number; minY: number; w: number; h: number };
 }
 
@@ -101,7 +102,7 @@ function finish(model: GraphModel, sim: SimNode[]): PositionedGraph {
 
   const minY = Math.min(...ys);
 
-  return { nodes, edges: model.edges, sequence: model.sequence, bounds: { minX, minY, w: Math.max(...xs) - minX, h: Math.max(...ys) - minY } };
+  return { nodes, edges: model.edges, sequence: model.sequence, relations: model.relations, bounds: { minX, minY, w: Math.max(...xs) - minX, h: Math.max(...ys) - minY } };
 }
 
 type SimLink = SimulationLinkDatum<SimNode> & { weak: boolean };
@@ -166,7 +167,7 @@ function layoutFree(model: GraphModel, seed: number): PositionedGraph {
 }
 
 export function layoutGraph(model: GraphModel, seed = 1, mode: GraphLayoutMode = "free"): PositionedGraph {
-  if (model.nodes.length === 0) return { nodes: [], edges: model.edges, sequence: model.sequence, bounds: { minX: 0, minY: 0, w: 0, h: 0 } };
+  if (model.nodes.length === 0) return { nodes: [], edges: model.edges, sequence: model.sequence, relations: model.relations, bounds: { minX: 0, minY: 0, w: 0, h: 0 } };
 
   return mode === "timeline" ? layoutTimeline(model, seed) : layoutFree(model, seed);
 }

@@ -32,6 +32,7 @@ const FULL: ScenarioIndex = {
     { sceneId: "a", entityType: "artifact", entityId: "o", count: 1, sectionIds: [], secret: false },
     { sceneId: "a", entityType: "spell", entityId: "s", count: 1, sectionIds: [], secret: false },
   ],
+  relations: [],
   counts: { scenes: 2, entities: 3, edges: 4, byType: { unit: 1, artifact: 1, spell: 1 }, missing: 1 },
 };
 
@@ -85,6 +86,21 @@ describe("ScenarioGraph", () => {
     expect(node("unit:g")).not.toHaveClass("graph-node-selected");
   });
 
+  it("draws a relation with its label and lists it in the inspector", () => {
+    index = { ...FULL, relations: [{ sceneId: "a", a: "unit:g", b: "artifact:o", label: "guards" }] };
+
+    render(<ScenarioGraph campaignId="c" />);
+
+    expect(document.querySelector('[data-edge-id="rel:artifact:o~unit:g"] title')).toHaveTextContent("guards");
+
+    fireEvent.click(node("unit:g"));
+
+    expect(screen.getByText("scenarioGraph.inspector.relations")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Orb\s*guards/ }));
+
+    expect(node("artifact:o")).toHaveClass("graph-node-selected");
+  });
+
   it("opens a page from the inspector", () => {
     render(<ScenarioGraph campaignId="c" />);
 
@@ -115,7 +131,7 @@ describe("ScenarioGraph", () => {
   });
 
   it("shows the empty state with a link when there are no pages", () => {
-    index = { scenes: [], entities: [], edges: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
+    index = { scenes: [], entities: [], edges: [], relations: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
     render(<ScenarioGraph campaignId="c" />);
 
     expect(screen.getByText("scenarioGraph.empty.noPages")).toBeInTheDocument();
@@ -123,7 +139,7 @@ describe("ScenarioGraph", () => {
   });
 
   it("hints to insert mentions when pages have none", () => {
-    index = { scenes: [scene("a", 0)], entities: [], edges: [], counts: { scenes: 1, entities: 0, edges: 0, byType: {}, missing: 0 } };
+    index = { scenes: [scene("a", 0)], entities: [], edges: [], relations: [], counts: { scenes: 1, entities: 0, edges: 0, byType: {}, missing: 0 } };
     render(<ScenarioGraph campaignId="c" />);
 
     expect(screen.getByText("scenarioGraph.empty.noMentions")).toBeInTheDocument();
@@ -301,6 +317,7 @@ describe("ScenarioGraph", () => {
         scenes: [scene("a", 0), scene("b", 1)],
         entities,
         edges: entities.flatMap((e) => ["a", "b"].map((sceneId) => ({ sceneId, entityType: "unit" as const, entityId: e.id, count: 1, sectionIds: [], secret: false }))),
+        relations: [],
         counts: { scenes: 2, entities: n, edges: n * 2, byType: { unit: n }, missing: 0 },
       };
     };

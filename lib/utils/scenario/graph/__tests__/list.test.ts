@@ -18,6 +18,7 @@ const index: ScenarioIndex = {
     { sceneId: "b", entityType: "unit", entityId: "u2", count: 3, sectionIds: [], secret: false },
     { sceneId: "b", entityType: "spell", entityId: "s1", count: 1, sectionIds: [], secret: false },
   ],
+  relations: [],
   counts: { scenes: 2, entities: 3, edges: 4, byType: {}, missing: 1 },
 };
 
