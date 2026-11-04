@@ -8,7 +8,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { listTracks } from "@/lib/server/audio/track-store";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
-import { readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
+import { loadRules, readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
 import { assertCan } from "@/lib/server/content/access";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -188,7 +188,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
 
         await assertCampaignRefs(actor.campaignId, { spell: units.flatMap((unit) => unit.knownSpells) });
 
-        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, units);
+        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, units, await loadRules(actor.campaignId));
 
         invalidate(actor, ReferenceKind.UNITS);
 

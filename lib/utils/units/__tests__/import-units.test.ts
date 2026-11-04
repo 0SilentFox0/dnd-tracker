@@ -58,4 +58,11 @@ describe("unit import mapping", () => {
     ]);
     expect(report).toEqual({ imported: 2, total: 3, skipped: 1, unknownRaces: ["Нежить"] });
   });
+
+  it("characteristics are written only for a wfrp campaign", () => {
+    const wfrpRow = { ...row, characteristics: { base: { s: 40 } } } as never;
+
+    expect(toUnitCreateData("c1", wfrpRow, null)).not.toHaveProperty("characteristics");
+    expect(toUnitCreateData("c1", wfrpRow, null, true)).toHaveProperty("characteristics");
+  });
 });

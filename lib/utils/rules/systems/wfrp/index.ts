@@ -1,6 +1,7 @@
 import type { RuleSystemDefinition } from "../types";
 import { woundsBreakdown, woundsMax } from "./characteristics/derive";
 import { wfrpSheetBlock } from "./characteristics/sheet-block";
+import { wfrpParticipantFields } from "./combat/participant";
 import { onSession } from "./session";
 import { rollWfrpSheetTest } from "./sheet-test";
 
@@ -16,7 +17,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   },
   rest: { kinds: false, onSession },
   battle: { supported: false },
-  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false } },
+  combat: { dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields },
   lineage: false,
   attacks: false,
   spells: false,

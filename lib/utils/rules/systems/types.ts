@@ -1,4 +1,5 @@
 import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
+import type { WfrpParticipantStats } from "./wfrp/combat/participant";
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
@@ -79,6 +80,7 @@ export interface ZeroHpCtx {
 
 export interface RuleSystemCombat {
   dice: 20 | 100;
+  participantFields?(row: { characteristics?: unknown }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
   mitigateDamage?(ctx: MitigateCtx): { amount: number; steps: DamageStep[] };

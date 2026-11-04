@@ -17,6 +17,7 @@ import { logger } from "@/lib/utils/common/logger";
 import { spellGrantFields, spellPoolKey } from "@/lib/utils/items/pools";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { bestMentalAbility, isMonster5e, monsterSaveDc, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
 import type { AbilityPool, BattleAttack, BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
 import type { Unit } from "@/types/units";
@@ -168,6 +169,7 @@ function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, mon
     raceId: race?.id,
     moraleCap: moraleCapFromRules(rules),
     ...(monster && { damageModel: "5e" as const }),
+    ...ruleSystemOf(rules).combat.participantFields?.(unit),
     ...(statblock.creatureType && { creatureType: statblock.creatureType }),
     ...(monster && unit.cr != null && { cr: unit.cr }),
     ...(saveProficiencies.length > 0 && { saveProficiencies }),

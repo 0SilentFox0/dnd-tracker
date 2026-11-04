@@ -3,6 +3,8 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import type { ImportUnitRow } from "@/lib/schemas/units";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { nameKey } from "@/lib/utils/content/import/mapping";
+import type { Ruleset } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { resolveUnitProficiency } from "@/lib/utils/units/monster";
 import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
 import type { UnitImportResult } from "@/types/import";
@@ -31,7 +33,7 @@ export function resolveImportRaces(names: Array<string | undefined>, races: Arra
   };
 }
 
-export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId: string | null): Prisma.UnitCreateManyInput {
+export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId: string | null, keepCharacteristics = false): Prisma.UnitCreateManyInput {
   return {
     campaignId,
     name: unit.name,
@@ -59,11 +61,11 @@ export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId
     legendaryActions: unit.legendaryActions,
     legendaryResistances: unit.legendaryResistances,
     saveProficiencies: unit.saveProficiencies as Prisma.InputJsonValue,
-    ...(unit.characteristics && { characteristics: unit.characteristics as Prisma.InputJsonObject }),
+    ...(keepCharacteristics && unit.characteristics && { characteristics: unit.characteristics as Prisma.InputJsonObject }),
   };
 }
 
-export async function importUnitsIntoCampaign(db: ImportDb, campaignId: string, rows: ImportUnitRow[]): Promise<UnitImportResult> {
+export async function importUnitsIntoCampaign(db: ImportDb, campaignId: string, rows: ImportUnitRow[], rules?: Pick<Ruleset, "system">): Promise<UnitImportResult> {
   const races = await db.race.findMany({ where: { campaignId }, select: { id: true, name: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
 
   const { raceIdOf, unknownRaces } = resolveImportRaces(rows.map((r) => r.raceName), races);
@@ -72,7 +74,7 @@ export async function importUnitsIntoCampaign(db: ImportDb, campaignId: string, 
 
   const taken = new Set(existing.map((u) => u.name));
 
-  const data = rows.filter((r) => !taken.has(r.name)).map((r) => toUnitCreateData(campaignId, r, raceIdOf(r.raceName)));
+  const data = rows.filter((r) => !taken.has(r.name)).map((r) => toUnitCreateData(campaignId, r, raceIdOf(r.raceName), !!rules && ruleSystemOf(rules).characteristics.kind === "wfrp"));
 
   const { count } = data.length > 0 ? await db.unit.createMany({ data }) : { count: 0 };
 

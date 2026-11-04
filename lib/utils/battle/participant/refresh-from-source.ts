@@ -40,7 +40,7 @@ export function refreshFromSource(live: BattleParticipant, fresh: BattleParticip
 
   return {
     ...live,
-    abilities: { ...live.abilities, creatureType: fresh.abilities.creatureType, cr: fresh.abilities.cr },
+    abilities: { ...live.abilities, creatureType: fresh.abilities.creatureType, cr: fresh.abilities.cr, ...(fresh.abilities.wfrp && { characteristics: fresh.abilities.characteristics, wfrp: fresh.abilities.wfrp }) },
     combatStats: { ...live.combatStats, gridSize: fresh.combatStats.gridSize, speed: fresh.combatStats.speed },
     battleData: {
       ...live.battleData,

@@ -10,6 +10,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
+import type { Characteristics, WfrpParticipantStats } from "@/lib/utils/rules/systems";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
@@ -176,6 +177,8 @@ export interface BattleParticipantBasicInfo {
  * Характеристики учасника бою
  */
 export interface BattleParticipantAbilities {
+  characteristics?: Characteristics;
+  wfrp?: WfrpParticipantStats;
   creatureType?: string;
   cr?: number;
   damageModel?: "5e";

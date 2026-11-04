@@ -35,6 +35,7 @@ import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calc
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 import type { BattleParticipant } from "@/types/battle";
@@ -258,6 +259,7 @@ export async function createBattleParticipantFromCharacter(
       raceId: (race as { id?: string } | null)?.id,
       moraleCap: moraleCapFromRules(rules),
       ...(resolvedClasses && { damageModel: "5e" as const }),
+      ...ruleSystemOf(rules).combat.participantFields?.(character),
       heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,

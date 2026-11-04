@@ -5,6 +5,7 @@ import { getResponseJson } from "./helpers";
 
 const db = vi.hoisted(() => ({
   $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
+  campaign: { findUnique: vi.fn(async () => ({ rules: {} })) },
   race: { findMany: vi.fn() },
   spell: { count: vi.fn() },
   unit: { findMany: vi.fn(), createMany: vi.fn() },
