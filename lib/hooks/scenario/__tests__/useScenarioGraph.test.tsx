@@ -36,10 +36,11 @@ const index: ScenarioIndex = {
   scenes: [scene("s1", "Таверна", 0), scene("s2", "Ліс", 1)],
   entities: [entity("unit", "u1", "Вовк", ["s1", "s2"]), entity("character", "c1", "Вовкулака", ["s1", "s2"])],
   edges: [edge("s1", "unit", "u1"), edge("s2", "unit", "u1", true), edge("s1", "character", "c1"), edge("s2", "character", "c1")],
+  relations: [],
   counts: { scenes: 2, entities: 2, edges: 4, byType: { unit: 1, character: 1 }, missing: 0 },
 };
 
-const empty: ScenarioIndex = { scenes: [], entities: [], edges: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
+const empty: ScenarioIndex = { scenes: [], entities: [], edges: [], relations: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
 
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -94,6 +95,17 @@ describe("useScenarioGraph", () => {
     act(() => result.current.set.filters({ types: new Set(["unit"]) }));
     expect(result.current.state.graph?.nodes.map((n) => n.id).sort()).toEqual(["scene:s1", "scene:s2", "unit:u1"]);
     expect(result.current.state.filters.showAll).toBe(false);
+  });
+
+  it("selection highlights relation partners", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue({ ...index, relations: [{ a: "unit:u1", b: "character:c1", label: "hunts" }] });
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+    act(() => result.current.set.selected("unit:u1"));
+    expect(result.current.selection.nodes.has("character:c1")).toBe(true);
+    expect(result.current.selection.edges.size).toBe(3);
   });
 
   it("selection exposes neighbors and detail links without relayout", async () => {

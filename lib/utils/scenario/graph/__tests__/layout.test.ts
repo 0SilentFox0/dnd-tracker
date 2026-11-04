@@ -17,6 +17,7 @@ const model: GraphModel = {
   nodes: [sceneNode(1), sceneNode(2), sceneNode(3), sceneNode(4), entityNode(1), entityNode(2), entityNode(3)],
   edges: [link(1, 1), link(2, 1), link(2, 2), link(3, 2), link(3, 3), link(4, 3)],
   sequence: [],
+  relations: [],
   truncated: 0,
   entityTotal: 0,
 };
@@ -35,7 +36,7 @@ describe("layoutGraph", () => {
   });
 
   it("handles an empty model", () => {
-    expect(layoutGraph({ nodes: [], edges: [], sequence: [], truncated: 0, entityTotal: 0 })).toEqual({ nodes: [], edges: [], sequence: [], bounds: { minX: 0, minY: 0, w: 0, h: 0 } });
+    expect(layoutGraph({ nodes: [], edges: [], sequence: [], relations: [], truncated: 0, entityTotal: 0 })).toEqual({ nodes: [], edges: [], sequence: [], relations: [], bounds: { minX: 0, minY: 0, w: 0, h: 0 } });
   });
 
   it("orders scenes along x by order", () => {

@@ -25,7 +25,7 @@ export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose, foc
 
   const tType = useTranslations("scenario.mentionTypes");
 
-  const { node, links } = detail;
+  const { node, links, relations } = detail;
 
   const kind = node.kind === "scene" ? tPage(node.pageKind ?? "scene") : node.type ? tType(node.type) : "";
 
@@ -56,6 +56,21 @@ export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose, foc
           ))}
         </ul>
       </div>
+      {relations.length > 0 ? (
+        <div>
+          <p className="mb-1 text-sm font-medium">{t("relations")}</p>
+          <ul className="flex flex-col gap-1">
+            {relations.map((r) => (
+              <li key={`${r.node.id}|${r.label}`}>
+                <button type="button" className="flex w-full flex-col rounded px-1 py-0.5 text-left text-sm hover:bg-accent" onClick={() => onSelect(r.node.id)}>
+                  <span className="truncate">{r.node.label}</span>
+                  <span className="text-xs text-muted-foreground">{r.label}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       {children}
     </div>
   );

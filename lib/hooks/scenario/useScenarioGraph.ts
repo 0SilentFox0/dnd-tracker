@@ -9,7 +9,7 @@ import { matchesQuery } from "@/lib/utils/common/text-search";
 import { type GraphLayoutMode, layoutGraph } from "@/lib/utils/scenario/graph/layout";
 import { buildGraphList } from "@/lib/utils/scenario/graph/list";
 import { buildGraphModel, defaultFilters, egoModel, entityNodeId, neighbors, searchMatches } from "@/lib/utils/scenario/graph/model";
-import type { GraphDetail, GraphFilters } from "@/lib/utils/scenario/graph/types";
+import type { GraphDetail, GraphEdge, GraphFilters, GraphNode } from "@/lib/utils/scenario/graph/types";
 
 const NO_SELECTION = { nodes: new Set<string>(), edges: new Set<string>() };
 
@@ -68,13 +68,18 @@ export function useScenarioGraph(campaignId: string) {
 
     const byId = new Map(graph.nodes.map((n) => [n.id, n]));
 
-    const links = viewModel.edges.flatMap((e) => {
-      const other = byId.get(e.source === node.id ? e.target : e.source);
+    const incident = <T,>(edges: GraphEdge[], pick: (e: GraphEdge, other: GraphNode) => T) =>
+      edges.flatMap((e) => {
+        const other = byId.get(e.source === node.id ? e.target : e.source);
 
-      return (e.source === node.id || e.target === node.id) && other ? [{ node: other, count: e.count, secret: e.secret }] : [];
-    });
+        return (e.source === node.id || e.target === node.id) && other ? [pick(e, other)] : [];
+      });
 
-    return { ...hood, detail: { node, links } as GraphDetail | null };
+    const links = incident(viewModel.edges, (e, other) => ({ node: other, count: e.count, secret: e.secret }));
+
+    const relations = incident(viewModel.relations, (r, other) => ({ node: other, label: r.label ?? "" }));
+
+    return { ...hood, detail: { node, links, relations } as GraphDetail | null };
   }, [viewModel, graph, selectedId]);
 
   const visibleSelectedId = selection.detail ? selectedId : null;

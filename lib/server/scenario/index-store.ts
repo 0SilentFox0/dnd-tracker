@@ -2,10 +2,11 @@ import "server-only";
 import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { pageFactsSchema } from "@/lib/schemas/scenario-index";
+import { relationsSchema } from "@/lib/schemas/scenario-summary";
 import { listPages, readContent } from "@/lib/server/scenario/page-store";
 import { buildScenarioIndex, entityKey } from "@/lib/utils/scenario/index/build";
 import { extractPageFacts } from "@/lib/utils/scenario/index/extract";
-import type { MentionType, PageFacts, ScenarioIndex } from "@/types/scenario";
+import type { IndexRelation, MentionType, PageFacts, ScenarioIndex } from "@/types/scenario";
 
 const BATCH = 20;
 
@@ -96,6 +97,16 @@ async function resolveEntities(campaignId: string, facts: Map<string, PageFacts>
   return resolved;
 }
 
+export async function loadSummaryRelations(campaignId: string, pageIds: ReadonlySet<string>): Promise<IndexRelation[]> {
+  const rows = await prisma.$queryRaw<{ pageId: string; relations: unknown }[]>`SELECT "pageId", summary->'relations' AS relations FROM scenario_page_summaries WHERE "campaignId" = ${campaignId}`;
+
+  return rows.flatMap((row) => {
+    const parsed = pageIds.has(row.pageId) ? relationsSchema.safeParse(row.relations) : null;
+
+    return parsed?.success ? parsed.data : [];
+  });
+}
+
 export async function loadScenarioIndex(campaignId: string): Promise<ScenarioIndex> {
   const pages = await listPages(campaignId);
 
@@ -103,7 +114,7 @@ export async function loadScenarioIndex(campaignId: string): Promise<ScenarioInd
 
   const present = pages.filter((page) => facts.has(page.id));
 
-  const resolved = await resolveEntities(campaignId, facts);
+  const [resolved, relations] = await Promise.all([resolveEntities(campaignId, facts), loadSummaryRelations(campaignId, new Set(present.map((p) => p.id)))]);
 
-  return buildScenarioIndex({ pages: present, facts, resolved });
+  return buildScenarioIndex({ pages: present, facts, resolved, relations });
 }

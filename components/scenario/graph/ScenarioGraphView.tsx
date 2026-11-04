@@ -280,6 +280,17 @@ export function ScenarioGraphView({ graph, selection, selectedId, focus, showSeq
                 return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} color="var(--color-hud-gold-bright)" sequence dimmed={!!selectedId && !selection.nodes.has(edge.source) && !selection.nodes.has(edge.target)} highlighted={false} secretLabel="" />;
               })
             : null}
+          {graph.relations.map((edge) => {
+            const from = byId.get(edge.source);
+
+            const to = byId.get(edge.target);
+
+            if (!from || !to) return null;
+
+            const touched = selection.edges.has(edge.id);
+
+            return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} color="var(--color-hud-gold-bright)" relation dimmed={!!selectedId && !touched} highlighted={touched} secretLabel="" />;
+          })}
           {graph.edges.map((edge) => {
             const from = byId.get(edge.source);
 

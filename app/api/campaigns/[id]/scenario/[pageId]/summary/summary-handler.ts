@@ -28,6 +28,7 @@ const instruction = (language: string) =>
     "secrets are the hidden layer: facts that players must not learn (the ||double bars|| text and DM notes); overview, events and digest must not reveal them.",
     `Limits: overview at most ${SUMMARY_LIMITS.overview} characters; at most ${SUMMARY_LIMITS.events} events of at most ${SUMMARY_LIMITS.event} characters each; at most ${SUMMARY_LIMITS.secrets} secrets of at most ${SUMMARY_LIMITS.secret} characters each; digest at most ${SUMMARY_LIMITS.digest} characters.`,
     "entities may only contain keys from the allowed entities list; never invent keys.",
+    `relations link two entities from the allowed list (keys a and b only, never invent keys) with a short label of at most ${SUMMARY_LIMITS.relation} characters; at most ${SUMMARY_LIMITS.relations}; no secrets.`,
     "digest is one line usable as context for an assistant that knows the whole scenario.",
   ].join("\n");
 

@@ -22,6 +22,7 @@
     "missingHint": "This entity was deleted",
     "noConnections": "No visible connections",
     "open": "Open",
+    "relations": "Relations",
     "title": "Node details"
   },
   "legend": {

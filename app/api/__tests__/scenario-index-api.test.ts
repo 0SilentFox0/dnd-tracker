@@ -31,7 +31,7 @@ describe("GET scenario index", () => {
   });
 
   it("returns the index for the DM", async () => {
-    const index = { scenes: [], entities: [], edges: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
+    const index = { scenes: [], entities: [], edges: [], relations: [], counts: { scenes: 0, entities: 0, edges: 0, byType: {}, missing: 0 } };
 
     vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "u", isDM: true } as never);
     vi.mocked(loadScenarioIndex).mockResolvedValue(index);

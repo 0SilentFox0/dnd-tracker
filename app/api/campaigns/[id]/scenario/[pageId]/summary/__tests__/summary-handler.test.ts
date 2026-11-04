@@ -44,7 +44,7 @@ const content = (text: string) => ({ legend: [], sections: [{ id: "s1", title: "
 
 const page = (over: Record<string, unknown> = {}) => ({ id: "p1", campaignId: "c1", version: 3, title: "Cave", kind: "scene", arc: null, content: content("The party enters the cave."), ...over });
 
-const generated = { overview: "o", events: ["e"], secrets: [], entities: ["unit:u9", "npc:unknown"], digest: "d" };
+const generated = { overview: "o", events: ["e"], secrets: [], entities: ["unit:u9", "npc:unknown"], digest: "d", relations: [] };
 
 const post = (body?: unknown) => generateSummaryHandler(new Request("http://x", { method: "POST", body: body === undefined ? undefined : JSON.stringify(body) }), "c1", "p1");
 
@@ -132,7 +132,7 @@ describe("generateSummaryHandler", () => {
 
   it("trims an overrun to the limits and saves it instead of failing", async () => {
     h.generate.mockResolvedValue({
-      object: { overview: "o".repeat(900), events: Array.from({ length: 10 }, () => "e".repeat(300)), secrets: Array.from({ length: 7 }, () => "s".repeat(300)), entities: [], digest: "d".repeat(500) },
+      object: { overview: "o".repeat(900), events: Array.from({ length: 10 }, () => "e".repeat(300)), secrets: Array.from({ length: 7 }, () => "s".repeat(300)), entities: [], digest: "d".repeat(500), relations: [] },
       usage: {},
     });
 

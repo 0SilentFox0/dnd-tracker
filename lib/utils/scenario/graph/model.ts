@@ -2,6 +2,7 @@ import { MENTION_TYPES } from "@/lib/constants/scenario";
 import { GRAPH_ENTITY_CAP } from "@/lib/constants/scenario-graph";
 import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { GraphEdge, GraphFilters, GraphModel, GraphNode } from "@/lib/utils/scenario/graph/types";
+import { relationPairKey } from "@/lib/utils/scenario/index/build";
 import type { MentionType, ScenarioIndex } from "@/types/scenario";
 
 export const sceneNodeId = (id: string) => `scene:${id}`;
@@ -17,7 +18,13 @@ export const defaultFilters = (): GraphFilters => ({
 export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap = GRAPH_ENTITY_CAP, forceInclude: ReadonlySet<string> = new Set()): GraphModel {
   const candidates = index.entities.filter((e) => filters.types.has(e.type) && (!filters.onlyMissing || e.missing));
 
-  const forced = (e: (typeof candidates)[number]) => forceInclude.has(entityNodeId(e.type, e.id));
+  const related = new Set(index.relations.flatMap((r) => [r.a, r.b]));
+
+  const forced = (e: (typeof candidates)[number]) => {
+    const id = entityNodeId(e.type, e.id);
+
+    return forceInclude.has(id) || related.has(id);
+  };
 
   const isLeaf = (e: (typeof candidates)[number]) => e.degree === 1 && !e.missing && !filters.showLeaves && !forced(e);
 
@@ -105,7 +112,23 @@ export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap
     if (prev) sequence.push({ id: `seq:${prev.refId}>${n.refId}`, source: prev.id, target: n.id, count: 1, secret: false });
   });
 
-  return { nodes: [...sceneNodes, ...entityNodes], edges, sequence, truncated, entityTotal: candidates.length };
+  const merged = new Map<string, { a: string; b: string; labels: string[] }>();
+
+  for (const r of index.relations) {
+    if (!keptIds.has(r.a) || !keptIds.has(r.b)) continue;
+
+    const key = relationPairKey(r.a, r.b);
+
+    const entry = merged.get(key) ?? { a: r.a < r.b ? r.a : r.b, b: r.a < r.b ? r.b : r.a, labels: [] };
+
+    if (r.label && !entry.labels.includes(r.label)) entry.labels.push(r.label);
+
+    merged.set(key, entry);
+  }
+
+  const relations: GraphEdge[] = [...merged.entries()].map(([key, r]) => ({ id: `rel:${key}`, source: r.a, target: r.b, count: 1, secret: false, label: r.labels.join("; ") }));
+
+  return { nodes: [...sceneNodes, ...entityNodes], edges, sequence, relations, truncated, entityTotal: candidates.length };
 }
 
 export function neighbors(model: GraphModel, nodeId: string): { nodes: Set<string>; edges: Set<string> } {
@@ -119,6 +142,14 @@ export function neighbors(model: GraphModel, nodeId: string): { nodes: Set<strin
     edges.add(e.id);
     nodes.add(e.source);
     nodes.add(e.target);
+  }
+
+  for (const r of model.relations) {
+    if (r.source !== nodeId && r.target !== nodeId) continue;
+
+    edges.add(r.id);
+    nodes.add(r.source);
+    nodes.add(r.target);
   }
 
   return { nodes, edges };
@@ -145,5 +176,6 @@ export function egoModel(model: GraphModel, nodeId: string): GraphModel {
     nodes: model.nodes.filter((n) => keep.has(n.id)),
     edges: model.edges.filter((e) => keep.has(e.source) && keep.has(e.target)),
     sequence: model.sequence.filter((e) => keep.has(e.source) && keep.has(e.target)),
+    relations: model.relations.filter((e) => keep.has(e.source) && keep.has(e.target)),
   };
 }
