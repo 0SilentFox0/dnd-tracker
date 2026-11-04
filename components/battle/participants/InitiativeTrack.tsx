@@ -4,15 +4,15 @@ import { memo, useRef } from "react";
 
 import { Portrait } from "@/components/battle/hud";
 import { ROMAN_NUMERALS } from "@/lib/constants/spells";
-import { useBattleSceneData } from "@/lib/hooks/battle";
+import { useBattleSceneData, useInitiativeDrag } from "@/lib/hooks/battle";
 import { useFlip } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import { queueKeys } from "@/lib/utils/battle/view";
 
 const roman = (n: number) => ROMAN_NUMERALS[n] ?? String(n);
 
-export const InitiativeTrack = memo(function InitiativeTrack() {
-  const { turn: { queue }, roster: { myParticipants }, select } = useBattleSceneData();
+export const InitiativeTrack = memo(function InitiativeTrack({ onReorder }: { onReorder?: (order: string[]) => void }) {
+  const { battle, turn: { queue }, roster: { myParticipants }, select } = useBattleSceneData();
 
   const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 
@@ -22,6 +22,8 @@ export const InitiativeTrack = memo(function InitiativeTrack() {
 
   useFlip(track, queue);
 
+  const dragProps = useInitiativeDrag((battle.initiativeOrder ?? []).map((p) => p.basicInfo.id), onReorder);
+
   return (
     <div ref={track} data-tour="battle.initiative" className="relative flex h-[72px] items-center gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
       {queue.map((e, i) =>
@@ -30,7 +32,7 @@ export const InitiativeTrack = memo(function InitiativeTrack() {
             <span className="hud-sc absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full text-[11px] text-[var(--hud-muted)]">{roman(e.round)}</span>
           </span>
         ) : (
-          <button key={keys[i]} data-flip={keys[i]} type="button" onClick={() => select(e.participant.basicInfo.id)} className="shrink-0">
+          <button key={keys[i]} data-flip={keys[i]} type="button" onClick={() => select(e.participant.basicInfo.id)} className={cn("shrink-0", dragProps && "cursor-grab touch-none")} {...dragProps?.(e.participant.basicInfo.id)}>
             <Portrait fx="track" key={e.current ? "current" : "queued"} className={cn(e.current && "animate-[hud-turn_.6s_ease-out]")} participant={e.participant} size={e.current ? 52 : 36} current={e.current} me={!e.current && mine.has(e.participant.basicInfo.id)} extra={e.kind === "extra"} />
           </button>
         ),

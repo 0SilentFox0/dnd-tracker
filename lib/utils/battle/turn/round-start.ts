@@ -1,5 +1,5 @@
 import { countDownRoundEffects } from "./effects";
-import { calculateInitiative, sortByInitiative } from "./initiative";
+import { initiativeSlot } from "./initiative";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -36,7 +36,11 @@ export function processStartOfRound(
 
   const summons = summonsOf(pendingSummons);
 
-  const updatedOrder = [...baseOrder, ...summons];
+  const updatedOrder = summons.reduce((order, s) => {
+    const at = initiativeSlot(order, s);
+
+    return [...order.slice(0, at), s, ...order.slice(at)];
+  }, baseOrder);
 
   const newSummonIds = new Set(summons.map((p) => p.basicInfo.id));
 
@@ -59,9 +63,7 @@ export function processStartOfRound(
 
   messages.push(...round.messages);
 
-  const sortedOrder = sortByInitiative(
-    round.participants.map((p) => ({ ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, round.participants) } })),
-  );
+  const sortedOrder = round.participants;
 
   return {
     updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),

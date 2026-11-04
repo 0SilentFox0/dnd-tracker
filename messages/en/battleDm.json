@@ -17,7 +17,9 @@
     "debuff": "Weaken",
     "debuffHint": "HP and damage ÷1.1, stacks",
     "participants": "Participants",
-    "nobody": "Nobody on the field"
+    "nobody": "Nobody on the field",
+    "rollInitiative": "Roll initiative",
+    "reorderInitiative": "Initiative order"
   },
   "refresh": {
     "title": "Refresh from the library?",
@@ -198,5 +200,15 @@
       "teleportPairs": "Teleport pairs",
       "fogPatches": "Fog patches"
     }
+  },
+  "initiative": {
+    "confirmTitle": "Re-roll initiative?",
+    "confirmDescription": "The turn order is recalculated from new d20 + modifier rolls. The first in the new order takes the turn; the round stays the same.",
+    "confirm": "Roll",
+    "title": "Initiative order",
+    "up": "Move up: {name}",
+    "down": "Move down: {name}",
+    "apply": "Apply",
+    "close": "Close"
   }
 }

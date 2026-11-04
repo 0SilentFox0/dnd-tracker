@@ -29,6 +29,10 @@ export type BattleConditionsBody =
   | { action: "apply"; participantId: string; condition: Condition5eKey | CustomConditionKey; rounds?: number; levels?: number; saveEnds?: { ability: AbilityKey; dc: number } }
   | { action: "remove"; participantId: string; condition: Condition5eKey | CustomConditionKey };
 
+export type InitiativeRollBody = Record<string, never>;
+
+export type InitiativeReorderBody = { order: string[] };
+
 export type CoreActionBody =
   | { action: "dash" | "disengage" | "dodge" | "hide" | "ready" | "standUp" | "escape"; participantId: string }
   | { action: "help" | "grapple" | "readiedAttack"; participantId: string; targetId: string }
@@ -90,6 +94,8 @@ export const battleOps = {
   addParticipant: op<AddParticipantData>({ path: "/add-participant" }),
   reveal: op<{ participantIds: string[] }>({ path: "/reveal-participant" }),
   conditions: op<BattleConditionsBody>({ path: "/conditions" }),
+  initiativeReorder: op<InitiativeReorderBody>({ path: "/initiative-reorder" }),
+  initiativeRoll: op<InitiativeRollBody>({ path: "/initiative-roll" }),
   coreAction: op<CoreActionBody>({ path: "/core-action" }),
   scaleUnits: op<{ direction: "buff" | "debuff" }>({ path: "/scale-units" }),
   unitControl: op<UnitControlData>({ path: "/unit-control" }),

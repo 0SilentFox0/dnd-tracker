@@ -99,15 +99,26 @@ describe("critical effects at the start of turn", () => {
 });
 
 describe("processStartOfRound", () => {
-  it("сортує за ініціативою, далі базовою ініціативою, далі спритністю", () => {
+  it("keeps the existing order and initiative values", () => {
     const base = createMockParticipant();
 
     const make = (id: string, baseInitiative: number, dexterity: number) =>
-      createMockParticipant({ basicInfo: { ...base.basicInfo, id }, abilities: { ...base.abilities, initiative: baseInitiative, baseInitiative, dexterity } });
+      createMockParticipant({ basicInfo: { ...base.basicInfo, id }, abilities: { ...base.abilities, initiative: baseInitiative + 3, baseInitiative, dexterity } });
 
     const out = processStartOfRound([make("a", 10, 12), make("b", 15, 10), make("c", 10, 16)], 2);
 
-    expect(out.updatedInitiativeOrder.map((p) => p.basicInfo.id)).toEqual(["b", "c", "a"]);
+    expect(out.updatedInitiativeOrder.map((p) => p.basicInfo.id)).toEqual(["a", "b", "c"]);
+    expect(out.updatedInitiativeOrder.map((p) => p.abilities.initiative)).toEqual([13, 18, 13]);
+  });
+
+  it("removes extra-turn slots and appends summons at the end", () => {
+    const base = createMockParticipant();
+
+    const make = (id: string, slot = false) => createMockParticipant({ basicInfo: { ...base.basicInfo, id, isExtraTurnSlot: slot } });
+
+    const ids = processStartOfRound([make("a"), make("x", true), make("b")], 2, [make("s")]).updatedInitiativeOrder.map((p) => p.basicInfo.id);
+
+    expect(ids).toEqual(["a", "b", "s"]);
   });
 });
 

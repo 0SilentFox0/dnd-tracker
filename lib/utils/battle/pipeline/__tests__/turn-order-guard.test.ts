@@ -34,4 +34,10 @@ describe("guardTurnOrder", () => {
     expect(order(guardTurnOrder(scene, [p("a"), p("b")], { ...swapped, scene: { round: 3 } }))).toEqual(["b", "a"]);
     expect(order(guardTurnOrder(scene, [p("a"), p("b")], { ...swapped, history: { clear: true } }))).toEqual(["b", "a"]);
   });
+
+  it("lets a deliberately reordered result through", () => {
+    const r = guardTurnOrder(scene, [p("a"), p("b")], { participants: [p("b"), p("a")], pending: [], events: [], reordered: true });
+
+    expect(order(r)).toEqual(["b", "a"]);
+  });
 });

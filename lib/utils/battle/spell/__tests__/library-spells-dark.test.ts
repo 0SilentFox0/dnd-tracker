@@ -142,7 +142,7 @@ describe("Темрява — бібліотечні заклинання", () =>
     expect(active).toBe(3);
   });
 
-  it("Сповільнення: −3 ініціативи змінює чергу на наступному раунді", () => {
+  it("Сповільнення: −3 ініціативи не змінює чергу на наступному раунді", () => {
     const fast = unit("orc", ParticipantSide.ENEMY, { init: 12 });
 
     const slowGob = unit("gob", ParticipantSide.ENEMY, { init: 11 });
@@ -156,7 +156,7 @@ describe("Темрява — бібліотечні заклинання", () =>
 
     const ids = loop.updatedInitiativeOrder.map((p) => p.basicInfo.id);
 
-    expect(ids.indexOf("gob")).toBeLessThan(ids.indexOf("orc"));
+    expect(ids.indexOf("orc")).toBeLessThan(ids.indexOf("gob"));
   });
 
   it("Немічність: три накладання — −6 AC у кидку на влучання; четверте оновлює найстаріше", () => {

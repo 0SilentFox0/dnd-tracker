@@ -122,7 +122,7 @@ describe("Божественна сила (+25 % шкоди, 3 раунди)", (
 });
 
 describe("Поспіх (+3 ініціативи, +10 фт швидкості, 3 раунди)", () => {
-  it("змінює чергу з наступного раунду", () => {
+  it("не змінює чергу в наступному раунді", () => {
     const c = unit("c", ParticipantSide.ALLY, { init: 20 });
 
     const slow = unit("a", ParticipantSide.ALLY, { init: 8 });
@@ -134,8 +134,8 @@ describe("Поспіх (+3 ініціативи, +10 фт швидкості, 3 
     const out = advanceTurn({ participants: ps, pending: [], scene: scene(1, 2), rng: seq(0.99) });
 
     expect(out.scene.round).toBe(2);
-    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["c", "a", "e"]);
-    expect(get(out.participants, "a").abilities.initiative).toBe(11);
+    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["c", "e", "a"]);
+    expect(get(out.participants, "a").abilities.initiative).toBe(8);
   });
 
   it("додає 2 клітинки руху", () => {

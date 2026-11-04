@@ -1,4 +1,8 @@
 {
+  "2026-11-04-battle-initiative": {
+    "title": "Initiative in battle",
+    "body": "The DM can re-roll initiative at any moment: everyone sees the d20 rolls, and the new order stays for the rest of the battle without changing between rounds. The order can also be set by hand by dragging portraits on the track, or through a dialog with up/down arrows on a phone."
+  },
   "2026-10-31-user-palettes": {
     "title": "Color palettes",
     "body": "Choose your theme from the menu at the top of the page: Tavern, Midnight, Forest, Parchment, Amethyst, or Frost. Your selection is saved to your profile and themes your spellbook on character sheets and in battle."

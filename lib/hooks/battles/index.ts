@@ -21,6 +21,8 @@ export {
   useCompleteBattle,
   useCritChoice,
   useDeleteAllBattles,
+  useInitiativeReorder,
+  useInitiativeRoll,
   useMapTerrain,
   useMapWeather,
   useMazeAction,

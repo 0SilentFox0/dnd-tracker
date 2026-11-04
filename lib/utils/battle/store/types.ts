@@ -118,6 +118,8 @@ export interface BattleMutationOutcome {
   pending: BattleParticipant[];
   events: NewBattleEvent[];
   history?: HistoryChange;
+  /** the mutation deliberately changed the turn order (initiative roll / manual reorder) */
+  reordered?: boolean;
 }
 
 export interface BattleDelta {

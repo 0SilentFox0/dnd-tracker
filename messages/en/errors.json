@@ -84,6 +84,7 @@
   "battleReserveNotFound": "Reserve participant not found",
   "battleMoraleDisabled": "Morale is disabled in the campaign rules",
   "battleAwaitingDm": "The battle is waiting for the DM's reserve decision",
+  "battleInitiativeOrderInvalid": "The initiative order must list every battle participant exactly once",
   "invalidBody": "Invalid request data",
   "invalidQuery": "Invalid query parameters",
   "initiativeOutOfRange": "Hero initiative is outside the range allowed by the campaign rules",

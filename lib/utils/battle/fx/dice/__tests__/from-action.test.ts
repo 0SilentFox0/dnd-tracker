@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { diceThrowsOf } from "@/lib/utils/battle/fx/dice";
+import { diceThrowsOf, MAX_INITIATIVE_DICE } from "@/lib/utils/battle/fx/dice";
 import type { BattleAction } from "@/types/battle";
 
 const action = (over: Partial<BattleAction> & { actionDetails: BattleAction["actionDetails"] }): BattleAction =>
@@ -14,8 +14,8 @@ describe("diceThrowsOf", () => {
     ] } }));
 
     expect(specs).toEqual([
-      { seed: 35, groups: [[{ sides: 20, value: 4, dropped: true }, { sides: 20, value: 18, chosen: true }]] },
-      { seed: 37, groups: [[{ sides: 8, value: 5 }]] },
+      { seed: 42, groups: [[{ sides: 20, value: 4, dropped: true }, { sides: 20, value: 18, chosen: true }]] },
+      { seed: 44, groups: [[{ sides: 8, value: 5 }]] },
     ]);
   });
 
@@ -35,4 +35,16 @@ describe("diceThrowsOf", () => {
     expect(diceThrowsOf(action({ actionDetails: { diceRolls: [] } }))).toEqual([]);
   });
 
+  it("ініціатива: усі кидки в одній пачці d20", () => {
+    const rolls = (n: number) => Array.from({ length: n }, (_, i) => ({ kind: "initiative" as const, rollerId: `p${i}`, dice: [{ sides: 20 as const, value: i + 1 }] }));
+
+    const ev = (n: number) => action({ actionType: "ability", targets: [], actionDetails: { diceRolls: rolls(n) } });
+
+    const specs = diceThrowsOf(ev(3));
+
+    expect(specs).toHaveLength(1);
+    expect(specs[0].groups).toEqual([[{ sides: 20, value: 1 }, { sides: 20, value: 2 }, { sides: 20, value: 3 }]]);
+    expect(diceThrowsOf(ev(15))[0].groups[0]).toHaveLength(MAX_INITIATIVE_DICE);
+    expect(diceThrowsOf(ev(3))[0].seed).toBe(diceThrowsOf(ev(3))[0].seed);
+  });
 });

@@ -5,12 +5,12 @@ import type { BattleParticipant } from "@/types/battle";
 const ids = (ps: BattleParticipant[]) => ps.map((p) => p.basicInfo.id);
 
 /**
- * Порядок ініціативи змінюють лише старт/скидання/відкат (history) і новий раунд.
+ * Порядок ініціативи змінюють лише старт/скидання/відкат (history), кидок/ручний порядок (reordered) і новий раунд.
  * Будь-яка інша мутація, що переставила наявних учасників, — баг рушія: повертаємо їхній порядок
  * (додані/видалені лишаються на своїх місцях) і пишемо помилку в лог.
  */
 export function guardTurnOrder<T extends BattleMutationOutcome>(scene: BattleSceneState, before: BattleParticipant[], result: T, label = ""): T {
-  if (result.history || (result.scene?.round ?? scene.round) !== scene.round || (result.scene?.status ?? scene.status) !== scene.status) return result;
+  if (result.history || result.reordered || (result.scene?.round ?? scene.round) !== scene.round || (result.scene?.status ?? scene.status) !== scene.status) return result;
 
   const after = result.participants;
 
