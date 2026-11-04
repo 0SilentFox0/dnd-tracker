@@ -3,12 +3,14 @@
 import { memo, useState } from "react";
 import Image from "next/image";
 
+import { MotionBackground } from "./motion/MotionBackground";
+
 import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { backgroundBox } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig } from "@/types/battle";
 
 /** Фон цілком (без обрізання): клітинка фону = клітинка сітки, зсув — частки клітинки; непокрите лишається темним. */
-export const MapBackground = memo(function MapBackground({ map, cellPx, phone }: { map: BattleMapConfig; cellPx: number; phone: boolean }) {
+export const MapBackground = memo(function MapBackground({ map, cellPx, phone, rotated }: { map: BattleMapConfig; cellPx: number; phone: boolean; rotated: boolean }) {
   const src = map.background ?? DEFAULT_MAP_BACKGROUND;
 
   const [loaded, setLoaded] = useState<{ src: string; aspect: number } | null>(null);
@@ -16,6 +18,8 @@ export const MapBackground = memo(function MapBackground({ map, cellPx, phone }:
   const box = backgroundBox(map, cellPx, loaded?.src === src ? loaded.aspect : null);
 
   const px = Math.ceil(box.width);
+
+  if (map.motion) return <MotionBackground map={map} motion={map.motion} cellPx={cellPx} rotated={rotated} phone={phone} />;
 
   return (
     <div data-map-background className="pointer-events-none absolute inset-0 overflow-hidden">

@@ -118,7 +118,7 @@ function MapStageImpl({ map, participants, view, actions, editing, layout, inter
       className="absolute"
       style={{ left: -win.x * UNIT * pxPerUnit, top: -win.y * UNIT * pxPerUnit, width: size.width * pxPerUnit, height: size.height * pxPerUnit }}
     >
-      <MapBackground map={map} cellPx={UNIT * pxPerUnit} phone={phone} />
+      <MapBackground map={map} cellPx={UNIT * pxPerUnit} phone={phone} rotated={rotated} />
       <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
         <GridLayer map={map} marks={view?.marks} cellActions={cellActions} onStrokeStart={painting ? onStrokeStart : undefined} scene={gridScene} />
         {ui?.MapLayers && <ui.MapLayers map={map} view={modeView ?? null} rotated={rotated} editing={modeTools?.toolActive ? modeTools.raw : null} />}
