@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ToggleRow } from "./ToggleRow";
 
 import { BattleMap } from "@/components/battle/map";
+import { MapMotionPanel } from "@/components/battle/map/MapMotionPanel";
 import { MAP_MODE_UI, type MapModeUi } from "@/components/battle/modes";
 import { HudSection } from "@/components/hud/form";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
@@ -158,6 +159,12 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                 </div>
               )}
             </div>
+            {editor.motionTool && (
+              <div className="space-y-2">
+                <Label>{t("motion")}</Label>
+                <MapMotionPanel tool={editor.motionTool} />
+              </div>
+            )}
             <div className="space-y-2">
               <ImageUpload value={map.background ?? ""} onChange={(v) => actions.setBackground(v || null)} label={t("background")} maxSide={2400} allowFile />
               <Button type="button" variant="outline" size="sm" onClick={() => actions.setBackground(null)} disabled={map.background === null}>
