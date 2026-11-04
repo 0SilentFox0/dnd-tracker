@@ -2,25 +2,31 @@
 
 import { useEffect, useRef } from "react";
 
-import { type PaletteKey, palettesToClose } from "./modes/palettes";
+import { PALETTE_KEYS, type PaletteKey, type PaletteState, palettesToClose } from "./modes/palettes";
 
-type Closer = (() => void) | undefined;
+type PaletteTools = Record<PaletteKey, { active: boolean; close?: () => void }>;
+
+const stateOf = (tools: PaletteTools): PaletteState => Object.fromEntries(PALETTE_KEYS.map((k) => [k, tools[k].active])) as PaletteState;
 
 /** Щойно відкрита палітра (режиму, місцевості, погоди, руху, фону) закриває решту. */
-export function useExclusivePalettes(open: Record<PaletteKey, boolean>, closers: Record<PaletteKey, Closer>) {
-  const { mode, terrain, weather, motion, background } = open;
+export function useExclusivePalettes(tools: PaletteTools) {
+  const latest = useRef(tools);
 
-  const { mode: closeMode, terrain: closeTerrain, weather: closeWeather, motion: closeMotion, background: closeBackground } = closers;
+  const state = stateOf(tools);
 
-  const prev = useRef({ mode, terrain, weather, motion, background });
+  const signature = PALETTE_KEYS.map((k) => (state[k] ? "1" : "0")).join("");
+
+  const prev = useRef(state);
 
   useEffect(() => {
-    const next = { mode, terrain, weather, motion, background };
+    latest.current = tools;
+  });
 
-    const byKey = { mode: closeMode, terrain: closeTerrain, weather: closeWeather, motion: closeMotion, background: closeBackground };
+  useEffect(() => {
+    const next = stateOf(latest.current);
 
-    for (const key of palettesToClose(prev.current, next)) byKey[key]?.();
+    for (const key of palettesToClose(prev.current, next)) latest.current[key].close?.();
 
     prev.current = next;
-  }, [mode, terrain, weather, motion, background, closeMode, closeTerrain, closeWeather, closeMotion, closeBackground]);
+  }, [signature]);
 }

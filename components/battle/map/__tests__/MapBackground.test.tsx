@@ -8,7 +8,7 @@ import type { BattleMapConfig } from "@/types/battle";
 
 const reduced = vi.hoisted(() => ({ value: false }));
 
-vi.mock("@/lib/hooks/common", () => ({ useReducedMotion: () => reduced.value, usePageHidden: () => false }));
+vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<object>()), useReducedMotion: () => reduced.value, usePageHidden: () => false }));
 
 vi.mock("@/lib/utils/canvas/ticker", () => ({ subscribe: vi.fn(() => vi.fn()) }));
 

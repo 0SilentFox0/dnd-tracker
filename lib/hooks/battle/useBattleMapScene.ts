@@ -155,10 +155,13 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const backgroundTool = useMapBackgroundTool({ isDM, current: map?.background ?? null, mutation: actions.mapBackground });
 
-  useExclusivePalettes(
-    { mode: !!modeTools?.paletteOpen, terrain: terrainTool.active, weather: !!weatherTool?.active, motion: !!motionTool?.active, background: !!backgroundTool?.active },
-    { mode: closeModeTool, terrain: closeTerrain, weather: weatherTool?.close, motion: motionTool?.close, background: backgroundTool?.close },
-  );
+  useExclusivePalettes({
+    mode: { active: !!modeTools?.paletteOpen, close: closeModeTool },
+    terrain: { active: terrainTool.active, close: closeTerrain },
+    weather: { active: !!weatherTool?.active, close: weatherTool?.close },
+    motion: { active: !!motionTool?.active, close: motionTool?.close },
+    background: { active: !!backgroundTool?.active, close: backgroundTool?.close },
+  });
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 

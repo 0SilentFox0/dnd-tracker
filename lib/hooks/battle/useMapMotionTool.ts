@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
+
+import { usePaletteToggle } from "./usePaletteToggle";
 
 import { MAP_MOTION_DEFAULT_SPEED } from "@/lib/constants/battle-motion";
 import { clampMotionSpeed, resumeSpeed } from "@/lib/utils/battle/map-motion";
@@ -31,13 +33,9 @@ export function useMapMotionTool(args: {
     mutation: { mutate, isPending },
   } = args;
 
-  const [active, setActive] = useState(false);
+  const { active, toggle, close } = usePaletteToggle();
 
   const last = useRef<number | null>(null);
-
-  const close = useCallback(() => setActive(false), []);
-
-  const toggle = useCallback(() => setActive((o) => !o), []);
 
   const send = useCallback(
     (next: MapMotion) => {

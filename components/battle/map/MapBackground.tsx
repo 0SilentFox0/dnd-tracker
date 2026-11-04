@@ -6,6 +6,7 @@ import Image from "next/image";
 import { MotionBackground } from "./motion/MotionBackground";
 
 import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { useLoadedAspect } from "@/lib/hooks/battle";
 import { useReducedMotion } from "@/lib/hooks/common";
 import { backgroundBox } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig } from "@/types/battle";
@@ -24,9 +25,9 @@ interface LayerProps {
 function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
   const src = map.background ?? DEFAULT_MAP_BACKGROUND;
 
-  const [loaded, setLoaded] = useState<{ src: string; aspect: number } | null>(null);
+  const { aspect, imgProps } = useLoadedAspect(src, onReady);
 
-  const box = backgroundBox(map, cellPx, loaded?.src === src ? loaded.aspect : null);
+  const box = backgroundBox(map, cellPx, aspect);
 
   if (map.motion) return <MotionBackground map={map} motion={map.motion} cellPx={cellPx} rotated={rotated} phone={phone} onReady={onReady} />;
 
@@ -42,14 +43,7 @@ function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
           sizes={phone && px > 0 ? `${px}px` : "100vw"}
           className="object-contain object-left-top"
           priority
-          onLoad={(e) => {
-            const img = e.currentTarget;
-
-            if (img.naturalWidth > 0) setLoaded({ src, aspect: img.naturalHeight / img.naturalWidth });
-
-            onReady?.();
-          }}
-          onError={onReady}
+          {...imgProps}
         />
       </div>
     </div>
@@ -57,7 +51,6 @@ function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
 }
 
 interface Track {
-  src: string;
   base: BattleMapConfig;
   previous: BattleMapConfig | null;
   ready: boolean;
@@ -73,9 +66,9 @@ export const MapBackground = memo(function MapBackground(props: Omit<LayerProps,
 
   const reduced = useReducedMotion();
 
-  const [track, setTrack] = useState<Track>({ src, base: map, previous: null, ready: true });
+  const [track, setTrack] = useState<Track>({ base: map, previous: null, ready: true });
 
-  if (track.src !== src) setTrack({ src, base: map, previous: reduced ? null : track.base, ready: reduced });
+  if ((track.base.background ?? DEFAULT_MAP_BACKGROUND) !== src) setTrack({ base: map, previous: reduced ? null : track.base, ready: reduced });
 
   const { previous, ready } = track;
 

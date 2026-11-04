@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+
+import { usePaletteToggle } from "./usePaletteToggle";
 
 import type { MapBackgroundData } from "@/types/api";
 
@@ -24,11 +26,7 @@ export function useMapBackgroundTool(args: {
     mutation: { mutate, isPending },
   } = args;
 
-  const [active, setActive] = useState(false);
-
-  const close = useCallback(() => setActive(false), []);
-
-  const toggle = useCallback(() => setActive((o) => !o), []);
+  const { active, toggle, close } = usePaletteToggle();
 
   const choose = useCallback(
     (background: string | null) => {
