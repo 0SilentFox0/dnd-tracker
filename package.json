@@ -33,7 +33,6 @@
     "assets:icon-prompts": "tsx --tsconfig tsconfig.scripts.json scripts/assets/build-icon-prompts.ts",
     "constructor:official-templates": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/create-official-templates.ts",
     "constructor:copy-heroes": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/copy-test-heroes.ts",
-    "constructor:legacy-layers": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/legacy-layers.ts",
     "constructor:backfill": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/backfill-content-fields.ts",
     "constructor:srd-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/load-template.ts",
     "constructor:empty-5e-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/empty-template.ts",
