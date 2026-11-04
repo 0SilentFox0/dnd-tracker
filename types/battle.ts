@@ -531,8 +531,6 @@ export interface BattleParticipantBattleData {
   pendingExtraActions?: number;
   /** Атаки дії «Атака», що лишилися цього ходу */
   attacksLeft?: number;
-  /** WFRP: жетон Momentum сторони (однаковий в усіх учасників сторони) */
-  momentum?: boolean;
   inspiration?: boolean;
   /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
   inspirationSpent?: boolean;

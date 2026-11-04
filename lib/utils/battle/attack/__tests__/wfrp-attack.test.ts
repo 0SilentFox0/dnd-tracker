@@ -3,28 +3,30 @@ import { describe, expect, it } from "vitest";
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
+import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant, SceneMomentum } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };
 
 const bow: BattleAttack = { ...sword, id: "bw", type: AttackType.RANGED };
 
-const fighter = (id: string, side: ParticipantSide, over: { characteristics?: boolean; momentum?: boolean; position?: { x: number; y: number } } = {}): BattleParticipant => {
+const fighter = (id: string, side: ParticipantSide, over: { characteristics?: boolean; position?: { x: number; y: number } } = {}): BattleParticipant => {
   const p = makeParticipant({ id, side, hp: 20, maxHp: 20 });
 
-  const { characteristics = true, momentum, position } = over;
+  const { characteristics = true, position } = over;
 
   return {
     ...p,
     abilities: { ...p.abilities, ...(characteristics && { characteristics: { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } } }) },
-    battleData: { ...p.battleData, attacks: [sword, bow], ...(momentum && { momentum }), ...(position && { position }) },
+    battleData: { ...p.battleData, attacks: [sword, bow], ...(position && { position }) },
   };
 };
 
-function strike(roll: number, defenderRoll: number, opts: { attack?: BattleAttack; attacker?: BattleParticipant; target?: BattleParticipant; others?: BattleParticipant[]; rules?: typeof WFRP_RULES } = {}) {
+function strike(roll: number, defenderRoll: number, opts: { attack?: BattleAttack; attacker?: BattleParticipant; target?: BattleParticipant; others?: BattleParticipant[]; rules?: typeof WFRP_RULES; momentum?: SceneMomentum } = {}) {
   const attacker = opts.attacker ?? fighter("a", ParticipantSide.ALLY);
 
   const target = opts.target ?? fighter("t", ParticipantSide.ENEMY);
@@ -42,6 +44,7 @@ function strike(roll: number, defenderRoll: number, opts: { attack?: BattleAttac
     battleId: "b",
     rng,
     rules: opts.rules ?? WFRP_RULES,
+    momentum: opts.momentum,
   });
 }
 
@@ -102,38 +105,50 @@ describe("WFRP percentile attack", () => {
   });
 
   it("winner gains Momentum for the side, spending adds an SL", () => {
-    const won = strike(30, 80);
+    expect(strike(30, 80).momentum).toEqual({ ally: true });
 
-    expect(won.attackerUpdated.battleData.momentum).toBe(true);
-
-    const spent = strike(30, 80, { attacker: fighter("a", ParticipantSide.ALLY, { momentum: true }) });
+    const spent = strike(30, 80, { momentum: { ally: true } });
 
     expect(spent.attackRoll.percentile).toMatchObject({ sl: 2, momentumUsed: true });
+    expect(spent.momentum).toEqual({ ally: true });
 
-    const lost = strike(70, 10, { attacker: fighter("a", ParticipantSide.ALLY, { momentum: true }) });
-
-    expect(lost.attackerUpdated.battleData.momentum).toBe(false);
-    expect(lost.targetUpdated.battleData.momentum).toBe(true);
+    expect(strike(70, 10, { momentum: { ally: true } }).momentum).toEqual({ enemy: true });
   });
 
   it("the defender's Momentum is spent when it applies and the loser side never keeps one", () => {
-    const held = fighter("t", ParticipantSide.ENEMY, { momentum: true });
+    const won = strike(30, 80, { momentum: { enemy: true } });
 
-    const won = strike(30, 80, { target: held });
+    expect(won.attackRoll.percentile?.defender?.sl).toBe((strike(30, 80).attackRoll.percentile?.defender?.sl ?? 0) + 1);
+    expect(won.momentum).toEqual({ ally: true });
 
-    expect(won.attackRoll.percentile?.defender?.sl).toBe(strike(30, 80).attackRoll.percentile!.defender!.sl + 1);
-    expect(won.targetUpdated.battleData.momentum).toBe(false);
-    expect(won.attackerUpdated.battleData.momentum).toBe(true);
+    expect(strike(30, 80, { momentum: { ally: true, enemy: true } }).momentum).toEqual({ ally: true });
 
-    const both = strike(30, 80, { attacker: fighter("a", ParticipantSide.ALLY, { momentum: true }), target: held });
+    const defended = strike(70, 10, { momentum: { enemy: true } });
 
-    expect(both.attackerUpdated.battleData.momentum).toBe(true);
-    expect(both.targetUpdated.battleData.momentum).toBe(false);
+    expect(defended.momentum).toEqual({ enemy: true });
+  });
 
-    const defended = strike(70, 10, { target: held });
+  it("server attacks read and write flow.momentum", () => {
+    const attacker = fighter("a", ParticipantSide.ENEMY);
 
-    expect(defended.targetUpdated.battleData.momentum).toBe(true);
-    expect(defended.attackerUpdated.battleData.momentum).toBeFalsy();
+    const target = fighter("t", ParticipantSide.ALLY);
+
+    const flow = (momentum: SceneMomentum): ActionFlow => ({ ps: [attacker, target], messages: [], summons: [], ctx: { round: 1, rng: seq(0.1), rules: WFRP_RULES }, momentum });
+
+    const input = (f: ActionFlow) => ({ flow: f, attackerId: "a", targetId: "t", attack: sword, currentRound: 1, battleId: "b", rng: f.ctx.rng, label: "retaliation" as const });
+
+    const f1 = flow({});
+
+    resolveServerAttack(input(f1));
+
+    expect(f1.momentum).toEqual({ enemy: true });
+
+    const f2 = flow({ enemy: true });
+
+    const r = resolveServerAttack(input(f2));
+
+    expect(r.battleAction.actionDetails.percentile?.momentumUsed).toBe(true);
+    expect(f2.momentum).toEqual({ enemy: true });
   });
 
   it("outnumbering adds a bonus to the attacker target", () => {

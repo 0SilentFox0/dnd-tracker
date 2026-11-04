@@ -20,6 +20,7 @@ import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/b
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
+import { heldBy, NO_MOMENTUM, settle } from "@/lib/utils/battle/momentum";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
@@ -67,7 +68,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: rngOf(params), map: params.map, rules: params.rules, crit: params.crit } };
+  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: rngOf(params), map: params.map, rules: params.rules, crit: params.crit }, momentum: params.momentum ?? NO_MOMENTUM };
 
   const run: AttackRun = { params, flow, before, attackerId, targetId, existedBefore: activeEffectIds(flow.ps) };
 
@@ -133,12 +134,12 @@ function spendAttackAction(run: AttackRun): void {
   put(flow, params.offHand && ruleSystemOf(flow.ctx.rules).combat.actionEconomy.bonusAction ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
 }
 
-function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult {
+function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons" | "momentum">, hit: boolean): ProcessAttackResult {
   const { flow, attackerId, targetId, existedBefore } = run;
 
   flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
 
-  return { ...r, summons: flow.summons, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
+  return { ...r, summons: flow.summons, momentum: flow.momentum, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
 }
 
 function abortedResult(run: AttackRun): ProcessAttackResult {
@@ -151,6 +152,7 @@ function abortedResult(run: AttackRun): ProcessAttackResult {
   return {
     success: false,
     summons: flow.summons,
+    momentum: flow.momentum,
     attackRoll: abortedRoll(run),
     targetUpdated: getP(flow, targetId),
     attackerUpdated: getP(flow, attackerId),
@@ -198,12 +200,6 @@ function judgeD20(run: AttackRun, actionModifiers: Modifiers): Judged {
   return { second, targetAC, ...judgeHit(run, rolled, targetAC, actionModifiers) };
 }
 
-const momentumOf = (ps: BattleParticipant[], side: BattleParticipant["basicInfo"]["side"]) => ps.some((p) => p.basicInfo.side === side && p.battleData.momentum);
-
-function setMomentum(flow: ActionFlow, side: BattleParticipant["basicInfo"]["side"], on: boolean): void {
-  flow.ps = flow.ps.map((p) => (p.basicInfo.side === side && !!p.battleData.momentum !== on ? { ...p, battleData: { ...p.battleData, momentum: on } } : p));
-}
-
 function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): Judged {
   const { flow, attackerId, targetId, params } = run;
 
@@ -213,7 +209,9 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
 
   const rules = flow.ctx.rules;
 
-  const held = { attacker: momentumOf(flow.ps, attacker.basicInfo.side), defender: momentumOf(flow.ps, target.basicInfo.side) };
+  const sides = { attacker: attacker.basicInfo.side, target: target.basicInfo.side };
+
+  const held = { attacker: heldBy(flow.momentum, sides.attacker), defender: heldBy(flow.momentum, sides.target) };
 
   const r = resolve({
     attacker,
@@ -226,20 +224,13 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
     momentum: held,
   });
 
-  if (r.momentum.spent) setMomentum(flow, attacker.basicInfo.side, false);
+  const { next, gained } = settle(flow.momentum, sides, r.momentum);
 
-  if (held.defender) setMomentum(flow, target.basicInfo.side, false);
-
-  const winnerSide = r.momentum.gainedBy && (r.momentum.gainedBy === "attacker" ? attacker.basicInfo.side : target.basicInfo.side);
-
-  if (winnerSide) {
-    setMomentum(flow, winnerSide, true);
-    setMomentum(flow, winnerSide === attacker.basicInfo.side ? target.basicInfo.side : attacker.basicInfo.side, false);
-  }
+  flow.momentum = next;
 
   flow.messages.push(...percentileLines(r.attackRoll.percentile, r.isHit));
 
-  if (winnerSide && !(winnerSide === attacker.basicInfo.side ? held.attacker : held.defender)) flow.messages.push(textRef("battleLog.percentile.momentum"));
+  if (gained) flow.messages.push(textRef("battleLog.percentile.momentum"));
 
   return { second: undefined, targetAC: r.attackRoll.percentile?.defender?.target ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
 }

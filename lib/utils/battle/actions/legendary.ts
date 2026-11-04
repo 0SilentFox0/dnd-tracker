@@ -9,6 +9,7 @@ import { assertAttackAllowed } from "@/lib/utils/battle/attack-phase/request";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
+import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -43,7 +44,7 @@ export function legendaryAttack(input: LegendaryAttackInput): { participants: Ba
 
   if (reach) return reject(reach);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules }, momentum: NO_MOMENTUM };
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: actorId, targetId, attack, currentRound: round, battleId, rng, label: "legendary" });
 

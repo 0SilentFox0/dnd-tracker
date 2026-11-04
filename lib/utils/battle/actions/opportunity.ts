@@ -8,6 +8,7 @@ import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
 import { conditionSourceIds } from "@/lib/utils/battle/conditions";
 import { cellsOf, footprint, footprintDistance, isOnMap, sizeOf } from "@/lib/utils/battle/grid";
 import { meleeReachCells } from "@/lib/utils/battle/grid/attack-reach";
+import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -39,7 +40,7 @@ const canProvoke = (e: BattleParticipant, moverId: string, rules: Ruleset) => ca
 export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityResult {
   const { moverId, path, start, round, battleId, rules, rng } = input;
 
-  const flow: ActionFlow = { ps: input.participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules } };
+  const flow: ActionFlow = { ps: input.participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules }, momentum: NO_MOMENTUM };
 
   const actions: BattleAction[] = [];
 

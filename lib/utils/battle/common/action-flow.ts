@@ -4,7 +4,7 @@ import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/u
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { type HitLocation, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AbilityEvent } from "@/types/abilities";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleParticipant, SceneMomentum } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 /** Стан однієї дії (атака, закляття): свіжий список учасників і накопичений лог умінь. */
@@ -13,6 +13,7 @@ export interface ActionFlow {
   messages: LogLine[];
   summons: SummonRequest[];
   ctx: AbilityRunContext;
+  momentum: SceneMomentum;
 }
 
 export function getP(flow: ActionFlow, id: string): BattleParticipant {

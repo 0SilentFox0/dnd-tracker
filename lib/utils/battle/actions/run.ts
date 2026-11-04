@@ -21,6 +21,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { removeEffects } from "@/lib/utils/battle/conditions";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import { baseMovement } from "@/lib/utils/battle/grid/path";
+import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -167,7 +168,7 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   if (reach) return reject(reach);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules }, momentum: NO_MOMENTUM };
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: actor.basicInfo.id, targetId, attack, currentRound: round, battleId: input.battleId, rng, label: "readied" });
 
