@@ -1,5 +1,5 @@
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { DefenseKind, HitLocation } from "@/lib/utils/rules/systems/wfrp/combat/constants";
+import type { DefenseKind, HitLocation } from "@/lib/utils/rules/systems";
 import type { DamageRow } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
