@@ -24,6 +24,7 @@ import { LoadingState, QueryState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
 import { PlayerSheetHint } from "@/components/onboarding/OnboardingHint";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
 import { useSeenOnOpen } from "@/lib/hooks/notifications";
@@ -33,10 +34,10 @@ const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.Prof
 
 const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story", "log"];
 
-function viewTabs(withLog: boolean, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
+function viewTabs({ withLog, withPath }: { withLog: boolean; withPath: boolean }, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
   const tabs: ProfileTab[] = [
     { id: "combat", label: t("combat"), content: <CombatTab /> },
-    { id: "skills", label: t("path"), content: <SkillsTab /> },
+    ...(withPath ? [{ id: "skills" as const, label: t("path"), content: <SkillsTab /> }] : []),
     { id: "magic", label: t("magic"), content: <MagicTab /> },
     { id: "items", label: t("items"), content: <InventoryTab /> },
     { id: "story", label: t("story"), content: <StoryTab /> },
@@ -128,7 +129,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                   ref={hero.ref}
                   badge={
                     <>
-                      <LevelUpBadge free={sheet.progression.freePoints} onOpen={() => setTab("skills")} />
+                      {!systemUiOf(sheet.system).hideProgression && <LevelUpBadge free={sheet.progression.freePoints} onOpen={() => setTab("skills")} />}
                       <PendingChoicesBadge />
                     </>
                   }
@@ -146,8 +147,8 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                 {sheet.viewer.isOwner && !sheet.viewer.isDM && !sheet.review.pending && <PlayerSheetHint className="mx-3 my-2" />}
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
                 {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
-                <ProfileTabs value={tab === "log" && !sheet.rest ? "combat" : tab} onValueChange={setTab} tabs={viewTabs(!!sheet.rest, (id) => t(`tabs.${id}`))} header={hero.past ? <CompactHero /> : null} />
-                <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
+                <ProfileTabs value={(tab === "log" && !sheet.rest) || (tab === "skills" && systemUiOf(sheet.system).hideProgression) ? "combat" : tab} onValueChange={setTab} tabs={viewTabs({ withLog: !!sheet.rest, withPath: !systemUiOf(sheet.system).hideProgression }, (id) => t(`tabs.${id}`))} header={hero.past ? <CompactHero /> : null} />
+                {!systemUiOf(sheet.system).hideProgression && <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
               </>
             )}
           </ProfileShell>

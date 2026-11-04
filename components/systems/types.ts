@@ -1,0 +1,46 @@
+import type { ComponentType } from "react";
+
+import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
+import type { DifficultyKey } from "@/lib/utils/rules/systems";
+import type { SheetRollBody, SheetRollResult, SheetTotal } from "@/types/characters";
+import type { Unit } from "@/types/units";
+
+export interface SheetRollRequest {
+  label: string;
+  subject: SheetRollBody;
+}
+
+export interface StatsTabProps {
+  section: "top" | "bottom";
+  onRoll: (request: SheetRollRequest) => void;
+  canRoll: boolean;
+}
+
+export interface RollDialogBodyProps {
+  request: SheetRollRequest;
+  result: SheetRollResult | null;
+  difficulty: DifficultyKey;
+  setDifficulty: (difficulty: DifficultyKey) => void;
+}
+
+export interface StatsFieldsProps {
+  bindings: CharacterFormBindings;
+  campaignId: string;
+  mode: "create" | "edit";
+  classArmor?: SheetTotal | null;
+}
+
+export interface UnitStatsFieldsProps {
+  formData: Partial<Unit>;
+  onChange: (patch: Partial<Unit>) => void;
+  fiveE?: boolean;
+}
+
+export interface SystemUi {
+  HeroStats: ComponentType;
+  StatsTab: ComponentType<StatsTabProps>;
+  RollDialogBody: ComponentType<RollDialogBodyProps>;
+  StatsFields: ComponentType<StatsFieldsProps>;
+  UnitStatsFields: ComponentType<UnitStatsFieldsProps>;
+  hideProgression: boolean;
+}

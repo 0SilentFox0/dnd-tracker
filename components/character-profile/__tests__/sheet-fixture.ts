@@ -3,6 +3,7 @@ import type { CharacterSheet } from "@/types/characters";
 const line = (label: string, value: string) => ({ label, value });
 
 export const sheetFixture: CharacterSheet = {
+  system: "homm",
   viewer: { isDM: false, isOwner: true },
   review: { pending: false, note: null },
   maxLevel: 30,

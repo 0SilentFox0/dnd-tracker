@@ -5,6 +5,8 @@ import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/
 import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
 import { isCanonicalSrdTemplate, isLegacySrdTemplate, SRD_CONTENT_LOCALES, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
+import { parseRules } from "@/lib/utils/rules/schema";
+import { systemKeyOf } from "@/lib/utils/rules/systems";
 import type { TemplateCard, TemplateList } from "@/types/campaigns";
 
 const select = {
@@ -16,11 +18,13 @@ const select = {
   credits: true,
   locale: true,
   templateKey: true,
+  rules: true,
   _count: { select: Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, true])) },
 } as const;
 
-const toCard = ({ _count, ...t }: { id: string; name: string; description: string | null; kind: string; visibility: string; credits: string | null; locale: string | null; templateKey: string | null; _count: Record<string, number> }): TemplateCard => ({
+const toCard = ({ _count, rules, ...t }: { id: string; name: string; description: string | null; kind: string; visibility: string; credits: string | null; locale: string | null; templateKey: string | null; rules: unknown; _count: Record<string, number> }): TemplateCard => ({
   ...t,
+  system: systemKeyOf(parseRules(rules)),
   counts: _count,
   ...(isCanonicalSrdTemplate(t) ? { availableLocales: SRD_CONTENT_LOCALES } : {}),
 });

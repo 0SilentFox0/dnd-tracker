@@ -286,5 +286,15 @@
       "sling": "Sling",
       "throwing": "Throwing"
     }
+  },
+  "testOutcome": {
+    "critical": "Critical success",
+    "success": "Success",
+    "failure": "Failure",
+    "fumble": "Fumble"
+  },
+  "distanceUnit": {
+    "ft": "ft",
+    "yd": "yd"
   }
 }

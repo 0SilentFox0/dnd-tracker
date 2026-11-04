@@ -21,8 +21,18 @@
       "initiative": "Init",
       "speed": "Speed",
       "toHit": "Hit",
-      "proficiency": "Prof"
-    }
+      "proficiency": "Prof",
+      "wounds": "Wnd",
+      "move": "Move",
+      "fate": "Fate",
+      "fortune": "Fort"
+    },
+    "wounds": "Wounds",
+    "woundsCurrent": "Wounds {current} / {max}",
+    "woundsTotal": "Wounds {total}",
+    "move": "Move (walk/run)",
+    "fate": "Fate",
+    "fortune": "Fortune"
   },
   "combat": {
     "roll": "Roll",
@@ -42,7 +52,8 @@
     "skills": "SKILLS",
     "passives": "Passive: perception {perception} · investigation {investigation} · insight {insight}",
     "languages": "Languages: {list}",
-    "proficiencies": "Proficiencies: {list}"
+    "proficiencies": "Proficiencies: {list}",
+    "untrained": "Untrained skill: the test is not possible"
   },
   "magic": {
     "saveDC": "Spell save DC",
@@ -264,5 +275,9 @@
       "description": "Description",
       "equipmentNote": "The DM hands out equipment and money manually."
     }
+  },
+  "wfrp": {
+    "characteristics": "CHARACTERISTICS",
+    "skills": "SKILLS"
   }
 }

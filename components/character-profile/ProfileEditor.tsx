@@ -18,13 +18,12 @@ import { SkillsTab } from "./SkillsTab";
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
-import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
-import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterChoicesPanel } from "@/components/choices/CharacterChoicesPanel";
 import { ActionBar } from "@/components/common/ActionBar";
 import { FormAlert } from "@/components/common/states";
 import { LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -69,7 +68,9 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const { form, equipped, setEquipped, artifacts } = editor;
 
-  const { formData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
+  const { formData, abilityScores, skills, abilities, spellcasting } = form;
+
+  const Ui = systemUiOf(sheet.system);
 
   const heroClasses = (formData.basicInfo.classes ?? []).filter((e) => e.classId);
 
@@ -86,12 +87,14 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     <form id="profile-edit" className="hud-form" onSubmit={form.actions.handleSubmit}>
       <ProfileHero
         actions={
-          <LevelUpAction
-            level={formData.basicInfo.level}
-            maxLevel={sheet.maxLevel}
-            onLevelUp={() => void editor.dmActions.levelUp()}
-            classLevelUp={classLevelUp}
-          />
+          Ui.hideProgression ? undefined : (
+            <LevelUpAction
+              level={formData.basicInfo.level}
+              maxLevel={sheet.maxLevel}
+              onLevelUp={() => void editor.dmActions.levelUp()}
+              classLevelUp={classLevelUp}
+            />
+          )
         }
       />
       {form.status.error && (
@@ -107,22 +110,25 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             label: t("tabs.combat"),
             content: (
               <div className="space-y-6">
-                <CharacterAbilityScores abilityScores={abilityScores} withPrimary />
-                <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} classArmor={classesEnabled && (formData.basicInfo.classes ?? []).length > 0 ? sheet.armorClass : undefined} />
-                <CharacterSkillsSection skills={skills} />
+                <Ui.StatsFields bindings={form} campaignId={campaignId} mode="edit" classArmor={classesEnabled && (formData.basicInfo.classes ?? []).length > 0 ? sheet.armorClass : undefined} />
+                {!Ui.hideProgression && <CharacterSkillsSection skills={skills} />}
               </div>
             ),
           },
-          {
-            id: "skills",
-            label: t("tabs.path"),
-            content: (
-              <div className="space-y-4">
-                <CharacterAbilitiesSection campaignId={campaignId} abilities={abilities} />
-                <SkillsTab manage classLevelUp={classLevelUp} />
-              </div>
-            ),
-          },
+          ...(Ui.hideProgression
+            ? []
+            : [
+                {
+                  id: "skills" as const,
+                  label: t("tabs.path"),
+                  content: (
+                    <div className="space-y-4">
+                      <CharacterAbilitiesSection campaignId={campaignId} abilities={abilities} />
+                      <SkillsTab manage classLevelUp={classLevelUp} />
+                    </div>
+                  ),
+                },
+              ]),
           ...(showChoices
             ? [
                 {

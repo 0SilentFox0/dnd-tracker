@@ -20,6 +20,7 @@ interface CharacterBasicInfoProps {
   campaignMembers?: CampaignMember[];
   races?: Race[];
   isPlayerView?: boolean;
+  hideProgression?: boolean;
   classMode?: { classes: GameClassData[]; byId: Record<string, GameClassData> };
 }
 
@@ -28,6 +29,7 @@ export function CharacterBasicInfo({
   campaignMembers = [],
   races = [],
   isPlayerView = false,
+  hideProgression = false,
   classMode,
 }: CharacterBasicInfoProps) {
   const t = useTranslations("characters.form.basic");
@@ -135,7 +137,7 @@ export function CharacterBasicInfo({
         />
         </>
       )}
-      {!isPlayerView && !classMode && (
+      {!isPlayerView && !classMode && !hideProgression && (
         <div className="w-full min-w-0">
           <Label htmlFor="archetype">{t("archetype")}</Label>
           <SelectField
@@ -163,7 +165,7 @@ export function CharacterBasicInfo({
         />
       </div>
 
-      {!classMode && (
+      {!classMode && !hideProgression && (
         <div className="col-span-2 grid grid-cols-3 gap-2">
           <LabeledInput
             id="level"

@@ -140,6 +140,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     skills,
     spellcasting,
     abilities,
+    characteristics,
   } = useMemo(
     () =>
       buildCharacterFormBindings(formData, recommendScores ? setWithRecommendation : setFormData, { toggleSavingThrow, toggleSkill }),
@@ -155,6 +156,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     skills,
     spellcasting,
     abilities,
+    characteristics,
     actions: { updateField, updateFields, toggleSavingThrow, toggleSkill, handleSubmit, handleCancel, setFormData },
   };
 }

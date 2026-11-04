@@ -27,7 +27,10 @@
   "party": {
     "rest": "Відпочинок",
     "closeRest": "Завершити відпочинок",
-    "xp": "Досвід"
+    "xp": "Досвід",
+    "session": "Нова сесія",
+    "sessionConfirmTitle": "Почати нову сесію?",
+    "sessionConfirm": "Удача кожного персонажа відновиться до значення Долі."
   },
   "xpDialog": {
     "title": "Досвід",
@@ -54,7 +57,15 @@
     "inspirationAria": "Натхнення",
     "inspiration": "✦ Натхнення — перевага, натхнення буде витрачено",
     "autoFail": "Автопровал",
-    "result": "d20 {rolls}{mode, select, advantage { з перевагою} disadvantage { з перешкодою} other {}} · {bonus}"
+    "result": "d20 {rolls}{mode, select, advantage { з перевагою} disadvantage { з перешкодою} other {}} · {bonus}",
+    "difficulty": "Складність",
+    "target": "ціль {target}",
+    "reversed": "реверс",
+    "sl": "РУ {sl}",
+    "auto": {
+      "success": "автоуспіх",
+      "failure": "автопровал"
+    }
   },
   "hitDice": {
     "aria": "Кістки хітів",
@@ -79,7 +90,8 @@
     "shortRest": "Короткий відпочинок",
     "xp": "Досвід {value}",
     "xpNext": " / {next}",
-    "levelUp": "· доступне підвищення рівня"
+    "levelUp": "· доступне підвищення рівня",
+    "fortune": "Удача {current}/{max}"
   },
   "dm": {
     "resources": "Ресурси",

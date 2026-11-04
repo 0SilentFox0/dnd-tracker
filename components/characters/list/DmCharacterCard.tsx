@@ -10,6 +10,7 @@ import { CharacterType } from "@/lib/constants/characters";
 import { levelUpAvailable } from "@/lib/constants/experience";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useClassMode } from "@/lib/hooks/classes";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { currentHp } from "@/lib/utils/characters/resources/hp";
 import { heroHpFormula } from "@/lib/utils/rules";
@@ -34,6 +35,10 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const classMode = useClassMode(campaignId);
 
+  const { system } = useRuleSystem({ campaignId });
+
+  const wfrp = system.key === "wfrp";
+
   const classPick = classMode.enabled && !!character.classes?.length;
 
   const entries = classMode.enabled && character.classes?.length ? resolveClassEntries(character.classes, classMode.byId) : null;
@@ -44,7 +49,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const hp = ooc?.persistResources && character.resources ? currentHp(character.resources, maxHp) : maxHp;
 
-  const levelReady = !!ooc?.xp && levelUpAvailable({ level: character.level, experience: character.experience ?? 0 }, maxLevel);
+  const levelReady = !wfrp && !!ooc?.xp && levelUpAvailable({ level: character.level, experience: character.experience ?? 0 }, maxLevel);
 
   const isNpc = character.type === CharacterType.NPC_HERO;
 
@@ -71,7 +76,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
           onTriggerClick={(e) => e.preventDefault()}
           actions={[
             { label: tc("edit"), icon: Pencil, href: `/campaigns/${campaignId}/dm/characters/${character.id}` },
-            ...(actions.onLevelUp && !classPick
+            ...(actions.onLevelUp && !classPick && !wfrp
               ? [{ label: t("levelUp"), icon: TrendingUp, onSelect: actions.onLevelUp, disabled: busy }]
               : []),
             { label: tc("delete"), icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },
@@ -79,10 +84,10 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
         />}
       </div>
       <div className="flex gap-1.5">
-        <HudStatChip short={t("statLevel")} value={character.level} />
-        <HudStatChip short="HP" label="HP" value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />
-        <HudStatChip short="AC" value={character.armorClass} />
-        <HudStatChip short={t("statInitiative")} value={character.initiative} />
+        {!wfrp && <HudStatChip short={t("statLevel")} value={character.level} />}
+        <HudStatChip short={wfrp ? t("wounds") : "HP"} label={wfrp ? t("wounds") : "HP"} value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />
+        {!wfrp && <HudStatChip short="AC" value={character.armorClass} />}
+        {!wfrp && <HudStatChip short={t("statInitiative")} value={character.initiative} />}
       </div>
     </HudCard>
   );

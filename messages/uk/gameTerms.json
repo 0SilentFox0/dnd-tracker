@@ -286,5 +286,15 @@
       "sling": "Праща",
       "throwing": "Метальна зброя"
     }
+  },
+  "testOutcome": {
+    "critical": "Критичний успіх",
+    "success": "Успіх",
+    "failure": "Провал",
+    "fumble": "Фатальний провал"
+  },
+  "distanceUnit": {
+    "ft": "фт",
+    "yd": "ярд"
   }
 }

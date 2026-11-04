@@ -1,6 +1,7 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CharacterType, type CharacterTypeValue, clampHeroInitiative, HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { backgroundFields } from "@/lib/utils/backgrounds/selection";
+import { readCharacteristics } from "@/lib/utils/rules/systems";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
 import type { SpellSlotProgression } from "@/types/races";
@@ -20,6 +21,7 @@ export function characterToFormData(
   raceProgression?: SpellSlotProgression[],
 ): CharacterFormData {
   return {
+    characteristics: readCharacteristics(character),
     basicInfo: {
       name: character.name || "",
       type: (character.type as CharacterTypeValue) || CharacterType.PLAYER,
@@ -111,6 +113,7 @@ export function formDataToCharacter(
   "id" | "campaignId" | "createdAt" | "updatedAt" | "user" | "inventory"
 > {
   return {
+    ...(formData.characteristics && { characteristics: formData.characteristics }),
     type: formData.basicInfo.type,
     controlledBy: formData.basicInfo.controlledBy,
     name: formData.basicInfo.name,

@@ -7,6 +7,7 @@ import { useProfile } from "./ProfileContext";
 
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import type { DmCharacterEditor } from "@/lib/hooks/characters";
 import { useClassMode } from "@/lib/hooks/classes";
@@ -41,8 +42,8 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
 
   return (
     <div className="space-y-6">
-      <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={options.members} races={options.races} classMode={classUi ? classMode : undefined} />
-      {classMode.enabled && !classUi && (
+      <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={options.members} races={options.races} hideProgression={systemUiOf(sheet.system).hideProgression} classMode={classUi ? classMode : undefined} />
+      {classMode.enabled && !classUi && sheet.system !== "wfrp" && (
         <Button type="button" variant="outline" size="sm" onClick={() => setConverting(true)}>
           {t("toClasses")}
         </Button>

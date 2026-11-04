@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 
-import { HudCard } from "@/components/hud/page";
+import { HudCard, HudPill } from "@/components/hud/page";
 import { SelectField } from "@/components/ui/select-field";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
 import { isCanonicalSrdTemplate, isLegacySrdTemplate } from "@/lib/utils/campaigns/template-locales";
 import { groupTemplates, pickVariant, type TemplateGroup } from "@/lib/utils/campaigns/template-variants";
+import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 
 export interface TemplateTile {
   id: string;
@@ -18,12 +19,15 @@ export interface TemplateTile {
   templateKey: string | null;
   kind?: string;
   visibility?: string;
+  system?: RuleSystemKey;
 }
 
 const languageName = (code: string) => NATIVE_LANGUAGE_NAMES[code as keyof typeof NATIVE_LANGUAGE_NAMES] ?? code;
 
 function TemplateGroupTile({ group }: { group: TemplateGroup<TemplateTile> }) {
   const t = useTranslations("campaigns.templatePicker");
+
+  const tg = useTranslations("gameTerms");
 
   const uiLocale = useLocale();
 
@@ -37,6 +41,7 @@ function TemplateGroupTile({ group }: { group: TemplateGroup<TemplateTile> }) {
     <HudCard className="space-y-2">
       <Link href={`/campaigns/${variant.id}`} className="block space-y-2">
         <h3 className="hud-sc text-lg text-hud-ink">{variant.name}</h3>
+        {variant.system && <HudPill tone="silver">{tg(`ruleSystem.${variant.system}`)}</HudPill>}
         {variant.description && <p className="text-sm text-hud-muted">{variant.description}</p>}
       </Link>
       {options.length > 1 ? (

@@ -18,6 +18,7 @@ export function RestBadges() {
   return (
     <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
       {rest.dead && <HudPill tone="silver">{t("dead")}</HudPill>}
+      {sheet.wfrp && <HudPill tone="gold">{t("fortune", { current: sheet.wfrp.fortune, max: sheet.wfrp.fate })}</HudPill>}
       {rest.exhaustion > 0 && <HudPill tone="silver">{t("exhaustion", { level: rest.exhaustion })}</HudPill>}
       {rest.inspiration && <HudPill tone="gold">{t("inspiration")}</HudPill>}
       {rest.shortRestOpen && <HudPill tone="gold">{t("shortRest")}</HudPill>}

@@ -27,7 +27,10 @@
   "party": {
     "rest": "Rest",
     "closeRest": "End rest",
-    "xp": "Experience"
+    "xp": "Experience",
+    "session": "New session",
+    "sessionConfirmTitle": "Start a new session?",
+    "sessionConfirm": "Each character's Fortune is restored to their Fate."
   },
   "xpDialog": {
     "title": "Experience",
@@ -54,7 +57,15 @@
     "inspirationAria": "Inspiration",
     "inspiration": "✦ Inspiration — advantage, inspiration will be spent",
     "autoFail": "Automatic failure",
-    "result": "d20 {rolls}{mode, select, advantage { with advantage} disadvantage { with disadvantage} other {}} · {bonus}"
+    "result": "d20 {rolls}{mode, select, advantage { with advantage} disadvantage { with disadvantage} other {}} · {bonus}",
+    "difficulty": "Difficulty",
+    "target": "target {target}",
+    "reversed": "reversed",
+    "sl": "SL {sl}",
+    "auto": {
+      "success": "auto success",
+      "failure": "auto failure"
+    }
   },
   "hitDice": {
     "aria": "Hit dice",
@@ -79,7 +90,8 @@
     "shortRest": "Short rest",
     "xp": "Experience {value}",
     "xpNext": " / {next}",
-    "levelUp": "· level up available"
+    "levelUp": "· level up available",
+    "fortune": "Fortune {current}/{max}"
   },
   "dm": {
     "resources": "Resources",

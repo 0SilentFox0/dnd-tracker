@@ -116,7 +116,8 @@
     "levelUp": "Level up",
     "dead": "Dead",
     "statLevel": "Lvl",
-    "statInitiative": "Init"
+    "statInitiative": "Init",
+    "wounds": "Wounds"
   },
   "review": {
     "pendingTitle": "Awaiting approval",
@@ -228,5 +229,21 @@
     "levelUpConfirm": "Level up",
     "levelUpDoneIncreased": "Level up! {ability}: +1. Spell slots updated.",
     "levelUpDoneMaxed": "Level up! All abilities are at maximum. Spell slots updated."
+  },
+  "wfrp": {
+    "characteristics": "Characteristics",
+    "skills": "Skills",
+    "base": "Base",
+    "advances": "Advances",
+    "total": "Total",
+    "move": "Move",
+    "fate": "Fate",
+    "extraWounds": "Extra wounds",
+    "skillSearch": "Search skills",
+    "skill": "Skill",
+    "spec": "Specialisation",
+    "addSkill": "Add",
+    "noSkillAdvances": "No skill advances yet",
+    "removeSkill": "Remove: {name}"
   }
 }

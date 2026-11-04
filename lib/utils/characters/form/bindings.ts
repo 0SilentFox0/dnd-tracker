@@ -1,3 +1,4 @@
+import { type Characteristics, DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import type { CharacterFormData } from "@/types/characters";
 
 export interface SectionBinding<S> {
@@ -21,6 +22,13 @@ function sectionBinding<T extends FieldSection>(formData: CharacterFormData, set
   };
 }
 
+function characteristicsBinding(formData: CharacterFormData, setFormData: SetFormData): SectionBinding<Characteristics> {
+  return {
+    data: formData.characteristics ?? DEFAULT_CHARACTERISTICS,
+    set: (key, value) => setFormData((prev) => ({ ...prev, characteristics: { ...(prev.characteristics ?? DEFAULT_CHARACTERISTICS), [key]: value } })),
+  };
+}
+
 export function buildCharacterFormBindings(formData: CharacterFormData, setFormData: SetFormData, handlers: CharacterFormHandlers) {
   return {
     basicInfo: sectionBinding(formData, setFormData, "basicInfo"),
@@ -29,6 +37,7 @@ export function buildCharacterFormBindings(formData: CharacterFormData, setFormD
     skills: { data: formData.skills, handlers },
     spellcasting: sectionBinding(formData, setFormData, "spellcasting"),
     abilities: sectionBinding(formData, setFormData, "abilities"),
+    characteristics: characteristicsBinding(formData, setFormData),
   };
 }
 
