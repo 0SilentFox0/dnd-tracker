@@ -141,6 +141,8 @@ export function classifyLayered(ctx: Pick<LayeredContext, "entries" | "ignored">
     } else if (e.override) {
       const local = { ...e.override.row, id: e.key };
 
+      if (!s && b === undefined) continue;
+
       if (!s) status = "deletedInSource";
       else {
         status = pairStatus(s, e.override.sourceHash ?? b, rowHash(local, e.t));

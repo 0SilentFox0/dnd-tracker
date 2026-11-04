@@ -64,14 +64,9 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem) {
 
   const { hideTable } = layeredModels()[t.model];
 
-  if (i.status === "deletedLocally") {
-    await db.campaignContentHide.deleteMany({ where: { campaignId, table: hideTable, id: i.key } });
-  } else if (i.localId && i.status === "deletedInSource") {
-    await bypassLayer(() => delegateOf(db, t).updateMany({ where: { id: i.localId!, campaignId }, data: { sourceId: null, sourceHash: null } }));
-    await db.campaignContentHide.createMany({ data: [{ campaignId, table: hideTable, id: i.key }], skipDuplicates: true });
-  } else if (i.localId) {
-    await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
-  } else return;
+  if (i.status === "deletedLocally") await db.campaignContentHide.deleteMany({ where: { campaignId, table: hideTable, id: i.key } });
+  else if (i.status !== "deletedInSource" && i.localId) await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
+  else return;
 
   markContentDirty();
 }

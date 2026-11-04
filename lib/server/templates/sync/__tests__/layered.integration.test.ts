@@ -169,9 +169,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     expect(await names(campaignId)).toEqual(["Alpha2", "Bravo", "Charlie"]);
   });
 
-  it("a row deleted upstream under an override can be kept as a local row", async () => {
+  it("a row deleted upstream under an override is kept as an orphan override with its base id", async () => {
     const campaignId = await fresh();
 
+    await raw.character.create({ data: { campaignId, type: "player", controlledBy: marker, name: "Hero", class: "wizard", race: "human", knownSpells: [spellId("b")] } });
     await inWrite(campaignId, (tx) => tx.spell.update({ where: { id: spellId("b") }, data: { name: "Mine" } }));
     await raw.spellBase.updateMany({ where: { id: spellId("b") }, data: { validTo: 2 } });
     await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
@@ -183,8 +184,13 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     await apply(campaignId, { apply: [ref(gone)], ignore: [] });
 
     expect(await names(campaignId)).toEqual(["Alpha", "Mine"]);
-    expect(await raw.spell.findMany({ where: { campaignId }, select: { sourceId: true } })).toEqual([{ sourceId: null }]);
+    expect(await raw.spell.findMany({ where: { campaignId }, select: { sourceId: true } })).toEqual([{ sourceId: spellId("b") }]);
+    expect(await raw.campaignContentHide.count({ where: { campaignId } })).toBe(0);
     expect(await diffOf(campaignId)).toEqual([]);
+
+    const known = (await raw.character.findFirst({ where: { campaignId } }))!.knownSpells as string[];
+
+    expect((await getCachedSpells(campaignId)).find((s) => s.id === known[0])?.name).toBe("Mine");
   });
 
   it("a character's knownSpells on a base id still resolves after the upgrade", async () => {
