@@ -12,6 +12,7 @@ import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 
 const h = vi.hoisted(() => ({
   campaign: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
+  campaignContentHide: { deleteMany: vi.fn() },
   campaignMember: { findUnique: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
   apiToken: { update: vi.fn(), create: vi.fn() },
   aiThread: { update: vi.fn() },
@@ -27,7 +28,7 @@ vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: vi.fn(async () =
 vi.mock("@/lib/i18n/translator", () => ({ getTranslator: vi.fn(async () => (key: string) => `T:${key}`) }));
 vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) => unknown) => fn(h) } }));
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
-vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
+vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), invalidateAllReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
 vi.mock("@/lib/server/campaigns/create-campaign", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/server/campaigns/create-campaign")>(), createCampaignFromBundle: h.create, createCampaignForUser: async (userId: string, data: object, options: { source?: { bundle: unknown; id: string; contentLocale: string | null } } = {}) => ({ ok: true, ...await h.create({ userId, ...data, bundle: options.source?.bundle ?? null, createdFromId: options.source?.id ?? null, contentLocale: options.source?.contentLocale ?? null }) }) }));
 vi.mock("@/lib/server/templates/export-campaign", () => ({ exportCampaign: h.export }));
 vi.mock("@/lib/server/templates/list-templates", () => ({ listTemplates: vi.fn(async () => ({ official: [], mine: [] })) }));
@@ -42,6 +43,11 @@ describe("campaign action guards", () => {
     h.campaignMember.findUnique.mockResolvedValue({ campaignId: "c", userId: "dm", role: "dm" });
     await expect(runCampaignOperation(actor, "members.remove", { memberId: "member" })).rejects.toMatchObject({ status: 400 });
     expect(h.campaignMember.deleteMany).not.toHaveBeenCalled();
+  });
+  it("delete clears the campaign content hides before the campaign row", async () => {
+    await runCampaignOperation(actor, "delete", {});
+    expect(h.campaignContentHide.deleteMany).toHaveBeenCalledWith({ where: { campaignId: "c" } });
+    expect(h.campaignContentHide.deleteMany.mock.invocationCallOrder[0]).toBeLessThan(h.campaign.delete.mock.invocationCallOrder[0]);
   });
   it("cannotSetOfficialWithoutAdmin", async () => {
     await expect(runCampaignOperation(actor, "template.update", { patch: { visibility: "official" } })).rejects.toMatchObject({ status: 403 });

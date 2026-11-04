@@ -11,7 +11,7 @@ import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
-vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
+vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), invalidateAllReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
 
 // Route helpers and the injected executor use the SAME one-connection client.
 const database = vi.hoisted(() => ({ client: undefined as PrismaClient | undefined }));
@@ -133,6 +133,12 @@ describe.skipIf(!isLocalDevDatabaseEnv())("campaign lifecycle real constructor, 
     expect(await db.assistantIntent.count({ where: { id: prepared.intent.id } })).toBe(0);
     expect(await readDeletionReceipt(userId, campaignId, prepared.intent.id, db)).toEqual({ id: receipt.id, status: "applied", deleted: true });
     await expect(readDeletionReceipt("foreign", campaignId, prepared.intent.id, db)).rejects.toMatchObject({ status: 404 });
+  });
+  it("deleting a campaign removes its content hides", async () => {
+    await db.campaignContentHide.createMany({ data: [{ campaignId, table: "spells", id: `${marker}-a` }, { campaignId, table: "units", id: `${marker}-b` }] });
+    await runCampaignOperation(actor(), "delete", {});
+    expect(await db.campaign.count({ where: { id: campaignId } })).toBe(0);
+    expect(await db.campaignContentHide.count({ where: { campaignId } })).toBe(0);
   });
   it("new cascade targets make campaign deletion stale", async () => {
     const prepared = await executor().dispatchAction(caller(), { actionId: "campaign.delete", requestId: randomUUID(), input: {} });

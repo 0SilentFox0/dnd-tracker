@@ -205,9 +205,10 @@ export async function removeCampaignMember(actor: Actor, memberId: string) {
 export async function deleteCampaign(actor: Actor) {
   assertCan(actor, need(true, true));
 
-  return withCampaignContentWrite(actor.campaignId, async () => {
+  return withCampaignRuntimeWrite(actor.campaignId, async () => {
     const members = await prisma.campaignMember.findMany({ where: { campaignId: actor.campaignId }, select: { userId: true } });
 
+    await prisma.campaignContentHide.deleteMany({ where: { campaignId: actor.campaignId } });
     await prisma.campaign.delete({ where: { id: actor.campaignId } });
     afterContentCommit(async () => {
       await invalidateCampaignLists(members.map(m => m.userId));
