@@ -33,6 +33,11 @@ const bypass = new AsyncLocalStorage<true>();
 /** Overlays may reflect writes that are not committed (or not yet counted in contentVersion) inside a write context or open transaction. */
 const overlayCachingAllowed = () => !currentContentWrite() && !currentTransaction();
 
+/** Only the campaign that owns the open write context is bumped; rows written for another campaign (clone, template save) leave it alone. */
+const touch = (campaignId: string) => {
+  if (currentContentWrite()?.campaignId === campaignId) markContentDirty();
+};
+
 const txOrWrite = (): Raw | undefined => (currentContentWrite()?.db as Raw | undefined) ?? (currentTransaction() as Raw | undefined);
 
 const scopeOf = (): object | undefined => (currentContentWrite() as object | undefined) ?? (currentTransaction() as object | undefined);
@@ -476,7 +481,7 @@ async function materialize(ctx: Ctx, config: LayerConfig, campaignId: string, la
     return { ...shaped, sourceHash: hashJson(Object.fromEntries(config.hashColumns.filter((c) => c in b).map((c) => [c, b[c]]))) };
   }) });
 
-  markContentDirty();
+  touch(campaignId);
 }
 
 async function hideBase(ctx: Ctx, config: LayerConfig, campaignId: string, ids: string[]) {
@@ -484,7 +489,7 @@ async function hideBase(ctx: Ctx, config: LayerConfig, campaignId: string, ids: 
 
   await ctx.raw.campaignContentHide.createMany({ data: ids.map((id) => ({ campaignId, table: config.hideTable, id })), skipDuplicates: true });
 
-  markContentDirty();
+  touch(campaignId);
 }
 
 async function removeMany(ctx: Ctx, config: LayerConfig, campaignId: string, layer: CampaignLayer, where: Row, args: Row, query: Query) {
@@ -565,8 +570,23 @@ async function onWrite(ctx: Ctx, config: LayerConfig, operation: string, args: R
   return withRelations(ctx, config, target ? { ...args, where: { ...args.where, id: target.id } } : args, campaignId, query);
 }
 
+const stringOf = (v: unknown) => (typeof v === "string" ? v : undefined);
+
+/** The campaign a create/createMany writes for: always taken from the data, never from the ambient write context. */
+function createdFor(args: Row): string | undefined {
+  const rows: Row[] = Array.isArray(args.data) ? args.data : [args.data];
+
+  const found = new Set(rows.map((d) => stringOf(d?.campaignId) ?? stringOf(d?.campaign?.connect?.id)));
+
+  if (found.size > 1) throw new Error("LAYER_MIXED_CAMPAIGNS");
+
+  return [...found][0];
+}
+
 async function onOther(ctx: Ctx, config: LayerConfig, operation: string, args: Row, query: Query) {
-  const campaignId = (typeof args.data?.campaignId === "string" ? args.data.campaignId : undefined) ?? (typeof args.where?.campaignId === "string" ? args.where.campaignId : undefined) ?? (typeof args.create?.campaignId === "string" ? args.create.campaignId : undefined) ?? currentContentWrite()?.campaignId;
+  const creating = operation === "create" || operation === "createMany";
+
+  const campaignId = creating ? createdFor(args) : stringOf(args.data?.campaignId) ?? stringOf(args.where?.campaignId) ?? stringOf(args.create?.campaignId) ?? currentContentWrite()?.campaignId;
 
   const layer = campaignId ? await campaignLayer(ctx, campaignId) : null;
 
@@ -574,12 +594,12 @@ async function onOther(ctx: Ctx, config: LayerConfig, operation: string, args: R
 
   if (UNSUPPORTED_OPS.has(operation)) throw new Error(`LAYER_UNSUPPORTED_OPERATION:${config.model}.${operation}`);
 
-  if (operation === "create" || operation === "createMany") {
+  if (creating) {
     const given = (operation === "create" ? [args.data] : Array.isArray(args.data) ? args.data : [args.data]).flatMap((d: Row) => (typeof d?.id === "string" ? [d.id] : []));
 
     if (given.length && (await baseVisible(ctx, config, layer, { id: { in: given } })).length) throw new Error(`LAYER_ID_COLLISION:${config.model}`);
 
-    markContentDirty();
+    touch(campaignId);
 
     return operation === "create" ? withRelations(ctx, config, args, campaignId, query) : query(args);
   }

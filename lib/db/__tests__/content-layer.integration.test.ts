@@ -266,6 +266,36 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content layer over 13 models", () => 
       expect(await D.spell.count({ where: { campaignId: id } })).toBe(0);
     });
 
+    it("rows created for another campaign inside a layered write do not bump the source or collide with its base ids", async () => {
+      const source = `${marker}-clone-src`;
+
+      const target = `${marker}-clone-dst`;
+
+      const targetLayered = `${marker}-clone-dst2`;
+
+      await newCampaign(source, { baseSourceId: ids.template, baseVersion: 1 });
+      await newCampaign(target);
+      await newCampaign(targetLayered, { baseSourceId: ids.template, baseVersion: 1 });
+      invalidateCampaignLayer();
+
+      const version = async () => (await raw.campaign.findUniqueOrThrow({ where: { id: source } })).contentVersion;
+
+      const before = await version();
+
+      await inWrite(source, async (tx) => {
+        await tx.spell.createMany({ data: [{ ...localRow(FIXTURES[1], target, "a", "Alpha clone") }, { ...localRow(FIXTURES[1], target, "k", "Kilo") }].map((r, i) => ({ ...r, id: i ? r.id : rid(FIXTURES[1], "a") })) });
+        await tx.spell.create({ data: { ...localRow(FIXTURES[1], targetLayered, "n", "November") } });
+      });
+
+      expect(await version()).toBe(before);
+      expect(await raw.spell.count({ where: { campaignId: target } })).toBe(2);
+      expect(await raw.spell.count({ where: { campaignId: targetLayered } })).toBe(1);
+
+      await expect(inWrite(source, (tx) => tx.spell.createMany({ data: [localRow(FIXTURES[1], target, "m1", "M1"), localRow(FIXTURES[1], targetLayered, "m2", "M2")] }))).rejects.toThrow("LAYER_MIXED_CAMPAIGNS");
+
+      await expect(inWrite(source, (tx) => tx.spell.create({ data: { ...localRow(FIXTURES[1], source, "a", "Collide"), id: rid(FIXTURES[1], "a") } }))).rejects.toThrow("LAYER_ID_COLLISION");
+    });
+
     it("base rows are shared between campaigns on one template version", async () => {
       invalidateCampaignLayer();
       await D.race.findMany({ where: { campaignId: ids.other } });
