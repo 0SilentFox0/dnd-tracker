@@ -8,7 +8,7 @@ export type PercentileOutcome = "critical" | "success" | "failure" | "fumble";
 
 export interface PercentileTestInput {
   target: number;
-  modifier?: number;
+  slModifier?: number;
   mode?: TestMode;
   doubles?: boolean;
   rng: Rng;
@@ -35,12 +35,12 @@ const isDouble = (roll: number) => roll === 100 || (roll >= 11 && roll % 11 === 
 
 type Single = Pick<PercentileTestResult, "roll" | "outcome" | "sl" | "auto" | "doubles">;
 
-function resolveSingle(roll: number, target: number, withDoubles: boolean): Single {
+function resolveSingle(roll: number, target: number, slModifier: number, withDoubles: boolean): Single {
   const auto = roll <= 5 ? "success" : roll >= 96 ? "failure" : null;
 
   const success = auto ? auto === "success" : roll <= target;
 
-  const sl = tens(target) - tens(roll);
+  const sl = tens(target) - tens(roll) + slModifier;
 
   const doubles = isDouble(roll);
 
@@ -51,16 +51,14 @@ function resolveSingle(roll: number, target: number, withDoubles: boolean): Sing
 
 const score = (r: Single) => OUTCOME_RANK[r.outcome] * 1000 + r.sl;
 
-export function resolvePercentileTest({ target: baseTarget, modifier = 0, mode = "normal", doubles = false, rng, presetRoll }: PercentileTestInput): PercentileTestResult {
-  const target = Math.max(0, baseTarget + modifier);
-
+export function resolvePercentileTest({ target, slModifier = 0, mode = "normal", doubles = false, rng, presetRoll }: PercentileTestInput): PercentileTestResult {
   const rawRoll = rollPercentile(rng, presetRoll);
 
-  const straight = resolveSingle(rawRoll, target, doubles);
+  const straight = resolveSingle(rawRoll, target, slModifier, doubles);
 
   if (mode === "normal") return { ...straight, rawRoll, reversed: false, target, mode };
 
-  const flipped = resolveSingle(reverseRoll(rawRoll), target, doubles);
+  const flipped = resolveSingle(reverseRoll(rawRoll), target, slModifier, doubles);
 
   const flippedWins = mode === "advantage" ? score(flipped) > score(straight) : score(flipped) < score(straight);
 
