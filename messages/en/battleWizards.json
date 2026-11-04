@@ -65,7 +65,23 @@
       "unknown": "unknown",
       "estimate": "Estimate",
       "cunning": "Cunning Strike · instead of Sneak Attack dice ({dice}d6)",
-      "submit": "Attack"
+      "submit": "Attack",
+      "d100": {
+        "roll": "Roll {roll} vs {target}",
+        "sl": "SL {sl} · defense {defSl} · net {net}",
+        "net": "SL {net}",
+        "location": "Location: {location}",
+        "locations": {
+          "head": "head",
+          "arm": "arm",
+          "body": "body",
+          "leg": "leg"
+        },
+        "momentum": {
+          "gained": "Momentum gained",
+          "spent": "Momentum spent"
+        }
+      }
     }
   },
   "spell": {

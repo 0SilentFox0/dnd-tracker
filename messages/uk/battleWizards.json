@@ -65,7 +65,23 @@
       "unknown": "невідомо",
       "estimate": "Орієнтовно",
       "cunning": "Підступний удар · замість кубиків Прихованої атаки ({dice}d6)",
-      "submit": "Атакувати"
+      "submit": "Атакувати",
+      "d100": {
+        "roll": "Кидок {roll} проти {target}",
+        "sl": "РУ {sl} · захист {defSl} · чистий {net}",
+        "net": "РУ {net}",
+        "location": "Локація: {location}",
+        "locations": {
+          "head": "голова",
+          "arm": "рука",
+          "body": "тулуб",
+          "leg": "нога"
+        },
+        "momentum": {
+          "gained": "Momentum отримано",
+          "spent": "Momentum витрачено"
+        }
+      }
     }
   },
   "spell": {

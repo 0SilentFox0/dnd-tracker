@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
+import { PercentileResultLines } from "./PercentileResultLines";
+
 import { useInCornerStack } from "@/components/battle/scene/CornerStack";
 import { useMapStripSlot, useNoticeStack } from "@/components/battle/scene/MapStrip";
 import { HUD_SURFACE } from "@/components/hud";
@@ -46,12 +48,22 @@ function AttackBody({ fx }: { fx: AttackFx }) {
           ))}
         </ul>
       ) : fx.kind === "miss" ? (
-        <div className="mt-1 text-sm">{fx.targetName} · d20 {fx.d20} · AC {fx.known}</div>
+        fx.percentile ? (
+          <>
+            <div className="mt-1 text-sm">{fx.targetName}</div>
+            <PercentileResultLines p={fx.percentile} hit={false} />
+          </>
+        ) : (
+          <div className="mt-1 text-sm">{fx.targetName} · d20 {fx.d20} · AC {fx.known}</div>
+        )
       ) : (
-        <div className="mt-1 flex items-baseline justify-between gap-3 text-sm">
-          <span className="truncate">{fx.targetName}{fx.downed ? ` · ${t("downed")}` : ""}</span>
-          <span className={cn("hud-sc shrink-0 text-2xl font-extrabold", TONE[fx.kind])}>−{fx.damage}</span>
-        </div>
+        <>
+          <div className="mt-1 flex items-baseline justify-between gap-3 text-sm">
+            <span className="truncate">{fx.targetName}{fx.downed ? ` · ${t("downed")}` : ""}</span>
+            <span className={cn("hud-sc shrink-0 text-2xl font-extrabold", TONE[fx.kind])}>−{fx.damage}</span>
+          </div>
+          {fx.percentile && <PercentileResultLines p={fx.percentile} hit />}
+        </>
       )}
       {effect && (
         <div className="mt-1 text-sm">

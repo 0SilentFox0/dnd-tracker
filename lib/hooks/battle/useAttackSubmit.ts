@@ -7,7 +7,7 @@ import { useCritPause } from "./useCritPause";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { type AttackFlowAction, type AttackFlowState, attackPayload, effectiveD20, strikeMode } from "@/lib/utils/battle/flows";
-import { attackResultsOf, buildAttackResultFx } from "@/lib/utils/battle/view";
+import { attackResultsOf, buildAttackResultFx, canSeeExactStats } from "@/lib/utils/battle/view";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const FAIL_TEXT = textRef("battleWizards.attack.failed");
@@ -45,6 +45,11 @@ export function useAttackSubmit({ attacker, attack, flow: { state, dispatch }, o
         d20: effectiveD20(strike, strikeMode(state, strike)),
         weapon: attack?.name,
         nameOf: (id) => order.find((p) => p.basicInfo.id === id)?.basicInfo.name ?? "",
+        exactOf: (id) => {
+          const target = (current?.initiativeOrder ?? order).find((p) => p.basicInfo.id === id);
+
+          return !!target && canSeeExactStats(target, scene.viewer);
+        },
         knowledge: current?.knowledge,
       }),
     );

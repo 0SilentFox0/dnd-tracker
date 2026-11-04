@@ -32,6 +32,11 @@ describe("ActionResultCard", () => {
       { kind: "hit", targetName: "Гоблін", damage: 15, downed: false, d20: 14, strikes: [{ targetName: "Гоблін", kind: "hit", damage: 9, downed: false }, { targetName: "Орк", kind: "miss", damage: 0, downed: false }, { targetName: "Біс", kind: "crit", damage: 6, downed: true }] },
       ["Гоблін", "−9", "Орк", "промах", "Біс", "крит −6 · повалений"],
     ],
+    [
+      { kind: "hit", targetName: "Циклоп", damage: 6, downed: false, d20: 30, percentile: { roll: 30, target: 45, sl: 1, netSl: 3, location: "arm", doubles: false, defender: { kind: "parry", roll: 60, sl: -2, target: 40 }, momentumUsed: true } },
+      ["Кидок 30 проти 45", "РУ 1 · захист -2 · чистий 3", "Локація: рука", "Momentum витрачено", "Momentum отримано"],
+    ],
+    [{ kind: "miss", targetName: "Гоблін", d20: 80, known: "?", percentile: { roll: 80, target: 45, sl: -1, netSl: -1, location: "head", doubles: false } }, ["Кидок 80 проти 45", "РУ -1"]],
     [{ kind: "spell", spellName: "Вогняна куля", changes: [{ name: "Гоблін", change: 12 }, { name: "Годрік", change: -5 }], targetCount: 2 }, ["Вогняна куля", "Гоблін", "−12", "Годрік", "+5"]],
     [{ kind: "spell", spellName: "Благословення", changes: [], targetCount: 3 }, ["Благословення", "Застосовано · цілей: 3"]],
   ])("%o", (fx, parts) => {
@@ -40,6 +45,16 @@ describe("ActionResultCard", () => {
     render(<ActionResultCard />, { wrapper });
 
     for (const part of parts) expect(card().textContent).toContain(part);
+  });
+
+  it("d100 без захисника не показує «захист» і промах без локації", () => {
+    const { wrapper } = fakeScene({ result: { kind: "miss", targetName: "Гоблін", d20: 80, known: "?", percentile: { roll: 80, target: 45, sl: -1, netSl: -1, location: "head", doubles: false } } });
+
+    render(<ActionResultCard />, { wrapper });
+
+    expect(card().textContent).not.toContain("захист");
+    expect(card().textContent).not.toContain("Локація");
+    expect(card().textContent).not.toContain("d20");
   });
 
   it("мораль — не для картки", () => {
