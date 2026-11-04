@@ -6,6 +6,7 @@ import { BUNDLE_TABLES, type BundleTable } from "@/lib/server/templates/bundle";
 import { checkEligibility } from "@/lib/server/templates/legacy-migration/eligibility";
 import { referrerUpdates, writeMigration } from "@/lib/server/templates/legacy-migration/execute";
 import { loadMigrationInput } from "@/lib/server/templates/legacy-migration/load";
+import { findDroppedNotifications } from "@/lib/server/templates/legacy-migration/notifications";
 import { planLegacyMigration } from "@/lib/server/templates/legacy-migration/plan";
 import { writePreImage } from "@/lib/server/templates/legacy-migration/preimage";
 import { type Referrer, REFERRERS } from "@/lib/server/templates/legacy-migration/referrers";
@@ -57,12 +58,27 @@ function referrersOf(input: MigrationInput, plan: MigrationPlan): ReferrerReport
   });
 }
 
+async function withDroppedNotifications(db: object, args: { input: MigrationInput; plan: MigrationPlan }): Promise<MigrationInput> {
+  const { input, plan } = args;
+
+  const rows = input.referrers.find((x) => x.r.model === "PlayerNotification")?.rows ?? [];
+
+  const dropped = await findDroppedNotifications(db, { rows, idMap: plan.idMap });
+
+  if (dropped.length === 0) return input;
+
+  const ids = new Set(dropped.map((n) => n.id));
+
+  return { ...input, droppedNotifications: dropped, referrers: input.referrers.map((x) => (x.r.model === "PlayerNotification" ? { ...x, rows: x.rows.filter((n) => !ids.has(n.id)) } : x)) };
+}
+
 function warningsOf(input: MigrationInput, plan: MigrationPlan): MigrationReport["warnings"] {
   const counted = (code: string, count: number) => (count > 0 ? [{ code, count }] : []);
 
   return [
     ...plan.warnings,
     ...counted("PENDING_RULES_SETTINGS", input.pendingRulesSettings),
+    ...counted("DROPPED_NOTIFICATIONS", input.droppedNotifications?.length ?? 0),
     ...(input.syncStateFallback ? [{ code: "SYNC_STATE_FALLBACK" }] : []),
   ];
 }
@@ -107,9 +123,11 @@ export async function dryRunCampaign(db: object, campaignId: string): Promise<Mi
 
   if (!eligibility.ok) return ineligible({ campaignId, name, reason: eligibility.reason, detail: eligibility.detail });
 
-  const input = await loadMigrationInput(db, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version });
+  const loaded = await loadMigrationInput(db, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version });
 
-  return reportOf({ name, input, plan: planLegacyMigration(input), status: "eligible" });
+  const plan = planLegacyMigration(loaded);
+
+  return reportOf({ name, input: await withDroppedNotifications(db, { input: loaded, plan }), plan, status: "eligible" });
 }
 
 export interface MigrateSeams { registry?: readonly Referrer[]; mapPlan?: (plan: MigrationPlan) => MigrationPlan }
@@ -131,9 +149,11 @@ export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: st
 
     for (const r of REFERRERS) if (r.mode === "remap" && r.lockSql) await tx.$queryRaw(r.lockSql(campaignId));
 
-    const input = await loadMigrationInput(tx, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version, registry: seams?.registry });
+    const loaded = await loadMigrationInput(tx, { campaignId, sourceId: eligibility.sourceId, version: eligibility.version, registry: seams?.registry });
 
-    const plan = (seams?.mapPlan ?? ((p: MigrationPlan) => p))(planLegacyMigration(input));
+    const plan = (seams?.mapPlan ?? ((p: MigrationPlan) => p))(planLegacyMigration(loaded));
+
+    const input = await withDroppedNotifications(tx, { input: loaded, plan });
 
     if (plan.blockers.length > 0) throw new LegacyMigrationError("ID_COLLISION", plan.blockers);
 
@@ -147,6 +167,7 @@ export async function migrateCampaign(db: ExtendedPrisma, args: { campaignId: st
       stored: input.stored,
       referrerCells: referrerUpdates({ input, idMap: plan.idMap }).flatMap((u) => u.cells),
       plan: { idMap: [...plan.idMap], hides: plan.hides },
+      ...(input.droppedNotifications && { droppedNotifications: input.droppedNotifications }),
       postContentVersion: contentVersion + 1,
     };
 

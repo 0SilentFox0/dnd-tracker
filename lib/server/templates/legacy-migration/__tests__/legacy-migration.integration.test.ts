@@ -439,4 +439,29 @@ describe.skipIf(!isLocalDevDatabaseEnv())("legacy layer migration", () => {
     expect(result).toMatchObject({ ok: false, conflicts: [{ model: "Character", pk: { id: character.id }, column: "knownSpells" }] });
     expect(await storedState(c.id)).toBe(snapshot);
   });
+
+  it("drops a notification that would collide on the global unique key, reports it, and undo recreates it", async () => {
+    const c = await clone("dup");
+
+    const L = c.local;
+
+    const kept = await R.playerNotification.create({ data: { userId: marker, campaignId: c.id, type: "spell", refId: L(T.sp2), href: "stale" } });
+
+    const colliding = await R.playerNotification.create({ data: { userId: marker, campaignId: c.id, type: "spell", refId: L(T.sp1), href: "stale" } });
+
+    const original = JSON.stringify(colliding);
+
+    const report = await migrateCampaign(asMigrate, { campaignId: c.id, preImageDir });
+
+    expect(report.status).toBe("migrated");
+    expect(report.warnings).toContainEqual({ code: "DROPPED_NOTIFICATIONS", count: 1 });
+    expect(await R.playerNotification.findUnique({ where: { id: colliding.id } })).toBeNull();
+    expect(await R.playerNotification.findUnique({ where: { id: kept.id } })).toMatchObject({ refId: T.sp2 });
+    expect(await R.playerNotification.findFirst({ where: { userId: marker, type: "spell", refId: T.sp1, campaignId: clones.main.id } })).not.toBeNull();
+    expect((await verifyFromPreImage(db, report.preImagePath!)).ok).toBe(true);
+
+    expect(await undoMigration(asMigrate, report.preImagePath!)).toEqual({ ok: true });
+    expect(JSON.stringify(await R.playerNotification.findUnique({ where: { id: colliding.id } }))).toBe(original);
+    expect(await R.playerNotification.findUnique({ where: { id: kept.id } })).toMatchObject({ refId: L(T.sp2) });
+  });
 });

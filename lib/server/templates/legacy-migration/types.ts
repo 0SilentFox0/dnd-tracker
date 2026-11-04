@@ -48,6 +48,7 @@ export interface MigrationInput extends PlanInput {
   pendingRulesSettings: number;
   syncStateFallback: boolean;
   sourceSync: Row | null;
+  droppedNotifications?: Row[];
 }
 
 export interface MigrationPlan {
@@ -79,6 +80,7 @@ export interface PreImage {
   stored: Record<BundleTable, Row[]>;
   referrerCells: PreImageCell[];
   plan: { idMap: Array<[string, string]>; hides: MigrationPlan["hides"] };
+  droppedNotifications?: Row[];
   postContentVersion: number;
 }
 

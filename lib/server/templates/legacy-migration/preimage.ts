@@ -96,6 +96,8 @@ export async function undoMigration(db: PrismaClient, file: string): Promise<Und
 
     for (const cell of image.referrerCells) await t[delegateName(cell.model)].update({ where: cell.pk, data: revive(cell.model, { [cell.column]: cell.before }) });
 
+    if (image.droppedNotifications?.length) await tx.playerNotification.createMany({ data: image.droppedNotifications.map((n) => revive("PlayerNotification", n)) as Prisma.PlayerNotificationCreateManyInput[] });
+
     await tx.campaignSourceSync.deleteMany({ where: { campaignId } });
 
     if (image.sourceSync) await tx.campaignSourceSync.create({ data: revive("CampaignSourceSync", image.sourceSync) as Prisma.CampaignSourceSyncUncheckedCreateInput });

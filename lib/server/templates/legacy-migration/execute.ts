@@ -90,6 +90,10 @@ export async function writeMigration(tx: Prisma.TransactionClient, args: { input
     create: { campaignId, sourceCampaignId: sourceId, sourceVersion: version, baseline: { tables: {}, rules: {} }, ignored },
   });
 
+  const dropped = input.droppedNotifications ?? [];
+
+  if (dropped.length > 0) await tx.playerNotification.deleteMany({ where: { id: { in: dropped.map((n) => n.id) } } });
+
   const updates = referrerUpdates({ input, idMap: plan.idMap });
 
   for (const u of updates) await t[delegateName(u.model)].update({ where: u.pk, data: u.data });
