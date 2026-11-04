@@ -101,6 +101,22 @@ const OPERATIONS: Record<string, Loader> = {
       return { schema: battleConditionsSchema, mutate: battleConditionsMutation };
     },
   }),
+  "initiative-reorder": operation({
+    access: DM,
+    load: async () => {
+      const { initiativeReorderMutation, initiativeReorderSchema } = await import("@/lib/server/battles/mutations/initiative/initiative-reorder-mutation");
+
+      return { schema: initiativeReorderSchema, mutate: initiativeReorderMutation };
+    },
+  }),
+  "initiative-roll": operation({
+    access: DM,
+    load: async () => {
+      const { initiativeRollMutation, initiativeRollSchema } = await import("@/lib/server/battles/mutations/initiative/initiative-roll-mutation");
+
+      return { schema: initiativeRollSchema, mutate: initiativeRollMutation };
+    },
+  }),
   "core-action": operation({
     access: MEMBER,
     blockedByMode: true,

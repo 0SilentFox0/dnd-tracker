@@ -262,6 +262,8 @@
     "scaleNerf": "Послаблення ворожих юнітів (DM): HP і шкода ÷{step}",
     "cancelled": "ДМ скасував дію",
     "added": "DM додав на поле: {names}",
+    "initiativeRolled": "ДМ: ініціатива перекинута — {list}",
+    "initiativeReordered": "ДМ: порядок ініціативи змінено вручну",
     "conditionRemoved": "ДМ: {target} — стан знято: {condition}",
     "revealed": "ДМ ввів у бій: {names}",
     "revealedWith": "ДМ ввів у бій: {names}. {rest}",

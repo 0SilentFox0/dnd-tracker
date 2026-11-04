@@ -657,7 +657,7 @@ export interface RolledDie {
 }
 
 export interface DiceRollGroup {
-  kind: "attack" | "damage" | "heal" | "save" | "morale";
+  kind: "attack" | "damage" | "heal" | "save" | "morale" | "initiative";
   rollerId: string;
   targetId?: string;
   dice: RolledDie[];

@@ -262,6 +262,8 @@
     "scaleNerf": "Enemy units weakened (DM): HP and damage ÷{step}",
     "cancelled": "The DM cancelled the action",
     "added": "The DM added to the field: {names}",
+    "initiativeRolled": "DM: initiative re-rolled — {list}",
+    "initiativeReordered": "DM: initiative order changed manually",
     "conditionRemoved": "DM: {target} — condition removed: {condition}",
     "revealed": "The DM brought into the battle: {names}",
     "revealedWith": "The DM brought into the battle: {names}. {rest}",
