@@ -18,7 +18,9 @@ export interface StorageCodec<T> {
  * A value kept in localStorage. It is cached and re-read only on `set` or a `storage` event from another
  * tab, so a snapshot read on every render never touches localStorage.
  */
-export function createStorageValue<T>(key: string, defaultValue: T, codec: StorageCodec<T>): StorageValue<T> {
+export function createStorageValue<T>(key: string, defaultValue: T, codec: StorageCodec<T>, storage: "local" | "session" = "local"): StorageValue<T> {
+  const area = () => (storage === "session" ? window.sessionStorage : window.localStorage);
+
   const listeners = new Set<() => void>();
 
   let cached: T | undefined;
@@ -27,7 +29,7 @@ export function createStorageValue<T>(key: string, defaultValue: T, codec: Stora
 
   const read = () => {
     try {
-      return codec.parse(window.localStorage.getItem(key));
+      return codec.parse(area().getItem(key));
     } catch {
       return defaultValue;
     }
@@ -36,7 +38,7 @@ export function createStorageValue<T>(key: string, defaultValue: T, codec: Stora
   const notify = () => listeners.forEach((l) => l());
 
   const onStorage = (e: StorageEvent) => {
-    if ((e.storageArea && e.storageArea !== window.localStorage) || (e.key !== null && e.key !== key)) return;
+    if ((e.storageArea && e.storageArea !== area()) || (e.key !== null && e.key !== key)) return;
 
     cached = read();
     notify();
@@ -49,7 +51,7 @@ export function createStorageValue<T>(key: string, defaultValue: T, codec: Stora
       cached = codec.parse(codec.serialize(value));
 
       try {
-        window.localStorage.setItem(key, codec.serialize(cached));
+        area().setItem(key, codec.serialize(cached));
       } catch {
         // private mode: the value just won't persist
       }
@@ -61,7 +63,7 @@ export function createStorageValue<T>(key: string, defaultValue: T, codec: Stora
         // Another tab may have changed the value while nobody listened for `storage` events.
         if (unheard) cached = undefined;
 
-        window.addEventListener("storage", onStorage);
+        if (storage === "local") window.addEventListener("storage", onStorage);
       }
 
       listeners.add(onChange);
@@ -70,7 +72,8 @@ export function createStorageValue<T>(key: string, defaultValue: T, codec: Stora
         listeners.delete(onChange);
 
         if (!listeners.size) {
-          window.removeEventListener("storage", onStorage);
+          if (storage === "local") window.removeEventListener("storage", onStorage);
+
           unheard = true;
         }
       };
@@ -78,12 +81,19 @@ export function createStorageValue<T>(key: string, defaultValue: T, codec: Stora
   };
 }
 
+const flagCodec = (defaultValue: boolean): StorageCodec<boolean> => ({
+  parse: (raw) => (raw === "on" ? true : raw === "off" ? false : defaultValue),
+  serialize: (v) => (v ? "on" : "off"),
+});
+
 /** "on"/"off" */
 export function createStorageFlag(key: string, defaultValue: boolean): StorageValue<boolean> {
-  return createStorageValue(key, defaultValue, {
-    parse: (raw) => (raw === "on" ? true : raw === "off" ? false : defaultValue),
-    serialize: (v) => (v ? "on" : "off"),
-  });
+  return createStorageValue(key, defaultValue, flagCodec(defaultValue));
+}
+
+/** Per-window flag (sessionStorage); defaults to false, no cross-tab sync. */
+export function createSessionFlag(key: string): StorageValue<boolean> {
+  return createStorageValue(key, false, flagCodec(false), "session");
 }
 
 export function createStorageNumber(key: string, defaultValue: number, clamp: (v: number) => number = (v) => v): StorageValue<number> {

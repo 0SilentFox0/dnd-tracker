@@ -12,7 +12,7 @@ const side = (s: ParticipantSide) => {
   return { ...p, basicInfo: { ...p.basicInfo, side: s } };
 };
 
-const player = { userId: "u", isDM: false, canSeeEnemyHp: false };
+const player = { userId: "u", isDM: false, readOnly: false, canSeeEnemyHp: false };
 
 describe("видимість", () => {
   it("союзника видно точно, ворога — ні, DM і seeEnemyHp бачать усе", () => {

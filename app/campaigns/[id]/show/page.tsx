@@ -1,5 +1,6 @@
 import { ShowPageClient } from "./page-client";
 
+import { PlayerViewGuard } from "@/components/common/PlayerViewGuard";
 import { showKeys } from "@/lib/hooks/show/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
@@ -16,7 +17,9 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   return (
     <PrefetchedQuery queryKey={showKeys.state(id)} data={seed}>
-      <ShowPageClient campaignId={id} isDM={isDM} userId={userId} />
+      <PlayerViewGuard scope={{ kind: "show", id }}>
+        <ShowPageClient campaignId={id} isDM={isDM} userId={userId} />
+      </PlayerViewGuard>
     </PrefetchedQuery>
   );
 }

@@ -14,16 +14,19 @@ import { usePuzzleControl, usePuzzleDrag } from "@/lib/hooks/show";
 import { generatePuzzle } from "@/lib/utils/puzzle/generate";
 import type { PuzzleSpec, PuzzleState } from "@/types/show";
 
+const NO_GRAB = () => undefined;
+
 interface Props {
   campaignId: string;
   isDM: boolean;
+  readOnly?: boolean;
   userId: string;
   spec: PuzzleSpec;
   imageUrl: string;
   puzzle: PuzzleState;
 }
 
-export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }: Props) {
+export function PuzzleStage({ campaignId, isDM, readOnly = false, userId, spec, imageUrl, puzzle }: Props) {
   const t = useTranslations("show");
 
   const notify = useNotify();
@@ -44,7 +47,7 @@ export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }
 
   const boardStyle = fit > 0 ? { width: spec.imageWidth * fit, height: spec.imageHeight * fit } : { width: "100%", aspectRatio: `${spec.imageWidth}/${spec.imageHeight}` };
 
-  const scene: PuzzleScene = { pieces, state: puzzle, spec, imageUrl, userId, draggingId: drag?.id ?? null, onGrab: start };
+  const scene: PuzzleScene = { pieces, state: puzzle, spec, imageUrl, userId, draggingId: drag?.id ?? null, onGrab: readOnly ? NO_GRAB : start };
 
   const held = pieces.find((p) => p.id === drag?.id);
 

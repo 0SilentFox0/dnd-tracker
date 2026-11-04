@@ -13,6 +13,10 @@
     "enter": "Fullscreen",
     "exit": "Exit fullscreen"
   },
+  "playerView": {
+    "on": "Player view: on",
+    "off": "Player view: off"
+  },
   "transport": {
     "prev": "Previous slide (←)",
     "next": "Next slide (→)",

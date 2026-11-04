@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { spellTargetCandidates } from "@/lib/utils/battle/flows/spell-flow";
-import { deriveMazeView, visibleParticipants } from "@/lib/utils/battle/modes/maze";
+import { deriveMazeView, mazeViewHeroes, visibleParticipants } from "@/lib/utils/battle/modes/maze";
 import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { turnQueue } from "@/lib/utils/battle/view";
 import { filterQueueByView } from "@/lib/utils/battle/view/queue";
@@ -140,5 +140,17 @@ describe("лабіринт: непритомні союзники", () => {
 
   it("непритомний союзник поза полем зору прихований", () => {
     expect(view.visibleIds.has("far")).toBe(false);
+  });
+});
+
+describe("mazeViewHeroes", () => {
+  it("лише живі розміщені союзники на полі", () => {
+    const a = hero("a", { x: 1, y: 5 }, "u1");
+
+    const dead = { ...hero("d", { x: 2, y: 5 }, "u2"), combatStats: { ...hero("d", { x: 2, y: 5 }, "u2").combatStats, status: CombatStatus.DEAD } };
+
+    const foe = placed("foe", { at: { x: 3, y: 5 } });
+
+    expect(mazeViewHeroes([a, dead, foe]).map((p) => p.basicInfo.id)).toEqual(["a"]);
   });
 });

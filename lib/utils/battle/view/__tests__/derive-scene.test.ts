@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { deriveScene, deriveTurn } from "../derive-scene";
+import { canSeeExactStats } from "../visibility";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -88,5 +89,46 @@ describe("резерв і очікування рішення ДМ", () => {
     expect(deriveScene(scene(true), "dm-user", null).turn.isMyTurn).toBe(false);
     expect(deriveTurn(scene(false), "u1", false, null).isMyTurn).toBe(true);
     expect(deriveTurn(scene(false), "u1", false, null, true).isMyTurn).toBe(false);
+  });
+});
+
+describe("deriveScene: playerView", () => {
+  const dmHero = (id: string, side = ParticipantSide.ALLY) => p(id, "dm-user", side);
+
+  const imp = { ...p("imp", "dm", ParticipantSide.ENEMY), battleData: { ...createMockParticipant().battleData, reserved: true } };
+
+  const scene = (turnIndex = 0) =>
+    ({ initiativeOrder: [dmHero("mine"), p("gob", "dm", ParticipantSide.ENEMY)], currentTurnIndex: turnIndex, currentRound: 1, status: "active", isDM: true, pendingSummons: [imp] }) as unknown as BattleScene;
+
+  it("DM + playerView: не DM, readOnly, без резерву, без свого ходу і героя", () => {
+    const out = deriveScene(scene(0), "dm-user", "gob", { playerView: true });
+
+    expect(out.viewer).toMatchObject({ userId: null, isDM: false, readOnly: true, canSeeEnemyHp: false });
+    expect(out.roster.reserve).toEqual([]);
+    expect(out.turn.isMyTurn).toBe(false);
+    expect(out.roster.hero).toBeNull();
+    expect(out.roster.myParticipants).toEqual([]);
+  });
+
+  it("dmControlledId ігнорується", () => {
+    const out = deriveScene(scene(1), "dm-user", "gob", { playerView: true });
+
+    expect(out.turn.isMyTurn).toBe(false);
+    expect(out.roster.hero).toBeNull();
+  });
+
+  it("ворожі стати приховані як для гравця (canSeeExactStats)", () => {
+    const { viewer, roster } = deriveScene(scene(), "dm-user", null, { playerView: true });
+
+    expect(canSeeExactStats(roster.enemies[0]!, viewer)).toBe(false);
+    expect(canSeeExactStats(roster.allies[0]!, viewer)).toBe(true);
+  });
+
+  it("без опції поведінка DM незмінна; без knowledge не падає", () => {
+    const out = deriveScene(scene(0), "dm-user", null);
+
+    expect(out.viewer).toMatchObject({ isDM: true, readOnly: false });
+    expect(out.turn.isMyTurn).toBe(true);
+    expect(out.roster.reserve).toHaveLength(1);
   });
 });

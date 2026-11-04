@@ -51,6 +51,14 @@ function emit(type: string, index: number, status: string, action: string) {
 afterEach(() => { cleanup(); window.history.replaceState({}, "", "/"); mocks.joyrideProps = null; mocks.setFlag.mockClear(); mocks.push.mockClear(); });
 
 describe("DemoTourCoordinator", () => {
+  it("turns player view off when a tour starts", () => {
+    window.sessionStorage.setItem("player-view:b1", "on");
+    renderCoordinator();
+    fireEvent.click(screen.getByText("launch"));
+
+    expect(window.sessionStorage.getItem("player-view:b1")).toBeNull();
+  });
+
   it("starts the selected tour and supplies active-locale steps and controls", () => {
     renderCoordinator();
     fireEvent.click(screen.getByRole("button", { name: "launch" }));

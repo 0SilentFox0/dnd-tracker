@@ -55,6 +55,7 @@ export interface BattleSceneDialogs {
 export interface BattleSceneValue extends BattleSceneData {
   dialogs: BattleSceneDialogs;
   connection: PusherConnectionState;
+  playerView: { available: boolean; enabled: boolean; toggle(): void };
   selectedId: string | null;
   intents: BattleSceneIntents;
   toast: BattleToastApi;

@@ -15,6 +15,7 @@ import { usePusherBattleSync } from "./usePusherBattleSync";
 import { BattleStatus } from "@/lib/constants/battle";
 import type { BattleSceneData, BattleSceneValue } from "@/lib/hooks/battle/types";
 import { battleQueryKey, useBattle } from "@/lib/hooks/battles";
+import { usePlayerView } from "@/lib/hooks/common";
 import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { deriveScene, NO_ORDER } from "@/lib/utils/battle/view";
@@ -105,7 +106,22 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const logHistory = useBattleLogHistory(campaignId, battleId, battle?.battleLog);
 
-  const derived = useMemo(() => (battle ? deriveScene(battle, userId, dmControlledId) : null), [battle, userId, dmControlledId]);
+  const flag = usePlayerView({ kind: "battle", id: battleId });
+
+  const realIsDM = battle?.isDM === true;
+
+  const playerViewOn = realIsDM && flag.enabled;
+
+  const derived = useMemo(() => (battle ? deriveScene(battle, userId, dmControlledId, { playerView: playerViewOn }) : null), [battle, userId, dmControlledId, playerViewOn]);
+
+  if (playerViewOn && (attackIntent || mapAim || mapPick || attackReadyId)) {
+    setAttackIntent(null);
+    setMapAim(null);
+    setMapPick(null);
+    setAttackReady(null);
+  }
+
+  const playerView = useMemo(() => ({ available: realIsDM, enabled: playerViewOn, toggle: flag.toggle }), [realIsDM, playerViewOn, flag.toggle]);
 
   const awaitingDm = useAwaitingDmDialog(!!derived?.viewer.isDM, derived?.awaiting ?? null);
 
@@ -143,6 +159,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     dialogs: { awaitingDm, resultScreen },
     connection: connectionState,
     dmControl,
+    playerView,
     selectedId,
     select,
     clickParticipant,

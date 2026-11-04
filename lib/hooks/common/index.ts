@@ -1,6 +1,6 @@
 export { ConfirmContext, type ConfirmFn } from "./confirm-context";
 export { prefersReducedMotion } from "./media-query";
-export { createStorageFlag, createStorageNumber, createStorageValue, type StorageCodec, type StorageValue, useStorageValue } from "./storage-value";
+export { createSessionFlag, createStorageFlag, createStorageNumber, createStorageValue, type StorageCodec, type StorageValue, useStorageValue } from "./storage-value";
 export { useCheckedIds } from "./useCheckedIds";
 export { useConfirm } from "./useConfirm";
 export { useCrudMutation } from "./useCrudMutation";
@@ -22,6 +22,8 @@ export { useNavigateFresh } from "./useNavigateFresh";
 export { useNotify, useOptionalNotify } from "./useNotify";
 export { usePageHidden } from "./usePageHidden";
 export { offsetPager, type Pager, type PagerControls, usePager } from "./usePager";
+export { type PlayerViewScope, resetPlayerViews, usePlayerView } from "./usePlayerView";
+export { usePlayerViewKey } from "./usePlayerViewKey";
 export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useReducedMotion } from "./useReducedMotion";
 export { useRowKeys } from "./useRowKeys";

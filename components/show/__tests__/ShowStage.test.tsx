@@ -4,6 +4,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ShowStage } from "../stage/ShowStage";
 
+vi.mock("@/lib/hooks/world", () => ({
+  useShowWorld: () => ({ status: "ready", props: { detail: { map: { id: "m1" } }, heroes: [] }, mapId: "m1" }),
+  useWorldDive: (p: unknown) => ({ shown: p, phase: "idle", origin: null }),
+}));
+
+vi.mock("@/components/world/WorldMapView", () => ({ WorldMapView: () => <div /> }));
+
 vi.mock("next/image", () => ({ default: (p: { src: string; alt: string }) => <img src={p.src} alt={p.alt} /> }));
 
 afterEach(cleanup);
@@ -46,5 +53,19 @@ describe("ShowStage", () => {
     render(<ShowStage campaignId="c1" show={show({ curtain: true })} />);
 
     expect(screen.getByText("show.waiting.paused")).toBeTruthy();
+  });
+});
+
+const worldShow = () => show({ world: { mapId: "m1" } });
+
+describe("ShowStage readOnly", () => {
+  it("DM бачить підпис карти світу, у режимі гравця — ні", () => {
+    const { container, rerender } = render(<ShowStage campaignId="c1" isDM show={worldShow()} />);
+
+    expect(container.textContent).toContain("world.show.dmNotice");
+
+    rerender(<ShowStage campaignId="c1" isDM readOnly show={worldShow()} />);
+
+    expect(container.textContent).not.toContain("world.show.dmNotice");
   });
 });

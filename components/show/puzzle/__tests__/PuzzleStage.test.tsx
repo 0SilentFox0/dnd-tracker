@@ -275,3 +275,16 @@ describe("PuzzleStage", () => {
     }
   });
 });
+
+describe("PuzzleStage readOnly", () => {
+  it("без DM-кнопок і без захоплення шматочків", async () => {
+    renderWithConfirm(<PuzzleStage campaignId="c1" isDM={false} readOnly userId="me" spec={spec} imageUrl="https://x/a.webp" puzzle={state()} />);
+
+    expect(screen.queryByRole("button")).toBeNull();
+
+    fireEvent.pointerDown(screen.getByTestId(`tray-piece-${a}`), { pointerId: 1, clientX: 10, clientY: 10, button: 0 });
+    await flush();
+
+    expect(send).not.toHaveBeenCalled();
+  });
+});

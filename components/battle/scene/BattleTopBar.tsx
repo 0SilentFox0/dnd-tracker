@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 
+import { BattlePlayerViewToggle } from "./BattlePlayerViewToggle";
+
 import { BattleStatus } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
@@ -34,6 +36,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
       <button type="button" disabled={!motionAllowed} title={fxHint} onClick={() => setFxOn(!fxOn)} aria-label={fxOn ? t("fxOn") : t("fxOff")} aria-pressed={fxOn} className={cn("ml-auto flex size-8 items-center justify-center hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent", fxOn ? "text-[var(--gold)]" : "text-hud-soft/60")}>
         <Sparkles className="size-4" />
       </button>
+      <BattlePlayerViewToggle />
       <span className="hud-sc flex items-center gap-2 text-sm text-hud-soft">
         {t("round", { round: battle.currentRound })}
         <i className={cn("size-1.5 rounded-full", connection === "connected" ? "bg-[#9fb98a]" : "bg-[#f0b44c] animate-[hud-pulse_1.2s_infinite]")} />

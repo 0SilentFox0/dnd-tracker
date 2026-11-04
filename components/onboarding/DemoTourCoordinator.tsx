@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import type { DemoTourRunnerProps } from "@/components/onboarding/DemoTourRunner";
 import { DemoTourTooltip } from "@/components/onboarding/DemoTourTooltip";
+import { resetPlayerViews } from "@/lib/hooks/common";
 import { useSetOnboardingFlag } from "@/lib/hooks/onboarding";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { setActiveDemoTour } from "@/lib/onboarding/active-demo-tour";
@@ -154,6 +155,7 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
   const startTour = useCallback((id: DemoTourId) => {
     if (!DEMO_TOURS.some((item) => item.id === id)) return;
 
+    resetPlayerViews();
     lastStepShown.current = false;
     setCenteredSteps(new Set());
     setActiveTour(id);

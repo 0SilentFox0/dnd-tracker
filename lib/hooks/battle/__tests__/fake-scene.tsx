@@ -11,7 +11,7 @@ import { ConfirmContext } from "@/lib/hooks/common";
 import { IntlWrapper } from "@/lib/i18n/test/intl-wrapper";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
-import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
+import { buildDisplayEffects, deriveScene, turnQueue } from "@/lib/utils/battle/view";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
@@ -36,6 +36,9 @@ export interface FakeSceneOptions {
   attackReady?: boolean;
   reserve?: BattleParticipant[];
   audio?: BattleScene["audio"];
+  playerView?: boolean;
+  critPending?: boolean;
+  resultOpen?: boolean;
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -72,8 +75,8 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const battle = {
     id: "b1", campaignId: "c1", name: "Засідка", status: opts.status ?? "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
-    initiativeOrder: order, pendingSummons: [], rules: DEFAULT_RULES, battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? false,
-    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingCritChoice: null, map: opts.map ?? null, audio: opts.audio ?? null,
+    initiativeOrder: order, pendingSummons: [], rules: DEFAULT_RULES, battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? opts.playerView ?? false,
+    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingCritChoice: opts.critPending ? { triggers: [{ key: "k", source: "attack", kind: "success", actorId: "me", targetId: "gob" }] } : null, map: opts.map ?? null, audio: opts.audio ?? null,
   } as BattleScene;
 
   const usedMe = { ...me, actionFlags: { ...me.actionFlags, hasUsedAction: true, hasUsedBonusAction: true } };
@@ -118,17 +121,20 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const openLog = vi.fn();
 
+  const derived = opts.playerView ? deriveScene(battle, "u", null, { playerView: true }) : null;
+
   const value = {
     campaignId: "c1",
     battleId: "b1",
     battle,
-    viewer: { userId: "u", isDM: opts.isDM ?? false, canSeeEnemyHp: false },
-    turn: { current: isMyTurn ? me : gob, isMyTurn, queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound) },
-    roster: { myParticipants: [me], hero: me, allies: [me, ally], enemies: [gob], reserve: opts.reserve ?? [] },
-    awaiting: null,
-    dialogs: { awaitingDm: { open: false, setOpen: vi.fn() }, resultScreen: { open: false, setOpen: vi.fn() } },
+    viewer: derived?.viewer ?? { userId: "u", isDM: opts.isDM ?? false, readOnly: false, canSeeEnemyHp: false },
+    turn: derived?.turn ?? { current: isMyTurn ? me : gob, isMyTurn, queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound) },
+    roster: derived?.roster ?? { myParticipants: [me], hero: me, allies: [me, ally], enemies: [gob], reserve: opts.reserve ?? [] },
+    awaiting: derived?.awaiting ?? null,
+    dialogs: { awaitingDm: { open: false, setOpen: vi.fn() }, resultScreen: { open: opts.resultOpen ?? false, setOpen: vi.fn() } },
     effects: buildDisplayEffects(order),
     connection: "connected",
+    playerView: { available: opts.isDM ?? opts.playerView ?? false, enabled: opts.playerView ?? false, toggle: vi.fn() },
     dmControl: { id: null, set: vi.fn() },
     selectedId: null,
     select: vi.fn(),

@@ -1,5 +1,6 @@
 import { BattlePageClient } from "./BattlePageClient";
 
+import { PlayerViewGuard } from "@/components/common/PlayerViewGuard";
 import { getSessionUserId } from "@/lib/auth";
 import { battleQueryKey } from "@/lib/hooks/battles/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
@@ -19,7 +20,9 @@ export default async function BattlePage({ params }: { params: Promise<{ id: str
 
   return (
     <PrefetchedQuery queryKey={battleQueryKey(id, battleId)} data={battle}>
-      <BattlePageClient campaignId={id} battleId={battleId} userId={userId} />
+      <PlayerViewGuard scope={{ kind: "battle", id: battleId }}>
+        <BattlePageClient campaignId={id} battleId={battleId} userId={userId} />
+      </PlayerViewGuard>
     </PrefetchedQuery>
   );
 }

@@ -38,7 +38,7 @@ function input({ actor, mode, ...over }: InputOverride = {}): MapSceneInput {
     map,
     participants: [hero, near, far, reserved],
     selectedId: null,
-    actor: { current: hero, viewer: { userId: "u1", isDM: false, canSeeEnemyHp: false }, canAct: true, isDM: false, attackReady: true, ...actor },
+    actor: { current: hero, viewer: { userId: "u1", isDM: false, readOnly: false, canSeeEnemyHp: false }, canAct: true, isDM: false, attackReady: true, ...actor },
     mode: { placing: false, placingId: null, ...mode },
     ...over,
   };
@@ -81,7 +81,7 @@ describe("deriveMapScene", () => {
     const hidden = invisible(near);
 
     expect(deriveMapScene(input({ participants: [own, hidden] })).participants.map((p) => p.basicInfo.id)).toEqual(["h"]);
-    expect(deriveMapScene(input({ participants: [own, hidden], actor: { isDM: true, viewer: { userId: "dm", isDM: true, canSeeEnemyHp: true } } })).participants.map((p) => p.basicInfo.id)).toEqual(["h", "e1"]);
+    expect(deriveMapScene(input({ participants: [own, hidden], actor: { isDM: true, viewer: { userId: "dm", isDM: true, readOnly: false, canSeeEnemyHp: true } } })).participants.map((p) => p.basicInfo.id)).toEqual(["h", "e1"]);
   });
 
   it("клік по якірній клітинці ходячого вибирає його, інші клітинки ходять", () => {
@@ -335,11 +335,11 @@ describe("deriveMapScene: DM без ліміту руху", () => {
   const own = { ...hero, basicInfo: { ...hero.basicInfo, controlledBy: "u1" } };
 
   it("юніт ДМ: усі досяжні клітинки поза швидкістю підсвічені; герой — лише в межах швидкості", () => {
-    const dm = deriveMapScene(input({ participants: [unit], actor: { current: unit, isDM: true, viewer: { userId: "dm", isDM: true, canSeeEnemyHp: true } } }));
+    const dm = deriveMapScene(input({ participants: [unit], actor: { current: unit, isDM: true, viewer: { userId: "dm", isDM: true, readOnly: false, canSeeEnemyHp: true } } }));
 
     expect(dm.view.marks?.get("9:4")).toBe(9);
 
-    const player = deriveMapScene(input({ participants: [own], actor: { current: own, isDM: true, viewer: { userId: "dm", isDM: true, canSeeEnemyHp: true } } }));
+    const player = deriveMapScene(input({ participants: [own], actor: { current: own, isDM: true, viewer: { userId: "dm", isDM: true, readOnly: false, canSeeEnemyHp: true } } }));
 
     expect(player.view.marks?.get("9:4")).toBeUndefined();
     expect(player.view.marks?.get("2:0")).toBe(2);

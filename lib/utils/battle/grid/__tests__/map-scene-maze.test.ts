@@ -20,7 +20,7 @@ function scene(map: BattleMapConfig, participants: BattleParticipant[], isDM: bo
 
   const maze = deriveMazeView({ map, participants, userId: isDM ? "dm" : "u", isDM });
 
-  const actor: MapSceneActor = { current, viewer: { userId: isDM ? "dm" : "u", isDM, canSeeEnemyHp: false }, canAct: true, isDM, attackReady: true };
+  const actor: MapSceneActor = { current, viewer: { userId: isDM ? "dm" : "u", isDM, readOnly: false, canSeeEnemyHp: false }, canAct: true, isDM, attackReady: true };
 
   return { maze, scene: deriveMapScene({ map, participants, selectedId: null, actor, mode: { placing: false, placingId: null }, modeView: maze }) };
 }

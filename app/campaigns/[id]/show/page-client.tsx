@@ -1,16 +1,21 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerProvider";
 import { DiceRoller } from "@/components/common/DiceRoller";
+import { PlayerViewToggle } from "@/components/common/PlayerViewToggle";
 import { FullscreenButton } from "@/components/show/stage/FullscreenButton";
 import { ShowBattleCall } from "@/components/show/stage/ShowBattleCall";
 import { ShowControlPanel } from "@/components/show/stage/ShowControlPanel";
 import { ShowStage } from "@/components/show/stage/ShowStage";
-import { useNotify } from "@/lib/hooks/common";
+import { useNotify, usePlayerView, usePlayerViewKey } from "@/lib/hooks/common";
 import { usePusherShowSync, useShowAudioHost, useShowControl, useShowKeys, useShowState } from "@/lib/hooks/show";
 
 export function ShowPageClient({ campaignId, isDM, userId }: { campaignId: string; isDM: boolean; userId: string }) {
+  const t = useTranslations("show");
+
   const notify = useNotify();
 
   usePusherShowSync(campaignId);
@@ -19,25 +24,34 @@ export function ShowPageClient({ campaignId, isDM, userId }: { campaignId: strin
 
   const control = useShowControl(campaignId, notify);
 
-  useShowKeys(isDM ? control : null);
+  const playerView = usePlayerView(isDM ? { kind: "show", id: campaignId } : null);
 
-  const host = useShowAudioHost({ campaignId, isDM, onFailure: notify });
+  usePlayerViewKey(playerView.toggle, isDM);
+
+  const readOnly = isDM && playerView.enabled;
+
+  const effectiveDM = isDM && !readOnly;
+
+  useShowKeys(effectiveDM ? control : null);
+
+  const host = useShowAudioHost({ campaignId, isDM: effectiveDM, onFailure: notify });
 
   return (
     <AudioPlayerProvider host={host}>
       <div className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col">
         <div className="relative min-h-[60dvh] flex-1">
-          <ShowStage show={show} campaignId={campaignId} isDM={isDM} userId={userId} />
-          {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} />}
+          <ShowStage show={show} campaignId={campaignId} isDM={effectiveDM} readOnly={readOnly} userId={userId} />
+          {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} playerView={readOnly} />}
           <div className="absolute right-3 top-3 z-20 flex gap-2">
             {!isDM && <DiceRoller />}
+            {isDM && <PlayerViewToggle enabled={playerView.enabled} onToggle={playerView.toggle} labels={{ on: t("playerView.on"), off: t("playerView.off") }} className="rounded bg-black/50" />}
             <FullscreenButton />
           </div>
           <div className="absolute left-3 top-3 z-30">
             <AudioDock placement="corner" />
           </div>
         </div>
-        {isDM && <ShowControlPanel campaignId={campaignId} show={show} control={control} />}
+        {effectiveDM && <ShowControlPanel campaignId={campaignId} show={show} control={control} />}
       </div>
     </AudioPlayerProvider>
   );
