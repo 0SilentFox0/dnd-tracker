@@ -5,11 +5,11 @@ import { useTranslations } from "next-intl";
 import { Heart, Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
-import { EffectLine, HealthBar, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
+import { EffectLine, HealthBar, HpFigure, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
 import { ReactionSpellButton } from "@/components/battle/turn/ReactionSpellButton";
 import { ReadiedAttackButton } from "@/components/battle/turn/ReadiedAttackButton";
 import { BattleStatus } from "@/lib/constants/battle";
-import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
+import { useBattleRules, useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -21,6 +21,8 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
   const t = useTranslations("battle.hero");
 
   const { battle, turn: { queue, isMyTurn }, effects } = useBattleSceneData();
+
+  const { d20Stats, woundsLabel } = useBattleRules();
 
   const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
@@ -49,14 +51,14 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
               {morale !== 0 && <span className={cn("shrink-0 font-sans text-sm font-medium tracking-normal", morale > 0 ? "text-hud-good" : "text-hud-danger")}>{t("morale", { value: signed(morale) })}</span>}
             </span>
             <span className="shrink-0 whitespace-nowrap pl-2 font-sans text-sm font-normal italic tracking-normal text-hud-soft">
-              {compact ? `${hero.combatStats.currentHp} / ${hero.combatStats.maxHp} · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}` : battle.status !== BattleStatus.ACTIVE ? "" : isMyTurn ? t("yourTurn") : until === 0 ? t("acting") : until !== null ? t("turnIn", { count: until }) : ""}
+              {compact ? <><HpFigure participant={hero} wounds={woundsLabel === "wounds"} />{d20Stats && ` · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}`}</> : battle.status !== BattleStatus.ACTIVE ? "" : isMyTurn ? t("yourTurn") : until === 0 ? t("acting") : until !== null ? t("turnIn", { count: until }) : ""}
             </span>
           </div>
           <HealthBar participant={hero} exact className="h-1.5" />
           {!compact && (
             <div className="mt-1.5 flex h-6 items-center gap-4 text-[15px] text-hud-text">
-              <span className="flex items-center gap-1.5"><Heart className="size-4 text-[var(--enemy)]" />{hero.combatStats.currentHp} / {hero.combatStats.maxHp}</span>
-              <span className="flex items-center gap-1.5"><Shield className="size-4 text-hud-soft" />{getEffectiveArmorClass(hero, battle.initiativeOrder)}</span>
+              <span className="flex items-center gap-1.5"><Heart className="size-4 text-[var(--enemy)]" /><HpFigure participant={hero} wounds={woundsLabel === "wounds"} /></span>
+              {d20Stats && <span className="flex items-center gap-1.5"><Shield className="size-4 text-hud-soft" />{getEffectiveArmorClass(hero, battle.initiativeOrder)}</span>}
             </div>
           )}
         </div>

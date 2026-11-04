@@ -16,6 +16,7 @@
     "waitingNote": "The DM is choosing the critical roll effect…"
   },
   "hud": {
+    "wounds": "Wounds",
     "d100": {
       "tens": "Tens",
       "units": "Units",

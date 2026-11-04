@@ -17,7 +17,7 @@ const Tile = ({ icon: Icon, label, used, primary, onClick }: { icon: typeof Swor
 export function ActionGrid({ turn, pending, available, actions }: {
   turn: Turn;
   pending: boolean;
-  available: { magic: boolean; bonus: boolean; ability?: boolean; core?: boolean };
+  available: { magic: boolean; bonus: boolean; bonusTile?: boolean; ability?: boolean; core?: boolean };
   actions: { attack(): void; magic(): void; bonus(): void; ability?(): void; core?(): void };
 }) {
   const t = useTranslations("battle.actions");
@@ -30,7 +30,7 @@ export function ActionGrid({ turn, pending, available, actions }: {
         <Tile icon={Swords} label={t("attack")} used={(turn.status.actionUsed && !turn.status.attackLeft) || turn.status.skipped || pending} primary onClick={actions.attack} />
         <Tile icon={BookOpen} label={t("magic")} used={(turn.status.actionUsed && !turn.status.bonusSpellReady) || turn.status.skipped || !available.magic || pending} onClick={actions.magic} />
         {available.ability && <Tile icon={Zap} label={t("ability")} used={turn.status.actionUsed || turn.status.skipped || pending} onClick={actions.ability} />}
-        <Tile icon={Sparkles} label={t("bonus")} used={!turn.status.bonusAvailable || turn.status.skipped || !available.bonus || pending} onClick={actions.bonus} />
+        {available.bonusTile !== false && <Tile icon={Sparkles} label={t("bonus")} used={!turn.status.bonusAvailable || turn.status.skipped || !available.bonus || pending} onClick={actions.bonus} />}
         {available.core && <Tile icon={ListChecks} label={t("core")} used={turn.status.skipped || pending} onClick={actions.core} />}
         {turn.strikeAndReturn.available && <Tile icon={Undo2} label={t("strikeAndReturn")} used={pending} onClick={turn.strikeAndReturn.run} />}
         {turn.moraleResult && <Tile icon={Hourglass} label={tm(`outcome.${turn.moraleResult}`)} used />}

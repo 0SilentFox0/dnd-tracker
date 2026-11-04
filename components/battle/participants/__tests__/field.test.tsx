@@ -18,6 +18,7 @@ import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleScene } from "@/types/api";
 import type { ActiveEffect, BattleAction } from "@/types/battle";
 
@@ -43,7 +44,7 @@ function scene(isDM = false) {
     { actionIndex: 1, round: 1, actorName: "Годрік", actionType: "attack", hpChanges: [], targets: [{ participantId: "gob", participantName: "Гоблін" }], resultText: "Годрік завдав 6", actionDetails: { totalAttackValue: 15, isHit: true, targetAC: 15, damageBreakdown: "секрет" } },
   ] as unknown as BattleAction[];
 
-  const battle = { initiativeOrder: [gob, hero], currentTurnIndex: 0, currentRound: 3, battleLog: log } as unknown as BattleScene;
+  const battle = { initiativeOrder: [gob, hero], currentTurnIndex: 0, currentRound: 3, battleLog: log, rules: DEFAULT_RULES } as unknown as BattleScene;
 
   return {
     battle, viewer: { userId: "u", isDM, readOnly: false, canSeeEnemyHp: false },
@@ -205,7 +206,7 @@ describe("поле бою", () => {
     const renderRow = () => {
       const onSelect = vi.fn();
 
-      render(<TooltipProvider><ParticipantRow impact={null} participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
+      render(<TooltipProvider><ParticipantRow impact={null} participant={p("gob", "Гоблін", ParticipantSide.ENEMY)} effects={[effect("a"), effect("b"), effect("c")]} exact acText="15" wounds={false} current={false} onSelect={onSelect} /></TooltipProvider>, { wrapper: wrap(scene()) });
 
       return onSelect;
     };
@@ -230,7 +231,7 @@ describe("поле бою", () => {
     describe("декорації удару фіксуються в момент зміни HP", () => {
       const hit: FxImpact = { element: "fire", kind: "damage", delayMs: 600 };
 
-      const row = (hp: number, impact: FxImpact | null) => <TooltipProvider><ParticipantRow impact={impact} participant={p("gob", "Гоблін", ParticipantSide.ENEMY, hp)} effects={[]} exact acText="15" current={false} onSelect={vi.fn()} /></TooltipProvider>;
+      const row = (hp: number, impact: FxImpact | null) => <TooltipProvider><ParticipantRow impact={impact} participant={p("gob", "Гоблін", ParticipantSide.ENEMY, hp)} effects={[]} exact acText="15" wounds={false} current={false} onSelect={vi.fn()} /></TooltipProvider>;
 
       const portrait = (container: HTMLElement) => container.querySelector('[data-fx-participant="gob"]') as HTMLElement;
 
