@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
-import { useMapMotionTool } from "@/lib/hooks/battle";
+import { useMapMotionTool } from "@/lib/hooks/battle/useMapMotionTool";
 import { useImageSize } from "@/lib/hooks/common";
 import { textRef } from "@/lib/i18n/text-ref";
 import {
