@@ -114,9 +114,7 @@ export const useCompleteBattle = makeBattleHook(battleOps.complete);
 export const useRollbackBattleAction = makeBattleHook(battleOps.rollback);
 export const useRevealBattleParticipants = makeBattleHook(battleOps.reveal);
 export const useBattleConditions = makeBattleHook(battleOps.conditions);
-
 export const useInitiativeReorder = makeBattleHook(battleOps.initiativeReorder);
-
 export const useInitiativeRoll = makeBattleHook(battleOps.initiativeRoll);
 export const useBattleCoreAction = makeBattleHook(battleOps.coreAction);
 export const useAddBattleParticipant = makeBattleHook(battleOps.addParticipant);
