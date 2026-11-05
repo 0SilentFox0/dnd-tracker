@@ -111,6 +111,16 @@ const OPERATIONS: Record<string, Loader> = {
       return { schema: conditionTestSchema, mutate: conditionTestMutation };
     },
   }),
+  channel: operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "attack",
+    load: async () => {
+      const { channelMutation, channelSchema } = await import("@/lib/server/battles/mutations/channel/channel-mutation");
+
+      return { schema: channelSchema, mutate: channelMutation };
+    },
+  }),
   "system-condition": operation({
     access: DM,
     load: async () => {
