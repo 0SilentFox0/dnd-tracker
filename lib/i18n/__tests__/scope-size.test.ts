@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { LOCALES } from "../config";
 import { loadMessages, loadStaticMessages } from "../messages";
-import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES, ROOT_NAMESPACES } from "../scopes";
+import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES, ROOT_NAMESPACES, WFRP_BATTLE_NAMESPACES } from "../scopes";
 
 const LIMIT_KB = 105;
 
@@ -12,6 +12,7 @@ const ROOT_LIMIT_KB = 20;
 const SCOPES = [
   { name: "campaign", namespaces: CAMPAIGN_NAMESPACES },
   { name: "campaign + battle", namespaces: [...CAMPAIGN_NAMESPACES, ...BATTLE_NAMESPACES] },
+  { name: "campaign + battle + battleWfrp", namespaces: [...CAMPAIGN_NAMESPACES, ...WFRP_BATTLE_NAMESPACES] },
 ] as const;
 
 describe("message scope size", () => {
