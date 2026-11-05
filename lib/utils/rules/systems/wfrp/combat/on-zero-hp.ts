@@ -18,7 +18,7 @@ export function wfrpOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
 
   let next: BattleParticipant = { ...after, combatStats: { ...after.combatStats, status: CombatStatus.UNCONSCIOUS } };
 
-  const messages: LogLine[] = [textRef("battleLog.wfrp.unconscious", { name: after.basicInfo.name })];
+  const messages: LogLine[] = [textRef("battleWfrp.log.unconscious", { name: after.basicInfo.name })];
 
   // a doubles crit (ctx.crit) was already rolled for this blow
   if (!ctx.manual && !ctx.crit) {

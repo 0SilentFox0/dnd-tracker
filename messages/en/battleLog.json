@@ -25,8 +25,7 @@
       "abilityTotal": "Abilities: +{total}",
       "spellMod": "{label} mod",
       "spellBonus": "Spell bonus",
-      "pacified": "🕊 condition: deals no damage = 0",
-      "wfrpTotal": "Total damage"
+      "pacified": "🕊 condition: deals no damage = 0"
     },
     "steps": {
       "dice": "Dice",
@@ -40,16 +39,7 @@
       "weaponBonus": "Weapon bonus",
       "obstacle": "Obstacle",
       "resistance": "Resistance",
-      "berserk": "Berserk",
-      "wfrp": {
-        "weapon": "Weapon",
-        "sb": "Strength bonus",
-        "netSl": "Net SL",
-        "tb": "Toughness bonus",
-        "ap": "Armour",
-        "minimum": "Minimum damage",
-        "crit": "Critical wound"
-      }
+      "berserk": "Berserk"
     },
     "sources": {
       "skill": "Skill bonus",
@@ -389,41 +379,6 @@
     "applied": "🐾 {name} transforms: {unit} ({hp} HP, AC {ac})",
     "reverted": "🐾 {name} returns to the normal form",
     "formLost": "🐾 {name}: the form is lost{hasOverflow, select, true {, {overflow} damage carries over to the normal form} other {}}"
-  },
-  "wfrp": {
-    "crit": {
-      "head": {
-        "1": "The blow only rings through the skull.",
-        "2": "A split brow floods the eyes with blood.",
-        "3": "Skull ringing, the world swims.",
-        "4": "The helm cracks and the foe sways like a drunkard.",
-        "5": "The skull caves in, and consciousness gutters like a candle."
-      },
-      "arm": {
-        "1": "The arm bones ache from the strike.",
-        "2": "A deep cut, blood seeping through the sleeve.",
-        "3": "Fingers spasm open and the weapon drops.",
-        "4": "An artery is opened, blood spurts forth.",
-        "5": "The arm hangs limp, the weapon slips away."
-      },
-      "body": {
-        "1": "Ribs creak but hold.",
-        "2": "Breath is knocked out, wheezing and coughing.",
-        "3": "A ragged wound in the flank, the blood will not stop.",
-        "4": "The blade bites deep, guts afire.",
-        "5": "A chest blow topples the foe, darkness closing in."
-      },
-      "leg": {
-        "1": "The knee buckles for a moment.",
-        "2": "A shin wound leaves a trail of blood.",
-        "3": "Legs swept, the foe sprawls in the mud.",
-        "4": "Tendon severed, the foe falls screaming.",
-        "5": "The knee is shattered, no more walking."
-      }
-    },
-    "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
-    "critWound": "🩸 Critical wound for {target}: {text}",
-    "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious"
   },
   "percentile": {
     "test": "🎲 Test: {roll} vs {target} (SL {sl})",

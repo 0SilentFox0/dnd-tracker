@@ -66,7 +66,10 @@
     "endTestFailHidden": "{name}: {condition} — test {roll}, SL {sl}: failure",
     "stand": "{name} gets up",
     "fortuneReroll": "{name} spends Fortune: reroll (first roll {first})",
-    "fortuneSl": "{name} spends Fortune: +1 SL"
+    "fortuneSl": "{name} spends Fortune: +1 SL",
+    "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
+    "critWound": "🩸 Critical wound for {target}: {text}",
+    "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious"
   },
   "ui": {
     "dialog": {
@@ -96,5 +99,47 @@
       "used": "Fortune: reroll (first roll {first})",
       "usedSl": "Fortune: +1 SL"
     }
+  },
+  "crit": {
+    "head": {
+      "1": "The blow only rings through the skull.",
+      "2": "A split brow floods the eyes with blood.",
+      "3": "Skull ringing, the world swims.",
+      "4": "The helm cracks and the foe sways like a drunkard.",
+      "5": "The skull caves in, and consciousness gutters like a candle."
+    },
+    "arm": {
+      "1": "The arm bones ache from the strike.",
+      "2": "A deep cut, blood seeping through the sleeve.",
+      "3": "Fingers spasm open and the weapon drops.",
+      "4": "An artery is opened, blood spurts forth.",
+      "5": "The arm hangs limp, the weapon slips away."
+    },
+    "body": {
+      "1": "Ribs creak but hold.",
+      "2": "Breath is knocked out, wheezing and coughing.",
+      "3": "A ragged wound in the flank, the blood will not stop.",
+      "4": "The blade bites deep, guts afire.",
+      "5": "A chest blow topples the foe, darkness closing in."
+    },
+    "leg": {
+      "1": "The knee buckles for a moment.",
+      "2": "A shin wound leaves a trail of blood.",
+      "3": "Legs swept, the foe sprawls in the mud.",
+      "4": "Tendon severed, the foe falls screaming.",
+      "5": "The knee is shattered, no more walking."
+    }
+  },
+  "damage": {
+    "steps": {
+      "weapon": "Weapon",
+      "sb": "Strength bonus",
+      "netSl": "Net SL",
+      "tb": "Toughness bonus",
+      "ap": "Armour",
+      "minimum": "Minimum damage",
+      "crit": "Critical wound"
+    },
+    "total": "Total damage"
   }
 }

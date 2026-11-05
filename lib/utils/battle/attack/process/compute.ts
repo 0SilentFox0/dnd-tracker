@@ -12,7 +12,7 @@ import { applyResistanceForAdditional } from "./damage";
 
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
+import { textRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackAbilityFor, attackDamageModifier } from "@/lib/utils/battle/attack/ability";
 import { critNameRef } from "@/lib/utils/battle/attack/critical";
@@ -255,8 +255,6 @@ function applyAttackerMultipliers(
   }
 }
 
-const WFRP_TARGET_SIDE = new Set(["tb", "ap"]);
-
 function mitigateHit(
   params: ComputeHitDamageParams & { rules: Ruleset },
   input: { attacker: BattleParticipant; target: BattleParticipant; weapon: number; amount: number },
@@ -282,13 +280,13 @@ function mitigateHit(
   const steps = result.steps.map<DamageStep>((s) => {
     running += s.value;
 
-    return { label: dynamicTextRef(`battleLog.damage.steps.wfrp.${s.key}`), side: WFRP_TARGET_SIDE.has(s.key) ? "target" : "attacker", kind: "flat", value: s.value, after: running };
+    return { label: s.label, side: s.side, kind: "flat", value: s.value, after: running };
   });
 
   const rows = [
-    ...result.steps.map((s) => stepRow(dynamicTextRef(`battleLog.damage.steps.wfrp.${s.key}`), s.value > 0 ? `+${s.value}` : s.value)),
+    ...result.steps.map((s) => stepRow(s.label, s.value > 0 ? `+${s.value}` : s.value)),
     ruleRow(),
-    totalRow(textRef("battleLog.damage.rows.wfrpTotal"), result.amount),
+    totalRow(result.totalLabel, result.amount),
   ];
 
   return { amount: result.amount, steps, rows, afterHit: result.afterHit };

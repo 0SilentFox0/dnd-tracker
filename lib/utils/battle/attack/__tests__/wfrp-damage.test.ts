@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
@@ -54,7 +55,7 @@ const crits = (p: BattleParticipant) => p.battleData.activeEffects.filter((e) =>
 
 const logOf = (r: ReturnType<typeof strike>) => JSON.stringify(r.battleAction);
 
-const critLines = (r: ReturnType<typeof strike>) => (logOf(r).match(/battleLog\.wfrp\.crit(?:Hit|Wound)/g) ?? []).length;
+const critLines = (r: ReturnType<typeof strike>) => (logOf(r).match(/battleWfrp\.log\.crit(?:Hit|Wound)/g) ?? []).length;
 
 describe("WFRP damage", () => {
   it("weapon + SB + net SL - TB - AP", () => {
@@ -63,6 +64,16 @@ describe("WFRP damage", () => {
     expect(r.attackRoll.percentile).toMatchObject({ netSl: 5, location: "head", doubles: false });
     expect(r.targetUpdated.combatStats.currentHp).toBe(20 - (4 + 3 + 5 - 3 - 2));
     expect(r.battleAction.actionDetails.damageSteps?.t.map((s) => s.value)).toEqual([4, 3, 5, -3, -2]);
+  });
+
+  it("labels and sides come from the system contract", () => {
+    const r = strike(30, 80, { target: { ap: 2 } });
+
+    const steps = r.battleAction.actionDetails.damageSteps?.t ?? [];
+
+    expect(steps.map((s) => s.label)).toEqual(["weapon", "sb", "netSl", "tb", "ap"].map((k) => dynamicTextRef(`battleWfrp.damage.steps.${k}`)));
+    expect(steps.map((s) => s.side)).toEqual(["attacker", "attacker", "attacker", "target", "target"]);
+    expect(JSON.stringify(r.battleAction)).toContain("battleWfrp.damage.total");
   });
 
   it("never below 1", () => {
@@ -81,7 +92,7 @@ describe("WFRP damage", () => {
     expect(effect.name).toBe("crit.wfrp.arm.5.disarmed");
     expect(effect.effects).toEqual([{ type: "disarmed", value: 1 }]);
     expect(r.targetUpdated.combatStats.currentHp).toBe(20 - (4 + 3 + (r.attackRoll.percentile?.netSl ?? 0) - 3 + 4));
-    expect(logOf(r)).toContain("battleLog.wfrp.critHit");
+    expect(logOf(r)).toContain("battleWfrp.log.critHit");
   });
 
   it("doubles on a miss: no crit, log only", () => {
@@ -97,7 +108,7 @@ describe("WFRP damage", () => {
     const r = strike(30, 80, { target: { hp: 3 } });
 
     expect(r.targetUpdated.combatStats).toMatchObject({ currentHp: 0, status: CombatStatus.UNCONSCIOUS });
-    expect(logOf(r)).toContain("battleLog.wfrp.unconscious");
+    expect(logOf(r)).toContain("battleWfrp.log.unconscious");
     expect(critLines(r)).toBe(1);
 
     const again = strike(30, 80, { target: r.targetUpdated });

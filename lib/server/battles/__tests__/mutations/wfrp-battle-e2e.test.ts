@@ -82,7 +82,7 @@ describe("wfrp battle end to end (engine)", () => {
     const target = ctx.participants.find((p) => p.basicInfo.id === "t")!;
 
     expect(target.combatStats).toMatchObject({ currentHp: 0, status: CombatStatus.UNCONSCIOUS });
-    expect((lastEvents.match(/battleLog\.wfrp\.crit(?:Hit|Wound)/g) ?? []).length).toBe(1);
+    expect((lastEvents.match(/battleWfrp\.log\.crit(?:Hit|Wound)/g) ?? []).length).toBe(1);
     expect(rolls.every((n) => n > 0)).toBe(true);
   });
 

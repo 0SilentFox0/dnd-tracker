@@ -77,7 +77,7 @@ describe("wfrpConditionsTurnStart", () => {
 
     expect(self(r).combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
     expect(r.downed).toBe(true);
-    expect(JSON.stringify(r.messages)).toContain("battleLog.wfrp.unconscious");
+    expect(JSON.stringify(r.messages)).toContain("battleWfrp.log.unconscious");
   });
 
   it("tick damage never takes wounds below 0 (unconscious, not dead)", () => {

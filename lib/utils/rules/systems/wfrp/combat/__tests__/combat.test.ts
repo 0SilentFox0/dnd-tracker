@@ -9,12 +9,13 @@ import { applyWfrpCrit } from "../crit-effect";
 import { CRIT_TABLE, rollCrit } from "../crit-table";
 import { computeWfrpDamage } from "../damage";
 import { hitLocation } from "../location";
+import { mitigateWfrpDamage } from "../mitigate";
 import { resolveOpposed } from "../opposed";
 import { wfrpAbilitiesOf } from "../participant";
 import { resolveWfrpAttack } from "../resolve-attack";
 
 import { AttackType, CombatStatus } from "@/lib/constants/battle";
-import { textRef } from "@/lib/i18n/text-ref";
+import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
@@ -104,6 +105,32 @@ describe("computeWfrpDamage", () => {
   });
 });
 
+describe("mitigateWfrpDamage", () => {
+  const ctx = (amount: number) => {
+    const attacker = makeParticipant({ id: "a", hp: 10, maxHp: 10 });
+
+    const target = makeParticipant({ id: "t", hp: 10, maxHp: 10 });
+
+    return { attacker, target, weapon: 4, amount, netSl: 2, location: "body" as const, crit: false, rng, rules: WFRP_RULES };
+  };
+
+  it("every step carries a label and side, plus totalLabel", () => {
+    const r = mitigateWfrpDamage({ ...ctx(5), target: { ...ctx(5).target, abilities: { ...ctx(5).target.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { head: 0, arm: 0, body: 2, leg: 0 }) } } });
+
+    expect(r.totalLabel).toEqual(textRef("battleWfrp.damage.total"));
+    expect(r.steps.length).toBeGreaterThan(0);
+
+    for (const s of r.steps) {
+      expect(s.label).toEqual(dynamicTextRef(`battleWfrp.damage.steps.${s.key}`));
+      expect(s.side).toBe(s.key === "tb" || s.key === "ap" ? "target" : "attacker");
+    }
+  });
+
+  it("totalLabel is set for amount <= 0", () => {
+    expect(mitigateWfrpDamage(ctx(0))).toMatchObject({ amount: 0, steps: [], totalLabel: textRef("battleWfrp.damage.total") });
+  });
+});
+
 describe("rollCrit", () => {
   it("every row of every table is reachable", () => {
     for (const loc of LOCATIONS) {
@@ -116,8 +143,8 @@ describe("rollCrit", () => {
   });
 
   it("returns text key, bonus and marker", () => {
-    expect(rollCrit("head", rng, 100)).toEqual({ id: "head.5", textKey: "battleLog.wfrp.crit.head.5", bonusDamage: 5, markerKey: "unconscious" });
-    expect(rollCrit("leg", rng, 1)).toEqual({ id: "leg.1", textKey: "battleLog.wfrp.crit.leg.1", bonusDamage: 1 });
+    expect(rollCrit("head", rng, 100)).toEqual({ id: "head.5", textKey: "battleWfrp.crit.head.5", bonusDamage: 5, markerKey: "unconscious" });
+    expect(rollCrit("leg", rng, 1)).toEqual({ id: "leg.1", textKey: "battleWfrp.crit.leg.1", bonusDamage: 1 });
   });
 
   it("rolls from rng without preset", () => {
@@ -157,7 +184,7 @@ describe("resolveWfrpAttack conditions", () => {
   });
 
   describe("crits", () => {
-    const crit = (id: string, markerKey: string) => ({ id, textKey: `battleLog.wfrp.crit.${id}`, bonusDamage: 2, markerKey });
+    const crit = (id: string, markerKey: string) => ({ id, textKey: `battleWfrp.crit.${id}`, bonusDamage: 2, markerKey });
 
     const crits = (p: BattleParticipant) => p.battleData.activeEffects.filter((e) => e.name.startsWith("crit.wfrp."));
 

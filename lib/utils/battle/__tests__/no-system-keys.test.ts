@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 
-const SYSTEM_KEY = /["`]battleWfrp\./;
+const SYSTEM_KEY = /["`]battleWfrp\.|wfrpTotal|\.wfrp\./;
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -17,7 +17,7 @@ function walk(dir: string): string[] {
 }
 
 describe("battle core knows no rule-system i18n keys", () => {
-  it("lib/utils/battle has no battleWfrp.* literals", () => {
+  it("lib/utils/battle has no wfrp key literals", () => {
     const hits = walk(join(ROOT, "lib/utils/battle"))
       .map((file) => relative(ROOT, file))
       .flatMap((file) =>
@@ -33,5 +33,18 @@ describe("battle core knows no rule-system i18n keys", () => {
     expect(SYSTEM_KEY.test('textRef("battleWfrp.log.x")')).toBe(true);
     expect(SYSTEM_KEY.test("textRef(`battleWfrp.${k}`)")).toBe(true);
     expect(SYSTEM_KEY.test("battleLog.percentile")).toBe(false);
+  });
+
+  it("the pattern catches the legacy battleLog wfrp keys", () => {
+    expect(SYSTEM_KEY.test("battleLog.damage.rows.wfrpTotal")).toBe(true);
+    expect(SYSTEM_KEY.test("battleLog.wfrp.crit.head.1")).toBe(true);
+  });
+
+  it.each(["uk", "en"])("%s battleLog.json carries no wfrp texts", (locale) => {
+    const log = JSON.parse(readFileSync(join(ROOT, `messages/${locale}/battleLog.json`), "utf8"));
+
+    expect(log.wfrp).toBeUndefined();
+    expect(log.damage.steps.wfrp).toBeUndefined();
+    expect(log.damage.rows.wfrpTotal).toBeUndefined();
   });
 });

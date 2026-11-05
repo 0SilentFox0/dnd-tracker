@@ -56,5 +56,5 @@ export function rollCrit(location: HitLocation, rng: Rng, presetRoll?: number): 
 
   const { bonusDamage, markerKey } = rows[index];
 
-  return { id: `${location}.${index + 1}`, textKey: `battleLog.wfrp.crit.${location}.${index + 1}`, bonusDamage, ...(markerKey ? { markerKey } : {}) };
+  return { id: `${location}.${index + 1}`, textKey: `battleWfrp.crit.${location}.${index + 1}`, bonusDamage, ...(markerKey ? { markerKey } : {}) };
 }
