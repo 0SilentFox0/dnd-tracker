@@ -46,6 +46,13 @@ export interface Slide {
   trackId?: string;
   kind?: "puzzle";
   puzzle?: PuzzleSpec;
+  /** id героїв, яким видно слайд; відсутнє — усім. */
+  audience?: string[];
+}
+
+/** Знімок слайда для стежки показу; лише на сервері. */
+export interface SlideTrailEntry {
+  slide: Slide;
 }
 
 /** Заглушка кампанії: знімок обраного слайда (без треку). */
@@ -110,6 +117,8 @@ export interface ShowState {
   /** Карта світу на екрані гравців: лише id, вигляд кожен клієнт дочитує сам. */
   world?: ShowWorld;
   puzzle?: PuzzleState;
+  /** Лише серверне: ніколи не віддається клієнтам. */
+  trail?: SlideTrailEntry[];
   seq: number;
 }
 
@@ -138,7 +147,9 @@ export interface ShowSnapshot {
 /** Pusher `show-state` */
 export interface ShowEvent {
   campaignId: string;
-  show: ShowState;
+  /** Відсутній, коли показ обмежений: клієнт перечитує власний вигляд. */
+  show?: ShowState;
+  seq: number;
 }
 
 export interface SlideUploadRequest {

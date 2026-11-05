@@ -7,6 +7,7 @@ import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
+import { toClientShow } from "@/lib/utils/show/player-view";
 import type { ShowResponse } from "@/types/show";
 
 export async function commandShow(req: Request, campaignId: string): Promise<NextResponse> {
@@ -25,11 +26,11 @@ export async function commandShow(req: Request, campaignId: string): Promise<Nex
 
     const next = await applyAndWriteShowCommand(campaignId, prev, cmd);
 
-    if (next === prev) return NextResponse.json({ show: prev } satisfies ShowResponse);
+    if (next === prev) return NextResponse.json({ show: prev && toClientShow(prev) } satisfies ShowResponse);
 
     after(() => publishShow(campaignId, next));
 
-    return NextResponse.json({ show: next } satisfies ShowResponse);
+    return NextResponse.json({ show: toClientShow(next) } satisfies ShowResponse);
   } catch (error) {
     return handleApiError(error, { action: "show command" });
   }

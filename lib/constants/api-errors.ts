@@ -158,6 +158,7 @@ export const API_ERRORS = {
   SHOW_DECK_EMPTY: "errors.showDeckEmpty",
   SHOW_NOT_RUNNING: "errors.showNotRunning",
   SHOW_CONFLICT: "errors.showConflict",
+  SHOW_COVER_RESTRICTED: "errors.showCoverRestricted",
   PUZZLE_NOT_ACTIVE: "errors.puzzleNotActive",
   PUZZLE_PIECE_NOT_FOUND: "errors.puzzlePieceNotFound",
   PUZZLE_PIECE_TAKEN: "errors.puzzlePieceTaken",

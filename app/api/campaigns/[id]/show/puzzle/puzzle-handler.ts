@@ -6,6 +6,7 @@ import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { puzzleCommandSchema } from "@/lib/schemas/puzzle";
 import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
+import { showForViewer } from "@/lib/server/show/viewer-show";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -50,7 +51,7 @@ export async function commandPuzzle(req: Request, campaignId: string): Promise<N
       if (await writeShowState(campaignId, prev, next)) {
         after(() => publishShow(campaignId, next));
 
-        return NextResponse.json({ show: next } satisfies ShowResponse);
+        return NextResponse.json({ show: await showForViewer(campaignId, access, next) } satisfies ShowResponse);
       }
     }
 

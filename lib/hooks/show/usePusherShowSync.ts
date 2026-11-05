@@ -9,7 +9,7 @@ import { writeShowSnapshot } from "./show-snapshot";
 import { usePusherChannel } from "@/lib/hooks/common";
 import { worldKeys } from "@/lib/hooks/world/keys";
 import { SHOW_STATE_EVENT, showChannelName, WORLD_CHANGED_EVENT } from "@/lib/pusher/channels";
-import type { ShowEvent } from "@/types/show";
+import type { ShowEvent, ShowSnapshot } from "@/types/show";
 import type { WorldChangedEvent } from "@/types/world";
 
 const WORLD_THROTTLE_MS = 1000;
@@ -36,11 +36,16 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
     enabled ? showChannelName(campaignId) : null,
     {
       [SHOW_STATE_EVENT]: (data) => {
-        const show = (data as Partial<ShowEvent> | null)?.show;
+        const event = data as Partial<ShowEvent> | null;
 
-        if (!show || typeof show.seq !== "number") return;
+        if (event?.show && typeof event.show.seq === "number") return writeShowSnapshot(queryClient, campaignId, { show: event.show });
 
-        writeShowSnapshot(queryClient, campaignId, { show });
+        // обмежений слайд не розсилається: перечитуємо власний вигляд
+        if (typeof event?.seq !== "number") return;
+
+        const cachedSeq = queryClient.getQueryData<ShowSnapshot>(showKeys.state(campaignId))?.show?.seq ?? -1;
+
+        if (event.seq > cachedSeq) void queryClient.invalidateQueries({ queryKey: showKeys.state(campaignId) });
       },
       [WORLD_CHANGED_EVENT]: (data) => {
         const seq = (data as Partial<WorldChangedEvent> | null)?.seq;

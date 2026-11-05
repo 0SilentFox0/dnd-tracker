@@ -1,4 +1,8 @@
 {
+  "2026-11-05-slide-audience": {
+    "title": "Slides for chosen heroes",
+    "body": "Limit a slide to specific heroes in the slide editor. Other players keep seeing the last slide available to their heroes — the hidden one never reaches their screens or music."
+  },
   "2026-11-05-section-music": {
     "title": "Music for a scenario section",
     "body": "Bind a track from the music library to a scenario section. When you show a slide from that section, the player switches to the track (a slide with its own track keeps priority); the ▶ button in the section header plays it manually."

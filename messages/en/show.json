@@ -30,6 +30,7 @@
     }
   },
   "deckStrip": {
+    "audience": "Only for {count} heroes",
     "thisScene": "This scene",
     "otherDecks": "Other decks",
     "deck": "Deck",
@@ -96,6 +97,12 @@
     "slides": "{count, plural, one {# slide} other {# slides}}",
     "scene": "Scene: {scene}"
   },
+  "audience": {
+    "label": "Who sees this slide",
+    "all": "Everyone",
+    "chosen": "Chosen heroes",
+    "pickOne": "Pick at least one hero"
+  },
   "slideDialog": {
     "cuts": {
       "classic": "Classic",
@@ -157,6 +164,7 @@
   "validation": {
     "httpUrl": "An http(s) link is required",
     "puzzleParams": "A puzzle and its parameters go together",
+    "puzzleAudience": "A puzzle cannot be limited to heroes",
     "duplicateSlideId": "Duplicate slide id"
   }
 }

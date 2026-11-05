@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { showKeys } from "../keys";
 import { usePusherShowSync } from "../usePusherShowSync";
 
 import { worldKeys } from "@/lib/hooks/world/keys";
@@ -27,7 +28,7 @@ const setup = () => {
 
   const hook = renderHook(() => usePusherShowSync("c1"), { wrapper });
 
-  return { invalidate, ...hook };
+  return { invalidate, queryClient, ...hook };
 };
 
 const keysOf = (spy: ReturnType<typeof setup>["invalidate"]) => spy.mock.calls.map((c) => c[0]?.queryKey);
@@ -94,5 +95,41 @@ describe("usePusherShowSync world-changed", () => {
 
     expect(keysOf(invalidate)).toContainEqual(worldKeys.viewAll("c1"));
     expect(invalidate).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("usePusherShowSync show-state", () => {
+  const full = { deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 3 };
+
+  it("повний стан лягає в кеш без перечитування", () => {
+    const { invalidate, queryClient } = setup();
+
+    captured.handlers["show-state"]({ campaignId: "c1", show: full, seq: 3 });
+
+    expect(queryClient.getQueryData<{ show: { seq: number } }>(showKeys.state("c1"))?.show.seq).toBe(3);
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it("подія лише з seq перечитує вигляд, якщо seq новіший", () => {
+    const { invalidate, queryClient } = setup();
+
+    queryClient.setQueryData(showKeys.state("c1"), { show: full, clockOffsetMs: null });
+
+    captured.handlers["show-state"]({ campaignId: "c1", seq: 3 });
+
+    expect(invalidate).not.toHaveBeenCalled();
+
+    captured.handlers["show-state"]({ campaignId: "c1", seq: 4 });
+
+    expect(keysOf(invalidate)).toEqual([showKeys.state("c1")]);
+  });
+
+  it("сміття ігнорується", () => {
+    const { invalidate } = setup();
+
+    captured.handlers["show-state"](null);
+    captured.handlers["show-state"]({ campaignId: "c1" });
+
+    expect(invalidate).not.toHaveBeenCalled();
   });
 });

@@ -6,6 +6,7 @@ import {
   MAX_SLIDES_PER_DECK,
   PUZZLE_MAX_PIECES,
   PUZZLE_MIN_PIECES,
+  SLIDE_AUDIENCE_MAX,
   SLIDE_CAPTION_MAX,
   SLIDE_TITLE_MAX,
   SLIDE_UPLOAD_TYPES,
@@ -47,8 +48,15 @@ const slideSchema = z
     trackId: z.string().min(1).max(64).optional(),
     kind: z.literal("puzzle").optional(),
     puzzle: puzzleSpecSchema.optional(),
+    audience: z
+      .array(z.string().min(1).max(64))
+      .min(1)
+      .max(SLIDE_AUDIENCE_MAX)
+      .refine((ids) => new Set(ids).size === ids.length)
+      .optional(),
   })
-  .refine((s) => (s.kind === "puzzle") === (s.puzzle !== undefined), "show.validation.puzzleParams");
+  .refine((s) => (s.kind === "puzzle") === (s.puzzle !== undefined), "show.validation.puzzleParams")
+  .refine((s) => !(s.kind === "puzzle" && s.audience), "show.validation.puzzleAudience");
 
 export const slidesSchema = z
   .array(slideSchema)

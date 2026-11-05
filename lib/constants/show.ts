@@ -8,6 +8,10 @@ export const MAX_SLIDES_PER_DECK = 100;
 
 export const MAX_DECKS_PER_CAMPAIGN = 100;
 
+export const SLIDE_AUDIENCE_MAX = 50;
+
+export const SHOW_TRAIL_MAX = 30;
+
 export const DECK_TITLE_MAX = 80;
 
 export const SLIDE_TITLE_MAX = 80;

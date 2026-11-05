@@ -530,6 +530,7 @@ model CampaignShow {
   cover        Json?
   curtain      Boolean  @default(false)
   world        Json?
+  trail        Json?
   seq          Int      @default(0)
   updatedAt    DateTime @updatedAt
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)

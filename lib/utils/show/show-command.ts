@@ -1,10 +1,11 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
+import { SHOW_TRAIL_MAX } from "@/lib/constants/show";
 import { applyAudioCommand, type AudioLibraryEntry, commandNeedsLibrary } from "@/lib/utils/audio/audio-command";
 import { initPuzzle } from "@/lib/utils/puzzle/puzzle-command";
 import type { BattleAudioState } from "@/types/audio";
 import type { Result } from "@/types/common";
-import type { PuzzleSpec, ShowBattle, ShowCommand, ShowState, Slide } from "@/types/show";
+import type { PuzzleSpec, ShowBattle, ShowCommand, ShowState, Slide, SlideTrailEntry } from "@/types/show";
 
 export interface ShowDeck {
   id: string;
@@ -69,7 +70,22 @@ const puzzleKept = (prev: ShowState | null, slide: Slide) => (prev?.puzzle && pr
 
 const puzzleFor = (slide: Slide) => (slide.kind === "puzzle" && slide.puzzle ? { puzzle: initPuzzle(slide.puzzle) } : {});
 
-const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
+const slideAt = (deck: ShowDeck, index: number) => {
+  const next = deck.slides[index + 1];
+
+  return { slide: deck.slides[index], nextImageUrl: next && !next.audience ? next.imageUrl : null };
+};
+
+/** Публічний слайд скидає стежку: хід назад від будь-чого після нього все одно зупиниться на ньому. */
+export function nextTrail(trail: SlideTrailEntry[] | undefined, slide: Slide): SlideTrailEntry[] {
+  const { kind: _kind, puzzle: _puzzle, ...plain } = slide;
+
+  const entry = { slide: plain };
+
+  if (!slide.audience) return [entry];
+
+  return [...(trail ?? []).filter((e) => e.slide.id !== slide.id), entry].slice(-SHOW_TRAIL_MAX);
+}
 
 /** Прибирає поле стану й піднімає seq. */
 function without(prev: ShowState, ...keys: ("battle" | "curtain" | "cover" | "world")[]): ShowState {
@@ -97,6 +113,8 @@ function setCover(prev: ShowState | null, slideId: string, deck: ShowDeck | null
   const found = deck.slides.find((s) => s.id === slideId);
 
   if (!found) return fail(API_ERRORS.SLIDE_NOT_FOUND);
+
+  if (found.audience) return fail(API_ERRORS.SHOW_COVER_RESTRICTED);
 
   const { trackId: _trackId, kind: _kind, puzzle: _puzzle, ...slide } = found;
 
@@ -146,7 +164,7 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
 
   const at = slideAt(deck, index);
 
-  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), ...keepCover(prev), ...(puzzleKept(prev, at.slide) ?? puzzleFor(at.slide)), seq: (prev?.seq ?? 0) + 1 });
+  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), ...keepCover(prev), ...(puzzleKept(prev, at.slide) ?? puzzleFor(at.slide)), trail: nextTrail(cmd.action === "open" ? undefined : prev?.trail, at.slide), seq: (prev?.seq ?? 0) + 1 });
 }
 
 function stopAudio(prev: ShowState | null, ctx: Ctx): BattleAudioState | null {
@@ -199,7 +217,9 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
   }
 }
 
-const sameSlide = (a: Slide | null, b: Slide) => !!a && a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId && a.kind === b.kind && samePuzzleSpec(a.puzzle, b.puzzle);
+const sameAudience = (a?: string[], b?: string[]) => a === b || (!!a && !!b && a.length === b.length && a.every((id, i) => id === b[i]));
+
+const sameSlide = (a: Slide | null, b: Slide) => !!a && a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId && a.kind === b.kind && sameAudience(a.audience, b.audience) && samePuzzleSpec(a.puzzle, b.puzzle);
 
 /** Після збереження набору: знімок поточного слайда без перемикання і без автотреку; видалений слайд замінює сусід, порожній набір завершує показ. */
 export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before: Slide[]; now: number }): ShowState | null {
@@ -221,5 +241,5 @@ export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before:
 
   const { puzzle: _puzzle, ...rest } = prev;
 
-  return { ...rest, deckTitle: deck.title, slide, nextImageUrl, ...(puzzleKept(prev, slide) ?? puzzleFor(slide)), seq: prev.seq + 1 };
+  return { ...rest, deckTitle: deck.title, slide, nextImageUrl, ...(puzzleKept(prev, slide) ?? puzzleFor(slide)), trail: nextTrail(prev.trail, slide), seq: prev.seq + 1 };
 }

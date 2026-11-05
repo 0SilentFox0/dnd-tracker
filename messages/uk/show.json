@@ -30,6 +30,7 @@
     }
   },
   "deckStrip": {
+    "audience": "Лише для героїв: {count}",
     "thisScene": "Ця сцена",
     "otherDecks": "Інші набори",
     "deck": "Набір",
@@ -96,6 +97,12 @@
     "slides": "{count, plural, one {# слайд} few {# слайди} many {# слайдів} other {# слайдів}}",
     "scene": "Сцена: {scene}"
   },
+  "audience": {
+    "label": "Кому видно слайд",
+    "all": "Усім",
+    "chosen": "Обраним героям",
+    "pickOne": "Оберіть хоча б одного героя"
+  },
   "slideDialog": {
     "cuts": {
       "classic": "Класична",
@@ -157,6 +164,7 @@
   "validation": {
     "httpUrl": "Потрібне посилання http(s)",
     "puzzleParams": "Пазл і його параметри йдуть разом",
+    "puzzleAudience": "Пазл не можна обмежити героями",
     "duplicateSlideId": "Повторюваний id слайда"
   }
 }

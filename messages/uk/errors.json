@@ -177,6 +177,7 @@
   "showDeckEmpty": "У наборі немає слайдів",
   "showNotRunning": "Показ не запущено",
   "showConflict": "Стан показу змінився — повторіть",
+  "showCoverRestricted": "Слайд лише для обраних героїв не може бути заглушкою",
   "puzzleNotActive": "Пазл зараз не на екрані",
   "puzzlePieceNotFound": "Шматочка не знайдено",
   "puzzlePieceTaken": "Шматочок уже тримає інший гравець",

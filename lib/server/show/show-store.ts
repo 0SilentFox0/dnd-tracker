@@ -5,11 +5,12 @@ import { prisma } from "@/lib/db";
 import { SHOW_STATE_EVENT, showChannelName } from "@/lib/pusher/channels";
 import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
+import { isRestricted, toClientShow } from "@/lib/utils/show/player-view";
 import { withoutBattle, withoutWorldTargets } from "@/lib/utils/show/show-command";
 import type { BattleAudioState } from "@/types/audio";
-import type { PuzzleState, ShowBattle, ShowCover, ShowEvent, ShowState, ShowWorld, Slide } from "@/types/show";
+import type { PuzzleState, ShowBattle, ShowCover, ShowEvent, ShowState, ShowWorld, Slide, SlideTrailEntry } from "@/types/show";
 
-const SHOW_SELECT = { deckId: true, deckTitle: true, slide: true, nextImageUrl: true, audio: true, battle: true, cover: true, curtain: true, world: true, seq: true } as const;
+const SHOW_SELECT = { deckId: true, deckTitle: true, slide: true, nextImageUrl: true, audio: true, battle: true, cover: true, curtain: true, world: true, trail: true, seq: true } as const;
 
 type ShowRow = Prisma.CampaignShowGetPayload<{ select: typeof SHOW_SELECT }>;
 
@@ -38,6 +39,7 @@ export function toShowState(row: ShowRow): ShowState {
     ...(row.curtain ? { curtain: true as const } : {}),
     ...(row.world ? { world: row.world as unknown as ShowWorld } : {}),
     ...(puzzle ? { puzzle } : {}),
+    ...(Array.isArray(row.trail) && row.trail.length > 0 ? { trail: row.trail as unknown as SlideTrailEntry[] } : {}),
     seq: row.seq,
   };
 }
@@ -52,7 +54,7 @@ const json = (v: unknown) => (v === null ? Prisma.DbNull : (v as Prisma.InputJso
 
 /** Оптимістичне блокування за seq; рядок створюється лише першим записом і ніколи не видаляється. */
 export async function writeShowState(campaignId: string, prev: ShowState | null, next: ShowState): Promise<boolean> {
-  const data = { deckId: next.deckId, deckTitle: next.deckTitle, slide: json(next.slide && next.puzzle ? { ...next.slide, puzzleState: next.puzzle } : next.slide), nextImageUrl: next.nextImageUrl, audio: json(next.audio), battle: json(next.battle ?? null), cover: json(next.cover ?? null), curtain: !!next.curtain, world: json(next.world ?? null), seq: next.seq };
+  const data = { deckId: next.deckId, deckTitle: next.deckTitle, slide: json(next.slide && next.puzzle ? { ...next.slide, puzzleState: next.puzzle } : next.slide), nextImageUrl: next.nextImageUrl, audio: json(next.audio), battle: json(next.battle ?? null), cover: json(next.cover ?? null), curtain: !!next.curtain, world: json(next.world ?? null), trail: json(next.trail?.length ? next.trail : null), seq: next.seq };
 
   if (!prev) {
     const { count } = await prisma.campaignShow.createMany({ data: [{ campaignId, ...data }], skipDuplicates: true });
@@ -67,7 +69,7 @@ export async function writeShowState(campaignId: string, prev: ShowState | null,
 
 /** Викликати з after(): Pusher не повинен затримувати відповідь. */
 export function publishShow(campaignId: string, show: ShowState, options: { strict?: boolean } = {}): Promise<void> {
-  const event: ShowEvent = { campaignId, show };
+  const event: ShowEvent = isRestricted(show) ? { campaignId, seq: show.seq } : { campaignId, show: toClientShow(show), seq: show.seq };
 
   if (options.strict) return pusherServer.trigger(showChannelName(campaignId), SHOW_STATE_EVENT, event).then(() => undefined);
 

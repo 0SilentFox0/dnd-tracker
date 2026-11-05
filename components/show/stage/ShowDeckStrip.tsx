@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Music, Star, X } from "lucide-react";
+import { Lock, Music, Star, X } from "lucide-react";
 
 import { SHOW_TONE, ShowButton } from "./show-ui";
 
@@ -98,7 +98,9 @@ export function ShowDeckStrip({ campaignId, show, control, sceneId }: { campaign
                     {i + 1}. {slide.title ?? t("deckStrip.untitled")}
                   </span>
                 </button>
+                {slide.audience && <Lock aria-label={t("deckStrip.audience", { count: slide.audience.length })} className="absolute bottom-1 right-1 size-3 text-white drop-shadow" />}
                 {slide.trackId && <Music aria-label={t("deckStrip.hasTrack")} className="absolute right-1 top-1 size-3 text-white drop-shadow" />}
+                {!slide.audience && (
                 <button
                   type="button"
                   aria-pressed={isCover}
@@ -109,6 +111,7 @@ export function ShowDeckStrip({ campaignId, show, control, sceneId }: { campaign
                 >
                   <Star className={cn("size-3", isCover && "fill-current")} />
                 </button>
+                )}
               </li>
             );
           })}

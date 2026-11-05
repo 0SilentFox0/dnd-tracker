@@ -40,7 +40,7 @@ const ok = (r: ReturnType<typeof applyShowCommand>) => {
 
 describe("applyShowCommand", () => {
   it("open без slideId — перший слайд, наступна картинка, seq з 1", () => {
-    expect(ok(applyShowCommand(null, { action: "open", deckId: "d1" }, ctx))).toEqual({ deckId: "d1", deckTitle: "Таверна", slide: s(1), nextImageUrl: img(2), audio: null, seq: 1 });
+    expect(ok(applyShowCommand(null, { action: "open", deckId: "d1" }, ctx))).toEqual({ deckId: "d1", deckTitle: "Таверна", slide: s(1), nextImageUrl: img(2), audio: null, trail: [{ slide: s(1) }], seq: 1 });
   });
 
   it("open конкретного слайда з треком — play цього треку", () => {
@@ -134,7 +134,7 @@ describe("refreshShowSlide", () => {
   it("змінився підпис поточного слайда — новий знімок і seq+1", () => {
     const edited: ShowDeck = { ...deck, slides: [{ ...s(1), caption: "Новий" }, s(2, "t2"), s(3)] };
 
-    expect(refreshShowSlide(showing(0), edited, at)).toEqual({ ...showing(0), slide: { ...s(1), caption: "Новий" }, seq: 5 });
+    expect(refreshShowSlide(showing(0), edited, at)).toEqual({ ...showing(0), slide: { ...s(1), caption: "Новий" }, trail: [{ slide: { ...s(1), caption: "Новий" } }], seq: 5 });
   });
 
   it("змінився наступний слайд — новий nextImageUrl", () => {
@@ -155,6 +155,7 @@ describe("refreshShowSlide", () => {
       ...showing(0, { audio: playing }),
       slide: s(2, "t2"),
       nextImageUrl: img(3),
+      trail: [{ slide: s(2, "t2") }],
       seq: 5,
     });
     expect(refreshShowSlide(showing(2), { ...deck, slides: [s(1), s(2, "t2")] }, at)).toMatchObject({ slide: s(2, "t2"), nextImageUrl: null, seq: 5 });
@@ -443,5 +444,86 @@ describe("пазл-слайд", () => {
     const plain = refreshShowSlide(opened, { ...pdeck, slides: [s(1), { id: "slide-0009", imageUrl: img(9) }, s(3)] }, { before: pdeck.slides, now: 1 });
 
     expect(plain?.puzzle).toBeUndefined();
+  });
+});
+
+describe("стежка і аудиторія", () => {
+  const restricted = (n: number): Slide => ({ ...s(n), audience: ["h1"] });
+
+  const aDeck: ShowDeck = { id: "d1", title: "Т", slides: [s(1), restricted(2), restricted(3), s(4)] };
+
+  const actx = { now: 1, deck: aDeck, library: [] };
+
+  const ids = (st: ShowState) => st.trail?.map((e) => e.slide.id);
+
+  it("open resets the trail to the target", () => {
+    const st = ok(applyShowCommand({ ...showing(0), trail: [{ slide: restricted(2) }] }, { action: "open", deckId: "d1", slideId: aDeck.slides[1].id }, actx));
+
+    expect(ids(st)).toEqual(["slide-0002"]);
+  });
+
+  it("next appends restricted slides and a public slide compacts", () => {
+    let st = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, actx));
+
+    st = ok(applyShowCommand(st, { action: "next" }, actx));
+    st = ok(applyShowCommand(st, { action: "next" }, actx));
+
+    expect(ids(st)).toEqual(["slide-0001", "slide-0002", "slide-0003"]);
+
+    st = ok(applyShowCommand(st, { action: "next" }, actx));
+
+    expect(ids(st)).toEqual(["slide-0004"]);
+  });
+
+  it("prev moves a revisited slide to the end without duplicates", () => {
+    let st = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0002" }, actx));
+
+    st = ok(applyShowCommand(st, { action: "next" }, actx));
+    st = ok(applyShowCommand(st, { action: "prev" }, actx));
+
+    expect(ids(st)).toEqual(["slide-0003", "slide-0002"]);
+  });
+
+  it("strips puzzle fields from the trail snapshot", () => {
+    const pz: Slide = { ...s(5), kind: "puzzle", puzzle: { cut: "classic", count: 4, seed: 1, imageWidth: 10, imageHeight: 10 } };
+
+    const st = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...actx, deck: { ...aDeck, slides: [pz] } }));
+
+    expect(st.trail?.[0].slide.kind).toBeUndefined();
+  });
+
+  it("end clears the trail", () => {
+    expect(ok(applyShowCommand({ ...showing(0), trail: [{ slide: s(1) }] }, { action: "end" }, actx)).trail).toBeUndefined();
+  });
+
+  it("hides the image of a restricted next slide", () => {
+    expect(ok(applyShowCommand(null, { action: "open", deckId: "d1" }, actx)).nextImageUrl).toBeNull();
+    expect(ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0003" }, actx)).nextImageUrl).toBe(img(4));
+  });
+
+  it("rejects a restricted slide as cover", () => {
+    const r = applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-0002" }, actx);
+
+    expect(r).toEqual({ ok: false, message: API_ERRORS.SHOW_COVER_RESTRICTED });
+  });
+
+  it("refreshShowSlide updates the last trail entry when audience changes", () => {
+    const prev = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, actx));
+
+    const edited: ShowDeck = { ...aDeck, slides: [{ ...aDeck.slides[0], audience: ["h9"] }, ...aDeck.slides.slice(1)] };
+
+    const next = refreshShowSlide(prev, edited, { before: aDeck.slides, now: 1 });
+
+    expect(next?.trail?.[0].slide.audience).toEqual(["h9"]);
+  });
+
+  it("caps the trail length", () => {
+    const many: ShowDeck = { id: "d1", title: "Т", slides: Array.from({ length: 40 }, (_, i) => ({ id: `slide-${String(i).padStart(4, "0")}`, imageUrl: img(i), audience: ["h1"] })) };
+
+    let st = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...actx, deck: many }));
+
+    for (let i = 0; i < 39; i++) st = ok(applyShowCommand(st, { action: "next" }, { ...actx, deck: many }));
+
+    expect(st.trail).toHaveLength(30);
   });
 });

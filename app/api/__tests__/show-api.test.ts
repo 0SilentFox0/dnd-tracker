@@ -23,6 +23,7 @@ vi.mock("@/lib/db", async () => {
     worldMap: { findFirst: vi.fn() },
     worldMarker: { findFirst: vi.fn() },
     campaignTrack: { findMany: vi.fn(async () => []) },
+    character: { findMany: vi.fn(async () => []) },
   }) };
 });
 
@@ -69,7 +70,7 @@ describe("show API", () => {
     expect(trigger).not.toHaveBeenCalled();
 
     await Promise.all(afterCallbacks.map((cb) => cb()));
-    expect(trigger).toHaveBeenCalledWith("private-show-c1", "show-state", { campaignId: "c1", show });
+    expect(trigger).toHaveBeenCalledWith("private-show-c1", "show-state", { campaignId: "c1", show, seq: show.seq });
   });
 
   it("гонка — 409, без Pusher", async () => {
@@ -124,6 +125,48 @@ describe("show API", () => {
     expect(await res.json()).toEqual({ show: state });
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(prisma.slideDeck.findFirst).not.toHaveBeenCalled();
+  });
+
+  describe("слайд лише для визначених героїв", () => {
+    const secret = { id: "slide-0002", imageUrl: url(2), caption: "таємниця", trackId: "t9", audience: ["h1"] };
+
+    const state = { deckId: "d1", deckTitle: "Таверна", slide: secret, nextImageUrl: url(3), audio: null, trail: [{ slide: deckRow.slides[0] }, { slide: secret }], seq: 7 };
+
+    const get = async () => {
+      const { GET } = await import("@/app/api/campaigns/[id]/show/route");
+
+      return (await GET(new Request("http://x"), { params: Promise.resolve({ id: "c1" }) })).json();
+    };
+
+    beforeEach(() => vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(state as never));
+
+    it("GET для героя поза аудиторією не містить прихованого", async () => {
+      vi.mocked(prisma.character.findMany).mockResolvedValue([{ id: "h2" }] as never);
+
+      const json = JSON.stringify(await get());
+
+      for (const leak of [url(2), url(3), "таємниця", "t9", "trail", "audience"]) expect(json).not.toContain(leak);
+
+      expect(json).toContain(url(1));
+    });
+
+    it("GET для героя з аудиторії віддає слайд без audience і trail", async () => {
+      vi.mocked(prisma.character.findMany).mockResolvedValue([{ id: "h1" }] as never);
+
+      const body = await get();
+
+      expect(body.show.slide).toEqual({ id: "slide-0002", imageUrl: url(2), caption: "таємниця", trackId: "t9" });
+      expect(body.show.trail).toBeUndefined();
+    });
+
+    it("GET для ДМ віддає все, крім trail", async () => {
+      vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access(true));
+
+      const body = await get();
+
+      expect(body.show.slide).toEqual(secret);
+      expect(body.show.trail).toBeUndefined();
+    });
   });
 
   it("battle: активний бій — стан з battle, Pusher", async () => {

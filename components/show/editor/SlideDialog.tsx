@@ -3,6 +3,7 @@
 import { type Dispatch, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { AudiencePicker } from "./AudiencePicker";
 import { PuzzlePreview } from "./PuzzlePreview";
 import { TrackPicker } from "./TrackPicker";
 
@@ -37,8 +38,10 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
 
   const [puzzle, setPuzzle] = useState(slide.puzzle);
 
+  const [audience, setAudience] = useState(slide.audience);
+
   const done = () => {
-    actions.dispatch({ type: "update", id: slide.id, patch: { title: title.trim(), caption: caption.trim(), trackId, puzzle } });
+    actions.dispatch({ type: "update", id: slide.id, patch: { title: title.trim(), caption: caption.trim(), trackId, puzzle, audience } });
     actions.close();
   };
 
@@ -83,11 +86,12 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
         </p>
       </div>
       <TrackPicker campaignId={campaignId} value={trackId} onChange={setTrackId} />
+      {!puzzle && <AudiencePicker campaignId={campaignId} value={audience} onChange={setAudience} />}
       <div className="flex gap-2">
         <Button type="button" variant="outline" onClick={actions.close}>
           {tc("actions.cancel")}
         </Button>
-        <Button type="button" onClick={done}>
+        <Button type="button" onClick={done} disabled={audience?.length === 0}>
           {t("slideDialog.done")}
         </Button>
       </div>

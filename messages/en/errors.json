@@ -177,6 +177,7 @@
   "showDeckEmpty": "The deck has no slides",
   "showNotRunning": "The show is not running",
   "showConflict": "The show state changed — try again",
+  "showCoverRestricted": "A slide limited to chosen heroes cannot be the cover",
   "puzzleNotActive": "The puzzle is not on screen now",
   "puzzlePieceNotFound": "Piece not found",
   "puzzlePieceTaken": "Another player is already holding the piece",
