@@ -45,3 +45,22 @@ describe("SpellCastDialog rolls step", () => {
     expect(screen.queryByText(/СН 6/)).toBeNull();
   });
 });
+
+describe("SpellCastDialog summary step", () => {
+  afterEach(cleanup);
+
+  const summary = (magic: boolean) => ({
+    state: { step: "summary", targetIds: [], saves: {}, attacks: {}, damage: [], pick: { diceSlots: [] } },
+    view: { selected: { id: "s", name: "Іскра", level: 1 }, magic, slot: { options: [], value: "" }, targets: [], formulaOf: () => "", definitionOf: () => ({ targeting: { kind: "single" } }), slotCostLabel: () => "Витратить слот I кола", ingredients: null },
+    actions: { back: vi.fn(), close: vi.fn() },
+  }) as unknown as Props["book"];
+
+  it("hides slot cost line for magic systems only", () => {
+    const { unmount } = render(<SpellCastDialog book={summary(true)} />);
+
+    expect(screen.queryByText("Витратить слот I кола")).toBeNull();
+    unmount();
+    render(<SpellCastDialog book={summary(false)} />);
+    expect(screen.getByText("Витратить слот I кола")).toBeTruthy();
+  });
+});

@@ -139,6 +139,7 @@ export function useSpellBook(
     sourceValue: flow.grantKey ? `grant:${flow.grantKey}` : flow.slotKey ? `slot:${flow.slotKey}` : "",
     castLevelOptions,
     castLevelValue: flow.castLevel ?? selectedGrant?.castLevel,
+    magic,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, bypassCost || spells.some((s) => s.level === level && !!grantOf(s))),
     slotCostLabel: (s: BookSpell) => {
       const parts = [special ? textRef("battleWizards.flow.cost.special") : undefined, labelOf(s)].filter((p): p is LogLine => p !== undefined && p !== "");

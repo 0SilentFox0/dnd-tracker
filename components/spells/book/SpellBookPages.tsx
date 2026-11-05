@@ -19,7 +19,7 @@ const PAPER = "hud-book spell-book relative bg-[var(--book-page,#e9dec5)] text-[
 
 export interface SpellBookPagesProps {
   byLevel: Record<number, BookSpell[]>;
-  page: { level: number; slotOf: (level: number) => number; onLevel: (level: number) => void };
+  page: { level: number; slotOf: (level: number) => number; hideSlots?: boolean; onLevel: (level: number) => void };
   pick: { pickedId: string | null; onPick: (spell: BookSpell) => void; formulaOf?: (spell: BookSpell) => string; badgeOf?: (spell: BookSpell) => string | undefined };
   layout: { wide: boolean; showDetail: boolean };
   detail: ReactNode;
@@ -30,7 +30,7 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
 
   const tg = useTranslator("gameTerms");
 
-  const { level, slotOf, onLevel } = page;
+  const { level, slotOf, hideSlots, onLevel } = page;
 
   const { pickedId, onPick, formulaOf, badgeOf } = pick;
 
@@ -40,7 +40,7 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
 
   return (
     <div className="relative pr-11">
-      <LevelBookmarks level={level} slotOf={slotOf} onLevel={onLevel} />
+      <LevelBookmarks level={level} slotOf={slotOf} hideSlots={hideSlots} onLevel={onLevel} />
       <div className={cn(PAPER, "min-h-[70dvh]", wide ? "grid grid-cols-2" : "flex flex-col")}>
         {(wide || !showDetail) && (
           <div className="px-5 pb-12 pt-4">
