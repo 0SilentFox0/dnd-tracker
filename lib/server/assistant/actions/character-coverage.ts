@@ -25,5 +25,6 @@ export const CHARACTER_ACTION_COVERAGE = [
   ["POST", `${hero}/progression/reset`, "progression.reset", "character-progression-actions"],
   ["POST", `${hero}/progression/seen-level`, "progression.seen-level", "progression-actions-api"],
   ["POST", "campaigns/[id]/rest", "rest", "character-progression-storage.integration"],
+  ["POST", `${hero}/advance`, "advance", "advance"], ["DELETE", `${hero}/advance`, "advance.undo", "advance"],
   ["POST", "campaigns/[id]/experience", "experience", "character-progression-storage.integration"],
 ].map(([method, route, operation, testId]) => ({ method, route, actionId: `characters.${operation}`, testId }));

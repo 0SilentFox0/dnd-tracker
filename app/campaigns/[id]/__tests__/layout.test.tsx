@@ -51,6 +51,6 @@ describe("CampaignLayout", () => {
 
     mocks.wfrp = true;
 
-    expect(await html()).toContain('data-scope="wfrpMagic"');
+    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement"');
   });
 });
