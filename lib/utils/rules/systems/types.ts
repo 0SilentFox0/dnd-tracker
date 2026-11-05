@@ -1,15 +1,18 @@
 import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
 import type { HitLocation } from "./wfrp/combat/constants";
 import type { WfrpParticipantStats } from "./wfrp/combat/participant";
+import type { PercentileOutcome } from "./wfrp/percentile";
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
-import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import type { AttackRollResult, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import type { SpellMagic } from "@/lib/utils/spells/model/schema";
 import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { LogLine } from "@/types/text";
@@ -163,6 +166,36 @@ export interface RuleSystemConditions {
   ): SystemConditionResult & { success: boolean };
 }
 
+export interface CastTestCtx {
+  caster: BattleParticipant;
+  spell: CastableSpell;
+  magic: SpellMagic;
+  rules: Ruleset;
+  rng: Rng;
+  presetRoll?: number;
+  fortune?: { kind: FortuneKind; manualReroll?: number };
+}
+
+export interface CastTestResult {
+  success: boolean;
+  sl: number;
+  overcastSteps: number;
+  miscast: "minor" | "major" | null;
+  percentile: PercentileCastDetails & { outcome: PercentileOutcome };
+  lines: LogLine[];
+  fortune?: { kind: FortuneKind; firstRoll?: number };
+}
+
+export interface RuleSystemMagic {
+  slots: false;
+  castTest(ctx: CastTestCtx): CastTestResult;
+  channel(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng; presetRoll?: number }): { participant: BattleParticipant; lines: LogLine[]; miscast: "minor" | "major" | null };
+  miscast(ps: BattleParticipant[], casterId: string, kind: "minor" | "major", ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult;
+  attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
+  /** Channelled SL lost when the caster takes damage */
+  onDamaged(p: BattleParticipant): BattleParticipant;
+}
+
 export interface RuleSystemCombat {
   fortune?: true;
   dice: 20 | 100;
@@ -202,6 +235,7 @@ export interface RuleSystemDefinition {
   battle: { supported: boolean };
   combat: RuleSystemCombat;
   conditions?: RuleSystemConditions;
+  magic?: RuleSystemMagic;
   lineage: boolean;
   classes: boolean;
   attacks: boolean;

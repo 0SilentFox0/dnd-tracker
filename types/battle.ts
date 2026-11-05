@@ -534,6 +534,8 @@ export interface BattleParticipantBattleData {
   inspiration?: boolean;
   /** WFRP Fortune left this battle; seeded at battle start from the sheet (saved fortune, else Fate) */
   fortune?: number;
+  /** WFRP channelled SL banked for the next cast; lost on damage */
+  channelledSl?: number;
   /** WFRP condition keys whose end test was already attempted this turn */
   conditionTests?: string[];
   /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */

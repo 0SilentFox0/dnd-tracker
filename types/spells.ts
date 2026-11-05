@@ -4,7 +4,7 @@ import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { IdName } from "@/types/common";
 
-export type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+export type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellMagic, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
 export type SpellGroupRef = IdName & { color?: string | null; icon?: string | null };
 

@@ -17,6 +17,20 @@ export interface PercentileAttackDetails {
   fortune?: { kind: "reroll" | "sl"; firstRoll?: number };
 }
 
+export interface PercentileCastDetails {
+  roll: number;
+  target: number;
+  sl: number;
+  cn: number;
+  channelled: number;
+  armourSl: number;
+  doubles: boolean;
+  outcome: "critical" | "success" | "failure" | "fumble";
+  overcastSteps: number;
+  miscast: "minor" | "major" | null;
+  fortune?: { kind: "reroll" | "sl"; firstRoll?: number };
+}
+
 export interface AttackRollResult {
   isHit: boolean;
   isCritical: boolean;
