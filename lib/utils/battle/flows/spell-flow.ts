@@ -76,7 +76,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
 
-      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, inputCount: a.pick.inputDice ? 1 : undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), castRoll: undefined, castSecond: undefined, castServer: undefined, castFortune: undefined, error: undefined };
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, inputCount: a.pick.inputDice ? 1 : undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), castRoll: undefined, castSecond: undefined, castServer: undefined, castFortune: undefined, useIngredient: undefined, error: undefined };
     case "SET_SLOT":
       return reconcileSpellPick(s, a.pick, { slotKey: a.slotKey, grantKey: undefined, castLevel: undefined });
     case "SET_GRANT":
@@ -141,6 +141,9 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, damage: s.damage.map((v, i) => (i === a.index ? a.value : v)) };
     case "SET_CAST_ROLL":
       return { ...s, castRoll: a.roll, castSecond: a.second, castServer: a.roll === undefined ? true : undefined };
+    case "SET_CAST_INGREDIENT":
+      return { ...s, useIngredient: a.value };
+
     case "SET_CAST_FORTUNE":
       return { ...s, castFortune: a.value ?? undefined, castRoll: undefined, castSecond: undefined, castServer: undefined };
     case "TO_SUMMARY":
@@ -208,6 +211,7 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     ...(s.pick?.inputDice && s.inputCount !== undefined && { inputCount: s.inputCount }),
     ...(s.pick?.options && s.optionIndex !== undefined && { optionIndex: s.optionIndex }),
     ...(s.pick?.castTest && castTestPayload(s)),
+    ...(s.useIngredient && { useIngredient: true as const }),
   };
 }
 

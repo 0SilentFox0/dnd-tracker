@@ -138,7 +138,7 @@ function SummaryStep({ book }: { book: Book }) {
   return (
     <>
       {selected && <SpellSummary spell={selected} state={state} targets={view.targets} formula={view.formulaOf(selected)} targeting={view.definitionOf(selected).targeting} slotCost={view.slotCostLabel(selected)} />}
-      <IngredientsLine line={view.ingredients} />
+      <IngredientsLine line={view.ingredients} onUse={actions.setUseIngredient} />
       <OptionPicker book={book} />
       <button type="button" disabled={submitting || optionMissing(state) || !!view.ingredients?.blocked} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
         {submitting ? <Loader2 className="size-5 animate-spin" /> : <><Sparkles className="size-5" />{tw("apply")}</>}

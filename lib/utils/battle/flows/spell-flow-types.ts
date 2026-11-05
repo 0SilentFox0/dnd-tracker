@@ -66,6 +66,8 @@ export interface SpellFlowState {
   castSecond?: number;
   castServer?: boolean;
   castFortune?: "reroll" | "sl";
+  /** optional-ingredient systems: spend an ingredient to cancel a miscast */
+  useIngredient?: boolean;
   error?: LogLine;
   /** сервер зупинив каст: ДМ обирає ефект крита */
   waitingCrit?: boolean;
@@ -90,6 +92,7 @@ export type SpellFlowAction =
   | { type: "SET_SAVE"; id: string; value: number | undefined }
   | { type: "SET_DAMAGE"; index: number; value: number | undefined }
   | { type: "SET_CAST_ROLL"; roll?: number; second?: number }
+  | { type: "SET_CAST_INGREDIENT"; value: boolean }
   | { type: "SET_CAST_FORTUNE"; value: "reroll" | "sl" | null }
   | { type: "TO_SUMMARY" }
   | { type: "BACK" }

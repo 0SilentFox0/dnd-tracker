@@ -193,6 +193,10 @@ export interface CastTestResult {
 
 export interface RuleSystemMagic {
   slots: false;
+  /** Ingredients are optional: spending one cancels the miscast instead of gating the cast */
+  ingredients?: "avertMiscast";
+  /** Drops the miscast of a cast that used an ingredient */
+  avertMiscast(cast: CastTestResult, who: { name: string; spell: string }): CastTestResult;
   castTest(ctx: CastTestCtx): CastTestResult;
   /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
   castPreview(caster: BattleParticipant, kind?: SpellMagicKind): { target: number; channelTarget: number; channelled: number; armourSl: number };

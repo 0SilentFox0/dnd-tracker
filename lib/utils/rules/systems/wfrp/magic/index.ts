@@ -6,12 +6,15 @@ import { castTargetOf, isPrayerKind, prayTargetOf, wfrpCastTest } from "./cast-t
 import { channelTargetOf, wfrpChannel } from "./channel";
 import { wfrpMiscast } from "./miscast";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import type { BattleParticipant } from "@/types/battle";
 
 const dropChannelled = (p: BattleParticipant): BattleParticipant => (p.battleData.channelledSl ? { ...p, battleData: { ...p.battleData, channelledSl: 0 } } : p);
 
 export const WFRP_MAGIC: RuleSystemMagic = {
   slots: false,
+  ingredients: "avertMiscast",
+  avertMiscast: (cast, who) => (cast.miscast ? { ...cast, miscast: null, percentile: { ...cast.percentile, miscast: null }, lines: [...cast.lines, textRef("wfrpMagic.log.ingredientAverts", who)] } : cast),
   castTest: wfrpCastTest,
   castPreview: (caster, kind) => {
     const prayer = isPrayerKind(kind);

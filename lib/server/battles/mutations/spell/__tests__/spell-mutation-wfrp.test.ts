@@ -1,6 +1,7 @@
 import type { Prisma, Spell } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { castSpellSchema } from "@/lib/schemas/battles";
 import { context, goblin, participant } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
@@ -50,7 +51,7 @@ const run = (row: Spell, body: Record<string, unknown>, opts: { wfrp?: boolean; 
   );
 };
 
-const details = (out: { events: { details?: unknown }[] }) => (out.events[0].details as { actionDetails: { percentileCast?: { roll: number; outcome: string } }; lines?: unknown }).actionDetails;
+const details = (out: { events: { details?: unknown }[] }) => (out.events[0].details as { actionDetails: { percentileCast?: { roll: number; outcome: string; miscast?: string | null } }; lines?: unknown }).actionDetails;
 
 const hp = (out: { participants: BattleParticipant[] }, id: string) => out.participants.find((p) => p.basicInfo.id === id)?.combatStats.currentHp as number;
 
@@ -125,5 +126,62 @@ describe("spell mutation in WFRP", () => {
 describe("spell mutation in d20", () => {
   it("ignores the percentile fields and still needs a slot", async () => {
     await expect(run(bolt, { castRoll: 30 }, { wfrp: false })).rejects.toMatchObject({ message: "errors.battleNoFreeSlot" });
+  });
+});
+
+describe("spell mutation in WFRP, ingredients", () => {
+  const withIngredient = { ...bolt, ingredients: [{ name: "Diamond", qty: 1, minGp: 50, consumed: true, focus: false }] } as unknown as Spell;
+
+  const stocked = (items = 1) => {
+    const c = caster();
+
+    return { ...c, battleData: { ...c.battleData, ingredientStock: { items: items ? [{ id: "i1", key: "diamond", name: "Diamond", worthGp: 50, qty: items, used: 0 }] : [], purseCp: 0, usedCp: 0 } } };
+  };
+
+  const rules = { ...WFRP_RULES, spellIngredients: { enabled: true, autoPay: false } };
+
+  const cast = (body: Record<string, unknown>, c: BattleParticipant) => {
+    const ctx = context({ participants: [c, goblin] });
+
+    return createSpellMutation({ loadSpell: vi.fn(async () => withIngredient), loadPool: async () => ({ units: [], races: [] as unknown as Prisma.RaceGetPayload<object>[] }) })({ ...ctx, meta: { ...ctx.meta, rules } }, { casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [], ...body } as never);
+  };
+
+  const stockOf = (out: { participants: BattleParticipant[] }) => out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.ingredientStock;
+
+  it("schema accepts useIngredient: true only", () => {
+    expect(castSpellSchema.safeParse({ casterId: "h", spellId: "s", useIngredient: true }).success).toBe(true);
+    expect(castSpellSchema.safeParse({ casterId: "h", spellId: "s", useIngredient: false }).success).toBe(false);
+  });
+
+  it("casts without an ingredient, even with an empty stock", async () => {
+    const out = await cast({ castRoll: 30 }, stocked(0));
+
+    expect(details(out).percentileCast?.outcome).toBe("success");
+    expect(stockOf(out)?.items).toHaveLength(0);
+  });
+
+  it("useIngredient spends the item and cancels a miscast", async () => {
+    const out = await cast({ castRoll: 77, useIngredient: true }, stocked());
+
+    expect(stockOf(out)?.items[0].used).toBe(1);
+    expect(details(out).percentileCast?.miscast).toBeNull();
+    expect(JSON.stringify(out.events)).toContain("wfrpMagic.log.ingredientAverts");
+  });
+
+  it("the same doubles without it miscasts", async () => {
+    const out = await cast({ castRoll: 77 }, stocked());
+
+    expect(details(out).percentileCast?.miscast).toBe("minor");
+  });
+
+  it("the ingredient is spent even when nothing needed averting", async () => {
+    const out = await cast({ castRoll: 30, useIngredient: true }, stocked());
+
+    expect(stockOf(out)?.items[0].used).toBe(1);
+    expect(JSON.stringify(out.events)).not.toContain("ingredientAverts");
+  });
+
+  it("useIngredient without stock is refused", async () => {
+    await expect(cast({ castRoll: 30, useIngredient: true }, stocked(0))).rejects.toMatchObject({ message: API_ERRORS.BATTLE_SPELL_INGREDIENTS_MISSING });
   });
 });

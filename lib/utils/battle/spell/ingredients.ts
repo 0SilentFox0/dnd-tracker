@@ -14,12 +14,17 @@ interface GateSource {
   grant?: unknown;
 }
 
-export function ingredientsGate(caster: BattleParticipant, spell: { ingredients?: SpellIngredient[] }, rules: Ruleset, source: GateSource): IngredientPlan | null {
+interface OptionalMode {
+  optional: boolean;
+  use: boolean;
+}
+
+export function ingredientsGate(caster: BattleParticipant, spell: { ingredients?: SpellIngredient[] }, rules: Ruleset, source: GateSource, mode?: OptionalMode): IngredientPlan | null {
   const stock = caster.battleData.ingredientStock;
 
   const list = spell.ingredients ?? [];
 
-  if (!rules.spellIngredients.enabled || source.free || source.legendaryAbility || source.grant || !stock || trackedIngredients(list).length === 0) return null;
+  if (!rules.spellIngredients.enabled || source.free || source.legendaryAbility || source.grant || (mode?.optional && !mode.use) || !stock || trackedIngredients(list).length === 0) return null;
 
   const plan = planIngredients(list, stock, { autoPay: rules.spellIngredients.autoPay });
 

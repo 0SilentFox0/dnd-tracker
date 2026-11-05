@@ -71,7 +71,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     return { success: false, reason: "systemMismatch", casterUpdated: readyCaster, allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps), battleAction: actionOf(readyCaster, spell, targetsBefore, battleId, currentRound, ""), summons: [], messages: [] };
   }
 
-  const test = percentile && spellMagic && !params.dryRun ? rollCastTest(percentile, { caster: readyCaster, spell: source, magic: spellMagic, rules: params.rules, rng }, params.castTest) : undefined;
+  const rolled = percentile && spellMagic && !params.dryRun ? rollCastTest(percentile, { caster: readyCaster, spell: source, magic: spellMagic, rules: params.rules, rng }, params.castTest) : undefined;
+
+  const test = rolled && percentile && params.ingredientUsed ? percentile.avertMiscast(rolled, { name: readyCaster.basicInfo.name, spell: spell.name }) : rolled;
 
   const castLevel = test && test.overcastSteps > 0 ? spell.level + test.overcastSteps : chosenLevel;
 

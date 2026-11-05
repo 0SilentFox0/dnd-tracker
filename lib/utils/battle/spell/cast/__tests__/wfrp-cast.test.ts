@@ -152,3 +152,20 @@ describe("prayers in castSpell", () => {
   });
 });
 
+describe("ingredients avert a miscast", () => {
+  it("cancels the miscast and logs it", () => {
+    const r = run(spellOf(magicOf({ cn: 9 })), { castTest: { roll: 77 }, ingredientUsed: true });
+
+    expect(r.cast?.miscast).toBeNull();
+    expect(r.messages.some((m) => typeof m !== "string" && m.message === "wfrpMagic.log.ingredientAverts")).toBe(true);
+    expect(conditionLevel(r.casterUpdated, "fatigued") + conditionLevel(r.casterUpdated, "deafened") + conditionLevel(r.casterUpdated, "stunned") + conditionLevel(r.casterUpdated, "blinded")).toBe(0);
+    expect(r.casterUpdated.combatStats.currentHp).toBe(20);
+  });
+
+  it("logs nothing when there was no miscast", () => {
+    const r = run(spellOf(magicOf()), { castTest: { roll: 30 }, ingredientUsed: true });
+
+    expect(r.messages.some((m) => typeof m !== "string" && m.message === "wfrpMagic.log.ingredientAverts")).toBe(false);
+  });
+});
+

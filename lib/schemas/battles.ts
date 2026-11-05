@@ -242,6 +242,7 @@ export const castSpellSchema = z.object({
   serverRoll: z.literal(true).optional(),
   fortune: z.enum(["reroll", "sl"]).optional(),
   fortuneRoll: z.number().int().min(1).max(100).optional(),
+  useIngredient: z.literal(true).optional(),
 }).refine((d) => !d.fortune || !d.free, { message: REJECT.fortuneNotFree, path: ["fortune"] });
 
 export type SpellRequestData = z.infer<typeof castSpellSchema>;

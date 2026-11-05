@@ -101,7 +101,7 @@ export function useSpellBook(
 
   const { grantsOf, grantOf, canSlot, slotChoices, selectedGrant, sourceOptions, castLevelOptions, formulaOf } = spellSourceModel(caster, flow, selected, bypassCost);
 
-  const ingredients = useIngredientPlan(caster, selected, bypassCost || !!selectedGrant || !!selected?.grantKey);
+  const ingredients = useIngredientPlan(caster, selected, bypassCost || !!selectedGrant || !!selected?.grantKey, state.useIngredient ?? false);
 
   useSpellCastSubmit({ caster, selected, flow: { state, dispatch }, cast: { free, legendaryKey: special?.abilityKey, finishLong }, onDone: options.onDone });
 
@@ -251,6 +251,7 @@ export function useSpellBook(
       if (state.pick?.needsAttackRolls) state.targetIds.forEach((id) => state.attacks[id] === undefined && dispatch({ type: "SET_ATTACK", id, value: rollDie(20, cryptoRandom) }));
     },
     setCastRoll: (roll?: number, second?: number) => dispatch({ type: "SET_CAST_ROLL", roll, second }),
+    setUseIngredient: (value: boolean) => dispatch({ type: "SET_CAST_INGREDIENT", value }),
     setCastFortune: (value: "reroll" | "sl" | null) => dispatch({ type: "SET_CAST_FORTUNE", value }),
     toSummary: () => dispatch({ type: "TO_SUMMARY" }),
     back: () => dispatch({ type: "BACK" }),

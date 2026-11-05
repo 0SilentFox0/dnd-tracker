@@ -6,7 +6,8 @@
     "castCritical": "{name} читає «{spell}»: {roll} / {target} — критичний успіх (СН {cn})",
     "channelSuccess": "{name} збирає силу: {roll} / {target}, SL {sl}, накопичено {banked}",
     "channelFail": "{name} не вдається зібрати силу: {roll} / {target}",
-    "wrath": "{name} викликає гнів богів! {effect}"
+    "wrath": "{name} викликає гнів богів! {effect}",
+    "ingredientAverts": "{name} палить інгредієнт, і збій магії «{spell}» згасає"
   },
   "miscast": {
     "minor": {

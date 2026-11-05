@@ -142,7 +142,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const castLevel = (grant ? data.castLevel : undefined) ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
 
-    const ingredients = ingredientsGate(caster, spell, ctx.meta.rules, source);
+    const ingredients = ingredientsGate(caster, spell, ctx.meta.rules, source, { optional: ruleSystemOf(ctx.meta.rules).magic?.ingredients === "avertMiscast", use: !!data.useIngredient });
 
     if (definition.cost === "long" && !free && !data.preview) {
       const long = beginLongCast(ctx, order, caster, spell, data, { grantKey: grant?.key, castLevel, hasGrant: !!grant });
@@ -290,6 +290,7 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
     map: ctx.meta.map,
     rules: ctx.meta.rules,
     ...(data.preview && { dryRun: true }),
+    ...(plan.ingredients && { ingredientUsed: true }),
     ...(!free && !legendaryAbility && !grant && { castTest: { roll: data.castRoll, serverRoll: data.serverRoll ?? (plan.serverRolls ? true : undefined), fortune: data.fortune, fortuneRoll: data.fortuneRoll } }),
   });
 
@@ -326,12 +327,24 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
   return finalizeCast(plan, result, rng);
 }
 
+function fizzleResult({ ctx, caster, ingredients }: CastPlan, result: ReturnType<typeof castSpell>): MutationResult {
+  const stock = caster.battleData.ingredientStock;
+
+  if (!ingredients || !stock) return { participants: result.allParticipantsUpdated, pending: ctx.pending, events: [battleActionToEvent(result.battleAction)] };
+
+  const participants = updateParticipant(result.allParticipantsUpdated, caster.basicInfo.id, (p) => spendIngredients(p, ingredients));
+
+  const action = withLines(result.battleAction, [textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients) })]);
+
+  return { participants, pending: ctx.pending, events: [battleActionToEvent(action)] };
+}
+
 async function finalizeCast(plan: CastPlan, result: ReturnType<typeof castSpell>, rng: Rng): Promise<MutationResult> {
   const { ctx, spell, caster, resolution, deps } = plan;
 
   const { legendaryAbility, grant } = plan.source;
 
-  if (result.fizzled) return { participants: result.allParticipantsUpdated, pending: ctx.pending, events: [battleActionToEvent(result.battleAction)] };
+  if (result.fizzled) return fizzleResult(plan, result);
 
   const summoned = await applyAbilitySummons(result.summons.map((r) => (r.inline && resolution.centre ? { ...r, atCell: resolution.centre } : r)), result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps, map: ctx.meta.map, round: ctx.scene.round });
 

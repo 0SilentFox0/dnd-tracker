@@ -9,5 +9,6 @@ export const WFRP_RULES = RulesetSchema.parse({
   conditions: { enabled: false },
   actions: { enabled: false },
   outOfCombat: { persistResources: true, xp: true, inspiration: false },
+  spellIngredients: { enabled: true },
   encounters: { balance: "fair" },
 });

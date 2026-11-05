@@ -144,7 +144,8 @@
     "ingredients": {
       "need": "Required: {list}",
       "missing": "Missing: {list}",
-      "autoPay": "{gp} gp will be paid from the purse"
+      "autoPay": "{gp} gp will be paid from the purse",
+      "use": "Use ingredient (cancels a miscast)"
     }
   },
   "bonus": {
