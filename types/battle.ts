@@ -532,6 +532,10 @@ export interface BattleParticipantBattleData {
   /** Атаки дії «Атака», що лишилися цього ходу */
   attacksLeft?: number;
   inspiration?: boolean;
+  /** WFRP Fortune left this battle; unset means the sheet value (read lazily, so nothing is seeded at battle start) */
+  fortune?: number;
+  /** WFRP condition keys whose end test was already attempted this turn */
+  conditionTests?: string[];
   /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
   inspirationSpent?: boolean;
   /** Цього ходу була атака дією легкою ближньою зброєю основної руки */

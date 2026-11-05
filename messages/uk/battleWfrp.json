@@ -1,0 +1,57 @@
+{
+  "conditions": {
+    "bleeding": {
+      "label": "Кровотеча",
+      "description": "На початку ходу −1 Wounds за рівень; шанс знепритомніти 10% за рівень"
+    },
+    "fatigued": {
+      "label": "Втома",
+      "description": "−10 до тестів за рівень"
+    },
+    "poisoned": {
+      "label": "Отруєння",
+      "description": "−10 до тестів за рівень"
+    },
+    "stunned": {
+      "label": "Оглушення",
+      "description": "Без дії; −10 до тестів за рівень"
+    },
+    "ablaze": {
+      "label": "Горіння",
+      "description": "На початку ходу d10 + рівень − 1 шкоди"
+    },
+    "broken": {
+      "label": "Зламаний",
+      "description": "−10 до тестів за рівень"
+    },
+    "entangled": {
+      "label": "Сплутаний",
+      "description": "Не рухається; −10 до тестів за рівень"
+    },
+    "prone": {
+      "label": "Лежить",
+      "description": "Не рухається; ближнім атакам по ньому +20"
+    },
+    "surprised": {
+      "label": "Захоплений зненацька",
+      "description": "Без дії; атакам по ньому +20"
+    },
+    "blinded": {
+      "label": "Осліплений",
+      "description": "−20 до власних атак; атакам по ньому +20"
+    },
+    "deafened": {
+      "label": "Оглушений звуком",
+      "description": "Не чує"
+    },
+    "unconscious": {
+      "label": "Непритомний",
+      "description": "Не діє й не рухається"
+    }
+  },
+  "log": {
+    "applied": "{target}: {condition}{level, plural, =1 {} other { ×#}} ({source})",
+    "removed": "{target}: {condition} знято",
+    "reduced": "{target}: {condition} ×{level}"
+  }
+}

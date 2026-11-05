@@ -14,6 +14,7 @@ import type battleDm from "./messages/uk/battleDm.json";
 import type battleLog from "./messages/uk/battleLog.json";
 import type battleSetup from "./messages/uk/battleSetup.json";
 import type battleTerms from "./messages/uk/battleTerms.json";
+import type battleWfrp from "./messages/uk/battleWfrp.json";
 import type battleWizards from "./messages/uk/battleWizards.json";
 import type campaigns from "./messages/uk/campaigns.json";
 import type characterProfile from "./messages/uk/characterProfile.json";
@@ -105,6 +106,7 @@ declare module "next-intl" {
       battleSetup: typeof battleSetup;
       battleLog: typeof battleLog;
       battleActions: typeof battleActions;
+      battleWfrp: typeof battleWfrp;
     };
   }
 }

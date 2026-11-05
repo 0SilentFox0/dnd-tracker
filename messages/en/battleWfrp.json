@@ -1,0 +1,57 @@
+{
+  "conditions": {
+    "bleeding": {
+      "label": "Bleeding",
+      "description": "At turn start −1 Wounds per level; 10% chance per level to fall unconscious"
+    },
+    "fatigued": {
+      "label": "Fatigued",
+      "description": "−10 to tests per level"
+    },
+    "poisoned": {
+      "label": "Poisoned",
+      "description": "−10 to tests per level"
+    },
+    "stunned": {
+      "label": "Stunned",
+      "description": "No action; −10 to tests per level"
+    },
+    "ablaze": {
+      "label": "Ablaze",
+      "description": "At turn start d10 + level − 1 damage"
+    },
+    "broken": {
+      "label": "Broken",
+      "description": "−10 to tests per level"
+    },
+    "entangled": {
+      "label": "Entangled",
+      "description": "Cannot move; −10 to tests per level"
+    },
+    "prone": {
+      "label": "Prone",
+      "description": "Cannot move; melee attacks against it get +20"
+    },
+    "surprised": {
+      "label": "Surprised",
+      "description": "No action; attacks against it get +20"
+    },
+    "blinded": {
+      "label": "Blinded",
+      "description": "−20 to own attacks; attacks against it get +20"
+    },
+    "deafened": {
+      "label": "Deafened",
+      "description": "Cannot hear"
+    },
+    "unconscious": {
+      "label": "Unconscious",
+      "description": "Cannot act or move"
+    }
+  },
+  "log": {
+    "applied": "{target}: {condition}{level, plural, =1 {} other { ×#}} ({source})",
+    "removed": "{target}: {condition} removed",
+    "reduced": "{target}: {condition} ×{level}"
+  }
+}

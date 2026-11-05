@@ -10,7 +10,7 @@ import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { LogLine } from "@/types/text";
 
@@ -103,7 +103,48 @@ export interface InitiativeScore {
   die: number | null;
 }
 
+export interface SystemConditionInfo {
+  key: string;
+  maxLevel: number | null;
+  endTest: "roll" | "stand" | null;
+}
+
+export interface SystemConditionApply {
+  key: string;
+  levels?: number;
+  rounds?: number;
+  round: number;
+  source?: ActiveEffect["source"];
+  sourceName: LogLine;
+}
+
+export interface SystemConditionResult {
+  participants: BattleParticipant[];
+  messages: LogLine[];
+}
+
+export interface SystemConditionLevel {
+  key: string;
+  level: number;
+  effectKey: string;
+}
+
+export interface RuleSystemConditions {
+  catalog: readonly SystemConditionInfo[];
+  list(p: BattleParticipant): SystemConditionLevel[];
+  apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
+  reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };
+  turnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset }): SystemConditionResult & { downed: boolean };
+  attemptEnd(
+    ps: BattleParticipant[],
+    id: string,
+    key: string,
+    ctx: { round: number; rng: Rng; rules: Ruleset; presetRoll?: number },
+  ): SystemConditionResult & { success: boolean; roll: number; target: number; sl: number };
+}
+
 export interface RuleSystemCombat {
+  fortune?: true;
   dice: 20 | 100;
   participantFields?(row: { characteristics?: unknown }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
   actionEconomy: { bonusAction: boolean; reaction: boolean };
@@ -140,6 +181,7 @@ export interface RuleSystemDefinition {
   rest: { kinds: boolean; onSession?(resources: CharacterResources, characteristics: Characteristics): CharacterResources };
   battle: { supported: boolean };
   combat: RuleSystemCombat;
+  conditions?: RuleSystemConditions;
   lineage: boolean;
   classes: boolean;
   attacks: boolean;
