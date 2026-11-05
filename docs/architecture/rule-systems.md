@@ -125,6 +125,18 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - Решта відомих прогалин: таланти, редагований контент `tables`, дальність/площа/тривалість overcast, long cast, штраф броні (AP = 0 до 5f).
 - **Обов'язково перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20) — виконано 2026-11-05: перший прогін мав 1 збій лабіринту (застарілий assert, виправлено 221877d27), повторний прогін exit 0, 0 помилок, регресії немає.
 
+## Межі 5e-1
+
+Таланти й XP-леджер (на `feat/wfrp`, не змерджено; міграція `feats_xp_cost_max_rank`, expand-only). Spec/план — `docs/superpowers/{specs,plans}/2026-11-05-wfrp-5e1*`.
+
+- Хук системи `advancement` (`cost`/`planPurchase`/`planUndo`/`availableXp`/`talentGroups`; `undefined` у homm/dnd5e) і секція `rules.advancement` (таблиці цін характеристик/навичок, `talentCostMultiplier`). Секція поза `MECHANIC_REGISTRY`: `rulesHashes` її не відстежують, доки немає редактора.
+- Каталог талантів = `feats` + `xpCost`/`maxRank`; набуті — `characteristics.talents { featId: rank }`, історія — `characteristics.ledger` (≤ 200). Доступний XP похідний: `experience − Σ ledger.cost`.
+- Операції `advance` (власник або ДМ) і `advance-undo` (лише ДМ) під `lockCharacters`/`FOR UPDATE`; відкат лише останньої покупки, `LEDGER_STALE`, якщо ДМ змінив значення вручну.
+- Приватність: `ledger` бачать власник і ДМ, у `list` для інших він `[]`; гравець не змінює `talents`/`ledger`/`advances`/`skillAdvances` через PATCH (`preserveServerOwned`).
+- Ранг таланта = повтор ability-групи `rank` разів (`scale` у DSL для feats недоступний); нестекові таланти мають `maxRank = 1`. Невідомий (видалений) талант у бою пропускається.
+- Свідомі межі: кар'єри/знижки — 5e-2, створення персонажа — 5e-3; передумови талантів автоматично лише `maxRank` і баланс; ціни й `xpCost` — заглушки `verify against 5e book`, не звірені з книгою; прямі правки ДМ у `characteristics` не пишуть у леджер.
+- Відомі хвости: обрізання леджера на 201-му записі повертає XP (`availableXp`); PATCH `characteristics` гравцем читає рядок без блокування (вузьке вікно гонки з `advance`); у DM-редакторі профілю немає вкладки «Розвиток» (stale `characteristics` при збереженні); `scope-size` uk 104.5 / 105 KB.
+
 ## Межі 5c-1
 
 Стани й Fortune на `feat/wfrp` (без міграції; UI — namespace `battleWfrp`). Свідомі межі:
