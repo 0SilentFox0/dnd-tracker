@@ -54,4 +54,35 @@ describe("useAdvance", () => {
     expect(undoCharacterAdvance).toHaveBeenCalledWith("c", "ch");
     await waitFor(() => expect(hook.current.error).toBeNull());
   });
+
+  it("ignores a second buy while one is in flight", async () => {
+    let resolve!: (v: never) => void;
+
+    vi.mocked(advanceCharacter).mockClear();
+    vi.mocked(advanceCharacter).mockReturnValueOnce(new Promise((r) => (resolve = r)));
+
+    const { result: hook } = setup();
+
+    await act(async () => {
+      const first = hook.current.buy({ kind: "characteristic", key: "ws" });
+      const second = hook.current.buy({ kind: "characteristic", key: "ws" });
+
+      resolve(result as never);
+      await Promise.all([first, second]);
+    });
+
+    expect(advanceCharacter).toHaveBeenCalledTimes(1);
+  });
+
+  it("refetches the character detail after a refusal", async () => {
+    vi.mocked(advanceCharacter).mockRejectedValueOnce(new Error("Not enough XP"));
+
+    const { qc, result: hook } = setup();
+
+    const invalidate = vi.spyOn(qc, "invalidateQueries");
+
+    await act(() => hook.current.buy({ kind: "skill", key: "athletics" }));
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: characterKeys.detail("c", "ch") });
+  });
 });

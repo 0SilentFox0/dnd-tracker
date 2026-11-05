@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
@@ -20,13 +21,30 @@ export function useAdvance(campaignId: string, characterId: string) {
     mutationFn: (op: AdvanceOp) => (op.kind === "buy" ? advanceCharacter(campaignId, characterId, op.request) : undoCharacterAdvance(campaignId, characterId)),
     invalidateKeys: [characterKeys.sheet(campaignId, characterId), characterKeys.log(campaignId, characterId)],
     onSuccess: applyDelta,
+    // a refusal means the cached balance is stale
+    onError: () => void queryClient.invalidateQueries({ queryKey: characterKeys.detail(campaignId, characterId) }),
   });
+
+  const inFlight = useRef(false);
+
+  // synchronous: isPending only flips after a render, a fast second click would slip through
+  const guarded = async (op: AdvanceOp) => {
+    if (inFlight.current) return;
+
+    inFlight.current = true;
+
+    try {
+      await mutateOk(op);
+    } finally {
+      inFlight.current = false;
+    }
+  };
 
   const { mutateOk } = mutation;
 
   return {
-    buy: async (request: AdvanceBody) => void (await mutateOk({ kind: "buy", request })),
-    undo: async () => void (await mutateOk({ kind: "undo" })),
+    buy: (request: AdvanceBody) => guarded({ kind: "buy", request }),
+    undo: () => guarded({ kind: "undo" }),
     isPending: mutation.isPending,
     error: mutation.error ? mutation.error.message : null,
   };
