@@ -46,4 +46,24 @@ describe("rule system registry", () => {
     expect(s).toMatchObject({ lineage: false, attacks: false });
     expect(s.unusedMechanics).toContain("classes");
   });
+
+  it("conditions and fortune hooks exist only for wfrp", () => {
+    expect(RULE_SYSTEM_REGISTRY.wfrp.conditions).toBeDefined();
+    expect(RULE_SYSTEM_REGISTRY.wfrp.combat.fortune).toBe(true);
+
+    for (const key of ["homm", "dnd5e"] as const) {
+      expect(RULE_SYSTEM_REGISTRY[key].conditions).toBeUndefined();
+      expect(RULE_SYSTEM_REGISTRY[key].combat.fortune).toBeUndefined();
+    }
+
+    const catalog = RULE_SYSTEM_REGISTRY.wfrp.conditions!.catalog;
+
+    const by = (k: string) => catalog.find((c) => c.key === k);
+
+    expect(catalog).toHaveLength(12);
+    expect(by("prone")).toMatchObject({ endTest: "stand", maxLevel: null });
+    expect(by("fatigued")?.endTest).toBeNull();
+    expect(by("bleeding")?.maxLevel).toBe(10);
+    expect(by("bleeding")?.endTest).toBe("roll");
+  });
 });

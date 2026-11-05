@@ -52,6 +52,14 @@
   "log": {
     "applied": "{target}: {condition}{level, plural, =1 {} other { ×#}} ({source})",
     "removed": "{target}: {condition} знято",
-    "reduced": "{target}: {condition} ×{level}"
+    "reduced": "{target}: {condition} ×{level}",
+    "tick": {
+      "bleeding": "{name}: кровотеча, −{damage} Wounds",
+      "ablaze": "{name}: горить, −{damage} Wounds",
+      "faint": "{name} знепритомнів від крововтрати"
+    },
+    "endTestSuccess": "{name}: {condition} — тест {roll} / {target}, SL {sl}: успіх",
+    "endTestFail": "{name}: {condition} — тест {roll} / {target}, SL {sl}: невдача",
+    "stand": "{name} підводиться"
   }
 }

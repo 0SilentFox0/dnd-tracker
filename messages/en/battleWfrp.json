@@ -52,6 +52,14 @@
   "log": {
     "applied": "{target}: {condition}{level, plural, =1 {} other { ×#}} ({source})",
     "removed": "{target}: {condition} removed",
-    "reduced": "{target}: {condition} ×{level}"
+    "reduced": "{target}: {condition} ×{level}",
+    "tick": {
+      "bleeding": "{name}: bleeding, −{damage} Wounds",
+      "ablaze": "{name}: burning, −{damage} Wounds",
+      "faint": "{name} faints from blood loss"
+    },
+    "endTestSuccess": "{name}: {condition} — test {roll} / {target}, SL {sl}: success",
+    "endTestFail": "{name}: {condition} — test {roll} / {target}, SL {sl}: failure",
+    "stand": "{name} gets up"
   }
 }
