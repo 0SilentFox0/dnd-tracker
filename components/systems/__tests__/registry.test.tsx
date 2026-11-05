@@ -21,9 +21,10 @@ describe("system ui registry", () => {
     expect(systemUiOf("dnd5e").MagicTab).toBeUndefined();
   });
 
-  it("wfrp has its own magic tab, d20 uses the shared one", () => {
-    expect(systemUiOf("wfrp").MagicTab).toBeTypeOf("function");
-    expect(systemUiOf("dnd5e").MagicTab).toBeUndefined();
+  it("only wfrp has an advancement tab", () => {
+    expect(systemUiOf("wfrp").AdvancementTab).toBeTypeOf("function");
+    expect(systemUiOf("dnd5e").AdvancementTab).toBeUndefined();
+    expect(systemUiOf("homm").AdvancementTab).toBeUndefined();
   });
 
   it("sheet flags: d20 keeps spells/items/rest kinds/d20 stats, wfrp keeps only spells", () => {

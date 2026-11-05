@@ -9,3 +9,5 @@ export function advanceCost(kind: "characteristic" | "skill", currentAdvances: n
 
   return bracket.cost;
 }
+
+export const talentCost = (xpCost: number, currentRank: number, rules: AdvancementRules): number => Math.round(xpCost * (currentRank + 1) * rules.talentCostMultiplier);

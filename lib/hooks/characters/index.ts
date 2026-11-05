@@ -1,3 +1,4 @@
+export { useAdvance } from "./useAdvance";
 export { useArcaneRecovery } from "./useArcaneRecovery";
 export { useArchetypeOptions } from "./useArchetypeOptions";
 export { useCharacterChoices } from "./useCharacterChoices";

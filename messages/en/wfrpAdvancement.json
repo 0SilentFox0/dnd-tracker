@@ -1,0 +1,25 @@
+{
+  "ui": {
+    "balance": "Available XP",
+    "characteristics": "Characteristics",
+    "skills": "Skills",
+    "talents": "Talents",
+    "ledger": "Advancement log",
+    "buy": "Buy · {cost}",
+    "buyNew": "Buy",
+    "undo": "Undo",
+    "atLimit": "Limit",
+    "maxRank": "Max rank",
+    "noCost": "—",
+    "needXp": "Not enough XP",
+    "advances": "Advances: {count}",
+    "rank": "Rank {rank}/{max}",
+    "rankOnly": "Rank {rank}",
+    "unknownTalent": "Unknown talent",
+    "noTalents": "No talents with an XP cost in the catalog.",
+    "ledgerEmpty": "No purchases yet.",
+    "spent": "{cost} XP",
+    "newSkill": "New skill",
+    "spec": "Specialization"
+  }
+}

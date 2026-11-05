@@ -40,6 +40,8 @@
     "prereqText": "Інші передумови (текст)",
     "prereqTextPlaceholder": "Напр.: Spellcasting Feature",
     "repeatable": "Повторювана",
+    "xpCost": "Вартість у досвіді (за ранг)",
+    "maxRank": "Макс. ранг",
     "description": "Опис"
   },
   "list": {

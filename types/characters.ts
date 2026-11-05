@@ -12,7 +12,7 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
-import type { CharacteristicKey, Characteristics, DifficultyKey, RuleSystemKey, SheetWfrpBlock } from "@/lib/utils/rules/systems";
+import type { CharacteristicKey, Characteristics, DifficultyKey, LedgerEntry, PurchaseRequest, RuleSystemKey, SheetWfrpBlock } from "@/lib/utils/rules/systems";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
 
@@ -146,6 +146,7 @@ export interface Character {
   goals?: CharacterGoal[];
   archetype?: string | null;
   characteristics?: Characteristics;
+  experience?: number;
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<
     string,
@@ -370,6 +371,10 @@ export interface HitDieResult {
 }
 
 export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
+
+export type AdvanceBody = PurchaseRequest;
+
+export type AdvanceResult = { characteristics: Characteristics; experience: number; available: number; entry: LedgerEntry };
 
 export type ResourcesEditBody = { fortune?: number; sin?: number; hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
 

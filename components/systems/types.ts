@@ -53,5 +53,6 @@ export interface SystemUi {
   UnitStatsFields: ComponentType<UnitStatsFieldsProps>;
   hideProgression: boolean;
   MagicTab?: ComponentType;
+  AdvancementTab?: ComponentType;
   battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
 }

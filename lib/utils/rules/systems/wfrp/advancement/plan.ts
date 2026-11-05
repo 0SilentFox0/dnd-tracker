@@ -1,5 +1,5 @@
 import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, LEDGER_MAX, type LedgerEntry, SKILL_ADVANCE_KEY_RE } from "../characteristics/keys";
-import { advanceCost } from "./cost";
+import { advanceCost, talentCost } from "./cost";
 import type { AdvancementRules } from "./rules";
 
 export type PurchaseRequest = { kind: "characteristic" | "skill" | "talent"; key: string };
@@ -57,7 +57,7 @@ function priceTalent(c: Characteristics, key: string, talent: PurchaseTalent | u
 
   if (from >= (talent.maxRank ?? 1)) return { error: "MAX_RANK" };
 
-  return { from, cost: Math.round(talent.xpCost * (from + 1) * rules.talentCostMultiplier), apply: (cur) => ({ ...cur, talents: { ...cur.talents, [key]: from + 1 } }) };
+  return { from, cost: talentCost(talent.xpCost, from, rules), apply: (cur) => ({ ...cur, talents: { ...cur.talents, [key]: from + 1 } }) };
 }
 
 export function planPurchase(input: PurchaseInput): PurchaseResult {

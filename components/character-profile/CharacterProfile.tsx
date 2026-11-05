@@ -33,13 +33,14 @@ import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 
 const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
 
-const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story", "log"];
+const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "advancement", "items", "story", "log"];
 
-function viewTabs({ withLog, withPath, withMagic: Magic, withItems }: { withLog: boolean; withPath: boolean; withMagic: ComponentType | false; withItems: boolean }, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
+function viewTabs({ withLog, withPath, withMagic: Magic, withAdvancement: Advancement, withItems }: { withLog: boolean; withPath: boolean; withMagic: ComponentType | false; withAdvancement: ComponentType | false; withItems: boolean }, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
   const tabs: ProfileTab[] = [
     { id: "combat", label: t("combat"), content: <CombatTab /> },
     ...(withPath ? [{ id: "skills" as const, label: t("path"), content: <SkillsTab /> }] : []),
     ...(Magic ? [{ id: "magic" as const, label: t("magic"), content: <Magic /> }] : []),
+    ...(Advancement ? [{ id: "advancement" as const, label: t("advancement"), content: <Advancement /> }] : []),
     ...(withItems ? [{ id: "items" as const, label: t("items"), content: <InventoryTab /> }] : []),
     { id: "story", label: t("story"), content: <StoryTab /> },
   ];
@@ -121,7 +122,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
       {(sheet) => {
         const system = RULE_SYSTEM_REGISTRY[sheet.system];
 
-        const tabs = viewTabs({ withLog: !!sheet.rest, withPath: !systemUiOf(sheet.system).hideProgression, withMagic: system.spells && (systemUiOf(sheet.system).MagicTab ?? MagicTab), withItems: system.items }, (id) => t(`tabs.${id}`));
+        const tabs = viewTabs({ withLog: !!sheet.rest, withPath: !systemUiOf(sheet.system).hideProgression, withMagic: system.spells && (systemUiOf(sheet.system).MagicTab ?? MagicTab), withAdvancement: (sheet.viewer.isDM || sheet.viewer.isOwner) && (systemUiOf(sheet.system).AdvancementTab ?? false), withItems: system.items }, (id) => t(`tabs.${id}`));
 
         return (
         <ProfileProvider campaignId={campaignId} characterId={characterId} sheet={sheet} canEdit={canEdit && sheet.viewer.isDM}>
