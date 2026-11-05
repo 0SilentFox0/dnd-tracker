@@ -99,7 +99,9 @@ export function applyCharacterResources(p: BattleParticipant, state: StoredChara
 
   if (!r) return inspired;
 
-  return withHpState(withCharges(withSpentSlots(withExhaustion(inspired, r.exhaustion ?? 0, rules), r.slotsSpent), r.charges), r, rules);
+  const out = withHpState(withCharges(withSpentSlots(withExhaustion(inspired, r.exhaustion ?? 0, rules), r.slotsSpent), r.charges), r, rules);
+
+  return r.fortune === undefined ? out : { ...out, battleData: { ...out.battleData, fortune: r.fortune } };
 }
 
 export function spentSlots(p: BattleParticipant): Record<string, number> {
@@ -139,6 +141,7 @@ export function applyBattleResult(r: CharacterResources, p: BattleParticipant): 
     slotsSpent: spentSlots(p),
     charges: battleCharges(r.charges, p),
     exhaustion: exhaustionLevel(p),
+    fortune: p.battleData.fortune ?? r.fortune,
     shortRestOpen: undefined,
   };
 

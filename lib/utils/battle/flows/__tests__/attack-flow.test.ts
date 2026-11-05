@@ -308,3 +308,38 @@ describe("attackFlow", () => {
     expect(attackPayload(done, "me")).not.toHaveProperty("serverRoll");
   });
 });
+
+describe("Fortune in attack flow", () => {
+  const pct = (...extra: AttackFlowAction[]) => run(open(1, 2), { type: "TOGGLE_TARGET", id: "e1" }, { type: "CONFIRM_TARGETS" }, ...extra);
+
+  it("SET_FORTUNE sets state; payload carries fortune and fortuneRoll", () => {
+    const s = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", percentile: true });
+
+    expect(s.fortune).toBe("reroll");
+    expect(attackPayload(s, "a1")).toMatchObject({ fortune: "reroll", fortuneRoll: 20, attackRoll: 90 });
+  });
+
+  it("server roll: no fortuneRoll; sl: no fortuneRoll", () => {
+    const server = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", outcome: "hit", percentile: true });
+
+    expect(attackPayload(server, "a1")).toMatchObject({ fortune: "reroll" });
+    expect(attackPayload(server, "a1")).not.toHaveProperty("fortuneRoll");
+
+    const sl = pct({ type: "SET_FORTUNE", value: "sl" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", percentile: true });
+
+    expect(attackPayload(sl, "a1")).toMatchObject({ fortune: "sl" });
+    expect(attackPayload(sl, "a1")).not.toHaveProperty("fortuneRoll");
+    expect(attackPayload(sl, "a1")).not.toHaveProperty("advantageRoll");
+  });
+
+  it("two targets: no fortune in body; SET_TARGETS/TOGGLE_TARGET to >1 clears it", () => {
+    const base = run(open(1, 3), { type: "SET_FORTUNE", value: "sl" });
+
+    expect(run(open(1, 3), { type: "SET_FORTUNE", value: "sl" }, { type: "SET_TARGETS", ids: ["a", "b"] }).fortune).toBeUndefined();
+    expect(attackFlow({ ...base, targetIds: ["a"] }, { type: "TOGGLE_TARGET", id: "b" }).fortune).toBeUndefined();
+
+    const two = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 10, outcome: "miss", percentile: true }, { type: "ROLL", d20: 10, outcome: "miss", percentile: true });
+
+    expect(attackPayload({ ...two, fortune: "sl" }, "a1")).not.toHaveProperty("fortune");
+  });
+});

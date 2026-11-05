@@ -53,6 +53,7 @@ export interface AttackFlowState {
   /** d100: the server decides hit/miss, so there is no damage step */
   percentile?: boolean;
   cunningStrike?: CunningStrikeEffect[];
+  fortune?: "reroll" | "sl";
 }
 
 export type AttackFlowAction =
@@ -64,6 +65,7 @@ export type AttackFlowAction =
   | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
+  | { type: "SET_FORTUNE"; value: "reroll" | "sl" | null }
   | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
   | { type: "ROLL"; d20?: number; second?: number; outcome: RollOutcome; percentile?: boolean; damage?: number[] }
   | { type: "DAMAGE"; values: number[] }
@@ -88,6 +90,14 @@ const prevHit = (strikes: Strike[], before: number) => {
   return -1;
 };
 
+const withSingleFortune = (s: AttackFlowState): AttackFlowState => {
+  if (s.targetIds.length <= 1) return s;
+
+  const { fortune: _f, ...rest } = s;
+
+  return rest;
+};
+
 export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowState {
   switch (a.type) {
     case "OPEN":
@@ -99,12 +109,17 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "TOGGLE_TARGET": {
       if (s.maxTargets <= 1) return { ...s, targetIds: [a.id] };
 
-      if (s.targetIds.includes(a.id)) return { ...s, targetIds: s.targetIds.filter((id) => id !== a.id) };
+      if (s.targetIds.includes(a.id)) return withSingleFortune({ ...s, targetIds: s.targetIds.filter((id) => id !== a.id) });
 
-      return s.targetIds.length >= s.maxTargets ? s : { ...s, targetIds: [...s.targetIds, a.id] };
+      return s.targetIds.length >= s.maxTargets ? s : withSingleFortune({ ...s, targetIds: [...s.targetIds, a.id] });
     }
     case "SET_TARGETS":
-      return { ...s, targetIds: a.ids.slice(0, s.maxTargets) };
+      return withSingleFortune({ ...s, targetIds: a.ids.slice(0, s.maxTargets) });
+    case "SET_FORTUNE": {
+      const { fortune: _old, ...rest } = s;
+
+      return a.value ? { ...rest, fortune: a.value } : rest;
+    }
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0
         ? s
@@ -222,8 +237,10 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
       ...base,
       targetIds: [st.targetId],
       ...(serverRoll ? { serverRoll } : { attackRoll: st.d20 }),
-      ...(st.second !== undefined && mode === "advantage" && { advantageRoll: st.second }),
-      ...(st.second !== undefined && mode === "disadvantage" && { disadvantageRoll: st.second }),
+      ...(st.second !== undefined && !s.percentile && mode === "advantage" && { advantageRoll: st.second }),
+      ...(st.second !== undefined && !s.percentile && mode === "disadvantage" && { disadvantageRoll: st.second }),
+      ...(s.fortune && { fortune: s.fortune }),
+      ...(s.fortune === "reroll" && s.percentile && st.second !== undefined && !serverRoll && { fortuneRoll: st.second }),
       damageRolls: isHit(st) ? st.damage : [],
     } as AttackData & { endTurn: boolean };
   }
@@ -235,7 +252,7 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
     ...base,
     targetIds: s.strikes.map((st) => st.targetId),
     ...(serverRoll ? { serverRoll } : { attackRolls: s.strikes.map((st) => st.d20 ?? 0) }),
-    ...(s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
+    ...(!s.percentile && s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };
 }

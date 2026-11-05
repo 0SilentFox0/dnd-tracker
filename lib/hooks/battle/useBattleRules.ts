@@ -19,6 +19,7 @@ export function useBattleRules() {
 
     return {
       dice: combat.dice,
+      fortune: !!combat.fortune,
       actionEconomy: combat.actionEconomy,
       d20Stats,
       spells,

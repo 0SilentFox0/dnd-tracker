@@ -27,7 +27,7 @@ import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();
 
-  const { dice, momentum } = useBattleRules();
+  const { dice, momentum, fortune } = useBattleRules();
 
   const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
 
@@ -130,7 +130,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   };
 
   const rollAction = (d20?: number, second?: number): AttackFlowAction =>
-    dice === 100 ? { type: "ROLL", d20, outcome: "hit", percentile: true, damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20 ?? 0, second) };
+    dice === 100 ? { type: "ROLL", d20, outcome: "hit", percentile: true, damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)), ...(second !== undefined && { second }) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20 ?? 0, second) };
 
   useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
@@ -142,6 +142,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       maxEffects: cunningOffer.maxEffects,
       sneakDice: cunningOffer.sneakDice,
     },
+    fortune: { available: dice === 100 && fortune && (attacker?.battleData.fortune ?? 0) >= 1 && state.targetIds.length === 1, left: attacker?.battleData.fortune ?? 0 },
     attack, attacks, targets, steps, estimate, cover, unknownDefense, previews, dice, percentile,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
@@ -207,6 +208,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
     toggleCunning: (effect: CunningStrikeEffect) => cunningOffer && dispatch({ type: "SET_CUNNING_STRIKE", effects: toggleCunningStrike(state.cunningStrike ?? [], effect, cunningOffer) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
+    setFortune: (value: "reroll" | "sl" | null) => dispatch({ type: "SET_FORTUNE", value }),
     setInspiration: (value: boolean) => {
       const t = byId(state.strikes[0]?.targetId ?? "");
 

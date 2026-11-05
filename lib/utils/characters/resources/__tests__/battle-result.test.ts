@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { applyBattleResult, battleResultLogData } from "@/lib/utils/characters/resources/battle";
+import { applyBattleResult, applyCharacterResources, battleResultLogData } from "@/lib/utils/characters/resources/battle";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 
 const surge = resolved({ trigger: { event: "action" }, limits: { perRest: { rest: "short", uses: 1 } }, effects: [{ kind: "note", text: "x" }] } as never, { type: "class", id: "fighter" });
@@ -52,5 +53,20 @@ describe("applyBattleResult", () => {
 
   it("log data: HP before/after", () => {
     expect(battleResultLogData({ hp: 15 }, hero({ hp: 7 }), "b1")).toMatchObject({ battleId: "b1", hpBefore: 15, hpAfter: 7, maxHp: 20, dead: false });
+  });
+});
+
+describe("Fortune sheet <-> battle", () => {
+  it("applyCharacterResources copies fortune to battleData; absent -> no field", () => {
+    expect(applyCharacterResources(hero(), { inspiration: null, resources: { fortune: 2 } }, WFRP_RULES).battleData.fortune).toBe(2);
+    expect(applyCharacterResources(hero(), { inspiration: null, resources: { hp: 5 } }, WFRP_RULES).battleData).not.toHaveProperty("fortune");
+  });
+
+  it("applyBattleResult writes the participant's fortune back, falling back to the sheet", () => {
+    const withFortune = { ...hero(), battleData: { ...hero().battleData, fortune: 1 } };
+
+    expect(applyBattleResult({ fortune: 2 }, withFortune).fortune).toBe(1);
+    expect(applyBattleResult({ fortune: 2 }, hero()).fortune).toBe(2);
+    expect(applyBattleResult({}, hero())).not.toHaveProperty("fortune");
   });
 });
