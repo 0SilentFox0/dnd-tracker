@@ -62,11 +62,15 @@ export function logEntryView(e: BattleAction): LogEntryView {
 
   const hazard = !!e.actionDetails?.hazard;
 
+  const rolls = e.actionDetails?.damageRolls;
+
+  const turnStart = !!rolls?.length && rolls.every((r) => r.damageType === "dot");
+
   return {
     headline,
     lines,
     hp: [...byId.values()].filter((h) => h.delta !== 0),
-    kindLabel: hazard ? textRef("battleCommon.actionKinds.hazard") : KNOWN_KINDS.has(e.actionType) ? dynamicTextRef(`battleCommon.actionKinds.${e.actionType}`) : textRef("battleCommon.actionKinds.event"),
+    kindLabel: hazard ? textRef("battleCommon.actionKinds.hazard") : turnStart ? textRef("battleCommon.actionKinds.turnStart") : KNOWN_KINDS.has(e.actionType) ? dynamicTextRef(`battleCommon.actionKinds.${e.actionType}`) : textRef("battleCommon.actionKinds.event"),
     hasDetails: getLogEntryDetailItems(e).length > 0,
     isTrigger,
     ...(hazard && { kind: "hazard" as const }),

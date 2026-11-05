@@ -64,8 +64,8 @@
     "endTestSuccessHidden": "{name}: {condition} — тест {roll}, SL {sl}: успіх",
     "endTestFailHidden": "{name}: {condition} — тест {roll}, SL {sl}: невдача",
     "stand": "{name} підводиться",
-    "fortuneReroll": "{name} витрачає Fortune: перекидання (перший кидок {first})",
-    "fortuneSl": "{name} витрачає Fortune: +1 SL"
+    "fortuneReroll": "{name} витрачає Удачу: перекидання (перший кидок {first})",
+    "fortuneSl": "{name} витрачає Удачу: +1 SL"
   },
   "ui": {
     "dialog": {
@@ -86,14 +86,14 @@
       "manual": "Вручну"
     },
     "fortune": {
-      "label": "Fortune",
+      "label": "Удача",
       "off": "Вимк.",
       "reroll": "Перекинути",
       "sl": "+1 SL",
-      "left": "Залишилось Fortune: {count}",
-      "secondRoll": "Другий кидок",
-      "used": "Витрачено Fortune: перекидання (перший кидок {first})",
-      "usedSl": "Витрачено Fortune: +1 SL"
+      "left": "Залишилось Удачі: {count}",
+      "secondRoll": "Кидок на випадок промаху",
+      "used": "Витрачено Удачу: перекидання (перший кидок {first})",
+      "usedSl": "Витрачено Удачу: +1 SL"
     }
   }
 }

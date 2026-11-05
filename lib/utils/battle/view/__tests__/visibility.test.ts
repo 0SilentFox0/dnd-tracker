@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { alwaysSeesEnemyStats, canSeeEnemyHp, canSeeExactStats, hiddenTargetSteps, PLAYER_VIEWER, redactLogForPlayers, sanitizeLogEntry } from "@/lib/utils/battle/view";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
 import type { BattleAction, DamageStep } from "@/types/battle";
 
@@ -11,6 +13,10 @@ const side = (s: ParticipantSide) => {
 
   return { ...p, basicInfo: { ...p.basicInfo, side: s } };
 };
+
+const WFRP: Ruleset = { ...DEFAULT_RULES, system: { key: "wfrp" } };
+
+const ctxOf = (participants: BattleParticipant[] = [], rules = WFRP) => ({ participants, rules });
 
 const player = { userId: "u", isDM: false, readOnly: false, canSeeEnemyHp: false };
 
@@ -25,8 +31,8 @@ describe("видимість", () => {
   it("журнал для гравця без targetAC і damageBreakdown; DM бачить усе", () => {
     const e = { actionDetails: { targetAC: 15, damageBreakdown: "x", totalAttackValue: 19 } } as unknown as BattleAction;
 
-    expect(sanitizeLogEntry(e, player).actionDetails).toEqual({ totalAttackValue: 19 });
-    expect(sanitizeLogEntry(e, { ...player, isDM: true })).toBe(e);
+    expect(sanitizeLogEntry(e, player, ctxOf()).actionDetails).toEqual({ totalAttackValue: 19 });
+    expect(sanitizeLogEntry(e, { ...player, isDM: true }, ctxOf())).toBe(e);
   });
 
   it("захист цілі в percentile-записі прибирається для гравця, DM бачить усе", () => {
@@ -36,13 +42,13 @@ describe("видимість", () => {
 
     const e = { actionDetails: { percentile }, log: ["head", opposed] } as unknown as BattleAction;
 
-    const seen = sanitizeLogEntry(e, player);
+    const seen = sanitizeLogEntry(e, player, ctxOf());
 
     expect(seen.actionDetails.percentile?.defender).toBeUndefined();
     expect(seen.log?.[0]).toBe("head");
     expect(seen.log?.[1]).toEqual({ message: "battleLog.percentile.opposedHidden", params: { roll: 30, target: 45, sl: 1, netSl: 2 } });
     expect(JSON.stringify(seen)).not.toContain("52");
-    expect(sanitizeLogEntry(e, { ...player, isDM: true })).toBe(e);
+    expect(sanitizeLogEntry(e, { ...player, isDM: true }, ctxOf())).toBe(e);
   });
 
   it("wfrp: рівень стану і ціль тесту зняття чужої не-exact цілі ховаються для гравця", () => {
@@ -56,13 +62,13 @@ describe("видимість", () => {
 
     const test = { message: "battleWfrp.log.endTestFail", params: { name: "x", condition: "c", roll: 50, target: 35, sl: -1 } };
 
-    const seen = sanitizeLogEntry(entry("e", [applied, test]), player, [enemy, ally]);
+    const seen = sanitizeLogEntry(entry("e", [applied, test]), player, ctxOf([enemy, ally]));
 
     expect(seen.log?.[0]).toEqual({ message: "battleWfrp.log.appliedHidden", params: { target: "x", condition: "c", source: "s" } });
     expect(seen.log?.[1]).toEqual({ message: "battleWfrp.log.endTestFailHidden", params: { name: "x", condition: "c", roll: 50, sl: -1 } });
-    expect(sanitizeLogEntry(entry("f", [applied, test]), player, [enemy, ally]).log).toEqual([applied, test]);
-    expect(sanitizeLogEntry(entry("e", [applied]), { ...player, isDM: true }, [enemy])).toEqual(entry("e", [applied]));
-    expect(sanitizeLogEntry(entry("e", [applied]), { ...player, canSeeEnemyHp: true }, [enemy]).log).toEqual([applied]);
+    expect(sanitizeLogEntry(entry("f", [applied, test]), player, ctxOf([enemy, ally])).log).toEqual([applied, test]);
+    expect(sanitizeLogEntry(entry("e", [applied]), { ...player, isDM: true }, ctxOf([enemy]))).toEqual(entry("e", [applied]));
+    expect(sanitizeLogEntry(entry("e", [applied]), { ...player, canSeeEnemyHp: true }, ctxOf([enemy])).log).toEqual([applied]);
   });
 
   it("кроки цілі ховаються, доки не помічені в журналі", () => {
@@ -143,7 +149,7 @@ describe("redactLogForPlayers", () => {
 
     const e = entry("e", [applied, pass], { targetAC: 15, damageBreakdown: "x", damageRows: [], percentile });
 
-    const { entries, changed } = redactLogForPlayers([e], [enemy, ally]);
+    const { entries, changed } = redactLogForPlayers([e], ctxOf([enemy, ally]));
 
     expect(changed).toBe(true);
     expect(entries[0].log?.[0]).toEqual({ message: "battleWfrp.log.appliedHidden", params: { target: "x", condition: "c", source: "s" } });
@@ -157,7 +163,7 @@ describe("redactLogForPlayers", () => {
   it("запис про союзника без прихованих полів — той самий об'єкт, changed: false", () => {
     const e = entry("f", [applied]);
 
-    const { entries, changed } = redactLogForPlayers([e], [enemy, ally]);
+    const { entries, changed } = redactLogForPlayers([e], ctxOf([enemy, ally]));
 
     expect(changed).toBe(false);
     expect(entries[0]).toBe(e);
@@ -166,9 +172,27 @@ describe("redactLogForPlayers", () => {
   it("ідемпотентно: другий прохід дорівнює першому і нічого не змінює", () => {
     const e = entry("e", [applied], { targetAC: 15, percentile: { roll: 1, target: 2, sl: 0, netSl: 0, location: "arm", doubles: false, defender: { kind: "parry", roll: 5, sl: 0, target: 4 } } });
 
-    const once = sanitizeLogEntry(e, PLAYER_VIEWER, [enemy]);
+    const once = sanitizeLogEntry(e, PLAYER_VIEWER, ctxOf([enemy]));
 
-    expect(sanitizeLogEntry(once, PLAYER_VIEWER, [enemy])).toBe(once);
-    expect(sanitizeLogEntry(once, PLAYER_VIEWER, [enemy])).toEqual(once);
+    expect(sanitizeLogEntry(once, PLAYER_VIEWER, ctxOf([enemy]))).toBe(once);
+    expect(sanitizeLogEntry(once, PLAYER_VIEWER, ctxOf([enemy]))).toEqual(once);
+  });
+});
+
+describe("concealLine через контракт системи", () => {
+  const enemy = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "e" } } as BattleParticipant;
+
+  const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 3, source: "s" } };
+
+  const e = { targets: [{ participantId: "e", participantName: "x" }], actionDetails: {}, log: [applied] } as unknown as BattleAction;
+
+  it("dnd5e з wfrp-рядком — без змін", () => {
+    const dnd = { ...DEFAULT_RULES, system: { key: "dnd5e" as const } };
+
+    expect(sanitizeLogEntry(e, PLAYER_VIEWER, ctxOf([enemy], dnd))).toBe(e);
+  });
+
+  it("wfrp — applied приховано", () => {
+    expect(sanitizeLogEntry(e, PLAYER_VIEWER, ctxOf([enemy])).log?.[0]).toMatchObject({ message: "battleWfrp.log.appliedHidden" });
   });
 });

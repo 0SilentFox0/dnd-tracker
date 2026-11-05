@@ -91,7 +91,7 @@
       "reroll": "Reroll",
       "sl": "+1 SL",
       "left": "Fortune left: {count}",
-      "secondRoll": "Second roll",
+      "secondRoll": "Reroll if the first misses",
       "used": "Fortune: reroll (first roll {first})",
       "usedSl": "Fortune: +1 SL"
     }

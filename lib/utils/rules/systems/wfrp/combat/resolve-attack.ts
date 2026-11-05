@@ -8,6 +8,7 @@ import { hitLocation } from "./location";
 import { resolveOpposed } from "./opposed";
 
 import { AttackType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
@@ -74,7 +75,9 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
   const marked = (r: ResolvedAttack, fortune?: ResolvedAttack["fortune"]): ResolvedAttack => {
     if (!fortune) return r;
 
-    return { ...r, fortune, attackRoll: { ...r.attackRoll, percentile: r.attackRoll.percentile && { ...r.attackRoll.percentile, fortune } } };
+    const fortuneLine = textRef(fortune.kind === "reroll" ? "battleWfrp.log.fortuneReroll" : "battleWfrp.log.fortuneSl", { name: attacker.basicInfo.name, first: fortune.firstRoll ?? 0 });
+
+    return { ...r, fortune, fortuneLine, attackRoll: { ...r.attackRoll, percentile: r.attackRoll.percentile && { ...r.attackRoll.percentile, fortune } } };
   };
 
   if (attackKindOf(attack.type) === AttackType.RANGED) {

@@ -717,11 +717,15 @@ describe("runBattleMutation: зони без концентрації", () => {
 });
 
 describe("runBattleMutation: редакція журналу", () => {
+  const wfrpMeta = { ...loaded().meta, rules: { ...DEFAULT_RULES, system: { key: "wfrp" as const } } };
+
+  const wfrpLoaded = (over: Partial<LoadedBattle> = {}) => loaded({ meta: wfrpMeta, ...over });
+
   const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 3, source: "s" } };
 
   const enc = (log: unknown[]) => ({ seq: 5, type: "attack", round: 1, actorId: null, targets: [{ participantId: "gob", participantName: "Гоблін" }], details: { log }, hpChanges: [], resultText: "" });
 
-  const withLog = () => deps({ saveBattle: vi.fn(async () => ({ ...delta(), events: [enc([applied])] as never })) });
+  const withLog = () => deps({ loadBattle: vi.fn(async () => wfrpLoaded()), saveBattle: vi.fn(async () => ({ ...delta(), events: [enc([applied])] as never })) });
 
   const lineOf = (json: { delta: { log: { log: { message: string }[] }[] } }) => json.delta.log[0].log[0].message;
 
@@ -730,7 +734,7 @@ describe("runBattleMutation: редакція журналу", () => {
 
     expect(lineOf(player)).toBe("battleWfrp.log.appliedHidden");
 
-    const dm = await (await runBattleMutation(req(), { params, access: "member", mutate: noop }, { ...withLog(), loadBattle: vi.fn(async () => loaded({ isDM: true })) })).json();
+    const dm = await (await runBattleMutation(req(), { params, access: "member", mutate: noop }, { ...withLog(), loadBattle: vi.fn(async () => wfrpLoaded({ isDM: true })) })).json();
 
     expect(lineOf(dm)).toBe("battleWfrp.log.applied");
   });
@@ -738,7 +742,7 @@ describe("runBattleMutation: редакція журналу", () => {
   it("Pusher: публічне повідомлення redacted, dm-канал — повне", async () => {
     const d = withLog();
 
-    await runBattleMutation(req(), { params, access: "member", mutate: noop }, { ...d, loadBattle: vi.fn(async () => loaded({ isDM: true })) });
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, { ...d, loadBattle: vi.fn(async () => wfrpLoaded({ isDM: true })) });
 
     const [pub, dm] = vi.mocked(d.publish).mock.calls[0][0];
 
@@ -751,7 +755,7 @@ describe("runBattleMutation: редакція журналу", () => {
     const entry = { id: "b1-5", targets: [{ participantId: "gob", participantName: "x" }], actionDetails: {}, log: [applied] } as never;
 
     const run = (isDM: boolean) =>
-      runBattleMutation(req(), { params, access: "member", dryRun: () => true, includeRecentEvents: 10, mutate: noop }, deps({ loadRecentEvents: vi.fn(async () => [entry]), loadBattle: vi.fn(async () => loaded({ isDM })) }));
+      runBattleMutation(req(), { params, access: "member", dryRun: () => true, includeRecentEvents: 10, mutate: noop }, deps({ loadRecentEvents: vi.fn(async () => [entry]), loadBattle: vi.fn(async () => wfrpLoaded({ isDM })) }));
 
     expect((await (await run(false)).json()).battleLog[0].log[0].message).toBe("battleWfrp.log.appliedHidden");
     expect((await (await run(true)).json()).battleLog[0].log[0].message).toBe("battleWfrp.log.applied");

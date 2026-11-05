@@ -10,6 +10,7 @@ import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -72,15 +73,16 @@ export function buildPusherMessages(args: {
   before: BattleSceneState;
   after: BattleSceneState;
   participants: BattleParticipant[];
+  rules: Ruleset;
   pending?: BattleParticipant[];
   wasAwaiting?: boolean;
   delta: ClientBattleDelta;
 }): PusherMessage[] {
-  const { before, after, participants, pending = [], wasAwaiting = false, delta } = args;
+  const { before, after, participants, rules, pending = [], wasAwaiting = false, delta } = args;
 
   const channel = battleChannelName(after.id);
 
-  const { entries, changed } = redactLogForPlayers(delta.log ?? [], participants);
+  const { entries, changed } = redactLogForPlayers(delta.log ?? [], { participants, rules });
 
   const publicDelta: ClientBattleDelta = changed ? { ...delta, log: entries, redacted: true } : delta;
 

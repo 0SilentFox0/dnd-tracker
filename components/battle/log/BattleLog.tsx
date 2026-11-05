@@ -13,9 +13,9 @@ export function BattleLog() {
 
   const { woundsLabel } = useBattleRules();
 
-  const { battleLog, initiativeOrder } = battle;
+  const { battleLog, initiativeOrder, rules } = battle;
 
-  const entries = useMemo(() => [...(battleLog ?? [])].reverse().map((e) => sanitizeLogEntry(e, viewer, initiativeOrder)), [battleLog, viewer, initiativeOrder]);
+  const entries = useMemo(() => [...(battleLog ?? [])].reverse().map((e) => sanitizeLogEntry(e, viewer, { participants: initiativeOrder, rules })), [battleLog, viewer, initiativeOrder, rules]);
 
   return (
     <>

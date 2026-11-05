@@ -71,6 +71,7 @@ export interface ResolvedAttack {
   momentum: { spent: boolean; gainedBy: "attacker" | "defender" | null };
   /** Only when Fortune actually took effect */
   fortune?: { kind: FortuneKind; firstRoll?: number };
+  fortuneLine?: LogLine;
 }
 
 export interface DamageStep {
@@ -113,6 +114,8 @@ export interface SystemConditionInfo {
   maxLevel: number | null;
   endTest: "roll" | "stand" | null;
   timed: boolean;
+  /** i18n key */
+  label: string;
 }
 
 export interface SystemConditionApply {
@@ -137,6 +140,8 @@ export interface SystemConditionLevel {
 
 export interface RuleSystemConditions {
   catalog: readonly SystemConditionInfo[];
+  /** Strips what a viewer must not learn about a target from a log line */
+  concealLine(line: LogLine): LogLine;
   list(p: BattleParticipant): SystemConditionLevel[];
   apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
   reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };

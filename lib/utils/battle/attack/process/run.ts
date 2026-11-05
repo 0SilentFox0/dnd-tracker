@@ -238,7 +238,7 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
 
     put(flow, { ...spender, battleData: { ...spender.battleData, fortune: Math.max(0, (spender.battleData.fortune ?? 0) - 1) } });
 
-    flow.messages.push(textRef(r.fortune.kind === "reroll" ? "battleWfrp.log.fortuneReroll" : "battleWfrp.log.fortuneSl", { name: spender.basicInfo.name, first: r.fortune.firstRoll ?? 0 }));
+    if (r.fortuneLine) flow.messages.push(r.fortuneLine);
   }
 
   return { second: undefined, targetAC: r.attackRoll.percentile?.defender?.target ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };

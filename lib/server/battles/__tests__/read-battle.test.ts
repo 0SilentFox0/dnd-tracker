@@ -129,7 +129,8 @@ describe("readBattleEvents redaction", () => {
     loadAccess: vi.fn(async () => ({ version: 1, isMember: true, isDM })),
     loadEventsBefore: vi.fn(async () => raw as never),
     loadAllEvents: vi.fn(),
-    loadParticipants: vi.fn(async () => [enemy]),
+    loadParticipants: vi.fn(),
+    loadRedactionCtx: vi.fn(async () => ({ participants: [enemy], rules: DEFAULT_RULES })),
   });
 
   it("гравець отримує відредаговану сторінку", async () => {
@@ -144,6 +145,6 @@ describe("readBattleEvents redaction", () => {
     const res = await readBattleEvents(params, { before: 5, limit: 10 }, d);
 
     expect((await res.json()).events[0].actionDetails.targetAC).toBe(15);
-    expect(d.loadParticipants).not.toHaveBeenCalled();
+    expect(d.loadRedactionCtx).not.toHaveBeenCalled();
   });
 });

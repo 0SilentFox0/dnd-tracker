@@ -27,14 +27,14 @@ describe("D100RollBody Fortune", () => {
 
   it("shows the toggle only when Fortune is available", () => {
     render(<D100RollBody wizard={model(false).wizard} />);
-    expect(screen.queryByRole("group", { name: "Fortune" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Удача" })).toBeNull();
     cleanup();
 
     const { wizard, actions } = model(true);
 
     render(<D100RollBody wizard={wizard} />);
-    expect(screen.getByRole("group", { name: "Fortune" })).toBeTruthy();
-    expect(screen.getByText("Залишилось Fortune: 2")).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Удача" })).toBeTruthy();
+    expect(screen.getByText("Залишилось Удачі: 2")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Перекинути" }));
     expect(actions.setFortune).toHaveBeenCalledWith("reroll");
@@ -49,7 +49,7 @@ describe("D100RollBody Fortune", () => {
     fireEvent.click(screen.getByRole("button", { name: "Кинути" }));
 
     expect(actions.roll).not.toHaveBeenCalled();
-    expect(screen.getByText("Другий кидок")).toBeTruthy();
+    expect(screen.getByText("Кидок на випадок промаху")).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("1–100"), { target: { value: "12" } });
     fireEvent.click(screen.getByRole("button", { name: "Кинути" }));

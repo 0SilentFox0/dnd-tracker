@@ -196,7 +196,7 @@ async function buildScenePreview(userId: string, loaded: LoadedBattle, result: M
     needsKnowledge ? deps.loadKnowledge?.(loaded.scene.id) : undefined,
   ]);
 
-  const entries = loaded.isDM ? recent : redactLogForPlayers(recent, loaded.participants).entries;
+  const entries = loaded.isDM ? recent : redactLogForPlayers(recent, { participants: loaded.participants, rules: loaded.meta.rules }).entries;
 
   const battle = toBattleResponse(
     loaded,
@@ -311,9 +311,9 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   if (loaded.scene.status === BattleStatus.ACTIVE && after.status !== BattleStatus.ACTIVE) deps.onLeftActive?.(campaignId, battleId);
 
-  deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaiting !== null, delta: clientDelta }));
+  deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, rules: loaded.meta.rules, pending: result.pending, wasAwaiting: awaiting !== null, delta: clientDelta }));
 
-  const reply = ctx.isDM ? clientDelta : { ...clientDelta, log: redactLogForPlayers(clientDelta.log, result.participants).entries };
+  const reply = ctx.isDM ? clientDelta : { ...clientDelta, log: redactLogForPlayers(clientDelta.log, { participants: result.participants, rules: loaded.meta.rules }).entries };
 
   return { delta: reply, version: clientDelta.version, ...(result.response && { response: result.response }) };
 }

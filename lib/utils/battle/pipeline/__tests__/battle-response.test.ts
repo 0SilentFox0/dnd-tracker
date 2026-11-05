@@ -11,6 +11,8 @@ const scene: BattleSceneState = {
   eventSeq: 4, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null,
 };
 
+const WFRP_RULES = { ...DEFAULT_RULES, system: { key: "wfrp" as const } };
+
 const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date() };
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
@@ -55,19 +57,19 @@ describe("buildPusherMessages", () => {
   const payload = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log: [] };
 
   it("зміна ходу на гравця — battle-delta + turn-started у його канал", () => {
-    const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, goblin], delta: payload });
+    const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, rules: WFRP_RULES, participants: [hero, goblin], delta: payload });
 
     expect(messages.map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
     expect(messages[1]).toMatchObject({ channel: "private-user-u-player", payload: { battleId: "b1", participantId: "hero" } });
   });
 
   it("хід переходить до DM-учасника — без turn-started", () => {
-    expect(buildPusherMessages({ before: scene, after: { ...scene, turnIndex: 1 }, participants: [hero, goblin], delta: payload }).map((m) => m.event)).toEqual(["battle-delta"]);
+    expect(buildPusherMessages({ before: scene, after: { ...scene, turnIndex: 1 }, rules: WFRP_RULES, participants: [hero, goblin], delta: payload }).map((m) => m.event)).toEqual(["battle-delta"]);
   });
 
   it("старт і завершення — лише battle-delta, без окремих подій", () => {
-    expect(buildPusherMessages({ before: { ...scene, status: "prepared" }, after: scene, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
-    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta"]);
+    expect(buildPusherMessages({ before: { ...scene, status: "prepared" }, after: scene, rules: WFRP_RULES, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
+    expect(buildPusherMessages({ before: scene, after: { ...scene, status: "completed" }, rules: WFRP_RULES, participants: [hero], delta: payload }).map((m) => m.event)).toEqual(["battle-delta"]);
   });
 
   it("бій очікує рішення ДМ про резерв — без turn-started", () => {
@@ -75,13 +77,13 @@ describe("buildPusherMessages", () => {
 
     const deadGob = { ...goblin, basicInfo: { ...goblin.basicInfo, side: ParticipantSide.ENEMY }, combatStats: { ...goblin.combatStats, currentHp: 0, status: "dead" as const } };
 
-    const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, deadGob], pending: [imp], delta: payload });
+    const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, rules: WFRP_RULES, participants: [hero, deadGob], pending: [imp], delta: payload });
 
     expect(messages.map((m) => m.event)).toEqual(["battle-delta"]);
   });
 
   it("ДМ вирішив очікування розкриттям — гравець поточного слота отримує turn-started без зсуву ходу", () => {
-    const messages = buildPusherMessages({ before: scene, after: scene, participants: [hero, goblin], wasAwaiting: true, delta: payload });
+    const messages = buildPusherMessages({ before: scene, after: scene, rules: WFRP_RULES, participants: [hero, goblin], wasAwaiting: true, delta: payload });
 
     expect(messages.map((m) => m.event)).toEqual(["battle-delta", "turn-started"]);
     expect(messages[1]).toMatchObject({ channel: "private-user-u-player" });
@@ -90,7 +92,7 @@ describe("buildPusherMessages", () => {
   it("велика дельта — refetch", () => {
     const big = { ...payload, upserted: Array.from({ length: 60 }, () => hero) };
 
-    expect(buildPusherMessages({ before: scene, after: scene, participants: [hero], delta: big })[0].payload).toEqual({ battleId: "b1", version: 4, refetch: true });
+    expect(buildPusherMessages({ before: scene, after: scene, rules: WFRP_RULES, participants: [hero], delta: big })[0].payload).toEqual({ battleId: "b1", version: 4, refetch: true });
   });
 
   describe("редакція журналу", () => {
@@ -98,7 +100,7 @@ describe("buildPusherMessages", () => {
 
     const action = (log: unknown[]) => ({ id: "b1-5", targets: [{ participantId: "gob", participantName: "x" }], actionDetails: {}, log }) as never;
 
-    const args = { before: scene, after: scene, participants: [hero, goblin] };
+    const args = { before: scene, after: scene, rules: WFRP_RULES, participants: [hero, goblin] };
 
     it("без змін — одне публічне повідомлення без redacted", () => {
       const messages = buildPusherMessages({ ...args, delta: { ...payload, log: [action(["рядок"])] } });
@@ -127,7 +129,7 @@ describe("buildPusherMessages", () => {
     });
 
     it("turn-started лишається після battle-delta каналів", () => {
-      const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, goblin], delta: { ...payload, log: [action([applied])] } });
+      const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, rules: WFRP_RULES, participants: [hero, goblin], delta: { ...payload, log: [action([applied])] } });
 
       expect(messages.map((m) => m.event)).toEqual(["battle-delta", "battle-delta", "turn-started"]);
     });

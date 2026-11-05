@@ -22,6 +22,7 @@ import {
   saveBattle,
 } from "@/lib/utils/battle/store";
 import { summarizeKnowledge } from "@/lib/utils/battle/view/knowledge";
+import { parseRulesCached } from "@/lib/utils/rules/schema";
 
 function recheckAccessWith(db: Parameters<typeof loadBattleAccess>[0]): PipelineDeps["recheckAccess"] {
   return async args => {
@@ -61,6 +62,11 @@ export const defaultReadDeps: BattleReadDeps = {
   loadEventsBefore: (battleId, page) => loadEventsBefore(prisma, battleId, page),
   loadAllEvents: (battleId) => loadAllEvents(prisma, battleId),
   loadParticipants: async (args) => (await loadBattle(prisma, args))?.participants ?? [],
+  loadRedactionCtx: async (args) => {
+    const loaded = await loadBattle(prisma, args);
+
+    return { participants: loaded?.participants ?? [], rules: loaded?.meta.rules ?? parseRulesCached({}) };
+  },
 };
 
 /** All store helpers, including saveBattle's transaction, reuse the intent connection. */

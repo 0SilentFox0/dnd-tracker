@@ -4,6 +4,8 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { lineKey, textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import type { Ruleset } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -39,30 +41,19 @@ function hideDefense(line: LogLine): LogLine {
   return textRef("battleLog.percentile.opposedHidden", { roll: roll ?? 0, target: target ?? 0, sl: sl ?? 0, netSl: netSl ?? 0 });
 }
 
-function hideTargetDetails(line: LogLine): LogLine {
-  if (typeof line === "string") return line;
-
-  const { message, params } = line;
-
-  if (message === "battleWfrp.log.applied") {
-    const { level: _level, ...rest } = params ?? {};
-
-    return textRef("battleWfrp.log.appliedHidden", rest);
-  }
-
-  if (message === "battleWfrp.log.endTestSuccess" || message === "battleWfrp.log.endTestFail") {
-    const { target: _target, ...rest } = params ?? {};
-
-    return textRef(`${message}Hidden`, rest);
-  }
-
-  return line;
-}
-
 export const PLAYER_VIEWER: Viewer = { userId: null, isDM: false, readOnly: true, canSeeEnemyHp: false };
 
-export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, participants: BattleParticipant[] = []): BattleAction {
+export interface RedactionCtx {
+  participants: BattleParticipant[];
+  rules: Ruleset;
+}
+
+export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: RedactionCtx): BattleAction {
   if (viewer.isDM) return e;
+
+  const { participants } = ctx;
+
+  const conceal = ruleSystemOf(ctx.rules).conditions?.concealLine ?? ((l: LogLine) => l);
 
   const concealed = (e.targets ?? []).some((t) => {
     const p = participants.find((x) => x.basicInfo.id === t.participantId);
@@ -76,7 +67,7 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, participants: 
 
   const strips = "targetAC" in details || "damageBreakdown" in details || "damageRows" in details || percentile?.defender !== undefined;
 
-  const lines = e.log?.map((l) => (concealed ? hideTargetDetails(hideDefense(l)) : hideDefense(l)));
+  const lines = e.log?.map((l) => (concealed ? conceal(hideDefense(l)) : hideDefense(l)));
 
   const linesChanged = !!lines && lines.some((l, i) => l !== e.log?.[i]);
 
@@ -87,8 +78,8 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, participants: 
   return { ...e, actionDetails, ...(lines && { log: lines }) };
 }
 
-export function redactLogForPlayers(entries: BattleAction[], participants: BattleParticipant[]): { entries: BattleAction[]; changed: boolean } {
-  const redacted = entries.map((e) => sanitizeLogEntry(e, PLAYER_VIEWER, participants));
+export function redactLogForPlayers(entries: BattleAction[], ctx: RedactionCtx): { entries: BattleAction[]; changed: boolean } {
+  const redacted = entries.map((e) => sanitizeLogEntry(e, PLAYER_VIEWER, ctx));
 
   return { entries: redacted, changed: redacted.some((e, i) => e !== entries[i]) };
 }

@@ -8,7 +8,7 @@ import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
 import { type PipelineDeps, readScenePreview } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
-import { redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
+import { type RedactionCtx, redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
 import type { BattleEventsPage, BattleSummary, BattleVersion } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -20,6 +20,7 @@ export interface BattleReadDeps {
   loadEventsBefore(battleId: string, page: { before: number; limit: number }): Promise<BattleEventsPage>;
   loadAllEvents(battleId: string): Promise<BattleAction[]>;
   loadParticipants(args: { battleId: string; campaignId: string; userId: string }): Promise<BattleParticipant[]>;
+  loadRedactionCtx(args: { battleId: string; campaignId: string; userId: string }): Promise<RedactionCtx>;
 }
 
 const canRead = (access: { isMember: boolean; isDemo?: boolean }) => access.isMember || Boolean(access.isDemo);
@@ -83,9 +84,9 @@ export async function readBattleEvents(
 
     if (isDM) return NextResponse.json(events);
 
-    const participants = await deps.loadParticipants({ battleId: params.battleId, campaignId: params.id, userId });
+    const ctx = await deps.loadRedactionCtx({ battleId: params.battleId, campaignId: params.id, userId });
 
-    return NextResponse.json({ ...events, events: redactLogForPlayers(events.events, participants).entries });
+    return NextResponse.json({ ...events, events: redactLogForPlayers(events.events, ctx).entries });
   } catch (err) {
     return battleErrorResponse(err);
   }

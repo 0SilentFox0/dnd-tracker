@@ -34,7 +34,7 @@ export function useConditionTestPanel(hero: BattleParticipant): ConditionTestPan
 
     if (!info?.endTest || tried.includes(key)) return [];
 
-    return [{ key, label: dynamicTextRef(`battleWfrp.conditions.${key}.label`), stand: info.endTest === "stand" }];
+    return [{ key, label: dynamicTextRef(info.label), stand: info.endTest === "stand" }];
   });
 
   if (items.length === 0) return null;
