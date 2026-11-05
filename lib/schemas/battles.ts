@@ -238,7 +238,11 @@ export const castSpellSchema = z.object({
   optionIndex: z.number().int().min(0).max(6).optional(),
   inputCount: z.number().int().min(0).max(40).optional(),
   slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
-});
+  castRoll: z.number().int().min(1).max(100).optional(),
+  serverRoll: z.literal(true).optional(),
+  fortune: z.enum(["reroll", "sl"]).optional(),
+  fortuneRoll: z.number().int().min(1).max(100).optional(),
+}).refine((d) => !d.fortune || !d.free, { message: REJECT.fortuneNotFree, path: ["fortune"] });
 
 export type SpellRequestData = z.infer<typeof castSpellSchema>;
 

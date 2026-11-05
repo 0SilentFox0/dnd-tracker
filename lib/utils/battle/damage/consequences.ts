@@ -6,6 +6,7 @@ import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle
 import { revertOnZero } from "@/lib/utils/battle/transform/revert";
 import type { Ruleset } from "@/lib/utils/rules";
 import { type HitLocation, ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { RuleSystemMagic } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -83,6 +84,14 @@ function concentrationFallout(input: DamageConsequencesInput, participant: Battl
   return { participant: findParticipant(r.participants, participant.basicInfo.id) ?? participant, participants: r.participants, messages: r.messages };
 }
 
+function loseChannelled(result: DamageConsequencesResult, magic: RuleSystemMagic | undefined, amount: number): DamageConsequencesResult {
+  if (!magic || amount <= 0) return result;
+
+  const participant = magic.onDamaged(result.participant);
+
+  return participant === result.participant ? result : { ...result, participant, participants: replaceParticipant(result.participants, participant) };
+}
+
 export function applyDamageConsequences(input: DamageConsequencesInput): DamageConsequencesResult {
   const reverted = revertOnZero(input.before, input.after, input.amount);
 
@@ -98,9 +107,9 @@ export function applyDamageConsequences(input: DamageConsequencesInput): DamageC
 
   if (!rules) return { participant: after, participants, messages: [] };
 
-  const onZeroHp = ruleSystemOf(rules).combat.onZeroHp;
+  const system = ruleSystemOf(rules);
 
-  if (onZeroHp) return onZeroHp({ ...input, rules });
+  if (system.combat.onZeroHp) return loseChannelled(system.combat.onZeroHp({ ...input, rules }), system.magic, input.amount);
 
   const hero = heroGoesDown(input, rules);
 

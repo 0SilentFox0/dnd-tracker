@@ -341,6 +341,7 @@
     "badStrikeRoll": "Некоректний кидок атаки для цілі {target}",
     "rollsRequired": "d20Roll, attackRoll або attackRolls обов'язковий",
     "oneTargetRequired": "Потрібно вказати хоча б одну ціль",
+    "fortuneNotFree": "Удача не діє на вільний каст",
     "barrierDuration": "Барʼєру потрібна тривалість у раундах",
     "mapOccupied": "Клітинка зайнята або поза полем",
     "rollbackLimit": "Цю дію вже не відкотити: після завершення бою зберігаються лише останні {count} станів",

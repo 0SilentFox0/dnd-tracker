@@ -2,6 +2,7 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { TransformRequest } from "@/lib/utils/battle/transform/types";
+import type { PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { SpellDice } from "@/lib/utils/spells/model/dice";
@@ -42,6 +43,9 @@ export interface CastSpellParams {
   crit?: CritPicker;
   map?: BattleMapConfig | null;
   rules: Ruleset;
+  castTest?: { roll?: number; serverRoll?: true; fortune?: "reroll" | "sl"; fortuneRoll?: number };
+  /** прев'ю: без кидка тесту й без списань */
+  dryRun?: boolean;
 }
 
 export interface CastSpellResult {
@@ -53,6 +57,10 @@ export interface CastSpellResult {
   /** перетворення цілей: застосовуються асинхронно (потрібен юніт кампанії) */
   transforms?: TransformRequest[];
   messages: LogLine[];
+  reason?: "systemMismatch";
+  /** тест провалено: ціна витрачена, ефектів немає */
+  fizzled?: boolean;
+  cast?: PercentileCastDetails;
   /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
   spellDamage?: TerrainDamage;
   /** мітка концентрації цього касту — для зони, що згасає разом із нею */

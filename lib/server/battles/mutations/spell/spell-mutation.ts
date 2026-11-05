@@ -44,6 +44,7 @@ import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { IngredientPlan } from "@/lib/utils/spells/ingredients/plan";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -85,6 +86,7 @@ interface CastPlan {
   expected: ReturnType<typeof casterSpellDice>;
   diceRolls: number[];
   saves: ReturnType<typeof splitSaveRolls>;
+  serverRolls: boolean;
 }
 
 export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
@@ -119,6 +121,12 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     const source = resolveSpellSource(ctx, caster, spell, data);
 
     const { legendaryAbility, free, grant } = source;
+
+    const tested = !!ruleSystemOf(ctx.meta.rules).magic && !free && !legendaryAbility && !grant;
+
+    if (tested && (!definition.casting?.magic || definition.resolution.kind !== "auto" || definition.cost === "long")) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH);
+
+    if (data.fortune && (!tested || !ruleSystemOf(ctx.meta.rules).combat.fortune || (caster.battleData.fortune ?? 0) < 1)) throw new BattleRuleError("action_rejected", API_ERRORS.NO_FORTUNE);
 
     if (!data.preview && !legendaryAbility) assertActionAvailable(ctx, caster, spell, free);
 
@@ -193,7 +201,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const saves = splitSaveRolls(ctx, order, data.saveRolls);
 
-    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, ingredients, castLevel, resolution, expected, diceRolls, saves };
+    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, ingredients, castLevel, resolution, expected, diceRolls, saves, serverRolls: !!options.serverRolls };
 
     return runWithCritChoice(ctx, {
       action: "spell",
@@ -281,7 +289,11 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
     crit,
     map: ctx.meta.map,
     rules: ctx.meta.rules,
+    ...(data.preview && { dryRun: true }),
+    ...(!free && !legendaryAbility && !grant && { castTest: { roll: data.castRoll, serverRoll: data.serverRoll ?? (plan.serverRolls ? true : undefined), fortune: data.fortune, fortuneRoll: data.fortuneRoll } }),
   });
+
+  if (result.reason === "systemMismatch") throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH);
 
   if (!result.success) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT);
 
@@ -294,7 +306,7 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
     presetSaveIds: new Set(trusted.map((s) => s.participantId)),
   });
 
-  if (groups.length > 0) result.battleAction.actionDetails.diceRolls = groups;
+  if (groups.length > 0 && !result.fizzled) result.battleAction.actionDetails.diceRolls = groups;
 
   if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
 
@@ -318,6 +330,8 @@ async function finalizeCast(plan: CastPlan, result: ReturnType<typeof castSpell>
   const { ctx, spell, caster, resolution, deps } = plan;
 
   const { legendaryAbility, grant } = plan.source;
+
+  if (result.fizzled) return { participants: result.allParticipantsUpdated, pending: ctx.pending, events: [battleActionToEvent(result.battleAction)] };
 
   const summoned = await applyAbilitySummons(result.summons.map((r) => (r.inline && resolution.centre ? { ...r, atCell: resolution.centre } : r)), result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps, map: ctx.meta.map, round: ctx.scene.round });
 

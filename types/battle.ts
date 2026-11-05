@@ -10,7 +10,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
+import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { Characteristics, WfrpParticipantStats } from "@/lib/utils/rules/systems";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
@@ -723,6 +723,7 @@ export interface BattleAction {
     secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
     chosenD20?: number;
     percentile?: PercentileAttackDetails;
+    percentileCast?: PercentileCastDetails;
     // Для урону:
     damageRolls?: Array<{
       dice: string;

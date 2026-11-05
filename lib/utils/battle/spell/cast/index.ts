@@ -9,6 +9,7 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import { applyAnchoredZones } from "@/lib/utils/battle/spell/cast/anchored-zone";
+import { applyCastAttribute, rollCastTest, settleCastTest } from "@/lib/utils/battle/spell/cast/cast-test";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
 import { applyGrantCasts } from "@/lib/utils/battle/spell/cast/grant-cast";
@@ -22,6 +23,7 @@ import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import { rngOf } from "@/lib/utils/common/rng";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AbilityEvent } from "@/types/abilities";
 
 const DEFAULT_CONCENTRATION_ROUNDS = 10;
@@ -49,21 +51,37 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const before = flow.ps;
 
-  const castLevel = params.castLevel ?? spell.level;
+  const chosenLevel = params.castLevel ?? spell.level;
 
-  const info = { spellId: spell.id, school: spell.groupId, level: spell.level, ...(params.castLevel !== undefined && { castLevel }) };
+  const baseInfo = { spellId: spell.id, school: spell.groupId, level: spell.level, ...(params.castLevel !== undefined && { castLevel: chosenLevel }) };
 
   const targetsBefore = targetIds.flatMap((id) => findParticipant(before, id) ?? []);
 
-  const { actionModifiers } = fire(flow, { type: "spellCast", phase: "before", actorId: casterId, targetIds, ...info });
+  const { actionModifiers } = fire(flow, { type: "spellCast", phase: "before", actorId: casterId, targetIds, ...baseInfo });
 
   const readyCaster = getP(flow, casterId);
+
+  const magic = params.rules ? ruleSystemOf(params.rules).magic : undefined;
+
+  const percentile = magic && !isDMCast && !params.isLegendaryCast && !params.grant ? magic : undefined;
+
+  const spellMagic = def.casting?.magic;
+
+  if (percentile && (!spellMagic || def.resolution.kind !== "auto")) {
+    return { success: false, reason: "systemMismatch", casterUpdated: readyCaster, allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps), battleAction: actionOf(readyCaster, spell, targetsBefore, battleId, currentRound, ""), summons: [], messages: [] };
+  }
+
+  const test = percentile && spellMagic && !params.dryRun ? rollCastTest(percentile, { caster: readyCaster, spell: source, magic: spellMagic, rules: params.rules, rng }, params.castTest) : undefined;
+
+  const castLevel = test && test.overcastSteps > 0 ? spell.level + test.overcastSteps : chosenLevel;
+
+  const info = castLevel !== chosenLevel ? { ...baseInfo, castLevel } : baseInfo;
 
   const slotKey = params.slotKey ?? spellSlotKey(readyCaster, spell.level);
 
   const slot = readyCaster.spellcasting.spellSlots[slotKey];
 
-  const usesSlot = !isDMCast && !params.isLegendaryCast && !params.grant && spellNeedsSlot(spell.level);
+  const usesSlot = !magic && !isDMCast && !params.isLegendaryCast && !params.grant && spellNeedsSlot(spell.level);
 
   if (usesSlot && (!slot || slot.current <= 0)) {
     return {
@@ -84,7 +102,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     touchedIds: new Set(targetIds),
     info,
     castLevel,
-    chosenCastLevel: params.castLevel,
+    chosenCastLevel: castLevel !== chosenLevel ? castLevel : params.castLevel,
     ability: abilityOf(spell),
     grant: params.grant,
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
@@ -106,6 +124,17 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     transforms: [],
     dealt: 0,
   };
+
+  if (test) flow.messages.push(...test.lines);
+
+  const settle = percentile && spellMagic && test ? { magic: percentile, spellMagic, cast: test } : undefined;
+
+  if (settle && !settle.cast.success) {
+    spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
+    settleCastTest(state, settle);
+
+    return finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, cast: settle.cast.percentile, fizzled: true });
+  }
 
   const concentrates = !!params.rules?.concentration.enabled && def.concentration === true;
 
@@ -174,9 +203,13 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   state.transforms.push(...transformRequests(state, source.definition.effects, currentRound, castId, tag));
 
+  if (settle) applyCastAttribute(state, settle);
+
   spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
 
-  const result = finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects });
+  if (settle) settleCastTest(state, settle);
+
+  const result = finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, ...(test && { cast: test.percentile }) });
 
   return tag ? { ...result, concentration: tag } : result;
 }

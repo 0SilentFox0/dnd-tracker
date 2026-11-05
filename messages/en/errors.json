@@ -351,6 +351,8 @@
   "battleNotYourTurn": "It is not your turn",
   "battleNotParticipantTurn": "It is not this participant's turn",
   "battleNoControllableUnits": "No free units or players with heroes on this side",
+  "battleSpellSystemMismatch": "This spell does not fit the magic of this rule system",
+  "battleChannelUnsupported": "This rule system has no channelling",
   "battleNoFreeSlot": "No free slot for this spell",
   "battleNoLiveEnemies": "No living enemy units",
   "battleNoMap": "This battle has no map",

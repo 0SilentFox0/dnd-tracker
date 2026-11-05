@@ -346,6 +346,8 @@ export const API_ERRORS = {
   BATTLE_NOT_PARTICIPANT_TURN: "errors.battleNotParticipantTurn",
   BATTLE_NO_CONTROLLABLE_UNITS: "errors.battleNoControllableUnits",
   BATTLE_NO_FREE_SLOT: "errors.battleNoFreeSlot",
+  BATTLE_SPELL_SYSTEM_MISMATCH: "errors.battleSpellSystemMismatch",
+  BATTLE_CHANNEL_UNSUPPORTED: "errors.battleChannelUnsupported",
   BATTLE_NO_LIVE_ENEMIES: "errors.battleNoLiveEnemies",
   BATTLE_NO_MAP: "errors.battleNoMap",
   BATTLE_NO_PARTICIPANTS: "errors.battleNoParticipants",

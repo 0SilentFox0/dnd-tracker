@@ -136,6 +136,7 @@
     "captionDamage": "шкода: {dealt}",
     "captionDamageHits": "шкода: {dealt} ({hits})",
     "captionHeal": "лікування: {healed} HP",
+    "fizzled": "{name} невдало застосовує {spell}",
     "cast": "{name} застосовує {spell}",
     "castCaption": "{name} застосовує {spell} ({caption})",
     "noSlots": "{name}: {spell} недоступне — немає spell slots"

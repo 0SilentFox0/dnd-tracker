@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 
-const SYSTEM_KEY = /["`]battleWfrp\.|["`][^"`]*(\.wfrp\.|wfrpTotal)/;
+const SYSTEM_KEY = /["`](battleWfrp|wfrpMagic)\.|["`][^"`]*(\.wfrp\.|wfrpTotal)/;
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -32,6 +32,7 @@ describe("battle core knows no rule-system i18n keys", () => {
   it("the pattern catches both quote styles", () => {
     expect(SYSTEM_KEY.test('textRef("battleWfrp.log.x")')).toBe(true);
     expect(SYSTEM_KEY.test("textRef(`battleWfrp.${k}`)")).toBe(true);
+    expect(SYSTEM_KEY.test('textRef("wfrpMagic.log.x")')).toBe(true);
     expect(SYSTEM_KEY.test("battleLog.percentile")).toBe(false);
   });
 

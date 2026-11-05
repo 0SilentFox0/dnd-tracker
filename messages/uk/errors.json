@@ -351,6 +351,8 @@
   "battleNotYourTurn": "Зараз не ваш хід",
   "battleNotParticipantTurn": "Зараз не хід цього учасника",
   "battleNoControllableUnits": "Немає вільних юнітів або гравців із героями на цій стороні",
+  "battleSpellSystemMismatch": "Це заклинання не підходить до магії цієї системи правил",
+  "battleChannelUnsupported": "Ця система правил не має зосередження",
   "battleNoFreeSlot": "Немає вільного слота для цього заклинання",
   "battleNoLiveEnemies": "Немає живих ворожих юнітів",
   "battleNoMap": "У цьому бою немає карти",
