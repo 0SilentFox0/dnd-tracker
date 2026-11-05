@@ -84,6 +84,24 @@ describe("видимість", () => {
     expect(sanitizeLogEntry(entry("e", [applied]), { ...player, canSeeEnemyHp: true }, ctxOf([enemy])).log).toEqual([applied]);
   });
 
+  it("wfrp: умови miscast ворожого заклинача ховаються від гравця, DM бачить, d20 без змін", () => {
+    const wizard = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "w" } } as BattleParticipant;
+
+    const hero = { ...side(ParticipantSide.ALLY), basicInfo: { ...side(ParticipantSide.ALLY).basicInfo, id: "h" } } as BattleParticipant;
+
+    const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 2, source: "s" } };
+
+    const entry = (miscast: string | null) => ({ actorId: "w", targets: [{ participantId: "h", participantName: "x" }], actionDetails: { percentileCast: { miscast } }, log: [applied] }) as unknown as BattleAction;
+
+    const ctx = ctxOf([wizard, hero]);
+
+    expect(sanitizeLogEntry(entry("minor"), player, ctx).log?.[0]).toEqual({ message: "battleWfrp.log.appliedHidden", params: { target: "x", condition: "c", source: "s" } });
+    expect(sanitizeLogEntry(entry("wrath"), player, ctx).log).not.toEqual([applied]);
+    expect(sanitizeLogEntry(entry(null), player, ctx).log).toEqual([applied]);
+    expect(sanitizeLogEntry(entry("minor"), { ...player, isDM: true }, ctx).log).toEqual([applied]);
+    expect(sanitizeLogEntry(entry("minor"), player, ctxOf([wizard, hero], DEFAULT_RULES)).log).toEqual([applied]);
+  });
+
   it("кроки цілі ховаються, доки не помічені в журналі", () => {
     const steps: DamageStep[] = [
       { label: "Кубики", side: "attacker", kind: "dice", value: 6, after: 6 },

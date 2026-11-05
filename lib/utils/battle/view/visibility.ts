@@ -63,6 +63,10 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const details = e.actionDetails ?? {};
 
+  const actor = participants.find((x) => x.basicInfo.id === e.actorId);
+
+  const casterConditions = !!details.percentileCast?.miscast && (!actor || !canSeeExactStats(actor, viewer));
+
   const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = details;
 
   const hideNumbers = concealed || !e.targets?.length;
@@ -71,7 +75,7 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const stripsDefender = percentile?.defender !== undefined;
 
-  const lines = e.log?.map((l) => (concealed ? conceal(hideDefense(l)) : hideDefense(l)));
+  const lines = e.log?.map((l) => (concealed || casterConditions ? conceal(hideDefense(l)) : hideDefense(l)));
 
   const linesChanged = !!lines && lines.some((l, i) => l !== e.log?.[i]);
 
