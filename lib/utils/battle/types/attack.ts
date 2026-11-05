@@ -14,6 +14,7 @@ export interface PercentileAttackDetails {
   momentumUsed?: boolean;
   /** Opposed melee test; survives the privacy strip of `defender`. */
   opposed?: boolean;
+  fortune?: { kind: "reroll" | "sl"; firstRoll?: number };
 }
 
 export interface AttackRollResult {

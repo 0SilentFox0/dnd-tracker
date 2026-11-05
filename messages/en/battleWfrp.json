@@ -60,6 +60,8 @@
     },
     "endTestSuccess": "{name}: {condition} — test {roll} / {target}, SL {sl}: success",
     "endTestFail": "{name}: {condition} — test {roll} / {target}, SL {sl}: failure",
-    "stand": "{name} gets up"
+    "stand": "{name} gets up",
+    "fortuneReroll": "{name} spends Fortune: reroll (first roll {first})",
+    "fortuneSl": "{name} spends Fortune: +1 SL"
   }
 }

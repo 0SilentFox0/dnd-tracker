@@ -49,6 +49,8 @@ export interface SheetTestInput {
 
 export type SheetTestResult = SheetRollResult;
 
+export type FortuneKind = "reroll" | "sl";
+
 export interface ResolveAttackCtx {
   attacker: BattleParticipant;
   target: BattleParticipant;
@@ -58,6 +60,7 @@ export interface ResolveAttackCtx {
   rng: Rng;
   manualRoll?: number;
   momentum: { attacker: boolean; defender: boolean };
+  fortune?: { kind: FortuneKind; manualReroll?: number };
 }
 
 export interface ResolvedAttack {
@@ -66,6 +69,8 @@ export interface ResolvedAttack {
   netSl: number;
   location: HitLocation;
   momentum: { spent: boolean; gainedBy: "attacker" | "defender" | null };
+  /** Only when Fortune actually took effect */
+  fortune?: { kind: FortuneKind; firstRoll?: number };
 }
 
 export interface DamageStep {

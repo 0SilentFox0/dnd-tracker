@@ -222,6 +222,7 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
     rng: flow.ctx.rng,
     manualRoll: params.d20Roll,
     momentum: held,
+    fortune: params.fortune,
   });
 
   const { next, gained } = settle(flow.momentum, sides, r.momentum);
@@ -231,6 +232,14 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
   flow.messages.push(...percentileLines(r.attackRoll.percentile, r.isHit));
 
   if (gained) flow.messages.push(textRef("battleLog.percentile.momentum"));
+
+  if (r.fortune) {
+    const spender = getP(flow, attackerId);
+
+    put(flow, { ...spender, battleData: { ...spender.battleData, fortune: Math.max(0, (spender.battleData.fortune ?? 0) - 1) } });
+
+    flow.messages.push(textRef(r.fortune.kind === "reroll" ? "battleWfrp.log.fortuneReroll" : "battleWfrp.log.fortuneSl", { name: spender.basicInfo.name, first: r.fortune.firstRoll ?? 0 }));
+  }
 
   return { second: undefined, targetAC: r.attackRoll.percentile?.defender?.target ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
 }

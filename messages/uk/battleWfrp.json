@@ -60,6 +60,8 @@
     },
     "endTestSuccess": "{name}: {condition} — тест {roll} / {target}, SL {sl}: успіх",
     "endTestFail": "{name}: {condition} — тест {roll} / {target}, SL {sl}: невдача",
-    "stand": "{name} підводиться"
+    "stand": "{name} підводиться",
+    "fortuneReroll": "{name} витрачає Fortune: перекидання (перший кидок {first})",
+    "fortuneSl": "{name} витрачає Fortune: +1 SL"
   }
 }

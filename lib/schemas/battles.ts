@@ -168,6 +168,8 @@ export const attackBodySchema = z
     damageRolls: z.array(z.number()).default([]),
     offHand: z.boolean().optional(),
     useInspiration: z.boolean().optional(),
+    fortune: z.enum(["reroll", "sl"]).optional(),
+    fortuneRoll: z.number().int().min(1).max(100).optional(),
     /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
     cunningStrike: z.array(z.enum(CUNNING_STRIKE_EFFECTS)).min(1).max(3).optional(),
     endTurn: z.boolean().default(false),
@@ -179,6 +181,10 @@ export const attackBodySchema = z
   .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {
     message: REJECT.oneTargetRequired,
     path: ["targetIds"],
+  })
+  .refine((d) => !d.fortune || ((d.targetIds?.length ?? 0) + (d.targetId ? 1 : 0) === 1 && (d.targetIds?.length ?? 0) <= 1), {
+    message: REJECT.oneTargetRequired,
+    path: ["fortune"],
   });
 
 export const auraZoneSchema = z.object({

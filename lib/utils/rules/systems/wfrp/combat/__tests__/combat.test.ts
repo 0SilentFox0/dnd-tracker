@@ -180,3 +180,66 @@ describe("resolveWfrpAttack conditions", () => {
     });
   });
 });
+
+describe("resolveWfrpAttack fortune", () => {
+  const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };
+
+  const bow: BattleAttack = { ...sword, id: "bw", type: AttackType.RANGED };
+
+  const fighter = (id: string): BattleParticipant => {
+    const p = makeParticipant({ id, hp: 20, maxHp: 20 });
+
+    const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } };
+
+    return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { head: 0, arm: 0, body: 0, leg: 0 }) } };
+  };
+
+  const run = (attack: BattleAttack, extra: Partial<Parameters<typeof resolveWfrpAttack>[0]>) => {
+    const attacker = fighter("a");
+
+    const target = fighter("t");
+
+    return resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, momentum: { attacker: false, defender: false }, ...extra });
+  };
+
+  it("melee reroll after a miss rerolls the attacker against the same defender roll", () => {
+    const r = run(sword, { manualRoll: 90, fortune: { kind: "reroll", manualReroll: 20 } });
+
+    expect(r.isHit).toBe(true);
+    expect(r.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
+    expect(r.attackRoll.percentile?.defender?.roll).toBe(51);
+    expect(r.attackRoll.percentile?.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
+  });
+
+  it("melee reroll is not spent when the first roll hits", () => {
+    const r = run(sword, { manualRoll: 20, fortune: { kind: "reroll", manualReroll: 10 } });
+
+    expect(r.fortune).toBeUndefined();
+    expect(r.attackRoll.percentile?.fortune).toBeUndefined();
+    expect(r.attackRoll.percentile?.roll).toBe(20);
+  });
+
+  it("ranged reroll after a miss", () => {
+    const r = run(bow, { manualRoll: 90, fortune: { kind: "reroll", manualReroll: 10 } });
+
+    expect(r.isHit).toBe(true);
+    expect(r.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
+  });
+
+  it("ranged reroll without a manual roll uses rng", () => {
+    const r = run(bow, { manualRoll: 90, rng: () => 0.05, fortune: { kind: "reroll" } });
+
+    expect(r.isHit).toBe(true);
+    expect(r.attackRoll.percentile?.roll).toBe(6);
+  });
+
+  it("sl adds one SL even on a miss", () => {
+    const plain = run(sword, { manualRoll: 90 });
+
+    const boosted = run(sword, { manualRoll: 90, fortune: { kind: "sl" } });
+
+    expect(boosted.netSl).toBe(plain.netSl + 1);
+    expect(boosted.fortune).toEqual({ kind: "sl" });
+    expect(boosted.attackRoll.percentile?.fortune).toEqual({ kind: "sl" });
+  });
+});

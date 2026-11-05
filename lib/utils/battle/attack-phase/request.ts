@@ -34,6 +34,8 @@ export interface AttackRequest {
   offHand?: boolean;
   useInspiration?: boolean;
   cunningStrike?: CunningStrikeEffect[];
+  fortune?: "reroll" | "sl";
+  fortuneRoll?: number;
 }
 
 export function requestedTargetIds(data: Pick<AttackRequest, "targetId" | "targetIds">): string[] {
@@ -122,6 +124,10 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest, ru
 
   if (order[scope.scene.turnIndex]?.basicInfo.id !== attacker.basicInfo.id) {
     throw new BattleRuleError("action_rejected", REJECT.notAttackerTurn);
+  }
+
+  if (data.fortune && (!ruleSystemOf(rules).combat.fortune || (attacker.battleData.fortune ?? 0) < 1 || chosenTargets.length !== 1)) {
+    throw new BattleRuleError("action_rejected", API_ERRORS.NO_FORTUNE);
   }
 
   if (data.offHand && !isFiveE(attacker)) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NOT_ALLOWED);
