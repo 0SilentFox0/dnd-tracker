@@ -152,7 +152,9 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           ...(system.spells ? [{
             id: "magic" as const,
             label: t("tabs.magic"),
-            content: (
+            content: Ui.MagicTab ? (
+              <Ui.MagicTab />
+            ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="spellcastingAbility">{t("editor.spellAbility")}</Label>

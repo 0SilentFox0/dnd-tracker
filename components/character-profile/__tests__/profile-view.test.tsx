@@ -141,10 +141,12 @@ describe("CharacterProfile — перегляд", () => {
   });
 
   it("wfrp: вкладки «Інвентар» немає, «Магія» є (з 5d-2); d20 має обидві", () => {
-    h.sheetQuery.data = withSheet({ system: "wfrp" });
+    h.sheetQuery.data = withSheet({ system: "wfrp", spells: [] });
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="magic" />);
 
     expect(screen.getByRole("tab", { name: "characterProfile.tabs.magic" })).toBeTruthy();
+    expect(screen.getByText("wfrpMagic.ui.sheet.empty")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "characterProfile.magic.book" })).toBeNull();
     expect(screen.queryByRole("tab", { name: "characterProfile.tabs.items" })).toBeNull();
     expect(screen.getByRole("tab", { name: "characterProfile.tabs.story" })).toBeTruthy();
 

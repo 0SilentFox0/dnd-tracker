@@ -55,6 +55,20 @@
     "badge": {
       "label": "+{sl} SL",
       "hint": "Накопичений channelling: +{sl} SL до наступного касту"
+    },
+    "sheet": {
+      "empty": "Заклинань ще не знає.",
+      "noLore": "Інше",
+      "cn": "СН {cn}",
+      "kind": {
+        "petty": "Дрібна",
+        "arcane": "Аркана",
+        "hedge": "Знахарська",
+        "witchcraft": "Відьомська",
+        "chaos": "Хаос",
+        "blessing": "Благословення",
+        "miracle": "Чудо"
+      }
     }
   }
 }

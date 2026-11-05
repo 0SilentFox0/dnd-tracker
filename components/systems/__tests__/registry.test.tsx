@@ -16,6 +16,16 @@ describe("system ui registry", () => {
     expect(systemUiOf("homm").hideProgression).toBe(false);
   });
 
+  it("wfrp has its own magic tab, d20 uses the shared one", () => {
+    expect(systemUiOf("wfrp").MagicTab).toBeTypeOf("function");
+    expect(systemUiOf("dnd5e").MagicTab).toBeUndefined();
+  });
+
+  it("wfrp has its own magic tab, d20 uses the shared one", () => {
+    expect(systemUiOf("wfrp").MagicTab).toBeTypeOf("function");
+    expect(systemUiOf("dnd5e").MagicTab).toBeUndefined();
+  });
+
   it("sheet flags: d20 keeps spells/items/rest kinds/d20 stats, wfrp keeps only spells", () => {
     for (const key of ["homm", "dnd5e"] as const) {
       const sys = RULE_SYSTEM_REGISTRY[key];

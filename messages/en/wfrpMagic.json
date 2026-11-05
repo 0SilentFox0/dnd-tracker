@@ -55,6 +55,20 @@
     "badge": {
       "label": "+{sl} SL",
       "hint": "Banked channelling: +{sl} SL on the next cast"
+    },
+    "sheet": {
+      "empty": "No spells known yet.",
+      "noLore": "Other",
+      "cn": "CN {cn}",
+      "kind": {
+        "petty": "Petty",
+        "arcane": "Arcane",
+        "hedge": "Hedge",
+        "witchcraft": "Witchcraft",
+        "chaos": "Chaos",
+        "blessing": "Blessing",
+        "miracle": "Miracle"
+      }
     }
   }
 }

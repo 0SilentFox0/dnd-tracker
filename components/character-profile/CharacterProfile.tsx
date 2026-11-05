@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ComponentType, type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
@@ -35,11 +35,11 @@ const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.Prof
 
 const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story", "log"];
 
-function viewTabs({ withLog, withPath, withMagic, withItems }: { withLog: boolean; withPath: boolean; withMagic: boolean; withItems: boolean }, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
+function viewTabs({ withLog, withPath, withMagic: Magic, withItems }: { withLog: boolean; withPath: boolean; withMagic: ComponentType | false; withItems: boolean }, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
   const tabs: ProfileTab[] = [
     { id: "combat", label: t("combat"), content: <CombatTab /> },
     ...(withPath ? [{ id: "skills" as const, label: t("path"), content: <SkillsTab /> }] : []),
-    ...(withMagic ? [{ id: "magic" as const, label: t("magic"), content: <MagicTab /> }] : []),
+    ...(Magic ? [{ id: "magic" as const, label: t("magic"), content: <Magic /> }] : []),
     ...(withItems ? [{ id: "items" as const, label: t("items"), content: <InventoryTab /> }] : []),
     { id: "story", label: t("story"), content: <StoryTab /> },
   ];
@@ -121,7 +121,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
       {(sheet) => {
         const system = RULE_SYSTEM_REGISTRY[sheet.system];
 
-        const tabs = viewTabs({ withLog: !!sheet.rest, withPath: !systemUiOf(sheet.system).hideProgression, withMagic: system.spells, withItems: system.items }, (id) => t(`tabs.${id}`));
+        const tabs = viewTabs({ withLog: !!sheet.rest, withPath: !systemUiOf(sheet.system).hideProgression, withMagic: system.spells && (systemUiOf(sheet.system).MagicTab ?? MagicTab), withItems: system.items }, (id) => t(`tabs.${id}`));
 
         return (
         <ProfileProvider campaignId={campaignId} characterId={characterId} sheet={sheet} canEdit={canEdit && sheet.viewer.isDM}>
