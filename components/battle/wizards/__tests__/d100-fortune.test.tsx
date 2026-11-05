@@ -45,11 +45,12 @@ describe("D100RollBody Fortune", () => {
 
     render(<D100RollBody wizard={wizard} />);
     fireEvent.click(screen.getByRole("button", { name: "Ручний" }));
+    expect(screen.getByText("Перший кидок")).toBeTruthy();
     fireEvent.change(screen.getByLabelText("1–100"), { target: { value: "73" } });
     fireEvent.click(screen.getByRole("button", { name: "Кинути" }));
 
     expect(actions.roll).not.toHaveBeenCalled();
-    expect(screen.getByText("Кидок на випадок промаху")).toBeTruthy();
+    expect(screen.getByText("Другий кидок (перекидання)")).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("1–100"), { target: { value: "12" } });
     fireEvent.click(screen.getByRole("button", { name: "Кинути" }));

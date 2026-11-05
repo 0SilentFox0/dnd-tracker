@@ -39,7 +39,12 @@ export function D100RollPicker({ locked, fortune, onRoll, onAuto }: D100RollPick
   const manualRoll = () => {
     if (fortune.value !== "reroll") return <D100Input onRoll={onRoll} />;
 
-    if (first === undefined) return <D100Input onRoll={setFirst} />;
+    if (first === undefined) return (
+      <>
+        <div className="mt-3 text-sm text-hud-gold">{tf("firstRoll")}</div>
+        <D100Input onRoll={setFirst} />
+      </>
+    );
 
     return (
       <>
