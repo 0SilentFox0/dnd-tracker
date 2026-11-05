@@ -26,10 +26,22 @@ describe("systemConditionMutation", () => {
     expect(eventTextOf(out.events![0] as never)).toContain("Гоблін");
   });
 
+  it("writes no log entry when applying unconscious twice", () => {
+    const first = apply({ condition: "unconscious" });
+
+    expect(first.events).toHaveLength(1);
+
+    const again = apply({ condition: "unconscious" }, ctx(first.participants));
+
+    expect(again.events).toEqual([]);
+    expect(again.participants).toEqual(first.participants);
+  });
+
   it("applies timed prone", () => {
     const out = apply({ condition: "prone", rounds: 2 });
 
     const gob = out.participants.find((p) => p.basicInfo.id === "gob")!;
+
     const eff = gob.battleData.activeEffects.find((e) => e.abilityKey === conditions.list(gob)[0].effectKey)!;
 
     expect(eff.permanent).toBeFalsy();

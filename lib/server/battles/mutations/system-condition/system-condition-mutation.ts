@@ -38,12 +38,12 @@ export function systemConditionMutation(ctx: BattleMutationContext, body: System
   if (body.action === "apply") {
     const out = conditions.apply(ctx.participants, body.participantId, { key: body.condition, levels: body.levels, rounds: body.rounds, round, sourceName: textRef("battleLog.dm.name") });
 
-    return { participants: out.participants, pending: ctx.pending, events: [dmEvent(round, lineText(out.messages, "; "), targets)] };
+    return { participants: out.participants, pending: ctx.pending, events: out.messages.length ? [dmEvent(round, lineText(out.messages, "; "), targets)] : [] };
   }
 
   if (!conditions.list(target).some((c) => c.key === body.condition)) throw new BattleRuleError("invalid_target", API_ERRORS.CONDITION_ABSENT, { name: target.basicInfo.name });
 
   const out = conditions.reduce(ctx.participants, body.participantId, body.condition, body.all ? "all" : 1);
 
-  return { participants: out.participants, pending: ctx.pending, events: [dmEvent(round, lineText(out.messages, "; "), targets)] };
+  return { participants: out.participants, pending: ctx.pending, events: out.messages.length ? [dmEvent(round, lineText(out.messages, "; "), targets)] : [] };
 }
