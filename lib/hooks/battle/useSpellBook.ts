@@ -101,7 +101,7 @@ export function useSpellBook(
 
   const { grantsOf, grantOf, canSlot, slotChoices, selectedGrant, sourceOptions, castLevelOptions, formulaOf } = spellSourceModel(caster, flow, selected, bypassCost);
 
-  const ingredients = useIngredientPlan(caster, selected, bypassCost || !!selectedGrant || !!selected?.grantKey, state.useIngredient ?? false);
+  const ingredients = useIngredientPlan(caster, selected, costFree || !!selectedGrant || !!selected?.grantKey, state.useIngredient ?? false);
 
   useSpellCastSubmit({ caster, selected, flow: { state, dispatch }, cast: { free, legendaryKey: special?.abilityKey, finishLong }, onDone: options.onDone });
 
