@@ -30,7 +30,7 @@ export function wfrpMiscast(
   let participants = ps;
 
   if (row.condition) {
-    const applied = applyWfrpConditionTo(caster, { ...row.condition, round: ctx.round, sourceName: dynamicTextRef(`wfrpMagic.miscast.${kind}.${index + 1}`) });
+    const applied = applyWfrpConditionTo(caster, { ...row.condition, round: ctx.round, sourceName: dynamicTextRef(`wfrpMagic.miscast.${kind}.${index + 1}`), concealed: true });
 
     participants = replaceParticipant(participants, applied.participant);
 

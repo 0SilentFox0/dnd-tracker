@@ -1,11 +1,13 @@
 import type { Prisma, Spell } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import { context, goblin, participant } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { channelMutation } from "@/lib/server/battles/mutations/channel/channel-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { splitParticipant } from "@/lib/utils/battle/store";
+import { redactLogForPlayers, redactParticipantsForPlayers } from "@/lib/utils/battle/view";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
@@ -86,5 +88,39 @@ describe("wfrp magic end to end (engine)", () => {
     expect(joined).toMatch(/wfrpMagic\.log\.cast/);
 
     ctx.participants.forEach((p, i) => expect(splitParticipant(p, { orderIndex: i, isPending: false }).snapshotHash).toMatch(/\S/));
+  });
+
+  it("enemy caster miscast: the player view has no miscast line, text, condition or percentileCast.miscast", async () => {
+    const enemyMage = (): BattleParticipant => {
+      const m = mage();
+
+      return { ...m, basicInfo: { ...m.basicInfo, id: "foe", side: ParticipantSide.ENEMY, controlledBy: "dm" } };
+    };
+
+    const hero = { ...participant("pc", { controlledBy: "user-2" }) };
+
+    const base = context({ participants: [enemyMage(), { ...hero, basicInfo: { ...hero.basicInfo, side: ParticipantSide.ALLY } }] });
+
+    const ctx: BattleMutationContext = { ...base, meta: { ...base.meta, rules: WFRP_RULES }, rng: () => 0.5, isDM: true };
+
+    const out = await cast(ctx, { casterId: "foe", spellId: "s1", targetIds: ["pc"], diceRolls: [], castRoll: 77 } as never);
+
+    expect(JSON.stringify(out.events)).toContain("wfrpMagic.log.miscast");
+
+    const actions = out.events.map((e) => ({ ...(e.details as object), actorId: "foe" })) as never[];
+
+    const { entries: seen, changed } = redactLogForPlayers(actions, { participants: out.participants, rules: WFRP_RULES });
+
+    expect(changed).toBe(true);
+    expect(JSON.stringify(seen).replace('"miscast":null', "")).not.toMatch(/miscast/i);
+    expect(seen[0].actionDetails.percentileCast?.miscast).toBeNull();
+
+    const raw = out.participants.find((p) => p.basicInfo.id === "foe") as BattleParticipant;
+
+    expect(raw.battleData.activeEffects.some((e) => e.concealed)).toBe(true);
+
+    const shown = redactParticipantsForPlayers(out.participants).find((p) => p.basicInfo.id === "foe") as BattleParticipant;
+
+    expect(shown.battleData.activeEffects.some((e) => e.concealed)).toBe(false);
   });
 });

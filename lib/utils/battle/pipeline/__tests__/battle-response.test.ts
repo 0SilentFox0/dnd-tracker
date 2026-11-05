@@ -135,3 +135,30 @@ describe("buildPusherMessages", () => {
     });
   });
 });
+
+describe("приховані miscast-стани ворога", () => {
+  const hiddenEffect = { id: "ef", name: "wfrp:cond:fatigued", type: "condition" as const, duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [], concealed: true as const };
+
+  const cursed = { ...goblin, battleData: { ...goblin.battleData, activeEffects: [hiddenEffect] } };
+
+  const delta = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [cursed], patched: [{ id: "gob", battleData: { activeEffects: [hiddenEffect] } }], removed: [], log: [] };
+
+  it("GET/SSR: гравець не бачить стан, ДМ бачить", () => {
+    const row = (isDM: boolean) => toBattleResponse({ meta }, scene, [hero, cursed], [], { mode: "full", entries: [] }, { isDM }).initiativeOrder[1];
+
+    expect(row(false).battleData.activeEffects).toEqual([]);
+    expect(row(true).battleData.activeEffects).toEqual([hiddenEffect]);
+  });
+
+  it("Pusher: публічна дельта без стану (upserted і patched), dm-канал повний", () => {
+    const [pub, dm] = buildPusherMessages({ before: scene, after: scene, rules: WFRP_RULES, participants: [hero, cursed], delta });
+
+    const shown = pub.payload as typeof delta & { redacted?: true };
+
+    expect(shown.redacted).toBe(true);
+    expect(shown.upserted[0].battleData.activeEffects).toEqual([]);
+    expect(shown.patched[0].battleData.activeEffects).toEqual([]);
+    expect(dm.channel).toContain("dm");
+    expect((dm.payload as typeof delta).upserted[0].battleData.activeEffects).toEqual([hiddenEffect]);
+  });
+});

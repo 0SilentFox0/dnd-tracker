@@ -1,7 +1,7 @@
 import type { ZodType } from "zod";
 
 import type { PusherMessage } from "./battle-response";
-import { buildPusherMessages, toBattleResponse } from "./battle-response";
+import { buildPusherMessages, redactDeltaForPlayers, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { guardTurnOrder } from "./turn-order-guard";
 
@@ -313,7 +313,7 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, rules: loaded.meta.rules, pending: result.pending, wasAwaiting: awaiting !== null, delta: clientDelta }));
 
-  const reply = ctx.isDM ? clientDelta : { ...clientDelta, log: redactLogForPlayers(clientDelta.log, { participants: result.participants, rules: loaded.meta.rules }).entries };
+  const reply = ctx.isDM ? clientDelta : redactDeltaForPlayers(clientDelta, result.participants, loaded.meta.rules).delta;
 
   return { delta: reply, version: clientDelta.version, ...(result.response && { response: result.response }) };
 }

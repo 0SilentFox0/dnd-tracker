@@ -78,6 +78,8 @@ export interface ActiveEffect {
   armed?: boolean;
   charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
+  /** Stripped server-side from non-DM views of participants whose stats the viewer cannot see (WFRP miscast conditions) */
+  concealed?: true;
   abilityEffects?: StaticEffect[];
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null; personal?: boolean };
   /** постійний ефект (пасивне персональне вміння, зона аури) — без відліку раундів */

@@ -132,6 +132,7 @@ export interface SystemConditionApply {
   round: number;
   source?: ActiveEffect["source"];
   sourceName: LogLine;
+  concealed?: true;
 }
 
 export interface SystemConditionResult {
@@ -149,6 +150,8 @@ export interface RuleSystemConditions {
   catalog: readonly SystemConditionInfo[];
   /** Strips what a viewer must not learn about a target from a log line */
   concealLine(line: LogLine): LogLine;
+  /** Lines that reveal a caster's miscast; dropped for players when the caster is not visible to them */
+  isMiscastLine?(line: LogLine): boolean;
   list(p: BattleParticipant): SystemConditionLevel[];
   apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
   reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };

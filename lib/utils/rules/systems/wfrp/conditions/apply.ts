@@ -50,7 +50,7 @@ export function applyWfrpConditionTo(p: BattleParticipant, input: SystemConditio
 
     const description = dynamicTextRef(`battleWfrp.conditions.${key}.description`);
 
-    next = { ...next, battleData: { ...next.battleData, activeEffects: next.battleData.activeEffects.map((e) => (e.abilityKey === effectKey ? { ...e, description } : e)) } };
+    next = { ...next, battleData: { ...next.battleData, activeEffects: next.battleData.activeEffects.map((e) => (e.abilityKey === effectKey ? { ...e, description, ...(input.concealed && { concealed: true as const }) } : e)) } };
   }
 
   if (key === "unconscious" && next.combatStats.status !== CombatStatus.DEAD) next = { ...next, combatStats: { ...next.combatStats, status: CombatStatus.UNCONSCIOUS } };

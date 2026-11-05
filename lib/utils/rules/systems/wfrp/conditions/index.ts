@@ -1,6 +1,6 @@
 import { applyWfrpCondition, reduceWfrpConditionIn, UNTIMED_CONDITIONS } from "./apply";
 import { isWfrpConditionKey, WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY, wfrpConditionEffectKey } from "./catalog";
-import { concealWfrpLine } from "./conceal";
+import { concealWfrpLine, isWfrpMiscastLine } from "./conceal";
 import { attemptWfrpConditionEnd } from "./end-test";
 import { wfrpConditions } from "./levels";
 import { wfrpConditionsTurnStart, wfrpSkippedTurn } from "./tick";
@@ -16,6 +16,7 @@ export const WFRP_CONDITIONS: RuleSystemConditions = {
     return { key, maxLevel: d.leveled ? d.leveled.max : null, endTest: d.endTest === null ? null : d.endTest === "stand" ? "stand" : "roll", timed: !UNTIMED_CONDITIONS.has(key), label: `battleWfrp.conditions.${key}.label` };
   }),
   concealLine: concealWfrpLine,
+  isMiscastLine: isWfrpMiscastLine,
   list: wfrpConditions,
   apply: (ps, id, input) => (isWfrpConditionKey(input.key) ? applyWfrpCondition(ps, id, { ...input, key: input.key }) : { participants: ps, messages: [] }),
   reduce: reduceWfrpConditionIn,

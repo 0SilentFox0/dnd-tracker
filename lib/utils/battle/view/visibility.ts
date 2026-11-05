@@ -6,7 +6,8 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
+import type { BattleParticipantPatch } from "@/types/api";
+import type { ActiveEffect, BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export interface Viewer {
@@ -53,7 +54,11 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const { participants } = ctx;
 
-  const conceal = ruleSystemOf(ctx.rules).conditions?.concealLine ?? ((l: LogLine) => l);
+  const conditions = ruleSystemOf(ctx.rules).conditions;
+
+  const conceal = conditions?.concealLine ?? ((l: LogLine) => l);
+
+  const isMiscastLine = conditions?.isMiscastLine ?? (() => false);
 
   const concealed = (e.targets ?? []).some((t) => {
     const p = participants.find((x) => x.basicInfo.id === t.participantId);
@@ -65,7 +70,7 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const actor = participants.find((x) => x.basicInfo.id === e.actorId);
 
-  const casterConditions = !!details.percentileCast?.miscast && (!actor || !canSeeExactStats(actor, viewer));
+  const casterConditions = (!!details.percentileCast?.miscast || !!e.log?.some(isMiscastLine)) && (!actor || !canSeeExactStats(actor, viewer));
 
   const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = details;
 
@@ -75,15 +80,19 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const stripsDefender = percentile?.defender !== undefined;
 
-  const lines = e.log?.map((l) => (concealed || casterConditions ? conceal(hideDefense(l)) : hideDefense(l)));
+  const visible = casterConditions ? e.log?.filter((l) => !isMiscastLine(l)) : e.log;
 
-  const linesChanged = !!lines && lines.some((l, i) => l !== e.log?.[i]);
+  const lines = visible?.map((l) => (concealed || casterConditions ? conceal(hideDefense(l)) : hideDefense(l)));
 
-  if (!stripsNumbers && !stripsDefender && !linesChanged) return e;
+  const linesChanged = !!lines && (lines.length !== e.log?.length || lines.some((l, i) => l !== e.log?.[i]));
+
+  if (!stripsNumbers && !stripsDefender && !linesChanged && !casterConditions) return e;
 
   const base = hideNumbers ? rest : details;
 
-  const actionDetails = stripsDefender && percentile ? { ...base, percentile: { ...percentile, defender: undefined } } : base;
+  const withDefender = stripsDefender && percentile ? { ...base, percentile: { ...percentile, defender: undefined } } : base;
+
+  const actionDetails = casterConditions && withDefender.percentileCast ? { ...withDefender, percentileCast: { ...withDefender.percentileCast, miscast: null } } : withDefender;
 
   return { ...e, actionDetails, ...(lines && { log: lines }) };
 }
@@ -103,4 +112,38 @@ export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: Ba
 
   // after відомого кроку вже містить прихований опір, тож або всі кроки цілі, або жодного
   return allKnown ? steps : steps.filter((s) => s.side === "attacker");
+}
+
+const hidesEffects = (p: BattleParticipant) => !canSeeExactStats(p, PLAYER_VIEWER);
+
+const withoutConcealed = (effects: ActiveEffect[]) => effects.filter((e) => !e.concealed);
+
+function redactParticipant(p: BattleParticipant): BattleParticipant {
+  const effects = p.battleData.activeEffects;
+
+  if (!hidesEffects(p) || !effects.some((e) => e.concealed)) return p;
+
+  return { ...p, battleData: { ...p.battleData, activeEffects: withoutConcealed(effects) } };
+}
+
+export function redactParticipantsForPlayers(participants: BattleParticipant[]): BattleParticipant[] {
+  const redacted = participants.map(redactParticipant);
+
+  return redacted.some((p, i) => p !== participants[i]) ? redacted : participants;
+}
+
+export function redactPatchesForPlayers(patches: BattleParticipantPatch[], participants: BattleParticipant[]): BattleParticipantPatch[] {
+  const byId = new Map(participants.map((p) => [p.basicInfo.id, p]));
+
+  const redacted = patches.map((patch) => {
+    const owner = byId.get(patch.id);
+
+    const effects = patch.battleData?.activeEffects;
+
+    if (!owner || !hidesEffects(owner) || !effects?.some((e) => e.concealed)) return patch;
+
+    return { ...patch, battleData: { ...patch.battleData, activeEffects: withoutConcealed(effects) } };
+  });
+
+  return redacted.some((p, i) => p !== patches[i]) ? redacted : patches;
 }

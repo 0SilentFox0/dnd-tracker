@@ -20,3 +20,13 @@ export function concealWfrpLine(line: LogLine): LogLine {
 
   return line;
 }
+
+const MISCAST_LINES: ReadonlySet<string> = new Set(["wfrpMagic.log.miscast", "wfrpMagic.log.wrath"]);
+
+const isMiscastSource = (v: unknown): boolean => typeof v === "object" && v !== null && "message" in v && String(v.message).startsWith("wfrpMagic.miscast.");
+
+export function isWfrpMiscastLine(line: LogLine): boolean {
+  if (typeof line === "string") return false;
+
+  return MISCAST_LINES.has(line.message) || isMiscastSource(line.params?.source);
+}

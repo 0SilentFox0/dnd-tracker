@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { alwaysSeesEnemyStats, canSeeEnemyHp, canSeeExactStats, hiddenTargetSteps, PLAYER_VIEWER, redactLogForPlayers, sanitizeLogEntry } from "@/lib/utils/battle/view";
+import { alwaysSeesEnemyStats, canSeeEnemyHp, canSeeExactStats, hiddenTargetSteps, PLAYER_VIEWER, redactLogForPlayers, redactParticipantsForPlayers, sanitizeLogEntry } from "@/lib/utils/battle/view";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
@@ -100,6 +100,63 @@ describe("видимість", () => {
     expect(sanitizeLogEntry(entry(null), player, ctx).log).toEqual([applied]);
     expect(sanitizeLogEntry(entry("minor"), { ...player, isDM: true }, ctx).log).toEqual([applied]);
     expect(sanitizeLogEntry(entry("minor"), player, ctxOf([wizard, hero], DEFAULT_RULES)).log).toEqual([applied]);
+  });
+
+  it("wfrp: miscast ворожого заклинача: ні рядка, ні джерела стану, ні percentileCast.miscast; свої й ДМ бачать усе", () => {
+    const wizard = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "w" } } as BattleParticipant;
+
+    const mine = { ...side(ParticipantSide.ALLY), basicInfo: { ...side(ParticipantSide.ALLY).basicInfo, id: "m" } } as BattleParticipant;
+
+    const miscastLine = { message: "wfrpMagic.log.miscast", params: { name: "x", effect: { message: "wfrpMagic.miscast.minor.3" } } };
+
+    const wrathLine = { message: "wfrpMagic.log.wrath", params: { name: "x", effect: { message: "wfrpMagic.miscast.wrath.1" } } };
+
+    const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 1, source: { message: "wfrpMagic.miscast.minor.3" } } };
+
+    const cast = { message: "wfrpMagic.log.cast", params: { name: "x" } };
+
+    const entry = (actorId: string, miscast: string | null) => ({ actorId, targets: [], actionDetails: { percentileCast: { miscast, sl: 1 } }, log: [cast, miscastLine, wrathLine, applied] }) as unknown as BattleAction;
+
+    const seen = sanitizeLogEntry(entry("w", "minor"), player, ctxOf([wizard, mine]));
+
+    expect(seen.log).toEqual([cast]);
+    expect(seen.actionDetails.percentileCast).toEqual({ miscast: null, sl: 1 });
+    expect(JSON.stringify(seen)).not.toMatch(/miscast\./);
+
+    const channel = { actorId: "w", targets: [], actionDetails: {}, log: [cast, miscastLine, applied] } as unknown as BattleAction;
+
+    expect(sanitizeLogEntry(channel, player, ctxOf([wizard, mine])).log).toEqual([cast]);
+
+    const own = entry("m", "minor");
+
+    expect(sanitizeLogEntry(own, player, ctxOf([wizard, mine]))).toBe(own);
+
+    const dm = entry("w", "minor");
+
+    expect(sanitizeLogEntry(dm, { ...player, isDM: true }, ctxOf([wizard, mine]))).toBe(dm);
+  });
+
+  it("redactParticipantsForPlayers: ховає concealed-стани лише ворожих не-exact, решту не чіпає", () => {
+    const effect = (id: string, concealed?: true) => ({ id, name: id, type: "condition", duration: 1, appliedAt: { round: 1, timestamp: new Date() }, effects: [], ...(concealed && { concealed }) }) as unknown as BattleParticipant["battleData"]["activeEffects"][number];
+
+    const withEffects = (s: ParticipantSide, id: string, effects: ReturnType<typeof effect>[]) => {
+      const p = side(s);
+
+      return { ...p, basicInfo: { ...p.basicInfo, id }, battleData: { ...p.battleData, activeEffects: effects } } as BattleParticipant;
+    };
+
+    const foe = withEffects(ParticipantSide.ENEMY, "foe", [effect("keep"), effect("hide", true)]);
+
+    const friend = withEffects(ParticipantSide.ALLY, "fr", [effect("own", true)]);
+
+    const [redactedFoe, redactedFriend] = redactParticipantsForPlayers([foe, friend]);
+
+    expect(redactedFoe.battleData.activeEffects.map((e) => e.id)).toEqual(["keep"]);
+    expect(redactedFriend).toBe(friend);
+
+    const clean = withEffects(ParticipantSide.ENEMY, "c", [effect("keep")]);
+
+    expect(redactParticipantsForPlayers([clean])[0]).toBe(clean);
   });
 
   it("кроки цілі ховаються, доки не помічені в журналі", () => {

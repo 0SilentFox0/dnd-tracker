@@ -9,7 +9,7 @@ import { hasMomentum } from "@/lib/utils/battle/momentum";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
-import { redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
+import { redactLogForPlayers, redactParticipantsForPlayers, redactPatchesForPlayers } from "@/lib/utils/battle/view/visibility";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -34,6 +34,8 @@ export function toBattleResponse(
 ): BattleScene {
   const { meta } = loaded;
 
+  const hide = view && !view.isDM;
+
   return {
     id: scene.id,
     campaignId: scene.campaignId,
@@ -43,8 +45,8 @@ export function toBattleResponse(
     participants: scene.status === BattleStatus.PREPARED ? meta.setup : [],
     currentRound: scene.round,
     currentTurnIndex: scene.turnIndex,
-    initiativeOrder: participants,
-    pendingSummons: pending,
+    initiativeOrder: hide ? redactParticipantsForPlayers(participants) : participants,
+    pendingSummons: hide ? redactParticipantsForPlayers(pending) : pending,
     pendingMoraleCheck: scene.pendingMoraleCheck,
     pendingCritChoice: toPublicPendingCrit(scene.pendingCritChoice),
     ...(hasMomentum(scene.momentum) && { momentum: scene.momentum }),
@@ -61,6 +63,20 @@ export function toBattleResponse(
     campaign: { id: scene.campaignId, friendlyFire: meta.friendlyFire },
     ...(view && { isDM: Boolean(view.isDM), userRole: view.isDM ? CampaignRole.DM : CampaignRole.PLAYER }),
   };
+}
+
+export function redactDeltaForPlayers(delta: ClientBattleDelta, participants: BattleParticipant[], rules: Ruleset): { delta: ClientBattleDelta; changed: boolean } {
+  const { entries, changed: logChanged } = redactLogForPlayers(delta.log, { participants, rules });
+
+  const upserted = redactParticipantsForPlayers(delta.upserted);
+
+  const patched = delta.patched && redactPatchesForPlayers(delta.patched, participants);
+
+  const pending = delta.pending && redactParticipantsForPlayers(delta.pending);
+
+  const changed = logChanged || upserted !== delta.upserted || patched !== delta.patched || pending !== delta.pending;
+
+  return { delta: changed ? { ...delta, log: entries, upserted, ...(patched && { patched }), ...(pending && { pending }) } : delta, changed };
 }
 
 function fitOrRefetch(delta: ClientBattleDelta): ClientBattleDelta | BattleRefetchSignal {
@@ -82,9 +98,9 @@ export function buildPusherMessages(args: {
 
   const channel = battleChannelName(after.id);
 
-  const { entries, changed } = redactLogForPlayers(delta.log, { participants, rules });
+  const { delta: redactedDelta, changed } = redactDeltaForPlayers(delta, participants, rules);
 
-  const publicDelta: ClientBattleDelta = changed ? { ...delta, log: entries, redacted: true } : delta;
+  const publicDelta: ClientBattleDelta = changed ? { ...redactedDelta, redacted: true } : delta;
 
   const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload: fitOrRefetch(publicDelta) }];
 
