@@ -23,6 +23,8 @@
 | `combat.initiative` / `baseStats` | `I` (+d10) замість d20 + Dex (`InitiativeScore {total, roll, die}`), тай-брейк за `abilities.wfrp.ag`; початкові `initiative`/`speed` (Move × 3 ft) | `scoreInitiative`, `from-character`/`from-unit` |
 | `combat.hitModel` | `offense/defense/winChance/damage/refHit` для чесного балансу (замість d20 to-hit/AC) | `balance/hit-model.ts`, `heroPower`, `loadUnitLibraryStats` |
 | `combat.participantFields` | додаткові поля учасника при створенні з персонажа/юніта (`abilities.characteristics`, `abilities.wfrp`: стати, AP = 0); d20 не додає ключів; `refreshFromSource` копіює | `from-character`, `from-unit`, `refresh-from-source` |
+| `conditions` | 12 станів wfrp: `catalog`, `apply`/`remove`/`level` (рівень = сума маркерів, обрізання 10), `tick` на початку ходу активного носія, `endTest` (тест зняття), `selfTestMod`/`againstMod` для d100-тестів; `undefined` у d20 → `CONDITION_5E_REGISTRY` без змін | `turn/start` (`applyStartOfTurnDamage`), `resolve-attack`, `crit-effect`, `system-condition`/`condition-test` мутації, `sheet-test` |
+| `combat.fortune` | Fortune: перекинути d100 (атакувальник/захисник) або +1 SL; `percentile.fortune` у деталях дії; `undefined` у d20 | `attack/run.ts`, схема атаки, `useAttackWizard` |
 | `cellFeetOf(rules)` | розмір клітинки в футах (`grid/cell-feet.ts`): homm/dnd5e 5, wfrp 6 (2 yd); `CELL_FEET` видалено, `rules` — обов'язковий параметр grid-хелперів (рух, шаблони, досяжність, цілі) | `lib/utils/battle/grid/*` |
 | `battle.supported` | wfrp = `true` (5b-1); `false` → старт бою 409 `SYSTEM_BATTLE_UNSUPPORTED` | `start-mutation`, setup UI |
 | `unusedMechanics` | механіки, що ховаються на сторінці правил | `RulesForm` |
@@ -43,6 +45,7 @@
 | `wfrp/percentile/` | `roll` (d100, інверсія, дублети), `difficulty` (`DIFFICULTY_KEYS`, модифікатори), `resolve` (SL, критичний успіх/невдача) |
 | `wfrp/characteristics/` | `schema` (`CharacteristicsSchema`, 10 характеристик, `fate`, `advances`, навички), `derive` (Wounds, Move), `sheet-block` |
 | `wfrp/skills/` | каталог навичок і спеціалізацій (`catalog.ts`) |
+| `wfrp/conditions/` | `catalog.ts` (числа станів), `apply.ts`, `levels.ts`, `tick.ts`, `end-test.ts`, `test-mod.ts`, `index.ts` (`WFRP_CONDITIONS`) |
 | `wfrp/sheet-test.ts`, `session.ts` | `sheetTest.roll` і `rest.onSession` |
 | `components/systems/wfrp/` | `HeroStats`, `StatsTab`, `StatsFields`, `UnitStatsFields`, `RollDialogBody`, редактори характеристик і навичок |
 
@@ -60,7 +63,7 @@
 
 - Momentum — жетон сцени `{ ally?, enemy? }` (`battle_scenes.momentum`, у знімку, дельті й rollback; `lib/utils/battle/momentum.ts`: `settle`, `heldBy`, `momentumPatch`), спільний для гравецьких і серверних атак (фаза атаки, помста, нагода, рух, легендарні дії, підготовлена атака); `spell/cast` і `berserk` його не чіпають (`NO_MOMENTUM`). У d20 `scene.momentum` ніколи не з'являється в дельті. У wfrp немає реакцій, тож нагода/підготовлена атака за реальних правил недосяжні; крит-вибір ДМ (`pendingCritChoice`) атаками wfrp не запускається. Дальній бій Momentum не використовує.
 - Щита й броні немає (AP = 0, щит не моделюється): 5f.
-- Крит-маркери (bleeding, stunned, …) лише інертні ефекти-мітки; стани й механіки — 5c; head.5 «unconscious» не змінює статус.
+- Крит-маркери (bleeding, stunned, …) були інертними мітками: закрито в 5c-1 для bleeding/stunned/unconscious/prone (див. «Межі 5c-1»); head.5 «unconscious» тепер дає стан.
 - d100 не пишеться в `diceRolls` (`DieSides` не має 100); значення лежить в `actionDetails.percentile`. Схема атаки приймає `d20Roll`/`attackRoll`/`attackRolls` до 100, а верхню межу задає `combat.dice` (закрито в 5b-3).
 - Дальня атака без смуг дальності (складність challenging, ціль захисту 0).
 - Еталони балансу (`refHit`) припущені, не звірені з книгою.
@@ -69,6 +72,22 @@
 - Небойові джерела шкоди на 0 Wounds дають крит у «body»; опір у wfrp = лише імунітет; stat-модифікатор d20 у шкоді ігнорується.
 - Підписи відстані: літерал «фт/ft» лишився лише в `battleLog.spellFx.{anchoredAura,delayed,distanceDice}` (магія/ауры, недосяжні при `spells: false`); гард — `lib/i18n/__tests__/battle-log-distance-unit.test.ts`. Описи 5e-дій і станів (`battle.json` «shove», `battleCommon` conditions) недосяжні в wfrp (`actions`/`conditions` вимкнені). Нова wfrp-досяжна відстань у тексті — через `{unit}` із `ruleSystemOf(rules).distance.unit`.
 - `rules` стало обов'язковим на шляхах, досяжних у wfrp (фаза атаки, flow, ефекти, зони, маневри). Необов'язковий `rules?` лишається в `roll-check`, `saves`, `conditions`, кидках смерті й `balance-*` — вони d20-лише за задумом.
+
+## Межі 5c-1
+
+Стани й Fortune на `feat/wfrp` (без міграції; UI — namespace `battleWfrp`). Свідомі межі:
+
+- 12 станів; числа каталогу (`conditions/catalog.ts`) — припущення до звірки з книгою.
+- Стан = `ActiveEffect` `wfrp:cond:<key>`, рівень = сума маркерів `wfrp:<key>`, обрізання `max` 10; зняття -1 іде з найновішого ефекту, ДМ «зняти все» прибирає всі ефекти ключа.
+- Тіки лише на активному носії; кровотеча на непритомному — 5c-2.
+- Unconscious має два джерела (Wounds = 0 і стан-ефект); лікування до > 0 Wounds стан-ефект не знімає (ДМ знімає вручну).
+- Спроба зняття вільна, одна на стан за хід (`battleData.conditionTests`), подія без `actionDetails.percentile` (кидок у рядку журналу). Повтор, не свій хід або стан без `endTest` → `CONDITION_TEST_UNAVAILABLE`.
+- Тест зняття Entangled: ціль = S + власний штраф стану (-10 за рівень), тож S 47 дає 37.
+- Тест з листа отримує `selfTestMod`, але `roll-handler` будує учасника з листа, тож у реальному виклику модифікатор `sheet-test` = 0 і стани бою на нього зараз не впливають (хвіст для 5c-2).
+- Панель «Спробувати зняти» для ДМ, що керує поточним учасником, не перевірена вручну: перевіряється в live-run (Task 12).
+- Fortune: `percentile.fortune` замість окремого `actionDetails.fortune`; перекидання при влучанні з першого кидка не списується; серверні атаки й ініціатива без Fortune; Fate без механіки.
+- Мітки disarmed/winded/crippled — інертні (5c-2); Besmirched, Corruption, психологія, травми — поза межами.
+- `battleWfrp` вантажиться лише в бойових лейаутах wfrp-кампаній (`isWfrpCampaign`); `scope-size` (кампанія + бій): uk 102.0 → 102.7 KB gzip, en 82.1 → 82.7 KB, ліміт 105.
 
 ## Межі 5b-3
 
