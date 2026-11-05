@@ -1,3 +1,5 @@
+import { applyWfrpConditionTo } from "../conditions/apply";
+import { isWfrpConditionKey } from "../conditions/catalog";
 import type { CritResult } from "./crit-table";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
@@ -10,6 +12,8 @@ export function applyWfrpCrit(target: BattleParticipant, crit: CritResult, round
   const message = crit.bonusDamage > 0 ? textRef("battleLog.wfrp.critHit", { target: target.basicInfo.name, text: dynamicTextRef(crit.textKey), bonus: crit.bonusDamage }) : textRef("battleLog.wfrp.critWound", { target: target.basicInfo.name, text: dynamicTextRef(crit.textKey) });
 
   if (!crit.markerKey) return { participant: target, message };
+
+  if (isWfrpConditionKey(crit.markerKey)) return { participant: applyWfrpConditionTo(target, { key: crit.markerKey, levels: 1, round, sourceName: dynamicTextRef(crit.textKey) }).participant, message };
 
   const participant = upsertLabeled(
     target,

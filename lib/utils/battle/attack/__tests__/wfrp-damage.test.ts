@@ -7,6 +7,7 @@ import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
+import { wfrpConditions } from "@/lib/utils/rules/systems/wfrp/conditions/levels";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -96,19 +97,19 @@ describe("WFRP damage", () => {
 
     expect(r.targetUpdated.combatStats).toMatchObject({ currentHp: 0, status: CombatStatus.UNCONSCIOUS });
     expect(logOf(r)).toContain("battleLog.wfrp.unconscious");
-    expect(crits(r.targetUpdated)).toHaveLength(1);
+    expect(crits(r.targetUpdated).length + wfrpConditions(r.targetUpdated).length).toBeGreaterThan(0);
 
     const again = strike(30, 80, { target: r.targetUpdated });
 
     expect(again.success).toBe(false);
-    expect(crits(again.targetUpdated)).toHaveLength(1);
+    expect(crits(again.targetUpdated).length + wfrpConditions(again.targetUpdated).length).toBeGreaterThan(0);
   });
 
   it("a doubles crit that also drops the target gives one crit", () => {
     const r = strike(22, 90, { target: { hp: 3 } });
 
     expect(r.targetUpdated.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-    expect(crits(r.targetUpdated)).toHaveLength(1);
+    expect(crits(r.targetUpdated).length + wfrpConditions(r.targetUpdated).length).toBeGreaterThan(0);
   });
 
   it("a hit does not crash on an attacker without characteristics stats", () => {

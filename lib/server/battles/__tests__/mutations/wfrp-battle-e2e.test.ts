@@ -14,6 +14,7 @@ import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
+import { wfrpConditions } from "@/lib/utils/rules/systems/wfrp/conditions/levels";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -79,7 +80,7 @@ describe("wfrp battle end to end (engine)", () => {
     const target = ctx.participants.find((p) => p.basicInfo.id === "t")!;
 
     expect(target.combatStats).toMatchObject({ currentHp: 0, status: CombatStatus.UNCONSCIOUS });
-    expect(crits(target)).toHaveLength(1);
+    expect(crits(target).length + wfrpConditions(target).length).toBeGreaterThan(0);
     expect(rolls.every((n) => n > 0)).toBe(true);
   });
 

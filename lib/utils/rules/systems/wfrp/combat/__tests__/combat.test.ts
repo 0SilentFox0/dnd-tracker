@@ -1,13 +1,25 @@
 import { describe, expect, it } from "vitest";
 
+import { applyWfrpConditionTo } from "../../conditions/apply";
+import type { WfrpConditionKey } from "../../conditions/catalog";
+import { conditionLevel } from "../../conditions/levels";
 import { reverseRoll } from "../../percentile";
 import { LOCATIONS } from "../constants";
+import { applyWfrpCrit } from "../crit-effect";
 import { CRIT_TABLE, rollCrit } from "../crit-table";
 import { computeWfrpDamage } from "../damage";
 import { hitLocation } from "../location";
 import { resolveOpposed } from "../opposed";
+import { wfrpAbilitiesOf } from "../participant";
+import { resolveWfrpAttack } from "../resolve-attack";
 
+import { AttackType, CombatStatus } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
+import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const rng = mulberry32(1);
 
@@ -110,5 +122,61 @@ describe("rollCrit", () => {
 
   it("rolls from rng without preset", () => {
     expect(rollCrit("body", mulberry32(3)).id).toMatch(/^body\.[1-5]$/);
+  });
+});
+
+describe("resolveWfrpAttack conditions", () => {
+  const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };
+
+  const bow: BattleAttack = { ...sword, id: "bw", type: AttackType.RANGED };
+
+  const fighter = (id: string): BattleParticipant => {
+    const p = makeParticipant({ id, hp: 20, maxHp: 20 });
+
+    const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } };
+
+    return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { head: 0, arm: 0, body: 0, leg: 0 }) } };
+  };
+
+  const cond = (p: BattleParticipant, key: WfrpConditionKey, levels?: number) => applyWfrpConditionTo(p, { key, levels, round: 1, sourceName: textRef("battleWfrp.log.removed", { target: "x", condition: "y" }) }).participant;
+
+  const run = (attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack) =>
+    resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, manualRoll: 30, momentum: { attacker: false, defender: false } });
+
+  it("attacker condition lowers the attack target", () => {
+    expect(run(cond(fighter("a"), "stunned", 1), fighter("t"), sword).attackRoll.percentile?.target).toBe(30);
+  });
+
+  it("prone target is easier to hit with ranged only if it has the bonus", () => {
+    expect(run(fighter("a"), cond(fighter("t"), "prone"), bow).attackRoll.percentile?.target).toBe(40);
+    expect(run(fighter("a"), cond(fighter("t"), "prone"), sword).attackRoll.percentile?.target).toBe(60);
+  });
+
+  it("defender condition lowers the defense target", () => {
+    expect(run(fighter("a"), cond(fighter("t"), "fatigued", 2), sword).attackRoll.percentile?.defender?.target).toBe(20);
+  });
+
+  describe("crits", () => {
+    const crit = (id: string, markerKey: string) => ({ id, textKey: `battleLog.wfrp.crit.${id}`, bonusDamage: 2, markerKey });
+
+    const crits = (p: BattleParticipant) => p.battleData.activeEffects.filter((e) => e.name.startsWith("crit.wfrp."));
+
+    it("condition markers apply a condition, no inert mark", () => {
+      const r = applyWfrpCrit(fighter("t"), crit("head.2", "bleeding"), 1).participant;
+
+      expect(conditionLevel(r, "bleeding")).toBe(1);
+      expect(crits(r)).toHaveLength(0);
+      expect(applyWfrpCrit(fighter("t"), crit("leg.3", "prone"), 1).participant).toSatisfy((p: BattleParticipant) => conditionLevel(p, "prone") === 1);
+    });
+
+    it("unconscious marker sets the status", () => {
+      expect(applyWfrpCrit(fighter("t"), crit("head.5", "unconscious"), 1).participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+    });
+
+    it("disarmed stays an inert mark", () => {
+      const r = applyWfrpCrit(fighter("t"), crit("arm.3", "disarmed"), 1).participant;
+
+      expect(crits(r).map((e) => e.name)).toEqual(["crit.wfrp.arm.3.disarmed"]);
+    });
   });
 });

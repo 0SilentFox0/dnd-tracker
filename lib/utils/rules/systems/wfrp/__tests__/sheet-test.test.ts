@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import type { SheetTestInput } from "../../types";
+import { applyWfrpConditionTo } from "../conditions/apply";
 import { rollWfrpSheetTest } from "../sheet-test";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { makeT } from "@/lib/i18n/test/mock-t";
+import { textRef } from "@/lib/i18n/text-ref";
 import { ContentError } from "@/lib/server/content/errors";
+import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
@@ -34,6 +37,14 @@ const fails = (body: unknown, status: number, message: string) => {
 };
 
 describe("rollWfrpSheetTest", () => {
+  it("participant conditions modify the target", () => {
+    const fatigued = applyWfrpConditionTo(makeParticipant({ id: "a" }), { key: "fatigued", levels: 1, round: 1, sourceName: textRef("battleWfrp.log.removed", { target: "x", condition: "y" }) }).participant;
+
+    const body = { kind: "test", characteristic: "ws" };
+
+    expect(rollWfrpSheetTest(input(body, { participant: fatigued })).target).toBe(rollWfrpSheetTest(input(body)).target - 10);
+  });
+
   it("characteristic test defaults to challenging", () => {
     expect(rollWfrpSheetTest(input({ kind: "test", characteristic: "ws" }))).toMatchObject({
       kind: "percentile",
