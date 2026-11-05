@@ -38,7 +38,11 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
       [SHOW_STATE_EVENT]: (data) => {
         const event = data as Partial<ShowEvent> | null;
 
-        if (event?.show && typeof event.show.seq === "number") return writeShowSnapshot(queryClient, campaignId, { show: event.show });
+        if (event?.show && typeof event.show.seq === "number") {
+          writeShowSnapshot(queryClient, campaignId, { show: event.show });
+
+          return;
+        }
 
         // обмежений слайд не розсилається: перечитуємо власний вигляд
         if (typeof event?.seq !== "number") return;

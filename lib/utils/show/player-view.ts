@@ -19,10 +19,8 @@ export function stageMode(show: ShowState | null): StageMode {
 
 const sees = (slide: Slide, heroIds: readonly string[]) => !slide.audience || slide.audience.some((id) => heroIds.includes(id));
 
-const lastEntry = (show: ShowState) => show.trail?.[show.trail.length - 1];
-
 /** Поточний слайд обмежений: стан для гравців читається окремо, а не розсилається. */
-export const isRestricted = (show: ShowState | null): boolean => !!show && !!lastEntry(show)?.slide.audience && lastEntry(show)?.slide.id === show.slide?.id;
+export const isRestricted = (show: ShowState | null): boolean => !!show?.slide?.audience;
 
 /** Те, що клієнт ніколи не бачить: серверна стежка. */
 export function toClientShow(show: ShowState): ShowState {
