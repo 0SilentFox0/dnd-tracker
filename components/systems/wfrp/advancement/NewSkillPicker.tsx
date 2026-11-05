@@ -41,9 +41,9 @@ export function NewSkillPicker({ cost, available, pending, onBuy }: Props) {
 
   return (
     <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-      <SelectField aria-label={t("newSkill")} value={skill} onValueChange={(v) => { setSkill(v); setSpec(""); }} options={options} placeholder={t("newSkill")} triggerClassName="w-full" />
-      {def?.spec === "fixed" && <SelectField aria-label={t("spec")} value={spec} onValueChange={setSpec} options={(def.specs ?? []).map((s) => ({ value: s, label: specName(tg, def.key, s) }))} placeholder={t("spec")} triggerClassName="w-full" />}
-      {def?.spec === "open" && <Input aria-label={t("spec")} placeholder={t("spec")} value={spec} onChange={(e) => setSpec(e.target.value)} />}
+      <SelectField aria-label={t("newSkill")} value={skill} onValueChange={(v) => { setSkill(v); setSpec(""); }} options={options} placeholder={t("newSkill")} triggerClassName="min-h-11 w-full" />
+      {def?.spec === "fixed" && <SelectField aria-label={t("spec")} value={spec} onValueChange={setSpec} options={(def.specs ?? []).map((s) => ({ value: s, label: specName(tg, def.key, s) }))} placeholder={t("spec")} triggerClassName="min-h-11 w-full" />}
+      {def?.spec === "open" && <Input className="min-h-11" aria-label={t("spec")} placeholder={t("spec")} value={spec} onChange={(e) => setSpec(e.target.value)} />}
       <Button
         type="button"
         size="sm"
