@@ -73,7 +73,7 @@ export function wfrpSkippedTurn(ps: BattleParticipant[], id: string, ctx: { roun
 
   const bleeding = conditionLevel(p, "bleeding");
 
-  if (bleeding === 0 || ctx.rng() >= BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding) return { participants: ps, messages: [] };
+  if (bleeding === 0 || p.combatStats.currentHp > 0 || ctx.rng() >= BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding) return { participants: ps, messages: [] };
 
   const dead: BattleParticipant = { ...p, combatStats: { ...p.combatStats, currentHp: 0, status: CombatStatus.DEAD } };
 

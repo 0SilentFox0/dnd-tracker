@@ -137,6 +137,20 @@ describe("wfrpSkippedTurn", () => {
     expect(r.participants[0]).toBe(p);
   });
 
+  it("bleeding while above 0 Wounds never kills and does not consume rng", () => {
+    const rng = vi.fn(() => {
+      throw new Error("rng used");
+    });
+
+    const ps = [make(5, [["bleeding", 3]], CombatStatus.UNCONSCIOUS)];
+
+    const r = wfrpSkippedTurn(ps, "a", { round: 3, rng });
+
+    expect(r.participants).toBe(ps);
+    expect(r.messages).toEqual([]);
+    expect(rng).not.toHaveBeenCalled();
+  });
+
   it("active and dead bearers are untouched", () => {
     for (const status of [CombatStatus.ACTIVE, CombatStatus.DEAD]) {
       const rng = vi.fn(() => 0);
