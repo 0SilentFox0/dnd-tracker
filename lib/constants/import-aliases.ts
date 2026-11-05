@@ -134,6 +134,8 @@ export const FIELD_ALIASES: Record<ImportKind, PerField<readonly string[]>> = {
     type: ["тип", "type"],
     prerequisite: ["передумови (json)", "prerequisite", "передумова", "передумови", "prerequisites (json)"],
     repeatable: ["повторювана", "repeatable"],
+    xpCost: ["ціна в досвіді", "xp cost", "xpcost"],
+    maxRank: ["макс. ранг", "max rank", "maxrank"],
     description: DESCRIPTION,
     abilities: ABILITIES,
     choices: ["вибори (json)", "choices", "вибори", "choices (json)"],

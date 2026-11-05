@@ -138,6 +138,8 @@
       "type": "Type",
       "prerequisite": "Prerequisites (JSON)",
       "repeatable": "Repeatable",
+      "xpCost": "XP cost",
+      "maxRank": "Max rank",
       "description": "Description",
       "abilities": "Abilities",
       "choices": "Choices (JSON)"

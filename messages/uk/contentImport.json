@@ -138,6 +138,8 @@
       "type": "Тип",
       "prerequisite": "Передумови (JSON)",
       "repeatable": "Повторювана",
+      "xpCost": "Ціна в досвіді",
+      "maxRank": "Макс. ранг",
       "description": "Опис",
       "abilities": "Здібності",
       "choices": "Вибори (JSON)"
