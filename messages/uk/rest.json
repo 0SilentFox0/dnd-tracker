@@ -124,6 +124,8 @@
     "inspirationRemoved": "✦ Натхнення знято",
     "resourcesEdit": "ДМ змінив ресурси",
     "choicesEdit": "✎ Змінено вибори (раса, риси, опції класу)",
-    "battleResult": "⚔ Після бою: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · загинув} other {}}"
+    "battleResult": "⚔ Після бою: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · загинув} other {}}",
+    "advance": "📈 Розвиток: {key} {from} → {to} (−{cost} досвіду)",
+    "advanceUndo": "↩ Відкат розвитку: {key} {to} → {from} (+{cost} досвіду)"
   }
 }

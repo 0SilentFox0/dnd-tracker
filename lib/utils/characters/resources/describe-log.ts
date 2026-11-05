@@ -58,6 +58,8 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
         key: "rest.log.xp",
         params: { amount: `${num("amount") > 0 ? "+" : ""}${num("amount")}`, total: num("total"), hasNote: yes(typeof d.note === "string"), note: typeof d.note === "string" ? d.note : "" },
       };
+    case "advance":
+      return { key: d.undo ? "rest.log.advanceUndo" : "rest.log.advance", params: { kind: String(d.kind), key: String(d.key), from: num("from"), to: num("to"), cost: num("cost") } };
     case "inspiration":
       return { key: d.value ? "rest.log.inspirationGained" : "rest.log.inspirationRemoved" };
     case "resources_edit":

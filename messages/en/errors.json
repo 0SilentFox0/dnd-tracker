@@ -512,5 +512,12 @@
   "rollOutOfRange": "Roll is outside the system die range",
   "skillUntrained": "The skill is untrained, so the test is not possible",
   "restKindUnsupported": "This kind of rest is not available in the campaign rule system",
-  "characteristicsRequired": "This rule system requires characteristics"
+  "characteristicsRequired": "This rule system requires characteristics",
+  "advanceInsufficientXp": "Not enough experience for this advance",
+  "advanceAtLimit": "Advancement limit reached",
+  "advanceMaxRank": "Talent is at its maximum rank",
+  "advanceUnknown": "Unknown advancement target",
+  "advanceLedgerEmpty": "No purchases to undo",
+  "advanceLedgerStale": "The last purchase cannot be undone — data was edited manually",
+  "advanceNotWfrp": "Experience advancement is only available in WFRP"
 }

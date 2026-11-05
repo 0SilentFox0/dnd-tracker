@@ -9,6 +9,7 @@ export const CharacterLogKind = {
   HIT_DIE: "hit_die",
   ARCANE_RECOVERY: "arcane_recovery",
   XP: "xp",
+  ADVANCE: "advance",
   INSPIRATION: "inspiration",
   RESOURCES_EDIT: "resources_edit",
   CHOICES_EDIT: "choices_edit",

@@ -1,4 +1,8 @@
 import { type CharacterOperation } from "../operation-runner";
+import { advanceOperation } from "./advance";
+import { advanceOperation } from "./advance";
+import { advanceUndoOperation } from "./advance-undo";
+import { advanceUndoOperation } from "./advance-undo";
 import { arcaneRecoveryOperation } from "./arcane-recovery";
 import { choicesOperation } from "./choices";
 import { createOperation } from "./create";
@@ -52,6 +56,10 @@ export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
   inspiration: erased(inspirationOperation),
   rest: erased(restOperation),
   experience: erased(experienceOperation),
+  advance: erased(advanceOperation),
+  "advance.undo": erased(advanceUndoOperation),
+  advance: erased(advanceOperation),
+  "advance.undo": erased(advanceUndoOperation),
   roll: erased(rollOperation),
   ...Object.fromEntries(Object.entries(READ_OPERATIONS).map(([key, op]) => [key, erased(op)])),
 };

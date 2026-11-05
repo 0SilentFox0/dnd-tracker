@@ -124,6 +124,8 @@
     "inspirationRemoved": "✦ Inspiration removed",
     "resourcesEdit": "DM changed resources",
     "choicesEdit": "✎ Choices changed (race, feats, class options)",
-    "battleResult": "⚔ After battle: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · died} other {}}"
+    "battleResult": "⚔ After battle: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · died} other {}}",
+    "advance": "📈 Advance: {key} {from} → {to} (−{cost} XP)",
+    "advanceUndo": "↩ Advance undone: {key} {to} → {from} (+{cost} XP)"
   }
 }
