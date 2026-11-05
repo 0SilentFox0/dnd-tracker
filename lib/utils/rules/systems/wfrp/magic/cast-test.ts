@@ -4,7 +4,7 @@ import { selfTestMod } from "../conditions/test-mod";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import { applyFortune } from "../percentile/fortune";
 import { armourSl } from "./armour";
-import { CAST_SKILL, NO_OVERCAST_KINDS, OVERCAST_SL_STEP, PRAY_SKILL, PRAYER_KINDS } from "./constants";
+import { CAST_SKILL, MAJOR_MISCAST_ROLLS, MAX_OVERCAST_STEPS, NO_OVERCAST_KINDS, OVERCAST_SL_STEP, PRAY_SKILL, PRAYER_KINDS } from "./constants";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import type { CastTestCtx, CastTestResult } from "@/lib/utils/rules/systems/types";
@@ -24,8 +24,6 @@ export function prayTargetOf(caster: BattleParticipant): number {
 }
 
 export const isPrayerKind = (kind: SpellMagicKind | undefined): boolean => kind !== undefined && PRAYER_KINDS.has(kind);
-
-const MAJOR_MISCAST_ROLLS = new Set([99, 100]);
 
 export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
   const { caster, spell, magic, rng, presetRoll } = ctx;
@@ -56,7 +54,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
   const miscast = prayer ? (wrath ? "wrath" : null) : MAJOR_MISCAST_ROLLS.has(test.roll) ? "major" : test.doubles ? "minor" : null;
 
-  const overcastSteps = success && magic.overcast !== null && !NO_OVERCAST_KINDS.has(magic.kind) ? Math.max(0, Math.floor((test.sl - cn) / OVERCAST_SL_STEP)) : 0;
+  const overcastSteps = success && magic.overcast !== null && !NO_OVERCAST_KINDS.has(magic.kind) ? Math.min(MAX_OVERCAST_STEPS, Math.max(0, Math.floor((test.sl - cn) / OVERCAST_SL_STEP))) : 0;
 
   const outcome = success ? (critical ? "critical" : "success") : test.outcome === "fumble" ? "fumble" : "failure";
 

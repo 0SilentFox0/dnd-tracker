@@ -60,7 +60,7 @@ export function SpellMagicFields({ formData, setFormData, conditions }: SpellFor
               value={magic.overcast ?? "none"}
               onValueChange={(v) => set({ overcast: v === "none" ? null : (v as "dice" | "targets") })}
               placeholder={te("overcast")}
-              options={OVERCAST_KEYS.map((k) => ({ value: k, label: te(`overcast${k[0].toUpperCase()}${k.slice(1)}`) }))}
+              options={OVERCAST_KEYS.filter((k) => k !== "targets" || magic.overcast === "targets").map((k) => ({ value: k, label: te(`overcast${k[0].toUpperCase()}${k.slice(1)}`) }))}
             />
           </div>
           <div>

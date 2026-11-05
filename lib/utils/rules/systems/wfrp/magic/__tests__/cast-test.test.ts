@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { applyWfrpConditionTo } from "../../conditions/apply";
 import { wfrpCastTest } from "../cast-test";
+import { MAX_OVERCAST_STEPS } from "../constants";
 import { caster } from "./fixtures";
 
 import { textRef } from "@/lib/i18n/text-ref";
@@ -24,6 +25,12 @@ describe("wfrpCastTest", () => {
     expect(r.overcastSteps).toBe(0);
     expect(r.miscast).toBeNull();
     expect(r.percentile).toMatchObject({ roll: 30, target: 50, cn: 2, outcome: "success" });
+  });
+
+  it("caps overcast steps", () => {
+    const r = wfrpCastTest({ caster: caster({ channelledSl: 10 }), spell, magic: { cn: 0, kind: "arcane", overcast: "dice" }, rules: WFRP_RULES, rng: mulberry32(1), presetRoll: 10 });
+
+    expect(r.overcastSteps).toBe(MAX_OVERCAST_STEPS);
   });
 
   it("fails when SL is below CN", () => {

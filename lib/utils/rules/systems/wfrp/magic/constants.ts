@@ -16,3 +16,9 @@ export const PRAY_SKILL = { key: "pray" } as const;
 export const PRAYER_KINDS: ReadonlySet<SpellMagicKind> = new Set(["blessing", "miracle"]);
 // verify against 5e book
 export const WRATH_SIN_MAX = 10;
+// verify against 5e book
+export const MAX_OVERCAST_STEPS = 3;
+// verify against 5e book
+export const MAJOR_MISCAST_ROLLS: ReadonlySet<number> = new Set([99, 100]);
+// verify against 5e book
+export const WORST_ROLL = 100;

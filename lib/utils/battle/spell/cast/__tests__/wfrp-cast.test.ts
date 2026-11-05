@@ -82,6 +82,20 @@ describe("castSpell in a percentile magic system", () => {
     expect(over.battleAction.actionDetails.spellSlotUsed).toBe(3);
   });
 
+  it("overcast adds upcast dice to a spellRoll spell, but not for overcast null or Petty", () => {
+    const damage = (magic: Partial<SpellMagic>) => hpLost(run(spellOf(magicOf(magic), { dice: 2, upcastDice: 1, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }] } as Partial<SpellDefinition>), { castTest: { roll: 3 }, dice: { count: 2, sides: 6 }, diceRolls: [3, 3] }, at(wfrpCaster({ channelledSl: 1 }), 0)));
+
+    expect(damage({ overcast: null })).toBe(6);
+    expect(damage({ kind: "petty", overcast: "dice" })).toBe(6);
+    expect(damage({ overcast: "dice" })).toBe(12);
+  });
+
+  it("overcast targets does not raise the cast level", () => {
+    const r = run(spellOf(magicOf({ overcast: "targets" }), { upcastDice: 1 }), { castTest: { roll: 3 } }, at(wfrpCaster({ channelledSl: 1 }), 0));
+
+    expect(hpLost(r)).toBe(3);
+  });
+
   it("the lore attribute lands on the affected targets", () => {
     const r = run(spellOf(magicOf({ attribute: { condition: "ablaze", levels: 1 } })), { castTest: { roll: 30 } });
 
@@ -153,6 +167,14 @@ describe("prayers in castSpell", () => {
 });
 
 describe("ingredients avert a miscast", () => {
+  it("does not cancel divine wrath", () => {
+    const caster = at(wfrpCaster({ channelledSl: 2, sin: 3 }), 0);
+
+    const r = run(spellOf(magicOf({ kind: "blessing", cn: 0 })), { castTest: { roll: 22 }, ingredientUsed: true }, caster);
+
+    expect(r.cast?.miscast).toBe("wrath");
+  });
+
   it("cancels the miscast and logs it", () => {
     const r = run(spellOf(magicOf({ cn: 9 })), { castTest: { roll: 77 }, ingredientUsed: true });
 

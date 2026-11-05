@@ -2,15 +2,13 @@ import { skillTarget, value } from "../characteristics/derive";
 import { readCharacteristics } from "../characteristics/keys";
 import { selfTestMod } from "../conditions/test-mod";
 import { resolvePercentileTest } from "../percentile";
-import { CHANNEL_MAX_SL } from "./constants";
+import { CHANNEL_MAX_SL, WORST_ROLL } from "./constants";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
-
-const WORST_ROLL = 100;
 
 export function channelTargetOf(p: BattleParticipant): number {
   const chars = readCharacteristics({ characteristics: p.abilities.characteristics });

@@ -22,6 +22,7 @@ import { transformRequests } from "@/lib/utils/battle/spell/cast/transform";
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
+import { rollGroups } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AbilityEvent } from "@/types/abilities";
@@ -75,7 +76,17 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const test = rolled && percentile && params.ingredientUsed ? percentile.avertMiscast(rolled, { name: readyCaster.basicInfo.name, spell: spell.name }) : rolled;
 
-  const castLevel = test && test.overcastSteps > 0 ? spell.level + test.overcastSteps : chosenLevel;
+  const overcastSteps = test && spellMagic?.overcast === "dice" ? test.overcastSteps : 0;
+
+  const castLevel = overcastSteps > 0 ? spell.level + overcastSteps : chosenLevel;
+
+  const sides = params.dice?.sides ?? 0;
+
+  const extraCount = overcastSteps > 0 && !def.fixedDice && sides > 0 ? (def.upcastDice ?? 0) * overcastSteps : 0;
+
+  const extraRolls = extraCount > 0 ? rollGroups([{ count: extraCount, size: sides }], rng) : [];
+
+  const allRolls = [...diceRolls, ...extraRolls];
 
   const info = castLevel !== chosenLevel ? { ...baseInfo, castLevel } : baseInfo;
 
@@ -107,7 +118,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     chosenCastLevel: castLevel !== chosenLevel ? castLevel : params.castLevel,
     ability: abilityOf(spell),
     grant: params.grant,
-    power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
+    power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: allRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
     saveDc: params.grant?.dc ?? spellSaveDc(readyCaster, params.grant?.dcAbility, params.rules.formulas.saveDcBase),
     attackBonus: params.grant?.attackBonus,
     battleId,
@@ -115,8 +126,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     rng,
     saveRolls,
     attackRolls,
-    diceRolls,
-    diceCount: params.dice?.count ?? 0,
+    diceRolls: allRolls,
+    diceCount: (params.dice?.count ?? 0) + extraRolls.length,
     diceSides: params.dice?.sides ?? 0,
     attacks: [],
     saves: [],

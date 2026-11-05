@@ -14,7 +14,7 @@ const dropChannelled = (p: BattleParticipant): BattleParticipant => (p.battleDat
 export const WFRP_MAGIC: RuleSystemMagic = {
   slots: false,
   ingredients: "avertMiscast",
-  avertMiscast: (cast, who) => (cast.miscast ? { ...cast, miscast: null, percentile: { ...cast.percentile, miscast: null }, lines: [...cast.lines, textRef("wfrpMagic.log.ingredientAverts", who)] } : cast),
+  avertMiscast: (cast, who) => (cast.miscast && cast.miscast !== "wrath" ? { ...cast, miscast: null, percentile: { ...cast.percentile, miscast: null }, lines: [...cast.lines, textRef("wfrpMagic.log.ingredientAverts", who)] } : cast),
   castTest: wfrpCastTest,
   castPreview: (caster, kind) => {
     const prayer = isPrayerKind(kind);
