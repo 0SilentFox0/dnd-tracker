@@ -1,3 +1,4 @@
+import type { planCareerAdvance, planCareerSet } from "./wfrp/advancement/career";
 import type { advanceCost } from "./wfrp/advancement/cost";
 import type { planPurchase } from "./wfrp/advancement/plan";
 import type { availableXp, talentGroups } from "./wfrp/advancement/talent-groups";
@@ -270,6 +271,8 @@ export interface RuleSystemAdvancement {
   cost: typeof advanceCost;
   planPurchase: typeof planPurchase;
   planUndo: typeof planUndo;
+  planCareerSet: typeof planCareerSet;
+  planCareerAdvance: typeof planCareerAdvance;
   availableXp: typeof availableXp;
   talentGroups: typeof talentGroups;
 }

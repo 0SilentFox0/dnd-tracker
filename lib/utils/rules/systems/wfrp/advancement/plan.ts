@@ -1,4 +1,5 @@
 import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, LEDGER_MAX, type LedgerEntry, SKILL_ADVANCE_KEY_RE } from "../characteristics/keys";
+import { type CareerCtx, inCareer, tickKey } from "./career";
 import { advanceCost, talentCost } from "./cost";
 import type { AdvancementRules } from "./rules";
 
@@ -14,6 +15,7 @@ export type PurchaseInput = {
   request: PurchaseRequest;
   rules: AdvancementRules;
   talent?: PurchaseTalent;
+  career?: CareerCtx;
   now: string;
   id: string;
 };
@@ -67,11 +69,19 @@ export function planPurchase(input: PurchaseInput): PurchaseResult {
 
   if ("error" in priced) return { ok: false, error: priced.error };
 
-  if (input.available < priced.cost) return { ok: false, error: "INSUFFICIENT_XP" };
+  const inList = input.career ? inCareer(input.career, request.kind, request.key) : false;
 
-  const entry: LedgerEntry = { id: input.id, at: input.now, kind: request.kind, key: request.key, from: priced.from, to: priced.from + 1, cost: priced.cost };
+  const cost = input.career && !inList ? Math.round(priced.cost * rules.career.outOfCareerMultiplier) : priced.cost;
 
-  const advanced = priced.apply(characteristics);
+  const tick = input.career && inList && !input.career.state.ticks.includes(tickKey(request.kind, request.key)) ? tickKey(request.kind, request.key) : undefined;
+
+  if (input.available < cost) return { ok: false, error: "INSUFFICIENT_XP" };
+
+  const entry: LedgerEntry = { id: input.id, at: input.now, kind: request.kind, key: request.key, from: priced.from, to: priced.from + 1, cost, ...(tick ? { tick } : {}) };
+
+  const stepped = priced.apply(characteristics);
+
+  const advanced = tick && input.career ? { ...stepped, career: { ...input.career.state, ticks: [...input.career.state.ticks, tick] } } : stepped;
 
   const full = [...advanced.ledger, entry];
 

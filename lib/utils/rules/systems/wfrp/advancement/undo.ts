@@ -4,7 +4,19 @@ export type UndoResult = { ok: true; next: Characteristics; entry: LedgerEntry }
 
 const without = <T>(record: Record<string, T>, key: string) => Object.fromEntries(Object.entries(record).filter(([k]) => k !== key));
 
+function dropTick(c: Characteristics, tick: string | undefined): Characteristics {
+  if (!tick || !c.career?.ticks.includes(tick)) return c;
+
+  return { ...c, career: { ...c.career, ticks: c.career.ticks.filter((t) => t !== tick) } };
+}
+
 export function planUndo(characteristics: Characteristics): UndoResult {
+  const result = undoLast(characteristics);
+
+  return result.ok ? { ...result, next: dropTick(result.next, result.entry.tick) } : result;
+}
+
+function undoLast(characteristics: Characteristics): UndoResult {
   const entry = characteristics.ledger[characteristics.ledger.length - 1];
 
   if (!entry) return { ok: false, error: "LEDGER_EMPTY" };
