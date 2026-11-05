@@ -11,6 +11,7 @@ export function resetTurnState(p: BattleParticipant, opts: { keepLegendary?: boo
     readied: undefined,
     attacksLeft: undefined,
     attackedWithLight: undefined,
+    ...(p.battleData.conditionTests && { conditionTests: undefined }),
     ...(p.battleData.legendary && !opts.keepLegendary && { legendary: { ...p.battleData.legendary, actionsLeft: p.battleData.legendary.actions } }),
   };
 }
