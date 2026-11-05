@@ -139,7 +139,7 @@ export interface RuleSystemConditions {
   list(p: BattleParticipant): SystemConditionLevel[];
   apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
   reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };
-  turnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset }): SystemConditionResult & { downed: boolean };
+  turnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult & { downed: boolean };
   attemptEnd(
     ps: BattleParticipant[],
     id: string,
@@ -195,3 +195,5 @@ export interface RuleSystemDefinition {
   d20Stats: boolean;
   unusedMechanics: readonly MechanicKey[];
 }
+
+export type ApplyDamageConsequences = typeof import("@/lib/utils/battle/damage/consequences").applyDamageConsequences;

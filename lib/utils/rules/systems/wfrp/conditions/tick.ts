@@ -5,15 +5,14 @@ import { conditionLevel } from "./levels";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { SystemConditionResult } from "@/lib/utils/rules/systems/types";
+import type { ApplyDamageConsequences, SystemConditionResult } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
-export function wfrpConditionsTurnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset }): SystemConditionResult & { downed: boolean } {
+export function wfrpConditionsTurnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult & { downed: boolean } {
   const start = findParticipant(ps, id);
 
   if (!start || !isActive(start)) return { participants: ps, messages: [], downed: false };
@@ -29,7 +28,7 @@ export function wfrpConditionsTurnStart(ps: BattleParticipant[], id: string, ctx
 
     const after = { ...before, combatStats: { ...before.combatStats, currentHp: before.combatStats.currentHp - amount } };
 
-    const r = applyDamageConsequences({ before, after, amount, rules: ctx.rules, rng: ctx.rng, participants: replaceParticipant(participants, after), round: ctx.round });
+    const r = ctx.applyDamage({ before, after, amount, rules: ctx.rules, rng: ctx.rng, participants: replaceParticipant(participants, after), round: ctx.round });
 
     participants = r.participants;
 

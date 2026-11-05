@@ -9,6 +9,7 @@ import { wfrpConditionsTurnStart } from "../tick";
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
@@ -25,7 +26,7 @@ const make = (hp: number, conds: Array<[WfrpConditionKey, number]> = [], status?
   return status ? { ...p, combatStats: { ...p.combatStats, status } } : p;
 };
 
-const tick = (p: BattleParticipant, rng: () => number) => wfrpConditionsTurnStart([p], "a", { round: 2, rng, rules: WFRP_RULES });
+const tick = (p: BattleParticipant, rng: () => number) => wfrpConditionsTurnStart([p], "a", { round: 2, rng, rules: WFRP_RULES, applyDamage: applyDamageConsequences });
 
 const self = (r: ReturnType<typeof tick>) => r.participants[0];
 
@@ -76,7 +77,7 @@ describe("wfrpConditionsTurnStart", () => {
   it("no conditions leaves the list untouched", () => {
     const ps = [make(10)];
 
-    const r = wfrpConditionsTurnStart(ps, "a", { round: 2, rng: seq(0.5), rules: WFRP_RULES });
+    const r = wfrpConditionsTurnStart(ps, "a", { round: 2, rng: seq(0.5), rules: WFRP_RULES, applyDamage: applyDamageConsequences });
 
     expect(r.participants).toBe(ps);
     expect(r.messages).toEqual([]);

@@ -145,7 +145,7 @@ function applyStartOfTurnDamage(
     killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
     damageMessages.push(...dotResult.damageMessages, ...(dotRules?.messages ?? []));
 
-    const ticks = ruleSystemOf(rules).conditions?.turnStart(replaceParticipant(others, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules });
+    const ticks = ruleSystemOf(rules).conditions?.turnStart(replaceParticipant(others, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules, applyDamage: applyDamageConsequences });
 
     if (ticks) {
       others = ticks.participants;
