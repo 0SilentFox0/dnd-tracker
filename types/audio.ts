@@ -34,6 +34,7 @@ export type BattleAudioCommand =
   | { action: "play"; trackId: string }
   | { action: "pause" }
   | { action: "resume" }
+  | { action: "seek"; offsetSec: number }
   | { action: "next" }
   | { action: "prev" }
   | { action: "stop" };

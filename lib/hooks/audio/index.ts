@@ -2,6 +2,7 @@ export { writeAudioSnapshot } from "./audio-snapshot";
 export { type AudioHost } from "./host";
 export { type AudioControl, useAudioControl } from "./useAudioControl";
 export { useAudioElementSync } from "./useAudioElementSync";
+export { useAudioPosition } from "./useAudioPosition";
 export { type AudioPrefs, useAudioPrefs } from "./useAudioPrefs";
 export { useAudioState } from "./useAudioState";
 export { useDriftSync } from "./useDriftSync";

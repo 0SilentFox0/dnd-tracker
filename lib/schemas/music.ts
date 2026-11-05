@@ -36,6 +36,7 @@ export const battleAudioCommandSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("play"), trackId: z.string().min(1).max(64) }),
   z.object({ action: z.literal("pause") }),
   z.object({ action: z.literal("resume") }),
+  z.object({ action: z.literal("seek"), offsetSec: z.number().min(0).max(86_400) }),
   z.object({ action: z.literal("next") }),
   z.object({ action: z.literal("prev") }),
   z.object({ action: z.literal("stop") }),

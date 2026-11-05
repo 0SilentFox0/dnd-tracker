@@ -32,5 +32,7 @@ describe("music schemas", () => {
     }
 
     expect(battleAudioCommandSchema.safeParse({ action: "seek" }).success).toBe(false);
+    expect(battleAudioCommandSchema.safeParse({ action: "seek", offsetSec: 42.5 }).success).toBe(true);
+    expect(battleAudioCommandSchema.safeParse({ action: "seek", offsetSec: -1 }).success).toBe(false);
   });
 });

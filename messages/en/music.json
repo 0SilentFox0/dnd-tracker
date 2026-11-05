@@ -85,7 +85,8 @@
     "play": "Play",
     "next": "Next track",
     "stop": "Stop",
-    "emptyLibrary": "The library is empty — <link>add tracks</link>."
+    "emptyLibrary": "The library is empty — <link>add tracks</link>.",
+    "seek": "Track position"
   },
   "playlist": {
     "title": "Playlist",

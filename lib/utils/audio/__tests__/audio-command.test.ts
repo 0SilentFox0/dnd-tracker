@@ -39,6 +39,12 @@ describe("applyAudioCommand", () => {
     expect(apply(paused, { action: "resume" }, { ...ctx, now: 70_000 })).toMatchObject({ playing: true, offsetSec: 40, startedAt: 70_000, seq: 6 });
   });
 
+  it("seek: ставить позицію, зберігає playing, обрізає по тривалості; без треку — помилка", () => {
+    expect(apply(playingA, { action: "seek", offsetSec: 30 })).toMatchObject({ playing: true, offsetSec: 30, startedAt: 50_000, seq: 5 });
+    expect(apply({ ...playingA, playing: false }, { action: "seek", offsetSec: 500 })).toMatchObject({ playing: false, offsetSec: 100 });
+    expect(applyAudioCommand(null, { action: "seek", offsetSec: 5 }, ctx)).toEqual({ ok: false, message: API_ERRORS.BATTLE_AUDIO_NO_TRACK });
+  });
+
   it("pause/resume без треку — помилка; повторна pause — лише seq", () => {
     expect(applyAudioCommand(null, { action: "pause" }, ctx)).toEqual({ ok: false, message: API_ERRORS.BATTLE_AUDIO_NO_TRACK });
     expect(applyAudioCommand(null, { action: "resume" }, ctx)).toEqual({ ok: false, message: API_ERRORS.BATTLE_AUDIO_NO_TRACK });

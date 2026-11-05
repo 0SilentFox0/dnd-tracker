@@ -56,6 +56,15 @@ const handlers: Handlers = {
 
     return done(prev.playing ? { ...prev, seq: ctx.seq } : { ...prev, playing: true, startedAt: ctx.now, seq: ctx.seq });
   },
+  seek: (prev, cmd, ctx) => {
+    if (!prev?.trackId) return fail(API_ERRORS.BATTLE_AUDIO_NO_TRACK);
+
+    const duration = prev.track?.durationSec;
+
+    const offsetSec = duration && duration > 0 ? Math.min(cmd.offsetSec, duration) : cmd.offsetSec;
+
+    return done({ ...prev, offsetSec, startedAt: ctx.now, seq: ctx.seq });
+  },
   next: (prev, _cmd, ctx) => step(prev, ctx, 1),
   prev: (prev, _cmd, ctx) => step(prev, ctx, -1),
   stop: (_prev, _cmd, ctx) => done({ trackId: null, track: null, playing: false, offsetSec: 0, startedAt: ctx.now, seq: ctx.seq }),

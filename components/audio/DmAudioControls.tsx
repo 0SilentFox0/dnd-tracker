@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
 
 import { DmPlaylist } from "./DmPlaylist";
+import { SeekBar } from "./SeekBar";
 
 import { type PlayerAudioDm, usePlayerAudio } from "@/lib/hooks/audio";
 
@@ -52,6 +53,7 @@ export function DmAudioControls({ dm }: { dm: PlayerAudioDm }) {
           <Square className="size-4" />
         </IconButton>
       </div>
+      <SeekBar disabled={pending} onSeek={(offsetSec) => send({ action: "seek", offsetSec })} />
       {empty && !library.isLoading ? (
         <p className="mt-2 text-hud-muted">
           {t.rich("dm.emptyLibrary", { link: (chunks) => <Link href={dm.musicHref} className="underline">{chunks}</Link> })}
