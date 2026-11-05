@@ -15,6 +15,8 @@ export {
   useAuraZone,
   useBattle,
   useBattleConditions,
+  useConditionTest,
+  useSystemCondition,
   useBattleCoreAction,
   useBonusAction,
   useCastSpell,
