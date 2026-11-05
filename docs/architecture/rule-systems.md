@@ -93,13 +93,13 @@
 
 ## Межі 5d-2
 
-UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, вкладка «Магія» на аркуші, каст-діалог і плитка Channelling у бою, поля магії в редакторі заклинань). Свідомі межі:
+UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, вкладка «Магія» на аркуші, каст-діалог і плитка «Скерування» у бою, поля магії в редакторі заклинань). Свідомі межі:
 
 - `wfrpMagic` підвантажується лише для wfrp-кампаній: `app/campaigns/[id]/layout.tsx` обгортає дерево в `ExtendLocaleScope` з `WFRP_CAMPAIGN_EXTRA` (`lib/i18n/scopes.ts`), для d20-кампаній scope не змінюється.
 - Розмір `scope-size` (gzip, ліміт 105 KB): campaign + battle + battleWfrp до 5d-2 — uk 102.8 / en 82.8 KB; після (+ `wfrpMagic`) — uk 103.8 / en 83.6 KB (+1.0 / +0.8 KB). Ліміт не перевищено, відповідь П5 (окремий ліміт) не знадобилась; запас uk ≈ 1.2 KB, тож наступний wfrp-namespace потребує винесення або окремого ліміту.
 - Онбординг: запис `2026-11-05-wfrp-magic` у what's new і розділ «Магія» в `dm-rule-systems`.
 - Live-run 5d-2 (Task 10.3) виконано; хвости виправлено в 5d-3 (мітки умов у редакторі, слоти в книзі заклинань, підписи Fortune-перекиду).
-- **Обов'язкова перевірка перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (виконано 2026-11-05: exit 1 лише через давній збій лабіринту, не регресія; див. `.superpowers/sdd/2026-11-05-wfrp-5d/battle-sweep-report.md`).
+- **Обов'язкова перевірка перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (виконано 2026-11-05, повторно після виправлення assert лабіринту (221877d27): exit 0, 0 помилок, 9 попереджень; див. `.superpowers/sdd/2026-11-05-wfrp-5d/battle-sweep-report.md`).
 
 ## Межі 5d-3
 
@@ -122,7 +122,7 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - M6: `rollKeys` у `lib/server/battles/dice.ts` не знає `castRoll`/`fortuneRoll` (у режимі серверних кубиків асистента ігноруються мовчки).
 - M8: плитка Channel показується всім героям wfrp; `battleData.sin` видно в знімку (за специфікацією).
 - Решта відомих прогалин: таланти, редагований контент `tables`, дальність/площа/тривалість overcast, long cast, штраф броні (AP = 0 до 5f).
-- **Обов'язково перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20) — виконано 2026-11-05: 111 перевірок, 1 збій лабіринту (застарілий assert `battle-sweep.ts:1740`, ключ `errors.mazeDark`; на main той самий), регресії немає.
+- **Обов'язково перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20) — виконано 2026-11-05: перший прогін мав 1 збій лабіринту (застарілий assert, виправлено 221877d27), повторний прогін exit 0, 0 помилок, регресії немає.
 
 ## Межі 5c-1
 
