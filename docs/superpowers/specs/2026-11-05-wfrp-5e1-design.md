@@ -13,7 +13,7 @@
 | Р1 | Каталог талантів = таблиця `feats` + nullable `xpCost`, `maxRank` (expand-only міграція). Нового content kind немає. |
 | Р2 | Набуті таланти — `characteristics.talents: { featId: rank }`, не `Character.feats` (той працює лише в `classMode` і не має рангів). Choices-пайплайн 5e не чіпаємо. |
 | Р3 | Купувати може власник листа або ДМ; відкотити останню покупку — лише ДМ. |
-| Р4 | Таблиці цін і ліміти — в `rules.progression` пресету `WFRP_RULES` (ДМ редагує). Числа — заглушки `verify against 5e book`. |
+| Р4 | Таблиці цін і ліміти — в `rules.advancement` пресету `WFRP_RULES` (ДМ редагує). Числа — заглушки `verify against 5e book`. |
 | Р5 | Передумови талантів: автоматично лише `maxRank` і баланс; `prerequisite.manualText` — підказка. |
 | Р6 | `ledger` бачать власник і ДМ; для інших гравців сервер його прибирає. |
 | Р7 | Одна таблиця цін; знижки за кар'єрою — 5e-2. |
@@ -28,7 +28,7 @@
 - Шов системи: `ruleSystemOf(rules)` (`lib/utils/rules/systems`), `WFRP_RULES`/`RulesetSchema`; точка підстановки в бою — `lib/utils/battle/participant/from-character.ts`.
 - Клієнт: `lib/api/characters`, `lib/hooks/characters/*` (barrel, ключі в `keys.ts`), компоненти wfrp — `components/systems/wfrp/*` (`StatsTab`, `SkillsList`, `CharacteristicsGrid`, `MagicTab` як зразок вкладки), редактор feats — `lib/hooks/feats/useFeatForm`.
 - i18n: `WFRP_CAMPAIGN_EXTRA` у `lib/i18n/scopes.ts` (за зразком `wfrpMagic`), `scope-size.test.ts`; онбординг: `lib/onboarding/whats-new.ts`.
-- Нове, бо немає аналога: ціни/покупка/відкат (`wfrp/progression/`), поле леджера, адаптер талантів у бій, вкладка «Розвиток».
+- Нове, бо немає аналога: ціни/покупка/відкат (`wfrp/advancement/`), поле леджера, адаптер талантів у бій, вкладка «Розвиток».
 
 ## Дизайн
 
@@ -39,14 +39,14 @@
 - `Character.experience` = зароблено всього. Доступний XP **похідний**: `experience − Σ ledger.cost`, не зберігається.
 - Оновити `CharacteristicsSchema`, `readCharacteristics` (дзеркало), `DEFAULT_CHARACTERISTICS`; бекфіл не потрібен (відсутні поля → `{}`/`[]`).
 
-### 2. Рушій (`lib/utils/rules/systems/wfrp/progression/`)
+### 2. Рушій (`lib/utils/rules/systems/wfrp/advancement/`)
 
 Чисті модулі, без Prisma:
-- `rules.ts`: `ProgressionRulesSchema` у `RulesetSchema` (`rules.progression`): `characteristic: { brackets: [{upTo, cost}] , max }`, `skill: { brackets, max }`, `talentCostMultiplier`. Дефолти — у `WFRP_RULES`.
+- `rules.ts`: `AdvancementRulesSchema` у `RulesetSchema` (`rules.advancement`): `characteristic: { brackets: [{upTo, cost}] , max }`, `skill: { brackets, max }`, `talentCostMultiplier`. Дефолти — у `WFRP_RULES`.
 - `cost.ts`: `advanceCost(kind, currentAdvances, progression)` → число або `null` (ліміт).
 - `plan.ts`: `planPurchase(characteristics, available, request, catalog)` → `{ ok, next, entry } | { error }`; помилки — коди (`INSUFFICIENT_XP`, `AT_LIMIT`, `MAX_RANK`, `UNKNOWN_TALENT`/`UNKNOWN_SKILL`).
 - `undo.ts`: `planUndo(characteristics)` відновлює `from` для останнього запису. Якщо стан розійшовся із записом (DM змінив advances вручну), відкат відмовляє (`LEDGER_STALE`).
-- Контракт у `RuleSystem`: опційний хук `progression` (`undefined` у d20-системах).
+- Контракт у `RuleSystem`: опційний хук `advancement` (не плутати з наявним `progression: { levels, maxHp }`; `undefined` у d20-системах).
 
 ### 3. Сервер
 
@@ -58,19 +58,19 @@
 
 ### 4. Таланти в бою
 
-- `wfrp/progression/talent-groups.ts`: `talentGroups(characteristics.talents, featsById)` → `{ source, abilities }[]`; ранг — через наявний `scale` групи, якщо DSL його підтримує (інакше група повторюється `rank` разів; рішення в плані після читання `collectModifiers`).
+- `wfrp/advancement/talent-groups.ts`: `talentGroups(characteristics.talents, featsById)` → `{ source, abilities }[]`; ранг — через наявний `scale` групи, якщо DSL його підтримує (інакше група повторюється `rank` разів; рішення в плані після читання `collectModifiers`).
 - `from-character.ts`: для `rules.system.key === "wfrp"` додає ці групи до решти; гілка homm/dnd5e без змін, `feats: classMode ? … : []` не чіпаємо.
 
 ### 5. UI
 
-- Вкладка «Розвиток» на wfrp-листі (`components/systems/wfrp/ProgressionTab.tsx`, реєстрація як у `MagicTab`): баланс XP; таблиця 10 характеристик (поточне / advances / ціна наступного / «Купити»); навички (за каталогом, спеціалізації); вибір таланта з каталогу (ціна, ранг/ліміт, `manualText`-підказка); журнал витрат із «Відкотити» для ДМ.
+- Вкладка «Розвиток» на wfrp-листі (`components/systems/wfrp/AdvancementTab.tsx`, реєстрація як у `MagicTab`): баланс XP; таблиця 10 характеристик (поточне / advances / ціна наступного / «Купити»); навички (за каталогом, спеціалізації); вибір таланта з каталогу (ціна, ранг/ліміт, `manualText`-підказка); журнал витрат із «Відкотити» для ДМ.
 - Хуки: `useAdvance` (`lib/hooks/characters/`, у barrel) для покупки/відкату; компоненти без `fetch`/`@/lib/api/*` (ESLint). Оптимістичного оновлення нема: сервер — істина, відповідь оновлює кеш листа.
 - Редактор feats у wfrp-кампаніях (`useFeatForm` + форма): поля `xpCost`/`maxRank`, D&D-специфічні (`type`, рівень, choices) приховані; в інших системах `xpCost`/`maxRank` не показуються.
 - Адаптивність: таблиці вміщаються на 375 px; дії — кнопки ≥ 44 px.
 
 ### 6. i18n, онбординг
 
-- Namespace `wfrpProgression` у `WFRP_CAMPAIGN_EXTRA` (лише wfrp-кампанії); `scope-size` uk ≤ 105 KB gzip (зараз 103.8 / 83.6 KB; якщо не влізає — розсунути терміни між `wfrpMagic`/`wfrpProgression`, не піднімати ліміт).
+- Namespace `wfrpAdvancement` у `WFRP_CAMPAIGN_EXTRA` (лише wfrp-кампанії); `scope-size` uk ≤ 105 KB gzip (зараз 103.8 / 83.6 KB; якщо не влізає — розсунути терміни між `wfrpMagic`/`wfrpAdvancement`, не піднімати ліміт).
 - Терміни uk узгоджуються з наявними (Скерування, РУ, Оверкаст, збій магії); нові: «Розвиток», «Досвід», «Талант», «Ранг», «Відкотити». en не ламаємо.
 - `whats-new` запис + одна довідкова стаття (`help`), ключі `whatsNew.<id>` у обох `messages/*/whatsNew.json`.
 
@@ -86,7 +86,7 @@
 
 - Юніти: `cost`, `plan` (баланс, ліміт, ранги, помилки), `undo` (звичайний, застарілий), схеми й дзеркало `readCharacteristics`; `talentGroups`.
 - Сервер: `advance`/`advance-undo` — власник, ДМ, чужий гравець (403), чужа кампанія, не-wfrp (409), гонка двох паралельних покупок, відкат; редакція `ledger` на кожному шляху читання.
-- e2e `wfrp-progression-e2e.test.ts`: купівля таланта → група здібностей у учасника → змінений бонус у бою.
+- e2e `wfrp-advancement-e2e.test.ts`: купівля таланта → група здібностей у учасника → змінений бонус у бою.
 - Регрес: dnd5e/homm — `from-character` без змін; повний `test:run` один раз наприкінці; live-run (Sonnet, claude-in-chrome; `get_page_text`/`javascript_tool`; змішані герої й юніти; тестові дані видалити; мову Chrome повернути на uk).
 
 ## Ризики
