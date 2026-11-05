@@ -33,7 +33,7 @@ describe("SpellCastDialog rolls step", () => {
 
   it("percentile casting: CN line, no slot select, no save rolls", () => {
     render(<SpellCastDialog book={book({ cn: 6, target: 50, channelTarget: 40, channelled: 2, armourSl: 0, fortune: { available: false, left: 0, value: null } })} />);
-    expect(screen.getByText("СН 6 · ціль 50 · Channelling +2 · броня −0")).toBeTruthy();
+    expect(screen.getByText("СН 6 · ціль 50 · Скерування +2 · броня −0")).toBeTruthy();
     expect(screen.queryByRole("combobox")).toBeNull();
     expect(screen.queryByText(/· Гоблін/)).toBeNull();
   });

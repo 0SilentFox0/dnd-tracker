@@ -27,9 +27,9 @@ const model = (over: { fortune?: boolean; state?: object } = {}) => {
 describe("CastTestBody", () => {
   afterEach(cleanup);
 
-  it("shows CN, target, channelling and armour", () => {
+  it("shows CN, target, скерування and armour", () => {
     render(<CastTestBody book={model().book} />);
-    expect(screen.getByText("СН 6 · ціль 50 · Channelling +2 · броня −0")).toBeTruthy();
+    expect(screen.getByText("СН 6 · ціль 50 · Скерування +2 · броня −0")).toBeTruthy();
   });
 
   it("Auto sends the server roll", () => {

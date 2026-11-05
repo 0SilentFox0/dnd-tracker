@@ -74,16 +74,16 @@ describe("MyTurnControls: gating за прапорцями правил", () => 
     expect(await screen.findByTestId("picker-bonus")).toBeInTheDocument();
   });
 
-  it("wfrp показує плитку Channelling, d20 — ні", async () => {
+  it("wfrp показує плитку Скерування, d20 — ні", async () => {
     rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, magic: true };
     render(<MyTurnControls hero={hero} />);
-    expect(screen.getByRole("button", { name: /Channelling/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Скерування/ })).toBeInTheDocument();
     expect(await screen.findByTestId("channel-dialog")).toBeInTheDocument();
     cleanup();
 
     rules.current = { actionEconomy: { bonusAction: true, reaction: true }, spells: true, magic: false };
     render(<MyTurnControls hero={hero} />);
-    expect(screen.queryByRole("button", { name: /Channelling/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Скерування/ })).not.toBeInTheDocument();
     expect(screen.queryByTestId("channel-dialog")).not.toBeInTheDocument();
   });
 });

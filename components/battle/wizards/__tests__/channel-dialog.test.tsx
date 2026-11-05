@@ -22,7 +22,7 @@ describe("ChannelDialog", () => {
     const { channel, actions } = model();
 
     render(<ChannelDialog channel={channel} />);
-    expect(screen.getByText("Ціль 40 · накопичено +2 SL")).toBeTruthy();
+    expect(screen.getByText("Ціль 40 · накопичено +2 РУ")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Авто-кидок" }));
     expect(actions.auto).toHaveBeenCalled();
   });

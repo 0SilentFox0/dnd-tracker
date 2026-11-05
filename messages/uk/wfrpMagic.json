@@ -1,10 +1,10 @@
 {
   "log": {
     "miscast": "{name}: збій магії! {effect}",
-    "castSuccess": "{name} читає «{spell}»: {roll} / {target}, SL {sl} (СН {cn}) — успіх",
-    "castFail": "{name} читає «{spell}»: {roll} / {target}, SL {sl} (СН {cn}) — невдача",
+    "castSuccess": "{name} читає «{spell}»: {roll} / {target}, РУ {sl} (СН {cn}) — успіх",
+    "castFail": "{name} читає «{spell}»: {roll} / {target}, РУ {sl} (СН {cn}) — невдача",
     "castCritical": "{name} читає «{spell}»: {roll} / {target} — критичний успіх (СН {cn})",
-    "channelSuccess": "{name} збирає силу: {roll} / {target}, SL {sl}, накопичено {banked}",
+    "channelSuccess": "{name} збирає силу: {roll} / {target}, РУ {sl}, накопичено {banked}",
     "channelFail": "{name} не вдається зібрати силу: {roll} / {target}",
     "wrath": "{name} викликає гнів богів! {effect}",
     "ingredientAverts": "{name} палить інгредієнт, і збій магії «{spell}» згасає"
@@ -34,15 +34,15 @@
   "reject": {},
   "ui": {
     "cast": {
-      "line": "СН {cn} · ціль {target} · Channelling +{channelled} · броня −{armour}",
+      "line": "СН {cn} · ціль {target} · Скерування +{channelled} · броня −{armour}",
       "rolled": "Кидок прийнято: {roll}",
       "rolledReroll": "Кидки прийнято: {roll} і {second}",
       "rolledAuto": "Кидок зробить сервер"
     },
     "channel": {
-      "tile": "Channelling",
-      "title": "Channelling",
-      "target": "Ціль {target} · накопичено +{banked} SL"
+      "tile": "Скерування",
+      "title": "Скерування",
+      "target": "Ціль {target} · накопичено +{banked} РУ"
     },
     "result": {
       "title": {
@@ -51,10 +51,10 @@
         "failure": "Каст не вдався",
         "fumble": "Провал касту"
       },
-      "roll": "{roll} / {target} · SL {sl} проти СН {cn}",
-      "channelled": "Накопичено +{channelled} SL",
+      "roll": "{roll} / {target} · РУ {sl} проти СН {cn}",
+      "channelled": "Накопичено +{channelled} РУ",
       "armour": "броня −{armour}",
-      "overcast": "Overcast ×{steps}",
+      "overcast": "Оверкаст ×{steps}",
       "miscast": {
         "minor": "Малий збій магії",
         "major": "Великий збій магії",
@@ -62,8 +62,8 @@
       }
     },
     "badge": {
-      "label": "+{sl} SL",
-      "hint": "Накопичений channelling: +{sl} SL до наступного касту"
+      "label": "+{sl} РУ",
+      "hint": "Накопичене скерування: +{sl} РУ до наступного касту"
     },
     "sheet": {
       "empty": "Заклинань ще не знає.",

@@ -60,13 +60,13 @@
       "ablaze": "{name}: горить, −{damage} Wounds",
       "faint": "{name} знепритомнів від крововтрати"
     },
-    "endTestSuccess": "{name}: {condition} — тест {roll} / {target}, SL {sl}: успіх",
-    "endTestFail": "{name}: {condition} — тест {roll} / {target}, SL {sl}: невдача",
-    "endTestSuccessHidden": "{name}: {condition} — тест {roll}, SL {sl}: успіх",
-    "endTestFailHidden": "{name}: {condition} — тест {roll}, SL {sl}: невдача",
+    "endTestSuccess": "{name}: {condition} — тест {roll} / {target}, РУ {sl}: успіх",
+    "endTestFail": "{name}: {condition} — тест {roll} / {target}, РУ {sl}: невдача",
+    "endTestSuccessHidden": "{name}: {condition} — тест {roll}, РУ {sl}: успіх",
+    "endTestFailHidden": "{name}: {condition} — тест {roll}, РУ {sl}: невдача",
     "stand": "{name} підводиться",
     "fortuneReroll": "{name} витрачає Удачу: перекидання (перший кидок {first})",
-    "fortuneSl": "{name} витрачає Удачу: +1 SL",
+    "fortuneSl": "{name} витрачає Удачу: +1 РУ",
     "critHit": "🩸 Критична рана для {target} (+{bonus} шкоди): {text}",
     "critWound": "🩸 Критична рана для {target}: {text}",
     "unconscious": "💤 {name} падає на 0 Ран і втрачає свідомість"
@@ -93,12 +93,12 @@
       "label": "Удача",
       "off": "Вимк.",
       "reroll": "Перекинути",
-      "sl": "+1 SL",
+      "sl": "+1 РУ",
       "left": "Залишилось Удачі: {count}",
       "firstRoll": "Перший кидок",
       "secondRoll": "Другий кидок (перекидання)",
       "used": "Витрачено Удачу: перекидання (перший кидок {first})",
-      "usedSl": "Витрачено Удачу: +1 SL"
+      "usedSl": "Витрачено Удачу: +1 РУ"
     }
   },
   "crit": {
@@ -135,7 +135,7 @@
     "steps": {
       "weapon": "Зброя",
       "sb": "Бонус Сили",
-      "netSl": "Чистий SL",
+      "netSl": "Чистий РУ",
       "tb": "Бонус Витривалості",
       "ap": "Броня",
       "minimum": "Мінімальна шкода",
