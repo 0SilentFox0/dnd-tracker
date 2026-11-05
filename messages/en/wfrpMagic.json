@@ -1,6 +1,23 @@
 {
-  "log": {},
-  "miscast": {},
+  "log": {
+    "miscast": "{name} suffers a miscast! {effect}"
+  },
+  "miscast": {
+    "minor": {
+      "1": "A cold weariness settles in your limbs.",
+      "2": "Silence slams shut over your ears.",
+      "3": "The Winds ring in your skull and the world reels.",
+      "4": "A whisper of raw magic scorches your skin.",
+      "5": "A flash blinds you and pain lances through the body."
+    },
+    "major": {
+      "1": "Flames burst from your hands and devour you.",
+      "2": "Reality strikes you like a hammer.",
+      "3": "Cursed light sears your eyes and flays your flesh.",
+      "4": "Dread steals your will and your hands shake.",
+      "5": "The magic tears you apart from within."
+    }
+  },
   "reject": {},
   "ui": {}
 }

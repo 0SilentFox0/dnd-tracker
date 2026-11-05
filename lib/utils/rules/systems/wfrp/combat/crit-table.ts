@@ -1,6 +1,6 @@
+import { rollTable } from "../tables/roll-table";
 import type { HitLocation } from "./constants";
 
-import { rollDie } from "@/lib/utils/common/dice";
 import type { Rng } from "@/lib/utils/common/rng";
 
 export interface CritResult {
@@ -48,13 +48,9 @@ export const CRIT_TABLE: Record<HitLocation, CritRow[]> = {
 };
 
 export function rollCrit(location: HitLocation, rng: Rng, presetRoll?: number): CritResult {
-  const roll = presetRoll ?? rollDie(100, rng);
+  const { index, row } = rollTable(CRIT_TABLE[location], rng, presetRoll);
 
-  const rows = CRIT_TABLE[location];
-
-  const index = rows.findIndex((row) => roll <= row.max);
-
-  const { bonusDamage, markerKey } = rows[index];
+  const { bonusDamage, markerKey } = row;
 
   return { id: `${location}.${index + 1}`, textKey: `battleWfrp.crit.${location}.${index + 1}`, bonusDamage, ...(markerKey ? { markerKey } : {}) };
 }
