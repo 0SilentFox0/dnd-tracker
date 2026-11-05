@@ -41,7 +41,7 @@ describe("ActionResultCard", () => {
     [{ kind: "spell", spellName: "Благословення", changes: [], targetCount: 3 }, ["Благословення", "Застосовано · цілей: 3"]],
     [
       { kind: "spell", spellName: "Іскра", changes: [{ name: "Гоблін", change: 4 }], targetCount: 1, cast: { roll: 20, target: 50, sl: 3, cn: 3, channelled: 2, armourSl: 0, doubles: false, outcome: "success", overcastSteps: 1, miscast: null } },
-      ["Каст вдався", "20 / 50 · SL 3 проти СН 3", "Channelling +2", "Overcast ×1", "−4"],
+      ["Каст вдався", "20 / 50 · SL 3 проти СН 3", "Накопичено +2 SL", "Overcast ×1", "−4"],
     ],
     [
       { kind: "spell", spellName: "Іскра", changes: [], targetCount: 1, cast: { roll: 44, target: 40, sl: -1, cn: 3, channelled: 0, armourSl: 0, doubles: true, outcome: "failure", overcastSteps: 0, miscast: "minor" } },
