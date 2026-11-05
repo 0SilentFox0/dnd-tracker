@@ -3,6 +3,7 @@ import { readCharacteristics } from "../characteristics/keys";
 import { againstMod, selfTestMod } from "../conditions/test-mod";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import { DIFFICULTY_SL } from "../percentile/difficulty";
+import { applyFortune } from "../percentile/fortune";
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from "./constants";
 import { hitLocation } from "./location";
 import { resolveOpposed } from "./opposed";
@@ -70,8 +71,6 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   const slBonus = ctx.fortune?.kind === "sl" ? 1 : 0;
 
-  const reroll = ctx.fortune?.kind === "reroll" ? ctx.fortune : undefined;
-
   const marked = (r: ResolvedAttack, fortune?: ResolvedAttack["fortune"]): ResolvedAttack => {
     if (!fortune) return r;
 
@@ -86,14 +85,12 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
       const isHit = test.outcome === "success" || test.outcome === "critical";
 
-      return { test, result: toResult(detailsOf(test, test.sl), isHit, { spent: false, gainedBy: null }) };
+      return { roll: test.roll, result: toResult(detailsOf(test, test.sl), isHit, { spent: false, gainedBy: null }) };
     };
 
-    const first = rangedOnce(manualRoll);
+    const { result, fortune } = applyFortune<ReturnType<typeof rangedOnce>>((preset) => rangedOnce(preset), ctx.fortune, (r) => r.result.isHit, manualRoll);
 
-    if (reroll && !first.result.isHit) return marked(rangedOnce(reroll.manualReroll).result, { kind: "reroll", firstRoll: first.test.roll });
-
-    return marked(first.result, slBonus ? { kind: "sl" } : undefined);
+    return marked(result.result, fortune);
   }
 
   const d = charsOf(target);
@@ -121,16 +118,15 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
       ...(spent && { momentumUsed: true }),
     });
 
-    return { raw: result, resolved: toResult(details, result.isHit, { spent, gainedBy: result.attackerWon ? "attacker" : "defender" }) };
+    return { roll: result.attacker.roll, defenderRaw: result.defender.rawRoll, resolved: toResult(details, result.isHit, { spent, gainedBy: result.attackerWon ? "attacker" : "defender" }) };
   };
 
-  const first = meleeOnce({ attacker: manualRoll });
+  const { result, fortune } = applyFortune<ReturnType<typeof meleeOnce>>(
+    (preset, first) => meleeOnce(first ? { attacker: preset, defender: first.defenderRaw } : { attacker: preset }),
+    ctx.fortune,
+    (r) => r.resolved.isHit,
+    manualRoll,
+  );
 
-  if (reroll && !first.resolved.isHit) {
-    const second = meleeOnce({ attacker: reroll.manualReroll, defender: first.raw.defender.rawRoll });
-
-    return marked(second.resolved, { kind: "reroll", firstRoll: first.raw.attacker.roll });
-  }
-
-  return marked(first.resolved, slBonus ? { kind: "sl" } : undefined);
+  return marked(result.resolved, fortune);
 }

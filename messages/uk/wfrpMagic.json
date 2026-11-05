@@ -1,6 +1,11 @@
 {
   "log": {
-    "miscast": "{name}: збій магії! {effect}"
+    "miscast": "{name}: збій магії! {effect}",
+    "castSuccess": "{name} читає «{spell}»: {roll} / {target}, SL {sl} (СН {cn}) — успіх",
+    "castFail": "{name} читає «{spell}»: {roll} / {target}, SL {sl} (СН {cn}) — невдача",
+    "castCritical": "{name} читає «{spell}»: {roll} / {target} — критичний успіх (СН {cn})",
+    "channelSuccess": "{name} збирає силу: {roll} / {target}, SL {sl}, накопичено {banked}",
+    "channelFail": "{name} не вдається зібрати силу: {roll} / {target}"
   },
   "miscast": {
     "minor": {
