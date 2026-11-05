@@ -25,7 +25,8 @@ describe("useBattleRules", () => {
     expect(render("wfrp", { ally: true })).toMatchObject({
       dice: 100,
       d20Stats: false,
-      spells: false,
+      spells: true,
+      magic: true,
       actionEconomy: { bonusAction: false, reaction: false },
       distance: { unit: "yd", perCell: 2 },
       woundsLabel: "wounds",

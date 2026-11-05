@@ -12,10 +12,14 @@ import type { LogLine } from "@/types/text";
 
 const WORST_ROLL = 100;
 
-export function wfrpChannel(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng; presetRoll?: number }): { participant: BattleParticipant; lines: LogLine[]; miscast: "minor" | "major" | null } {
+export function channelTargetOf(p: BattleParticipant): number {
   const chars = readCharacteristics({ characteristics: p.abilities.characteristics });
 
-  const target = (skillTarget(chars, "channelling")?.target ?? value(chars, "wp")) + selfTestMod(p, "test");
+  return (skillTarget(chars, "channelling")?.target ?? value(chars, "wp")) + selfTestMod(p, "test");
+}
+
+export function wfrpChannel(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng; presetRoll?: number }): { participant: BattleParticipant; lines: LogLine[]; miscast: "minor" | "major" | null } {
+  const target = channelTargetOf(p);
 
   const test = resolvePercentileTest({ target, rng: ctx.rng, presetRoll: ctx.presetRoll });
 

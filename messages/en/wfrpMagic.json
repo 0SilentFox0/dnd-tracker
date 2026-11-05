@@ -24,5 +24,37 @@
     }
   },
   "reject": {},
-  "ui": {}
+  "ui": {
+    "cast": {
+      "line": "CN {cn} · target {target} · channelling +{channelled} · armour −{armour}",
+      "rolled": "Roll set: {roll}",
+      "rolledReroll": "Rolls set: {roll} and {second}",
+      "rolledAuto": "The server will roll"
+    },
+    "channel": {
+      "tile": "Channelling",
+      "title": "Channelling",
+      "target": "Target {target} · banked +{banked} SL"
+    },
+    "result": {
+      "title": {
+        "critical": "Critical cast",
+        "success": "Spell cast",
+        "failure": "Spell failed",
+        "fumble": "Fumbled cast"
+      },
+      "roll": "{roll} / {target} · SL {sl} vs CN {cn}",
+      "channelled": "Channelling +{channelled}",
+      "armour": "armour −{armour}",
+      "overcast": "Overcast ×{steps}",
+      "miscast": {
+        "minor": "Minor miscast",
+        "major": "Major miscast"
+      }
+    },
+    "badge": {
+      "label": "+{sl} SL",
+      "hint": "Banked channelling: +{sl} SL on the next cast"
+    }
+  }
 }

@@ -18,6 +18,7 @@ export {
   useBattleCoreAction,
   useBonusAction,
   useCastSpell,
+  useChannel,
   useCompleteBattle,
   useConditionTest,
   useCritChoice,

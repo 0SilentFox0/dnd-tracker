@@ -3,6 +3,7 @@ import { Loader2, Sparkles } from "lucide-react";
 
 import { btn, primaryBtn } from "../attack/shared";
 import { TargetButton } from "../TargetButton";
+import { CastTestBody } from "./CastTestBody";
 import { IngredientsLine } from "./IngredientsLine";
 import { SaveRolls } from "./SaveRolls";
 import { SlotSelect } from "./SlotSelect";
@@ -75,9 +76,13 @@ function RollsStep({ book }: { book: Book }) {
 
   return (
     <>
-      <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
-      <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title={tw("attackRoll")} />
-      {view.attackTargets.length > 0 && <p className="mt-1 text-xs italic text-[var(--hud-muted)]">{tw("serverD20")}</p>}
+      {view.cast ? <CastTestBody book={book} /> : (
+        <>
+          <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
+          <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title={tw("attackRoll")} />
+        </>
+      )}
+      {!view.cast && view.attackTargets.length > 0 && <p className="mt-1 text-xs italic text-[var(--hud-muted)]">{tw("serverD20")}</p>}
       {state.pick?.inputDice && (
         <label className="mt-3 flex items-center justify-between gap-3 text-sm">
           <span className="hud-sc font-bold">{state.pick.inputDice.label}</span>
@@ -154,7 +159,7 @@ export function SpellCastDialog({ book }: { book: Book }) {
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={view.selected?.name ?? tw("fallbackName")} className={cn(HUD_SURFACE, "spellbook-dialog border-white/25")}>
-      {step !== "submitting" && <SlotSelect book={book} />}
+      {step !== "submitting" && !view.cast && <SlotSelect book={book} />}
       {step === "targets" && <TargetsStep book={book} />}
       {step === "rolls" && <RollsStep book={book} />}
       {(step === "summary" || step === "submitting") && <SummaryStep book={book} />}

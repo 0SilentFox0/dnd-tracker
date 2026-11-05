@@ -25,3 +25,8 @@ export function percentileTargetOf(attacker: BattleParticipant, attack: BattleAt
 
   return resolved ? { target: resolved.target, label: textRef(`gameTerms.characteristics.${resolved.characteristic}.label`) } : null;
 }
+
+/** Casting-test numbers shown before the roll; null outside systems with a casting test. */
+export function castPreviewOf(caster: BattleParticipant, rules: Ruleset): { target: number; channelTarget: number; channelled: number; armourSl: number } | null {
+  return ruleSystemOf(rules).magic?.castPreview(caster) ?? null;
+}

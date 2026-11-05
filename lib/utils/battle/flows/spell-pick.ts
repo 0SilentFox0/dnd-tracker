@@ -41,7 +41,7 @@ export function spellTargetSide(s: BookSpell | null): SpellPick["targetSide"] {
 
 const AUTO_TARGETING = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"];
 
-export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null, opts: { castLevel?: number } = {}): SpellPick {
+export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null, opts: { castLevel?: number; castTest?: boolean } = {}): SpellPick {
   const def = spellDefinition(s);
 
   const { targeting } = def;
@@ -92,6 +92,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     ...(choose && { options: choose.options.map(describeEffect) }),
     needsSaves: def.resolution.kind === "save" && !auto,
     ...(def.resolution.kind === "attack" && !auto && { needsAttackRolls: true }),
+    ...(opts.castTest && { castTest: true }),
     ...(input && { inputDice: { ...input, sides: dice.sides } }),
     ...(s.grantKey && s.hostSpellId && { inline: { spellId: s.hostSpellId, grantKey: s.grantKey } }),
     diceSlots: Array.from({ length: input ? 1 : dice.count }, () => dice.sides),

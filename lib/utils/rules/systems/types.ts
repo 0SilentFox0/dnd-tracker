@@ -189,9 +189,13 @@ export interface CastTestResult {
 export interface RuleSystemMagic {
   slots: false;
   castTest(ctx: CastTestCtx): CastTestResult;
+  /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
+  castPreview(caster: BattleParticipant): { target: number; channelTarget: number; channelled: number; armourSl: number };
   channel(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng; presetRoll?: number }): { participant: BattleParticipant; lines: LogLine[]; miscast: "minor" | "major" | null };
   miscast(ps: BattleParticipant[], casterId: string, kind: "minor" | "major", ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult;
   attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
+  /** Token badge for banked channelling */
+  badge(p: BattleParticipant): ActiveEffect | null;
   /** Channelled SL lost when the caster takes damage */
   onDamaged(p: BattleParticipant): BattleParticipant;
 }

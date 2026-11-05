@@ -196,6 +196,8 @@ export type AbilityActionData = z.infer<typeof abilityActionSchema>;
 
 export type PatchParticipantData = z.infer<typeof patchParticipantSchema>;
 
+export type ChannelData = { participantId: string; roll?: number; serverRoll?: true };
+
 export type SpellCastData = Omit<z.input<typeof castSpellSchema>, "targetIds" | "diceRolls"> & { targetIds: string[]; diceRolls: number[] };
 
 // Skill Trees API

@@ -107,6 +107,7 @@ export const useMazeAction = makeBattleHook(battleOps.maze);
 export const useMazeMark = makeBattleHook(battleOps.mazeMark);
 export const useMapWeather = makeBattleHook(battleOps.mapWeather);
 export const useBonusAction = makeBattleHook(battleOps.bonusAction);
+export const useChannel = makeBattleHook(battleOps.channel);
 export const useCastSpell = makeBattleHook(battleOps.castSpell);
 export const useStartBattle = makeBattleHook(battleOps.start);
 export const useResetBattle = makeBattleHook(battleOps.reset);

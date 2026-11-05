@@ -11,7 +11,7 @@ import { AiRollButton, DiceGrid } from "@/components/battle/hud/DiceInput";
 import { modeUiOf } from "@/components/battle/modes";
 import { MapStripRow } from "@/components/battle/scene/MapStrip";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
-import { useAttackWizard, useAuraZones, useBattleRules, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
+import { useAttackWizard, useAuraZones, useBattleRules, useBattleScene, useBonusSpells, useChannelAction, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack } from "@/lib/utils/battle/flows";
@@ -19,6 +19,8 @@ import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
+
+const ChannelDialog = dynamic(() => import("@/components/battle/wizards/ChannelDialog").then((m) => m.ChannelDialog), { ssr: false });
 
 const AttackWizard = dynamic(() => import("@/components/battle/wizards/AttackWizard").then((m) => m.AttackWizard), { ssr: false });
 
@@ -36,7 +38,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const { anyPending, battle, intents } = useBattleScene();
 
-  const { actionEconomy, spells } = useBattleRules();
+  const { actionEconomy, magic, spells } = useBattleRules();
 
   const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, mapPick, setAttackReady } = intents;
 
@@ -45,6 +47,8 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
   const attack = useAttackWizard(hero, turn.actions.afterAction);
 
   const book = useSpellBook(hero, { onDone: turn.actions.afterAction });
+
+  const channel = useChannelAction(hero, turn.actions.afterAction);
 
   const zone = useAuraZones(hero);
 
@@ -107,8 +111,8 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
         <ActionGrid
           turn={turn}
           pending={anyPending}
-          available={{ magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
-          actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
+          available={{ channel: magic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
+          actions={{ channel: channel.actions.open, attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
         />
       )}
       {turn.phase === "acting" && ui?.TurnControls && <ui.TurnControls hero={hero} />}
@@ -127,6 +131,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
       {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.actions.endTurn()} onStay={turn.actions.stay} />}
       <AttackWizard wizard={attack} />
       <SpellBook book={book} />
+      {magic && <ChannelDialog channel={channel} />}
       {battle.rules?.actions.enabled && <CoreActionsDialog participant={hero} open={coreOpen} onOpenChange={setCoreOpen} onDone={turn.actions.afterAction} />}
       {actionEconomy.bonusAction && <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} onOffHand={() => attack.actions.open(undefined, undefined, { offHand: true })} />}
       <BonusActionPicker participant={hero} trigger="action" open={abilityOpen} onOpenChange={setAbilityOpen} onDone={turn.actions.afterAction} />

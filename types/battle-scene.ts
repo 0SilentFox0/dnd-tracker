@@ -1,4 +1,4 @@
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
+import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { CritEffectFx } from "@/lib/utils/battle/view/crit-outcome";
 import type { QueueEntry } from "@/lib/utils/battle/view/queue";
 import type { RetaliationOutcome } from "@/lib/utils/battle/view/retaliation";
@@ -16,7 +16,7 @@ export interface StrikeFx {
 export type ResultFx =
   | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string; percentile?: PercentileAttackDetails; retaliation?: RetaliationOutcome; critEffect?: CritEffectFx; strikes?: StrikeFx[] }
   | { kind: "miss"; targetName: string; d20: number; known: string; percentile?: PercentileAttackDetails; retaliation?: RetaliationOutcome; critFail?: CritEffectFx; strikes?: StrikeFx[] }
-  | { kind: "spell"; spellName: string; changes: { name: string; change: number }[]; targetCount: number }
+  | { kind: "spell"; spellName: string; changes: { name: string; change: number }[]; targetCount: number; cast?: PercentileCastDetails }
   | { kind: "morale-extra" | "morale-skip"; name: string; d10: number; morale: number };
 
 export type ActionResultFx = Extract<ResultFx, { kind: "hit" | "crit" | "miss" | "spell" }>;

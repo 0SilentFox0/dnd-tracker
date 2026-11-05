@@ -1,7 +1,9 @@
 import type { RuleSystemMagic } from "../../types";
+import { armourSl } from "./armour";
 import { wfrpLoreAttribute } from "./attribute";
-import { wfrpCastTest } from "./cast-test";
-import { wfrpChannel } from "./channel";
+import { channelBadge } from "./badge";
+import { castTargetOf, wfrpCastTest } from "./cast-test";
+import { channelTargetOf, wfrpChannel } from "./channel";
 import { wfrpMiscast } from "./miscast";
 
 import type { BattleParticipant } from "@/types/battle";
@@ -11,8 +13,10 @@ const dropChannelled = (p: BattleParticipant): BattleParticipant => (p.battleDat
 export const WFRP_MAGIC: RuleSystemMagic = {
   slots: false,
   castTest: wfrpCastTest,
+  castPreview: (caster) => ({ target: castTargetOf(caster), channelTarget: channelTargetOf(caster), channelled: caster.battleData.channelledSl ?? 0, armourSl: armourSl(caster) }),
   channel: wfrpChannel,
   miscast: wfrpMiscast,
   attribute: wfrpLoreAttribute,
+  badge: channelBadge,
   onDamaged: dropChannelled,
 };

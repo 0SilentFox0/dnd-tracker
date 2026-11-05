@@ -8,15 +8,20 @@ import { CAST_SKILL, NO_OVERCAST_KINDS, OVERCAST_SL_STEP } from "./constants";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import type { CastTestCtx, CastTestResult } from "@/lib/utils/rules/systems/types";
+import type { BattleParticipant } from "@/types/battle";
+
+export function castTargetOf(caster: BattleParticipant): number {
+  const chars = readCharacteristics({ characteristics: caster.abilities.characteristics });
+
+  return (skillTarget(chars, CAST_SKILL.key, CAST_SKILL.spec)?.target ?? value(chars, "int")) + selfTestMod(caster, "test");
+}
 
 const MAJOR_MISCAST_ROLLS = new Set([99, 100]);
 
 export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
   const { caster, spell, magic, rng, presetRoll } = ctx;
 
-  const chars = readCharacteristics({ characteristics: caster.abilities.characteristics });
-
-  const target = (skillTarget(chars, CAST_SKILL.key, CAST_SKILL.spec)?.target ?? value(chars, "int")) + selfTestMod(caster, "test");
+  const target = castTargetOf(caster);
 
   const channelled = caster.battleData.channelledSl ?? 0;
 

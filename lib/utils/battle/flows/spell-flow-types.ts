@@ -33,6 +33,8 @@ export interface SpellPick {
   inline?: { spellId: string; grantKey: string };
   needsSaves: boolean;
   needsAttackRolls?: boolean;
+  /** the system rolls a casting test (percentile magic): the rolls step needs a test roll */
+  castTest?: boolean;
   diceSlots: number[];
 }
 
@@ -59,6 +61,11 @@ export interface SpellFlowState {
   optionIndex?: number;
   inputCount?: number;
   damage: (number | undefined)[];
+  /** casting test: manual d100 (and the second one for a Fortune reroll) or the server roll */
+  castRoll?: number;
+  castSecond?: number;
+  castServer?: boolean;
+  castFortune?: "reroll" | "sl";
   error?: LogLine;
   /** сервер зупинив каст: ДМ обирає ефект крита */
   waitingCrit?: boolean;
@@ -82,6 +89,8 @@ export type SpellFlowAction =
   | { type: "CONFIRM_TARGETS" }
   | { type: "SET_SAVE"; id: string; value: number | undefined }
   | { type: "SET_DAMAGE"; index: number; value: number | undefined }
+  | { type: "SET_CAST_ROLL"; roll?: number; second?: number }
+  | { type: "SET_CAST_FORTUNE"; value: "reroll" | "sl" | null }
   | { type: "TO_SUMMARY" }
   | { type: "BACK" }
   | { type: "SUBMIT" }

@@ -91,6 +91,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const actions = {
     attack: mutation(),
     castSpell: mutation(),
+    channel: mutation(),
     bonusAction: mutation(),
     abilityAction: mutation(),
     nextTurn: mutation(),

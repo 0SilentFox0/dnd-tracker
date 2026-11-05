@@ -19,6 +19,7 @@ const EXPECTED_PATHS: Record<keyof typeof battleOps, string> = {
   moraleCheck: "morale-check",
   critChoice: "crit-choice",
   castSpell: "spell",
+  channel: "channel",
   start: "start",
   reset: "reset",
   complete: "complete",

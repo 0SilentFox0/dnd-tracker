@@ -11,14 +11,20 @@ export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targ
 
 const selfCentered = (p: SpellPick | undefined) => p?.template?.shape === "emanation";
 
-const needsRolls = (p: SpellPick) => p.needsSaves || !!p.needsAttackRolls || p.diceSlots.length > 0;
+const needsRolls = (p: SpellPick) => p.needsSaves || !!p.needsAttackRolls || !!p.castTest || p.diceSlots.length > 0;
 
 export const optionMissing = (s: SpellFlowState): boolean => !!s.pick?.options && s.optionIndex === undefined;
 
 export function rollsComplete(s: SpellFlowState): boolean {
   if (!s.pick) return false;
 
-  return s.pick.diceSlots.every((_, i) => typeof s.damage[i] === "number");
+  return s.pick.diceSlots.every((_, i) => typeof s.damage[i] === "number") && (!s.pick.castTest || castTestRolled(s));
+}
+
+function castTestRolled(s: SpellFlowState): boolean {
+  if (s.castServer) return true;
+
+  return s.castRoll !== undefined && (s.castFortune !== "reroll" || s.castSecond !== undefined);
 }
 
 const afterTargets = (s: SpellFlowState): SpellFlowState =>
@@ -70,7 +76,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
 
-      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, inputCount: a.pick.inputDice ? 1 : undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, inputCount: a.pick.inputDice ? 1 : undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), castRoll: undefined, castSecond: undefined, castServer: undefined, castFortune: undefined, error: undefined };
     case "SET_SLOT":
       return reconcileSpellPick(s, a.pick, { slotKey: a.slotKey, grantKey: undefined, castLevel: undefined });
     case "SET_GRANT":
@@ -133,6 +139,10 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "SET_DAMAGE":
 
       return { ...s, damage: s.damage.map((v, i) => (i === a.index ? a.value : v)) };
+    case "SET_CAST_ROLL":
+      return { ...s, castRoll: a.roll, castSecond: a.second, castServer: a.roll === undefined ? true : undefined };
+    case "SET_CAST_FORTUNE":
+      return { ...s, castFortune: a.value ?? undefined, castRoll: undefined, castSecond: undefined, castServer: undefined };
     case "TO_SUMMARY":
 
       return rollsComplete(s) ? { ...s, step: "summary", error: undefined } : s;
@@ -197,5 +207,14 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     ...(s.castLevel !== undefined && { castLevel: s.castLevel }),
     ...(s.pick?.inputDice && s.inputCount !== undefined && { inputCount: s.inputCount }),
     ...(s.pick?.options && s.optionIndex !== undefined && { optionIndex: s.optionIndex }),
+    ...(s.pick?.castTest && castTestPayload(s)),
+  };
+}
+
+function castTestPayload(s: SpellFlowState): Pick<SpellCastData, "castRoll" | "serverRoll" | "fortune" | "fortuneRoll"> {
+  return {
+    ...(s.castServer ? { serverRoll: true as const } : s.castRoll !== undefined && { castRoll: s.castRoll }),
+    ...(s.castFortune && { fortune: s.castFortune }),
+    ...(s.castFortune === "reroll" && !s.castServer && s.castSecond !== undefined && { fortuneRoll: s.castSecond }),
   };
 }

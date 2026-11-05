@@ -16,7 +16,7 @@ describe("system ui registry", () => {
     expect(systemUiOf("homm").hideProgression).toBe(false);
   });
 
-  it("sheet flags: d20 keeps spells/items/rest kinds/d20 stats, wfrp hides them", () => {
+  it("sheet flags: d20 keeps spells/items/rest kinds/d20 stats, wfrp keeps only spells", () => {
     for (const key of ["homm", "dnd5e"] as const) {
       const sys = RULE_SYSTEM_REGISTRY[key];
 
@@ -25,6 +25,6 @@ describe("system ui registry", () => {
 
     const wfrp = RULE_SYSTEM_REGISTRY.wfrp;
 
-    expect([wfrp.spells, wfrp.items, wfrp.d20Stats, wfrp.rest.kinds]).toEqual([false, false, false, false]);
+    expect([wfrp.spells, wfrp.items, wfrp.d20Stats, wfrp.rest.kinds]).toEqual([true, false, false, false]);
   });
 });

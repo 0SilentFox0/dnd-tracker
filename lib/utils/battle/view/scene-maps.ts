@@ -15,7 +15,9 @@ export const NO_EFFECTS: readonly ActiveEffect[] = Object.freeze([]);
 
 /** Список ефектів лишається тим самим масивом, поки його вміст не змінився, — memo-рядки не перемальовуються. */
 export function buildDisplayEffects(order: BattleParticipant[], prev?: Map<string, DisplayEffect[]>, rules?: Ruleset): Map<string, DisplayEffect[]> {
-  const conditions = rules ? ruleSystemOf(rules).conditions : undefined;
+  const system = rules ? ruleSystemOf(rules) : undefined;
+
+  const conditions = system?.conditions;
 
   return new Map(
     order.map((p) => {
@@ -23,7 +25,11 @@ export function buildDisplayEffects(order: BattleParticipant[], prev?: Map<strin
 
       const all = displayEffects(p, order);
 
-      const list = levels?.length ? collapseSystemConditions(all, levels) : all;
+      const collapsed = levels?.length ? collapseSystemConditions(all, levels) : all;
+
+      const badge = system?.magic?.badge(p);
+
+      const list = badge ? [...collapsed, badge] : collapsed;
 
       const before = prev?.get(p.basicInfo.id);
 

@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
+import { CastResultLines } from "./CastResultLines";
 import { PercentileResultLines } from "./PercentileResultLines";
 
 import { useInCornerStack } from "@/components/battle/scene/CornerStack";
@@ -84,6 +85,7 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: "spell" }> }) {
   return (
     <>
       <div className="hud-sc text-lg font-extrabold tracking-[.06em] text-hud-gold-bright">{fx.spellName}</div>
+      {fx.cast && <CastResultLines cast={fx.cast} />}
       {fx.changes.length > 0 ? (
         <ul className="mt-1 space-y-0.5 text-sm">
           {fx.changes.map((c) => (
@@ -93,7 +95,7 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: "spell" }> }) {
             </li>
           ))}
         </ul>
-      ) : (
+      ) : fx.cast && (fx.cast.outcome === "failure" || fx.cast.outcome === "fumble") ? null : (
         <div className="mt-1 text-sm text-[var(--hud-muted)]">{fx.targetCount > 0 ? t("appliedTargets", { count: fx.targetCount }) : t("applied")}</div>
       )}
     </>

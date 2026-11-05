@@ -140,14 +140,13 @@ describe("CharacterProfile — перегляд", () => {
     expect(screen.queryByText("characterProfile.combat.targets")).toBeNull();
   });
 
-  it("wfrp: вкладок «Магія» і «Інвентар» немає, ?tab=magic веде на бойову; d20 їх має", () => {
+  it("wfrp: вкладки «Інвентар» немає, «Магія» є (з 5d-2); d20 має обидві", () => {
     h.sheetQuery.data = withSheet({ system: "wfrp" });
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="magic" />);
 
-    expect(screen.queryByRole("tab", { name: "characterProfile.tabs.magic" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.magic" })).toBeTruthy();
     expect(screen.queryByRole("tab", { name: "characterProfile.tabs.items" })).toBeNull();
     expect(screen.getByRole("tab", { name: "characterProfile.tabs.story" })).toBeTruthy();
-    expect(screen.getByRole("tab", { name: "characterProfile.tabs.combat" })).toHaveAttribute("data-state", "active");
 
     cleanup();
     h.sheetQuery.data = sheetFixture;
@@ -205,13 +204,13 @@ describe("CharacterProfile — редагування ДМа", () => {
     expect(screen.getByText("Мітка мисливця")).toBeTruthy();
   });
 
-  it("wfrp: в редакторі немає вкладок «Магія» і «Речі»", async () => {
+  it("wfrp: в редакторі є «Магія», немає «Речі»", async () => {
     h.sheetQuery.data = withSheet({ system: "wfrp", viewer: { isDM: true, isOwner: false } });
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
 
     fireEvent.click(screen.getByRole("button", { name: "common.actions.edit" }));
     expect(await screen.findByRole("tab", { name: "common.tabs.basic" })).toBeTruthy();
-    expect(screen.queryByRole("tab", { name: "characterProfile.tabs.magic" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.magic" })).toBeTruthy();
     expect(screen.queryByRole("tab", { name: "characterProfile.tabs.things" })).toBeNull();
     expect(screen.getByRole("tab", { name: "characterProfile.tabs.story" })).toBeTruthy();
   });

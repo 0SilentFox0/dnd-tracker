@@ -30,7 +30,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   lineage: false,
   classes: false,
   attacks: false,
-  spells: false,
+  spells: true,
   items: false,
   d20Stats: false,
   unusedMechanics: ["morale", "criticals", "formulas", "heroScaling", "initiative", "saves", "deathSaves", "concentration", "conditions", "actions", "classes", "encounters"],

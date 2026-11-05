@@ -18,6 +18,7 @@ vi.mock("next/dynamic", () => ({
 }));
 
 vi.mock("@/components/battle/wizards/AttackWizard", () => ({ AttackWizard: () => null }));
+vi.mock("@/components/battle/wizards/ChannelDialog", () => ({ ChannelDialog: () => <div data-testid="channel-dialog" /> }));
 vi.mock("@/components/battle/wizards/SpellBook", () => ({ SpellBook: () => null }));
 vi.mock("@/components/battle/turn/CoreActionsDialog", () => ({ CoreActionsDialog: () => null }));
 vi.mock("@/components/battle/wizards/BonusActionPicker", () => ({ BonusActionPicker: ({ trigger }: { trigger?: string }) => <div data-testid={`picker-${trigger ?? "bonus"}`} /> }));
@@ -38,6 +39,7 @@ vi.mock("@/lib/hooks/battle", () => ({
   useAuraZones: () => null,
   useSpellBook: () => ({ actions: { open: vi.fn() } }),
   useAttackWizard: () => ({ actions: { open: vi.fn() } }),
+  useChannelAction: () => ({ view: {}, actions: { open: vi.fn() } }),
   usePlayerTurn: () => ({
     phase: "acting",
     status: { actionUsed: false, attackLeft: true, bonusAvailable: true, skipped: false },
@@ -70,5 +72,18 @@ describe("MyTurnControls: gating за прапорцями правил", () => 
     expect(screen.getByRole("button", { name: /Магія/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Бонус/ })).toBeInTheDocument();
     expect(await screen.findByTestId("picker-bonus")).toBeInTheDocument();
+  });
+
+  it("wfrp показує плитку Channelling, d20 — ні", async () => {
+    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, magic: true };
+    render(<MyTurnControls hero={hero} />);
+    expect(screen.getByRole("button", { name: /Channelling/ })).toBeInTheDocument();
+    expect(await screen.findByTestId("channel-dialog")).toBeInTheDocument();
+    cleanup();
+
+    rules.current = { actionEconomy: { bonusAction: true, reaction: true }, spells: true, magic: false };
+    render(<MyTurnControls hero={hero} />);
+    expect(screen.queryByRole("button", { name: /Channelling/ })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("channel-dialog")).not.toBeInTheDocument();
   });
 });

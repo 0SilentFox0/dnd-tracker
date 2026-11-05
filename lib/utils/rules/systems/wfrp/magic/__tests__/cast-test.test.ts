@@ -104,3 +104,18 @@ describe("wfrpCastTest", () => {
     expect(run(60).lines[0]).toMatchObject({ message: "wfrpMagic.log.castFail" });
   });
 });
+
+describe("castPreview and badge", () => {
+  it("shows both targets, banked SL and armour", async () => {
+    const { WFRP_MAGIC } = await import("../index");
+
+    expect(WFRP_MAGIC.castPreview(caster({ channelledSl: 2 }))).toEqual({ target: 50, channelTarget: 40, channelled: 2, armourSl: 0 });
+  });
+
+  it("badge only while SL is banked", async () => {
+    const { channelBadge } = await import("../badge");
+
+    expect(channelBadge(caster())).toBeNull();
+    expect(channelBadge(caster({ channelledSl: 3 }))).toMatchObject({ permanent: true, label: { params: { sl: 3 } } });
+  });
+});

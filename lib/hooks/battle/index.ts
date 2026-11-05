@@ -23,6 +23,7 @@ export {
 } from "./useBattleScene";
 export { useBattleTitle } from "./useBattleTitle";
 export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
+export { useChannelAction } from "./useChannelAction";
 export { type ConditionTestItem, type ConditionTestPanel, useConditionTestPanel } from "./useConditionTestPanel";
 export { canReadiedAttack, type CoreActionChoice, useCoreActions, useReadiedAttack } from "./useCoreActions";
 export { type CritChoiceRow, useCritChoiceDialog } from "./useCritChoiceDialog";

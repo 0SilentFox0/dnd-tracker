@@ -15,7 +15,7 @@ export function useBattleRules() {
   const { rules, momentum } = battle;
 
   return useMemo(() => {
-    const { combat, d20Stats, distance, characteristics, spells } = ruleSystemOf(rules);
+    const { combat, d20Stats, distance, characteristics, spells, magic } = ruleSystemOf(rules);
 
     return {
       dice: combat.dice,
@@ -23,6 +23,7 @@ export function useBattleRules() {
       actionEconomy: combat.actionEconomy,
       d20Stats,
       spells,
+      magic: !!magic,
       distance,
       woundsLabel: characteristics.kind === "wfrp" ? ("wounds" as const) : ("hp" as const),
       momentum: momentum ?? NO_MOMENTUM,

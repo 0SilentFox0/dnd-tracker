@@ -1,3 +1,5 @@
+import type { PercentileCastDetails } from "@/lib/utils/battle/types/attack";
+import type { BattleAction } from "@/types/battle";
 import type { ResultFx } from "@/types/battle-scene";
 
 type HpChange = { participantId: string; participantName: string; change: number };
@@ -15,6 +17,11 @@ export function hpTotals(changes: HpChange[]): { name: string; change: number }[
   return [...byId.values()].filter((c) => c.change !== 0);
 }
 
-export function buildSpellResultFx(spellName: string, changes: HpChange[], targetCount: number): ResultFx {
-  return { kind: "spell", spellName, changes: hpTotals(changes), targetCount };
+export function buildSpellResultFx(spellName: string, changes: HpChange[], targetCount: number, cast?: PercentileCastDetails): ResultFx {
+  return { kind: "spell", spellName, changes: hpTotals(changes), targetCount, ...(cast && { cast }) };
+}
+
+/** Casting test of the caster's new log entry, when the system rolled one. */
+export function castDetailsOf(log: BattleAction[], seen: Set<number>, actorId: string): PercentileCastDetails | undefined {
+  return log.findLast((e) => !seen.has(e.actionIndex) && e.actorId === actorId && e.actionDetails?.percentileCast)?.actionDetails?.percentileCast;
 }

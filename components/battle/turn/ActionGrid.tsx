@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { BookOpen, Hourglass, ListChecks, Sparkles, Swords, Undo2, Zap } from "lucide-react";
+import { BookOpen, Hourglass, ListChecks, Sparkle, Sparkles, Swords, Undo2, Zap } from "lucide-react";
 
 import type { usePlayerTurn } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -17,18 +17,21 @@ const Tile = ({ icon: Icon, label, used, primary, onClick }: { icon: typeof Swor
 export function ActionGrid({ turn, pending, available, actions }: {
   turn: Turn;
   pending: boolean;
-  available: { magic: boolean; magicTile?: boolean; bonus: boolean; bonusTile?: boolean; ability?: boolean; core?: boolean };
-  actions: { attack(): void; magic(): void; bonus(): void; ability?(): void; core?(): void };
+  available: { channel?: boolean; magic: boolean; magicTile?: boolean; bonus: boolean; bonusTile?: boolean; ability?: boolean; core?: boolean };
+  actions: { channel?(): void; attack(): void; magic(): void; bonus(): void; ability?(): void; core?(): void };
 }) {
   const t = useTranslations("battle.actions");
 
   const tm = useTranslations("battle.morale");
+
+  const tw = useTranslations("wfrpMagic.ui.channel");
 
   return (
     <>
       <div data-tour="battle.turn-controls" className="grid grid-cols-2 gap-2 pt-3">
         <Tile icon={Swords} label={t("attack")} used={(turn.status.actionUsed && !turn.status.attackLeft) || turn.status.skipped || pending} primary onClick={actions.attack} />
         {available.magicTile !== false && <Tile icon={BookOpen} label={t("magic")} used={(turn.status.actionUsed && !turn.status.bonusSpellReady) || turn.status.skipped || !available.magic || pending} onClick={actions.magic} />}
+        {available.channel && <Tile icon={Sparkle} label={tw("tile")} used={turn.status.actionUsed || turn.status.skipped || pending} onClick={actions.channel} />}
         {available.ability && <Tile icon={Zap} label={t("ability")} used={turn.status.actionUsed || turn.status.skipped || pending} onClick={actions.ability} />}
         {available.bonusTile !== false && <Tile icon={Sparkles} label={t("bonus")} used={!turn.status.bonusAvailable || turn.status.skipped || !available.bonus || pending} onClick={actions.bonus} />}
         {available.core && <Tile icon={ListChecks} label={t("core")} used={turn.status.skipped || pending} onClick={actions.core} />}
