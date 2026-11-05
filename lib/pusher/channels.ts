@@ -15,6 +15,10 @@ export const userChannelName = (userId: string): string =>
   `private-user-${userId}`;
 
 export const BATTLE_CHANNEL_PREFIX = "private-battle-";
+export const BATTLE_DM_CHANNEL_PREFIX = "private-battle-dm-";
+
+/** Повна дельта лише для ДМ: публічний канал несе журнал, відредагований для гравців. */
+export const battleDmChannelName = (battleId: string): string => `${BATTLE_DM_CHANNEL_PREFIX}${battleId}`;
 export const USER_CHANNEL_PREFIX = "private-user-";
 
 export const NOTIFY_CHANNEL_PREFIX = "private-notify-";

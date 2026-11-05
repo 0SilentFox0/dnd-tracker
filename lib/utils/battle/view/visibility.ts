@@ -59,6 +59,8 @@ function hideTargetDetails(line: LogLine): LogLine {
   return line;
 }
 
+export const PLAYER_VIEWER: Viewer = { userId: null, isDM: false, readOnly: true, canSeeEnemyHp: false };
+
 export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, participants: BattleParticipant[] = []): BattleAction {
   if (viewer.isDM) return e;
 
@@ -68,11 +70,27 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, participants: 
     return !p || !canSeeExactStats(p, viewer);
   });
 
-  const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = e.actionDetails ?? {};
+  const details = e.actionDetails ?? {};
 
-  const hidden: BattleAction = { ...e, actionDetails: percentile ? { ...rest, percentile: { ...percentile, defender: undefined } } : rest };
+  const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = details;
 
-  return e.log ? { ...hidden, log: e.log.map((l) => (concealed ? hideTargetDetails(hideDefense(l)) : hideDefense(l))) } : hidden;
+  const strips = "targetAC" in details || "damageBreakdown" in details || "damageRows" in details || percentile?.defender !== undefined;
+
+  const lines = e.log?.map((l) => (concealed ? hideTargetDetails(hideDefense(l)) : hideDefense(l)));
+
+  const linesChanged = !!lines && lines.some((l, i) => l !== e.log?.[i]);
+
+  if (!strips && !linesChanged) return e;
+
+  const actionDetails = percentile ? { ...rest, percentile: { ...percentile, defender: undefined } } : rest;
+
+  return { ...e, actionDetails, ...(lines && { log: lines }) };
+}
+
+export function redactLogForPlayers(entries: BattleAction[], participants: BattleParticipant[]): { entries: BattleAction[]; changed: boolean } {
+  const redacted = entries.map((e) => sanitizeLogEntry(e, PLAYER_VIEWER, participants));
+
+  return { entries: redacted, changed: redacted.some((e, i) => e !== entries[i]) };
 }
 
 export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: BattleAction[], exact: boolean, knowledge?: BattleKnowledge): DamageStep[] {

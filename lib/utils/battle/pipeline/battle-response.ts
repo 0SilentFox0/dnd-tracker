@@ -3,12 +3,13 @@ import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
-import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { battleChannelName, battleDmChannelName, userChannelName } from "@/lib/pusher/channels";
 import { toPublicPendingCrit } from "@/lib/utils/battle/crit-choice/public";
 import { hasMomentum } from "@/lib/utils/battle/momentum";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
+import { redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -61,6 +62,12 @@ export function toBattleResponse(
   };
 }
 
+function fitOrRefetch(delta: ClientBattleDelta): ClientBattleDelta | BattleRefetchSignal {
+  const fits = Buffer.byteLength(JSON.stringify(delta), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
+
+  return fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true };
+}
+
 export function buildPusherMessages(args: {
   before: BattleSceneState;
   after: BattleSceneState;
@@ -73,11 +80,13 @@ export function buildPusherMessages(args: {
 
   const channel = battleChannelName(after.id);
 
-  const fits = Buffer.byteLength(JSON.stringify(delta), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
+  const { entries, changed } = redactLogForPlayers(delta.log ?? [], participants);
 
-  const payload: ClientBattleDelta | BattleRefetchSignal = fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true };
+  const publicDelta: ClientBattleDelta = changed ? { ...delta, log: entries, redacted: true } : delta;
 
-  const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload }];
+  const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload: fitOrRefetch(publicDelta) }];
+
+  if (changed) messages.push({ channel: battleDmChannelName(after.id), event: "battle-delta", payload: fitOrRefetch(delta) });
 
   const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status || wasAwaiting;
 

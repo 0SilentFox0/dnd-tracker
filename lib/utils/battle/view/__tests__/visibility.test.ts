@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { alwaysSeesEnemyStats, canSeeEnemyHp, canSeeExactStats, hiddenTargetSteps, sanitizeLogEntry } from "@/lib/utils/battle/view";
+import { alwaysSeesEnemyStats, canSeeEnemyHp, canSeeExactStats, hiddenTargetSteps, PLAYER_VIEWER, redactLogForPlayers, sanitizeLogEntry } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 import type { BattleAction, DamageStep } from "@/types/battle";
 
@@ -123,5 +123,52 @@ describe("alwaysSeesEnemyStats", () => {
     expect(alwaysSeesEnemyStats([seer], "u1")).toBe(true);
     expect(alwaysSeesEnemyStats([seer, plain], "u1")).toBe(false);
     expect(alwaysSeesEnemyStats([seer], "u2")).toBe(false);
+  });
+});
+
+describe("redactLogForPlayers", () => {
+  const enemy = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "e" } } as BattleParticipant;
+
+  const ally = { ...side(ParticipantSide.ALLY), basicInfo: { ...side(ParticipantSide.ALLY).basicInfo, id: "f" } } as BattleParticipant;
+
+  const entry = (id: string, log: unknown[], actionDetails: unknown = {}) =>
+    ({ targets: [{ participantId: id, participantName: "x" }], actionDetails, log }) as unknown as BattleAction;
+
+  const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 3, source: "s" } };
+
+  const pass = { message: "battleWfrp.log.endTestSuccess", params: { name: "x", condition: "c", roll: 20, target: 35, sl: 1 } };
+
+  it("ховає рівень, ціль тесту, захист і числа броні для ворога", () => {
+    const percentile = { roll: 30, target: 45, sl: 1, netSl: 2, location: "arm", doubles: false, defender: { kind: "parry", roll: 52, sl: -1, target: 40 } };
+
+    const e = entry("e", [applied, pass], { targetAC: 15, damageBreakdown: "x", damageRows: [], percentile });
+
+    const { entries, changed } = redactLogForPlayers([e], [enemy, ally]);
+
+    expect(changed).toBe(true);
+    expect(entries[0].log?.[0]).toEqual({ message: "battleWfrp.log.appliedHidden", params: { target: "x", condition: "c", source: "s" } });
+    expect(entries[0].log?.[1]).toEqual({ message: "battleWfrp.log.endTestSuccessHidden", params: { name: "x", condition: "c", roll: 20, sl: 1 } });
+    expect(entries[0].actionDetails).not.toHaveProperty("targetAC");
+    expect(entries[0].actionDetails).not.toHaveProperty("damageBreakdown");
+    expect(entries[0].actionDetails).not.toHaveProperty("damageRows");
+    expect(entries[0].actionDetails.percentile?.defender).toBeUndefined();
+  });
+
+  it("запис про союзника без прихованих полів — той самий об'єкт, changed: false", () => {
+    const e = entry("f", [applied]);
+
+    const { entries, changed } = redactLogForPlayers([e], [enemy, ally]);
+
+    expect(changed).toBe(false);
+    expect(entries[0]).toBe(e);
+  });
+
+  it("ідемпотентно: другий прохід дорівнює першому і нічого не змінює", () => {
+    const e = entry("e", [applied], { targetAC: 15, percentile: { roll: 1, target: 2, sl: 0, netSl: 0, location: "arm", doubles: false, defender: { kind: "parry", roll: 5, sl: 0, target: 4 } } });
+
+    const once = sanitizeLogEntry(e, PLAYER_VIEWER, [enemy]);
+
+    expect(sanitizeLogEntry(once, PLAYER_VIEWER, [enemy])).toBe(once);
+    expect(sanitizeLogEntry(once, PLAYER_VIEWER, [enemy])).toEqual(once);
   });
 });

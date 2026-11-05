@@ -9,7 +9,7 @@ import { writeAudioSnapshot } from "@/lib/hooks/audio";
 import { battleKeys } from "@/lib/hooks/battles/keys";
 import { writeBattleDelta } from "@/lib/hooks/battles/write-battle-delta";
 import { usePusherChannel, usePusherConnection } from "@/lib/hooks/common";
-import { BATTLE_AUDIO_EVENT, battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { BATTLE_AUDIO_EVENT, battleChannelName, battleDmChannelName, userChannelName } from "@/lib/pusher/channels";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAudioEvent } from "@/types/audio";
 
@@ -27,6 +27,7 @@ export function usePusherBattleSync(
   battleId: string,
   currentUserId: string | null,
   onTurnStarted: (participantName: string | undefined) => void,
+  isDM = false,
 ): { connectionState: PusherConnectionState } {
   const queryClient = useQueryClient();
 
@@ -47,26 +48,33 @@ export function usePusherBattleSync(
     () => void resync(),
   );
 
+  const applyDelta = (data: unknown) => {
+    const key = battleKeys.scene(campaignId, battleId);
+
+    if (!data || typeof data !== "object" || !("version" in data)) {
+      void queryClient.invalidateQueries({ queryKey: key });
+
+      return;
+    }
+
+    const signal = data as ClientBattleDelta | BattleRefetchSignal;
+
+    // ДМ бере повну дельту з dm-каналу тієї ж версії
+    if (isDM && "redacted" in signal && signal.redacted) return;
+
+    const cachedVersion = queryClient.getQueryData<BattleScene>(key)?.version;
+
+    if (cachedVersion !== undefined && signal.version <= cachedVersion) return;
+
+    void writeBattleDelta(queryClient, key, signal);
+  };
+
+  usePusherChannel(isDM ? battleDmChannelName(battleId) : null, { "battle-delta": applyDelta });
+
   usePusherChannel(
     channel,
     {
-      "battle-delta": (data) => {
-        const key = battleKeys.scene(campaignId, battleId);
-
-        if (!data || typeof data !== "object" || !("version" in data)) {
-          void queryClient.invalidateQueries({ queryKey: key });
-
-          return;
-        }
-
-        const signal = data as ClientBattleDelta | BattleRefetchSignal;
-
-        const cachedVersion = queryClient.getQueryData<BattleScene>(key)?.version;
-
-        if (cachedVersion !== undefined && signal.version <= cachedVersion) return;
-
-        void writeBattleDelta(queryClient, key, signal);
-      },
+      "battle-delta": applyDelta,
       [BATTLE_AUDIO_EVENT]: (data) => {
         const audio = (data as Partial<BattleAudioEvent> | null)?.audio;
 

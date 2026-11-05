@@ -124,6 +124,8 @@ export interface ClientBattleDelta {
   cancelledFrom?: number;
   /** зведення знань після відкату: вікно журналу клієнта не бачить подій за його межами */
   knowledge?: BattleKnowledge;
+  /** публічна дельта з журналом, відредагованим для гравців; ДМ бере повну з dm-каналу */
+  redacted?: true;
 }
 
 export interface BattleEventsPage {

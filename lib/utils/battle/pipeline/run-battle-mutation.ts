@@ -43,7 +43,7 @@ import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
 import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
-import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
+import { alwaysSeesEnemyStats, redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -191,10 +191,12 @@ type PreviewDeps = Pick<PipelineDeps, "loadRecentEvents" | "loadKnowledge">;
 async function buildScenePreview(userId: string, loaded: LoadedBattle, result: MutationResult, options: PreviewOptions, deps: PreviewDeps) {
   const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
 
-  const [entries, knowledge] = await Promise.all([
+  const [recent, knowledge] = await Promise.all([
     options.includeRecentEvents ? deps.loadRecentEvents(loaded.scene.id, options.includeRecentEvents) : [],
     needsKnowledge ? deps.loadKnowledge?.(loaded.scene.id) : undefined,
   ]);
+
+  const entries = loaded.isDM ? recent : redactLogForPlayers(recent, loaded.participants).entries;
 
   const battle = toBattleResponse(
     loaded,
@@ -311,7 +313,9 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaiting !== null, delta: clientDelta }));
 
-  return { delta: clientDelta, version: clientDelta.version, ...(result.response && { response: result.response }) };
+  const reply = ctx.isDM ? clientDelta : { ...clientDelta, log: redactLogForPlayers(clientDelta.log, result.participants).entries };
+
+  return { delta: reply, version: clientDelta.version, ...(result.response && { response: result.response }) };
 }
 
 /** Read-only guards shared by intent preview and execution; never invokes a mutation. */

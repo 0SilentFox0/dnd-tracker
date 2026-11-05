@@ -8,6 +8,7 @@ import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
 import { type PipelineDeps, readScenePreview } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
+import { redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
 import type { BattleEventsPage, BattleSummary, BattleVersion } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -15,7 +16,7 @@ type BattleParams = { id: string; battleId: string };
 
 export interface BattleReadDeps {
   getUserId(): Promise<string | null>;
-  loadAccess(args: { battleId: string; campaignId: string; userId: string }): Promise<{ version: number; isMember: boolean; isDemo?: boolean } | null>;
+  loadAccess(args: { battleId: string; campaignId: string; userId: string }): Promise<{ version: number; isMember: boolean; isDM?: boolean; isDemo?: boolean } | null>;
   loadEventsBefore(battleId: string, page: { before: number; limit: number }): Promise<BattleEventsPage>;
   loadAllEvents(battleId: string): Promise<BattleAction[]>;
   loadParticipants(args: { battleId: string; campaignId: string; userId: string }): Promise<BattleParticipant[]>;
@@ -76,9 +77,15 @@ export async function readBattleEvents(
   deps: BattleReadDeps = defaultReadDeps,
 ): Promise<NextResponse> {
   try {
-    await authorize(params, deps);
+    const { userId, isDM } = await authorize(params, deps);
 
-    return NextResponse.json(await deps.loadEventsBefore(params.battleId, page));
+    const events = await deps.loadEventsBefore(params.battleId, page);
+
+    if (isDM) return NextResponse.json(events);
+
+    const participants = await deps.loadParticipants({ battleId: params.battleId, campaignId: params.id, userId });
+
+    return NextResponse.json({ ...events, events: redactLogForPlayers(events.events, participants).entries });
   } catch (err) {
     return battleErrorResponse(err);
   }

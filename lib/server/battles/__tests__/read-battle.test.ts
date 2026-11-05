@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { readBattleScene } from "@/lib/server/battles/read-battle";
+import { readBattleEvents, readBattleScene } from "@/lib/server/battles/read-battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { readScenePreview } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -116,5 +116,34 @@ describe("readScenePreview", () => {
 
     await readScenePreview("dm", loaded({ isDM: true }), { includeKnowledge: true }, { loadRecentEvents: async () => [], loadKnowledge });
     expect(loadKnowledge).not.toHaveBeenCalled();
+  });
+});
+
+describe("readBattleEvents redaction", () => {
+  const enemy = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "e", side: "enemy" } });
+
+  const raw = { events: [{ targets: [{ participantId: "e", participantName: "x" }], actionDetails: { targetAC: 15 }, log: ["ok"] }], hasMore: false };
+
+  const readDeps = (isDM: boolean) => ({
+    getUserId: vi.fn(async () => "u-player"),
+    loadAccess: vi.fn(async () => ({ version: 1, isMember: true, isDM })),
+    loadEventsBefore: vi.fn(async () => raw as never),
+    loadAllEvents: vi.fn(),
+    loadParticipants: vi.fn(async () => [enemy]),
+  });
+
+  it("гравець отримує відредаговану сторінку", async () => {
+    const res = await readBattleEvents(params, { before: 5, limit: 10 }, readDeps(false));
+
+    expect((await res.json()).events[0].actionDetails).not.toHaveProperty("targetAC");
+  });
+
+  it("ДМ отримує сиру сторінку без читання учасників", async () => {
+    const d = readDeps(true);
+
+    const res = await readBattleEvents(params, { before: 5, limit: 10 }, d);
+
+    expect((await res.json()).events[0].actionDetails.targetAC).toBe(15);
+    expect(d.loadParticipants).not.toHaveBeenCalled();
   });
 });

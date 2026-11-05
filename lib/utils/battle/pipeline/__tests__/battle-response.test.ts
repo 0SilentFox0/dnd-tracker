@@ -15,7 +15,7 @@ const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "uni
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
 
-const goblin = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "gob", controlledBy: "dm" } });
+const goblin = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "gob", side: ParticipantSide.ENEMY, controlledBy: "dm" } });
 
 describe("toBattleResponse", () => {
   it("payload для інших клієнтів не містить isDM/userRole", () => {
@@ -91,5 +91,45 @@ describe("buildPusherMessages", () => {
     const big = { ...payload, upserted: Array.from({ length: 60 }, () => hero) };
 
     expect(buildPusherMessages({ before: scene, after: scene, participants: [hero], delta: big })[0].payload).toEqual({ battleId: "b1", version: 4, refetch: true });
+  });
+
+  describe("редакція журналу", () => {
+    const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 3, source: "s" } };
+
+    const action = (log: unknown[]) => ({ id: "b1-5", targets: [{ participantId: "gob", participantName: "x" }], actionDetails: {}, log }) as never;
+
+    const args = { before: scene, after: scene, participants: [hero, goblin] };
+
+    it("без змін — одне публічне повідомлення без redacted", () => {
+      const messages = buildPusherMessages({ ...args, delta: { ...payload, log: [action(["рядок"])] } });
+
+      expect(messages.map((m) => m.channel)).toEqual(["private-battle-b1"]);
+      expect(messages[0].payload).not.toHaveProperty("redacted");
+    });
+
+    it("зі змінами — публічне redacted з appliedHidden і повне dm-повідомлення", () => {
+      const full = { ...payload, log: [action([applied])] };
+
+      const messages = buildPusherMessages({ ...args, delta: full });
+
+      expect(messages.map((m) => m.channel)).toEqual(["private-battle-b1", "private-battle-dm-b1"]);
+      expect(messages[0].payload).toMatchObject({ redacted: true, log: [{ log: [{ message: "battleWfrp.log.appliedHidden" }] }] });
+      expect(messages[1].payload).toEqual(full);
+    });
+
+    it("переповнення — обидва канали дають refetch-сигнал без журналу", () => {
+      const big = { ...payload, log: [action([applied])], upserted: Array.from({ length: 60 }, (_, i) => createMockParticipant({ basicInfo: { ...hero.basicInfo, id: `h${i}` } })) };
+
+      const [pub, dm] = buildPusherMessages({ ...args, delta: big });
+
+      expect(pub.payload).toEqual({ battleId: "b1", version: 4, refetch: true });
+      expect(dm.payload).toEqual({ battleId: "b1", version: 4, refetch: true });
+    });
+
+    it("turn-started лишається після battle-delta каналів", () => {
+      const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, participants: [hero, goblin], delta: { ...payload, log: [action([applied])] } });
+
+      expect(messages.map((m) => m.event)).toEqual(["battle-delta", "battle-delta", "turn-started"]);
+    });
   });
 });
