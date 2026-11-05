@@ -79,15 +79,40 @@
 
 - 12 станів; числа каталогу (`conditions/catalog.ts`) — припущення до звірки з книгою.
 - Стан = `ActiveEffect` `wfrp:cond:<key>`, рівень = сума маркерів `wfrp:<key>`, обрізання `max` 10; зняття -1 іде з найновішого ефекту, ДМ «зняти все» прибирає всі ефекти ключа.
-- Тіки лише на активному носії; кровотеча на непритомному — 5c-2.
+- Тіки лише на активному носії; ~~кровотеча на непритомному — 5c-2~~ (закрито в 5c-2: шанс смерті на пропущеному ході).
 - Unconscious має два джерела (Wounds = 0 і стан-ефект); лікування до > 0 Wounds стан-ефект не знімає (ДМ знімає вручну).
 - Спроба зняття вільна, одна на стан за хід (`battleData.conditionTests`), подія без `actionDetails.percentile` (кидок у рядку журналу). Повтор, не свій хід або стан без `endTest` → `CONDITION_TEST_UNAVAILABLE`.
 - Тест зняття Entangled: ціль = S + власний штраф стану (-10 за рівень), тож S 47 дає 37.
-- Тест з листа отримує `selfTestMod`, але `roll-handler` будує учасника з листа, тож у реальному виклику модифікатор `sheet-test` = 0 і стани бою на нього зараз не впливають (хвіст для 5c-2).
+- Тест з листа отримує `selfTestMod`, але `roll-handler` будує учасника з листа, тож у реальному виклику модифікатор `sheet-test` = 0 і стани бою на нього зараз не впливають (~~хвіст для 5c-2~~ закрито: тест з листа бере ефекти зі стану активного бою).
 - Панель «Спробувати зняти» для ДМ, що керує поточним учасником, не перевірена вручну: перевіряється в live-run (Task 12).
 - Fortune: `percentile.fortune` замість окремого `actionDetails.fortune`; перекидання при влучанні з першого кидка не списується; серверні атаки й ініціатива без Fortune; Fate без механіки.
 - Мітки disarmed/winded/crippled — інертні (5c-2); Besmirched, Corruption, психологія, травми — поза межами.
 - `battleWfrp` вантажиться лише в бойових лейаутах wfrp-кампаній (`isWfrpCampaign`); `scope-size` (кампанія + бій): uk 102.0 → 102.7 KB gzip, en 82.1 → 82.7 KB, ліміт 105.
+
+## Межі 5c-2
+
+Приватність журналу, непритомність і кровотеча на `feat/wfrp` (без міграції). Свідомі межі:
+
+- Редакція журналу на сервері: `redactLogForPlayers`/`sanitizeLogEntry` (`lib/utils/battle/view/visibility.ts`) для не-DM ховають рівень стану, ціль тесту зняття, `percentile.defender` (завжди) і `targetAC`/`damageBreakdown`/`damageRows` (лише коли ціль «concealed»: не союзник і не exact для глядача), тож `changed` істинний лише за реальної різниці. Рядки ховає `concealLine` системи. Публічний канал `private-battle-<id>` несе відредаговану дельту з `redacted: true`; ДМ додатково підписаний на `private-battle-dm-<id>` (`battleDmChannelName`) з повною дельтою тієї ж версії. Клієнт ДМ ігнорує `redacted`, лише поки dm-канал підписаний (`onSubscribed` робить resync, `onError` дає `unavailable` і polling).
+- Переповнення (`PUSHER_DELTA_LIMIT_BYTES`): публічний refetch-сигнал при `changed` позначений `redacted: true`, тож ДМ рефетчить один раз (за своїм dm-сигналом); GET сцени й сторінка журналу віддають гравцю відредагований журнал. Відповідь мутації ДМу повна.
+- Учасники йдуть сирими: `initiativeOrder` (`activeEffects`, `currentHp` ворогів) у дельті/GET не редагується. Повна серверна приватність учасників — окремий епік для всіх систем (хвіст нижче).
+- Unconscious без тривалості (`UNTIMED_CONDITIONS`): знімають ДМ або лікування. `keepsWhenDown` повертає `true` для всіх ефектів `wfrp:cond:*`, тож `clearFallenEffects` лишає стани на непритомному (DEAD — знімає все, як і раніше), і ДМ бачить бейдж/кнопку «Зняти».
+- Кровотеча на непритомному = шанс смерті на пропущеному ході: контракт `conditions.skippedTurn` (`wfrpSkippedTurn`), виклик із `skippedTurnAt` (`turn/skipped-turn.ts`) на ході непритомного. Рядок «хід пропущено» пишеться для не-ворожої сторони або коли є кидок кровотечі (збитий ворог без кровотечі мовчить). `keepDownedAfterVictory: true`: збиті герої лишаються збитими після перемоги з 0 Wounds (не піднімаються до 1).
+- Контракт `RuleSystemConditions` доповнено: `keepsWhenDown`, `skippedTurn`, `keepDownedAfterVictory`; d20-системи їх не задають, поведінка не змінена.
+- `import/no-cycle` `maxDepth: 6` (цикли attack/damage/ability розірвано в пакеті E).
+- Тест з листа бере ефекти зі стану активного бою, тож стани впливають на `selfTestMod`.
+- `scope-size` (кампанія + бій, gzip): uk 102.0 KB без `battleWfrp`, 102.8 KB з ним (база 5c-1: 102.7), en 82.1 / 82.8 KB (база 82.7); кампанія окремо uk 81.6 / en 65.5; root 13.6. Ліміт 105.
+
+### Відкриті хвости для 5c-3
+
+- Числа каталогу станів і формула Entangled не звірені з книгою (немає джерела).
+- Повна серверна приватність учасників (`initiativeOrder`: `activeEffects`/`currentHp` ворогів) — окремий епік усіх систем.
+- Питання до користувача (M-4): шанс смерті від кровотечі діє й при HP > 0 (непритомність від крововтрати), тоді як дослідження каже про 0 Wounds. Код не змінено.
+- Повторне накладання стану на вже непритомного дублює рядок журналу; Unconscious, накладений ДМ, не обнуляє `currentHp`.
+- Залишки ядра: у core лишились `battleLog.damage.steps.wfrp.*`, `battleLog.damage.rows.wfrpTotal`, `battleLog.wfrp.unconscious`; гард ловить лише `battleWfrp.` (M-7).
+- Dev-індикатор Next «1 Issue» = гідратація `Button`/`DropdownMenuTrigger` у Header (є й на main, не з гілки).
+- Не перевірено живу Pusher-дельту гравцю (немає другого акаунта).
+- ESLint: ще 16 не-cycle помилок у тестах `lib/server` та `useUnitsList.ts` (давні).
 
 ## Межі 5b-3
 
@@ -101,7 +126,7 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 - d100, режим кидка («Авто»/«Вручну») фіксується першим ударом багатоцільової атаки (`lockedRollSource` за станом flow: після першого кинутого удару перемикач прихований), тож змішаного режиму й тихого перекидання ручних кидків сервером немає. Відомі обмеження: кубики шкоди в режимі «server» кидає клієнт (як у d20); пробний прогін пулу шкоди не враховує d20-криті (wfrp їх не має).
 - Багатоцільова d100-атака: клієнт шле блок кубиків на кожну ціль, а `runAttackPhase` для систем з `combat.dice !== 20` робить пробний прогін із записом rng і програє запис, лишаючи в пулі блоки лише за влучання (як у d20, де клієнт шле кубики лише влучань).
 - Сервер: `validateAttackRequest(scope, data, rules)` кидає `ROLL_OUT_OF_RANGE` (код `invalid_dice`), коли кидок > `combat.dice` (у dnd5e/homm `d20Roll` > 20 — теж 400); другий кидок ігнорується, коли `sides != 20`.
-- Приватність: якщо глядач бачить ціль не «exact» (`canSeeExactStats`), `buildAttackResultFx` прибирає `defender`, а `sl` стає `netSl`; `percentile.opposed` (ближній бій) лишається, тож «Momentum gained» видно й без захисника. У журналі `sanitizeLogEntry` для не-DM прибирає `percentile.defender` і замінює рядок `battleLog.percentile.opposed` на `opposedHidden` (без кидка/цілі/SL захисника); рядки «Відповідь цілі» для d100 не містять d20, деталі запису не показують «Attack roll»/«Target AC» для percentile-записів, HP у деталях і підказці воскресіння — «Wounds» за `woundsLabel`; рядок відсічі/нагоди (`buildOffTurnAction`) обирає d100-формулювання за `combat.dice` правил (`rules` — параметр білдера). ДМ-панель масштабування (Підсилити/Послабити) і підпис множника в рядку учасника в wfrp кажуть «Wounds» (`woundsLabel`); `ParticipantRow` бере `view: { exact, acText, wounds, current }` і порівнює його поверхнево (`memo` з компаратором); `DmCharacterCard` не малює Level/HP, поки `useRuleSystem` не `ready`.
+- Приватність: якщо глядач бачить ціль не «exact» (`canSeeExactStats`), `buildAttackResultFx` прибирає `defender` (у публічних даних гравця сервер уже завжди прибирає `percentile.defender`, тож гілка `exact` у клієнті реально працює лише для ДМ/сирого журналу), а `sl` стає `netSl`; `percentile.opposed` (ближній бій) лишається, тож «Momentum gained» видно й без захисника. У журналі `sanitizeLogEntry` для не-DM прибирає `percentile.defender` і замінює рядок `battleLog.percentile.opposed` на `opposedHidden` (без кидка/цілі/SL захисника); рядки «Відповідь цілі» для d100 не містять d20, деталі запису не показують «Attack roll»/«Target AC» для percentile-записів, HP у деталях і підказці воскресіння — «Wounds» за `woundsLabel`; рядок відсічі/нагоди (`buildOffTurnAction`) обирає d100-формулювання за `combat.dice` правил (`rules` — параметр білдера). ДМ-панель масштабування (Підсилити/Послабити) і підпис множника в рядку учасника в wfrp кажуть «Wounds» (`woundsLabel`); `ParticipantRow` бере `view: { exact, acText, wounds, current }` і порівнює його поверхнево (`memo` з компаратором); `DmCharacterCard` не малює Level/HP, поки `useRuleSystem` не `ready`.
 - 3D-кубики: пара d10 будується з `actionDetails.percentile` у `from-action.ts` (seed `1_000_003 + actionIndex`), у `diceRolls` не пишеться; `DieSlot.tens` — грань «00…90», `DieSlot.units` — кубик одиниць, його грань 10 читається «0» (d10 моралі лишається «10»).
 - Гард літералів відстані: `battle-log-distance-unit.test.ts`.
 - Панель героя: плитка «Magic» (`ActionGrid.available.magicTile`) і слоти заклинань ховаються прапорцем `spells` з `useBattleRules()`; `ActionResultCard` обирає d100-вигляд за `combat.dice`.

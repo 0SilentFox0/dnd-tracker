@@ -12,7 +12,7 @@ Self-hosted (`public/fonts/*.woff2` + `@font-face` in `app/fonts.css`; latin+cyr
 
 ## Pusher
 
-`lib/pusher/server.ts` (`server-only`, routes/pipeline) / `lib/pusher/client.ts` (`pusher-js`, lazy-imported by `usePusherBattleSync`) / `lib/pusher/channels.ts` (names, safe for both) + `app/api/pusher/auth/route.ts`. Battle pages fall back to polling if Pusher env vars are missing; in production `PUSHER_APP_ID`/`PUSHER_SECRET` must be set or events silently no-op.
+`lib/pusher/server.ts` (`server-only`, routes/pipeline) / `lib/pusher/client.ts` (`pusher-js`, lazy-imported by `usePusherBattleSync`) / `lib/pusher/channels.ts` (names, safe for both) + `app/api/pusher/auth/route.ts`. Battle pages fall back to polling if Pusher env vars are missing; in production `PUSHER_APP_ID`/`PUSHER_SECRET` must be set or events silently no-op. Channels: `private-battle-<id>` (all members), `private-battle-dm-<id>` (DM only, full unredacted battle delta; auth route checks the DM role), `private-user-<id>`.
 
 ## Data in the first HTML
 

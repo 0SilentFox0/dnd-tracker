@@ -33,7 +33,7 @@ Every battle route is a Zod schema + `runBattleMutation` (`lib/server/battles/ru
 - runs `mutate` (pure engine code from `lib/utils/battle/*`, `lib/utils/abilities/*`), checks victory once;
 - saves with an optimistic `version` lock (`saveBattle`: changed `battle_participants` rows in one `UPDATE … FROM (VALUES …)` without reading rows back, append-only `battle_events`, `battle_snapshots` for rollback — pruned to the last 20 when the battle completes; the cleanup cron deletes all snapshots of battles completed more than 90 days ago, events and participants are kept);
 - answers `{ delta, response? }` (`ClientBattleDelta` from `pipeline/client-delta.ts`: new participants and those whose snapshot changed go in `upserted`, the rest as `patched` with only the column/state fields from `PATCHABLE_PARTICIPANT_FIELDS`);
-- sends Pusher `battle-delta` (or `{ refetch: true }` above 9 500 bytes) after the response (`after()`).
+- sends Pusher `battle-delta` (or `{ refetch: true }` above 9 500 bytes) after the response (`after()`). Systems with concealed log lines (wfrp): the public `private-battle-<id>` delta carries a server-redacted log (`redacted: true`), the DM also gets the full delta on `private-battle-dm-<id>`; see "Межі 5c-2" in [rule-systems.md](rule-systems.md).
 
 `GET /` and `dryRun` still return the full `BattleScene` with the last 30 events; older ones come from `GET /events?before=<seq>` («Показати раніші», `useBattleLogHistory`), and `GET /?versionOnly=1` answers `{ version }`.
 
