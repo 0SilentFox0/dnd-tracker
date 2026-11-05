@@ -7,7 +7,7 @@ import { multiplierRow, ruleRow, stepRow, totalRow } from "../../damage/rows";
 import { applyWeaponFlat } from "../../damage/weapon-flat";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
-import { applyCriticalEffect } from "..";
+import { applyCriticalEffect } from "../critical";
 import { applyResistanceForAdditional } from "./damage";
 
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";

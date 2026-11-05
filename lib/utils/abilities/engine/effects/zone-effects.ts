@@ -1,8 +1,8 @@
-import { staticEffectStrength } from "@/lib/utils/abilities/engine/core/effect-strength";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { numericStrength } from "@/lib/utils/abilities/engine/core/strength-core";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
-const effectStrength = (e: ActiveEffect) => (e.abilityEffects ?? []).reduce((sum, s) => sum + staticEffectStrength(s), 0);
+const effectStrength = (e: ActiveEffect) => (e.abilityEffects ?? []).reduce((sum, s) => sum + numericStrength(s), 0);
 
 /**
  * Ефекти, що діють на учасника: зони мертвих власників не діють, однакові аури кількох власників — лише найсильніша.

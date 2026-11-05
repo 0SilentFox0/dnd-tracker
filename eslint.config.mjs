@@ -182,7 +182,7 @@ const eslintConfig = defineConfig([
           next: ["const", "let", "var", "if", "class", "function", "block", "return"],
         },
       ],
-      "import/no-cycle": [2, { maxDepth: 1 }],
+      "import/no-cycle": [2, { maxDepth: 6 }],
       "react/jsx-key": "warn",
     },
   },
