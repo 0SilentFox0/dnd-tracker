@@ -65,6 +65,15 @@ describe("wfrpConditionsTurnStart", () => {
     expect(JSON.stringify(r.messages)).toContain("battleLog.wfrp.unconscious");
   });
 
+  it("tick damage never takes wounds below 0 (unconscious, not dead)", () => {
+    for (const cond of [["bleeding", 3], ["ablaze", 5]] as Array<[WfrpConditionKey, number]>) {
+      const r = tick(make(1, [cond]), () => 0.99);
+
+      expect(self(r).combatStats.currentHp).toBe(0);
+      expect(self(r).combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+    }
+  });
+
   it("an inactive bearer does not tick", () => {
     const p = make(10, [["bleeding", 2]], CombatStatus.UNCONSCIOUS);
 

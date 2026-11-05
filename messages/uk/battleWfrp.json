@@ -51,6 +51,7 @@
   },
   "log": {
     "applied": "{target}: {condition}{level, plural, =1 {} other { ×#}} ({source})",
+    "appliedHidden": "{target}: {condition} ({source})",
     "removed": "{target}: {condition} знято",
     "reduced": "{target}: {condition} ×{level}",
     "tick": {
@@ -60,6 +61,8 @@
     },
     "endTestSuccess": "{name}: {condition} — тест {roll} / {target}, SL {sl}: успіх",
     "endTestFail": "{name}: {condition} — тест {roll} / {target}, SL {sl}: невдача",
+    "endTestSuccessHidden": "{name}: {condition} — тест {roll}, SL {sl}: успіх",
+    "endTestFailHidden": "{name}: {condition} — тест {roll}, SL {sl}: невдача",
     "stand": "{name} підводиться",
     "fortuneReroll": "{name} витрачає Fortune: перекидання (перший кидок {first})",
     "fortuneSl": "{name} витрачає Fortune: +1 SL"

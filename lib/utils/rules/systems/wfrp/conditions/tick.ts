@@ -26,7 +26,7 @@ export function wfrpConditionsTurnStart(ps: BattleParticipant[], id: string, ctx
 
     if (!before || !isActive(before) || amount <= 0) return;
 
-    const after = { ...before, combatStats: { ...before.combatStats, currentHp: before.combatStats.currentHp - amount } };
+    const after = { ...before, combatStats: { ...before.combatStats, currentHp: Math.max(0, before.combatStats.currentHp - amount) } };
 
     const r = ctx.applyDamage({ before, after, amount, rules: ctx.rules, rng: ctx.rng, participants: replaceParticipant(participants, after), round: ctx.round });
 

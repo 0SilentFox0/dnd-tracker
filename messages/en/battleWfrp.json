@@ -51,6 +51,7 @@
   },
   "log": {
     "applied": "{target}: {condition}{level, plural, =1 {} other { ×#}} ({source})",
+    "appliedHidden": "{target}: {condition} ({source})",
     "removed": "{target}: {condition} removed",
     "reduced": "{target}: {condition} ×{level}",
     "tick": {
@@ -60,6 +61,8 @@
     },
     "endTestSuccess": "{name}: {condition} — test {roll} / {target}, SL {sl}: success",
     "endTestFail": "{name}: {condition} — test {roll} / {target}, SL {sl}: failure",
+    "endTestSuccessHidden": "{name}: {condition} — test {roll}, SL {sl}: success",
+    "endTestFailHidden": "{name}: {condition} — test {roll}, SL {sl}: failure",
     "stand": "{name} gets up",
     "fortuneReroll": "{name} spends Fortune: reroll (first roll {first})",
     "fortuneSl": "{name} spends Fortune: +1 SL"

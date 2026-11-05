@@ -19,7 +19,7 @@ export function applyWfrpConditionTo(p: BattleParticipant, input: SystemConditio
 
   const effectKey = wfrpConditionEffectKey(key);
 
-  const levels = def.leveled ? Math.min(Math.max(input.levels ?? 1, 1), def.leveled.max) : 1;
+  const levels = def.leveled ? Math.min(Math.max(input.levels ?? 1, 1), def.leveled.max - conditionLevel(p, key)) : 1;
 
   const rounds = input.rounds ?? def.rounds;
 

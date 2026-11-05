@@ -15,7 +15,7 @@ export function BattleLog() {
 
   const { battleLog, initiativeOrder } = battle;
 
-  const entries = useMemo(() => [...(battleLog ?? [])].reverse().map((e) => sanitizeLogEntry(e, viewer)), [battleLog, viewer]);
+  const entries = useMemo(() => [...(battleLog ?? [])].reverse().map((e) => sanitizeLogEntry(e, viewer, initiativeOrder)), [battleLog, viewer, initiativeOrder]);
 
   return (
     <>

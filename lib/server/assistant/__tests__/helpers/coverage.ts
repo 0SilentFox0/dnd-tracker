@@ -83,6 +83,8 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/battles/[battleId]/crit-choice', methods: ['POST'], task: 10, adapter: 'battle-crit-choice-handoff', state: "handoff" },
   { route: 'campaigns/[id]/battles/[battleId]/complete', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/conditions', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
+  { route: 'campaigns/[id]/battles/[battleId]/condition-test', methods: ['POST'], task: 0, adapter: 'wfrp rule system, assistant adapter after the epic', state: "planned" },
+  { route: 'campaigns/[id]/battles/[battleId]/system-condition', methods: ['POST'], task: 0, adapter: 'wfrp rule system, assistant adapter after the epic', state: "planned" },
   { route: 'campaigns/[id]/battles/[battleId]/core-action', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/events', methods: ['GET'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/initiative-reorder', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },

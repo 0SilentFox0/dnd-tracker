@@ -16,7 +16,6 @@ import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { wfrpConditions } from "@/lib/utils/rules/systems/wfrp/conditions/levels";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -41,8 +40,6 @@ const firstThen = (first: number, rest: number) => {
   return () => (calls++ === 0 ? first : rest);
 };
 
-const crits = (p: BattleParticipant) => p.battleData.activeEffects.filter((e) => e.name.startsWith("crit.wfrp."));
-
 const hp = (c: BattleMutationContext, id: string) => c.participants.find((p) => p.basicInfo.id === id)!.combatStats.currentHp;
 
 describe("wfrp battle end to end (engine)", () => {
@@ -60,10 +57,13 @@ describe("wfrp battle end to end (engine)", () => {
 
     const rolls: number[] = [];
 
+    let lastEvents = "";
+
     const step = async (attackerId: string, targetId: string, attackerRoll = 30) => {
       const out = await attackMutation({ ...ctx, rng: () => 0.795 }, hit(attackerId, targetId, attackerRoll));
 
       rolls.push(out.events.length);
+      lastEvents = JSON.stringify(out.events);
       ctx = { ...ctx, participants: out.participants, pending: out.pending ?? ctx.pending, scene: { ...ctx.scene, ...out.scene } };
     };
 
@@ -82,7 +82,7 @@ describe("wfrp battle end to end (engine)", () => {
     const target = ctx.participants.find((p) => p.basicInfo.id === "t")!;
 
     expect(target.combatStats).toMatchObject({ currentHp: 0, status: CombatStatus.UNCONSCIOUS });
-    expect(crits(target).length + wfrpConditions(target).length).toBeGreaterThan(0);
+    expect((lastEvents.match(/battleLog\.wfrp\.crit(?:Hit|Wound)/g) ?? []).length).toBe(1);
     expect(rolls.every((n) => n > 0)).toBe(true);
   });
 

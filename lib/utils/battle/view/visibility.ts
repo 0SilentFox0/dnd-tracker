@@ -39,14 +39,40 @@ function hideDefense(line: LogLine): LogLine {
   return textRef("battleLog.percentile.opposedHidden", { roll: roll ?? 0, target: target ?? 0, sl: sl ?? 0, netSl: netSl ?? 0 });
 }
 
-export function sanitizeLogEntry(e: BattleAction, viewer: Viewer): BattleAction {
+function hideTargetDetails(line: LogLine): LogLine {
+  if (typeof line === "string") return line;
+
+  const { message, params } = line;
+
+  if (message === "battleWfrp.log.applied") {
+    const { level: _level, ...rest } = params ?? {};
+
+    return textRef("battleWfrp.log.appliedHidden", rest);
+  }
+
+  if (message === "battleWfrp.log.endTestSuccess" || message === "battleWfrp.log.endTestFail") {
+    const { target: _target, ...rest } = params ?? {};
+
+    return textRef(`${message}Hidden`, rest);
+  }
+
+  return line;
+}
+
+export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, participants: BattleParticipant[] = []): BattleAction {
   if (viewer.isDM) return e;
+
+  const concealed = (e.targets ?? []).some((t) => {
+    const p = participants.find((x) => x.basicInfo.id === t.participantId);
+
+    return !p || !canSeeExactStats(p, viewer);
+  });
 
   const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = e.actionDetails ?? {};
 
   const hidden: BattleAction = { ...e, actionDetails: percentile ? { ...rest, percentile: { ...percentile, defender: undefined } } : rest };
 
-  return e.log ? { ...hidden, log: e.log.map(hideDefense) } : hidden;
+  return e.log ? { ...hidden, log: e.log.map((l) => (concealed ? hideTargetDetails(hideDefense(l)) : hideDefense(l))) } : hidden;
 }
 
 export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: BattleAction[], exact: boolean, knowledge?: BattleKnowledge): DamageStep[] {

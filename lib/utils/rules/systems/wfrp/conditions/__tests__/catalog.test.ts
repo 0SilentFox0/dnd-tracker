@@ -71,6 +71,13 @@ describe("stacking", () => {
     expect(effectsOf(more, "bleeding")).toHaveLength(2);
   });
 
+  it("stored levels never exceed the cap, so -1 acts at once", () => {
+    const p = me(add(add([makeParticipant({ id: "a" })], "bleeding", 9), "bleeding", 3));
+
+    expect(effectsOf(p, "bleeding").reduce((n, e) => n + (e.effects[0].value ?? 0), 0)).toBe(10);
+    expect(conditionLevel(me(reduceWfrpConditionIn([p], "a", "bleeding", 1).participants), "bleeding")).toBe(9);
+  });
+
   it("does not duplicate a flat condition", () => {
     const p = me(add(add([makeParticipant({ id: "a" })], "prone"), "prone"));
 

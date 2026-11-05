@@ -182,7 +182,7 @@ export const attackBodySchema = z
     message: REJECT.oneTargetRequired,
     path: ["targetIds"],
   })
-  .refine((d) => !d.fortune || ((d.targetIds?.length ?? 0) + (d.targetId ? 1 : 0) === 1 && (d.targetIds?.length ?? 0) <= 1), {
+  .refine((d) => !d.fortune || ((d.targetIds?.length ?? 0) + (d.targetId ? 1 : 0) === 1), {
     message: REJECT.oneTargetRequired,
     path: ["fortune"],
   });

@@ -45,6 +45,26 @@ describe("видимість", () => {
     expect(sanitizeLogEntry(e, { ...player, isDM: true })).toBe(e);
   });
 
+  it("wfrp: рівень стану і ціль тесту зняття чужої не-exact цілі ховаються для гравця", () => {
+    const enemy = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "e" } } as BattleParticipant;
+
+    const ally = { ...side(ParticipantSide.ALLY), basicInfo: { ...side(ParticipantSide.ALLY).basicInfo, id: "f" } } as BattleParticipant;
+
+    const entry = (id: string, log: unknown[]) => ({ targets: [{ participantId: id, participantName: "x" }], actionDetails: {}, log }) as unknown as BattleAction;
+
+    const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 3, source: "s" } };
+
+    const test = { message: "battleWfrp.log.endTestFail", params: { name: "x", condition: "c", roll: 50, target: 35, sl: -1 } };
+
+    const seen = sanitizeLogEntry(entry("e", [applied, test]), player, [enemy, ally]);
+
+    expect(seen.log?.[0]).toEqual({ message: "battleWfrp.log.appliedHidden", params: { target: "x", condition: "c", source: "s" } });
+    expect(seen.log?.[1]).toEqual({ message: "battleWfrp.log.endTestFailHidden", params: { name: "x", condition: "c", roll: 50, sl: -1 } });
+    expect(sanitizeLogEntry(entry("f", [applied, test]), player, [enemy, ally]).log).toEqual([applied, test]);
+    expect(sanitizeLogEntry(entry("e", [applied]), { ...player, isDM: true }, [enemy])).toEqual(entry("e", [applied]));
+    expect(sanitizeLogEntry(entry("e", [applied]), { ...player, canSeeEnemyHp: true }, [enemy]).log).toEqual([applied]);
+  });
+
   it("кроки цілі ховаються, доки не помічені в журналі", () => {
     const steps: DamageStep[] = [
       { label: "Кубики", side: "attacker", kind: "dice", value: 6, after: 6 },

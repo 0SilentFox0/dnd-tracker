@@ -532,7 +532,7 @@ export interface BattleParticipantBattleData {
   /** Атаки дії «Атака», що лишилися цього ходу */
   attacksLeft?: number;
   inspiration?: boolean;
-  /** WFRP Fortune left this battle; unset means the sheet value (read lazily, so nothing is seeded at battle start) */
+  /** WFRP Fortune left this battle; seeded at battle start from the sheet (saved fortune, else Fate) */
   fortune?: number;
   /** WFRP condition keys whose end test was already attempted this turn */
   conditionTests?: string[];
