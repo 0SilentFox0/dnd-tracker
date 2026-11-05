@@ -1,1 +1,1 @@
-export { type AdvancementRules, AdvancementRulesSchema, type AdvancementTrack } from "@/lib/utils/rules/advancement";
+export type { AdvancementRules, AdvancementTrack } from "@/lib/utils/rules/advancement";

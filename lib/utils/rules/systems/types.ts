@@ -1,3 +1,7 @@
+import type { advanceCost } from "./wfrp/advancement/cost";
+import type { planPurchase } from "./wfrp/advancement/plan";
+import type { availableXp, talentGroups } from "./wfrp/advancement/talent-groups";
+import type { planUndo } from "./wfrp/advancement/undo";
 import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
 import type { HitLocation } from "./wfrp/combat/constants";
 import type { WfrpParticipantStats } from "./wfrp/combat/participant";
@@ -252,6 +256,7 @@ export interface RuleSystemDefinition {
   combat: RuleSystemCombat;
   conditions?: RuleSystemConditions;
   magic?: RuleSystemMagic;
+  advancement?: RuleSystemAdvancement;
   lineage: boolean;
   classes: boolean;
   attacks: boolean;
@@ -259,6 +264,14 @@ export interface RuleSystemDefinition {
   items: boolean;
   d20Stats: boolean;
   unusedMechanics: readonly MechanicKey[];
+}
+
+export interface RuleSystemAdvancement {
+  cost: typeof advanceCost;
+  planPurchase: typeof planPurchase;
+  planUndo: typeof planUndo;
+  availableXp: typeof availableXp;
+  talentGroups: typeof talentGroups;
 }
 
 export type ApplyDamageConsequences = typeof import("@/lib/utils/battle/damage/consequences").applyDamageConsequences;

@@ -7,7 +7,7 @@ import { UnitGroupAppearancesSchema } from "@/lib/schemas/unit-groups";
 import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
-import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement";
+import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
