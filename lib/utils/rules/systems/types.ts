@@ -12,7 +12,7 @@ import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { SpellMagic } from "@/lib/utils/spells/model/schema";
+import type { SpellMagic, SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { LogLine } from "@/types/text";
@@ -37,6 +37,7 @@ export interface SheetWfrpBlock {
   skills: { key: string; spec?: string; characteristic: CharacteristicKey; target: number; advances: number; trained: boolean; kind: "basic" | "advanced" }[];
   fate: number;
   fortune: number;
+  sin: number;
 }
 
 export interface SheetTestInput {
@@ -176,11 +177,15 @@ export interface CastTestCtx {
   fortune?: { kind: FortuneKind; manualReroll?: number };
 }
 
+export type MiscastKind = "minor" | "major" | "wrath";
+
 export interface CastTestResult {
   success: boolean;
   sl: number;
   overcastSteps: number;
-  miscast: "minor" | "major" | null;
+  miscast: MiscastKind | null;
+  /** Prayers neither use nor spend banked channelling */
+  keepChannelled?: true;
   percentile: PercentileCastDetails & { outcome: PercentileOutcome };
   lines: LogLine[];
   fortune?: { kind: FortuneKind; firstRoll?: number };
@@ -190,9 +195,9 @@ export interface RuleSystemMagic {
   slots: false;
   castTest(ctx: CastTestCtx): CastTestResult;
   /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
-  castPreview(caster: BattleParticipant): { target: number; channelTarget: number; channelled: number; armourSl: number };
+  castPreview(caster: BattleParticipant, kind?: SpellMagicKind): { target: number; channelTarget: number; channelled: number; armourSl: number };
   channel(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng; presetRoll?: number }): { participant: BattleParticipant; lines: LogLine[]; miscast: "minor" | "major" | null };
-  miscast(ps: BattleParticipant[], casterId: string, kind: "minor" | "major", ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult;
+  miscast(ps: BattleParticipant[], casterId: string, kind: MiscastKind, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences; presetRoll?: number }): SystemConditionResult;
   attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
   /** Token badge for banked channelling */
   badge(p: BattleParticipant): ActiveEffect | null;

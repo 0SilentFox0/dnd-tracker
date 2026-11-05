@@ -35,6 +35,8 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
 
   const [temp, setTemp] = useState(String(rest.hp?.temp ?? 0));
 
+  const [sin, setSin] = useState(String(sheet.wfrp?.sin ?? 0));
+
   const [exhaustion, setExhaustion] = useState(String(rest.exhaustion ?? 0));
 
   const itemCharges = rest.charges.filter((c) => c.key.startsWith(ITEM_POOL_PREFIX) || c.key.startsWith(GRANT_POOL_PREFIX));
@@ -45,9 +47,9 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
 
   const send = (body: ResourcesEditBody) => void edit.mutateOk(body).then((ok) => ok && onOpenChange(false));
 
-  const filled = [hp, temp, exhaustion].every((v) => v.trim() !== "");
+  const filled = [hp, temp, exhaustion, ...(sheet.wfrp ? [sin] : [])].every((v) => v.trim() !== "");
 
-  const save = () => filled && send({ hp: Number(hp), tempHp: Number(temp), exhaustion: Number(exhaustion), ...(Object.keys(changedCharges).length > 0 && { charges: changedCharges }) });
+  const save = () => filled && send({ hp: Number(hp), tempHp: Number(temp), exhaustion: Number(exhaustion), ...(sheet.wfrp && { sin: Number(sin) }), ...(Object.keys(changedCharges).length > 0 && { charges: changedCharges }) });
 
   const toggleDead = async () => {
     if (rest.dead || (await confirm({ title: t("deadConfirmTitle"), confirmLabel: t("deadConfirm"), destructive: true }))) send({ dead: !rest.dead });
@@ -89,6 +91,12 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
               <Input id="res-exh" type="number" min={0} max={MAX_EXHAUSTION} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
             </div>
           </>
+        )}
+        {sheet.wfrp && (
+          <div>
+            <Label htmlFor="res-sin">{t("sin")}</Label>
+            <Input id="res-sin" type="number" min={0} max={10} value={sin} onChange={(e) => setSin(e.target.value)} />
+          </div>
         )}
         {itemCharges.map((c) => (
           <div key={c.key} className="col-span-3 grid grid-cols-[1fr_6rem] items-center gap-2">

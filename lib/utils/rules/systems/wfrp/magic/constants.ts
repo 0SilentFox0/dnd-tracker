@@ -10,3 +10,9 @@ export const ARMOUR_SL_PER_AP = 1;
 export const CHANNEL_MAX_SL = 10;
 // verify against 5e book
 export const NO_OVERCAST_KINDS: ReadonlySet<SpellMagicKind> = new Set(["petty", "blessing", "miracle"]);
+// verify against 5e book
+export const PRAY_SKILL = { key: "pray" } as const;
+// verify against 5e book
+export const PRAYER_KINDS: ReadonlySet<SpellMagicKind> = new Set(["blessing", "miracle"]);
+// verify against 5e book
+export const WRATH_SIN_MAX = 10;

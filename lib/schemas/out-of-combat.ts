@@ -51,6 +51,7 @@ export const resourcesEditSchema = z
     exhaustion: z.number().int().min(0).max(MAX_EXHAUSTION).optional(),
     dead: z.boolean().optional(),
     fortune: z.number().int().min(0).max(9).optional(),
+    sin: z.number().int().min(0).max(10).optional(),
     reset: z.literal(true).optional(),
     charges: z.record(z.string().min(1).max(300), z.number().int().min(0).max(999)).optional(),
   })

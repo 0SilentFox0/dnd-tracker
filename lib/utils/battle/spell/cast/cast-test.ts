@@ -35,7 +35,7 @@ export function settleCastTest(state: SpellCastState, { magic, cast }: Settle): 
 
   const caster = getP(state.flow, casterId);
 
-  put(state.flow, { ...caster, battleData: { ...caster.battleData, channelledSl: 0, ...(cast.fortune && { fortune: Math.max(0, (caster.battleData.fortune ?? 0) - 1) }) } });
+  put(state.flow, { ...caster, battleData: { ...caster.battleData, ...(!cast.keepChannelled && { channelledSl: 0 }), ...(cast.fortune && { fortune: Math.max(0, (caster.battleData.fortune ?? 0) - 1) }) } });
 
   if (!cast.miscast) return;
 

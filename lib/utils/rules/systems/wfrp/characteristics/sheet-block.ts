@@ -37,5 +37,6 @@ export function wfrpSheetBlock({ characteristics: c, resources }: SheetBlockInpu
     skills,
     fate: c.fate,
     fortune: resources.fortune ?? c.fate,
+    sin: resources.sin ?? 0,
   };
 }

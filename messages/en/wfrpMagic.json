@@ -5,7 +5,8 @@
     "castFail": "{name} casts {spell}: {roll} / {target}, SL {sl} (CN {cn}) — failure",
     "castCritical": "{name} casts {spell}: {roll} / {target} — critical success (CN {cn})",
     "channelSuccess": "{name} channels: {roll} / {target}, SL {sl}, banked {banked}",
-    "channelFail": "{name} fails to channel: {roll} / {target}"
+    "channelFail": "{name} fails to channel: {roll} / {target}",
+    "wrath": "{name} stirs divine wrath! {effect}"
   },
   "miscast": {
     "minor": {
@@ -21,6 +22,12 @@
       "3": "Cursed light sears your eyes and flays your flesh.",
       "4": "Dread steals your will and your hands shake.",
       "5": "The magic tears you apart from within."
+    },
+    "wrath": {
+      "1": "Holy weariness drags at you.",
+      "2": "Your head rings with a reproachful hymn.",
+      "3": "A thunderclap deafens you.",
+      "4": "A searing light blinds and burns you."
     }
   },
   "reject": {},
@@ -49,7 +56,8 @@
       "overcast": "Overcast ×{steps}",
       "miscast": {
         "minor": "Minor miscast",
-        "major": "Major miscast"
+        "major": "Major miscast",
+        "wrath": "Divine wrath"
       }
     },
     "badge": {

@@ -119,3 +119,62 @@ describe("castPreview and badge", () => {
     expect(channelBadge(caster({ channelledSl: 3 }))).toMatchObject({ permanent: true, label: { params: { sl: 3 } } });
   });
 });
+
+describe("prayers", () => {
+  const pray = (presetRoll: number, kind: SpellMagic["kind"], over: { sin?: number; channelledSl?: number; cn?: number } = {}) =>
+    wfrpCastTest({ caster: caster({ base: { fel: 35 }, sin: over.sin, channelledSl: over.channelledSl }), spell, magic: { cn: over.cn ?? 0, kind, overcast: "dice" }, rules: WFRP_RULES, rng: mulberry32(1), presetRoll });
+
+  it("Blessing: Pray (Fel 35) preset 30 succeeds with no CN and no overcast", () => {
+    const r = pray(30, "blessing");
+
+    expect(r.success).toBe(true);
+    expect(r.percentile).toMatchObject({ target: 35, cn: 0 });
+    expect(r.overcastSteps).toBe(0);
+  });
+
+  it("Blessing fails when the roll is above the target", () => {
+    expect(pray(60, "blessing").success).toBe(false);
+  });
+
+  it("Miracle with CN 2 fails on SL 1", () => {
+    const r = pray(25, "miracle", { cn: 2 });
+
+    expect(r.percentile.sl).toBe(1);
+    expect(r.success).toBe(false);
+  });
+
+  it("uses the Pray skill advances", () => {
+    const r = wfrpCastTest({ caster: caster({ base: { fel: 35 }, skillAdvances: { pray: 10 } }), spell, magic: { cn: 0, kind: "blessing", overcast: null }, rules: WFRP_RULES, rng: mulberry32(1), presetRoll: 30 });
+
+    expect(r.percentile.target).toBe(45);
+  });
+
+  it("doubles with units at or below Sin bring wrath", () => {
+    expect(pray(22, "blessing", { sin: 3 }).miscast).toBe("wrath");
+    expect(pray(66, "blessing", { sin: 3 }).miscast).toBeNull();
+    expect(pray(33, "miracle", { sin: 3, cn: 1 }).miscast).toBe("wrath");
+  });
+
+  it("Sin 0 never brings wrath, and prayers have no minor or major miscast", () => {
+    expect(pray(22, "blessing", { sin: 0 }).miscast).toBeNull();
+    expect(pray(100, "blessing", { sin: 0 }).miscast).toBeNull();
+  });
+
+  it("channelled SL does not help a prayer and is kept", () => {
+    const r = pray(60, "miracle", { channelledSl: 3, cn: 1 });
+
+    expect(r.success).toBe(false);
+    expect(r.percentile.channelled).toBe(0);
+    expect(r.keepChannelled).toBe(true);
+  });
+
+  it("an ordinary spell does not keep channelled SL", () => {
+    expect(run(30).keepChannelled).toBeUndefined();
+  });
+
+  it("preview of a prayer ignores channelling and armour", async () => {
+    const { WFRP_MAGIC } = await import("../index");
+
+    expect(WFRP_MAGIC.castPreview(caster({ base: { fel: 35 }, channelledSl: 2, ap: { head: 1, arm: 1, body: 1, leg: 1 } }), "blessing")).toMatchObject({ target: 35, channelled: 0, armourSl: 0 });
+  });
+});

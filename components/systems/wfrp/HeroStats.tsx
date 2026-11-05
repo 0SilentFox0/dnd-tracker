@@ -24,6 +24,7 @@ export function HeroStats() {
       <HudStatChip size="lg" label={t("move")} short={t("short.move")} value={`${block.move.walkYd}/${block.move.runYd} ${yd}`} />
       <HudStatChip size="lg" label={t("fate")} short={t("short.fate")} value={String(block.fate)} />
       <HudStatChip size="lg" label={t("fortune")} short={t("short.fortune")} value={String(block.fortune)} />
+      <HudStatChip size="lg" label={t("sin")} short={t("short.sin")} value={String(block.sin)} />
     </>
   );
 }

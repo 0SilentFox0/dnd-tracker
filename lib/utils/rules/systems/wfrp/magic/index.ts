@@ -2,7 +2,7 @@ import type { RuleSystemMagic } from "../../types";
 import { armourSl } from "./armour";
 import { wfrpLoreAttribute } from "./attribute";
 import { channelBadge } from "./badge";
-import { castTargetOf, wfrpCastTest } from "./cast-test";
+import { castTargetOf, isPrayerKind, prayTargetOf, wfrpCastTest } from "./cast-test";
 import { channelTargetOf, wfrpChannel } from "./channel";
 import { wfrpMiscast } from "./miscast";
 
@@ -13,7 +13,11 @@ const dropChannelled = (p: BattleParticipant): BattleParticipant => (p.battleDat
 export const WFRP_MAGIC: RuleSystemMagic = {
   slots: false,
   castTest: wfrpCastTest,
-  castPreview: (caster) => ({ target: castTargetOf(caster), channelTarget: channelTargetOf(caster), channelled: caster.battleData.channelledSl ?? 0, armourSl: armourSl(caster) }),
+  castPreview: (caster, kind) => {
+    const prayer = isPrayerKind(kind);
+
+    return { target: prayer ? prayTargetOf(caster) : castTargetOf(caster), channelTarget: channelTargetOf(caster), channelled: prayer ? 0 : (caster.battleData.channelledSl ?? 0), armourSl: prayer ? 0 : armourSl(caster) };
+  },
   channel: wfrpChannel,
   miscast: wfrpMiscast,
   attribute: wfrpLoreAttribute,

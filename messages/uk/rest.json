@@ -50,7 +50,8 @@
     "tempHp": "Тимч. HP",
     "exhaustion": "Виснаження",
     "charge": "{name} (з {uses})",
-    "chargeSpent": "{name}: витрачено"
+    "chargeSpent": "{name}: витрачено",
+    "sin": "Гріх"
   },
   "sheetRoll": {
     "roll": "Кинути",

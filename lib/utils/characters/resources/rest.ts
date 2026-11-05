@@ -41,5 +41,6 @@ export function applyRest(action: RestAction, r: CharacterResources, opts: { poo
     exhaustion: Math.max(0, (r.exhaustion ?? 0) - 1),
     charges: withoutKey(r.charges, (_k, c) => c.rest !== null),
     fortune: r.fortune,
+    sin: r.sin,
   });
 }

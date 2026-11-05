@@ -319,6 +319,8 @@ export interface CharacterResources {
   exhaustion?: number;
   shortRestOpen?: boolean;
   fortune?: number;
+  /** WFRP Sin 0-10; only the DM changes it, battle never writes it */
+  sin?: number;
 }
 
 export type RestBody = { kind: "short" | "long" | "close" | "session"; characterIds: string[] };
@@ -369,7 +371,7 @@ export interface HitDieResult {
 
 export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
 
-export type ResourcesEditBody = { fortune?: number; hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
+export type ResourcesEditBody = { fortune?: number; sin?: number; hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
 
 export interface SheetRest {
   persist: boolean;

@@ -25,14 +25,16 @@
       "wounds": "Wnd",
       "move": "Move",
       "fate": "Fate",
-      "fortune": "Fort"
+      "fortune": "Fort",
+      "sin": "Sin"
     },
     "wounds": "Wounds",
     "woundsCurrent": "Wounds {current} / {max}",
     "woundsTotal": "Wounds {total}",
     "move": "Move (walk/run)",
     "fate": "Fate",
-    "fortune": "Fortune"
+    "fortune": "Fortune",
+    "sin": "Sin"
   },
   "combat": {
     "roll": "Roll",

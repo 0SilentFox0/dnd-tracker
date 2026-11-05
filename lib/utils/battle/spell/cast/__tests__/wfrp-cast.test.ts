@@ -138,3 +138,17 @@ describe("castSpell in a percentile magic system", () => {
     expect(r.casterUpdated.battleData.fortune).toBe(1);
   });
 });
+
+describe("prayers in castSpell", () => {
+  it("a prayer keeps banked SL, and doubles at or under Sin bring wrath", () => {
+    const caster = at(wfrpCaster({ channelledSl: 2, sin: 3 }), 0);
+
+    const r = run(spellOf(magicOf({ kind: "blessing", cn: 0 })), { castTest: { roll: 22 } }, caster);
+
+    expect(r.casterUpdated.battleData.channelledSl).toBe(2);
+    expect(r.cast?.miscast).toBe("wrath");
+    expect(r.casterUpdated.battleData.sin).toBe(3);
+    expect(r.messages.some((m) => typeof m !== "string" && m.message === "wfrpMagic.log.wrath")).toBe(true);
+  });
+});
+

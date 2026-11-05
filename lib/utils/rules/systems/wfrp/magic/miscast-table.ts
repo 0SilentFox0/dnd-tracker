@@ -7,6 +7,14 @@ export interface MiscastEffect {
 }
 
 // verify against 5e book
+export const WRATH_TABLE: readonly MiscastEffect[] = [
+  { max: 25, condition: { key: "fatigued", levels: 1 } },
+  { max: 50, condition: { key: "stunned", levels: 1 } },
+  { max: 75, condition: { key: "deafened", levels: 1 } },
+  { max: 100, condition: { key: "blinded", levels: 1 }, wounds: 2 },
+];
+
+// verify against 5e book
 export const MISCAST_TABLE: Record<"minor" | "major", readonly MiscastEffect[]> = {
   minor: [
     { max: 20, condition: { key: "fatigued", levels: 1 } },

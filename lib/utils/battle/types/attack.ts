@@ -27,7 +27,7 @@ export interface PercentileCastDetails {
   doubles: boolean;
   outcome: "critical" | "success" | "failure" | "fumble";
   overcastSteps: number;
-  miscast: "minor" | "major" | null;
+  miscast: "minor" | "major" | "wrath" | null;
   fortune?: { kind: "reroll" | "sl"; firstRoll?: number };
 }
 

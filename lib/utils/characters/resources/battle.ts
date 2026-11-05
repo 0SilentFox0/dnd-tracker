@@ -101,7 +101,7 @@ export function applyCharacterResources(p: BattleParticipant, state: StoredChara
 
   const fortune = r?.fortune ?? p.abilities.characteristics?.fate;
 
-  return fortune === undefined ? out : { ...out, battleData: { ...out.battleData, fortune } };
+  return fortune === undefined && r?.sin === undefined ? out : { ...out, battleData: { ...out.battleData, ...(fortune !== undefined && { fortune }), ...(r?.sin !== undefined && { sin: r.sin }) } };
 }
 
 export function spentSlots(p: BattleParticipant): Record<string, number> {

@@ -536,6 +536,8 @@ export interface BattleParticipantBattleData {
   fortune?: number;
   /** WFRP channelled SL banked for the next cast; lost on damage */
   channelledSl?: number;
+  /** WFRP Sin snapshot from the sheet; read-only in battle (the DM edits it on the sheet) */
+  sin?: number;
   /** WFRP condition keys whose end test was already attempted this turn */
   conditionTests?: string[];
   /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */

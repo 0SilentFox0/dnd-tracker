@@ -109,7 +109,7 @@ export function useSpellBook(
 
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
-  const castPreview = magic && caster && selected && state.pick?.castTest ? castPreviewOf(caster, scene.battle.rules) : null;
+  const castPreview = magic && caster && selected && state.pick?.castTest ? castPreviewOf(caster, scene.battle.rules, selected.casting?.magic?.kind) : null;
 
   const view = {
     cast: castPreview && { ...castPreview, cn: selected?.casting?.magic?.cn ?? 0, fortune: { available: fortune && (caster?.battleData.fortune ?? 0) >= 1, left: caster?.battleData.fortune ?? 0, value: state.castFortune ?? null } },

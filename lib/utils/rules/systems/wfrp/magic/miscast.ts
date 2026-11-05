@@ -1,31 +1,31 @@
 import { applyWfrpConditionTo } from "../conditions/apply";
 import { rollTable } from "../tables/roll-table";
-import { MISCAST_TABLE } from "./miscast-table";
+import { MISCAST_TABLE, WRATH_TABLE } from "./miscast-table";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { ApplyDamageConsequences, SystemConditionResult } from "@/lib/utils/rules/systems/types";
+import type { ApplyDamageConsequences, MiscastKind, SystemConditionResult } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export function wfrpMiscast(
   ps: BattleParticipant[],
   casterId: string,
-  kind: "minor" | "major",
+  kind: MiscastKind,
   ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences; presetRoll?: number },
 ): SystemConditionResult {
   const caster = findParticipant(ps, casterId);
 
   if (!caster) return { participants: ps, messages: [] };
 
-  const { index, row } = rollTable(MISCAST_TABLE[kind], ctx.rng, ctx.presetRoll);
+  const { index, row } = rollTable(kind === "wrath" ? WRATH_TABLE : MISCAST_TABLE[kind], ctx.rng, ctx.presetRoll);
 
   const name = caster.basicInfo.name;
 
-  const messages: LogLine[] = [textRef("wfrpMagic.log.miscast", { name, effect: dynamicTextRef(`wfrpMagic.miscast.${kind}.${index + 1}`) })];
+  const messages: LogLine[] = [textRef(kind === "wrath" ? "wfrpMagic.log.wrath" : "wfrpMagic.log.miscast", { name, effect: dynamicTextRef(`wfrpMagic.miscast.${kind}.${index + 1}`) })];
 
   let participants = ps;
 

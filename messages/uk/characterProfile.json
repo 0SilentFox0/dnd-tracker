@@ -25,14 +25,16 @@
       "wounds": "Рани",
       "move": "Рух",
       "fate": "Доля",
-      "fortune": "Удача"
+      "fortune": "Удача",
+      "sin": "Гріх"
     },
     "wounds": "Рани",
     "woundsCurrent": "Рани {current} / {max}",
     "woundsTotal": "Рани {total}",
     "move": "Рух (кроком/бігом)",
     "fate": "Доля",
-    "fortune": "Удача"
+    "fortune": "Удача",
+    "sin": "Гріх"
   },
   "combat": {
     "roll": "Кинути",

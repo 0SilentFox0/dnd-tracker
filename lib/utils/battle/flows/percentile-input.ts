@@ -3,6 +3,7 @@ import { parseDieInput } from "./die-input";
 import { textRef } from "@/lib/i18n/text-ref";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -27,6 +28,6 @@ export function percentileTargetOf(attacker: BattleParticipant, attack: BattleAt
 }
 
 /** Casting-test numbers shown before the roll; null outside systems with a casting test. */
-export function castPreviewOf(caster: BattleParticipant, rules: Ruleset): { target: number; channelTarget: number; channelled: number; armourSl: number } | null {
-  return ruleSystemOf(rules).magic?.castPreview(caster) ?? null;
+export function castPreviewOf(caster: BattleParticipant, rules: Ruleset, kind?: SpellMagicKind): { target: number; channelTarget: number; channelled: number; armourSl: number } | null {
+  return ruleSystemOf(rules).magic?.castPreview(caster, kind) ?? null;
 }
