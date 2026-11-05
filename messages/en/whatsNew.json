@@ -1,4 +1,8 @@
 {
+  "2026-11-05-section-music": {
+    "title": "Music for a scenario section",
+    "body": "Bind a track from the music library to a scenario section. When you show a slide from that section, the player switches to the track (a slide with its own track keeps priority); the ▶ button in the section header plays it manually."
+  },
   "2026-11-05-map-background": {
     "title": "Change the map background mid-battle",
     "body": "The DM can now swap the map background during a battle with the new Background tool on the map panel (file or link). Players see it fade smoothly: the old background dissolves while the new one appears."

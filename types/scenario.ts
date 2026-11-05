@@ -54,6 +54,8 @@ export interface ScenarioSection {
   title: string;
   played: boolean;
   icon?: SectionIconKey;
+  /** Трек із музичної бібліотеки: вмикається, коли ДМ запускає рядок розділу. */
+  trackId?: string;
   reveal?: RevealRule;
   marker?: ScenarioMarkerRef;
   revealedAt?: string | null;

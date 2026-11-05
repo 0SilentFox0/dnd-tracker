@@ -20,7 +20,7 @@ import { ScenarioLegend } from "@/components/scenario/ScenarioLegend";
 import { ScenarioToc, type TocControl, tocItems } from "@/components/scenario/ScenarioToc";
 import { useConfirm, useCssVarHeight } from "@/lib/hooks/common";
 import { useMentionSearch, useScenarioDraft, useScenarioPage } from "@/lib/hooks/scenario";
-import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowMarker, setRowSlide, setSectionMarker, updateRow, updateSection } from "@/lib/utils/scenario/structure";
+import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowMarker, setRowSlide, setSectionMarker, setSectionTrack, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
 type ActiveCell = { rowId: string; sectionId: string; column: CellColumn } | null;
@@ -130,6 +130,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
                   onTitle: (title) => draft.setContent((c) => updateSection(c, s.id, { title })),
                   onIcon: (icon) => draft.setContent((c) => updateSection(c, s.id, { icon })),
                   onMarker: (marker) => draft.setContent((c) => setSectionMarker(c, s.id, marker)),
+                  onTrack: (trackId) => draft.setContent((c) => setSectionTrack(c, s.id, trackId)),
                   onMove: (dir) => draft.setContent((c) => moveSection(c, s.id, dir)),
                   onRemove: () => void removeWithConfirm(t("removeSection", { title: s.title }), () => draft.setContent((c) => removeSection(c, s.id))),
                 }}

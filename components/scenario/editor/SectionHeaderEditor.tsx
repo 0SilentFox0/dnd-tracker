@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { MapPin } from "lucide-react";
+import { MapPin, Music } from "lucide-react";
 
 import { MarkerPickerDialog } from "./MarkerPickerDialog";
 import { OrderButtons } from "./OrderButtons";
+import { SectionTrackDialog } from "./SectionTrackDialog";
 
 import { MarkerChip } from "@/components/scenario/MarkerChip";
 import { SectionIcon } from "@/components/scenario/SectionIcon";
+import { SectionTrackChip } from "@/components/scenario/SectionTrackChip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SECTION_ICON_KEYS } from "@/lib/constants/scenario";
 import { sectionIcon } from "@/lib/utils/scenario/section-icon";
 import type { ScenarioMarkerRef, ScenarioSection, SectionIconKey } from "@/types/scenario";
 
-type Actions = { onTitle: (title: string) => void; onMove: (dir: -1 | 1) => void; onRemove: () => void; onIcon: (icon: SectionIconKey | undefined) => void; onMarker: (marker: ScenarioMarkerRef | undefined) => void };
+type Actions = { onTitle: (title: string) => void; onMove: (dir: -1 | 1) => void; onRemove: () => void; onIcon: (icon: SectionIconKey | undefined) => void; onMarker: (marker: ScenarioMarkerRef | undefined) => void; onTrack: (trackId: string | undefined) => void };
 
 export function SectionHeaderEditor({ campaignId, section, actions }: { campaignId: string; section: ScenarioSection; actions: Actions }) {
   const t = useTranslations("scenario.sectionHeader");
@@ -22,6 +24,8 @@ export function SectionHeaderEditor({ campaignId, section, actions }: { campaign
   const tIcons = useTranslations("scenario.sectionIcons");
 
   const [picking, setPicking] = useState(false);
+
+  const [pickingTrack, setPickingTrack] = useState(false);
 
   return (
     <h2 className="sb-sec-edit">
@@ -49,6 +53,11 @@ export function SectionHeaderEditor({ campaignId, section, actions }: { campaign
           <MapPin className="size-3.5" />
         </button>
       )}
+      {section.trackId && <SectionTrackChip campaignId={campaignId} trackId={section.trackId} />}
+      <button type="button" className="toggle" aria-label={t("bindTrack")} onClick={() => setPickingTrack(true)}>
+        <Music className="size-3.5" />
+      </button>
+      {pickingTrack && <SectionTrackDialog campaignId={campaignId} value={section.trackId} open onOpenChange={setPickingTrack} onPick={actions.onTrack} />}
       {picking && <MarkerPickerDialog campaignId={campaignId} open onOpenChange={setPicking} onPick={actions.onMarker} />}
       <OrderButtons
         labels={{ up: t("up", { title: section.title }), down: t("down", { title: section.title }), remove: t("remove", { title: section.title }) }}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addRow, addSection, emptyContent, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, updateRow, updateSection } from "@/lib/utils/scenario/structure";
+import { addRow, addSection, emptyContent, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, setSectionTrack, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 
 describe("structure", () => {
   it("addSection додає розділ з одним порожнім рядком і унікальними id", () => {
@@ -55,5 +55,18 @@ describe("structure", () => {
 
     expect(cleared.sections[0].rows[0]).not.toHaveProperty("slide");
     expect(cleared.sections[0].rows[0]).not.toHaveProperty("battleId");
+  });
+});
+
+describe("setSectionTrack", () => {
+  it("ставить і знімає трек розділу", () => {
+    const base = addSection(emptyContent(), "Глава");
+
+    const id = base.sections[0].id;
+
+    const bound = setSectionTrack(base, id, "t1");
+
+    expect(bound.sections[0].trackId).toBe("t1");
+    expect(setSectionTrack(bound, id, undefined).sections[0]).not.toHaveProperty("trackId");
   });
 });

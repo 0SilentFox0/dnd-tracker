@@ -12,14 +12,16 @@ import { battleKeys, useBattleBriefs } from "@/lib/hooks/battles";
 import { useNotify } from "@/lib/hooks/common";
 import { type ShowControl, showKeys, usePusherShowSync, useShowControl, useShowState } from "@/lib/hooks/show";
 import { errorMessage } from "@/lib/utils/common/error-message";
-import { battleAction, boundDeckIds, currentSlideRow, hasBattleBindings, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
+import { battleAction, boundDeckIds, currentSlideRow, hasBattleBindings, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState, sectionTrackToPlay } from "@/lib/utils/scenario/play";
 import type { BattleBrief } from "@/types/battle";
-import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow } from "@/types/scenario";
+import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow, ScenarioSection } from "@/types/scenario";
 import type { Slide } from "@/types/show";
 
 export interface ScenarioPlay {
   lookup: PlayLookup;
   showSlide(row: ScenarioRow): void;
+  /** Вмикає трек розділу вручну (без слайда). */
+  playSectionTrack(section: ScenarioSection): void;
   /** Рядок, на чиєму слайді стоїть показ. */
   currentRow: ScenarioRow | null;
   /** Рядок для «Наступний рядок»; null — далі слайдів немає. */
@@ -99,7 +101,18 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent, en
     showSlide: (row) => {
       const state = rowSlideState(row, lookup);
 
-      if (!readOnly && row.slide && state.kind === "ready" && !state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
+      if (readOnly || !row.slide || state.kind !== "ready" || state.active) return;
+
+      const section = content.sections.find((s) => s.rows.some((r) => r.id === row.id));
+
+      const trackId = section && sectionTrackToPlay(section, row, lookup);
+
+      void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId }).then((ok) => {
+        if (ok && trackId) void control.send({ action: "audio", command: { action: "play", trackId } });
+      });
+    },
+    playSectionTrack: ({ trackId }) => {
+      if (!readOnly && trackId) void control.send({ action: "audio", command: { action: "play", trackId } });
     },
     showMarker: ({ mapId, markerId }) => { if (!readOnly) void control.send({ action: "world", mapId, focusMarkerId: markerId }); },
     currentRow: currentSlideRow(content, lookup),

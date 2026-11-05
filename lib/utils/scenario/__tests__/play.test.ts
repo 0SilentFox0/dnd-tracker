@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { battleAction, boundDeckIds, currentSlideRow, hasPlayBindings, markerOnScreen, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "../play";
+import { battleAction, boundDeckIds, currentSlideRow, hasPlayBindings, markerOnScreen, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState, sectionTrackToPlay } from "../play";
 
-import type { RichDoc, ScenarioContent, ScenarioRow } from "@/types/scenario";
+import type { RichDoc, ScenarioContent, ScenarioRow, ScenarioSection } from "@/types/scenario";
 import type { ShowState, Slide } from "@/types/show";
 
 const doc: RichDoc = { type: "doc", content: [] };
@@ -110,5 +110,30 @@ describe("marker bindings", () => {
     expect(markerOnScreen(ref, show({ world: { mapId: "w", focusMarkerId: "other" } }))).toBe(false);
     expect(markerOnScreen(ref, show({ world: { mapId: "w", focusMarkerId: "m" }, curtain: true }))).toBe(false);
     expect(markerOnScreen(ref, null)).toBe(false);
+  });
+});
+
+describe("sectionTrackToPlay", () => {
+  const section = (over: Partial<ScenarioSection> = {}): ScenarioSection => ({ id: "s1", title: "Глава", played: false, rows: [], ...over });
+
+  const audio = (trackId: string | null) => ({ trackId, track: null, playing: true, offsetSec: 0, startedAt: 0, seq: 1 });
+
+  const plain = row({ slide: { deckId: "d1", slideId: "slide-b" } });
+
+  it("без треку розділу — нічого", () => expect(sectionTrackToPlay(section(), plain, lookup())).toBeUndefined());
+
+  it("трек розділу, у показі інший — грає трек розділу", () => {
+    expect(sectionTrackToPlay(section({ trackId: "t1" }), plain, lookup())).toBe("t1");
+    expect(sectionTrackToPlay(section({ trackId: "t1" }), plain, lookup({ show: show({ audio: audio("t0") }) }))).toBe("t1");
+  });
+
+  it("той самий трек уже грає (навіть на паузі) — нічого", () => {
+    expect(sectionTrackToPlay(section({ trackId: "t1" }), plain, lookup({ show: show({ audio: audio("t1") }) }))).toBeUndefined();
+  });
+
+  it("слайд зі своїм треком перебиває трек розділу", () => {
+    const own = lookup({ decks: new Map([["d1", [slide("slide-a"), { ...slide("slide-b"), trackId: "own" }]]]) });
+
+    expect(sectionTrackToPlay(section({ trackId: "t1" }), plain, own)).toBeUndefined();
   });
 });

@@ -255,6 +255,7 @@
     "auto": "automatic",
     "autoItem": "Automatic",
     "bindMarker": "Bind a place to the section",
+    "bindTrack": "Bind a track to the section",
     "down": "Move section down: {title}",
     "icon": "Section icon: {icon}",
     "remove": "Delete section: {title}",
@@ -270,6 +271,12 @@
     "rest": "Rest",
     "scene": "Scene",
     "secret": "Secret"
+  },
+  "sectionTrack": {
+    "loading": "Track…",
+    "missing": "Track unavailable",
+    "pick": "Section music",
+    "play": "Play"
   },
   "sectionUpdateFailed": "Could not update the section — reload the page",
   "slidePicker": {

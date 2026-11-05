@@ -22,7 +22,7 @@ describe("SectionHeaderEditor", () => {
   it("показує автоматичну іконку і дозволяє обрати іншу або повернути авто", async () => {
     const onIcon = vi.fn();
 
-    const actions = { onTitle: vi.fn(), onMove: vi.fn(), onRemove: vi.fn(), onIcon, onMarker: vi.fn() };
+    const actions = { onTitle: vi.fn(), onMove: vi.fn(), onRemove: vi.fn(), onIcon, onMarker: vi.fn(), onTrack: vi.fn() };
 
     const { container, rerender } = render(<SectionHeaderEditor campaignId="c" section={section} actions={actions} />);
 

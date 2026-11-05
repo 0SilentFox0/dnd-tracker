@@ -80,3 +80,6 @@ export const setRowMarker = (c: ScenarioContent, sectionId: string, rowId: strin
 
 export const setSectionMarker = (c: ScenarioContent, sectionId: string, marker: ScenarioMarkerRef | undefined): ScenarioContent =>
   mapSection(c, sectionId, (s) => (marker ? { ...s, marker } : without(s, "marker")));
+
+export const setSectionTrack = (c: ScenarioContent, sectionId: string, trackId: string | undefined): ScenarioContent =>
+  mapSection(c, sectionId, (s) => (trackId ? { ...s, trackId } : without(s, "trackId")));

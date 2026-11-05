@@ -59,6 +59,7 @@ const sectionSchema = z.object({
   played: z.boolean(),
   // схема спільна для читання й збереження: ключ із новішого релізу (після відкату) не має ламати сторінку
   icon: z.enum(SECTION_ICON_KEYS).optional().catch(undefined),
+  trackId: z.string().min(1).max(64).optional(),
   reveal: revealSchema.optional(),
   marker: markerRefSchema.optional(),
   revealedAt: z.string().nullable().optional(),

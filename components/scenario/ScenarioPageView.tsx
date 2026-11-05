@@ -6,6 +6,7 @@ import { MarkerPlay, RowPlayControls } from "./play/RowPlayControls";
 import { ScenarioLegend } from "./ScenarioLegend";
 import { ScenarioRichText } from "./ScenarioRichText";
 import { SectionIcon } from "./SectionIcon";
+import { SectionTrackChip } from "./SectionTrackChip";
 
 import type { ScenarioPlay, SectionCollapse } from "@/lib/hooks/scenario";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,7 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
   for (const s of page.content.sections) {
     if (!!collapse && sectionDone(s, isHero, progress?.played).done && !collapse.isExpanded(s.id)) continue;
 
-    if (!bindingsId && play && s.marker) bindingsId = `s-${s.id}`;
+    if (!bindingsId && play && (s.marker || s.trackId)) bindingsId = `s-${s.id}`;
 
     for (const r of s.rows) {
       if (!bindingsId && play && (r.slide || r.battleId || r.marker)) bindingsId = `r-${r.id}`;
@@ -78,9 +79,10 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
                 </div>
                 <h2>{s.title}</h2>
                 {!collapsed && playedButton}
-                {play && s.marker && !collapsed && (
+                {play && (s.marker || s.trackId) && !collapsed && (
                   <div className="sb-play sans" data-tour={bindingsId === `s-${s.id}` ? "scenario.bindings" : undefined}>
-                    <MarkerPlay campaignId={campaignId} marker={s.marker} play={play} />
+                    {s.marker && <MarkerPlay campaignId={campaignId} marker={s.marker} play={play} />}
+                    {s.trackId && <SectionTrackChip campaignId={campaignId} trackId={s.trackId} onPlay={play.readOnly ? undefined : () => play.playSectionTrack(s)} disabled={play.pending} />}
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 import { BattleStatus } from "@/lib/constants/battle";
 import type { BattleBrief } from "@/types/battle";
-import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow } from "@/types/scenario";
+import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow, ScenarioSection } from "@/types/scenario";
 import type { ShowState, Slide } from "@/types/show";
 
 /** current — позиція показу на цьому слайді; active — і гравці його бачать (не під заглушкою). */
@@ -22,7 +22,7 @@ export const boundDeckIds = (content: ScenarioContent): string[] => [...new Set(
 
 export const hasBattleBindings = (content: ScenarioContent) => content.sections.some((s) => s.rows.some((r) => r.battleId));
 
-export const hasPlayBindings = (content: ScenarioContent) => content.sections.some((s) => s.marker || s.rows.some((r) => r.slide || r.battleId || r.marker));
+export const hasPlayBindings = (content: ScenarioContent) => content.sections.some((s) => s.marker || s.trackId || s.rows.some((r) => r.slide || r.battleId || r.marker));
 
 export const markerOnScreen = (ref: ScenarioMarkerRef, show: ShowState | null): boolean => show?.world?.mapId === ref.mapId && show.world.focusMarkerId === ref.markerId && !show.curtain;
 
@@ -84,4 +84,15 @@ export function nextSlideRow(content: ScenarioContent, lookup: PlayLookup): Scen
 
     return state && !state.active;
   }) ?? null;
+}
+
+/** Трек розділу, який треба ввімкнути перед слайдом рядка: слайд зі своїм треком його перебиває, той самий трек не чіпаємо. */
+export function sectionTrackToPlay(section: ScenarioSection, row: ScenarioRow, lookup: PlayLookup): string | undefined {
+  const { trackId } = section;
+
+  if (!trackId || lookup.show?.audio?.trackId === trackId) return undefined;
+
+  const state = rowSlideState(row, lookup);
+
+  return state.kind === "ready" && state.slide.trackId ? undefined : trackId;
 }

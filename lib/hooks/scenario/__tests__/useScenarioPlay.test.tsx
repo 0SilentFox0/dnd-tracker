@@ -35,14 +35,14 @@ const content: ScenarioContent = { legend: [], sections: [{ id: "s1", title: "S"
 
 const brief = (status: string) => ({ id: "b1", name: "Засідка", status });
 
-function setup(status = "prepared") {
+function setup(status = "prepared", c: ScenarioContent = content) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   client.setQueryData(battleKeys.briefs("c"), [brief(status)]);
 
   const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 
-  return { client, ...renderHook(() => useScenarioPlay("c", content), { wrapper }) };
+  return { client, ...renderHook(() => useScenarioPlay("c", c), { wrapper }) };
 }
 
 beforeEach(() => {
@@ -165,5 +165,44 @@ describe("useScenarioPlay — наступний рядок і заглушка"
     show = shown({ curtain: true });
     rerender();
     expect(result.current.nextRow).toBe(slideRow);
+  });
+
+  describe("трек розділу", () => {
+    const withTrack: ScenarioContent = { legend: [], sections: [{ ...content.sections[0], trackId: "t1" }] };
+
+    const play = { action: "audio", command: { action: "play", trackId: "t1" } };
+
+    it("showSlide після open вмикає трек розділу", async () => {
+      const { result } = setup("prepared", withTrack);
+
+      await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
+      act(() => result.current.showSlide(slideRow));
+
+      await waitFor(() => expect(send).toHaveBeenCalledWith(play));
+      expect(send.mock.calls[0]).toEqual([{ action: "open", deckId: "d1", slideId: "sl1" }]);
+    });
+
+    it("слайд зі своїм треком — трек розділу не вмикається", async () => {
+      vi.mocked(decksApi.getDeck).mockResolvedValueOnce({ id: "d1", slides: [{ id: "sl1", imageUrl: "https://x/a.webp", trackId: "own" }] } as never);
+
+      const { result } = setup("prepared", withTrack);
+
+      await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
+      act(() => result.current.showSlide(slideRow));
+
+      await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+      expect(send).not.toHaveBeenCalledWith(play);
+    });
+
+    it("playSectionTrack вмикає трек без слайда; без треку або в демо — нічого", () => {
+      const { result } = setup("prepared", withTrack);
+
+      act(() => result.current.playSectionTrack(withTrack.sections[0]));
+      expect(send).toHaveBeenCalledWith(play);
+
+      send.mockClear();
+      act(() => result.current.playSectionTrack(content.sections[0]));
+      expect(send).not.toHaveBeenCalled();
+    });
   });
 });
