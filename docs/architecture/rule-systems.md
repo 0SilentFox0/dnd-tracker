@@ -103,13 +103,26 @@
 - Тест з листа бере ефекти зі стану активного бою, тож стани впливають на `selfTestMod`.
 - `scope-size` (кампанія + бій, gzip): uk 102.0 KB без `battleWfrp`, 102.8 KB з ним (база 5c-1: 102.7), en 82.1 / 82.8 KB (база 82.7); кампанія окремо uk 81.6 / en 65.5; root 13.6. Ліміт 105.
 
-### Відкриті хвости для 5c-3
+### Закриті в 5c-3
 
-- Числа каталогу станів і формула Entangled не звірені з книгою (немає джерела).
-- Повна серверна приватність учасників (`initiativeOrder`: `activeEffects`/`currentHp` ворогів) — окремий епік усіх систем.
-- Питання до користувача (M-4): шанс смерті від кровотечі діє й при HP > 0 (непритомність від крововтрати), тоді як дослідження каже про 0 Wounds. Код не змінено.
-- Повторне накладання стану на вже непритомного дублює рядок журналу; Unconscious, накладений ДМ, не обнуляє `currentHp`.
-- Залишки ядра: у core лишились `battleLog.damage.steps.wfrp.*`, `battleLog.damage.rows.wfrpTotal`, `battleLog.wfrp.unconscious`; гард ловить лише `battleWfrp.` (M-7).
+- M-4 вирішено: шанс смерті від кровотечі на непритомному лише при 0 Wounds (`wfrpSkippedTurn` перевіряє `currentHp > 0` до `rng`, тож при HP > 0 `rng` не споживається).
+- Повторне накладання Unconscious (ДМ-діалог і нуль HP) не дублює рядок журналу: `applyWfrpConditionTo` повертає того самого учасника без повідомлень.
+
+## Межі 5c-3
+
+Хвости 5c-2 на `feat/wfrp` (без міграції). Свідомі межі:
+
+- M-4 (5d1d5d120): кровотеча вбиває лише непритомного з `currentHp === 0`; при HP > 0 хід пропускається без кидка.
+- Unconscious без дубля (5d1d5d120): повторне накладання нічого не змінює і не пише в журнал. Unconscious від ДМ зберігає `currentHp` за задумом (стан, а не нуль HP).
+- Ключі винесено з ядра (b6b0d8e89): контракт `mitigate` несе `label`/`side` у кроках і `totalLabel`, тож `compute.ts` (`mitigateHit`) без wfrp-літералів. Тексти шкоди, критів і непритомності живуть у `battleWfrp.{damage.steps,damage.total,crit,log}` (uk/en); у `battleLog.json` ключів wfrp немає. Гард `no-system-keys` ловить `battleWfrp.` та `wfrpTotal|.wfrp.` у `lib/utils/battle`, плюс перевірка відсутності старих піддерев у `battleLog.json`; `label-keys-battleWfrp` розширено.
+- Пропущено за рішенням користувача: хвіст 1, звірка чисел `catalog.ts` і формули Entangled з книгою (у репозиторії немає джерела); `catalog.ts` не змінювався.
+- Приватність учасників лишається окремим епіком усіх систем; оцінка обсягу й рекомендація: [participant-privacy-scope.md](participant-privacy-scope.md).
+- `scope-size` (кампанія + бій, gzip): uk 101.2 KB без `battleWfrp`, 102.8 KB з ним; en 81.6 / 82.8 KB; кампанія окремо uk 81.6 / en 65.5; root 13.6. Ліміт 105.
+
+### Відкриті хвости після 5c-3
+
+- Числа каталогу станів і формула Entangled не звірені з книгою (немає джерела; пропущено за рішенням користувача).
+- Повна серверна приватність учасників (`initiativeOrder`: `activeEffects`/`currentHp` ворогів) — окремий епік усіх систем, див. [participant-privacy-scope.md](participant-privacy-scope.md).
 - Dev-індикатор Next «1 Issue» = гідратація `Button`/`DropdownMenuTrigger` у Header (є й на main, не з гілки).
 - Не перевірено живу Pusher-дельту гравцю (немає другого акаунта).
 - ESLint: ще 16 не-cycle помилок у тестах `lib/server` та `useUnitsList.ts` (давні).

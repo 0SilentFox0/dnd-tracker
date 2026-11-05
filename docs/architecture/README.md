@@ -18,6 +18,7 @@ Details that used to live in `CLAUDE.md`. Read the file of the subsystem you are
 | [notifications.md](notifications.md) | Сповіщення «нове»: таблиця, `notify*`, канал `private-notify-*`, тости й піли, retention |
 | [acquaintances.md](acquaintances.md) | Знайомства: NPC зі сценарію, видимість за «зіграно», журнал, нотатки, розкриття → сповіщення |
 | [rule-systems.md](rule-systems.md) | Рульові системи homm/dnd5e/wfrp: реєстр і хуки, блокування, d100-тести, характеристики |
+| [participant-privacy-scope.md](participant-privacy-scope.md) | Оцінка серверної приватності учасників бою (шляхи, поля, рекомендація; без реалізації) |
 | [platform.md](platform.md) | Auth session (`getClaims`), self-hosted fonts, Pusher, prefetched first HTML, egress, account color palettes, prodcopy battle-sweep |
 | [i18n.md](i18n.md) | Мультимовність uk/en: next-intl, потік мови, лендинг `/` і `/en`, ESLint-храповик, перенесення доменів |
 
