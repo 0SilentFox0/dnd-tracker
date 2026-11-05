@@ -29,11 +29,12 @@ export type Characteristics = {
   extraWounds: number;
   talents: Record<string, number>;
   ledger: LedgerEntry[];
+  spentArchived: number;
 };
 
 const fill = (value: number) => Object.fromEntries(CHARACTERISTIC_KEYS.map((k) => [k, value])) as Record<CharacteristicKey, number>;
 
-export const DEFAULT_CHARACTERISTICS: Characteristics = { base: fill(30), advances: fill(0), move: 4, skillAdvances: {}, fate: 0, extraWounds: 0, talents: {}, ledger: [] };
+export const DEFAULT_CHARACTERISTICS: Characteristics = { base: fill(30), advances: fill(0), move: 4, skillAdvances: {}, fate: 0, extraWounds: 0, talents: {}, ledger: [], spentArchived: 0 };
 
 const isInt = (v: unknown, min: number, max: number): v is number => typeof v === "number" && Number.isInteger(v) && v >= min && v <= max;
 
@@ -99,5 +100,6 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
     extraWounds: num("extraWounds", 0, 3),
     talents: readTalents(raw.talents),
     ledger: readLedger(raw.ledger),
+    spentArchived: raw.spentArchived === undefined || !isInt(raw.spentArchived, 0, 1e9) ? 0 : raw.spentArchived,
   };
 }

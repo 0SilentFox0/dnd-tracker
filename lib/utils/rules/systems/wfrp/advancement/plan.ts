@@ -73,5 +73,11 @@ export function planPurchase(input: PurchaseInput): PurchaseResult {
 
   const advanced = priced.apply(characteristics);
 
-  return { ok: true, next: { ...advanced, ledger: [...advanced.ledger, entry].slice(-LEDGER_MAX) }, entry };
+  const full = [...advanced.ledger, entry];
+
+  const dropped = full.slice(0, Math.max(0, full.length - LEDGER_MAX));
+
+  const spentArchived = advanced.spentArchived + dropped.reduce((sum, e) => sum + e.cost, 0);
+
+  return { ok: true, next: { ...advanced, ledger: full.slice(dropped.length), spentArchived }, entry };
 }

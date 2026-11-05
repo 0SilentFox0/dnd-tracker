@@ -29,4 +29,5 @@ export const CharacteristicsSchema = z.object({
   extraWounds: z.number().int().min(0).max(3).default(0),
   talents: z.record(z.string().min(1), z.number().int().min(1).max(20)).default({}),
   ledger: z.array(LedgerEntrySchema).max(LEDGER_MAX).default([]),
+  spentArchived: z.number().int().min(0).max(1e9).default(0),
 });

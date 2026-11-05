@@ -8,5 +8,5 @@ export function redactLedger(characteristics: Characteristics, viewer: LedgerVie
 
 /** Fields only `advance` / `advance-undo` (or the DM) may change. */
 export function preserveServerOwned(existing: Characteristics, incoming: Characteristics): Characteristics {
-  return { ...incoming, talents: existing.talents, ledger: existing.ledger, advances: existing.advances, skillAdvances: existing.skillAdvances };
+  return { ...incoming, talents: existing.talents, ledger: existing.ledger, advances: existing.advances, skillAdvances: existing.skillAdvances, spentArchived: existing.spentArchived };
 }

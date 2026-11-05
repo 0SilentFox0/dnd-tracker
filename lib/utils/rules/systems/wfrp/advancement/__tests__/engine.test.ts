@@ -85,6 +85,19 @@ describe("planPurchase", () => {
     expect(r.ok && [r.next.ledger[0].id, r.next.ledger[199].id]).toEqual(["o1", "e1"]);
   });
 
+  it("does not refund XP for entries trimmed beyond 200", () => {
+    const ledger = Array.from({ length: 200 }, (_, i) => ({ id: `o${i}`, at: "x", kind: "skill" as const, key: "athletics", from: 0, to: 1, cost: 10 }));
+
+    const characteristics = base({ ledger });
+
+    const before = availableXp(5000, characteristics);
+
+    const r = buy({ request: { kind: "characteristic", key: "ws" }, characteristics });
+
+    expect(r.ok && r.next.spentArchived).toBe(10);
+    expect(r.ok && before - availableXp(5000, r.next)).toBe(25);
+  });
+
   it("does not mutate the input", () => {
     const c = base();
 
