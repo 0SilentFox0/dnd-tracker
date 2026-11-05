@@ -89,7 +89,21 @@
       "overcastTargets": "Додаткові цілі",
       "attribute": "Накладає стан",
       "attributeNone": "Немає",
-      "attributeLevels": "Рівні"
+      "attributeLevels": "Рівні",
+      "condition": {
+        "bleeding": "Кровотеча",
+        "fatigued": "Втома",
+        "poisoned": "Отруєння",
+        "stunned": "Оглушення",
+        "ablaze": "Горіння",
+        "broken": "Зламаний",
+        "entangled": "Сплутаний",
+        "prone": "Лежить",
+        "surprised": "Захоплений зненацька",
+        "blinded": "Осліплений",
+        "deafened": "Оглушений звуком",
+        "unconscious": "Непритомний"
+      }
     }
   }
 }

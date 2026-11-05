@@ -89,7 +89,21 @@
       "overcastTargets": "Extra targets",
       "attribute": "Applies a condition",
       "attributeNone": "None",
-      "attributeLevels": "Levels"
+      "attributeLevels": "Levels",
+      "condition": {
+        "bleeding": "Bleeding",
+        "fatigued": "Fatigued",
+        "poisoned": "Poisoned",
+        "stunned": "Stunned",
+        "ablaze": "Ablaze",
+        "broken": "Broken",
+        "entangled": "Entangled",
+        "prone": "Prone",
+        "surprised": "Surprised",
+        "blinded": "Blinded",
+        "deafened": "Deafened",
+        "unconscious": "Unconscious"
+      }
     }
   }
 }

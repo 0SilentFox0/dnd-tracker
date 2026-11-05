@@ -70,7 +70,7 @@ export function SpellMagicFields({ formData, setFormData, conditions }: SpellFor
               value={magic.attribute?.condition ?? ""}
               onValueChange={(key) => set({ attribute: key ? { condition: key, levels: 1 } : undefined })}
               placeholder={te("attribute")}
-              options={conditions.map((c) => ({ value: c.key, label: t(c.label) }))}
+              options={conditions.map((c) => ({ value: c.key, label: te(`condition.${c.key}`) }))}
               allowNone
               noneLabel={te("attributeNone")}
             />
