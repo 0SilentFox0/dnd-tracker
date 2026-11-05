@@ -1,0 +1,100 @@
+import { NextResponse } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const h = vi.hoisted(() => ({
+  access: vi.fn(),
+  character: { findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn() },
+}));
+
+vi.mock("server-only", () => ({}));
+vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) => unknown) => fn(h) } }));
+vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: h.access, requireDM: h.access, requireAuth: vi.fn() }));
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn() }));
+vi.mock("@/lib/supabase/avatar-storage", () => ({ resolveAvatarForPersistence: vi.fn(async () => ({ ok: true, avatar: undefined })) }));
+
+import { getOperation } from "../get";
+import { listOperation } from "../list";
+import { patchOperation } from "../patch";
+
+import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+
+const entry = { id: "e1", at: "2026-01-01T00:00:00.000Z", kind: "characteristic", key: "ws", from: 0, to: 1, cost: 25 } as const;
+
+const stored = { ...DEFAULT_CHARACTERISTICS, advances: { ...DEFAULT_CHARACTERISTICS.advances, ws: 1 }, talents: { feat: 1 }, ledger: [entry] };
+
+const rows = [
+  { id: "mine", controlledBy: "p1", characteristics: stored },
+  { id: "theirs", controlledBy: "p2", characteristics: stored },
+  { id: "dnd", controlledBy: "p2", characteristics: null },
+];
+
+type ListRow = { id: string; characteristics: typeof stored | null };
+
+const listFor = async (viewer: { userId: string; isDM: boolean }) => {
+  h.access.mockResolvedValue({ ...viewer, campaign: { id: "camp", rules: WFRP_RULES } });
+  h.character.findMany.mockResolvedValue(rows.map((r) => ({ ...r })));
+
+  const gate = await listOperation.gate({ campaignId: "camp", characterId: "" });
+
+  return (await listOperation.run(gate as never, { compact: false })) as ListRow[];
+};
+
+beforeEach(() => vi.clearAllMocks());
+
+describe("ledger redaction on list", () => {
+  it("another player sees an empty ledger for others, own ledger intact, null untouched", async () => {
+    const result = await listFor({ userId: "p1", isDM: false });
+
+    expect(result.find((r) => r.id === "mine")?.characteristics?.ledger).toEqual([entry]);
+    expect(result.find((r) => r.id === "theirs")?.characteristics?.ledger).toEqual([]);
+    expect(result.find((r) => r.id === "theirs")?.characteristics?.talents).toEqual({ feat: 1 });
+    expect(result.find((r) => r.id === "dnd")?.characteristics).toBeNull();
+  });
+
+  it("DM sees every ledger", async () => {
+    const result = await listFor({ userId: "dm", isDM: true });
+
+    expect(result.filter((r) => r.characteristics).every((r) => r.characteristics?.ledger.length === 1)).toBe(true);
+  });
+});
+
+describe("get stays owner/DM only", () => {
+  it("a stranger gets 403 before any data is returned", async () => {
+    h.character.findUnique.mockResolvedValue({ id: "theirs", campaignId: "camp", controlledBy: "p2", characteristics: stored, campaign: { members: [{ userId: "p1", role: "player" }] } });
+
+    await expect(getOperation.run({ userId: "p1", campaignId: "camp" }, { characterId: "theirs" })).rejects.toMatchObject({ status: 403 });
+  });
+});
+
+describe("PATCH cannot bypass the ledger", () => {
+  const record = { id: "mine", campaignId: "camp", controlledBy: "p1", type: "player", status: "active", level: 1, classes: [], race: "", avatar: null, characteristics: stored };
+
+  const patch = async (viewer: { userId: string; isDM: boolean }, characteristics: object) => {
+    h.access.mockResolvedValue({ ...viewer, campaign: { id: "camp", maxLevel: 20, allowPlayerEdit: true, rules: WFRP_RULES } });
+    h.character.findUnique.mockResolvedValue(record);
+    h.character.update.mockResolvedValue({ ...record, level: 1 });
+
+    const gate = await patchOperation.gate({ campaignId: "camp", characterId: "mine" });
+
+    expect(gate).not.toBeInstanceOf(NextResponse);
+
+    await patchOperation.run(gate as never, patchOperation.schema.parse({ characteristics }));
+
+    return h.character.update.mock.calls[0][0].data.characteristics as typeof stored;
+  };
+
+  const tampered = { ...stored, fate: 2, advances: { ...stored.advances, ws: 30 }, talents: { cheat: 3 }, ledger: [], skillAdvances: { "melee:basic": 20 } };
+
+  it("player: advances, talents, ledger, skillAdvances stay server-side, fate is saved", async () => {
+    const saved = await patch({ userId: "p1", isDM: false }, tampered);
+
+    expect(saved).toMatchObject({ fate: 2, advances: stored.advances, talents: stored.talents, ledger: stored.ledger, skillAdvances: {} });
+  });
+
+  it("DM edits advances directly", async () => {
+    const saved = await patch({ userId: "dm", isDM: true }, tampered);
+
+    expect(saved).toMatchObject({ fate: 2, advances: tampered.advances, talents: { cheat: 3 }, ledger: [] });
+  });
+});

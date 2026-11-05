@@ -28,7 +28,7 @@ import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import { levelNotificationEvents, spellNotificationEvents } from "@/lib/utils/notifications/events";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -56,6 +56,8 @@ async function editableData({ access, character }: Gate, input: Parsed) {
   const data = isDM
     ? parsed
     : ({ ...parsed, level: undefined, classes: undefined, archetype: undefined, avatar: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
+
+  if (!isDM && data.characteristics) data.characteristics = preserveServerOwned(readCharacteristics(character), data.characteristics);
 
   if (isDM && data.controlledBy !== undefined) {
     const owner = await resolveCharacterOwner(character.campaignId, userId, {type: character.type as "player" | "npc_hero", controlledBy: data.controlledBy ?? character.controlledBy ?? ""});

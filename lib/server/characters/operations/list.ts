@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
+import { type Characteristics, redactLedger } from "@/lib/utils/rules/systems";
 
 const COMPACT_SELECT = {
   id: true,
@@ -37,6 +38,13 @@ const LIST_SELECT = {
   user: { select: { displayName: true } },
 } as const;
 
+const hasLedger = (value: unknown): value is Characteristics => typeof value === "object" && value !== null && Array.isArray((value as Characteristics).ledger);
+
+type LedgerRow = { characteristics?: unknown; controlledBy?: string | null };
+
+export const redactListedLedgers = <T extends LedgerRow>(rows: T[], viewer: { userId?: string; isDM: boolean }): T[] =>
+  rows.map((row) => hasLedger(row.characteristics) ? { ...row, characteristics: redactLedger(row.characteristics, { isDM: viewer.isDM, isOwner: !!viewer.userId && row.controlledBy === viewer.userId }) } : row);
+
 const listSchema = z.object({ type: z.string().nullish(), compact: z.boolean().optional(), status: z.string().nullish() });
 
 export const listOperation = defineCharacterOperation({
@@ -60,9 +68,9 @@ export const listOperation = defineCharacterOperation({
 
     const orderBy = { createdAt: "desc" } as const;
 
-    return compact
-      ? prisma.character.findMany({ where, select: COMPACT_SELECT, orderBy })
-      : prisma.character.findMany({ where, select: pending ? { ...LIST_SELECT, reviewNote: true } : LIST_SELECT, orderBy });
+    if (compact) return prisma.character.findMany({ where, select: COMPACT_SELECT, orderBy });
+
+    return redactListedLedgers(await prisma.character.findMany({ where, select: pending ? { ...LIST_SELECT, reviewNote: true } : LIST_SELECT, orderBy }), access);
   },
 });
 
@@ -93,5 +101,5 @@ export async function listCharacters(request: Request, campaignId: string, actor
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(rows);
+  return NextResponse.json(compact ? rows : redactListedLedgers(rows as LedgerRow[], { isDM: access.isDM }));
 }
