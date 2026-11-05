@@ -65,6 +65,7 @@ describe("useAdvance", () => {
 
     await act(async () => {
       const first = hook.current.buy({ kind: "characteristic", key: "ws" });
+
       const second = hook.current.buy({ kind: "characteristic", key: "ws" });
 
       resolve(result as never);
