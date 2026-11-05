@@ -1,0 +1,1 @@
+ALTER TABLE "feats" ADD COLUMN "xpCost" INTEGER, ADD COLUMN "maxRank" INTEGER;

@@ -9,11 +9,13 @@ export const MECHANIC_KEYS = Object.keys(MECHANIC_REGISTRY) as Array<keyof typeo
 
 const isDefaultCharacteristics = (v: unknown) => v == null || (typeof v === "object" && Object.keys(v).length === 0) || hashJson(v) === hashJson(DEFAULT_CHARACTERISTICS);
 
-// units.characteristics postdates stored baselines: an empty/default value must hash as absent
+// units.characteristics and feats.xpCost/maxRank postdate stored baselines: an empty/default value must hash as absent
 export function rowHash(row: Record<string, unknown>, t: BundleTableDef): string {
   const picked = pick(row, t.columns);
 
   if (t.key === "units" && isDefaultCharacteristics(picked.characteristics)) delete picked.characteristics;
+
+  if (t.key === "feats") for (const c of ["xpCost", "maxRank"]) if (picked[c] == null) delete picked[c];
 
   return hashJson(picked);
 }

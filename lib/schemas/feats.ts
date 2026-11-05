@@ -15,6 +15,8 @@ const featFields = {
   type: z.enum(FEAT_TYPES),
   prerequisite: FeatPrerequisiteSchema,
   repeatable: z.boolean(),
+  xpCost: z.number().int().min(0).max(100000).nullable().optional(),
+  maxRank: z.number().int().min(1).max(20).nullable().optional(),
   description: z.string().max(8000).nullable(),
   abilities: AbilitiesSchema,
   choices: FeatChoicesSchema,

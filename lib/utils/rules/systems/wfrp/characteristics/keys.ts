@@ -8,6 +8,18 @@ export const SPEC_RE = /^[a-z0-9-]{1,40}$/;
 
 export const SKILL_ADVANCE_KEY_RE = /^[a-z][a-z0-9-]{0,39}(:[a-z0-9-]{1,40})?$/;
 
+export type LedgerEntry = {
+  id: string;
+  at: string;
+  kind: "characteristic" | "skill" | "talent";
+  key: string;
+  from: number;
+  to: number;
+  cost: number;
+};
+
+export const LEDGER_MAX = 200;
+
 export type Characteristics = {
   base: Record<CharacteristicKey, number>;
   advances: Record<CharacteristicKey, number>;
@@ -15,11 +27,13 @@ export type Characteristics = {
   skillAdvances: Record<string, number>;
   fate: number;
   extraWounds: number;
+  talents: Record<string, number>;
+  ledger: LedgerEntry[];
 };
 
 const fill = (value: number) => Object.fromEntries(CHARACTERISTIC_KEYS.map((k) => [k, value])) as Record<CharacteristicKey, number>;
 
-export const DEFAULT_CHARACTERISTICS: Characteristics = { base: fill(30), advances: fill(0), move: 4, skillAdvances: {}, fate: 0, extraWounds: 0 };
+export const DEFAULT_CHARACTERISTICS: Characteristics = { base: fill(30), advances: fill(0), move: 4, skillAdvances: {}, fate: 0, extraWounds: 0, talents: {}, ledger: [] };
 
 const isInt = (v: unknown, min: number, max: number): v is number => typeof v === "number" && Number.isInteger(v) && v >= min && v <= max;
 
@@ -48,6 +62,27 @@ function readSkillAdvances(raw: unknown) {
   return valid ? { ...(raw as Record<string, number>) } : DEFAULT_CHARACTERISTICS.skillAdvances;
 }
 
+function readTalents(raw: unknown) {
+  if (raw === undefined) return {};
+
+  if (!isRecord(raw)) return DEFAULT_CHARACTERISTICS.talents;
+
+  const valid = Object.entries(raw).every(([k, v]) => k.length > 0 && isInt(v, 1, 20));
+
+  return valid ? { ...(raw as Record<string, number>) } : DEFAULT_CHARACTERISTICS.talents;
+}
+
+const LEDGER_KINDS: readonly unknown[] = ["characteristic", "skill", "talent"];
+
+const isLedgerEntry = (v: unknown): v is LedgerEntry =>
+  isRecord(v) && typeof v.id === "string" && typeof v.at === "string" && LEDGER_KINDS.includes(v.kind) && typeof v.key === "string" && isInt(v.from, 0, 1e6) && isInt(v.to, 0, 1e6) && isInt(v.cost, 0, 1e9);
+
+function readLedger(raw: unknown): LedgerEntry[] {
+  if (!Array.isArray(raw) || raw.length > LEDGER_MAX || !raw.every(isLedgerEntry)) return DEFAULT_CHARACTERISTICS.ledger;
+
+  return raw.map((e) => ({ id: e.id, at: e.at, kind: e.kind, key: e.key, from: e.from, to: e.to, cost: e.cost }));
+}
+
 export function readCharacteristics(row: { characteristics?: unknown }): Characteristics {
   const raw = row.characteristics ?? {};
 
@@ -62,5 +97,7 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
     skillAdvances: readSkillAdvances(raw.skillAdvances),
     fate: num("fate", 0, 9),
     extraWounds: num("extraWounds", 0, 3),
+    talents: readTalents(raw.talents),
+    ledger: readLedger(raw.ledger),
   };
 }

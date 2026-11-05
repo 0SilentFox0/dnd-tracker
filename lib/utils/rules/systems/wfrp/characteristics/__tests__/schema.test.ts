@@ -11,7 +11,7 @@ describe("CharacteristicsSchema", () => {
       expect(c.advances[k]).toBe(0);
     }
 
-    expect(c).toMatchObject({ move: 4, fate: 0, extraWounds: 0, skillAdvances: {} });
+    expect(c).toMatchObject({ move: 4, fate: 0, extraWounds: 0, skillAdvances: {}, talents: {}, ledger: [] });
     expect(DEFAULT_CHARACTERISTICS).toEqual(c);
   });
 
@@ -38,6 +38,28 @@ describe("readCharacteristics", () => {
   it("returns defaults for missing or non-object", () => {
     expect(readCharacteristics({})).toEqual(DEFAULT_CHARACTERISTICS);
     expect(readCharacteristics({ characteristics: 5 })).toEqual(DEFAULT_CHARACTERISTICS);
+  });
+});
+
+describe("talents and ledger", () => {
+  const entry = { id: "e1", at: "2026-11-05T00:00:00.000Z", kind: "talent", key: "f1", from: 0, to: 1, cost: 100 };
+
+  it("round-trips valid values", () => {
+    const characteristics = { talents: { f1: 2 }, ledger: [entry] };
+
+    expect(readCharacteristics({ characteristics })).toEqual(CharacteristicsSchema.parse(characteristics));
+    expect(readCharacteristics({ characteristics }).ledger).toEqual([entry]);
+  });
+
+  it("reader drops an invalid ledger entry set or >200", () => {
+    expect(readCharacteristics({ characteristics: { ledger: [entry, { ...entry, kind: "x" }] } }).ledger).toEqual([]);
+    expect(readCharacteristics({ characteristics: { ledger: Array.from({ length: 201 }, () => entry) } }).ledger).toEqual([]);
+    expect(readCharacteristics({ characteristics: { talents: { f1: 0 } } }).talents).toEqual({});
+  });
+
+  it("schema rejects invalid rank and >200 ledger", () => {
+    expect(CharacteristicsSchema.safeParse({ talents: { f1: 0 } }).success).toBe(false);
+    expect(CharacteristicsSchema.safeParse({ ledger: Array.from({ length: 201 }, () => entry) }).success).toBe(false);
   });
 });
 

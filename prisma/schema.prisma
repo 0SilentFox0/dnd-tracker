@@ -711,6 +711,8 @@ model Feat {
   type         String   @default("general")
   prerequisite Json     @default("{}")
   repeatable   Boolean  @default(false)
+  xpCost       Int?
+  maxRank      Int?
   description  String?
   abilities    Json     @default("[]")
   choices      Json     @default("[]")

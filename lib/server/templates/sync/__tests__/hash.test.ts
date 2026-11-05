@@ -16,6 +16,15 @@ describe("sync hashes", () => {
     expect(rowHash({ ...row, sourceId: "x", campaignId: "y" }, spells)).toBe(rowHash(row, spells));
   });
 
+  it("feat rowHash ignores null xpCost/maxRank but reacts to values", () => {
+    const feats = BUNDLE_TABLES.find((t) => t.key === "feats")!;
+
+    const row = { id: "c" + "a".repeat(24), name: "Grappler", repeatable: false };
+
+    expect(rowHash({ ...row, xpCost: null, maxRank: null }, feats)).toBe(rowHash(row, feats));
+    expect(rowHash({ ...row, xpCost: 100, maxRank: null }, feats)).not.toBe(rowHash(row, feats));
+  });
+
   it("rowHash reacts to ingredients and componentFlags", () => {
     const row = { id: "c" + "a".repeat(24), name: "Revivify", ingredients: [], componentFlags: null };
 

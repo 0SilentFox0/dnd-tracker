@@ -92,6 +92,8 @@ export interface FeatData {
   type: FeatType;
   prerequisite: FeatPrerequisite;
   repeatable: boolean;
+  xpCost?: number | null;
+  maxRank?: number | null;
   description: string | null;
   abilities: Ability[];
   choices: Choice[];

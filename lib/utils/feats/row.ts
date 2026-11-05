@@ -37,5 +37,7 @@ export function toFeatData(row: Feat): FeatData {
     description: row.description,
     abilities: featAbilities(row),
     choices: readChoiceList(row.choices),
+    xpCost: row.xpCost,
+    maxRank: row.maxRank,
   };
 }

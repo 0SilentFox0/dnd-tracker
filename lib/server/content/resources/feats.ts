@@ -53,6 +53,8 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
         type: data.type,
         prerequisite: toInputJson(data.prerequisite),
         repeatable: data.repeatable,
+        xpCost: data.xpCost ?? null,
+        maxRank: data.maxRank ?? null,
         description: data.description ?? null,
         abilities: abilitiesJson(data.abilities),
         choices: toInputJson(data.choices),
