@@ -15,6 +15,7 @@ export interface DmParticipantActions {
   onChangeHp: (p: BattleParticipant) => void;
   onTakeControl: (p: BattleParticipant | null) => void;
   onRemove: (p: BattleParticipant) => void;
+  onToReserve?: (p: BattleParticipant) => void;
   onKill?: (p: BattleParticipant) => void;
   onConditions?: (p: BattleParticipant) => void;
   onToggleLair?: (p: BattleParticipant) => void;
@@ -44,7 +45,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
 
   const isActive = battle.status === BattleStatus.ACTIVE;
 
-  const update = (p: BattleParticipant, data: { removeFromBattle: true } | { kill: true }) =>
+  const update = (p: BattleParticipant, data: { removeFromBattle: true } | { returnToReserve: true } | { kill: true }) =>
     actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data });
 
   const [orderOpen, setOrderOpen] = useState(false);
@@ -71,6 +72,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
     onChangeHp,
     onTakeControl: (p) => dmControl.set(p?.basicInfo.id ?? null),
     onRemove: (p) => update(p, { removeFromBattle: true }),
+    onToReserve: isActive ? (p) => update(p, { returnToReserve: true }) : undefined,
     onConditions: isActive ? (p) => setConditionsId(p.basicInfo.id) : undefined,
     onToggleLair: isActive ? (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { lairActive: !p.battleData.lair?.active } }) : undefined,
     onLegendary: isActive ? (p) => setLegendaryId(p.basicInfo.id) : undefined,

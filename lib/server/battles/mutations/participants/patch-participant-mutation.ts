@@ -6,7 +6,7 @@ import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { toggleLair } from "@/lib/utils/battle/actions/lair";
 import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { lineText } from "@/lib/utils/battle/log/lines";
-import { reserveOf } from "@/lib/utils/battle/participant/reserve";
+import { reserveOf, returnedToReserve } from "@/lib/utils/battle/participant/reserve";
 import { isUp, statusForHp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, dmEvent, systemEvent } from "@/lib/utils/battle/store";
@@ -35,6 +35,8 @@ export function patchParticipantMutation(
 
   if (data.removeFromBattle === true) return removeParticipant(ctx, participantId);
 
+  if (data.returnToReserve === true) return returnToReserve(ctx, participantId);
+
   if (data.kill === true) return updateHp(ctx, participantId, 0, true);
 
   if (data.revive === true) return revive(ctx, participantId);
@@ -45,15 +47,29 @@ export function patchParticipantMutation(
 }
 
 function removeParticipant(ctx: BattleMutationContext, participantId: string): MutationResult {
-  const removedIndex = ctx.participants.findIndex((p) => p.basicInfo.id === participantId);
+  if (!ctx.participants.some((p) => p.basicInfo.id === participantId)) return removeFromReserve(ctx, participantId);
 
-  if (removedIndex === -1) return removeFromReserve(ctx, participantId);
+  return takeOutOfOrder(ctx, participantId, "battleLog.dm.removed");
+}
+
+function returnToReserve(ctx: BattleMutationContext, participantId: string): MutationResult {
+  const removed = findParticipant(ctx.participants, participantId);
+
+  if (!removed) throw new BattleAccessError(404, API_ERRORS.MEMBER_NOT_FOUND);
+
+  const out = takeOutOfOrder(ctx, participantId, "battleLog.dm.returnedReserve");
+
+  return { ...out, pending: [...(out.pending ?? ctx.pending), returnedToReserve(removed)] };
+}
+
+function takeOutOfOrder(ctx: BattleMutationContext, participantId: string, eventKey: "battleLog.dm.removed" | "battleLog.dm.returnedReserve"): MutationResult {
+  const removedIndex = ctx.participants.findIndex((p) => p.basicInfo.id === participantId);
 
   const removed = ctx.participants[removedIndex];
 
   const participants = ctx.participants.filter((p) => p.basicInfo.id !== participantId);
 
-  const removalEvent = dmEvent(ctx.scene.round, textRef("battleLog.dm.removed", { name: removed.basicInfo.name }));
+  const removalEvent = dmEvent(ctx.scene.round, textRef(eventKey, { name: removed.basicInfo.name }));
 
   const current = ctx.scene.turnIndex;
 

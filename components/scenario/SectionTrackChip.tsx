@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Music, Play } from "lucide-react";
+import { Music, Play, X } from "lucide-react";
 
 import { useTracks } from "@/lib/hooks/music";
 
-export function SectionTrackChip({ campaignId, trackId, onPlay, disabled }: { campaignId: string; trackId: string; onPlay?: () => void; disabled?: boolean }) {
+export function SectionTrackChip({ campaignId, trackId, onPlay, onRemove, disabled }: { campaignId: string; trackId: string; onPlay?: () => void; onRemove?: () => void; disabled?: boolean }) {
   const t = useTranslations("scenario.sectionTrack");
 
   const { data: tracks } = useTracks(campaignId);
@@ -19,6 +19,11 @@ export function SectionTrackChip({ campaignId, trackId, onPlay, disabled }: { ca
       {onPlay && track && (
         <button type="button" className="toggle" aria-label={t("play")} disabled={disabled} onClick={onPlay}>
           <Play className="size-3" /> {t("play")}
+        </button>
+      )}
+      {onRemove && (
+        <button type="button" aria-label={t("unbind")} onClick={onRemove}>
+          <X className="size-3" />
         </button>
       )}
     </span>

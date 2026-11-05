@@ -276,7 +276,8 @@
     "loading": "Track…",
     "missing": "Track unavailable",
     "pick": "Section music",
-    "play": "Play"
+    "play": "Play",
+    "unbind": "Remove section music"
   },
   "sectionUpdateFailed": "Could not update the section — reload the page",
   "slidePicker": {

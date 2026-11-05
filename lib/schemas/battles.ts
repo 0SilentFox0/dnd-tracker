@@ -258,6 +258,7 @@ export const patchParticipantSchema = z
     lairActive: z.boolean().optional(),
     currentHp: z.number().int().min(0).optional(),
     removeFromBattle: z.boolean().optional(),
+    returnToReserve: z.boolean().optional(),
     kill: z.boolean().optional(),
     revive: z.boolean().optional(),
   })

@@ -254,6 +254,7 @@
     "lairOut": "🏰 {name}: поза лігвом",
     "removed": "Видалено з бою (DM): {name}",
     "removedReserve": "Видалено з резерву (DM): {name}",
+    "returnedReserve": "Повернено в резерв (DM): {name}",
     "killed": "Вбито (DM): {name}",
     "hpChanged": "Зміна HP (DM): {name}, {old} → {new}",
     "revived": "Повернуто до життя (DM): {name}, {hp} HP",

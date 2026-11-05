@@ -26,6 +26,18 @@ describe("patch-participant mutation", () => {
     expect(eventTextOf(out.events[0])).toContain("з резерву");
   });
 
+  it("returnToReserve: учасник іде з черги в резерв без позиції, хід не збивається", () => {
+    const placed = participant("orc", { controlledBy: "dm" }, { battleData: { ...orc.battleData, position: { x: 3, y: 4 }, facing: "e" } });
+
+    const out = patchParticipantMutation(context({ participants: [hero, goblin, placed], scene: { ...context().scene, turnIndex: 2 } }), "orc", { returnToReserve: true });
+
+    expect(out.participants?.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
+    expect(out.pending).toHaveLength(1);
+    expect(out.pending?.[0].battleData).toMatchObject({ reserved: true });
+    expect(out.pending?.[0].battleData.position).toBeUndefined();
+    expect(out.pending?.[0].battleData.facing).toBeUndefined();
+  });
+
   it("HP до 0 — unconscious і подія зі зміною HP", () => {
     const out = patchParticipantMutation(context(), "gob", { currentHp: 0 });
 

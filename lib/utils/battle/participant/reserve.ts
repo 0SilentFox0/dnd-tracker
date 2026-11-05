@@ -8,6 +8,13 @@ export const summonsOf = (pending: BattleParticipant[]): BattleParticipant[] => 
 
 export const toReserve = (p: BattleParticipant): BattleParticipant => ({ ...p, battleData: { ...p.battleData, reserved: true } });
 
+/** Off the map and out of the order: the position and per-field state go; «reveal» places the unit again. */
+export function returnedToReserve(p: BattleParticipant): BattleParticipant {
+  const { position: _position, dormant: _dormant, mazeWakeRound: _wake, facing: _facing, revealPending: _pending, ...battleData } = p.battleData;
+
+  return toReserve({ ...p, battleData });
+}
+
 export function dropBattleFlag(p: BattleParticipant, key: "reserved" | "revealPending"): BattleParticipant {
   const battleData = { ...p.battleData };
 

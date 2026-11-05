@@ -254,6 +254,7 @@
     "lairOut": "🏰 {name}: outside the lair",
     "removed": "Removed from battle (DM): {name}",
     "removedReserve": "Removed from reserve (DM): {name}",
+    "returnedReserve": "Returned to reserve (DM): {name}",
     "killed": "Killed (DM): {name}",
     "hpChanged": "HP changed (DM): {name}, {old} → {new}",
     "revived": "Revived (DM): {name}, {hp} HP",

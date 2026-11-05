@@ -53,7 +53,7 @@ export function SectionHeaderEditor({ campaignId, section, actions }: { campaign
           <MapPin className="size-3.5" />
         </button>
       )}
-      {section.trackId && <SectionTrackChip campaignId={campaignId} trackId={section.trackId} />}
+      {section.trackId && <SectionTrackChip campaignId={campaignId} trackId={section.trackId} onRemove={() => actions.onTrack(undefined)} />}
       <button type="button" className="toggle" aria-label={t("bindTrack")} onClick={() => setPickingTrack(true)}>
         <Music className="size-3.5" />
       </button>

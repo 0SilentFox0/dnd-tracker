@@ -42,7 +42,9 @@
     "kill": "Вбити",
     "killConfirm": "Вбити {name}?",
     "remove": "Видалити з бою",
-    "removeConfirm": "Видалити {name} з бою?"
+    "removeConfirm": "Видалити {name} з бою?",
+    "toReserve": "Повернути в резерв",
+    "toReserveConfirm": "Повернути {name} в резерв?"
   },
   "conditions": {
     "title": "Стани",

@@ -50,15 +50,14 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
 
   return (
     <>
-      {canGenerate ? (
+      {canGenerate && (
         <ToolButton tall={tall} onClick={() => setDialog("generate")}>
           {t("toolbar.generate")}
         </ToolButton>
-      ) : (
-        <ToolButton tall={tall} onClick={() => setDialog("reshuffle")}>
-          {t("toolbar.reshuffle")}
-        </ToolButton>
       )}
+      <ToolButton tall={tall} onClick={() => setDialog("reshuffle")}>
+        {t("toolbar.reshuffle")}
+      </ToolButton>
       <ToolButton tall={tall} active={editing} onClick={() => actions.setTool(editing ? "none" : "walls")}>
         {t("toolbar.edit")}
       </ToolButton>

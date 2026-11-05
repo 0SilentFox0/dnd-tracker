@@ -55,12 +55,12 @@ describe("MazeToolbar", () => {
     expect(queryByRole("button", { name: "Розставити" })).not.toBeNull();
   });
 
-  it("ДМ до першого кроку: «Згенерувати» і «Розкидати старти», без «Місцевість»", () => {
+  it("ДМ до першого кроку: «Згенерувати», «Перетасувати» і «Розкидати старти», без «Місцевість»", () => {
     const { getByRole, queryByRole } = panel();
 
     expect(getByRole("button", { name: "Згенерувати" })).toBeTruthy();
     expect(getByRole("button", { name: "Розкидати старти" })).toBeTruthy();
-    expect(queryByRole("button", { name: "Перетасувати" })).toBeNull();
+    expect(getByRole("button", { name: "Перетасувати" })).toBeTruthy();
     expect(queryByRole("button", { name: "Місцевість" })).toBeNull();
   });
 

@@ -42,6 +42,8 @@
     "kill": "Kill",
     "killConfirm": "Kill {name}?",
     "remove": "Remove from battle",
+    "toReserve": "Return to reserve",
+    "toReserveConfirm": "Return {name} to reserve?",
     "removeConfirm": "Remove {name} from the battle?"
   },
   "conditions": {

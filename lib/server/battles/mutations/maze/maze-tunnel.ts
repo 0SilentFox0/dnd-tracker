@@ -6,7 +6,7 @@ import { currentOf } from "@/lib/utils/battle/common/control";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
 import { heroTunnel, isPlaced, mazeAwareness, nearestFree } from "@/lib/utils/battle/modes/maze";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
-import { toReserve } from "@/lib/utils/battle/participant/reserve";
+import { returnedToReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
 import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
@@ -19,13 +19,6 @@ const isDead = (p: BattleParticipant) => p.combatStats.status === CombatStatus.D
 const leaves = (p: BattleParticipant) => originalSide(p) === ParticipantSide.ENEMY && (!!p.basicInfo.isExtraTurnSlot || !isDead(p));
 
 const entersTunnel = (p: BattleParticipant) => originalSide(p) === ParticipantSide.ALLY && !p.basicInfo.isExtraTurnSlot && !isDead(p) && !isEscaped(p);
-
-// у резерві позиції немає: після «Ввести в бій» лабіринт сам поставить ворога (сплячим) на вільну клітинку
-function intoReserve(p: BattleParticipant): BattleParticipant {
-  const { position: _position, dormant: _dormant, mazeWakeRound: _wake, facing: _facing, ...battleData } = p.battleData;
-
-  return toReserve({ ...p, battleData });
-}
 
 function turnAfter(ctx: BattleMutationContext, remaining: BattleParticipant[], pending: BattleParticipant[], map: BattleMapConfig) {
   const current = currentOf(ctx);
@@ -86,7 +79,7 @@ export function tunnelMutation(ctx: BattleMutationContext, { map: base, grid: cu
     return moved ? { ...p, battleData: { ...p.battleData, position: moved } } : p;
   });
 
-  const reserve = ctx.participants.filter((p) => leaves(p) && !p.basicInfo.isExtraTurnSlot).map(intoReserve);
+  const reserve = ctx.participants.filter((p) => leaves(p) && !p.basicInfo.isExtraTurnSlot).map(returnedToReserve);
 
   const map = { ...base, maze: nextMaze };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Crown, Heart, LogIn, ShieldAlert, Skull, Trash2 } from "lucide-react";
+import { Crown, EyeOff, Heart, LogIn, ShieldAlert, Skull, Trash2 } from "lucide-react";
 
 import { SideDot } from "@/components/battle/hud";
 import { SelectField } from "@/components/ui/select-field";
@@ -32,7 +32,7 @@ interface DmParticipantRowProps {
 }
 
 export function DmParticipantRow({ participant, controlled, actions }: DmParticipantRowProps) {
-  const { onChangeHp, onTakeControl, onRemove, onKill, onConditions, onLegendary, onToggleLair, conditionsEnabled, onDone, unitControl } = actions;
+  const { onChangeHp, onTakeControl, onRemove, onToReserve, onKill, onConditions, onLegendary, onToggleLair, conditionsEnabled, onDone, unitControl } = actions;
 
   const t = useTranslations("battleDm.row");
 
@@ -122,6 +122,22 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
             }}
           >
             <Skull className="size-3.5" />
+          </button>
+        )}
+        {onToReserve && (
+          <button
+            type="button"
+            className={ICON}
+            title={t("toReserve")}
+            aria-label={t("toReserve")}
+            onClick={async () => {
+              if (await confirm({ title: t("toReserveConfirm", { name: participant.basicInfo.name }), confirmLabel: t("toReserve") })) {
+                onToReserve(participant);
+                close();
+              }
+            }}
+          >
+            <EyeOff className="size-3.5" />
           </button>
         )}
         <button
