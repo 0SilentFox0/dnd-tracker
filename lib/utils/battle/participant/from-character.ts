@@ -35,7 +35,7 @@ import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calc
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 import type { BattleParticipant } from "@/types/battle";
@@ -146,6 +146,16 @@ async function characterSpellcasting(character: CharacterFromPrisma, refs: Build
   };
 }
 
+async function characterTalentGroups(character: CharacterFromPrisma, rules: Ruleset, context: CampaignSpellContext | undefined) {
+  const advancement = ruleSystemOf(rules).advancement;
+
+  const talents = advancement ? readCharacteristics(character).talents : {};
+
+  if (!advancement || Object.keys(talents).length === 0) return [];
+
+  return advancement.talentGroups(talents, await loadFeatsById(character.campaignId, true, context?.featsById));
+}
+
 function finalizeCharacter(participant: BattleParticipant, character: CharacterFromPrisma, classMode: boolean, spellcastingAbility: string | null | undefined, rules: Ruleset): BattleParticipant {
   const baked = bakePassives(participant);
 
@@ -212,6 +222,8 @@ export async function createBattleParticipantFromCharacter(
 
   const computedMaxHp = characterBaseHp(character, { entries: resolvedClasses, formula: heroHpFormula(rules.heroScaling), rules, characteristics: character.characteristics }).total;
 
+  const choiceGroups = [...(selections?.groups ?? []), ...(await characterTalentGroups(character, rules, context))];
+
   const resolvedAbilities = [
     ...collectCharacterAbilities({
     skills,
@@ -220,7 +232,7 @@ export async function createBattleParticipantFromCharacter(
     completedSets: completed.sets,
     consumables: consumables.map(({ itemId, row }) => ({ itemId, row })),
     ...(resolvedClasses && { classes: resolvedClasses }),
-    ...(selections && selections.groups.length > 0 && { choiceGroups: selections.groups }),
+    ...(choiceGroups.length > 0 && { choiceGroups }),
   }),
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
