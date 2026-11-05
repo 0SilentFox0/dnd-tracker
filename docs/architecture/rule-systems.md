@@ -24,6 +24,7 @@
 | `combat.hitModel` | `offense/defense/winChance/damage/refHit` для чесного балансу (замість d20 to-hit/AC) | `balance/hit-model.ts`, `heroPower`, `loadUnitLibraryStats` |
 | `combat.participantFields` | додаткові поля учасника при створенні з персонажа/юніта (`abilities.characteristics`, `abilities.wfrp`: стати, AP = 0); d20 не додає ключів; `refreshFromSource` копіює | `from-character`, `from-unit`, `refresh-from-source` |
 | `conditions` | 12 станів wfrp: `catalog`, `apply`/`remove`/`level` (рівень = сума маркерів, обрізання 10), `tick` на початку ходу активного носія, `endTest` (тест зняття), `selfTestMod`/`againstMod` для d100-тестів; `undefined` у d20 → `CONDITION_5E_REGISTRY` без змін | `turn/start` (`applyStartOfTurnDamage`), `resolve-attack`, `crit-effect`, `system-condition`/`condition-test` мутації, `sheet-test` |
+| `magic` | `RuleSystemMagic`: `castTest` (d100 проти Int + Language (Magick), SL + канальований SL ≥ CN, броня, Fortune, дублі → miscast), `channel` (банк SL, `battleData.channelledSl`), `miscast` (таблиці minor/major), `attribute` (lore → стан), `onDamaged` (втрата канальованого SL); `slots: false`; `undefined` у d20 | `castSpell` (`spell/cast/cast-test.ts`, `finish.ts`), `spell-mutation`, `channel-mutation` (`POST …/channel`), `damage/consequences.ts` |
 | `combat.fortune` | Fortune: перекинути d100 (лише атакувальник; захисник — ні) або +1 SL; `percentile.fortune` у деталях дії; `undefined` у d20 | `attack/run.ts`, схема атаки, `useAttackWizard` |
 | `cellFeetOf(rules)` | розмір клітинки в футах (`grid/cell-feet.ts`): homm/dnd5e 5, wfrp 6 (2 yd); `CELL_FEET` видалено, `rules` — обов'язковий параметр grid-хелперів (рух, шаблони, досяжність, цілі) | `lib/utils/battle/grid/*` |
 | `battle.supported` | wfrp = `true` (5b-1); `false` → старт бою 409 `SYSTEM_BATTLE_UNSUPPORTED` | `start-mutation`, setup UI |
@@ -46,6 +47,8 @@
 | `wfrp/characteristics/` | `schema` (`CharacteristicsSchema`, 10 характеристик, `fate`, `advances`, навички), `derive` (Wounds, Move), `sheet-block` |
 | `wfrp/skills/` | каталог навичок і спеціалізацій (`catalog.ts`) |
 | `wfrp/conditions/` | `catalog.ts` (числа станів), `apply.ts`, `levels.ts`, `tick.ts`, `end-test.ts`, `test-mod.ts`, `index.ts` (`WFRP_CONDITIONS`) |
+| `wfrp/magic/` | `cast-test.ts`, `channel.ts`, `miscast.ts` + `miscast-table.ts`, `attribute.ts` (lore attribute), `armour.ts` (штраф броні), `constants.ts` (`CAST_SKILL`, `OVERCAST_SL_STEP`, `CHANNEL_MAX_SL`), `index.ts` (`WFRP_MAGIC`) |
+| `wfrp/tables/` | `roll-table.ts` — спільний `rollTable` для критів і miscast |
 | `wfrp/sheet-test.ts`, `session.ts` | `sheetTest.roll` і `rest.onSession` |
 | `components/systems/wfrp/` | `HeroStats`, `StatsTab`, `StatsFields`, `UnitStatsFields`, `RollDialogBody`, редактори характеристик і навичок |
 
@@ -72,6 +75,21 @@
 - Небойові джерела шкоди на 0 Wounds дають крит у «body»; опір у wfrp = лише імунітет; stat-модифікатор d20 у шкоді ігнорується.
 - Підписи відстані: літерал «фт/ft» лишився лише в `battleLog.spellFx.{anchoredAura,delayed,distanceDice}` (магія/ауры, недосяжні при `spells: false`); гард — `lib/i18n/__tests__/battle-log-distance-unit.test.ts`. Описи 5e-дій і станів (`battle.json` «shove», `battleCommon` conditions) недосяжні в wfrp (`actions`/`conditions` вимкнені). Нова wfrp-досяжна відстань у тексті — через `{unit}` із `ruleSystemOf(rules).distance.unit`.
 - `rules` стало обов'язковим на шляхах, досяжних у wfrp (фаза атаки, flow, ефекти, зони, маневри). Необов'язковий `rules?` лишається в `roll-check`, `saves`, `conditions`, кидках смерті й `balance-*` — вони d20-лише за задумом.
+
+## Межі 5d-1
+
+Рушій магії на `feat/wfrp` (без міграції; UI — 5d-2, namespace `wfrpMagic`). Свідомі межі:
+
+- Заклинання wfrp береться лише з `casting.magic` (`cn`, `kind`, `overcast`, `attribute`) і резолюцією `auto`; save-заклинання, заклинання без magic-даних і `cost: "long"` дають 422 `BATTLE_SPELL_SYSTEM_MISMATCH`. Вільний каст ДМ, легендарні дії й гранти — без тесту й без слота.
+- Каст-тест: слот не витрачається (`slots: false`); channelled SL списується при будь-якому результаті спроби; Fortune для касту — перекид або +1 SL, для channelling Fortune немає.
+- Overcast піднімає лише `castLevel` (кроки `OVERCAST_SL_STEP` за перевищення CN); `diceRolls` клієнта не розширюються, тож апкаст по кубиках/цілях рахує сервер. Каст без `castRoll`/`serverRoll` сервер кидає сам (не відхиляє).
+- `channel`: основна дія; не свій хід, використана дія або d20-кампанія (`BATTLE_CHANNEL_UNSUPPORTED`, 422) відхиляються; кидок 100 дає minor miscast; будь-яка шкода кастеру скидає channelled SL (`onDamaged`).
+- Числа (`MISCAST_TABLE`, CN, кроки SL: `OVERCAST_SL_STEP`, `ARMOUR_SL_PER_AP`, `CHANNEL_MAX_SL`, правила miscast на дублях) не звірені з книгою (немає джерела).
+- AP = 0 до 5f, тож штраф броні касту завжди 0 (формула покрита тестом).
+- Long cast заборонений; overcast лише апкаст (дальність, площа, тривалість — ні).
+- Шкода заклинань іде наявним ефект-рушієм без SL касту, TB й AP.
+- Таланти, редагований контент `tables`, Sin/молитви (5d-3) — поза межами.
+- **Обов'язкова перевірка перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20). Ще не запускався.
 
 ## Межі 5c-1
 
