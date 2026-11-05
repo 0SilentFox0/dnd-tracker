@@ -397,6 +397,11 @@
         "heading": "Sheet tests, new session and battles",
         "b0": "Click a characteristic or skill to open the test dialog: choose a difficulty and roll a d100. The log records the result, the target number and success levels (SL), and a critical success or failure. The \"New session\" button in the party rest menu restores Fortune to the Fate value.",
         "b1": "Battles in Grim d100 are not ready yet: trying to start one returns an error. They arrive in the next part."
+      },
+      "s4": {
+        "heading": "Magic",
+        "b0": "In a Grim d100 campaign spells have a Casting Number (CN), a kind (Arcane or Petty) and a lore. These fields, the overcast dice and the lore attribute are set in the spell editor, and heroes see their known spells in the Magic tab of the sheet.",
+        "b1": "In battle the Channelling button banks SL for the next cast. Casting is a d100 test: the total SL against the CN decides success, overcast strengthens the spell, and doubles cause a miscast. Spells without magic data and long casts are unavailable in Grim d100."
       }
     }
   }

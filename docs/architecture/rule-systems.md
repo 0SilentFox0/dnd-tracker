@@ -91,6 +91,16 @@
 - Таланти, редагований контент `tables`, Sin/молитви (5d-3) — поза межами.
 - **Обов'язкова перевірка перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20). Ще не запускався.
 
+## Межі 5d-2
+
+UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, вкладка «Магія» на аркуші, каст-діалог і плитка Channelling у бою, поля магії в редакторі заклинань). Свідомі межі:
+
+- `wfrpMagic` підвантажується лише для wfrp-кампаній: `app/campaigns/[id]/layout.tsx` обгортає дерево в `ExtendLocaleScope` з `WFRP_CAMPAIGN_EXTRA` (`lib/i18n/scopes.ts`), для d20-кампаній scope не змінюється.
+- Розмір `scope-size` (gzip, ліміт 105 KB): campaign + battle + battleWfrp до 5d-2 — uk 102.8 / en 82.8 KB; після (+ `wfrpMagic`) — uk 103.8 / en 83.6 KB (+1.0 / +0.8 KB). Ліміт не перевищено, відповідь П5 (окремий ліміт) не знадобилась; запас uk ≈ 1.2 KB, тож наступний wfrp-namespace потребує винесення або окремого ліміту.
+- Онбординг: запис `2026-11-05-wfrp-magic` у what's new і розділ «Магія» в `dm-rule-systems`.
+- Live-run 5d-2 (Task 10.3) ще не виконано.
+- **Обов'язкова перевірка перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (залишається в силі, ще не запускався).
+
 ## Межі 5c-1
 
 Стани й Fortune на `feat/wfrp` (без міграції; UI — namespace `battleWfrp`). Свідомі межі:

@@ -44,3 +44,5 @@ export const CAMPAIGN_NAMESPACES = [
 export const BATTLE_NAMESPACES = ["battleCommon", "battle", "battleWizards", "battleDm", "battleSetup", "battleLog", "battleActions"] as const satisfies readonly Namespace[];
 
 export const WFRP_BATTLE_NAMESPACES = [...BATTLE_NAMESPACES, "battleWfrp"] as const satisfies readonly Namespace[];
+
+export const WFRP_CAMPAIGN_EXTRA = ["wfrpMagic"] as const satisfies readonly Namespace[];

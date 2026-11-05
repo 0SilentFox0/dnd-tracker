@@ -1,4 +1,8 @@
 {
+  "2026-11-05-wfrp-magic": {
+    "title": "Grim d100: magic",
+    "body": "In Grim d100 campaigns spells have a Casting Number, a kind (Arcane or Petty), a lore and effects. The sheet gets a Magic tab; in battle there is a Channelling action and a d100 casting test with success levels, overcast and miscast on doubles. Spell magic fields are set in the editor."
+  },
   "2026-11-04-player-view": {
     "title": "Player view",
     "body": "The DM can switch a battle or the show page to the player view (button in the corner or the P key) and show exactly what players see, without any controls. The mode is per window, so keep one window as the DM and share the other. Enemy traits you see may be incomplete, because the DM has no observed knowledge of them."

@@ -44,7 +44,7 @@
         "fumble": "Провал касту"
       },
       "roll": "{roll} / {target} · SL {sl} проти СН {cn}",
-      "channelled": "Channelling +{channelled}",
+      "channelled": "Накопичено +{channelled} SL",
       "armour": "броня −{armour}",
       "overcast": "Overcast ×{steps}",
       "miscast": {
