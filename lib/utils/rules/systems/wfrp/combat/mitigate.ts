@@ -3,9 +3,9 @@ import { rollCrit } from "./crit-table";
 import { computeWfrpDamage } from "./damage";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
-import type { DamageStep, MitigateCtx, MitigateResult } from "@/lib/utils/rules/systems/types";
+import type { MitigateCtx, MitigateResult,MitigateStep } from "@/lib/utils/rules/systems/types";
 
-const step = (key: string, value: number): DamageStep => ({
+const step = (key: string, value: number): MitigateStep => ({
   key,
   value,
   label: dynamicTextRef(`battleWfrp.damage.steps.${key}`),

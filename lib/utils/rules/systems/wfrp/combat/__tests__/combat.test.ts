@@ -200,6 +200,15 @@ describe("resolveWfrpAttack conditions", () => {
       expect(applyWfrpCrit(fighter("t"), crit("head.5", "unconscious"), 1).participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
     });
 
+    it("unconscious marker on an already unconscious target adds no second log line", () => {
+      const down = applyWfrpCrit(fighter("t"), crit("head.5", "unconscious"), 1).participant;
+
+      const again = applyWfrpCrit(down, crit("head.5", "unconscious"), 2);
+
+      expect(again.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+      expect(conditionLevel(again.participant, "unconscious")).toBe(1);
+    });
+
     it("disarmed stays an inert mark", () => {
       const r = applyWfrpCrit(fighter("t"), crit("arm.3", "disarmed"), 1).participant;
 

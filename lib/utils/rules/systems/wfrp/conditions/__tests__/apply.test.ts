@@ -26,3 +26,16 @@ describe("applyWfrpConditionTo unconscious", () => {
     expect(r.messages).toHaveLength(1);
   });
 });
+
+describe("applyWfrpConditionTo unconscious repair", () => {
+  it("condition present but status ACTIVE restores UNCONSCIOUS", () => {
+    const first = applyWfrpConditionTo(makeParticipant({ id: "a", hp: 7, maxHp: 20 }), { key: "unconscious", round: 1, sourceName: src }).participant;
+
+    const woken = { ...first, combatStats: { ...first.combatStats, status: CombatStatus.ACTIVE } };
+
+    const r = applyWfrpConditionTo(woken, { key: "unconscious", round: 2, sourceName: src });
+
+    expect(r.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+    expect(r.messages).toHaveLength(1);
+  });
+});

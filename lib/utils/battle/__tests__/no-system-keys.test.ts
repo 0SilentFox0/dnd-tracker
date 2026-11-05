@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
 
-const SYSTEM_KEY = /["`]battleWfrp\.|wfrpTotal|\.wfrp\./;
+const SYSTEM_KEY = /["`]battleWfrp\.|["`][^"`]*(\.wfrp\.|wfrpTotal)/;
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -36,8 +36,13 @@ describe("battle core knows no rule-system i18n keys", () => {
   });
 
   it("the pattern catches the legacy battleLog wfrp keys", () => {
-    expect(SYSTEM_KEY.test("battleLog.damage.rows.wfrpTotal")).toBe(true);
-    expect(SYSTEM_KEY.test("battleLog.wfrp.crit.head.1")).toBe(true);
+    expect(SYSTEM_KEY.test('"battleLog.damage.rows.wfrpTotal"')).toBe(true);
+    expect(SYSTEM_KEY.test('"battleLog.wfrp.crit.head.1"')).toBe(true);
+  });
+
+  it("the pattern ignores property access", () => {
+    expect(SYSTEM_KEY.test("p.abilities.wfrp.tb")).toBe(false);
+    expect(SYSTEM_KEY.test("const x = p.wfrpTotal;")).toBe(false);
   });
 
   it.each(["uk", "en"])("%s battleLog.json carries no wfrp texts", (locale) => {

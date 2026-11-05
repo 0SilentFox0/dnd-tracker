@@ -74,7 +74,7 @@ export interface ResolvedAttack {
   fortuneLine?: LogLine;
 }
 
-export interface DamageStep {
+export interface MitigateStep {
   key: string;
   value: number;
   label: LogLine;
@@ -98,7 +98,7 @@ export interface MitigateCtx {
 
 export interface MitigateResult {
   amount: number;
-  steps: DamageStep[];
+  steps: MitigateStep[];
   totalLabel: LogLine;
   /** Follow-up applied to the target after the hit (e.g. a WFRP critical wound) */
   afterHit?(target: BattleParticipant, round: number): { participant: BattleParticipant; message: LogLine };

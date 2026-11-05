@@ -16,7 +16,11 @@ export function wfrpOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
 
   if (!wentDown) return { participant: after, participants, messages: [] };
 
+  const alreadyDown = before.combatStats.status === CombatStatus.UNCONSCIOUS;
+
   let next: BattleParticipant = { ...after, combatStats: { ...after.combatStats, status: CombatStatus.UNCONSCIOUS } };
+
+  if (alreadyDown) return { participant: next, participants: replaceParticipant(participants, next), messages: [] };
 
   const messages: LogLine[] = [textRef("battleWfrp.log.unconscious", { name: after.basicInfo.name })];
 

@@ -40,12 +40,12 @@
 | `abilities` | усі | лише відомі | усі |
 | Позиція, ім'я, сторона, `status` | усі | усі | усі |
 
-Союзники й власні герої не редагуються. Рішення «що публічно» вже є для журналу (`concealLine`, `isConcealed`), його треба перевикористати.
+Союзники й власні герої не редагуються. Рішення «що публічно» вже є для журналу (`concealLine`), його треба перевикористати.
 
 ## Оцінка обсягу
 
 - Нова чиста функція `redactParticipantsForViewer(participants, viewer, rules)` у `lib/utils/battle/view/` (+ тести на кожне поле/глядача): 2 файли.
-- Застосування: `toBattleResponse` (GET + SSR, потрібен viewer: `BattleResponseView` уже несе `isDM`/userId), `buildPusherMessages` (публічна дельта: `upserted`, `patched`, `pending`, `setup`), відповідь мутації для не-DM: 3-4 файли.
+- Застосування: `toBattleResponse` (GET + SSR, потрібен viewer: `BattleResponseView` несе лише `isDM`, для редакції треба додати viewer/userId), `buildPusherMessages` (публічна дельта: `upserted`, `patched`, `pending`, `setup`), відповідь мутації для не-DM: 3-4 файли.
 - `patched` (`BattleParticipantPatch`) редагувати складніше, ніж `upserted`: треба або відкидати приховані ключі, або надсилати для ворога повний редагований upsert; +1-2 файли й тести.
 - Клієнт: `applyBattleDelta` і оптимістичні апдейти (`useAttackSubmit`, `useBattleFxQueue`, FX з `currentHp` до/після) працюють із даними, яких у гравця більше не буде: аудит ~10 хуків/компонентів (`useBattleFxQueue`, `useDownedHeroPrompt`, `useAttackTargets`, `useAttackWizard`, `usePlayerTurn`, `derive-scene`, `strike-steps`, `InitiativeTrack`, `ParticipantList`, `ParticipantDetails`, `map-scene`).
 - Оцінка: ~12-18 файлів коду, ~15-25 нових/змінених тестів (редаговані дельти, вирівнювання версій, GET/SSR, dm-канал), плюс live-run з другим акаунтом гравця (його зараз немає).

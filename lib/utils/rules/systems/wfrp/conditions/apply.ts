@@ -17,7 +17,7 @@ const labelKey = (key: WfrpConditionKey) => `battleWfrp.conditions.${key}.label`
 export function applyWfrpConditionTo(p: BattleParticipant, input: SystemConditionApply & { key: WfrpConditionKey }): { participant: BattleParticipant; messages: LogLine[] } {
   const { key } = input;
 
-  if (key === "unconscious" && conditionLevel(p, key) > 0) return { participant: p, messages: [] };
+  if (key === "unconscious" && conditionLevel(p, key) > 0 && p.combatStats.status !== CombatStatus.ACTIVE) return { participant: p, messages: [] };
 
   const def = WFRP_CONDITION_REGISTRY[key];
 
