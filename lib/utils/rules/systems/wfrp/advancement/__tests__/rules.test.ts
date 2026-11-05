@@ -33,4 +33,20 @@ describe("rules.advancement", () => {
 
     expect(merged.ok && merged.rules.advancement.talentCostMultiplier).toBe(2);
   });
+
+  it("default carries career rules; old rules without career parse with the default", () => {
+    expect(DEFAULT_ADVANCEMENT_RULES.career).toEqual({ ticksRequired: [10, 12, 14], outOfCareerMultiplier: 2 });
+
+    const { career: _career, ...old } = DEFAULT_ADVANCEMENT_RULES;
+
+    expect(parseRules({ advancement: old }).advancement.career).toEqual(DEFAULT_ADVANCEMENT_RULES.career);
+  });
+
+  it("rejects bad career rules", () => {
+    const career = (c: unknown) => RulesetSchema.safeParse({ advancement: { career: c } }).success;
+
+    expect(career({ ticksRequired: [10, 12, 14], outOfCareerMultiplier: 0.5 })).toBe(false);
+    expect(career({ ticksRequired: [10, 12], outOfCareerMultiplier: 2 })).toBe(false);
+    expect(career({ ticksRequired: [10, 12, 14], outOfCareerMultiplier: 1 })).toBe(true);
+  });
 });

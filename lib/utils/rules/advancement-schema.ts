@@ -7,8 +7,14 @@ const TrackSchema = z
   .refine((t) => t.brackets.every((b, i) => i === 0 || (b.upTo > t.brackets[i - 1].upTo && b.cost >= t.brackets[i - 1].cost)), { message: "rules.validation.advancementBrackets", path: ["brackets"] })
   .refine((t) => t.max >= t.brackets[t.brackets.length - 1].upTo, { message: "rules.validation.advancementMax", path: ["max"] });
 
+const CareerRulesSchema = z.strictObject({
+  ticksRequired: z.tuple([z.number().int().min(1).max(200), z.number().int().min(1).max(200), z.number().int().min(1).max(200)]),
+  outOfCareerMultiplier: z.number().min(1).max(100),
+});
+
 export const AdvancementRulesSchema = z.strictObject({
   characteristic: TrackSchema,
   skill: TrackSchema,
   talentCostMultiplier: z.number().min(0).max(100),
+  career: CareerRulesSchema,
 });

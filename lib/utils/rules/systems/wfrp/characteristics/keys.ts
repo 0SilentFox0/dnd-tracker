@@ -16,9 +16,14 @@ export type LedgerEntry = {
   from: number;
   to: number;
   cost: number;
+  tick?: string;
 };
 
 export const LEDGER_MAX = 200;
+
+export type CareerState = { careerId: string; tier: 1 | 2 | 3 | 4; ticks: string[] };
+
+export const CAREER_TIERS = [1, 2, 3, 4] as const;
 
 export type Characteristics = {
   base: Record<CharacteristicKey, number>;
@@ -30,6 +35,7 @@ export type Characteristics = {
   talents: Record<string, number>;
   ledger: LedgerEntry[];
   spentArchived: number;
+  career?: CareerState;
 };
 
 const fill = (value: number) => Object.fromEntries(CHARACTERISTIC_KEYS.map((k) => [k, value])) as Record<CharacteristicKey, number>;
@@ -73,15 +79,27 @@ function readTalents(raw: unknown) {
   return valid ? { ...(raw as Record<string, number>) } : DEFAULT_CHARACTERISTICS.talents;
 }
 
+const isTier = (v: unknown): v is CareerState["tier"] => (CAREER_TIERS as readonly unknown[]).includes(v);
+
+function readCareer(raw: unknown): CareerState | undefined {
+  if (!isRecord(raw) || typeof raw.careerId !== "string" || raw.careerId.length < 1 || raw.careerId.length > 64 || !isTier(raw.tier)) return undefined;
+
+  const ticks = raw.ticks;
+
+  if (!Array.isArray(ticks) || ticks.length > LEDGER_MAX || !ticks.every((t) => typeof t === "string" && t.length >= 1 && t.length <= 100) || new Set(ticks).size !== ticks.length) return undefined;
+
+  return { careerId: raw.careerId, tier: raw.tier, ticks: [...ticks] };
+}
+
 const LEDGER_KINDS: readonly unknown[] = ["characteristic", "skill", "talent"];
 
 const isLedgerEntry = (v: unknown): v is LedgerEntry =>
-  isRecord(v) && typeof v.id === "string" && typeof v.at === "string" && LEDGER_KINDS.includes(v.kind) && typeof v.key === "string" && isInt(v.from, 0, 1e6) && isInt(v.to, 0, 1e6) && isInt(v.cost, 0, 1e9);
+  isRecord(v) && typeof v.id === "string" && typeof v.at === "string" && LEDGER_KINDS.includes(v.kind) && typeof v.key === "string" && isInt(v.from, 0, 1e6) && isInt(v.to, 0, 1e6) && isInt(v.cost, 0, 1e9) && (v.tick === undefined || (typeof v.tick === "string" && v.tick.length >= 1 && v.tick.length <= 100));
 
 function readLedger(raw: unknown): LedgerEntry[] {
   if (!Array.isArray(raw) || raw.length > LEDGER_MAX || !raw.every(isLedgerEntry)) return DEFAULT_CHARACTERISTICS.ledger;
 
-  return raw.map((e) => ({ id: e.id, at: e.at, kind: e.kind, key: e.key, from: e.from, to: e.to, cost: e.cost }));
+  return raw.map((e) => ({ id: e.id, at: e.at, kind: e.kind, key: e.key, from: e.from, to: e.to, cost: e.cost, ...(e.tick === undefined ? {} : { tick: e.tick }) }));
 }
 
 export function readCharacteristics(row: { characteristics?: unknown }): Characteristics {
@@ -90,6 +108,8 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
   if (!isRecord(raw)) return DEFAULT_CHARACTERISTICS;
 
   const num = (key: "move" | "fate" | "extraWounds", min: number, max: number) => (raw[key] === undefined || !isInt(raw[key], min, max) ? DEFAULT_CHARACTERISTICS[key] : (raw[key] as number));
+
+  const career = readCareer(raw.career);
 
   return {
     base: readPerKey(raw.base, 1, 100, 30, DEFAULT_CHARACTERISTICS.base),
@@ -101,5 +121,6 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
     talents: readTalents(raw.talents),
     ledger: readLedger(raw.ledger),
     spentArchived: raw.spentArchived === undefined || !isInt(raw.spentArchived, 0, 1e9) ? 0 : raw.spentArchived,
+    ...(career ? { career } : {}),
   };
 }

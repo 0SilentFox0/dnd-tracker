@@ -25,8 +25,10 @@ import { HudForm, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useRulesForm } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { MECHANIC_REGISTRY,type MechanicKey } from "@/lib/utils/rules";
+import type { MechanicKey } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+
+type FormMechanicKey = Exclude<MechanicKey, "advancement">;
 
 const FORM_ID = "campaign-rules-form";
 
@@ -47,7 +49,7 @@ const SECTIONS = {
   encounters: EncountersSection,
   items: ItemsSection,
   spellIngredients: SpellIngredientsSection,
-} satisfies Record<MechanicKey, unknown>;
+} satisfies Record<FormMechanicKey, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {
   const t = useTranslator("rules");
@@ -62,7 +64,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   const unused = ruleSystemOf(form.data).unusedMechanics;
 
-  const tabs: HudTab<MechanicKey>[] = (Object.keys(MECHANIC_REGISTRY) as MechanicKey[]).map((key) => {
+  const tabs: HudTab<FormMechanicKey>[] = (Object.keys(SECTIONS) as FormMechanicKey[]).map((key) => {
     const Section = SECTIONS[key];
 
     return {

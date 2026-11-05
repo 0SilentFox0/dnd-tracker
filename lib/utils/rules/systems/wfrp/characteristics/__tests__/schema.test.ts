@@ -75,4 +75,36 @@ describe("readCharacteristics matches schema", () => {
 
     expect(c).toEqual({ ...DEFAULT_CHARACTERISTICS, fate: 3 });
   });
+
+  describe("career", () => {
+    const career = { careerId: "c1", tier: 2, ticks: ["skill:melee", "talent:t1"] };
+
+    const entry = { id: "a", at: "t", kind: "skill", key: "melee", from: 0, to: 1, cost: 10 };
+
+    it("absent career stays undefined", () => {
+      expect(CharacteristicsSchema.parse({}).career).toBeUndefined();
+      expect(readCharacteristics({ characteristics: {} }).career).toBeUndefined();
+    });
+
+    it("accepts a valid career in schema and mirror", () => {
+      expect(CharacteristicsSchema.parse({ career }).career).toEqual(career);
+      expect(readCharacteristics({ characteristics: { career } }).career).toEqual(career);
+    });
+
+    it("rejects tier 5, duplicate ticks and more than 200 ticks", () => {
+      const many = Array.from({ length: 201 }, (_, i) => `skill:s${i}`);
+
+      for (const bad of [{ ...career, tier: 5 }, { ...career, ticks: ["a", "a"] }, { ...career, ticks: many }]) {
+        expect(CharacteristicsSchema.safeParse({ career: bad }).success).toBe(false);
+        expect(readCharacteristics({ characteristics: { career: bad } }).career).toBeUndefined();
+      }
+    });
+
+    it("ledger tick is optional", () => {
+      expect(CharacteristicsSchema.parse({ ledger: [entry] }).ledger[0].tick).toBeUndefined();
+      expect(CharacteristicsSchema.parse({ ledger: [{ ...entry, tick: "skill:melee" }] }).ledger[0].tick).toBe("skill:melee");
+      expect(readCharacteristics({ characteristics: { ledger: [entry] } }).ledger[0]).toEqual(entry);
+      expect(readCharacteristics({ characteristics: { ledger: [{ ...entry, tick: "skill:melee" }] } }).ledger[0].tick).toBe("skill:melee");
+    });
+  });
 });
