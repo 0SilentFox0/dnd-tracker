@@ -30,7 +30,7 @@ describe("wfrpMiscast", () => {
 
     const r = run("minor", preset);
 
-    expect(conditionLevel(r.participants[0], MISCAST_TABLE.minor[n - 1].condition!.key)).toBeGreaterThan(0);
+    expect(conditionLevel(r.participants[0], MISCAST_TABLE.minor[n - 1].condition?.key ?? "fatigued")).toBeGreaterThan(0);
     expect(r.messages[0]).toMatchObject({ message: "wfrpMagic.log.miscast", params: { effect: { message: `wfrpMagic.miscast.minor.${n}` } } });
   });
 
@@ -42,7 +42,7 @@ describe("wfrpMiscast", () => {
     const r = run("minor", preset, 20, spy);
 
     expect(spy).toHaveBeenCalledOnce();
-    expect(r.participants[0].combatStats.currentHp).toBe(20 - MISCAST_TABLE.minor[n - 1].wounds!);
+    expect(r.participants[0].combatStats.currentHp).toBe(20 - (MISCAST_TABLE.minor[n - 1].wounds ?? 0));
   });
 
   it("0 Wounds goes through wfrpOnZeroHp", () => {

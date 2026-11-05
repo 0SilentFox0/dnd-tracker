@@ -396,7 +396,7 @@
       "s3": {
         "heading": "Sheet tests, new session and battles",
         "b0": "Click a characteristic or skill to open the test dialog: choose a difficulty and roll a d100. The log records the result, the target number and success levels (SL), and a critical success or failure. The \"New session\" button in the party rest menu restores Fortune to the Fate value.",
-        "b1": "Battles in Grim d100 are not ready yet: trying to start one returns an error. They arrive in the next part."
+        "b1": "Battles and magic work in Grim d100: the log records d100 tests, SL and miscasts."
       },
       "s4": {
         "heading": "Magic",

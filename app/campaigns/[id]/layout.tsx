@@ -12,11 +12,11 @@ import { isWfrpCampaign } from "@/lib/server/campaigns/system-key";
 export default async function CampaignLayout({ children, params }: { children: ReactNode; params: Promise<{ id: string }> }) {
   const [{ id }, userId] = await Promise.all([params, getSessionUserId()]);
 
-  const campaign = userId ? await getCampaignForLayout(id, userId) : null;
+  const [campaign, wfrpSystem] = userId ? await Promise.all([getCampaignForLayout(id, userId), isWfrpCampaign(id)]) : [null, false];
 
   const isDemo = isDemoKind(campaign?.kind);
 
-  const isWfrp = campaign ? await isWfrpCampaign(id) : false;
+  const isWfrp = !!campaign && wfrpSystem;
 
   const content = isDemo ? <ExtendLocaleScope namespaces={["demoTours"]}><DemoTourCoordinator campaignId={id}>{children}</DemoTourCoordinator></ExtendLocaleScope> : children;
 

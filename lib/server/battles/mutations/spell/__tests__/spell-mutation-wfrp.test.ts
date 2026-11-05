@@ -123,6 +123,16 @@ describe("spell mutation in WFRP", () => {
   });
 });
 
+describe("spell mutation in WFRP, fizzle with Fortune", () => {
+  it("spends Fortune exactly once", async () => {
+    const out = await run(bolt, { castRoll: 90, fortune: "reroll", fortuneRoll: 80 }, { c: caster(2) });
+
+    expect(details(out).percentileCast?.outcome).toBe("failure");
+    expect(hp(out, "gob")).toBe(goblin.combatStats.currentHp);
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.fortune).toBe(1);
+  });
+});
+
 describe("spell mutation in d20", () => {
   it("ignores the percentile fields and still needs a slot", async () => {
     await expect(run(bolt, { castRoll: 30 }, { wfrp: false })).rejects.toMatchObject({ message: "errors.battleNoFreeSlot" });

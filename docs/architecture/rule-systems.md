@@ -82,7 +82,7 @@
 
 - Заклинання wfrp береться лише з `casting.magic` (`cn`, `kind`, `overcast`, `attribute`) і резолюцією `auto`; save-заклинання, заклинання без magic-даних і `cost: "long"` дають 422 `BATTLE_SPELL_SYSTEM_MISMATCH`. Вільний каст ДМ, легендарні дії й гранти — без тесту й без слота.
 - Каст-тест: слот не витрачається (`slots: false`); channelled SL списується при будь-якому результаті спроби; Fortune для касту — перекид або +1 SL, для channelling Fortune немає.
-- Overcast піднімає лише `castLevel` (кроки `OVERCAST_SL_STEP` за перевищення CN); `diceRolls` клієнта не розширюються, тож апкаст по кубиках/цілях рахує сервер. Каст без `castRoll`/`serverRoll` сервер кидає сам (не відхиляє).
+- Overcast (кроки `OVERCAST_SL_STEP` за перевищення CN, див. «Межі 5d-3»): `diceRolls` клієнта не розширюються, додаткові кубики кидає сервер. Каст без `castRoll`/`serverRoll` сервер кидає сам (не відхиляє).
 - `channel`: основна дія; не свій хід, використана дія або d20-кампанія (`BATTLE_CHANNEL_UNSUPPORTED`, 422) відхиляються; кидок 100 дає minor miscast; будь-яка шкода кастеру скидає channelled SL (`onDamaged`).
 - Числа (`MISCAST_TABLE`, CN, кроки SL: `OVERCAST_SL_STEP`, `ARMOUR_SL_PER_AP`, `CHANNEL_MAX_SL`, правила miscast на дублях) не звірені з книгою (немає джерела).
 - AP = 0 до 5f, тож штраф броні касту завжди 0 (формула покрита тестом).
@@ -114,7 +114,13 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - Підсумок перед застосуванням не показує SL проти CN: кидок відомий лише після застосування (авто-кидок робить сервер), CN і ціль видно на кроці кидка.
 - Ablaze: рівні складаються (`leveled`, максимум `WFRP_CONDITION_MAX_LEVEL`), шкода тіка = d10 + рівень − 1 − TB − AP, мін. `MIN_DAMAGE` (`conditions/tick.ts`); зростання до −4/−6 після кількох кастів відповідає задуму, не баг (числа каталогу не звірено з книгою).
 - Розмір `scope-size`: uk ≈ 104 / 105 KB (запас ≈ 1 KB), тож наступний wfrp-namespace потребує винесення або окремого ліміту. Мітки умов для редактора заклинань продубльовано в `wfrpMagic.ui.editor.condition.*`, бо `battleWfrp` не входить у scope `/dm/spells`.
-- Застарілий текст довідки `dm-rule-systems` s3 b1 (каже, що бої wfrp не готові) — не оновлено.
+- Overcast: тільки `overcast: "dice"` підвищує рівень каста й додає `upcastDice × кроки` кубиків до сили заклинання (кроки обмежені `MAX_OVERCAST_STEPS`); `"targets"` не підтримано (кидок відомий після вибору цілей), схема його приймає, редактор не пропонує.
+- Miscast/wrath ворожого заклинача: для гравців рядки умов ховаються через `concealLine`, як для ворожої цілі.
+- Інгредієнт гасить лише arcane miscast, не wrath.
+- M4: miscast на каналізації (кидок 100) не викликає `resolveDowned`/`hpChanges`.
+- M5: фізл пропускає after-тригер, але побічні ефекти before-тригера `spellCast` лишаються; legendary/grant довгі касти проходять `beginLongCast` зі слот-перевіркою.
+- M6: `rollKeys` у `lib/server/battles/dice.ts` не знає `castRoll`/`fortuneRoll` (у режимі серверних кубиків асистента ігноруються мовчки).
+- M8: плитка Channel показується всім героям wfrp; `battleData.sin` видно в знімку (за специфікацією).
 - Решта відомих прогалин: таланти, редагований контент `tables`, дальність/площа/тривалість overcast, long cast, штраф броні (AP = 0 до 5f).
 - **Обов'язково перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20) — ще не запускався.
 
