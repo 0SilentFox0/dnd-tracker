@@ -175,7 +175,7 @@ RuleSystemDefinition.magic?: RuleSystemMagic;   // d20: undefined → повед
 - Бюджет i18n (запас ~2 KB gzip) — П5.
 - `battle-sweep` homm/dnd5e на prodcopy досі не запускався для епіку: зміни в `castSpell`/`consequences` — ще один привід прогнати перед деплоєм епіку.
 
-## Питання до користувача (з рекомендацією)
+## Питання до користувача (закрито 2026-11-05: усі п'ять — рекомендовані варіанти, «так»)
 
 - **П1. Числа без книги.** Робимо на припущеннях (CN ≤ SL, overcast кожні +2 SL, броня −1 SL/AP, дублі-провал → minor, 100 → major, channelling miscast лише на 100), усе в `magic/constants.ts` з позначкою «звірити»? *Рекомендація: так, як для каталогу станів.*
 - **П2. Lore attribute.** У кожному заклинанні (`casting.magic.attribute`, без міграції) чи на лорі (нова JSON-колонка `spell_groups.magic` + `spell_groups_base`, expand-only)? *Рекомендація: у заклинанні; на лор — лише якщо 5g покаже незручність.*
