@@ -402,6 +402,11 @@
         "heading": "Magic",
         "b0": "In a Grim d100 campaign spells have a Casting Number (CN), a kind (Arcane or Petty) and a lore. These fields, the overcast dice and the lore attribute are set in the spell editor, and heroes see their known spells in the Magic tab of the sheet.",
         "b1": "In battle the Channelling button banks SL for the next cast. Casting is a d100 test: the total SL against the CN decides success, overcast strengthens the spell, and doubles cause a miscast. Spells without magic data and long casts are unavailable in Grim d100."
+      },
+      "s5": {
+        "heading": "Advancement and experience",
+        "b0": "In Grim d100 a hero spends experience (XP) on characteristics, skills and talents. The \"Advancement\" tab on the sheet shows the available XP, the price of the next step and a \"Buy\" button; the hero's owner and the DM can see it. Prices and limits come from the campaign rules (the \"Advancement\" section), and a talent's price is set in the talent editor (cost per rank and maximum rank).",
+        "b1": "Every purchase goes into the advancement log. The DM can undo the last purchase with the \"Undo\" button: the XP comes back, and undo is blocked if the data was edited by hand after the purchase. Purchased talents work in battle with their effects."
       }
     }
   }
