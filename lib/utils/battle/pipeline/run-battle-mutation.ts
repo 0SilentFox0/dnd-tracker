@@ -131,7 +131,7 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
   };
 }
 
-function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
+function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean, rules: Ruleset): MutationResult {
   const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
 
   if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(dismissed.messages, "; "))] };
@@ -140,7 +140,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(reverted.messages, "; "))] };
 
-  const cleared = clearFallenEffects(result.participants);
+  const cleared = clearFallenEffects(result.participants, rules);
 
   if (cleared !== result.participants) result = { ...result, participants: cleared };
 
@@ -214,7 +214,7 @@ async function buildScenePreview(userId: string, loaded: LoadedBattle, result: M
 export function readScenePreview(userId: string, loaded: LoadedBattle, options: PreviewOptions, deps: PreviewDeps) {
   const unchanged = guardTurnOrder(loaded.scene, loaded.participants, { participants: loaded.participants, pending: loaded.pending, events: [] });
 
-  const placed = withPlacement(loaded.meta.map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, unchanged, false);
+  const placed = withPlacement(loaded.meta.map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, unchanged, false, loaded.meta.rules);
 
   return buildScenePreview(userId, loaded, withVictory(loaded.scene, placed, loaded.meta.rules), options, deps);
 }
@@ -253,7 +253,7 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const mutatedMap = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-  const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+  const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun, loaded.meta.rules);
 
   const swept = sweepDeadZones(mutatedMap, unswept.participants);
 

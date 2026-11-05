@@ -1,5 +1,5 @@
 import { applyWfrpCondition, reduceWfrpConditionIn, UNTIMED_CONDITIONS } from "./apply";
-import { isWfrpConditionKey, WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY } from "./catalog";
+import { isWfrpConditionKey, WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY,wfrpConditionEffectKey } from "./catalog";
 import { concealWfrpLine } from "./conceal";
 import { attemptWfrpConditionEnd } from "./end-test";
 import { wfrpConditions } from "./levels";
@@ -20,5 +20,6 @@ export const WFRP_CONDITIONS: RuleSystemConditions = {
   turnStart: wfrpConditionsTurnStart,
   skippedTurn: wfrpSkippedTurn,
   keepDownedAfterVictory: true,
+  keepsWhenDown: (effect) => effect.abilityKey === wfrpConditionEffectKey("bleeding"),
   attemptEnd: attemptWfrpConditionEnd,
 };

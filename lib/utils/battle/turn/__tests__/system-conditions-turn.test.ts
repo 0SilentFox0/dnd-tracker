@@ -6,6 +6,7 @@ import { resetTurnState } from "../turn-state";
 import { CombatStatus } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn, enterChangedTurn } from "@/lib/utils/battle/turn";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -79,6 +80,25 @@ describe("system condition ticks at turn start", () => {
 
     expect(res.participants[res.turnIndex].basicInfo.id).toBe("c");
     expect(isActive(res.participants[0])).toBe(false);
+  });
+
+  it("unconscious bleeder keeps bleeding through the fallen sweep and can bleed out on the skipped turn", () => {
+    const a = bleed("a", 10);
+
+    const b0 = bleed("b", 0, 3);
+
+    const b = { ...b0, combatStats: { ...b0.combatStats, status: CombatStatus.UNCONSCIOUS } };
+
+    const c = bleed("c", 10);
+
+    const swept = clearFallenEffects([a, b, c], WFRP_RULES);
+
+    expect(swept[1].battleData.activeEffects).toHaveLength(1);
+
+    const out = advanceTurn({ participants: swept, pending: [], scene: { ...scene, turnIndex: 0 }, rng: () => 0.1, map: null, rules: WFRP_RULES });
+
+    expect(out.participants.find((p) => p.basicInfo.id === "b")?.combatStats.status).toBe(CombatStatus.DEAD);
+    expect(JSON.stringify(out.actions)).toContain("battleWfrp.log.tick.bleedOut");
   });
 
   it("d20 rules do not tick wfrp conditions", () => {

@@ -150,6 +150,8 @@ export interface RuleSystemConditions {
   skippedTurn?(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng }): SystemConditionResult;
   /** Downed allies stay at 0 HP after a victory (healing raises them) */
   keepDownedAfterVictory?: true;
+  /** Effects that survive a participant going UNCONSCIOUS (cleared on death) */
+  keepsWhenDown?(effect: ActiveEffect): boolean;
   attemptEnd(
     ps: BattleParticipant[],
     id: string,
