@@ -28,7 +28,7 @@ import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import { levelNotificationEvents, spellNotificationEvents } from "@/lib/utils/notifications/events";
-import { preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { type Characteristics, preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -68,6 +68,18 @@ async function editableData({ access, character }: Gate, input: Parsed) {
   }
 
   return { data };
+}
+
+function reconcileCharacteristics(fresh: CharacterRecord, incoming: Characteristics, isDM: boolean): Characteristics {
+  const stored = readCharacteristics(fresh);
+
+  if (!isDM) return preserveServerOwned(stored, incoming);
+
+  const moved = incoming.ledger.length !== stored.ledger.length || incoming.ledger.at(-1)?.id !== stored.ledger.at(-1)?.id || incoming.spentArchived !== stored.spentArchived;
+
+  if (moved) throw new ContentError(API_ERRORS.CHARACTERISTICS_CHANGED, 409);
+
+  return incoming;
 }
 
 async function resolveClasses(campaign: Campaign, character: CharacterRecord, data: Parsed) {
@@ -146,12 +158,12 @@ function updateWriter({ character, data, avatar, resolved, computedState }: Upda
     ...(fromClasses.spellcastingAbility && { spellcastingAbility: fromClasses.spellcastingAbility }),
   };
 
-  return (db: Pick<Prisma.TransactionClient, "character">, classes: ClassesResult["classesInput"], choiceFields?: ChoiceFields) =>
+  return (db: Pick<Prisma.TransactionClient, "character">, classes: ClassesResult["classesInput"], choiceFields?: ChoiceFields, characteristics?: Characteristics) =>
     db.character.update({
       where: { id: character.id },
       data: {
         ...data,
-        characteristics: data.characteristics as Prisma.InputJsonValue | undefined,
+        characteristics: (characteristics ?? data.characteristics) as Prisma.InputJsonValue | undefined,
         backgroundChoices: undefined,
         backgroundFeatPicks: undefined,
         classes: classes as unknown as Prisma.InputJsonValue | undefined,
@@ -209,7 +221,9 @@ async function patchCore(gate: Gate, parsed: Parsed) {
 
   const writeUpdate = updateWriter({ character, data, avatar: avatar.avatar, resolved, computedState });
 
-  const updatedCharacter = data.classes || changesBackground
+  const guardsLedger = Boolean(data.characteristics && ruleSystemOf(campaign.rules).advancement);
+
+  const updatedCharacter = data.classes || changesBackground || guardsLedger
     ? await prisma.$transaction(async (tx) => {
         await lockCharacters(tx, [characterId]);
 
@@ -225,7 +239,9 @@ async function patchCore(gate: Gate, parsed: Parsed) {
 
         if (choices && !choices.ok) throw choices.error;
 
-        return writeUpdate(tx, classes, choices?.ok ? choices.fields : undefined);
+        const characteristics = guardsLedger && data.characteristics ? reconcileCharacteristics(fresh, data.characteristics, isDM) : undefined;
+
+        return writeUpdate(tx, classes, choices?.ok ? choices.fields : undefined, characteristics);
       })
     : await writeUpdate(prisma, resolved.classesInput);
 

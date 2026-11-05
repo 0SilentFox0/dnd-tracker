@@ -519,5 +519,6 @@
   "advanceUnknown": "Невідомий елемент розвитку",
   "advanceLedgerEmpty": "Немає покупок для відкату",
   "advanceLedgerStale": "Останню покупку не можна відкотити — дані змінено вручну",
+  "characteristicsChanged": "Лист змінився — перезавантажте сторінку",
   "advanceNotWfrp": "Розвиток за досвід доступний лише в WFRP"
 }

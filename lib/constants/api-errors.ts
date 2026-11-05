@@ -231,6 +231,7 @@ export const API_ERRORS = {
   ADVANCE_UNKNOWN: "errors.advanceUnknown",
   ADVANCE_LEDGER_EMPTY: "errors.advanceLedgerEmpty",
   ADVANCE_LEDGER_STALE: "errors.advanceLedgerStale",
+  CHARACTERISTICS_CHANGED: "errors.characteristicsChanged",
   ADVANCE_NOT_WFRP: "errors.advanceNotWfrp",
   SHORT_REST_CLOSED: "errors.shortRestClosed",
   CHARACTER_DEAD: "errors.characterDead",

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const h = vi.hoisted(() => ({
   access: vi.fn(),
   character: { findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn() },
+  $queryRaw: vi.fn(async () => []),
 }));
 
 vi.mock("server-only", () => ({}));
@@ -70,9 +71,9 @@ describe("get stays owner/DM only", () => {
 describe("PATCH cannot bypass the ledger", () => {
   const record = { id: "mine", campaignId: "camp", controlledBy: "p1", type: "player", status: "active", level: 1, classes: [], race: "", avatar: null, characteristics: stored };
 
-  const patch = async (viewer: { userId: string; isDM: boolean }, characteristics: object) => {
+  const patch = async (viewer: { userId: string; isDM: boolean }, characteristics: object, fresh: object = record) => {
     h.access.mockResolvedValue({ ...viewer, campaign: { id: "camp", maxLevel: 20, allowPlayerEdit: true, rules: WFRP_RULES } });
-    h.character.findUnique.mockResolvedValue(record);
+    h.character.findUnique.mockResolvedValueOnce(record).mockResolvedValue(fresh);
     h.character.update.mockResolvedValue({ ...record, level: 1 });
 
     const gate = await patchOperation.gate({ campaignId: "camp", characterId: "mine" });
@@ -93,8 +94,21 @@ describe("PATCH cannot bypass the ledger", () => {
   });
 
   it("DM edits advances directly", async () => {
-    const saved = await patch({ userId: "dm", isDM: true }, tampered);
+    const saved = await patch({ userId: "dm", isDM: true }, { ...tampered, ledger: stored.ledger });
 
-    expect(saved).toMatchObject({ fate: 2, advances: tampered.advances, talents: { cheat: 3 }, ledger: [] });
+    expect(saved).toMatchObject({ fate: 2, advances: tampered.advances, talents: { cheat: 3 }, ledger: stored.ledger });
+  });
+
+  const bought = { ...stored, advances: { ...stored.advances, ws: 2 }, ledger: [...stored.ledger, { ...entry, id: "e2", from: 1, to: 2 }] };
+
+  it("player: a purchase committed after the gate read is not reverted", async () => {
+    const saved = await patch({ userId: "p1", isDM: false }, { ...stored, fate: 2 }, { ...record, characteristics: bought });
+
+    expect(saved).toMatchObject({ fate: 2, advances: bought.advances, ledger: bought.ledger });
+  });
+
+  it("DM: saving a sheet loaded before a purchase returns 409 and writes nothing", async () => {
+    await expect(patch({ userId: "dm", isDM: true }, { ...stored, fate: 2 }, { ...record, characteristics: bought })).rejects.toMatchObject({ status: 409 });
+    expect(h.character.update).not.toHaveBeenCalled();
   });
 });
