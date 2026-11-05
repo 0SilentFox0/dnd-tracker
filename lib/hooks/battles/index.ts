@@ -15,12 +15,11 @@ export {
   useAuraZone,
   useBattle,
   useBattleConditions,
-  useConditionTest,
-  useSystemCondition,
   useBattleCoreAction,
   useBonusAction,
   useCastSpell,
   useCompleteBattle,
+  useConditionTest,
   useCritChoice,
   useDeleteAllBattles,
   useInitiativeReorder,
@@ -38,9 +37,11 @@ export {
   useRollbackBattleAction,
   useScaleBattleUnits,
   useStartBattle,
+  useSystemCondition,
   useUnitControl,
   useUpdateBattleParticipant,
 } from "./useBattles";
 export { useBattleSummary } from "./useBattleSummary";
 export { useDeleteBattleCard } from "./useDeleteBattleCard";
+export type { SystemConditionBody } from "@/lib/api/battle-ops";
 export type { BattleConditionsBody, CoreActionBody } from "@/lib/api/battles";

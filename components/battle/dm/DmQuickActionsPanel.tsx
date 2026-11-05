@@ -11,6 +11,7 @@ import { DmParticipantRow } from "./DmParticipantRow";
 import { LegendaryActionDialog } from "./LegendaryActionDialog";
 
 import { HUD_SURFACE } from "@/components/hud";
+import { systemUiOf } from "@/components/systems";
 import { BattleStatus } from "@/lib/constants/battle";
 import { type BattlePageDialogs, useBattleRules, useBattleScene, useDmParticipantActions } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -78,7 +79,9 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const closePanel = () => setOpen(false);
 
-  const { row, refreshSources, randomUnits, conditions, legendary, initiative } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
+  const { row, refreshSources, randomUnits, conditions, systemConditions, legendary, initiative } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
+
+  const SystemDialog = battle.rules ? systemUiOf(battle.rules.system.key).battleConditionsDialog : undefined;
 
   if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 
@@ -194,7 +197,11 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         </div>
       </div>
 
-      <ConditionsDialog participant={conditions.target} custom={conditions.custom} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
+      {SystemDialog ? (
+        <SystemDialog participant={conditions.target} onClose={conditions.close} onSubmit={systemConditions.submit} isPending={systemConditions.isPending} />
+      ) : (
+        <ConditionsDialog participant={conditions.target} custom={conditions.custom} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
+      )}
       <InitiativeOrderDialog participants={initiative.orderTarget} onClose={initiative.closeOrder} onSubmit={initiative.submitOrder} isPending={initiative.isReordering} />
       <LegendaryActionDialog participant={legendary.target} onClose={legendary.close} />
 

@@ -63,5 +63,34 @@
     "stand": "{name} gets up",
     "fortuneReroll": "{name} spends Fortune: reroll (first roll {first})",
     "fortuneSl": "{name} spends Fortune: +1 SL"
+  },
+  "ui": {
+    "dialog": {
+      "title": "Conditions",
+      "level": "Levels",
+      "rounds": "Rounds (empty = permanent)",
+      "permanent": "permanent",
+      "apply": "Apply",
+      "reduce": "−1",
+      "remove": "Remove",
+      "current": "Current",
+      "none": "No conditions"
+    },
+    "test": {
+      "attempt": "Try to end: {condition}",
+      "stand": "Stand up",
+      "auto": "Auto",
+      "manual": "Manual"
+    },
+    "fortune": {
+      "label": "Fortune",
+      "off": "Off",
+      "reroll": "Reroll",
+      "sl": "+1 SL",
+      "left": "Fortune left: {count}",
+      "secondRoll": "Second roll",
+      "used": "Fortune: reroll (first roll {first})",
+      "usedSl": "Fortune: +1 SL"
+    }
   }
 }

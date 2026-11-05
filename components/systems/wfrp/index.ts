@@ -3,6 +3,7 @@ import { HeroStats } from "./HeroStats";
 import { RollDialogBody } from "./RollDialogBody";
 import { StatsFields } from "./StatsFields";
 import { StatsTab } from "./StatsTab";
+import { SystemConditionsDialog } from "./SystemConditionsDialog";
 import { UnitStatsFields } from "./UnitStatsFields";
 
-export const WFRP_UI: SystemUi = { HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true };
+export const WFRP_UI: SystemUi = { HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, battleConditionsDialog: SystemConditionsDialog };

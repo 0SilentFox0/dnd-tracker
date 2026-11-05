@@ -63,5 +63,34 @@
     "stand": "{name} підводиться",
     "fortuneReroll": "{name} витрачає Fortune: перекидання (перший кидок {first})",
     "fortuneSl": "{name} витрачає Fortune: +1 SL"
+  },
+  "ui": {
+    "dialog": {
+      "title": "Стани",
+      "level": "Рівні",
+      "rounds": "Раунди (порожньо — постійно)",
+      "permanent": "постійно",
+      "apply": "Накласти",
+      "reduce": "−1",
+      "remove": "Зняти",
+      "current": "Поточні",
+      "none": "Немає станів"
+    },
+    "test": {
+      "attempt": "Спробувати зняти: {condition}",
+      "stand": "Встати",
+      "auto": "Авто",
+      "manual": "Вручну"
+    },
+    "fortune": {
+      "label": "Fortune",
+      "off": "Вимк.",
+      "reroll": "Перекинути",
+      "sl": "+1 SL",
+      "left": "Залишилось Fortune: {count}",
+      "secondRoll": "Другий кидок",
+      "used": "Витрачено Fortune: перекидання (перший кидок {first})",
+      "usedSl": "Витрачено Fortune: +1 SL"
+    }
   }
 }

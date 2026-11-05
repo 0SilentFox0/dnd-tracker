@@ -1,7 +1,9 @@
 import type { ComponentType } from "react";
 
+import type { SystemConditionBody } from "@/lib/hooks/battles";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import type { DifficultyKey } from "@/lib/utils/rules/systems";
+import type { BattleParticipant } from "@/types/battle";
 import type { SheetRollBody, SheetRollResult, SheetTotal } from "@/types/characters";
 import type { Unit } from "@/types/units";
 
@@ -36,6 +38,13 @@ export interface UnitStatsFieldsProps {
   fiveE?: boolean;
 }
 
+export interface SystemConditionsDialogProps {
+  participant: BattleParticipant | null;
+  onClose: () => void;
+  onSubmit: (body: SystemConditionBody) => void;
+  isPending: boolean;
+}
+
 export interface SystemUi {
   HeroStats: ComponentType;
   StatsTab: ComponentType<StatsTabProps>;
@@ -43,4 +52,5 @@ export interface SystemUi {
   StatsFields: ComponentType<StatsFieldsProps>;
   UnitStatsFields: ComponentType<UnitStatsFieldsProps>;
   hideProgression: boolean;
+  battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
 }

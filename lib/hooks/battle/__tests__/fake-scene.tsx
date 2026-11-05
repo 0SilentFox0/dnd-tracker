@@ -110,6 +110,8 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     maze: mutation(),
     unitControl: mutation(),
     conditions: mutation(),
+    systemCondition: mutation(),
+    conditionTest: mutation(),
     initiativeRoll: mutation(),
     initiativeReorder: mutation(),
     coreAction: mutation(),

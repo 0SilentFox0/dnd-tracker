@@ -6,6 +6,7 @@ import { Heart, Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, HpFigure, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
+import { ConditionTestPanel } from "@/components/battle/participants/ConditionTestPanel";
 import { ReactionSpellButton } from "@/components/battle/turn/ReactionSpellButton";
 import { ReadiedAttackButton } from "@/components/battle/turn/ReadiedAttackButton";
 import { BattleStatus } from "@/lib/constants/battle";
@@ -71,6 +72,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
         </div>
       )}
       {!compact && <EffectLine effects={heroEffects} />}
+      {!compact && <ConditionTestPanel hero={hero} />}
       {hero.battleData.pendingCast && <p className="mt-2 text-sm">{t("pendingCast", { spell: hero.battleData.pendingCast.spellName, rounds: hero.battleData.pendingCast.remainingRounds })}</p>}
       <ReadiedAttackButton participant={hero} />
       {battle.status === BattleStatus.ACTIVE && <ReactionSpellButton participant={hero} />}

@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
+import { EffectLine } from "@/components/battle/hud/EffectLine";
 import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
@@ -13,7 +14,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { render } from "@/lib/i18n/test/render-uk";
+import { textRef } from "@/lib/i18n/text-ref";
 import type { RuleSystemKey } from "@/lib/utils/rules/systems";
+import { applyWfrpConditionTo } from "@/lib/utils/rules/systems/wfrp/conditions/apply";
+import type { BattleParticipant } from "@/types/battle";
 
 vi.unmock("next-intl");
 
@@ -74,5 +78,46 @@ describe("прапорці системи правил у HUD бою", () => {
     const { container } = render(<><ReactionSpellButton participant={me} /><ReadiedAttackButton participant={me} /></>, { wrapper });
 
     expect(container.textContent).toBe("");
+  });
+
+  it("EffectLine: рівень стану показується, а з hideLevels — ні", () => {
+    const { wrapper, me } = scene("wfrp");
+
+    const bleeding = applyWfrpConditionTo(me, { key: "bleeding", levels: 3, round: 1, sourceName: textRef("battleWfrp.log.removed", { target: "x", condition: "y" }) }).participant.battleData.activeEffects[0];
+
+    const { unmount } = render(<TooltipProvider><EffectLine effects={[{ ...bleeding, level: 3 }]} /></TooltipProvider>, { wrapper });
+
+    expect(screen.getByText("×3")).toBeTruthy();
+    unmount();
+
+    render(<TooltipProvider><EffectLine effects={[{ ...bleeding, level: 3 }]} hideLevels /></TooltipProvider>, { wrapper });
+    expect(screen.queryByText("×3")).toBeNull();
+  });
+
+  it("MyHeroPanel: «Спробувати зняти» у свій хід, лише для wfrp і без спроби цього ходу", () => {
+    const withBleeding = (hero: BattleParticipant, tests?: string[]): BattleParticipant => {
+      const bled = applyWfrpConditionTo(hero, { key: "bleeding", levels: 1, round: 1, sourceName: textRef("battleWfrp.log.removed", { target: "x", condition: "y" }) }).participant;
+
+      return { ...bled, battleData: { ...bled.battleData, ...(tests && { conditionTests: tests }) } };
+    };
+
+    const wfrp = scene("wfrp");
+
+    render(<TooltipProvider><MyHeroPanel hero={withBleeding(wfrp.me)} /></TooltipProvider>, { wrapper: wfrp.wrapper });
+    fireEvent.click(screen.getByRole("button", { name: /Спробувати зняти/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Авто-кидок/ }));
+    expect(wfrp.value.actions.conditionTest.mutate).toHaveBeenCalledWith({ participantId: "me", condition: "bleeding", serverRoll: true });
+    cleanup();
+
+    const tried = scene("wfrp");
+
+    render(<TooltipProvider><MyHeroPanel hero={withBleeding(tried.me, ["bleeding"])} /></TooltipProvider>, { wrapper: tried.wrapper });
+    expect(screen.queryByRole("button", { name: /Спробувати зняти/ })).toBeNull();
+    cleanup();
+
+    const d20 = scene();
+
+    render(<TooltipProvider><MyHeroPanel hero={withBleeding(d20.me)} /></TooltipProvider>, { wrapper: d20.wrapper });
+    expect(screen.queryByRole("button", { name: /Спробувати зняти/ })).toBeNull();
   });
 });

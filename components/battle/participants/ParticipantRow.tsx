@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 import { legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import { isDown } from "@/lib/utils/battle/participant/state";
-import { hpRatio } from "@/lib/utils/battle/view";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import { type DisplayEffect, hpRatio } from "@/lib/utils/battle/view";
+import type { BattleParticipant } from "@/types/battle";
 
 function Pips({ count, filled, color }: { count: number; filled: number; color: string }) {
   return (
@@ -48,7 +48,7 @@ export interface ParticipantRowView {
 
 interface ParticipantRowProps {
   participant: BattleParticipant;
-  effects: readonly ActiveEffect[];
+  effects: readonly DisplayEffect[];
   view: ParticipantRowView;
   impact: FxImpact | null;
   onSelect: (id: string) => void;
@@ -84,7 +84,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
           {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-hud-text")}><HpFigure participant={participant} wounds={wounds} /></span> : <HealthLabel participant={participant} />}
         </div>
         <HealthBar participant={participant} exact={exact} />
-        <EffectLine effects={effects} />
+        <EffectLine effects={effects} hideLevels={!exact} />
         {participant.battleData.deathSaves && <DeathSavePips saves={participant.battleData.deathSaves} />}
         {badge && <div className="mt-1 text-xs text-[var(--hud-muted)]">{text(badge)}</div>}
       </div>

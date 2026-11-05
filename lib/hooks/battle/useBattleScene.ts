@@ -134,7 +134,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const order = battle?.initiativeOrder;
 
-  const effects = useDisplayEffectMap(order ?? NO_ORDER);
+  const effects = useDisplayEffectMap(order ?? NO_ORDER, battle?.rules);
 
   const dmControl = useMemo<DmControl>(() => ({ id: dmControlledId, set: setDmControlledId }), [dmControlledId]);
 

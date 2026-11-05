@@ -20,6 +20,7 @@ export * from "./spell-result";
 export * from "./statblock";
 export * from "./strike-steps";
 export * from "./summary";
+export * from "./system-conditions";
 export * from "./turn-exhausted";
 export * from "./visibility";
 export * from "./volley-results";
