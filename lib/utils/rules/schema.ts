@@ -7,6 +7,7 @@ import { UnitGroupAppearancesSchema } from "@/lib/schemas/unit-groups";
 import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
+import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
@@ -75,6 +76,7 @@ const sectionSchemas = {
   }),
   items: z.strictObject({ enabled: z.boolean(), attunementLimit: z.number().int().min(1).max(10) }),
   spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
+  advancement: AdvancementRulesSchema,
   system: z.strictObject({ key: z.enum(RULE_SYSTEM_KEYS) }),
 };
 
@@ -115,6 +117,7 @@ const sections = {
   encounters: withDefaults(sectionSchemas.encounters, DEFAULT_RULES.encounters),
   items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
   spellIngredients: withDefaults(sectionSchemas.spellIngredients, DEFAULT_RULES.spellIngredients),
+  advancement: withDefaults(sectionSchemas.advancement, DEFAULT_RULES.advancement),
   system: withDefaults(sectionSchemas.system, DEFAULT_RULES.system),
 };
 
@@ -148,6 +151,7 @@ export const RulesetSchema = z
     encounters: sections.encounters.prefault({}),
     items: sections.items.prefault({}),
     spellIngredients: sections.spellIngredients.prefault({}),
+    advancement: sections.advancement.prefault({}),
     system: sections.system.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
@@ -217,6 +221,7 @@ export const RulesetPatchSchema = z
     encounters: patchSection("encounters").optional(),
     items: patchSection("items").optional(),
     spellIngredients: patchSection("spellIngredients").optional(),
+    advancement: patchSection("advancement").optional(),
     system: patchSection("system").optional(),
     removeCustomConditions: z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional(),
   })

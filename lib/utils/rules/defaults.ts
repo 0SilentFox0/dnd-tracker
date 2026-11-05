@@ -1,5 +1,7 @@
 import type { Ruleset } from "./schema";
 
+import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
+
 export const DEFAULT_RULES: Ruleset = {
   morale: { enabled: true, cap: 3 },
   criticals: { critOn: 20, fumbleOn: 1, effects: true, doubleDice: false, disabledSuccess: [], disabledFail: [] },
@@ -17,6 +19,7 @@ export const DEFAULT_RULES: Ruleset = {
   encounters: { balance: "fair", edition: "2014", autoXp: false },
   items: { enabled: false, attunementLimit: 3 },
   spellIngredients: { enabled: false, autoPay: true },
+  advancement: DEFAULT_ADVANCEMENT_RULES,
   system: { key: "homm" },
 };
 
