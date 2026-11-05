@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { HudCard, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { BattleStatus } from "@/lib/constants/battle";
-import { useDeleteBattleCard } from "@/lib/hooks/battles";
+import { useDeleteBattleCard, useResetBattleCard } from "@/lib/hooks/battles";
 
 interface BattleListCardProps {
   battle: { id: string; name: string; description: string | null; currentRound: number; participants: unknown };
@@ -25,6 +25,8 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true, "data
 
   const { isDeleting, onDelete } = useDeleteBattleCard(campaignId, battle.id);
 
+  const { isResetting, onReset } = useResetBattleCard(campaignId, battle.id, kind === BattleStatus.COMPLETED ? "replay" : "stop");
+
   const participantCount = Array.isArray(battle.participants) ? battle.participants.length : 0;
 
   const editHref = `/campaigns/${campaignId}/dm/battles/${battle.id}`;
@@ -36,6 +38,13 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true, "data
       {t("card.delete")}
     </Button>
   );
+
+  const resetButton = (label: string) =>
+    canEdit && (
+      <Button variant="outline" size="sm" disabled={isResetting} onClick={onReset}>
+        {label}
+      </Button>
+    );
 
   const editButton = (label: string) =>
     canEdit && (
@@ -70,6 +79,7 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true, "data
           <Button asChild size="sm" className="flex-1">
             <Link href={playHref} data-tour="battle.open">{t("card.play")}</Link>
           </Button>
+          {resetButton(t("card.stop"))}
           {deleteButton}
         </div>
       )}
@@ -89,6 +99,7 @@ export function BattleListCard({ battle, campaignId, kind, canEdit = true, "data
               <Link href={playHref} data-tour="battle.open">{t("card.play")}</Link>
             </Button>
           ) : editButton(t("card.view"))}
+          {resetButton(t("card.replay"))}
           {deleteButton}
         </div>
       )}

@@ -43,4 +43,5 @@ export {
 } from "./useBattles";
 export { useBattleSummary } from "./useBattleSummary";
 export { useDeleteBattleCard } from "./useDeleteBattleCard";
+export { useResetBattleCard } from "./useResetBattleCard";
 export type { BattleConditionsBody, CoreActionBody } from "@/lib/api/battles";

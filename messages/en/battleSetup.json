@@ -26,13 +26,27 @@
       "edit": "Edit",
       "start": "Start",
       "view": "View",
-      "delete": "Delete"
+      "delete": "Delete",
+      "stop": "Stop",
+      "replay": "Play again"
     },
     "empty": {
       "title": "No battle scenes yet",
       "create": "Create the first battle scene"
     },
-    "search": "Search battles"
+    "search": "Search battles",
+    "reset": {
+      "stop": {
+        "title": "Stop the battle?",
+        "description": "The battle returns to its pre-start state: the log and current progress are cleared.",
+        "confirm": "Stop"
+      },
+      "replay": {
+        "title": "Play this battle again?",
+        "description": "The battle returns to its pre-start state: the log and result are cleared.",
+        "confirm": "Play again"
+      }
+    }
   },
   "form": {
     "loading": "Loading...",

@@ -6,7 +6,12 @@ import { BattleListCard } from "@/components/battle/list/BattleListCard";
 
 const onDelete = vi.fn();
 
-vi.mock("@/lib/hooks/battles", () => ({ useDeleteBattleCard: () => ({ isDeleting: false, onDelete }) }));
+const onReset = vi.fn();
+
+vi.mock("@/lib/hooks/battles", () => ({
+  useDeleteBattleCard: () => ({ isDeleting: false, onDelete }),
+  useResetBattleCard: () => ({ isResetting: false, onReset }),
+}));
 
 afterEach(cleanup);
 
@@ -25,7 +30,29 @@ describe("BattleListCard", () => {
     expect(hrefOf("battleSetup.list.card.play")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getByRole("link", { name: "battleSetup.list.card.play" }).getAttribute("data-tour")).toBe("battle.open");
     expect(screen.getAllByRole("link")).toHaveLength(1);
-    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+  });
+
+  it("active: «Зупинити» скидає бій", () => {
+    render(<BattleListCard battle={battle} campaignId="c1" kind="active" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.list.card.stop" }));
+
+    expect(onReset).toHaveBeenCalledOnce();
+  });
+
+  it("completed: «Зіграти ще раз» скидає бій, prepared без скидання", () => {
+    const { unmount } = render(<BattleListCard battle={battle} campaignId="c1" kind="completed" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.list.card.replay" }));
+
+    expect(onReset).toHaveBeenCalledTimes(2);
+
+    unmount();
+    render(<BattleListCard battle={battle} campaignId="c1" kind="prepared" />);
+
+    expect(screen.queryByRole("button", { name: "battleSetup.list.card.stop" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "battleSetup.list.card.replay" })).toBeNull();
   });
 
   it("completed read-only battle remains playable and exposes tour targets", () => {
