@@ -55,6 +55,7 @@
     "removed": "{target}: {condition} removed",
     "reduced": "{target}: {condition} ×{level}",
     "tick": {
+      "bleedOut": "{name} bleeds out",
       "bleeding": "{name}: bleeding, −{damage} Wounds",
       "ablaze": "{name}: burning, −{damage} Wounds",
       "faint": "{name} faints from blood loss"

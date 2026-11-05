@@ -167,6 +167,7 @@
     "turnEnd": "Кінець ходу"
   },
   "turn": {
+    "skipUnconscious": "{name} непритомний — хід пропущено",
     "recharged": "🔄 {pool} перезарядилась ({roll})",
     "notRecharged": "🔄 {pool} не перезарядилась ({roll})",
     "skipLost": "💫 {name} втрачає дію ({source})",

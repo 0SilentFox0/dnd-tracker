@@ -4,11 +4,11 @@ import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { joinLines, lineKey, textRef } from "@/lib/i18n/text-ref";
 import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { processStartOfRound } from "@/lib/utils/battle/turn/round-start";
+import { skippedTurnAt } from "@/lib/utils/battle/turn/skipped-turn";
 import { processEndOfTurn } from "@/lib/utils/battle/turn/turn-end";
 import { processStartOfTurn, type StartOfTurnResult } from "@/lib/utils/battle/turn/turn-start";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
@@ -229,7 +229,7 @@ export function runAdvanceTurnLoop(
 
     if (!nextParticipant) break;
 
-    const dyingRoll = st.round > previousRound ? rollDyingAt(st.order, st.index, params.rules, rng) : null;
+    const dyingRoll = st.round > previousRound ? skippedTurnAt(st.order, st.index, { rules: params.rules, rng, round: st.round }) : null;
 
     if (dyingRoll) {
       st.order = dyingRoll.participants;

@@ -167,6 +167,7 @@
     "turnEnd": "End of turn"
   },
   "turn": {
+    "skipUnconscious": "{name} is unconscious — turn skipped",
     "recharged": "🔄 {pool} recharged ({roll})",
     "notRecharged": "🔄 {pool} did not recharge ({roll})",
     "skipLost": "💫 {name} loses the action ({source})",

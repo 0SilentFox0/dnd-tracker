@@ -3,6 +3,7 @@ import { applyWfrpConditionTo } from "./apply";
 import { BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL } from "./catalog";
 import { conditionLevel } from "./levels";
 
+import { CombatStatus } from "@/lib/constants/battle";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
@@ -63,4 +64,18 @@ export function wfrpConditionsTurnStart(ps: BattleParticipant[], id: string, ctx
   const after = findParticipant(participants, id);
 
   return { participants, messages, downed: !!after && !isActive(after) };
+}
+
+export function wfrpSkippedTurn(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng }): SystemConditionResult {
+  const p = findParticipant(ps, id);
+
+  if (!p || p.combatStats.status !== CombatStatus.UNCONSCIOUS) return { participants: ps, messages: [] };
+
+  const bleeding = conditionLevel(p, "bleeding");
+
+  if (bleeding === 0 || ctx.rng() >= BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL * bleeding) return { participants: ps, messages: [] };
+
+  const dead: BattleParticipant = { ...p, combatStats: { ...p.combatStats, currentHp: 0, status: CombatStatus.DEAD } };
+
+  return { participants: replaceParticipant(ps, dead), messages: [textRef("battleWfrp.log.tick.bleedOut", { name: p.basicInfo.name })] };
 }

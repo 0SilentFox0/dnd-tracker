@@ -1,6 +1,6 @@
 import { CombatStatus } from "@/lib/constants/battle";
 import { idleTurnIndex, isActive, sitsOutTurn } from "@/lib/utils/abilities/engine/core/participants";
-import { rollDyingAt } from "@/lib/utils/battle/death-saves";
+import { skippedTurnAt } from "@/lib/utils/battle/turn/skipped-turn";
 import { rngOf } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
@@ -41,7 +41,7 @@ export function processEndOfTurn(
     }
 
     // у новому раунді черга перевпорядковується: кидки для нього робить цикл ходу
-    const rolled = nextRound === currentRound ? rollDyingAt(order, nextTurnIndex, deathSaves?.rules, rngOf(deathSaves)) : null;
+    const rolled = nextRound === currentRound ? skippedTurnAt(order, nextTurnIndex, { rules: deathSaves?.rules, rng: rngOf(deathSaves), round: nextRound }) : null;
 
     if (rolled) {
       order = rolled.participants;

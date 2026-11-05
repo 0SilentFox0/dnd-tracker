@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { wfrpAbilitiesOf } from "../../combat/participant";
 import { applyWfrpConditionTo } from "../apply";
 import type { WfrpConditionKey } from "../catalog";
 import { conditionLevel } from "../levels";
-import { wfrpConditionsTurnStart } from "../tick";
+import { wfrpConditionsTurnStart, wfrpSkippedTurn } from "../tick";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
@@ -106,5 +106,45 @@ describe("wfrpConditionsTurnStart", () => {
     expect(r.participants).toBe(ps);
     expect(r.messages).toEqual([]);
     expect(r.downed).toBe(false);
+  });
+});
+
+describe("wfrpSkippedTurn", () => {
+  const skip = (p: BattleParticipant, rng: () => number) => wfrpSkippedTurn([p], "a", { round: 3, rng });
+
+  it("unconscious bearer bleeds out below 10% per level", () => {
+    const r = skip(make(0, [["bleeding", 3]], CombatStatus.UNCONSCIOUS), () => 0.25);
+
+    expect(r.participants[0].combatStats.status).toBe(CombatStatus.DEAD);
+    expect(JSON.stringify(r.messages)).toContain("battleWfrp.log.tick.bleedOut");
+  });
+
+  it("survives on a higher roll with no messages", () => {
+    const r = skip(make(0, [["bleeding", 3]], CombatStatus.UNCONSCIOUS), () => 0.35);
+
+    expect(r.participants[0].combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+    expect(r.messages).toEqual([]);
+  });
+
+  it("without bleeding the rng is untouched", () => {
+    const rng = vi.fn(() => 0);
+
+    const p = make(0, [], CombatStatus.UNCONSCIOUS);
+
+    const r = skip(p, rng);
+
+    expect(rng).not.toHaveBeenCalled();
+    expect(r.participants[0]).toBe(p);
+  });
+
+  it("active and dead bearers are untouched", () => {
+    for (const status of [CombatStatus.ACTIVE, CombatStatus.DEAD]) {
+      const rng = vi.fn(() => 0);
+
+      const p = make(5, [["bleeding", 3]], status);
+
+      expect(skip(p, rng).participants[0]).toBe(p);
+      expect(rng).not.toHaveBeenCalled();
+    }
   });
 });

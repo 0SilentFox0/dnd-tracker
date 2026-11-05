@@ -55,6 +55,7 @@
     "removed": "{target}: {condition} знято",
     "reduced": "{target}: {condition} ×{level}",
     "tick": {
+      "bleedOut": "{name} стікає кров'ю і помирає",
       "bleeding": "{name}: кровотеча, −{damage} Wounds",
       "ablaze": "{name}: горить, −{damage} Wounds",
       "faint": "{name} знепритомнів від крововтрати"

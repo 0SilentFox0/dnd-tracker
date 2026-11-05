@@ -146,6 +146,10 @@ export interface RuleSystemConditions {
   apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
   reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };
   turnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult & { downed: boolean };
+  /** Called when a downed participant's turn is skipped (e.g. WFRP bleeding out) */
+  skippedTurn?(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng }): SystemConditionResult;
+  /** Downed allies stay at 0 HP after a victory (healing raises them) */
+  keepDownedAfterVictory?: true;
   attemptEnd(
     ps: BattleParticipant[],
     id: string,
