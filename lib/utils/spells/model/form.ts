@@ -1,4 +1,5 @@
 import { readSpellDefinition } from "./read";
+import type { SpellMagic } from "./schema";
 
 import type { ErrorParams } from "@/lib/constants/api-errors";
 import { issueParams } from "@/lib/i18n/translate-issue";
@@ -32,6 +33,24 @@ export function defaultSpellForm(): SpellFormData {
     ingredients: [],
     componentFlags: null,
   };
+}
+
+export const DEFAULT_SPELL_MAGIC: SpellMagic = { cn: 0, kind: "arcane", overcast: null };
+
+export function withSpellMagic(form: SpellFormData, magic: SpellMagic | undefined): SpellFormData {
+  const { magic: _previous, ...rest } = form.casting ?? {};
+
+  const { casting: _casting, ...others } = form;
+
+  const casting = magic ? { ...rest, magic } : rest;
+
+  return Object.keys(casting).length ? { ...others, casting } : others;
+}
+
+export function asMagicSpell(form: SpellFormData): SpellFormData {
+  const next = form.casting?.magic ? form : withSpellMagic(form, DEFAULT_SPELL_MAGIC);
+
+  return { ...next, resolution: { kind: "auto" }, ...(next.cost === "long" && { cost: "action" as const }) };
 }
 
 export function spellToForm(spell: Spell): SpellFormData {

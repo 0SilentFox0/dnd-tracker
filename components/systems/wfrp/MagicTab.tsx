@@ -23,6 +23,8 @@ export function MagicTab() {
 
   const t = useTranslations("wfrpMagic.ui.sheet");
 
+  const tk = useTranslations("wfrpMagic.ui.kind");
+
   const tg = useTranslations("gameTerms");
 
   const groups = groupSpellsBySchool(sheet.spells);
@@ -55,7 +57,7 @@ export function MagicTab() {
                     <span>{s.name}</span>
                     {magic && (
                       <span className="text-xs text-hud-muted">
-                        {t("cn", { cn: magic.cn })} · {t(`kind.${magic.kind}`)}
+                        {t("cn", { cn: magic.cn })} · {tk(magic.kind)}
                       </span>
                     )}
                   </li>

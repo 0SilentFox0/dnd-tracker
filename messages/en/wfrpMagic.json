@@ -59,16 +59,28 @@
     "sheet": {
       "empty": "No spells known yet.",
       "noLore": "Other",
-      "cn": "CN {cn}",
-      "kind": {
-        "petty": "Petty",
-        "arcane": "Arcane",
-        "hedge": "Hedge",
-        "witchcraft": "Witchcraft",
-        "chaos": "Chaos",
-        "blessing": "Blessing",
-        "miracle": "Miracle"
-      }
+      "cn": "CN {cn}"
+    },
+    "kind": {
+      "petty": "Petty",
+      "arcane": "Arcane",
+      "hedge": "Hedge",
+      "witchcraft": "Witchcraft",
+      "chaos": "Chaos",
+      "blessing": "Blessing",
+      "miracle": "Miracle"
+    },
+    "editor": {
+      "title": "d100 magic",
+      "cn": "Casting Number (CN)",
+      "kind": "Kind",
+      "overcast": "Overcast",
+      "overcastNone": "None",
+      "overcastDice": "Extra dice",
+      "overcastTargets": "Extra targets",
+      "attribute": "Applies a condition",
+      "attributeNone": "None",
+      "attributeLevels": "Levels"
     }
   }
 }

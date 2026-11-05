@@ -59,16 +59,28 @@
     "sheet": {
       "empty": "Заклинань ще не знає.",
       "noLore": "Інше",
-      "cn": "СН {cn}",
-      "kind": {
-        "petty": "Дрібна",
-        "arcane": "Аркана",
-        "hedge": "Знахарська",
-        "witchcraft": "Відьомська",
-        "chaos": "Хаос",
-        "blessing": "Благословення",
-        "miracle": "Чудо"
-      }
+      "cn": "СН {cn}"
+    },
+    "kind": {
+      "petty": "Дрібна",
+      "arcane": "Аркана",
+      "hedge": "Знахарська",
+      "witchcraft": "Відьомська",
+      "chaos": "Хаос",
+      "blessing": "Благословення",
+      "miracle": "Чудо"
+    },
+    "editor": {
+      "title": "Магія d100",
+      "cn": "Складність касту (СН)",
+      "kind": "Вид",
+      "overcast": "Оверкаст",
+      "overcastNone": "Немає",
+      "overcastDice": "Додаткові кості",
+      "overcastTargets": "Додаткові цілі",
+      "attribute": "Накладає стан",
+      "attributeNone": "Немає",
+      "attributeLevels": "Рівні"
     }
   }
 }

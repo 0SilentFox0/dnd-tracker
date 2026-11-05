@@ -1,7 +1,7 @@
 "use client";
 
 
-import { SPELL_COST_KEYS, SPELL_LEVELS, type SpellFormData } from "./spell-form-defaults";
+import { SPELL_LEVELS, spellCostKeysOf, type SpellFormData } from "./spell-form-defaults";
 import { SpellFxFields } from "./SpellFxFields";
 
 import { IconUrlField } from "@/components/common/IconUrlField";
@@ -19,19 +19,21 @@ export interface SpellFormFieldsProps {
   setFormData: (data: SpellFormData) => void;
 }
 
-export function SpellFormBasicFields({ formData, setFormData, spellGroups }: SpellFormFieldsProps & { spellGroups: IdName[] }) {
+export function SpellFormBasicFields({ formData, setFormData, spellGroups, magic = false }: SpellFormFieldsProps & { spellGroups: IdName[]; magic?: boolean }) {
   const t = useTranslator();
 
   return (
     <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
       <LabeledInput containerClassName="col-span-2" id="name" label={t("spellEditor.basic.name")} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required maxLength={SPELL_NAME_MAX} placeholder={t("spellEditor.basic.name")} />
+      {!magic && (
       <div>
         <Label htmlFor="level">{t("spellEditor.basic.level")}</Label>
         <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder={t("spellEditor.basic.levelPlaceholder")} options={SPELL_LEVELS.map((n) => ({ value: String(n), label: t(`gameTerms.spellLevels.${n}`) }))} />
       </div>
+      )}
       <div>
         <Label htmlFor="cost">{t("spellEditor.basic.cost")}</Label>
-        <SelectField id="cost" value={formData.cost} onValueChange={(value) => setFormData({ ...formData, cost: value as SpellCost, ...(value === "long" && { casting: { ...formData.casting, rounds: formData.casting?.rounds ?? 10 } }) })} placeholder={t("spellEditor.basic.cost")} options={SPELL_COST_KEYS.map((k) => ({ value: k, label: t(`spells.costs.${k}`) }))} />
+        <SelectField id="cost" value={formData.cost} onValueChange={(value) => setFormData({ ...formData, cost: value as SpellCost, ...(value === "long" && { casting: { ...formData.casting, rounds: formData.casting?.rounds ?? 10 } }) })} placeholder={t("spellEditor.basic.cost")} options={spellCostKeysOf(magic).map((k) => ({ value: k, label: t(`spells.costs.${k}`) }))} />
       </div>
       {formData.cost === "long" && <LabeledInput id="casting-rounds" label={t("spellEditor.basic.castingRounds")} type="number" min={2} max={144000} value={formData.casting?.rounds ?? 10} onChange={(e) => setFormData({ ...formData, casting: { ...formData.casting, rounds: Number(e.target.value) } })} />}
       {formData.cost === "reaction" && <LabeledInput containerClassName="col-span-2" id="reaction-trigger" label={t("spellEditor.basic.reactionTrigger")} value={formData.casting?.trigger ?? ""} onChange={(e) => setFormData({ ...formData, casting: { ...formData.casting, trigger: e.target.value || undefined } })} />}
