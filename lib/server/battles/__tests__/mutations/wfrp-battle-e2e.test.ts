@@ -2,9 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
 import { type AttackBody, attackMutation, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { conditionTestMutation } from "@/lib/server/battles/mutations/condition-test/condition-test-mutation";
 import { initiativeRollMutation } from "@/lib/server/battles/mutations/initiative/initiative-roll-mutation";
 import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -12,7 +14,7 @@ import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
 import { wfrpConditions } from "@/lib/utils/rules/systems/wfrp/conditions/levels";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
@@ -111,6 +113,38 @@ describe("wfrp battle end to end (engine)", () => {
 
     expect(out.events[0]).toBeDefined();
     expect(hp({ ...ctx, participants: out.participants }, "t")).toBeLessThan(20);
+  });
+
+  it("crit applies Bleeding, it ticks at the bearer's turn start and an Endurance test removes it", async () => {
+    const base = context({ participants: [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });
+
+    const ctx: BattleMutationContext = { ...base, meta: { ...base.meta, rules: WFRP_RULES }, scene: { ...base.scene, turnIndex: 0 } };
+
+    const conditions = ruleSystemOf(WFRP_RULES).conditions!;
+
+    const strike = (endTurn: boolean) => attackMutation({ ...ctx, rng: () => 0.3 }, attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "sw", d20Roll: 22, damageRolls: [4], endTurn }));
+
+    const out = await strike(true);
+
+    const noTick = await strike(false);
+
+    const target = out.participants.find((p) => p.basicInfo.id === "t")!;
+
+    expect(conditions.list(target)).toContainEqual(expect.objectContaining({ key: "bleeding", level: 1 }));
+    expect(out.scene?.turnIndex).toBe(1);
+    expect(hp({ ...ctx, participants: noTick.participants }, "t") - hp({ ...ctx, participants: out.participants }, "t")).toBe(1);
+    expect(hp({ ...ctx, participants: out.participants }, "t")).toBe(12);
+    expect(JSON.stringify(out.events)).toContain("battleWfrp.log.tick.bleeding");
+
+    const afterTurn: BattleMutationContext = { ...ctx, participants: out.participants, scene: { ...ctx.scene, ...out.scene } };
+
+    const tested = conditionTestMutation(afterTurn, { participantId: "t", condition: "bleeding", roll: 10 });
+
+    const healed = tested.participants.find((p) => p.basicInfo.id === "t")!;
+
+    expect(conditions.list(healed)).toEqual([]);
+    expect(healed.battleData.conditionTests).toEqual(["bleeding"]);
+    expect(() => conditionTestMutation({ ...afterTurn, participants: tested.participants }, { participantId: "t", condition: "bleeding", roll: 10 })).toThrow(API_ERRORS.CONDITION_TEST_UNAVAILABLE);
   });
 
   describe("scene momentum", () => {
