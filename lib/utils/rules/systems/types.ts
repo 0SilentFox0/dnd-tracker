@@ -112,6 +112,7 @@ export interface SystemConditionInfo {
   key: string;
   maxLevel: number | null;
   endTest: "roll" | "stand" | null;
+  timed: boolean;
 }
 
 export interface SystemConditionApply {
@@ -145,7 +146,7 @@ export interface RuleSystemConditions {
     id: string,
     key: string,
     ctx: { round: number; rng: Rng; rules: Ruleset; presetRoll?: number },
-  ): SystemConditionResult & { success: boolean; roll: number; target: number; sl: number };
+  ): SystemConditionResult & { success: boolean };
 }
 
 export interface RuleSystemCombat {

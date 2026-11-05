@@ -17,8 +17,8 @@ export function attemptWfrpConditionEnd(
   id: string,
   key: string,
   ctx: { round: number; rng: Rng; rules: Ruleset; presetRoll?: number },
-): SystemConditionResult & { success: boolean; roll: number; target: number; sl: number } {
-  const none = { participants: ps, messages: [], success: false, roll: 0, target: 0, sl: 0 };
+): SystemConditionResult & { success: boolean } {
+  const none = { participants: ps, messages: [], success: false };
 
   const p = ps.find((x) => x.basicInfo.id === id);
 
@@ -35,7 +35,7 @@ export function attemptWfrpConditionEnd(
   if (endTest === "stand") {
     const { participant } = reduceWfrpCondition(p, key, "all");
 
-    return { participants: replace(participant), messages: [textRef("battleWfrp.log.stand", { name: p.basicInfo.name })], success: true, roll: 0, target: 0, sl: 0 };
+    return { participants: replace(participant), messages: [textRef("battleWfrp.log.stand", { name: p.basicInfo.name })], success: true };
   }
 
   const c = readCharacteristics({ characteristics: p.abilities.characteristics });
@@ -52,5 +52,5 @@ export function attemptWfrpConditionEnd(
 
   const participants = success ? replace(reduceWfrpCondition(p, key, 1).participant) : ps;
 
-  return { participants, messages: [textRef(success ? "battleWfrp.log.endTestSuccess" : "battleWfrp.log.endTestFail", params)], success, roll: t.roll, target, sl: t.sl };
+  return { participants, messages: [textRef(success ? "battleWfrp.log.endTestSuccess" : "battleWfrp.log.endTestFail", params)], success };
 }

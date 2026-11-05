@@ -28,9 +28,24 @@ const make = (hp: number, conds: Array<[WfrpConditionKey, number]> = [], status?
 
 const tick = (p: BattleParticipant, rng: () => number) => wfrpConditionsTurnStart([p], "a", { round: 2, rng, rules: WFRP_RULES, applyDamage: applyDamageConsequences });
 
+const withBreakOnDamage = (p: BattleParticipant): BattleParticipant => ({
+  ...p,
+  battleData: { ...p.battleData, activeEffects: [...p.battleData.activeEffects, { id: "bod", abilityKey: "test:bod", name: "bod", type: "buff", rounds: 3, effects: [], breakOnDamage: true } as never] },
+});
+
 const self = (r: ReturnType<typeof tick>) => r.participants[0];
 
 describe("wfrpConditionsTurnStart", () => {
+  it("bleeding damage drops breakOnDamage effects; no damage keeps them", () => {
+    const hurt = tick(withBreakOnDamage(make(10, [["bleeding", 1]])), () => 0.5);
+
+    expect(self(hurt).battleData.activeEffects.some((e) => e.id === "bod")).toBe(false);
+
+    const calm = tick(withBreakOnDamage(make(10)), () => 0.5);
+
+    expect(self(calm).battleData.activeEffects.some((e) => e.id === "bod")).toBe(true);
+  });
+
   it("bleeding deals its level in wounds", () => {
     const r = tick(make(10, [["bleeding", 2]]), () => 0.5);
 

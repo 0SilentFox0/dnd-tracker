@@ -51,13 +51,17 @@ function DialogBody({ participant, onClose, onSubmit, isPending }: SystemConditi
 
   const current = WFRP_CONDITIONS.list(participant);
 
-  const maxLevel = WFRP_CONDITIONS.catalog.find((c) => c.key === selected)?.maxLevel ?? null;
+  const info = WFRP_CONDITIONS.catalog.find((c) => c.key === selected);
+
+  const maxLevel = info?.maxLevel ?? null;
+
+  const timed = info?.timed ?? true;
 
   const levelsCount = toInt(levels);
 
-  const roundsCount = toInt(rounds);
+  const roundsCount = timed ? toInt(rounds) : undefined;
 
-  const valid = (rounds === "" || inRange(roundsCount, CONDITION_LIMITS.rounds)) && (maxLevel === null || inRange(levelsCount, maxLevel));
+  const valid = (!timed || rounds === "" || inRange(roundsCount, CONDITION_LIMITS.rounds)) && (maxLevel === null || inRange(levelsCount, maxLevel));
 
   const apply = (e: FormEvent) => {
     e.preventDefault();
@@ -99,15 +103,19 @@ function DialogBody({ participant, onClose, onSubmit, isPending }: SystemConditi
       <form id={FORM_ID} noValidate onSubmit={apply} className="space-y-3 py-2">
         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label={t("title")}>
           {WFRP_CONDITIONS.catalog.map(({ key }) => (
-            <OptionButton key={key} role="radio" checked={selected === key} onClick={() => setSelected(key)} title={tCondition(key, "label")} note={tCondition(key, "description")} />
+            <OptionButton key={key} role="radio" checked={selected === key} onClick={() => { setSelected(key);
+
+ if (!WFRP_CONDITIONS.catalog.find((c) => c.key === key)?.timed) setRounds(""); }} title={tCondition(key, "label")} note={tCondition(key, "description")} />
           ))}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <Label htmlFor="wfrp-condition-rounds">{t("rounds")}</Label>
-            <Input id="wfrp-condition-rounds" type="number" min={1} max={CONDITION_LIMITS.rounds} value={rounds} onChange={(e) => setRounds(e.target.value)} />
-          </div>
+          {timed && (
+            <div className="space-y-1">
+              <Label htmlFor="wfrp-condition-rounds">{t("rounds")}</Label>
+              <Input id="wfrp-condition-rounds" type="number" min={1} max={CONDITION_LIMITS.rounds} value={rounds} onChange={(e) => setRounds(e.target.value)} />
+            </div>
+          )}
           {maxLevel !== null && (
             <div className="space-y-1">
               <Label htmlFor="wfrp-condition-levels">{t("level")}</Label>

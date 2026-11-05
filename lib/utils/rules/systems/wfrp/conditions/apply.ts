@@ -10,6 +10,8 @@ import type { SystemConditionApply, SystemConditionResult } from "@/lib/utils/ru
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
+export const UNTIMED_CONDITIONS: ReadonlySet<WfrpConditionKey> = new Set(["unconscious"]);
+
 const labelKey = (key: WfrpConditionKey) => `battleWfrp.conditions.${key}.label`;
 
 export function applyWfrpConditionTo(p: BattleParticipant, input: SystemConditionApply & { key: WfrpConditionKey }): { participant: BattleParticipant; messages: LogLine[] } {
@@ -21,7 +23,7 @@ export function applyWfrpConditionTo(p: BattleParticipant, input: SystemConditio
 
   const levels = def.leveled ? Math.min(Math.max(input.levels ?? 1, 1), def.leveled.max - conditionLevel(p, key)) : 1;
 
-  const rounds = input.rounds ?? def.rounds;
+  const rounds = UNTIMED_CONDITIONS.has(key) ? undefined : (input.rounds ?? def.rounds);
 
   const message = textRef("battleWfrp.log.applied", { target: p.basicInfo.name, condition: dynamicTextRef(labelKey(key)), level: levels, source: input.sourceName });
 

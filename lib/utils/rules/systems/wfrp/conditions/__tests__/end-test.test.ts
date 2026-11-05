@@ -30,6 +30,7 @@ describe("attemptWfrpConditionEnd", () => {
     const ok = attempt(make([["bleeding", 2]]), "bleeding", 10);
 
     expect(ok.success).toBe(true);
+    expect(ok.messages[0]).toMatchObject({ params: { roll: 10, target: 30 } });
     expect(conditionLevel(ok.participants[0], "bleeding")).toBe(1);
 
     const bad = attempt(make([["bleeding", 2]]), "bleeding", 90);
@@ -41,21 +42,21 @@ describe("attemptWfrpConditionEnd", () => {
   it("prone stands up without a roll", () => {
     const r = attempt(make([["prone", 1]]), "prone");
 
-    expect(r).toMatchObject({ success: true, roll: 0, target: 0, sl: 0 });
+    expect(r.success).toBe(true);
     expect(conditionLevel(r.participants[0], "prone")).toBe(0);
   });
 
   it("own penalties lower the target", () => {
     const r = attempt(make([["fatigued", 3], ["bleeding", 1]]), "bleeding", 25);
 
-    expect(r.target).toBe(0);
+    expect(r.messages[0]).toMatchObject({ params: { target: 0 } });
     expect(r.success).toBe(false);
   });
 
   it("entangled tests S (minus its own penalty), not a skill", () => {
     const c: Characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, s: 47 } };
 
-    expect(attempt(make([["entangled", 1]], c), "entangled", 10).target).toBe(37);
+    expect(attempt(make([["entangled", 1]], c), "entangled", 10).messages[0]).toMatchObject({ params: { roll: 10, target: 37 } });
   });
 
   it("a condition without an end test is a no-op", () => {
@@ -63,7 +64,7 @@ describe("attemptWfrpConditionEnd", () => {
 
     const r = attempt(p, "fatigued", 10);
 
-    expect(r).toMatchObject({ success: false, roll: 0, target: 0, sl: 0 });
+    expect(r.success).toBe(false);
     expect(r.participants[0]).toBe(p);
   });
 
@@ -75,7 +76,7 @@ describe("attemptWfrpConditionEnd", () => {
   it("uses the rng when no roll is preset", () => {
     const r = attempt(make([["bleeding", 1]]), "bleeding", undefined, () => 0.04);
 
-    expect(r.roll).toBe(5);
+    expect(r.messages[0]).toMatchObject({ params: { roll: 5 } });
     expect(r.success).toBe(true);
   });
 });

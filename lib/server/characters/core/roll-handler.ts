@@ -6,6 +6,7 @@ import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import type { SheetRollInput } from "@/lib/schemas/out-of-combat";
 import type { CharacterGate } from "@/lib/server/characters/access";
+import { loadBattleEffects } from "@/lib/server/characters/battle-effects";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { buildCharacterParticipant } from "@/lib/server/characters/participant";
@@ -38,7 +39,15 @@ export async function rollForSheet({ access, character }: CharacterGate, body: S
     await assertNotInActiveBattle(character.campaignId, [character.id]);
   }
 
-  const { participant } = await buildCharacterParticipant(character, { maxLevel, rules });
+  const built = await buildCharacterParticipant(character, { maxLevel, rules });
+
+  let { participant } = built;
+
+  if (system.conditions) {
+    const effects = await loadBattleEffects(character.campaignId, character.id);
+
+    if (effects) participant = { ...participant, battleData: { ...participant.battleData, activeEffects: effects } };
+  }
 
   const result = system.sheetTest.roll({ participant, character, body, rules, rng: Math.random, inspiration: inspired, t: await getTranslator(await getRequestLocale()) });
 

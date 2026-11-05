@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { applyWfrpCondition, reduceWfrpConditionIn } from "../apply";
 import { BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL, WFRP_CONDITION_MAX_LEVEL, WFRP_CONDITION_REGISTRY as R } from "../catalog";
+import { WFRP_CONDITIONS } from "../index";
 import { conditionLevel, wfrpConditions } from "../levels";
 
 import { CombatStatus, EffectMarker } from "@/lib/constants/battle";
@@ -172,5 +173,20 @@ describe("isolation from 5e and display", () => {
     expect(r.participants).toBe(ps);
     expect(r.messages).toEqual([]);
     expect(reduceWfrpConditionIn(ps, "a", "frenzy", 1).removed).toBe(false);
+  });
+});
+
+describe("untimed unconscious", () => {
+  it("ignores rounds and is permanent", () => {
+    const ps = WFRP_CONDITIONS.apply([makeParticipant({ id: "a" })], "a", { key: "unconscious", rounds: 3, round: 1, sourceName: src }).participants;
+
+    expect(effectsOf(ps[0], "unconscious")[0].permanent).toBe(true);
+  });
+
+  it("catalog marks timed", () => {
+    const timed = (k: string) => WFRP_CONDITIONS.catalog.find((c) => c.key === k)!.timed;
+
+    expect(timed("unconscious")).toBe(false);
+    expect(timed("stunned")).toBe(true);
   });
 });

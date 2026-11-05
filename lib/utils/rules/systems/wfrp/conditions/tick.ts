@@ -5,6 +5,7 @@ import { conditionLevel } from "./levels";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -26,7 +27,7 @@ export function wfrpConditionsTurnStart(ps: BattleParticipant[], id: string, ctx
 
     if (!before || !isActive(before) || amount <= 0) return;
 
-    const after = { ...before, combatStats: { ...before.combatStats, currentHp: Math.max(0, before.combatStats.currentHp - amount) } };
+    const after = dropBreakOnDamage({ ...before, combatStats: { ...before.combatStats, currentHp: Math.max(0, before.combatStats.currentHp - amount) } }, amount);
 
     const r = ctx.applyDamage({ before, after, amount, rules: ctx.rules, rng: ctx.rng, participants: replaceParticipant(participants, after), round: ctx.round });
 

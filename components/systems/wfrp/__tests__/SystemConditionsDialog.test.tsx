@@ -47,4 +47,17 @@ describe("SystemConditionsDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Зняти" }));
     expect(onSubmit).toHaveBeenLastCalledWith({ action: "remove", participantId: "p1", condition: "bleeding", all: true });
   });
+
+  it("hides rounds for an untimed condition and submits without them", () => {
+    const onSubmit = open();
+
+    fireEvent.click(screen.getByRole("radio", { name: /Непритомний/ }));
+    expect(document.querySelector("#wfrp-condition-rounds")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Накласти" }));
+    expect(onSubmit).toHaveBeenCalledWith({ action: "apply", participantId: "p1", condition: "unconscious" });
+
+    fireEvent.click(screen.getByRole("radio", { name: /Оглушення/ }));
+    expect(document.querySelector("#wfrp-condition-rounds")).not.toBeNull();
+  });
 });
