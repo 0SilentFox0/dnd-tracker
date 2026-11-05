@@ -40,7 +40,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
   const slModifier = channelled - armour + (ctx.fortune?.kind === "sl" ? 1 : 0);
 
-  const passes = (t: PercentileTestResult) => t.outcome === "critical" || ((t.outcome === "success") && t.sl >= cn);
+  const passes = (t: PercentileTestResult) => (t.outcome === "success" || t.outcome === "critical") && t.sl >= cn;
 
   const { result: test, fortune } = applyFortune((preset) => resolvePercentileTest({ target, slModifier, doubles: true, rng, presetRoll: preset }), ctx.fortune, passes, presetRoll);
 

@@ -57,13 +57,23 @@ describe("wfrpCastTest", () => {
     expect(high(null).overcastSteps).toBe(0);
   });
 
-  it("doubles with success is a critical cast with a minor miscast", () => {
-    const r = run(33, { cn: 8 });
+  it("doubles with success meeting CN is a critical cast with a minor miscast", () => {
+    const r = run(33, { cn: 2 });
 
     expect(r.success).toBe(true);
     expect(r.percentile.outcome).toBe("critical");
     expect(r.miscast).toBe("minor");
     expect(r.lines[0]).toMatchObject({ message: "wfrpMagic.log.castCritical" });
+  });
+
+  it("critical success below CN does not bypass it", () => {
+    const r = run(33, { cn: 8 });
+
+    expect(r.success).toBe(false);
+    expect(r.percentile.outcome).toBe("failure");
+    expect(r.overcastSteps).toBe(0);
+    expect(r.miscast).toBe("minor");
+    expect(r.lines[0]).toMatchObject({ message: "wfrpMagic.log.castFail" });
   });
 
   it("doubles with failure fails with a minor miscast", () => {
