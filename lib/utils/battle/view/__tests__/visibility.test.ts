@@ -28,11 +28,24 @@ describe("видимість", () => {
     expect(canSeeExactStats(side(ParticipantSide.ENEMY), { ...player, canSeeEnemyHp: true })).toBe(true);
   });
 
-  it("журнал для гравця без targetAC і damageBreakdown; DM бачить усе", () => {
-    const e = { actionDetails: { targetAC: 15, damageBreakdown: "x", totalAttackValue: 19 } } as unknown as BattleAction;
+  it("журнал для гравця без targetAC і damageBreakdown ворога; DM бачить усе", () => {
+    const foe = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "foe" } } as BattleParticipant;
 
-    expect(sanitizeLogEntry(e, player, ctxOf()).actionDetails).toEqual({ totalAttackValue: 19 });
-    expect(sanitizeLogEntry(e, { ...player, isDM: true }, ctxOf())).toBe(e);
+    const e = { targets: [{ participantId: "foe", participantName: "x" }], actionDetails: { targetAC: 15, damageBreakdown: "x", totalAttackValue: 19 } } as unknown as BattleAction;
+
+    expect(sanitizeLogEntry(e, player, ctxOf([foe])).actionDetails).toEqual({ totalAttackValue: 19 });
+    expect(sanitizeLogEntry(e, { ...player, isDM: true }, ctxOf([foe]))).toBe(e);
+  });
+
+  it("атака по союзнику: числа не ховаються, запис не змінюється (changed: false)", () => {
+    const friend = { ...side(ParticipantSide.ALLY), basicInfo: { ...side(ParticipantSide.ALLY).basicInfo, id: "fr" } } as BattleParticipant;
+
+    const e = { targets: [{ participantId: "fr", participantName: "x" }], actionDetails: { targetAC: 15, damageBreakdown: "x", damageRows: [] } } as unknown as BattleAction;
+
+    const { entries, changed } = redactLogForPlayers([e], ctxOf([friend]));
+
+    expect(changed).toBe(false);
+    expect(entries[0]).toBe(e);
   });
 
   it("захист цілі в percentile-записі прибирається для гравця, DM бачить усе", () => {

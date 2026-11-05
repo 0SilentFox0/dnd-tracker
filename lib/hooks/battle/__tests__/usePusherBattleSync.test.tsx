@@ -541,6 +541,7 @@ describe("usePusherBattleSync: dm-канал", () => {
     render(<PlayerSync campaignId="camp-1" battleId="battle-1" userId="dm" client={qc} isDM />);
     await waitFor(() => expect(channelBindings.get("private-battle-dm-battle-1")?.has("battle-delta")).toBe(true));
     await waitFor(() => expect(channelBindings.get("private-battle-battle-1")?.has("battle-delta")).toBe(true));
+    act(() => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_succeeded", {}));
 
     act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
     expect(qc.getQueryData<BattleScene>(key)?.version).toBe(4);
@@ -561,5 +562,58 @@ describe("usePusherBattleSync: dm-канал", () => {
     act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
     await waitFor(() => expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5));
     expect(JSON.stringify(qc.getQueryData<BattleScene>(key)?.battleLog)).toContain("прихований");
+  });
+
+  it("поки dm-канал не підписаний, ДМ приймає redacted дельту", async () => {
+    const qc = new QueryClient();
+
+    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+    render(<PlayerSync campaignId="camp-1" battleId="battle-1" userId="dm" client={qc} isDM />);
+    await waitFor(() => expect(channelBindings.get("private-battle-battle-1")?.has("battle-delta")).toBe(true));
+
+    act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
+    await waitFor(() => expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5));
+  });
+
+  it("помилка підписки dm-каналу: unavailable і знову приймає redacted", async () => {
+    const qc = new QueryClient();
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+
+    function Probe() {
+      const { connectionState } = usePusherBattleSync("camp-1", "battle-1", "dm", vi.fn(), true);
+
+      return <span data-testid="state">{String(connectionState)}</span>;
+    }
+
+    render(
+      <QueryClientProvider client={qc}>
+        <Probe />
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(channelBindings.get("private-battle-dm-battle-1")?.has("pusher:subscription_error")).toBe(true));
+    act(() => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_succeeded", {}));
+    act(() => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_error", { status: 403 }));
+
+    expect(screen.getByTestId("state").textContent).toBe("unavailable");
+
+    act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
+    await waitFor(() => expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5));
+    warn.mockRestore();
+  });
+
+  it("підписка dm-каналу запускає перевірку версії", async () => {
+    vi.mocked(getBattleVersion).mockResolvedValue({ version: 4 });
+
+    const qc = new QueryClient();
+
+    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+    render(<PlayerSync campaignId="camp-1" battleId="battle-1" userId="dm" client={qc} isDM />);
+    await waitFor(() => expect(channelBindings.get("private-battle-dm-battle-1")?.has("battle-delta")).toBe(true));
+
+    await act(async () => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_succeeded", {}));
+    expect(getBattleVersion).toHaveBeenCalled();
   });
 });

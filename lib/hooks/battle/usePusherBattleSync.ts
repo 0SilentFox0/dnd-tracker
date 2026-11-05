@@ -35,11 +35,17 @@ export function usePusherBattleSync(
 
   const [rawState, setRawState] = useState<PusherConnectionState>(null);
 
-  const [failedChannel, setFailedChannel] = useState<string | null>(null);
+  const [failedChannels, setFailedChannels] = useState<string[]>([]);
 
   const resyncedChannelRef = useRef<string | null>(null);
 
   const channel = battleChannelName(battleId);
+
+  const dmChannel = battleDmChannelName(battleId);
+
+  const [dmSubscribed, setDmSubscribed] = useState<string | null>(null);
+
+  const dmReady = isDM && dmSubscribed === dmChannel;
 
   usePusherConnection(
     (state) => {
@@ -59,8 +65,8 @@ export function usePusherBattleSync(
 
     const signal = data as ClientBattleDelta | BattleRefetchSignal;
 
-    // ДМ бере повну дельту з dm-каналу тієї ж версії
-    if (isDM && "redacted" in signal && signal.redacted) return;
+    // ДМ бере повну дельту з dm-каналу тієї ж версії, але лише поки той канал підписаний
+    if (dmReady && "redacted" in signal && signal.redacted) return;
 
     const cachedVersion = queryClient.getQueryData<BattleScene>(key)?.version;
 
@@ -69,7 +75,33 @@ export function usePusherBattleSync(
     void writeBattleDelta(queryClient, key, signal);
   };
 
-  usePusherChannel(isDM ? battleDmChannelName(battleId) : null, { "battle-delta": applyDelta });
+  const onChannelSubscribed = (name: string) => {
+    const recovered = failedChannels.includes(name);
+
+    if (!recovered && resyncedChannelRef.current === name) return;
+
+    resyncedChannelRef.current = name;
+
+    if (recovered) setFailedChannels((list) => list.filter((n) => n !== name));
+
+    void resync();
+  };
+
+  const onChannelError = (name: string, error: unknown) => {
+    console.warn("[battle-sync] channel subscription failed, falling back to polling", name, error);
+    setFailedChannels((list) => (list.includes(name) ? list : [...list, name]));
+  };
+
+  usePusherChannel(isDM ? dmChannel : null, { "battle-delta": applyDelta }, {
+    onSubscribed: () => {
+      setDmSubscribed(dmChannel);
+      onChannelSubscribed(dmChannel);
+    },
+    onError: (error) => {
+      setDmSubscribed(null);
+      onChannelError(dmChannel, error);
+    },
+  });
 
   usePusherChannel(
     channel,
@@ -85,21 +117,8 @@ export function usePusherBattleSync(
     },
     {
       // the cached scene (server HTML or GET) predates the subscription: deltas in between would be lost
-      onSubscribed: () => {
-        const recovered = failedChannel === channel;
-
-        if (!recovered && resyncedChannelRef.current === channel) return;
-
-        resyncedChannelRef.current = channel;
-
-        if (recovered) setFailedChannel(null);
-
-        void resync();
-      },
-      onError: (error) => {
-        console.warn("[battle-sync] battle channel subscription failed, falling back to polling", error);
-        setFailedChannel(channel);
-      },
+      onSubscribed: () => onChannelSubscribed(channel),
+      onError: (error) => onChannelError(channel, error),
     },
   );
 
@@ -112,7 +131,7 @@ export function usePusherBattleSync(
   });
 
   // з'єднання живе, але канал бою не підписаний — дельт не буде, хай працює polling
-  const connectionState = failedChannel === channel ? "unavailable" : rawState;
+  const connectionState = failedChannels.includes(channel) || (isDM && failedChannels.includes(dmChannel)) ? "unavailable" : rawState;
 
   return { connectionState };
 }

@@ -66,7 +66,7 @@ export function toBattleResponse(
 function fitOrRefetch(delta: ClientBattleDelta): ClientBattleDelta | BattleRefetchSignal {
   const fits = Buffer.byteLength(JSON.stringify(delta), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
 
-  return fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true };
+  return fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true, ...(delta.redacted && { redacted: true as const }) };
 }
 
 export function buildPusherMessages(args: {
@@ -82,7 +82,7 @@ export function buildPusherMessages(args: {
 
   const channel = battleChannelName(after.id);
 
-  const { entries, changed } = redactLogForPlayers(delta.log ?? [], { participants, rules });
+  const { entries, changed } = redactLogForPlayers(delta.log, { participants, rules });
 
   const publicDelta: ClientBattleDelta = changed ? { ...delta, log: entries, redacted: true } : delta;
 

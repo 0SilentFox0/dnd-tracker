@@ -119,12 +119,12 @@ describe("buildPusherMessages", () => {
       expect(messages[1].payload).toEqual(full);
     });
 
-    it("переповнення — обидва канали дають refetch-сигнал без журналу", () => {
+    it("переповнення — публічний refetch позначений redacted (ДМ не рефетчить двічі), dm-сигнал без позначки", () => {
       const big = { ...payload, log: [action([applied])], upserted: Array.from({ length: 60 }, (_, i) => createMockParticipant({ basicInfo: { ...hero.basicInfo, id: `h${i}` } })) };
 
       const [pub, dm] = buildPusherMessages({ ...args, delta: big });
 
-      expect(pub.payload).toEqual({ battleId: "b1", version: 4, refetch: true });
+      expect(pub.payload).toEqual({ battleId: "b1", version: 4, refetch: true, redacted: true });
       expect(dm.payload).toEqual({ battleId: "b1", version: 4, refetch: true });
     });
 

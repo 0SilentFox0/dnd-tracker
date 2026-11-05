@@ -78,11 +78,21 @@ describe("clearFallenEffects: keepsWhenDown (wfrp)", () => {
     return { ...bled, battleData: { ...bled.battleData, activeEffects: [...bled.battleData.activeEffects, charm] } };
   };
 
-  it("unconscious keeps only the bleeding effect and is stable afterwards", () => {
+  it("unconscious keeps wfrp condition effects (not foreign ones) and is stable afterwards", () => {
     const out = clearFallenEffects([bleeder(CombatStatus.UNCONSCIOUS)], WFRP_RULES);
 
     expect(out[0].battleData.activeEffects.map((e) => e.abilityKey)).toEqual(["wfrp:cond:bleeding"]);
     expect(clearFallenEffects(out, WFRP_RULES)).toBe(out);
+  });
+
+  it("an applied unconscious condition survives clearFallenEffects and is listed", () => {
+    const wf = ruleSystemOf(WFRP_RULES).conditions!;
+
+    const applied = wf.apply([charmed(CombatStatus.UNCONSCIOUS)], "gob", { key: "unconscious", levels: 1, round: 1, sourceName: "x" }).participants;
+
+    const out = clearFallenEffects(applied, WFRP_RULES);
+
+    expect(wf.list(out[0]).map((c) => c.key)).toContain("unconscious");
   });
 
   it("dead loses everything", () => {

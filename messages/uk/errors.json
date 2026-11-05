@@ -439,7 +439,7 @@
   "conditionAbsent": "{name}: такого стану немає",
   "conditionUnsupported": "Цей стан недоступний у цій системі",
   "conditionTestUnavailable": "Цей стан зараз не можна спробувати зняти",
-  "noFortune": "У героя немає Fortune",
+  "noFortune": "У героя немає Удачі",
   "abilityCooldown": "Перезарядка: ще {rounds, plural, one {# раунд} few {# раунди} many {# раундів} other {# раунду}}",
   "battleStateChanged": "Стан бою змінився",
   "mazeDark": "Темрява — ніхто не може діяти",

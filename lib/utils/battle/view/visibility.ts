@@ -65,15 +65,21 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = details;
 
-  const strips = "targetAC" in details || "damageBreakdown" in details || "damageRows" in details || percentile?.defender !== undefined;
+  const hideNumbers = concealed || !e.targets?.length;
+
+  const stripsNumbers = hideNumbers && ("targetAC" in details || "damageBreakdown" in details || "damageRows" in details);
+
+  const stripsDefender = percentile?.defender !== undefined;
 
   const lines = e.log?.map((l) => (concealed ? conceal(hideDefense(l)) : hideDefense(l)));
 
   const linesChanged = !!lines && lines.some((l, i) => l !== e.log?.[i]);
 
-  if (!strips && !linesChanged) return e;
+  if (!stripsNumbers && !stripsDefender && !linesChanged) return e;
 
-  const actionDetails = percentile ? { ...rest, percentile: { ...percentile, defender: undefined } } : rest;
+  const base = hideNumbers ? rest : details;
+
+  const actionDetails = stripsDefender && percentile ? { ...base, percentile: { ...percentile, defender: undefined } } : base;
 
   return { ...e, actionDetails, ...(lines && { log: lines }) };
 }

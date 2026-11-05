@@ -1,11 +1,13 @@
 import { applyWfrpCondition, reduceWfrpConditionIn, UNTIMED_CONDITIONS } from "./apply";
-import { isWfrpConditionKey, WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY,wfrpConditionEffectKey } from "./catalog";
+import { isWfrpConditionKey, WFRP_CONDITION_KEYS, WFRP_CONDITION_REGISTRY, wfrpConditionEffectKey } from "./catalog";
 import { concealWfrpLine } from "./conceal";
 import { attemptWfrpConditionEnd } from "./end-test";
 import { wfrpConditions } from "./levels";
 import { wfrpConditionsTurnStart, wfrpSkippedTurn } from "./tick";
 
 import type { RuleSystemConditions } from "@/lib/utils/rules/systems/types";
+
+const WFRP_CONDITION_EFFECT_PREFIX = wfrpConditionEffectKey("bleeding").replace(/bleeding$/, "");
 
 export const WFRP_CONDITIONS: RuleSystemConditions = {
   catalog: WFRP_CONDITION_KEYS.map((key) => {
@@ -20,6 +22,6 @@ export const WFRP_CONDITIONS: RuleSystemConditions = {
   turnStart: wfrpConditionsTurnStart,
   skippedTurn: wfrpSkippedTurn,
   keepDownedAfterVictory: true,
-  keepsWhenDown: (effect) => effect.abilityKey === wfrpConditionEffectKey("bleeding"),
+  keepsWhenDown: (effect) => effect.abilityKey?.startsWith(WFRP_CONDITION_EFFECT_PREFIX) ?? false,
   attemptEnd: attemptWfrpConditionEnd,
 };

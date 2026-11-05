@@ -103,9 +103,7 @@ function DialogBody({ participant, onClose, onSubmit, isPending }: SystemConditi
       <form id={FORM_ID} noValidate onSubmit={apply} className="space-y-3 py-2">
         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label={t("title")}>
           {WFRP_CONDITIONS.catalog.map(({ key }) => (
-            <OptionButton key={key} role="radio" checked={selected === key} onClick={() => { setSelected(key);
-
- if (!WFRP_CONDITIONS.catalog.find((c) => c.key === key)?.timed) setRounds(""); }} title={tCondition(key, "label")} note={tCondition(key, "description")} />
+            <OptionButton key={key} role="radio" checked={selected === key} onClick={() => setSelected(key)} title={tCondition(key, "label")} note={tCondition(key, "description")} />
           ))}
         </div>
 

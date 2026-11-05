@@ -17,7 +17,7 @@ vi.mock("@/lib/server/battles/pipeline-deps", () => ({
     loadRecentEvents: vi.fn(),
     loadKnowledge: vi.fn(),
   },
-  defaultReadDeps: { getUserId: vi.fn(), loadAccess: vi.fn(), loadEventsBefore: vi.fn(), loadAllEvents: vi.fn(), loadParticipants: vi.fn(), loadRedactionCtx: vi.fn() },
+  defaultReadDeps: { getUserId: vi.fn(), loadAccess: vi.fn(), loadEventsBefore: vi.fn(), loadAllEvents: vi.fn(), loadRedactionCtx: vi.fn() },
 }));
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn(), requireAuth: vi.fn() }));
@@ -110,13 +110,12 @@ describe("GET /battles/[battleId]/summary", () => {
     readDeps.loadAllEvents.mockResolvedValue([
       { round: 4, actorId: hero.basicInfo.id, actionDetails: {}, hpChanges: [{ participantId: goblin.basicInfo.id, participantName: "g", oldHp: 7, newHp: 0, change: 7 }] } as never,
     ]);
-    readDeps.loadParticipants.mockResolvedValue([hero, goblin]);
 
     const res = await GET(new Request("http://x/api"), params);
 
     expect(res.status).toBe(200);
     expect(readDeps.loadAllEvents).toHaveBeenCalledWith("b1");
-    expect(readDeps.loadParticipants).toHaveBeenCalledWith({ battleId: "b1", campaignId: "c1", userId: "user-1" });
+    expect(readDeps.loadRedactionCtx).toHaveBeenCalledWith({ battleId: "b1", campaignId: "c1", userId: "user-1" });
     expect(await res.json()).toMatchObject({ rounds: 4, heroes: [expect.objectContaining({ damageDealt: 7, kills: 1 })] });
   });
 

@@ -158,6 +158,8 @@ export interface BattleRefetchSignal {
   battleId: string;
   version: number;
   refetch: true;
+  /** публічний сигнал при редакції журналу: ДМ чекає свій dm-сигнал, а не рефетчить двічі */
+  redacted?: true;
 }
 
 export interface BattleMutationResponse<R = Record<string, unknown>> {

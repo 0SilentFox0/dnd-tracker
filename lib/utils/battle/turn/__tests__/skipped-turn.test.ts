@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { skippedTurnAt } from "../skipped-turn";
 
-import { CombatStatus } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -62,6 +62,18 @@ describe("skippedTurnAt", () => {
 
     expect(got?.messages).toHaveLength(1);
     expect(rng).not.toHaveBeenCalled();
+  });
+
+  it("wfrp enemy unconscious without bleeding: no log line, still skipped; with bleeding: lines kept", () => {
+    const asEnemy = (p: BattleParticipant): BattleParticipant => ({ ...p, basicInfo: { ...p.basicInfo, side: ParticipantSide.ENEMY } });
+
+    const quiet = skippedTurnAt([asEnemy(downed(CombatStatus.UNCONSCIOUS))], 0, { rules: WFRP_RULES, rng: () => 0.5, round: 2 });
+
+    expect(quiet?.messages).toEqual([]);
+
+    const bleeding = skippedTurnAt([asEnemy(downed(CombatStatus.UNCONSCIOUS, 3))], 0, { rules: WFRP_RULES, rng: () => 0.1, round: 2 });
+
+    expect(bleeding?.messages[0]).toMatchObject({ message: "battleLog.turn.skipUnconscious" });
   });
 
   it("wfrp active and dead: null", () => {

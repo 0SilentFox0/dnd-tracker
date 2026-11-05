@@ -129,7 +129,6 @@ describe("readBattleEvents redaction", () => {
     loadAccess: vi.fn(async () => ({ version: 1, isMember: true, isDM })),
     loadEventsBefore: vi.fn(async () => raw as never),
     loadAllEvents: vi.fn(),
-    loadParticipants: vi.fn(),
     loadRedactionCtx: vi.fn(async () => ({ participants: [enemy], rules: DEFAULT_RULES })),
   });
 
@@ -137,6 +136,12 @@ describe("readBattleEvents redaction", () => {
     const res = await readBattleEvents(params, { before: 5, limit: 10 }, readDeps(false));
 
     expect((await res.json()).events[0].actionDetails).not.toHaveProperty("targetAC");
+  });
+
+  it("бій зник — 404 замість правил за замовчуванням", async () => {
+    const d = { ...readDeps(false), loadRedactionCtx: vi.fn(async () => null) };
+
+    expect((await readBattleEvents(params, { before: 5, limit: 10 }, d)).status).toBe(404);
   });
 
   it("ДМ отримує сиру сторінку без читання учасників", async () => {

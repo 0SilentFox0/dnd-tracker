@@ -1,4 +1,4 @@
-import { CombatStatus } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -21,9 +21,14 @@ export function skippedTurnAt(
 
   if (!p || !conditions || p.combatStats.status !== CombatStatus.UNCONSCIOUS) return null;
 
-  const skip = textRef("battleLog.turn.skipUnconscious", { name: p.basicInfo.name });
-
   const extra = conditions.skippedTurn?.(order, p.basicInfo.id, { round: ctx.round, rng: ctx.rng });
 
-  return { participants: extra?.participants ?? order, messages: [skip, ...(extra?.messages ?? [])] };
+  const extraMessages = extra?.messages ?? [];
+
+  // збитий ворог без кровотечі щоразу не засмічує журнал
+  const quiet = p.basicInfo.side === ParticipantSide.ENEMY && extraMessages.length === 0;
+
+  const skip = quiet ? [] : [textRef("battleLog.turn.skipUnconscious", { name: p.basicInfo.name })];
+
+  return { participants: extra?.participants ?? order, messages: [...skip, ...extraMessages] };
 }
