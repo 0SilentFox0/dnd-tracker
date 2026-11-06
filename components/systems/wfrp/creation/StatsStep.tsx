@@ -8,7 +8,7 @@ import type { WfrpDraftFormState } from "./types";
 
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
-import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement-schema";
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement";
 import { CHARACTERISTIC_KEYS, STAT_FLOOR } from "@/lib/utils/rules/systems";
 
 export function StatsStep({ form }: { form: WfrpDraftFormState }) {

@@ -1,3 +1,7 @@
+export const FREE_POINT_MIN = 4;
+
+export const FREE_POINT_MAX = 18;
+
 export type AdvancementTrack = { brackets: { upTo: number; cost: number }[]; max: number };
 
 export type CareerRules = { ticksRequired: [number, number, number]; outOfCareerMultiplier: number };

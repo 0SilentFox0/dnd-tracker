@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-export const FREE_POINT_MIN = 4;
-
-export const FREE_POINT_MAX = 18;
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement";
 
 const CHARACTERISTIC_COUNT = 10;
 

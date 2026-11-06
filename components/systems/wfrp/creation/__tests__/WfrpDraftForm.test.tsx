@@ -89,9 +89,10 @@ describe("WfrpDraftForm", () => {
 
     const options = within(screen.getByRole("radiogroup", { name: "wfrpCreation.career.pickLabel" })).getAllByRole("radio");
 
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(1);
+    expect(options[0].getAttribute("aria-checked")).toBe("true");
+    expect((next() as HTMLButtonElement).disabled).toBe(false);
 
-    fireEvent.click(options[0]);
     fireEvent.click(next());
 
     expect(screen.getByText("wfrpCreation.stats.hint")).toBeTruthy();
