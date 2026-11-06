@@ -15,7 +15,8 @@ describe("Breadcrumbs", () => {
     path = "/campaigns/abc/character/new";
     render(<Breadcrumbs />);
 
-    expect(screen.getByText("common.breadcrumbs.segments.campaigns")).toBeTruthy();
+    expect(screen.getByText("common.header.home").closest("a")?.getAttribute("href")).toBe("/campaigns");
+    expect(screen.queryByText("common.breadcrumbs.segments.campaigns")).toBeNull();
     expect(screen.getByText("common.breadcrumbs.ids.campaigns")).toBeTruthy();
     expect(screen.getByText("common.breadcrumbs.segments.character")).toBeTruthy();
     expect(screen.getByText("common.breadcrumbs.segments.new")).toBeTruthy();

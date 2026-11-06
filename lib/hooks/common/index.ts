@@ -27,6 +27,7 @@ export { usePlayerViewKey } from "./usePlayerViewKey";
 export { type PusherHandlers, usePusherChannel, usePusherConnection } from "./usePusherChannel";
 export { useReducedMotion } from "./useReducedMotion";
 export { useRowKeys } from "./useRowKeys";
+export { useScrollLock } from "./useScrollLock";
 export { SEARCH_DEBOUNCE_MS, type SearchState, useSearch } from "./useSearch";
 export { useSetLocale } from "./useSetLocale";
 export { useSingleFlight } from "./useSingleFlight";

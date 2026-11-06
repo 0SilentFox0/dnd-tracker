@@ -4,7 +4,7 @@ import { Fragment, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CircleHelp, Globe, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
+import { CircleHelp, Globe, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
@@ -22,10 +22,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
 import { dmSectionsFor } from "@/lib/constants/campaigns";
-import { useSessionEmail, useSwitchGoogleAccount } from "@/lib/hooks/auth";
+import { useSessionUser, useSwitchGoogleAccount } from "@/lib/hooks/auth";
 import { useCampaignRules, useIsTemplateCampaign } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
+
+function UserAvatar({ url, className }: { url: string | null; className: string }) {
+  return (
+    <span className={cn("inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-hud-gold/60 bg-hud-panel text-hud-gold", className)}>
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt="" referrerPolicy="no-referrer" className="size-full object-cover" />
+      ) : (
+        <User className="size-4" aria-hidden />
+      )}
+    </span>
+  );
+}
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
 
@@ -36,7 +49,9 @@ export function Header() {
 
   const pathname = usePathname();
 
-  const email = useSessionEmail();
+  const sessionUser = useSessionUser();
+
+  const email = sessionUser?.email ?? null;
 
   const isTemplate = useIsTemplateCampaign(pathname?.includes("/dm/") ? pathname.match(/^\/campaigns\/([^/]+)/)?.[1] : undefined);
 
@@ -67,13 +82,6 @@ export function Header() {
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className={cn(width, "flex h-14 items-center justify-between")}>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong" asChild>
-            <Link href="/campaigns">
-              <Home className="h-4 w-4" />
-              <span className="sr-only">{t("home")}</span>
-            </Link>
-          </Button>
-
           {isCampaignPage && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -125,23 +133,19 @@ export function Header() {
           <WatchShowButton />
           {email && <WhatsNewButton />}
           <AbbreviationsInfoDialog />
-          {email && (
-            <span className="hidden sm:inline text-sm text-hud-muted">
-              {email}
-            </span>
-          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9 text-hud-gold hover:bg-transparent hover:text-hud-gold-strong">
-                <User className="h-4 w-4" />
+                <UserAvatar url={sessionUser?.avatarUrl ?? null} className="size-7" />
                 <span className="sr-only">{t("profile")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {email && (
                 <>
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    {email}
+                  <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground">
+                    <UserAvatar url={sessionUser?.avatarUrl ?? null} className="size-8" />
+                    <span className="min-w-0 truncate">{email}</span>
                   </div>
                   <DropdownMenuSeparator />
                 </>

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 import type { DemoTourRunnerProps } from "@/components/onboarding/DemoTourRunner";
 import { DemoTourTooltip } from "@/components/onboarding/DemoTourTooltip";
-import { resetPlayerViews } from "@/lib/hooks/common";
+import { resetPlayerViews, useScrollLock } from "@/lib/hooks/common";
 import { useSetOnboardingFlag } from "@/lib/hooks/onboarding";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { setActiveDemoTour } from "@/lib/onboarding/active-demo-tour";
@@ -144,6 +144,8 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
 
     return () => setActiveDemoTour(null);
   }, [run, activeTour]);
+
+  useScrollLock(run, "[data-joyride-step]");
 
   const lastStepShown = useRef(false);
 

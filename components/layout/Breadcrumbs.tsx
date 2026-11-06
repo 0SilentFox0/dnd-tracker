@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 
 import { DM_SECTIONS } from "@/lib/constants/campaigns";
 import { LANDING_PATHS } from "@/lib/constants/site";
@@ -32,6 +32,8 @@ function getLabel(t: Translate, tCommon: Translator, segment: string, previous?:
 
 export function Breadcrumbs() {
   const t = useTranslations("common.breadcrumbs");
+
+  const tHeader = useTranslations("common.header");
 
   const tCommon = useTranslator("common");
 
@@ -64,6 +66,12 @@ export function Breadcrumbs() {
       continue;
     }
 
+    // the home icon is the "campaigns" crumb
+    if (segment === "campaigns" && i === 0 && !isLastSegment) {
+      previousDisplaySegment = segment;
+      continue;
+    }
+
     crumbs.push({
       href: `/${allSegments.slice(0, i + 1).join("/")}`,
       label: getLabel(t, tCommon, segment, previousDisplaySegment),
@@ -75,12 +83,23 @@ export function Breadcrumbs() {
 
   if (crumbs.length === 0) return null;
 
+  const homeCrumb = allSegments[0] !== "campaigns" || allSegments.length > 1;
+
   return (
     <nav
       aria-label={t("label")}
       className="h-6 text-xs text-hud-muted"
     >
       <ol className="flex h-full flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap">
+        {homeCrumb && (
+          <li className="flex items-center gap-1">
+            <Link href="/campaigns" className="flex items-center text-hud-gold transition-colors hover:text-hud-gold-strong">
+              <Home className="h-3.5 w-3.5" />
+              <span className="sr-only">{tHeader("home")}</span>
+            </Link>
+            <ChevronRight className="h-3 w-3 text-hud-line" />
+          </li>
+        )}
         {crumbs.map((crumb) => (
           <li key={crumb.href} className="flex items-center gap-1">
             {crumb.isLast ? (
