@@ -110,6 +110,12 @@
 - `PUT /api/campaigns/{id}/characters/{characterId}/choices` (сесія, поза OpenAPI): `{ raceChoices?, feats?, classChoices?: Record<classId, Picks> }` → персонаж; відмови `CHOICE_*`, `FEAT_*`, `SKILL_NOT_ALLOWED`, `EXPERTISE_NEEDS_PROFICIENCY`, `SPELL_NOT_IN_LIST`, `ABILITY_SCORE_CAP`, `CHOICES_NEED_CLASSES`, `ORIGIN_FEAT_ONLY_ONE`, `DM_FEAT_ONLY_DM` (422/403) з `issues [{ path, code, message }]`. Створення персонажа приймає `raceChoices`, `feats`, `classes[].choices`; level-up — `choices`; чернетка гравця — `choices { raceChoices?, feats?, classChoices? }`.
 - Міграція `20261103000000_choices_feats`.
 
+## Кар'єри WFRP (5e-2)
+
+- Вид `careers` (`/careers`, `careerId`): `name`, `icon?`, `class?`, `tiers` (рівно 4: `name`, `status?`, `characteristics[]`, `skills[]`, `talents[]` — id рис кампанії, `trappings[]`); список — для учасників, елемент і зміни — лише ДМ (`defineResource`, REST/MCP `content_*`). Відмови: `CAREER_NAME_TAKEN` (409), `CAREER_IN_USE` (409, герой тримає кар'єру), `FOREIGN_FEAT` (400). Кеш — `ReferenceKind.CAREERS`.
+- Імпорт/експорт CSV — лише плоскі колонки `tier{1..4}_*`; без шарів/source-sync/compendium-import. Маршрути кар'єр поза OpenAPI-документом.
+- Операції героя `career-set`, `career-advance` — [rule-systems.md](rule-systems.md#межі-5e-2). Міграція `20261125000000_careers`.
+
 ## Імпорт і експорт (етап 4f-0)
 
 Масове перенесення контенту з CSV/TSV/JSON для `units`, `spells`, `skills`, `main-skills`, `spell-groups`, `races`, `classes`, `feats`, `backgrounds`, `artifacts`, `artifact-sets` (треки — ні).

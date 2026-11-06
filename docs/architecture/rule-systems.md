@@ -138,6 +138,23 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - Виправлено після фінального рев'ю: леджер не потрапляє до учасників бою (гравці його не бачать); обрізання леджера на 201-му записі не повертає XP (`spentArchived` додається до суми витрат); PATCH `characteristics` під `FOR UPDATE`, а збереження ДМ-редактором з застарілим леджером (довжина, id останнього запису, `spentArchived`) → 409 `characteristicsChanged`; лист/кидки/ресурси бачать здібності талантів.
 - Відомі хвости: у DM-редакторі профілю немає вкладки «Розвиток»; `rules.advancement` без редактора й не синхронізується шаблонами (до merge епіку — додати в `MECHANIC_REGISTRY`); `scope-size` uk ≈ 104.5 / 105 KB.
 
+## Межі 5e-2
+
+Кар'єри (на `feat/wfrp`, не змерджено; міграція `20261125000000_careers`, expand-only, з RLS). Spec/план — `docs/superpowers/{specs,plans}/2026-11-05-wfrp-5e2*`.
+
+- Вид контенту `careers` (таблиця `careers`: `name`, `icon`, `class`, `tiers` — рівно 4 рівні з `characteristics`/`skills`/`talents`/`trappings`), стан героя — `characteristics.career { careerId, tier, ticks[] }`. Ціна в кар'єрі = базова + тік (унікальний ключ `kind:key`, відкат останньої покупки прибирає тік); поза кар'єрою — множник `rules.advancement.career.outOfCareerMultiplier`. Перехід на наступний рівень — `career-advance` (поріг `ticksRequired`, ДМ може `force`), тіки скидаються.
+- Операції `career-set` і `career-advance` (власник або ДМ) під `lockCharacters`; гравець не підробляє `career` через PATCH (`preserveServerOwned`). Видалення кар'єри, яку тримає герой, — 409 `CAREER_IN_USE`; видалена кар'єра в героя дає базову ціну без тіка.
+- **Без шарів шаблонів:** немає `*Base`, `sourceId`, template sync і compendium-import; кар'єри не входять до офіційних шаблонів і «Оновлення з шаблону».
+- Імпорт CSV/JSON лише з плоскими полями `tier{1..4}_*` (вкладених `tiers` у JSON немає).
+- Маршрути кар'єр відсутні в OpenAPI-документі (REST працює, але не описаний); бюджет розміру OpenAPI піднято до 180 000 (операції характеристик).
+- `advancement` у `MECHANIC_REGISTRY` додано, але в наявних клонів шаблонів немає `rulesHashes`-бази для цієї секції: вони показують конфлікт, а не оновлення (міграції бази немає).
+- Ціни, пороги тіків і множник — заглушки `verify against 5e book`; `uk` scope-size без запасу (105.0 / 105 KB), `wfrpCareers` вантажиться лише ДМ-ам; вкладка леджера read-only; перевірки на 375 px у браузері не було.
+
+### Закриті хвости 5e-1
+
+- `rules.advancement` додано в `MECHANIC_REGISTRY` (синхронізація шаблонами) і отримав DM-редактор (`AdvancementEditor` у формі правил).
+- DM-вкладка «Розвиток» у профілі героя (`ProfileEditor`, кар'єра/леджер/покупки; леджер лише читається).
+
 ## Межі 5c-1
 
 Стани й Fortune на `feat/wfrp` (без міграції; UI — namespace `battleWfrp`). Свідомі межі:
