@@ -11,7 +11,7 @@
 ## Рішення (з брейншторму)
 
 1. Покроковий візард з кидками, чернетка `pending`.
-2. Дані виду — колонка `races.characteristics` (Json), **поза шарами** (як кар'єри 5e-2): без `races_base`/хешів; `careerId`/`featId` локальні для кампанії, тому шари приходять у 5g.
+2. Дані виду — окрема таблиця `race_profiles` (`raceId` PK, Json `profile`, каскад з видом), **поза шарами й шаблонами** (як кар'єри 5e-2). Колонка в `races` не годиться: `Race` має двійника `RaceBase`, а `bundle`/sync/хеші беруть колонки з Prisma-enum, тож профіль із локальними `careerId`/`featId` поїхав би в шаблони. Шари — 5g.
 3. d100-таблиця кар'єр виду й таблиця випадкових талантів лежать у профілі виду (`rollTable` приймає рядки `{ max }`).
 4. Бонус XP за кидки — параметри `rules.advancement.creation` (MECHANIC_REGISTRY, DM-редактор), значення — заглушки `verify against 5e book`.
 5. Кидки на клієнті, сервер довіряє походженню, перевіряє діапазони.
@@ -23,15 +23,15 @@
 
 ## Дані
 
-- `races.characteristics Json @default("{}")` — expand-only міграція (таблиця вже має RLS). Схема `SpeciesProfile`:
+- Таблиця `race_profiles` (`raceId` PK → `races` ON DELETE CASCADE, `campaignId`, `profile Json @default("{}")`, `createdAt`/`updatedAt`) — expand-only міграція `CREATE TABLE` + `ENABLE ROW LEVEL SECURITY`. Схема `SpeciesProfile` (`resilience` не входить: у `CharacteristicsSchema` немає куди його зберігати):
   - `mods`: частковий запис по 10 характеристиках (додаток до бази 20; 2d10 додається при кидку);
-  - `move`, `fate`, `resilience`, `extraWounds`;
+  - `move`, `fate`, `extraWounds`;
   - `talents: featId[]` (фіксовані), `randomTalents: [{ max, featId }]`, `randomTalentCount`;
   - `careerTable: [{ max, careerId }]` (зростаючі `max`, останній 100).
 - `rules.advancement.creation`: `careerBonus { rolled, choice, free }`, `statBonus { rolled, rearranged, free }`, `freeBudget`. У `MECHANIC_REGISTRY`, DM-редактор у `AdvancementEditor`. Існуючі клони без `creation` отримують дефолт (`defaults.ts`).
 - Стан героя — наявні `characteristics.{base,advances,move,fate,extraWounds,talents,career}` та `experience` (бонус XP). Нових полів `Character` немає. У леджер бонус не пишеться (леджер для витрат).
 - Цілісність: видалення кар'єри або фіта, що стоїть у таблиці будь-якого виду → 409 (аналог `careerInUse`); видалення виду, на який посилається герой, — наявна поведінка.
-- Прямі перевірки при плануванні: `updateRaceCascade`, sync шаблонів і compendium-import не затирають невідому колонку.
+- Читання профілів: `GET …/race-profiles` (member), запис: `PUT …/races/[raceId]/profile` (DM); `getCachedRaces`, `racesResource` і `updateRaceCascade` не змінюються.
 
 ## Чиста логіка `lib/utils/rules/systems/wfrp/creation/`
 
@@ -48,7 +48,7 @@
 - `app/api/campaigns/[id]/characters/draft/`: `route.ts` диспатчить за `ruleSystemOf(rules).creation` у `create-wfrp-draft.ts`; те саме для PATCH у `[characterId]/draft` → `patch-wfrp-draft.ts`. Системи без `creation` → 409 `SYSTEM_DRAFTS_UNSUPPORTED`.
 - `wfrpDraftSchema` (Zod): `speciesId`, `career { mode, careerId, rolls? }`, `stats { mode, rolls[10], values }`, `talents`, ім'я/біографія/аватар/цілі. Помилки `planDraft` → 400 з ключами, тексти з `lib/constants/api-errors.ts` (uk) + i18n-ключі.
 - Створення: `lockPlayerDrafts`, одна чернетка на гравця, `status: pending`, `race = name`, `raceId`, `characteristics`, `experience`, інвентар як у 5e-драфті (`EMPTY_INVENTORY`). Вид без профілю (`{}`) → 422.
-- Race resource (`create`/`update`) і `createRaceSchema`/`updateRaceSchema` приймають `characteristics` (валідація `SpeciesProfile`, посилання `careerId`/`featId` через `assertCampaignRefs`).
+- `PUT …/races/[raceId]/profile`: валідація `SpeciesProfile`, посилання `careerId`/`featId` через `assertCampaignRefs` (додається вид `career` + `FOREIGN_CAREER`).
 - `lib/api/characters` (wfrp-варіанти draft), `types/characters.ts` (`WfrpDraftInput`).
 
 ## Клієнт
@@ -76,7 +76,9 @@
 
 ## Відомі межі й ризики
 
+- Редагування wfrp-чернетки після створення (`PATCH …/draft`) змінює лише ідентичність (ім'я, біографія, аватар, цілі); кидки й вибір механіки фіксуються при створенні (для змін — DM правка профілю).
+
 - Бонуси XP, `freeBudget`, `randomTalentCount` — заглушки `verify against 5e book`.
 - Вид без профілю не годиться для створення; офіційні види/таблиці — 5g.
 - Клієнт довіряється щодо походження кидків (бонус XP можна підробити); захист — схвалення ДМ.
-- Міграція `races.characteristics` додається до списку передеплойних міграцій епіку (на prod не виконується).
+- Міграція `race_profiles` додається до списку передеплойних міграцій епіку (на prod не виконується).
