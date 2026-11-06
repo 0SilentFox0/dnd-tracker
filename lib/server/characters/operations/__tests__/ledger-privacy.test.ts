@@ -71,7 +71,7 @@ describe("get stays owner/DM only", () => {
 describe("PATCH cannot bypass the ledger", () => {
   const record = { id: "mine", campaignId: "camp", controlledBy: "p1", type: "player", status: "active", level: 1, classes: [], race: "", avatar: null, characteristics: stored };
 
-  const patch = async (viewer: { userId: string; isDM: boolean }, characteristics: object, fresh: object = record) => {
+  const patch = async (viewer: { userId: string; isDM: boolean }, characteristics: object, fresh: object = record, careerBaseline?: object) => {
     h.access.mockResolvedValue({ ...viewer, campaign: { id: "camp", maxLevel: 20, allowPlayerEdit: true, rules: WFRP_RULES } });
     h.character.findUnique.mockResolvedValueOnce(record).mockResolvedValue(fresh);
     h.character.update.mockResolvedValue({ ...record, level: 1 });
@@ -80,7 +80,7 @@ describe("PATCH cannot bypass the ledger", () => {
 
     expect(gate).not.toBeInstanceOf(NextResponse);
 
-    await patchOperation.run(gate as never, patchOperation.schema.parse({ characteristics }));
+    await patchOperation.run(gate as never, patchOperation.schema.parse({ characteristics, careerBaseline }));
 
     return h.character.update.mock.calls[0][0].data.characteristics as typeof stored;
   };
@@ -110,5 +110,28 @@ describe("PATCH cannot bypass the ledger", () => {
   it("DM: saving a sheet loaded before a purchase returns 409 and writes nothing", async () => {
     await expect(patch({ userId: "dm", isDM: true }, { ...stored, fate: 2 }, { ...record, characteristics: bought })).rejects.toMatchObject({ status: 409 });
     expect(h.character.update).not.toHaveBeenCalled();
+  });
+
+  const career = { careerId: "c1", tier: 1 as const, ticks: [] as string[] };
+
+  const advanced = { ...record, characteristics: { ...stored, career: { ...career, tier: 2 as const } } };
+
+  it("DM: a career advanced after the editor loaded returns 409 and writes nothing", async () => {
+    await expect(patch({ userId: "dm", isDM: true }, { ...stored, career }, advanced, career)).rejects.toMatchObject({ status: 409 });
+    expect(h.character.update).not.toHaveBeenCalled();
+  });
+
+  it("DM: a matching career baseline saves, and a deliberate career change passes", async () => {
+    const withCareer = { ...record, characteristics: { ...stored, career } };
+
+    const saved = await patch({ userId: "dm", isDM: true }, { ...stored, career: { ...career, tier: 3 as const } }, withCareer, career);
+
+    expect(saved.career).toMatchObject({ tier: 3 });
+  });
+
+  it("player: career stays server-side, baseline ignored", async () => {
+    const saved = await patch({ userId: "p1", isDM: false }, { ...stored, career: { ...career, tier: 4 as const } }, advanced, career);
+
+    expect(saved.career).toMatchObject({ tier: 2 });
   });
 });

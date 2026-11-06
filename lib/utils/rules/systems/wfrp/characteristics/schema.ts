@@ -21,7 +21,7 @@ const LedgerEntrySchema = z.object({
   tick: z.string().min(1).max(100).optional(),
 });
 
-const CareerStateSchema = z.object({
+export const CareerStateSchema = z.object({
   careerId: z.string().min(1).max(64),
   tier: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   ticks: z

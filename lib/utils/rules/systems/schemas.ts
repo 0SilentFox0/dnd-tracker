@@ -1,1 +1,1 @@
-export { CharacteristicsSchema } from "./wfrp/characteristics/schema";
+export { CareerStateSchema, CharacteristicsSchema } from "./wfrp/characteristics/schema";

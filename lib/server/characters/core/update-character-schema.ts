@@ -5,7 +5,7 @@ import { HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { BackgroundSelectionFields } from "@/lib/schemas/choices";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
-import { CharacteristicsSchema } from "@/lib/utils/rules/systems/schemas";
+import { CareerStateSchema, CharacteristicsSchema } from "@/lib/utils/rules/systems/schemas";
 
 export const updateCharacterSchema = z.object({
   ...BackgroundSelectionFields,
@@ -67,6 +67,7 @@ export const updateCharacterSchema = z.object({
 
   archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
   characteristics: CharacteristicsSchema.optional(),
+  careerBaseline: CareerStateSchema.nullable().optional(),
 });
 
 export type UpdateCharacterInput = z.infer<typeof updateCharacterSchema>;

@@ -28,7 +28,7 @@ import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import { levelNotificationEvents, spellNotificationEvents } from "@/lib/utils/notifications/events";
-import { type Characteristics, preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { type CareerState, type Characteristics, preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -70,14 +70,18 @@ async function editableData({ access, character }: Gate, input: Parsed) {
   return { data };
 }
 
-function reconcileCharacteristics(fresh: CharacterRecord, incoming: Characteristics, isDM: boolean): Characteristics {
+const sameCareer = (a?: CareerState | null, b?: CareerState | null) => (!a && !b) || Boolean(a && b && a.careerId === b.careerId && a.tier === b.tier && a.ticks.length === b.ticks.length && a.ticks.every((t, i) => t === b.ticks[i]));
+
+function reconcileCharacteristics(fresh: CharacterRecord, incoming: Characteristics, isDM: boolean, careerBaseline?: CareerState | null): Characteristics {
   const stored = readCharacteristics(fresh);
 
   if (!isDM) return preserveServerOwned(stored, incoming);
 
   const moved = incoming.ledger.length !== stored.ledger.length || incoming.ledger.at(-1)?.id !== stored.ledger.at(-1)?.id || incoming.spentArchived !== stored.spentArchived;
 
-  if (moved) throw new ContentError(API_ERRORS.CHARACTERISTICS_CHANGED, 409);
+  const careerMoved = careerBaseline !== undefined && !sameCareer(careerBaseline, stored.career);
+
+  if (moved || careerMoved) throw new ContentError(API_ERRORS.CHARACTERISTICS_CHANGED, 409);
 
   return incoming;
 }
@@ -239,7 +243,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
 
         if (choices && !choices.ok) throw choices.error;
 
-        const characteristics = guardsLedger && data.characteristics ? reconcileCharacteristics(fresh, data.characteristics, isDM) : undefined;
+        const characteristics = guardsLedger && data.characteristics ? reconcileCharacteristics(fresh, data.characteristics, isDM, data.careerBaseline) : undefined;
 
         return writeUpdate(tx, classes, choices?.ok ? choices.fields : undefined, characteristics);
       })

@@ -4,7 +4,7 @@ export type { CharacterHpInput, RuleSystemAdvancement, RuleSystemDefinition, She
 export type { CareerTierDef } from "./wfrp/advancement/career";
 export type { PurchaseError, PurchaseRequest } from "./wfrp/advancement/plan";
 export { type LedgerViewer, preserveServerOwned, redactLedger } from "./wfrp/advancement/privacy";
-export { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, DEFAULT_CHARACTERISTICS, type LedgerEntry, readCharacteristics, SKILL_ADVANCE_KEY_RE, SKILL_KEY_RE, SPEC_RE } from "./wfrp/characteristics/keys";
+export { type CareerState, CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, DEFAULT_CHARACTERISTICS, type LedgerEntry, readCharacteristics, SKILL_ADVANCE_KEY_RE, SKILL_KEY_RE, SPEC_RE } from "./wfrp/characteristics/keys";
 export type { DefenseKind, HitLocation } from "./wfrp/combat/constants";
 export type { WfrpParticipantStats } from "./wfrp/combat/participant";
 export { DIFFICULTY_KEYS, type DifficultyKey } from "./wfrp/percentile/difficulty";
