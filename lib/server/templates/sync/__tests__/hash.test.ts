@@ -25,6 +25,17 @@ describe("sync hashes", () => {
     expect(rowHash({ ...row, xpCost: 100, maxRank: null }, feats)).not.toBe(rowHash(row, feats));
   });
 
+  it("artifact rowHash ignores null systemStats but reacts to values", () => {
+    const artifacts = BUNDLE_TABLES.find((t) => t.key === "artifacts")!;
+
+    expect(artifacts.columns).toContain("systemStats");
+
+    const row = { id: "c" + "a".repeat(24), name: "Mail", slot: "armor" };
+
+    expect(rowHash({ ...row, systemStats: null }, artifacts)).toBe(rowHash(row, artifacts));
+    expect(rowHash({ ...row, systemStats: { type: "gear", weight: 1, price: 1, qualities: [] } }, artifacts)).not.toBe(rowHash(row, artifacts));
+  });
+
   it("rowHash reacts to ingredients and componentFlags", () => {
     const row = { id: "c" + "a".repeat(24), name: "Revivify", ingredients: [], componentFlags: null };
 

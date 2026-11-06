@@ -8,6 +8,7 @@ import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
+import { armourAp } from "@/lib/utils/rules/systems/wfrp/equipment";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -25,7 +26,7 @@ const fighter = (id: string, side: ParticipantSide, { s = 30, t = 30, hp = 20, a
 
   const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40, s, t } };
 
-  const fields = wfrpAbilitiesOf(characteristics, { head: ap, arm: ap, body: ap, leg: ap });
+  const fields = wfrpAbilitiesOf(characteristics, { ap: { head: ap, arm: ap, body: ap, leg: ap } });
 
   return { ...p, abilities: { ...p.abilities, ...fields }, battleData: { ...p.battleData, attacks: [sword] } };
 };
@@ -64,6 +65,23 @@ describe("WFRP damage", () => {
     expect(r.attackRoll.percentile).toMatchObject({ netSl: 5, location: "head", doubles: false });
     expect(r.targetUpdated.combatStats.currentHp).toBe(20 - (4 + 3 + 5 - 3 - 2));
     expect(r.battleAction.actionDetails.damageSteps?.t.map((s) => s.value)).toEqual([4, 3, 5, -3, -2]);
+  });
+
+  it("armour and shield from equipment feed the ap step", () => {
+    const layer = { type: "armour", locations: { head: 0, arm: 0, body: 2, leg: 0 }, kind: "mail", qualities: [], weight: 1, price: 1 };
+
+    const shield = { type: "gear", weight: 1, price: 1, qualities: [{ key: "shield", value: 1 }] };
+
+    const gear = armourAp([{ slot: "armor", systemStats: layer }, { slot: "shield", systemStats: shield }]);
+
+    const base = fighter("t", ParticipantSide.ENEMY);
+
+    const target = { ...base, abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, gear) } };
+
+    const r = strike(30, 80, { target });
+
+    expect(r.attackRoll.percentile?.location).toBe("head");
+    expect(r.battleAction.actionDetails.damageSteps?.t.map((s) => s.value)).toEqual([4, 3, r.attackRoll.percentile?.netSl, -3, -1]);
   });
 
   it("labels and sides come from the system contract", () => {

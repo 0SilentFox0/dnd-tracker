@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { QUALITY_REGISTRY, QualityRefSchema } from "../qualities";
+import { QUALITY_REGISTRY } from "../qualities";
+import { QualityRefSchema } from "../stats";
 
 const IMPLEMENTED = ["damaging", "impale", "penetrating", "hack", "pummel", "precise", "accurate", "imprecise", "undamaging", "unreliable", "dangerous", "slow", "fast", "blast", "pistol", "shield", "defensive", "reload", "flexible"];
 

@@ -1,8 +1,12 @@
 import { z } from "zod";
 
 import type { HitLocation } from "../combat/constants";
-import { AP_MAX_PER_LAYER, ARMOUR_KINDS, WEAPON_GROUPS, WEAPON_REACHES } from "./constants";
-import { type QualityRef, QualityRefSchema } from "./qualities";
+import { AP_MAX_PER_LAYER, ARMOUR_KINDS, QUALITY_VALUE_MAX, WEAPON_GROUPS, WEAPON_REACHES } from "./constants";
+import { QUALITY_KEYS, QUALITY_REGISTRY, type QualityRef } from "./qualities";
+
+export const QualityRefSchema: z.ZodType<QualityRef> = z
+  .strictObject({ key: z.enum(QUALITY_KEYS), value: z.number().int().min(1).max(QUALITY_VALUE_MAX).optional() })
+  .refine((r) => QUALITY_REGISTRY[r.key].hasValue === (r.value !== undefined), { message: "quality value mismatch", path: ["value"] });
 
 const weight = z.number().min(0).max(1000);
 

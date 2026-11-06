@@ -11,7 +11,6 @@ import type { isUsableProfile } from "./wfrp/creation/profile";
 import type { rollCreation } from "./wfrp/creation/roll";
 import type { armourAp, parseWfrpStats } from "./wfrp/equipment/armour";
 import type { QUALITY_REGISTRY, QualityRef } from "./wfrp/equipment/qualities";
-import type { WfrpItemStatsSchema } from "./wfrp/equipment/stats";
 import type { PercentileOutcome } from "./wfrp/percentile";
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
@@ -226,7 +225,7 @@ export interface RuleSystemMagic {
 export interface RuleSystemCombat {
   fortune?: true;
   dice: 20 | 100;
-  participantFields?(row: { characteristics?: unknown }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
+  participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; flexible?: boolean }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
@@ -307,7 +306,6 @@ export type WeaponProfile = {
 };
 
 export interface RuleSystemEquipment {
-  statsSchema: typeof WfrpItemStatsSchema;
   armourAp: typeof armourAp;
   parseStats: typeof parseWfrpStats;
   weaponProfile(stats: unknown): WeaponProfile | null;

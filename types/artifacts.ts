@@ -15,6 +15,7 @@ export interface ArtifactListItem {
   abilitySummary?: AbilityFlowSummary[];
   artifactSet?: { id: string; name: string } | null;
   itemKind?: "property" | "gear";
+  systemStats?: unknown | null;
   [key: string]: unknown;
 }
 
@@ -50,4 +51,5 @@ export interface ArtifactData {
   weapon: WeaponStats;
   armor?: ArmorStats | null;
   item?: ItemStats | null;
+  systemStats?: unknown | null;
 }

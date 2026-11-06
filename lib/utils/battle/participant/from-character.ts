@@ -196,6 +196,8 @@ export async function createBattleParticipantFromCharacter(
 
   const { selections, schoolMastery, grantPools, spellcastingAbility, spellcasting } = await characterSpellcasting(character, refs, proficiencyBonus, context);
 
+  const equipmentGear = ruleSystemOf(rules).equipment?.armourAp(artifactRows.filter((r) => !r.carried).map(({ row, slot }) => ({ slot, systemStats: row.systemStats })));
+
   const archetype = heroArchetype(resolvedClasses ? null : (character as { archetype?: string | null }).archetype);
 
   const meleeDice = heroDiceTable(rules, "melee");
@@ -273,7 +275,7 @@ export async function createBattleParticipantFromCharacter(
       raceId: (race as { id?: string } | null)?.id,
       moraleCap: moraleCapFromRules(rules),
       ...(resolvedClasses && { damageModel: "5e" as const }),
-      ...ruleSystemOf(rules).combat.participantFields?.(character),
+      ...ruleSystemOf(rules).combat.participantFields?.(character, equipmentGear),
       heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,

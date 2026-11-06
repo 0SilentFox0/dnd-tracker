@@ -19,7 +19,7 @@ const src = textRef("battleWfrp.log.removed", { target: "x", condition: "y" });
 const make = (hp: number, conds: Array<[WfrpConditionKey, number]> = [], status?: BattleParticipant["combatStats"]["status"]): BattleParticipant => {
   const base = makeParticipant({ id: "a", hp, maxHp: 20 });
 
-  const withStats: BattleParticipant = { ...base, abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { head: 0, arm: 0, body: 1, leg: 0 }) } };
+  const withStats: BattleParticipant = { ...base, abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: { head: 0, arm: 0, body: 1, leg: 0 } }) } };
 
   const p = conds.reduce<BattleParticipant>((acc, [key, levels]) => applyWfrpConditionTo(acc, { key, levels, round: 1, sourceName: src }).participant, withStats);
 

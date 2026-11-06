@@ -160,6 +160,8 @@
   "itemAlreadyInStash": "This item is already in the stash",
   "itemsDisabled": "5e items are disabled in the campaign rules",
   "armorSlotOnly": "An armor model is only for an artifact in the Armor slot",
+  "systemStatsUnsupported": "This rule system has no item system stats",
+  "systemStatsInvalid": "The item system stats are invalid",
   "trackNotFound": "Track not found",
   "trackLimit": "The library already has {max} tracks — delete some",
   "trackUploadMissing": "File not uploaded — try again",

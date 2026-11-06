@@ -159,6 +159,8 @@ export const API_ERRORS = {
   ITEM_ALREADY_IN_STASH: "errors.itemAlreadyInStash",
   ITEMS_DISABLED: "errors.itemsDisabled",
   ARMOR_SLOT_ONLY: "errors.armorSlotOnly",
+  SYSTEM_STATS_UNSUPPORTED: "errors.systemStatsUnsupported",
+  SYSTEM_STATS_INVALID: "errors.systemStatsInvalid",
   TRACK_NOT_FOUND: "errors.trackNotFound",
   TRACK_LIMIT: "errors.trackLimit",
   TRACK_FILE_INVALID: "validation.trackFileInvalid",

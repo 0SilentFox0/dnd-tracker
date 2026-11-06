@@ -64,7 +64,7 @@ describe("berserk on a d100 system", () => {
     const wfrp = (id: string, side: ParticipantSide) => {
       const base = makeParticipant({ id, side, hp: 20, maxHp: 20 });
 
-      return { ...base, abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { head: 0, arm: 0, body: 0, leg: 0 }) }, battleData: { ...base.battleData, attacks: [{ id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" }] } };
+      return { ...base, abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: { head: 0, arm: 0, body: 0, leg: 0 } }) }, battleData: { ...base.battleData, attacks: [{ id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" }] } };
     };
 
     const berserker = wfrp("b", ParticipantSide.ALLY);

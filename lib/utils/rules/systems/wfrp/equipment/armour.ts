@@ -1,7 +1,8 @@
 import { type HitLocation, LOCATIONS } from "../combat/constants";
 import { AP_CAP } from "./constants";
+import { readStats } from "./guard";
 import { hasQuality, qualityValue } from "./qualities";
-import { type WfrpItemStats, WfrpItemStatsSchema } from "./stats";
+import type { WfrpItemStats } from "./stats";
 
 const ARMOUR_SLOTS = new Set(["armor", "helmet", "boots"]);
 
@@ -11,11 +12,7 @@ const SHIELD_LOCATIONS: readonly HitLocation[] = ["head", "arm", "body"];
 
 export type EquippedStatsRow = { slot: string; systemStats: unknown };
 
-export const parseWfrpStats = (raw: unknown): WfrpItemStats | null => {
-  const r = WfrpItemStatsSchema.safeParse(raw);
-
-  return r.success ? (r.data as WfrpItemStats) : null;
-};
+export const parseWfrpStats = (raw: unknown): WfrpItemStats | null => readStats(raw);
 
 export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation, number>; flexible: boolean } {
   const ap = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<HitLocation, number>;

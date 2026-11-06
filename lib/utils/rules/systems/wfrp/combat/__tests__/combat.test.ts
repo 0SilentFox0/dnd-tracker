@@ -105,6 +105,16 @@ describe("computeWfrpDamage", () => {
   });
 });
 
+describe("wfrpAbilitiesOf gear", () => {
+  it("takes AP and the flexible flag from gear", () => {
+    const gear = { ap: { head: 1, arm: 2, body: 3, leg: 0 }, flexible: true };
+
+    expect(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, gear).wfrp).toMatchObject({ ap: gear.ap, flexible: true });
+    expect(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: gear.ap, flexible: false }).wfrp).not.toHaveProperty("flexible");
+    expect(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS).wfrp.ap).toEqual({ head: 0, arm: 0, body: 0, leg: 0 });
+  });
+});
+
 describe("mitigateWfrpDamage", () => {
   const ctx = (amount: number) => {
     const attacker = makeParticipant({ id: "a", hp: 10, maxHp: 10 });
@@ -115,7 +125,7 @@ describe("mitigateWfrpDamage", () => {
   };
 
   it("every step carries a label and side, plus totalLabel", () => {
-    const r = mitigateWfrpDamage({ ...ctx(5), target: { ...ctx(5).target, abilities: { ...ctx(5).target.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { head: 0, arm: 0, body: 2, leg: 0 }) } } });
+    const r = mitigateWfrpDamage({ ...ctx(5), target: { ...ctx(5).target, abilities: { ...ctx(5).target.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: { head: 0, arm: 0, body: 2, leg: 0 } }) } } });
 
     expect(r.totalLabel).toEqual(textRef("battleWfrp.damage.total"));
     expect(r.steps.length).toBeGreaterThan(0);
@@ -162,7 +172,7 @@ describe("resolveWfrpAttack conditions", () => {
 
     const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } };
 
-    return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { head: 0, arm: 0, body: 0, leg: 0 }) } };
+    return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { ap: { head: 0, arm: 0, body: 0, leg: 0 } }) } };
   };
 
   const cond = (p: BattleParticipant, key: WfrpConditionKey, levels?: number) => applyWfrpConditionTo(p, { key, levels, round: 1, sourceName: textRef("battleWfrp.log.removed", { target: "x", condition: "y" }) }).participant;
@@ -227,7 +237,7 @@ describe("resolveWfrpAttack fortune", () => {
 
     const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } };
 
-    return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { head: 0, arm: 0, body: 0, leg: 0 }) } };
+    return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { ap: { head: 0, arm: 0, body: 0, leg: 0 } }) } };
   };
 
   const run = (attack: BattleAttack, extra: Partial<Parameters<typeof resolveWfrpAttack>[0]>) => {

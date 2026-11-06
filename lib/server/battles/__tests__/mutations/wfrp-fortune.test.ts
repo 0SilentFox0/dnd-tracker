@@ -23,7 +23,7 @@ const fighter = (id: string, side: ParticipantSide, fortune?: number): BattlePar
   return {
     ...p,
     basicInfo: { ...p.basicInfo, battleId: "b1", controlledBy: "dm" },
-    abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { head: 0, arm: 0, body: 0, leg: 0 }) },
+    abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { ap: { head: 0, arm: 0, body: 0, leg: 0 } }) },
     battleData: { ...p.battleData, attacks: [sword], ...(fortune !== undefined && { fortune }) },
   };
 };

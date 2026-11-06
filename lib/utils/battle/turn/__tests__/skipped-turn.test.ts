@@ -19,7 +19,7 @@ const downed = (status: BattleParticipant["combatStats"]["status"], bleeding = 0
     ...base,
     basicInfo: { ...base.basicInfo, id: "a" },
     combatStats: { ...base.combatStats, currentHp: 0, maxHp: 20, status },
-    abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { head: 0, arm: 0, body: 1, leg: 0 }) },
+    abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: { head: 0, arm: 0, body: 1, leg: 0 } }) },
   };
 
   if (!bleeding) return p;

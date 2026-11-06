@@ -27,7 +27,7 @@ const bleed = (id: string, hp: number, levels = 0): BattleParticipant => {
     ...base,
     basicInfo: { ...base.basicInfo, id },
     combatStats: { ...base.combatStats, currentHp: hp, maxHp: 20 },
-    abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { head: 0, arm: 0, body: 1, leg: 0 }) },
+    abilities: { ...base.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: { head: 0, arm: 0, body: 1, leg: 0 } }) },
   };
 
   if (!levels) return p;

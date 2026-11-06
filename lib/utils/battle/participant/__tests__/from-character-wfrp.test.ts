@@ -5,6 +5,8 @@ import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/partici
 import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-source";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { armourSl } from "@/lib/utils/rules/systems/wfrp/magic/armour";
+import { ARMOUR_SL_PER_AP } from "@/lib/utils/rules/systems/wfrp/magic/constants";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
 const character = {
@@ -22,6 +24,50 @@ const context = {
 
 const build = (over: object, rules = parseRules(WFRP_RULES)) =>
   createBattleParticipantFromCharacter({ ...character, ...over } as never, "b1", ParticipantSide.ALLY, undefined, context, { artifactRows: [], rules });
+
+const stat = (type: string, extra: object) => ({ type, weight: 1, price: 1, ...extra });
+
+const mail = stat("armour", { locations: { head: 0, arm: 1, body: 3, leg: 1 }, kind: "mail", qualities: [] });
+
+const flexLeather = stat("armour", { locations: { head: 0, arm: 0, body: 1, leg: 0 }, kind: "soft", qualities: [{ key: "flexible" }] });
+
+const buckler = stat("gear", { qualities: [{ key: "shield", value: 1 }] });
+
+const row = (id: string, slot: string, systemStats: unknown) => ({ row: { id, campaignId: "c1", name: id, slot, setId: null, icon: null, rarity: null, description: null, bonuses: {}, modifiers: [], abilities: [], systemStats }, slot });
+
+const withGear = (rows: ReturnType<typeof row>[]) =>
+  createBattleParticipantFromCharacter({ ...character, inventory: { equipped: {}, backpack: [], items: [], stash: [] } } as never, "b1", ParticipantSide.ALLY, undefined, context, { artifactRows: rows as never, rules: parseRules(WFRP_RULES) });
+
+describe("participant: WFRP equipment", () => {
+  it("equipped mail and shield give AP per location", async () => {
+    const p = await withGear([row("m", "armor", mail), row("s", "shield", buckler)]);
+
+    expect(p.abilities.wfrp?.ap).toEqual({ head: 1, arm: 2, body: 4, leg: 1 });
+    expect(p.abilities.wfrp).not.toHaveProperty("flexible");
+    expect(armourSl(p)).toBe(ARMOUR_SL_PER_AP * 4);
+  });
+
+  it("all-flexible armour sets the flag and cancels the armour penalty", async () => {
+    const p = await withGear([row("f", "armor", flexLeather)]);
+
+    expect(p.abilities.wfrp).toMatchObject({ flexible: true, ap: { body: 1 } });
+    expect(armourSl(p)).toBe(0);
+  });
+
+  it("no gear, garbage stats or stats missing leave AP at zero", async () => {
+    for (const rows of [[], [row("g", "armor", { type: "armour" })], [row("n", "armor", null)]]) {
+      const p = await withGear(rows);
+
+      expect(p.abilities.wfrp?.ap).toEqual({ head: 0, arm: 0, body: 0, leg: 0 });
+    }
+  });
+
+  it("d20 system ignores systemStats", async () => {
+    const p = await createBattleParticipantFromCharacter({ ...character, inventory: { equipped: {}, backpack: [], items: [], stash: [] } } as never, "b1", ParticipantSide.ALLY, undefined, context, { artifactRows: [row("m", "armor", mail)] as never, rules: parseRules({}) });
+
+    expect(p.abilities).not.toHaveProperty("wfrp");
+  });
+});
 
 describe("participant: WFRP characteristics", () => {
   it("SB/TB/move from characteristics; AP zero for every location", async () => {

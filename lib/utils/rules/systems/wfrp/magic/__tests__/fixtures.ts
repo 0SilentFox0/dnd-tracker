@@ -14,5 +14,5 @@ export function caster(over: { base?: Partial<Characteristics["base"]>; skillAdv
 
   const p = makeParticipant({ id: "c", hp: 20, maxHp: 20 });
 
-  return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, over.ap) }, battleData: { ...p.battleData, channelledSl: over.channelledSl, ...(over.sin !== undefined && { sin: over.sin }) } };
+  return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, over.ap && { ap: over.ap }) }, battleData: { ...p.battleData, channelledSl: over.channelledSl, ...(over.sin !== undefined && { sin: over.sin }) } };
 }

@@ -1,4 +1,4 @@
-import type { Artifact as ArtifactRow, Prisma } from "@prisma/client";
+import { type Artifact as ArtifactRow, Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
 import type { z } from "zod";
 
@@ -9,7 +9,9 @@ import { prisma } from "@/lib/db";
 import { createArtifactSchema, patchArtifactSchema } from "@/lib/schemas/artifacts";
 import { persistIcon } from "@/lib/server/artifacts/persist-icon";
 import { readArtifactsList } from "@/lib/server/artifacts/read-artifacts-list";
+import { systemStatsOrThrow } from "@/lib/server/artifacts/system-stats";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
+import { loadRules } from "@/lib/server/campaigns/rules";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
@@ -40,6 +42,16 @@ function nextModifiers(existing: unknown, data: { weapon?: WeaponStats; armor?: 
   return [...base, ...item];
 }
 
+async function systemStatsColumn(campaignId: string, stats: unknown): Promise<{ systemStats?: Prisma.InputJsonValue | typeof Prisma.DbNull }> {
+  if (stats === undefined) return {};
+
+  if (stats === null) return { systemStats: Prisma.DbNull };
+
+  const value = systemStatsOrThrow(await loadRules(campaignId), stats);
+
+  return { systemStats: value as Prisma.InputJsonValue };
+}
+
 const withSet = { artifactSet: true } as const;
 
 export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof createArtifactSchema>, z.infer<typeof patchArtifactSchema>>({
@@ -64,6 +76,8 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
 
     const icon = data.icon !== undefined ? await persistIcon(actor.campaignId, data.icon, randomUUID()) : undefined;
 
+    const stats = await systemStatsColumn(actor.campaignId, data.systemStats);
+
     return prisma.artifact.create({
       data: {
         campaignId: actor.campaignId,
@@ -74,6 +88,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         ...(data.weapon && { bonuses: weaponStatsColumns(data.weapon).bonuses }),
         ...((data.weapon || data.armor || data.item) && { modifiers: nextModifiers([], data, false) as Prisma.InputJsonValue }),
+        ...stats,
         setId: data.setId,
         icon,
       },
@@ -86,6 +101,8 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
     await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
 
     const icon = data.icon === undefined ? undefined : data.icon === existing.icon ? data.icon : await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`);
+
+    const stats = await systemStatsColumn(actor.campaignId, data.systemStats);
 
     const dropArmor = data.armor === null || (data.slot !== undefined && data.slot !== ArtifactSlot.ARMOR);
 
@@ -101,6 +118,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
         abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
         ...(data.weapon && { bonuses: weaponStatsColumns(data.weapon).bonuses }),
         ...(modifiers && { modifiers: modifiers as Prisma.InputJsonValue }),
+        ...stats,
         setId: data.setId !== undefined ? data.setId || null : undefined,
         icon: icon === undefined ? undefined : (icon ?? null),
       },

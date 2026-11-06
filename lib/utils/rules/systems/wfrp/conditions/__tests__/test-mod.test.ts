@@ -55,7 +55,7 @@ describe("wfrpAttackTarget", () => {
 
     const base = withConds();
 
-    const attacker = (p: BattleParticipant) => ({ ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { head: 0, arm: 0, body: 0, leg: 0 }) } });
+    const attacker = (p: BattleParticipant) => ({ ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { ap: { head: 0, arm: 0, body: 0, leg: 0 } }) } });
 
     const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };
 

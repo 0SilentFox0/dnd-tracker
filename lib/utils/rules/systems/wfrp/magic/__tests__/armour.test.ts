@@ -18,6 +18,12 @@ describe("armourSl", () => {
     expect(armourSl(caster({ ap: { head: 1, arm: 9, body: 3, leg: 9 } }))).toBe(3 * ARMOUR_SL_PER_AP);
   });
 
+  it("is 0 for flexible armour", () => {
+    const p = caster({ ap: { head: 3, arm: 0, body: 3, leg: 0 } });
+
+    expect(armourSl({ ...p, abilities: { ...p.abilities, wfrp: { ...p.abilities.wfrp!, flexible: true } } })).toBe(0);
+  });
+
   it("makes a cast with SL 4 fail against CN 2 at AP 3", () => {
     const spell = { id: "s", name: "Bolt", level: 1, groupId: null, definition: {} } as unknown as CastTestCtx["spell"];
 

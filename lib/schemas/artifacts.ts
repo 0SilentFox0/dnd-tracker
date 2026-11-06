@@ -29,6 +29,7 @@ export const createArtifactSchema = z
     weapon: WeaponStatsSchema.optional(),
     armor: ArmorStatsSchema.nullable().describe("5e armor (armor slot only); null removes the model").optional(),
     item: ItemStatsSchema.nullable().describe("5e item; null removes the model").optional(),
+    systemStats: z.unknown().nullable().optional(),
     setId: z.string().optional(),
     icon: z.preprocess(
       (val) => (val === "" ? null : val),
@@ -49,6 +50,7 @@ export const patchArtifactSchema = z
     weapon: WeaponStatsSchema.optional(),
     armor: ArmorStatsSchema.nullable().describe("5e armor (armor slot only); null removes the model").optional(),
     item: ItemStatsSchema.nullable().describe("5e item; null removes the model").optional(),
+    systemStats: z.unknown().nullable().optional(),
     setId: z.string().nullable().optional(),
     icon: z.preprocess(
       (val) => (val === "" ? null : val),
