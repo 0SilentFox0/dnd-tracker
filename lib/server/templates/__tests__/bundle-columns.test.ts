@@ -32,3 +32,10 @@ describe("bundle: spell table", () => {
     expect(out).not.toHaveProperty("campaignId");
   });
 });
+
+describe("bundle: race_profiles", () => {
+  it("species profiles are not part of bundles and race columns carry no relation", () => {
+    expect(BUNDLE_TABLES.map((t) => t.model)).not.toContain("RaceProfile");
+    expect(BUNDLE_TABLES.find((t) => t.key === "races")?.columns).not.toContain("profile");
+  });
+});

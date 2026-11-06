@@ -4,6 +4,7 @@ const db = vi.hoisted(() => ({
   career: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
   character: { count: vi.fn() },
   feat: { count: vi.fn() },
+  raceProfile: { findMany: vi.fn() },
 }));
 
 vi.mock("server-only", () => ({}));
@@ -26,6 +27,7 @@ describe("careersResource", () => {
     db.career.findFirst.mockResolvedValue(null);
     db.feat.count.mockResolvedValue(0);
     db.character.count.mockResolvedValue(0);
+    db.raceProfile.findMany.mockResolvedValue([]);
   });
 
   it("lists and finds through the service", async () => {
@@ -76,5 +78,15 @@ describe("careersResource", () => {
     await careersResource.remove(actor, { id: "k" } as never);
 
     expect(db.career.deleteMany).toHaveBeenCalledWith({ where: { id: "k", campaignId: "c" } });
+  });
+
+  it("remove while a species table lists it -> 409 CAREER_IN_SPECIES_TABLE (after CAREER_IN_USE)", async () => {
+    db.raceProfile.findMany.mockResolvedValue([{ profile: { careerTable: [{ max: 100, careerId: "k" }] } }]);
+
+    await expect(careersResource.remove(actor, { id: "k" } as never)).rejects.toMatchObject({ message: API_ERRORS.CAREER_IN_SPECIES_TABLE, status: 409 });
+    expect(db.career.deleteMany).not.toHaveBeenCalled();
+
+    db.character.count.mockResolvedValue(1);
+    await expect(careersResource.remove(actor, { id: "k" } as never)).rejects.toMatchObject({ message: API_ERRORS.CAREER_IN_USE });
   });
 });

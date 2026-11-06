@@ -11,6 +11,7 @@ import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { careerNameTaken } from "@/lib/server/careers/career-name";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import { profileReferences } from "@/lib/server/races/profile-usage";
 import { toCareerData } from "@/lib/utils/careers/row";
 import { toInputJson } from "@/lib/utils/common/json";
 import type { CareerTierDef } from "@/types/careers";
@@ -49,6 +50,8 @@ export const careersResource = defineResource<Career, z.infer<typeof createCaree
   },
   async remove(actor, existing) {
     if (await careerInUse(actor.campaignId, existing.id)) throw new ContentError(API_ERRORS.CAREER_IN_USE, 409);
+
+    if (await profileReferences(actor.campaignId, { careerId: existing.id })) throw new ContentError(API_ERRORS.CAREER_IN_SPECIES_TABLE, 409);
 
     await prisma.career.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
   },

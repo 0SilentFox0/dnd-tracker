@@ -668,12 +668,25 @@ model Race {
   color                String?
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   units                Unit[]
+  profile              RaceProfile?
   sourceId             String?
   sourceHash           String?
 
   @@index([campaignId, name])
   @@index([campaignId, sourceId])
   @@map("races")
+}
+
+model RaceProfile {
+  raceId     String   @id
+  campaignId String
+  profile    Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  race       Race     @relation(fields: [raceId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("race_profiles")
 }
 
 model GameClass {
