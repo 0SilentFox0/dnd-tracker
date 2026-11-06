@@ -11,7 +11,7 @@ import type { ZodType } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { exampleOf } from "@/lib/constants/import-aliases";
-import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
+import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createCareerSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import { type AnyContentResource, defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
@@ -218,6 +218,7 @@ const CREATE: Record<ImportKind, ZodType> = {
   races: createRaceSchema,
   classes: createClassSchema,
   backgrounds: createBackgroundSchema,
+  careers: createCareerSchema,
   feats: createFeatSchema,
   artifacts: createArtifactSchema,
   "artifact-sets": createArtifactSetSchema,

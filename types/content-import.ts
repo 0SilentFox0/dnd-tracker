@@ -1,4 +1,4 @@
-export type ImportKind = "units" | "spells" | "skills" | "main-skills" | "spell-groups" | "races" | "classes" | "feats" | "backgrounds" | "artifacts" | "artifact-sets";
+export type ImportKind = "units" | "spells" | "skills" | "main-skills" | "spell-groups" | "races" | "classes" | "feats" | "backgrounds" | "careers" | "artifacts" | "artifact-sets";
 
 export type ImportMode = "create" | "update" | "skip";
 

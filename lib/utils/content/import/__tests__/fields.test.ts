@@ -3,7 +3,7 @@ import type { ZodType } from "zod";
 
 import { exampleOf } from "@/lib/constants/import-aliases";
 import type { Locale } from "@/lib/i18n/config";
-import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema, createUnitSchema } from "@/lib/schemas";
+import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createCareerSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema, createUnitSchema } from "@/lib/schemas";
 import { autoMap, IMPORT_KINDS, IMPORT_SPECS, normalizeHeader, transformRow } from "@/lib/utils/content/import";
 import type { ImportKind } from "@/types/content-import";
 
@@ -16,6 +16,7 @@ const CREATE: Record<ImportKind, ZodType> = {
   races: createRaceSchema,
   classes: createClassSchema,
   backgrounds: createBackgroundSchema,
+  careers: createCareerSchema,
   feats: createFeatSchema,
   artifacts: createArtifactSchema,
   "artifact-sets": createArtifactSetSchema,
@@ -64,6 +65,25 @@ describe("IMPORT_SPECS", () => {
 
       expect(parsed.success, JSON.stringify(parsed.error?.issues)).toBe(true);
     }
+  });
+
+  it("careers: колонки tierN_* збираються в чотири рівні; три рівні — помилка схеми", () => {
+    const spec = IMPORT_SPECS.careers;
+
+    const row = (n: number) => ({ name: "Soldier", ...Object.fromEntries(Array.from({ length: n }, (_, i) => [[`tier${i + 1}_name`, `T${i + 1}`], [`tier${i + 1}_characteristics`, "ws; bs"], [`tier${i + 1}_skills`, "athletics; melee"]]).flat()) });
+
+    const convert = (n: number) => transformRow(row(n), autoMap(Object.keys(row(n)), spec.fields), spec.fields);
+
+    const four = convert(4);
+
+    expect(four.issues).toEqual([]);
+
+    const body = spec.toBody?.(four.value, "create");
+
+    expect(body).toMatchObject({ name: "Soldier", tiers: [{ name: "T1", characteristics: ["ws", "bs"], skills: ["athletics", "melee"], talents: [], trappings: [] }, {}, {}, { name: "T4" }] });
+    expect(Object.keys(body ?? {})).not.toContain("tier1_name");
+    expect(createCareerSchema.safeParse(body).success).toBe(true);
+    expect(createCareerSchema.safeParse(spec.toBody?.(convert(3).value, "create")).success).toBe(false);
   });
 
   it("skills: create вкладає групи завжди, update — лише надані", () => {

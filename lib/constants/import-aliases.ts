@@ -3,6 +3,23 @@ import type { ImportKind } from "@/types/content-import";
 
 type PerField<T> = Readonly<Record<string, T>>;
 
+export const CAREER_TIER_COUNT = 4;
+
+export const CAREER_TIER_PARTS = ["name", "status", "characteristics", "skills", "talents", "trappings"] as const;
+
+export type CareerTierPart = (typeof CAREER_TIER_PARTS)[number];
+
+export const careerTierKey = (n: number, part: CareerTierPart) => `tier${n}_${part}`;
+
+const CAREER_PART_WORDS: Record<CareerTierPart, readonly [string, string]> = { name: ["назва", "name"], status: ["статус", "status"], characteristics: ["характеристики", "characteristics"], skills: ["навички", "skills"], talents: ["таланти", "talents"], trappings: ["спорядження", "trappings"] };
+
+const careerTierAliases = () =>
+  Object.fromEntries(
+    Array.from({ length: CAREER_TIER_COUNT }, (_, i) => i + 1).flatMap((n) =>
+      CAREER_TIER_PARTS.map((part) => [careerTierKey(n, part), [`рівень ${n}: ${CAREER_PART_WORDS[part][0]}`, `tier ${n} ${CAREER_PART_WORDS[part][1]}`]] as const),
+    ),
+  );
+
 const NAME = ["назва", "name", "ім'я"];
 
 const ICON = ["іконка", "icon"];
@@ -150,6 +167,12 @@ export const FIELD_ALIASES: Record<ImportKind, PerField<readonly string[]>> = {
     toolProficiencies: ["інструменти (json)", "toolproficiencies", "інструменти", "tools (json)"],
     equipmentText: ["спорядження (видає дм)", "equipmenttext", "спорядження", "equipment (given by the dm)"],
   },
+  careers: {
+    name: NAME,
+    icon: ICON,
+    class: ["клас", "class", "тип", "type"],
+    ...careerTierAliases(),
+  },
   artifacts: {
     name: NAME,
     description: DESCRIPTION,
@@ -182,6 +205,7 @@ export const NUMBER_WORDS: Record<ImportKind, PerField<Readonly<Record<string, n
   classes: {},
   feats: {},
   backgrounds: {},
+  careers: {},
   artifacts: {},
   "artifact-sets": {},
 };
@@ -263,6 +287,7 @@ const NEUTRAL: Examples = {
   },
   feats: { prerequisite: ["{}", '{"level":4}'], choices: ["[]", "[]"] },
   backgrounds: { skillProficiencies: ['["arcana","history"]', '["athletics","intimidation"]'] },
+  careers: Object.fromEntries(Array.from({ length: CAREER_TIER_COUNT }, (_, i) => i + 1).flatMap((n) => [[careerTierKey(n, "name"), [`Tier ${n}`, `Tier ${n}`]], [careerTierKey(n, "characteristics"), ["ws", "bs"]], [careerTierKey(n, "skills"), ["athletics, melee", "perception"]], [careerTierKey(n, "trappings"), ["Sword; Shield", "Dagger"]]])),
   artifacts: { weapon: ['{"damageDice":"1d8","damageType":"slashing","attackType":"melee"}', ""], item: ['{"unique":false}', '{"unique":false,"attunement":true,"charges":{"max":7,"rest":"long"}}'] },
   "artifact-sets": {},
 };
@@ -279,6 +304,7 @@ const LOCALIZED: Record<Locale, Examples> = {
     classes: { name: ["Воїн", "Чарівник"], proficiencies: ['{"armor":["усі обладунки","щити"],"weapons":["прості","бойові"],"tools":[]}', '{"armor":[],"weapons":["кинджали"],"tools":[]}'], caster: ["Не заклинач", "Повний заклинач"] },
     feats: { name: ["Пильний", "Влучний стрілець"], type: ["Походження", "Стиль бою"], repeatable: ["ні", "ні"], description: ["Майстерність до ініціативи", "+2 до дальніх атак"] },
     backgrounds: { name: ["Sage", "Soldier"] },
+    careers: { name: ["Солдат", "Шпигун"], class: ["Воїни", "Мандрівники"] },
     artifacts: { name: ["Меч Дракона", "Кільце захисту"], description: ["Старовинний меч", "+1 до КД"], rarity: ["Рідкісний", "Незвичайний"], slot: ["Зброя", "Кільце"] },
     "artifact-sets": { name: ["Обладунки Дракона", "Регалії Мага"], setBonus: ['{"name":"Драконяча кров","description":"+2 до КД за повний комплект"}', ""] },
   },
@@ -292,6 +318,7 @@ const LOCALIZED: Record<Locale, Examples> = {
     classes: { name: ["Fighter", "Wizard"], proficiencies: ['{"armor":["all armor","shields"],"weapons":["simple","martial"],"tools":[]}', '{"armor":[],"weapons":["daggers"],"tools":[]}'], caster: ["none", "full"] },
     feats: { name: ["Alert", "Sharpshooter"], type: ["origin", "fightingStyle"], repeatable: ["no", "no"], description: ["Proficiency bonus to initiative", "+2 to ranged attacks"] },
     backgrounds: { name: ["Sage", "Soldier"] },
+    careers: { name: ["Soldier", "Spy"], class: ["Warriors", "Rangers"] },
     artifacts: { name: ["Dragon Sword", "Ring of Protection"], description: ["An ancient sword", "+1 AC"], rarity: ["rare", "uncommon"], slot: ["weapon", "ring"] },
     "artifact-sets": { name: ["Dragon Armor", "Mage Regalia"], setBonus: ['{"name":"Dragon Blood","description":"+2 AC for the full set"}', ""] },
   },

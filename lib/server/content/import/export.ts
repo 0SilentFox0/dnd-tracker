@@ -11,6 +11,7 @@ import { NEED } from "@/lib/utils/api/need";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { isWeaponSlot, weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
+import { careerToImportRecord } from "@/lib/utils/careers/import-record";
 import { IMPORT_SPECS } from "@/lib/utils/content/import/fields";
 import { refKindsOf } from "@/lib/utils/content/import/kinds";
 import { recordToCells } from "@/lib/utils/content/import/mapping";
@@ -38,6 +39,7 @@ export const EXPORT_LOADERS: Record<ImportKind, (campaignId: string) => Promise<
   races: async (c) => asRecords((await prisma.race.findMany(query(c))).map((r) => ({ ...r, abilities: raceAbilities(r) }))),
   classes: async (c) => asRecords(await prisma.gameClass.findMany(query(c))),
   backgrounds: async (c) => asRecords(await prisma.background.findMany(query(c))),
+  careers: async (c) => asRecords((await prisma.career.findMany(query(c))).map(careerToImportRecord)),
   feats: async (c) => asRecords((await prisma.feat.findMany(query(c))).map((r) => ({ ...r, abilities: featAbilities(r) }))),
   artifacts: async (c) =>
     asRecords((await prisma.artifact.findMany(query(c))).map((r) => ({ ...r, abilities: artifactAbilities(r), weapon: isWeaponSlot(r.slot) ? weaponStatsFromRow(r) : undefined, armor: r.slot === ArtifactSlot.ARMOR ? (armorStatsFromRow(r) ?? undefined) : undefined, item: itemStatsFromRow(r) ?? undefined }))),

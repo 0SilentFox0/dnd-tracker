@@ -1,6 +1,7 @@
 import { ARTIFACT_SETS_IMPORT } from "./artifact-sets";
 import { ARTIFACTS_IMPORT } from "./artifacts";
 import { BACKGROUNDS_IMPORT } from "./backgrounds";
+import { CAREERS_IMPORT } from "./careers";
 import { CLASSES_IMPORT } from "./classes";
 import { FEATS_IMPORT } from "./feats";
 import { MAIN_SKILLS_IMPORT } from "./main-skills";
@@ -22,6 +23,7 @@ export const IMPORT_SPECS: Record<ImportKind, ImportSpec> = {
   classes: CLASSES_IMPORT,
   feats: FEATS_IMPORT,
   backgrounds: BACKGROUNDS_IMPORT,
+  careers: CAREERS_IMPORT,
   artifacts: ARTIFACTS_IMPORT,
   "artifact-sets": ARTIFACT_SETS_IMPORT,
 };
