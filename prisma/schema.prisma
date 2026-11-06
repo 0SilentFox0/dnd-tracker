@@ -65,6 +65,7 @@ model Campaign {
   races                Race[]
   classes              GameClass[]
   backgrounds          Background[]
+  careers              Career[]
   feats                Feat[]
   scenarioPages        ScenarioPage[]
   skillTrees           SkillTree[]
@@ -749,6 +750,22 @@ model Background {
   @@index([originFeatId])
   @@index([campaignId, sourceId])
   @@map("backgrounds")
+}
+
+model Career {
+  id         String   @id @default(cuid())
+  campaignId String
+  name       String
+  icon       String?
+  class      String?
+  tiers      Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, name])
+  @@index([campaignId])
+  @@map("careers")
 }
 
 model CompendiumSource {

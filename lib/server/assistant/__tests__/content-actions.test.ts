@@ -55,12 +55,12 @@ function fixture() {
 const request = { actionId: "content.units.create", requestId: "request", input: { data: { name: "Гоблін" } } };
 
 describe("content action review policy", () => {
-  it("all12KindsUseExistingResource: existing schemas reject invalid create before intent", async () => {
+  it("allKindsUseExistingResource: existing schemas reject invalid create before intent", async () => {
     const actions = createContentActions({ snapshot: async () => ({}) });
 
     const catalog = createActionCatalog(actions);
 
-    expect(Object.keys(CONTENT_RESOURCES)).toHaveLength(12);
+    expect(Object.keys(CONTENT_RESOURCES)).toHaveLength(13);
     for (const kind of Object.keys(CONTENT_RESOURCES)) {
       const action = catalog.getAction(`content.${kind}.create`);
 

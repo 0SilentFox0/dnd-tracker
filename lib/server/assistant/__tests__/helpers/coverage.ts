@@ -74,6 +74,8 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/artifacts', methods: ['DELETE', 'GET', 'POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/backgrounds/[backgroundId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/backgrounds', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
+  { route: 'campaigns/[id]/careers/[careerId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
+  { route: 'campaigns/[id]/careers', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/ability-action', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/add-participant', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },
   { route: 'campaigns/[id]/battles/[battleId]/attack', methods: ['POST'], task: 10, adapter: 'battles', state: "active" },

@@ -520,5 +520,9 @@
   "advanceLedgerEmpty": "No purchases to undo",
   "advanceLedgerStale": "The last purchase cannot be undone — data was edited manually",
   "characteristicsChanged": "The sheet changed — reload the page",
-  "advanceNotWfrp": "Experience advancement is only available in WFRP"
+  "advanceNotWfrp": "Experience advancement is only available in WFRP",
+  "careerNotFound": "Career not found",
+  "careerInUse": "Characters have this career — remove it from their sheets first",
+  "careerNameTaken": "The career \"{name}\" already exists",
+  "foreignFeat": "The feat does not belong to this campaign"
 }

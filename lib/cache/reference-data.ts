@@ -126,3 +126,11 @@ export async function getCachedBackgrounds(campaignId: string) {
     { tags: [cacheTags.backgrounds(campaignId)], revalidate: REFERENCE_REVALIDATE_SECONDS },
   )();
 }
+
+export async function getCachedCareers(campaignId: string) {
+  return referenceCache(
+    async () => prisma.career.findMany({ where: { campaignId }, orderBy: { name: "asc" } }),
+    [cacheTags.careers(campaignId)],
+    { tags: [cacheTags.careers(campaignId)], revalidate: REFERENCE_REVALIDATE_SECONDS },
+  )();
+}

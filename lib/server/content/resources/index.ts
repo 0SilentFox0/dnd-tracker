@@ -3,6 +3,7 @@ import type { AnyContentResource, ContentKind } from "@/lib/server/content/defin
 import { artifactSetsResource } from "@/lib/server/content/resources/artifact-sets";
 import { artifactsResource } from "@/lib/server/content/resources/artifacts";
 import { backgroundsResource } from "@/lib/server/content/resources/backgrounds";
+import { careersResource } from "@/lib/server/content/resources/careers";
 import { classesResource } from "@/lib/server/content/resources/classes";
 import { featsResource } from "@/lib/server/content/resources/feats";
 import { mainSkillsResource } from "@/lib/server/content/resources/main-skills";
@@ -19,6 +20,7 @@ export const CONTENT_RESOURCES = {
   classes: classesResource,
   feats: featsResource,
   backgrounds: backgroundsResource,
+  careers: careersResource,
   spells: spellsResource,
   "spell-groups": spellGroupsResource,
   "main-skills": mainSkillsResource,
