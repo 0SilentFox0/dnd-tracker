@@ -9,7 +9,7 @@ import { type CharacterTypeValue, type GoalKind } from "@/lib/constants/characte
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { AdvanceBody, AdvanceResult, AwardXpBody, CareerResult, Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterLogEntry, CharacterResources, CharacterSheet, CharacterToken, DraftInput, HitDieResult, ResourcesEditBody, RestBody, RosterHero, SheetRollBody, SheetRollResult } from "@/types/characters";
+import type { AdvanceBody, AdvanceResult, AwardXpBody, CareerResult, Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterLogEntry, CharacterResources, CharacterSheet, CharacterToken, DraftInput, HitDieResult, ResourcesEditBody, RestBody, RosterHero, SheetRollBody, SheetRollResult, WfrpDraftIdentityInput, WfrpDraftInput } from "@/types/characters";
 import type { ChoicesBody } from "@/types/choices";
 import type { ClassLevelUpPick } from "@/types/classes";
 
@@ -113,6 +113,10 @@ export async function deleteAllCharacters(
 export const getCharacterRoster = (campaignId: string) => campaignGet<RosterHero[]>(campaignId, "/characters/roster");
 
 export const createDraft = (campaignId: string, body: DraftInput) => campaignPost<Character>(campaignId, "/characters/draft", body);
+
+export const createWfrpDraft = (campaignId: string, body: WfrpDraftInput) => campaignPost<Character>(campaignId, "/characters/draft", body);
+
+export const updateWfrpDraftIdentity = (campaignId: string, characterId: string, body: WfrpDraftIdentityInput) => campaignPatch<Character>(campaignId, `/characters/${characterId}/draft`, body);
 
 export const updateDraft = (campaignId: string, characterId: string, body: DraftInput) => campaignPatch<Character>(campaignId, `/characters/${characterId}/draft`, body);
 
