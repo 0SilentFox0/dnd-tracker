@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createWfrpDraft } from "./create-wfrp-draft";
 import { draftChoiceFields } from "./draft-choices";
 import { parseDraftBody } from "./draft-class";
 import { draftFields } from "./draft-data";
@@ -22,6 +23,8 @@ export async function createDraft(request: Request, campaignId: string): Promise
   if (access instanceof NextResponse) return access;
 
   const { campaign } = access;
+
+  if (ruleSystemOf(campaign.rules).creation) return createWfrpDraft(request, campaign, access);
 
   if (ruleSystemOf(campaign.rules).characteristics.kind !== "d20") return errorResponse(API_ERRORS.SYSTEM_DRAFTS_UNSUPPORTED, 409);
 

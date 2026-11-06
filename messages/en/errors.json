@@ -531,5 +531,6 @@
   "foreignCareer": "The career does not belong to this campaign",
   "careerInSpeciesTable": "The career is in a species table — remove it there first",
   "featInSpeciesTable": "The feat is in a species table — remove it there first",
-  "speciesProfileNotReady": "This species has no creation profile yet"
+  "speciesProfileNotReady": "This species has no creation profile yet",
+  "wfrpDraftInvalid": "The hero creation choices are invalid"
 }

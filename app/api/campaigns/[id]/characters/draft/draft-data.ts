@@ -10,7 +10,7 @@ const buildDraftGoals = (goals: DraftData["goals"]) =>
   (goals ?? []).map((g) => ({ id: randomUUID(), text: g.text, kind: g.kind, status: GoalStatus.ACTIVE, author: GoalAuthor.PLAYER }));
 
 /** Keeps ids of unchanged player goals and every DM-authored goal; only new texts get fresh ids. */
-function mergeDraftGoals(stored: unknown, incoming: DraftData["goals"]): CharacterGoal[] {
+export function mergeDraftGoals(stored: unknown, incoming: DraftData["goals"]): CharacterGoal[] {
   const existing = Array.isArray(stored) ? (stored as CharacterGoal[]) : [];
 
   const dmGoals = existing.filter((g) => g.author === GoalAuthor.DM);

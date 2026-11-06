@@ -45,6 +45,7 @@ export const API_ERRORS = {
   FOREIGN_CAREER: "errors.foreignCareer",
   CAREER_IN_SPECIES_TABLE: "errors.careerInSpeciesTable",
   FEAT_IN_SPECIES_TABLE: "errors.featInSpeciesTable",
+  WFRP_DRAFT_INVALID: "errors.wfrpDraftInvalid",
   SPECIES_PROFILE_NOT_READY: "errors.speciesProfileNotReady",
   BACKGROUND_IN_USE: "errors.backgroundInUse",
   BACKGROUND_FEAT_INVALID: "errors.backgroundFeatInvalid",

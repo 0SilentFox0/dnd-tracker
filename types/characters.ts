@@ -306,6 +306,21 @@ export interface DraftInput {
   choices?: Partial<BackgroundSelection> & { raceChoices?: Picks; feats?: CharacterFeat[]; classChoices?: Picks };
 }
 
+export interface WfrpDraftIdentityInput {
+  name: string;
+  alignment?: string;
+  background?: string;
+  avatar?: string;
+  goals?: Array<{ text: string; kind: GoalKind }>;
+}
+
+export interface WfrpDraftInput extends WfrpDraftIdentityInput {
+  speciesId: string;
+  career: { mode: "rolled" | "choice" | "free"; careerId: string };
+  stats: { mode: "rolled"; rolls: number[] } | { mode: "rearranged"; rolls: number[]; arranged: number[] } | { mode: "free"; points: number[] };
+  talents: string[];
+}
+
 export type RestKindValue = "short" | "long";
 
 export interface CharacterResources {
