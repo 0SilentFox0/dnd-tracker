@@ -19,7 +19,13 @@ const TALENT_RANK_CAP = 20;
 
 const inRange = (values: number[], min: number, max: number) => values.every((v) => Number.isInteger(v) && v >= min && v <= max);
 
-const sameMultiset = (a: number[], b: number[]) => a.length === b.length && [...a].sort((x, y) => x - y).every((v, i) => v === [...b].sort((x, y) => x - y)[i]);
+const sameMultiset = (a: number[], b: number[]) => {
+  if (a.length !== b.length) return false;
+
+  const sortedB = [...b].sort((x, y) => x - y);
+
+  return [...a].sort((x, y) => x - y).every((v, i) => v === sortedB[i]);
+};
 
 function statValues(stats: CreationPicks["stats"], rules: AdvancementRules, errors: string[]): number[] | null {
   const count = CHARACTERISTIC_KEYS.length;

@@ -11,9 +11,12 @@ const tableOk = <R extends { max: number }>(rows: R[]) => rows.every((r, i) => i
 
 const endsAt100 = <R extends { max: number }>(rows: R[]) => rows.length === 0 || rows[rows.length - 1].max === 100;
 
-const featTable = z.array(z.strictObject({ max, featId: id })).max(100).refine(tableOk, { message: "creation.tableAscending" }).refine(endsAt100, { message: "creation.tableEnd" }).default([]);
+const rollTableOf = <S extends z.ZodType<{ max: number }>>(row: S) =>
+  z.array(row).max(100).refine(tableOk, { message: "creation.tableAscending" }).refine(endsAt100, { message: "creation.tableEnd" }).default([]);
 
-const careerTable = z.array(z.strictObject({ max, careerId: id })).max(100).refine(tableOk, { message: "creation.tableAscending" }).refine(endsAt100, { message: "creation.tableEnd" }).default([]);
+const featTable = rollTableOf(z.strictObject({ max, featId: id }));
+
+const careerTable = rollTableOf(z.strictObject({ max, careerId: id }));
 
 const mod = z.number().int().min(-20).max(20).optional();
 
@@ -25,7 +28,7 @@ export const SpeciesProfileSchema = z.strictObject({
   talents: z.array(z.string().min(1).max(100)).max(20).default([]),
   randomTalentCount: z.number().int().min(0).max(5).default(0),
   randomTalents: featTable,
-  careerTable: careerTable,
+  careerTable,
 });
 
 export function parseProfile(raw: unknown): SpeciesProfile {
