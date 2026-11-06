@@ -109,6 +109,8 @@ export interface MitigateCtx {
   attackRoll?: number;
   qualities?: QualityRef[];
   flaws?: QualityRef[];
+  /** WFRP weapon without the Strength bonus */
+  noSb?: boolean;
   rng: Rng;
   rules: Ruleset;
 }

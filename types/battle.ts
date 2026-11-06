@@ -155,7 +155,7 @@ export interface BattleAttack {
   /** Категорія зброї 5e (з опису предмета); відсутня — вважається володінням */
   weaponCategory?: "simple" | "martial";
   /** WFRP: weapon qualities from the equipped item's system stats */
-  wfrp?: { qualities: QualityRef[]; flaws: QualityRef[]; ammoCapacity?: number; reload?: number };
+  wfrp?: { qualities: QualityRef[]; flaws: QualityRef[]; ammoCapacity?: number; reload?: number; noSb?: boolean; reachCells?: number; blastRadius?: number };
 }
 
 /**

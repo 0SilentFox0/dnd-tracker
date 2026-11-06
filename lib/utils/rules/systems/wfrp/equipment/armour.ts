@@ -8,6 +8,8 @@ const ARMOUR_SLOTS = new Set(["armor", "helmet", "boots"]);
 
 const SHIELD_SLOTS = new Set(["shield", "weapon", "range_weapon"]);
 
+const WEAPON_SLOTS = new Set(["weapon", "mainHand", "offHand", "range_weapon"]);
+
 const SHIELD_LOCATIONS: readonly HitLocation[] = ["head", "arm", "body"];
 
 export type EquippedStatsRow = { slot: string; systemStats: unknown };
@@ -21,6 +23,12 @@ export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation
 
   let allFlexible = true;
 
+  const twoHanded = equipped.some((row) => {
+    const stats = WEAPON_SLOTS.has(row.slot) ? parseWfrpStats(row.systemStats) : null;
+
+    return stats?.type === "weapon" && stats.twoHanded;
+  });
+
   for (const row of equipped) {
     const stats = parseWfrpStats(row.systemStats);
 
@@ -33,7 +41,7 @@ export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation
       if (!hasQuality(stats.qualities, "flexible")) allFlexible = false;
     }
 
-    if (SHIELD_SLOTS.has(row.slot) && stats.type !== "armour") {
+    if (!twoHanded && SHIELD_SLOTS.has(row.slot) && stats.type !== "armour") {
       const x = qualityValue(stats.qualities, "shield");
 
       if (x) for (const l of SHIELD_LOCATIONS) ap[l] += x;

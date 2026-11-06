@@ -18,6 +18,8 @@ export function attackRangeCells(range: string | undefined, rules: Ruleset): num
 }
 
 export function meleeReachCells(p: BattleParticipant, attack: BattleAttack): number {
+  if (attack.wfrp?.reachCells) return attack.wfrp.reachCells;
+
   return isFiveE(p) && hasTrait(attack, "reach") ? 2 : 1;
 }
 
@@ -101,7 +103,9 @@ export function attackReachError(
     return placed.map((t) => modeMeleeBlockedText(map, attacker, t)).find(Boolean) ?? null;
   }
 
-  const engaged = !fiveE && participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isOnMap(p) && distanceTo(p) <= 1 && modeEngages(map, attacker, p));
+  const pistol = attack.wfrp?.qualities.some((q) => q.key === "pistol");
+
+  const engaged = !fiveE && !pistol && participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isOnMap(p) && distanceTo(p) <= 1 && modeEngages(map, attacker, p));
 
   if (engaged) return textRef(REJECT.enemyNearNoShoot);
 

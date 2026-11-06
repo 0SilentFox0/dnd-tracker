@@ -11,6 +11,8 @@ import {
   getModifierValue,
   getOptionalModifierValue,
 } from "./artifact-utils";
+import { type EquippedArtifactRow } from "./extract-artifacts";
+import { extractWfrpAttacks } from "./extract-wfrp-attacks";
 
 import { WEAPON_PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
@@ -18,6 +20,7 @@ import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
 import { weaponCategoryFromText } from "@/lib/utils/artifacts/weapon-slot";
 import { resolveItemRow } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import type { RuleSystemEquipment } from "@/lib/utils/rules/systems/types";
 
 // 5e: безоружний удар = 1 + Сил (плоска «1»)
 // Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
@@ -39,9 +42,9 @@ export function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
   artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   names: Ruleset["defaultAttacks"] = DEFAULT_RULES.defaultAttacks,
-  opts: { fiveE?: boolean; items?: { enabled: boolean; attuned: readonly string[] } } = {},
+  opts: { fiveE?: boolean; items?: { enabled: boolean; attuned: readonly string[] }; equipment?: { hooks: RuleSystemEquipment; rows: EquippedArtifactRow[] } } = {},
 ): ExtractedAttack[] {
-  const weapons = extractWeaponAttacks(character, artifactsById, !!opts.fiveE, names, opts.items);
+  const weapons = opts.equipment ? extractWfrpAttacks(opts.equipment.rows, opts.equipment.hooks) : extractWeaponAttacks(character, artifactsById, !!opts.fiveE, names, opts.items);
 
   return [...weapons, ...defaultAttacks(names, !!opts.fiveE).filter((d) => !weapons.some((w) => w.type === d.type))];
 }

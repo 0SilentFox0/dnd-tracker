@@ -29,7 +29,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     { attackRoll: ctx.attackRoll ?? 0, netSl: ctx.netSl, crit: ctx.crit, sb, ap },
   );
 
-  const base = computeWfrpDamage({ weapon: ctx.weapon, sb, netSl: ctx.netSl, tb: target.abilities.wfrp?.tb ?? 0, ap, extra: qualitySteps, minDamage: effect.minDamage });
+  const base = computeWfrpDamage({ weapon: ctx.weapon, sb: ctx.noSb ? 0 : sb, netSl: ctx.netSl, tb: target.abilities.wfrp?.tb ?? 0, ap, extra: qualitySteps, minDamage: effect.minDamage });
 
   const steps = base.steps.filter((s) => s.key === "weapon" || s.value !== 0).map((s) => step(s.key, s.value));
 

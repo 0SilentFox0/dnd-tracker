@@ -4,6 +4,7 @@ import type { AttackType } from "@/lib/constants/battle";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BackgroundData } from "@/types/backgrounds";
+import type { BattleAttack } from "@/types/battle";
 import type { FeatData } from "@/types/choices";
 import type { GameClassData } from "@/types/classes";
 
@@ -29,6 +30,8 @@ export type ExtractedAttack = {
   hand?: "off";
   damageBonus?: number;
   weaponCategory?: "simple" | "martial";
+  targetType?: "target" | "aoe";
+  wfrp?: BattleAttack["wfrp"];
 };
 
 export type CharacterFromPrisma = Prisma.CharacterGetPayload<{
