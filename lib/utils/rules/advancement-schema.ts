@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export const FREE_POINT_MIN = 4;
+
+export const FREE_POINT_MAX = 18;
+
+const CHARACTERISTIC_COUNT = 10;
+
+const FREE_BUDGET_MIN = FREE_POINT_MIN * CHARACTERISTIC_COUNT;
+
+const FREE_BUDGET_MAX = FREE_POINT_MAX * CHARACTERISTIC_COUNT;
+
 const BracketSchema = z.strictObject({ upTo: z.number().int().min(1).max(1000), cost: z.number().int().min(0).max(100000) });
 
 const TrackSchema = z
@@ -17,7 +27,7 @@ const bonus = (n: number) => z.number().int().min(0).max(1000).default(n);
 const CreationRulesSchema = z.strictObject({
   careerBonus: z.strictObject({ rolled: bonus(50), choice: bonus(25), free: bonus(0) }).prefault({}),
   statBonus: z.strictObject({ rolled: bonus(50), rearranged: bonus(25), free: bonus(0) }).prefault({}),
-  freeBudget: bonus(100),
+  freeBudget: z.number().int().min(FREE_BUDGET_MIN).max(FREE_BUDGET_MAX).default(100),
 });
 
 export const AdvancementRulesSchema = z.strictObject({

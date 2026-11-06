@@ -29,6 +29,8 @@ interface WfrpDraftFormProps {
 export function WfrpDraftForm({ campaignId, characterId, initialIdentity }: WfrpDraftFormProps) {
   const t = useTranslations("wfrpCreation.wizard");
 
+  const te = useTranslations("wfrpCreation.errors");
+
   const tc = useTranslations("common");
 
   const form = useWfrpDraftForm({ campaignId, characterId, initialIdentity });
@@ -63,6 +65,13 @@ export function WfrpDraftForm({ campaignId, characterId, initialIdentity }: Wfrp
               <span className="sr-only">{t("skipHint")}</span>
             </button>
           )}
+          {step.id !== "identity" && form.stepErrors(step.id).length > 0 && (
+            <ul role="alert" className="mt-4 list-disc pl-5 text-sm text-destructive">
+              {form.stepErrors(step.id).map((code) => (
+                <li key={code}>{te(code as never)}</li>
+              ))}
+            </ul>
+          )}
           <div className="mt-4">
             {step.id === "species" && <SpeciesStep form={form} />}
             {step.id === "career" && <CareerStep form={form} />}
@@ -86,7 +95,7 @@ export function WfrpDraftForm({ campaignId, characterId, initialIdentity }: Wfrp
               {submit.isPending ? t("submitting") : characterId ? t("submitEdit") : t("submit")}
             </Button>
           ) : (
-            <Button type="button" className="min-h-11" onClick={step.next} disabled={!step.canNext || rolling}>
+            !step.hideNext && <Button type="button" className="min-h-11" onClick={step.next} disabled={!step.canNext || rolling}>
               {t("next")}
             </Button>
           )}

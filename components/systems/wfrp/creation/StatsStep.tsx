@@ -8,11 +8,8 @@ import type { WfrpDraftFormState } from "./types";
 
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement-schema";
 import { CHARACTERISTIC_KEYS, STAT_FLOOR } from "@/lib/utils/rules/systems";
-
-const POINT_MIN = 4;
-
-const POINT_MAX = 18;
 
 export function StatsStep({ form }: { form: WfrpDraftFormState }) {
   const t = useTranslations("wfrpCreation.stats");
@@ -37,10 +34,14 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
       <ModeTabs label={t("modeLabel")} value={mode} options={modes} onChange={setMode} />
       {mode !== "free" && (
         <>
-          <Button type="button" className="min-h-11 w-full sm:w-auto" onClick={roll}>
-            {rolls.length ? t("reroll") : t("roll")}
-          </Button>
-          {rolls.length === 0 && <p className="text-sm text-hud-muted">{t("rollFirst")}</p>}
+          {rolls.length === 0 && (
+            <>
+              <Button type="button" className="min-h-11 w-full sm:w-auto" onClick={roll}>
+                {t("roll")}
+              </Button>
+              <p className="text-sm text-hud-muted">{t("rollFirst")}</p>
+            </>
+          )}
           {mode === "rearranged" && rolls.length > 0 && <p className="text-sm text-hud-muted">{t("swapHint")}</p>}
         </>
       )}
@@ -55,7 +56,7 @@ export function StatsStep({ form }: { form: WfrpDraftFormState }) {
             <li key={key} className="flex min-h-11 items-center gap-2 rounded-lg border border-hud-line px-3 py-1">
               <span className="min-w-0 flex-1 text-sm">{tg(`${key}.label`)}</span>
               {mode === "free" ? (
-                <BoundedNumberInput aria-label={t("value", { characteristic: tg(`${key}.label`) })} className="min-h-11 w-16 text-center" value={points[i]} min={POINT_MIN} max={POINT_MAX} onCommit={(v) => setPoint(i, v)} />
+                <BoundedNumberInput aria-label={t("value", { characteristic: tg(`${key}.label`) })} className="min-h-11 w-16 text-center" value={points[i]} min={FREE_POINT_MIN} max={FREE_POINT_MAX} onCommit={(v) => setPoint(i, v)} onValueChange={(v) => setPoint(i, v)} />
               ) : (
                 <b data-testid={`stat-${key}`} className="w-8 text-center tabular-nums">
                   {form.shown(`stat${i}`, values[i])}

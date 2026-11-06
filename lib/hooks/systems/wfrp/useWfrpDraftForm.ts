@@ -27,6 +27,8 @@ const FULL_STEPS: WfrpDraftStepId[] = ["species", "career", "stats", "talents", 
 
 const STAT_COUNT = CHARACTERISTIC_KEYS.length;
 
+const VISIBLE_STEP_ERRORS = new Set(["CAREER_UNKNOWN", "FEAT_UNKNOWN", "PROFILE_NOT_READY"]);
+
 const STEP_ERRORS: Record<WfrpDraftStepId, (code: string) => boolean> = {
   species: (c) => c === "PROFILE_NOT_READY",
   career: (c) => c.startsWith("CAREER_"),
@@ -69,7 +71,7 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
 
   const [speciesId, setSpeciesId] = useState<string>();
 
-  const [careerMode, setCareerMode] = useState<CareerMode>("rolled");
+  const [careerMode, setCareerModeState] = useState<CareerMode>("rolled");
 
   const [careerId, setCareerId] = useState<string>();
 
@@ -132,34 +134,50 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
 
   const valid: Record<WfrpDraftStepId, boolean> = {
     species: !!profile,
-    career: !!careerId && errorsFor("career").length === 0 && (careerMode !== "rolled" || careerRolls.some((r) => r.careerId === careerId)),
+    career: !!careerId && errorsFor("career").length === 0 && careerPickValid(careerMode, careerId, careerRolls),
     stats: !!preview && errorsFor("stats").length === 0,
     talents: !!preview && errorsFor("talents").length === 0 && rolledTalents.length === talentCount,
     identity: identity.name.trim().length > 0 && (identityOnly || (!!preview && preview.ok)),
   };
 
+  const stepErrors = (id: WfrpDraftStepId) => errorsFor(id).filter((c) => VISIBLE_STEP_ERRORS.has(c) && (c !== "CAREER_UNKNOWN" || !!careerId));
+
   const rollAll = useCallback(() => (profile && creation ? creation.rollCreation(rng, profile) : undefined), [creation, profile, rng]);
 
   const selectSpecies = useCallback((raceId: string) => {
+    if (raceId === speciesId) return;
+
     setSpeciesId(raceId);
     setCareerId(undefined);
     setCareerRolls([]);
     setStatRolls([]);
     setArranged([]);
     setRolledTalents([]);
-  }, []);
+  }, [speciesId]);
+
+  const setCareerMode = useCallback(
+    (mode: CareerMode) => {
+      setCareerModeState(mode);
+      setCareerId((prev) => (mode === "rolled" ? careerRolls[0]?.careerId : mode === "choice" ? (careerRolls.some((r) => r.careerId === prev) ? prev : undefined) : prev));
+    },
+    [careerRolls],
+  );
 
   const rollCareer = useCallback(() => {
+    if (careerRolls.length) return;
+
     const rolled = rollAll();
 
     if (!rolled) return;
 
     setCareerRolls(rolled.careerRolls);
-    setCareerId(undefined);
+    setCareerId(careerMode === "rolled" ? rolled.careerRolls[0]?.careerId : undefined);
     reveal.start(rolled.careerRolls.map((r, i) => ({ key: `career${i}`, pool: () => careerName((profile?.careerTable[Math.floor(rng() * profile.careerTable.length)] ?? r).careerId), final: careerName(r.careerId) })));
-  }, [rollAll, reveal, careerName, profile, rng]);
+  }, [careerRolls.length, careerMode, rollAll, reveal, careerName, profile, rng]);
 
   const rollStats = useCallback(() => {
+    if (statRolls.length) return;
+
     const rolled = rollAll();
 
     if (!rolled) return;
@@ -167,29 +185,22 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
     setStatRolls(rolled.statRolls);
     setArranged(rolled.statRolls);
     reveal.start(rolled.statRolls.map((v, i) => ({ key: `stat${i}`, pool: () => 2 + Math.floor(rng() * 19), final: v })));
-  }, [rollAll, reveal, rng]);
+  }, [statRolls.length, rollAll, reveal, rng]);
 
   const swap = useCallback((i: number, j: number) => setArranged((prev) => prev.map((v, k) => (k === i ? prev[j] : k === j ? prev[i] : v))), []);
 
   const setPoint = useCallback((i: number, v: number) => setPoints((prev) => prev.map((p, k) => (k === i ? v : p))), []);
 
   const rollTalents = useCallback(() => {
+    if (rolledTalents.length) return;
+
     const rolled = rollAll();
 
     if (!rolled) return;
 
     setRolledTalents(rolled.randomTalents);
     reveal.start(rolled.randomTalents.map((f, i) => ({ key: `talent${i}`, pool: () => featName((profile?.randomTalents[Math.floor(rng() * profile.randomTalents.length)] ?? { featId: f }).featId), final: featName(f) })));
-  }, [rollAll, reveal, featName, profile, rng]);
-
-  const rerollTalent = useCallback(
-    (i: number) => {
-      const next = rollAll()?.randomTalents[0];
-
-      if (next) setRolledTalents((prev) => prev.map((f, k) => (k === i ? next : f)));
-    },
-    [rollAll],
-  );
+  }, [rolledTalents.length, rollAll, reveal, featName, profile, rng]);
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -206,21 +217,24 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
   });
 
   return {
-    step: { id: stepId, index, total: steps.length, canNext: valid[stepId], next: () => setIndex((i) => Math.min(i + 1, steps.length - 1)), back: () => setIndex((i) => Math.max(i - 1, 0)) },
+    step: { id: stepId, index, total: steps.length, canNext: valid[stepId], hideNext: stepId === "species" && (races.isPending || profiles.isPending || species.length === 0), next: () => setIndex((i) => Math.min(i + 1, steps.length - 1)), back: () => setIndex((i) => Math.max(i - 1, 0)) },
     species: { data: species, selected: speciesId, select: selectSpecies, loading: races.isPending || profiles.isPending },
     career: { mode: careerMode, setMode: setCareerMode, rolls: careerRolls, roll: rollCareer, careerId, pick: setCareerId, table: profile?.careerTable ?? [], all: careers.data ?? [] },
     stats: { mode: statsMode, setMode: setStatsMode, rolls: statRolls, roll: rollStats, arranged, swap, points, setPoint, budget: rules?.creation.freeBudget ?? 0 },
-    talents: { fixed: profile?.talents ?? [], count: talentCount, rolled: rolledTalents, roll: rollTalents, reroll: rerollTalent, names: featName },
+    talents: { fixed: profile?.talents ?? [], count: talentCount, rolled: rolledTalents, roll: rollTalents, names: featName },
     careerName,
     profile,
     xp: rules?.creation,
     shown: (key: string, final: string | number) => (reveal.rolling && !reveal.settled.has(key) && key in reveal.display ? reveal.display[key] ?? final : final),
     preview,
+    stepErrors,
     identity: { values: identity, set: (patch: Partial<WfrpDraftIdentityInput>) => setIdentity((prev) => ({ ...prev, ...patch })) },
     reveal,
     submit: { run: () => mutation.mutate(), isPending: mutation.isPending, error: mutation.error, canRun: valid.identity },
   };
 }
+
+const careerPickValid = (mode: CareerMode, careerId: string, rolls: CreationRolls["careerRolls"]) => (mode === "rolled" ? careerId === rolls[0]?.careerId : mode === "choice" ? rolls.some((r) => r.careerId === careerId) : true);
 
 const cleanIdentity = ({ name, alignment, background, avatar, goals }: WfrpDraftIdentityInput): WfrpDraftIdentityInput => ({
   name: name.trim(),

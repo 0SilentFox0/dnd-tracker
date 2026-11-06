@@ -3,6 +3,8 @@ import type { AdvancementRules } from "../advancement/rules";
 import { CHARACTERISTIC_KEYS, type Characteristics, DEFAULT_CHARACTERISTICS } from "../characteristics/keys";
 import { isUsableProfile, type SpeciesProfile, STAT_FLOOR } from "./profile";
 
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement-schema";
+
 export type CreationPicks = {
   career: { mode: "rolled" | "choice" | "free"; careerId: string };
   stats: { mode: "rolled"; rolls: number[] } | { mode: "rearranged"; rolls: number[]; arranged: number[] } | { mode: "free"; points: number[] };
@@ -29,7 +31,7 @@ function statValues(stats: CreationPicks["stats"], rules: AdvancementRules, erro
       return null;
     }
 
-    if (!inRange(stats.points, 4, 18)) errors.push("POINTS_RANGE");
+    if (!inRange(stats.points, FREE_POINT_MIN, FREE_POINT_MAX)) errors.push("POINTS_RANGE");
 
     if (stats.points.reduce((a, b) => a + b, 0) !== rules.creation.freeBudget) errors.push("POINTS_BUDGET");
 
@@ -60,9 +62,8 @@ export function planDraft(picks: CreationPicks, ctx: CreationCtx): PlanDraftResu
 
   const { career, stats } = picks;
 
-  if (career.mode === "free" ? !ctx.careerIds.has(career.careerId) : !profile.careerTable.some((r) => r.careerId === career.careerId)) {
-    errors.push(career.mode === "free" ? "CAREER_UNKNOWN" : "CAREER_NOT_IN_TABLE");
-  }
+  if (!ctx.careerIds.has(career.careerId)) errors.push("CAREER_UNKNOWN");
+  else if (career.mode !== "free" && !profile.careerTable.some((r) => r.careerId === career.careerId)) errors.push("CAREER_NOT_IN_TABLE");
 
   const values = statValues(stats, rules, errors);
 

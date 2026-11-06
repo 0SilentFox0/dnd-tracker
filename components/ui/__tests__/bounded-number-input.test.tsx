@@ -34,6 +34,18 @@ describe("BoundedNumberInput", () => {
     expect(input().value).toBe("4");
   });
 
+  it("onValueChange спрацьовує живо лише для коректного значення в межах", () => {
+    const onValueChange = vi.fn();
+
+    render(<BoundedNumberInput aria-label="n" value={12} min={4} max={60} onCommit={() => {}} onValueChange={onValueChange} />);
+    fireEvent.change(input(), { target: { value: "" } });
+    fireEvent.change(input(), { target: { value: "2" } });
+    fireEvent.change(input(), { target: { value: "99" } });
+    expect(onValueChange).not.toHaveBeenCalled();
+    fireEvent.change(input(), { target: { value: "15" } });
+    expect(onValueChange).toHaveBeenCalledWith(15);
+  });
+
   it("порожнє чи нечислове на blur — повертає останнє значення без запису", () => {
     const onCommit = vi.fn();
 

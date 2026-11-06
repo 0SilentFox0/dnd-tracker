@@ -44,18 +44,15 @@ export async function createWfrpDraft(request: Request, campaign: Campaign, acce
 
   if (race instanceof NextResponse) return race;
 
-  const [stored, careers, feats, avatar] = await Promise.all([
+  const [stored, careers, feats] = await Promise.all([
     prisma.raceProfile.findUnique({ where: { raceId: data.speciesId }, select: { profile: true } }),
     prisma.career.findMany({ where: { campaignId }, select: { id: true } }),
     prisma.feat.findMany({ where: { campaignId }, select: { id: true } }),
-    resolveAvatarForPersistence(data.avatar, { campaignId }),
   ]);
 
   const profile = parseProfile(stored?.profile);
 
   if (!creation.isUsableProfile(profile)) return errorResponse(API_ERRORS.SPECIES_PROFILE_NOT_READY, 422);
-
-  if (!avatar.ok) return errorResponse(avatar.message, 400, undefined, avatar.params);
 
   const plan = creation.planDraft(
     { career: data.career, stats: data.stats, talents: data.talents },
@@ -63,6 +60,10 @@ export async function createWfrpDraft(request: Request, campaign: Campaign, acce
   );
 
   if (!plan.ok) return errorResponse(API_ERRORS.WFRP_DRAFT_INVALID, 400, plan.errors);
+
+  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
+
+  if (!avatar.ok) return errorResponse(avatar.message, 400, undefined, avatar.params);
 
   const result = await prisma.$transaction(async (tx) => {
     await lockPlayerDrafts(tx, campaignId, access.userId);

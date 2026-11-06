@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { saveRaceProfile } from "@/lib/server/races/race-profile";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
@@ -19,7 +21,7 @@ const put = async (body: unknown) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm" } as never);
+  vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm", campaign: { rules: WFRP_RULES } } as never);
 });
 
 describe("PUT /races/[raceId]/profile", () => {
@@ -27,6 +29,13 @@ describe("PUT /races/[raceId]/profile", () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: API_ERRORS.FORBIDDEN }, { status: 403 }));
 
     expect((await put(valid)).status).toBe(403);
+    expect(saveRaceProfile).not.toHaveBeenCalled();
+  });
+
+  it("409 when the rule system has no creation", async () => {
+    vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm", campaign: { rules: DEFAULT_RULES } } as never);
+
+    expect((await put(valid)).status).toBe(409);
     expect(saveRaceProfile).not.toHaveBeenCalled();
   });
 

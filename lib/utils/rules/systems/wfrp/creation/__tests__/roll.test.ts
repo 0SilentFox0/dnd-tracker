@@ -23,6 +23,17 @@ describe("rollCreation", () => {
     expect(r.randomTalents.every((f) => ["x", "y"].includes(f))).toBe(true);
   });
 
+  it("rerolls duplicate random talents and fixed ones while distinct feats remain", () => {
+    const wide = parseProfile({ talents: ["x"], careerTable: [{ max: 100, careerId: "a" }], randomTalentCount: 2, randomTalents: [{ max: 34, featId: "x" }, { max: 67, featId: "y" }, { max: 100, featId: "z" }] });
+
+    for (let seed = 1; seed <= 40; seed++) {
+      const talents = rollCreation(mulberry32(seed), wide).randomTalents;
+
+      expect(new Set(talents).size).toBe(2);
+      expect(talents).not.toContain("x");
+    }
+  });
+
   it("is deterministic per seed", () => {
     expect(rollCreation(mulberry32(42), profile)).toEqual(rollCreation(mulberry32(42), profile));
   });

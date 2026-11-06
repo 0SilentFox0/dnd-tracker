@@ -77,11 +77,82 @@ describe("useWfrpDraftForm", () => {
     act(() => result.current.career.roll());
 
     expect(result.current.career.rolls).toHaveLength(2);
+    expect(result.current.step.canNext).toBe(true);
+
+    act(() => result.current.career.pick("zzz"));
+
+    expect(result.current.step.canNext).toBe(false);
+  });
+
+  it("rolled career is the first roll, auto-picked, and cannot be rerolled", () => {
+    const { result } = setup();
+
+    act(() => result.current.species.select("r1"));
+    act(() => result.current.step.next());
+    act(() => result.current.career.roll());
+
+    const rolls = result.current.career.rolls;
+
+    expect(result.current.career.careerId).toBe(rolls[0].careerId);
+    expect(result.current.step.canNext).toBe(true);
+
+    act(() => result.current.career.pick("zzz"));
     expect(result.current.step.canNext).toBe(false);
 
-    act(() => result.current.career.pick(result.current.career.rolls[0].careerId));
+    act(() => result.current.career.roll());
+    expect(result.current.career.rolls).toEqual(rolls);
+  });
 
+  it("choice mode picks only among the two rolls and mode switches fix the pick", () => {
+    const { result } = setup();
+
+    act(() => result.current.species.select("r1"));
+    act(() => result.current.career.roll());
+
+    const rolls = result.current.career.rolls;
+
+    act(() => result.current.step.next());
+    act(() => result.current.career.setMode("choice"));
+    expect(result.current.career.careerId).toBe(rolls[0].careerId);
+
+    act(() => result.current.career.setMode("free"));
+    act(() => result.current.career.pick("zzz"));
+    act(() => result.current.career.setMode("choice"));
+    expect(result.current.career.careerId).toBeUndefined();
+
+    act(() => result.current.career.pick(rolls[1].careerId));
     expect(result.current.step.canNext).toBe(true);
+
+    act(() => result.current.career.setMode("rolled"));
+    expect(result.current.career.careerId).toBe(rolls[0].careerId);
+  });
+
+  it("stats and talents roll once; re-selecting the same species keeps the rolls", () => {
+    const { result } = setup();
+
+    act(() => result.current.species.select("r1"));
+    act(() => result.current.stats.roll());
+    act(() => result.current.talents.roll());
+
+    const { rolls } = result.current.stats;
+
+    const { rolled } = result.current.talents;
+
+    act(() => result.current.stats.roll());
+    act(() => result.current.talents.roll());
+    act(() => result.current.stats.setMode("free"));
+    act(() => result.current.stats.setMode("rolled"));
+    act(() => result.current.species.select("r1"));
+
+    expect(result.current.stats.rolls).toEqual(rolls);
+    expect(result.current.talents.rolled).toEqual(rolled);
+  });
+
+  it("hides Next on the species step without usable species and explains unknown ids", () => {
+    const { result } = setup();
+
+    expect(result.current.step.hideNext).toBe(false);
+    expect(result.current.stepErrors("career")).toEqual([]);
   });
 
   it("rolls stats deterministically and rearranging changes the experience bonus", () => {

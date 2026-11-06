@@ -89,8 +89,10 @@ describe("planDraft", () => {
 
   it("career errors", () => {
     expect(errorsOf({ ...rolled, career: { mode: "choice", careerId: "c3" } })).toEqual(["CAREER_NOT_IN_TABLE"]);
-    expect(errorsOf({ ...rolled, career: { mode: "rolled", careerId: "zzz" } })).toEqual(["CAREER_NOT_IN_TABLE"]);
+    expect(errorsOf({ ...rolled, career: { mode: "rolled", careerId: "c3" } })).toEqual(["CAREER_NOT_IN_TABLE"]);
     expect(errorsOf({ ...rolled, career: { mode: "free", careerId: "zzz" } })).toEqual(["CAREER_UNKNOWN"]);
+    expect(errorsOf(rolled, { ...ctx, careerIds: new Set(["c2"]) })).toEqual(["CAREER_UNKNOWN"]);
+    expect(errorsOf({ ...rolled, career: { mode: "choice", careerId: "c1" } }, { ...ctx, careerIds: new Set(["c2"]) })).toEqual(["CAREER_UNKNOWN"]);
   });
 
   it("stat errors", () => {

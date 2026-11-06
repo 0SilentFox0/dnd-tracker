@@ -38,8 +38,9 @@
     },
     "bonus": "+{xp} experience",
     "roll": "Roll careers",
-    "reroll": "Roll again",
     "rollFirst": "Roll the dice to get two careers to choose from.",
+    "rollFirstRolled": "Roll the dice to get your career; it cannot be changed.",
+    "rolledFinal": "The roll is final: no rerolls.",
     "rolledAt": "Roll {roll}",
     "pickLabel": "Career",
     "pickPlaceholder": "Pick a career",
@@ -55,7 +56,6 @@
     },
     "bonus": "+{xp} experience",
     "roll": "Roll characteristics",
-    "reroll": "Roll again",
     "rollFirst": "Roll 2d10 for each characteristic.",
     "up": "Move up",
     "down": "Move down",
@@ -74,7 +74,6 @@
     "random": "Random talents ({count})",
     "noRandom": "This species has no random talents.",
     "roll": "Roll talents",
-    "reroll": "Roll again",
     "rollFirst": "Roll the dice for random talents."
   },
   "identity": {

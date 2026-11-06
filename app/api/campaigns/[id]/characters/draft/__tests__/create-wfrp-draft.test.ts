@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
@@ -89,6 +90,16 @@ describe("createWfrpDraft", () => {
     expect(res.status).toBe(400);
     expect((await res.json()).issues).toContain("CAREER_NOT_IN_TABLE");
     expect(prisma.character.create).not.toHaveBeenCalled();
+  });
+
+  it("rolled career unknown to the campaign -> 400, avatar not uploaded", async () => {
+    vi.mocked(prisma.career.findMany).mockResolvedValue([{ id: "c2" }] as never);
+
+    const res = await post(body({ avatar: "data:image/png;base64,AAAA" }));
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).issues).toContain("CAREER_UNKNOWN");
+    expect(resolveAvatarForPersistence).not.toHaveBeenCalled();
   });
 
   it("rearranged stats that are not a permutation -> 400", async () => {

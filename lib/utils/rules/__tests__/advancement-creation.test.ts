@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
+import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 const { creation: _creation, ...withoutCreation } = DEFAULT_ADVANCEMENT_RULES;
@@ -16,6 +17,12 @@ describe("advancement.creation", () => {
 
     expect(rules.advancement.talentCostMultiplier).toBe(3);
     expect(rules.advancement.creation).toEqual(DEFAULT_RULES.advancement.creation);
+  });
+
+  it("rejects a free budget nobody can reach (outside 40..180)", () => {
+    const parse = (freeBudget: number) => AdvancementRulesSchema.safeParse({ ...DEFAULT_ADVANCEMENT_RULES, creation: { freeBudget } }).success;
+
+    expect([parse(40), parse(180), parse(39), parse(181), parse(0)]).toEqual([true, true, false, false, false]);
   });
 
   it("keeps a partial creation and defaults the rest", () => {
@@ -35,9 +42,9 @@ describe("advancement.creation", () => {
   });
 
   it("accepts the bounds", () => {
-    const rules = parseRules({ advancement: { ...DEFAULT_ADVANCEMENT_RULES, creation: { freeBudget: 0, statBonus: { rolled: 1000 } } } });
+    const rules = parseRules({ advancement: { ...DEFAULT_ADVANCEMENT_RULES, creation: { freeBudget: 40, statBonus: { rolled: 1000 } } } });
 
-    expect(rules.advancement.creation.freeBudget).toBe(0);
+    expect(rules.advancement.creation.freeBudget).toBe(40);
     expect(rules.advancement.creation.statBonus.rolled).toBe(1000);
   });
 });

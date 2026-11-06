@@ -5,6 +5,8 @@ import type { SpeciesProfile } from "./profile";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Rng } from "@/lib/utils/common/rng";
 
+const TALENT_REROLL_ATTEMPTS = 20;
+
 export type CreationRolls = { careerRolls: { careerId: string; roll: number }[]; statRolls: number[]; randomTalents: string[] };
 
 export function rollCreation(rng: Rng, profile: SpeciesProfile): CreationRolls {
@@ -20,7 +22,20 @@ export function rollCreation(rng: Rng, profile: SpeciesProfile): CreationRolls {
 
   const statRolls = CHARACTERISTIC_KEYS.map(() => rollDie(10, rng) + rollDie(10, rng));
 
-  const talents = randomTalents.length ? Array.from({ length: randomTalentCount }, () => rollTable(randomTalents, rng).row.featId) : [];
+  const talents: string[] = [];
+
+  if (randomTalents.length) {
+    const taken = new Set(profile.talents);
+
+    for (let i = 0; i < randomTalentCount; i++) {
+      let featId = rollTable(randomTalents, rng).row.featId;
+
+      for (let attempt = 0; attempt < TALENT_REROLL_ATTEMPTS && taken.has(featId); attempt++) featId = rollTable(randomTalents, rng).row.featId;
+
+      taken.add(featId);
+      talents.push(featId);
+    }
+  }
 
   return { careerRolls, statRolls, randomTalents: talents };
 }

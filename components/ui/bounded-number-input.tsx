@@ -9,11 +9,12 @@ type BoundedNumberInputProps = Omit<ComponentProps<typeof Input>, "type" | "valu
   min: number;
   max: number;
   onCommit: (value: number) => void;
+  onValueChange?: (value: number) => void;
   decimal?: boolean;
 };
 
-/** Чернетка під час введення (можна стерти й набрати заново); обмеження й запис — на blur чи Enter, порожнє повертає останнє значення. */
-export function BoundedNumberInput({ value, min, max, onCommit, onKeyDown, decimal = false, inputMode = decimal ? "decimal" : "numeric", ...props }: BoundedNumberInputProps) {
+/** Чернетка під час введення (можна стерти й набрати заново); обмеження й запис — на blur чи Enter (onValueChange — живо, лише для коректного значення в межах), порожнє повертає останнє значення. */
+export function BoundedNumberInput({ value, min, max, onCommit, onValueChange, onKeyDown, decimal = false, inputMode = decimal ? "decimal" : "numeric", ...props }: BoundedNumberInputProps) {
   const [draft, setDraft] = useState<string | null>(null);
 
   const commit = () => {
@@ -35,7 +36,13 @@ export function BoundedNumberInput({ value, min, max, onCommit, onKeyDown, decim
       {...props}
       inputMode={inputMode}
       value={draft ?? String(value)}
-      onChange={(e) => setDraft(e.target.value)}
+      onChange={(e) => {
+        setDraft(e.target.value);
+
+        const n = Number(e.target.value);
+
+        if (onValueChange && e.target.value.trim() !== "" && Number.isFinite(n) && (decimal || Number.isInteger(n)) && n >= min && n <= max && n !== value) onValueChange(n);
+      }}
       onBlur={commit}
       onKeyDown={(e) => {
         // Enter у формі бою інакше відправив би всю форму
