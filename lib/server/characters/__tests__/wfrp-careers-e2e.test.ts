@@ -46,7 +46,7 @@ const character = { id: "hero", campaignId: "camp", controlledBy: "p1", status: 
 
 const gateOf = (rules = WFRP_RULES) => ({ access: { userId: "dm", isDM: true, campaign: { id: "camp", rules } }, character });
 
-const tier = (over: object = {}) => ({ name: "T", characteristics: ["ws", "bs", "s", "t"], skills: ["a", "b", "c", "d", "e", "f"], talents: [], trappings: [], ...over });
+const tier = (over: object = {}) => ({ name: "T", characteristics: ["ws", "bs", "s", "t"] as ("ws" | "bs" | "s" | "t")[], skills: ["a", "b", "c", "d", "e", "f"], talents: [], trappings: [], ...over });
 
 const stored = () => h.state.row?.characteristics as Chars;
 
