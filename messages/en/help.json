@@ -407,6 +407,11 @@
         "heading": "Advancement and experience",
         "b0": "In Grim d100 a hero spends experience (XP) on characteristics, skills and talents. The \"Advancement\" tab on the sheet shows the available XP, the price of the next step and a \"Buy\" button; the hero's owner and the DM can see it. Prices and limits come from the campaign rules (the \"Advancement\" section), and a talent's price is set in the talent editor (cost per rank and maximum rank).",
         "b1": "Every purchase goes into the advancement log. The DM can undo the last purchase with the \"Undo\" button: the XP comes back, and undo is blocked if the data was edited by hand after the purchase. Purchased talents work in battle with their effects."
+      },
+      "s6": {
+        "heading": "Careers",
+        "b0": "The DM creates careers in the campaign's \"Careers\" section: 4 tiers, each with characteristics, skills, talents and trappings. A hero's career and tier are assigned in the \"Advancement\" tab (or in the DM profile).",
+        "b1": "Every purchased item from the career tier earns a \"Tick\". When there are enough ticks the DM advances the career tier; if they are short the advance can be forced. \"Out of career\" purchases cost more (multiplier in the campaign rules)."
       }
     }
   }

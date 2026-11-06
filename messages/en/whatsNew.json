@@ -1,4 +1,8 @@
 {
+  "2026-11-06-wfrp-careers": {
+    "title": "Grim d100: careers",
+    "body": "In Grim d100 campaigns the DM creates careers with 4 tiers and assigns them to heroes; in-career purchases are cheaper and earn ticks toward the next career tier. Out-of-career purchases cost more."
+  },
   "2026-11-05-wfrp-advancement": {
     "title": "Grim d100: advancement",
     "body": "In Grim d100 campaigns a hero spends XP on characteristics, skills and talents in the \"Advancement\" tab of the sheet. Prices come from the campaign rules, a talent's price is set in its editor, and the DM can undo the last purchase. Purchased talents work in battle."

@@ -4,6 +4,7 @@ import type { WhatsNewEntry } from "@/lib/onboarding/types";
 export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+  { id: "2026-11-06-wfrp-careers", date: "2026-11-06", audience: "dm", href: "/help/dm-rule-systems" },
   { id: "2026-11-05-wfrp-advancement", date: "2026-11-05", audience: "all" },
   { id: "2026-11-05-wfrp-magic", date: "2026-11-05", audience: "dm", href: "/help/dm-rule-systems" },
   { id: "2026-11-04-player-view", date: "2026-11-04", audience: "dm" },
