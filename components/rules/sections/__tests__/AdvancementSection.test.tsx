@@ -53,4 +53,14 @@ describe("AdvancementSection", () => {
 
     expect(next.brackets.at(-1)).toEqual({ upTo: 45, cost: 150 });
   });
+
+  it("renders the 7 creation fields and saves an edit", () => {
+    const set = mount();
+
+    expect(screen.getAllByLabelText(/rules\.creation\./)).toHaveLength(7);
+
+    commit("wfrpCareers.rules.creation.freeBudget", "90");
+
+    expect(set).toHaveBeenLastCalledWith("advancement", expect.objectContaining({ creation: { ...DEFAULT_RULES.advancement.creation, freeBudget: 90 } }));
+  });
 });

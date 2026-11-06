@@ -12,9 +12,18 @@ const CareerRulesSchema = z.strictObject({
   outOfCareerMultiplier: z.number().min(1).max(100),
 });
 
+const bonus = (n: number) => z.number().int().min(0).max(1000).default(n);
+
+const CreationRulesSchema = z.strictObject({
+  careerBonus: z.strictObject({ rolled: bonus(50), choice: bonus(25), free: bonus(0) }).prefault({}),
+  statBonus: z.strictObject({ rolled: bonus(50), rearranged: bonus(25), free: bonus(0) }).prefault({}),
+  freeBudget: bonus(100),
+});
+
 export const AdvancementRulesSchema = z.strictObject({
   characteristic: TrackSchema,
   skill: TrackSchema,
   talentCostMultiplier: z.number().min(0).max(100),
   career: CareerRulesSchema,
+  creation: CreationRulesSchema.prefault({}),
 });

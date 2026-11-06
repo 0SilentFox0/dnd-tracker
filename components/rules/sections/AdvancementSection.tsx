@@ -7,7 +7,7 @@ import { RulesSection } from "../RulesSection";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
-import type { AdvancementTrack } from "@/lib/utils/rules/advancement";
+import type { AdvancementTrack, CreationRules } from "@/lib/utils/rules/advancement";
 
 type TrackKey = "characteristic" | "skill";
 
@@ -41,6 +41,23 @@ function TrackFields({ trackKey, track, onChange }: { trackKey: TrackKey; track:
   );
 }
 
+function CreationFields({ creation, onChange }: { creation: CreationRules; onChange: (next: CreationRules) => void }) {
+  const t = useTranslations("wfrpCareers.rules.creation");
+
+  return (
+    <div className="space-y-2">
+      <h3 className="text-sm text-hud-ink">{t("title")}</h3>
+      {(["rolled", "choice", "free"] as const).map((k) => (
+        <NumberField key={`c${k}`} label={t(`careerBonus.${k}`)} value={creation.careerBonus[k]} range={[0, 1000]} onCommit={(v) => onChange({ ...creation, careerBonus: { ...creation.careerBonus, [k]: v } })} />
+      ))}
+      {(["rolled", "rearranged", "free"] as const).map((k) => (
+        <NumberField key={`s${k}`} label={t(`statBonus.${k}`)} value={creation.statBonus[k]} range={[0, 1000]} onCommit={(v) => onChange({ ...creation, statBonus: { ...creation.statBonus, [k]: v } })} />
+      ))}
+      <NumberField label={t("freeBudget")} value={creation.freeBudget} range={[0, 1000]} onCommit={(freeBudget) => onChange({ ...creation, freeBudget })} />
+    </div>
+  );
+}
+
 export function AdvancementSection({ form }: { form: RulesFormState }) {
   const t = useTranslations("wfrpCareers.rules");
 
@@ -58,6 +75,7 @@ export function AdvancementSection({ form }: { form: RulesFormState }) {
         <NumberField key={i} label={t("ticks", { n: i + 1 })} value={rules.career.ticksRequired[i]} range={[1, 200]} onCommit={(v) => set({ career: { ...rules.career, ticksRequired: rules.career.ticksRequired.map((x, j) => (j === i ? v : x)) as [number, number, number] } })} />
       ))}
       <NumberField label={t("multiplier")} value={rules.career.outOfCareerMultiplier} range={[1, 100]} decimal onCommit={(outOfCareerMultiplier) => set({ career: { ...rules.career, outOfCareerMultiplier } })} />
+      <CreationFields creation={rules.creation} onChange={(creation) => set({ creation })} />
     </RulesSection>
   );
 }

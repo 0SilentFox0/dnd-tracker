@@ -2,7 +2,13 @@ export type AdvancementTrack = { brackets: { upTo: number; cost: number }[]; max
 
 export type CareerRules = { ticksRequired: [number, number, number]; outOfCareerMultiplier: number };
 
-export type AdvancementRules = { characteristic: AdvancementTrack; skill: AdvancementTrack; talentCostMultiplier: number; career: CareerRules };
+export type CreationRules = {
+  careerBonus: { rolled: number; choice: number; free: number };
+  statBonus: { rolled: number; rearranged: number; free: number };
+  freeBudget: number;
+};
+
+export type AdvancementRules = { characteristic: AdvancementTrack; skill: AdvancementTrack; talentCostMultiplier: number; career: CareerRules; creation: CreationRules };
 
 // verify against 5e book: placeholder price tables
 export const DEFAULT_ADVANCEMENT_RULES: AdvancementRules = {
@@ -33,4 +39,6 @@ export const DEFAULT_ADVANCEMENT_RULES: AdvancementRules = {
   talentCostMultiplier: 1,
   // verify against 5e book
   career: { ticksRequired: [10, 12, 14], outOfCareerMultiplier: 2 },
+  // verify against 5e book
+  creation: { careerBonus: { rolled: 50, choice: 25, free: 0 }, statBonus: { rolled: 50, rearranged: 25, free: 0 }, freeBudget: 100 },
 };

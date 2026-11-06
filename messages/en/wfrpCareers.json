@@ -42,7 +42,21 @@
     "talentMultiplier": "Talent price multiplier",
     "career": "Career",
     "ticks": "Ticks for tier {n}",
-    "multiplier": "Out-of-career multiplier"
+    "multiplier": "Out-of-career multiplier",
+    "creation": {
+      "title": "Character creation",
+      "careerBonus": {
+        "rolled": "Career XP: rolled",
+        "choice": "Career XP: chosen from roll",
+        "free": "Career XP: free"
+      },
+      "statBonus": {
+        "rolled": "Stats XP: rolled",
+        "rearranged": "Stats XP: rearranged",
+        "free": "Stats XP: free"
+      },
+      "freeBudget": "Free stat points budget"
+    }
   },
   "profile": {
     "career": "Career",
