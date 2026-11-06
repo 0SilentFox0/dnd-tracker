@@ -6,6 +6,9 @@ import type { planUndo } from "./wfrp/advancement/undo";
 import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
 import type { HitLocation } from "./wfrp/combat/constants";
 import type { WfrpParticipantStats } from "./wfrp/combat/participant";
+import type { planDraft } from "./wfrp/creation/plan";
+import type { isUsableProfile } from "./wfrp/creation/profile";
+import type { rollCreation } from "./wfrp/creation/roll";
 import type { PercentileOutcome } from "./wfrp/percentile";
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
@@ -258,6 +261,7 @@ export interface RuleSystemDefinition {
   conditions?: RuleSystemConditions;
   magic?: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;
+  creation?: RuleSystemCreation;
   lineage: boolean;
   classes: boolean;
   attacks: boolean;
@@ -275,6 +279,12 @@ export interface RuleSystemAdvancement {
   planCareerAdvance: typeof planCareerAdvance;
   availableXp: typeof availableXp;
   talentGroups: typeof talentGroups;
+}
+
+export interface RuleSystemCreation {
+  rollCreation: typeof rollCreation;
+  planDraft: typeof planDraft;
+  isUsableProfile: typeof isUsableProfile;
 }
 
 export type ApplyDamageConsequences = typeof import("@/lib/utils/battle/damage/consequences").applyDamageConsequences;

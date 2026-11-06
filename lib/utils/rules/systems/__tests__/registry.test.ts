@@ -47,6 +47,12 @@ describe("rule system registry", () => {
     expect(s.unusedMechanics).toContain("classes");
   });
 
+  it("creation exists only for wfrp", () => {
+    expect(RULE_SYSTEM_REGISTRY.wfrp.creation).toBeDefined();
+    expect(RULE_SYSTEM_REGISTRY.homm.creation).toBeUndefined();
+    expect(RULE_SYSTEM_REGISTRY.dnd5e.creation).toBeUndefined();
+  });
+
   it("conditions and fortune hooks exist only for wfrp", () => {
     expect(RULE_SYSTEM_REGISTRY.wfrp.conditions).toBeDefined();
     expect(RULE_SYSTEM_REGISTRY.wfrp.combat.fortune).toBe(true);
