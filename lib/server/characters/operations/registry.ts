@@ -2,6 +2,7 @@ import { type CharacterOperation } from "../operation-runner";
 import { advanceOperation } from "./advance";
 import { advanceUndoOperation } from "./advance-undo";
 import { arcaneRecoveryOperation } from "./arcane-recovery";
+import { careerAdvanceOperation, careerSetOperation } from "./career";
 import { choicesOperation } from "./choices";
 import { createOperation } from "./create";
 import { deleteOperation } from "./delete";
@@ -56,6 +57,8 @@ export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
   experience: erased(experienceOperation),
   advance: erased(advanceOperation),
   "advance.undo": erased(advanceUndoOperation),
+  "career.set": erased(careerSetOperation),
+  "career.advance": erased(careerAdvanceOperation),
   roll: erased(rollOperation),
   ...Object.fromEntries(Object.entries(READ_OPERATIONS).map(([key, op]) => [key, erased(op)])),
 };

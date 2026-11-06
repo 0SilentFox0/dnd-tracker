@@ -9,6 +9,7 @@ const h = vi.hoisted(() => {
     access: vi.fn(),
     character: { findUnique: vi.fn(), update: vi.fn() },
     feat: { findFirst: vi.fn() },
+    career: { findFirst: vi.fn() },
     characterLog: { createMany: vi.fn() },
     $queryRaw: vi.fn(),
   };
@@ -60,6 +61,7 @@ beforeEach(() => {
   h.character.update.mockImplementation(async ({ data }: { data: { characteristics: unknown } }) => { if (h.state.row) h.state.row.characteristics = data.characteristics; });
   h.characterLog.createMany.mockImplementation(async ({ data }: { data: unknown[] }) => { h.state.logs.push(...data); });
   h.feat.findFirst.mockResolvedValue(null);
+  h.career.findFirst.mockResolvedValue(null);
 });
 
 describe("advance", () => {
@@ -141,6 +143,55 @@ describe("advance", () => {
   it("schema rejects bad kind and empty key", () => {
     expect(advanceOperation.schema.safeParse({ kind: "x", key: "ws" }).success).toBe(false);
     expect(advanceOperation.schema.safeParse({ kind: "skill", key: "" }).success).toBe(false);
+  });
+});
+
+describe("advance with a career", () => {
+  const tier = { name: "T", characteristics: ["ws"], skills: [], talents: [], trappings: [] };
+
+  const row = { id: "c1", name: "Soldier", icon: null, class: null, tiers: [tier, tier, tier, tier] };
+
+  const withCareer = (ticks: string[] = []) => ({ ...DEFAULT_CHARACTERISTICS, career: { careerId: "c1", tier: 1, ticks } });
+
+  it("in-career purchase adds a tick and costs the base price", async () => {
+    h.state.row!.characteristics = withCareer();
+    h.career.findFirst.mockResolvedValue(row);
+
+    const result = await advance(gateOf(), { kind: "characteristic", key: "ws" });
+
+    expect(result.characteristics.career?.ticks).toEqual(["characteristic:ws"]);
+    expect(result.entry.cost).toBe(25);
+    expect(h.career.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "c1", campaignId: "camp" } }));
+  });
+
+  it("out-of-career purchase costs x multiplier and adds no tick", async () => {
+    h.state.row!.characteristics = withCareer();
+    h.career.findFirst.mockResolvedValue(row);
+
+    const result = await advance(gateOf(), { kind: "characteristic", key: "bs" });
+
+    expect(result.entry.cost).toBe(50);
+    expect(result.characteristics.career?.ticks).toEqual([]);
+  });
+
+  it("career deleted from the campaign: base price, no error, no tick", async () => {
+    h.state.row!.characteristics = withCareer();
+
+    const result = await advance(gateOf(), { kind: "characteristic", key: "bs" });
+
+    expect(result.entry.cost).toBe(25);
+    expect(result.characteristics.career?.ticks).toEqual([]);
+  });
+
+  it("two parallel purchases of the same in-career key: one tick, XP spent once", async () => {
+    h.state.row!.characteristics = withCareer();
+    h.state.row!.experience = 25;
+    h.career.findFirst.mockResolvedValue(row);
+
+    const results = await Promise.allSettled([advance(gateOf(), { kind: "characteristic", key: "ws" }), advance(gateOf(), { kind: "characteristic", key: "ws" })]);
+
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    expect((h.state.row?.characteristics as { career: { ticks: string[] } }).career.ticks).toEqual(["characteristic:ws"]);
   });
 });
 

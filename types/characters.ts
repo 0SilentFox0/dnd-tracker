@@ -374,6 +374,8 @@ export type AwardXpBody = { characterIds: string[]; amount: number; split: boole
 
 export type AdvanceBody = PurchaseRequest;
 
+export type CareerResult = { characteristics: Characteristics };
+
 export type AdvanceResult = { characteristics: Characteristics; experience: number; available: number; entry: LedgerEntry };
 
 export type ResourcesEditBody = { fortune?: number; sin?: number; hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };

@@ -9,7 +9,7 @@ import { type CharacterTypeValue, type GoalKind } from "@/lib/constants/characte
 import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
-import type { AdvanceBody, AdvanceResult, AwardXpBody, Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterLogEntry, CharacterResources, CharacterSheet, CharacterToken, DraftInput, HitDieResult, ResourcesEditBody, RestBody, RosterHero, SheetRollBody, SheetRollResult } from "@/types/characters";
+import type { AdvanceBody, AdvanceResult, AwardXpBody, CareerResult, Character, CharacterFormData, CharacterGoal, CharacterListItem, CharacterLogEntry, CharacterResources, CharacterSheet, CharacterToken, DraftInput, HitDieResult, ResourcesEditBody, RestBody, RosterHero, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { ChoicesBody } from "@/types/choices";
 import type { ClassLevelUpPick } from "@/types/classes";
 
@@ -143,6 +143,10 @@ export const postExperience = (campaignId: string, body: AwardXpBody) => campaig
 export const advanceCharacter = (campaignId: string, characterId: string, body: AdvanceBody) => campaignPost<AdvanceResult>(campaignId, `/characters/${characterId}/advance`, body);
 
 export const undoCharacterAdvance = (campaignId: string, characterId: string) => campaignDelete<AdvanceResult>(campaignId, `/characters/${characterId}/advance`);
+
+export const setCharacterCareer = (campaignId: string, characterId: string, careerId: string) => campaignPost<CareerResult>(campaignId, `/characters/${characterId}/career`, { careerId });
+
+export const advanceCharacterCareer = (campaignId: string, characterId: string, force?: boolean) => campaignPost<CareerResult>(campaignId, `/characters/${characterId}/career/advance`, { force });
 
 export const postInspiration = (campaignId: string, characterId: string, value: boolean) => campaignPost<{ inspiration: boolean }>(campaignId, `/characters/${characterId}/inspiration`, { value });
 

@@ -1,6 +1,7 @@
 export { useAdvance } from "./useAdvance";
 export { useArcaneRecovery } from "./useArcaneRecovery";
 export { useArchetypeOptions } from "./useArchetypeOptions";
+export { useCareerOps } from "./useCareerOps";
 export { useCharacterChoices } from "./useCharacterChoices";
 export { useCharacterEditor } from "./useCharacterEditor";
 export { useCharacterForm } from "./useCharacterForm";

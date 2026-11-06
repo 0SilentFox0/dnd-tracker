@@ -132,6 +132,8 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/characters/[characterId]/goals', methods: ['PUT'], task: 8, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/hit-dice', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/advance', methods: ['DELETE', 'POST'], task: 9, adapter: 'characters', state: "active" },
+  { route: 'campaigns/[id]/characters/[characterId]/career', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
+  { route: 'campaigns/[id]/characters/[characterId]/career/advance', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/arcane-recovery', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/inspiration', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/inventory', methods: ['GET', 'PATCH'], task: 9, adapter: 'characters', state: "active" },

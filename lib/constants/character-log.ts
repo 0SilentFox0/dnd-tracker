@@ -10,6 +10,8 @@ export const CharacterLogKind = {
   ARCANE_RECOVERY: "arcane_recovery",
   XP: "xp",
   ADVANCE: "advance",
+  CAREER_SET: "career_set",
+  CAREER_ADVANCE: "career_advance",
   INSPIRATION: "inspiration",
   RESOURCES_EDIT: "resources_edit",
   CHOICES_EDIT: "choices_edit",

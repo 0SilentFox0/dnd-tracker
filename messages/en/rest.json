@@ -126,6 +126,8 @@
     "choicesEdit": "✎ Choices changed (race, feats, class options)",
     "battleResult": "⚔ After battle: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · died} other {}}",
     "advance": "📈 Advance: {key} {from} → {to} (−{cost} XP)",
+    "careerSet": "🧭 Career assigned: {name}",
+    "careerAdvance": "🧭 Career tier reached: {tier}",
     "advanceUndo": "↩ Advance undone: {key} {to} → {from} (+{cost} XP)"
   }
 }

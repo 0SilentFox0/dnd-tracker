@@ -10,6 +10,7 @@ import { characteristicsJson } from "@/lib/server/characters/core/system-fields"
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
+import { toCareerData } from "@/lib/utils/careers/row";
 import type { Characteristics, LedgerEntry, PurchaseError } from "@/lib/utils/rules/systems";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 
@@ -48,12 +49,17 @@ export async function advanceCharacter(gate: CharacterGate, input: AdvanceInput)
 
     const feat = input.kind === "talent" ? await tx.feat.findFirst({ where: { id: input.key, campaignId: character.campaignId }, select: { id: true, xpCost: true, maxRank: true } }) : null;
 
+    const state = locked.characteristics.career;
+
+    const row = state ? await tx.career.findFirst({ where: { id: state.careerId, campaignId: character.campaignId } }) : null;
+
     const plan = advancement.planPurchase({
       characteristics: locked.characteristics,
       available: advancement.availableXp(locked.experience, locked.characteristics),
       request: input,
       rules: access.campaign.rules.advancement,
       talent: feat ?? undefined,
+      career: state && row ? { state, tiers: toCareerData(row).tiers } : undefined,
       now: new Date().toISOString(),
       id: randomUUID(),
     });

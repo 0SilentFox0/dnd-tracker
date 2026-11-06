@@ -60,6 +60,10 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
       };
     case "advance":
       return { key: d.undo ? "rest.log.advanceUndo" : "rest.log.advance", params: { kind: String(d.kind), key: String(d.key), from: num("from"), to: num("to"), cost: num("cost") } };
+    case "career_set":
+      return { key: "rest.log.careerSet", params: { name: String(d.name ?? "") } };
+    case "career_advance":
+      return { key: "rest.log.careerAdvance", params: { tier: num("tier") } };
     case "inspiration":
       return { key: d.value ? "rest.log.inspirationGained" : "rest.log.inspirationRemoved" };
     case "resources_edit":

@@ -522,6 +522,9 @@
   "characteristicsChanged": "The sheet changed — reload the page",
   "advanceNotWfrp": "Experience advancement is only available in WFRP",
   "careerNotFound": "Career not found",
+  "careerNoCareer": "The character has no career",
+  "careerMaxTier": "The character is already at the last career tier",
+  "careerTicksMissing": "Not enough ticked advances to move to the next tier",
   "careerInUse": "Characters have this career — remove it from their sheets first",
   "careerNameTaken": "The career \"{name}\" already exists",
   "foreignFeat": "The feat does not belong to this campaign"
