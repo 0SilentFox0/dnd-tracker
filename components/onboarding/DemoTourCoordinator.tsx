@@ -28,6 +28,9 @@ const BEFORE_TIMEOUT_MS = 20000;
 // joyride скролить ціль до верху вікна: без запасу вона ховається під липкою шапкою (89px)
 const SCROLL_OFFSET_PX = 120;
 
+// опційні кроки (ціль залежить від стану: демо лише для перегляду, бій уже запущено): не висимо 20 с
+const OPTIONAL_WAIT_MS = 2000;
+
 const CLICK_SOURCE_WAIT_MS = 4000;
 
 const CLICK_UNTIL_ATTEMPTS = 15;
@@ -39,6 +42,8 @@ const CLICK_UNTIL_TIMEOUT_MS = 30000;
 const POLL_MS = 100;
 
 const SETTLE_ATTEMPTS = 8;
+
+const stepWait = (item: { optional?: boolean; clickUntilTarget?: boolean }) => (item.optional ? OPTIONAL_WAIT_MS + 1000 : item.clickUntilTarget ? CLICK_UNTIL_TIMEOUT_MS : BEFORE_TIMEOUT_MS);
 
 async function waitFor<T>(probe: () => T | null, deadline: number): Promise<T | null> {
   for (;;) {
@@ -172,7 +177,7 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
     title: t(item.titleKey),
     content: t(item.descriptionKey),
     placement: centeredSteps.has(item.id) ? "center" : item.placement ?? "bottom",
-    beforeTimeout: item.clickUntilTarget ? CLICK_UNTIL_TIMEOUT_MS : BEFORE_TIMEOUT_MS,
+    beforeTimeout: stepWait(item),
     before: async () => {
       let destination = item.route !== undefined ? `${campaignPath}${item.route}` : window.location.pathname;
 
@@ -188,7 +193,7 @@ export function DemoTourCoordinator({ campaignId, children }: { campaignId: stri
 
       if (!window.location.pathname.endsWith(destination)) router.push(destination);
 
-      const deadline = Date.now() + (item.clickUntilTarget ? CLICK_UNTIL_TIMEOUT_MS : BEFORE_TIMEOUT_MS) - 700;
+      const deadline = Date.now() + stepWait(item) - 700;
 
       const arrived = () => window.location.pathname.endsWith(destination);
 

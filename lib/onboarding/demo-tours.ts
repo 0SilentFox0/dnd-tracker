@@ -12,6 +12,8 @@ export type DemoTourStep = {
   clickFromTarget?: string;
   /** Repeat the click until the target appears (bounded). */
   clickUntilTarget?: boolean;
+  /** Target depends on app state (read-only demo, battle already started): wait briefly, then move on. */
+  optional?: boolean;
   placement?: DemoTourPlacement;
   titleKey: string;
   descriptionKey: string;
@@ -25,7 +27,7 @@ export type DemoTourDefinition = {
   steps: readonly DemoTourStep[];
 };
 
-type StepOptions = Partial<Pick<DemoTourStep, "route" | "routeFromTarget" | "clickFromTarget" | "clickUntilTarget" | "placement">> & { anchor?: string };
+type StepOptions = Partial<Pick<DemoTourStep, "route" | "routeFromTarget" | "clickFromTarget" | "clickUntilTarget" | "optional" | "placement">> & { anchor?: string };
 
 const step = (tour: DemoTourId, id: string, options: StepOptions = {}): DemoTourStep => {
   const { anchor, ...rest } = options;
@@ -73,7 +75,7 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
   tour("show", "/dm/show", [
     step("show", "decks", { route: "/dm/show" }),
     step("show", "deck-card"),
-    step("show", "start"),
+    step("show", "start", { optional: true }),
     step("show", "present"),
     step("show", "stage", { routeFromTarget: "show.present" }),
     step("show", "nav", { placement: "top" }),
@@ -112,8 +114,8 @@ export const DEMO_TOURS: readonly DemoTourDefinition[] = [
   tour("battle", BATTLES, [
     step("battle", "list", { route: BATTLES }),
     step("battle", "card"),
-    step("battle", "arena", { routeFromTarget: "battle.open" }),
-    step("battle", "start"),
+    step("battle", "arena", { routeFromTarget: "battle.open", optional: true }),
+    step("battle", "start", { optional: true }),
     step("battle", "topbar", { clickFromTarget: "battle.start" }),
     step("battle", "initiative"),
     step("battle", "hero", { placement: "right" }),
