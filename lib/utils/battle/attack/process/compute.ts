@@ -271,6 +271,8 @@ function mitigateHit(
     netSl: details.netSl,
     location: details.location,
     crit: params.attackRoll.isCritical,
+    attackRoll: details.roll,
+    ...(params.attack.wfrp && { qualities: params.attack.wfrp.qualities, flaws: params.attack.wfrp.flaws }),
     rng: params.rng ?? Math.random,
     rules: params.rules,
   });

@@ -1,6 +1,7 @@
 import { skillTarget, value } from "../characteristics/derive";
 import { readCharacteristics } from "../characteristics/keys";
 import { againstMod, selfTestMod } from "../conditions/test-mod";
+import { qualityFumbleFrom, qualityToHit } from "../equipment/quality-effects";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import { DIFFICULTY_SL } from "../percentile/difficulty";
 import { applyFortune } from "../percentile/fortune";
@@ -66,8 +67,16 @@ const detailsOf = (t: PercentileTestResult, netSl: number, extra: Partial<Percen
   ...extra,
 });
 
+const refsOf = (attack: BattleAttack) => ({ qualities: attack.wfrp?.qualities ?? [], flaws: attack.wfrp?.flaws ?? [] });
+
 export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
   const { attacker, target, attack, participants, rng, manualRoll } = ctx;
+
+  const toHit = qualityToHit(refsOf(attack));
+
+  const fumbleFrom = qualityFumbleFrom(refsOf(attack));
+
+  const fumbled = (roll: number) => fumbleFrom !== undefined && roll >= fumbleFrom;
 
   const slBonus = ctx.fortune?.kind === "sl" ? 1 : 0;
 
@@ -81,9 +90,9 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   if (attackKindOf(attack.type) === AttackType.RANGED) {
     const rangedOnce = (presetRoll?: number) => {
-      const test = resolvePercentileTest({ target: attackerTargetOf(attacker, attack) + againstMod(target, "ranged"), slModifier: DIFFICULTY_SL.challenging + slBonus, doubles: true, rng, presetRoll });
+      const test = resolvePercentileTest({ target: attackerTargetOf(attacker, attack) + againstMod(target, "ranged") + toHit, slModifier: DIFFICULTY_SL.challenging + slBonus, doubles: true, rng, presetRoll });
 
-      const isHit = test.outcome === "success" || test.outcome === "critical";
+      const isHit = (test.outcome === "success" || test.outcome === "critical") && !fumbled(test.roll);
 
       return { roll: test.roll, result: toResult(detailsOf(test, test.sl), isHit, { spent: false, gainedBy: null }) };
     };
@@ -101,7 +110,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   const meleeOnce = (presetRolls: { attacker?: number; defender?: number }) => {
     const result = resolveOpposed({
-      attackerTarget: attackerTargetOf(attacker, attack) + againstMod(target, "melee") + (isOutnumbering(attacker, target, participants) ? OUTNUMBERING_BONUS : 0),
+      attackerTarget: attackerTargetOf(attacker, attack) + toHit + againstMod(target, "melee") + (isOutnumbering(attacker, target, participants) ? OUTNUMBERING_BONUS : 0),
       defenderTargets: [
         { kind: "parry", target: value(d, "ws") + selfTestMod(target, "test") },
         { kind: "dodge", target: dodge + selfTestMod(target, "test") },
@@ -118,7 +127,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
       ...(spent && { momentumUsed: true }),
     });
 
-    return { roll: result.attacker.roll, defenderRaw: result.defender.rawRoll, resolved: toResult(details, result.isHit, { spent, gainedBy: result.attackerWon ? "attacker" : "defender" }) };
+    return { roll: result.attacker.roll, defenderRaw: result.defender.rawRoll, resolved: toResult(details, result.isHit && !fumbled(result.attacker.roll), { spent, gainedBy: result.attackerWon ? "attacker" : "defender" }) };
   };
 
   const { result, fortune } = applyFortune<ReturnType<typeof meleeOnce>>(

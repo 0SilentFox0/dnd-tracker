@@ -12,6 +12,7 @@ import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { Characteristics, WfrpParticipantStats } from "@/lib/utils/rules/systems";
+import type { QualityRef } from "@/lib/utils/rules/systems/wfrp/equipment/qualities";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
@@ -153,6 +154,8 @@ export interface BattleAttack {
   damageBonus?: number;
   /** Категорія зброї 5e (з опису предмета); відсутня — вважається володінням */
   weaponCategory?: "simple" | "martial";
+  /** WFRP: weapon qualities from the equipped item's system stats */
+  wfrp?: { qualities: QualityRef[]; flaws: QualityRef[]; ammoCapacity?: number; reload?: number };
 }
 
 /**

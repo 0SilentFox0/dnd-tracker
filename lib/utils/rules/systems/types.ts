@@ -106,6 +106,9 @@ export interface MitigateCtx {
   location: HitLocation;
   /** The attack roll was a critical (WFRP: doubles on a hit) */
   crit: boolean;
+  attackRoll?: number;
+  qualities?: QualityRef[];
+  flaws?: QualityRef[];
   rng: Rng;
   rules: Ruleset;
 }

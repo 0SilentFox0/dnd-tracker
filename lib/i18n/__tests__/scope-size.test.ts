@@ -5,7 +5,7 @@ import { LOCALES } from "../config";
 import { loadMessages, loadStaticMessages } from "../messages";
 import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES, ROOT_NAMESPACES, WFRP_BATTLE_NAMESPACES, WFRP_CAMPAIGN_EXTRA } from "../scopes";
 
-const LIMIT_KB = 105;
+const LIMIT_KB = 106;
 
 const ROOT_LIMIT_KB = 20;
 

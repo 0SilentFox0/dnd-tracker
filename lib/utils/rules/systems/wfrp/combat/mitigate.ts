@@ -1,3 +1,4 @@
+import { qualityEffects } from "../equipment/quality-effects";
 import { applyWfrpCrit } from "./crit-effect";
 import { rollCrit } from "./crit-table";
 import { computeWfrpDamage } from "./damage";
@@ -19,13 +20,16 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
   if (ctx.amount <= 0) return { amount: 0, steps: [], totalLabel };
 
-  const base = computeWfrpDamage({
-    weapon: ctx.weapon,
-    sb: attacker.abilities.wfrp?.sb ?? 0,
-    netSl: ctx.netSl,
-    tb: target.abilities.wfrp?.tb ?? 0,
-    ap: target.abilities.wfrp?.ap[location] ?? 0,
-  });
+  const sb = attacker.abilities.wfrp?.sb ?? 0;
+
+  const ap = target.abilities.wfrp?.ap[location] ?? 0;
+
+  const { effect, steps: qualitySteps } = qualityEffects(
+    { qualities: ctx.qualities ?? [], flaws: ctx.flaws ?? [] },
+    { attackRoll: ctx.attackRoll ?? 0, netSl: ctx.netSl, crit: ctx.crit, sb, ap },
+  );
+
+  const base = computeWfrpDamage({ weapon: ctx.weapon, sb, netSl: ctx.netSl, tb: target.abilities.wfrp?.tb ?? 0, ap, extra: qualitySteps, minDamage: effect.minDamage });
 
   const steps = base.steps.filter((s) => s.key === "weapon" || s.value !== 0).map((s) => step(s.key, s.value));
 

@@ -138,6 +138,12 @@
       "netSl": "Net SL",
       "tb": "Toughness bonus",
       "ap": "Armour",
+      "damaging": "Damaging",
+      "impale": "Impale",
+      "penetrating": "Penetrating",
+      "hack": "Hack",
+      "pummel": "Pummel",
+      "precise": "Precise",
       "minimum": "Minimum damage",
       "crit": "Critical wound"
     },
