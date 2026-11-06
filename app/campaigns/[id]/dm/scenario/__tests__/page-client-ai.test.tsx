@@ -33,7 +33,8 @@ vi.mock("@/components/ui/dropdown-menu", () => ({
   DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuItem: ({ children, onSelect }: { children: React.ReactNode; onSelect: () => void }) => <button type="button" onClick={onSelect}>{children}</button>,
 }));
-vi.mock("@/lib/hooks/scenario", () => ({
+vi.mock("@/lib/hooks/scenario", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/hooks/scenario")>()),
   useScenarioPage: () => ({}),
   useGenerateScenarioSummary: () => ({ pendingPageId: null, generate: vi.fn() }),
   useScenarioPlay: () => ({}),
