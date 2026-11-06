@@ -11,6 +11,12 @@ describe("rule system registry", () => {
     expect(Object.keys(RULE_SYSTEM_REGISTRY).sort()).toEqual(["dnd5e", "homm", "wfrp"]);
   });
 
+  it("only wfrp drops alignments from the identity", () => {
+    expect(RULE_SYSTEM_REGISTRY.wfrp.identity.alignments).toBe(false);
+    expect(RULE_SYSTEM_REGISTRY.homm.identity.alignments).toBe(true);
+    expect(RULE_SYSTEM_REGISTRY.dnd5e.identity.alignments).toBe(true);
+  });
+
   it("only wfrp defines equipment", () => {
     expect(RULE_SYSTEM_REGISTRY.wfrp.equipment).toBeDefined();
     expect(RULE_SYSTEM_REGISTRY.homm.equipment).toBeUndefined();

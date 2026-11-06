@@ -15,4 +15,8 @@ import { UnitStatsFields } from "./UnitStatsFields";
 
 const SpeciesProfileEditor = dynamic(() => import("./creation/SpeciesProfileEditor").then((m) => m.SpeciesProfileEditor));
 
-export const WFRP_UI: SystemUi = { HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, DraftForm: WfrpDraftForm, RaceProfileEditor: SpeciesProfileEditor, battleConditionsDialog: SystemConditionsDialog };
+const ArtifactStatsEditor = dynamic(() => import("./equipment/ArtifactStatsEditor").then((m) => m.ArtifactStatsEditor));
+
+const EquippedSummary = dynamic(() => import("./equipment/EquippedArmourSummary").then((m) => m.EquippedArmourSummary));
+
+export const WFRP_UI: SystemUi = { HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, DraftForm: WfrpDraftForm, RaceProfileEditor: SpeciesProfileEditor, battleConditionsDialog: SystemConditionsDialog, ArtifactStatsEditor, EquippedSummary };

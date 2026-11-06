@@ -12,6 +12,7 @@ import { ArtifactWeaponFields } from "./ArtifactWeaponFields";
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
@@ -48,6 +49,7 @@ export interface ArtifactFormInitial {
   weapon?: WeaponStats;
   armor?: ArmorStats | null;
   item?: ItemStats | null;
+  systemStats?: unknown;
 }
 
 export interface ArtifactFormProps {
@@ -76,6 +78,10 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
   const [tab, setTab] = useState<ArtifactFormTabId>(ARTIFACT_FORM_TAB.basic);
 
   const rules = useCampaignRules(campaignId).data;
+
+  const StatsEditor = rules ? systemUiOf(rules.system.key).ArtifactStatsEditor : undefined;
+
+  const [statsValid, setStatsValid] = useState(true);
 
   const classesEnabled = !!rules?.classes.enabled;
 
@@ -182,6 +188,9 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
       label: t("artifacts.form.tabs.item"),
       content: <ArtifactItemFields campaignId={campaignId} name={data.name} slot={data.slot} value={data.item} onChange={(item) => set("item", item)} itemsEnabled={itemsEnabled} />,
     },
+    ...(StatsEditor
+      ? [{ id: ARTIFACT_FORM_TAB.stats, label: t("artifacts.form.tabs.stats"), invalid: !statsValid, content: <StatsEditor value={data.systemStats} slot={data.slot} onChange={(v) => set("systemStats", v)} onValidityChange={setStatsValid} /> }]
+      : []),
     {
       id: ARTIFACT_FORM_TAB.abilities,
       label: t("common.tabs.abilities"),
@@ -218,7 +227,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
             <Button type="button" variant="outline" onClick={() => router.push(cancelHref)} disabled={editor.status.isBusy}>
               {t("common.actions.cancel")}
             </Button>
-            <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid}>
+            <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid || !statsValid}>
               {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors, ta)}
             </Button>
           </>

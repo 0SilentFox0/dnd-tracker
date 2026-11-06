@@ -12,11 +12,14 @@ import { FormField } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 
 export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
   const t = useTranslations("wfrpCreation.identity");
 
   const te = useTranslations("wfrpCreation.errors");
+
+  const alignments = RULE_SYSTEM_REGISTRY.wfrp.identity.alignments;
 
   const [goal, setGoal] = useState("");
 
@@ -49,9 +52,11 @@ export function IdentityStep({ form }: { form: WfrpDraftFormState }) {
       <FormField label={t("name")} htmlFor="wfrp-draft-name" required>
         <Input id="wfrp-draft-name" className="min-h-11" maxLength={100} value={values.name} placeholder={t("namePlaceholder")} onChange={(e) => set({ name: e.target.value })} />
       </FormField>
-      <FormField label={t("alignment")} htmlFor="wfrp-draft-alignment">
-        <SelectField id="wfrp-draft-alignment" value={values.alignment ?? ""} onValueChange={(v) => set({ alignment: v })} placeholder={t("alignmentPlaceholder")} options={ALIGNMENTS.map((a) => ({ value: a, label: a }))} allowNone triggerClassName="min-h-11 w-full" />
-      </FormField>
+      {alignments && (
+        <FormField label={t("alignment")} htmlFor="wfrp-draft-alignment">
+          <SelectField id="wfrp-draft-alignment" value={values.alignment ?? ""} onValueChange={(v) => set({ alignment: v })} placeholder={t("alignmentPlaceholder")} options={ALIGNMENTS.map((a) => ({ value: a, label: a }))} allowNone triggerClassName="min-h-11 w-full" />
+        </FormField>
+      )}
       <FormField label={t("background")} htmlFor="wfrp-draft-background">
         <Textarea id="wfrp-draft-background" rows={6} maxLength={4000} value={values.background ?? ""} placeholder={t("backgroundPlaceholder")} onChange={(e) => set({ background: e.target.value })} />
       </FormField>

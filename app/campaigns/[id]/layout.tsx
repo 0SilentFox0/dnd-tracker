@@ -5,7 +5,7 @@ import { DemoTourCoordinator } from "@/components/onboarding/DemoTourCoordinator
 import { getSessionUserId } from "@/lib/auth";
 import { CampaignRole, isDemoKind } from "@/lib/constants/campaigns";
 import { ExtendLocaleScope } from "@/lib/i18n/extend-locale-scope";
-import { WFRP_CAMPAIGN_EXTRA, WFRP_DM_EXTRA } from "@/lib/i18n/scopes";
+import { WFRP_CAMPAIGN_EXTRA, WFRP_DM_EXTRA, WFRP_MEMBER_EXTRA } from "@/lib/i18n/scopes";
 import { getCampaignForLayout } from "@/lib/server/campaigns/access";
 import { isWfrpCampaign } from "@/lib/server/campaigns/system-key";
 
@@ -24,7 +24,7 @@ export default async function CampaignLayout({ children, params }: { children: R
 
   return (
     <>
-      {isWfrp ? <ExtendLocaleScope namespaces={isDM ? [...WFRP_CAMPAIGN_EXTRA, ...WFRP_DM_EXTRA] : WFRP_CAMPAIGN_EXTRA}>{content}</ExtendLocaleScope> : content}
+      {isWfrp ? <ExtendLocaleScope namespaces={isDM ? [...WFRP_CAMPAIGN_EXTRA, ...WFRP_MEMBER_EXTRA, ...WFRP_DM_EXTRA] : [...WFRP_CAMPAIGN_EXTRA, ...WFRP_MEMBER_EXTRA]}>{content}</ExtendLocaleScope> : content}
       {!isDemo && <NotificationsHost campaignId={id} userId={userId} />}
     </>
   );

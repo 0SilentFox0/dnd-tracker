@@ -32,6 +32,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   advancement: WFRP_ADVANCEMENT,
   creation: WFRP_CREATION,
   equipment: WFRP_EQUIPMENT,
+  identity: { alignments: false },
   combat: { fortune: true, dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
   classes: false,

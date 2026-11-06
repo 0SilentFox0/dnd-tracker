@@ -264,6 +264,7 @@ export interface RuleSystemDefinition {
   magic?: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;
   equipment?: RuleSystemEquipment;
+  identity: { alignments: boolean };
   creation?: RuleSystemCreation;
   lineage: boolean;
   classes: boolean;

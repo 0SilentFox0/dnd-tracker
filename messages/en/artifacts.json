@@ -56,7 +56,8 @@
     "tabs": {
       "weapon": "Weapon",
       "armor": "Armor",
-      "item": "Item"
+      "item": "Item",
+      "stats": "Stats"
     },
     "name": "Name",
     "namePlaceholder": "For example: Ring of Sar Issa",

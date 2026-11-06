@@ -240,4 +240,12 @@ describe("useWfrpDraftForm", () => {
     expect(createWfrpDraft).not.toHaveBeenCalled();
     expect(push).toHaveBeenCalledWith("/campaigns/c1/character");
   });
+
+  it("drops a legacy alignment from the submitted identity", async () => {
+    const { result } = setup({ characterId: "ch1", initialIdentity: { name: "Old", alignment: "lawful good" } });
+
+    await act(async () => result.current.submit.run());
+
+    expect(updateWfrpDraftIdentity).toHaveBeenCalledWith("c1", "ch1", { name: "Old" });
+  });
 });

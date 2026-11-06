@@ -12,7 +12,7 @@ import { useRaceProfiles, useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems/useRuleSystem";
 import { cryptoRandom } from "@/lib/utils/common/dice";
 import type { Rng } from "@/lib/utils/common/rng";
-import type { CreationPicks, CreationRolls, PlanDraftResult, SpeciesProfile } from "@/lib/utils/rules/systems";
+import { type CreationPicks, type CreationRolls, type PlanDraftResult, RULE_SYSTEM_REGISTRY, type SpeciesProfile } from "@/lib/utils/rules/systems";
 import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems/wfrp/characteristics/keys";
 import type { WfrpDraftIdentityInput, WfrpDraftInput } from "@/types/characters";
 import type { Race } from "@/types/races";
@@ -238,7 +238,7 @@ const careerPickValid = (mode: CareerMode, careerId: string, rolls: CreationRoll
 
 const cleanIdentity = ({ name, alignment, background, avatar, goals }: WfrpDraftIdentityInput): WfrpDraftIdentityInput => ({
   name: name.trim(),
-  ...(alignment && { alignment }),
+  ...(alignment && RULE_SYSTEM_REGISTRY.wfrp.identity.alignments && { alignment }),
   ...(background && { background }),
   ...(avatar && { avatar }),
   ...(goals?.length && { goals }),

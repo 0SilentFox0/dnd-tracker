@@ -70,6 +70,18 @@ export interface RaceProfileEditorProps {
   raceId: string;
 }
 
+export interface ArtifactStatsEditorProps {
+  value: unknown;
+  onChange: (value: unknown) => void;
+  slot: string;
+  onValidityChange?: (valid: boolean) => void;
+}
+
+export interface EquippedSummaryProps {
+  campaignId: string;
+  characterId: string;
+}
+
 export interface SystemUi {
   HeroStats: ComponentType;
   StatsTab: ComponentType<StatsTabProps>;
@@ -84,4 +96,6 @@ export interface SystemUi {
   DraftForm?: ComponentType<DraftFormProps>;
   RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
   battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
+  ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;
+  EquippedSummary?: ComponentType<EquippedSummaryProps>;
 }

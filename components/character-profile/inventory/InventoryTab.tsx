@@ -18,6 +18,7 @@ import { PurseBar } from "./PurseBar";
 
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HudPanel } from "@/components/hud/page";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useInventory } from "@/lib/hooks/characters";
@@ -30,6 +31,8 @@ export function InventoryTab() {
   const t = useTranslations("inventory.tab");
 
   const inv = useInventory(campaignId, characterId, sheet);
+
+  const EquippedSummary = systemUiOf(sheet.system).EquippedSummary;
 
   const newIds = useSeenOnOpen(campaignId, { types: ["item"], enabled: sheet.viewer.isOwner && !sheet.viewer.isDM });
 
@@ -68,6 +71,7 @@ export function InventoryTab() {
         <div className="space-y-3">
           {sheet.items.attunement && <p className="text-xs text-hud-muted">{t("attunement", { used: sheet.items.attunement.used, limit: sheet.items.attunement.limit })}</p>}
           <EquipmentGrid inv={inv} />
+          {EquippedSummary && <EquippedSummary campaignId={campaignId} characterId={characterId} />}
           {inv.access.pending ? (
             <EmptyState title={t("pending")} />
           ) : (

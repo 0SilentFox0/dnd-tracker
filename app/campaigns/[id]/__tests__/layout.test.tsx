@@ -52,7 +52,7 @@ describe("CampaignLayout", () => {
 
     mocks.wfrp = true;
 
-    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement"');
+    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement,wfrpEquipment"');
   });
 
   it("adds the careers scope for the DM of a wfrp campaign only", async () => {
@@ -60,7 +60,7 @@ describe("CampaignLayout", () => {
     mocks.wfrp = true;
     mocks.role = "dm";
 
-    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement,wfrpCareers,wfrpCreation"');
+    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement,wfrpEquipment,wfrpCareers,wfrpCreation"');
 
     mocks.wfrp = false;
 

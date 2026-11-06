@@ -224,6 +224,7 @@ export interface SheetArtifact {
   effects: AbilityFlowSummary[];
   attunement?: "attuned" | "required";
   carried?: true;
+  systemStats?: unknown;
 }
 
 export interface SetProgress {

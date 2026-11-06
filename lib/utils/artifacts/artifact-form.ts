@@ -16,6 +16,7 @@ export interface ArtifactFormState {
   weapon: WeaponStats;
   armor?: ArmorStats | null;
   item?: ItemStats | null;
+  systemStats?: unknown;
 }
 
 export interface ArtifactFormSubmitPayload {
@@ -29,6 +30,7 @@ export interface ArtifactFormSubmitPayload {
   weapon?: WeaponStats;
   armor?: ArmorStats | null;
   item?: ItemStats | null;
+  systemStats?: unknown;
 }
 
 const bonusOnly = (w: WeaponStats): WeaponStats => ({
@@ -51,6 +53,7 @@ export function buildArtifactPayload(s: ArtifactFormState, mode: "create" | "edi
     abilities: s.abilities,
     ...(isWeaponSlot(s.slot) && { weapon: property ? bonusOnly(s.weapon) : s.weapon }),
     ...(s.slot === ArtifactSlot.ARMOR && (property ? mode === "edit" && { armor: null } : s.armor ? { armor: s.armor } : mode === "edit" && { armor: null })),
+    ...(s.systemStats !== undefined && (s.systemStats !== null || mode === "edit") && { systemStats: s.systemStats }),
     ...(s.item ? { item: s.item } : s.item === null && mode === "edit" && { item: null }),
   };
 }

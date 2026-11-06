@@ -52,6 +52,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
     effects: abilitySummary("artifact", row),
     ...(itemsOn && attunementRequired(row.id, raw) && { attunement: attuned.includes(row.id) ? ("attuned" as const) : ("required" as const) }),
     ...(carried && { carried }),
+    ...(row.systemStats != null && { systemStats: row.systemStats }),
   }));
 
   const personal = character.personalSkillId ? context.skillsById?.[character.personalSkillId] : undefined;
