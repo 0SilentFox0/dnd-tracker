@@ -14,6 +14,7 @@ import { useCareerOps } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
 import { useFeats } from "@/lib/hooks/feats";
 import type { Characteristics } from "@/lib/utils/rules/systems";
+import { parseSkillAdvanceKey } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 
 interface Props {
   campaignId: string;
@@ -56,7 +57,7 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
 
     if (kind === "talent") return feats.data?.find((f) => f.id === key)?.name ?? tu("unknownTalent");
 
-    const [skill, spec] = key.split(":");
+    const { key: skill, spec } = parseSkillAdvanceKey(key);
 
     return skillLabel(tg, skill, spec);
   };

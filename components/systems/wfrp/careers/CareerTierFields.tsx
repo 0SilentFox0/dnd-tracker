@@ -11,7 +11,6 @@ import { CommaListInput } from "@/components/ui/comma-list-input";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
-import { cn } from "@/lib/utils";
 import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/utils/rules/systems";
 import { parseSkillAdvanceKey } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 import type { CareerTierDef } from "@/types/careers";
@@ -61,7 +60,7 @@ export function CareerTierFields({ index, tier, feats, onChange }: Props) {
         <p className="mb-1 text-xs text-hud-muted">{t("characteristics")}</p>
         <div className="flex flex-wrap gap-1">
           {CHARACTERISTIC_KEYS.map((key) => (
-            <Button key={key} type="button" size="sm" variant={tier.characteristics.includes(key) ? "default" : "outline"} className={cn("min-h-11 min-w-11")} aria-pressed={tier.characteristics.includes(key)} onClick={() => toggle(key)}>
+            <Button key={key} type="button" size="sm" variant={tier.characteristics.includes(key) ? "default" : "outline"} className="min-h-11 min-w-11" aria-pressed={tier.characteristics.includes(key)} onClick={() => toggle(key)}>
               {tc(`${key}.label`)}
             </Button>
           ))}
