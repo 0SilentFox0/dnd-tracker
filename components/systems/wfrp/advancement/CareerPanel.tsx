@@ -15,12 +15,46 @@ import { useConfirm } from "@/lib/hooks/common";
 import { useFeats } from "@/lib/hooks/feats";
 import type { Characteristics } from "@/lib/utils/rules/systems";
 import { parseSkillAdvanceKey } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
+import type { CareerData } from "@/types/careers";
 
 interface Props {
   campaignId: string;
   characterId: string;
   state: Characteristics["career"];
   isDM: boolean;
+}
+
+interface PickerProps {
+  careers: CareerData[];
+  state: Characteristics["career"];
+  pending: boolean;
+  onAssign: (careerId: string) => Promise<unknown>;
+}
+
+// DM-only: wfrpCareers messages are loaded for the DM scope only
+function CareerPicker({ careers, state, pending, onAssign }: PickerProps) {
+  const t = useTranslations("wfrpAdvancement.career");
+
+  const td = useTranslations("wfrpCareers.panel");
+
+  const confirm = useConfirm();
+
+  const [pick, setPick] = useState("");
+
+  const assign = async () => {
+    if (state && !(await confirm({ title: td("replaceTitle"), description: td("replaceBody", { tier: state.tier, have: state.ticks.length }), confirmLabel: t("assign"), destructive: true }))) return;
+
+    await onAssign(pick);
+  };
+
+  return (
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+      <SelectField aria-label={t("pick")} value={pick} onValueChange={setPick} options={careers.map((c) => ({ value: c.id, label: c.name }))} placeholder={t("pick")} triggerClassName="min-h-11 w-full" />
+      <Button type="button" size="sm" variant="outline" className="min-h-11" disabled={!pick || pending} onClick={() => void assign()}>
+        {t("assign")}
+      </Button>
+    </div>
+  );
 }
 
 export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
@@ -41,8 +75,6 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
   const ops = useCareerOps(campaignId, characterId);
 
   const confirm = useConfirm();
-
-  const [pick, setPick] = useState("");
 
   const career = state ? careers.data?.find((c) => c.id === state.careerId) : undefined;
 
@@ -72,14 +104,7 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
     await ops.advanceCareer(short);
   };
 
-  const picker = isDM && (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
-      <SelectField aria-label={t("pick")} value={pick} onValueChange={setPick} options={(careers.data ?? []).map((c) => ({ value: c.id, label: c.name }))} placeholder={t("pick")} triggerClassName="min-h-11 w-full" />
-      <Button type="button" size="sm" variant="outline" className="min-h-11" disabled={!pick || ops.isPending} onClick={() => void ops.setCareer(pick)}>
-        {t("assign")}
-      </Button>
-    </div>
-  );
+  const picker = isDM && <CareerPicker careers={careers.data ?? []} state={state} pending={ops.isPending} onAssign={ops.setCareer} />;
 
   if (!state) {
     return (

@@ -18,6 +18,18 @@ vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: DEFAU
 vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => ({ data: [{ id: "f1", name: "Меткий" }] }) }));
 vi.mock("@/lib/hooks/characters", () => ({ useCareerOps: () => ({ setCareer: mocks.setCareer, advanceCareer: mocks.advanceCareer, isPending: false }) }));
 vi.mock("@/lib/hooks/common", () => ({ useConfirm: () => mocks.confirm }));
+vi.mock("@/components/ui/select-field", () => ({
+  SelectField: ({ value, options, onValueChange, "aria-label": label }: { value: string; options: { value: string; label: string }[]; onValueChange: (v: string) => void; "aria-label"?: string }) => (
+    <select aria-label={label} value={value} onChange={(e) => onValueChange(e.target.value)}>
+      <option value="">—</option>
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  ),
+}));
 
 const mount = (state: Parameters<typeof CareerPanel>[0]["state"], isDM: boolean) => render(<CareerPanel campaignId="c" characterId="ch" state={state} isDM={isDM} />);
 
@@ -77,6 +89,25 @@ describe("CareerPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Підвищити" }));
 
     await waitFor(() => expect(mocks.advanceCareer).toHaveBeenCalledWith(false));
+    expect(mocks.confirm).toHaveBeenCalledTimes(1);
+  });
+
+  it("assigning over an existing career asks to confirm; a first assignment does not", async () => {
+    mocks.confirm.mockResolvedValue(false);
+
+    mount({ careerId: "car", tier: 2, ticks: ["skill:a"] }, true);
+    fireEvent.change(screen.getByLabelText("Оберіть кар'єру"), { target: { value: "car" } });
+    fireEvent.click(screen.getByRole("button", { name: "Призначити" }));
+
+    await waitFor(() => expect(mocks.confirm).toHaveBeenCalledWith(expect.objectContaining({ description: "Поточна кар'єра на рівні 2, позначок 1. Нова кар'єра почнеться з рівня 1 без позначок." })));
+    expect(mocks.setCareer).not.toHaveBeenCalled();
+
+    cleanup();
+    mount(undefined, true);
+    fireEvent.change(screen.getByLabelText("Оберіть кар'єру"), { target: { value: "car" } });
+    fireEvent.click(screen.getByRole("button", { name: "Призначити" }));
+
+    await waitFor(() => expect(mocks.setCareer).toHaveBeenCalledWith("car"));
     expect(mocks.confirm).toHaveBeenCalledTimes(1);
   });
 });

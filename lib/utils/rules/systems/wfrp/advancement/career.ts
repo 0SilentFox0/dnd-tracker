@@ -9,15 +9,14 @@ export type CareerAdvanceResult = { ok: true; next: Characteristics } | { ok: fa
 
 export const tickKey = (kind: LedgerEntry["kind"], key: string) => `${kind}:${key}`;
 
-export function inCareer(ctx: CareerCtx, kind: LedgerEntry["kind"], key: string): boolean {
-  const tier = ctx.tiers[ctx.state.tier - 1];
-
-  if (!tier) return false;
-
+const listed = (tier: CareerTierDef, kind: LedgerEntry["kind"], key: string) => {
   const list = kind === "characteristic" ? tier.characteristics : kind === "skill" ? tier.skills : tier.talents;
 
   return list.includes(key) || (kind === "skill" && list.includes(key.split(":")[0]));
-}
+};
+
+// WFRP 4e: the current tier and all earlier tiers of the career are in-career
+export const inCareer = (ctx: CareerCtx, kind: LedgerEntry["kind"], key: string): boolean => ctx.tiers.slice(0, ctx.state.tier).some((tier) => listed(tier, kind, key));
 
 export const planCareerSet = (c: Characteristics, careerId: string): Characteristics => ({ ...c, career: { careerId, tier: 1, ticks: [] } });
 

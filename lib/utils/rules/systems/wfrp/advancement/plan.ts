@@ -1,5 +1,5 @@
 import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, LEDGER_MAX, type LedgerEntry, SKILL_ADVANCE_KEY_RE } from "../characteristics/keys";
-import { type CareerCtx, inCareer, tickKey } from "./career";
+import { type CareerCtx, careerPrice, tickKey } from "./career";
 import { advanceCost, talentCost } from "./cost";
 import type { AdvancementRules } from "./rules";
 
@@ -69,11 +69,11 @@ export function planPurchase(input: PurchaseInput): PurchaseResult {
 
   if ("error" in priced) return { ok: false, error: priced.error };
 
-  const inList = input.career ? inCareer(input.career, request.kind, request.key) : false;
+  const { cost, outOfCareer } = careerPrice(input.career, rules, request.kind, request.key, priced.cost);
 
-  const cost = input.career && !inList ? Math.round(priced.cost * rules.career.outOfCareerMultiplier) : priced.cost;
+  const key = tickKey(request.kind, request.key);
 
-  const tick = input.career && inList && !input.career.state.ticks.includes(tickKey(request.kind, request.key)) ? tickKey(request.kind, request.key) : undefined;
+  const tick = input.career && outOfCareer === null && !input.career.state.ticks.includes(key) ? key : undefined;
 
   if (input.available < cost) return { ok: false, error: "INSUFFICIENT_XP" };
 

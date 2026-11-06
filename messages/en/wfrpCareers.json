@@ -6,7 +6,7 @@
     "emptyTitle": "No careers yet",
     "emptyDescription": "Create a career with four tiers.",
     "deleteTitle": "Delete \"{name}\"?",
-    "deleteBody": "A career held by heroes cannot be deleted.",
+    "deleteBody": "This cannot be undone.",
     "deleteFailed": "Could not delete"
   },
   "form": {
@@ -55,5 +55,9 @@
     "remove": "Remove: {name}",
     "addTalent": "Add talent",
     "ledgerNote": "Purchase log: {count}. Changed only by buying or undoing."
+  },
+  "panel": {
+    "replaceTitle": "Replace the career?",
+    "replaceBody": "The current career is at tier {tier} with {have} ticks. The new career starts at tier 1 with no ticks."
   }
 }

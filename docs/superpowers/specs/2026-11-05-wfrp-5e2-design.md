@@ -40,7 +40,7 @@
 
 ### 3. Рушій (чисті модулі `wfrp/advancement/career/`)
 
-- `inCareer(career, tierDef, kind, key)` → чи пункт входить у перелік поточного рівня.
+- `inCareer(career, tierDef, kind, key)` → чи пункт входить у перелік поточного або будь-якого попереднього рівня (WFRP 4e; змінено на фінальному рев'ю 2026-11-06 — спершу був лише поточний рівень).
 - `planPurchase` приймає `career?: { state, tierDef }`: якщо кар'єра є й пункт не в переліку — ціна × `outOfCareerMultiplier` (округлення `Math.round`, як `talentCost`); якщо в переліку й тіка ще немає — додає тік у `career.ticks` і `entry.tick`. Без `career` — поведінка 5e-1 без змін.
 - `planUndo` знімає `entry.tick` з `career.ticks`, якщо запис містить тік. Якщо кар'єру змінили після покупки (`careerId`/`tier` не збігаються з тими, що були, або тіка вже немає) — тік не чіпаємо, покупка відкочується як у 5e-1.
 - `planCareerSet(characteristics, careerId)` → `career = { careerId, tier: 1, ticks: [] }`; `planCareerAdvance(characteristics, rules, { force })` → `tier + 1`, `ticks: []`; помилки: `NO_CAREER`, `MAX_TIER`, `TICKS_MISSING` (без `force`).

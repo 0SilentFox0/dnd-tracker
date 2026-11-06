@@ -30,11 +30,13 @@ describe("inCareer", () => {
     expect(inCareer(c, "talent", "t1")).toBe(true);
   });
 
-  it("uses only the current tier", () => {
-    const c = { ...ctx(), tiers: [tier(), tier({ talents: ["t2"] }), tier(), tier()] };
+  it("includes the current and earlier tiers, not later ones", () => {
+    const c = { ...ctx(), tiers: [tier(), tier({ talents: ["t2"] }), tier({ talents: ["t3"] }), tier()] };
 
-    expect(inCareer({ ...c, state: { ...c.state, tier: 2 } }, "talent", "t1")).toBe(false);
+    expect(inCareer({ ...c, state: { ...c.state, tier: 2 } }, "talent", "t1")).toBe(true);
     expect(inCareer({ ...c, state: { ...c.state, tier: 2 } }, "talent", "t2")).toBe(true);
+    expect(inCareer({ ...c, state: { ...c.state, tier: 2 } }, "talent", "t3")).toBe(false);
+    expect(inCareer(c, "talent", "t2")).toBe(false);
   });
 });
 
@@ -48,6 +50,14 @@ describe("planPurchase with career", () => {
 
   it("in-career: base price and a tick", () => {
     const c = ctx();
+
+    const r = buy({ request: { kind: "characteristic", key: "ws" }, career: c, characteristics: withCareer(c) });
+
+    expect(r.ok && [r.entry.cost, r.entry.tick, r.next.career?.ticks]).toEqual([25, "characteristic:ws", ["characteristic:ws"]]);
+  });
+
+  it("an earlier-tier item stays in-career and ticks the current tier", () => {
+    const c: CareerCtx = { state: { careerId: "c1", tier: 2, ticks: [] }, tiers: [tier(), tier({ characteristics: ["bs"] }), tier(), tier()] };
 
     const r = buy({ request: { kind: "characteristic", key: "ws" }, career: c, characteristics: withCareer(c) });
 
@@ -111,7 +121,7 @@ describe("planUndo with ticks", () => {
 
     expect(u2.ok && u2.next.career).toBeUndefined();
 
-    const u3 = planUndo({ ...bought.next, career: { ...bought.next.career!, ticks: [] } });
+    const u3 = planUndo({ ...bought.next, career: { ...c.state, ticks: [] } });
 
     expect(u3.ok && u3.next.career?.ticks).toEqual([]);
   });
