@@ -47,4 +47,4 @@ export const WFRP_BATTLE_NAMESPACES = [...BATTLE_NAMESPACES, "battleWfrp"] as co
 
 export const WFRP_CAMPAIGN_EXTRA = ["wfrpMagic", "wfrpAdvancement"] as const satisfies readonly Namespace[];
 
-export const WFRP_DM_EXTRA = ["wfrpCareers"] as const satisfies readonly Namespace[];
+export const WFRP_DM_EXTRA = ["wfrpCareers", "wfrpCreation"] as const satisfies readonly Namespace[];

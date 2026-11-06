@@ -1,5 +1,7 @@
 import { type SystemUi } from "../types";
 import { CareerForm } from "./careers/CareerForm";
+import { SpeciesProfileEditor } from "./creation/SpeciesProfileEditor";
+import { WfrpDraftForm } from "./creation/WfrpDraftForm";
 import { AdvancementEditor } from "./AdvancementEditor";
 import { AdvancementTab } from "./AdvancementTab";
 import { HeroStats } from "./HeroStats";
@@ -10,4 +12,4 @@ import { StatsTab } from "./StatsTab";
 import { SystemConditionsDialog } from "./SystemConditionsDialog";
 import { UnitStatsFields } from "./UnitStatsFields";
 
-export const WFRP_UI: SystemUi = { HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, battleConditionsDialog: SystemConditionsDialog };
+export const WFRP_UI: SystemUi = { HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, DraftForm: WfrpDraftForm, RaceProfileEditor: SpeciesProfileEditor, battleConditionsDialog: SystemConditionsDialog };

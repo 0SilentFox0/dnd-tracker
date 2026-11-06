@@ -1,0 +1,139 @@
+// @vitest-environment happy-dom
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { WfrpDraftForm } from "../WfrpDraftForm";
+
+import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
+vi.mock("@/lib/api/characters", () => ({ createWfrpDraft: vi.fn(), updateWfrpDraftIdentity: vi.fn() }));
+
+vi.mock("@/components/ui/image-upload", () => ({ ImageUpload: () => null }));
+
+vi.mock("@/components/ui/select-field", () => ({
+  SelectField: ({ value, options, onValueChange, "aria-label": label }: { value: string; options: { value: string; label: string }[]; onValueChange: (v: string) => void; "aria-label"?: string }) => (
+    <select aria-label={label} value={value} onChange={(e) => onValueChange(e.target.value)}>
+      <option value="">-</option>
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  ),
+}));
+
+const data = vi.hoisted(() => ({ races: [] as unknown[], profiles: [] as unknown[] }));
+
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { system: { key: "wfrp" }, advancement: DEFAULT_ADVANCEMENT_RULES } }) }));
+
+vi.mock("@/lib/hooks/careers", () => ({ useCareers: () => ({ data: [{ id: "ca", name: "Soldier" }, { id: "cb", name: "Scribe" }] }) }));
+
+vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => ({ data: [{ id: "f0", name: "Hardy" }, { id: "f1", name: "Lucky" }] }) }));
+
+vi.mock("@/lib/hooks/races", () => ({
+  useRaces: () => ({ data: data.races, isPending: false }),
+  useRaceProfiles: () => ({ data: data.profiles, isPending: false }),
+}));
+
+const profile = {
+  mods: { ws: 5 },
+  move: 4,
+  fate: 2,
+  extraWounds: 0,
+  talents: ["f0"],
+  randomTalentCount: 1,
+  randomTalents: [{ max: 100, featId: "f1" }],
+  careerTable: [
+    { max: 50, careerId: "ca" },
+    { max: 100, careerId: "cb" },
+  ],
+};
+
+const mount = () => render(<QueryClientProvider client={new QueryClient()}><WfrpDraftForm campaignId="c1" /></QueryClientProvider>);
+
+const next = () => screen.getByRole("button", { name: "wfrpCreation.wizard.next" });
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", () => ({ matches: true }));
+  data.races = [{ id: "r1", name: "Human" }];
+  data.profiles = [{ raceId: "r1", profile }];
+});
+
+afterEach(cleanup);
+
+describe("WfrpDraftForm", () => {
+  it("shows the not-ready empty state when no species has a usable profile", () => {
+    data.profiles = [];
+
+    mount();
+
+    expect(screen.getByText("wfrpCreation.species.notReadyTitle")).toBeTruthy();
+  });
+
+  it("walks the steps in order and blocks Next until each is valid", () => {
+    mount();
+
+    expect((next() as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Human/ }));
+    fireEvent.click(next());
+
+    expect(screen.getByText("wfrpCreation.career.hint")).toBeTruthy();
+    expect((next() as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.career.roll" }));
+
+    const options = within(screen.getByRole("radiogroup", { name: "wfrpCreation.career.pickLabel" })).getAllByRole("radio");
+
+    expect(options).toHaveLength(2);
+
+    fireEvent.click(options[0]);
+    fireEvent.click(next());
+
+    expect(screen.getByText("wfrpCreation.stats.hint")).toBeTruthy();
+    expect((next() as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.stats.roll" }));
+
+    expect(screen.getAllByTestId(/^stat-/)).toHaveLength(10);
+
+    fireEvent.click(next());
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.talents.roll" }));
+    fireEvent.click(next());
+
+    expect(screen.getByText("wfrpCreation.identity.hint")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "wfrpCreation.wizard.submit" })).toHaveProperty("disabled", true);
+
+    fireEvent.change(screen.getByLabelText(/wfrpCreation.identity.name/), { target: { value: "Hans" } });
+
+    expect(screen.getByRole("button", { name: "wfrpCreation.wizard.submit" })).toHaveProperty("disabled", false);
+    expect(screen.getByText(/wfrpCreation.identity.experience/)).toBeTruthy();
+  });
+
+  it("rearranging swaps neighbouring values", () => {
+    mount();
+
+    fireEvent.click(screen.getByRole("radio", { name: /Human/ }));
+    fireEvent.click(next());
+    fireEvent.click(screen.getAllByRole("button", { name: "wfrpCreation.career.roll" })[0]);
+    fireEvent.click(within(screen.getByRole("radiogroup", { name: "wfrpCreation.career.pickLabel" })).getAllByRole("radio")[0]);
+    fireEvent.click(next());
+    fireEvent.click(screen.getByRole("radio", { name: /wfrpCreation.stats.modes.rearranged/ }));
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.stats.roll" }));
+
+    const read = () => screen.getAllByTestId(/^stat-/).map((e) => e.textContent);
+
+    const before = read();
+
+    fireEvent.click(screen.getByRole("button", { name: /wfrpCreation.stats.down: gameTerms.characteristics.ws.label/ }));
+
+    const after = read();
+
+    expect(after[0]).toBe(before[1]);
+    expect(after[1]).toBe(before[0]);
+  });
+});

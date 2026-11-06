@@ -5,7 +5,7 @@ import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings
 import type { DifficultyKey } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { CareerData } from "@/types/careers";
-import type { SheetRollBody, SheetRollResult, SheetTotal } from "@/types/characters";
+import type { SheetRollBody, SheetRollResult, SheetTotal, WfrpDraftIdentityInput } from "@/types/characters";
 import type { Unit } from "@/types/units";
 
 export interface SheetRollRequest {
@@ -59,6 +59,17 @@ export interface SystemConditionsDialogProps {
   isPending: boolean;
 }
 
+export interface DraftFormProps {
+  campaignId: string;
+  characterId?: string;
+  initialIdentity?: WfrpDraftIdentityInput;
+}
+
+export interface RaceProfileEditorProps {
+  campaignId: string;
+  raceId: string;
+}
+
 export interface SystemUi {
   HeroStats: ComponentType;
   StatsTab: ComponentType<StatsTabProps>;
@@ -70,5 +81,7 @@ export interface SystemUi {
   AdvancementTab?: ComponentType;
   AdvancementEditor?: ComponentType<AdvancementEditorProps>;
   CareerForm?: ComponentType<CareerFormProps>;
+  DraftForm?: ComponentType<DraftFormProps>;
+  RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
   battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
 }

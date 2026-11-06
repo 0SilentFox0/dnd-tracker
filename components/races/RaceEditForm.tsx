@@ -6,8 +6,10 @@ import { RaceFormFields } from "./RaceFormFields";
 
 import { withAbilityErrors } from "@/components/abilities";
 import { HudForm, HudFormPage } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { useRaceForm } from "@/lib/hooks/races";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { getInitialRaceFormData } from "@/lib/utils/races/race-form";
@@ -24,6 +26,10 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
   const ta = useTranslator("abilities");
 
   const tc = useTranslations("common");
+
+  const { key } = useRuleSystem({ campaignId });
+
+  const ProfileEditor = key && systemUiOf(key).RaceProfileEditor;
 
   const editor = useRaceForm(campaignId, race.id, getInitialRaceFormData(race));
 
@@ -55,6 +61,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
             abilityIssues={race.abilityIssues}
             onAbilitiesValidityChange={editor.abilities.onValidityChange}
           />
+          {ProfileEditor && <ProfileEditor campaignId={campaignId} raceId={race.id} />}
         </div>
       </HudForm>
     </HudFormPage>
