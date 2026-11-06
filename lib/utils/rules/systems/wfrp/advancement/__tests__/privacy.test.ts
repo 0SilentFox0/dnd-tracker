@@ -28,4 +28,14 @@ describe("preserveServerOwned", () => {
 
     expect(result).toMatchObject({ fate: 3, advances: existing.advances, skillAdvances: existing.skillAdvances, talents: existing.talents, ledger: existing.ledger, spentArchived: 70 });
   });
+
+  it("a player cannot set, change or drop the career through a patch", () => {
+    const career = { careerId: "c1", tier: 2 as const, ticks: ["skill:athletics"] };
+
+    const forged = { ...DEFAULT_CHARACTERISTICS, career: { careerId: "c1", tier: 4 as const, ticks: [] } };
+
+    expect(preserveServerOwned({ ...existing, career }, forged).career).toEqual(career);
+    expect(preserveServerOwned({ ...existing, career }, DEFAULT_CHARACTERISTICS).career).toEqual(career);
+    expect(preserveServerOwned(existing, forged).career).toBeUndefined();
+  });
 });

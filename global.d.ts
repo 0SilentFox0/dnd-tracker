@@ -49,6 +49,7 @@ import type spells from "./messages/uk/spells.json";
 import type units from "./messages/uk/units.json";
 import type validation from "./messages/uk/validation.json";
 import type wfrpAdvancement from "./messages/uk/wfrpAdvancement.json";
+import type wfrpCareers from "./messages/uk/wfrpCareers.json";
 import type wfrpMagic from "./messages/uk/wfrpMagic.json";
 import type whatsNew from "./messages/uk/whatsNew.json";
 import type world from "./messages/uk/world.json";
@@ -110,6 +111,7 @@ declare module "next-intl" {
       battleActions: typeof battleActions;
       battleWfrp: typeof battleWfrp;
       wfrpAdvancement: typeof wfrpAdvancement;
+      wfrpCareers: typeof wfrpCareers;
       wfrpMagic: typeof wfrpMagic;
     };
   }

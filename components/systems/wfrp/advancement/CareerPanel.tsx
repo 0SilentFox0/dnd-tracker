@@ -66,7 +66,7 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
 
     const short = required !== undefined && state.ticks.length < required;
 
-    if (short && !(await confirm({ title: t("forceTitle"), description: t("forceBody", { have: state.ticks.length, need: required }), confirmLabel: t("advance") }))) return;
+    if (short && !(await confirm({ title: t("advance"), description: t("forceBody", { have: state.ticks.length, need: required }), confirmLabel: t("advance") }))) return;
 
     await ops.advanceCareer(short);
   };
@@ -75,7 +75,7 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
       <SelectField aria-label={t("pick")} value={pick} onValueChange={setPick} options={(careers.data ?? []).map((c) => ({ value: c.id, label: c.name }))} placeholder={t("pick")} triggerClassName="min-h-11 w-full" />
       <Button type="button" size="sm" variant="outline" className="min-h-11" disabled={!pick || ops.isPending} onClick={() => void ops.setCareer(pick)}>
-        {state ? t("change") : t("assign")}
+        {t("assign")}
       </Button>
     </div>
   );
@@ -92,11 +92,11 @@ export function CareerPanel({ campaignId, characterId, state, isDM }: Props) {
     <HudSection title={t("title")}>
       <div className="space-y-2">
         <div className="flex items-baseline justify-between gap-2 text-sm">
-          <b className="min-w-0 truncate text-hud-ink">{career?.name ?? t("deleted")}</b>
+          <b className="min-w-0 truncate text-hud-ink">{career?.name ?? "—"}</b>
           <span className="shrink-0 tabular-nums text-hud-muted">{t("tier", { tier: state.tier })}</span>
         </div>
         {career?.tiers[state.tier - 1]?.name && <p className="text-xs text-hud-muted">{career.tiers[state.tier - 1].name}</p>}
-        <p className="text-sm tabular-nums">{required === undefined ? t("maxTier") : t("ticks", { have: state.ticks.length, need: required })}</p>
+        {required !== undefined && <p className="text-sm tabular-nums">{t("ticks", { have: state.ticks.length, need: required })}</p>}
         {state.ticks.length > 0 && (
           <ul className="flex flex-wrap gap-1 text-xs">
             {state.ticks.map((tick) => (

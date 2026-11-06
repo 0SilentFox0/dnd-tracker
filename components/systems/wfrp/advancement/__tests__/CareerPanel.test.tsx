@@ -35,7 +35,7 @@ describe("CareerPanel", () => {
     cleanup();
     mount(undefined, false);
 
-    expect(screen.getByText("Кар'єру ще не призначено.")).toBeTruthy();
+    expect(screen.getByText("Кар'єру не призначено.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Призначити" })).toBeNull();
   });
 

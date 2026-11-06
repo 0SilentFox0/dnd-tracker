@@ -4,6 +4,7 @@ import type { SystemConditionBody } from "@/lib/hooks/battles";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import type { DifficultyKey } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
+import type { CareerData } from "@/types/careers";
 import type { SheetRollBody, SheetRollResult, SheetTotal } from "@/types/characters";
 import type { Unit } from "@/types/units";
 
@@ -32,6 +33,19 @@ export interface StatsFieldsProps {
   classArmor?: SheetTotal | null;
 }
 
+export interface AdvancementEditorProps {
+  bindings: CharacterFormBindings;
+  campaignId: string;
+}
+
+export interface CareerFormProps {
+  formId: string;
+  campaignId: string;
+  career?: CareerData;
+  onDone: () => void;
+  onSavingChange?: (saving: boolean) => void;
+}
+
 export interface UnitStatsFieldsProps {
   formData: Partial<Unit>;
   onChange: (patch: Partial<Unit>) => void;
@@ -54,5 +68,7 @@ export interface SystemUi {
   hideProgression: boolean;
   MagicTab?: ComponentType;
   AdvancementTab?: ComponentType;
+  AdvancementEditor?: ComponentType<AdvancementEditorProps>;
+  CareerForm?: ComponentType<CareerFormProps>;
   battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
 }

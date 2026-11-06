@@ -132,6 +132,9 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                   ),
                 },
               ]),
+          ...(sheet.viewer.isDM && Ui.AdvancementEditor
+            ? [{ id: "advancement" as const, label: t("tabs.advancement"), content: <Ui.AdvancementEditor bindings={form} campaignId={campaignId} /> }]
+            : []),
           ...(showChoices
             ? [
                 {

@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 
 import { ActionsSection } from "./sections/ActionsSection";
+import { AdvancementSection } from "./sections/AdvancementSection";
 import { ClassesSection } from "./sections/ClassesSection";
 import { ConcentrationSection } from "./sections/ConcentrationSection";
 import { ConditionsSection } from "./sections/ConditionsSection";
@@ -28,8 +29,6 @@ import { useTranslator } from "@/lib/i18n/use-translator";
 import type { MechanicKey } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 
-type FormMechanicKey = Exclude<MechanicKey, "advancement">;
-
 const FORM_ID = "campaign-rules-form";
 
 const SECTIONS = {
@@ -49,7 +48,8 @@ const SECTIONS = {
   encounters: EncountersSection,
   items: ItemsSection,
   spellIngredients: SpellIngredientsSection,
-} satisfies Record<FormMechanicKey, unknown>;
+  advancement: AdvancementSection,
+} satisfies Record<MechanicKey, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {
   const t = useTranslator("rules");
@@ -64,7 +64,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   const unused = ruleSystemOf(form.data).unusedMechanics;
 
-  const tabs: HudTab<FormMechanicKey>[] = (Object.keys(SECTIONS) as FormMechanicKey[]).map((key) => {
+  const tabs: HudTab<MechanicKey>[] = (Object.keys(SECTIONS) as MechanicKey[]).filter((key) => key !== "advancement" || form.data.system.key === "wfrp").map((key) => {
     const Section = SECTIONS[key];
 
     return {

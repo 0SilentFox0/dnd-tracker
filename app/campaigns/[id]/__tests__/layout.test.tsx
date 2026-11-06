@@ -1,10 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ userId: "u1", kind: "demo", wfrp: false }));
+const mocks = vi.hoisted(() => ({ userId: "u1", kind: "demo", wfrp: false, role: "player" }));
 
 vi.mock("@/lib/auth", () => ({ getSessionUserId: () => Promise.resolve(mocks.userId) }));
-vi.mock("@/lib/server/campaigns/access", () => ({ getCampaignForLayout: () => Promise.resolve({ kind: mocks.kind }) }));
+vi.mock("@/lib/server/campaigns/access", () => ({ getCampaignForLayout: () => Promise.resolve({ kind: mocks.kind, members: [{ role: mocks.role }] }) }));
 vi.mock("@/components/onboarding/DemoTourCoordinator", () => ({
   DemoTourCoordinator: ({ children }: { children: React.ReactNode }) => <div data-testid="tour-coordinator">{children}</div>,
 }));
@@ -21,6 +21,7 @@ import CampaignLayout from "@/app/campaigns/[id]/layout";
 afterEach(() => {
   mocks.kind = "demo";
   mocks.wfrp = false;
+  mocks.role = "player";
 });
 
 describe("CampaignLayout", () => {
@@ -52,5 +53,17 @@ describe("CampaignLayout", () => {
     mocks.wfrp = true;
 
     expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement"');
+  });
+
+  it("adds the careers scope for the DM of a wfrp campaign only", async () => {
+    mocks.kind = "campaign";
+    mocks.wfrp = true;
+    mocks.role = "dm";
+
+    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement,wfrpCareers"');
+
+    mocks.wfrp = false;
+
+    expect(await html()).not.toContain("wfrpCareers");
   });
 });
