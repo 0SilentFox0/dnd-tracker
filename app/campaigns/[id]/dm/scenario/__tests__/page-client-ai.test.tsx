@@ -37,6 +37,7 @@ vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioPage: () => ({}),
   useGenerateScenarioSummary: () => ({ pendingPageId: null, generate: vi.fn() }),
   useScenarioPlay: () => ({}),
+  useSceneNeighbours: () => ({}),
   useSectionCollapse: () => ({ showPlayed: false, setShowPlayed: vi.fn(), isExpanded: () => true, expand: vi.fn() }),
   useSectionProgress: () => ({ setPlayed: vi.fn(), setRevealed: vi.fn(), isPending: false }),
 }));

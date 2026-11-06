@@ -21,10 +21,12 @@ html.dark .scenario-book:not([data-theme]) {
 .scenario-book .sb-bar strong { font-size: 17px; margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-scenario-serif), serif; }
 .scenario-book .sb-bar-btns { display: flex; gap: 8px; align-items: center; flex: none; }
 .scenario-book .sb-bar-toc { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.scenario-book .sb-bar-nav { display: inline-flex; align-items: center; gap: 6px; flex: none; max-width: 180px; text-decoration: none; }
+.scenario-book .sb-bar-nav-label { font-size: 11px; opacity: .75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .scenario-book .sb-bar-more { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .scenario-book .sb-bar .toggle.is-primary { border-color: var(--blood); color: var(--blood); font-weight: 700; }
 @media (max-width: 640px) {
-  .scenario-book .sb-bar strong, .scenario-book .sb-bar-toc-label, .scenario-book .sb-hide-sm { display: none; }
+  .scenario-book .sb-bar strong, .scenario-book .sb-bar-toc-label, .scenario-book .sb-bar-nav-label, .scenario-book .sb-hide-sm { display: none; }
   .scenario-book .sb-bar-btns { margin-left: auto; scrollbar-width: none; }
 }
 .scenario-book .toggle { font: inherit; background: none; border: 1px solid var(--rule); color: var(--ink); border-radius: 4px; padding: 4px 10px; cursor: pointer; }

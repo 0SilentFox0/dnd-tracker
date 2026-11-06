@@ -30,4 +30,11 @@ describe("ScenarioBar", () => {
     expect(onOpen).toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Показати нотатки" })).toBeTruthy();
   });
+
+  it("стрілки на попередню/наступну сцену з підписом", () => {
+    render(<ScenarioBar title="Б" notes={{ hidden: false, toggle: vi.fn() }} nav={{ prev: { href: "/a", title: "А" }, next: { href: "/c", title: "В" } }} menu={[]} />);
+
+    expect(screen.getByRole("link", { name: /Попередня сцена: А/ }).getAttribute("href")).toBe("/a");
+    expect(screen.getByRole("link", { name: /Наступна сцена: В/ }).getAttribute("href")).toBe("/c");
+  });
 });

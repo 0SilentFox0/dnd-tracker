@@ -2,25 +2,22 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BookOpen, ChevronDown, ChevronsUpDown, History, Loader2, MessageSquare, Moon, RefreshCw, Sun } from "lucide-react";
+import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
 
-import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
-import { AssistantReview } from "@/components/ai/AssistantReview";
+import { ScenarioAiPanel } from "./scenario-ai-panel";
+import { ScenarioPageActions } from "./scenario-page-actions";
+
 import type { ActionsMenuItem } from "@/components/common/ActionsMenu";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioSummaryPanel, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { WorldMapLink } from "@/components/world/WorldMapLink";
 import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
 import { useMediaQuery } from "@/lib/hooks/common";
-import { useGenerateScenarioSummary, useScenarioPage, useScenarioPlay, useSectionCollapse, useSectionProgress } from "@/lib/hooks/scenario";
+import { useGenerateScenarioSummary, useScenarioPage, useScenarioPlay, useSceneNeighbours, useSectionCollapse, useSectionProgress } from "@/lib/hooks/scenario";
 import { useAppDark } from "@/lib/hooks/theme";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
@@ -61,6 +58,10 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit, i
   const summary = useGenerateScenarioSummary(campaignId);
 
   const collapse = useSectionCollapse();
+
+  const neighbours = useSceneNeighbours(campaignId, page.id);
+
+  const sceneLink = (p?: { id: string; title: string }) => (p ? { href: `/campaigns/${campaignId}/dm/scenario/${p.id}`, title: p.title } : undefined);
 
   const [hideNotes, setHideNotes] = useState(false);
 
@@ -119,44 +120,15 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit, i
     setAiOpen(true);
   };
 
-  // edit mode leaves through the editor's own "Done" button, which awaits the last save first
   const actions = (
-    <>
-      {!editBase && canEdit && (
-        <>
-          <button type="button" className="toggle is-primary" onClick={() => setEditBase(page)}>
-            {t("edit")}
-          </button>
-          <Link className="toggle sb-hide-sm" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
-            {t("showScreen")}
-          </Link>
-          <WorldMapLink campaignId={campaignId} variant="toggle" />
-        </>
-      )}
-      {aiEnabled && (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button type="button" variant="ghost" className="toggle" aria-label="AI">
-                AI <ChevronDown className="ml-1 size-3.5" aria-hidden />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => openAi(false)}>
-                <MessageSquare aria-hidden /> {t("openAi")}
-              </DropdownMenuItem>
-              {page.kind === "scene" && (
-                <DropdownMenuItem disabled={summary.pendingPageId === page.id} onSelect={() => summary.generate(page.id, true)}>
-                  {summary.pendingPageId === page.id ? <Loader2 className="animate-spin" aria-hidden /> : <RefreshCw aria-hidden />}
-                  {t("refreshSummary")}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AiProposalBadge count={proposals.pendingCount} onClick={() => openAi(true)} />
-        </>
-      )}
-    </>
+    <ScenarioPageActions
+      campaignId={campaignId}
+      page={page}
+      flags={{ canEdit, aiEnabled, editing: !!editBase }}
+      summary={summary}
+      proposals={{ pendingCount: proposals.pendingCount }}
+      on={{ edit: () => setEditBase(page), openAi }}
+    />
   );
 
   const menu: ActionsMenuItem[] = [
@@ -172,6 +144,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit, i
         title={page.title}
         notes={{ hidden: hideNotes, toggle: () => setHideNotes((v) => !v) }}
         toc={tocInline ? undefined : { onOpen: () => setTocOpen(true) }}
+        nav={page.kind === "scene" && !editBase ? { prev: sceneLink(neighbours.prev), next: sceneLink(neighbours.next) } : undefined}
         actions={actions}
         menu={menu}
       />
@@ -205,25 +178,13 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled, canEdit, i
       )}
       {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}
       {aiEnabled && aiOpen && (
-        <AiPanel
+        <ScenarioAiPanel
           campaignId={campaignId}
           mode={aiMode}
-          focus={{ value: focus, page, onClear: () => setFocusCleared(true) }}
-          proposals={{
-            data: proposals,
-            showPending: pendingShown,
-            review: <AssistantReview campaignId={campaignId} />,
-            render: (id, { send }) => {
-              const proposal = proposals.byId(id);
-
-              if (!proposal) return null;
-
-              const onRedo = () => send?.(`The proposal "${proposal.summary}" is outdated: re-read the page and propose it again.`);
-
-              return <AiProposalCard campaignId={campaignId} proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
-            },
-          }}
-          actions={{ onClose: () => setAiOpen(false) }}
+          page={page}
+          focus={{ value: focus, onClear: () => setFocusCleared(true) }}
+          proposals={{ data: proposals, showPending: pendingShown }}
+          onClose={() => setAiOpen(false)}
         />
       )}
       {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}

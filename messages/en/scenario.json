@@ -33,6 +33,8 @@
   "bar": {
     "hideNotes": "Hide notes",
     "more": "More",
+    "nextScene": "Next scene",
+    "prevScene": "Previous scene",
     "sections": "Sections",
     "showNotes": "Show notes"
   },
