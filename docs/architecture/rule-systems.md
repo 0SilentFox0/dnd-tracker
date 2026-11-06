@@ -163,6 +163,19 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - `rules.advancement` додано в `MECHANIC_REGISTRY` (синхронізація шаблонами) і отримав DM-редактор (`AdvancementEditor` у формі правил).
 - DM-вкладка «Розвиток» у профілі героя (`ProfileEditor`, кар'єра/леджер/покупки; леджер лише читається).
 
+## Межі 5e-3
+
+Створення персонажа wfrp (на `feat/wfrp`, не змерджено; міграція `20261126000000_race_profiles`, expand-only, з RLS). Spec/план — `docs/superpowers/{specs,plans}/2026-11-06-wfrp-5e3*`.
+
+- Таблиця `race_profiles` (`raceId` unique, `campaignId`, `profile` JSON = `SpeciesProfile`: `mods`, `move`, `fate`, `extraWounds`, `talents`, `randomTalentCount`, `randomTalents`, `careerTable`). Профіль живе в окремій таблиці, а не колонкою `Race`. `GET /api/campaigns/:id/race-profiles` (член; невалідні рядки пропускаються), `PUT /api/campaigns/:id/races/:raceId/profile` (DM; перевірка посилань на кар'єри/таланти кампанії через `assertCampaignRefs`).
+- `RuleSystemDefinition.creation` (`RuleSystemCreation`): `planDraft(picks, ctx)` — чиста валідація вибору і підрахунок `characteristics` + XP (коди помилок `CAREER_*`, `STATS_*`, `POINTS_*`, `TALENT_*`, `FEAT_UNKNOWN`, `PROFILE_NOT_READY`), `rollCreation(rng, profile)` — кидки кар'єри (2), характеристик (2d10 × N) і талантів, `isUsableProfile`. Код — `lib/utils/rules/systems/wfrp/creation/`.
+- Слоти `SystemUi.DraftForm` (майстер `WfrpDraftForm`: вид → кар'єра → характеристики → таланти → особисте) і `SystemUi.RaceProfileEditor` (редактор профілю в `RaceEditForm`; `SpeciesProfileEditor` ліниво, щоб zod не потрапляв у клієнтські entry). Схеми імпортуються з `@/lib/utils/rules/systems/schemas`, не з барелю (zod у графі wfrp ламає `client-imports.test.ts`).
+- API чернеток: `POST …/characters/draft` і `PATCH …/characters/[characterId]/draft` для систем із `creation` — див. [characters.md](characters.md).
+- `rules.advancement.creation`: `careerBonus { rolled, choice, free }`, `statBonus { rolled, rearranged, free }`, `freeBudget`; дефолти 50/25/0, 50/25/0, 100 — заглушки `// verify against 5e book`. Редагується в `AdvancementSection`.
+- Правило «кидок один раз»: кидки кар'єри/характеристик/талантів робляться одноразово, перекиду немає (скидаються лише зміною виду).
+- Відхилення від spec: стійкість (resilience) прибрано; профіль у `race_profiles`, а не колонка `Race`; вид зберігається за назвою в `character.race` (у `Character` немає `raceId`); PATCH чернетки wfrp лише для особистих полів.
+- Відкрито: M6 — коди `issues` сервера (`WFRP_DRAFT_INVALID`) у UI показуються лише загальним повідомленням; M11 — D&D-алайнменти у wfrp-майстрі (до 5f); синхронізація шаблонів може видалити риску/кар'єру, використану в профілі виду (гарда немає); в майстрі немає AI-аватара/передісторії; цілі лише `personal`; браузерної перевірки майстра на 375 px не було.
+
 ## Межі 5c-1
 
 Стани й Fortune на `feat/wfrp` (без міграції; UI — namespace `battleWfrp`). Свідомі межі:
