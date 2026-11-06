@@ -20,6 +20,21 @@
     "ledgerEmpty": "No purchases yet.",
     "spent": "{cost} XP",
     "newSkill": "New skill",
-    "spec": "Specialization"
+    "spec": "Specialization",
+    "outOfCareer": "Out of career ×{multiplier}"
+  },
+  "career": {
+    "title": "Career",
+    "none": "No career assigned yet.",
+    "pick": "Choose a career",
+    "assign": "Assign",
+    "change": "Change",
+    "deleted": "Career deleted",
+    "tier": "Tier {tier}/4",
+    "maxTier": "Top tier",
+    "ticks": "Ticks {have}/{need}",
+    "advance": "Advance",
+    "forceTitle": "Advance without ticks?",
+    "forceBody": "Ticks {have} of {need}. Advance the career tier anyway?"
   }
 }

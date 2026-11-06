@@ -13,14 +13,17 @@ import type { FeatData } from "@/types/choices";
 
 vi.unmock("next-intl");
 
-const mocks = vi.hoisted(() => ({ character: { data: undefined as unknown }, feats: { data: undefined as unknown }, buy: vi.fn(), undo: vi.fn() }));
+const mocks = vi.hoisted(() => ({ character: { data: undefined as unknown }, feats: { data: undefined as unknown }, careers: { data: [] as unknown }, buy: vi.fn(), undo: vi.fn() }));
 
 vi.mock("@/lib/hooks/characters", () => ({
   useCharacter: () => mocks.character,
+  useCareerOps: () => ({ setCareer: vi.fn(), advanceCareer: vi.fn(), isPending: false }),
   useAdvance: () => ({ buy: mocks.buy, undo: mocks.undo, isPending: false, error: null }),
 }));
 vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: DEFAULT_RULES }) }));
 vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => mocks.feats }));
+vi.mock("@/lib/hooks/common", () => ({ useConfirm: () => vi.fn() }));
+vi.mock("@/lib/hooks/careers", () => ({ useCareers: () => mocks.careers }));
 
 const feat = (id: string, xpCost: number | null, maxRank: number | null): FeatData => ({ id, name: `Feat ${id}`, icon: null, type: "general", prerequisite: {}, repeatable: false, xpCost, maxRank, description: null, abilities: [], choices: [] });
 
@@ -90,6 +93,25 @@ describe("AdvancementTab", () => {
 
     expect(screen.getAllByText("Невідомий талант").length).toBeGreaterThan(0);
     expect(screen.getByText("Ранг 2")).toBeTruthy();
+  });
+
+  it("marks out-of-career items with the multiplier and prices them x2; in-list items stay at base", () => {
+    mocks.careers.data = [{ id: "car", name: "Soldier", icon: null, class: null, tiers: [{ name: "Recruit", characteristics: ["ws"], skills: [], talents: [], trappings: [] }, ...Array.from({ length: 3 }, () => ({ name: "", characteristics: [], skills: [], talents: [], trappings: [] }))] }];
+
+    mount({ experience: 500, chars: { career: { careerId: "car", tier: 1, ticks: [] } } });
+
+    expect(screen.getAllByRole("button", { name: "Купити · 25" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Купити · 50" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Поза кар'єрою ×2").length).toBeGreaterThan(0);
+
+    mocks.careers.data = [];
+  });
+
+  it("keeps the base price when the career row is gone", () => {
+    mount({ experience: 500, chars: { career: { careerId: "gone", tier: 1, ticks: [] } } });
+
+    expect(screen.queryByText("Поза кар'єрою ×2")).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Купити · 25" }).length).toBeGreaterThan(0);
   });
 
   it("offers undo on the last ledger entry to the DM only", () => {

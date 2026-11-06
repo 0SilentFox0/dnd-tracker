@@ -32,3 +32,11 @@ export function planCareerAdvance(c: Characteristics, rules: AdvancementRules, o
 
   return { ok: true, next: { ...c, career: { ...career, tier: (career.tier + 1) as CareerState["tier"], ticks: [] } } };
 }
+
+export type CareerPrice = { cost: number; outOfCareer: number | null };
+
+export function careerPrice(ctx: CareerCtx | undefined, rules: AdvancementRules, kind: LedgerEntry["kind"], key: string, base: number): CareerPrice {
+  if (!ctx || inCareer(ctx, kind, key)) return { cost: base, outOfCareer: null };
+
+  return { cost: Math.round(base * rules.career.outOfCareerMultiplier), outOfCareer: rules.career.outOfCareerMultiplier };
+}

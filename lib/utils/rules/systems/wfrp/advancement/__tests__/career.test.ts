@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { type Characteristics, DEFAULT_CHARACTERISTICS } from "../../characteristics/keys";
-import { type CareerCtx, type CareerTierDef, inCareer, planCareerAdvance, planCareerSet, tickKey } from "../career";
+import { type CareerCtx, careerPrice, type CareerTierDef, inCareer, planCareerAdvance, planCareerSet, tickKey } from "../career";
 import { DEFAULT_ADVANCEMENT_RULES as RULES } from "../defaults";
 import { planPurchase, type PurchaseInput } from "../plan";
 import { planUndo } from "../undo";
@@ -159,5 +159,13 @@ describe("planCareerSet / planCareerAdvance", () => {
 
     expect(adv?.planCareerSet).toBe(planCareerSet);
     expect(adv?.planCareerAdvance).toBe(planCareerAdvance);
+  });
+});
+
+describe("careerPrice", () => {
+  it("keeps the base price without a career or in the list, multiplies outside it", () => {
+    expect(careerPrice(undefined, RULES, "characteristic", "bs", 25)).toEqual({ cost: 25, outOfCareer: null });
+    expect(careerPrice(ctx(), RULES, "characteristic", "ws", 25)).toEqual({ cost: 25, outOfCareer: null });
+    expect(careerPrice(ctx(), RULES, "characteristic", "bs", 25)).toEqual({ cost: 50, outOfCareer: 2 });
   });
 });

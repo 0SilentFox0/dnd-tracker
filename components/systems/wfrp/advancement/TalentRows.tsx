@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { AdvanceRow } from "./AdvanceRow";
 
-import { type AdvancementRules, talentCost } from "@/lib/utils/rules/systems/wfrp/advancement";
+import { type AdvancementRules, type CareerPrice, talentCost } from "@/lib/utils/rules/systems/wfrp/advancement";
 import type { FeatData } from "@/types/choices";
 
 interface Props {
@@ -13,10 +13,11 @@ interface Props {
   rules: AdvancementRules;
   available: number;
   pending: boolean;
+  price: (featId: string, base: number) => CareerPrice;
   onBuy: (featId: string) => void;
 }
 
-export function TalentRows({ feats, talents, rules, available, pending, onBuy }: Props) {
+export function TalentRows({ feats, talents, rules, available, pending, price, onBuy }: Props) {
   const t = useTranslations("wfrpAdvancement.ui");
 
   const shown = feats.filter((f) => f.xpCost != null || talents[f.id]);
@@ -34,13 +35,16 @@ export function TalentRows({ feats, talents, rules, available, pending, onBuy }:
 
         const max = feat.maxRank ?? 1;
 
+        const priced = rank >= max || feat.xpCost == null ? null : price(feat.id, talentCost(feat.xpCost, rank, rules));
+
         return (
           <AdvanceRow
             key={feat.id}
             label={feat.name}
             value={t("rank", { rank, max })}
             hint={feat.description}
-            cost={rank >= max || feat.xpCost == null ? null : talentCost(feat.xpCost, rank, rules)}
+            cost={priced?.cost ?? null}
+            outOfCareer={priced?.outOfCareer}
             limitLabel={rank >= max ? t("maxRank") : t("noCost")}
             available={available}
             pending={pending}

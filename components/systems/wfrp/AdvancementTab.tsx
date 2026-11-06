@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { AdvanceLedger } from "./advancement/AdvanceLedger";
 import { AdvanceRow } from "./advancement/AdvanceRow";
+import { CareerPanel } from "./advancement/CareerPanel";
 import { NewSkillPicker } from "./advancement/NewSkillPicker";
 import { TalentRows } from "./advancement/TalentRows";
 import { skillLabel } from "./skill-label";
@@ -12,10 +13,11 @@ import { useProfile } from "@/components/character-profile/ProfileContext";
 import { LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { useCareers } from "@/lib/hooks/careers";
 import { useAdvance, useCharacter } from "@/lib/hooks/characters";
 import { useFeats } from "@/lib/hooks/feats";
 import { CHARACTERISTIC_KEYS, readCharacteristics } from "@/lib/utils/rules/systems";
-import { advanceCost, availableXp } from "@/lib/utils/rules/systems/wfrp/advancement";
+import { advanceCost, availableXp, careerPrice } from "@/lib/utils/rules/systems/wfrp/advancement";
 import { skillAdvanceKey } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 
 export function AdvancementTab() {
@@ -35,13 +37,23 @@ export function AdvancementTab() {
 
   const advance = useAdvance(campaignId, characterId);
 
-  if (!character.data || !rules.data || !feats.data) return <LoadingState />;
+  const careers = useCareers(campaignId);
+
+  if (!character.data || !rules.data || !feats.data || !careers.data) return <LoadingState />;
 
   const advancement = rules.data.advancement;
 
   const c = readCharacteristics(character.data);
 
   const available = availableXp(character.data.experience ?? 0, c);
+
+  const career = c.career;
+
+  const tiers = career ? careers.data.find((row) => row.id === career.careerId)?.tiers : undefined;
+
+  const ctx = career && tiers ? { state: career, tiers } : undefined;
+
+  const price = (kind: "characteristic" | "skill" | "talent", key: string, base: number | null) => (base === null ? { cost: null, outOfCareer: null } : careerPrice(ctx, advancement, kind, key, base));
 
   const skillRows = sheet.wfrp?.skills ?? [];
 
@@ -51,6 +63,7 @@ export function AdvancementTab() {
         <span>{t("balance")}</span>
         <b className="text-lg text-hud-ink tabular-nums">{available}</b>
       </div>
+      <CareerPanel campaignId={campaignId} characterId={characterId} state={career} isDM={sheet.viewer.isDM} />
       {advance.error && (
         <p role="alert" className="text-sm text-destructive">
           {advance.error}
@@ -64,7 +77,8 @@ export function AdvancementTab() {
               label={tc(`${key}.label`)}
               value={c.base[key] + c.advances[key]}
               hint={t("advances", { count: c.advances[key] })}
-              cost={advanceCost("characteristic", c.advances[key], advancement)}
+              cost={price("characteristic", key, advanceCost("characteristic", c.advances[key], advancement)).cost}
+              outOfCareer={price("characteristic", key, advanceCost("characteristic", c.advances[key], advancement)).outOfCareer}
               available={available}
               pending={advance.isPending}
               onBuy={() => void advance.buy({ kind: "characteristic", key })}
@@ -79,13 +93,15 @@ export function AdvancementTab() {
 
             const advances = c.skillAdvances[key] ?? 0;
 
-            return <AdvanceRow key={key} label={skillLabel(tg, s.key, s.spec)} value={advances} cost={advanceCost("skill", advances, advancement)} available={available} pending={advance.isPending} onBuy={() => void advance.buy({ kind: "skill", key })} />;
+            const priced = price("skill", key, advanceCost("skill", advances, advancement));
+
+            return <AdvanceRow key={key} label={skillLabel(tg, s.key, s.spec)} value={advances} cost={priced.cost} outOfCareer={priced.outOfCareer} available={available} pending={advance.isPending} onBuy={() => void advance.buy({ kind: "skill", key })} />;
           })}
         </ul>
-        <NewSkillPicker cost={(key) => advanceCost("skill", c.skillAdvances[key] ?? 0, advancement)} available={available} pending={advance.isPending} onBuy={(key) => void advance.buy({ kind: "skill", key })} />
+        <NewSkillPicker cost={(key) => price("skill", key, advanceCost("skill", c.skillAdvances[key] ?? 0, advancement)).cost} available={available} pending={advance.isPending} onBuy={(key) => void advance.buy({ kind: "skill", key })} />
       </HudSection>
       <HudSection title={t("talents")}>
-        <TalentRows feats={feats.data} talents={c.talents} rules={advancement} available={available} pending={advance.isPending} onBuy={(key) => void advance.buy({ kind: "talent", key })} />
+        <TalentRows feats={feats.data} talents={c.talents} rules={advancement} price={(id, base) => careerPrice(ctx, advancement, "talent", id, base)} available={available} pending={advance.isPending} onBuy={(key) => void advance.buy({ kind: "talent", key })} />
       </HudSection>
       <HudSection title={t("ledger")}>
         <AdvanceLedger ledger={c.ledger} featsById={new Map(feats.data.map((f) => [f.id, f]))} isDM={sheet.viewer.isDM} pending={advance.isPending} onUndo={() => void advance.undo()} />
