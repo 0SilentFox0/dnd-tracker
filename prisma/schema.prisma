@@ -352,6 +352,7 @@ model Artifact {
   artifactSet ArtifactSet? @relation(fields: [setId], references: [id])
   sourceId    String?
   sourceHash  String?
+  systemStats Json?        @map("system_stats")
 
   @@index([campaignId])
   @@index([setId])

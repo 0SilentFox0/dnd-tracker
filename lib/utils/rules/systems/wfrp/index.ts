@@ -10,6 +10,7 @@ import { resolveWfrpAttack, wfrpAttackTarget } from "./combat/resolve-attack";
 import { WFRP_ADVANCEMENT } from "./advancement";
 import { WFRP_CONDITIONS } from "./conditions";
 import { WFRP_CREATION } from "./creation";
+import { WFRP_EQUIPMENT } from "./equipment";
 import { WFRP_MAGIC } from "./magic";
 import { onSession } from "./session";
 import { rollWfrpSheetTest } from "./sheet-test";
@@ -30,6 +31,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   magic: WFRP_MAGIC,
   advancement: WFRP_ADVANCEMENT,
   creation: WFRP_CREATION,
+  equipment: WFRP_EQUIPMENT,
   combat: { fortune: true, dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
   classes: false,

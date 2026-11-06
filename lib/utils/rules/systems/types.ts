@@ -9,6 +9,9 @@ import type { WfrpParticipantStats } from "./wfrp/combat/participant";
 import type { planDraft } from "./wfrp/creation/plan";
 import type { isUsableProfile } from "./wfrp/creation/profile";
 import type { rollCreation } from "./wfrp/creation/roll";
+import type { armourAp, parseWfrpStats } from "./wfrp/equipment/armour";
+import type { QUALITY_REGISTRY, QualityRef } from "./wfrp/equipment/qualities";
+import type { WfrpItemStatsSchema } from "./wfrp/equipment/stats";
 import type { PercentileOutcome } from "./wfrp/percentile";
 
 import type { RuleSystemKey } from "@/lib/constants/rules";
@@ -261,6 +264,7 @@ export interface RuleSystemDefinition {
   conditions?: RuleSystemConditions;
   magic?: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;
+  equipment?: RuleSystemEquipment;
   creation?: RuleSystemCreation;
   lineage: boolean;
   classes: boolean;
@@ -288,3 +292,24 @@ export interface RuleSystemCreation {
 }
 
 export type ApplyDamageConsequences = typeof import("@/lib/utils/battle/damage/consequences").applyDamageConsequences;
+
+export type WeaponProfile = {
+  range: "melee" | "ranged";
+  /** Melee reach in cells */
+  cells?: number;
+  rangeFt?: number;
+  damageFlat: number;
+  addSb: boolean;
+  qualities: QualityRef[];
+  flaws: QualityRef[];
+  ammoCapacity?: number;
+  twoHanded: boolean;
+};
+
+export interface RuleSystemEquipment {
+  statsSchema: typeof WfrpItemStatsSchema;
+  armourAp: typeof armourAp;
+  parseStats: typeof parseWfrpStats;
+  weaponProfile(stats: unknown): WeaponProfile | null;
+  qualities: typeof QUALITY_REGISTRY;
+}

@@ -1,6 +1,6 @@
 export * from "./registry";
 export type { RuleSystemKey } from "./types";
-export type { CharacterHpInput, RuleSystemAdvancement, RuleSystemCreation, RuleSystemDefinition, SheetBlockInput, SheetTestInput, SheetTestResult, SheetWfrpBlock, SystemConditionInfo } from "./types";
+export type { CharacterHpInput, RuleSystemAdvancement, RuleSystemCreation, RuleSystemDefinition, RuleSystemEquipment, SheetBlockInput, SheetTestInput, SheetTestResult, SheetWfrpBlock, SystemConditionInfo, WeaponProfile } from "./types";
 export type { CareerTierDef } from "./wfrp/advancement/career";
 export type { PurchaseError, PurchaseRequest } from "./wfrp/advancement/plan";
 export { type LedgerViewer, preserveServerOwned, redactLedger } from "./wfrp/advancement/privacy";
@@ -9,4 +9,6 @@ export type { DefenseKind, HitLocation } from "./wfrp/combat/constants";
 export type { WfrpParticipantStats } from "./wfrp/combat/participant";
 export type { CreationCtx, CreationPicks, CreationRolls, PlanDraftResult, SpeciesProfile } from "./wfrp/creation";
 export { STAT_FLOOR } from "./wfrp/creation";
+export type { QualityKey, QualityRef } from "./wfrp/equipment/qualities";
+export type { WfrpArmourStats, WfrpGearStats, WfrpItemStats, WfrpWeaponStats } from "./wfrp/equipment/stats";
 export { DIFFICULTY_KEYS, type DifficultyKey } from "./wfrp/percentile/difficulty";

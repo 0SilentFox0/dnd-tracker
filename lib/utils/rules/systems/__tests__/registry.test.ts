@@ -11,6 +11,12 @@ describe("rule system registry", () => {
     expect(Object.keys(RULE_SYSTEM_REGISTRY).sort()).toEqual(["dnd5e", "homm", "wfrp"]);
   });
 
+  it("only wfrp defines equipment", () => {
+    expect(RULE_SYSTEM_REGISTRY.wfrp.equipment).toBeDefined();
+    expect(RULE_SYSTEM_REGISTRY.homm.equipment).toBeUndefined();
+    expect(RULE_SYSTEM_REGISTRY.dnd5e.equipment).toBeUndefined();
+  });
+
   it("resolves from rules", () => {
     expect(ruleSystemOf(DEFAULT_RULES).key).toBe("homm");
     expect(systemKeyOf({ system: { key: "wfrp" } })).toBe("wfrp");
