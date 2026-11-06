@@ -191,6 +191,8 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/onboarding', methods: ['GET'], task: 7, adapter: 'campaign/templates', state: "active" },
   { route: 'campaigns/[id]/races/[raceId]', methods: ['DELETE', 'GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/races', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
+  { route: 'campaigns/[id]/race-profiles', methods: ['GET'], task: 0, adapter: 'handoffs', state: "handoff" },
+  { route: 'campaigns/[id]/races/[raceId]/profile', methods: ['PUT'], task: 0, adapter: 'handoffs', state: "handoff" },
   { route: 'campaigns/[id]/rest', methods: ['POST'], task: 8, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]', methods: ['DELETE', 'GET', 'PATCH'], task: 7, adapter: 'campaign/templates', state: "active" },
   { route: 'campaigns/[id]/rules', methods: ['GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
