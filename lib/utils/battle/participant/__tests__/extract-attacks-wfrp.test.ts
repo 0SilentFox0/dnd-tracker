@@ -34,7 +34,7 @@ describe("extractWfrpAttacks", () => {
   it("sword becomes a melee attack with flat damage and reach", () => {
     const [a, d] = extract([sword]);
 
-    expect(a).toMatchObject({ id: "sword", type: AttackType.MELEE, damageDice: "4", attackBonus: 0, wfrp: { reachCells: 1, qualities: [], flaws: [] } });
+    expect(a).toMatchObject({ id: "sword", type: AttackType.MELEE, damageDice: "", damageBonus: 4, attackBonus: 0, wfrp: { reachCells: 1, qualities: [], flaws: [] } });
     expect(a.range).toBeUndefined();
     expect(d.id).toBe("default-ranged");
   });
@@ -42,7 +42,7 @@ describe("extractWfrpAttacks", () => {
   it("bow becomes a ranged attack with range, ammo and reload", () => {
     const [a] = extract([bow]);
 
-    expect(a).toMatchObject({ id: "bow", type: AttackType.RANGED, range: "60 ft", damageDice: "3", wfrp: { ammoCapacity: 20, reload: 1, noSb: true } });
+    expect(a).toMatchObject({ id: "bow", type: AttackType.RANGED, range: "60 ft", damageDice: "", damageBonus: 3, wfrp: { ammoCapacity: 20, reload: 1, noSb: true } });
   });
 
   it("both weapons: two attacks, no defaults", () => {

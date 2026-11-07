@@ -102,7 +102,7 @@ export interface MitigateCtx {
   target: BattleParticipant;
   /** Rolled weapon damage (dice + flat bonus), before the system's own modifiers */
   weapon: number;
-  /** d20-pipeline damage after resistance; 0 means the target is immune */
+  /** 0 means the target is immune (d20 damage was resisted to nothing); otherwise positive, weapon damage is in `weapon` */
   amount: number;
   netSl: number;
   location: HitLocation;

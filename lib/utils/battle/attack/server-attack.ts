@@ -107,7 +107,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
   if (isHit) {
     const formula = heroAttackDamageParts(getP(flow, attackerId), attack).formula;
 
-    const single = rollGroups(parseDiceLenient(formula).groups, rng);
+    const single = attack.wfrp ? [] : rollGroups(parseDiceLenient(formula).groups, rng);
 
     const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) && !ruleSystemOf(flow.ctx.rules).combat.mitigateDamage ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
 

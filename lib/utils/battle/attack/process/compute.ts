@@ -132,7 +132,9 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     attackKindOf(attack.type),
   );
 
-  const mitigated = mitigateHit({ ...params, rules: params.rules }, { attacker: updatedAttacker, target: updatedTarget, weapon: baseDamage, amount: resistanceResult.finalDamage });
+  const immune = physicalDamageForTarget > 0 && resistanceResult.finalDamage <= 0;
+
+  const mitigated = mitigateHit({ ...params, rules: params.rules }, { attacker: updatedAttacker, target: updatedTarget, weapon: baseDamage, amount: immune ? 0 : Math.max(resistanceResult.finalDamage, 1) });
 
   if (mitigated) {
     state.steps = mitigated.steps;
