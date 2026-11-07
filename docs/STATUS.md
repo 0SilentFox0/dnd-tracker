@@ -79,6 +79,11 @@ _Оновлено: 2026-11-04._
 4. Повний `pnpm test:run` і repo-wide lint один раз перед merge.
 5. Після деплою: існуючі wfrp-кампанії вмикають правило `spellIngredients` вручну.
 
+Хвости 5h-1 (фінальне review):
+
+- Список цілей Breath/ranged/Blast не фільтрується за дальністю, а 422 `targetOutOfAttackRange` не показує повідомлення (5f-2, раніше за 5h-1).
+- Ward 11: помилка поля uk показала сирий англійський текст Zod у dev live-run; перевірити в браузері `legendaryCost` = 4 — якщо теж англійською, це глобальний хвіст zod-locale.
+
 ## Домовленості
 
 Актуальний refactor checkpoint: **S1–S10 завершено локально** — [manifest/evidence](archive/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md). Інтегровані assistant executor/snapshots/adapters, rules, character/battle mechanics, query keys/polling, background lifecycle і spellbook hooks; закрито lifecycle/delta/browser/roundtrip gates. S10 виправив class/feat nested ownership та abilities contract, DELETE409 OpenAPI. Full suite8309/8309, build і typecheck пройшли; lint exit0 (0 errors/200 наявних warnings), фінальні SQL67/67 і browser18+12 пройшли; незалежний review завершено, два harness findings виправлено; залишки з owners наведено в checkpoint. Live provider/Storage/Pusher/Redis та production/HOMM gateway не запускалися. Історичні T19/S1 records нижче не задають поточний next task.
