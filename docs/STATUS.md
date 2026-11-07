@@ -69,6 +69,16 @@ _Оновлено: 2026-11-04._
 | Дашборд кампанії | злито в `main` | Двоколонкова сторінка кампанії: «Що далі» для ДМ, картка героя для гравця, згруповані розділи з пошуком, бічна колонка; браузерна перевірка (ДМ/гравець, 390px) не проводилась |
 | Пазл у «Показі» | `feat/puzzle`, `../dnd-tracker-puzzle` | Слайд-пазл: нарізка за seed (класична/органічна/прямі), спільне складання гравцями й ДМ (холд 30 с, повороти, привʼязка до місця), стан у JSONB слайда без міграції (`docs/architecture/show.md`); код, тести, живий прогін і simplify готові, лишається фінальне рев'ю і злиття |
 
+### WFRP: чекліст перед деплоєм епіку (`feat/wfrp`)
+
+Нічого з `feat/wfrp` не мерджиться в `main`, доки не завершено весь епік (лишились 5g і 5h). Перед merge/deploy:
+
+1. Міграції `feat/wfrp`, яких немає в `main` (за порядком; `git diff --name-only main...feat/wfrp -- prisma/migrations`): `20261122000000_characteristics`, `20261122000001_units_base_characteristics`, `20261123000000_battle_scene_momentum`, `20261124000000_feats_xp_cost_max_rank`, `20261124000001_feats_base_xp_cost_max_rank`, `20261125000000_careers`, `20261126000000_race_profiles`, `20261127000000_artifact_system_stats`, `20261128000000_artifacts_base_system_stats`. У `main` уже є `20261122000000_show_trail` з тим самим префіксом: після merge перевірити порядок і `prisma migrate status` на prodcopy.
+2. RLS: нові таблиці `careers` і `race_profiles` мають `ENABLE ROW LEVEL SECURITY` у своїх міграціях (перевірено 2026-11-07); кожна нова таблиця 5g/5h також.
+3. Гейт: `battle-sweep` homm/dnd5e на prodcopy після останніх змін епіку (останній прогін 2026-11-05 — до 5e/5f, тож повторити перед merge).
+4. Повний `pnpm test:run` і repo-wide lint один раз перед merge.
+5. Після деплою: `backfill-default-attacks --apply` не потрібен для wfrp, але перевірити існуючі wfrp-кампанії (правило `spellIngredients` вмикається вручну).
+
 ## Домовленості
 
 Актуальний refactor checkpoint: **S1–S10 завершено локально** — [manifest/evidence](archive/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md). Інтегровані assistant executor/snapshots/adapters, rules, character/battle mechanics, query keys/polling, background lifecycle і spellbook hooks; закрито lifecycle/delta/browser/roundtrip gates. S10 виправив class/feat nested ownership та abilities contract, DELETE409 OpenAPI. Full suite8309/8309, build і typecheck пройшли; lint exit0 (0 errors/200 наявних warnings), фінальні SQL67/67 і browser18+12 пройшли; незалежний review завершено, два harness findings виправлено; залишки з owners наведено в checkpoint. Live provider/Storage/Pusher/Redis та production/HOMM gateway не запускалися. Історичні T19/S1 records нижче не задають поточний next task.
