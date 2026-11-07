@@ -243,6 +243,10 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 
 `battleData.ammo[attackId]` і `battleData.reload[attackId]` живуть у `ParticipantState` (`split-participant`, `CORE_PATCHABLE_FIELDS`): постріл і тік перезарядки дають дельту `battleData`, знімок і `snapshotHash` не чіпаються. `reload` після завершення лишається `{}`, а не видаляється (інакше дельта стає `FULL_PARTICIPANT`). Атака без набоїв або під перезарядкою відхиляється до будь-яких змін (`assertAmmo`, той самий гейт у превʼю асистента); старі бої без `ammo` б'ють як раніше. Перезарядка X армується як X+1, бо кінець ходу, що спорожнив зброю, не рахується.
 
+## Приєднання й психологія (wfrp 5h-1)
+
+`runJoinTriggers` (`lib/utils/battle/turn/join-triggers.ts`) замінює три виклики `battleStart` (старт бою, reveal резерву, початок раунду/призов) і викликає `traits.psychology` системи; d20 нічого не робить. `battleData.psychologyTested` (`fear`/`terror` → тестовані джерела) живе в `ParticipantState` (`split-participant`, `participant-patch`): тест дає дельту `battleData`, знімок і `snapshotHash` не чіпаються. Журнал: старт — окрема `psychology-start`, reveal — другий `dmEvent`, раунд — `psychology-round`; `concealWfrpLine` ховає ціль у Hidden-варіантах.
+
 ## Crit choice (DM-chosen critical effects)
 
 Campaign setting `critChoiceByDm` (off by default). Triggers: natural 20/1 on an attack and on a **target's saving throw** of a spell (`SAVE_SUCCESS_EFFECTS` / `SAVE_FAIL_EFFECTS` in `lib/constants/save-critical-effects.ts`; spells have no to-hit roll). With the setting off, every trigger gets a random effect (also for saves).

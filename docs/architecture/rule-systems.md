@@ -22,11 +22,13 @@
 | `combat.onZeroHp` | 0 Wounds → непритомність + один крит; після `revertOnZero` у `applyDamageConsequences` і в `settleStatusChange` (ручна зміна ДМ — без крита) | `damage/consequences.ts` |
 | `combat.initiative` / `baseStats` | `I` (+d10) замість d20 + Dex (`InitiativeScore {total, roll, die}`), тай-брейк за `abilities.wfrp.ag`; початкові `initiative`/`speed` (Move × 3 ft) | `scoreInitiative`, `from-character`/`from-unit` |
 | `combat.hitModel` | `offense/defense/winChance/damage/refHit` для чесного балансу (замість d20 to-hit/AC) | `balance/hit-model.ts`, `heroPower`, `loadUnitLibraryStats` |
+| `combat.hitModel.durability?(p)` | множник ефективних HP за AP (зважено за локаціями), TB і Ward; `builtUnitsById` бере `rules` лише для систем із `hitModel` (d20 без змін) | `hitModelHeroStats/UnitStats` |
 | `combat.participantFields` | додаткові поля учасника при створенні з персонажа/юніта (`abilities.characteristics`, `abilities.wfrp`: стати, AP = 0); d20 не додає ключів; `refreshFromSource` копіює | `from-character`, `from-unit`, `refresh-from-source` |
 | `conditions` | 12 станів wfrp: `catalog`, `apply`/`remove`/`level` (рівень = сума маркерів, обрізання 10), `tick` на початку ходу активного носія, `endTest` (тест зняття), `selfTestMod`/`againstMod` для d100-тестів; `undefined` у d20 → `CONDITION_5E_REGISTRY` без змін | `turn/start` (`applyStartOfTurnDamage`), `resolve-attack`, `crit-effect`, `system-condition`/`condition-test` мутації, `sheet-test` |
 | `magic` | `RuleSystemMagic`: `castTest` (d100 проти Int + Language (Magick), SL + канальований SL ≥ CN, броня, Fortune, дублі → miscast), `channel` (банк SL, `battleData.channelledSl`), `miscast` (таблиці minor/major), `attribute` (lore → стан), `onDamaged` (втрата канальованого SL); `slots: false`; `undefined` у d20 | `castSpell` (`spell/cast/cast-test.ts`, `finish.ts`), `spell-mutation`, `channel-mutation` (`POST …/channel`), `damage/consequences.ts` |
 | `combat.fortune` | Fortune: перекинути d100 (лише атакувальник; захисник — ні) або +1 SL; `percentile.fortune` у деталях дії; `undefined` у d20 | `attack/run.ts`, схема атаки, `useAttackWizard` |
 | `cellFeetOf(rules)` | розмір клітинки в футах (`grid/cell-feet.ts`): homm/dnd5e 5, wfrp 6 (2 yd); `CELL_FEET` видалено, `rules` — обов'язковий параметр grid-хелперів (рух, шаблони, досяжність, цілі) | `lib/utils/battle/grid/*` |
+| `traits` | `RuleSystemTraits`: `recipes` (рецепти Traits у галереї вмінь), `unitBuild(row, abilities)` (поля учасника й атаки-Traits юніта), `psychology` (Fear/Terror при приєднанні); d20 не має. Прапорець = наявність `traits` | `RecipeGallery`, `create-participant-from-unit`, `runJoinTriggers` |
 | `battle.supported` | wfrp = `true` (5b-1); `false` → старт бою 409 `SYSTEM_BATTLE_UNSUPPORTED` | `start-mutation`, setup UI |
 | `unusedMechanics` | механіки, що ховаються на сторінці правил | `RulesForm` |
 
@@ -49,6 +51,7 @@
 | `wfrp/conditions/` | `catalog.ts` (числа станів), `apply.ts`, `levels.ts`, `tick.ts`, `end-test.ts`, `test-mod.ts`, `index.ts` (`WFRP_CONDITIONS`) |
 | `wfrp/magic/` | `cast-test.ts`, `channel.ts`, `miscast.ts` + `miscast-table.ts`, `attribute.ts` (lore attribute), `armour.ts` (штраф броні), `constants.ts` (`CAST_SKILL`, `OVERCAST_SL_STEP`, `CHANNEL_MAX_SL`), `index.ts` (`WFRP_MAGIC`) |
 | `wfrp/tables/` | `roll-table.ts` — спільний `rollTable` для критів і miscast |
+| `wfrp/traits/` | `constants.ts` (числа-заглушки Traits), `read.ts` (`traitEntries`/`traitEffects`/`sizeStep`), `recipes.ts` (14 рецептів), `unit-build.ts` (`wfrpUnitBuild`), `size.ts` (`sizeHitMod`, `sizeDamageBonus`, `wardRoll`), `psychology.ts` (`wfrpPsychology`), `index.ts` (`WFRP_TRAITS`) |
 | `wfrp/sheet-test.ts`, `session.ts` | `sheetTest.roll` і `rest.onSession` |
 | `components/systems/wfrp/` | `HeroStats`, `StatsTab`, `StatsFields`, `UnitStatsFields`, `RollDialogBody`, редактори характеристик і навичок |
 
@@ -139,6 +142,16 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - Алайнмент у core-UI (`ProfileHero`, `CharacterBasicInfo` через `hideAlignment`) читає `identity.alignments`: у wfrp не показується й не редагується.
 - Відкрито: Defensive не реалізовано (свідомо лишено в межах), Penetrating не звірено з книгою. ~~M4 (зброя в слоті `shield`)~~ і ~~геометрія Blast~~ закрито.
 
+## Межі 5h-1
+
+Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breath/Weapon, Regenerate) — ефекти `abilities` юніта, без міграцій. Spec/план: `docs/superpowers/plans/2026-11-07-wfrp-5h1-unit-traits.md`.
+
+- Відхилення від spec: (1) id `wfrp.trait.<key>` і `params` не використовуються (`AbilityListEditor` перегенеровує id, `AbilityParamsSchema` strict) — X живе в полях ефекту. (2) Броня `wfrpArmour {head, body, arm, leg}` — ключі `HitLocation` 5f. (3) П'ятий ефект `wfrpAttack` для Bite/Claw/Breath/Weapon (+ `magical`), власних якостей атака-Trait не має. (4) Magical — перемикач у рецептах атак, не окремий рецепт; механіки немає (лише `attack.wfrp.magical`). (5) Імпорт юнітів не несе `abilities` — лише регресійний тест. (6) Ефекти Traits з `condition` читачі ігнорують (лише passive без умови). (7) Size/Ward/Armour/атаки діють на юнітів (включно з расою); на персонажів — лише психологія (носій або джерело Fear через расу).
+- Без механіки: Flier, Swarm, Magical, Hardy (лише `note`/`sense`/прапорець). Breath = Blast-коло, не конус. «Бачить істоту» = будь-який `inPlay` ворог, без лінії зору. rng Ward споживається лише з Ward (d20 і юніти без Ward — без зсуву).
+- Psychology: сильніше джерело на тестера — Terror над Fear, далі більше значення; один тест на джерело (`battleData.psychologyTested`); носій і `conditionImmunity` fear/all не тестуються; сплячі вороги лабіринту не лякають.
+- Тип `Effect` лишається базовим, Trait-ефекти — `AnyEffect`/`TraitEffect` ([abilities.md](abilities.md)).
+- `scope-size` після 5h-1: учасник wfrp uk 106.1 KB gzip — `WFRP_MEMBER_LIMIT_KB` 106 → 107; ДМ 109.6 KB — `WFRP_DM_LIMIT_KB` 109 → 110 (запас ≈ 0.4 KB, наступний wfrp-текст потребує нового винесення). Бюджет OpenAPI 180000 → 183000 байт (доку 181370, Traits ≈ +1.4 KB).
+
 ## Межі 5e-1
 
 Таланти й XP-леджер (на `feat/wfrp`, не змерджено; міграція `feats_xp_cost_max_rank`, expand-only). Spec/план — `docs/superpowers/{specs,plans}/2026-11-05-wfrp-5e1*`.
@@ -190,6 +203,7 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - Blast: радіус X клітинок і цілі на клітинку (`extract-wfrp-attacks.ts:10`, `attack-phase/targets.ts`); на карті Blast б'є всіх у радіусі, союзників теж (рішення користувача 2026-11-07), крім самого атакувальника.
 - `attackBonus`: `flat` таланту трактується як кількість SL (`flat: 2` = +2 SL); якщо таланти задають відсотки, потрібен перерахунок `flat / 10`.
 - Defensive не реалізовано (`implemented:false`) до тексту книги.
+- Traits: `wfrp/traits/constants.ts` (поріг Ward на d10, кроки й множники Size, критерій SL і рівні `broken` Fear/Terror, Breath: радіус/дальність/без SB, Regenerate 1d10, Night Vision 60 ft, перелік атак-Traits і `TRAIT_SIZES`), `BALANCE_REF_INCOMING`; Terror випереджає Fear, далі більше значення, і Terror також записує fear як протестований з тим самим цільовим числом.
 
 ## Межі 5e-3
 

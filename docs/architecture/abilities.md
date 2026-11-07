@@ -94,3 +94,7 @@ Cunning Strike (Rogue): `Ability.params` (`schema/params.ts`) — `sneakAttack: 
 
 - **Поля Spell**: `ingredients Json @default("[]")` (`SpellIngredient { name, qty, minGp?, consumed, focus }`, `lib/schemas/spell-ingredients.ts`; ключ `ingredientKey(name)` унікальний, непорожній список вимагає `componentFlags.m`) і `componentFlags Json?` (`null` = не вказано, показується старий `components`). Поширюються через content API, sync, 5etools-імпорт (`parseMaterial`) і `toBookSpell`/`toCastableSpell`.
 - **Правило** `rules.spellIngredients { enabled, autoPay }` (default вимкнено; секція `SpellIngredientsSection`, опис у `rules.mechanics.spellIngredients`). Предмет інвентаря — `SpecialItem.worthGp`/`ingredient`; відповідність за `itemIngredientKey`. Бойова перевірка й списання — [battle.md](battle.md#інгредієнти-заклинань); форма — `SpellComponentsFields` + `useSpellComponents`.
+
+## Trait-ефекти (wfrp 5h-1)
+
+`wfrpArmour`, `wfrpWard`, `wfrpSize`, `wfrpPsychology`, `wfrpAttack` (`TRAIT_EFFECTS`, `schema/effects.ts`) — лише passive: в іншому тригері `passiveEffectKinds`. У реєстрі `pickable: false` (не в палітрі ефектів, `allowedEffectKinds` ховає в кожному тригері), `applyTrait` — no-op, поза `BASE_EFFECTS`; рецепти wfrp збирають їх літералами. Типи: `AnyEffect` = `Effect | TraitEffect`, `Effect` лишається базовим (інакше ламаються спели, що ділять `Effect`). Читає їх лише `wfrp/traits/read.ts`; константи (розміри, види психології, атаки) — `schema/kinds.ts`. Деталі — [rule-systems.md](rule-systems.md#межі-5h-1).
