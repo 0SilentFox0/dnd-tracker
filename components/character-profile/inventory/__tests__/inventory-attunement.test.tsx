@@ -14,7 +14,7 @@ import type { StashArtifact } from "@/types/inventory";
 const mocks = vi.hoisted(() => ({ mutateAsync: vi.fn(), useStash: vi.fn(), classes: false }));
 
 vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: () => new Set<string>(), useNotifications: () => ({ data: undefined }) }));
-vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { classes: { enabled: mocks.classes } } }) }));
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { system: { key: "dnd5e" }, classes: { enabled: mocks.classes } } }) }));
 
 vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({
   ...(await orig<object>()),

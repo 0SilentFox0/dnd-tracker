@@ -24,6 +24,7 @@ import { type GrantError, type GrantPlan, planGrant } from "@/lib/utils/items/gr
 import { parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
 import { attunedRefs, attunementRequired, pruneAttuned, resolveItemRow, uniqueChecker } from "@/lib/utils/items/resolve";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { EquippedItems, StashState } from "@/types/inventory";
 
 const STASH_ERROR_TEXT: Record<StashErrorCode, string> = {
@@ -165,7 +166,7 @@ async function buildActionContext(tx: Tx, scope: { campaignId: string; rules: Ru
 
   if (data.action === "attune" || data.action === "unattune") ({ items, name } = await attuneContext(tx, campaignId, data, state, rules));
 
-  return { newItemId: randomUUID(), artifactSlotType, artifact, classesEnabled, grant, items, name, isDM };
+  return { newItemId: randomUUID(), artifactSlotType, artifact, classesEnabled, grant, items, name, isDM, coinValue: ruleSystemOf(rules).currency?.value };
 }
 
 async function applyStashCore({ access, campaignId, characterId }: CampaignScope, data: StashData) {

@@ -91,10 +91,11 @@ export type StashCtx = {
   classesEnabled?: boolean;
   grant?: GrantPlan;
   isDM?: boolean;
+  coinValue?: Record<Coin, number>;
 } & ItemsCtx;
 
-function spendAction(s: StashState, a: Of<"spend">): StashResult {
-  const purse = spendCoins(s.purse, a.amount, a.coin);
+function spendAction(s: StashState, a: Of<"spend">, ctx: Pick<StashCtx, "coinValue">): StashResult {
+  const purse = spendCoins(s.purse, a.amount, a.coin, ctx.coinValue);
 
   if (!purse) return fail(StashError.NOT_ENOUGH_MONEY);
 
@@ -248,7 +249,7 @@ function unattuneAction(s: StashState, a: Of<"unattune">, ctx: ItemsCtx): StashR
 export function applyStashAction(s: StashState, a: StashAction, ctx: StashCtx): StashResult {
   switch (a.action) {
     case "spend":
-      return spendAction(s, a);
+      return spendAction(s, a, ctx);
     case "gain":
       return gainAction(s, a);
     case "setMoney":

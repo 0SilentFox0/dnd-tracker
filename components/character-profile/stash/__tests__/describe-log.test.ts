@@ -13,6 +13,7 @@ describe("describeLog", () => {
       'inventory.log.withNote {"text":"inventory.log.money {\\"coins\\":\\"−50 inventory.coins.gp\\"}","note":"найм човна"}',
     ));
   it("DM money set", () => expect(describeLog(e("money_set", { gp: 1 }), t)).toBe('inventory.log.moneySet {"coins":"+1 inventory.coins.gp"}'));
+  it("uses a system coin label when given", () => expect(describeLog(e("money_set", { sp: 3 }), t, () => "ss")).toBe('inventory.log.moneySet {"coins":"+3 ss"}'));
   it("item use", () => expect(describeLog(e("item_use", { item: "Зілля", qty: -1 }), t)).toBe('inventory.log.item.item_use {"name":"Зілля"}'));
   it("artifact", () => expect(describeLog(e("artifact_stash", { artifactId: "a", artifactName: "Меч" }), t)).toBe('inventory.log.artifact.artifact_stash {"name":"Меч"}'));
   it("DM unequip", () => expect(describeLog(e("artifact_unequip", { artifactId: "a", artifactName: "Меч" }), t)).toBe('inventory.log.artifact.artifact_unequip {"name":"Меч"}'));

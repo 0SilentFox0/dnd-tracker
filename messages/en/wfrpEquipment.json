@@ -96,5 +96,10 @@
     "dangerous": "Dangerous",
     "slow": "Slow",
     "reload": "Reload"
+  },
+  "money": {
+    "gc": "gc",
+    "ss": "ss",
+    "d": "d"
   }
 }

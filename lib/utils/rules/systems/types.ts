@@ -13,6 +13,7 @@ import type { armourAp, parseWfrpStats } from "./wfrp/equipment/armour";
 import type { QUALITY_REGISTRY, QualityRef } from "./wfrp/equipment/qualities";
 import type { PercentileOutcome } from "./wfrp/percentile";
 
+import type { Coin } from "@/lib/constants/inventory";
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
@@ -269,6 +270,7 @@ export interface RuleSystemDefinition {
   magic?: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;
   equipment?: RuleSystemEquipment;
+  currency?: RuleSystemCurrency;
   identity: { alignments: boolean };
   creation?: RuleSystemCreation;
   lineage: boolean;
@@ -310,6 +312,12 @@ export type WeaponProfile = {
   ammoCapacity?: number;
   twoHanded: boolean;
 };
+
+export interface RuleSystemCurrency {
+  coins: readonly Coin[];
+  value: Record<Coin, number>;
+  labelKeys: Record<Coin, string>;
+}
 
 export interface RuleSystemEquipment {
   armourAp: typeof armourAp;

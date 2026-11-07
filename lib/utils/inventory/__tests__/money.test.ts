@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { DEFAULT_CURRENCY } from "@/lib/constants/inventory";
 import { formatCoins, gainCoins, spendCoins, toCopper } from "@/lib/utils/inventory/money";
 
 const p = (gp: number, sp: number, cp: number) => ({ gp, sp, cp });
@@ -40,5 +41,28 @@ describe("gainCoins / formatCoins", () => {
   it("formats signed deltas", () => {
     expect(formatCoins({ gp: -50 }, (c) => ({ gp: "зм", sp: "см", cp: "мм" })[c])).toBe("−50 зм");
     expect(formatCoins({ gp: 1, cp: 5 }, (c) => ({ gp: "зм", sp: "см", cp: "мм" })[c])).toBe("+1 зм +5 мм");
+  });
+});
+
+describe("12/20 currency table", () => {
+  const WFRP = { gp: 240, sp: 12, cp: 1 };
+
+  it("converts to pence", () => expect(toCopper(p(1, 1, 1), WFRP)).toBe(253));
+
+  it("breaks a gold crown into 12-table change", () => expect(spendCoins(p(1, 0, 0), 1, "sp", WFRP)).toEqual(p(0, 19, 0)));
+
+  it("pays 5 shillings from a crown", () => expect(spendCoins(p(1, 0, 0), 5, "sp", WFRP)).toEqual(p(0, 15, 0)));
+
+  it("returns null when short", () => expect(spendCoins(p(0, 1, 0), 1, "gp", WFRP)).toBeNull());
+
+  it("zero amount changes nothing", () => expect(spendCoins(p(1, 2, 3), 0, "sp", WFRP)).toEqual(p(1, 2, 3)));
+
+  it("default table is untouched", () => expect(toCopper(p(1, 1, 1))).toBe(111));
+});
+
+describe("DEFAULT_CURRENCY", () => {
+  it("keeps the d20 table and inventory labels", () => {
+    expect(DEFAULT_CURRENCY.value).toEqual({ gp: 100, sp: 10, cp: 1 });
+    expect(DEFAULT_CURRENCY.labelKeys.gp).toBe("inventory.coins.gp");
   });
 });

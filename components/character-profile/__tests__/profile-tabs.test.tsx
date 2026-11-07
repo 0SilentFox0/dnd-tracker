@@ -18,7 +18,7 @@ vi.mock("@/lib/hooks/characters", async (orig) => ({
   ...(await orig<object>()),
   useCharacterRoster: () => ({ data: [], isLoading: false }), useTransferArtifact: () => ({ mutateAsync: vi.fn(), isPending: false }), useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
-vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { classes: { enabled: false } } }) }));
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { system: { key: "dnd5e" }, classes: { enabled: false } } }) }));
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [] }) }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div> }));
 
