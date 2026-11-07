@@ -138,6 +138,8 @@
       "netSl": "Net SL",
       "tb": "Toughness bonus",
       "ap": "Armour",
+      "ward": "Ward: d10 {roll} vs {ward}, hit negated",
+      "size": "Size",
       "minimum": "Minimum damage",
       "crit": "Critical wound"
     },

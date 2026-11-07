@@ -1,5 +1,6 @@
 import { QUALITY_REGISTRY } from "../equipment/qualities";
 import { qualityEffects } from "../equipment/quality-effects";
+import { sizeDamageBonus, wardRoll } from "../traits/size";
 import { applyWfrpCrit } from "./crit-effect";
 import { rollCrit } from "./crit-table";
 import { computeWfrpDamage } from "./damage";
@@ -21,6 +22,12 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
   if (ctx.amount <= 0) return { amount: 0, steps: [], totalLabel };
 
+  const ward = wardRoll(target, ctx.rng);
+
+  if (ward?.saved) {
+    return { amount: 0, steps: [{ key: "ward", value: 0, label: textRef("battleWfrp.damage.steps.ward", { roll: ward.roll, ward: target.abilities.wfrp?.ward ?? 0 }), side: "target" }], totalLabel };
+  }
+
   const sb = attacker.abilities.wfrp?.sb ?? 0;
 
   const ap = target.abilities.wfrp?.ap[location] ?? 0;
@@ -30,7 +37,11 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
     { attackRoll: ctx.attackRoll ?? 0, netSl: ctx.netSl, crit: ctx.crit, sb, ap },
   );
 
-  const base = computeWfrpDamage({ weapon: ctx.weapon, sb: ctx.noSb ? 0 : sb, netSl: ctx.netSl, tb: target.abilities.wfrp?.tb ?? 0, ap, extra: qualitySteps, minDamage: effect.minDamage });
+  const appliedSb = ctx.noSb ? 0 : sb;
+
+  const size = sizeDamageBonus(attacker, target, ctx.weapon + appliedSb + ctx.netSl);
+
+  const base = computeWfrpDamage({ weapon: ctx.weapon, sb: appliedSb, netSl: ctx.netSl, size, tb: target.abilities.wfrp?.tb ?? 0, ap, extra: qualitySteps, minDamage: effect.minDamage });
 
   const steps = base.steps.filter((s) => s.key === "weapon" || s.value !== 0).map((s) => step(s.key, s.value));
 

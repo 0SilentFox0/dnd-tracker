@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import type { UnitFromPrisma } from "../types/participant";
+import { wfrpAttackFromProfile } from "./extract-wfrp-attacks";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -19,6 +20,7 @@ import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { bestMentalAbility, isMonster5e, monsterSaveDc, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
+import type { ResolvedAbility } from "@/types/abilities";
 import type { AbilityPool, BattleAttack, BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
 import type { Unit } from "@/types/units";
 
@@ -150,7 +152,9 @@ function unitLegendary(unit: UnitFromPrisma, monster: boolean, statblock: UnitSt
     : undefined;
 }
 
-function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, monster: boolean, statblock: UnitStatblock): BattleParticipant["abilities"] {
+type UnitTraits = ReturnType<NonNullable<ReturnType<typeof ruleSystemOf>["traits"]>["unitBuild"]>;
+
+function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, monster: boolean, statblock: UnitStatblock, traits?: UnitTraits): BattleParticipant["abilities"] {
   const saveProficiencies = monster ? readSaveProficiencies(unit.saveProficiencies) : [];
 
   const baseStats = ruleSystemOf(rules).combat.baseStats?.(unit);
@@ -171,7 +175,7 @@ function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, mon
     raceId: race?.id,
     moraleCap: moraleCapFromRules(rules),
     ...(monster && { damageModel: "5e" as const }),
-    ...ruleSystemOf(rules).combat.participantFields?.(unit),
+    ...(traits ? traits.fields : ruleSystemOf(rules).combat.participantFields?.(unit)),
     ...(statblock.creatureType && { creatureType: statblock.creatureType }),
     ...(monster && unit.cr != null && { cr: unit.cr }),
     ...(saveProficiencies.length > 0 && { saveProficiencies }),
@@ -193,19 +197,14 @@ function unitCombatStats(unit: UnitFromPrisma, rules: Ruleset): BattleParticipan
   };
 }
 
-function unitBattleData(unit: UnitFromPrisma, race: UnitRace, monster: boolean, statblock: UnitStatblock, pools: Record<string, AbilityPool>): BattleParticipant["battleData"] {
+function unitBattleData(unit: UnitFromPrisma, monster: boolean, statblock: UnitStatblock, pools: Record<string, AbilityPool>, resolvedAbilities: ResolvedAbility[], traits?: UnitTraits): BattleParticipant["battleData"] {
   const legendary = unitLegendary(unit, monster, statblock);
 
   return {
-    attacks: unitBattleAttacks(unit),
+    attacks: [...unitBattleAttacks(unit), ...(traits?.attacks ?? []).map((a) => wfrpAttackFromProfile(a.id, a.name, a.profile, a.magical && { magical: true }))],
     activeEffects: [],
     equippedArtifacts: [],
-    resolvedAbilities: [
-      ...collectUnitAbilities(unit, race),
-      ...(monster ? multiattackAbilities(unit) : []),
-      ...monsterSenseAbilities(unit, statblock.senses),
-      ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
-    ],
+    resolvedAbilities,
     abilityUsage: {},
     pendingExtraActions: 0,
     ...(legendary && { legendary }),
@@ -237,6 +236,15 @@ export async function createBattleParticipantFromUnit(
 
   const { spellcasting, pools } = monsterSpellcasting(unit, rules);
 
+  const resolvedAbilities = [
+    ...collectUnitAbilities(unit, race),
+    ...(monster ? multiattackAbilities(unit) : []),
+    ...monsterSenseAbilities(unit, statblock.senses),
+    ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
+  ];
+
+  const traits = ruleSystemOf(rules).traits?.unitBuild(unit, resolvedAbilities);
+
   const participant: BattleParticipant = {
     basicInfo: {
       id: `${unit.id}-${instanceNumber}-${Date.now()}`,
@@ -251,10 +259,10 @@ export async function createBattleParticipantFromUnit(
       controlledBy: CONTROLLED_BY_DM,
       ...(xp !== null && { xp }),
     },
-    abilities: unitAbilities(unit, race, rules, monster, statblock),
+    abilities: unitAbilities(unit, race, rules, monster, statblock, traits),
     combatStats: unitCombatStats(unit, rules),
     spellcasting,
-    battleData: unitBattleData(unit, race, monster, statblock, pools),
+    battleData: unitBattleData(unit, monster, statblock, pools, resolvedAbilities, traits),
     actionFlags: {
       hasUsedAction: false,
       hasUsedBonusAction: false,

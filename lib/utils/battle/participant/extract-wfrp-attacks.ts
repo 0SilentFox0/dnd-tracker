@@ -4,7 +4,7 @@ import type { EquippedArtifactRow } from "./extract-artifacts";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
-import type { RuleSystemEquipment } from "@/lib/utils/rules/systems/types";
+import type { RuleSystemEquipment, WeaponProfile } from "@/lib/utils/rules/systems/types";
 
 const valueOf = (list: { key: string; value?: number }[], key: string) => list.find((q) => q.key === key)?.value;
 
@@ -25,33 +25,36 @@ export function extractWfrpAttacks(rows: EquippedArtifactRow[], equipment: RuleS
 
     seen.add(row.id);
 
-    const ranged = profile.range === "ranged";
-
-    const blast = valueOf(profile.qualities, "blast");
-
-    const reload = valueOf(profile.flaws, "reload");
-
-    const attack: ExtractedAttack = {
-      id,
-      name: row.name,
-      type: (ranged ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
-      attackBonus: 0,
-      damageDice: "",
-      damageBonus: profile.damageFlat,
-      damageType: "physical",
-      ...(ranged && { range: `${profile.rangeFt} ft` }),
-      ...(blast && { targetType: "aoe" as const, maxTargets: blast * BLAST_TARGETS_PER_RADIUS_CELL }),
-      wfrp: {
-        qualities: profile.qualities,
-        flaws: profile.flaws,
-        ...(profile.ammoCapacity !== undefined && { ammoCapacity: profile.ammoCapacity }),
-        ...(reload && { reload }),
-        ...(!profile.addSb && { noSb: true }),
-        ...(!ranged && profile.cells && { reachCells: profile.cells }),
-        ...(blast && { blastRadius: blast }),
-      },
-    };
-
-    return [attack];
+    return [wfrpAttackFromProfile(id, row.name, profile)];
   });
+}
+
+export function wfrpAttackFromProfile(id: string, name: string, profile: WeaponProfile, extra?: { magical?: true }): ExtractedAttack {
+  const ranged = profile.range === "ranged";
+
+  const blast = valueOf(profile.qualities, "blast");
+
+  const reload = valueOf(profile.flaws, "reload");
+
+  return {
+    id,
+    name,
+    type: (ranged ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
+    attackBonus: 0,
+    damageDice: "",
+    damageBonus: profile.damageFlat,
+    damageType: "physical",
+    ...(ranged && { range: `${profile.rangeFt} ft` }),
+    ...(blast && { targetType: "aoe" as const, maxTargets: blast * BLAST_TARGETS_PER_RADIUS_CELL }),
+    wfrp: {
+      qualities: profile.qualities,
+      flaws: profile.flaws,
+      ...(profile.ammoCapacity !== undefined && { ammoCapacity: profile.ammoCapacity }),
+      ...(reload && { reload }),
+      ...(!profile.addSb && { noSb: true }),
+      ...(!ranged && profile.cells && { reachCells: profile.cells }),
+      ...(blast && { blastRadius: blast }),
+      ...(extra?.magical && { magical: true as const }),
+    },
+  };
 }
