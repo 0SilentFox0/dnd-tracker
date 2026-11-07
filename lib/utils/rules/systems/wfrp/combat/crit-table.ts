@@ -1,56 +1,37 @@
-import { rollTable } from "../tables/roll-table";
+import type { WfrpConditionKey } from "../conditions/catalog";
+import { rollSlot } from "../tables/resolve";
 import type { HitLocation } from "./constants";
 
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { Rng } from "@/lib/utils/common/rng";
+import type { Ruleset } from "@/lib/utils/rules/schema";
+import type { TableSlot } from "@/lib/utils/rules/tables-schema";
+import type { LogLine } from "@/types/text";
 
 export interface CritResult {
   id: string;
-  textKey: string;
+  text: LogLine;
   bonusDamage: number;
-  markerKey?: string;
+  conditions: { key: WfrpConditionKey; levels: number }[];
+  markers: string[];
 }
 
-interface CritRow {
-  max: number;
-  bonusDamage: number;
-  markerKey?: string;
-}
+const SLOT: Record<HitLocation, TableSlot> = { head: "critHead", arm: "critArm", body: "critBody", leg: "critLeg" };
 
-export const CRIT_TABLE: Record<HitLocation, CritRow[]> = {
-  head: [
-    { max: 20, bonusDamage: 1 },
-    { max: 40, bonusDamage: 2, markerKey: "bleeding" },
-    { max: 60, bonusDamage: 2, markerKey: "stunned" },
-    { max: 80, bonusDamage: 3, markerKey: "stunned" },
-    { max: 100, bonusDamage: 5, markerKey: "unconscious" },
-  ],
-  arm: [
-    { max: 20, bonusDamage: 1 },
-    { max: 40, bonusDamage: 2, markerKey: "bleeding" },
-    { max: 60, bonusDamage: 2, markerKey: "disarmed" },
-    { max: 80, bonusDamage: 3, markerKey: "bleeding" },
-    { max: 100, bonusDamage: 4, markerKey: "disarmed" },
-  ],
-  body: [
-    { max: 20, bonusDamage: 1 },
-    { max: 40, bonusDamage: 2, markerKey: "winded" },
-    { max: 60, bonusDamage: 2, markerKey: "bleeding" },
-    { max: 80, bonusDamage: 3, markerKey: "bleeding" },
-    { max: 100, bonusDamage: 5, markerKey: "stunned" },
-  ],
-  leg: [
-    { max: 20, bonusDamage: 1 },
-    { max: 40, bonusDamage: 2, markerKey: "bleeding" },
-    { max: 60, bonusDamage: 2, markerKey: "prone" },
-    { max: 80, bonusDamage: 3, markerKey: "prone" },
-    { max: 100, bonusDamage: 4, markerKey: "crippled" },
-  ],
-};
+export function rollCrit(location: HitLocation, rules: Pick<Ruleset, "tables">, rng: Rng, presetRoll?: number): CritResult {
+  const { index, row } = rollSlot(rules, SLOT[location], rng, presetRoll);
 
-export function rollCrit(location: HitLocation, rng: Rng, presetRoll?: number): CritResult {
-  const { index, row } = rollTable(CRIT_TABLE[location], rng, presetRoll);
+  const n = index + 1;
 
-  const { bonusDamage, markerKey } = row;
+  const result: CritResult = { id: `${location}.${n}`, text: "", bonusDamage: 0, conditions: [], markers: [] };
 
-  return { id: `${location}.${index + 1}`, textKey: `battleWfrp.crit.${location}.${index + 1}`, bonusDamage, ...(markerKey ? { markerKey } : {}) };
+  result.text = row.textKey ? dynamicTextRef(row.textKey) : (row.text ?? "");
+
+  for (const e of row.effects) {
+    if (e.type === "damage") result.bonusDamage += e.amount;
+    else if (e.type === "condition") result.conditions.push({ key: e.key, levels: e.levels });
+    else if (e.type === "marker") result.markers.push(e.key);
+  }
+
+  return result;
 }

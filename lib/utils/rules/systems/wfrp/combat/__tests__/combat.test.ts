@@ -6,7 +6,7 @@ import { conditionLevel } from "../../conditions/levels";
 import { reverseRoll } from "../../percentile";
 import { LOCATIONS } from "../constants";
 import { applyWfrpCrit } from "../crit-effect";
-import { CRIT_TABLE, rollCrit } from "../crit-table";
+import { type CritResult, rollCrit } from "../crit-table";
 import { computeWfrpDamage } from "../damage";
 import { hitLocation } from "../location";
 import { mitigateWfrpDamage } from "../mitigate";
@@ -146,19 +146,19 @@ describe("rollCrit", () => {
     for (const loc of LOCATIONS) {
       const ids = new Set<string>();
 
-      for (let roll = 1; roll <= 100; roll++) ids.add(rollCrit(loc, rng, roll).id);
+      for (let roll = 1; roll <= 100; roll++) ids.add(rollCrit(loc, WFRP_RULES, rng, roll).id);
 
-      expect([...ids].sort()).toEqual(CRIT_TABLE[loc].map((_r, i) => `${loc}.${i + 1}`));
+      expect([...ids].sort()).toEqual([1, 2, 3, 4, 5].map((i) => `${loc}.${i}`));
     }
   });
 
   it("returns text key, bonus and marker", () => {
-    expect(rollCrit("head", rng, 100)).toEqual({ id: "head.5", textKey: "battleWfrp.crit.head.5", bonusDamage: 5, markerKey: "unconscious" });
-    expect(rollCrit("leg", rng, 1)).toEqual({ id: "leg.1", textKey: "battleWfrp.crit.leg.1", bonusDamage: 1 });
+    expect(rollCrit("head", WFRP_RULES, rng, 100)).toEqual({ id: "head.5", text: dynamicTextRef("battleWfrp.crit.head.5"), bonusDamage: 5, conditions: [{ key: "unconscious", levels: 1 }], markers: [] });
+    expect(rollCrit("leg", WFRP_RULES, rng, 1)).toEqual({ id: "leg.1", text: dynamicTextRef("battleWfrp.crit.leg.1"), bonusDamage: 1, conditions: [], markers: [] });
   });
 
   it("rolls from rng without preset", () => {
-    expect(rollCrit("body", mulberry32(3)).id).toMatch(/^body\.[1-5]$/);
+    expect(rollCrit("body", WFRP_RULES, mulberry32(3)).id).toMatch(/^body\.[1-5]$/);
   });
 });
 
@@ -194,7 +194,13 @@ describe("resolveWfrpAttack conditions", () => {
   });
 
   describe("crits", () => {
-    const crit = (id: string, markerKey: string) => ({ id, textKey: `battleWfrp.crit.${id}`, bonusDamage: 2, markerKey });
+    const crit = (id: string, key: string): CritResult => ({
+      id,
+      text: dynamicTextRef(`battleWfrp.crit.${id}`),
+      bonusDamage: 2,
+      conditions: key === "disarmed" ? [] : [{ key: key as WfrpConditionKey, levels: 1 }],
+      markers: key === "disarmed" ? ["disarmed"] : [],
+    });
 
     const crits = (p: BattleParticipant) => p.battleData.activeEffects.filter((e) => e.name.startsWith("crit.wfrp."));
 

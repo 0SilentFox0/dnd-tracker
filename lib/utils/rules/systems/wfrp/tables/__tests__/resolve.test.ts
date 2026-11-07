@@ -1,17 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { CRIT_TABLE } from "../../combat/crit-table";
-import { MISCAST_TABLE, WRATH_TABLE } from "../../magic/miscast-table";
 import { DEFAULT_TABLES } from "../defaults";
-import { resolveTable, rollSlot } from "../resolve";
+import { resolveTable } from "../resolve";
 
-import { mulberry32 } from "@/lib/utils/common/rng";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { TABLE_SLOTS, type TableRow,TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
-
-const rng = mulberry32(1);
-
-const sum = (row: { effects: { type: string; amount?: number; levels?: number; key?: string }[] }, type: string) => row.effects.find((e) => e.type === type);
 
 describe("DEFAULT_TABLES", () => {
   it("every slot passes TablesRulesSchema", () => {
@@ -22,42 +14,8 @@ describe("DEFAULT_TABLES", () => {
     }
   });
 
-  it("matches legacy crit tables at all boundaries", () => {
-    const slots = { critHead: "head", critArm: "arm", critBody: "body", critLeg: "leg" } as const;
-
-    for (const [slot, loc] of Object.entries(slots)) {
-      for (const row of CRIT_TABLE[loc]) {
-        for (const roll of [1, row.max, row.max + 1, 100]) {
-          const old = CRIT_TABLE[loc].find((r) => roll <= r.max) ?? CRIT_TABLE[loc][CRIT_TABLE[loc].length - 1];
-
-          const got = rollSlot(DEFAULT_RULES, slot as keyof typeof slots, rng, roll).row;
-
-          expect(sum(got, "damage")?.amount).toBe(old.bonusDamage);
-
-          const cond = sum(got, "condition")?.key ?? sum(got, "marker")?.key;
-
-          expect(cond).toBe(old.markerKey);
-        }
-      }
-    }
-  });
-
-  it("matches legacy miscast and wrath tables at all boundaries", () => {
-    const legacy = { miscastMinor: MISCAST_TABLE.minor, miscastMajor: MISCAST_TABLE.major, wrath: WRATH_TABLE } as const;
-
-    for (const [slot, table] of Object.entries(legacy)) {
-      for (const row of table) {
-        for (const roll of [1, row.max, row.max + 1, 100]) {
-          const old = table.find((r) => roll <= r.max) ?? table[table.length - 1];
-
-          const got = rollSlot(DEFAULT_RULES, slot as keyof typeof legacy, rng, roll).row;
-
-          expect(sum(got, "wounds")?.amount).toBe(old.wounds);
-          expect(sum(got, "condition")?.key).toBe(old.condition?.key);
-          expect(sum(got, "condition")?.levels).toBe(old.condition?.levels);
-        }
-      }
-    }
+  it("keeps the shipped row counts", () => {
+    expect(TABLE_SLOTS.map((slot) => DEFAULT_TABLES[slot].length)).toEqual(TABLE_SLOTS.map((slot) => (slot === "wrath" ? 4 : 5)));
   });
 
   it("uses legacy text keys", () => {

@@ -1,6 +1,5 @@
 import { applyWfrpConditionTo } from "../conditions/apply";
-import { rollTable } from "../tables/roll-table";
-import { MISCAST_TABLE, WRATH_TABLE } from "./miscast-table";
+import { rollSlot } from "../tables/resolve";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -21,28 +20,36 @@ export function wfrpMiscast(
 
   if (!caster) return { participants: ps, messages: [] };
 
-  const { index, row } = rollTable(kind === "wrath" ? WRATH_TABLE : MISCAST_TABLE[kind], ctx.rng, ctx.presetRoll);
+  const { row } = rollSlot(ctx.rules, kind === "wrath" ? "wrath" : kind === "major" ? "miscastMajor" : "miscastMinor", ctx.rng, ctx.presetRoll);
+
+  const effect = row.textKey ? dynamicTextRef(row.textKey) : (row.text ?? "");
 
   const name = caster.basicInfo.name;
 
-  const messages: LogLine[] = [textRef(kind === "wrath" ? "wfrpMagic.log.wrath" : "wfrpMagic.log.miscast", { name, effect: dynamicTextRef(`wfrpMagic.miscast.${kind}.${index + 1}`) })];
+  const messages: LogLine[] = [textRef(kind === "wrath" ? "wfrpMagic.log.wrath" : "wfrpMagic.log.miscast", { name, effect })];
 
   let participants = ps;
 
-  if (row.condition) {
-    const applied = applyWfrpConditionTo(caster, { ...row.condition, round: ctx.round, sourceName: dynamicTextRef(`wfrpMagic.miscast.${kind}.${index + 1}`), concealed: true });
+  for (const e of row.effects) {
+    if (e.type !== "condition") continue;
+
+    const target = findParticipant(participants, casterId) ?? caster;
+
+    const applied = applyWfrpConditionTo(target, { key: e.key, levels: e.levels, round: ctx.round, sourceName: effect, concealed: true });
 
     participants = replaceParticipant(participants, applied.participant);
 
     messages.push(...applied.messages);
   }
 
+  const wounds = row.effects.reduce((sum, e) => (e.type === "wounds" ? sum + e.amount : sum), 0);
+
   const before = findParticipant(participants, casterId);
 
-  if (row.wounds && before) {
-    const after = dropBreakOnDamage({ ...before, combatStats: { ...before.combatStats, currentHp: Math.max(0, before.combatStats.currentHp - row.wounds) } }, row.wounds);
+  if (wounds > 0 && before) {
+    const after = dropBreakOnDamage({ ...before, combatStats: { ...before.combatStats, currentHp: Math.max(0, before.combatStats.currentHp - wounds) } }, wounds);
 
-    const r = ctx.applyDamage({ before, after, amount: row.wounds, rules: ctx.rules, rng: ctx.rng, participants: replaceParticipant(participants, after), round: ctx.round });
+    const r = ctx.applyDamage({ before, after, amount: wounds, rules: ctx.rules, rng: ctx.rng, participants: replaceParticipant(participants, after), round: ctx.round });
 
     participants = r.participants;
 

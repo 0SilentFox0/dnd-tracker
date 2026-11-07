@@ -49,7 +49,7 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
   if (base.total !== raw) steps.push(step("minimum", base.total - raw));
 
-  const crit = ctx.crit && target.combatStats.currentHp > 0 ? rollCrit(location, ctx.rng) : undefined;
+  const crit = ctx.crit && target.combatStats.currentHp > 0 ? rollCrit(location, ctx.rules, ctx.rng) : undefined;
 
   if (!crit) return { amount: base.total, steps, totalLabel };
 

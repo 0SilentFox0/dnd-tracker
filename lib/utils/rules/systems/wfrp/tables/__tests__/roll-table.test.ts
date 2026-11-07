@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { CRIT_TABLE, rollCrit } from "../../combat/crit-table";
+import { rollCrit } from "../../combat/crit-table";
+import { DEFAULT_TABLES } from "../defaults";
 import { rollTable } from "../roll-table";
 
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const rows = [{ max: 20 }, { max: 40 }, { max: 100 }];
 
@@ -34,13 +37,15 @@ describe("rollTable", () => {
 describe("rollCrit through rollTable", () => {
   it.each(["head", "arm", "body", "leg"] as const)("%s keeps ids and keys across presets", (loc) => {
     for (const preset of [1, 20, 21, 40, 41, 60, 61, 80, 81, 100]) {
-      const index = CRIT_TABLE[loc].findIndex((r) => preset <= r.max);
+      const table = DEFAULT_TABLES[{ head: "critHead", arm: "critArm", body: "critBody", leg: "critLeg" }[loc] as "critHead"];
 
-      const crit = rollCrit(loc, rng, preset);
+      const index = table.findIndex((r) => preset <= r.max);
+
+      const crit = rollCrit(loc, DEFAULT_RULES, rng, preset);
 
       expect(crit.id).toBe(`${loc}.${index + 1}`);
-      expect(crit.textKey).toBe(`battleWfrp.crit.${loc}.${index + 1}`);
-      expect(crit.bonusDamage).toBe(CRIT_TABLE[loc][index].bonusDamage);
+      expect(crit.text).toEqual(dynamicTextRef(`battleWfrp.crit.${loc}.${index + 1}`));
+      expect(crit.bonusDamage).toBe(table[index].effects.find((e) => e.type === "damage")?.amount);
     }
   });
 });

@@ -2,8 +2,8 @@ import { describe } from "vitest";
 
 import { expectLabelKeys } from "../test/label-keys";
 
-import { CRIT_TABLE } from "@/lib/utils/rules/systems/wfrp/combat/crit-table";
 import { WFRP_CONDITION_KEYS } from "@/lib/utils/rules/systems/wfrp/conditions/catalog";
+import { DEFAULT_TABLES } from "@/lib/utils/rules/systems/wfrp/tables/defaults";
 
 describe("wfrp battle labels have translations", () => {
   for (const k of WFRP_CONDITION_KEYS) expectLabelKeys("battleWfrp", `conditions.${k}`, ["label", "description"]);
@@ -11,5 +11,5 @@ describe("wfrp battle labels have translations", () => {
   expectLabelKeys("battleWfrp", "damage.steps", ["weapon", "sb", "netSl", "tb", "ap", "ward", "size", "minimum", "crit"]);
   expectLabelKeys("battleWfrp", "damage", ["total"]);
   expectLabelKeys("battleWfrp", "log", ["critHit", "critWound", "unconscious"]);
-  expectLabelKeys("battleWfrp", "crit", Object.entries(CRIT_TABLE).flatMap(([loc, rows]) => rows.map((_, i) => `${loc}.${i + 1}`)));
+  expectLabelKeys("battleWfrp", "crit", (["head", "arm", "body", "leg"] as const).flatMap((loc) => DEFAULT_TABLES[`crit${loc[0].toUpperCase()}${loc.slice(1)}` as "critHead"].map((_, i) => `${loc}.${i + 1}`)));
 });
