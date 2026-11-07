@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WfrpDraftForm } from "../WfrpDraftForm";
 
+import { ApiError } from "@/lib/api/client";
 import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
@@ -113,6 +114,32 @@ describe("WfrpDraftForm", () => {
 
     expect(screen.getByRole("button", { name: "wfrpCreation.wizard.submit" })).toHaveProperty("disabled", false);
     expect(screen.getByText(/wfrpCreation.identity.experience/)).toBeTruthy();
+  });
+
+  it("shows translated per-code messages for server issues and falls back to the general text", async () => {
+    const { createWfrpDraft } = await import("@/lib/api/characters");
+
+    mount();
+
+    fireEvent.click(screen.getByRole("radio", { name: /Human/ }));
+    fireEvent.click(next());
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.career.roll" }));
+    fireEvent.click(next());
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.stats.roll" }));
+    fireEvent.click(next());
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.talents.roll" }));
+    fireEvent.click(next());
+    fireEvent.change(screen.getByLabelText(/wfrpCreation.identity.name/), { target: { value: "Hans" } });
+
+    vi.mocked(createWfrpDraft).mockRejectedValueOnce(new ApiError("invalid", 400, "/x", { issues: ["CAREER_NOT_IN_TABLE", "TALENT_COUNT"] }));
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.wizard.submit" }));
+
+    expect(await screen.findByText("wfrpCreation.errors.CAREER_NOT_IN_TABLE · wfrpCreation.errors.TALENT_COUNT")).toBeTruthy();
+
+    vi.mocked(createWfrpDraft).mockRejectedValueOnce(new ApiError("plain failure", 500, "/x"));
+    fireEvent.click(screen.getByRole("button", { name: "wfrpCreation.wizard.submit" }));
+
+    expect(await screen.findByText("plain failure")).toBeTruthy();
   });
 
   it("rearranging swaps neighbouring values", () => {

@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { createWfrpDraft, updateWfrpDraftIdentity } from "@/lib/api/characters";
+import { ApiError } from "@/lib/api/client";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useCareers } from "@/lib/hooks/careers";
 import { characterKeys } from "@/lib/hooks/characters/keys";
@@ -230,7 +231,7 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
     stepErrors,
     identity: { values: identity, set: (patch: Partial<WfrpDraftIdentityInput>) => setIdentity((prev) => ({ ...prev, ...patch })) },
     reveal,
-    submit: { run: () => mutation.mutate(), isPending: mutation.isPending, error: mutation.error, canRun: valid.identity },
+    submit: { run: () => mutation.mutate(), isPending: mutation.isPending, error: mutation.error, issueCodes: serverIssueCodes(mutation.error), canRun: valid.identity },
   };
 }
 
@@ -243,3 +244,9 @@ const cleanIdentity = ({ name, alignment, background, avatar, goals }: WfrpDraft
   ...(avatar && { avatar }),
   ...(goals?.length && { goals }),
 });
+
+const serverIssueCodes = (error: unknown): string[] => {
+  const issues = error instanceof ApiError ? (error.body as { issues?: unknown } | undefined)?.issues : undefined;
+
+  return Array.isArray(issues) ? [...new Set(issues.filter((i): i is string => typeof i === "string"))] : [];
+};

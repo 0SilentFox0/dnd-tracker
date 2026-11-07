@@ -53,6 +53,8 @@ export function WfrpDraftForm({ campaignId, characterId, initialIdentity }: Wfrp
     return () => window.removeEventListener("keydown", onKey);
   }, [rolling, skip]);
 
+  const issueTexts = submit.issueCodes.filter((code) => te.has(code as never)).map((code) => te(code as never));
+
   const ids = characterId ? (["identity"] as const) : STEP_ORDER;
 
   return (
@@ -80,7 +82,7 @@ export function WfrpDraftForm({ campaignId, characterId, initialIdentity }: Wfrp
             {step.id === "identity" && <IdentityStep form={form} />}
           </div>
         </div>
-        <ActionBar error={submit.error ? errorMessage(submit.error, t("failed")) : null} className="mt-4 sm:sticky sm:bottom-0 sm:border-t sm:bg-background/[.97] sm:pt-3">
+        <ActionBar error={submit.error ? (issueTexts.length ? issueTexts.join(" · ") : errorMessage(submit.error, t("failed"))) : null} className="mt-4 sm:sticky sm:bottom-0 sm:border-t sm:bg-background/[.97] sm:pt-3">
           {characterId || step.index === 0 ? (
             <Button type="button" variant="outline" className="min-h-11" asChild>
               <Link href={`/campaigns/${campaignId}/character`}>{tc("actions.cancel")}</Link>
