@@ -406,6 +406,23 @@ it("refuses deleting a feat still referenced by a background", async () => {
   expect(rows("feat", TGT)).toHaveLength(1);
 });
 
+it("skips deleting a feat used by a race profile and reports it as a warning", async () => {
+  const FEAT = id("f");
+
+  f.addRow("feat", { id: FEAT, campaignId: SRC, name: "Hardy", type: "general" });
+  await applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] });
+
+  const localFeat = rows("feat", TGT)[0];
+
+  f.addRow("raceProfile", { raceId: "r1", campaignId: TGT, profile: { talents: [localFeat.id], randomTalents: [] } });
+  f.removeRow("feat", FEAT);
+
+  const result = await applySourceChanges(f.db, TGT, { apply: (await visible()).filter((i) => i.scope === "feats").map(ref), ignore: [] });
+
+  expect(rows("feat", TGT)).toHaveLength(1);
+  expect(result.warnings).toEqual([expect.stringContaining("Hardy")]);
+});
+
 it("validates new background origin refs and prevents changing a referenced origin's type", async () => {
   const FEAT = id("f"), BG = id("b");
 

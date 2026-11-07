@@ -11,6 +11,7 @@ import { markContentDirty } from "@/lib/server/content/write-context";
 import { delegateOf } from "@/lib/server/templates/bundle";
 import { rowHash } from "@/lib/server/templates/sync/hash";
 import { classifyLayered, type LayeredContext, type LayeredDb, type LayerRef, loadLayeredContext, pendingKey, tableOf } from "@/lib/server/templates/sync/layered";
+import { blockedByProfileWarning, isFeatUsedByRaceProfile } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, emptyState, getEntry, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -48,7 +49,9 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
 
   const { items, ignored } = sourceSelection(all, refs);
 
-  for (const i of items) await applyItem(db, campaignId, i, getEntry(ctx.ignored, i.scope, pendingKey(i.key)) !== undefined);
+  const warnings: string[] = [];
+
+  for (const i of items) await applyItem(db, campaignId, i, getEntry(ctx.ignored, i.scope, pendingKey(i.key)) !== undefined, warnings);
 
   const advancing = ctx.source.contentVersion > ctx.baseVersion;
 
@@ -62,10 +65,10 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
     if (count !== 1) throw new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
   }
 
-  return { applied: items.length, ignored: ignored.length, autoAdded: [], warnings: [] };
+  return { applied: items.length, ignored: ignored.length, autoAdded: [], warnings };
 }
 
-async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending: boolean) {
+async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending: boolean, warnings: string[]) {
   const t = tableOf(i.scope)!;
 
   const { hideTable } = layeredModels()[t.model];
@@ -75,6 +78,12 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending
 
     if (!count) return;
   } else if (i.localId) {
+    if (i.status === "deletedInSource" && i.scope === "feats" && (await isFeatUsedByRaceProfile(db, campaignId, [i.localId, i.key]))) {
+      warnings.push(blockedByProfileWarning(i.name));
+
+      return;
+    }
+
     const kind = i.status === "deletedInSource" ? DETACH_KIND_BY_TABLE[i.scope] : undefined;
 
     if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], campaignId, kind, [i.localId, i.key]);

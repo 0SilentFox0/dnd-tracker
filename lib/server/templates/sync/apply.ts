@@ -19,6 +19,7 @@ import { indexOf } from "@/lib/server/templates/sync/index";
 import { type LayeredDb,layerOf } from "@/lib/server/templates/sync/layered";
 import { applyLayered, previewLayeredSelection } from "@/lib/server/templates/sync/layered-apply";
 import { assertSrdNameReferences } from "@/lib/server/templates/sync/name-references";
+import { blockedByProfileWarning, isFeatUsedByRaceProfile } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceChanged, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -132,7 +133,9 @@ function cleanRow(t: BundleTableDef, src: Record<string, unknown>, item: SyncIte
   return data;
 }
 
-async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>) {
+async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>, warnings: string[]): Promise<Set<string>> {
+  const blocked = new Set<string>();
+
   for (const t of [...BUNDLE_TABLES].reverse()) {
     for (const i of selected.values()) {
       if (i.scope !== t.key || i.status !== "deletedInSource" || !i.localId) continue;
@@ -147,6 +150,13 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
         const backgrounds = await db.background.findMany({ where: { campaignId: ctx.campaignId } });
 
         if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+
+        if (await isFeatUsedByRaceProfile(db, ctx.campaignId, [i.localId])) {
+          warnings.push(blockedByProfileWarning(i.name));
+          blocked.add(i.localId);
+
+          continue;
+        }
       }
 
       const kind = DETACH_KIND_BY_TABLE[t.key];
@@ -156,6 +166,8 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
       await delegateOf(db, t).deleteMany({ where: { id: i.localId, campaignId: ctx.campaignId } });
     }
   }
+
+  return blocked;
 }
 
 async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnType<typeof indexOf>, selected: Map<string, SyncItem>, map: Map<string, string>) {
@@ -271,11 +283,11 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
 
   await assertWritable(db, ctx, written, index.sourceIds, new Set(map.values()));
 
-  await deleteRemoved(db, ctx, selected);
+  const blocked = await deleteRemoved(db, ctx, selected, warnings);
 
   if (db.compendiumEntry && db.compendiumSource) {
     await syncCompendiumProvenance(db as CompendiumBundleDb, ctx.sourceBundle.compendium, ctx.campaignId, map, new Set([...selected.values()].filter((i) => i.status !== "deletedInSource").map((i) => i.key)));
-    for (const item of selected.values()) if (item.status === "deletedInSource" && item.localId) await db.compendiumEntry.deleteMany({ where: { campaignId: ctx.campaignId, localId: item.localId } });
+    for (const item of selected.values()) if (item.status === "deletedInSource" && item.localId && !blocked.has(item.localId)) await db.compendiumEntry.deleteMany({ where: { campaignId: ctx.campaignId, localId: item.localId } });
   }
 
   if (ctx.sourceBundle.compendium?.pages.length) warnings.push((await getTranslator(await localeOrRequest(), "campaigns"))("sync.compendiumNotSynced"));
