@@ -11,6 +11,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { CUSTOM_CONDITION_KEY_RE, type CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isConditionUsed } from "@/lib/utils/rules/condition-usage";
+import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
 import type { Ruleset, RulesetPatch } from "@/lib/utils/rules/schema";
 import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
 import type { CampaignRulesView, ConditionUsage } from "@/types/campaigns";
@@ -36,7 +37,7 @@ export async function readCampaignRules(actor: Actor): Promise<CampaignRulesView
 
   const [rules, systemLocked] = await Promise.all([loadRules(actor.campaignId), hasSystemBoundContent(prisma, actor.campaignId)]);
 
-  return { ...rules, systemLocked };
+  return { ...(actor.isDM ? rules : stripPlayerHiddenRules(rules)), systemLocked };
 }
 
 export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Promise<CampaignRulesView> {

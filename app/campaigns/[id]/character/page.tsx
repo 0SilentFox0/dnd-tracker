@@ -8,6 +8,7 @@ import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { readCharacterSheet } from "@/lib/server/characters/core/read-sheet";
 import { readOkJson } from "@/lib/utils/api/read-json";
+import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { CharacterSheet } from "@/types/characters";
 
@@ -32,7 +33,7 @@ export default async function CharacterPage({ params, searchParams }: { params: 
 
   return (
     <PrefetchedQuery queryKey={characterKeys.sheet(id, character.id)} data={sheet}>
-      <PrefetchedQuery queryKey={campaignKeys.rules(id)} data={rules}>
+      <PrefetchedQuery queryKey={campaignKeys.rules(id)} data={isDM ? rules : stripPlayerHiddenRules(rules)}>
         <CharacterProfile campaignId={id} characterId={character.id} canEdit={isDM} initialTab={tab} />
       </PrefetchedQuery>
     </PrefetchedQuery>
