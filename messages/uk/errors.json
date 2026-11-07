@@ -521,7 +521,7 @@
   "advanceUnknown": "Невідомий елемент розвитку",
   "advanceLedgerEmpty": "Немає покупок для відкату",
   "advanceLedgerStale": "Останню покупку не можна відкотити — дані змінено вручну",
-  "characteristicsChanged": "Лист змінився — перезавантажте сторінку",
+  "characteristicsChanged": "Лист змінився — форму оновлено, збережіть знову",
   "advanceNotWfrp": "Розвиток за досвід доступний лише в WFRP",
   "careerNotFound": "Кар'єру не знайдено",
   "careerNoCareer": "У персонажа немає кар'єри",

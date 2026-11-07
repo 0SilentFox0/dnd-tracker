@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useCharacterForm } from "./useCharacterForm";
 import { useCharacter, useUpdateCharacter } from "./useCharacters";
 
+import { ApiError } from "@/lib/api/client";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems";
@@ -26,11 +27,20 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const { system } = useRuleSystem({ campaignId });
 
+  const [seededFor, setSeededFor] = useState<string | null>(null);
+
   const form = useCharacterForm({
     requireRace: system?.lineage,
     requireClass: system?.classes,
     onSubmit: async (data) => {
-      const saved = await update.mutateAsync(data);
+      const saved = await update.mutateAsync(data).catch(async (e: unknown) => {
+        if (e instanceof ApiError && e.status === 409) {
+          await query.refetch();
+          setSeededFor(null);
+        }
+
+        throw e;
+      });
 
       onSaved();
 
@@ -42,8 +52,6 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   // Seed once from data fetched on this mount: a cached snapshot may predate saves made elsewhere,
   // and later refetches must not overwrite what the user is typing.
-  const [seededFor, setSeededFor] = useState<string | null>(null);
-
   const freshData = query.isFetchedAfterMount ? query.data : undefined;
 
   useEffect(() => {

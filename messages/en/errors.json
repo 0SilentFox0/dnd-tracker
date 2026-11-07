@@ -521,7 +521,7 @@
   "advanceUnknown": "Unknown advancement target",
   "advanceLedgerEmpty": "No purchases to undo",
   "advanceLedgerStale": "The last purchase cannot be undone — data was edited manually",
-  "characteristicsChanged": "The sheet changed — reload the page",
+  "characteristicsChanged": "The sheet changed — form refreshed, save again",
   "advanceNotWfrp": "Experience advancement is only available in WFRP",
   "careerNotFound": "Career not found",
   "careerNoCareer": "The character has no career",
