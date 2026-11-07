@@ -1,11 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 
+import { Footer } from "@/components/layout/Footer";
 import { LANDING_PATHS } from "@/lib/constants/site";
-
-const Footer = dynamic(() => import("@/components/layout/Footer").then((m) => m.Footer));
 
 const AUTH_SCREENS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password"];
 
