@@ -13,10 +13,12 @@ import type { armourAp, parseWfrpStats } from "./wfrp/equipment/armour";
 import type { encumbrance } from "./wfrp/equipment/encumbrance";
 import type { QUALITY_REGISTRY, QualityRef } from "./wfrp/equipment/qualities";
 import type { PercentileOutcome } from "./wfrp/percentile";
+import type { wfrpUnitBuild } from "./wfrp/traits/unit-build";
 
 import type { Coin } from "@/lib/constants/inventory";
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
+import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { AttackRollResult, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -271,6 +273,7 @@ export interface RuleSystemDefinition {
   magic?: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;
   equipment?: RuleSystemEquipment;
+  traits?: RuleSystemTraits;
   currency?: RuleSystemCurrency;
   identity: { alignments: boolean };
   creation?: RuleSystemCreation;
@@ -282,6 +285,12 @@ export interface RuleSystemDefinition {
   inventory: boolean;
   d20Stats: boolean;
   unusedMechanics: readonly MechanicKey[];
+}
+
+export interface RuleSystemTraits {
+  recipes: readonly Recipe[];
+  unitBuild: typeof wfrpUnitBuild;
+  psychology?(ps: BattleParticipant[], ctx: { round: number; rng: Rng; newcomerIds?: readonly string[] }): SystemConditionResult & { testerIds: string[] };
 }
 
 export interface RuleSystemAdvancement {

@@ -45,6 +45,28 @@ describe("unitsResource", () => {
     expect(db.unit.update.mock.calls[1][0].data.characteristics).toEqual(DEFAULT_CHARACTERISTICS);
   });
 
+  it("rejects trait effects outside wfrp before writing, accepts them in wfrp", async () => {
+    db.unit.create.mockResolvedValue({ id: "u1" });
+    db.unit.update.mockResolvedValue({ id: "u1" });
+
+    const abilities = [{ id: "a1", name: "Ward", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] }];
+
+    const input = createUnitSchema.parse({ name: "X", abilities }) as never;
+
+    db.campaign.findUnique.mockResolvedValue({ rules: {} });
+    await expect(unitsResource.create(actor, input)).rejects.toMatchObject({ message: API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, status: 400 });
+    await expect(unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input)).rejects.toMatchObject({ message: API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, status: 400 });
+    expect(db.unit.create).not.toHaveBeenCalled();
+    expect(db.unit.update).not.toHaveBeenCalled();
+
+    await unitsResource.create(actor, createUnitSchema.parse({ name: "X" }) as never);
+    expect(db.unit.create).toHaveBeenCalledTimes(1);
+
+    db.campaign.findUnique.mockResolvedValue({ rules: WFRP_RULES });
+    await unitsResource.create(actor, input);
+    expect(db.unit.create).toHaveBeenCalledTimes(2);
+  });
+
   it("find scopes to the actor campaign", async () => {
     await unitsResource.find(actor, "u1", "read");
 

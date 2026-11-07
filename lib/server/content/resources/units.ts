@@ -10,17 +10,27 @@ import { createUnitSchema, updateUnitSchema } from "@/lib/schemas";
 import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { detachRefs } from "@/lib/server/content/detach-refs";
-import { toJsonInput } from "@/lib/server/content/errors";
+import { ContentError, toJsonInput } from "@/lib/server/content/errors";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
+import { isTraitEffectKind } from "@/lib/utils/abilities/schema/kinds";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
+import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
 import { toUnit } from "@/lib/utils/units/to-unit";
 import { unitCreateData } from "@/lib/utils/units/unit-create-data";
 
-async function keepsCharacteristics(campaignId: string): Promise<boolean> {
+async function loadCampaignSystem(campaignId: string): Promise<RuleSystemDefinition | null> {
   const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
 
-  return !!campaign && ruleSystemOf(parseRules(campaign.rules)).characteristics.kind === "wfrp";
+  return campaign ? ruleSystemOf(parseRules(campaign.rules)) : null;
+}
+
+const keepsCharacteristics = (system: RuleSystemDefinition | null) => system?.characteristics.kind === "wfrp";
+
+function assertTraitsSupported(system: RuleSystemDefinition | null, abilities: readonly { effects: readonly { kind: string }[] }[] | undefined) {
+  if (system?.traits || !abilities?.some((a) => a.effects.some((e) => isTraitEffectKind(e.kind)))) return;
+
+  throw new ContentError(API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, 400);
 }
 
 export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSchema>, z.infer<typeof updateUnitSchema>>({
@@ -40,12 +50,20 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
   async create(actor, data) {
     await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(data.knownSpells ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...(data.abilities ?? []).flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])] });
 
-    const unit = await prisma.unit.create({ data: unitCreateData(actor.campaignId, (await keepsCharacteristics(actor.campaignId)) ? data : { ...data, characteristics: undefined }) });
+    const system = await loadCampaignSystem(actor.campaignId);
+
+    assertTraitsSupported(system, data.abilities);
+
+    const unit = await prisma.unit.create({ data: unitCreateData(actor.campaignId, keepsCharacteristics(system) ? data : { ...data, characteristics: undefined }) });
 
     return unit;
   },
   async update(actor, existing, data) {
     await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(addedIds(data.knownSpells, existing.knownSpells) ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...(data.abilities ?? []).flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])] });
+
+    const system = await loadCampaignSystem(actor.campaignId);
+
+    assertTraitsSupported(system, data.abilities);
 
     const unit = await prisma.unit.update({
       where: { id: existing.id },
@@ -81,7 +99,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
         saveProficiencies: toJsonInput(data.saveProficiencies),
         statblock: toJsonInput(data.statblock),
         spellcasting: toJsonInput(data.spellcasting),
-        characteristics: (await keepsCharacteristics(actor.campaignId)) ? toJsonInput(data.characteristics) : undefined,
+        characteristics: keepsCharacteristics(system) ? toJsonInput(data.characteristics) : undefined,
       },
     });
 

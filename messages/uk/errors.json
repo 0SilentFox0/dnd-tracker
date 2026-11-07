@@ -536,5 +536,6 @@
   "speciesProfileNotReady": "Для цього виду ще не налаштовано профіль створення",
   "wfrpDraftInvalid": "Вибір створення героя недійсний",
   "outOfAmmo": "Немає боєприпасів",
-  "weaponReloading": "Зброя перезаряджається"
+  "weaponReloading": "Зброя перезаряджається",
+  "systemTraitsUnsupported": "Ця рульова система не підтримує риси юнітів"
 }

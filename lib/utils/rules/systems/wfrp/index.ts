@@ -14,6 +14,7 @@ import { WFRP_EQUIPMENT } from "./equipment";
 import { WFRP_MAGIC } from "./magic";
 import { onSession } from "./session";
 import { rollWfrpSheetTest } from "./sheet-test";
+import { WFRP_TRAITS } from "./traits";
 
 import { COINS } from "@/lib/constants/inventory";
 
@@ -34,6 +35,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   advancement: WFRP_ADVANCEMENT,
   creation: WFRP_CREATION,
   equipment: WFRP_EQUIPMENT,
+  traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },
   identity: { alignments: false },
   combat: { fortune: true, dice: 100, actionEconomy: { bonusAction: false, reaction: false }, participantFields: wfrpParticipantFields, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },

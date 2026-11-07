@@ -65,4 +65,13 @@ describe("unit import mapping", () => {
     expect(toUnitCreateData("c1", wfrpRow, null)).not.toHaveProperty("characteristics");
     expect(toUnitCreateData("c1", wfrpRow, null, true)).toHaveProperty("characteristics");
   });
+
+  it("imported specialAbilities become note effects only, in every system", () => {
+    for (const wfrp of [false, true]) {
+      const data = toUnitCreateData("c1", row, null, wfrp) as { abilities?: { effects: { kind: string }[] }[] };
+
+      expect(data.abilities?.length).toBeGreaterThan(0);
+      expect(data.abilities?.flatMap((a) => a.effects.map((e) => e.kind))).toEqual(data.abilities?.flatMap((a) => a.effects.map(() => "note")));
+    }
+  });
 });

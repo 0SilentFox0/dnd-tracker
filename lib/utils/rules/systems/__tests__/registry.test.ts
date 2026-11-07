@@ -23,6 +23,12 @@ describe("rule system registry", () => {
     expect(RULE_SYSTEM_REGISTRY.dnd5e.equipment).toBeUndefined();
   });
 
+  it("only wfrp defines traits", () => {
+    expect(RULE_SYSTEM_REGISTRY.wfrp.traits).toBeDefined();
+    expect(RULE_SYSTEM_REGISTRY.homm.traits).toBeUndefined();
+    expect(RULE_SYSTEM_REGISTRY.dnd5e.traits).toBeUndefined();
+  });
+
   it("resolves from rules", () => {
     expect(ruleSystemOf(DEFAULT_RULES).key).toBe("homm");
     expect(systemKeyOf({ system: { key: "wfrp" } })).toBe("wfrp");

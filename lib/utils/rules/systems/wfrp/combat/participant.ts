@@ -3,6 +3,8 @@ import { type Characteristics, readCharacteristics } from "../characteristics/ke
 import type { HitLocation } from "./constants";
 import { LOCATIONS } from "./constants";
 
+import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
+
 export interface WfrpParticipantStats {
   sb: number;
   tb: number;
@@ -10,6 +12,8 @@ export interface WfrpParticipantStats {
   ap: Record<HitLocation, number>;
   flexible?: true;
   castAp?: number;
+  size?: TraitSize;
+  ward?: number;
 }
 
 export interface WfrpParticipantFields {
