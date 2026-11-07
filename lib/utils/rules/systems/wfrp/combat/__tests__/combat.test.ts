@@ -16,7 +16,7 @@ import { resolveWfrpAttack } from "../resolve-attack";
 
 import { AttackType, CombatStatus } from "@/lib/constants/battle";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
-import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
@@ -287,5 +287,45 @@ describe("resolveWfrpAttack fortune", () => {
     expect(boosted.netSl).toBe(plain.netSl + 1);
     expect(boosted.fortune).toEqual({ kind: "sl" });
     expect(boosted.attackRoll.percentile?.fortune).toEqual({ kind: "sl" });
+  });
+});
+
+describe("resolveWfrpAttack attackBonus talent", () => {
+  const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };
+
+  const bow: BattleAttack = { ...sword, id: "bw", type: AttackType.RANGED };
+
+  const fighter = (id: string, flat = 0, attackKind?: "melee" | "ranged"): BattleParticipant => {
+    const abilities = flat ? [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat, ...(attackKind && { attackKind }) }] })] : [];
+
+    const p = makeParticipant({ id, hp: 20, maxHp: 20, abilities });
+
+    const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } };
+
+    return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { ap: { head: 0, arm: 0, body: 0, leg: 0 } }) } };
+  };
+
+  const run = (attack: BattleAttack, attacker: BattleParticipant) => {
+    const target = fighter("t");
+
+    return resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, momentum: { attacker: false, defender: false }, manualRoll: 30 });
+  };
+
+  it.each([
+    ["melee", sword],
+    ["ranged", bow],
+  ] as const)("adds SL on the %s test without moving the d100 target", (_, attack) => {
+    const plain = run(attack, fighter("a"));
+
+    const boosted = run(attack, fighter("a", 2));
+
+    expect(boosted.netSl).toBe(plain.netSl + 2);
+    expect(boosted.attackRoll.percentile?.target).toBe(plain.attackRoll.percentile?.target);
+    expect(boosted.attackRoll.percentile?.roll).toBe(plain.attackRoll.percentile?.roll);
+  });
+
+  it("respects attackKind", () => {
+    expect(run(sword, fighter("a", 2, "ranged")).netSl).toBe(run(sword, fighter("a")).netSl);
+    expect(run(bow, fighter("a", 2, "ranged")).netSl).toBe(run(bow, fighter("a")).netSl + 2);
   });
 });

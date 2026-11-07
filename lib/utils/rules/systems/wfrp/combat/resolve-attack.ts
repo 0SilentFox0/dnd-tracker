@@ -11,7 +11,8 @@ import { resolveOpposed } from "./opposed";
 
 import { AttackType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
@@ -78,7 +79,9 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   const fumbled = (roll: number) => fumbleFrom !== undefined && roll >= fumbleFrom;
 
-  const slBonus = ctx.fortune?.kind === "sl" ? 1 : 0;
+  const talentSl = collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack.type) }).flat;
+
+  const slBonus = (ctx.fortune?.kind === "sl" ? 1 : 0) + talentSl;
 
   const marked = (r: ResolvedAttack, fortune?: ResolvedAttack["fortune"]): ResolvedAttack => {
     if (!fortune) return r;
