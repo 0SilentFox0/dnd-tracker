@@ -143,6 +143,24 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     expect(await raw.spell.count({ where: { campaignId } })).toBe(0);
   });
 
+  it("a local edit of a base artifact without systemStats is no conflict while the source is unchanged", async () => {
+    const campaignId = await fresh();
+
+    const id = `${marker}-artifact-a`;
+
+    await raw.artifactBase.create({ data: { id, name: "Mail", slot: "armor", sourceCampaignId: tpl, validFrom: 1 } });
+    invalidateCampaignLayer();
+
+    try {
+      await inWrite(campaignId, (tx) => tx.artifact.update({ where: { id }, data: { name: "Mine" } }));
+
+      expect((await diffOf(campaignId)).filter((i) => i.key === id)).toEqual([]);
+    } finally {
+      await raw.artifact.deleteMany({ where: { campaignId } });
+      await raw.artifactBase.deleteMany({ where: { sourceCampaignId: tpl } });
+    }
+  });
+
   it("a hidden base row stays hidden after a patch", async () => {
     const campaignId = await fresh();
 
