@@ -97,17 +97,17 @@ describe("resolveAttackTargets: Blast", () => {
 
   const input = { rules: WFRP_RULES, order: [a, centre, near, far, friend], attacker: a, attack: bomb, chosen: [centre], targetIds: ["c"], map: testMap(), flags: none };
 
-  it("hits enemies within the radius of the chosen target only", () => {
+  it("hits everyone within the radius of the chosen target, allies included, never the attacker", () => {
     const r = resolveAttackTargets(input);
 
-    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n"]);
+    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n", "fr"]);
     expect(r.serverRolledFrom).toBe(1);
   });
 
   it("a larger radius reaches farther enemies", () => {
     const r = resolveAttackTargets({ ...input, attack: { ...bomb, wfrp: { ...bomb.wfrp, blastRadius: 4 } } });
 
-    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n", "f"]);
+    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n", "f", "fr"]);
   });
 
   it("on the map only one target is chosen", () => {

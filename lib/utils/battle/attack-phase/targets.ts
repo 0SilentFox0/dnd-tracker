@@ -49,7 +49,7 @@ function blastTargets({ map, order, attacker, centre, radius, rules }: { map: Ba
   // verify against 5e book: Blast X radius in cells
   const { targets } = templateArea(map, order, attacker, { shape: "circle", size: radius * cellFeetOf(rules), exact: true }, aim, rules);
 
-  return [centre, ...targets.filter((t) => t.basicInfo.id !== centre.basicInfo.id && enemyOf(attacker)(t))];
+  return [centre, ...targets.filter((t) => t.basicInfo.id !== centre.basicInfo.id && t.basicInfo.id !== attacker.basicInfo.id && isAttackable(t))];
 }
 
 export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags, rules }: AttackTargetsInput): AttackTargets {

@@ -187,7 +187,7 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - Магія: `magic/constants.ts:3–23`, `magic/miscast-table.ts:9,17`, `WRATH_TABLE`, числа молитов/Sin.
 - Екіпірування: `equipment/constants.ts:1`, `qualities.ts:7`, `quality-effects.ts:9` (там само Penetrating), `weapon-profile.ts:8`, `encumbrance.ts:13`.
 - Просування: `lib/utils/rules/advancement.ts:17,44,46`, дефолти `rules.advancement.creation` (50/25/0, `freeBudget` 100).
-- Blast: радіус X клітинок і цілі на клітинку (`extract-wfrp-attacks.ts:10`, `attack-phase/targets.ts`); на карті Blast зараз б'є лише ворогів атакувальника, у книзі, імовірно, всіх.
+- Blast: радіус X клітинок і цілі на клітинку (`extract-wfrp-attacks.ts:10`, `attack-phase/targets.ts`); на карті Blast б'є всіх у радіусі, союзників теж (рішення користувача 2026-11-07), крім самого атакувальника.
 - `attackBonus`: `flat` таланту трактується як кількість SL (`flat: 2` = +2 SL); якщо таланти задають відсотки, потрібен перерахунок `flat / 10`.
 - Defensive не реалізовано (`implemented:false`) до тексту книги.
 
