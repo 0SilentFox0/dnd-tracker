@@ -23,6 +23,7 @@ interface CharacterBasicInfoProps {
   hideProgression?: boolean;
   hideLineage?: boolean;
   hideClass?: boolean;
+  hideAlignment?: boolean;
   classMode?: { classes: GameClassData[]; byId: Record<string, GameClassData> };
 }
 
@@ -34,6 +35,7 @@ export function CharacterBasicInfo({
   hideProgression = false,
   hideLineage = false,
   hideClass = false,
+  hideAlignment = false,
   classMode,
 }: CharacterBasicInfoProps) {
   const t = useTranslations("characters.form.basic");
@@ -160,7 +162,7 @@ export function CharacterBasicInfo({
         </div>
       )}
 
-      {!hideLineage && (
+      {!hideLineage && !hideAlignment && (
       <div className="w-full min-w-0">
         <Label htmlFor="alignment">{t("alignment")}</Label>
         <SelectField

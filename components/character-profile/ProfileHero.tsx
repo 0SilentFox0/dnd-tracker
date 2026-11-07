@@ -46,7 +46,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
                 {id.raceIcon && <OptimizedImage src={id.raceIcon} alt="" width={14} height={14} className="size-3.5 shrink-0 rounded-sm" />}
                 <span className="truncate">
                   {id.race}{id.subrace ? ` (${id.subrace})` : ""}
-                  {id.alignment ? ` · ${id.alignment}` : ""}
+                  {system.identity.alignments && id.alignment ? ` · ${id.alignment}` : ""}
                 </span>
               </p>
               <button type="button" aria-expanded={hpOpen} onClick={() => setHpOpen((v) => !v)} className="mt-1 text-sm text-hud-bone underline-offset-2 hover:underline">

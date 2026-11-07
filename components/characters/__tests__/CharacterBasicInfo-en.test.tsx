@@ -47,6 +47,18 @@ describe("characters in en", () => {
     expect(document.getElementById("subclass")).toBeNull();
   });
 
+  it("hideAlignment hides only the alignment field", async () => {
+    const basicInfo = { data: { ...defaultCharacterFormData.basicInfo, type: "player" }, set: vi.fn() };
+
+    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />, { locale: "en", namespaces: ["common", "characters"] });
+    expect(document.getElementById("alignment")).not.toBeNull();
+    cleanup();
+
+    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} hideAlignment />, { locale: "en", namespaces: ["common", "characters"] });
+    expect(document.getElementById("alignment")).toBeNull();
+    expect(screen.getByText("Race *")).toBeInTheDocument();
+  });
+
   it("DraftBanner interpolates the DM comment", async () => {
     await renderWithIntl(<DraftBanner campaignId="c1" note="Add a goal" isOwner={false} />, { locale: "en", namespaces: ["common", "characters"] });
 
