@@ -107,7 +107,9 @@ function classifyRules(ctx: SyncContext, ruleLabel: (key: string) => string): Sy
   return MECHANIC_KEYS.flatMap((key): SyncItem[] => {
     const s = hashJson(src[key]);
 
-    const status = pairStatus(s, ctx.baseline.rules[key], hashJson(loc[key]));
+    const l = hashJson(loc[key]);
+
+    const status = pairStatus(s, ctx.baseline.rules[key] ?? l, l);
 
     if (!status) return [];
 

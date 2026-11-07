@@ -144,6 +144,14 @@ describe("classify", () => {
     expect(items).toEqual([expect.objectContaining({ scope: "rules", key: "morale", status: "updated", name: "morale" })]);
   });
 
+  it("rules: absent baseline entry is not a conflict", () => {
+    const c = ctx({ rules: { morale: { enabled: false } } }, [], {});
+
+    c.baseline.rules = {};
+
+    expect(visible(c)).toEqual([expect.objectContaining({ scope: "rules", key: "morale", status: "updated" })]);
+  });
+
   it("settings: one item with changed field names", () => {
     const c = ctx({ settings: { ...emptyBundle().settings, maxLevel: 10 } }, [], {});
 
