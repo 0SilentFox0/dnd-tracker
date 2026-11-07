@@ -95,4 +95,13 @@ describe("MyTurnControls: gating за прапорцями правил", () => 
     render(<MyTurnControls hero={mundane} />);
     expect(screen.queryByRole("button", { name: /Скерування/ })).not.toBeInTheDocument();
   });
+
+  it("hides the Channel tile for a wfrp unit that only has universal slots", () => {
+    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, magic: true };
+
+    const unit = { basicInfo: { id: "u1" }, spellcasting: { spellSlots: { universal: { current: 3 } }, knownSpells: [] } } as unknown as BattleParticipant;
+
+    render(<MyTurnControls hero={unit} />);
+    expect(screen.queryByRole("button", { name: /Скерування/ })).not.toBeInTheDocument();
+  });
 });
