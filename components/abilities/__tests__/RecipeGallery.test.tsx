@@ -6,6 +6,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AbilityEditorProvider } from "@/components/abilities/editor-context";
 import { RecipeGallery } from "@/components/abilities/RecipeGallery";
 import { RECIPES } from "@/lib/utils/abilities/templates";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+
+const ruleState = vi.hoisted(() => ({ key: null as null | "dnd5e" | "wfrp" }));
+
+vi.mock("@/lib/hooks/systems/useRuleSystem", () => ({
+  useRuleSystem: () => (ruleState.key ? { key: ruleState.key, system: RULE_SYSTEM_REGISTRY[ruleState.key], ready: true } : { key: undefined, system: undefined, ready: false }),
+}));
 
 vi.mock("@/lib/api/abilities", () => ({ getAbilitySources: vi.fn(async () => ({ sources: [] })), getOwnerAbilities: vi.fn(async () => ({ abilities: [] })) }));
 
@@ -30,7 +37,10 @@ function renderGallery(props: { scope: "ability" | "spell"; onPick: (v: never) =
 }
 
 describe("RecipeGallery", () => {
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    ruleState.key = null;
+  });
 
   it("category chips filter the cards, All restores", () => {
     renderGallery({ scope: "ability", onPick: vi.fn() });
@@ -208,5 +218,44 @@ describe("RecipeGallery", () => {
     fireEvent.click(screen.getByText(label("bonusAction")));
 
     expect(dice()).toHaveValue(initial);
+  });
+
+  describe("trait recipes", () => {
+    const traitLabel = (id: string) => `wfrpTraits.recipes.${id}.label`;
+
+    it("wfrp: traits tab and cards, ward form delivers the effect", () => {
+      ruleState.key = "wfrp";
+
+      const onPick = vi.fn();
+
+      renderGallery({ scope: "ability", onPick });
+      fireEvent.click(screen.getByRole("button", { name: "abilityRegistry.templates.categories.traits" }));
+
+      expect(screen.getByText(traitLabel("armour"))).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText(traitLabel("ward")));
+
+      expect(screen.getByLabelText("wfrpTraits.recipes.ward.params.value")).toHaveValue(9);
+
+      fireEvent.click(screen.getByRole("button", { name: "abilities.templates.create" }));
+
+      expect(onPick.mock.calls[0][0][0]).toMatchObject({ trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] });
+    });
+
+    it("dnd5e: no traits tab or cards", () => {
+      ruleState.key = "dnd5e";
+      renderGallery({ scope: "ability", onPick: vi.fn() });
+
+      expect(screen.queryByRole("button", { name: "abilityRegistry.templates.categories.traits" })).toBeNull();
+      expect(screen.queryByText(traitLabel("ward"))).toBeNull();
+      expect(screen.getByText(label("survive"))).toBeInTheDocument();
+    });
+
+    it("not ready: renders without traits", () => {
+      renderGallery({ scope: "ability", onPick: vi.fn() });
+
+      expect(screen.queryByText(traitLabel("ward"))).toBeNull();
+      expect(screen.getByText(label("survive"))).toBeInTheDocument();
+    });
   });
 });

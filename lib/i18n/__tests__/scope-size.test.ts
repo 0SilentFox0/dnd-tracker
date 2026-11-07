@@ -7,10 +7,10 @@ import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES, ROOT_NAMESPACES, WFRP_BATTLE_NA
 
 const LIMIT_KB = 105;
 
-// every wfrp member / the DM load more wfrp namespaces on top of the 105 KB base; measured uk gzip 105.5 / 108.4 KB, limits keep ~0.5 KB headroom
+// every wfrp member / the DM load more wfrp namespaces on top of the 105 KB base; measured uk gzip 106.0 / 109.5 KB (incl. 5h-1 trait texts), limits keep ~0.5 KB headroom
 const WFRP_MEMBER_LIMIT_KB = 106;
 
-const WFRP_DM_LIMIT_KB = 109;
+const WFRP_DM_LIMIT_KB = 110;
 
 const ROOT_LIMIT_KB = 20;
 

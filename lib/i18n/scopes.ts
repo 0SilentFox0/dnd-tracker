@@ -50,4 +50,4 @@ export const WFRP_CAMPAIGN_EXTRA = ["wfrpMagic", "wfrpAdvancement"] as const sat
 // Summary, encumbrance and money texts every member sees; kept out of WFRP_CAMPAIGN_EXTRA so the base scope stays measurable
 export const WFRP_MEMBER_EXTRA = ["wfrpEquipment"] as const satisfies readonly Namespace[];
 
-export const WFRP_DM_EXTRA = ["wfrpCareers", "wfrpCreation", "wfrpEquipmentEditor"] as const satisfies readonly Namespace[];
+export const WFRP_DM_EXTRA = ["wfrpCareers", "wfrpCreation", "wfrpEquipmentEditor", "wfrpTraits"] as const satisfies readonly Namespace[];

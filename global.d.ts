@@ -53,6 +53,7 @@ import type wfrpCareers from "./messages/uk/wfrpCareers.json";
 import type wfrpCreation from "./messages/uk/wfrpCreation.json";
 import type wfrpEquipment from "./messages/uk/wfrpEquipment.json";
 import type wfrpEquipmentEditor from "./messages/uk/wfrpEquipmentEditor.json";
+import type wfrpTraits from "./messages/uk/wfrpTraits.json";
 import type wfrpMagic from "./messages/uk/wfrpMagic.json";
 import type whatsNew from "./messages/uk/whatsNew.json";
 import type world from "./messages/uk/world.json";
@@ -118,6 +119,7 @@ declare module "next-intl" {
       wfrpCreation: typeof wfrpCreation;
       wfrpEquipment: typeof wfrpEquipment;
       wfrpEquipmentEditor: typeof wfrpEquipmentEditor;
+      wfrpTraits: typeof wfrpTraits;
       wfrpMagic: typeof wfrpMagic;
     };
   }
