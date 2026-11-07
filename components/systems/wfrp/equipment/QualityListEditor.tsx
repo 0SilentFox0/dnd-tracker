@@ -7,7 +7,7 @@ import { NumberField } from "./NumberField";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
-import { QUALITY_KEYS, QUALITY_REGISTRY, type QualityKey, type QualityRef } from "@/lib/utils/rules/systems/wfrp/equipment";
+import { QUALITY_KEYS, QUALITY_REGISTRY, QUALITY_VALUE_MAX, type QualityKey, type QualityRef } from "@/lib/utils/rules/systems/wfrp/equipment";
 
 interface QualityListEditorProps {
   id: string;
@@ -47,7 +47,7 @@ export function QualityListEditor({ id, label, kind, value, onChange }: QualityL
               <span className="min-w-0 flex-1 self-center text-sm">{tq(r.key)}</span>
               {QUALITY_REGISTRY[r.key].hasValue && (
                 <div className="w-24">
-                  <NumberField id={`${id}-${r.key}`} label={t("qualityValue")} value={r.value} min={1} max={20} onChange={(n) => setValue(i, n)} />
+                  <NumberField id={`${id}-${r.key}`} label={t("qualityValue")} value={r.value} min={1} max={QUALITY_VALUE_MAX} onChange={(n) => setValue(i, n)} />
                 </div>
               )}
               <Button type="button" size="icon" variant="ghost" className="size-11" aria-label={t("removeQuality", { name: tq(r.key) })} onClick={() => onChange(value.filter((_, j) => j !== i))}>

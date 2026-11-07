@@ -7,8 +7,7 @@ import { EncumbranceBar } from "./EncumbranceBar";
 import { HudSection } from "@/components/hud/form";
 import { HudStatChip } from "@/components/hud/page";
 import { useEncumbrance, useEquippedAp } from "@/lib/hooks/systems/wfrp";
-
-const LOCATIONS = ["head", "arm", "body", "leg"] as const;
+import { LOCATIONS } from "@/lib/utils/rules/systems/wfrp/combat/constants";
 
 export function EquippedArmourSummary({ campaignId, characterId }: { campaignId: string; characterId: string }) {
   const t = useTranslations("wfrpEquipment.summary");

@@ -7,10 +7,9 @@ import { QualityListEditor } from "./QualityListEditor";
 
 import { FormField } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
-import type { HitLocation, WfrpArmourStats } from "@/lib/utils/rules/systems";
+import type { WfrpArmourStats } from "@/lib/utils/rules/systems";
+import { LOCATIONS } from "@/lib/utils/rules/systems/wfrp/combat/constants";
 import { AP_MAX_PER_LAYER, ARMOUR_KINDS } from "@/lib/utils/rules/systems/wfrp/equipment";
-
-const LOCATIONS: HitLocation[] = ["head", "arm", "body", "leg"];
 
 interface ArmourFieldsProps {
   value: WfrpArmourStats;

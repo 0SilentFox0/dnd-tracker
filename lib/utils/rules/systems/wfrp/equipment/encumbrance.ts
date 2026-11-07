@@ -1,7 +1,7 @@
 import type { Characteristics } from "../characteristics/keys";
 import { parseWfrpStats } from "./armour";
 
-export type EncumbranceItem = { systemStats: unknown; quantity?: number };
+type EncumbranceItem = { systemStats: unknown; quantity?: number };
 
 export type Encumbrance = { carried: number; limit: number; over: boolean };
 

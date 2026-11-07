@@ -5,7 +5,6 @@ import { AttackType } from "@/lib/constants/battle";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 import type { RuleSystemEquipment } from "@/lib/utils/rules/systems/types";
 
-
 const valueOf = (list: { key: string; value?: number }[], key: string) => list.find((q) => q.key === key)?.value;
 
 // verify against 5e book: targets hit per cell of blast radius

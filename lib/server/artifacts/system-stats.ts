@@ -4,9 +4,9 @@ import type { Ruleset } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import { SYSTEM_STATS_SCHEMAS } from "@/lib/utils/rules/systems/schemas";
 
-export type SystemStatsResult = { ok: true; value: unknown | null } | { ok: false; key: ApiErrorKey; issues?: unknown };
+type SystemStatsResult = { ok: true; value: unknown | null } | { ok: false; key: ApiErrorKey; issues?: unknown };
 
-export function validateSystemStats(rules: Ruleset, stats: unknown): SystemStatsResult {
+function validateSystemStats(rules: Ruleset, stats: unknown): SystemStatsResult {
   if (stats === null) return { ok: true, value: null };
 
   const system = ruleSystemOf(rules);

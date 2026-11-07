@@ -6,7 +6,7 @@ import type { WfrpItemStats } from "./stats";
 
 const SHIELD_LOCATIONS: readonly HitLocation[] = ["head", "arm", "body"];
 
-export type EquippedStatsRow = { slot: string; systemStats: unknown };
+type EquippedStatsRow = { slot: string; systemStats: unknown };
 
 export const parseWfrpStats = (raw: unknown): WfrpItemStats | null => readStats(raw);
 
