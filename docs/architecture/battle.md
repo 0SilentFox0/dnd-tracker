@@ -245,7 +245,7 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 
 ## Приєднання й психологія (wfrp 5h-1)
 
-`runJoinTriggers` (`lib/utils/battle/turn/join-triggers.ts`) замінює три виклики `battleStart` (старт бою, reveal резерву, початок раунду/призов) і викликає `traits.psychology` системи; d20 нічого не робить. `battleData.psychologyTested` (`fear`/`terror` → тестовані джерела) живе в `ParticipantState` (`split-participant`, `participant-patch`): тест дає дельту `battleData`, знімок і `snapshotHash` не чіпаються. Журнал: старт — окрема `psychology-start`, reveal — другий `dmEvent`, раунд — `psychology-round`; `concealWfrpLine` ховає ціль у Hidden-варіантах.
+`runJoinTriggers` (`lib/utils/battle/turn/join-triggers.ts`) замінює три виклики `battleStart` (старт бою, reveal резерву, початок раунду/призов) і викликає `traits.psychology` системи; d20 нічого не робить. Пряме додавання юніта ДМ (`add-participant`, не резерв) викликає лише `runPsychology` (без `battleStart`-здібностей), другий `dmEvent` з `targets`. `battleData.psychologyTested` (`fear`/`terror` → тестовані джерела) живе в `ParticipantState` (`split-participant`, `participant-patch`): тест дає дельту `battleData`, знімок і `snapshotHash` не чіпаються. Журнал: старт — окрема `psychology-start`, reveal — другий `dmEvent`, раунд — `psychology-round`; `concealWfrpLine` ховає ціль у Hidden-варіантах.
 
 ## Crit choice (DM-chosen critical effects)
 

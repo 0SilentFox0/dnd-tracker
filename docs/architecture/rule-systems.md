@@ -204,8 +204,7 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - `attackBonus`: `flat` таланту трактується як кількість SL (`flat: 2` = +2 SL); якщо таланти задають відсотки, потрібен перерахунок `flat / 10`.
 - Defensive не реалізовано (`implemented:false`) до тексту книги.
 - Traits: `wfrp/traits/constants.ts` (поріг Ward на d10, кроки й множники Size, критерій SL і рівні `broken` Fear/Terror, Breath: радіус/дальність/без SB, Regenerate 1d10, Night Vision 60 ft, перелік атак-Traits і `TRAIT_SIZES`), `BALANCE_REF_INCOMING`; Terror випереджає Fear, далі більше значення, і Terror також записує fear як протестований з тим самим цільовим числом.
-- Психологія (5h-1, `wfrp/traits/psychology.ts`): (M1) ціль Cool рахується один раз, тож тест Fear після проваленого тесту Terror ігнорує щойно накладений штраф `broken`; (M3) джерело зі `side` ≠ `side` тестера означає, що нейтральний учасник тестується обома сторонами й лякає обидві.
-- Психологія не тестується, коли ДМ додає юніт напряму (`add-participant-mutation`, не резерв) і коли прокидаються вороги лабіринту (M2, як і раніше, прогалина spec).
+- Психологія (5h-1): у рушії лише дві сторони (`ally`/`enemy`), нейтральної немає, тож «нейтральний тестер» неможливий. Не тестується пробудження ворогів лабіринту (`withMazeAwareness` чиста, без rng/правил). Прямий `add-participant` (не резерв) тестується через `runPsychology`.
 - Ефекти Traits приймає лише ресурс `units` (guard у `lib/server/content/resources/units.ts`); раси/персонажі/артефакти в d20-кампаніях їх приймають, але вони інертні (M4).
 
 ## Межі 5e-3
