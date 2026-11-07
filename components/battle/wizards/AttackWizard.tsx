@@ -12,6 +12,7 @@ import { WeaponStep } from "./attack/WeaponStep";
 
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["weapon", "target", "roll", "damage", "summary"] as const;
@@ -22,6 +23,8 @@ const PICKED_STEPS = new Set(["roll", "damage", "summary", "submitting"]);
 
 export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
   const t = useTranslations("battleWizards.attack");
+
+  const text = useText();
 
   const { state, view, actions } = wizard;
 
@@ -71,6 +74,7 @@ export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
       {state.step === "roll" && target && <RollStep key={stepKey} wizard={wizard} target={target} />}
       {state.step === "damage" && <DamageStep key={stepKey} wizard={wizard} />}
       {(state.step === "summary" || state.step === "submitting") && <SummaryStep wizard={wizard} />}
+      {state.error && PICKED_STEPS.has(state.step) && <p role="alert" className="mt-2 text-sm text-[#e9a08f]">{text(state.error)}</p>}
     </ResponsiveDialog>
   );
 }

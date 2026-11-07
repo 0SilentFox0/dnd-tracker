@@ -90,6 +90,39 @@ describe("AttackWizard", () => {
     expect(screen.queryByText("Ближня атака · ціль поруч")).toBeNull();
   });
 
+  it("ціль поза дальністю атаки вимкнена з поясненням", async () => {
+    const { wrapper, me, gob } = fakeScene({ map: { cols: 20, rows: 4, background: null, opacity: 0.3 } });
+
+    me.battleData.position = { x: 0, y: 0 };
+    gob.battleData.position = { x: 15, y: 0 };
+
+    const bow = { id: "bow", name: "Лук", type: AttackType.RANGED, range: "30 ft", attackBonus: 4, damageDice: "1d6", damageType: "piercing" } as BattleAttack;
+
+    render(<Harness attacker={{ ...me, battleData: { ...me.battleData, attacks: [bow] } }} preset={{ attackId: "bow", targetId: "" }} />, { wrapper });
+
+    const target = await screen.findByRole("button", { name: /Гоблін/ });
+
+    expect((target as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText("Ціль поза дальністю атаки")).toBeTruthy();
+  });
+
+  it("помилка сервера видна на кроці кидка", async () => {
+    const { wrapper, me, mutateAsync } = fakeScene();
+
+    mutateAsync.mockRejectedValueOnce(new Error("Ціль поза дальністю атаки"));
+
+    render(<Harness attacker={me} />, { wrapper });
+
+    fireEvent.click(await screen.findByRole("button", { name: /Гоблін/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Далі · кидок" }));
+    fireEvent.click(screen.getByRole("button", { name: "14" }));
+    fireEvent.change(screen.getByLabelText("Кубик 1 (d8)"), { target: { value: "6" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
+    fireEvent.click(screen.getByRole("button", { name: /Атакувати/ }));
+
+    expect((await screen.findByRole("alert")).textContent).toBe("Ціль поза дальністю атаки");
+  });
+
   it("без карти дальність не перевірено — лише «Ближня атака»", async () => {
     const { wrapper, me } = fakeScene();
 

@@ -8,9 +8,10 @@ import { useBattleScene } from "./useBattleScene";
 import { AttackType } from "@/lib/constants/battle";
 import { isAirborne, isDying } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { lineOfFire } from "@/lib/utils/battle/grid";
+import { attackReachError, lineOfFire } from "@/lib/utils/battle/grid";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /** Цілі, яких атакувальник бачить, і ті з них, кого закриває укриття. */
 export function useAttackTargets(attacker: BattleParticipant | null, attack: BattleAttack | null, step: string) {
@@ -40,5 +41,21 @@ export function useAttackTargets(attacker: BattleParticipant | null, attack: Bat
     return new Set(candidates.filter((t) => lineOfFire(map, seen, attacker, t).blocked).map((t) => t.basicInfo.id));
   }, [step, attacker, attack, map, order, visible]);
 
-  return { targets, enemyTargets, cover, visible };
+  const rules = scene.battle.rules;
+
+  const unreachable = useMemo(() => {
+    const out = new Map<string, LogLine>();
+
+    if (step !== "target" || !attacker || !attack || !map || !attacker.battleData.position) return out;
+
+    for (const t of targets) {
+      const error = attackReachError(map, order, attacker, attack, [t], rules);
+
+      if (error) out.set(t.basicInfo.id, error);
+    }
+
+    return out;
+  }, [step, attacker, attack, map, order, rules, targets]);
+
+  return { targets, enemyTargets, cover, unreachable, visible };
 }

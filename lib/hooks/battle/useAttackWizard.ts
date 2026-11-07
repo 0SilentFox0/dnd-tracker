@@ -44,7 +44,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
-  const { targets, enemyTargets, cover, visible } = useAttackTargets(attacker, attack, state.step);
+  const { targets, enemyTargets, cover, unreachable, visible } = useAttackTargets(attacker, attack, state.step);
 
   const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
 
@@ -145,7 +145,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     fortune: { available: dice === 100 && fortune && (attacker?.battleData.fortune ?? 0) >= 1 && state.targetIds.length === 1, left: attacker?.battleData.fortune ?? 0 },
     ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.wfrp?.ammoCapacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.wfrp.ammoCapacity, capacity: a.wfrp.ammoCapacity }] as const] : []))) : {},
-    attack, attacks, targets, steps, estimate, cover, unknownDefense, previews, dice, percentile,
+    attack, attacks, targets, steps, estimate, cover, unreachable, unknownDefense, previews, dice, percentile,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
     reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
@@ -207,7 +207,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       dispatch({ type: "CONFIRM_TARGETS", forced });
     },
-    selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
+    selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.filter((p) => !unreachable.has(p.basicInfo.id)).map((p) => p.basicInfo.id) }),
     toggleCunning: (effect: CunningStrikeEffect) => cunningOffer && dispatch({ type: "SET_CUNNING_STRIKE", effects: toggleCunningStrike(state.cunningStrike ?? [], effect, cunningOffer) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
     setFortune: (value: "reroll" | "sl" | null) => dispatch({ type: "SET_FORTUNE", value }),
