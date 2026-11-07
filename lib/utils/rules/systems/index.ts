@@ -12,3 +12,4 @@ export { STAT_FLOOR } from "./wfrp/creation";
 export type { QualityKey, QualityRef } from "./wfrp/equipment/qualities";
 export type { WfrpArmourStats, WfrpGearStats, WfrpItemStats, WfrpWeaponStats } from "./wfrp/equipment/stats";
 export { DIFFICULTY_KEYS, type DifficultyKey } from "./wfrp/percentile/difficulty";
+export { DEFAULT_TABLES, type ResolvedRow } from "./wfrp/tables/defaults";

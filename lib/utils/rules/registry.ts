@@ -1,6 +1,6 @@
 import type { Ruleset } from "./schema";
 
-export type MechanicKey = Exclude<keyof Ruleset, "system" | "tables">;
+export type MechanicKey = Exclude<keyof Ruleset, "system">;
 
 export const MECHANIC_REGISTRY = {
   morale: true,
@@ -20,4 +20,5 @@ export const MECHANIC_REGISTRY = {
   items: true,
   spellIngredients: true,
   advancement: true,
+  tables: true,
 } satisfies Record<MechanicKey, true>;

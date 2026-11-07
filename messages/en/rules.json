@@ -172,6 +172,10 @@
     "advancement": {
       "label": "Advancement",
       "description": "Advance prices, career ticks and out-of-career multiplier."
+    },
+    "tables": {
+      "label": "Tables",
+      "description": "Critical, miscast and Wrath of the Gods tables; untouched tables keep the built-in rows."
     }
   },
   "customConditions": {

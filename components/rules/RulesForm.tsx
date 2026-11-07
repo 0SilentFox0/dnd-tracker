@@ -20,6 +20,7 @@ import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
 import { SpellIngredientsSection } from "./sections/SpellIngredientsSection";
 import { SystemSection } from "./sections/SystemSection";
+import { TablesSection } from "./sections/TablesSection";
 
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
@@ -28,6 +29,8 @@ import { useRulesForm } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { MechanicKey } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+
+const WFRP_ONLY = new Set<MechanicKey>(["advancement", "tables"]);
 
 const FORM_ID = "campaign-rules-form";
 
@@ -49,6 +52,7 @@ const SECTIONS = {
   items: ItemsSection,
   spellIngredients: SpellIngredientsSection,
   advancement: AdvancementSection,
+  tables: TablesSection,
 } satisfies Record<MechanicKey, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {
@@ -64,7 +68,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   const unused = ruleSystemOf(form.data).unusedMechanics;
 
-  const tabs: HudTab<MechanicKey>[] = (Object.keys(SECTIONS) as MechanicKey[]).filter((key) => key !== "advancement" || form.data.system.key === "wfrp").map((key) => {
+  const tabs: HudTab<MechanicKey>[] = (Object.keys(SECTIONS) as MechanicKey[]).filter((key) => !WFRP_ONLY.has(key) || form.data.system.key === "wfrp").map((key) => {
     const Section = SECTIONS[key];
 
     return {
