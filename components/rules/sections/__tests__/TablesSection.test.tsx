@@ -32,7 +32,7 @@ describe("TablesSection", () => {
     expect(screen.getByRole("button", { name: "wfrpTables.customize" })).toBeTruthy();
   });
 
-  it("customize copies the defaults without textKey", () => {
+  it("customize never persists a raw key when the translation is missing", () => {
     const set = mount();
 
     fireEvent.click(screen.getByRole("button", { name: "wfrpTables.customize" }));
@@ -40,7 +40,8 @@ describe("TablesSection", () => {
     const next = set.mock.calls.at(-1)?.[1].critHead;
 
     expect(next).toHaveLength(DEFAULT_TABLES.critHead.length);
-    expect(next[0]).toEqual({ max: 20, effects: [{ type: "damage", amount: 1 }], text: "battleWfrp.crit.head.1" });
+    expect(next[0]).toEqual({ max: 20, effects: [{ type: "damage", amount: 1 }] });
+    expect(JSON.stringify(next)).not.toContain("battleWfrp.");
   });
 
   it("adds an effect to a row", () => {

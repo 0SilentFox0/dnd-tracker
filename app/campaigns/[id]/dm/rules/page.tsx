@@ -1,9 +1,11 @@
 import { HudFormPage } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { RulesForm } from "@/components/rules/RulesForm";
+import { ExtendLocaleScope } from "@/lib/i18n/extend-locale-scope";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
+import { isWfrpCampaign } from "@/lib/server/campaigns/system-key";
 import { MECHANIC_REGISTRY } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -32,9 +34,11 @@ export default async function DMRulesPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  return (
+  const form = (
     <HudFormPage title={t("page.title")}>
       <RulesForm campaignId={id} />
     </HudFormPage>
   );
+
+  return (await isWfrpCampaign(id)) ? <ExtendLocaleScope namespaces={["battleWfrp"]}>{form}</ExtendLocaleScope> : form;
 }

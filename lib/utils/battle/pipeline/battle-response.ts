@@ -10,6 +10,7 @@ import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { redactLogForPlayers, redactParticipantsForPlayers, redactPatchesForPlayers } from "@/lib/utils/battle/view/visibility";
+import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -52,7 +53,7 @@ export function toBattleResponse(
     ...(hasMomentum(scene.momentum) && { momentum: scene.momentum }),
     map: meta.map,
     audio: meta.audio ?? null,
-    rules: meta.rules,
+    rules: hide ? stripPlayerHiddenRules(meta.rules) : meta.rules,
     battleLog: log.entries,
     ...(log.mode === "append" && { battleLogMode: "append" as const }),
     ...(log.cancelledFrom !== undefined && { battleLogCancelledFrom: log.cancelledFrom }),

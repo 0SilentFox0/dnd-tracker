@@ -4,7 +4,6 @@ export interface ResolvedRow extends TableRow {
   textKey?: string;
 }
 
-// verify magic tables against 5e book
 export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
   critHead: [
     { max: 20, effects: [{ type: "damage", amount: 1 }], textKey: "battleWfrp.crit.head.1" },

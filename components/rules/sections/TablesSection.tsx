@@ -114,7 +114,14 @@ export function TablesSection({ form }: { form: RulesFormState }) {
 
   const setRows = (next: TableRow[] | null) => form.set("tables", { ...tables, [slot]: next });
 
-  const customize = () => setRows(DEFAULT_TABLES[slot].map(({ textKey, ...row }) => ({ ...row, text: textKey ? tt(textKey) : row.text })));
+  const customize = () =>
+    setRows(
+      DEFAULT_TABLES[slot].map(({ textKey, ...row }) => {
+        const translated = textKey ? tt(textKey) : row.text;
+
+        return translated && translated !== textKey ? { ...row, text: translated } : row;
+      }),
+    );
 
   const secondLast = rows && rows.length > 1 ? rows[rows.length - 2].max : 0;
 

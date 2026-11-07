@@ -33,6 +33,17 @@ describe("toBattleResponse", () => {
     expect(toBattleResponse({ meta }, scene, [hero], [], { mode: "full", entries: [] }).rules).toEqual(meta.rules);
   });
 
+  it("гравцю не віддає таблиці правил, ДМ — віддає", () => {
+    const tables = { critHead: [{ max: 100, text: "x", effects: [] }] };
+
+    const withTables = { meta: { ...meta, rules: { ...DEFAULT_RULES, tables } } };
+
+    const entries = { mode: "full" as const, entries: [] };
+
+    expect(toBattleResponse(withTables, scene, [hero], [], entries, { isDM: false }).rules.tables).toEqual({});
+    expect(toBattleResponse(withTables, scene, [hero], [], entries, { isDM: true }).rules.tables).toEqual(tables);
+  });
+
   it("для того, хто діяв, — з isDM/userRole; лобі видно лише в prepared", () => {
     const active = toBattleResponse({ meta }, scene, [hero], [], { mode: "full", entries: [] }, { isDM: true });
 
