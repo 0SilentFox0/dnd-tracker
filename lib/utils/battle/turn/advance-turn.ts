@@ -8,6 +8,7 @@ import { resetTurnState } from "./turn-state";
 import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { tickReload } from "@/lib/utils/battle/ammo";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { logFields } from "@/lib/utils/battle/log/lines";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
@@ -74,7 +75,7 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
 
     const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending, { participants: order, rules, rng: rng ?? Math.random, round: scene.round });
 
-    order = replaceParticipant(order, finished.participant);
+    order = replaceParticipant(order, tickReload(finished.participant));
 
     if (finished.messages.length > 0) actions.push(turnEndAction(ending, scene, finished.messages));
 

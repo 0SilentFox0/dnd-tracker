@@ -11,6 +11,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
+import { ammoStatus } from "@/lib/utils/battle/ammo";
 import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { CUNNING_STRIKE_LABELS, cunningStrikeOffer, toggleCunningStrike } from "@/lib/utils/battle/attack/cunning-strike";
@@ -143,6 +144,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       sneakDice: cunningOffer.sneakDice,
     },
     fortune: { available: dice === 100 && fortune && (attacker?.battleData.fortune ?? 0) >= 1 && state.targetIds.length === 1, left: attacker?.battleData.fortune ?? 0 },
+    ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.wfrp?.ammoCapacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.wfrp.ammoCapacity, capacity: a.wfrp.ammoCapacity }] as const] : []))) : {},
     attack, attacks, targets, steps, estimate, cover, unknownDefense, previews, dice, percentile,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */

@@ -5,7 +5,8 @@ import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { attackBodySchema } from "@/lib/schemas/battles";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { ammoStatus, spendAmmo } from "@/lib/utils/battle/ammo";
 import { canUseInspiration, spendInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { findAttack, requestedTargetIds } from "@/lib/utils/battle/attack-phase/request";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
@@ -34,6 +35,10 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
 
   // без атакуючого чи атаки помилку дасть сама фаза атаки
   if (!attacker || !attack) return;
+
+  const ammo = ammoStatus(attacker, attack);
+
+  if (ammo !== "ok") throw ruleErrorOf("action_rejected", ammo === "empty" ? API_ERRORS.OUT_OF_AMMO : API_ERRORS.WEAPON_RELOADING);
 
   const targetIds = requestedTargetIds(data);
 
@@ -114,7 +119,11 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
 
         const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
 
-        const order = summoned.order;
+        const spent = findParticipant(summoned.order, data.attackerId);
+
+        const spentAttack = spent && findAttack(spent, data.attackId, data.offHand);
+
+        const order = spent && spentAttack ? replaceParticipant(summoned.order, spendAmmo(spent, spentAttack)) : summoned.order;
 
         const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 ? withLines(a, summoned.messages) : a));
 

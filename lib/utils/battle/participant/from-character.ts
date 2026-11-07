@@ -22,6 +22,7 @@ import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
 import { classPools } from "@/lib/utils/abilities/class-columns";
 import { readChoiceList } from "@/lib/utils/abilities/read";
+import { initAmmo } from "@/lib/utils/battle/ammo";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { classProficiencies, withGrantedProficiencies } from "@/lib/utils/battle/proficiency/collect";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
@@ -38,7 +39,7 @@ import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, profic
 import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { ResolvedClassEntry } from "@/types/classes";
 
 async function resolveCharacterClassEntries(character: CharacterFromPrisma, rules: Ruleset, context?: CampaignSpellContext): Promise<ResolvedClassEntry[]> {
@@ -88,6 +89,12 @@ async function loadCharacterBuildRefs(character: CharacterFromPrisma, rules: Rul
 
   return { skills, artifactRows, consumables, equippedArtifacts, completed, resolvedClasses, attacks, race };
 }
+
+const ammoOf = (attacks: BattleAttack[]) => {
+  const ammo = initAmmo(attacks);
+
+  return ammo ? { ammo } : {};
+};
 
 type BuildRefs = Awaited<ReturnType<typeof loadCharacterBuildRefs>>;
 
@@ -312,6 +319,7 @@ export async function createBattleParticipantFromCharacter(
       abilityUsage: {},
       ...(Object.keys(pools).length > 0 && { pools }),
       ...(ingredientStock && { ingredientStock }),
+      ...ammoOf(attacks),
       pendingExtraActions: 0,
     },
     actionFlags: {

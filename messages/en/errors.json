@@ -534,5 +534,7 @@
   "careerInSpeciesTable": "The career is in a species table — remove it there first",
   "featInSpeciesTable": "The feat is in a species table — remove it there first",
   "speciesProfileNotReady": "This species has no creation profile yet",
-  "wfrpDraftInvalid": "The hero creation choices are invalid"
+  "wfrpDraftInvalid": "The hero creation choices are invalid",
+  "outOfAmmo": "Out of ammunition",
+  "weaponReloading": "The weapon is reloading"
 }

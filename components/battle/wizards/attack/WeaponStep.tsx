@@ -13,6 +13,8 @@ export function WeaponStep({ wizard: { state, view, actions } }: { wizard: Attac
 
   const text = useText();
 
+  const ta = useTranslations("battleWfrp.ammo");
+
   return (
     <div className="space-y-2">
       {view.attacks.map((a) => {
@@ -20,13 +22,18 @@ export function WeaponStep({ wizard: { state, view, actions } }: { wizard: Attac
 
         const preview = view.previews[id];
 
+        const ammo = view.ammo[id];
+
+        const locked = !!ammo && ammo.status !== "ok";
+
         return (
-          <button key={id} type="button" onClick={() => actions.selectWeapon(a)} className={cn("flex h-[76px] w-full items-center gap-3 border px-3 text-left", id === state.attackId ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
+          <button key={id} type="button" disabled={locked} onClick={() => actions.selectWeapon(a)} className={cn("flex h-[76px] w-full items-center gap-3 border px-3 text-left disabled:opacity-50", id === state.attackId ? "border-[var(--enemy)] bg-[var(--enemy)]/15" : "border-white/15")}>
             {a.type === AttackType.RANGED ? <Crosshair className="size-7 shrink-0 text-[var(--gold)]" /> : <Swords className="size-7 shrink-0 text-[var(--gold)]" />}
             <span className="min-w-0 flex-1">
               <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
               <span className="block text-[13px] text-hud-soft">{t(view.dice === 100 ? "toHitPercent" : "toHit", { kind: t(a.type === AttackType.MELEE ? "melee" : "ranged"), bonus: signed(preview?.toHit ?? a.attackBonus), target: view.percentile.weaponTargets[id] ?? 0 })}</span>
               <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-hud-gold">
+                {ammo && <span>{locked ? ta(ammo.status) : ta("badge", { left: ammo.left, capacity: ammo.capacity })}</span>}
                 {preview?.bonuses.map((b) => {
                   const label = text(b.label);
 

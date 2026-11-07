@@ -527,6 +527,10 @@ export interface IngredientStock {
 
 export interface BattleParticipantBattleData {
   ingredientStock?: IngredientStock;
+  /** attack id → shots left; seeded at battle start from the weapon capacity, never persisted between battles */
+  ammo?: Record<string, number>;
+  /** attack id → owner turn ends left until the magazine refills */
+  reload?: Record<string, number>;
   pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];

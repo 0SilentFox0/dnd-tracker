@@ -465,6 +465,8 @@ export const API_ERRORS = {
   CONDITION_UNSUPPORTED: "errors.conditionUnsupported",
   CONDITION_TEST_UNAVAILABLE: "errors.conditionTestUnavailable",
   NO_FORTUNE: "errors.noFortune",
+  OUT_OF_AMMO: "errors.outOfAmmo",
+  WEAPON_RELOADING: "errors.weaponReloading",
   ABILITY_COOLDOWN: "errors.abilityCooldown",
   BATTLE_STATE_CHANGED: "errors.battleStateChanged",
   MAZE_DARK: "errors.mazeDark",

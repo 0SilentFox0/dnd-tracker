@@ -110,6 +110,33 @@ describe("AttackWizard", () => {
     expect(screen.queryByRole("button", { name: "Змінити зброю" })).toBeNull();
   });
 
+  it("WFRP: лічильник набоїв на зброї, кнопка вимкнена коли порожньо або перезарядка", async () => {
+    const { wrapper, me } = fakeScene();
+
+    const bow = { id: "bow", name: "Лук", type: AttackType.RANGED, range: "60 ft", attackBonus: 4, damageDice: "1d6", damageType: "piercing", wfrp: { qualities: [], flaws: [], ammoCapacity: 3, reload: 1 } } as BattleAttack;
+
+    const withAmmo = (battleData: Partial<typeof me.battleData>) => ({ ...me, battleData: { ...me.battleData, attacks: [...me.battleData.attacks, bow], ...battleData } });
+
+    const first = render(<Harness attacker={withAmmo({ ammo: { bow: 2 } })} />, { wrapper });
+
+    const button = await screen.findByRole("button", { name: /Лук/ });
+
+    expect(button.textContent).toContain("Набої 2/3");
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+    first.unmount();
+
+    const empty = render(<Harness attacker={withAmmo({ ammo: { bow: 0 } })} />, { wrapper });
+
+    expect(((await screen.findByRole("button", { name: /Лук/ })) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole("button", { name: /Лук/ }).textContent).toContain("Немає набоїв");
+    empty.unmount();
+
+    render(<Harness attacker={withAmmo({ ammo: { bow: 0 }, reload: { bow: 1 } })} />, { wrapper });
+
+    expect((await screen.findByRole("button", { name: /Лук/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole("button", { name: /Лук/ }).textContent).toContain("Перезарядка");
+  });
+
   it("закриття й повторне відкриття не залишає старих кубиків шкоди", async () => {
     const { wrapper, me } = fakeScene();
 
