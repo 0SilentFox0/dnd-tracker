@@ -16,3 +16,5 @@ export const BALANCE_REF_TB = 3;
 export const BALANCE_REF_AP = 0;
 
 export const BALANCE_REF_TARGET = 40;
+
+export const BALANCE_REF_INCOMING = 8;

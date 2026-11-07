@@ -13,7 +13,7 @@ const finite = (n: number, fallback: number) => (Number.isFinite(n) ? n : fallba
 export function hitModelHeroStats(p: BattleParticipant, model: HitModel): ReturnType<typeof getCharacterStats> {
   const dpr = finite(model.damage(p), 1);
 
-  const hp = p.combatStats.maxHp;
+  const hp = Math.round(p.combatStats.maxHp * finite(model.durability?.(p) ?? 1, 1));
 
   return {
     dpr,
@@ -37,5 +37,7 @@ export function hitModelUnitStats(unit: UnitStats, p: BattleParticipant, model: 
 
   const { spell: _spell, ...rest } = unit;
 
-  return { ...rest, dpr, kpi: dpr / unit.hp, ac: finite(model.defense(p), 0), attackBonus: finite(model.offense(p), 0), damageKey: MELEE_KEY };
+  const hp = Math.max(1, Math.round(unit.hp * finite(model.durability?.(p) ?? 1, 1)));
+
+  return { ...rest, hp, dpr, kpi: dpr / hp, ac: finite(model.defense(p), 0), attackBonus: finite(model.offense(p), 0), damageKey: MELEE_KEY };
 }

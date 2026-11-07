@@ -251,6 +251,8 @@ export interface RuleSystemCombat {
     defense(p: BattleParticipant): number;
     winChance(off: number, def: number): number;
     damage(p: BattleParticipant): number;
+    /** Multiplier on effective HP for protection that offense/defense do not capture (armour, ward) */
+    durability?(p: BattleParticipant): number;
     /** Hit chance of an average matchup; party/unit factors are relative to it */
     refHit: number;
   };

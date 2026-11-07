@@ -12,10 +12,10 @@ import type { BattleParticipant } from "@/types/battle";
 import type { RaceRow } from "@/types/races";
 
 /** The participants the battle would build; resistances (unit and race abilities, immunities) and system hit models read them. */
-async function builtUnitsById(units: UnitFromPrisma[], races: RaceRow[]): Promise<Map<string, BattleParticipant>> {
+async function builtUnitsById(units: UnitFromPrisma[], races: RaceRow[], rules?: Ruleset): Promise<Map<string, BattleParticipant>> {
   const racesById = Object.fromEntries(races.map((r) => [r.id, r]));
 
-  const built = await Promise.all(units.map((u) => createBattleParticipantFromUnit(u, "", ParticipantSide.ENEMY, 1, racesById)));
+  const built = await Promise.all(units.map((u) => createBattleParticipantFromUnit(u, "", ParticipantSide.ENEMY, 1, racesById, rules)));
 
   return new Map(built.map((p, i) => [units[i].id, p]));
 }
@@ -42,9 +42,9 @@ async function loadSummonSources(campaignId: string): Promise<unknown[]> {
 export async function loadUnitLibraryStats(campaignId: string, rules: Ruleset = DEFAULT_RULES): Promise<UnitStats[]> {
   const [rows, races, summonSources] = await Promise.all([prisma.unit.findMany({ where: { campaignId } }), prisma.race.findMany({ where: { campaignId } }), loadSummonSources(campaignId)]);
 
-  const [spellsById, builtById] = await Promise.all([loadSpellsForUnits(campaignId, rows), builtUnitsById(rows, races)]);
-
   const model = ruleSystemOf(rules).combat.hitModel;
+
+  const [spellsById, builtById] = await Promise.all([loadSpellsForUnits(campaignId, rows), builtUnitsById(rows, races, model ? rules : undefined)]);
 
   const summoned = summonedUnitIds([...summonSources, ...rows.map((u) => u.abilities), ...races.map((r) => r.abilities)]);
 

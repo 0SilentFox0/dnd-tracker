@@ -9,6 +9,10 @@ const LOCATION_TABLE: [number, HitLocation][] = [
   [100, "leg"],
 ];
 
+export const LOCATION_WEIGHTS = Object.fromEntries(
+  LOCATION_TABLE.map(([max, loc], i) => [loc, (max - (i === 0 ? 0 : LOCATION_TABLE[i - 1][0])) / 100]),
+) as Record<HitLocation, number>;
+
 export function hitLocation(roll: number): HitLocation {
   const reversed = reverseRoll(roll);
 

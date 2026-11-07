@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { wfrpHitModel } from "../hit-model";
 import { winChance } from "../win-chance";
 
-import { buildPartyPower, computeFairScaling, type UnitStats } from "@/lib/utils/battle/balance";
+import { buildPartyPower, computeFairScaling, hitModelHeroStats, hitModelUnitStats, type UnitStats } from "@/lib/utils/battle/balance";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems/wfrp/characteristics/keys";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -53,6 +53,65 @@ describe("wfrpHitModel", () => {
   it("damage is SB + weapon - reference TB, at least 1", () => {
     expect(wfrpHitModel.damage(wfrpP(DEFAULT_CHARACTERISTICS, "1d6"))).toBeCloseTo(3 + 3.5 - 3);
     expect(wfrpHitModel.damage(wfrpP(DEFAULT_CHARACTERISTICS, "0"))).toBeGreaterThanOrEqual(1);
+  });
+});
+
+const withWfrp = (wfrp: Record<string, unknown>, attacks?: unknown[]): BattleParticipant => {
+  const p = wfrpP(DEFAULT_CHARACTERISTICS);
+
+  return { ...p, abilities: { ...p.abilities, wfrp: { sb: 3, tb: 3, ap: {}, ...wfrp } }, battleData: attacks ? { attacks } : p.battleData } as unknown as BattleParticipant;
+};
+
+const allAp = (n: number) => ({ head: n, arm: n, body: n, leg: n });
+
+describe("wfrpHitModel traits", () => {
+  const durability = (wfrp: Record<string, unknown>) => wfrpHitModel.durability?.(withWfrp(wfrp)) ?? 0;
+
+  it("is 1 without armour, ward or extra toughness", () => {
+    expect(durability({})).toBe(1);
+  });
+
+  it("AP 2 everywhere gives 8/6", () => {
+    expect(durability({ ap: allAp(2) })).toBeCloseTo(8 / 6);
+  });
+
+  it("Ward 9 multiplies by 1.25", () => {
+    expect(durability({ ward: 9 })).toBeCloseTo(1.25);
+  });
+
+  it("Ward 1 hits the clamp", () => {
+    expect(durability({ ward: 1 })).toBe(10);
+  });
+
+  it("huge TB stays finite", () => {
+    const d = durability({ tb: 40, ap: allAp(10) });
+
+    expect(Number.isFinite(d)).toBe(true);
+    expect(d).toBeLessThanOrEqual(10);
+  });
+
+  it("large size lowers defense by 10", () => {
+    expect(wfrpHitModel.defense(withWfrp({ size: "large" }))).toBe(wfrpHitModel.defense(withWfrp({})) - 10);
+  });
+
+  it("breath without SB ignores SB, size scales damage", () => {
+    const breath = [{ name: "b", type: "ranged", damageDice: "", damageBonus: 6, wfrp: { noSb: true } }];
+
+    expect(wfrpHitModel.damage(withWfrp({ sb: 5 }, breath))).toBeCloseTo(6 - 3);
+    expect(wfrpHitModel.damage(withWfrp({ sb: 5, size: "large" }, breath))).toBeCloseTo(12 - 3);
+  });
+
+  it("unit stats multiply hp and recompute kpi; models without durability keep hp", () => {
+    const unit: UnitStats = { unitId: "t", name: "t", level: 1, hp: 12, dpr: 3, kpi: 0.25, raceId: null, ac: 0, attackBonus: 0 };
+
+    const p = withWfrp({ ward: 9 });
+
+    const out = hitModelUnitStats(unit, p, wfrpHitModel);
+
+    expect(out.hp).toBe(15);
+    expect(out.kpi).toBeCloseTo(out.dpr / 15);
+    expect(hitModelUnitStats(unit, p, { ...wfrpHitModel, durability: undefined }).hp).toBe(12);
+    expect(hitModelHeroStats(p, wfrpHitModel).hp).toBe(15);
   });
 });
 
