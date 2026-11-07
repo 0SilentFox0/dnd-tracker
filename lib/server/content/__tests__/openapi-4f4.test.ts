@@ -21,6 +21,6 @@ describe("OpenAPI 4f-4", () => {
   });
 
   it("stays under the size budget", () => {
-    expect(JSON.stringify(doc).length).toBeLessThan(183_000); // 5h-1 trait effects add ~1.4 KB
+    expect(JSON.stringify(doc).length).toBeLessThan(192_000); // 5h-1 trait effects ~1.4 KB, 5h-2 rules.tables ~7.2 KB
   });
 });

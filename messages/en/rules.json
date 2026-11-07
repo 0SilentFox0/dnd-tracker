@@ -13,7 +13,10 @@
   },
   "validation": {
     "initiativeOrder": "Minimum initiative is greater than the maximum",
-    "criticalsOrder": "Fumble must be lower than crit"
+    "criticalsOrder": "Fumble must be lower than crit",
+    "tablesOrder": "Rows must be in ascending order of the upper bound",
+    "tablesLast": "The last row must end at 100",
+    "tablesEffect": "This effect type is not allowed in this table"
   },
   "sections": {
     "morale": {

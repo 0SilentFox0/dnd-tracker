@@ -8,6 +8,7 @@ import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
+import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
@@ -77,6 +78,7 @@ const sectionSchemas = {
   items: z.strictObject({ enabled: z.boolean(), attunementLimit: z.number().int().min(1).max(10) }),
   spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
   advancement: AdvancementRulesSchema,
+  tables: TablesRulesSchema,
   system: z.strictObject({ key: z.enum(RULE_SYSTEM_KEYS) }),
 };
 
@@ -118,6 +120,7 @@ const sections = {
   items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
   spellIngredients: withDefaults(sectionSchemas.spellIngredients, DEFAULT_RULES.spellIngredients),
   advancement: withDefaults(sectionSchemas.advancement, DEFAULT_RULES.advancement),
+  tables: withDefaults(sectionSchemas.tables, DEFAULT_RULES.tables),
   system: withDefaults(sectionSchemas.system, DEFAULT_RULES.system),
 };
 
@@ -152,6 +155,7 @@ export const RulesetSchema = z
     items: sections.items.prefault({}),
     spellIngredients: sections.spellIngredients.prefault({}),
     advancement: sections.advancement.prefault({}),
+    tables: sections.tables.prefault({}),
     system: sections.system.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
@@ -222,6 +226,7 @@ export const RulesetPatchSchema = z
     items: patchSection("items").optional(),
     spellIngredients: patchSection("spellIngredients").optional(),
     advancement: patchSection("advancement").optional(),
+    tables: patchSection("tables").optional(),
     system: patchSection("system").optional(),
     removeCustomConditions: z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional(),
   })

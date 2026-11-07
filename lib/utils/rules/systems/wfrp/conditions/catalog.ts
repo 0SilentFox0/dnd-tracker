@@ -1,17 +1,15 @@
 import type { CharacteristicKey } from "../characteristics/keys";
 
 import { EffectMarker } from "@/lib/constants/battle";
+import { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL, type WfrpConditionKey } from "@/lib/constants/wfrp-conditions";
+
+export { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL, type WfrpConditionKey };
 
 // All values: verify against 5e book.
-export const WFRP_CONDITION_MAX_LEVEL = 10;
 export const BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL = 0.1;
 export const CONDITION_TEST_STEP = -10;
 export const BLINDED_SELF_ATTACK = -20;
 export const AGAINST_BONUS = 20;
-
-export const WFRP_CONDITION_KEYS = ["bleeding", "fatigued", "poisoned", "stunned", "ablaze", "broken", "entangled", "prone", "surprised", "blinded", "deafened", "unconscious"] as const;
-
-export type WfrpConditionKey = (typeof WFRP_CONDITION_KEYS)[number];
 
 export interface WfrpConditionDef {
   leveled: { max: number } | false;

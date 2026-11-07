@@ -20,6 +20,7 @@ export const DEFAULT_RULES: Ruleset = {
   items: { enabled: false, attunementLimit: 3 },
   spellIngredients: { enabled: false, autoPay: true },
   advancement: DEFAULT_ADVANCEMENT_RULES,
+  tables: {},
   system: { key: "homm" },
 };
 
