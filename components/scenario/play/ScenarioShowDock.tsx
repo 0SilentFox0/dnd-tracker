@@ -75,6 +75,7 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
   const dockRef = useRef<HTMLDivElement>(null);
 
   useCssVarHeight(dockRef, "--sb-dock-h");
+  useCssVarHeight(dockRef, "--app-footer-h", "footer");
 
   useShowKeys(play.control, play.readOnly ? {} : { KeyN: nextRow });
 
