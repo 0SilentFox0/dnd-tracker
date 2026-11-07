@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp, EyeOff, SkipForward } from "lucide-react";
 
@@ -10,7 +11,7 @@ import { ShowButton } from "@/components/show/stage/show-ui";
 import { ShowDeckStrip } from "@/components/show/stage/ShowDeckStrip";
 import { ShowTransport } from "@/components/show/stage/ShowTransport";
 import { ShowWorldControls } from "@/components/world/show/ShowWorldControls";
-import { useNotify } from "@/lib/hooks/common";
+import { useCssVarHeight, useNotify } from "@/lib/hooks/common";
 import { type ScenarioPlay, useShowDockExpanded } from "@/lib/hooks/scenario";
 import { useShowAudioHost, useShowKeys } from "@/lib/hooks/show";
 import { useWorldMaps } from "@/lib/hooks/world";
@@ -71,11 +72,15 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
 
   const current = play.currentRow;
 
+  const dockRef = useRef<HTMLDivElement>(null);
+
+  useCssVarHeight(dockRef, "--sb-dock-h");
+
   useShowKeys(play.control, play.readOnly ? {} : { KeyN: nextRow });
 
   return (
     <AudioPlayerProvider host={host}>
-      <div className="sb-show-dock" data-tour="scenario.dock">
+      <div ref={dockRef} className="sb-show-dock" data-tour="scenario.dock">
         <div className="sb-show-bar sans">
           <OnScreen campaignId={campaignId} show={show} onLocate={current ? () => scrollToRow(current.id) : undefined} />
           <div className="sb-show-controls">
