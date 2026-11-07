@@ -63,6 +63,20 @@ describe("extractWfrpAttacks", () => {
     expect(attacks.map((a) => a.id)).toEqual(["default-melee", "default-ranged"]);
   });
 
+  it("a weapon in the shield slot gets its own attack; a shield gives none", () => {
+    const dagger = weaponStats({ damage: { addSb: true, flat: 2 }, ammoCapacity: 3 });
+
+    const attacks = extract([sword, row("dagger", "shield", dagger), row("buckler", "shield", { type: "gear", weight: 1, price: 1, qualities: [{ key: "shield", value: 1 }], flaws: [] })]);
+
+    expect(attacks.map((a) => a.id).slice(0, 2)).toEqual(["sword", "dagger"]);
+    expect(attacks.some((a) => a.id === "buckler")).toBe(false);
+    expect(attacks[1]).toMatchObject({ damageBonus: 2, wfrp: { ammoCapacity: 3 } });
+  });
+
+  it("the same weapon in main hand and shield slot gets independent ids", () => {
+    expect(extract([row("knife", "weapon", weaponStats({})), row("knife", "shield", weaponStats({}))]).map((a) => a.id).slice(0, 2)).toEqual(["knife", "knife:shield"]);
+  });
+
   it("Blast X becomes an aoe attack", () => {
     const [a] = extract([row("bomb", "range_weapon", weaponStats({ reach: undefined, range: 30, qualities: [{ key: "blast", value: 2 }] }))]);
 

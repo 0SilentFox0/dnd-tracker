@@ -1,6 +1,7 @@
 import type { ExtractedAttack } from "../types/participant";
 import type { EquippedArtifactRow } from "./extract-artifacts";
 
+import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 import type { RuleSystemEquipment } from "@/lib/utils/rules/systems/types";
@@ -14,7 +15,7 @@ export function extractWfrpAttacks(rows: EquippedArtifactRow[], equipment: RuleS
   const seen = new Set<string>();
 
   return rows.flatMap(({ row, slot, carried }) => {
-    if (carried || !isWeaponSlot(slot)) return [];
+    if (carried || !(isWeaponSlot(slot) || slot === ArtifactSlot.SHIELD)) return [];
 
     const profile = equipment.weaponProfile(row.systemStats);
 
