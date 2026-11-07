@@ -8,7 +8,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import type { QualityRef } from "@/lib/utils/rules/systems/wfrp/equipment/qualities";
+import { QUALITY_REGISTRY, type QualityRef } from "@/lib/utils/rules/systems/wfrp/equipment/qualities";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -40,7 +40,7 @@ describe("mitigateWfrpDamage qualities", () => {
     const r = mitigateWfrpDamage(ctx({ qualities: [{ key: "damaging" }], attackRoll: 27 }));
 
     expect(r.amount).toBe(base.amount + 6);
-    expect(r.steps.map((s) => s.label)).toEqual([...base.steps.map((s) => s.label), dynamicTextRef("battleWfrp.damage.steps.damaging")]);
+    expect(r.steps.map((s) => s.label)).toEqual([...base.steps.map((s) => s.label), dynamicTextRef("wfrpEquipment.qualities.damaging")]);
     expect(r.steps.at(-1)).toMatchObject({ value: 6, side: "attacker" });
   });
 
@@ -64,7 +64,7 @@ describe("mitigateWfrpDamage qualities", () => {
 
     const order = r.steps.map((s) => s.label);
 
-    const at = (key: string) => order.findIndex((l) => JSON.stringify(l) === JSON.stringify(dynamicTextRef(`battleWfrp.damage.steps.${key}`)));
+    const at = (key: string) => order.findIndex((l) => JSON.stringify(l) === JSON.stringify(dynamicTextRef(key in QUALITY_REGISTRY ? `wfrpEquipment.qualities.${key}` : `battleWfrp.damage.steps.${key}`)));
 
     expect(at("precise")).toBeGreaterThan(at("ap"));
     expect(at("minimum")).toBeGreaterThan(at("precise"));

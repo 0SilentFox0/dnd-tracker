@@ -18,7 +18,7 @@ interface QualityListEditorProps {
 }
 
 export function QualityListEditor({ id, label, kind, value, onChange }: QualityListEditorProps) {
-  const t = useTranslations("wfrpEquipment.editor");
+  const t = useTranslations("wfrpEquipmentEditor.editor");
 
   const tq = useTranslations("wfrpEquipment.qualities");
 

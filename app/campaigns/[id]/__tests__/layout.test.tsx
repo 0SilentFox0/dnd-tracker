@@ -60,7 +60,7 @@ describe("CampaignLayout", () => {
     mocks.wfrp = true;
     mocks.role = "dm";
 
-    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement,wfrpEquipment,wfrpCareers,wfrpCreation"');
+    expect(await html()).toContain('data-scope="wfrpMagic,wfrpAdvancement,wfrpEquipment,wfrpCareers,wfrpCreation,wfrpEquipmentEditor"');
 
     mocks.wfrp = false;
 

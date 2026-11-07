@@ -21,11 +21,11 @@ const withoutRange = ({ range: _range, ...rest }: WfrpWeaponStats): WfrpWeaponSt
 const withoutReach = ({ reach: _reach, ...rest }: WfrpWeaponStats): WfrpWeaponStats => rest;
 
 export function WeaponFields({ value, onChange }: WeaponFieldsProps) {
-  const t = useTranslations("wfrpEquipment.editor");
+  const t = useTranslations("wfrpEquipmentEditor.editor");
 
-  const tg = useTranslations("wfrpEquipment.groups");
+  const tg = useTranslations("wfrpEquipmentEditor.groups");
 
-  const tr = useTranslations("wfrpEquipment.reaches");
+  const tr = useTranslations("wfrpEquipmentEditor.reaches");
 
   const ranged = value.range !== undefined;
 

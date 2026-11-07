@@ -41,7 +41,7 @@ export function WeaponStep({ wizard: { state, view, actions } }: { wizard: Attac
                 })}
               </span>
             </span>
-            <span className="w-[72px] text-right text-[15px]">{preview?.formula || a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {preview?.estimate}</small></span>
+            <span className="w-[72px] text-right text-[15px]">{preview?.formula || a.damageDice || (a.damageBonus !== undefined ? String(a.damageBonus) : "")}<small className="block text-xs text-[var(--hud-muted)]">≈ {preview?.estimate}</small></span>
           </button>
         );
       })}

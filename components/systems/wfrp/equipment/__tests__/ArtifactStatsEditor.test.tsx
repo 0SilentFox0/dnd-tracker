@@ -102,13 +102,13 @@ describe("ArtifactStatsEditor", () => {
     const { onChange } = mount("armor");
 
     fireEvent.change(input("wfrp-armour-q-pick"), { target: { value: "flexible" } });
-    fireEvent.click(screen.getByRole("button", { name: "wfrpEquipment.editor.addQuality" }));
+    fireEvent.click(screen.getByRole("button", { name: "wfrpEquipmentEditor.editor.addQuality" }));
 
     expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ qualities: [{ key: "flexible" }] }));
     expect(input("wfrp-armour-q-flexible")).toBeNull();
 
     fireEvent.change(input("wfrp-armour-q-pick"), { target: { value: "shield" } });
-    fireEvent.click(screen.getByRole("button", { name: "wfrpEquipment.editor.addQuality" }));
+    fireEvent.click(screen.getByRole("button", { name: "wfrpEquipmentEditor.editor.addQuality" }));
 
     expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ qualities: [{ key: "flexible" }, { key: "shield", value: 1 }] }));
     expect(input("wfrp-armour-q-shield")).toBeTruthy();

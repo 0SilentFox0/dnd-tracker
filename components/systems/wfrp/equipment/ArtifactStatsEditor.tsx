@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useArtifactStatsDraft } from "@/lib/hooks/systems/wfrp";
 
 export function ArtifactStatsEditor(props: ArtifactStatsEditorProps) {
-  const t = useTranslations("wfrpEquipment.editor");
+  const t = useTranslations("wfrpEquipmentEditor.editor");
 
   const { draft, valid, update, clear, hasValue } = useArtifactStatsDraft(props);
 

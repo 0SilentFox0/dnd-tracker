@@ -1,3 +1,4 @@
+import { QUALITY_REGISTRY } from "../equipment/qualities";
 import { qualityEffects } from "../equipment/quality-effects";
 import { applyWfrpCrit } from "./crit-effect";
 import { rollCrit } from "./crit-table";
@@ -9,7 +10,7 @@ import type { MitigateCtx, MitigateResult,MitigateStep } from "@/lib/utils/rules
 const step = (key: string, value: number): MitigateStep => ({
   key,
   value,
-  label: dynamicTextRef(`battleWfrp.damage.steps.${key}`),
+  label: dynamicTextRef(key in QUALITY_REGISTRY ? `wfrpEquipment.qualities.${key}` : `battleWfrp.damage.steps.${key}`),
   side: key === "tb" || key === "ap" ? "target" : "attacker",
 });
 

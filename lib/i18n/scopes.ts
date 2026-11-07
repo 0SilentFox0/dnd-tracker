@@ -47,7 +47,7 @@ export const WFRP_BATTLE_NAMESPACES = [...BATTLE_NAMESPACES, "battleWfrp"] as co
 
 export const WFRP_CAMPAIGN_EXTRA = ["wfrpMagic", "wfrpAdvancement"] as const satisfies readonly Namespace[];
 
-// Kept out of WFRP_CAMPAIGN_EXTRA: the uk campaign+battle scope sits at the 105 KB gzip split threshold
+// Summary, encumbrance and money texts every member sees; kept out of WFRP_CAMPAIGN_EXTRA so the base scope stays measurable
 export const WFRP_MEMBER_EXTRA = ["wfrpEquipment"] as const satisfies readonly Namespace[];
 
-export const WFRP_DM_EXTRA = ["wfrpCareers", "wfrpCreation"] as const satisfies readonly Namespace[];
+export const WFRP_DM_EXTRA = ["wfrpCareers", "wfrpCreation", "wfrpEquipmentEditor"] as const satisfies readonly Namespace[];

@@ -18,11 +18,11 @@ interface ArmourFieldsProps {
 }
 
 export function ArmourFields({ value, onChange }: ArmourFieldsProps) {
-  const t = useTranslations("wfrpEquipment.editor");
+  const t = useTranslations("wfrpEquipmentEditor.editor");
 
   const tl = useTranslations("wfrpEquipment.locations");
 
-  const tk = useTranslations("wfrpEquipment.armourKinds");
+  const tk = useTranslations("wfrpEquipmentEditor.armourKinds");
 
   return (
     <div className="space-y-4">
