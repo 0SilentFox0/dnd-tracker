@@ -65,9 +65,11 @@ export function wfrpPsychology(ps: BattleParticipant[], ctx: { round: number; rn
 
     const c = readCharacteristics({ characteristics: tester.abilities.characteristics });
 
-    const target = (skillTarget(c, "cool")?.target ?? value(c, "wp")) + selfTestMod(tester, "test");
+    const base = skillTarget(c, "cool")?.target ?? value(c, "wp");
 
     const run = (kind: PsychologyKind): { passed: boolean; sl: number } => {
+      const target = base + selfTestMod(participants.find((p) => p.basicInfo.id === tester.basicInfo.id), "test");
+
       const t = resolvePercentileTest({ target, rng: ctx.rng });
 
       const passed = (t.outcome === "success" || t.outcome === "critical") && t.sl >= PSYCHOLOGY_PASS_SL(top.value);

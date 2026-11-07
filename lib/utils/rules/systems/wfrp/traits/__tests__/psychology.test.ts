@@ -64,6 +64,15 @@ describe("wfrpPsychology", () => {
     expect(find(r.participants, "h").battleData.psychologyTested).toEqual({ terror: 2, fear: 2 });
   });
 
+  it("the fear test after a failed terror test includes the fresh broken penalty", () => {
+    const r = wfrpPsychology([hero(), monster("m", terror(1))], { round: 1, rng: rollOf(70, 70) });
+
+    const targets = r.messages.flatMap((m) => (typeof m !== "string" && m.message === "battleWfrp.log.psychologyFail" ? [m.params?.target] : []));
+
+    expect(targets[0]).toBe(40);
+    expect(targets[1]).toBeLessThan(40);
+  });
+
   it("terror passed but fear failed adds one level", () => {
     const r = wfrpPsychology([hero(), monster("m", terror(1))], { round: 1, rng: rollOf(10, 70) });
 
