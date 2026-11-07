@@ -2,9 +2,11 @@
 
 import { useTranslations } from "next-intl";
 
+import { EncumbranceBar } from "./EncumbranceBar";
+
 import { HudSection } from "@/components/hud/form";
 import { HudStatChip } from "@/components/hud/page";
-import { useEquippedAp } from "@/lib/hooks/systems/wfrp";
+import { useEncumbrance, useEquippedAp } from "@/lib/hooks/systems/wfrp";
 
 const LOCATIONS = ["head", "arm", "body", "leg"] as const;
 
@@ -14,6 +16,8 @@ export function EquippedArmourSummary({ campaignId, characterId }: { campaignId:
   const tl = useTranslations("wfrpEquipment.locations");
 
   const equipped = useEquippedAp(campaignId, characterId);
+
+  const load = useEncumbrance(campaignId, characterId);
 
   if (!equipped) return null;
 
@@ -29,6 +33,7 @@ export function EquippedArmourSummary({ campaignId, characterId }: { campaignId:
         {equipped.flexible && <li>{t("flexible")}</li>}
         {equipped.shield > 0 && <li>{t("shield", { value: equipped.shield })}</li>}
       </ul>
+      {load && <EncumbranceBar {...load} />}
     </HudSection>
   );
 }

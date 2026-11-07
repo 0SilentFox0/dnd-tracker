@@ -92,9 +92,10 @@ export interface StashArtifact {
   carried?: true;
   charges?: { max: number; left: number; rest: "short" | "long" | null };
   gear?: true;
+  systemStats?: unknown;
 }
 
-export type FreeArtifact = Omit<StashArtifact, "description" | "attunement" | "carried" | "charges"> & { property?: { nameTemplate?: string; bases: string[] }; parameter?: { kind: "damageType" | "creatureType"; options: Array<{ key: string; label: string }> }; spells?: Array<{ spellId: string; label: string; castLevel?: number }>; consumable?: true };
+export type FreeArtifact = Omit<StashArtifact, "description" | "attunement" | "carried" | "charges" | "systemStats"> & { property?: { nameTemplate?: string; bases: string[] }; parameter?: { kind: "damageType" | "creatureType"; options: Array<{ key: string; label: string }> }; spells?: Array<{ spellId: string; label: string; castLevel?: number }>; consumable?: true };
 
 export interface StashView {
   purse: Purse;

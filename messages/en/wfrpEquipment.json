@@ -101,5 +101,9 @@
     "gc": "gc",
     "ss": "ss",
     "d": "d"
+  },
+  "encumbrance": {
+    "label": "Carried: {carried} / {limit}",
+    "over": "Overencumbered: carrying more than the limit"
   }
 }

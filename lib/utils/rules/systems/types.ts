@@ -10,6 +10,7 @@ import type { planDraft } from "./wfrp/creation/plan";
 import type { isUsableProfile } from "./wfrp/creation/profile";
 import type { rollCreation } from "./wfrp/creation/roll";
 import type { armourAp, parseWfrpStats } from "./wfrp/equipment/armour";
+import type { encumbrance } from "./wfrp/equipment/encumbrance";
 import type { QUALITY_REGISTRY, QualityRef } from "./wfrp/equipment/qualities";
 import type { PercentileOutcome } from "./wfrp/percentile";
 
@@ -324,4 +325,5 @@ export interface RuleSystemEquipment {
   parseStats: typeof parseWfrpStats;
   weaponProfile(stats: unknown): WeaponProfile | null;
   qualities: typeof QUALITY_REGISTRY;
+  encumbrance: typeof encumbrance;
 }
