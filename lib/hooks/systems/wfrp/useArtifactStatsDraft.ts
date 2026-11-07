@@ -3,13 +3,9 @@
 import { useEffect, useState } from "react";
 
 import type { WfrpItemStats } from "@/lib/utils/rules/systems";
-import { parseWfrpStats } from "@/lib/utils/rules/systems/wfrp/equipment";
+import { ARMOUR_SLOTS, parseWfrpStats, WEAPON_SLOTS } from "@/lib/utils/rules/systems/wfrp/equipment";
 
 export type StatsKind = WfrpItemStats["type"];
-
-const ARMOUR_SLOTS = new Set(["armor", "helmet", "boots"]);
-
-const WEAPON_SLOTS = new Set(["weapon", "range_weapon"]);
 
 export const statsKindOf = (slot: string): StatsKind => (ARMOUR_SLOTS.has(slot) ? "armour" : WEAPON_SLOTS.has(slot) ? "weapon" : "gear");
 

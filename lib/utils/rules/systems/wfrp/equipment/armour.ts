@@ -1,14 +1,8 @@
 import { type HitLocation, LOCATIONS } from "../combat/constants";
-import { AP_CAP } from "./constants";
+import { AP_CAP, ARMOUR_SLOTS, MELEE_SLOT, SHIELD_SLOTS } from "./constants";
 import { readStats } from "./guard";
 import { hasQuality, qualityValue } from "./qualities";
 import type { WfrpItemStats } from "./stats";
-
-const ARMOUR_SLOTS = new Set(["armor", "helmet", "boots"]);
-
-const SHIELD_SLOTS = new Set(["shield", "weapon", "range_weapon"]);
-
-const WEAPON_SLOTS = new Set(["weapon", "mainHand", "offHand", "range_weapon"]);
 
 const SHIELD_LOCATIONS: readonly HitLocation[] = ["head", "arm", "body"];
 
@@ -16,15 +10,17 @@ export type EquippedStatsRow = { slot: string; systemStats: unknown };
 
 export const parseWfrpStats = (raw: unknown): WfrpItemStats | null => readStats(raw);
 
-export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation, number>; flexible: boolean } {
+export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation, number>; flexible: boolean; shield: number } {
   const ap = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<HitLocation, number>;
 
   let layers = 0;
 
   let allFlexible = true;
 
+  let shield = 0;
+
   const twoHanded = equipped.some((row) => {
-    const stats = WEAPON_SLOTS.has(row.slot) ? parseWfrpStats(row.systemStats) : null;
+    const stats = row.slot === MELEE_SLOT ? parseWfrpStats(row.systemStats) : null;
 
     return stats?.type === "weapon" && stats.twoHanded;
   });
@@ -44,11 +40,14 @@ export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation
     if (!twoHanded && SHIELD_SLOTS.has(row.slot) && stats.type !== "armour") {
       const x = qualityValue(stats.qualities, "shield");
 
-      if (x) for (const l of SHIELD_LOCATIONS) ap[l] += x;
+      if (x) {
+        shield += x;
+        for (const l of SHIELD_LOCATIONS) ap[l] += x;
+      }
     }
   }
 
   for (const l of LOCATIONS) ap[l] = Math.min(ap[l], AP_CAP);
 
-  return { ap, flexible: layers > 0 && allFlexible };
+  return { ap, flexible: layers > 0 && allFlexible, shield };
 }

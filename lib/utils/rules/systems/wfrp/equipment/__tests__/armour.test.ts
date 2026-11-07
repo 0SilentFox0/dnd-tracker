@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { armourAp } from "../armour";
 import { AP_CAP } from "../constants";
 
+import { equippedApOf } from "@/lib/hooks/systems/wfrp/useEquippedAp";
+
 const layer = (locations: Partial<Record<"head" | "arm" | "body" | "leg", number>>, qualities: unknown[] = []) => ({
   type: "armour",
   locations: { head: 0, arm: 0, body: 0, leg: 0, ...locations },
@@ -18,7 +20,7 @@ const ZERO = { head: 0, arm: 0, body: 0, leg: 0 };
 
 describe("armourAp", () => {
   it("returns zeros without items", () => {
-    expect(armourAp([])).toEqual({ ap: ZERO, flexible: false });
+    expect(armourAp([])).toEqual({ ap: ZERO, flexible: false, shield: 0 });
   });
 
   it("sums layers per location", () => {
@@ -52,7 +54,7 @@ describe("armourAp", () => {
       { slot: "ring", systemStats: shield(2) },
     ]);
 
-    expect(r).toEqual({ ap: ZERO, flexible: false });
+    expect(r).toEqual({ ap: ZERO, flexible: false, shield: 0 });
   });
 
   it("is flexible only when every AP layer is flexible", () => {
@@ -65,5 +67,38 @@ describe("armourAp", () => {
         { slot: "helmet", systemStats: layer({ head: 1 }) },
       ]).flexible,
     ).toBe(false);
+  });
+
+  describe("two-handed weapons and the shield", () => {
+    const weapon = (twoHanded: boolean) => ({ type: "weapon", group: "basic", reach: "average", damage: { addSb: true, flat: 1 }, qualities: [], flaws: [], twoHanded, weight: 1, price: 1 });
+
+    const sword = { slot: "weapon", systemStats: weapon(false) };
+
+    const greatsword = { slot: "weapon", systemStats: weapon(true) };
+
+    const bow = { slot: "range_weapon", systemStats: weapon(true) };
+
+    const buckler = { slot: "shield", systemStats: shield(2) };
+
+    it("sword + shield + two-handed bow keeps the shield", () => {
+      const r = armourAp([sword, buckler, bow]);
+
+      expect(r.ap.body).toBe(2);
+      expect(r.shield).toBe(2);
+    });
+
+    it("two-handed melee weapon drops the shield and reports it as 0", () => {
+      const r = armourAp([greatsword, buckler]);
+
+      expect(r.ap.body).toBe(0);
+      expect(r.shield).toBe(0);
+    });
+
+    it("sheet and battle agree", () => {
+      const artifacts = [sword, buckler, bow].map((a, i) => ({ id: String(i), name: "x", slot: a.slot, systemStats: a.systemStats })) as never[];
+
+      expect(equippedApOf(artifacts)).toMatchObject({ shield: 2, ap: armourAp([sword, buckler, bow]).ap });
+      expect(equippedApOf([greatsword, buckler].map((a, i) => ({ id: String(i), name: "x", slot: a.slot, systemStats: a.systemStats })) as never[])).toMatchObject({ shield: 0 });
+    });
   });
 });

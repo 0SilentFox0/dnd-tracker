@@ -2,18 +2,18 @@ import type { ExtractedAttack } from "../types/participant";
 import type { EquippedArtifactRow } from "./extract-artifacts";
 
 import { AttackType } from "@/lib/constants/battle";
+import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 import type { RuleSystemEquipment } from "@/lib/utils/rules/systems/types";
 
-const valueOf = (list: { key: string; value?: number }[], key: string) => list.find((q) => q.key === key)?.value;
 
-const WEAPON_SLOTS = new Set(["weapon", "mainHand", "offHand", "range_weapon"]);
+const valueOf = (list: { key: string; value?: number }[], key: string) => list.find((q) => q.key === key)?.value;
 
 // verify against 5e book: targets hit per cell of blast radius
 const BLAST_TARGETS_PER_RADIUS_CELL = 4;
 
 export function extractWfrpAttacks(rows: EquippedArtifactRow[], equipment: RuleSystemEquipment): ExtractedAttack[] {
   return rows.flatMap(({ row, slot, carried }) => {
-    if (carried || !WEAPON_SLOTS.has(slot)) return [];
+    if (carried || !isWeaponSlot(slot)) return [];
 
     const profile = equipment.weaponProfile(row.systemStats);
 
