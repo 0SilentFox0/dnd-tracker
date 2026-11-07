@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { ARMOUR_SL_PER_AP } from "../../magic/constants";
 import { armourAp } from "../armour";
 import { AP_CAP } from "../constants";
 
@@ -20,7 +21,7 @@ const ZERO = { head: 0, arm: 0, body: 0, leg: 0 };
 
 describe("armourAp", () => {
   it("returns zeros without items", () => {
-    expect(armourAp([])).toEqual({ ap: ZERO, flexible: false, shield: 0 });
+    expect(armourAp([])).toEqual({ ap: ZERO, armourOnly: ZERO, flexible: false, shield: 0 });
   });
 
   it("sums layers per location", () => {
@@ -46,6 +47,16 @@ describe("armourAp", () => {
     expect(armourAp([{ slot: "weapon", systemStats: shield(1) }]).ap.arm).toBe(1);
   });
 
+  it("armourOnly excludes the shield", () => {
+    const r = armourAp([
+      { slot: "armor", systemStats: layer({ body: 2, head: 1 }) },
+      { slot: "shield", systemStats: shield(3) },
+    ]);
+
+    expect(r.ap.body).toBe(5);
+    expect(r.armourOnly).toEqual({ head: 1, arm: 0, body: 2, leg: 0 });
+  });
+
   it("skips unparsable stats and ignores other slots", () => {
     const r = armourAp([
       { slot: "armor", systemStats: { type: "armour" } },
@@ -54,7 +65,7 @@ describe("armourAp", () => {
       { slot: "ring", systemStats: shield(2) },
     ]);
 
-    expect(r).toEqual({ ap: ZERO, flexible: false, shield: 0 });
+    expect(r).toEqual({ ap: ZERO, armourOnly: ZERO, flexible: false, shield: 0 });
   });
 
   it("is flexible only when every AP layer is flexible", () => {
@@ -99,6 +110,15 @@ describe("armourAp", () => {
 
       expect(equippedApOf(artifacts)).toMatchObject({ shield: 2, ap: armourAp([sword, buckler, bow]).ap });
       expect(equippedApOf([greatsword, buckler].map((a, i) => ({ id: String(i), name: "x", slot: a.slot, systemStats: a.systemStats })) as never[])).toMatchObject({ shield: 0 });
+    });
+
+    it("sheet casting penalty ignores the shield", () => {
+      const rows = [
+        { id: "a", name: "x", slot: "armor", systemStats: layer({ body: 2 }) },
+        { id: "s", name: "x", slot: "shield", systemStats: shield(3) },
+      ] as never[];
+
+      expect(equippedApOf(rows).penalty).toBe(2 * ARMOUR_SL_PER_AP);
     });
   });
 });

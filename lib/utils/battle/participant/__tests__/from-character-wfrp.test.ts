@@ -44,7 +44,7 @@ describe("participant: WFRP equipment", () => {
 
     expect(p.abilities.wfrp?.ap).toEqual({ head: 1, arm: 2, body: 4, leg: 1 });
     expect(p.abilities.wfrp).not.toHaveProperty("flexible");
-    expect(armourSl(p)).toBe(ARMOUR_SL_PER_AP * 4);
+    expect(armourSl(p)).toBe(ARMOUR_SL_PER_AP * 3);
   });
 
   it("all-flexible armour sets the flag and cancels the armour penalty", async () => {

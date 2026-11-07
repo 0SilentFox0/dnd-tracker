@@ -9,6 +9,7 @@ export interface WfrpParticipantStats {
   ag: number;
   ap: Record<HitLocation, number>;
   flexible?: true;
+  castAp?: number;
 }
 
 export interface WfrpParticipantFields {
@@ -21,13 +22,22 @@ const NO_ARMOR = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<HitL
 export interface WfrpGear {
   ap: Record<HitLocation, number>;
   flexible?: boolean;
+  armourOnly?: Record<HitLocation, number>;
+}
+
+function castApOf(gear?: WfrpGear): { castAp?: number } {
+  if (!gear?.armourOnly) return {};
+
+  const armour = Math.max(gear.armourOnly.head, gear.armourOnly.body);
+
+  return armour === Math.max(gear.ap.head, gear.ap.body) ? {} : { castAp: armour };
 }
 
 // The XP ledger is private and unused in battle, so it never enters participant data.
 export function wfrpAbilitiesOf(characteristics: Characteristics, gear?: WfrpGear): WfrpParticipantFields {
   return {
     characteristics: { ...characteristics, ledger: [] },
-    wfrp: { sb: bonus(characteristics, "s"), ag: value(characteristics, "ag"), tb: bonus(characteristics, "t"), ap: { ...(gear?.ap ?? NO_ARMOR) }, ...(gear?.flexible && { flexible: true as const }) },
+    wfrp: { sb: bonus(characteristics, "s"), ag: value(characteristics, "ag"), tb: bonus(characteristics, "t"), ap: { ...(gear?.ap ?? NO_ARMOR) }, ...(gear?.flexible && { flexible: true as const }), ...castApOf(gear) },
   };
 }
 

@@ -18,9 +18,9 @@ export interface EquippedAp {
 export function equippedApOf(artifacts: SheetArtifact[]): EquippedAp {
   const worn = artifacts.filter((a) => !a.carried);
 
-  const { ap, flexible, shield } = armourAp(worn.map((a) => ({ slot: a.slot, systemStats: a.systemStats })));
+  const { ap, armourOnly, flexible, shield } = armourAp(worn.map((a) => ({ slot: a.slot, systemStats: a.systemStats })));
 
-  return { ap, flexible, penalty: flexible ? 0 : Math.max(ap.head, ap.body) * ARMOUR_SL_PER_AP, shield };
+  return { ap, flexible, penalty: flexible ? 0 : Math.max(armourOnly.head, armourOnly.body) * ARMOUR_SL_PER_AP, shield };
 }
 
 export function useEquippedAp(campaignId: string, characterId: string): EquippedAp | null {

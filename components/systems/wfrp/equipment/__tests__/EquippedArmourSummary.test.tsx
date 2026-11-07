@@ -32,7 +32,7 @@ describe("EquippedArmourSummary", () => {
     expect(screen.getByLabelText("wfrpEquipment.locations.arm").textContent).toContain("3");
     expect(screen.getByLabelText("wfrpEquipment.locations.body").textContent).toContain("5");
     expect(screen.getByLabelText("wfrpEquipment.locations.leg").textContent).toContain("0");
-    expect(screen.getByText(/wfrpEquipment.summary.penalty/).textContent).toContain("5");
+    expect(screen.getByText(/wfrpEquipment.summary.penalty/).textContent).toContain("3");
     expect(screen.getByText(/wfrpEquipment.summary.shield/)).toBeTruthy();
   });
 

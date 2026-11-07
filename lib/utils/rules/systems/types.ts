@@ -232,7 +232,7 @@ export interface RuleSystemMagic {
 export interface RuleSystemCombat {
   fortune?: true;
   dice: 20 | 100;
-  participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; flexible?: boolean }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
+  participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; armourOnly?: Record<HitLocation, number>; flexible?: boolean }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */

@@ -10,8 +10,10 @@ type EquippedStatsRow = { slot: string; systemStats: unknown };
 
 export const parseWfrpStats = (raw: unknown): WfrpItemStats | null => readStats(raw);
 
-export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation, number>; flexible: boolean; shield: number } {
+export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation, number>; armourOnly: Record<HitLocation, number>; flexible: boolean; shield: number } {
   const ap = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<HitLocation, number>;
+
+  const armourOnly = { ...ap };
 
   let layers = 0;
 
@@ -31,7 +33,10 @@ export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation
     if (!stats) continue;
 
     if (stats.type === "armour" && ARMOUR_SLOTS.has(row.slot) && LOCATIONS.some((l) => stats.locations[l] > 0)) {
-      for (const l of LOCATIONS) ap[l] += stats.locations[l];
+      for (const l of LOCATIONS) {
+        ap[l] += stats.locations[l];
+        armourOnly[l] += stats.locations[l];
+      }
       layers += 1;
 
       if (!hasQuality(stats.qualities, "flexible")) allFlexible = false;
@@ -47,7 +52,10 @@ export function armourAp(equipped: EquippedStatsRow[]): { ap: Record<HitLocation
     }
   }
 
-  for (const l of LOCATIONS) ap[l] = Math.min(ap[l], AP_CAP);
+  for (const l of LOCATIONS) {
+    ap[l] = Math.min(ap[l], AP_CAP);
+    armourOnly[l] = Math.min(armourOnly[l], AP_CAP);
+  }
 
-  return { ap, flexible: layers > 0 && allFlexible, shield };
+  return { ap, armourOnly, flexible: layers > 0 && allFlexible, shield };
 }
