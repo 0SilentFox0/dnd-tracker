@@ -52,7 +52,7 @@ const run = async (flat: number, serverRolls = true) => {
 
   const weapon = steps.find((s) => s.label.message === "battleWfrp.damage.steps.weapon")?.value;
 
-  return { out, weapon, hp: out.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp };
+  return { out, weapon, hp: out.participants.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp ?? 0 };
 };
 
 describe("wfrp equipped weapon damage", () => {

@@ -16,7 +16,5 @@ export function tickReload(p: BattleParticipant): BattleParticipant {
     else nextAmmo[id] = attacks.find((a) => a.id === id)?.wfrp?.ammoCapacity ?? nextAmmo[id] ?? 0;
   }
 
-  const { reload: _drop, ...rest } = p.battleData;
-
-  return { ...p, battleData: { ...rest, ammo: nextAmmo, ...(Object.keys(nextReload).length > 0 && { reload: nextReload }) } };
+  return { ...p, battleData: { ...p.battleData, ammo: nextAmmo, reload: nextReload } };
 }

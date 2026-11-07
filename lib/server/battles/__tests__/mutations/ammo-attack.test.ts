@@ -80,7 +80,7 @@ describe("attack mutation ammo", () => {
     const knifeHit = await attackMutation({ ...ctx, scene: { ...ctx.scene, turnIndex: owner } }, attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "kn", d20Roll: 10, damageRolls: [2], endTurn: true }));
 
     expect(ammoOf(knifeHit.participants)).toMatchObject({ ammo: { bow: 2 } });
-    expect(ammoOf(knifeHit.participants).reload).toBeUndefined();
+    expect(ammoOf(knifeHit.participants).reload).toEqual({});
   });
 
   it("another participant's turn end does not tick", async () => {

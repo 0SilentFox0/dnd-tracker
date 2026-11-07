@@ -62,7 +62,7 @@ describe("tickReload", () => {
 
     const done = tickReload(ticked);
 
-    expect(done.battleData.reload).toBeUndefined();
+    expect(done.battleData.reload).toEqual({});
     expect(done.battleData.ammo).toEqual({ bow: 2 });
   });
 

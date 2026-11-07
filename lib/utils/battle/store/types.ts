@@ -61,6 +61,8 @@ export interface ParticipantState {
   escaped?: boolean;
   mazeWakeRound?: number;
   ingredientStock?: IngredientStock;
+  ammo?: Record<string, number>;
+  reload?: Record<string, number>;
   spellSlotsCurrent: Record<string, number>;
 }
 

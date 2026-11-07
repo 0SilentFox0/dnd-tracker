@@ -21,7 +21,7 @@ export function splitParticipant(
 
   const { currentHp, tempHp, maxHp, morale, status, ...combatRest } = p.combatStats;
 
-  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, turnStartPosition, returnedThisTurn, airborne, hazardHitRound, zoneHits, pendingHits, retaliationsUsed, dormant, facing, escaped, mazeWakeRound, ingredientStock, ...battleDataWithScoped } = p.battleData;
+  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, turnStartPosition, returnedThisTurn, airborne, hazardHitRound, zoneHits, pendingHits, retaliationsUsed, dormant, facing, escaped, mazeWakeRound, ingredientStock, ammo, reload, ...battleDataWithScoped } = p.battleData;
 
   // потрібне лише під час старту бою
   const battleDataRest = omit(battleDataWithScoped as typeof battleDataWithScoped & { pendingScopedArtifactBonuses?: unknown }, ["pendingScopedArtifactBonuses"]);
@@ -61,6 +61,8 @@ export function splitParticipant(
     ...(escaped !== undefined && { escaped }),
     ...(mazeWakeRound !== undefined && { mazeWakeRound }),
     ...(ingredientStock !== undefined && { ingredientStock }),
+    ...(ammo !== undefined && { ammo }),
+    ...(reload !== undefined && { reload }),
     spellSlotsCurrent,
   };
 
@@ -148,6 +150,8 @@ export function joinParticipant(stored: StoredParticipant, battleId: string): Ba
       ...(state.escaped !== undefined && { escaped: state.escaped }),
       ...(state.mazeWakeRound !== undefined && { mazeWakeRound: state.mazeWakeRound }),
       ...(state.ingredientStock !== undefined && { ingredientStock: state.ingredientStock }),
+      ...(state.ammo !== undefined && { ammo: state.ammo }),
+      ...(state.reload !== undefined && { reload: state.reload }),
     },
     actionFlags: {
       hasUsedAction: c.hasUsedAction,
