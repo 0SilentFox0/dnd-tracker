@@ -11,12 +11,16 @@ export interface JoinTriggersResult {
   psychology: { lines: LogLine[]; targets: BattleAction["targets"] };
 }
 
-export function runJoinTriggers(order: BattleParticipant[], ctx: { round: number; rng: Rng; map: BattleMapConfig | null | undefined; rules: Ruleset }, newcomerIds?: readonly string[]): JoinTriggersResult {
-  const joined = runAbilities(order, { type: "battleStart", ...(newcomerIds && { newcomerIds: [...newcomerIds] }) }, ctx);
+interface PsychologyCtx {
+  round: number;
+  rng: Rng;
+  rules: Ruleset;
+}
 
-  const tested = ruleSystemOf(ctx.rules).traits?.psychology?.(joined.participants, { round: ctx.round, rng: ctx.rng, newcomerIds });
+export function runPsychology(participants: BattleParticipant[], ctx: PsychologyCtx, newcomerIds?: readonly string[]): { participants: BattleParticipant[]; psychology: JoinTriggersResult["psychology"] } {
+  const tested = ruleSystemOf(ctx.rules).traits?.psychology?.(participants, { round: ctx.round, rng: ctx.rng, newcomerIds });
 
-  if (!tested) return { participants: joined.participants, messages: joined.messages, psychology: { lines: [], targets: [] } };
+  if (!tested) return { participants, psychology: { lines: [], targets: [] } };
 
   const targets = tested.testerIds.flatMap((id) => {
     const p = tested.participants.find((x) => x.basicInfo.id === id);
@@ -24,5 +28,11 @@ export function runJoinTriggers(order: BattleParticipant[], ctx: { round: number
     return p ? [{ participantId: id, participantName: p.basicInfo.name }] : [];
   });
 
-  return { participants: tested.participants, messages: joined.messages, psychology: { lines: tested.messages, targets } };
+  return { participants: tested.participants, psychology: { lines: tested.messages, targets } };
+}
+
+export function runJoinTriggers(order: BattleParticipant[], ctx: { round: number; rng: Rng; map: BattleMapConfig | null | undefined; rules: Ruleset }, newcomerIds?: readonly string[]): JoinTriggersResult {
+  const joined = runAbilities(order, { type: "battleStart", ...(newcomerIds && { newcomerIds: [...newcomerIds] }) }, ctx);
+
+  return { ...runPsychology(joined.participants, ctx, newcomerIds), messages: joined.messages };
 }

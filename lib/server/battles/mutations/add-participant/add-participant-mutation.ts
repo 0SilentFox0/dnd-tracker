@@ -18,7 +18,9 @@ import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 import { calculateInitiative, compareInitiative, initiativeSlot } from "@/lib/utils/battle/turn/initiative";
+import { runPsychology } from "@/lib/utils/battle/turn/join-triggers";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export const addParticipantSchema = z.object({
@@ -168,11 +170,16 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       order = [...order.slice(0, at), p, ...order.slice(at)];
     }
 
+    const { participants, psychology } = runPsychology(order, { round: ctx.scene.round, rng: rngOf(ctx), rules: ctx.meta.rules }, [...addedIds]);
+
     return {
-      participants: order,
+      participants,
       pending: ctx.pending,
       ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
-      events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.added", { names: added.map((p) => p.basicInfo.name).join(", ") }), added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })))],
+      events: [
+        dmEvent(ctx.scene.round, textRef("battleLog.dm.added", { names: added.map((p) => p.basicInfo.name).join(", ") }), added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name }))),
+        ...(psychology.lines.length > 0 ? [dmEvent(ctx.scene.round, psychology.lines, psychology.targets)] : []),
+      ],
     };
   };
 }
