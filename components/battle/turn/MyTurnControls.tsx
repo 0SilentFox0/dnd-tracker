@@ -111,7 +111,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
         <ActionGrid
           turn={turn}
           pending={anyPending}
-          available={{ channel: magic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
+          available={{ channel: magic && hasMagic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
           actions={{ channel: channel.actions.open, attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
         />
       )}

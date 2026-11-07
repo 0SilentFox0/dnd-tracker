@@ -58,6 +58,20 @@ describe("channelMutation", () => {
     expect(text(out)).toContain("wfrpMagic.log.miscast");
   });
 
+  it("miscast wounds are recorded in hpChanges and a downed caster goes through the zero-HP flow", () => {
+    const weak = caster();
+
+    weak.combatStats = { ...weak.combatStats, currentHp: 1 };
+
+    const out = channelMutation(ctx({ rng: () => 0.99 }, weak), { participantId: "hero", roll: 100 });
+
+    const change = out.events.flatMap((e) => (e as { hpChanges?: { participantId: string; oldHp: number; newHp: number }[] }).hpChanges ?? []).find((h) => h.participantId === "hero");
+
+    expect(change).toMatchObject({ oldHp: 1, newHp: 0 });
+    expect(heroOf(out).combatStats.currentHp).toBe(0);
+    expect(heroOf(out).combatStats.status).not.toBe(weak.combatStats.status);
+  });
+
   it("rejects off-turn, used action and d20 campaigns", () => {
     expect(() => channelMutation(ctx({ scene: { ...context().scene, turnIndex: 1 } }), { participantId: "hero", roll: 20 })).toThrow(/./);
 

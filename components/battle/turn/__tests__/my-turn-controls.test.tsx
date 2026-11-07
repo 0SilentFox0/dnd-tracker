@@ -86,4 +86,13 @@ describe("MyTurnControls: gating за прапорцями правил", () => 
     expect(screen.queryByRole("button", { name: /Скерування/ })).not.toBeInTheDocument();
     expect(screen.queryByTestId("channel-dialog")).not.toBeInTheDocument();
   });
+
+  it("hides the Channel tile for a wfrp hero without spells", () => {
+    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, magic: true };
+
+    const mundane = { basicInfo: { id: "h2" }, spellcasting: { spellSlots: {}, knownSpells: [] } } as unknown as BattleParticipant;
+
+    render(<MyTurnControls hero={mundane} />);
+    expect(screen.queryByRole("button", { name: /Скерування/ })).not.toBeInTheDocument();
+  });
 });

@@ -118,10 +118,10 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - Miscast/wrath ворожого (не союзного/не exact для глядача) заклинача: T1 live-run закрито (fix `redact enemy miscast`). Для не-ДМ сервер прибирає з журналу рядки miscast/wrath і рядки умов із джерелом miscast (`conditions.isMiscastLine`), обнуляє `percentileCast.miscast`, а стани, накладені miscast (`ActiveEffect.concealed`), знімає з учасника у GET/SSR, відповіді мутації та публічній Pusher-дельті (`redactParticipantsForPlayers`/`redactPatchesForPlayers`, `redactDeltaForPlayers`); dm-канал і відповідь ДМ повні. Союзні/власні заклиначі гравця не редагуються. Лишається: `percentileCast.doubles`+fumble виказує miscast непрямо; решта `activeEffects` ворога й `currentHp` досі сирі (див. participant-privacy-scope.md).
 - Критичний успіх каст-тесту (дублі на успішному d100) не обходить CN (T3 закрито): каст вдається лише при SL (з банком/Fortune/бронею) ≥ CN; при SL < CN результат «failure» з fizzle, а дублі й надалі дають minor miscast. outcome «critical» лишається позначкою вдалого касту з SL ≥ CN.
 - Інгредієнт гасить лише arcane miscast, не wrath.
-- M4: miscast на каналізації (кидок 100) не викликає `resolveDowned`/`hpChanges`.
+- ~~M4: miscast на каналізації (кидок 100) не викликає `resolveDowned`/`hpChanges`.~~ (закрито: `channel-mutation` викликає `resolveDowned` для впавшого і дописує `hpChanges` через `appendHpChanges`)
 - M5: фізл пропускає after-тригер, але побічні ефекти before-тригера `spellCast` лишаються; legendary/grant довгі касти проходять `beginLongCast` зі слот-перевіркою.
-- M6: `rollKeys` у `lib/server/battles/dice.ts` не знає `castRoll`/`fortuneRoll` (у режимі серверних кубиків асистента ігноруються мовчки).
-- M8: плитка Channel показується всім героям wfrp; `battleData.sin` видно в знімку (за специфікацією).
+- ~~M6: `rollKeys` у `lib/server/battles/dice.ts` не знає `castRoll`/`fortuneRoll`.~~ (закрито: ключі додано)
+- ~~M8: плитка Channel показується всім героям wfrp~~ (закрито: плитка лише для героя з відомими заклинаннями, `MyTurnControls`: `magic && hasMagic`); `battleData.sin` видно в знімку (за специфікацією).
 - Решта відомих прогалин: таланти, редагований контент `tables`, дальність/площа/тривалість overcast, long cast, штраф броні.
 - **Обов'язково перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20) — виконано 2026-11-05: перший прогін мав 1 збій лабіринту (застарілий assert, виправлено 221877d27), повторний прогін exit 0, 0 помилок, регресії немає.
 

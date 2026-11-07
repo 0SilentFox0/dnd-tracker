@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { appendHpChanges } from "@/lib/utils/battle/common/action-flow";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
@@ -47,11 +49,20 @@ export function channelMutation(ctx: BattleMutationContext, body: ChannelBody): 
 
     participants = r.participants;
     lines.push(...r.messages);
+
+    if (!isActive(findParticipant(participants, actor.basicInfo.id) ?? actor)) {
+      const downed = resolveDowned(participants, { victimId: actor.basicInfo.id, actorId: null }, { round, rng, rules: ctx.meta.rules });
+
+      participants = downed.participants;
+      lines.push(...downed.messages);
+    }
   }
 
   const updated = participants.find((p) => p.basicInfo.id === actor.basicInfo.id) ?? actor;
 
   const action = newBattleAction(actor, "ability", { battleId: ctx.scene.id, round, targets: [updated] }, { actionDetails: {}, ...logFields(lineText(lines, " | ")) });
+
+  appendHpChanges(action, ctx.participants, participants);
 
   return { participants, pending: ctx.pending, events: [battleActionToEvent(action)] };
 }
