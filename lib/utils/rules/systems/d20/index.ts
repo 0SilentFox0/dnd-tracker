@@ -22,6 +22,7 @@ export const d20System = (key: Extract<RuleSystemKey, "homm" | "dnd5e">): RuleSy
   attacks: true,
   spells: true,
   items: true,
+  inventory: true,
   d20Stats: true,
   unusedMechanics: [],
 });

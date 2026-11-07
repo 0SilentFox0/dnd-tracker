@@ -175,7 +175,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
               </div>
             ),
           }] : []),
-          ...(system.items ? [{
+          ...(system.inventory ? [{
             id: "items" as const,
             label: t("tabs.things"),
             content: (

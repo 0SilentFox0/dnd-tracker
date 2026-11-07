@@ -84,4 +84,11 @@ describe("rule system registry", () => {
     expect(by("bleeding")?.maxLevel).toBe(10);
     expect(by("bleeding")?.endTest).toBe("roll");
   });
+
+  it("inventory tab is on for every system; items (5e magic items) only for d20 systems", () => {
+    for (const key of ["homm", "dnd5e", "wfrp"] as const) expect(RULE_SYSTEM_REGISTRY[key].inventory).toBe(true);
+
+    expect(RULE_SYSTEM_REGISTRY.wfrp.items).toBe(false);
+    expect(RULE_SYSTEM_REGISTRY.dnd5e.items).toBe(true);
+  });
 });

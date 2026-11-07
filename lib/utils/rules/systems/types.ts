@@ -279,6 +279,7 @@ export interface RuleSystemDefinition {
   attacks: boolean;
   spells: boolean;
   items: boolean;
+  inventory: boolean;
   d20Stats: boolean;
   unusedMechanics: readonly MechanicKey[];
 }
