@@ -17,6 +17,7 @@ function deps(over = {}) {
     loadUnit: vi.fn(async () => ({ id: "u1", campaignId: "c1" }) as never),
     fromCharacter: vi.fn(async () => participant("new-ch")),
     fromUnit: vi.fn(async (_u: unknown, _b: string, _s: unknown, n: number) => participant(`new-u${n}`)),
+    buildContext: vi.fn(async () => undefined),
     ...over,
   };
 }
@@ -55,6 +56,17 @@ describe("add-participant mutation", () => {
     await createAddParticipantMutation(d)(context({ meta: { ...context().meta, rules } }), { sourceId: "ch1", type: "character", side: "ally", quantity: 1 });
 
     expect(d.fromCharacter).toHaveBeenCalledWith(expect.anything(), "b1", "ally", undefined, undefined, { rules });
+  });
+
+  it("героя будують з контекстом кампанії (артефакти екіпірування)", async () => {
+    const campaignContext = { artifactsById: { a1: {} } } as never;
+
+    const d = deps({ buildContext: vi.fn(async () => campaignContext) });
+
+    await createAddParticipantMutation(d)(context(), { sourceId: "ch1", type: "character", side: "ally", quantity: 1 });
+
+    expect(d.buildContext).toHaveBeenCalledWith("c1", expect.objectContaining({ id: "ch1" }));
+    expect(d.fromCharacter).toHaveBeenCalledWith(expect.anything(), "b1", "ally", undefined, campaignContext, expect.anything());
   });
 
   it("reserved — у резерв, черга не змінюється", async () => {

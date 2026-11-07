@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { textRef } from "@/lib/i18n/text-ref";
+import { buildCampaignContextForStart } from "@/lib/server/battles/mutations/start/start-build-context";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -10,6 +11,7 @@ import {
 import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-source";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { dmEvent } from "@/lib/utils/battle/store";
+import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 import type { BattleParticipant } from "@/types/battle";
 
 export const refreshSourcesSchema = z.object({});
@@ -23,6 +25,7 @@ export interface RefreshSourcesDeps {
   loadUnit(id: string, campaignId: string): Promise<UnitRow | null>;
   fromCharacter: typeof createBattleParticipantFromCharacter;
   fromUnit: typeof createBattleParticipantFromUnit;
+  buildContext(campaignId: string, characters: CharacterRow[]): Promise<CampaignSpellContext | undefined>;
 }
 
 const defaultDeps: RefreshSourcesDeps = {
@@ -30,6 +33,7 @@ const defaultDeps: RefreshSourcesDeps = {
   loadUnit: (id, campaignId) => prisma.unit.findFirst({ where: { id, campaignId } }) as Promise<UnitRow | null>,
   fromCharacter: createBattleParticipantFromCharacter,
   fromUnit: createBattleParticipantFromUnit,
+  buildContext: async (campaignId, characters) => (await buildCampaignContextForStart(campaignId, characters as never, [])).campaignContext,
 };
 
 const isRealParticipant = (p: BattleParticipant) => !p.basicInfo.isExtraTurnSlot && !p.battleData.summonedBy;
@@ -54,6 +58,14 @@ export function createRefreshSourcesMutation(deps: RefreshSourcesDeps = defaultD
       return loading;
     };
 
+    const characterIds = new Set([...ctx.participants, ...ctx.pending].filter((p) => isRealParticipant(p) && p.basicInfo.sourceType === ParticipantSourceType.CHARACTER).map((p) => p.basicInfo.sourceId));
+
+    const loaded = await Promise.all([...characterIds].map((id) => load(ParticipantSourceType.CHARACTER, id)));
+
+    const characters = loaded.filter((r): r is CharacterRow => !!r && r.campaignId === campaignId);
+
+    const campaignContext = characters.length > 0 ? await deps.buildContext(campaignId, characters) : undefined;
+
     let refreshed = 0;
 
     const refresh = async (live: BattleParticipant): Promise<BattleParticipant> => {
@@ -69,7 +81,7 @@ export function createRefreshSourcesMutation(deps: RefreshSourcesDeps = defaultD
 
       const fresh =
         sourceType === ParticipantSourceType.CHARACTER
-          ? await deps.fromCharacter(row as CharacterRow, battleId, side, instanceNumber, undefined, { rules: ctx.meta.rules })
+          ? await deps.fromCharacter(row as CharacterRow, battleId, side, instanceNumber, campaignContext, { rules: ctx.meta.rules })
           : await deps.fromUnit(row as UnitRow, battleId, side, instanceNumber ?? 1, undefined, ctx.meta.rules);
 
       refreshed++;
