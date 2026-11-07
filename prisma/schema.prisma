@@ -654,20 +654,20 @@ model Skill {
 }
 
 model Race {
-  id                   String   @id @default(cuid())
+  id                   String       @id @default(cuid())
   campaignId           String
   name                 String
-  availableSkills      Json     @default("[]")
-  disabledSkills       Json     @default("[]")
+  availableSkills      Json         @default("[]")
+  disabledSkills       Json         @default("[]")
   passiveAbility       Json?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  spellSlotProgression Json     @default("[]")
-  abilities            Json     @default("[]")
-  choices              Json     @default("[]")
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  spellSlotProgression Json         @default("[]")
+  abilities            Json         @default("[]")
+  choices              Json         @default("[]")
   icon                 String?
   color                String?
-  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign             Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   units                Unit[]
   profile              RaceProfile?
   sourceId             String?
@@ -1464,6 +1464,7 @@ model ArtifactBase {
   icon             String?
   createdAt        DateTime @default(now())
   abilities        Json     @default("[]")
+  systemStats      Json?    @map("system_stats")
   sourceCampaignId String
   validFrom        Int
   validTo          Int?
