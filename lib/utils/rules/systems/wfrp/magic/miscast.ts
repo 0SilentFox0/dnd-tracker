@@ -1,7 +1,7 @@
 import { applyWfrpConditionTo } from "../conditions/apply";
-import { rollSlot } from "../tables/resolve";
+import { rollSlot, rowText } from "../tables/resolve";
 
-import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import type { Rng } from "@/lib/utils/common/rng";
@@ -22,7 +22,7 @@ export function wfrpMiscast(
 
   const { row } = rollSlot(ctx.rules, kind === "wrath" ? "wrath" : kind === "major" ? "miscastMajor" : "miscastMinor", ctx.rng, ctx.presetRoll);
 
-  const effect = row.textKey ? dynamicTextRef(row.textKey) : (row.text ?? "");
+  const effect = rowText(row);
 
   const name = caster.basicInfo.name;
 

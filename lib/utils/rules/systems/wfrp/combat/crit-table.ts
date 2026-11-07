@@ -1,8 +1,7 @@
 import type { WfrpConditionKey } from "../conditions/catalog";
-import { rollSlot } from "../tables/resolve";
+import { rollSlot, rowText } from "../tables/resolve";
 import type { HitLocation } from "./constants";
 
-import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { TableSlot } from "@/lib/utils/rules/tables-schema";
@@ -21,11 +20,7 @@ const SLOT: Record<HitLocation, TableSlot> = { head: "critHead", arm: "critArm",
 export function rollCrit(location: HitLocation, rules: Pick<Ruleset, "tables">, rng: Rng, presetRoll?: number): CritResult {
   const { index, row } = rollSlot(rules, SLOT[location], rng, presetRoll);
 
-  const n = index + 1;
-
-  const result: CritResult = { id: `${location}.${n}`, text: "", bonusDamage: 0, conditions: [], markers: [] };
-
-  result.text = row.textKey ? dynamicTextRef(row.textKey) : (row.text ?? "");
+  const result: CritResult = { id: `${location}.${index + 1}`, text: rowText(row), bonusDamage: 0, conditions: [], markers: [] };
 
   for (const e of row.effects) {
     if (e.type === "damage") result.bonusDamage += e.amount;
