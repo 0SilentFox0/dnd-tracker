@@ -18,18 +18,18 @@
 
 `lib/utils/rules/tables-schema.ts`, секція `rules.tables` (за зразком `advancement-schema.ts`: `sectionSchemas`, `DEFAULT_RULES`, `patchSection`; поза `MECHANIC_REGISTRY`).
 
-- `tables: Partial<Record<Slot, Row[]>>`, `Slot` = `crit.head|arm|body|leg` | `miscast.minor|major` | `wrath`. Дефолт секції `{}` (= зашиті таблиці).
+- Плоскі ключі слотів (`mergeRules` зливає секцію поверхнево): `critHead|critArm|critBody|critLeg|miscastMinor|miscastMajor|wrath`, кожен `Row[] | null | undefined`; `null`/відсутній = дефолт («Скинути» шле `null`). Дефолт секції `{}`.
 - `Row = { max: 1..100, text?: string (≤200), effects: Effect[] (≤4) }`.
-- `Effect` = `{type:"damage", amount}` | `{type:"wounds", amount}` | `{type:"condition", key, levels}`. Ключ — з каталогу станів wfrp, рівні 1–10.
-- Валідація: `max` строго зростає, останній `max = 100`; ефекти за слотом: крити — `damage`, `condition`; miscast і Wrath — `wounds`, `condition`.
+- `Effect` = `{type:"damage", amount}` | `{type:"wounds", amount}` | `{type:"condition", key, levels}` | `{type:"marker", key}`. `condition.key` — з каталогу станів wfrp, рівні 1–10; `marker` — відображувані крит-маркери без механіки (`winded|disarmed|crippled`), які не входять до каталогу.
+- Валідація: `max` строго зростає, останній `max = 100`; ефекти за слотом: крити — `damage`, `condition`, `marker`; miscast і Wrath — `wounds`, `condition`.
 - Нижня межа рядка не зберігається (обчислюється з попереднього `max`), тож прогалин і перетинів немає за побудовою.
 
 ## Рушій
 
 - `resolveTable(rules, slot)` → рядки секції або зашиті дефолти в тому ж форматі (`CRIT_TABLE`, `MISCAST_TABLE`, `WRATH_TABLE` перетворюються на `Row[]`).
 - `rollTable` не змінюється (`max`-формат). `rollCrit(location, rng, preset)` отримує `rules`; виклики в `combat/mitigate.ts` і `combat/on-zero-hp.ts` передають `ctx.rules`. `wfrpMiscast` читає через резолвер.
-- Результат крита: `damage` → `bonusDamage`, `condition` → `markerKey`/рівні через наявний `applyWfrpCrit`; `id` = `slot.index`.
-- Журнал: зашиті рядки — i18n-ключі; рядок кампанії — `literalTextRef(text)` (новий в `lib/i18n/text-ref.ts`). Приховування miscast-рядків і `concealed`-станів для гравців не змінюється (ґрунтується на ключах `wfrpMagic.log.*`, не на тексті).
+- Результат крита: `damage` → `bonusDamage`, `condition`/`marker` — списки через `applyWfrpCrit` (замість одного `markerKey`); `id` = `slot.index`.
+- Журнал: зашиті рядки — i18n-ключі; рядок кампанії — звичайний рядок (`LogLine`/`TextArg` вже приймають рядок, нового `TextRef` не потрібно). Приховування miscast-рядків і `concealed`-станів для гравців не змінюється (ґрунтується на ключах `wfrpMagic.log.*`, не на тексті).
 - Без правил кампанії (unit-library balance, чисті тести) — дефолти.
 
 ## Приховування від гравців
@@ -48,7 +48,7 @@
 
 - Схема: порядок `max`, останній 100, ефекти за слотом, межі полів.
 - `resolveTable`: порожня секція → дефолт; перекриття слота.
-- Рушій: crit/miscast/wrath з дефолтом ≡ поточна поведінка (регрес на зашитих даних); preset-кидок вибирає потрібний рядок кампанії; `literalTextRef` у журналі.
+- Рушій: crit/miscast/wrath з дефолтом ≡ поточна поведінка (регрес на зашитих даних); preset-кидок вибирає потрібний рядок кампанії; текст кампанії в журналі рядком.
 - `readCampaignRules` вирізає `tables` для не-ДМ.
 - Редактор: додавання/видалення рядків, скидання, помилки.
 - Розмір `rules` із повними 7 слотами × ~20 рядків (малий, зафіксувати тестом).
