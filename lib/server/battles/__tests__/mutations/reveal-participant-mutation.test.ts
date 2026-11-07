@@ -10,6 +10,10 @@ import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { type BattleMutationOutcome, prepareSave } from "@/lib/utils/battle/store";
+import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { trait } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const reserved = (id: string) => participant(id, { side: ParticipantSide.ENEMY, controlledBy: "dm" }, { battleData: { ...goblin.battleData, reserved: true } });
@@ -45,6 +49,28 @@ describe("reveal-participant mutation", () => {
 
   it("невідомий ID — 404", () => {
     expect(() => revealParticipantMutation(context({ isDM: true, participants: [hero, goblin] }), { participantIds: ["nope"] })).toThrow(expect.objectContaining({ status: 404 }));
+  });
+});
+
+describe("reveal-participant: психологія wfrp", () => {
+  const fearful = participant("imp", { side: ParticipantSide.ENEMY, controlledBy: "dm" }, { battleData: { ...goblin.battleData, reserved: true, resolvedAbilities: [trait([{ kind: "wfrpPsychology", psychology: "fear", value: 1 }])] } });
+
+  const wfrpHero = { ...hero, abilities: { ...hero.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS) } };
+
+  it("новачок із Fear тестує наявних ворогів окремою подією з targets", () => {
+    const base = context({ isDM: true, participants: [wfrpHero, goblin], pending: [fearful] });
+
+    const out = revealParticipantMutation({ ...base, meta: { ...base.meta, rules: WFRP_RULES } }, { participantIds: ["imp"] });
+
+    expect(out.events).toHaveLength(2);
+    expect(out.events[1].targets).toEqual([{ participantId: "hero", participantName: hero.basicInfo.name }]);
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.psychologyTested).toEqual({ fear: 1 });
+  });
+
+  it("d20 без додаткової події", () => {
+    const out = revealParticipantMutation(context({ isDM: true, pending: [fearful] }), { participantIds: ["imp"] });
+
+    expect(out.events).toHaveLength(1);
   });
 });
 

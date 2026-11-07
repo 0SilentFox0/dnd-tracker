@@ -8,6 +8,7 @@ import type { RulesEdition } from "@/lib/constants/rules";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
+import type { PsychologyKind } from "@/lib/utils/abilities/schema/kinds";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
@@ -529,6 +530,8 @@ export interface BattleParticipantBattleData {
   ingredientStock?: IngredientStock;
   /** attack id → shots left; seeded at battle start from the weapon capacity, never persisted between battles */
   ammo?: Record<string, number>;
+  /** strongest fear/terror value already tested against, per kind */
+  psychologyTested?: Partial<Record<PsychologyKind, number>>;
   /** attack id → owner turn ends left until the magazine refills */
   reload?: Record<string, number>;
   pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };

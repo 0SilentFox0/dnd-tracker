@@ -11,6 +11,10 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { trait } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const debuff = (type: string, duration: number): ActiveEffect => makeEffect(`e-${type}`, { name: type, type: "debuff", duration, effects: [{ type, value: 0 }] });
@@ -316,4 +320,20 @@ describe("аура на учаснику на початку ходу", () => {
 
     expect(out.participant.combatStats.currentHp).toBe(16);
   });
+});
+
+it("processStartOfRound: призваний із Fear тестує наявних і віддає targets", () => {
+  const b = createMockParticipant();
+
+  const wfrp = wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS);
+
+  const hero = createMockParticipant({ basicInfo: { ...b.basicInfo, id: "hero", side: ParticipantSide.ALLY }, abilities: { ...b.abilities, ...wfrp } });
+
+  const wolf = createMockParticipant({ basicInfo: { ...b.basicInfo, id: "wolf", side: ParticipantSide.ENEMY }, battleData: { ...b.battleData, resolvedAbilities: [trait([{ kind: "wfrpPsychology", psychology: "fear", value: 1 }])] } });
+
+  const out = processStartOfRound([hero], 2, [wolf], () => 0.5, undefined, WFRP_RULES);
+
+  expect(out.psychology.targets).toEqual([{ participantId: "hero", participantName: hero.basicInfo.name }]);
+  expect(out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "hero")?.battleData.psychologyTested).toEqual({ fear: 1 });
+  expect(processStartOfRound([hero], 2, [], () => 0.5, undefined, WFRP_RULES).psychology.lines).toEqual([]);
 });

@@ -57,7 +57,7 @@ interface LoopEnv {
 
 const stateBeforeForEntry = () => undefined;
 
-function systemEntry(st: LoopState, env: LoopEnv, round: number, text: LogLine | LogLine[], tag: string): BattleAction {
+function systemEntry(st: LoopState, env: LoopEnv, round: number, text: LogLine | LogLine[], tag: string, targets: BattleAction["targets"] = []): BattleAction {
   return {
     id: `${tag}-${round}-${Date.now()}-${st.attempts}`,
     battleId: env.battleId,
@@ -66,7 +66,7 @@ function systemEntry(st: LoopState, env: LoopEnv, round: number, text: LogLine |
     timestamp: new Date(),
     ...SYSTEM_ACTOR,
     actionType: "ability",
-    targets: [],
+    targets,
     actionDetails: {},
     ...logFields(text),
     hpChanges: [],
@@ -101,6 +101,8 @@ function roundTransition(st: LoopState, env: LoopEnv, previousRound: number): vo
   if (roundResult.triggerMessages.length > 0) {
     st.log.push(systemEntry(st, env, st.round, [textRef("battleLog.triggers.roundStart", { round: st.round }), ...roundResult.triggerMessages], "triggers-round"));
   }
+
+  if (roundResult.psychology.lines.length > 0) st.log.push(systemEntry(st, env, st.round, roundResult.psychology.lines, "psychology-round", roundResult.psychology.targets));
 }
 
 function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnResult, before: BattleParticipant): void {

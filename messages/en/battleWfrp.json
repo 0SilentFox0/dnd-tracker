@@ -69,7 +69,15 @@
     "fortuneSl": "{name} spends Fortune: +1 SL",
     "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
     "critWound": "🩸 Critical wound for {target}: {text}",
-    "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious"
+    "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious",
+    "psychologyPass": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: resisted",
+    "psychologyFail": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: failed",
+    "psychologyPassHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: resisted",
+    "psychologyFailHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: failed"
+  },
+  "psychology": {
+    "fear": "Fear",
+    "terror": "Terror"
   },
   "ui": {
     "dialog": {

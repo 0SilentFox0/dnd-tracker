@@ -1,4 +1,5 @@
 import type { BattleStatus } from "@/lib/constants/battle";
+import type { PsychologyKind } from "@/lib/utils/abilities/schema/kinds";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { AbilityUsageCounter } from "@/types/abilities";
@@ -62,6 +63,7 @@ export interface ParticipantState {
   mazeWakeRound?: number;
   ingredientStock?: IngredientStock;
   ammo?: Record<string, number>;
+  psychologyTested?: Partial<Record<PsychologyKind, number>>;
   reload?: Record<string, number>;
   spellSlotsCurrent: Record<string, number>;
 }

@@ -84,6 +84,17 @@ describe("видимість", () => {
     expect(sanitizeLogEntry(entry("e", [applied]), { ...player, canSeeEnemyHp: true }, ctxOf([enemy])).log).toEqual([applied]);
   });
 
+  it("wfrp: ціль тесту психології ворожого учасника ховається для гравця, DM бачить усе", () => {
+    const enemy = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "e" } } as BattleParticipant;
+
+    const fail = { message: "battleWfrp.log.psychologyFail", params: { name: "x", source: "m", kind: "k", value: 2, roll: 80, target: 40, sl: -4 } };
+
+    const entry = { targets: [{ participantId: "e", participantName: "x" }], actionDetails: {}, log: [fail] } as unknown as BattleAction;
+
+    expect(sanitizeLogEntry(entry, player, ctxOf([enemy])).log?.[0]).toEqual({ message: "battleWfrp.log.psychologyFailHidden", params: { name: "x", source: "m", kind: "k", value: 2, roll: 80, sl: -4 } });
+    expect(sanitizeLogEntry(entry, { ...player, isDM: true }, ctxOf([enemy])).log).toEqual([fail]);
+  });
+
   it("wfrp: умови miscast ворожого заклинача ховаються від гравця, DM бачить, d20 без змін", () => {
     const wizard = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "w" } } as BattleParticipant;
 

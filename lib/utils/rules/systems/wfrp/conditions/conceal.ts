@@ -12,7 +12,7 @@ export function concealWfrpLine(line: LogLine): LogLine {
     return textRef("battleWfrp.log.appliedHidden", rest);
   }
 
-  if (message === "battleWfrp.log.endTestSuccess" || message === "battleWfrp.log.endTestFail") {
+  if (message === "battleWfrp.log.endTestSuccess" || message === "battleWfrp.log.endTestFail" || message === "battleWfrp.log.psychologyPass" || message === "battleWfrp.log.psychologyFail") {
     const { target: _target, ...rest } = params ?? {};
 
     return textRef(`${message}Hidden`, rest);

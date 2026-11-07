@@ -21,7 +21,7 @@ export function splitParticipant(
 
   const { currentHp, tempHp, maxHp, morale, status, ...combatRest } = p.combatStats;
 
-  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, turnStartPosition, returnedThisTurn, airborne, hazardHitRound, zoneHits, pendingHits, retaliationsUsed, dormant, facing, escaped, mazeWakeRound, ingredientStock, ammo, reload, ...battleDataWithScoped } = p.battleData;
+  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, turnStartPosition, returnedThisTurn, airborne, hazardHitRound, zoneHits, pendingHits, retaliationsUsed, dormant, facing, escaped, mazeWakeRound, ingredientStock, ammo, reload, psychologyTested, ...battleDataWithScoped } = p.battleData;
 
   // потрібне лише під час старту бою
   const battleDataRest = omit(battleDataWithScoped as typeof battleDataWithScoped & { pendingScopedArtifactBonuses?: unknown }, ["pendingScopedArtifactBonuses"]);
@@ -63,6 +63,7 @@ export function splitParticipant(
     ...(ingredientStock !== undefined && { ingredientStock }),
     ...(ammo !== undefined && { ammo }),
     ...(reload !== undefined && { reload }),
+    ...(psychologyTested !== undefined && { psychologyTested }),
     spellSlotsCurrent,
   };
 
@@ -152,6 +153,7 @@ export function joinParticipant(stored: StoredParticipant, battleId: string): Ba
       ...(state.ingredientStock !== undefined && { ingredientStock: state.ingredientStock }),
       ...(state.ammo !== undefined && { ammo: state.ammo }),
       ...(state.reload !== undefined && { reload: state.reload }),
+      ...(state.psychologyTested !== undefined && { psychologyTested: state.psychologyTested }),
     },
     actionFlags: {
       hasUsedAction: c.hasUsedAction,

@@ -69,7 +69,15 @@
     "fortuneSl": "{name} витрачає Удачу: +1 РУ",
     "critHit": "🩸 Критична рана для {target} (+{bonus} шкоди): {text}",
     "critWound": "🩸 Критична рана для {target}: {text}",
-    "unconscious": "💤 {name} падає на 0 Ран і втрачає свідомість"
+    "unconscious": "💤 {name} падає на 0 Ран і втрачає свідомість",
+    "psychologyPass": "{name}: {kind} {value} від {source} — тест {roll} / {target}, РУ {sl}: стійкість",
+    "psychologyFail": "{name}: {kind} {value} від {source} — тест {roll} / {target}, РУ {sl}: провал",
+    "psychologyPassHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: стійкість",
+    "psychologyFailHidden": "{name}: {kind} {value} від {source} — тест {roll}, РУ {sl}: провал"
+  },
+  "psychology": {
+    "fear": "Страх",
+    "terror": "Жах"
   },
   "ui": {
     "dialog": {

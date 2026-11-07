@@ -191,3 +191,28 @@ describe("ammo and reload live in state", () => {
     expect(joinParticipant(stored, archer().basicInfo.battleId).battleData).toMatchObject({ ammo: { bow: 2 }, reload: {} });
   });
 });
+
+describe("psychologyTested lives in state", () => {
+  const scared = (): BattleParticipant => {
+    const p = richParticipant();
+
+    return { ...p, battleData: { ...p.battleData, psychologyTested: { fear: 2 } } };
+  };
+
+  it("keeps the snapshot hash and patches battleData only", () => {
+    const before = richParticipant();
+
+    const after = scared();
+
+    expect(splitParticipant(after, { orderIndex: 0, isPending: false }).snapshotHash).toBe(splitParticipant(before, { orderIndex: 0, isPending: false }).snapshotHash);
+    expect(buildParticipantPatch(before, after)).toEqual({ id: before.basicInfo.id, battleData: { psychologyTested: { fear: 2 } } });
+  });
+
+  it("round-trips through state, not the snapshot", () => {
+    const stored = splitParticipant(scared(), { orderIndex: 0, isPending: false });
+
+    expect(stored.state).toMatchObject({ psychologyTested: { fear: 2 } });
+    expect(stored.snapshot.battleData).not.toHaveProperty("psychologyTested");
+    expect(joinParticipant(stored, scared().basicInfo.battleId).battleData).toMatchObject({ psychologyTested: { fear: 2 } });
+  });
+});
