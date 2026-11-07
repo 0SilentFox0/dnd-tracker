@@ -65,7 +65,7 @@
 Бій wfrp працює на рівні рушія (UI — див. «Межі 5b-3»). Свідомі межі:
 
 - Momentum — жетон сцени `{ ally?, enemy? }` (`battle_scenes.momentum`, у знімку, дельті й rollback; `lib/utils/battle/momentum.ts`: `settle`, `heldBy`, `momentumPatch`), спільний для гравецьких і серверних атак (фаза атаки, помста, нагода, рух, легендарні дії, підготовлена атака); `spell/cast` і `berserk` його не чіпають (`NO_MOMENTUM`). У d20 `scene.momentum` ніколи не з'являється в дельті. У wfrp немає реакцій, тож нагода/підготовлена атака за реальних правил недосяжні; крит-вибір ДМ (`pendingCritChoice`) атаками wfrp не запускається. Дальній бій Momentum не використовує.
-- Щита й броні немає (AP = 0, щит не моделюється): 5f.
+- Броня й щит: див. «Межі 5f» (AP із екіпірування).
 - Крит-маркери (bleeding, stunned, …) були інертними мітками: закрито в 5c-1 для bleeding/stunned/unconscious/prone (див. «Межі 5c-1»); head.5 «unconscious» тепер дає стан.
 - d100 не пишеться в `diceRolls` (`DieSides` не має 100); значення лежить в `actionDetails.percentile`. Схема атаки приймає `d20Roll`/`attackRoll`/`attackRolls` до 100, а верхню межу задає `combat.dice` (закрито в 5b-3).
 - Дальня атака без смуг дальності (складність challenging, ціль захисту 0).
@@ -85,7 +85,7 @@
 - Overcast (кроки `OVERCAST_SL_STEP` за перевищення CN, див. «Межі 5d-3»): `diceRolls` клієнта не розширюються, додаткові кубики кидає сервер. Каст без `castRoll`/`serverRoll` сервер кидає сам (не відхиляє).
 - `channel`: основна дія; не свій хід, використана дія або d20-кампанія (`BATTLE_CHANNEL_UNSUPPORTED`, 422) відхиляються; кидок 100 дає minor miscast; будь-яка шкода кастеру скидає channelled SL (`onDamaged`).
 - Числа (`MISCAST_TABLE`, CN, кроки SL: `OVERCAST_SL_STEP`, `ARMOUR_SL_PER_AP`, `CHANNEL_MAX_SL`, правила miscast на дублях) не звірені з книгою (немає джерела).
-- AP = 0 до 5f, тож штраф броні касту завжди 0 (формула покрита тестом).
+- Штраф броні касту береться з AP екіпірування (5f; враховує й щит, див. «Межі 5f»).
 - Long cast заборонений; overcast лише апкаст (дальність, площа, тривалість — ні).
 - Шкода заклинань іде наявним ефект-рушієм без SL касту, TB й AP.
 - Таланти, редагований контент `tables`, Sin/молитви (5d-3) — поза межами.
@@ -122,8 +122,20 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 - M5: фізл пропускає after-тригер, але побічні ефекти before-тригера `spellCast` лишаються; legendary/grant довгі касти проходять `beginLongCast` зі слот-перевіркою.
 - M6: `rollKeys` у `lib/server/battles/dice.ts` не знає `castRoll`/`fortuneRoll` (у режимі серверних кубиків асистента ігноруються мовчки).
 - M8: плитка Channel показується всім героям wfrp; `battleData.sin` видно в знімку (за специфікацією).
-- Решта відомих прогалин: таланти, редагований контент `tables`, дальність/площа/тривалість overcast, long cast, штраф броні (AP = 0 до 5f).
+- Решта відомих прогалин: таланти, редагований контент `tables`, дальність/площа/тривалість overcast, long cast, штраф броні (враховує щит, M3 у «Межі 5f»).
 - **Обов'язково перед деплоєм епіку wfrp:** `battle-sweep` homm/dnd5e на prodcopy (5d змінює `castSpell` і consequences, спільні з d20) — виконано 2026-11-05: перший прогін мав 1 збій лабіринту (застарілий assert, виправлено 221877d27), повторний прогін exit 0, 0 помилок, регресії немає.
+
+## Межі 5f
+
+- Екіпірування: колонка `artifacts.system_stats` (+ `artifacts_base`), валідація лише через `SYSTEM_STATS_SCHEMAS` (d20/homm відхиляють не-null), `null` очищає, пропуск зберігає. Два валідатори (`equipment/guard.ts` для клієнта без zod і zod-схема) звіряє `guard.test`.
+- Шкода зброї: плоский бонус `damage.flat` іде в `attack.damageBonus` (кубиків зброї немає, `damageDice: ""`, героїчні кубики рівня для атак із `attack.wfrp` не додаються); крок `weapon` = `damageBonus`, SB додається, якщо `addSb`. Нуль і від'ємне значення допустимі; нульовий `amount` d20-конвеєра більше не обриває `mitigate` (імунітет = `amount 0` лише коли d20-шкоду зменшили до нуля).
+- Броня: AP = сума шарів по локаціях (кап 12); щит дає X на голову/руки/тулуб і пропадає лише при дворучній зброї в слоті `weapon` (лук у `range_weapon` щит не знімає). `armourAp` повертає застосований `shield`, лист і бій беруть звідти.
+- Боєзапас і перезарядка: `battleData.ammo/reload` — у `ParticipantState` (дельти без перезапису знімка). Перезарядка X зберігається як X+1: кінець ходу, на якому закінчились набої, не рахується. Той самий артефакт у двох слотах ділить один лічильник; після зміни екіпірування посеред бою набої не пересіваються.
+- Властивості: `QUALITY_REGISTRY.implemented = false` для Defensive і всіх «лише збережених» (Distract, Entangle, Wrap, Spread, Trap-blade, Unbreakable, Inflict, Repeater). Blast = `aoe` із `4·X` цілями без геометрії радіуса (заглушка). Penetrating ігнорує `floor(AP/2)` (не звірено з книгою).
+- Гроші: таблиця валюти системи (`currencyValueOf`, wfrp 1 зк = 20 шл = 240 п) проходить через оплату інгредієнтів (`spendCp`, `planIngredients`, `buildIngredientStock`, `useIngredientPlan`); d20 лишається 100/10/1.
+- Тексти: редактор предметів (`wfrpEquipmentEditor`) лише в `WFRP_DM_EXTRA`; `scope-size` міряє справжній скоуп учасника wfrp (uk ≈105.5 KB, ліміт 106) і ДМ (≈108.4 KB, ліміт 109); база лишається 105.
+- Хеші шаблону: `contentRowHash` (`lib/utils/content/row-hash.ts`) спільний для `rowHash` синхронізації та `materialize` шарів, тож порожні нові колонки (`systemStats`, `characteristics`, `xpCost/maxRank`) хешуються як відсутні.
+- Відкрито: штраф броні касту враховує щит (M3), `useEncumbrance` не рахує `quantity` (M9, дорадча вага), легка зброя в слоті `shield` не дає атаки (M4), алайнмент у core-UI не читає прапор `identity.alignments` (M6), `extractWfrpAttacks` не пересіває набої посеред бою.
 
 ## Межі 5e-1
 

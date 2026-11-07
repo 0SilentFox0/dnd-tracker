@@ -69,8 +69,16 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   list: (actor) => readArtifactsList(actor.campaignId),
   find: (actor, id, purpose) => prisma.artifact.findFirst({ where: { id, campaignId: actor.campaignId }, ...(purpose === "read" && { include: withSet }) }),
   toItem: (row) => withAbilityIssues("artifact", row),
-  prepareCreate: async (actor, data) => data.icon === undefined ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, randomUUID()) },
-  prepareUpdate: async (actor, existing, data) => data.icon === undefined || data.icon === existing.icon ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, existing.id) },
+  prepareCreate: async (actor, data) => {
+    await systemStatsColumn(actor.campaignId, data.systemStats);
+
+    return data.icon === undefined ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, randomUUID()) };
+  },
+  prepareUpdate: async (actor, existing, data) => {
+    await systemStatsColumn(actor.campaignId, data.systemStats);
+
+    return data.icon === undefined || data.icon === existing.icon ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, existing.id) };
+  },
   async create(actor, data) {
     await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
 

@@ -5,6 +5,7 @@ import { context } from "./fixtures";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
+import { validateAttackPreview } from "@/lib/server/battles/dice";
 import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -89,5 +90,13 @@ describe("attack mutation ammo", () => {
     const out = await attackMutation(ctx, attackBodySchema.parse({ attackerId: "t", targetId: "o", attackId: "kn", d20Roll: 10, damageRolls: [2], endTurn: true }));
 
     expect(ammoOf(out.participants).reload).toEqual({ bow: 2 });
+  });
+
+  it("assistant preview rejects an empty or reloading weapon like the real attack", () => {
+    const preview = { attackerId: "a", targetId: "t", attackId: "bow", d20Roll: 1 };
+
+    expect(() => validateAttackPreview(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 0 } })), preview)).toThrow(expect.objectContaining({ message: API_ERRORS.OUT_OF_AMMO }));
+    expect(() => validateAttackPreview(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 0 }, reload: { bow: 1 } })), preview)).toThrow(expect.objectContaining({ message: API_ERRORS.WEAPON_RELOADING }));
+    expect(() => validateAttackPreview(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 2 } })), preview)).not.toThrow();
   });
 });

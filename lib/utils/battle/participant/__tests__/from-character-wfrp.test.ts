@@ -62,6 +62,16 @@ describe("participant: WFRP equipment", () => {
     }
   });
 
+  it("equipped bow becomes a wfrp attack with seeded ammo; the sword carries its flat damage", async () => {
+    const weapon = (extra: object) => stat("weapon", { group: "basic", damage: { addSb: true, flat: 4 }, qualities: [], flaws: [], twoHanded: false, ...extra });
+
+    const p = await withGear([row("sw", "weapon", weapon({ reach: "average" })), row("bw", "range_weapon", weapon({ group: "bow", range: 60, ammoCapacity: 20, flaws: [{ key: "reload", value: 1 }] }))]);
+
+    expect(p.battleData.attacks.find((a) => a.id === "sw")).toMatchObject({ damageDice: "", damageBonus: 4, wfrp: { qualities: [] } });
+    expect(p.battleData.attacks.find((a) => a.id === "bw")).toMatchObject({ wfrp: { ammoCapacity: 20, reload: 1 } });
+    expect(p.battleData.ammo).toEqual({ bw: 20 });
+  });
+
   it("d20 system ignores systemStats", async () => {
     const p = await createBattleParticipantFromCharacter({ ...character, inventory: { equipped: {}, backpack: [], items: [], stash: [] } } as never, "b1", ParticipantSide.ALLY, undefined, context, { artifactRows: [row("m", "armor", mail)] as never, rules: parseRules({}) });
 

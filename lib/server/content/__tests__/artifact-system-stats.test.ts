@@ -9,6 +9,10 @@ const db = vi.hoisted(() => ({
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: db }));
 
+const persistIcon = vi.hoisted(() => vi.fn(async () => "https://cdn/icon.png"));
+
+vi.mock("@/lib/server/artifacts/persist-icon", () => ({ persistIcon }));
+
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { artifactsResource } from "@/lib/server/content/resources/artifacts";
 import { createContent, updateContent } from "@/lib/server/content/service";
@@ -57,6 +61,16 @@ describe("artifact systemStats", () => {
     expect(error).toMatchObject({ status: 400, message: API_ERRORS.SYSTEM_STATS_INVALID });
     expect((error as { issues?: unknown[] }).issues?.length).toBeGreaterThan(0);
     expect(db.artifact.update).not.toHaveBeenCalled();
+  });
+
+  it("invalid stats are rejected before an icon is uploaded", async () => {
+    useRules(WFRP_RULES);
+
+    const invalid = { ...armour, locations: { head: 9, arm: 0, body: 0, leg: 0 } };
+
+    await expect(createContent(artifactsResource, actor, { name: "Mail", slot: "armor", icon: "data:image/png;base64,AAAA", systemStats: invalid })).rejects.toMatchObject({ status: 400 });
+    await expect(updateContent(artifactsResource, actor, "a1", { icon: "data:image/png;base64,AAAA", systemStats: invalid })).rejects.toMatchObject({ status: 400 });
+    expect(persistIcon).not.toHaveBeenCalled();
   });
 
   it("null clears and omitted keeps (even on d20)", async () => {

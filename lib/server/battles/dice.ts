@@ -1,5 +1,5 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { assertAmmo, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { ContentError } from "@/lib/server/content/errors";
 import { validateAttackRequest } from "@/lib/utils/battle/attack-phase/request";
@@ -27,6 +27,8 @@ export function validateAttackPreview(ctx: BattleMutationContext, body: Record<s
   const request = { ...body, attackerId: String(body.attackerId), damageRolls: (body.damageRolls ?? []) as number[] };
 
   const checked = validateAttackRequest(ctx, request, ctx.meta.rules);
+
+  assertAmmo(checked.attacker, checked.attack);
 
   const reach = attackReachError(ctx.meta.map, ctx.participants, checked.attacker, checked.attack, checked.chosenTargets, ctx.meta.rules);
 
