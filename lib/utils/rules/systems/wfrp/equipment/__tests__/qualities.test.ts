@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { QUALITY_REGISTRY } from "../qualities";
 import { QualityRefSchema } from "../stats";
 
-const IMPLEMENTED = ["damaging", "impale", "penetrating", "hack", "pummel", "precise", "accurate", "imprecise", "undamaging", "unreliable", "dangerous", "slow", "fast", "blast", "pistol", "shield", "defensive", "reload", "flexible"];
+const IMPLEMENTED = ["damaging", "impale", "penetrating", "hack", "pummel", "precise", "accurate", "imprecise", "undamaging", "unreliable", "dangerous", "slow", "fast", "blast", "pistol", "shield", "reload", "flexible"];
 
-const STORED_ONLY = ["distract", "entangle", "wrap", "spread", "trapBlade", "unbreakable", "inflict", "repeater"];
+const STORED_ONLY = ["defensive", "distract", "entangle", "wrap", "spread", "trapBlade", "unbreakable", "inflict", "repeater"];
 
 describe("QUALITY_REGISTRY", () => {
   it("lists every spec key exactly once", () => {

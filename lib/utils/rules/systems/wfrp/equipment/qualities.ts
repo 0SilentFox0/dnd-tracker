@@ -16,7 +16,7 @@ export const QUALITY_REGISTRY = {
   blast: q(true),
   pistol: q(),
   shield: q(true),
-  defensive: q(),
+  defensive: q(false, false),
   fast: q(),
   flexible: q(),
   distract: q(true, false),
