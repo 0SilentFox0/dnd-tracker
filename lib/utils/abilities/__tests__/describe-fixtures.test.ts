@@ -16,7 +16,7 @@ describe("describe fixtures", () => {
   });
 
   it("covers every registry entry", () => {
-    const effects = new Set(EFFECT_FIXTURES.map((e) => e.kind));
+    const effects = new Set<string>(EFFECT_FIXTURES.map((e) => e.kind));
 
     const flags = new Set(EFFECT_FIXTURES.flatMap((e) => (e.kind === "flag" ? [e.flag] : [])));
 

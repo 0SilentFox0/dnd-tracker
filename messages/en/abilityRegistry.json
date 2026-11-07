@@ -95,6 +95,68 @@
           "caster": "From the caster"
         }
       }
+    },
+    "wfrpArmour": {
+      "label": "WFRP: Armour",
+      "fields": {
+        "head": "Head",
+        "body": "Body",
+        "arm": "Arms",
+        "leg": "Legs"
+      }
+    },
+    "wfrpWard": {
+      "label": "WFRP: Ward",
+      "fields": {
+        "value": "Threshold (d10 ≥)"
+      }
+    },
+    "wfrpSize": {
+      "label": "WFRP: Size",
+      "fields": {
+        "size": "Size"
+      },
+      "options": {
+        "size": {
+          "tiny": "Tiny",
+          "little": "Little",
+          "small": "Small",
+          "average": "Average",
+          "large": "Large",
+          "enormous": "Enormous",
+          "monstrous": "Monstrous"
+        }
+      }
+    },
+    "wfrpPsychology": {
+      "label": "WFRP: Psychology",
+      "fields": {
+        "psychology": "Kind",
+        "value": "Value (X)"
+      },
+      "options": {
+        "psychology": {
+          "fear": "Fear",
+          "terror": "Terror"
+        }
+      }
+    },
+    "wfrpAttack": {
+      "label": "WFRP: Trait attack",
+      "fields": {
+        "attack": "Attack",
+        "damage": "Damage +X",
+        "rangeFt": "Range, feet",
+        "magical": "Magical"
+      },
+      "options": {
+        "attack": {
+          "bite": "Bite",
+          "claw": "Claw",
+          "breath": "Breath",
+          "weapon": "Weapon"
+        }
+      }
     }
   },
   "flags": {
@@ -922,7 +984,8 @@
       "offense": "Offense",
       "support": "Support",
       "resource": "Resources",
-      "control": "Control"
+      "control": "Control",
+      "traits": "Traits"
     }
   },
   "summary": {
@@ -997,7 +1060,12 @@
       "cleanse": "{includeConditions, select, yes {removes debuffs and conditions} other {removes debuffs}}",
       "randomOf": "one of: {options}",
       "help": "advantage for an ally on their next attack",
-      "push": "push {feet} ft away from the caster"
+      "push": "push {feet} ft away from the caster",
+      "wfrpArmour": "Armour {head}/{arm}/{body}/{leg}",
+      "wfrpWard": "Ward {value}+",
+      "wfrpSize": "Size: {size}",
+      "wfrpPsychology": "{psychology} {value}",
+      "wfrpAttack": "{attack} +{damage}{magical, select, yes {, magical} other {}}"
     },
     "flags": {
       "sense": "{sense} {range} ft",

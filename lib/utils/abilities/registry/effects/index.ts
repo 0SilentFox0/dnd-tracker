@@ -28,11 +28,12 @@ import {
   modifyStatFields,
 } from "./static";
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
+import { applyTrait, traitDescribe, traitFields } from "./traits";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Translator } from "@/lib/i18n/translator";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
-import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
+import type { Ability, AnyEffect, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS, MANEUVERS } from "@/lib/utils/abilities/schema/kinds";
 import { joinSegments, seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
@@ -44,9 +45,10 @@ export type { EffectApplyInput, EffectApplyResult };
 interface EffectDefinition<K extends EffectKind> {
   kind: K;
   static: boolean;
+  pickable?: false;
   fields: readonly FieldMeta[];
-  describe: (e: Extract<Effect, { kind: K }>) => Segment[];
-  apply: (input: EffectApplyInput<Extract<Effect, { kind: K }>>) => EffectApplyResult;
+  describe: (e: Extract<AnyEffect, { kind: K }>) => Segment[];
+  apply: (input: EffectApplyInput<Extract<AnyEffect, { kind: K }>>) => EffectApplyResult;
 }
 
 const AMOUNT: FieldMeta = { name: "amount", input: "amount" };
@@ -152,6 +154,11 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   },
   help: { kind: "help", static: false, fields: [TARGET_FIELD], describe: () => [seg("summary.effects.help")], apply: applyHelp },
   push: { kind: "push", static: false, fields: [{ name: "feet", input: "number" }, { name: "from", input: "select", options: [{ value: "caster" }] }, TARGET_FIELD], describe: describePush, apply: applyPush },
+  wfrpArmour: { kind: "wfrpArmour", static: true, pickable: false, fields: traitFields.wfrpArmour, describe: traitDescribe.wfrpArmour, apply: applyTrait },
+  wfrpWard: { kind: "wfrpWard", static: true, pickable: false, fields: traitFields.wfrpWard, describe: traitDescribe.wfrpWard, apply: applyTrait },
+  wfrpSize: { kind: "wfrpSize", static: true, pickable: false, fields: traitFields.wfrpSize, describe: traitDescribe.wfrpSize, apply: applyTrait },
+  wfrpPsychology: { kind: "wfrpPsychology", static: true, pickable: false, fields: traitFields.wfrpPsychology, describe: traitDescribe.wfrpPsychology, apply: applyTrait },
+  wfrpAttack: { kind: "wfrpAttack", static: true, pickable: false, fields: traitFields.wfrpAttack, describe: traitDescribe.wfrpAttack, apply: applyTrait },
   randomOf: {
     kind: "randomOf",
     static: false,

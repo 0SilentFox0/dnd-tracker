@@ -18,6 +18,6 @@ describe("OpenAPI 4f-2", () => {
   });
 
   it("stays compact", () => {
-    expect(json(doc).length).toBeLessThan(180_000);
+    expect(json(doc).length).toBeLessThan(183_000); // 5h-1 trait effects add ~1.4 KB
   });
 });

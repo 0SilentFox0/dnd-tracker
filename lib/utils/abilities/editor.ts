@@ -2,7 +2,7 @@ import type { ErrorParams } from "@/lib/constants/api-errors";
 import { issueParams } from "@/lib/i18n/translate-issue";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
-import { AbilitiesSchema, type Ability, AbilitySchema, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
+import { AbilitiesSchema, type Ability, AbilitySchema, type AnyEffect, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
 import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
 import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 import type { ClassColumn } from "@/types/classes";
@@ -11,7 +11,7 @@ export type AbilityError = string | { message: string; params?: ErrorParams };
 
 const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"];
 
-const ALL_KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
+const ALL_KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter((k) => (EFFECT_REGISTRY[k] as { pickable?: false }).pickable !== false);
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
   if (trigger.event === "passive") return STATIC_KINDS;
@@ -21,7 +21,7 @@ export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
 
 type WithoutKind<T> = T extends unknown ? Omit<T, "kind"> : never;
 
-const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: K }>> } = {
+const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>> } = {
   modifyStat: { stat: "armor", flat: 1 },
   damageBonus: { filter: { kind: "all" }, percent: 10 },
   flag: { flag: "advantage", attackKind: "all" },
@@ -47,6 +47,11 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   maneuver: { maneuver: "fireBurst", percentOfAttack: 50 },
   help: { target: "eventTarget" },
   push: { feet: 10, from: "caster", target: "eventTarget" },
+  wfrpArmour: { head: 0, body: 0, arm: 0, leg: 0 },
+  wfrpWard: { value: 9 },
+  wfrpSize: { size: "large" },
+  wfrpPsychology: { psychology: "fear", value: 1 },
+  wfrpAttack: { attack: "bite", damage: 3 },
   randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] },
 };
 

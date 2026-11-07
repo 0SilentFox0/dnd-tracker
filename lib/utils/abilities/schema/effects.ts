@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, MANEUVERS, STAT_KEYS, type StatKey } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, MANEUVERS, PSYCHOLOGY_KINDS, STAT_KEYS, type StatKey,TRAIT_ATTACKS, TRAIT_SIZES } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
@@ -297,19 +297,48 @@ export const BASE_EFFECTS = [
   PushSchema,
 ] as const;
 
+const ap = z.number().int().min(0).max(12);
+
+const WfrpArmourSchema = z.strictObject({ kind: z.literal("wfrpArmour"), head: ap, body: ap, arm: ap, leg: ap });
+
+const WfrpWardSchema = z.strictObject({ kind: z.literal("wfrpWard"), value: z.number().int().min(1).max(10) });
+
+const WfrpSizeSchema = z.strictObject({ kind: z.literal("wfrpSize"), size: z.enum(TRAIT_SIZES) });
+
+const WfrpPsychologySchema = z.strictObject({ kind: z.literal("wfrpPsychology"), psychology: z.enum(PSYCHOLOGY_KINDS), value: z.number().int().min(1).max(10) });
+
+const WfrpAttackSchema = z
+  .strictObject({
+    kind: z.literal("wfrpAttack"),
+    attack: z.enum(TRAIT_ATTACKS),
+    damage: z.number().int().min(0).max(30),
+    rangeFt: z.number().int().min(5).max(600).optional(),
+    magical: z.literal(true).optional(),
+  })
+  .refine((e) => e.rangeFt === undefined || e.attack === "breath", { message: "abilities.validation.traitRangeBreathOnly", path: ["rangeFt"] });
+
+export const TRAIT_EFFECTS = [WfrpArmourSchema, WfrpWardSchema, WfrpSizeSchema, WfrpPsychologySchema, WfrpAttackSchema] as const;
+
 export const StaticEffectSchema = z.discriminatedUnion("kind", [ModifyStatSchema, DamageBonusSchema, FlagSchema]);
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);
 
 export const RandomOfSchema = z.object({ kind: z.literal("randomOf"), options: z.array(NonRandomEffectSchema).min(2) });
 
-export const EffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema]);
+export const BaseEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema]);
 
-export type Effect = z.infer<typeof EffectSchema>;
+// trait kinds exist at runtime only: the static Effect type stays the spell-compatible base union (see AnyEffect)
+export const EffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, ...TRAIT_EFFECTS, RandomOfSchema]) as unknown as typeof BaseEffectSchema;
+
+export type Effect = z.infer<typeof BaseEffectSchema>;
+
+export type TraitEffect = z.infer<(typeof TRAIT_EFFECTS)[number]>;
+
+export type AnyEffect = Effect | TraitEffect;
 
 export type NonRandomEffect = z.infer<typeof NonRandomEffectSchema>;
 
-export type EffectKind = Effect["kind"];
+export type EffectKind = AnyEffect["kind"];
 
 export type StaticEffect = Extract<Effect, { kind: "modifyStat" | "damageBonus" | "flag" }>;
 

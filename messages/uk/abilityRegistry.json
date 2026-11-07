@@ -95,6 +95,68 @@
           "caster": "Від кастера"
         }
       }
+    },
+    "wfrpArmour": {
+      "label": "WFRP: Броня",
+      "fields": {
+        "head": "Голова",
+        "body": "Тулуб",
+        "arm": "Руки",
+        "leg": "Ноги"
+      }
+    },
+    "wfrpWard": {
+      "label": "WFRP: Оберіг (Ward)",
+      "fields": {
+        "value": "Поріг (d10 ≥)"
+      }
+    },
+    "wfrpSize": {
+      "label": "WFRP: Розмір",
+      "fields": {
+        "size": "Розмір"
+      },
+      "options": {
+        "size": {
+          "tiny": "Крихітний",
+          "little": "Малий",
+          "small": "Дрібний",
+          "average": "Середній",
+          "large": "Великий",
+          "enormous": "Величезний",
+          "monstrous": "Монструозний"
+        }
+      }
+    },
+    "wfrpPsychology": {
+      "label": "WFRP: Психологія",
+      "fields": {
+        "psychology": "Вид",
+        "value": "Значення (X)"
+      },
+      "options": {
+        "psychology": {
+          "fear": "Страх",
+          "terror": "Жах"
+        }
+      }
+    },
+    "wfrpAttack": {
+      "label": "WFRP: Атака-риса",
+      "fields": {
+        "attack": "Атака",
+        "damage": "Шкода +X",
+        "rangeFt": "Дальність, фути",
+        "magical": "Магічна"
+      },
+      "options": {
+        "attack": {
+          "bite": "Укус",
+          "claw": "Кіготь",
+          "breath": "Дихання",
+          "weapon": "Зброя"
+        }
+      }
     }
   },
   "flags": {
@@ -922,7 +984,8 @@
       "offense": "Атака",
       "support": "Підтримка",
       "resource": "Ресурси",
-      "control": "Контроль"
+      "control": "Контроль",
+      "traits": "Риси"
     }
   },
   "summary": {
@@ -997,7 +1060,12 @@
       "cleanse": "{includeConditions, select, yes {зняття дебафів і станів} other {зняття дебафів}}",
       "randomOf": "одне з: {options}",
       "help": "перевага союзнику на наступну атаку",
-      "push": "відштовхнути на {feet} фт від кастера"
+      "push": "відштовхнути на {feet} фт від кастера",
+      "wfrpArmour": "Броня {head}/{arm}/{body}/{leg}",
+      "wfrpWard": "Ward {value}+",
+      "wfrpSize": "Розмір: {size}",
+      "wfrpPsychology": "{psychology} {value}",
+      "wfrpAttack": "{attack} +{damage}{magical, select, yes {, магічна} other {}}"
     },
     "flags": {
       "sense": "{sense} {range} фт",

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { FormulaSchema, ScaleSchema } from "./common";
 import { ConditionSchema } from "./conditions";
 import { type Effect, EffectSchema, isBakedStat, isStaticEffect, TIMED_STATS } from "./effects";
-import { isAreaTarget, PASSIVE_TARGETS } from "./kinds";
+import { isAreaTarget, isTraitEffectKind, PASSIVE_TARGETS } from "./kinds";
 import { AbilityParamsSchema } from "./params";
 import { isStaticCondition } from "./static-condition";
 import { isActionScopedTrigger, type Trigger, TriggerSchema } from "./triggers";
@@ -29,7 +29,7 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
   const issues: EffectIssue[] = [];
 
   if (trigger.event === "passive") {
-    if (effect.kind !== "note" && effect.kind !== "restoreSpellSlotLevels" && !isStaticEffect(effect)) {
+    if (effect.kind !== "note" && effect.kind !== "restoreSpellSlotLevels" && !isTraitEffectKind(effect.kind) && !isStaticEffect(effect)) {
       issues.push({ message: "abilities.validation.passiveEffectKinds" });
     }
 
@@ -49,6 +49,8 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
 
     return issues;
   }
+
+  if (isTraitEffectKind(effect.kind)) issues.push({ message: "abilities.validation.passiveEffectKinds" });
 
   if ("target" in effect && isAreaTarget(effect.target)) {
     issues.push({ message: "abilities.validation.areaOnlyPassive" });

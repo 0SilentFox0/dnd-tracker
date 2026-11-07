@@ -14,10 +14,11 @@ import {
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import { type Ability, AbilitySchema, type EffectKind, type TriggerEvent } from "@/lib/utils/abilities/schema";
+import { isTraitEffectKind } from "@/lib/utils/abilities/schema/kinds";
 
 const EVENTS = Object.keys(TRIGGER_REGISTRY) as TriggerEvent[];
 
-const KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
+const KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter((k) => !isTraitEffectKind(k));
 
 describe("editor helpers", () => {
   it("newEffect валідний для кожного виду в кожному дозволеному тригері", () => {
