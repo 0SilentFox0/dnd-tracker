@@ -107,7 +107,7 @@ describe("resolveAttackTargets: Blast", () => {
   it("a larger radius reaches farther enemies", () => {
     const r = resolveAttackTargets({ ...input, attack: { ...bomb, wfrp: { ...bomb.wfrp, blastRadius: 4 } } });
 
-    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n", "f", "fr"]);
+    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n", "fr", "f"]);
   });
 
   it("on the map only one target is chosen", () => {
