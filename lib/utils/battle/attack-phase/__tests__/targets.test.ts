@@ -6,6 +6,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { CLAWS, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
 const none = { attackHitsAllEnemies: [], piercingShot: [], multiTargetFalloff: [], chainShot: [] };
 
@@ -78,5 +79,44 @@ describe("resolveAttackTargets: герой, що вмирає", () => {
     const h = downed();
 
     expect(() => resolveAttackTargets({ rules: DEFAULT_RULES, order: [attacker, h], attacker, attack: { ...CLAWS, type: AttackType.RANGED }, chosen: [], targetIds: [], map: testMap(), flags })).toThrow(REJECT.noEnemyInReach);
+  });
+});
+
+describe("resolveAttackTargets: Blast", () => {
+  const a = placed("a", { side: ParticipantSide.ALLY, at: { x: 0, y: 5 } });
+
+  const centre = placed("c", { at: { x: 5, y: 5 } });
+
+  const near = placed("n", { at: { x: 6, y: 6 } });
+
+  const far = placed("f", { at: { x: 9, y: 5 } });
+
+  const friend = placed("fr", { side: ParticipantSide.ALLY, at: { x: 5, y: 6 } });
+
+  const bomb = { ...CLAWS, type: AttackType.RANGED, targetType: "aoe" as const, maxTargets: 8, wfrp: { qualities: [], flaws: [], blastRadius: 2 } };
+
+  const input = { rules: WFRP_RULES, order: [a, centre, near, far, friend], attacker: a, attack: bomb, chosen: [centre], targetIds: ["c"], map: testMap(), flags: none };
+
+  it("hits enemies within the radius of the chosen target only", () => {
+    const r = resolveAttackTargets(input);
+
+    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n"]);
+    expect(r.serverRolledFrom).toBe(1);
+  });
+
+  it("a larger radius reaches farther enemies", () => {
+    const r = resolveAttackTargets({ ...input, attack: { ...bomb, wfrp: { ...bomb.wfrp, blastRadius: 4 } } });
+
+    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n", "f"]);
+  });
+
+  it("on the map only one target is chosen", () => {
+    expect(() => resolveAttackTargets({ ...input, chosen: [centre, near], targetIds: ["c", "n"] })).toThrow(REJECT.tooManyTargets);
+  });
+
+  it("without a map keeps the 4·X stub: chosen targets as picked", () => {
+    const r = resolveAttackTargets({ ...input, map: null, chosen: [centre, far], targetIds: ["c", "f"] });
+
+    expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "f"]);
   });
 });

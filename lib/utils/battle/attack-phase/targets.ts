@@ -5,7 +5,8 @@ import { attackMaxTargets, isCleave } from "@/lib/utils/battle/attack/max-target
 import { cleaveTargets } from "@/lib/utils/battle/attack/process/cleave";
 import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { enemiesInReach } from "@/lib/utils/battle/grid";
+import { enemiesInReach, templateArea } from "@/lib/utils/battle/grid";
+import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { Ruleset } from "@/lib/utils/rules/schema";
@@ -39,6 +40,18 @@ export interface AttackTargets {
 
 const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.basicInfo.side !== attacker.basicInfo.side && isAttackable(t);
 
+/** Центральна ціль плюс вороги в радіусі `radius` клітинок навколо неї. */
+function blastTargets({ map, order, attacker, centre, radius, rules }: { map: BattleMapConfig; order: BattleParticipant[]; attacker: BattleParticipant; centre: BattleParticipant; radius: number; rules: Ruleset }): BattleParticipant[] {
+  const aim = centre.battleData.position;
+
+  if (!aim) return [centre];
+
+  // verify against 5e book: Blast X radius in cells
+  const { targets } = templateArea(map, order, attacker, { shape: "circle", size: radius * cellFeetOf(rules), exact: true }, aim, rules);
+
+  return [centre, ...targets.filter((t) => t.basicInfo.id !== centre.basicInfo.id && enemyOf(attacker)(t))];
+}
+
 export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags, rules }: AttackTargetsInput): AttackTargets {
   const isAoe = attack.targetType === "aoe";
 
@@ -60,6 +73,8 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const isChain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
 
+  const blast = isAoe && onMap && !expanded ? (attack.wfrp?.blastRadius ?? 0) : 0;
+
   const limit = attackMaxTargets(attacker, attack, { chain: isChain, onMap });
 
   if (!expanded && chosen.length > limit) throw new BattleRuleError("action_rejected", REJECT.tooManyTargets, { max: limit });
@@ -68,9 +83,11 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
     ? [...chosen.filter(enemyOf(attacker)), ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id))]
     : piercing
       ? byId([...new Set([...piercingTargets(map, order, attacker, chosen[0].basicInfo.id), ...targetIds])])
-      : cleave
-        ? [chosen[0], ...cleaveTargets(map, order, attacker, chosen[0], (attack.maxTargets ?? 1) - 1)]
-        : chosen;
+      : blast
+        ? blastTargets({ map, order, attacker, centre: chosen[0], radius: blast, rules })
+        : cleave
+            ? [chosen[0], ...cleaveTargets(map, order, attacker, chosen[0], (attack.maxTargets ?? 1) - 1)]
+          : chosen;
 
   if (targets.length === 0) throw new BattleRuleError("action_rejected", REJECT.noEnemyInReach);
 
@@ -84,7 +101,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
     piercing,
     volley,
     falloff: falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1,
-    serverRolledFrom: cleave ? 1 : targets.length,
+    serverRolledFrom: cleave ? 1 : blast ? chosen.length : targets.length,
     chain: isChain ? { jumps: Math.max(0, ...flags.chainShot.map((f) => f.jumps)), percent: (flags.chainShot[0]?.percent ?? 100) / 100 } : null,
   };
 }
