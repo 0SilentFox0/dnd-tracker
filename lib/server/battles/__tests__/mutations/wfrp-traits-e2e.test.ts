@@ -15,13 +15,14 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.mock("@/lib/db", () => ({ prisma: { race: { findFirst: vi.fn() } } }));
 
 const recipe = (id: string, values: Record<string, string | number> = {}) => {
-  const r = TRAIT_RECIPES.find((x) => x.id === id)!;
+  const r = must(TRAIT_RECIPES.find((x) => x.id === id));
 
   const defaults = Object.fromEntries(r.params.map((p) => [p.key, p.default]));
 
@@ -85,7 +86,7 @@ const strike = (c: BattleMutationContext, attackerId: string, targetId: string, 
 
 const advance = (ctx: BattleMutationContext, out: Awaited<ReturnType<typeof strike>>): BattleMutationContext => ({ ...ctx, participants: out.participants, scene: { ...ctx.scene, ...out.scene } });
 
-const part = (ctx: BattleMutationContext, id: string) => ctx.participants.find((p) => p.basicInfo.id === id)!;
+const part = (ctx: BattleMutationContext, id: string) => must(ctx.participants.find((p) => p.basicInfo.id === id));
 
 const FAIL = 0.99;
 
@@ -103,12 +104,12 @@ describe("wfrp unit traits end to end", () => {
 
     const joined = runJoinTriggers(before, { round: 1, rng: () => FAIL, map: null, rules: WFRP_RULES });
 
-    const hero = joined.participants.find((p) => p.basicInfo.id === "h")!;
+    const hero = must(joined.participants.find((p) => p.basicInfo.id === "h"));
 
     expect(joined.psychology.targets).toEqual([{ participantId: "h", participantName: hero.basicInfo.name }]);
     expect(JSON.stringify(joined.psychology.lines)).toContain("psychologyFail");
     expect(hero.battleData.psychologyTested).toEqual({ fear: 1 });
-    expect(ruleSystemOf(WFRP_RULES).conditions!.list(hero)).toContainEqual(expect.objectContaining({ key: "broken" }));
+    expect(ruleSystemOf(WFRP_RULES).conditions?.list(hero)).toContainEqual(expect.objectContaining({ key: "broken" }));
 
     const split = (list: BattleParticipant[]) => list.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false }));
 
@@ -126,9 +127,9 @@ describe("wfrp unit traits end to end", () => {
 
     expect(afterHit).toBeLessThan(30);
 
-    const bite = part(ctx, "t").battleData.attacks.find((a) => a.id?.includes("bite"))!;
+    const bite = must(part(ctx, "t").battleData.attacks.find((a) => a.id?.includes("bite")));
 
-    const bitten = await strike({ ...ctx, scene: { ...ctx.scene, turnIndex: 1 } }, "t", "h", bite.id!, NO_WARD, 5, false);
+    const bitten = await strike({ ...ctx, scene: { ...ctx.scene, turnIndex: 1 } }, "t", "h", must(bite.id), NO_WARD, 5, false);
 
     expect(JSON.stringify(bitten.events)).toContain("steps.size");
     expect(part({ ...ctx, participants: bitten.participants }, "h").combatStats.currentHp).toBeLessThan(20);

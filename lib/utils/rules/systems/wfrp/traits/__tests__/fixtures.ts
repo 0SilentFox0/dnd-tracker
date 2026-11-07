@@ -6,3 +6,9 @@ export function trait(effects: unknown[], over: Partial<ResolvedAbility> = {}): 
 
   return { id: "a1", key: "a1", name: "Trait", trigger, effects: effects as Effect[], source: { kind: "unit" } as never, ...over };
 }
+
+export function must<T>(value: T | undefined | null, what = "value"): T {
+  if (value == null) throw new Error(`missing ${what}`);
+
+  return value;
+}

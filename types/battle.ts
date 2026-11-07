@@ -530,7 +530,6 @@ export interface BattleParticipantBattleData {
   ingredientStock?: IngredientStock;
   /** attack id → shots left; seeded at battle start from the weapon capacity, never persisted between battles */
   ammo?: Record<string, number>;
-  /** strongest fear/terror value already tested against, per kind */
   psychologyTested?: Partial<Record<PsychologyKind, number>>;
   /** attack id → owner turn ends left until the magazine refills */
   reload?: Record<string, number>;

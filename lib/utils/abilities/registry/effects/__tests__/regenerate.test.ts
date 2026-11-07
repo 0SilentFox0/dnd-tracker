@@ -4,10 +4,11 @@ import { CombatStatus } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
 import type { BattleParticipant } from "@/types/battle";
 
-const recipe = TRAIT_RECIPES.find((r) => r.id === "regenerate")!;
+const recipe = must(TRAIT_RECIPES.find((r) => r.id === "regenerate"));
 
 const built = recipe.build({}, { name: "Regenerate" } as never);
 

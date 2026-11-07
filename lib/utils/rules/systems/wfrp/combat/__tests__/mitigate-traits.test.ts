@@ -16,7 +16,7 @@ const unit = (id: string, extra: { size?: TraitSize; ward?: number; tb?: number 
 
   const base = wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS);
 
-  return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp!, sb: 0, tb: extra.tb ?? 0, ...(extra.size && { size: extra.size }), ...(extra.ward !== undefined && { ward: extra.ward }) } } };
+  return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp, sb: 0, tb: extra.tb ?? 0, ...(extra.size && { size: extra.size }), ...(extra.ward !== undefined && { ward: extra.ward }) } } };
 };
 
 const d10 = (n: number) => () => (n - 1) / 10 + 0.01;
@@ -74,7 +74,7 @@ describe("resolveWfrpAttack size", () => {
 
     const base = wfrpAbilitiesOf(characteristics);
 
-    return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp!, ...(size && { size }) } } };
+    return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp, ...(size && { size }) } } };
   };
 
   const target = (attack: BattleAttack, a: ReturnType<typeof fighter>, t: ReturnType<typeof fighter>) =>

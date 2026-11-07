@@ -10,7 +10,9 @@ import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participa
 const sized = (id: string, size?: TraitSize, ward?: number) => {
   const p = makeParticipant({ id });
 
-  return { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS), wfrp: { ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS).wfrp!, ...(size && { size }), ...(ward !== undefined && { ward }) } } };
+  const base = wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS);
+
+  return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp, ...(size && { size }), ...(ward !== undefined && { ward }) } } };
 };
 
 describe("size", () => {

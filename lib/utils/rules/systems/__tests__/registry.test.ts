@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { RULE_SYSTEM_REGISTRY, ruleSystemOf, systemKeyOf } from "../registry";
 
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 
 const sheetInput = { characteristics: {} as never, resources: {} };
 
@@ -80,7 +81,7 @@ describe("rule system registry", () => {
       expect(RULE_SYSTEM_REGISTRY[key].combat.fortune).toBeUndefined();
     }
 
-    const catalog = RULE_SYSTEM_REGISTRY.wfrp.conditions!.catalog;
+    const catalog = must(RULE_SYSTEM_REGISTRY.wfrp.conditions).catalog;
 
     const by = (k: string) => catalog.find((c) => c.key === k);
 
