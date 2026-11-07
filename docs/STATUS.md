@@ -77,7 +77,7 @@ _Оновлено: 2026-11-04._
 2. RLS: нові таблиці `careers` і `race_profiles` мають `ENABLE ROW LEVEL SECURITY` у своїх міграціях (перевірено 2026-11-07); кожна нова таблиця 5g/5h також.
 3. Гейт: `battle-sweep` homm/dnd5e на prodcopy після останніх змін епіку (останній прогін 2026-11-05 — до 5e/5f, тож повторити перед merge).
 4. Повний `pnpm test:run` і repo-wide lint один раз перед merge.
-5. Після деплою: `backfill-default-attacks --apply` не потрібен для wfrp, але перевірити існуючі wfrp-кампанії (правило `spellIngredients` вмикається вручну).
+5. Після деплою: існуючі wfrp-кампанії вмикають правило `spellIngredients` вручну.
 
 ## Домовленості
 
