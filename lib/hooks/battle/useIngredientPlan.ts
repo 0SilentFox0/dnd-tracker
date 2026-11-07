@@ -6,7 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 
 import { COIN_VALUE } from "@/lib/constants/inventory";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { trackedIngredients } from "@/lib/utils/spells/ingredients";
 import { planIngredients } from "@/lib/utils/spells/ingredients/plan";
 import { formatMissing, summarizeIngredients } from "@/lib/utils/spells/ingredients/summary";
@@ -40,11 +40,13 @@ export function useIngredientPlan(caster: BattleParticipant | null, spell: { ing
 
   const autoPay = !!rule?.autoPay;
 
-  const plan = useMemo(() => (enabled && stock && list ? planIngredients(list, stock, { autoPay }) : null), [enabled, stock, list, autoPay]);
+  const value = useMemo(() => (rules ? currencyValueOf(rules) : COIN_VALUE), [rules]);
+
+  const plan = useMemo(() => (enabled && stock && list ? planIngredients(list, stock, { autoPay, value }) : null), [enabled, stock, list, autoPay, value]);
 
   if (!plan || !list) return null;
 
   const need = summarizeIngredients(trackedIngredients(list), { minGp: (gp) => t("ingredients.minGpShort", { gp }), consumed: t("ingredients.consumedShort") });
 
-  return { need, missing: formatMissing(plan.missing), payGp: plan.spendCp / COIN_VALUE.gp, blocked: !plan.ok && (!optional || use), optional, use };
+  return { need, missing: formatMissing(plan.missing), payGp: plan.spendCp / value.gp, blocked: !plan.ok && (!optional || use), optional, use };
 }

@@ -1,7 +1,8 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { COIN_VALUE } from "@/lib/constants/inventory";
+import { type Coin, COIN_VALUE } from "@/lib/constants/inventory";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
+import { currencyValueOf } from "@/lib/utils/rules/systems";
 import { trackedIngredients } from "@/lib/utils/spells/ingredients";
 import { applyIngredientPlan, type IngredientPlan, planIngredients } from "@/lib/utils/spells/ingredients/plan";
 import { formatMissing } from "@/lib/utils/spells/ingredients/summary";
@@ -26,7 +27,7 @@ export function ingredientsGate(caster: BattleParticipant, spell: { ingredients?
 
   if (!rules.spellIngredients.enabled || source.free || source.legendaryAbility || source.grant || (mode?.optional && !mode.use) || !stock || trackedIngredients(list).length === 0) return null;
 
-  const plan = planIngredients(list, stock, { autoPay: rules.spellIngredients.autoPay });
+  const plan = planIngredients(list, stock, { autoPay: rules.spellIngredients.autoPay, value: currencyValueOf(rules) });
 
   if (!plan.ok) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_INGREDIENTS_MISSING, { list: formatMissing(plan.missing) });
 
@@ -39,10 +40,10 @@ export function spendIngredients(caster: BattleParticipant, plan: IngredientPlan
   return stock ? { ...caster, battleData: { ...caster.battleData, ingredientStock: applyIngredientPlan(stock, plan) } } : caster;
 }
 
-export function spentSummary(stock: IngredientStock, plan: IngredientPlan): string {
+export function spentSummary(stock: IngredientStock, plan: IngredientPlan, value: Record<Coin, number> = COIN_VALUE): string {
   const parts = stock.items.filter((i) => plan.spendItems[i.id]).map((i) => `${i.name} ×${plan.spendItems[i.id]}`);
 
-  if (plan.spendCp > 0) parts.push(`${plan.spendCp / COIN_VALUE.gp} gp`);
+  if (plan.spendCp > 0) parts.push(`${plan.spendCp / value.gp} gp`);
 
   return parts.join(", ");
 }

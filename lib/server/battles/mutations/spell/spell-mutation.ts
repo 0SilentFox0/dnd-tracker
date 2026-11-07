@@ -44,7 +44,7 @@ import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { IngredientPlan } from "@/lib/utils/spells/ingredients/plan";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -334,7 +334,7 @@ function fizzleResult({ ctx, caster, ingredients }: CastPlan, result: ReturnType
 
   const participants = updateParticipant(result.allParticipantsUpdated, caster.basicInfo.id, (p) => spendIngredients(p, ingredients));
 
-  const action = withLines(result.battleAction, [textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients) })]);
+  const action = withLines(result.battleAction, [textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients, currencyValueOf(ctx.meta.rules)) })]);
 
   return { participants, pending: ctx.pending, events: [battleActionToEvent(action)] };
 }
@@ -367,7 +367,7 @@ async function finalizeCast(plan: CastPlan, result: ReturnType<typeof castSpell>
 
   if (ingredients && stock) {
     summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => spendIngredients(p, ingredients));
-    summoned.messages.push(textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients) }));
+    summoned.messages.push(textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients, currencyValueOf(ctx.meta.rules)) }));
   }
 
   const action = withLines(result.battleAction, summoned.messages);

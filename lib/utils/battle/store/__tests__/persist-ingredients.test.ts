@@ -5,6 +5,8 @@ import { persistIngredients, spendCp } from "../persist-ingredients";
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { currencyValueOf } from "@/lib/utils/rules/systems";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import type { IngredientStock } from "@/types/battle";
 
 vi.mock("@/lib/server/artifacts/lock", () => ({ lockCampaignArtifacts: vi.fn() }));
@@ -38,6 +40,14 @@ describe("spendCp", () => {
   it("pays from gold first and breaks change", () => {
     expect(spendCp({ gold: 3, silver: 0, copper: 0 }, 150)).toEqual({ gold: 1, silver: 5, copper: 0 });
     expect(spendCp({ gold: 2, silver: 3, copper: 4 }, 100)).toEqual({ gold: 1, silver: 3, copper: 4 });
+  });
+
+  it("pays by the wfrp table: 1 gc = 20 ss = 240 d", () => {
+    const value = currencyValueOf(WFRP_RULES);
+
+    expect(spendCp({ gold: 0, silver: 20, copper: 0 }, 240, value)).toEqual({ gold: 0, silver: 0, copper: 0 });
+    expect(spendCp({ gold: 0, silver: 25, copper: 0 }, 240, value)).toEqual({ gold: 0, silver: 5, copper: 0 });
+    expect(spendCp({ gold: 2, silver: 0, copper: 0 }, 300, value)).toEqual({ gold: 0, silver: 15, copper: 0 });
   });
 
   it("zero spend is a no-op", () => {

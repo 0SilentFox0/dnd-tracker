@@ -36,7 +36,7 @@ import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calc
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
-import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { currencyValueOf, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -250,7 +250,7 @@ export async function createBattleParticipantFromCharacter(
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
-  const ingredientStock = rules.spellIngredients.enabled && character.controlledBy && character.controlledBy !== CONTROLLED_BY_DM ? buildIngredientStock(character.inventory, { withPurse: rules.spellIngredients.autoPay }) : undefined;
+  const ingredientStock = rules.spellIngredients.enabled && character.controlledBy && character.controlledBy !== CONTROLLED_BY_DM ? buildIngredientStock(character.inventory, { withPurse: rules.spellIngredients.autoPay, value: currencyValueOf(rules) }) : undefined;
 
   const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...grantPools };
 
