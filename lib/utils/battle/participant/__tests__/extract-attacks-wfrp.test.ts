@@ -45,6 +45,14 @@ describe("extractWfrpAttacks", () => {
     expect(a).toMatchObject({ id: "bow", type: AttackType.RANGED, range: "60 ft", damageDice: "", damageBonus: 3, wfrp: { ammoCapacity: 20, reload: 1, noSb: true } });
   });
 
+  it("the same artifact in two slots gets independent attack ids", () => {
+    const ids = extract([row("bow", "range_weapon", bow.row.systemStats), row("bow", "weapon", bow.row.systemStats)]).map((a) => a.id).filter((id) => id?.startsWith("bow"));
+
+    expect(ids).toHaveLength(2);
+    expect(new Set(ids).size).toBe(2);
+    expect(ids[0]).toBe("bow");
+  });
+
   it("both weapons: two attacks, no defaults", () => {
     expect(extract([sword, bow]).map((a) => a.id)).toEqual(["sword", "bow"]);
   });

@@ -11,12 +11,18 @@ const valueOf = (list: { key: string; value?: number }[], key: string) => list.f
 const BLAST_TARGETS_PER_RADIUS_CELL = 4;
 
 export function extractWfrpAttacks(rows: EquippedArtifactRow[], equipment: RuleSystemEquipment): ExtractedAttack[] {
+  const seen = new Set<string>();
+
   return rows.flatMap(({ row, slot, carried }) => {
     if (carried || !isWeaponSlot(slot)) return [];
 
     const profile = equipment.weaponProfile(row.systemStats);
 
     if (!profile) return [];
+
+    const id = seen.has(row.id) ? `${row.id}:${slot}` : row.id;
+
+    seen.add(row.id);
 
     const ranged = profile.range === "ranged";
 
@@ -25,7 +31,7 @@ export function extractWfrpAttacks(rows: EquippedArtifactRow[], equipment: RuleS
     const reload = valueOf(profile.flaws, "reload");
 
     const attack: ExtractedAttack = {
-      id: row.id,
+      id,
       name: row.name,
       type: (ranged ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
       attackBonus: 0,
