@@ -25,7 +25,7 @@
 | `combat.hitModel.durability?(p)` | множник ефективних HP за AP (зважено за локаціями), TB і Ward; `builtUnitsById` бере `rules` лише для систем із `hitModel` (d20 без змін) | `hitModelHeroStats/UnitStats` |
 | `combat.participantFields` | додаткові поля учасника при створенні з персонажа/юніта (`abilities.characteristics`, `abilities.wfrp`: стати, AP = 0); d20 не додає ключів; `refreshFromSource` копіює | `from-character`, `from-unit`, `refresh-from-source` |
 | `conditions` | 12 станів wfrp: `catalog`, `apply`/`remove`/`level` (рівень = сума маркерів, обрізання 10), `tick` на початку ходу активного носія, `endTest` (тест зняття), `selfTestMod`/`againstMod` для d100-тестів; `undefined` у d20 → `CONDITION_5E_REGISTRY` без змін | `turn/start` (`applyStartOfTurnDamage`), `resolve-attack`, `crit-effect`, `system-condition`/`condition-test` мутації, `sheet-test` |
-| `magic` | `RuleSystemMagic`: `castTest` (d100 проти Int + Language (Magick), SL + канальований SL ≥ CN, броня, Fortune, дублі → miscast), `channel` (банк SL, `battleData.channelledSl`), `miscast` (таблиці minor/major), `attribute` (lore → стан), `onDamaged` (втрата канальованого SL); `slots: false`; `undefined` у d20 | `castSpell` (`spell/cast/cast-test.ts`, `finish.ts`), `spell-mutation`, `channel-mutation` (`POST …/channel`), `damage/consequences.ts` |
+| `magic` | `RuleSystemMagic`: `castTest` (d100 проти Int + Language (Magick), SL + канальований SL ≥ CN, броня, Fortune, дублі → miscast), `channel` (банк SL, `battleData.channelledSl`), `miscast` (таблиці minor/major з `rules.tables`), `attribute` (lore → стан), `onDamaged` (втрата канальованого SL); `slots: false`; `undefined` у d20 | `castSpell` (`spell/cast/cast-test.ts`, `finish.ts`), `spell-mutation`, `channel-mutation` (`POST …/channel`), `damage/consequences.ts` |
 | `combat.fortune` | Fortune: перекинути d100 (лише атакувальник; захисник — ні) або +1 SL; `percentile.fortune` у деталях дії; `undefined` у d20 | `attack/run.ts`, схема атаки, `useAttackWizard` |
 | `cellFeetOf(rules)` | розмір клітинки в футах (`grid/cell-feet.ts`): homm/dnd5e 5, wfrp 6 (2 yd); `CELL_FEET` видалено, `rules` — обов'язковий параметр grid-хелперів (рух, шаблони, досяжність, цілі) | `lib/utils/battle/grid/*` |
 | `traits` | `RuleSystemTraits`: `recipes` (рецепти Traits у галереї вмінь), `unitBuild(row, abilities)` (поля учасника й атаки-Traits юніта), `psychology` (Fear/Terror при приєднанні); d20 не має. Прапорець = наявність `traits` | `RecipeGallery`, `create-participant-from-unit`, `runJoinTriggers` |
@@ -49,8 +49,8 @@
 | `wfrp/characteristics/` | `schema` (`CharacteristicsSchema`, 10 характеристик, `fate`, `advances`, навички), `derive` (Wounds, Move), `sheet-block` |
 | `wfrp/skills/` | каталог навичок і спеціалізацій (`catalog.ts`) |
 | `wfrp/conditions/` | `catalog.ts` (числа станів), `apply.ts`, `levels.ts`, `tick.ts`, `end-test.ts`, `test-mod.ts`, `index.ts` (`WFRP_CONDITIONS`) |
-| `wfrp/magic/` | `cast-test.ts`, `channel.ts`, `miscast.ts` + `miscast-table.ts`, `attribute.ts` (lore attribute), `armour.ts` (штраф броні), `constants.ts` (`CAST_SKILL`, `OVERCAST_SL_STEP`, `CHANNEL_MAX_SL`), `index.ts` (`WFRP_MAGIC`) |
-| `wfrp/tables/` | `roll-table.ts` — спільний `rollTable` для критів і miscast |
+| `wfrp/magic/` | `cast-test.ts`, `channel.ts`, `miscast.ts`, `attribute.ts` (lore attribute), `armour.ts` (штраф броні), `constants.ts` (`CAST_SKILL`, `OVERCAST_SL_STEP`, `CHANNEL_MAX_SL`), `index.ts` (`WFRP_MAGIC`) |
+| `wfrp/tables/` | `roll-table.ts` — спільний `rollTable`; `defaults.ts` (`DEFAULT_TABLES`), `resolve.ts` (`resolveTable`, `rollSlot`) — таблиці критів/miscast/wrath з `rules.tables` ([«Межі 5h-2»](#межі-5h-2)) |
 | `wfrp/traits/` | `constants.ts` (числа-заглушки Traits), `read.ts` (`traitEntries`/`traitEffects`/`sizeStep`), `recipes.ts` (14 рецептів), `unit-build.ts` (`wfrpUnitBuild`), `size.ts` (`sizeHitMod`, `sizeDamageBonus`, `wardRoll`), `psychology.ts` (`wfrpPsychology`), `index.ts` (`WFRP_TRAITS`) |
 | `wfrp/sheet-test.ts`, `session.ts` | `sheetTest.roll` і `rest.onSession` |
 | `components/systems/wfrp/` | `HeroStats`, `StatsTab`, `StatsFields`, `UnitStatsFields`, `RollDialogBody`, редактори характеристик і навичок |
@@ -151,6 +151,17 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - Psychology: сильніше джерело на тестера — Terror над Fear, далі більше значення; один тест на джерело (`battleData.psychologyTested`); носій і `conditionImmunity` fear/all не тестуються; сплячі вороги лабіринту не лякають.
 - Тип `Effect` лишається базовим, Trait-ефекти — `AnyEffect`/`TraitEffect` ([abilities.md](abilities.md)).
 - `scope-size` після 5h-1: учасник wfrp uk 106.1 KB gzip — `WFRP_MEMBER_LIMIT_KB` 106 → 107; ДМ 109.6 KB — `WFRP_DM_LIMIT_KB` 109 → 110 (запас ≈ 0.4 KB, наступний wfrp-текст потребує нового винесення). Бюджет OpenAPI 180000 → 183000 байт (доку 181370, Traits ≈ +1.4 KB).
+
+## Межі 5h-2
+
+Редаговані таблиці наслідків — секція правил `rules.tables`, без міграцій. Spec/план: `docs/superpowers/{specs,plans}/2026-11-07-wfrp-5h2-tables*`.
+
+- Ключі плоскі (`critHead|critArm|critBody|critLeg|miscastMinor|miscastMajor|wrath`), значення `TableRow[] | null | undefined`; `null`/відсутній = зашитий дефолт (`DEFAULT_TABLES`), `mergeRules` зливає секцію поверхнево, «Скинути» шле `null`. `resolveTable`/`rollSlot` — єдина точка читання.
+- Рядок: `max` (1..100, строго зростає, останній 100), `text` ≤ 200 (виводиться звичайним рядком), до 4 ефектів: `damage`, `wounds`, `condition{key,levels}`, `marker{key}`; за слотом — крити `damage|condition|marker`, miscast/wrath `wounds|condition`. Крит несе список `conditions` і `markers`; `timedKey` маркера `wfrp:crit:<id>:<marker>`.
+- Невалідна секція в сирих правилах не ламає бій: `parseRules` повертає `{}`.
+- Приховування: гравець не отримує `tables` (`stripPlayerHiddenRules` у `readCampaignRules` і prefetch сторінки персонажа); серверний рушій читає `loadRules` без стрипа.
+- Редактор `TablesSection` лише для wfrp (DM-пакет `wfrpTables`, `WFRP_DM_LIMIT_KB` 110 → 111); «Налаштувати» копіює переклад дефолтного тексту в `text` (мова того, хто натиснув). Бюджет OpenAPI → 192000 B (доку 190236).
+- Поза межами: імпорт/sync/шари — 5g; числа дефолтних таблиць не звірені з книгою; немає відображення помилки по рядку (загальний механізм `RulesForm`).
 
 ## Межі 5e-1
 
