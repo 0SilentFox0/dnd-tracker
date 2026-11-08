@@ -7,7 +7,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dealResistedHits, type ResistedHit } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export const maneuverResult = (participants: BattleParticipant[], messages: LogLine[] = []): ManeuverResult => ({ participants, messages, downed: [] });
