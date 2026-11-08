@@ -7,7 +7,8 @@
     "critLeg": "Critical: leg",
     "miscastMinor": "Minor miscast",
     "miscastMajor": "Major miscast",
-    "wrath": "Wrath of the Gods"
+    "wrath": "Wrath of the Gods",
+    "downtimeEvent": "Downtime events"
   },
   "from": "From {n} to",
   "upTo": "Up to, row {n}",

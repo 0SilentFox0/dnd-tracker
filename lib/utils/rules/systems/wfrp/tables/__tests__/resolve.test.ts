@@ -15,7 +15,7 @@ describe("DEFAULT_TABLES", () => {
   });
 
   it("keeps the shipped row counts", () => {
-    expect(TABLE_SLOTS.map((slot) => DEFAULT_TABLES[slot].length)).toEqual(TABLE_SLOTS.map((slot) => (slot === "wrath" ? 4 : 5)));
+    expect(TABLE_SLOTS.map((slot) => DEFAULT_TABLES[slot].length)).toEqual(TABLE_SLOTS.map((slot) => (slot === "wrath" ? 4 : slot === "downtimeEvent" ? 10 : 5)));
   });
 
   it("uses legacy text keys", () => {

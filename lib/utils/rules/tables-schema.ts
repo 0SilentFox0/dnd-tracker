@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL, type WfrpConditionKey } from "@/lib/constants/wfrp-conditions";
 
-export const TABLE_SLOTS = ["critHead", "critArm", "critBody", "critLeg", "miscastMinor", "miscastMajor", "wrath"] as const;
+export const TABLE_SLOTS = ["critHead", "critArm", "critBody", "critLeg", "miscastMinor", "miscastMajor", "wrath", "downtimeEvent"] as const;
 
 export type TableSlot = (typeof TABLE_SLOTS)[number];
 
@@ -43,6 +43,7 @@ export const SLOT_EFFECTS: Record<TableSlot, readonly TableEffect["type"][]> = {
   miscastMinor: ["wounds", "condition"],
   miscastMajor: ["wounds", "condition"],
   wrath: ["wounds", "condition"],
+  downtimeEvent: ["wounds", "condition"],
 };
 
 const slotRows = (slot: TableSlot) =>

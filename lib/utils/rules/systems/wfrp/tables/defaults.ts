@@ -53,4 +53,17 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
     { max: 75, effects: [{ type: "condition", key: "deafened", levels: 1 }], textKey: "wfrpMagic.miscast.wrath.3" },
     { max: 100, effects: [{ type: "condition", key: "blinded", levels: 1 }, { type: "wounds", amount: 2 }], textKey: "wfrpMagic.miscast.wrath.4" },
   ],
+  // verify against 5e book
+  downtimeEvent: [
+    { max: 10, effects: [], textKey: "wfrpDowntime.events.1" },
+    { max: 20, effects: [], textKey: "wfrpDowntime.events.2" },
+    { max: 30, effects: [{ type: "wounds", amount: 1 }], textKey: "wfrpDowntime.events.3" },
+    { max: 40, effects: [], textKey: "wfrpDowntime.events.4" },
+    { max: 50, effects: [], textKey: "wfrpDowntime.events.5" },
+    { max: 60, effects: [{ type: "condition", key: "fatigued", levels: 1 }], textKey: "wfrpDowntime.events.6" },
+    { max: 70, effects: [], textKey: "wfrpDowntime.events.7" },
+    { max: 80, effects: [], textKey: "wfrpDowntime.events.8" },
+    { max: 90, effects: [{ type: "wounds", amount: 2 }], textKey: "wfrpDowntime.events.9" },
+    { max: 100, effects: [], textKey: "wfrpDowntime.events.10" },
+  ],
 };
