@@ -15,6 +15,13 @@
 - **Усі числа** — заглушки `// verify against 5e book`, записуються в єдиний перелік «Звірити з книгою» в `rule-systems.md`.
 - **Поза межами:** леджер постійних травм/ампутацій після критів, Corruption (5h-3), шаблонний контент (5g), звірка чисел із книгою (немає джерела).
 
+**Рішення користувача 2026-11-08** (закривають відкриті питання spec):
+
+1. **i18n — варіант 2:** namespace `wfrpDowntime` не входить у жоден layout-scope; його підвантажує `ExtendLocaleScope` лише на сторінках, де він потрібен (див. «i18n і онбординг»). Ліміти `scope-size` не піднімаємо.
+2. **Заняття лишається між періодами**, доки власник або ДМ його не змінить чи не зніме (`null`).
+3. **Герой із 0 Wounds пропускає лише заняття**; лікування, недуги й подія для нього виконуються.
+4. **Знижка `train`** — нове необов'язкове поле `discount` у записі леджера й зміни `planPurchase`/`planUndo` (5e-1).
+
 ## Що перевикористовуємо і чому нове потрібне
 
 Перевірено в коді (2026-11-08):
@@ -82,7 +89,9 @@ type TestOutcome = { roll: number; target: number; sl: number; outcome: Percenti
 - `ailments` — лише ДМ (той самий PUT, поле `ailments`; новим записам без `id` сервер дає `randomUUID`), а також сервер у періоді.
 - `training`, `lastPeriod` — лише сервер (період, відкат, `advance`).
 - PATCH персонажа `downtime` не змінює ні для кого: `preserveServerOwned` додає `downtime: existing.downtime` (гравець), а гілка ДМ у `reconcileCharacteristics` також повертає `{ ...incoming, downtime: stored.downtime }` — інакше збереження редактора ДМ із застарілою формою затерло б результат періоду.
-- Приватність: `redactLedger` (перейменувати на `redactPrivate` або розширити) прибирає `downtime` для не-власника й не-ДМ у `list`; `wfrpAbilitiesOf` (`wfrp/combat/participant.ts`) не копіює `downtime` в учасника бою (як уже не копіює `ledger`).
+- Приватність: `redactLedger` (назва лишається) прибирає й `downtime` для не-власника й не-ДМ у `list`; `wfrpAbilitiesOf` (`wfrp/combat/participant.ts`) не копіює `downtime` в учасника бою (як уже не копіює `ledger`).
+- Створення персонажа (`normalizeCharacterInput`, `mode: "create"`) відкидає `characteristics.downtime`: стан простою з'являється лише через PUT і період.
+- `readCharacteristics` обов'язково зберігає `downtime`: `lockCharacters` читає через нього, і `advance`/`career`/`patch` пишуть `characteristicsJson(next)` — без поля в дзеркалі будь-яка покупка XP стерла б стан простою.
 
 ### Журнал
 
@@ -104,7 +113,7 @@ type TestOutcome = { roll: number; target: number; sl: number; outcome: Percenti
 - `rollEvent(rules, rng, preset?)` = `rollSlot(rules, "downtimeEvent", …)` → `{ roll, index, text: rowText(row), wounds, conditions }`. Ефект `wounds` віднімає Wounds (мін. 0, смерті поза боєм немає). Ефект `condition` поза боєм ніде не зберігається (у персонажа немає станів поза боєм): він лише показується в підсумку й журналі, ДМ накладає його в бою вручну.
 - `planPeriod(input)` — чиста композиція для одного героя (порядок нижче), повертає нові `resources`, `downtime`, `coins`, `summary`, `snapshot`. Обробник лише вантажить/пише.
 
-Порядок на героя: (1) мертвий (`resources.dead`) — пропуск усього, `skipped: "dead"`; (2) 0 Wounds — `skipped: "incapacitated"`: заняття не виконується (лікар теж не лікує інших), лікування, недуги й подія — так; (3) заняття всіх героїв (вклад `tend` у пацієнтів рахується першим); (4) лікування; (5) недуги; (6) подія.
+Порядок на героя: (1) мертвий (`resources.dead`) — пропуск усього, `skipped: "dead"`; (2) 0 Wounds — `skipped: "incapacitated"` (рішення користувача 2026-11-08): пропускається лише заняття (лікар теж не лікує інших), лікування, недуги й подія — так; заняття не знімається; (3) заняття всіх героїв (вклад `tend` у пацієнтів рахується першим); (4) лікування; (5) недуги; (6) подія.
 
 ### Слот `downtimeEvent`
 
@@ -115,7 +124,7 @@ type TestOutcome = { roll: number; target: number; sl: number; outcome: Percenti
 
 ### Знижка `train` у леджері
 
-`planPurchase` (`wfrp/advancement/plan.ts`) отримує `training?: TrainingCredit`; якщо `kind:key` покупки збігається, ціна = `max(0, cost − discount)`, запис леджера отримує `discount` (нове необов'язкове поле `LedgerEntrySchema` і `readLedger`), а `training` знімається. `planUndo` повертає `training` із запису. `advance-handler` передає `locked.characteristics.downtime?.training`.
+Рішення користувача 2026-11-08. `planPurchase` (`wfrp/advancement/plan.ts`) читає `characteristics.downtime?.training` (окремого параметра немає: `lockCharacters` уже повертає `downtime` через `readCharacteristics`, тож `advance-handler` не змінюється); якщо `kind` і `key` покупки збігаються з кредитом, ціна = `max(0, cost − discount)` (знижка рахується від ціни з урахуванням кар'єри, перевірка XP — після знижки), запис леджера отримує `discount` — значення використаного кредиту, щоб відкат повернув його без втрат (`cost` лишається фактично списаною ціною; нове необов'язкове поле `LedgerEntrySchema`, `LedgerEntry` і `readLedger`, ціле 1..1e6), а `downtime.training` знімається. Таланти знижки не мають. `planUndo` для запису з `discount` повертає `downtime.training = { kind, key, discount }`; якщо на момент відкату вже є інший кредит `training` — `LEDGER_STALE` (не затираємо новіший результат періоду).
 
 ## Сервер
 
@@ -166,14 +175,20 @@ interface RuleSystemDowntime {
 - `lib/api/downtime.ts`: `putDowntime`, `postDowntimePeriod`, `postDowntimePeriodUndo`; типи — `types/downtime.ts` (контракти відповіді; доменні типи стану — з `wfrp/downtime` через `@/lib/utils/rules/systems`).
 - Хуки `lib/hooks/characters/useDowntime.ts` (у барелі): `useDowntime(campaignId, characterId)` — `setQueryData` у `characterKeys.detail`, інвалідація `sheet`/`log`; `useDowntimePeriod(campaignId)` — дельта в `detail` кожного героя, інвалідація `lists`, `logs`, `stashes`, `inventoryLogs`. Ключі — наявні фабрики `characterKeys`.
 - Вкладка листа «Простій»: слот `SystemUi.DowntimeTab?` (`components/systems/wfrp/downtime/DowntimeTab.tsx`), `CharacterProfile.viewTabs` додає її для власника/ДМ, якщо слот є. Вміст: вибір заняття (тип + параметри: спеціалізація Trade, ціль тренування, пацієнт), список недуг (ДМ: додати/видалити/змінити дні), підсумок `lastPeriod.summary`.
-- Панель ДМ «Минув період» поруч із «Нова сесія» у `PartyRestActions` (показ лише за `system.downtime`): діалог (дні, вибір героїв; за замовчуванням — усі активні герої партії) → підсумок по героях + кнопка «Відкотити період».
+- Панель ДМ «Минув період» — слот `SystemUi.DowntimePeriodPanel?` (`components/systems/wfrp/downtime/DowntimePeriodPanel.tsx`), який рендерить `PartyRestActions` поруч із «Нова сесія» (показ лише за `system.downtime` і `outOfCombat.persistResources`). `PartyRestActions` живе на сторінці ДМ «Персонажі» (`app/campaigns/[id]/dm/characters/page.tsx` → `page-client.tsx`, гейт `requireCampaignDMOrDemo`, кнопки лише за `canEdit`, тобто не в демо) — саме там ДМ-доступ і своя підвантажка namespace. Діалог (дні, вибір героїв; за замовчуванням — усі активні герої партії) → підсумок по героях + кнопка «Відкотити період».
 - Приватність: гравець бачить свої заняття, недуги й підсумок (у т.ч. текст випалої події), але не таблицю подій (вирізана `stripPlayerHiddenRules`).
 
 ## i18n і онбординг
 
-- Новий namespace `wfrpDowntime` (uk/en): вкладка, заняття, недуги, підсумок, тексти дефолтних подій, панель ДМ.
-- Виміряно 2026-11-08 (`scope-size.test.ts`, uk gzip): учасник wfrp 106.2 / ліміт 107 (запас 0.8 KB), ДМ 110.1 / 111 (запас 0.9 KB); en 85.6 / 88.7. Окремі wfrp-namespace займають ≈ 0.7 KB gzip (`wfrpTables` 701 B, `wfrpAdvancement` 692 B), `wfrpDowntime` з 10 подіями оцінюється в ≈ 1.0–1.3 KB — не вміщається в запас учасника.
-- Пропозиція: `wfrpDowntime` (те, що бачить гравець) → `WFRP_MEMBER_EXTRA`, панель ДМ і редагування недуг → `wfrpDowntimeDm` у `WFRP_DM_EXTRA`; ліміти `WFRP_MEMBER_LIMIT_KB` 107 → 108, `WFRP_DM_LIMIT_KB` 111 → 113 з фактичними числами в коментарі після вимірювання в плані. Альтернатива без підйому ліміту — підвантажувати `wfrpDowntime` лише на сторінці персонажа/ДМ-персонажів (`ExtendLocaleScope` на рівні сторінки) з окремим рядком у `scope-size`; рішення — питання до користувача.
+- Новий namespace `wfrpDowntime` (uk/en): заняття, недуги, підсумок, тексти дефолтних подій, панель ДМ. Лише підпис вкладки — `characterProfile.tabs.downtime` (бо `viewTabs` бере підписи звідти; кілька байтів у базовому scope).
+- Виміряно 2026-11-08 (`scope-size.test.ts`, uk gzip): учасник wfrp 106.2 / ліміт 107 (запас 0.8 KB), ДМ 110.1 / 111 (запас 0.9 KB); `wfrpDowntime` з 10 подіями оцінюється в ≈ 1.0–1.3 KB — у layout-scope не вміщається.
+- **Рішення користувача 2026-11-08 — варіант 2:** `wfrpDowntime` не додається ні в `WFRP_MEMBER_EXTRA`, ні в `WFRP_DM_EXTRA`; ліміти `WFRP_MEMBER_LIMIT_KB` 107 і `WFRP_DM_LIMIT_KB` 111 не змінюються. Підвантаження — `ExtendLocaleScope namespaces={["wfrpDowntime"]}` лише для wfrp-кампаній (`isWfrpCampaign`, як `battleWfrp` на сторінці правил і `wfrpCreation` на `character/new`) на чотирьох сторінках:
+  - `app/campaigns/[id]/character/page.tsx` — лист гравця (вкладка «Простій»);
+  - `app/campaigns/[id]/dm/characters/[characterId]/page.tsx` — лист у ДМ (вкладка, редагування недуг);
+  - `app/campaigns/[id]/dm/characters/page.tsx` — список персонажів ДМ, де `PartyRestActions` рендерить панель «Минув період»;
+  - `app/campaigns/[id]/dm/rules/page.tsx` — `["battleWfrp", "wfrpDowntime"]`, бо `TablesSection` показує дефолтні тексти слота `downtimeEvent` (`wfrpDowntime.events.N`).
+- `scope-size.test.ts` — окремий рядок «wfrpDowntime page extra» (лише цей namespace, uk/en) з власним лімітом 2 KB gzip; виміряне число — у коментар.
+- Журнал персонажа показує лише `rest.log.downtime*` (днів, без тексту події), тож вкладка «Журнал» не залежить від `wfrpDowntime`.
 - Динамічні ключі (`wfrpDowntime.events.N`, `endeavours.<kind>`, `ailments.<kind>`, `wfrpTables.slots.downtimeEvent`) — у `label-keys-rule-systems.test.ts`.
 - What's new `2026-11-08-wfrp-downtime` (audience `all`, href `/help/dm-rule-systems`) + `whatsNew.<id>` в обох `messages/*/whatsNew.json`; розділ «Простій» у довідковій статті `dm-rule-systems`.
 
@@ -188,11 +203,11 @@ interface RuleSystemDowntime {
 
 ## Декомпозиція (для плану)
 
-1. Схема `downtime` (zod + `readDowntime`), `preserveServerOwned`/`reconcileCharacteristics`/редакція/`wfrpAbilitiesOf`, `CharacterLogKind.DOWNTIME` + `describe-log`, коди помилок.
-2. Чисті функції `wfrp/downtime/` (constants, endeavours, heal, ailments, event, planPeriod), слот `downtimeEvent` (схема, дефолти, `SLOT_EFFECTS`, підпис у `TablesSection`), знижка `train` у `planPurchase`/`planUndo`, OpenAPI-бюджет.
-3. Хук `RuleSystemDowntime`, винесення `loadStashState`, параметр помилки в `assertNotInActiveBattle`, обробники PUT/period/period-undo, операції й маршрути, `CHARACTER_OPERATIONS` + coverage, `lib/api/downtime.ts`, хуки, `types/downtime.ts`.
-4. UI: `DowntimeTab`, панель «Минув період» і діалог підсумку/відкату, namespace(и) `wfrpDowntime`.
-5. i18n uk/en, `scope-size`, what's new, довідка, e2e, docs «Межі 5h-4» і «Звірити з книгою» в `rule-systems.md`, `docs/STATUS.md`.
+1. Схема `downtime` (zod + `readDowntime`), `preserveServerOwned`/`reconcileCharacteristics`/редакція/`wfrpAbilitiesOf`/створення, `CharacterLogKind.DOWNTIME` + `describe-log`, коди помилок.
+2. Чисті функції `wfrp/downtime/` (constants, endeavours, heal, ailments, event, planPeriod), слот `downtimeEvent` (схема, дефолти, `SLOT_EFFECTS`, підпис у `TablesSection`), OpenAPI-бюджет.
+3. Хук `RuleSystemDowntime`, винесення `loadStashState`, параметр помилки в `assertNotInActiveBattle`, обробники PUT/period/period-undo з доходом у гаманець, операції й маршрути, `CHARACTER_OPERATIONS` + coverage, `lib/api/downtime.ts`, хуки, `types/downtime.ts`, знижка `train` у `planPurchase`/`planUndo`.
+4. UI: `DowntimeTab`, панель «Минув період» і діалог підсумку/відкату, namespace `wfrpDowntime` і його підвантаження на чотирьох сторінках.
+5. i18n uk/en (повнота), рядок `scope-size`, what's new, довідка, e2e, docs «Межі 5h-4» і «Звірити з книгою» в `rule-systems.md`, `docs/STATUS.md`.
 
 Контролер: `/simplify`, повний `pnpm test:run` один раз наприкінці, `eslint` лише змінених файлів (не repo-wide), live-run, фінальне Opus-рев'ю.
 
