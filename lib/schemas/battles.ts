@@ -27,6 +27,22 @@ const mazeDifficultySchema = z.enum(MAZE_DIFFICULTIES);
 
 const mazeMarkSymbolSchema = z.enum(MAZE_MARK_SYMBOLS);
 
+const illusionDisguiseSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  avatar: z.string().max(500).optional(),
+  unitId: z.string().max(64).optional(),
+});
+
+const illusionPairSchema = z
+  .object({ a: z.string().min(1).max(64), b: z.string().min(1).max(64), aSees: illusionDisguiseSchema, bSees: illusionDisguiseSchema })
+  .refine((p) => p.a !== p.b);
+
+const illusionPairsSchema = z.array(illusionPairSchema).max(8).superRefine((pairs, ctx) => {
+  const ids = pairs.flatMap((p) => [p.a, p.b]);
+
+  if (new Set(ids).size !== ids.length) ctx.addIssue({ code: "custom", message: "battleSetup.validation.illusionDuplicate" });
+});
+
 export const mazeSchema = z.object({
   walls: z.array(edgeKeySchema).max(7200),
   exit: mapCellSchema.nullable(),
@@ -45,6 +61,7 @@ export const mazeSchema = z.object({
     .refine((m) => Object.keys(m).length <= 3600, "battleSetup.validation.tooManyMarks"),
   dark: z.boolean(),
   moved: z.boolean().optional(),
+  illusionSwap: z.object({ pairs: illusionPairsSchema }).optional(),
 });
 
 const mazeFeatureCounts = {
@@ -62,6 +79,7 @@ export const mazeActionSchema = z.discriminatedUnion("op", [
   z.object({ op: z.literal("teleport"), pair: z.tuple([mapCellSchema, mapCellSchema]).nullable(), removeAt: mapCellSchema.optional() }),
   z.object({ op: z.literal("fog"), cells: z.array(cellKeySchema).max(MAZE_LIMITS.fogCellsPerOp), on: z.boolean() }),
   z.object({ op: z.literal("dark"), on: z.boolean() }),
+  z.object({ op: z.literal("illusion"), pairs: illusionPairsSchema }),
   z.object({ op: z.literal("scatterStarts") }),
 ]);
 

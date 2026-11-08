@@ -45,7 +45,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
     placeRevived: ({ map, config, participants, mover, from }) => nearestMazeCell({ ...map, maze: config }, participants, mover, from),
     onEnter: ({ participant }) =>
       participant.basicInfo.side === ParticipantSide.ENEMY ? { ...participant, battleData: { ...participant.battleData, dormant: true } } : participant,
-    onReset: (maze) => ({ ...maze, marks: {}, dark: false, moved: false }),
+    onReset: (maze) => ({ ...maze, marks: {}, dark: false, moved: false, illusionSwap: { pairs: [] } }),
     patchableFields: ["facing"],
   },
   engine: {

@@ -259,6 +259,20 @@ export interface MazeMark {
   by: string;
 }
 
+export interface IllusionDisguise {
+  name: string;
+  avatar?: string;
+  unitId?: string;
+}
+
+/** aSees — ким a бачить b; bSees — ким b бачить a */
+export interface IllusionPair {
+  a: string;
+  b: string;
+  aSees: IllusionDisguise;
+  bSees: IllusionDisguise;
+}
+
 /** walls — ребра "x:y:e" / "x:y:s"; fog і marks — за ключем клітинки "x:y" */
 export interface MazeConfig {
   walls: string[];
@@ -270,6 +284,7 @@ export interface MazeConfig {
   dark: boolean;
   /** перший крок героя зроблено: «Згенерувати»/«Розкидати старти» більше недоступні */
   moved?: boolean;
+  illusionSwap?: { pairs: IllusionPair[] };
 }
 
 export type TemplateShape = "circle" | "cube" | "cone" | "line" | "cross" | "emanation";

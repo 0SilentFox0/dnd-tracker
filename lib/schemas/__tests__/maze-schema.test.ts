@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { battleMapSchema, mazeSchema } from "../battles";
+import { battleMapSchema, mazeActionSchema, mazeSchema } from "../battles";
 
 import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 
@@ -53,5 +53,31 @@ describe("battleMapSchema.maze", () => {
     expect(battleMapSchema.safeParse({ ...map, maze: null }).success).toBe(true);
     expect(battleMapSchema.safeParse({ ...map, maze: valid }).success).toBe(true);
     expect(battleMapSchema.safeParse({ ...map, maze: { ...valid, walls: ["x"] } }).success).toBe(false);
+  });
+});
+
+describe("mazeActionSchema illusion", () => {
+  const disguise = { name: "Wolf" };
+
+  const pair = (over: object = {}) => ({ a: "p1", b: "p2", aSees: disguise, bSees: disguise, ...over });
+
+  const parse = (pairs: unknown[]) => mazeActionSchema.safeParse({ op: "illusion", pairs }).success;
+
+  it("accepts a valid pair and the empty reset", () => {
+    expect(parse([pair()])).toBe(true);
+    expect(parse([])).toBe(true);
+  });
+
+  it("rejects blank names, a == b, a repeated id and more than 8 pairs", () => {
+    expect(parse([pair({ aSees: { name: "" } })])).toBe(false);
+    expect(parse([pair({ bSees: { name: "   " } })])).toBe(false);
+    expect(parse([pair({ b: "p1" })])).toBe(false);
+    expect(parse([pair(), pair({ a: "p3", b: "p1" })])).toBe(false);
+    expect(parse(Array.from({ length: 9 }, (_, i) => pair({ a: `a${i}`, b: `b${i}` })))).toBe(false);
+    expect(parse(Array.from({ length: 8 }, (_, i) => pair({ a: `a${i}`, b: `b${i}` })))).toBe(true);
+  });
+
+  it("mazeSchema accepts illusionSwap", () => {
+    expect(mazeSchema.safeParse({ ...emptyMaze(), illusionSwap: { pairs: [pair()] } }).success).toBe(true);
   });
 });

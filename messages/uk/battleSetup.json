@@ -209,6 +209,7 @@
   },
   "validation": {
     "tooManyMarks": "Забагато позначок",
+    "illusionDuplicate": "Герой не може бути в двох парах ілюзії",
     "background": "Фон: потрібне посилання https, файл або вбудований фон",
     "barrierNeedsDuration": "Барʼєру потрібен строк",
     "tooManyTerrainCells": "Забагато клітинок місцевості",
