@@ -56,17 +56,20 @@ type IllusionPair = { a: string; b: string; aSees: IllusionDisguise; bSees: Illu
   мапі, не мертві, `a !== b`, жоден id не повторюється між парами, імена масок непорожні. Помилки через
   `REJECT.*` / `rejectAction`.
 - `onReset` очищає `illusionSwap`. Подія через `mazeOpEvent`, невидима гравцям.
-- Автознімання: у mode `afterMutation` пара видаляється, якщо хтось з пари мертвий / не на мапі / бій не
-  ACTIVE; DM-подія «підміна знята».
+- Автознімання: у mode `afterMutation` (аргументи `config`, `scene.status`, `result.participants`; нову
+  мапу віддаємо через `result.scene`, подію через `result.events`) пара видаляється, якщо хтось з пари
+  мертвий / не на мапі / бій не ACTIVE; DM-подія «підміна знята».
 
 ### 2. Ворожість у рушії
 
-- Додати в `ModeEngineHooks` опційний `areHostile?(ctx, a, b): boolean | undefined` (undefined = не
-  втручатись). Maze повертає `true` для учасників однієї пари.
-- В ядрі один `isHostile(ctx, a, b)` = `modeHook ?? a.side !== b.side`. Ядро режим не імпортує
-  (реєстр, як інші хуки).
+- Додати в `ModeEngineHooks` опційний `areHostile?({ config, map, a, b }): boolean | undefined`
+  (undefined = не втручатись; той самий стиль аргументів, що й `sees`/`engages`). Maze повертає `true`
+  для учасників однієї пари, інакше `undefined`.
+- В ядрі один `isHostile(map, a, b)` = `modeHook ?? a.side !== b.side`; режим і конфіг він бере з `map`
+  через реєстр, тож усі виклики мають лише `map` (у `resolveAttackTargets`, `enemiesInReach` він уже є;
+  де `map` не прокинуто — прокинути). Ядро режим не імпортує.
 - Замінити inline-порівняння лише тут: `attack-phase/targets.ts` (`enemyOf`), `grid/attack-reach.ts`,
-  `actions/run.ts`, `actions/legendary.ts`, `actions/opportunity.ts`, `spell/spell-targeting.ts`
+  `actions/run.ts:153` (лише відмова `enemyRequired`; `:121` — пасивне сприйняття, не чіпати), `actions/legendary.ts`, `actions/opportunity.ts`, `spell/spell-targeting.ts`
   (`hostile`, `resolveTargets`), `validation/ability-targets.ts`, `maneuvers/strike.ts` (`isEnemyOf`).
 - UI: `useAttackTargets.ts` пропускає «ворожу» ціль попри `friendlyFire` (клієнтський дублер того ж правила).
 - Поза межами: ауры, тригери здібностей, `fx/*`, інші ~70 порівнянь `side` лишаються на реальному `side`
