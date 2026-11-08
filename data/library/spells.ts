@@ -379,7 +379,7 @@ export const SPELLS: LibrarySpell[] = [
     key: "phantom",
     iconKey: "phantom",
     name: "Фантом",
-    school: DARK,
+    school: NATURE,
     level: 4,
     description: "Створює ілюзорного двійника союзної цілі на боці заклинателя: ті самі характеристики, вміння й сила, але лише 1 HP — він гине від першої отриманої шкоди. Двійником керує заклинатель.",
     appearanceDescription:
