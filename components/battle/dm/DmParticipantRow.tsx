@@ -1,12 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Crown, EyeOff, Heart, LogIn, ShieldAlert, Skull, Trash2 } from "lucide-react";
+import { Crown, EyeOff, Heart, LogIn, ShieldAlert, Skull, Trash2, VenetianMask } from "lucide-react";
 
 import { SideDot } from "@/components/battle/hud";
 import { SelectField } from "@/components/ui/select-field";
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
-import type { DmParticipantActions } from "@/lib/hooks/battle";
+import { type DmParticipantActions, useModeView } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,10 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
 
   const tCommon = useTranslations("common.actions");
 
+  const tMask = useTranslations("battleDm.maze.toolbar");
+
+  const masked = useModeView().view?.maskedIds?.has(participant.basicInfo.id) ?? false;
+
   const confirm = useConfirm();
 
   const close = () => onDone?.();
@@ -64,7 +68,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <SideDot side={participant.basicInfo.side} />
         <div className="min-w-0 flex-1 basis-32">
-          <div className="break-words text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</div>
+          <div className="break-words text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}{masked && <VenetianMask aria-label={tMask("illusion")} className="ml-1 inline size-4 text-[var(--hud-muted)]" />}</div>
           {label && <div className="break-words text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</div>}
           {badge && <div className="break-words text-xs text-[var(--hud-muted)]" data-testid="legendary-badge">{text(badge)}</div>}
         </div>

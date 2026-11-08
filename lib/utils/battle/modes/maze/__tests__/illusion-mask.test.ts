@@ -5,7 +5,7 @@ import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { deriveMazeView, maskMazeFxAction, maskMazeScene } from "@/lib/utils/battle/modes/maze";
 import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { maskAction, maskBattleBy, maskParticipant } from "@/lib/utils/battle/modes/maze/illusion-mask";
-import { turnQueue } from "@/lib/utils/battle/view";
+import { canSeeExactStats, turnQueue } from "@/lib/utils/battle/view";
 import type { BattleAction, BattleParticipant, IllusionPair } from "@/types/battle";
 
 const hero = (id: string, name: string, user: string, x: number): BattleParticipant => {
@@ -180,5 +180,50 @@ describe("disguiseNames", () => {
 
     expect(v.disguiseNames?.has("Godric")).toBe(false);
     expect(viewFor("u1")!.disguiseNames?.get("Godric")).toBe("Vampire");
+  });
+});
+
+describe("витоки справжнього імені партнера", () => {
+  const plain = { ...log, actorId: "system", actorName: "System", targets: [], hpChanges: [], resultText: "Spotted: Zehir, Godric, Cora", log: ["Start: Godric joined", "Godricson stays"] } as unknown as BattleAction;
+
+  it("рядкові записи й resultText маскуються точним ім'ям", () => {
+    const view = viewFor("u1")!;
+
+    const out = maskAction(plain, view.disguiseOf!, view.disguiseNames);
+
+    expect(out.resultText).toBe("Spotted: Zehir, Vampire, Cora");
+    expect(out.log?.[0]).toBe("Start: Vampire joined");
+    expect(maskAction(plain, viewFor("u3")!.disguiseOf ?? (() => undefined), viewFor("u3")!.disguiseNames)).toBe(plain);
+  });
+
+  it("двозначне ім'я в рядках не міняється", () => {
+    const twin = hero("twin", "Godric", "u4", 4);
+
+    const v = deriveMazeView({ map, participants: [...all, twin], userId: "u1", isDM: false })!;
+
+    expect(maskAction(plain, v.disguiseOf!, v.disguiseNames).resultText).toBe(plain.resultText);
+  });
+
+  it("джерело ефекту — замаскований партнер: ім'я джерела з маскою у ефектах і учасниках", () => {
+    const eff = { id: "e1", name: "Haste", source: { participantId: "godric", name: "Godric" } } as unknown as import("@/types/battle").ActiveEffect;
+
+    const withEffect = { ...zehir, battleData: { ...zehir.battleData, activeEffects: [eff] } };
+
+    const sc = { ...scene(), effects: new Map([["zehir", [eff]]]), battle: { battleLog: [], initiativeOrder: [withEffect, godric, c] } };
+
+    const out = maskMazeScene(sc, viewFor("u1"));
+
+    expect(out.effects?.get("zehir")?.[0].source?.name).toBe("Vampire");
+    expect(out.battle.initiativeOrder[0].battleData.activeEffects?.[0].source?.name).toBe("Vampire");
+    expect(maskMazeScene(sc, viewFor("u3")).effects?.get("zehir")?.[0].source?.name).toBe("Godric");
+  });
+});
+
+describe("точні стати маски", () => {
+  it("для не-ДМ глядача замаскований партнер — ворог без точних HP/AC; ДМ бачить усе, як і для справжніх ворогів", () => {
+    const masked = maskMazeScene(scene(), viewFor("u1")).roster.enemies[0];
+
+    expect(canSeeExactStats(masked, { userId: "u1", isDM: false, canSeeEnemyHp: false, readOnly: false })).toBe(false);
+    expect(canSeeExactStats(masked, { userId: "dm", isDM: true, canSeeEnemyHp: false, readOnly: false })).toBe(true);
   });
 });

@@ -1,7 +1,7 @@
 import type { ModeView } from "../types";
 import { mazeGridOf } from "./grid";
 import { disguiseFor, illusionPairs } from "./illusion";
-import { type DisguiseOf, maskAction, maskParticipantBy, maskQueueBy } from "./illusion-mask";
+import { type DisguiseOf, maskAction, maskEffectMap, maskParticipantBy, maskQueueBy } from "./illusion-mask";
 import { isMazeHero, isPlaced } from "./status";
 import { seesParticipant, unionVision, type Viewpoint, viewpointOf } from "./vision";
 import { edgeCells } from "./walls";
@@ -10,7 +10,7 @@ import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/con
 import { inPlay, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
 import { filterQueueByView, type QueueEntry } from "@/lib/utils/battle/view/queue";
-import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type MazeRole = "dm" | "player" | "spectator";
 
@@ -193,6 +193,7 @@ export function maskMazeFxAction(view: MazeView | null | undefined, action: Batt
 }
 
 export interface MazeMaskable {
+  effects?: ReadonlyMap<string, ActiveEffect[]>;
   battle: { battleLog?: BattleAction[]; initiativeOrder?: BattleParticipant[] };
   turn: { current: BattleParticipant | null; queue: QueueEntry[] };
   roster: { allies: BattleParticipant[]; enemies: BattleParticipant[] };
@@ -231,6 +232,7 @@ function disguiseScene<T extends MazeMaskable>(scene: T, disguiseOf: DisguiseOf,
 
   return {
     ...scene,
+    ...(scene.effects && { effects: maskEffectMap(scene.effects, disguiseOf) }),
     battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).map((e) => maskAction(e, disguiseOf, names)), ...(initiativeOrder && { initiativeOrder: by(initiativeOrder) }) },
     turn: { ...scene.turn, current: current && maskParticipantBy(current, disguiseOf), queue: maskQueueBy(scene.turn.queue, disguiseOf) },
     roster: { ...scene.roster, allies: everyone.filter((p) => p.basicInfo.side === ParticipantSide.ALLY), enemies: everyone.filter((p) => p.basicInfo.side !== ParticipantSide.ALLY) },
