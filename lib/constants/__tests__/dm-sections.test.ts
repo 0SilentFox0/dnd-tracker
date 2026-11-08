@@ -46,6 +46,7 @@ describe("dmSectionsFor", () => {
     const menu = paths(dmSectionsFor(ctx));
 
     expect(menu).toEqual(expect.arrayContaining(paths(dmTilesFor(ctx))));
-    expect(paths(dmTilesFor(ctx))).not.toContain("rules");
+    expect(paths(dmTilesFor(ctx))).toContain("rules");
+    expect(paths(dmTilesFor(ctx))).not.toContain("spell-groups");
   });
 });
