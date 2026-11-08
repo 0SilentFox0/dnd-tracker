@@ -14,7 +14,7 @@ export const maskParticipant = (p: BattleParticipant, d: IllusionDisguise): Batt
 });
 
 /** Ефект, накладений замаскованим партнером, показує маску, а не справжнє ім'я джерела */
-export const maskEffects = <E extends ActiveEffect>(effects: readonly E[], disguiseOf: DisguiseOf, names: ReadonlyMap<string, string> = NO_NAMES): readonly E[] => {
+const maskEffects = <E extends ActiveEffect>(effects: readonly E[], disguiseOf: DisguiseOf, names: ReadonlyMap<string, string> = NO_NAMES): readonly E[] => {
   const masked = effects.map((e) => {
     const { source } = e;
 
@@ -58,19 +58,29 @@ function maskArg(arg: TextArg, names: ReadonlyMap<string, string>): TextArg {
 
 const escapeRe = (v: string) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+const regexCache = new WeakMap<ReadonlyMap<string, string>, RegExp | null>();
+
+const namesRegex = (names: ReadonlyMap<string, string>): RegExp | null => {
+  if (regexCache.has(names)) return regexCache.get(names) ?? null;
+
+  const keys = [...names.keys()].filter(Boolean).sort((a, b) => b.length - a.length);
+
+  const re = keys.length ? new RegExp(`(?<![\\p{L}\\p{N}])(?:${keys.map(escapeRe).join("|")})(?![\\p{L}\\p{N}])`, "gu") : null;
+
+  regexCache.set(names, re);
+
+  return re;
+};
+
 /** Імена як окремі токени (не частина довшого слова); один прохід, довші першими — маска не підміняється вдруге */
 const maskPlain = (text: string, names: ReadonlyMap<string, string>): string => {
-  const reals = [...names.keys()].filter((r) => r && text.includes(r)).sort((a, b) => b.length - a.length);
+  const re = namesRegex(names);
 
-  if (reals.length === 0) return text;
-
-  const re = new RegExp(`(?<![\\p{L}\\p{N}])(?:${reals.map(escapeRe).join("|")})(?![\\p{L}\\p{N}])`, "gu");
-
-  return text.replace(re, (m) => names.get(m) ?? m);
+  return re ? text.replace(re, (m) => names.get(m) ?? m) : text;
 };
 
 /** Імена в params (рекурсивно) міняються на маску; рядки без TextRef лишаються як є */
-export const maskLogLine = (line: LogLine, names: ReadonlyMap<string, string>): LogLine => {
+const maskLogLine = (line: LogLine, names: ReadonlyMap<string, string>): LogLine => {
   if (names.size === 0) return line;
 
   return typeof line === "string" ? maskPlain(line, names) : (maskArg(line, names) as LogLine);
@@ -78,14 +88,16 @@ export const maskLogLine = (line: LogLine, names: ReadonlyMap<string, string>): 
 
 /** `viewerNames` — справжнє ім'я → маска для всіх записів (системні/DM-події без цілей теж згадують партнера) */
 export function maskAction(e: BattleAction, disguiseOf: DisguiseOf, viewerNames: ReadonlyMap<string, string> = NO_NAMES): BattleAction {
-  const names = new Map(viewerNames);
+  let names = viewerNames; // copied on first rename so the shared viewer map is never mutated
 
   const rename = (id: string, current: string) => {
     const d = disguiseOf(id);
 
     if (!d) return current;
 
-    names.set(current, d.name);
+    if (names === viewerNames) names = new Map(viewerNames);
+
+    (names as Map<string, string>).set(current, d.name);
 
     return d.name;
   };
