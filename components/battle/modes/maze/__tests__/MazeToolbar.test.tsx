@@ -72,6 +72,14 @@ describe("MazeToolbar", () => {
     expect(queryByRole("button", { name: "Розкидати старти" })).toBeNull();
   });
 
+  it("«Підміна» відкриває діалог підміни союзників", () => {
+    const { getByRole } = panel();
+
+    fireEvent.click(getByRole("button", { name: "Підміна" }));
+
+    expect(getByRole("dialog").textContent).toContain("Повернути союзників");
+  });
+
   it("«Згенерувати» відкриває діалог і надсилає генерацію з випадковим виходом", () => {
     const { getByRole, mutate } = panel({ maze: { difficulty: "hard" } });
 
@@ -149,6 +157,7 @@ function ToolbarWithAsHero() {
     actions: { setTool: vi.fn(), clickCell: vi.fn(), toggleDark: vi.fn(), scatterStarts: vi.fn(), generate: vi.fn(), reshuffle: vi.fn() },
     editing: null,
     asHero,
+    illusion: { pairs: [], set: vi.fn(), clear: vi.fn() },
   };
 
   return (

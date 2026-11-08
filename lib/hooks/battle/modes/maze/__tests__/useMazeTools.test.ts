@@ -181,6 +181,19 @@ describe("useMazeTools", () => {
     ]);
   });
 
+  it("illusion: pairs зі стану, set/clear шлють op illusion", () => {
+    const pair = { a: "h1", b: "h2", aSees: { name: "Орк" }, bSees: { name: "Ельф", unitId: "u1" } };
+
+    const { tools, mutate } = setup({ illusionSwap: { pairs: [pair] } });
+
+    expect(tools().illusion.pairs).toEqual([pair]);
+
+    act(() => tools().illusion.set([pair]));
+    act(() => tools().illusion.clear());
+
+    expect(mutate.mock.calls.map((c) => c[0])).toEqual([{ op: "illusion", pairs: [pair] }, { op: "illusion", pairs: [] }]);
+  });
+
   it("Esc вимикає інструмент", () => {
     const { tools } = setup();
 

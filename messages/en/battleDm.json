@@ -155,7 +155,8 @@
       "asHero": "Through a player's eyes",
       "asHeroOff": "Off",
       "asHeroExitLabel": "Turn off \"Through a player's eyes\"",
-      "asHeroExit": "Turn off"
+      "asHeroExit": "Turn off",
+      "illusion": "Swap"
     },
     "darkScreen": "Darkness",
     "marks": {
@@ -201,6 +202,12 @@
     "counts": {
       "teleportPairs": "Teleport pairs",
       "fogPatches": "Fog patches"
+    },
+    "illusion": {
+      "aSees": "How A sees B",
+      "bSees": "How B sees A",
+      "apply": "Apply",
+      "restore": "Restore allies"
     }
   },
   "initiative": {

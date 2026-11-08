@@ -4,6 +4,7 @@ import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { MazeGenerateDialog } from "./MazeGenerateDialog";
+import { MazeIllusionDialog } from "./MazeIllusionDialog";
 import { MazeReshuffleDialog } from "./MazeReshuffleDialog";
 
 import { SelectField } from "@/components/ui/select-field";
@@ -38,11 +39,11 @@ function ToolButton({ active, onClick, tall, label, children }: { active?: boole
 export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }) {
   const t = useTranslations("battleDm.maze");
 
-  const [dialog, setDialog] = useState<"generate" | "reshuffle" | null>(null);
+  const [dialog, setDialog] = useState<"generate" | "reshuffle" | "illusion" | null>(null);
 
   const { battle } = useBattleSceneData();
 
-  const { state: { canGenerate, tool, dark, heroes }, actions, asHero } = tools;
+  const { state: { canGenerate, tool, dark, heroes }, actions, asHero, illusion } = tools;
 
   const editing = isEditTool(tool);
 
@@ -60,6 +61,9 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
       </ToolButton>
       <ToolButton tall={tall} active={editing} onClick={() => actions.setTool(editing ? "none" : "walls")}>
         {t("toolbar.edit")}
+      </ToolButton>
+      <ToolButton tall={tall} active={illusion.pairs.length > 0} onClick={() => setDialog("illusion")}>
+        {t("toolbar.illusion")}
       </ToolButton>
       <ToolButton tall={tall} active={dark} onClick={actions.toggleDark}>
         {t("toolbar.dark")}
@@ -86,6 +90,7 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
       )}
       {dialog === "generate" && <MazeGenerateDialog open onOpenChange={close} difficulty={battle.map?.maze?.difficulty ?? "medium"} onSubmit={actions.generate} />}
       {dialog === "reshuffle" && <MazeReshuffleDialog open onOpenChange={close} onSubmit={actions.reshuffle} />}
+      {dialog === "illusion" && <MazeIllusionDialog open onOpenChange={close} campaignId={battle.campaignId} heroes={heroes} pairs={illusion.pairs} onApply={illusion.set} onClear={illusion.clear} />}
     </>
   );
 }

@@ -12,9 +12,10 @@ import { useBattleScene } from "@/lib/hooks/battle/useBattleScene";
 import { useNotify } from "@/lib/hooks/common";
 import { cellKey, samePoint } from "@/lib/utils/battle/grid";
 import { isEdgeCell } from "@/lib/utils/battle/modes/maze";
+import { illusionPairs } from "@/lib/utils/battle/modes/maze/illusion";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { MazeActionData } from "@/types/api";
-import type { GridPoint, MazeConfig } from "@/types/battle";
+import type { GridPoint, IllusionPair, MazeConfig } from "@/types/battle";
 
 export type { MazeEdgeStroke, MazeGenerateInput, MazeTool };
 
@@ -50,6 +51,13 @@ export interface MazeTools {
   /** для карти: null — інструмент не активний */
   editing: MazeEditing | null;
   asHero: MazeAsHero;
+  illusion: MazeIllusion;
+}
+
+export interface MazeIllusion {
+  pairs: IllusionPair[];
+  set(pairs: IllusionPair[]): void;
+  clear(): void;
 }
 
 /** Інструменти ДМ у лабіринті; null — не ДМ або бій без лабіринту. */
@@ -149,6 +157,13 @@ export function useMazeTools(): MazeTools | null {
 
   const scatterStarts = useCallback(() => send({ op: "scatterStarts" }), [send]);
 
+  const pairs = useMemo(() => illusionPairs(maze), [maze]);
+
+  const illusion = useMemo<MazeIllusion>(
+    () => ({ pairs, set: (next) => send({ op: "illusion", pairs: next }), clear: () => send({ op: "illusion", pairs: [] }) }),
+    [pairs, send],
+  );
+
   const tool = enabled ? state.tool : "none";
 
   useEffect(() => {
@@ -186,7 +201,7 @@ export function useMazeTools(): MazeTools | null {
     [setTool, clickCell, generate, reshuffle, toggleDark, scatterStarts],
   );
 
-  const tools = useMemo(() => ({ state: toolsState, actions: toolsActions, editing, asHero }), [toolsState, toolsActions, editing, asHero]);
+  const tools = useMemo(() => ({ state: toolsState, actions: toolsActions, editing, asHero, illusion }), [toolsState, toolsActions, editing, asHero, illusion]);
 
   return enabled ? tools : null;
 }

@@ -4,6 +4,7 @@ export { useMazePlaceUnit } from "./useMazePlaceUnit";
 export {
   type MazeEditing,
   type MazeGenerateInput,
+  type MazeIllusion,
   type MazeReshuffleMode,
   type MazeTool,
   type MazeTools,

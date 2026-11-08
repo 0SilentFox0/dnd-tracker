@@ -155,7 +155,8 @@
       "asHero": "Очима гравця",
       "asHeroOff": "Вимкнено",
       "asHeroExitLabel": "Вимкнути «Очима гравця»",
-      "asHeroExit": "Вимкнути"
+      "asHeroExit": "Вимкнути",
+      "illusion": "Підміна"
     },
     "darkScreen": "Темрява",
     "marks": {
@@ -201,6 +202,12 @@
     "counts": {
       "teleportPairs": "Пари телепортів",
       "fogPatches": "Плями туману"
+    },
+    "illusion": {
+      "aSees": "Як A бачить B",
+      "bSees": "Як B бачить A",
+      "apply": "Застосувати",
+      "restore": "Повернути союзників"
     }
   },
   "initiative": {
