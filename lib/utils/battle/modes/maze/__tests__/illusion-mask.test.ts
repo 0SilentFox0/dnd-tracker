@@ -1,0 +1,121 @@
+import { describe, expect, it } from "vitest";
+
+import { ParticipantSide } from "@/lib/constants/battle";
+import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { deriveMazeView, maskMazeFxAction, maskMazeScene } from "@/lib/utils/battle/modes/maze";
+import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { maskAction, maskBattleBy, maskParticipant } from "@/lib/utils/battle/modes/maze/illusion-mask";
+import { turnQueue } from "@/lib/utils/battle/view";
+import type { BattleAction, BattleParticipant, IllusionPair } from "@/types/battle";
+
+const hero = (id: string, name: string, user: string, x: number): BattleParticipant => {
+  const p = placed(id, { side: ParticipantSide.ALLY, at: { x, y: 1 } });
+
+  return flag({ ...p, basicInfo: { ...p.basicInfo, name, controlledBy: user, avatar: `${id}.png` } }, { facing: "e" });
+};
+
+const zehir = hero("zehir", "Zehir", "u1", 1);
+
+const godric = hero("godric", "Godric", "u2", 2);
+
+const c = hero("c", "Cora", "u3", 3);
+
+const all = [zehir, godric, c];
+
+const pairs: IllusionPair[] = [{ a: "zehir", b: "godric", aSees: { name: "Vampire", avatar: "v.png" }, bSees: { name: "Knight", avatar: "k.png" } }];
+
+const map = mazeMap({ illusionSwap: { pairs } }, 12);
+
+const viewFor = (userId: string, isDM = false, asHeroId?: string) => deriveMazeView({ map, participants: all, userId, isDM, asHeroId });
+
+const scene = () => ({
+  battle: { battleLog: [] as BattleAction[], initiativeOrder: all },
+  turn: { current: godric, queue: turnQueue(all, 1, 1) },
+  roster: { allies: all, enemies: [] as BattleParticipant[] },
+});
+
+const nameOf = (list: BattleParticipant[], id: string) => list.find((p) => p.basicInfo.id === id)?.basicInfo.name;
+
+const log: BattleAction = {
+  id: "1",
+  actorId: "godric",
+  actorName: "Godric",
+  targets: [{ participantId: "c", participantName: "Cora" }],
+  actionDetails: {},
+  resultText: "",
+  hpChanges: [{ participantId: "godric", participantName: "Godric" }],
+  log: [{ message: "x", params: { name: "Godric", inner: { message: "y", params: { who: "Godric" } } } }, "Godric plain"],
+} as unknown as BattleAction;
+
+describe("maskParticipant", () => {
+  it("міняє ім'я й аватар, id лишає", () => {
+    const m = maskParticipant(godric, pairs[0].aSees);
+
+    expect(m.basicInfo).toMatchObject({ id: "godric", name: "Vampire", avatar: "v.png" });
+  });
+});
+
+describe("maskMazeScene — ілюзія", () => {
+  it("zehir бачить godric як aSees у ростері, черзі, turn.current, initiativeOrder", () => {
+    const out = maskMazeScene(scene(), viewFor("u1"));
+
+    expect(nameOf(out.roster.allies, "godric")).toBe("Vampire");
+    expect(nameOf(out.battle.initiativeOrder, "godric")).toBe("Vampire");
+    expect(out.turn.current?.basicInfo).toMatchObject({ id: "godric", name: "Vampire", avatar: "v.png" });
+    expect(out.turn.queue.flatMap((e) => (e.kind === "round" ? [] : [e.participant])).filter((p) => p.basicInfo.id === "godric").every((p) => p.basicInfo.name === "Vampire")).toBe(true);
+    expect(nameOf(out.roster.allies, "zehir")).toBe("Zehir");
+  });
+
+  it("сторонній гравець бачить справжнє", () => {
+    const out = maskMazeScene(scene(), viewFor("u3"));
+
+    expect(nameOf(out.roster.allies, "godric")).toBe("Godric");
+  });
+
+  it("ДМ без asHero — справжнє, maskedIds містить обох; asHero=zehir — як zehir", () => {
+    const dm = viewFor("dm", true);
+
+    expect(dm?.maskedIds).toEqual(new Set(["zehir", "godric"]));
+    expect(dm?.disguiseOf).toBeUndefined();
+
+    const s = scene();
+
+    expect(maskMazeScene(s, dm)).toBe(s);
+    expect(nameOf(maskMazeScene(s, viewFor("dm", true, "zehir")).roster.allies, "godric")).toBe("Vampire");
+  });
+
+  it("журнал: actorName, targets, hpChanges і вкладені params", () => {
+    const s = scene();
+
+    s.battle.battleLog = [log];
+
+    const [e] = maskMazeScene(s, viewFor("u1")).battle.battleLog;
+
+    expect(e.actorName).toBe("Vampire");
+    expect(e.targets[0].participantName).toBe("Cora");
+    expect(e.hpChanges[0].participantName).toBe("Vampire");
+    expect(e.log?.[0]).toMatchObject({ params: { name: "Vampire", inner: { params: { who: "Vampire" } } } });
+    expect(maskMazeScene(s, viewFor("u3")).battle.battleLog[0]).toBe(log);
+  });
+});
+
+describe("maskAction / maskMazeFxAction", () => {
+  it("власний герой не маскується для власного гравця", () => {
+    const own = { ...log, actorId: "zehir", actorName: "Zehir", targets: [], hpChanges: [], log: undefined } as unknown as BattleAction;
+
+    expect(maskAction(own, viewFor("u1")!.disguiseOf!)).toBe(own);
+  });
+
+  it("fx-копія теж із маскою", () => {
+    expect(maskMazeFxAction(viewFor("u1"), log).actorName).toBe("Vampire");
+  });
+});
+
+describe("maskBattleBy", () => {
+  it("initiativeOrder і battleLog під маскою", () => {
+    const out = maskBattleBy({ initiativeOrder: all, battleLog: [log] }, viewFor("u1")!.disguiseOf!);
+
+    expect(nameOf(out.initiativeOrder, "godric")).toBe("Vampire");
+    expect(out.battleLog[0].actorName).toBe("Vampire");
+  });
+});

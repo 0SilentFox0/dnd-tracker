@@ -1,5 +1,7 @@
 import type { ModeView } from "../types";
 import { mazeGridOf } from "./grid";
+import { disguiseFor, illusionPairs } from "./illusion";
+import { type DisguiseOf, maskAction, maskParticipantBy, maskQueueBy } from "./illusion-mask";
 import { isMazeHero, isPlaced } from "./status";
 import { seesParticipant, unionVision, type Viewpoint, viewpointOf } from "./vision";
 import { edgeCells } from "./walls";
@@ -22,6 +24,10 @@ export interface MazeView extends ModeView {
   showFog: boolean;
   showExit: boolean;
   mazeDark: boolean;
+  /** ким глядач бачить цілі під ілюзією (undefined — нікого не маскує) */
+  disguiseOf?: DisguiseOf;
+  /** для ДМ без «як герой»: хто зараз під маскою (позначка в інтерфейсі) */
+  maskedIds: ReadonlySet<string>;
 }
 
 interface DeriveArgs {
@@ -55,10 +61,15 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
 
   const viewersOf = (list: BattleParticipant[]) => list.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
 
-  const base = { mazeDark: maze.dark, partyCells: null };
+  const pairs = illusionPairs(maze);
+
+  const base = { mazeDark: maze.dark, partyCells: null, maskedIds: NO_IDS };
+
+  const disguiseOfViewers = (viewerIds: string[]): DisguiseOf | undefined =>
+    pairs.length === 0 ? undefined : (targetId) => viewerIds.map((v) => disguiseFor(pairs, v, targetId)).find(Boolean);
 
   if (isDM && !asHeroId) {
-    return { ...base, role: "dm", cells: null, partyCells: unionVision(grid, viewersOf(participants.filter(isMazeHero))), visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
+    return { ...base, maskedIds: new Set(pairs.flatMap((p) => [p.a, p.b])), role: "dm", cells: null, partyCells: unionVision(grid, viewersOf(participants.filter(isMazeHero))), visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
   }
 
   const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isOwnOnField(p));
@@ -87,6 +98,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
     cells,
     visibleIds,
     ownIds: new Set(own.map(idOf)),
+    disguiseOf: disguiseOfViewers(own.map(idOf)),
     showWalls: (edge) => edgeCells(edge).some((c) => cells.has(cellKey(c))),
     showTeleportLinks: false,
     showFog: true,
@@ -140,7 +152,9 @@ export function mazeFxVisible(view: MazeView | null | undefined, e: BattleAction
 }
 
 /** FX-копія запису для гравця: рятунки невидимих не показуються, імена невидимих — «невідомий». */
-export function maskMazeFxAction(view: MazeView | null | undefined, e: BattleAction): BattleAction {
+export function maskMazeFxAction(view: MazeView | null | undefined, action: BattleAction): BattleAction {
+  const e = view?.disguiseOf ? maskAction(action, view.disguiseOf) : action;
+
   if (!hidesFrom(view)) return e;
 
   const name = (id: string, current: string) => (knows(view, id) ? current : MAZE_UNKNOWN_NAME);
@@ -157,13 +171,15 @@ export function maskMazeFxAction(view: MazeView | null | undefined, e: BattleAct
 }
 
 export interface MazeMaskable {
-  battle: { battleLog?: BattleAction[] };
+  battle: { battleLog?: BattleAction[]; initiativeOrder?: BattleParticipant[] };
   turn: { current: BattleParticipant | null; queue: QueueEntry[] };
   roster: { allies: BattleParticipant[]; enemies: BattleParticipant[] };
 }
 
 /** Сцена очима гравця в лабіринті: списки, черга, журнал і «ходить …» без прихованих. Сервер і далі шле повну сцену. */
-export function maskMazeScene<T extends MazeMaskable>(scene: T, view: MazeView | null | undefined): T {
+export function maskMazeScene<T extends MazeMaskable>(input: T, view: MazeView | null | undefined): T {
+  const scene = view?.disguiseOf ? disguiseScene(input, view.disguiseOf) : input;
+
   if (!hidesFrom(view)) {
     const log = scene.battle.battleLog ?? [];
 
@@ -179,5 +195,20 @@ export function maskMazeScene<T extends MazeMaskable>(scene: T, view: MazeView |
     battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).filter((e) => mazeLogVisible(view, e)) },
     turn: { ...scene.turn, current: masked, queue: filterQueueByView(scene.turn.queue, view) },
     roster: { ...scene.roster, allies: visibleParticipants(view, scene.roster.allies), enemies: visibleParticipants(view, scene.roster.enemies) },
+  } as T;
+}
+
+function disguiseScene<T extends MazeMaskable>(scene: T, disguiseOf: DisguiseOf): T {
+  const by = (list: BattleParticipant[]) => list.map((p) => maskParticipantBy(p, disguiseOf));
+
+  const { current } = scene.turn;
+
+  const { initiativeOrder } = scene.battle;
+
+  return {
+    ...scene,
+    battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).map((e) => maskAction(e, disguiseOf)), ...(initiativeOrder && { initiativeOrder: by(initiativeOrder) }) },
+    turn: { ...scene.turn, current: current && maskParticipantBy(current, disguiseOf), queue: maskQueueBy(scene.turn.queue, disguiseOf) },
+    roster: { ...scene.roster, allies: by(scene.roster.allies), enemies: by(scene.roster.enemies) },
   } as T;
 }

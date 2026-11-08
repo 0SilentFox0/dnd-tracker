@@ -8,6 +8,7 @@ import type { BattleSceneData, BattleSceneValue } from "@/lib/hooks/battle/types
 import { useBattleScene, useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
 import { modeFxVisible } from "@/lib/utils/battle/modes/client";
 import { deriveMazeView, maskMazeFxAction, maskMazeScene, type MazeView, mazeViewHeroes, mazeVisible } from "@/lib/utils/battle/modes/maze";
+import { maskBattleBy } from "@/lib/utils/battle/modes/maze/illusion-mask";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
 
@@ -109,7 +110,7 @@ export function useMazeMaskValue(): MazeMaskValue {
     () => ({
       view,
       visible: (p) => mazeVisible(view, p),
-      fxLog: view?.role === "player" ? log.filter((e) => modeFxVisible(map, view, e)).map((e) => maskMazeFxAction(view, e)) : log,
+      fxLog: view?.role === "player" ? log.filter((e) => modeFxVisible(map, view, e)).map((e) => maskMazeFxAction(view, e)) : view?.disguiseOf ? log.map((e) => maskMazeFxAction(view, e)) : log,
     }),
     [view, log, map],
   );
@@ -117,8 +118,20 @@ export function useMazeMaskValue(): MazeMaskValue {
   const maskedData = useMemo(() => maskMazeScene(data, view), [data, view]);
 
   const maskedValue = useMemo(
-    () => (maskedData === data ? value : { ...value, battle: maskedData.battle, turn: maskedData.turn, roster: maskedData.roster }),
-    [maskedData, data, value],
+    () => {
+      if (maskedData === data) return value;
+
+      const masked = { ...value, battle: maskedData.battle, turn: maskedData.turn, roster: maskedData.roster };
+
+      const disguiseOf = view?.disguiseOf;
+
+      if (!disguiseOf) return masked;
+
+      return { ...masked, readBattle: () => { const b = value.readBattle();
+
+ return b && maskBattleBy(b, disguiseOf); } };
+    },
+    [maskedData, data, value, view],
   );
 
   return { state, modeView, data: maskedData, value: maskedValue };
