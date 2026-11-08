@@ -12,7 +12,7 @@ Engine hooks include `lineBlocked({ config, map, line })` — a mode wall on a r
 
 The first mode: pure geometry/vision/generator, server wake-up in `afterMutation`, hiding client-side in `modes/maze/view.ts`; the server sends the full scene.
 
-**Підміна (illusion swap):** `MazeConfig.illusionSwap.pairs` — пари героїв, які бачать один одного ворогами під масками (`aSees`/`bSees`). Операція ДМ `op:"illusion"` замінює весь список (порожній = «Повернути союзників»); `areHostile` повертає `true` для пари; `pruneIllusion` в `afterMutation` знімає пару, коли хтось помер/покинув мапу або бій не ACTIVE (DM-подія); `onReset` очищає. Маска — клієнтська: `view.disguiseOf` + `maskMazeScene`/`maskMazeFxAction`/`maskBattleBy` (`illusion-mask.ts`); ДМ бачить справжні особи й позначку маски (`view.maskedIds`, `ParticipantRow`). Деталі межі — [battle.md](battle.md#підміна-в-лабіринті-isHostile).
+**Підміна (illusion swap):** `MazeConfig.illusionSwap.pairs` — пари героїв, які бачать один одного ворогами під масками (`aSees`/`bSees`). Операція ДМ `op:"illusion"` замінює весь список (порожній = «Повернути союзників»); `areHostile` повертає `true` для пари; `pruneIllusion` в `afterSettle` (після перемоги) знімає пару, коли хтось помер/покинув мапу або бій не ACTIVE (DM-подія); `onReset` очищає. Маска — клієнтська: `view.disguiseOf` + `maskMazeScene`/`maskMazeFxAction`/`maskBattleBy` (`illusion-mask.ts`); ДМ бачить справжні особи й позначку маски (`view.maskedIds`, `ParticipantRow`). Деталі межі — [battle.md](battle.md#підміна-в-лабіринті-ishostile).
 
 ## Spell terrain (P4)
 

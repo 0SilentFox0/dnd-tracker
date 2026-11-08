@@ -11,7 +11,7 @@ import { findParticipant } from "@/lib/utils/abilities/engine/core/participants"
 import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
-import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
+import { isHostile, modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
 import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
@@ -94,8 +94,8 @@ export function canStartAttack(p: BattleParticipant | null): p is BattleParticip
   return !!p && (p.battleData.attacks ?? []).length > 0 && (!p.actionFlags.hasUsedAction || (p.battleData.pendingExtraActions ?? 0) > 0 || canAttackFromPool(p));
 }
 
-function enemyAt(participants: BattleParticipant[], of: BattleParticipant | null, key: string): BattleParticipant | undefined {
-  return participants.find((x) => x.basicInfo.side !== of?.basicInfo.side && isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key));
+function enemyAt(map: BattleMapConfig, participants: BattleParticipant[], of: BattleParticipant | null, key: string): BattleParticipant | undefined {
+  return participants.find((x) => !!of && isHostile(map, of, x) && isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key));
 }
 
 export interface TrajectoryInput {
@@ -108,7 +108,7 @@ export interface TrajectoryInput {
 export function deriveTrajectory({ map, participants, marks, current }: TrajectoryInput, hover: GridPoint | null): BattleMapView["trajectory"] {
   if (!current || !hover || marks?.get(cellKey(hover)) !== "target") return null;
 
-  const target = enemyAt(participants, current, cellKey(hover));
+  const target = enemyAt(map, participants, current, cellKey(hover));
 
   const attack = target && pickAttack(map, participants, current, current.battleData.attacks ?? [], target).attack;
 
@@ -273,7 +273,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
 
     if (pick) return pickAt(id);
 
-    if (canAct && canAttack && current && target && target.basicInfo.side !== current.basicInfo.side && isOnMap(target)) {
+    if (canAct && canAttack && current && target && isHostile(map, current, target) && isOnMap(target)) {
       const mark = marks.get(cellKey(cellsOf(target)[0]));
 
       if (mark === "target") {
@@ -314,7 +314,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
     if (canAct && current && isMoveMark(mark)) return { kind: "move", participantId: current.basicInfo.id, to: steps?.get(key)?.anchor ?? p, free: false };
 
     if (mark === "target" || mark === "invalid-target") {
-      const occupant = enemyAt(participants, current, key);
+      const occupant = enemyAt(map, participants, current, key);
 
       if (occupant) return tokenClick(occupant.basicInfo.id);
     }

@@ -8,6 +8,7 @@ import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { spellNeedsSlot, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
@@ -148,14 +149,18 @@ export function needsBonusTarget(a: ResolvedAbility, onMap = false): boolean {
   return bonusTargetSide(a) !== null || deadTargetRules(a).requiresDead;
 }
 
-export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[], owner?: BattleParticipant): BattleParticipant[] {
+export function bonusTargetCandidates(a: ResolvedAbility, allies: BattleParticipant[], enemies: BattleParticipant[], owner?: BattleParticipant, map?: BattleMapConfig | null): BattleParticipant[] {
   const rules = deadTargetRules(a);
 
   if (rules.requiresDead) return [...allies, ...enemies].filter((p) => isEligibleDeadTarget(rules, p, owner));
 
   const selfId = owner?.basicInfo.id;
 
-  const pool = (bonusTargetSide(a) === ParticipantSide.ENEMY ? enemies : allies).filter((p) => isUp(p) && !isAirborne(p));
+  const wantEnemy = bonusTargetSide(a) === ParticipantSide.ENEMY;
+
+  const sided = owner ? [...allies, ...enemies].filter((p) => isHostile(map, owner, p) === wantEnemy) : wantEnemy ? enemies : allies;
+
+  const pool = sided.filter((p) => isUp(p) && !isAirborne(p));
 
   return a.effects.some((e) => e.kind === "guard") ? pool.filter((p) => p.basicInfo.id !== selfId) : pool;
 }

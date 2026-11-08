@@ -65,7 +65,7 @@ export function useAbilityPicker(participant: BattleParticipant, trigger: Trigge
     ability,
     side: ability ? bonusTargetSide(ability) : null,
     max,
-    candidates: ability ? bonusTargetCandidates(ability, allies, enemies, participant) : [],
+    candidates: ability ? bonusTargetCandidates(ability, allies, enemies, participant, battle.map) : [],
     picked,
     choose: (id: string) => {
       if (!ability) return;

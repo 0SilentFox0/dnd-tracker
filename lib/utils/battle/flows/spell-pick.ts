@@ -7,7 +7,7 @@ import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
-import { modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
+import { isHostile, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { inputDiceOf } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice, upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
@@ -116,11 +116,11 @@ export function spellAimTargets(scene: AimScene, pick: SpellPick, aim: GridPoint
   return targets.filter((p) => matchesTargetFilter(p, pick.filter, { spellLevel: pick.level, castLevel: pick.castLevel }));
 }
 
-export function spellTargetCandidates(order: BattleParticipant[], caster: BattleParticipant | null, side: SpellPick["targetSide"]): BattleParticipant[] {
+export function spellTargetCandidates(order: BattleParticipant[], caster: BattleParticipant | null, side: SpellPick["targetSide"], map?: BattleMapConfig | null): BattleParticipant[] {
   return order.filter((p) => {
     if (!side || !caster) return isUp(p);
 
-    const mine = p.basicInfo.side === caster.basicInfo.side;
+    const mine = !isHostile(map, caster, p);
 
     return side === "dead" ? mine && !isUp(p) : (isUp(p) || (side === "ally" && isDying(p))) && (side === "ally" ? mine : !mine);
   });

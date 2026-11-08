@@ -58,13 +58,13 @@ describe("maze illusion op", () => {
   it("rejects the swap before the battle is active", () => {
     const loaded = ctx();
 
-    expectRejected(() => illusion({ ...loaded, scene: { ...loaded.scene, status: BattleStatus.PENDING } }, [pair]), MAZE_TEXTS.illusionNotActive);
+    expectRejected(() => illusion({ ...loaded, scene: { ...loaded.scene, status: BattleStatus.PREPARED } }, [pair]), MAZE_TEXTS.illusionNotActive);
   });
 
   it("clearing is allowed outside an active battle", () => {
     const loaded = ctx({}, { illusionSwap: { pairs: [pair] } });
 
-    expect(illusion({ ...loaded, scene: { ...loaded.scene, status: BattleStatus.PENDING } }, []).scene?.map?.maze?.illusionSwap?.pairs).toEqual([]);
+    expect(illusion({ ...loaded, scene: { ...loaded.scene, status: BattleStatus.PREPARED } }, []).scene?.map?.maze?.illusionSwap?.pairs).toEqual([]);
   });
 
   it("rejects an enemy-side character", () => {

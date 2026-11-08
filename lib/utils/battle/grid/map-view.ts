@@ -5,6 +5,7 @@ import { moveBudget, reachable } from "./path";
 import { hazardCells, threatCells } from "./terrain";
 
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { BattleAttack, BattleMapConfig, BattleMapMark, BattleParticipant, GridPoint } from "@/types/battle";
 
 export type CellMark = BattleMapMark;
@@ -84,7 +85,7 @@ export function targetMarks(map: BattleMapConfig, participants: BattleParticipan
   const marks = new Map<string, CellMark>();
 
   for (const t of participants) {
-    if (t.basicInfo.side === attacker.basicInfo.side || !isOnMap(t) || !isActive(t)) continue;
+    if (!isHostile(map, attacker, t) || !isOnMap(t) || !isActive(t)) continue;
 
     const mark: CellMark = pickAttack(map, participants, attacker, attacks, t).attack ? "target" : "invalid-target";
 

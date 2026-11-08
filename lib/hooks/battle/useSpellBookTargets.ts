@@ -17,7 +17,7 @@ import {
   withLiveAimTargets,
 } from "@/lib/utils/battle/flows";
 import { isOnMap } from "@/lib/utils/battle/grid";
-import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
+import { isHostile, modeSightedTargets } from "@/lib/utils/battle/modes/engine";
 import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
@@ -34,7 +34,7 @@ export function useSpellBookTargets(caster: BattleParticipant | null, flow: Spel
 
   const pickSide = flow.pick?.targetMode === "template" ? undefined : flow.pick?.targetSide;
 
-  const targets = useMemo(() => spellTargetCandidates(order, caster, pickSide).filter(visible), [order, caster, pickSide, visible]);
+  const targets = useMemo(() => spellTargetCandidates(order, caster, pickSide, map).filter(visible), [order, caster, pickSide, map, visible]);
 
   const filteredOut = (t: BattleParticipant) => !matchesTargetFilter(t, flow.pick?.filter, { spellLevel: flow.pick?.level ?? 0, castLevel: flow.pick?.castLevel });
 
@@ -59,7 +59,7 @@ export function useSpellBookTargets(caster: BattleParticipant | null, flow: Spel
     caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, filteredOut, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
   });
 
-  const aimPreviewAt = (cell: GridPoint) => ({ targets: touchedAt(cell).filter(visible).map((p) => ({ participant: p, ally: p.basicInfo.side === caster?.basicInfo.side })) });
+  const aimPreviewAt = (cell: GridPoint) => ({ targets: touchedAt(cell).filter(visible).map((p) => ({ participant: p, ally: !!caster && !isHostile(map, caster, p) })) });
 
   const chainFirst = flow.pick?.chain ? order.find((p) => p.basicInfo.id === flow.targetIds[0]) : undefined;
 
