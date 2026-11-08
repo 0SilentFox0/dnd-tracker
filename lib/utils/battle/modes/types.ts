@@ -10,6 +10,8 @@ export interface ModeView {
   ownIds: ReadonlySet<string>;
   showDormant: boolean;
   dark: boolean;
+  /** Позначка в інтерфейсі ДМ: хто під ілюзією */
+  maskedIds?: ReadonlySet<string>;
 }
 
 export interface ModeMoveZone {

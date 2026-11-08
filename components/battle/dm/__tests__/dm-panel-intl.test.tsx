@@ -44,7 +44,7 @@ describe("DM panel texts in both locales", () => {
 
     const Wrapper = scene.wrapper;
 
-    const tools = { state: { canGenerate: true, tool: "none", dark: false, heroes: [], awaitingExit: false }, actions: {}, editing: null, asHero: { id: null, set: vi.fn() } } as unknown as MazeTools;
+    const tools = { state: { canGenerate: true, tool: "none", dark: false, heroes: [], awaitingExit: false }, actions: {}, illusion: { pairs: [], set: vi.fn(), clear: vi.fn() }, editing: null, asHero: { id: null, set: vi.fn() } } as unknown as MazeTools;
 
     render(<MazeToolbar tools={tools} tall={false} />, { wrapper: Wrapper });
 

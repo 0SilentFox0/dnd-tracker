@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { useTranslations } from "next-intl";
-import { Shield } from "lucide-react";
+import { Shield, VenetianMask } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, HealthLabel, hitFlashClass, HitFloat, Portrait } from "@/components/battle/hud";
@@ -39,16 +39,19 @@ function DeathSavePips({ saves }: { saves: NonNullable<BattleParticipant["battle
   );
 }
 
-export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, exact, acText, current, impact, onSelect }: {
+export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, exact, acText, current, masked, impact, onSelect }: {
   participant: BattleParticipant;
   effects: readonly ActiveEffect[];
   exact: boolean;
   acText: string;
   current: boolean;
+  masked: boolean;
   impact: FxImpact | null;
   onSelect: (id: string) => void;
 }) {
   const text = useText();
+
+  const tMask = useTranslations("battleDm.maze.toolbar");
 
   const creatureTypeLabel = useCreatureTypeLabel();
 
@@ -72,6 +75,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
         {exact && participant.abilities.creatureType && <div className="text-[10px] text-[var(--hud-muted)]">{creatureTypeLabel(participant.abilities.creatureType)}</div>}
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
+          {masked && <VenetianMask aria-label={tMask("illusion")} className="ml-1 size-4 shrink-0 text-[var(--hud-muted)]" />}
           {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-hud-text")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}
         </div>
         <HealthBar participant={participant} exact={exact} />
