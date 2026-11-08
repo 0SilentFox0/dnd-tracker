@@ -162,6 +162,7 @@
     "markOwnTurn": "A mark can only be placed on your own turn",
     "markUnable": "The participant cannot place a mark",
     "markNoSteps": "Not enough steps for a mark",
+    "illusionInvalid": "The illusion can only be cast on heroes standing in the maze",
     "placement": {
       "outside": "The cell is outside the map",
       "exit": "Nobody can be placed on the exit",
@@ -174,6 +175,9 @@
       "tunnel": "The DM left a single tunnel in the maze",
       "darkOn": "Darkness",
       "darkOff": "Light",
+      "illusionOn": "Illusion swap",
+      "illusionOff": "Illusion lifted",
+      "illusionAuto": "Illusion lifted: one of the heroes dropped out",
       "scatterStarts": "The DM scattered the heroes along the edges"
     },
     "escaped": "{name} escaped from the maze",

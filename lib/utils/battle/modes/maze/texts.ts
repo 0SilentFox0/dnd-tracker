@@ -25,6 +25,7 @@ export const MAZE_TEXTS = {
   markOwnTurn: "battleActions.maze.markOwnTurn",
   markUnable: "battleActions.maze.markUnable",
   markNoSteps: "battleActions.maze.markNoSteps",
+  illusionInvalid: "battleActions.maze.illusionInvalid",
   placement: {
     outside: "battleActions.maze.placement.outside",
     exit: "battleActions.maze.placement.exit",
@@ -37,6 +38,9 @@ export const MAZE_TEXTS = {
     tunnel: textRef("battleActions.maze.ops.tunnel"),
     darkOn: textRef("battleActions.maze.ops.darkOn"),
     darkOff: textRef("battleActions.maze.ops.darkOff"),
+    illusionOn: textRef("battleActions.maze.ops.illusionOn"),
+    illusionOff: textRef("battleActions.maze.ops.illusionOff"),
+    illusionAuto: textRef("battleActions.maze.ops.illusionAuto"),
     scatterStarts: textRef("battleActions.maze.ops.scatterStarts"),
   },
   escaped: (name: string) => textRef("battleActions.maze.escaped", { name }),

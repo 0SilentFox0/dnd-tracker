@@ -1,6 +1,6 @@
 import { tunnelMutation } from "./maze-tunnel";
 
-import { ParticipantSide } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { cellKey, inBounds, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import {
   allReachExit,
@@ -20,9 +20,10 @@ import {
   scatterFreeStarts,
   seedFrom,
 } from "@/lib/utils/battle/modes/maze";
+import { mazeOpEvent } from "@/lib/utils/battle/modes/maze/illusion";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { dmEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
+import { rejectAction } from "@/lib/utils/battle/store";
 import { rngOf } from "@/lib/utils/common/rng";
 import type { MazeActionData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
@@ -49,13 +50,6 @@ function canonicalCell(key: string, grid: GridSize): string {
   const cell = parseCellKey(key);
 
   return inBounds(grid, cell) ? cellKey(cell) : rejectAction(MAZE_TEXTS.cellOutside);
-}
-
-// подія потрібна, щоб зміну лабіринту можна було відкотити (знімок пишеться лише з подією)
-export function mazeOpEvent(round: number, text: LogLine, kind: "op" | "reshuffle"): NewBattleEvent {
-  const event = dmEvent(round, text);
-
-  return { ...event, details: { ...event.details, actionDetails: { mazeEvent: kind } } };
 }
 
 interface FinishArgs {
@@ -234,6 +228,22 @@ const fog: OpHandler<"fog"> = (ctx, { map, grid }, body) => {
 const dark: OpHandler<"dark"> = (ctx, { map, grid }, body) =>
   finish({ ctx, map, maze: { ...grid.maze, dark: body.on }, text: body.on ? MAZE_TEXTS.ops.darkOn : MAZE_TEXTS.ops.darkOff });
 
+const illusion: OpHandler<"illusion"> = (ctx, { map, grid }, body) => {
+  const byId = new Map(ctx.participants.map((p) => [p.basicInfo.id, p]));
+
+  const ok = (id: string) => {
+    const p = byId.get(id);
+
+    return !!p && p.basicInfo.sourceType === ParticipantSourceType.CHARACTER && onMazeField(p);
+  };
+
+  if (!body.pairs.every((p) => ok(p.a) && ok(p.b))) rejectAction(MAZE_TEXTS.illusionInvalid);
+
+  const text = body.pairs.length ? MAZE_TEXTS.ops.illusionOn : MAZE_TEXTS.ops.illusionOff;
+
+  return finish({ ctx, map, maze: { ...grid.maze, illusionSwap: { pairs: body.pairs } }, text });
+};
+
 const scatterStarts: OpHandler<"scatterStarts"> = (ctx, { map, grid }) => {
   if (grid.maze.moved) rejectAction(MAZE_TEXTS.alreadyMoved);
 
@@ -242,4 +252,4 @@ const scatterStarts: OpHandler<"scatterStarts"> = (ctx, { map, grid }) => {
   return finish({ ctx, map, maze: grid.maze, text: MAZE_TEXTS.ops.scatterStarts, extra: { participants: withPositions(ctx.participants, scatter(), grid) } });
 };
 
-export const MAZE_OPS: { [K in MazeActionData["op"]]: OpHandler<K> } = { generate, reshuffle, walls, exit, teleport, fog, dark, scatterStarts };
+export const MAZE_OPS: { [K in MazeActionData["op"]]: OpHandler<K> } = { generate, reshuffle, walls, exit, teleport, fog, dark, illusion, scatterStarts };

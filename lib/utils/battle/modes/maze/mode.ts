@@ -3,6 +3,7 @@ import { withMazeAwareness } from "./awareness";
 import { emptyMaze } from "./constants";
 import { mazeChange } from "./delta";
 import { mazeGridOf } from "./grid";
+import { pruneIllusion } from "./illusion";
 import { mazeMoveZone } from "./move-zone";
 import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
@@ -29,7 +30,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
   emptyConfig: () => emptyMaze(),
   server: {
     onStart: ({ map, order }) => startMaze(map, order),
-    afterMutation: ({ map, scene, result }) => withMazeAwareness(map, scene, result),
+    afterMutation: ({ map, scene, result }) => pruneIllusion(result.scene?.map ?? map, scene, withMazeAwareness(map, scene, result)),
     blockedText: (maze) => (maze.dark ? API_ERRORS.MAZE_DARK : null),
     autoSkipText: (maze) => (maze.dark ? MAZE_TEXTS.darkSkip : null),
     placeAll: ({ map, config, participants }) => placeMazeParticipants({ ...map, maze: config }, participants),
