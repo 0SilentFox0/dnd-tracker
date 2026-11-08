@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { HAZARD_DICE_PATTERN, MAZE_DIFFICULTIES, MAZE_LIMITS, MAZE_MARK_SYMBOLS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { HAZARD_DICE_PATTERN, MAZE_DIFFICULTIES, MAZE_LIMITS, MAZE_MARK_SYMBOLS, ParticipantSide, ParticipantSourceType, TURN_TIMER_RANGE } from "@/lib/constants/battle";
 import { MAP_MOTION_MAX_SPEED } from "@/lib/constants/battle-motion";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
@@ -125,6 +125,8 @@ export const battleMapSchema = z.object({
   motion: motionConfigSchema.nullable().optional(),
 }).refine((m) => hasPlayableArea(m), { message: "battleSetup.validation.playableAreaTooSmall", path: ["blocked"] });
 
+export const turnTimerSecondsSchema = z.number().int().min(TURN_TIMER_RANGE[0]).max(TURN_TIMER_RANGE[1]);
+
 export const createBattleSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().optional(),
@@ -138,6 +140,7 @@ export const createBattleSchema = z.object({
     }),
   ),
   map: battleMapSchema.nullable().optional(),
+  turnTimerSeconds: turnTimerSecondsSchema.nullable().optional(),
 });
 
 export const moraleCheckSchema = z.object({

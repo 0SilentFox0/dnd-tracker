@@ -98,10 +98,6 @@
     "spellIngredients": {
       "enabled": "Spell ingredients: check and spend material components when casting",
       "autoPay": "Cover missing ingredients from the wallet"
-    },
-    "turnTimer": {
-      "enabled": "Turn timer: end the turn automatically when time runs out",
-      "seconds": "Time per turn, seconds"
     }
   },
   "mechanics": {
@@ -168,10 +164,6 @@
     "spellIngredients": {
       "label": "Spell ingredients",
       "description": "Costly or consumed material components are checked when casting in battle and spent from the hero's inventory items; a shortfall can be covered with gold from the wallet. Non-consumed components only have to be in the inventory and are never spent. Spending is kept after the battle only with the \"persist resources\" out-of-combat rule on. Existing spells without ingredients are unchanged."
-    },
-    "turnTimer": {
-      "label": "Turn timer",
-      "description": "Optional time limit per turn in battle. Everyone sees the countdown in the top bar; when it runs out the turn ends automatically (sent by the DM's or the turn owner's client). Off by default."
     }
   },
   "customConditions": {

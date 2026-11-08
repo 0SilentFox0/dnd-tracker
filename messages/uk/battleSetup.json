@@ -80,7 +80,10 @@
     "name": "Назва битви *",
     "namePlaceholder": "Назва битви",
     "description": "Опис",
-    "descriptionPlaceholder": "Опис битви (опціонально)"
+    "descriptionPlaceholder": "Опис битви (опціонально)",
+    "turnTimer": "Таймер ходу",
+    "turnTimerHint": "Необов'язково: коли час на хід вийде, він завершиться автоматично. За замовчуванням вимкнено.",
+    "turnTimerSeconds": "Час на хід, секунд"
   },
   "map": {
     "title": "Карта бою",

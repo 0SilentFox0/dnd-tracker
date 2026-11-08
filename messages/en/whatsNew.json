@@ -1,7 +1,7 @@
 {
   "2026-11-08-turn-timer": {
     "title": "Turn timer",
-    "body": "Campaign rules can now enable a turn timer with a time limit in seconds. The countdown shows in the battle top bar, and when time runs out the turn ends automatically. Map motion also gained a “Very fast” speed."
+    "body": "Each battle's settings (the Basics tab) can now enable a turn timer with a time limit in seconds; it is off by default. The countdown shows in the battle top bar, and when time runs out the turn ends automatically. Map motion also gained a “Very fast” speed."
   },
   "2026-11-08-phantom": {
     "title": "Phantom spell",

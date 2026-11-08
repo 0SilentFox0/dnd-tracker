@@ -19,5 +19,4 @@ export const MECHANIC_REGISTRY = {
   encounters: true,
   items: true,
   spellIngredients: true,
-  turnTimer: true,
 } satisfies Record<MechanicKey, true>;

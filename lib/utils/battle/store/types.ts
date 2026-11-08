@@ -95,6 +95,7 @@ export interface BattleMeta {
   critChoiceByDm: boolean;
   map: BattleMapConfig | null;
   audio?: BattleAudioState | null;
+  turnTimerSeconds?: number | null;
   createdAt: Date;
 }
 
