@@ -14,45 +14,60 @@ export const maskParticipant = (p: BattleParticipant, d: IllusionDisguise): Batt
 });
 
 /** Ефект, накладений замаскованим партнером, показує маску, а не справжнє ім'я джерела */
-export const maskEffects = <E extends ActiveEffect>(effects: readonly E[], disguiseOf: DisguiseOf): readonly E[] => {
+export const maskEffects = <E extends ActiveEffect>(effects: readonly E[], disguiseOf: DisguiseOf, names: ReadonlyMap<string, string> = NO_NAMES): readonly E[] => {
   const masked = effects.map((e) => {
-    const name = e.source && disguiseOf(e.source.participantId)?.name;
+    const { source } = e;
 
-    return e.source && name ? { ...e, source: { ...e.source, name } } : e;
+    if (!source) return e;
+
+    const name = disguiseOf(source.participantId)?.name ?? maskPlain(source.name, names);
+
+    const abilityName = source.abilityName && maskPlain(source.abilityName, names);
+
+    return name === source.name && abilityName === source.abilityName ? e : { ...e, source: { ...source, name, ...(abilityName && { abilityName }) } };
   });
 
   return masked.some((e, i) => e !== effects[i]) ? masked : effects;
 };
 
-export const maskParticipantBy = (p: BattleParticipant, disguiseOf: DisguiseOf): BattleParticipant => {
+export const maskParticipantBy = (p: BattleParticipant, disguiseOf: DisguiseOf, names?: ReadonlyMap<string, string>): BattleParticipant => {
   const d = disguiseOf(p.basicInfo.id);
 
   const own = p.battleData.activeEffects;
 
-  const effects = own && maskEffects(own, disguiseOf);
+  const effects = own && maskEffects(own, disguiseOf, names);
 
   const base = effects && effects !== own ? { ...p, battleData: { ...p.battleData, activeEffects: effects as ActiveEffect[] } } : p;
 
   return d ? maskParticipant(base, d) : base;
 };
 
-export const maskEffectMap = (map: ReadonlyMap<string, ActiveEffect[]>, disguiseOf: DisguiseOf): Map<string, ActiveEffect[]> =>
-  new Map([...map].map(([id, list]) => [id, maskEffects(list, disguiseOf) as ActiveEffect[]]));
+export const maskEffectMap = (map: ReadonlyMap<string, ActiveEffect[]>, disguiseOf: DisguiseOf, names?: ReadonlyMap<string, string>): Map<string, ActiveEffect[]> =>
+  new Map([...map].map(([id, list]) => [id, maskEffects(list, disguiseOf, names) as ActiveEffect[]]));
 
-export const maskQueueBy = (queue: QueueEntry[], disguiseOf: DisguiseOf): QueueEntry[] =>
-  queue.map((e) => (e.kind === "round" ? e : { ...e, participant: maskParticipantBy(e.participant, disguiseOf) }));
+export const maskQueueBy = (queue: QueueEntry[], disguiseOf: DisguiseOf, names?: ReadonlyMap<string, string>): QueueEntry[] =>
+  queue.map((e) => (e.kind === "round" ? e : { ...e, participant: maskParticipantBy(e.participant, disguiseOf, names) }));
 
 function maskArg(arg: TextArg, names: ReadonlyMap<string, string>): TextArg {
-  if (typeof arg === "string") return names.get(arg) ?? arg;
+  if (typeof arg === "string") return maskPlain(arg, names);
 
   if (typeof arg === "number") return arg;
 
   return { ...arg, ...(arg.params && { params: Object.fromEntries(Object.entries(arg.params).map(([k, v]) => [k, maskArg(v, names)])) }) };
 }
 
-/** Старі записи — прості рядки: підміна за точним збігом імені (двозначні імена вже відсіяні в `names`) */
-const maskPlain = (text: string, names: ReadonlyMap<string, string>): string =>
-  [...names].reduce((acc, [real, mask]) => (real && acc.includes(real) ? acc.split(real).join(mask) : acc), text);
+const escapeRe = (v: string) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Імена як окремі токени (не частина довшого слова); один прохід, довші першими — маска не підміняється вдруге */
+const maskPlain = (text: string, names: ReadonlyMap<string, string>): string => {
+  const reals = [...names.keys()].filter((r) => r && text.includes(r)).sort((a, b) => b.length - a.length);
+
+  if (reals.length === 0) return text;
+
+  const re = new RegExp(`(?<![\\p{L}\\p{N}])(?:${reals.map(escapeRe).join("|")})(?![\\p{L}\\p{N}])`, "gu");
+
+  return text.replace(re, (m) => names.get(m) ?? m);
+};
 
 /** Імена в params (рекурсивно) міняються на маску; рядки без TextRef лишаються як є */
 export const maskLogLine = (line: LogLine, names: ReadonlyMap<string, string>): LogLine => {

@@ -227,3 +227,33 @@ describe("точні стати маски", () => {
     expect(canSeeExactStats(masked, { userId: "dm", isDM: true, canSeeEnemyHp: false, readOnly: false })).toBe(true);
   });
 });
+
+describe("імена як токени у довших рядках", () => {
+  const joined = { ...log, actorId: "system", actorName: "System", targets: [], hpChanges: [], resultText: "", log: [{ message: "triggers", params: { list: "Zehir, Godric, Cora", n: 2 } }, "Godricson, Godric and Godric." ] } as unknown as BattleAction;
+
+  it("кілька імен в одному рядку params: партнер міняється, інші ні", () => {
+    const view = viewFor("u1")!;
+
+    const out = maskAction(joined, view.disguiseOf!, view.disguiseNames);
+
+    expect((out.log?.[0] as unknown as { params: { list: string } }).params.list).toBe("Zehir, Vampire, Cora");
+  });
+
+  it("ім'я як частина іншого слова не чіпається", () => {
+    const view = viewFor("u1")!;
+
+    expect(maskAction(joined, view.disguiseOf!, view.disguiseNames).log?.[1]).toBe("Godricson, Vampire and Vampire.");
+  });
+
+  it("групове ім'я вміння й джерело ефекту з реальним ім'ям партнера маскуються", () => {
+    const eff = { id: "e", name: "Pupil", source: { participantId: "c", name: "Cora", abilityName: "Godric: Pupil" } } as unknown as import("@/types/battle").ActiveEffect;
+
+    const withEffect = { ...zehir, battleData: { ...zehir.battleData, activeEffects: [eff] } };
+
+    const sc = { ...scene(), battle: { battleLog: [], initiativeOrder: [withEffect, godric, c] } };
+
+    const out = maskMazeScene(sc, viewFor("u1"));
+
+    expect(out.battle.initiativeOrder?.[0].battleData.activeEffects?.[0].source?.abilityName).toBe("Vampire: Pupil");
+  });
+});

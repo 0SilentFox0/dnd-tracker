@@ -222,7 +222,7 @@ export function maskMazeScene<T extends MazeMaskable>(input: T, view: MazeView |
 }
 
 function disguiseScene<T extends MazeMaskable>(scene: T, disguiseOf: DisguiseOf, names?: ReadonlyMap<string, string>): T {
-  const by = (list: BattleParticipant[]) => list.map((p) => maskParticipantBy(p, disguiseOf));
+  const by = (list: BattleParticipant[]) => list.map((p) => maskParticipantBy(p, disguiseOf, names));
 
   const { current } = scene.turn;
 
@@ -232,9 +232,9 @@ function disguiseScene<T extends MazeMaskable>(scene: T, disguiseOf: DisguiseOf,
 
   return {
     ...scene,
-    ...(scene.effects && { effects: maskEffectMap(scene.effects, disguiseOf) }),
+    ...(scene.effects && { effects: maskEffectMap(scene.effects, disguiseOf, names) }),
     battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).map((e) => maskAction(e, disguiseOf, names)), ...(initiativeOrder && { initiativeOrder: by(initiativeOrder) }) },
-    turn: { ...scene.turn, current: current && maskParticipantBy(current, disguiseOf), queue: maskQueueBy(scene.turn.queue, disguiseOf) },
+    turn: { ...scene.turn, current: current && maskParticipantBy(current, disguiseOf, names), queue: maskQueueBy(scene.turn.queue, disguiseOf, names) },
     roster: { ...scene.roster, allies: everyone.filter((p) => p.basicInfo.side === ParticipantSide.ALLY), enemies: everyone.filter((p) => p.basicInfo.side !== ParticipantSide.ALLY) },
   } as T;
 }
