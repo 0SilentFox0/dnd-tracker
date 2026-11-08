@@ -62,6 +62,15 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - The DM window in the mode does not host battle music (`isDM` is false there); the working DM window keeps hosting it.
 - Demo tours reset the mode on start (`resetPlayerViews`).
 
+## Підміна в лабіринті (`isHostile`)
+
+Реальні `basicInfo.side`/`controlledBy` не змінюються; підміна = «ворожі на вигляд» (атаки, заклинання, cleave, opportunity) + маска імені/аватара. Перемога, мораль, XP рахуються за реальним `side`.
+
+- **`isHostile(map, a, b)`** (`modes/engine.ts`) = хук режиму `areHostile ?? a.side !== b.side`. Переведено на нього: `attack-phase/targets.ts`, `grid/attack-reach.ts`, `actions/run.ts` (лише відмова `enemyRequired`), `actions/legendary.ts`, `actions/opportunity.ts`, `spell/spell-targeting.ts`, `validation/ability-targets.ts`, `maneuvers/strike.ts`, клієнтський `useAttackTargets`.
+- **Лишається на реальному `side`:** ауры, тригери здібностей, `fx/*`, пасивне сприйняття в `actions/run.ts`, перемога/мораль/XP та решта порівнянь `side`.
+- **Маска лише в UI** (див. «Hiding is UI only» вище): дельти, Pusher і GET несуть справжні імена, тож це не межа безпеки. Глядач у парі бачить партнера під маскою в ростері, черзі, журналі (імена й `textRefs`), FX і токенах; треті гравці — справжні імена; ДМ — справжні імена з позначкою.
+- Не покрито: підміна не-героїв, ally↔enemy, per-user дельти.
+
 ## Attack: cover, chain shot, cleave
 
 - **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode wall (`lineBlocked`) on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. The wizard and the map show the same result.
