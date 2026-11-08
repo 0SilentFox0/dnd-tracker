@@ -124,6 +124,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
       round: p.currentRound,
       battleId: p.battleId,
       attackKind: attackKindOf(attack.type),
+      map: flow.ctx.map,
       rng: flow.ctx.rng,
     });
 

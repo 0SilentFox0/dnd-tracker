@@ -67,8 +67,11 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
 
   const base = { mazeDark: maze.dark, partyCells: null, maskedIds: NO_IDS };
 
-  const disguiseOfViewers = (viewerIds: string[]): DisguiseOf | undefined =>
-    pairs.length === 0 ? undefined : (targetId) => viewerIds.map((v) => disguiseFor(pairs, v, targetId)).find(Boolean);
+  const disguiseOfViewers = (viewerIds: string[]): DisguiseOf | undefined => {
+    const seen = pairs.filter((p) => !(viewerIds.includes(p.a) && viewerIds.includes(p.b)));
+
+    return seen.length === 0 ? undefined : (targetId) => viewerIds.map((v) => disguiseFor(seen, v, targetId)).find(Boolean);
+  };
 
   if (isDM && !asHeroId) {
     return { ...base, maskedIds: new Set(pairs.flatMap((p) => [p.a, p.b])), role: "dm", cells: null, partyCells: unionVision(grid, viewersOf(participants.filter(isMazeHero))), visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
@@ -113,14 +116,19 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   };
 }
 
-const disguiseNamesOf = (participants: BattleParticipant[], disguiseOf: DisguiseOf): ReadonlyMap<string, string> =>
-  new Map(
+const disguiseNamesOf = (participants: BattleParticipant[], disguiseOf: DisguiseOf): ReadonlyMap<string, string> => {
+  const count = new Map<string, number>();
+
+  for (const p of participants) count.set(p.basicInfo.name, (count.get(p.basicInfo.name) ?? 0) + 1);
+
+  return new Map(
     participants.flatMap((p) => {
       const d = disguiseOf(idOf(p));
 
-      return d ? [[p.basicInfo.name, d.name] as const] : [];
+      return d && count.get(p.basicInfo.name) === 1 ? [[p.basicInfo.name, d.name] as const] : [];
     }),
   );
+};
 
 export const MAZE_UNKNOWN_NAME = "???";
 

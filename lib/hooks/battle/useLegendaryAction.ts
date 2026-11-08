@@ -64,7 +64,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
       const blocked = (a.limits?.lair ? lairBlocker(participant, battle.currentRound, a.key) : legendaryBlocker(participant, current, cost)) ?? (!withinCountLimits(participant, a) ? textRef("battleDm.legendary.limitReached") : cooldownLeft(participant, a, battle.currentRound) > 0 ? textRef("battleDm.legendary.cooldown", { rounds: cooldownLeft(participant, a, battle.currentRound) }) : perform?.kind === "attack" && !attack ? textRef("battleDm.legendary.attackMissing") : null);
 
-      return { id: `ability:${a.key}`, kind: a.limits?.lair ? "lair" : "ability", label, cost, abilityKey: a.key, ...(perform?.kind === "spell" && { spellId: perform.spellId }), needsTarget: perform?.kind === "spell" ? false : perform?.kind === "attack" ? true : needsBonusTarget(a), maxTargets: perform?.kind === "attack" ? 1 : abilityMaxTargets(a), candidates: perform?.kind === "attack" ? enemies.filter(isAttackable) : bonusTargetCandidates(a, allies, enemies, participant), blocked };
+      return { id: `ability:${a.key}`, kind: a.limits?.lair ? "lair" : "ability", label, cost, abilityKey: a.key, ...(perform?.kind === "spell" && { spellId: perform.spellId }), needsTarget: perform?.kind === "spell" ? false : perform?.kind === "attack" ? true : needsBonusTarget(a), maxTargets: perform?.kind === "attack" ? 1 : abilityMaxTargets(a), candidates: perform?.kind === "attack" ? enemies.filter(isAttackable) : bonusTargetCandidates(a, allies, enemies, participant, battle.map), blocked };
     });
 
     return [...attacks, ...abilities];

@@ -144,3 +144,41 @@ describe("maskBattleBy", () => {
     expect(out.battleLog[0].actorName).toBe("Vampire");
   });
 });
+
+describe("власні герої глядача пари", () => {
+  const both = [hero("zehir", "Zehir", "u1", 1), hero("godric", "Godric", "u1", 2), c];
+
+  const bothScene = () => ({
+    battle: { battleLog: [] as BattleAction[], initiativeOrder: both },
+    turn: { current: both[1], queue: turnQueue(both, 1, 1) },
+    roster: { allies: both, enemies: [] as BattleParticipant[] },
+  });
+
+  it("один користувач керує обома — жодного маскування й переносу в ворогів", () => {
+    const v = deriveMazeView({ map, participants: both, userId: "u1", isDM: false })!;
+
+    const out = maskMazeScene(bothScene(), v);
+
+    expect(v.disguiseOf).toBeUndefined();
+    expect(out.roster.enemies).toEqual([]);
+    expect(nameOf(out.roster.allies, "godric")).toBe("Godric");
+    expect(out.roster.allies.every((p) => p.basicInfo.side === ParticipantSide.ALLY)).toBe(true);
+  });
+
+  it("третій гравець бачить пару без змін; пара керована одним не ламає вид іншого партнера", () => {
+    const v = deriveMazeView({ map, participants: both, userId: "u3", isDM: false })!;
+
+    expect(v.disguiseOf?.("godric")).toBeUndefined();
+  });
+});
+
+describe("disguiseNames", () => {
+  it("не перейменовує, коли справжнє ім'я партнера збігається з іменем іншого учасника", () => {
+    const twin = hero("twin", "Godric", "u3", 4);
+
+    const v = deriveMazeView({ map, participants: [zehir, godric, twin], userId: "u1", isDM: false })!;
+
+    expect(v.disguiseNames?.has("Godric")).toBe(false);
+    expect(viewFor("u1")!.disguiseNames?.get("Godric")).toBe("Vampire");
+  });
+});

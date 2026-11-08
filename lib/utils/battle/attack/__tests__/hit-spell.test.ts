@@ -5,6 +5,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { castHitSpell } from "@/lib/utils/battle/attack/process/hit-spell";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 
 const spellOf = (key: string): CastableSpell => {
@@ -69,5 +70,20 @@ describe("castHitSpell", () => {
 
     expect(effectNames(r)).toEqual([]);
     expect(r.messages).toEqual([]);
+  });
+
+  it("партнер ілюзії в лабіринті — ворог: атакуючий кидок на влучання може схибити", () => {
+    const bolt: CastableSpell = { id: "bolt", name: "Промінь", level: 0, groupId: null, definition: { dice: 1, cost: "action", targeting: { kind: "enemy", range: 60 }, resolution: { kind: "attack" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [] } };
+
+    const attacker = mistress(["bolt"]);
+
+    const target = makeParticipant({ id: "v", side: ParticipantSide.ALLY, hp: 50, maxHp: 50 });
+
+    const map = mazeMap({ illusionSwap: { pairs: [{ a: "m", b: "v", aSees: { name: "X" }, bSees: { name: "Y" } }] } }, 12);
+
+    const hpAfter = (rng: () => number) => castHitSpell({ attacker, targetId: "v", participants: [attacker, target], spells: new Map([["bolt", bolt]]), round: 1, battleId: "b", map, rng }).participants.find((p) => p.basicInfo.id === "v")!.combatStats.currentHp;
+
+    expect(hpAfter(seq(0.99))).toBeLessThan(50);
+    expect(hpAfter(seq(0))).toBe(50);
   });
 });
