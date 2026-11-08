@@ -70,6 +70,8 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
       return { key: "rest.log.resourcesEdit" };
     case "choices_edit":
       return { key: "rest.log.choicesEdit" };
+    case "downtime":
+      return { key: d.undo ? "rest.log.downtimeUndo" : "rest.log.downtime", params: { days: num("days") } };
     case "battle_result":
       return { key: "rest.log.battleResult", params: { hpBefore: num("hpBefore"), hpAfter: num("hpAfter"), maxHp: num("maxHp"), dead: yes(d.dead) } };
   }

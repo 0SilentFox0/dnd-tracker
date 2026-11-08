@@ -25,6 +25,11 @@ describe("describeCharacterLog wfrp", () => {
     expect(describeCharacterLog({ kind: "test", data: { ...data, auto: "failure", reversed: false } }).params).toMatchObject({ auto: "failure", reversed: "no" });
   });
 
+  it("downtime", () => {
+    expect(describeCharacterLog({ kind: "downtime", data: { periodId: "p", days: 7, summary: {} } })).toEqual({ key: "rest.log.downtime", params: { days: 7 } });
+    expect(describeCharacterLog({ kind: "downtime", data: { undo: true, days: 7 } }).key).toBe("rest.log.downtimeUndo");
+  });
+
   it("session", async () => {
     const d = describeCharacterLog({ kind: "session", data: {} });
 

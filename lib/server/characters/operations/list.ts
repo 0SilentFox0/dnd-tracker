@@ -38,12 +38,12 @@ const LIST_SELECT = {
   user: { select: { displayName: true } },
 } as const;
 
-const hasLedger = (value: unknown): value is Characteristics => typeof value === "object" && value !== null && Array.isArray((value as Characteristics).ledger);
+const isCharacteristicsObject = (value: unknown): value is Characteristics => typeof value === "object" && value !== null && !Array.isArray(value);
 
 type LedgerRow = { characteristics?: unknown; controlledBy?: string | null };
 
 export const redactListedLedgers = <T extends LedgerRow>(rows: T[], viewer: { userId?: string; isDM: boolean }): T[] =>
-  rows.map((row) => hasLedger(row.characteristics) ? { ...row, characteristics: redactLedger(row.characteristics, { isDM: viewer.isDM, isOwner: !!viewer.userId && row.controlledBy === viewer.userId }) } : row);
+  rows.map((row) => isCharacteristicsObject(row.characteristics) ? { ...row, characteristics: redactLedger(row.characteristics, { isDM: viewer.isDM, isOwner: !!viewer.userId && row.controlledBy === viewer.userId }) } : row);
 
 const listSchema = z.object({ type: z.string().nullish(), compact: z.boolean().optional(), status: z.string().nullish() });
 

@@ -3,12 +3,16 @@ import type { Characteristics } from "../characteristics/keys";
 export type LedgerViewer = { isDM: boolean; isOwner: boolean };
 
 export function redactLedger(characteristics: Characteristics, viewer: LedgerViewer): Characteristics {
-  return viewer.isDM || viewer.isOwner ? characteristics : { ...characteristics, ledger: [] };
+  if (viewer.isDM || viewer.isOwner) return characteristics;
+
+  const { downtime: _downtime, ...rest } = characteristics;
+
+  return { ...rest, ledger: [] };
 }
 
 /** Fields only `advance` / `advance-undo` (or the DM) may change. */
 export function preserveServerOwned(existing: Characteristics, incoming: Characteristics): Characteristics {
-  const { career: _incoming, ...rest } = incoming;
+  const { career: _career, downtime: _downtime, ...rest } = incoming;
 
-  return { ...rest, talents: existing.talents, ledger: existing.ledger, advances: existing.advances, skillAdvances: existing.skillAdvances, spentArchived: existing.spentArchived, ...(existing.career ? { career: existing.career } : {}) };
+  return { ...rest, talents: existing.talents, ledger: existing.ledger, advances: existing.advances, skillAdvances: existing.skillAdvances, spentArchived: existing.spentArchived, ...(existing.career ? { career: existing.career } : {}), ...(existing.downtime ? { downtime: existing.downtime } : {}) };
 }

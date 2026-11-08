@@ -11,4 +11,10 @@ describe("wfrpParticipantFields", () => {
     expect(fields.characteristics.ledger).toEqual([]);
     expect(fields.characteristics.talents).toEqual({ f1: 1 });
   });
+
+  it("never carries downtime into participant abilities", () => {
+    const fields = wfrpParticipantFields({ characteristics: { downtime: { ailments: [] } } });
+
+    expect("downtime" in fields.characteristics).toBe(false);
+  });
 });

@@ -14,7 +14,7 @@ vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.
 vi.mock("@/lib/supabase/avatar-storage", () => ({ resolveAvatarForPersistence: vi.fn(async () => ({ ok: true, avatar: undefined })) }));
 
 import { getOperation } from "../get";
-import { listOperation } from "../list";
+import { listOperation, redactListedLedgers } from "../list";
 import { patchOperation } from "../patch";
 
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
@@ -57,6 +57,31 @@ describe("ledger redaction on list", () => {
     const result = await listFor({ userId: "dm", isDM: true });
 
     expect(result.filter((r) => r.characteristics).every((r) => r.characteristics?.ledger.length === 1)).toBe(true);
+  });
+});
+
+describe("downtime redaction on list", () => {
+  const withDowntime = { ...stored, downtime: { ailments: [] } };
+
+  it("redactListedLedgers strips downtime even without a ledger in the row", () => {
+    const [row] = redactListedLedgers([{ controlledBy: "p2", characteristics: { downtime: { ailments: [] } } }], { userId: "p1", isDM: false });
+
+    expect("downtime" in (row.characteristics as object)).toBe(false);
+  });
+
+  it("another player does not see downtime, owner and DM do", async () => {
+    const run = async (viewer: { userId: string; isDM: boolean }) => {
+      h.access.mockResolvedValue({ ...viewer, campaign: { id: "camp", rules: WFRP_RULES } });
+      h.character.findMany.mockResolvedValue([{ id: "theirs", controlledBy: "p2", characteristics: withDowntime }]);
+
+      const gate = await listOperation.gate({ campaignId: "camp", characterId: "" });
+
+      return ((await listOperation.run(gate as never, { compact: false })) as { characteristics: object }[])[0].characteristics;
+    };
+
+    expect("downtime" in (await run({ userId: "p1", isDM: false }))).toBe(false);
+    expect("downtime" in (await run({ userId: "p2", isDM: false }))).toBe(true);
+    expect("downtime" in (await run({ userId: "dm", isDM: true }))).toBe(true);
   });
 });
 
@@ -127,6 +152,22 @@ describe("PATCH cannot bypass the ledger", () => {
     const saved = await patch({ userId: "dm", isDM: true }, { ...stored, career: { ...career, tier: 3 as const } }, withCareer, career);
 
     expect(saved.career).toMatchObject({ tier: 3 });
+  });
+
+  const downtime = { ailments: [], lastPeriod: { id: "p1", at: "2026-01-01T00:00:00.000Z", days: 7, before: { ailments: [] }, after: { ailmentIds: [] }, summary: { healed: 0, ailments: [] } } };
+
+  const withDowntime = { ...record, characteristics: { ...stored, downtime } };
+
+  it("DM: the stored downtime wins over the one in the form", async () => {
+    const saved = await patch({ userId: "dm", isDM: true }, { ...stored, downtime: { ailments: [] } }, withDowntime);
+
+    expect(saved.downtime).toEqual(downtime);
+  });
+
+  it("player: downtime stays server-side", async () => {
+    const saved = await patch({ userId: "p1", isDM: false }, { ...stored, downtime: { ailments: [], training: { kind: "skill", key: "charm", discount: 50 } } }, withDowntime);
+
+    expect(saved.downtime).toEqual(downtime);
   });
 
   it("player: career stays server-side, baseline ignored", async () => {

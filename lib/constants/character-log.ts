@@ -16,6 +16,7 @@ export const CharacterLogKind = {
   RESOURCES_EDIT: "resources_edit",
   CHOICES_EDIT: "choices_edit",
   BATTLE_RESULT: "battle_result",
+  DOWNTIME: "downtime",
 } as const;
 
 export type CharacterLogKindValue = (typeof CharacterLogKind)[keyof typeof CharacterLogKind];

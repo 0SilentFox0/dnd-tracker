@@ -33,6 +33,12 @@ describe("normalizeCharacterInput", () => {
     }
   });
 
+  it("wfrp create drops a client-supplied downtime", () => {
+    const data = normalizeCharacterInput(wfrp, create({ characteristics: { downtime: { ailments: [] } } }), WFRP_RULES, "create");
+
+    expect(data.characteristics && "downtime" in data.characteristics).toBe(false);
+  });
+
   it("wfrp create writes defaults for d20 fields", () => {
     const data = normalizeCharacterInput(wfrp, create({ characteristics: {}, initiative: 0, strength: 18, level: 5, speed: 40 }), { ...WFRP_RULES, initiative: { ...WFRP_RULES.initiative, heroMin: 10 } }, "create");
 

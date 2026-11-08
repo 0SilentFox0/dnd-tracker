@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { CHARACTERISTIC_KEYS, type CharacteristicKey, LEDGER_MAX, SKILL_ADVANCE_KEY_RE } from "./keys";
+import { readDowntime } from "../downtime/read";
+import type { DowntimeState } from "../downtime/types";
+import { CHARACTERISTIC_KEYS, type CharacteristicKey, SKILL_ADVANCE_KEY_RE } from "./constants";
+import { LEDGER_MAX } from "./keys";
 
 export { type CareerState, CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, DEFAULT_CHARACTERISTICS, LEDGER_MAX, type LedgerEntry, readCharacteristics, SKILL_ADVANCE_KEY_RE, SKILL_KEY_RE, SPEC_RE } from "./keys";
 
@@ -41,4 +44,5 @@ export const CharacteristicsSchema = z.object({
   ledger: z.array(LedgerEntrySchema).max(LEDGER_MAX).default([]),
   spentArchived: z.number().int().min(0).max(1e9).default(0),
   career: CareerStateSchema.optional(),
+  downtime: z.custom<DowntimeState>((v) => readDowntime(v) !== undefined).optional(),
 });

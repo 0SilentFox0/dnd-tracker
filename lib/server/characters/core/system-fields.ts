@@ -25,7 +25,9 @@ export function normalizeCharacterInput<T extends CreateCharacterInput | UpdateC
 
   if (!data.characteristics) throw new ContentError(API_ERRORS.CHARACTERISTICS_REQUIRED, 400);
 
-  return { ...data, level: 1, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 10, archetype: null, class: "", classes: [], initiative: rules.initiative.heroMin, speed: 30 };
+  const { downtime: _downtime, ...characteristics } = data.characteristics;
+
+  return { ...data, characteristics, level: 1, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 10, archetype: null, class: "", classes: [], initiative: rules.initiative.heroMin, speed: 30 };
 }
 
 export const characteristicsJson = (c: Characteristics) => c as Prisma.InputJsonObject;

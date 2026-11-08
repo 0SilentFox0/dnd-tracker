@@ -37,10 +37,12 @@ function castApOf(gear?: WfrpGear): { castAp?: number } {
   return armour === Math.max(gear.ap.head, gear.ap.body) ? {} : { castAp: armour };
 }
 
-// The XP ledger is private and unused in battle, so it never enters participant data.
+// The XP ledger and downtime are private and unused in battle, so they never enter participant data.
 export function wfrpAbilitiesOf(characteristics: Characteristics, gear?: WfrpGear): WfrpParticipantFields {
+  const { downtime: _downtime, ...rest } = characteristics;
+
   return {
-    characteristics: { ...characteristics, ledger: [] },
+    characteristics: { ...rest, ledger: [] },
     wfrp: { sb: bonus(characteristics, "s"), ag: value(characteristics, "ag"), tb: bonus(characteristics, "t"), ap: { ...(gear?.ap ?? NO_ARMOR) }, ...(gear?.flexible && { flexible: true as const }), ...castApOf(gear) },
   };
 }

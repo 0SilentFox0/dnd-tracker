@@ -20,6 +20,30 @@ describe("redactLedger", () => {
   });
 });
 
+const downtime = { ailments: [], lastPeriod: { id: "p1", at: "2026-01-01T00:00:00.000Z", days: 7, before: { ailments: [] }, after: { ailmentIds: [] }, summary: { healed: 0, ailments: [] } } };
+
+describe("redactLedger downtime", () => {
+  it("hides downtime from anyone but DM and owner", () => {
+    const withDowntime = { ...existing, downtime };
+
+    const other = redactLedger(withDowntime, { isDM: false, isOwner: false });
+
+    expect("downtime" in other).toBe(false);
+    expect(other.ledger).toEqual([]);
+    expect(redactLedger(withDowntime, { isDM: false, isOwner: true })).toBe(withDowntime);
+    expect(redactLedger(withDowntime, { isDM: true, isOwner: false })).toBe(withDowntime);
+  });
+});
+
+describe("preserveServerOwned downtime", () => {
+  it("keeps the stored downtime and ignores the incoming one", () => {
+    const incoming = { ...DEFAULT_CHARACTERISTICS, downtime: { ailments: [], training: { kind: "skill" as const, key: "charm", discount: 50 } } };
+
+    expect(preserveServerOwned({ ...existing, downtime }, incoming).downtime).toEqual(downtime);
+    expect("downtime" in preserveServerOwned(existing, incoming)).toBe(false);
+  });
+});
+
 describe("preserveServerOwned", () => {
   it("keeps advances, skillAdvances, talents and ledger from the stored value, takes the rest from the input", () => {
     const incoming = { ...DEFAULT_CHARACTERISTICS, fate: 3, advances: { ...DEFAULT_CHARACTERISTICS.advances, ws: 30 }, skillAdvances: { x: 9 }, talents: { cheat: 5 }, ledger: [], spentArchived: 0 };

@@ -83,7 +83,9 @@ function reconcileCharacteristics(fresh: CharacterRecord, incoming: Characterist
 
   if (moved || careerMoved) throw new ContentError(API_ERRORS.CHARACTERISTICS_CHANGED, 409);
 
-  return incoming;
+  const { downtime: _downtime, ...rest } = incoming;
+
+  return stored.downtime ? { ...rest, downtime: stored.downtime } : rest;
 }
 
 async function resolveClasses(campaign: Campaign, character: CharacterRecord, data: Parsed) {

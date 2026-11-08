@@ -126,6 +126,8 @@
     "choicesEdit": "✎ Змінено вибори (раса, риси, опції класу)",
     "battleResult": "⚔ Після бою: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · загинув} other {}}",
     "advance": "📈 Розвиток: {key} {from} → {to} (−{cost} досвіду)",
+    "downtime": "🕯 Простій: {days} дн.",
+    "downtimeUndo": "↩ Відкат простою",
     "careerSet": "🧭 Кар'єра призначена: {name}",
     "careerAdvance": "🧭 Новий рівень кар'єри: {tier}",
     "advanceUndo": "↩ Відкат розвитку: {key} {to} → {from} (+{cost} досвіду)"

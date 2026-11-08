@@ -1,12 +1,8 @@
-export const CHARACTERISTIC_KEYS = ["ws", "bs", "s", "t", "i", "ag", "dex", "int", "wp", "fel"] as const;
+import { readDowntime } from "../downtime/read";
+import type { DowntimeState } from "../downtime/types";
 
-export type CharacteristicKey = (typeof CHARACTERISTIC_KEYS)[number];
-
-export const SKILL_KEY_RE = /^[a-z][a-z0-9-]{0,39}$/;
-
-export const SPEC_RE = /^[a-z0-9-]{1,40}$/;
-
-export const SKILL_ADVANCE_KEY_RE = /^[a-z][a-z0-9-]{0,39}(:[a-z0-9-]{1,40})?$/;
+export { CHARACTERISTIC_KEYS, type CharacteristicKey, SKILL_ADVANCE_KEY_RE, SKILL_KEY_RE, SPEC_RE } from "./constants";
+import { CHARACTERISTIC_KEYS, type CharacteristicKey, SKILL_ADVANCE_KEY_RE } from "./constants";
 
 export type LedgerEntry = {
   id: string;
@@ -36,6 +32,7 @@ export type Characteristics = {
   ledger: LedgerEntry[];
   spentArchived: number;
   career?: CareerState;
+  downtime?: DowntimeState;
 };
 
 const fill = (value: number) => Object.fromEntries(CHARACTERISTIC_KEYS.map((k) => [k, value])) as Record<CharacteristicKey, number>;
@@ -111,6 +108,8 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
 
   const career = readCareer(raw.career);
 
+  const downtime = readDowntime(raw.downtime);
+
   return {
     base: readPerKey(raw.base, 1, 100, 30, DEFAULT_CHARACTERISTICS.base),
     advances: readPerKey(raw.advances, 0, 100, 0, DEFAULT_CHARACTERISTICS.advances),
@@ -122,5 +121,6 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
     ledger: readLedger(raw.ledger),
     spentArchived: raw.spentArchived === undefined || !isInt(raw.spentArchived, 0, 1e9) ? 0 : raw.spentArchived,
     ...(career ? { career } : {}),
+    ...(downtime ? { downtime } : {}),
   };
 }
