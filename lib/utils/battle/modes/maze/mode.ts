@@ -3,7 +3,7 @@ import { withMazeAwareness } from "./awareness";
 import { emptyMaze } from "./constants";
 import { mazeChange } from "./delta";
 import { mazeGridOf } from "./grid";
-import { pruneIllusion } from "./illusion";
+import { areIllusionFoes, illusionPairs, pruneIllusion } from "./illusion";
 import { mazeMoveZone } from "./move-zone";
 import { placeMazeParticipants } from "./movement";
 import { mazePlacementError, placeInMaze } from "./placement";
@@ -50,6 +50,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
     patchableFields: ["facing"],
   },
   engine: {
+    areHostile: ({ config, a, b }) => (areIllusionFoes(illusionPairs(config), a.basicInfo.id, b.basicInfo.id) ? true : undefined),
     sees: ({ map, viewer, target }) => seesTarget(gridOf(map), viewer, target),
     aimHiddenText: ({ map, caster, cell }) => (mazeAimHidden(map, caster, cell) ? textRef(MAZE_TEXTS.aimOutOfSight) : null),
     targetHiddenText: ({ map, caster, targets }) => (mazeTargetHidden(map, caster, targets) ? textRef(MAZE_TEXTS.targetOutOfSight) : null),

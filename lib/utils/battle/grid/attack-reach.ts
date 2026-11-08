@@ -6,7 +6,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { hasTrait, isFiveE } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { modeEngages, modeMeleeBlockedText, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
+import { isHostile,modeEngages, modeMeleeBlockedText, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -55,7 +55,7 @@ export function rangeDisadvantageReasons(
 
   if (bands && distance > bands.normal) reasons.push(textRef("battleLog.rollMode.farRange"));
 
-  const engaged = participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isOnMap(p) && footprintDistance(mine, cellsOf(p)) <= 1 && modeEngages(map, attacker, p));
+  const engaged = participants.some((p) => isHostile(map, attacker, p) && isOnMap(p) && footprintDistance(mine, cellsOf(p)) <= 1 && modeEngages(map, attacker, p));
 
   if (engaged && !thrown) reasons.push(textRef("battleLog.rollMode.enemyNear"));
 
@@ -97,7 +97,7 @@ export function attackReachError(
     return placed.map((t) => modeMeleeBlockedText(map, attacker, t)).find(Boolean) ?? null;
   }
 
-  const engaged = !fiveE && participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isOnMap(p) && distanceTo(p) <= 1 && modeEngages(map, attacker, p));
+  const engaged = !fiveE && participants.some((p) => isHostile(map, attacker, p) && isOnMap(p) && distanceTo(p) <= 1 && modeEngages(map, attacker, p));
 
   if (engaged) return textRef(REJECT.enemyNearNoShoot);
 
@@ -110,7 +110,7 @@ export function attackReachError(
 
 export function enemiesInReach(map: BattleMapConfig | null, participants: BattleParticipant[], attacker: BattleParticipant, attack: BattleAttack): BattleParticipant[] {
   return participants.filter(
-    (p) => p.basicInfo.side !== attacker.basicInfo.side && isAttackable(p) && isOnMap(p) && attackReachError(map, participants, attacker, attack, [p]) === null,
+    (p) => isHostile(map, attacker, p) && isAttackable(p) && isOnMap(p) && attackReachError(map, participants, attacker, attack, [p]) === null,
   );
 }
 

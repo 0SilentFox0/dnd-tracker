@@ -13,6 +13,12 @@ export function modeSees(map: MapArg, viewer: BattleParticipant, target: BattleP
   return active?.mode.engine.sees?.({ config: active.config, map: active.map, viewer, target }) ?? true;
 }
 
+export function isHostile(map: MapArg, a: BattleParticipant, b: BattleParticipant): boolean {
+  const active = activeModeWithConfig(map);
+
+  return active?.mode.engine.areHostile?.({ config: active.config, map: active.map, a, b }) ?? a.basicInfo.side !== b.basicInfo.side;
+}
+
 export function modeAimHiddenText(map: MapArg, caster: BattleParticipant, cell: GridPoint): LogLine | null {
   const active = activeModeWithConfig(map);
 

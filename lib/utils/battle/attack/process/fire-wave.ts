@@ -1,6 +1,7 @@
 import { FIRE_WAVE_NO_MAP_VICTIMS } from "@/lib/constants/battle";
 import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import { apexOf, bothOnMap, cellsOf, closestCell, participantsInCells, templateCells } from "@/lib/utils/battle/grid";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, victimId: string, sizeFt: number): string[] {
@@ -8,7 +9,7 @@ export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: Bat
 
   if (!victim) return [];
 
-  const isEnemy = (p: BattleParticipant) => p.basicInfo.side !== attacker.basicInfo.side && p.basicInfo.id !== victimId && isTargetable(p);
+  const isEnemy = (p: BattleParticipant) => isHostile(map, attacker, p) && p.basicInfo.id !== victimId && isTargetable(p);
 
   if (!bothOnMap(map, attacker, victim)) return ps.filter(isEnemy).slice(0, FIRE_WAVE_NO_MAP_VICTIMS).map((p) => p.basicInfo.id);
 

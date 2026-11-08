@@ -18,8 +18,8 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
   if (!actor) return maneuverResult(ps);
 
   const targets = input.map && isOnMap(actor)
-    ? ps.filter((p) => isEnemyOf(actor)(p) && isOnMap(p) && footprintDistance(cellsOf(actor), cellsOf(p)) <= 1)
-    : pickedEnemies(ps, actor, input.targetIds, input.maxTargets ?? input.targetIds.length);
+    ? ps.filter((p) => isEnemyOf(actor, input.map)(p) && isOnMap(p) && footprintDistance(cellsOf(actor), cellsOf(p)) <= 1)
+    : pickedEnemies(ps, actor, input.targetIds, input.maxTargets ?? input.targetIds.length, input.map);
 
   if (!targets.length) return { ...maneuverResult(ps), messages: [textRef("battleLog.maneuver.fireNobody", { ability: input.name, name: actor.basicInfo.name })] };
 

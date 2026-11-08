@@ -9,6 +9,7 @@ import { assertAttackAllowed } from "@/lib/utils/battle/attack-phase/request";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -35,7 +36,7 @@ export function legendaryAttack(input: LegendaryAttackInput): { participants: Ba
 
   const target = findParticipant(participants, targetId);
 
-  if (!target || target.basicInfo.side === actor.basicInfo.side || !isAttackable(target) || target.battleData.reserved) return reject(actionReason("enemyRequired"));
+  if (!target || !isHostile(map, actor, target) || !isAttackable(target) || target.battleData.reserved) return reject(actionReason("enemyRequired"));
 
   assertAttackAllowed(actor, attack, [target]);
 

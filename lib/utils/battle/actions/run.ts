@@ -21,6 +21,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { removeEffects } from "@/lib/utils/battle/conditions";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import { baseMovement } from "@/lib/utils/battle/grid/path";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -150,7 +151,7 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   const target = findParticipant(participants, targetId);
 
-  if (!target || target.basicInfo.side === actor.basicInfo.side || !isAttackable(target)) return reject(actionReason("enemyRequired"));
+  if (!target || !isHostile(map, actor, target) || !isAttackable(target)) return reject(actionReason("enemyRequired"));
 
   const disabled = getDisabledAttackKinds(actor);
 

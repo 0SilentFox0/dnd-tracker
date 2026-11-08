@@ -148,7 +148,7 @@ async function performAbility({ ctx, actor, option, ability, lair, spend, deps }
 
   const { round } = ctx.scene;
 
-  const targetIds = assertAbilityTargets(ability, ctx.participants, option.targetIds ?? [], { owner: actor, onMap: abilityOnMap(ctx.meta.map, actor) });
+  const targetIds = assertAbilityTargets(ability, ctx.participants, option.targetIds ?? [], { owner: actor, onMap: abilityOnMap(ctx.meta.map, actor), map: ctx.meta.map });
 
   const run = runAbilities(ctx.participants, { type: "action", actorId: id, abilityKey: ability.key, targetIds }, abilityRunContext(ctx));
 

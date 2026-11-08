@@ -21,7 +21,7 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
   const start = actor.battleData.position;
 
   if (!input.map || !start || !input.targetCell) {
-    const targets = pickedEnemies(ps, actor, input.targetIds, input.maxTargets ?? input.targetIds.length);
+    const targets = pickedEnemies(ps, actor, input.targetIds, input.maxTargets ?? input.targetIds.length, input.map);
 
     return strikeAll(maneuverResult(ps), targets.map((t) => ({ targetId: t.basicInfo.id, amount })), hit);
   }
@@ -32,7 +32,7 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
 
   const swept = new Set(path.flatMap((c) => footprint(c, sizeOf(actor))).map(cellKey));
 
-  const victims = participantsInCells(ps, [...swept], start).filter(isEnemyOf(actor));
+  const victims = participantsInCells(ps, [...swept], start).filter(isEnemyOf(actor, map));
 
   const landing = [...path].reverse().find((c) => canStand(map, ps, actor, c));
 

@@ -145,7 +145,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       order = long.order;
     } else if (data.castingRounds !== undefined) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_TIME_ONLY_DURATION_CAST);
 
-    const pacified = pacifiedBlock(order, caster, definition.targeting, data.targetIds);
+    const pacified = pacifiedBlock(order, caster, definition.targeting, data.targetIds, ctx.meta.map);
 
     if (pacified) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_PACIFIED, pacified);
 
@@ -170,7 +170,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       if (orphan) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_SPELL_NO_OBJECT_NEAR);
     }
 
-    const pacifiedHit = pacifiedBlock(order, caster, { kind: "self" }, resolution.targetIds);
+    const pacifiedHit = pacifiedBlock(order, caster, { kind: "self" }, resolution.targetIds, ctx.meta.map);
 
     if (pacifiedHit) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_PACIFIED, pacifiedHit);
 

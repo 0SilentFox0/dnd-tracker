@@ -1,5 +1,6 @@
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { apexOf, bothOnMap, cellDistance, cellKey, cellsOf, closestCell, footprintDistance, participantsInCells, rayCells } from "@/lib/utils/battle/grid";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function piercingTargets(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, firstTargetId: string): string[] {
@@ -18,7 +19,7 @@ export function piercingTargets(map: BattleMapConfig | null | undefined, ps: Bat
   const reach = cellDistance(apex, through);
 
   const rest = participantsInCells(ps, ray, apex)
-    .filter((p) => p.basicInfo.id !== firstTargetId && p.basicInfo.side !== attacker.basicInfo.side && footprintDistance([apex], cellsOf(p)) >= reach)
+    .filter((p) => p.basicInfo.id !== firstTargetId && isHostile(map, attacker, p) && footprintDistance([apex], cellsOf(p)) >= reach)
     .map((p) => p.basicInfo.id);
 
   return [firstTargetId, ...rest];

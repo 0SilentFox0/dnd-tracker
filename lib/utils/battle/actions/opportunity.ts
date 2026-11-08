@@ -8,6 +8,7 @@ import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
 import { conditionSourceIds } from "@/lib/utils/battle/conditions";
 import { cellsOf, footprint, footprintDistance, isOnMap, sizeOf } from "@/lib/utils/battle/grid";
 import { meleeReachCells } from "@/lib/utils/battle/grid/attack-reach";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -51,7 +52,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
   const size = sizeOf(mover0);
 
-  const enemies = flow.ps.filter((p) => p.basicInfo.side !== mover0.basicInfo.side && isOnMap(p)).map((p) => ({ id: p.basicInfo.id, reach: cellsOf(p) }));
+  const enemies = flow.ps.filter((p) => isHostile(input.map, mover0, p) && isOnMap(p)).map((p) => ({ id: p.basicInfo.id, reach: cellsOf(p) }));
 
   const melee = new Map<string, { attack: ReturnType<typeof pickMeleeAttack>; range: number }>();
 

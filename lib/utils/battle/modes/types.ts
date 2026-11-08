@@ -49,6 +49,8 @@ export interface ModeServerHooks<C> {
 export interface ModeEngineHooks<C> {
   /** Власник бачить ціль (масові вміння, заклинання «всім»). Відсутній — бачить. */
   sees?(args: { config: C; map: BattleMapConfig; viewer: BattleParticipant; target: BattleParticipant }): boolean;
+  /** Чи ворогують учасники всупереч сторонам (true — так, undefined — за сторонами). */
+  areHostile?(args: { config: C; map: BattleMapConfig; a: BattleParticipant; b: BattleParticipant }): boolean | undefined;
   /** Текст відмови, якщо клітинку прицілу не видно. */
   aimHiddenText?(args: { config: C; map: BattleMapConfig; caster: BattleParticipant; cell: GridPoint }): LogLine | null;
   /** Текст відмови, якщо хоч одну ціль не видно. */

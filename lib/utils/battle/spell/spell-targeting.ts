@@ -11,7 +11,7 @@ import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
-import { modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
+import { isHostile,modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
@@ -62,10 +62,8 @@ export function spellTargetingFor(ps: BattleParticipant[], casterId: string, spe
 }
 
 /** Режим «all»: уся сторона заклинання на полі — без вибору, наведення й дальності, з картою чи без. */
-export function skillAllTargets(ps: BattleParticipant[], caster: BattleParticipant, side: "ally" | "enemy"): string[] {
-  const mine = caster.basicInfo.side;
-
-  return ps.filter((p) => isTargetable(p) && !isReserved(p) && (p.basicInfo.side === mine) === (side === "ally")).map((p) => p.basicInfo.id);
+export function skillAllTargets(ps: BattleParticipant[], caster: BattleParticipant, side: "ally" | "enemy", map?: BattleMapConfig | null): string[] {
+  return ps.filter((p) => isTargetable(p) && !isReserved(p) && !isHostile(map, caster, p) === (side === "ally")).map((p) => p.basicInfo.id);
 }
 
 export interface SkillRadius {
@@ -85,9 +83,7 @@ export const SKILL_AREA_TEMPLATE: SpellTemplate = { shape: "circle", size: SKILL
 export function skillRadiusArea({ map, participants, caster }: AimScene, radius: SkillRadius, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
   const { cells, targets } = templateArea(map, participants, caster, SKILL_AREA_TEMPLATE, aim);
 
-  const mine = caster.basicInfo.side;
-
-  const sided = targets.filter((p) => (p.basicInfo.side === mine) === (radius.side === "ally"));
+  const sided = targets.filter((p) => !isHostile(map, caster, p) === (radius.side === "ally"));
 
   return { cells, targets: sided.slice(0, radius.maxTargets) };
 }
@@ -98,10 +94,8 @@ export interface SpellChain {
 }
 
 /** Ланцюг на карті: кожна наступна ціль — найближча до попередньої жива на карті зі сторони заклинання; рівні — за ініціативою. */
-export function spellChain({ participants, caster }: Omit<AimScene, "map">, chain: SpellChain, first: BattleParticipant): BattleParticipant[] {
-  const mine = caster.basicInfo.side;
-
-  const pool = participants.filter((p) => p !== first && isActive(p) && isOnMap(p) && (p.basicInfo.side === mine) === (chain.side === "ally"));
+export function spellChain({ participants, caster }: Omit<AimScene, "map">, chain: SpellChain, first: BattleParticipant, map?: BattleMapConfig | null): BattleParticipant[] {
+  const pool = participants.filter((p) => p !== first && isActive(p) && isOnMap(p) && !isHostile(map, caster, p) === (chain.side === "ally"));
 
   const out = [first];
 
@@ -215,7 +209,7 @@ function resolveRaw(
     const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
 
     if (skill.mode === "all") {
-      const all = modeSightedTargets(map, ps, caster, skillAllTargets(ps, caster, targeting.kind));
+      const all = modeSightedTargets(map, ps, caster, skillAllTargets(ps, caster, targeting.kind, map));
 
       return all.length > 0 ? { ok: true, targetIds: all } : fail(textRef("battleActions.spell.target.noTargets"));
     }
@@ -252,7 +246,7 @@ function resolveRaw(
       return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side === side) };
     case "allEnemies":
 
-      return { ok: true, targetIds: sighted((p) => isTargetable(p) && p.basicInfo.side !== side) };
+      return { ok: true, targetIds: sighted((p) => isTargetable(p) && isHostile(map, caster, p)) };
     case "everyone":
 
       return { ok: true, targetIds: sighted(isTargetable) };
@@ -276,7 +270,7 @@ function resolveRaw(
 
       if (picked.length === 0) return fail(textRef("battleActions.spell.target.pickTarget"));
 
-      if (picked.some((p) => !(isActive(p) || (wanted === "ally" && isDying(p))) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
+      if (picked.some((p) => !(isActive(p) || (wanted === "ally" && isDying(p))) || !isHostile(map, caster, p) !== (wanted === "ally"))) {
         return fail(textRef(wanted === "ally" ? "battleActions.spell.target.mustBeAlly" : "battleActions.spell.target.mustBeEnemy"));
       }
 
@@ -285,7 +279,7 @@ function resolveRaw(
       if (map && targeting.kind === "area" && targeting.chain) {
         if (picked.length !== 1) return fail(textRef("battleActions.spell.target.pickChainFirst"));
 
-        return { ok: true, targetIds: spellChain({ participants: ps, caster }, targeting, picked[0]).map((p) => p.basicInfo.id) };
+        return { ok: true, targetIds: spellChain({ participants: ps, caster }, targeting, picked[0], map).map((p) => p.basicInfo.id) };
       }
 
       const base = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
@@ -311,7 +305,7 @@ function hostile(targeting: SpellTargetingDef): boolean {
 }
 
 /** Кастер зі станом «без ворожих заклинань»: ворожий шаблон або будь-яка ціль-ворог. */
-export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[]): { state: string } | null {
+export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[], map?: BattleMapConfig | null): { state: string } | null {
   const marker = findEffectMarker(caster, "no_hostile_spells");
 
   if (!marker) return null;
@@ -319,7 +313,7 @@ export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant
   const hitsEnemy = targetIds.some((id) => {
     const t = ps.find((p) => p.basicInfo.id === id);
 
-    return !!t && t.basicInfo.side !== caster.basicInfo.side;
+    return !!t && isHostile(map, caster, t);
   });
 
   return hostile(targeting) || hitsEnemy ? { state: marker.effect.name } : null;

@@ -27,7 +27,7 @@ export function startDive(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 function victimOf(ps: BattleParticipant[], actor: BattleParticipant, map: BattleMapConfig | null | undefined): BattleParticipant | undefined {
   const { landAt, targetId } = actor.battleData.airborne ?? {};
 
-  const enemy = isEnemyOf(actor);
+  const enemy = isEnemyOf(actor, map);
 
   if (map && landAt) return participantsInCells(ps, [cellKey(landAt)], landAt).find(enemy);
 

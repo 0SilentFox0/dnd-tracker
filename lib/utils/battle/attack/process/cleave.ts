@@ -1,6 +1,6 @@
 import { findParticipant, isDormant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import { bothOnMap, cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
-import { modeMeleeBlockedText } from "@/lib/utils/battle/modes/engine";
+import { isHostile,modeMeleeBlockedText } from "@/lib/utils/battle/modes/engine";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const FACINGS: GridPoint[] = [
@@ -40,7 +40,7 @@ export function cleaveTargets(map: BattleMapConfig | null | undefined, order: Ba
   const candidates = order.filter(
     (p) =>
       p.basicInfo.id !== target.basicInfo.id &&
-      p.basicInfo.side !== attacker.basicInfo.side &&
+      isHostile(map, attacker, p) &&
       isTargetable(p) &&
       !isDormant(p) &&
       isOnMap(p) &&

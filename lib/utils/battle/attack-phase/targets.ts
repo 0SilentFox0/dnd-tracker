@@ -6,6 +6,7 @@ import { cleaveTargets } from "@/lib/utils/battle/attack/process/cleave";
 import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -35,7 +36,7 @@ export interface AttackTargets {
   chain: { jumps: number; percent: number } | null;
 }
 
-const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.basicInfo.side !== attacker.basicInfo.side && isAttackable(t);
+const enemyOf = (map: BattleMapConfig | null | undefined, attacker: BattleParticipant) => (t: BattleParticipant) => isHostile(map, attacker, t) && isAttackable(t);
 
 export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags }: AttackTargetsInput): AttackTargets {
   const isAoe = attack.targetType === "aoe";
@@ -54,7 +55,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const byId = (ids: string[]) => ids.flatMap((id) => findParticipant(order, id) ?? []);
 
-  const reachable = (): BattleParticipant[] => (onMap ? enemiesInReach(map, order, attacker, attack) : order.filter(enemyOf(attacker)));
+  const reachable = (): BattleParticipant[] => (onMap ? enemiesInReach(map, order, attacker, attack) : order.filter(enemyOf(map, attacker)));
 
   const isChain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
 
@@ -63,7 +64,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
   if (!expanded && chosen.length > limit) throw new BattleRuleError("action_rejected", REJECT.tooManyTargets, { max: limit });
 
   const targets = hitsAllEnemies
-    ? [...chosen.filter(enemyOf(attacker)), ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id))]
+    ? [...chosen.filter(enemyOf(map, attacker)), ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id))]
     : piercing
       ? byId([...new Set([...piercingTargets(map, order, attacker, chosen[0].basicInfo.id), ...targetIds])])
       : cleave

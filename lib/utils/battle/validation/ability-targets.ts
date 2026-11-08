@@ -2,15 +2,16 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { findParticipant, isActive, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export const abilityMaxTargets = (a: ResolvedAbility): number => a.maxTargets ?? 1;
 
-export function assertAbilityTargets(ability: ResolvedAbility, ps: BattleParticipant[], rawTargetIds: string[], ctx: { owner?: BattleParticipant; onMap?: boolean } = {}): string[] {
-  const { owner, onMap = false } = ctx;
+export function assertAbilityTargets(ability: ResolvedAbility, ps: BattleParticipant[], rawTargetIds: string[], ctx: { owner?: BattleParticipant; onMap?: boolean; map?: BattleMapConfig | null } = {}): string[] {
+  const { owner, onMap = false, map } = ctx;
 
   const targetIds = [...new Set(rawTargetIds)];
 
@@ -37,7 +38,7 @@ export function assertAbilityTargets(ability: ResolvedAbility, ps: BattlePartici
   }
 
   // UI пропонує лише ворогів; без цього застарілий клієнт міг повісити «Мисливця» на союзника
-  if (!rules.requiresDead && owner && bonusTargetSide(ability) === ParticipantSide.ENEMY && targets.some((t) => t && t.basicInfo.side === owner.basicInfo.side)) {
+  if (!rules.requiresDead && owner && bonusTargetSide(ability) === ParticipantSide.ENEMY && targets.some((t) => t && !isHostile(map, owner, t))) {
     throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TARGET_INVALID);
   }
 

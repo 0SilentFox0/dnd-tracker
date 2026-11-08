@@ -75,7 +75,7 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, req.targetCell);
 
-  const targetIds = assertAbilityTargets(ability, ctx.participants, req.targetIds, { owner: participant, onMap: abilityOnMap(ctx.meta.map, participant) });
+  const targetIds = assertAbilityTargets(ability, ctx.participants, req.targetIds, { owner: participant, onMap: abilityOnMap(ctx.meta.map, participant), map: ctx.meta.map });
 
   const id = participant.basicInfo.id;
 
