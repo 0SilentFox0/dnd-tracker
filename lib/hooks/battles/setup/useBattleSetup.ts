@@ -22,10 +22,11 @@ export interface BattleSetupInitial {
   description: string;
   participants: BattlePreparationParticipant[];
   map?: BattleMapConfig | null;
+  turnTimerSeconds?: number | null;
 }
 
 export function useBattleSetup(campaignId: string, battleId?: string, initial?: BattleSetupInitial) {
-  const [formData, setFormData] = useState({ name: initial?.name ?? "", description: initial?.description ?? "" });
+  const [formData, setFormData] = useState({ name: initial?.name ?? "", description: initial?.description ?? "", turnTimerSeconds: initial?.turnTimerSeconds ?? null });
 
   const { characters, units, entityStats, loadingData, races } = useNewBattleData(campaignId);
 
@@ -75,7 +76,7 @@ export function useBattleSetupInitial(campaignId: string, battleId: string) {
   const initial = useMemo<BattleSetupInitial | undefined>(
     () =>
       battle
-        ? { name: battle.name || "", description: (battle.description as string) || "", participants: (battle.participants ?? []) as unknown as BattlePreparationParticipant[], map: battle.map ?? null }
+        ? { name: battle.name || "", description: (battle.description as string) || "", participants: (battle.participants ?? []) as unknown as BattlePreparationParticipant[], map: battle.map ?? null, turnTimerSeconds: battle.turnTimerSeconds ?? null }
         : undefined,
     [battle],
   );

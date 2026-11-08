@@ -68,6 +68,8 @@ export interface BattleScene {
   battleLog: BattleAction[];
   createdAt: string;
   startedAt?: string;
+  /** Таймер ходу цього бою, секунд (немає — вимкнено) */
+  turnTimerSeconds?: number | null;
   /** Початок поточного ходу (ISO) — відлік таймера ходу */
   turnStartedAt?: string;
   completedAt?: string;

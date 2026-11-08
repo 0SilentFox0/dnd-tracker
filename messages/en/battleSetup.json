@@ -80,7 +80,10 @@
     "name": "Battle name *",
     "namePlaceholder": "Battle name",
     "description": "Description",
-    "descriptionPlaceholder": "Battle description (optional)"
+    "descriptionPlaceholder": "Battle description (optional)",
+    "turnTimer": "Turn timer",
+    "turnTimerHint": "Optional: when the turn time runs out, the turn ends automatically. Off by default.",
+    "turnTimerSeconds": "Seconds per turn"
   },
   "map": {
     "title": "Battle map",

@@ -27,7 +27,6 @@ describe("parseRules", () => {
       encounters: { balance: "fair", edition: "2014", autoXp: false },
       items: { enabled: false, attunementLimit: 3 },
       spellIngredients: { enabled: false, autoPay: true },
-      turnTimer: { enabled: false, seconds: 60 },
     });
   });
 

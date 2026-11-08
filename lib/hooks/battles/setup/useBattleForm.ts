@@ -12,7 +12,7 @@ import type { BattleMapConfig, BattlePreparationParticipant } from "@/types/batt
 interface UseBattleFormParams {
   campaignId: string;
   battleId?: string;
-  formData: { name: string; description: string };
+  formData: { name: string; description: string; turnTimerSeconds: number | null };
   participants: BattlePreparationParticipant[];
   map?: BattleMapConfig | null;
 }
@@ -48,7 +48,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
         return;
       }
 
-      const body = { name: formData.name, description: formData.description, participants, map: map ?? null };
+      const body = { name: formData.name, description: formData.description, participants, map: map ?? null, turnTimerSeconds: formData.turnTimerSeconds };
 
       if (battleId) {
         update.mutate(body, {
@@ -64,7 +64,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
         onError: (error) => void notify(error instanceof Error ? error.message : t("notify.createFailed")),
       });
     },
-    [battleId, formData.name, formData.description, participants, map, router, navigateFresh, notify, create, update, listHref, t],
+    [battleId, formData.name, formData.description, formData.turnTimerSeconds, participants, map, router, navigateFresh, notify, create, update, listHref, t],
   );
 
   const handleDelete = useCallback(async () => {

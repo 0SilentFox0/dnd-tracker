@@ -9,11 +9,11 @@ import { advanceTurn, assertMoraleResolved } from "@/lib/utils/battle/turn";
 export const TURN_TIMER_GRACE_MS = 2000;
 
 function assertTimerExpired(ctx: BattleMutationContext): void {
-  const { enabled, seconds } = ctx.meta.rules.turnTimer;
+  const seconds = ctx.meta.turnTimerSeconds;
 
   const startedAt = ctx.scene.turnStartedAt?.getTime();
 
-  if (!enabled || startedAt === undefined || Date.now() - startedAt < seconds * 1000 - TURN_TIMER_GRACE_MS) throw new BattleRuleError("action_rejected", REJECT.turnTimerRunning);
+  if (!seconds || startedAt === undefined || Date.now() - startedAt < seconds * 1000 - TURN_TIMER_GRACE_MS) throw new BattleRuleError("action_rejected", REJECT.turnTimerRunning);
 }
 
 export function nextTurnMutation(ctx: BattleMutationContext, data: { auto?: true } = {}): MutationResult {

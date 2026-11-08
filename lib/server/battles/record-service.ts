@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 import { BATTLE_AUDIO_EVENT, battleChannelName } from "@/lib/pusher/channels";
 import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
-import { battleMapSchema, createBattleSchema } from "@/lib/schemas";
+import { battleMapSchema, createBattleSchema, turnTimerSecondsSchema } from "@/lib/schemas";
 import { battleAudioCommandSchema } from "@/lib/schemas/music";
 import type { ActionExecutionContext } from "@/lib/server/assistant/types";
 import { loadAudioLibrary } from "@/lib/server/audio/track-store";
@@ -29,6 +29,7 @@ export const patchBattleSchema = z
     description: z.string().nullable().optional(),
     participants: createBattleSchema.shape.participants.optional(),
     map: battleMapSchema.nullable().optional(),
+    turnTimerSeconds: turnTimerSecondsSchema.nullable().optional(),
   })
   .strict();
 export const recordSchemas = { create: createBattleSchema, patch: patchBattleSchema, delete: z.object({}).strict(), "clear-history": z.object({}).strict(), audio: battleAudioCommandSchema };
@@ -99,6 +100,7 @@ export async function writeBattleRecord(
         participants: data.participants as unknown as Prisma.InputJsonValue,
         currentRound: 1,
         currentTurnIndex: 0,
+        turnTimerSeconds: data.turnTimerSeconds ?? null,
         ...(map && { map }),
       },
     });

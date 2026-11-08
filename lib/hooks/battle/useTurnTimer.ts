@@ -11,17 +11,15 @@ const TICK_MS = 500;
 
 const silent = { onConflict: () => undefined };
 
-/** Таймер ходу кампанії: показує залишок, а коли час вийшов — клієнт ДМа або власника ходу завершує хід. */
+/** Таймер ходу бою: показує залишок, а коли час вийшов — клієнт ДМа або власника ходу завершує хід. */
 export function useTurnTimer(): { secondsLeft: number | null } {
   const { campaignId, battleId, battle, viewer, turn, anyPending } = useBattleScene();
 
   const { mutate } = useNextTurn(campaignId, battleId, silent);
 
-  const { enabled, seconds } = battle.rules?.turnTimer ?? { enabled: false, seconds: 0 };
+  const { turnStartedAt, turnTimerSeconds: seconds, status, version } = battle;
 
-  const { turnStartedAt, status, version } = battle;
-
-  const running = enabled && status === BattleStatus.ACTIVE && !!turnStartedAt && !!turn.current;
+  const running = !!seconds && status === BattleStatus.ACTIVE && !!turnStartedAt && !!turn.current;
 
   const mine = viewer.isDM || (!!viewer.userId && turn.current?.basicInfo.controlledBy === viewer.userId);
 

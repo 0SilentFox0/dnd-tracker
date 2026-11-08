@@ -2,6 +2,12 @@ import type { BattleMapConfig } from "@/types/battle";
 
 export const CONDITION_LIMITS = { rounds: 99, dc: 40 } as const;
 
+export const TURN_TIMER_RANGE = [10, 600] as const;
+
+export const DEFAULT_TURN_TIMER_SECONDS = 60;
+
+export const clampTurnTimer = (seconds: number | null): number => Math.min(TURN_TIMER_RANGE[1], Math.max(TURN_TIMER_RANGE[0], seconds ?? DEFAULT_TURN_TIMER_SECONDS));
+
 export const AttackType = {
   MELEE: "melee",
   RANGED: "ranged",

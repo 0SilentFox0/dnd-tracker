@@ -47,6 +47,7 @@ export function toBattleResponse(
     map: meta.map,
     audio: meta.audio ?? null,
     rules: meta.rules,
+    turnTimerSeconds: meta.turnTimerSeconds ?? null,
     battleLog: log.entries,
     ...(log.mode === "append" && { battleLogMode: "append" as const }),
     ...(log.cancelledFrom !== undefined && { battleLogCancelledFrom: log.cancelledFrom }),
