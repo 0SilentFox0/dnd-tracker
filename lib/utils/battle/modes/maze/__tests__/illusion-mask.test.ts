@@ -256,4 +256,26 @@ describe("імена як токени у довших рядках", () => {
 
     expect(out.battle.initiativeOrder?.[0].battleData.activeEffects?.[0].source?.abilityName).toBe("Vampire: Pupil");
   });
+
+  it("окреме слово повного імені теж маскується, власного героя — ні", () => {
+    const lord = hero("godric", "Lord Godric Unicorn", "u2", 2);
+
+    const eff = { id: "e", name: "Firm", source: { participantId: "godric", name: "Lord Godric Unicorn", abilityName: "Godric: Firm" } } as unknown as import("@/types/battle").ActiveEffect;
+
+    const withEffect = { ...zehir, battleData: { ...zehir.battleData, activeEffects: [eff] } };
+
+    const people = [withEffect, lord, c];
+
+    const sc = { ...scene(), battle: { battleLog: [], initiativeOrder: people } };
+
+    const mine = deriveMazeView({ map, participants: people, userId: "u1", isDM: false })!;
+
+    const src = maskMazeScene(sc, mine).battle.initiativeOrder?.[0].battleData.activeEffects?.[0].source;
+
+    expect(src).toMatchObject({ name: "Vampire", abilityName: "Vampire: Firm" });
+
+    const own = deriveMazeView({ map, participants: people, userId: "u2", isDM: false })!;
+
+    expect(maskMazeScene(sc, own).battle.initiativeOrder?.[0].battleData.activeEffects?.[0].source?.abilityName).toBe("Godric: Firm");
+  });
 });

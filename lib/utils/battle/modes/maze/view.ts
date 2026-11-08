@@ -116,18 +116,31 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   };
 }
 
+const nameTokens = (name: string) => name.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length >= 3);
+
+/** Повне ім'я й його окремі слова («Годрик» з «Лорд Годрик Єдиноріг»), крім слів, що є й в інших учасників */
 const disguiseNamesOf = (participants: BattleParticipant[], disguiseOf: DisguiseOf): ReadonlyMap<string, string> => {
   const count = new Map<string, number>();
 
   for (const p of participants) count.set(p.basicInfo.name, (count.get(p.basicInfo.name) ?? 0) + 1);
 
-  return new Map(
-    participants.flatMap((p) => {
-      const d = disguiseOf(idOf(p));
+  const tokenOwners = new Map<string, number>();
 
-      return d && count.get(p.basicInfo.name) === 1 ? [[p.basicInfo.name, d.name] as const] : [];
-    }),
-  );
+  for (const p of participants) for (const t of new Set(nameTokens(p.basicInfo.name))) tokenOwners.set(t, (tokenOwners.get(t) ?? 0) + 1);
+
+  const names = new Map<string, string>();
+
+  for (const p of participants) {
+    const d = disguiseOf(idOf(p));
+
+    if (!d || count.get(p.basicInfo.name) !== 1) continue;
+
+    names.set(p.basicInfo.name, d.name);
+
+    for (const t of nameTokens(p.basicInfo.name)) if (tokenOwners.get(t) === 1 && !count.has(t)) names.set(t, d.name);
+  }
+
+  return names;
 };
 
 export const MAZE_UNKNOWN_NAME = "???";
