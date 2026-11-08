@@ -13,7 +13,19 @@ function dropTick(c: Characteristics, tick: string | undefined): Characteristics
 export function planUndo(characteristics: Characteristics): UndoResult {
   const result = undoLast(characteristics);
 
-  return result.ok ? { ...result, next: dropTick(result.next, result.entry.tick) } : result;
+  if (!result.ok) return result;
+
+  const next = dropTick(result.next, result.entry.tick);
+
+  const { entry } = result;
+
+  if (!entry.discount) return { ...result, next };
+
+  if (next.downtime?.training) return { ok: false, error: "LEDGER_STALE" };
+
+  const training = { kind: entry.kind as "characteristic" | "skill", key: entry.key, discount: entry.discount };
+
+  return { ...result, next: { ...next, downtime: { ...(next.downtime ?? { ailments: [] }), training } } };
 }
 
 function undoLast(characteristics: Characteristics): UndoResult {

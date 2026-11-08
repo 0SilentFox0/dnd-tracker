@@ -7,22 +7,22 @@ import { type CampaignScope, characterHandler, defineCharacterOperation, memberS
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import { ensureInventory } from "@/lib/server/artifacts/inventory";
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { buildStashView, STASH_ROW_SELECT } from "@/lib/server/characters/core/read-stash";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
+import { loadStashState } from "@/lib/server/characters/core/stash-state";
 import { ContentError } from "@/lib/server/content/errors";
 import { writeInventoryLog } from "@/lib/server/inventory/log";
 import type { Actor } from "@/lib/utils/api/actor";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { findHolder } from "@/lib/utils/artifacts/ownership";
-import { normalizeItems, normalizeStash } from "@/lib/utils/inventory/items";
+import { normalizeStash } from "@/lib/utils/inventory/items";
 import { canStashAction } from "@/lib/utils/inventory/permissions";
 import { applyStashAction, StashError, type StashErrorCode } from "@/lib/utils/inventory/stash-actions";
 import { type GrantError, type GrantPlan, planGrant } from "@/lib/utils/items/grant";
 import { parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
-import { attunedRefs, attunementRequired, pruneAttuned, resolveItemRow, uniqueChecker } from "@/lib/utils/items/resolve";
+import { attunementRequired, pruneAttuned, resolveItemRow, uniqueChecker } from "@/lib/utils/items/resolve";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { EquippedItems, StashState } from "@/types/inventory";
@@ -73,20 +73,6 @@ type StashRow = Prisma.ArtifactGetPayload<{ select: typeof STASH_ROW_SELECT }>;
 type Rules = ReturnType<typeof parseRules>;
 
 const isAttuneAction = (data: StashData) => data.action === "attune" || data.action === "unattune";
-
-async function loadStashState(tx: Tx, characterId: string) {
-  const inv = await ensureInventory(tx, characterId);
-
-  const state: StashState = {
-    equipped: inv.equipped as EquippedItems,
-    stash: normalizeStash(inv.stash),
-    items: normalizeItems(inv.items),
-    purse: { gp: inv.gold, sp: inv.silver, cp: inv.copper },
-    attuned: attunedRefs(inv),
-  };
-
-  return state;
-}
 
 async function planStashGrant(tx: Tx, campaignId: string, data: Extract<StashData, { action: "grant" }>, grantRow: StashRow): Promise<GrantPlan> {
   const base = data.baseId ? await tx.artifact.findFirst({ where: { id: data.baseId, campaignId }, select: STASH_ROW_SELECT }) : null;

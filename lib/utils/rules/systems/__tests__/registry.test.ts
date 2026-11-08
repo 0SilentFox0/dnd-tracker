@@ -30,6 +30,12 @@ describe("rule system registry", () => {
     expect(RULE_SYSTEM_REGISTRY.dnd5e.traits).toBeUndefined();
   });
 
+  it("only wfrp defines downtime", () => {
+    expect(RULE_SYSTEM_REGISTRY.wfrp.downtime?.maxDays).toBe(30);
+    expect(RULE_SYSTEM_REGISTRY.homm.downtime).toBeUndefined();
+    expect(RULE_SYSTEM_REGISTRY.dnd5e.downtime).toBeUndefined();
+  });
+
   it("resolves from rules", () => {
     expect(ruleSystemOf(DEFAULT_RULES).key).toBe("homm");
     expect(systemKeyOf({ system: { key: "wfrp" } })).toBe("wfrp");

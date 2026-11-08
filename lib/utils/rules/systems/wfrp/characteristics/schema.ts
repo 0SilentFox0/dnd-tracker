@@ -22,6 +22,7 @@ const LedgerEntrySchema = z.object({
   to: z.number().int().min(0).max(1e6),
   cost: z.number().int().min(0).max(1e9),
   tick: z.string().min(1).max(100).optional(),
+  discount: z.number().int().min(1).max(1e6).optional(),
 });
 
 export const CareerStateSchema = z.object({

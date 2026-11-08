@@ -10,6 +10,7 @@ import { resolveWfrpAttack, wfrpAttackTarget } from "./combat/resolve-attack";
 import { WFRP_ADVANCEMENT } from "./advancement";
 import { WFRP_CONDITIONS } from "./conditions";
 import { WFRP_CREATION } from "./creation";
+import { WFRP_DOWNTIME } from "./downtime";
 import { WFRP_EQUIPMENT } from "./equipment";
 import { WFRP_MAGIC } from "./magic";
 import { onSession } from "./session";
@@ -34,6 +35,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   magic: WFRP_MAGIC,
   advancement: WFRP_ADVANCEMENT,
   creation: WFRP_CREATION,
+  downtime: WFRP_DOWNTIME,
   equipment: WFRP_EQUIPMENT,
   traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },

@@ -1,4 +1,5 @@
 import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, LEDGER_MAX, type LedgerEntry, SKILL_ADVANCE_KEY_RE } from "../characteristics/keys";
+import type { DowntimeState } from "../downtime/types";
 import { type CareerCtx, careerPrice, tickKey } from "./career";
 import { advanceCost, talentCost } from "./cost";
 import type { AdvancementRules } from "./rules";
@@ -62,6 +63,8 @@ function priceTalent(c: Characteristics, key: string, talent: PurchaseTalent | u
   return { from, cost: talentCost(talent.xpCost, from, rules), apply: (cur) => ({ ...cur, talents: { ...cur.talents, [key]: from + 1 } }) };
 }
 
+const withoutTraining = ({ training: _training, ...rest }: DowntimeState): DowntimeState => rest;
+
 export function planPurchase(input: PurchaseInput): PurchaseResult {
   const { characteristics, request, rules } = input;
 
@@ -75,13 +78,21 @@ export function planPurchase(input: PurchaseInput): PurchaseResult {
 
   const tick = input.career && outOfCareer === null && !input.career.state.ticks.includes(key) ? key : undefined;
 
-  if (input.available < cost) return { ok: false, error: "INSUFFICIENT_XP" };
+  const credit = request.kind === "talent" ? undefined : characteristics.downtime?.training;
 
-  const entry: LedgerEntry = { id: input.id, at: input.now, kind: request.kind, key: request.key, from: priced.from, to: priced.from + 1, cost, ...(tick ? { tick } : {}) };
+  const discounted = credit && credit.kind === request.kind && credit.key === request.key ? credit : undefined;
+
+  const price = discounted ? Math.max(0, cost - discounted.discount) : cost;
+
+  if (input.available < price) return { ok: false, error: "INSUFFICIENT_XP" };
+
+  const entry: LedgerEntry = { id: input.id, at: input.now, kind: request.kind, key: request.key, from: priced.from, to: priced.from + 1, cost: price, ...(tick ? { tick } : {}), ...(discounted ? { discount: discounted.discount } : {}) };
 
   const stepped = priced.apply(characteristics);
 
-  const advanced = tick && input.career ? { ...stepped, career: { ...input.career.state, ticks: [...input.career.state.ticks, tick] } } : stepped;
+  const ticked = tick && input.career ? { ...stepped, career: { ...input.career.state, ticks: [...input.career.state.ticks, tick] } } : stepped;
+
+  const advanced = discounted && ticked.downtime ? { ...ticked, downtime: withoutTraining(ticked.downtime) } : ticked;
 
   const full = [...advanced.ledger, entry];
 

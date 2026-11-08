@@ -14,6 +14,6 @@ async function inActiveBattle(campaignId: string, characterIds: string[]) {
   return !!found;
 }
 
-export async function assertNotInActiveBattle(campaignId: string, characterIds: string[]): Promise<void> {
-  if (await inActiveBattle(campaignId, characterIds)) throw new ContentError(API_ERRORS.CHARACTER_IN_BATTLE, 409);
+export async function assertNotInActiveBattle(campaignId: string, characterIds: string[], message: string = API_ERRORS.CHARACTER_IN_BATTLE): Promise<void> {
+  if (await inActiveBattle(campaignId, characterIds)) throw new ContentError(message, 409);
 }

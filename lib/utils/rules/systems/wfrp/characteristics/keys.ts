@@ -13,6 +13,7 @@ export type LedgerEntry = {
   to: number;
   cost: number;
   tick?: string;
+  discount?: number;
 };
 
 export const LEDGER_MAX = 200;
@@ -91,12 +92,12 @@ function readCareer(raw: unknown): CareerState | undefined {
 const LEDGER_KINDS: readonly unknown[] = ["characteristic", "skill", "talent"];
 
 const isLedgerEntry = (v: unknown): v is LedgerEntry =>
-  isRecord(v) && typeof v.id === "string" && typeof v.at === "string" && LEDGER_KINDS.includes(v.kind) && typeof v.key === "string" && isInt(v.from, 0, 1e6) && isInt(v.to, 0, 1e6) && isInt(v.cost, 0, 1e9) && (v.tick === undefined || (typeof v.tick === "string" && v.tick.length >= 1 && v.tick.length <= 100));
+  isRecord(v) && typeof v.id === "string" && typeof v.at === "string" && LEDGER_KINDS.includes(v.kind) && typeof v.key === "string" && isInt(v.from, 0, 1e6) && isInt(v.to, 0, 1e6) && isInt(v.cost, 0, 1e9) && (v.tick === undefined || (typeof v.tick === "string" && v.tick.length >= 1 && v.tick.length <= 100)) && (v.discount === undefined || isInt(v.discount, 1, 1e6));
 
 function readLedger(raw: unknown): LedgerEntry[] {
   if (!Array.isArray(raw) || raw.length > LEDGER_MAX || !raw.every(isLedgerEntry)) return DEFAULT_CHARACTERISTICS.ledger;
 
-  return raw.map((e) => ({ id: e.id, at: e.at, kind: e.kind, key: e.key, from: e.from, to: e.to, cost: e.cost, ...(e.tick === undefined ? {} : { tick: e.tick }) }));
+  return raw.map((e) => ({ id: e.id, at: e.at, kind: e.kind, key: e.key, from: e.from, to: e.to, cost: e.cost, ...(e.tick === undefined ? {} : { tick: e.tick }), ...(e.discount === undefined ? {} : { discount: e.discount }) }));
 }
 
 export function readCharacteristics(row: { characteristics?: unknown }): Characteristics {

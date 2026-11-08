@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type Characteristics,DEFAULT_CHARACTERISTICS } from "../../characteristics/keys";
+import { type Characteristics,DEFAULT_CHARACTERISTICS, readCharacteristics } from "../../characteristics/keys";
 import { advanceCost } from "../cost";
 import { DEFAULT_ADVANCEMENT_RULES as RULES } from "../defaults";
 import { planPurchase, type PurchaseInput } from "../plan";
@@ -142,6 +142,68 @@ describe("planUndo", () => {
     const edited = { ...next, advances: { ...next.advances, ws: 5 } };
 
     expect(planUndo(edited)).toEqual({ ok: false, error: "LEDGER_STALE" });
+  });
+});
+
+describe("train discount", () => {
+  const credit = (over: Partial<NonNullable<NonNullable<Characteristics["downtime"]>["training"]>> = {}) => ({ kind: "characteristic" as const, key: "ws", discount: 15, ...over });
+
+  const withCredit = (training = credit()) => base({ downtime: { ailments: [{ id: "a1", kind: "injury", daysLeft: 3, label: "x" }], training } });
+
+  it("applies the credit once and drops it", () => {
+    const r = buy({ request: { kind: "characteristic", key: "ws" }, characteristics: withCredit() });
+
+    expect(r.ok && r.entry).toMatchObject({ cost: 10, discount: 15 });
+    expect(r.ok && r.next.downtime?.training).toBeUndefined();
+    expect(r.ok && r.next.downtime && "training" in r.next.downtime).toBe(false);
+    expect(r.ok && r.next.downtime?.ailments).toHaveLength(1);
+  });
+
+  it("never goes below zero", () => {
+    const rules = { ...RULES, characteristic: { ...RULES.characteristic, brackets: [{ upTo: 40, cost: 10 }] } };
+
+    const r = buy({ request: { kind: "characteristic", key: "ws" }, characteristics: withCredit(), rules });
+
+    expect(r.ok && r.entry).toMatchObject({ cost: 0, discount: 15 });
+  });
+
+  it("keeps a credit for another key or kind", () => {
+    const other = buy({ request: { kind: "characteristic", key: "bs" }, characteristics: withCredit() });
+
+    expect(other.ok && other.entry.cost).toBe(25);
+    expect(other.ok && other.next.downtime?.training).toEqual(credit());
+
+    const t = buy({ request: { kind: "talent", key: "smith" }, characteristics: withCredit({ kind: "skill", key: "smith" } as never), talent: { id: "smith", xpCost: 100, maxRank: 1 } });
+
+    expect(t.ok && t.entry.cost).toBe(100);
+    expect(t.ok && "discount" in t.entry).toBe(false);
+  });
+
+  it("checks XP after the discount", () => {
+    expect(buy({ request: { kind: "characteristic", key: "ws" }, characteristics: withCredit(), available: 10 }).ok).toBe(true);
+    expect(buy({ request: { kind: "characteristic", key: "ws" }, characteristics: withCredit(), available: 9 })).toEqual({ ok: false, error: "INSUFFICIENT_XP" });
+  });
+
+  it("undo restores the credit or reports a stale ledger", () => {
+    const r = buy({ request: { kind: "characteristic", key: "ws" }, characteristics: withCredit() });
+
+    if (!r.ok) throw new Error(r.error);
+
+    const u = planUndo(r.next);
+
+    expect(u.ok && u.next.downtime?.training).toEqual(credit());
+    expect(u.ok && u.next.downtime?.ailments).toHaveLength(1);
+
+    const clash = planUndo({ ...r.next, downtime: { ailments: [], training: credit({ key: "bs" }) } });
+
+    expect(clash).toEqual({ ok: false, error: "LEDGER_STALE" });
+  });
+
+  it("reader keeps a ledger discount and rejects 0", () => {
+    const entry = { id: "e", at: "x", kind: "characteristic", key: "ws", from: 0, to: 1, cost: 10 };
+
+    expect(readCharacteristics({ characteristics: { ledger: [{ ...entry, discount: 15 }] } }).ledger).toEqual([{ ...entry, discount: 15 }]);
+    expect(readCharacteristics({ characteristics: { ledger: [{ ...entry, discount: 0 }] } }).ledger).toEqual([]);
   });
 });
 

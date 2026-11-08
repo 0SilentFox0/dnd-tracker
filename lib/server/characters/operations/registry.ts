@@ -7,6 +7,9 @@ import { choicesOperation } from "./choices";
 import { createOperation } from "./create";
 import { deleteOperation } from "./delete";
 import { deleteAllOperation } from "./delete-all";
+import { downtimeSetOperation } from "./downtime";
+import { downtimePeriodOperation } from "./downtime-period";
+import { downtimePeriodUndoOperation } from "./downtime-period-undo";
 import { experienceOperation } from "./experience";
 import { getOperation } from "./get";
 import { goalsOperation } from "./goals";
@@ -59,6 +62,9 @@ export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
   "advance.undo": erased(advanceUndoOperation),
   "career.set": erased(careerSetOperation),
   "career.advance": erased(careerAdvanceOperation),
+  "downtime.set": erased(downtimeSetOperation),
+  "downtime.period": erased(downtimePeriodOperation),
+  "downtime.period.undo": erased(downtimePeriodUndoOperation),
   roll: erased(rollOperation),
   ...Object.fromEntries(Object.entries(READ_OPERATIONS).map(([key, op]) => [key, erased(op)])),
 };

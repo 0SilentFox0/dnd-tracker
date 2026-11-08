@@ -62,7 +62,7 @@ describe("buildOpenApi", () => {
 
     expect(JSON.stringify(doc.components.schemas.UnitsCreate)).toContain("#/components/schemas/Ability");
     expect(json.match(/"trigger":\{"\$ref"/g)?.length ?? 0).toBeLessThanOrEqual(1);
-    expect(json.length).toBeLessThan(192_000); // 5h-1 trait effects ~1.4 KB, 5h-2 rules.tables ~7.2 KB
+    expect(json.length).toBeLessThan(193_000); // 5h-1 trait effects ~1.4 KB, 5h-2 rules.tables ~7.2 KB, 5h-4 downtime actions (total ~191.7 KB)
   });
 
   it("query-параметри spells?ids і skills?mainSkillId", () => {

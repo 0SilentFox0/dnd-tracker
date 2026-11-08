@@ -18,6 +18,7 @@ export { useClassLevelUp } from "./useClassLevelUp";
 export { type LevelUpCharacter, NEW_CLASS, useClassLevelUpForm } from "./useClassLevelUpForm";
 export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEditor";
 export { useDmCharactersPage } from "./useDmCharactersPage";
+export { useDowntime, useDowntimePeriod, useDowntimePeriodUndo } from "./useDowntime";
 export { draftPortraitsQuery, useDraftPortraits } from "./useDraftPortraits";
 export { useEquipArtifact } from "./useEquipArtifact";
 export { clampGrantQuantity, useGrantArtifactForm } from "./useGrantArtifactForm";

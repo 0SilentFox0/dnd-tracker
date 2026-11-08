@@ -9,6 +9,8 @@ import type { WfrpParticipantStats } from "./wfrp/combat/participant";
 import type { planDraft } from "./wfrp/creation/plan";
 import type { isUsableProfile } from "./wfrp/creation/profile";
 import type { rollCreation } from "./wfrp/creation/roll";
+import type { validateEndeavour } from "./wfrp/downtime/endeavours";
+import type { planPeriod } from "./wfrp/downtime/plan-period";
 import type { armourAp, parseWfrpStats } from "./wfrp/equipment/armour";
 import type { encumbrance } from "./wfrp/equipment/encumbrance";
 import type { QUALITY_REGISTRY, QualityRef } from "./wfrp/equipment/qualities";
@@ -258,6 +260,12 @@ export interface RuleSystemCombat {
   };
 }
 
+export interface RuleSystemDowntime {
+  planPeriod: typeof planPeriod;
+  validateEndeavour: typeof validateEndeavour;
+  maxDays: number;
+}
+
 export interface RuleSystemDefinition {
   key: RuleSystemKey;
   distance: { unit: "ft" | "yd"; perCell: number };
@@ -277,6 +285,7 @@ export interface RuleSystemDefinition {
   equipment?: RuleSystemEquipment;
   traits?: RuleSystemTraits;
   currency?: RuleSystemCurrency;
+  downtime?: RuleSystemDowntime;
   identity: { alignments: boolean };
   creation?: RuleSystemCreation;
   lineage: boolean;

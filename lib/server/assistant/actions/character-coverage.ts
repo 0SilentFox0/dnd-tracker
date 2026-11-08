@@ -27,5 +27,7 @@ export const CHARACTER_ACTION_COVERAGE = [
   ["POST", "campaigns/[id]/rest", "rest", "character-progression-storage.integration"],
   ["POST", `${hero}/advance`, "advance", "advance"], ["DELETE", `${hero}/advance`, "advance.undo", "advance"],
   ["POST", `${hero}/career`, "career.set", "career"], ["POST", `${hero}/career/advance`, "career.advance", "career"],
+  ["PUT", `${hero}/downtime`, "downtime.set", "wfrp-downtime-e2e"],
+  ["POST", "campaigns/[id]/downtime/period", "downtime.period", "wfrp-downtime-e2e"], ["POST", "campaigns/[id]/downtime/period-undo", "downtime.period.undo", "wfrp-downtime-e2e"],
   ["POST", "campaigns/[id]/experience", "experience", "character-progression-storage.integration"],
 ].map(([method, route, operation, testId]) => ({ method, route, actionId: `characters.${operation}`, testId }));
