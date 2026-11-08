@@ -116,9 +116,12 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   };
 }
 
-const nameTokens = (name: string) => name.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length >= 3);
+// eslint-disable-next-line no-restricted-syntax -- uk titles are name data, not UI text
+const NAME_TITLES: ReadonlySet<string> = new Set(["Лорд", "Леді", "Сер", "Мати", "Батько", "Lord", "Lady", "Sir", "Mother", "Father"]);
 
-/** Повне ім'я й його окремі слова («Годрик» з «Лорд Годрик Єдиноріг»), крім слів, що є й в інших учасників */
+const nameTokens = (name: string) => name.split(/[^\p{L}\p{N}'’ʼ]+/u).filter((t) => t.length >= 3 && /^\p{Lu}/u.test(t) && !NAME_TITLES.has(t));
+
+/** Повне ім'я й його окремі слова («Годрик» з «Лорд Годрик Єдиноріг»), крім слів, що є й в інших учасників; імена решти — самі в себе, щоб довше ім'я перемагало */
 const disguiseNamesOf = (participants: BattleParticipant[], disguiseOf: DisguiseOf): ReadonlyMap<string, string> => {
   const count = new Map<string, number>();
 
@@ -139,6 +142,10 @@ const disguiseNamesOf = (participants: BattleParticipant[], disguiseOf: Disguise
 
     for (const t of nameTokens(p.basicInfo.name)) if (tokenOwners.get(t) === 1 && !count.has(t)) names.set(t, d.name);
   }
+
+  const keys = [...names.keys()];
+
+  for (const { basicInfo: { name } } of participants) if (!names.has(name) && keys.some((k) => name.includes(k))) names.set(name, name);
 
   return names;
 };

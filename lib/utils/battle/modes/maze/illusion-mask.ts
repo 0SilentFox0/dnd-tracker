@@ -104,6 +104,6 @@ export function maskAction(e: BattleAction, disguiseOf: DisguiseOf, viewerNames:
 /** Імперативне читання кешу (readBattle) теж віддає імена під маскою */
 export const maskBattleBy = <T extends { initiativeOrder: BattleParticipant[]; battleLog?: BattleAction[] }>(battle: T, disguiseOf: DisguiseOf, viewerNames?: ReadonlyMap<string, string>): T => ({
   ...battle,
-  initiativeOrder: battle.initiativeOrder.map((p) => maskParticipantBy(p, disguiseOf)),
+  initiativeOrder: battle.initiativeOrder.map((p) => maskParticipantBy(p, disguiseOf, viewerNames)),
   ...(battle.battleLog && { battleLog: battle.battleLog.map((e) => maskAction(e, disguiseOf, viewerNames)) }),
 });

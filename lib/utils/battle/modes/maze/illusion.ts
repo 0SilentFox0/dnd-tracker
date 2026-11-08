@@ -55,6 +55,6 @@ export function pruneIllusion<T extends PruneOutcome>(map: BattleMapConfig | nul
   return {
     ...result,
     scene: { ...result.scene, map: { ...map, maze: next } },
-    events: [...(result.events ?? []), mazeOpEvent(result.scene?.round ?? scene.round, MAZE_TEXTS.ops.illusionAuto, "op")],
+    events: [...(result.events ?? []), mazeOpEvent(result.scene?.round ?? scene.round, active ? MAZE_TEXTS.ops.illusionAuto : MAZE_TEXTS.ops.illusionOff, "op")],
   };
 }

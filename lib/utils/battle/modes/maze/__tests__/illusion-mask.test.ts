@@ -143,6 +143,16 @@ describe("maskBattleBy", () => {
     expect(nameOf(out.initiativeOrder, "godric")).toBe("Vampire");
     expect(out.battleLog[0].actorName).toBe("Vampire");
   });
+
+  it("імена джерел ефектів теж маскуються через viewerNames", () => {
+    const eff = { id: "e", name: "Haste", source: { participantId: "c", name: "Cora", abilityName: "Godric: Haste" } } as unknown as import("@/types/battle").ActiveEffect;
+
+    const view = viewFor("u1")!;
+
+    const out = maskBattleBy({ initiativeOrder: [{ ...zehir, battleData: { ...zehir.battleData, activeEffects: [eff] } }] }, view.disguiseOf!, view.disguiseNames);
+
+    expect(out.initiativeOrder[0].battleData.activeEffects?.[0].source?.abilityName).toBe("Vampire: Haste");
+  });
 });
 
 describe("власні герої глядача пари", () => {
@@ -277,5 +287,30 @@ describe("імена як токени у довших рядках", () => {
     const own = deriveMazeView({ map, participants: people, userId: "u2", isDM: false })!;
 
     expect(maskMazeScene(sc, own).battle.initiativeOrder?.[0].battleData.activeEffects?.[0].source?.abilityName).toBe("Godric: Firm");
+  });
+});
+
+describe("маскування окремих слів імені", () => {
+  const maskedBy = (partner: string, others: string[], text: string) => {
+    const people = [zehir, hero("godric", partner, "u2", 2), ...others.map((n, i) => hero(`o${i}`, n, `x${i}`, 5 + i))];
+
+    const view = deriveMazeView({ map, participants: people, userId: "u1", isDM: false })!;
+
+    return maskAction({ ...log, actorId: "system", actorName: "System", targets: [], hpChanges: [], resultText: text, log: [] }, view.disguiseOf!, view.disguiseNames).resultText;
+  };
+
+  it("слово, яке є й в іншого учасника, не маскується", () => {
+    expect(maskedBy("Lord Godric", ["Lord Cedric"], "Godric meets Cedric, Lord of nothing")).toBe("Vampire meets Cedric, Lord of nothing");
+  });
+
+  it("слово з малої літери, коротке й титул не маскуються; апостроф не ділить слово", () => {
+    expect(maskedBy("Arthur the Great", [], "Wrath of the Storm by Arthur")).toBe("Wrath of the Storm by Vampire");
+    expect(maskedBy("Sir Godric", [], "Sir Godric and Sir Cedric")).toBe("Vampire and Sir Cedric");
+    expect(maskedBy("Мар'ян", [], "Мар'ян б'є, а Мар б'є")).toBe("Vampire б'є, а Мар б'є");
+    expect(maskedBy("Al Bo", [], "Al and Bo")).toBe("Al and Bo");
+  });
+
+  it("повне ім'я партнера всередині довшого імені іншого учасника не чіпається", () => {
+    expect(maskedBy("Godric", ["Godric Young"], "Godric Young hits Godric")).toBe("Godric Young hits Vampire");
   });
 });

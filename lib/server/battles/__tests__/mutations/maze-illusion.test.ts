@@ -136,6 +136,7 @@ describe("pruneIllusion", () => {
     const out = run(withPair(), undefined, { status: BattleStatus.COMPLETED });
 
     expect(out.scene?.map?.maze?.illusionSwap?.pairs).toEqual([]);
+    expect(JSON.stringify(out.events[0].details)).toContain("illusionOff");
   });
 
   it("does nothing without pairs", () => {
