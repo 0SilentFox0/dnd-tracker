@@ -11,6 +11,7 @@ import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/utils/battle/actions/legendary-options";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { abilityMaxTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { bonusTargetCandidates, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { BattleParticipant, LegendaryOption } from "@/types/battle";
@@ -44,9 +45,9 @@ export function useLegendaryAction(participant: BattleParticipant) {
   const choices = useMemo<LegendaryChoice[]>(() => {
     const field = (order ?? []).filter((p) => !p.battleData.reserved);
 
-    const allies = field.filter((p) => p.basicInfo.side === participant.basicInfo.side);
+    const allies = field.filter((p) => !isHostile(battle.map, participant, p));
 
-    const enemies = field.filter((p) => p.basicInfo.side !== participant.basicInfo.side);
+    const enemies = field.filter((p) => isHostile(battle.map, participant, p));
 
     const attacks = participant.battleData.attacks.flatMap((a, i): LegendaryChoice[] =>
       a.hand === "off" ? [] : [{ id: `attack:${i}`, kind: "attack", label: a.name, cost: 1, attackIndex: i, needsTarget: true, maxTargets: 1, candidates: enemies.filter(isAttackable), blocked: legendaryBlocker(participant, current, 1) }],
@@ -67,7 +68,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
     });
 
     return [...attacks, ...abilities];
-  }, [order, participant, current, spells.data, battle.currentRound]);
+  }, [order, participant, current, spells.data, battle.currentRound, battle.map]);
 
   const { send, isPending } = useSendCoreAction();
 

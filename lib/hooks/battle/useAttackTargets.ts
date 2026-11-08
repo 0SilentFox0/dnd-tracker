@@ -9,6 +9,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { isAirborne, isDying } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { lineOfFire } from "@/lib/utils/battle/grid";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -22,13 +23,13 @@ export function useAttackTargets(attacker: BattleParticipant | null, attack: Bat
 
   const alive = (p: BattleParticipant) => isUp(p) || isDying(p);
 
-  const targets = order.filter(
-    (p) => alive(p) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
-  );
-
-  const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);
-
   const map = scene.battle.map;
+
+  const foe = (p: BattleParticipant) => (attacker ? isHostile(map, attacker, p) : true);
+
+  const targets = order.filter((p) => alive(p) && !isAirborne(p) && p !== attacker && visible(p) && (foe(p) || scene.battle.campaign?.friendlyFire === true));
+
+  const enemyTargets = targets.filter(foe);
 
   const cover = useMemo(() => {
     if (step === "closed" || !attacker || !attack || !map || attackKindOf(attack.type) !== AttackType.RANGED) return new Set<string>();

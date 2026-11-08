@@ -7,6 +7,7 @@ import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { bothOnMap, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -38,7 +39,7 @@ export function coreActionTargets(key: CoreActionKey, actor: BattleParticipant, 
 
   if (target === "none") return [];
 
-  const sideOk = (p: BattleParticipant) => (target === "allyAdjacent" ? p.basicInfo.side === actor.basicInfo.side && isActive(p) : p.basicInfo.side !== actor.basicInfo.side && isAttackable(p));
+  const sideOk = (p: BattleParticipant) => (target === "allyAdjacent" ? !isHostile(map, actor, p) && isActive(p) : isHostile(map, actor, p) && isAttackable(p));
 
   return participants.filter((p) => p.basicInfo.id !== actor.basicInfo.id && !p.battleData.reserved && sideOk(p) && (!bothOnMap(map, actor, p) || isAdjacent(actor, p)));
 }

@@ -9,6 +9,7 @@ import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { coreActionAvailability, coreActionCost, coreActionTargets } from "@/lib/utils/battle/actions/availability";
 import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import { CORE_ACTION_KEYS, CORE_ACTION_REGISTRY, type CoreActionKey } from "@/lib/utils/battle/actions/registry";
+import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface CoreActionChoice {
@@ -58,7 +59,7 @@ export function useReadiedAttack(participant: BattleParticipant, onDone?: () => 
 
   return {
     available: canReadiedAttack(!!battle.rules?.actions.enabled, participant),
-    targets: battle.initiativeOrder.filter((p) => p.basicInfo.side !== participant.basicInfo.side && isAttackable(p) && !p.battleData.reserved),
+    targets: battle.initiativeOrder.filter((p) => isHostile(battle.map, participant, p) && isAttackable(p) && !p.battleData.reserved),
     attack: (targetId: string) => send({ action: "readiedAttack", participantId: participant.basicInfo.id, targetId }),
     isPending,
   };
