@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { areIllusionFoes, disguiseFor, illusionPairs, illusionPartner } from "../illusion";
+import { areIllusionFoes, disguiseFor, illusionPairs } from "../illusion";
 
 import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 import type { IllusionPair } from "@/types/battle";
@@ -20,12 +20,6 @@ describe("illusion helpers", () => {
     expect(illusionPairs(null)).toEqual([]);
     expect(illusionPairs(emptyMaze())).toEqual([]);
     expect(illusionPairs({ ...emptyMaze(), illusionSwap: { pairs: [pair] } })).toEqual([pair]);
-  });
-
-  it("illusionPartner finds the pair by either side", () => {
-    expect(illusionPartner([pair, other], "godric")).toBe(pair);
-    expect(illusionPartner([pair, other], "x")).toBe(other);
-    expect(illusionPartner([pair], "c")).toBeUndefined();
   });
 
   it("areIllusionFoes is symmetric and pair-local", () => {

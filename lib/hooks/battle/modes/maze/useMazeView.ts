@@ -110,29 +110,35 @@ export function useMazeMaskValue(): MazeMaskValue {
     () => ({
       view,
       visible: (p) => mazeVisible(view, p),
-      fxLog: view?.role === "player" ? log.filter((e) => modeFxVisible(map, view, e)).map((e) => maskMazeFxAction(view, e)) : view?.disguiseOf ? log.map((e) => maskMazeFxAction(view, e)) : log,
+      fxLog:
+        view?.role === "player"
+          ? log.filter((e) => modeFxVisible(map, view, e)).map((e) => maskMazeFxAction(view, e))
+          : view?.disguiseOf
+            ? log.map((e) => maskMazeFxAction(view, e))
+            : log,
     }),
     [view, log, map],
   );
 
   const maskedData = useMemo(() => maskMazeScene(data, view), [data, view]);
 
-  const maskedValue = useMemo(
-    () => {
-      if (maskedData === data) return value;
+  const maskedValue = useMemo(() => {
+    if (maskedData === data) return value;
 
-      const masked = { ...value, battle: maskedData.battle, turn: maskedData.turn, roster: maskedData.roster };
+    const masked = { ...value, battle: maskedData.battle, turn: maskedData.turn, roster: maskedData.roster };
 
-      const disguiseOf = view?.disguiseOf;
+    const disguiseOf = view?.disguiseOf;
 
-      if (!disguiseOf) return masked;
+    if (!disguiseOf) return masked;
 
-      return { ...masked, readBattle: () => { const b = value.readBattle();
+    const readBattle = () => {
+      const b = value.readBattle();
 
- return b && maskBattleBy(b, disguiseOf); } };
-    },
-    [maskedData, data, value, view],
-  );
+      return b && maskBattleBy(b, disguiseOf);
+    };
+
+    return { ...masked, readBattle };
+  }, [maskedData, data, value, view]);
 
   return { state, modeView, data: maskedData, value: maskedValue };
 }

@@ -88,7 +88,10 @@ export function MazeIllusionDialog({ open, onOpenChange, campaignId, heroes, pai
 
   const ready = rows.every(isComplete);
 
-  const close = () => onOpenChange(false);
+  const submit = (action: () => void) => () => {
+    action();
+    onOpenChange(false);
+  };
 
   return (
     <ResponsiveDialog
@@ -99,10 +102,10 @@ export function MazeIllusionDialog({ open, onOpenChange, campaignId, heroes, pai
       title={tMaze("toolbar.illusion")}
       footer={
         <>
-          <Button variant="outline" onClick={() => { onClear(); close(); }}>
+          <Button variant="outline" onClick={submit(onClear)}>
             {t("restore")}
           </Button>
-          <Button disabled={!ready} onClick={() => { onApply(rows.filter(isComplete)); close(); }}>
+          <Button disabled={!ready} onClick={submit(() => onApply(rows.filter(isComplete)))}>
             {t("apply")}
           </Button>
         </>

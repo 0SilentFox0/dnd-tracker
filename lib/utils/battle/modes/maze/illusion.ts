@@ -7,10 +7,7 @@ import type { NewBattleEvent, ScenePatch } from "@/lib/utils/battle/store/types"
 import type { BattleMapConfig, BattleParticipant, IllusionDisguise, IllusionPair, MazeConfig } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
-
 export const illusionPairs = (maze: MazeConfig | null | undefined): IllusionPair[] => maze?.illusionSwap?.pairs ?? [];
-
-export const illusionPartner = (pairs: IllusionPair[], id: string): IllusionPair | undefined => pairs.find((p) => p.a === id || p.b === id);
 
 export const areIllusionFoes = (pairs: IllusionPair[], aId: string, bId: string): boolean =>
   aId !== bId && pairs.some((p) => (p.a === aId && p.b === bId) || (p.a === bId && p.b === aId));
