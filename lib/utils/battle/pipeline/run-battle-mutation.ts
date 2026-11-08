@@ -280,6 +280,7 @@ export async function runGuardedBattleOperationCore<TBody>(
     ...scenePatch,
     version: delta.version,
     eventSeq: delta.events.at(-1)?.seq ?? loaded.scene.eventSeq,
+    turnStartedAt: delta.scene?.turnStartedAt ?? null,
   };
 
   const entries = delta.events.map((e) => eventToBattleAction(e, battleId));

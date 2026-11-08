@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const SLIDER_DEBOUNCE_MS = 250;
 
-const PRESET_KEYS = ["slow", "medium", "fast"] as const;
+const PRESET_KEYS = ["slow", "medium", "fast", "veryFast"] as const;
 
 const chip = (pressed: boolean) =>
   cn("h-7 rounded border px-2 disabled:opacity-50", pressed ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted hover:text-hud-bone");

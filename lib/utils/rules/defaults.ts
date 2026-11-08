@@ -17,6 +17,7 @@ export const DEFAULT_RULES: Ruleset = {
   encounters: { balance: "fair", edition: "2014", autoXp: false },
   items: { enabled: false, attunementLimit: 3 },
   spellIngredients: { enabled: false, autoPay: true },
+  turnTimer: { enabled: false, seconds: 60 },
 };
 
 export function localizedDefaultAttacks(t: (key: string) => string): Ruleset["defaultAttacks"] {

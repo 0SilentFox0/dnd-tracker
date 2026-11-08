@@ -53,6 +53,7 @@ export function toBattleResponse(
     version: scene.version,
     createdAt: meta.createdAt.toISOString(),
     startedAt: scene.startedAt?.toISOString(),
+    turnStartedAt: scene.turnStartedAt?.toISOString(),
     completedAt: scene.completedAt?.toISOString(),
     campaign: { id: scene.campaignId, friendlyFire: meta.friendlyFire },
     ...(view && { isDM: Boolean(view.isDM), userRole: view.isDM ? CampaignRole.DM : CampaignRole.PLAYER }),

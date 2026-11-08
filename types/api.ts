@@ -68,6 +68,8 @@ export interface BattleScene {
   battleLog: BattleAction[];
   createdAt: string;
   startedAt?: string;
+  /** Початок поточного ходу (ISO) — відлік таймера ходу */
+  turnStartedAt?: string;
   completedAt?: string;
   campaign?: {
     id: string;
@@ -104,6 +106,8 @@ export interface ClientBattleDelta {
     pendingCritChoice: PendingCritChoice | null;
     /** null — дату скинуто (reset, відкат завершеного бою) */
     startedAt?: string | null;
+    /** коли почався поточний хід (для таймера ходу) */
+    turnStartedAt?: string | null;
     completedAt?: string | null;
     /** лише коли змінилось щось, крім місцевості */
     map?: BattleMapConfig | null;

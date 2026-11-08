@@ -42,7 +42,7 @@ describe("skill icons map", () => {
     expect(iconBucket("eternal-light")).toBe("skill-icons");
     expect(iconBucket("eternal-light", "spell")).toBe("spell-icons");
     expect(iconPublicUrl("https://x.supabase.co", "haste", "spell")).toBe("https://x.supabase.co/storage/v1/object/public/spell-icons/haste.webp");
-    expect(Object.keys(SPELL_ICONS)).toHaveLength(50);
+    expect(Object.keys(SPELL_ICONS)).toHaveLength(51);
   });
 });
 

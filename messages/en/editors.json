@@ -6,6 +6,7 @@
       "grantCast": "Temporary subcast",
       "hitRider": "Extra damage charges",
       "moveSelf": "Caster moves to the target",
+      "phantom": "Double of the target (phantom)",
       "createTerrain": "Wall / difficult terrain",
       "anchoredZone": "Aura on the target",
       "summonInline": "Summon from the spell map",
@@ -149,6 +150,7 @@
     },
     "hints": {
       "chooseOne": "The caster picks one of the options when casting.",
+      "phantom": "The spell target gets a double on the caster's side: same stats and abilities, 1 HP, controlled by the caster.",
       "moveSelf": "The caster moves to the nearest free cell next to the first target without provoking attacks.",
       "revertAtZero": "At 0 HP of the form it reverts; excess damage carries over to the normal form."
     },

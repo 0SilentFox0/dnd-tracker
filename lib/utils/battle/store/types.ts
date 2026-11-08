@@ -16,6 +16,7 @@ export interface BattleSceneState {
   pendingMoraleCheck: unknown | null;
   pendingCritChoice: StoredPendingCritChoice | null;
   startedAt: Date | null;
+  turnStartedAt?: Date | null;
   completedAt: Date | null;
 }
 
@@ -125,7 +126,7 @@ export interface BattleMutationOutcome {
 export interface BattleDelta {
   battleId: string;
   version: number;
-  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice">;
+  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "turnStartedAt">;
   upserted: BattleParticipant[];
   /** нові учасники й ті, чий знімок змінився */
   fullIds: string[];

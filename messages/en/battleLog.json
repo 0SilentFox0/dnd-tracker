@@ -307,6 +307,7 @@
     "wrongStatus": "The action is unavailable in the status “{status}”",
     "panicSkip": "The participant is panicking and skips the turn",
     "moraleFirst": "A morale check is needed first",
+    "turnTimerRunning": "The turn time has not run out yet",
     "outOfRange": "Out of range",
     "pickDirection": "Pick a direction",
     "badSpellTarget": "This target does not fit the spell",

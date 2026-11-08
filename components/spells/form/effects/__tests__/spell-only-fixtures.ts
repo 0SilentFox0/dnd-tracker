@@ -32,6 +32,7 @@ export const SPELL_ONLY_FIXTURES: Record<string, Fixture> = {
   transform: { effect: { kind: "transform", unitId: "u1", revertAtZero: true, duration: { rounds: 10 } }, edit: { id: "duration", value: "5", patch: { duration: { rounds: 5 } } } },
   inputDice: { effect: { kind: "inputDice", label: "Dice", max: 20 }, edit: { id: "max", value: "10", patch: { max: 10 } } },
   createTerrain: { effect: { kind: "createTerrain", terrain: "wall", shape: "line", cells: 4, rounds: 10 }, edit: { id: "cells", value: "6", patch: { cells: 6 } } },
+  phantom: { effect: { kind: "phantom" } },
   moveSelf: { effect: { kind: "moveSelf", to: "adjacentToTarget" } },
   chooseOne: { effect: { kind: "chooseOne", options: [{ kind: "heal", amount: { spellRoll: 100 } }, { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "radiant" }] } },
   dealDamage: {

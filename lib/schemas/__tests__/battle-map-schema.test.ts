@@ -118,6 +118,6 @@ describe("battleMapSchema.motion", () => {
 
     expect(parsed.motion).toEqual({ axis: "y", speed: -2 });
     expect(battleMapSchema.safeParse({ ...map, motion: null }).success).toBe(true);
-    expect(battleMapSchema.safeParse({ ...map, motion: { axis: "x", speed: 7 } }).success).toBe(false);
+    expect(battleMapSchema.safeParse({ ...map, motion: { axis: "x", speed: 13 } }).success).toBe(false);
   });
 });

@@ -1,9 +1,9 @@
 import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
-type SpellOnly = Extract<SpellEffect, { kind: "inputDice" | "grantCast" | "hitRider" | "anchoredZone" | "summonInline" | "transform" | "moveSelf" | "createTerrain" | "chooseOne" }>;
+type SpellOnly = Extract<SpellEffect, { kind: "inputDice" | "grantCast" | "hitRider" | "anchoredZone" | "summonInline" | "transform" | "phantom" | "moveSelf" | "createTerrain" | "chooseOne" }>;
 
-const SPELL_ONLY_KINDS = new Set(["inputDice", "grantCast", "hitRider", "anchoredZone", "summonInline", "transform", "moveSelf", "createTerrain", "chooseOne"]);
+const SPELL_ONLY_KINDS = new Set(["inputDice", "grantCast", "hitRider", "anchoredZone", "summonInline", "transform", "phantom", "moveSelf", "createTerrain", "chooseOne"]);
 
 export const isSpellOnlyEffect = (e: { kind: string }): e is SpellOnly => SPELL_ONLY_KINDS.has(e.kind);
 
@@ -66,6 +66,9 @@ export function describeSpellOnly(effect: SpellOnly, describe: (e: SpellEffect) 
 
     case "transform":
       return [seg("summary.spellOnly.transform", { rounds: effect.duration.rounds })];
+
+    case "phantom":
+      return [seg("summary.spellOnly.phantom")];
 
     case "moveSelf":
       return [seg("summary.spellOnly.moveSelf")];

@@ -17,6 +17,7 @@ const DEFAULTS: { [K in SpellOnlyKind]: Omit<SpellOnlyEffect<K>, "kind"> } = {
   chooseOne: { options: [{ kind: "heal", amount: { spellRoll: 100 } }, { kind: "dealDamage", amount: { spellRoll: 100 } }] },
   inputDice: { label: DEFAULT_TEXT, max: 20 },
   moveSelf: { to: "adjacentToTarget" },
+  phantom: {},
   createTerrain: { terrain: "difficult", shape: "cell", cells: 4, rounds: 10 },
   transform: { unitId: "", revertAtZero: true, duration: { rounds: 10 } },
   grantCast: {

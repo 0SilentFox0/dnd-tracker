@@ -104,6 +104,7 @@ export interface PreparedSave {
   events: StoredBattleEvent[];
   clearHistory: boolean;
   delta: BattleDelta;
+  turnStartedAt: Date | null;
 }
 
 export type BattleWrite = { logLocale: Locale };
@@ -142,7 +143,11 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
 
   const { map: _map, ...scenePatch } = outcome.scene ?? {};
 
-  const nextScene: BattleSceneState = { ...scene, ...scenePatch };
+  const moved = (scenePatch.round ?? scene.round) !== scene.round || (scenePatch.turnIndex ?? scene.turnIndex) !== scene.turnIndex || (scenePatch.status ?? scene.status) !== scene.status;
+
+  const turnStartedAt = moved ? new Date() : (scene.turnStartedAt ?? null);
+
+  const nextScene: BattleSceneState = { ...scene, ...scenePatch, turnStartedAt };
 
   const delta: BattleDelta = {
     battleId: scene.id,
@@ -153,6 +158,7 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
       turnIndex: nextScene.turnIndex,
       pendingMoraleCheck: nextScene.pendingMoraleCheck,
       pendingCritChoice: nextScene.pendingCritChoice,
+      turnStartedAt,
     },
     upserted: [...diff.created, ...diff.updated.map((u) => u.next)].map((p) => joinParticipant(p, scene.id)),
     fullIds: [...diff.created, ...diff.updated.filter((u) => u.snapshotChanged).map((u) => u.next)].map((p) => p.columns.id),
@@ -160,7 +166,7 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
     events,
   };
 
-  return { beforeStored, diff, events: stored, clearHistory, delta };
+  return { beforeStored, diff, events: stored, clearHistory, delta, turnStartedAt };
 }
 
 export async function saveBattle(
@@ -175,7 +181,7 @@ export async function saveBattle(
 
   const t = BATTLE_LOG_TEXT_FALLBACK ? await getTranslator(write.logLocale) : undefined;
 
-  const { beforeStored, diff, events, clearHistory, delta } = prepareSave(
+  const { beforeStored, diff, events, clearHistory, delta, turnStartedAt } = prepareSave(
     before,
     outcome,
     t && ((log) => formatBattleLog(t, { log, resultText: "" })),
@@ -195,6 +201,7 @@ export async function saveBattle(
         ...(patch.pendingMoraleCheck !== undefined && { pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck) }),
         ...(patch.pendingCritChoice !== undefined && { pendingCritChoice: jsonOrNull(patch.pendingCritChoice) }),
         ...(patch.startedAt !== undefined && { startedAt: patch.startedAt }),
+        ...(turnStartedAt !== (scene.turnStartedAt ?? null) && { turnStartedAt }),
         ...(patch.completedAt !== undefined && { completedAt: patch.completedAt }),
         ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
         ...(patch.rules !== undefined && { rules: patch.rules as Prisma.InputJsonValue }),

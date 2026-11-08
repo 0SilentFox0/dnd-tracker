@@ -201,7 +201,10 @@ const TransformSchema = z.object({
   duration: DurationSchema,
 });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema, SummonInlineSchema, TransformSchema] as const;
+/** Фантом: ціль заклинання отримує двійника (ті ж характеристики й вміння) на боці кастера, з 1 HP; кастер ним керує. */
+const PhantomSchema = z.object({ kind: z.literal("phantom") });
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema, SummonInlineSchema, TransformSchema, PhantomSchema] as const;
 
 export const SPELL_ONLY_EFFECT_KINDS = SPELL_ONLY_EFFECTS.map((s) => s.shape.kind.value);
 

@@ -17,4 +17,5 @@ export const SRD_RULES: Ruleset = RulesetSchema.parse({
   encounters: { balance: "xp", edition: "2024", autoXp: true },
   items: { enabled: true, attunementLimit: 3 },
   spellIngredients: { enabled: true, autoPay: true },
+  turnTimer: { enabled: false, seconds: 60 },
 });

@@ -1126,6 +1126,7 @@
       "acSpellDc": "= spell DC",
       "summonInline": "summons {count}× “{name}” ({hp}, AC {ac}) for {rounds} rd.{hasUpcast, select, yes {; +1 per {upcastEvery} slot levels} other {}}{hasAura, select, yes {; aura {auraRadius} ft{auraAttack, select, yes { (spell attack)} other {}}} other {}}",
       "transform": "transforms the target into a unit form for {rounds} rd.; at 0 HP of the form it reverts and excess damage carries over to the normal form",
+      "phantom": "creates a double of the target on the caster's side (same stats and abilities, 1 HP); dies on the first damage",
       "moveSelf": "the caster moves next to the target",
       "terrain": {
         "wall": "wall",

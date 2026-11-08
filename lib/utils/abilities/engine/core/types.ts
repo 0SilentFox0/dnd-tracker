@@ -32,6 +32,8 @@ export interface SummonRequest {
   group?: string;
   tier?: number;
   unitId?: string;
+  /** id учасника, чий двійник (фантом) створюється */
+  cloneOf?: string;
   count: number;
   casterLevel?: number;
   /** закляття, яким прикликано (для extraSummons) */

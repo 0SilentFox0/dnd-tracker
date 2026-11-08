@@ -1,6 +1,6 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema, mapBackgroundBodySchema, mapMotionSchema, mapTerrainSchema, mapWeatherSchema, mazeActionSchema, mazeMarkSchema, moveSchema, patchParticipantSchema } from "@/lib/schemas/battles";
+import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema, mapBackgroundBodySchema, mapMotionSchema, mapTerrainSchema, mapWeatherSchema, mazeActionSchema, mazeMarkSchema, moveSchema, nextTurnSchema, patchParticipantSchema } from "@/lib/schemas/battles";
 import { ContentError } from "@/lib/server/content/errors";
 import { BattleAccess, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
@@ -214,7 +214,7 @@ const OPERATIONS: Record<string, Loader> = {
     load: async () => {
       const { nextTurnMutation } = await import("@/lib/server/battles/mutations/next-turn/next-turn-mutation");
 
-      return { mutate: nextTurnMutation };
+      return { schema: nextTurnSchema, mutate: nextTurnMutation };
     },
   }),
   "refresh-sources": operation({

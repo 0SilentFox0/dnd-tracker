@@ -7,7 +7,7 @@ import { SPELL_ONLY_EFFECT_KINDS, SpellEffectSchema } from "@/lib/utils/spells/m
 
 describe("spell-only kinds", () => {
   it("список видів збігається з дискримінаторами схеми", () => {
-    expect([...SPELL_ONLY_EFFECT_KINDS].sort()).toEqual(["anchoredZone", "chooseOne", "createTerrain", "grantCast", "hitRider", "inputDice", "moveSelf", "summonInline", "transform"]);
+    expect([...SPELL_ONLY_EFFECT_KINDS].sort()).toEqual(["anchoredZone", "chooseOne", "createTerrain", "grantCast", "hitRider", "inputDice", "moveSelf", "phantom", "summonInline", "transform"]);
   });
 
   it("SPELL_ONLY_KINDS рушія (без zod у клієнті) збігається зі схемою без chooseOne", () => {

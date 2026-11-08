@@ -12,6 +12,8 @@ const CHAOS = "Хаос";
 
 const NATURE = "Природа";
 
+const PERSONAL = "Особисті";
+
 type Definition = LibrarySpell["definition"];
 
 type Targeting = SpellDefinition["targeting"];
@@ -71,7 +73,7 @@ const condition = (c: Extract<Effect, { kind: "applyCondition" }>["condition"], 
 
 const regen = (n: number): Effect => ({ kind: "hot", healPerRound: { percentOf: "maxHp", value: 10 }, duration: rounds(n) });
 
-function def(dice: number, targeting: Targeting, effects: Effect[], over: Partial<Definition> = {}): Definition {
+function def(dice: number, targeting: Targeting, effects: Definition["effects"], over: Partial<Definition> = {}): Definition {
   return { dice, cost: "action", targeting, resolution: AUTO, effects, ...over };
 }
 
@@ -371,6 +373,18 @@ export const SPELLS: LibrarySpell[] = [
     appearanceDescription:
       "Очі ворога наливаються кров'ю, а з горла виривається звіриний рев. Він більше не бачить облич — лише цілі, і кидається на першого, хто трапиться, хай то навіть його брат по зброї.",
     definition: def(0, ENEMY_NEAR, [{ kind: "berserk", damageBonusPercent: 50, duration: rounds(1) }], { resolution: save("wisdom", "none") }),
+    raceModifiers: [],
+  },
+  {
+    key: "phantom",
+    iconKey: "phantom",
+    name: "Фантом",
+    school: DARK,
+    level: 4,
+    description: "Створює ілюзорного двійника союзної цілі на боці заклинателя: ті самі характеристики, вміння й сила, але лише 1 HP — він гине від першої отриманої шкоди. Двійником керує заклинатель.",
+    appearanceDescription:
+      "Повітря поруч із ціллю тремтить, і з тіні відшаровується її бліда копія — той самий погляд, та сама поза, лише контури розмиті, наче дим. Двійник мовчки стає поруч із заклинателем і чекає наказу.",
+    definition: def(0, ALLY, [{ kind: "phantom" }]),
     raceModifiers: [],
   },
   {
@@ -757,7 +771,7 @@ export const SPELLS: LibrarySpell[] = [
     key: "avatar",
     iconKey: "avatar",
     name: "Аватар",
-    school: NATURE,
+    school: PERSONAL,
     level: 4,
     description: "Особисте закляття: Маркел прикликає Аватара Смерті (DM може замінити юніта в редакторі заклинання). Аватаром керує той, хто прикликав.",
     appearanceDescription:

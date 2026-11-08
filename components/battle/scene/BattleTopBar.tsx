@@ -1,12 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Timer } from "lucide-react";
 
 import { BattlePlayerViewToggle } from "./BattlePlayerViewToggle";
 
 import { BattleStatus } from "@/lib/constants/battle";
-import { useBattleScene, useFxEnabled } from "@/lib/hooks/battle";
+import { useBattleScene, useFxEnabled, useTurnTimer } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,8 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
   const t = useTranslations("battle.topBar");
 
   const { battle, viewer: { isDM }, turn: { isMyTurn }, connection, actions } = useBattleScene();
+
+  const { secondsLeft } = useTurnTimer();
 
   const confirm = useConfirm();
 
@@ -33,6 +35,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
     <header data-tour="battle.topbar" className="flex h-12 items-center gap-3 px-4">
       <span className="hud-sc truncate text-[15px] tracking-[.08em]">{battle.name}</span>
       {isMyTurn && battle.status === BattleStatus.ACTIVE && <span className="hud-sc hidden h-8 items-center border-y border-[var(--enemy)] bg-[var(--enemy)]/20 px-4 text-[15px] tracking-[.12em] lg:flex">{t("yourTurn")}</span>}
+      {secondsLeft !== null && <span aria-label={t("turnTimer")} className={cn("hud-sc flex h-8 items-center gap-1 px-3 text-[15px] tabular-nums", secondsLeft <= 10 ? "text-hud-danger" : "text-hud-soft")}><Timer className="size-4" />{secondsLeft}</span>}
       <button type="button" disabled={!motionAllowed} title={fxHint} onClick={() => setFxOn(!fxOn)} aria-label={fxOn ? t("fxOn") : t("fxOff")} aria-pressed={fxOn} className={cn("ml-auto flex size-8 items-center justify-center hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent", fxOn ? "text-[var(--gold)]" : "text-hud-muted")}>
         <Sparkles className="size-4" />
       </button>

@@ -5,8 +5,8 @@ import { clampMotionSpeed, mirrorTileCount, motionInMapSpace, resumeSpeed, stepM
 
 describe("clampMotionSpeed", () => {
   it("clamps, rounds to 0.1 and maps NaN to 0", () => {
-    expect(clampMotionSpeed(99)).toBe(6);
-    expect(clampMotionSpeed(-99)).toBe(-6);
+    expect(clampMotionSpeed(99)).toBe(12);
+    expect(clampMotionSpeed(-99)).toBe(-12);
     expect(clampMotionSpeed(NaN)).toBe(0);
     expect(clampMotionSpeed(1.26)).toBe(1.3);
   });
@@ -64,7 +64,7 @@ describe("resumeSpeed", () => {
 
 describe("mapMotionSchema", () => {
   it("validates axis and speed bounds", () => {
-    expect(mapMotionSchema.safeParse({ motion: { axis: "x", speed: 7 } }).success).toBe(false);
+    expect(mapMotionSchema.safeParse({ motion: { axis: "x", speed: 13 } }).success).toBe(false);
     expect(mapMotionSchema.safeParse({ motion: null }).success).toBe(true);
     expect(mapMotionSchema.safeParse({ motion: { axis: "z", speed: 1 } }).success).toBe(false);
   });

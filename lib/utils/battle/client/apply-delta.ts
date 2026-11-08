@@ -82,6 +82,7 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
     pendingCritChoice: scene.pendingCritChoice,
     ...(map !== cached.map && { map }),
     startedAt: scene.startedAt === null ? undefined : (scene.startedAt ?? cached.startedAt),
+    turnStartedAt: scene.turnStartedAt === null ? undefined : (scene.turnStartedAt ?? cached.turnStartedAt),
     completedAt: scene.completedAt === null ? undefined : (scene.completedAt ?? cached.completedAt),
     initiativeOrder,
     pendingSummons: delta.pending ?? cached.pendingSummons,

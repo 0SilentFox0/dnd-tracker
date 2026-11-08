@@ -22,6 +22,7 @@ const CASES: [SpellEffect, string][] = [
   [{ kind: "summonInline", name: "Вартовий", size: "medium", ac: "spellDc", hp: null, count: 2, upcastEvery: 2, aura: { radiusFeet: 10, side: "enemies", onTurnStart: { attack: "spell", effects: [] } }, duration }, "викликає 2× «Вартовий» (предмет, КЗ = СК) на 10 р.; +1 за кожні 2 кола слота; аура 10 фт (атака заклинанням)"],
   [{ kind: "summonInline", name: "Дух", size: "small", ac: 14, hp: 12, count: 1, duration }, "викликає 1× «Дух» (12 HP, КЗ 14) на 10 р."],
   [{ kind: "transform", unitId: "u1", revertAtZero: true, duration }, "перетворює ціль на форму юніта на 10 р.; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму"],
+  [{ kind: "phantom" }, "створює двійника цілі на боці кастера (ті ж характеристики й вміння, 1 HP); гине від першої шкоди"],
   [{ kind: "moveSelf", to: "adjacentToTarget" }, "кастер переміщується до цілі"],
   [{ kind: "createTerrain", terrain: "wall", shape: "line", cells: 4, rounds: 10 }, "стіна: лінія до цілі (до 4) на 10 р."],
   [{ kind: "createTerrain", terrain: "difficult", shape: "cell", cells: 6, rounds: 3 }, "складна місцевість: клітинки області (до 6) на 3 р."],

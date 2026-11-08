@@ -93,6 +93,7 @@ export function buildClientDelta(args: {
       turnIndex: after.turnIndex,
       pendingMoraleCheck: after.pendingMoraleCheck,
       pendingCritChoice: toPublicPendingCrit(after.pendingCritChoice),
+      ...(after.turnStartedAt && after.turnStartedAt.getTime() !== before.scene.turnStartedAt?.getTime() && { turnStartedAt: after.turnStartedAt.toISOString() }),
       ...(after.startedAt ? { startedAt: after.startedAt.toISOString() } : before.scene.startedAt && { startedAt: null }),
       ...(after.completedAt
         ? { completedAt: after.completedAt.toISOString() }

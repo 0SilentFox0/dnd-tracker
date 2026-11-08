@@ -77,7 +77,7 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
       isMember: true,
     }),
     async saveBattle(before, outcome) {
-      const { beforeStored, diff, events: created, clearHistory, delta } = prepareSave(before, outcome);
+      const { beforeStored, diff, events: created, clearHistory, delta, turnStartedAt } = prepareSave(before, outcome);
 
       if (before.scene.version !== scene.version) throw new Error("version conflict");
 
@@ -114,6 +114,7 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
       scene = {
         ...scene,
         ...outcome.scene,
+        turnStartedAt,
         version: scene.version + 1,
         eventSeq: clearHistory ? created.length : scene.eventSeq + created.length,
       };

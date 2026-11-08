@@ -1126,6 +1126,7 @@
       "acSpellDc": "= СК",
       "summonInline": "викликає {count}× «{name}» ({hp}, КЗ {ac}) на {rounds} р.{hasUpcast, select, yes {; +1 за кожні {upcastEvery} кола слота} other {}}{hasAura, select, yes {; аура {auraRadius} фт{auraAttack, select, yes { (атака заклинанням)} other {}}} other {}}",
       "transform": "перетворює ціль на форму юніта на {rounds} р.; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму",
+      "phantom": "створює двійника цілі на боці кастера (ті ж характеристики й вміння, 1 HP); гине від першої шкоди",
       "moveSelf": "кастер переміщується до цілі",
       "terrain": {
         "wall": "стіна",

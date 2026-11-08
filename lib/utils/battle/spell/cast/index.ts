@@ -14,6 +14,7 @@ import { applyGrantCasts } from "@/lib/utils/battle/spell/cast/grant-cast";
 import { applyHitRiders } from "@/lib/utils/battle/spell/cast/hit-rider";
 import { moveAdjacent } from "@/lib/utils/battle/spell/cast/move-self";
 import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
+import { phantomRequests } from "@/lib/utils/battle/spell/cast/phantom";
 import { abilityOf, actionOf, type ChosenSpell, expandChosen, hasMoveSelf, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
 import { inlineSummonRequests } from "@/lib/utils/battle/spell/cast/summon-inline";
 import { transformRequests } from "@/lib/utils/battle/spell/cast/transform";
@@ -171,6 +172,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   applyGrantCasts({ flow, effects: source.definition.effects, casterId, targetIds, spell, castId, round: currentRound, concentrationOf: tag });
 
   state.summons.push(...inlineSummonRequests({ effects: source.definition.effects, caster: readyCaster, spell, castLevel, saveDc: state.saveDc, round: currentRound, castId, concentrationOf: tag }));
+
+  state.summons.push(...phantomRequests(state, source.definition.effects, castId));
 
   state.transforms.push(...transformRequests(state, source.definition.effects, currentRound, castId, tag));
 

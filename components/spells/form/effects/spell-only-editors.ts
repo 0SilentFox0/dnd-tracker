@@ -7,6 +7,7 @@ import { GrantCastEditor } from "./editors/GrantCastEditor";
 import { HitRiderEditor } from "./editors/HitRiderEditor";
 import { InputDiceEditor } from "./editors/InputDiceEditor";
 import { MoveSelfEditor } from "./editors/MoveSelfEditor";
+import { PhantomEditor } from "./editors/PhantomEditor";
 import { SummonInlineEditor } from "./editors/SummonInlineEditor";
 import { TransformEditor } from "./editors/TransformEditor";
 import type { SpellOnlyEditorProps } from "./spell-only-types";
@@ -19,6 +20,7 @@ export const SPELL_ONLY_EDITORS: EditorMap = {
   chooseOne: ChooseOneEditor,
   inputDice: InputDiceEditor,
   moveSelf: MoveSelfEditor,
+  phantom: PhantomEditor,
   createTerrain: CreateTerrainEditor,
   transform: TransformEditor,
   hitRider: HitRiderEditor,

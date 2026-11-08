@@ -5,6 +5,7 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/summon/append-summoned-unit";
 import { buildInlineSummon } from "@/lib/utils/battle/summon/inline-summon";
+import { buildPhantom } from "@/lib/utils/battle/summon/phantom-summon";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { pickOne } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -53,7 +54,7 @@ export async function applyAbilitySummons(
 ): Promise<{ order: BattleParticipant[]; messages: LogLine[] }> {
   if (requests.length === 0) return { order, messages: [] };
 
-  const pool = requests.some((r) => !r.inline) ? await opts.deps.loadPool(opts.campaignId) : { units: [], races: [] };
+  const pool = requests.some((r) => !r.inline && !r.cloneOf) ? await opts.deps.loadPool(opts.campaignId) : { units: [], races: [] };
 
   const racesById = Object.fromEntries(pool.races.map((r) => [r.id, r]));
 
@@ -63,6 +64,19 @@ export async function applyAbilitySummons(
 
   for (const req of requests) {
     const owner = findParticipant(next, req.ownerId);
+
+    if (req.cloneOf) {
+      const source = findParticipant(next, req.cloneOf);
+
+      if (!owner || !source) continue;
+
+      const { finalOrder, added } = appendToInitiativeEnd(next, buildPhantom({ source, owner, order: next, castId: req.castId ?? req.spellId ?? "x", map: opts.map }));
+
+      next = finalOrder;
+      messages.push(textRef("battleLog.summon.appears", { names: added.basicInfo.name }));
+
+      continue;
+    }
 
     if (req.inline && owner) {
       const names: string[] = [];

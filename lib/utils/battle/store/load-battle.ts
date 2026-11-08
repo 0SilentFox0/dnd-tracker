@@ -118,6 +118,7 @@ export async function loadBattle(
       audio: true,
       rules: true,
       startedAt: true,
+      turnStartedAt: true,
       completedAt: true,
       createdAt: true,
       participants: true,
@@ -141,6 +142,7 @@ export async function loadBattle(
     pendingMoraleCheck: row.pendingMoraleCheck ?? null,
     pendingCritChoice: (row.pendingCritChoice ?? null) as StoredPendingCritChoice | null,
     startedAt: row.startedAt,
+    turnStartedAt: row.turnStartedAt,
     completedAt: row.completedAt,
   };
 

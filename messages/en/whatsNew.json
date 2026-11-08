@@ -1,4 +1,12 @@
 {
+  "2026-11-08-turn-timer": {
+    "title": "Turn timer",
+    "body": "Campaign rules can now enable a turn timer with a time limit in seconds. The countdown shows in the battle top bar, and when time runs out the turn ends automatically. Map motion also gained a “Very fast” speed."
+  },
+  "2026-11-08-phantom": {
+    "title": "Phantom spell",
+    "body": "A new level 4 Darkness spell: creates a double of an allied target on the caster's side with the same stats and abilities but only 1 HP. The double dies on the first damage. “Avatar” now belongs to the “Personal” school and is available only to Markel."
+  },
   "2026-11-05-slide-audience": {
     "title": "Slides for chosen heroes",
     "body": "Limit a slide to specific heroes in the slide editor. Other players keep seeing the last slide available to their heroes — the hidden one never reaches their screens or music."

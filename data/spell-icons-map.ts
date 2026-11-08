@@ -49,4 +49,5 @@ export const SPELL_ICONS: Record<string, string> = {
   "forest-rebirth": "Spell_Raise_dead.png",
   "call-of-the-beast": "Spell_Conjure_phoenix.png",
   "avatar": "Spell_Phantom_forces.png",
+  "phantom": "Spell_Phantom_forces.png",
 };

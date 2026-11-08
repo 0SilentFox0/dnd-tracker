@@ -191,6 +191,8 @@ export const auraZoneSchema = z.object({
   targetIds: z.array(z.string()).max(50),
 });
 
+export const nextTurnSchema = z.object({ auto: z.literal(true).optional() });
+
 export const moveSchema = z.object({
   participantId: z.string(),
   to: mapCellSchema,

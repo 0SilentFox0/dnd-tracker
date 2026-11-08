@@ -48,4 +48,5 @@ export { useSelectedParticipant } from "./useSelectedParticipant";
 export { useBonusSpells, useReactionSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
 export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";
 export { useStrokePaint } from "./useStrokePaint";
+export { useTurnTimer } from "./useTurnTimer";
 export { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel";

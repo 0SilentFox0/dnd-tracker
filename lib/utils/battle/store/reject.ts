@@ -10,6 +10,7 @@ export const REJECT = {
   abilityLimit: "battleLog.reject.abilityLimit",
   abilityCooldown: "battleLog.reject.abilityCooldown",
   pickCell: "battleLog.reject.pickCell",
+  turnTimerRunning: "battleLog.reject.turnTimerRunning",
   tooFar: "battleLog.reject.tooFar",
   tooManyRolls: "battleLog.reject.tooManyRolls",
   rollImpossible: "battleLog.reject.rollImpossible",

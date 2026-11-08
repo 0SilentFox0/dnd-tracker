@@ -482,8 +482,8 @@ describe("library content", () => {
     expect(PERSONAL).toHaveLength(10);
   });
 
-  content("has spells in 4 schools", () => {
-    expect(buildLibrary().schools).toHaveLength(4);
+  content("has spells in 5 schools", () => {
+    expect(buildLibrary().schools).toHaveLength(5);
     expect(SPELLS.length).toBeGreaterThanOrEqual(48);
   });
 

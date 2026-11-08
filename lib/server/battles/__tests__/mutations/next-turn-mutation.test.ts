@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const base = createMockParticipant();
 
@@ -34,5 +35,23 @@ describe("next-turn mutation", () => {
 
     expect(out.scene).toMatchObject({ round: 2, map: { cols: 8, rows: 8, background: null, opacity: 0.3 } });
     expect(out.scene?.map).not.toHaveProperty("terrain");
+  });
+
+  describe("auto (таймер ходу)", () => {
+    const timed = (over: { enabled?: boolean; seconds?: number }, agoMs: number | null) => ({
+      ...ctx,
+      scene: { ...ctx.scene, turnStartedAt: agoMs === null ? null : new Date(Date.now() - agoMs) },
+      meta: { ...ctx.meta, rules: { ...DEFAULT_RULES, turnTimer: { enabled: true, seconds: 30, ...over } } },
+    }) as unknown as BattleMutationContext;
+
+    it("завершує хід, коли час вичерпано", () => {
+      expect(nextTurnMutation(timed({}, 31_000), { auto: true }).scene).toMatchObject({ turnIndex: 1 });
+    });
+
+    it("відхиляє, поки час не вичерпано, таймер вимкнено або немає відмітки старту", () => {
+      expect(() => nextTurnMutation(timed({}, 5_000), { auto: true })).toThrow();
+      expect(() => nextTurnMutation(timed({ enabled: false }, 60_000), { auto: true })).toThrow();
+      expect(() => nextTurnMutation(timed({}, null), { auto: true })).toThrow();
+    });
   });
 });

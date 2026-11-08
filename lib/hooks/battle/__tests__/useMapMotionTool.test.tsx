@@ -51,7 +51,7 @@ describe("useMapMotionTool", () => {
     const { mutate, tool } = setup({ axis: "y", speed: 1 });
 
     act(() => tool()?.setSpeed(99));
-    expect(mutate).toHaveBeenCalledWith({ motion: { axis: "y", speed: 6 } });
+    expect(mutate).toHaveBeenCalledWith({ motion: { axis: "y", speed: 12 } });
   });
 
   it("setAxis from off enables with the default speed", () => {

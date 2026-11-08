@@ -18,6 +18,7 @@ import { MoraleSection } from "./sections/MoraleSection";
 import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
 import { SpellIngredientsSection } from "./sections/SpellIngredientsSection";
+import { TurnTimerSection } from "./sections/TurnTimerSection";
 
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
@@ -45,6 +46,7 @@ const SECTIONS = {
   encounters: EncountersSection,
   items: ItemsSection,
   spellIngredients: SpellIngredientsSection,
+  turnTimer: TurnTimerSection,
 } satisfies Record<keyof Ruleset, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {
