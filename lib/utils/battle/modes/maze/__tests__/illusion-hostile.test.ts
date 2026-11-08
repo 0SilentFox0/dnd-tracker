@@ -3,11 +3,14 @@ import { describe, expect, it } from "vitest";
 import { mazeMap } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { cleaveTargets } from "@/lib/utils/battle/attack/process/cleave";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
+import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { IllusionPair } from "@/types/battle";
 
 const ally = ParticipantSide.ALLY;
@@ -70,5 +73,29 @@ describe("illusion foes in the engine", () => {
 
     expect(resolveSpellTargets(order, a, spell, targeting, ["b"], { map: withPair })).toMatchObject({ ok: true, targetIds: ["b"] });
     expect(resolveSpellTargets(order, a, spell, targeting, ["b"], { map: noPair }).ok).toBe(false);
+  });
+});
+
+describe("attack-roll spell on an illusion partner", () => {
+  const spell: CastableSpell = {
+    id: "sp",
+    name: "Bolt",
+    level: 0,
+    groupId: "chaos",
+    definition: { dice: 1, cost: "action", targeting: { kind: "enemy", range: 60 }, resolution: { kind: "attack" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [] },
+  };
+
+  const cast = (map: ReturnType<typeof mazeMap>, roll: number) => {
+    const caster = makeParticipant({ id: "a" });
+
+    const partner = makeParticipant({ id: "b", hp: 50, maxHp: 50 });
+
+    return castSpell({ caster, spell, targetIds: ["b"], allParticipants: [caster, partner], currentRound: 1, battleId: "x", diceRolls: [3], dice: { count: 1, sides: 6 }, attackRolls: [{ participantId: "b", roll }], rng: () => 0.5, map });
+  };
+
+  it("rolls against AC like against a real enemy (a natural 1 misses)", () => {
+    const r = cast(mazeMap({ illusionSwap: { pairs: [pair] } }), 1);
+
+    expect(r.battleAction.actionDetails.spellAttacks?.[0]).toMatchObject({ participantId: "b", hit: false });
   });
 });

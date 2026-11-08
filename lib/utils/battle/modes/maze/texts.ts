@@ -26,6 +26,7 @@ export const MAZE_TEXTS = {
   markUnable: "battleActions.maze.markUnable",
   markNoSteps: "battleActions.maze.markNoSteps",
   illusionInvalid: "battleActions.maze.illusionInvalid",
+  illusionNotActive: "battleActions.maze.illusionNotActive",
   placement: {
     outside: "battleActions.maze.placement.outside",
     exit: "battleActions.maze.placement.exit",

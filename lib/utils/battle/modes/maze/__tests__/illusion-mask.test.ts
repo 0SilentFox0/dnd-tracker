@@ -59,11 +59,20 @@ describe("maskMazeScene — ілюзія", () => {
   it("zehir бачить godric як aSees у ростері, черзі, turn.current, initiativeOrder", () => {
     const out = maskMazeScene(scene(), viewFor("u1"));
 
-    expect(nameOf(out.roster.allies, "godric")).toBe("Vampire");
+    expect(nameOf(out.roster.enemies, "godric")).toBe("Vampire");
     expect(nameOf(out.battle.initiativeOrder, "godric")).toBe("Vampire");
     expect(out.turn.current?.basicInfo).toMatchObject({ id: "godric", name: "Vampire", avatar: "v.png" });
     expect(out.turn.queue.flatMap((e) => (e.kind === "round" ? [] : [e.participant])).filter((p) => p.basicInfo.id === "godric").every((p) => p.basicInfo.name === "Vampire")).toBe(true);
     expect(nameOf(out.roster.allies, "zehir")).toBe("Zehir");
+  });
+
+  it("замаскований партнер — у колонці ворогів і з ворожим боком; власний герой і треті — без змін", () => {
+    const out = maskMazeScene(scene(), viewFor("u1"));
+
+    expect(out.roster.enemies.map((p) => p.basicInfo.id)).toEqual(["godric"]);
+    expect(out.roster.allies.map((p) => p.basicInfo.id)).toEqual(["zehir", "c"]);
+    expect(out.roster.enemies[0].basicInfo.side).toBe(ParticipantSide.ENEMY);
+    expect(out.battle.initiativeOrder.find((p) => p.basicInfo.id === "godric")?.basicInfo.side).toBe(ParticipantSide.ENEMY);
   });
 
   it("сторонній гравець бачить справжнє", () => {
@@ -81,7 +90,7 @@ describe("maskMazeScene — ілюзія", () => {
     const s = scene();
 
     expect(maskMazeScene(s, dm)).toBe(s);
-    expect(nameOf(maskMazeScene(s, viewFor("dm", true, "zehir")).roster.allies, "godric")).toBe("Vampire");
+    expect(nameOf(maskMazeScene(s, viewFor("dm", true, "zehir")).roster.enemies, "godric")).toBe("Vampire");
   });
 
   it("журнал: actorName, targets, hpChanges і вкладені params", () => {
@@ -104,6 +113,22 @@ describe("maskAction / maskMazeFxAction", () => {
     const own = { ...log, actorId: "zehir", actorName: "Zehir", targets: [], hpChanges: [], log: undefined } as unknown as BattleAction;
 
     expect(maskAction(own, viewFor("u1")!.disguiseOf!)).toBe(own);
+  });
+
+  it("системний запис без цілей, де згадано партнера, теж маскується", () => {
+    const system = { ...log, actorId: "system", actorName: "System", targets: [], hpChanges: [], log: [{ message: "spotted", params: { hero: "Godric", target: "Cora" } }] } as unknown as BattleAction;
+
+    const view = viewFor("u1")!;
+
+    expect(view.disguiseNames).toEqual(new Map([["Godric", "Vampire"]]));
+    expect(maskAction(system, view.disguiseOf!, view.disguiseNames).log?.[0]).toMatchObject({ params: { hero: "Vampire", target: "Cora" } });
+    expect(maskMazeFxAction(view, system).log?.[0]).toMatchObject({ params: { hero: "Vampire" } });
+
+    const s = scene();
+
+    s.battle.battleLog = [system];
+
+    expect(maskMazeScene(s, view).battle.battleLog[0].log?.[0]).toMatchObject({ params: { hero: "Vampire" } });
   });
 
   it("fx-копія теж із маскою", () => {

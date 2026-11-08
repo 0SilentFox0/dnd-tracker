@@ -26,6 +26,8 @@ export interface MazeView extends ModeView {
   mazeDark: boolean;
   /** ким глядач бачить цілі під ілюзією (undefined — нікого не маскує) */
   disguiseOf?: DisguiseOf;
+  /** справжнє ім'я → маска для кожного, кого глядач бачить під маскою */
+  disguiseNames?: ReadonlyMap<string, string>;
   /** для ДМ без «як герой»: хто зараз під маскою (позначка в інтерфейсі) */
   maskedIds: ReadonlySet<string>;
 }
@@ -92,13 +94,16 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
     if (viewers.some((v) => seesParticipant(grid, cells, v.position, p.battleData.position))) visibleIds.add(idOf(p));
   }
 
+  const disguiseOf = disguiseOfViewers(own.map(idOf));
+
   return {
     ...base,
     role: "player",
     cells,
     visibleIds,
     ownIds: new Set(own.map(idOf)),
-    disguiseOf: disguiseOfViewers(own.map(idOf)),
+    disguiseOf,
+    ...(disguiseOf && { disguiseNames: disguiseNamesOf(participants, disguiseOf) }),
     showWalls: (edge) => edgeCells(edge).some((c) => cells.has(cellKey(c))),
     showTeleportLinks: false,
     showFog: true,
@@ -107,6 +112,15 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
     dark: maze.dark,
   };
 }
+
+const disguiseNamesOf = (participants: BattleParticipant[], disguiseOf: DisguiseOf): ReadonlyMap<string, string> =>
+  new Map(
+    participants.flatMap((p) => {
+      const d = disguiseOf(idOf(p));
+
+      return d ? [[p.basicInfo.name, d.name] as const] : [];
+    }),
+  );
 
 export const MAZE_UNKNOWN_NAME = "???";
 
@@ -153,7 +167,7 @@ export function mazeFxVisible(view: MazeView | null | undefined, e: BattleAction
 
 /** FX-копія запису для гравця: рятунки невидимих не показуються, імена невидимих — «невідомий». */
 export function maskMazeFxAction(view: MazeView | null | undefined, action: BattleAction): BattleAction {
-  const e = view?.disguiseOf ? maskAction(action, view.disguiseOf) : action;
+  const e = view?.disguiseOf ? maskAction(action, view.disguiseOf, view.disguiseNames) : action;
 
   if (!hidesFrom(view)) return e;
 
@@ -178,7 +192,7 @@ export interface MazeMaskable {
 
 /** Сцена очима гравця в лабіринті: списки, черга, журнал і «ходить …» без прихованих. Сервер і далі шле повну сцену. */
 export function maskMazeScene<T extends MazeMaskable>(input: T, view: MazeView | null | undefined): T {
-  const scene = view?.disguiseOf ? disguiseScene(input, view.disguiseOf) : input;
+  const scene = view?.disguiseOf ? disguiseScene(input, view.disguiseOf, view.disguiseNames) : input;
 
   if (!hidesFrom(view)) {
     const log = scene.battle.battleLog ?? [];
@@ -198,17 +212,19 @@ export function maskMazeScene<T extends MazeMaskable>(input: T, view: MazeView |
   } as T;
 }
 
-function disguiseScene<T extends MazeMaskable>(scene: T, disguiseOf: DisguiseOf): T {
+function disguiseScene<T extends MazeMaskable>(scene: T, disguiseOf: DisguiseOf, names?: ReadonlyMap<string, string>): T {
   const by = (list: BattleParticipant[]) => list.map((p) => maskParticipantBy(p, disguiseOf));
 
   const { current } = scene.turn;
 
   const { initiativeOrder } = scene.battle;
 
+  const everyone = by([...scene.roster.allies, ...scene.roster.enemies]);
+
   return {
     ...scene,
-    battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).map((e) => maskAction(e, disguiseOf)), ...(initiativeOrder && { initiativeOrder: by(initiativeOrder) }) },
+    battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).map((e) => maskAction(e, disguiseOf, names)), ...(initiativeOrder && { initiativeOrder: by(initiativeOrder) }) },
     turn: { ...scene.turn, current: current && maskParticipantBy(current, disguiseOf), queue: maskQueueBy(scene.turn.queue, disguiseOf) },
-    roster: { ...scene.roster, allies: by(scene.roster.allies), enemies: by(scene.roster.enemies) },
+    roster: { ...scene.roster, allies: everyone.filter((p) => p.basicInfo.side === ParticipantSide.ALLY), enemies: everyone.filter((p) => p.basicInfo.side !== ParticipantSide.ALLY) },
   } as T;
 }

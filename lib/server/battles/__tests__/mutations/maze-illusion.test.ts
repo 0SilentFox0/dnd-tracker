@@ -2,8 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, hero, participant } from "./fixtures";
 
-import { BattleStatus, CombatStatus } from "@/lib/constants/battle";
-import { mazeActionSchema } from "@/lib/schemas/battles";
+import { BattleStatus, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
@@ -56,25 +55,54 @@ describe("maze illusion op", () => {
     bad([at(hero, { x: 0, y: 2 })], "ghost");
   });
 
-  it("is DM-only", async () => {
-    const loaded = ctx({ isDM: false });
+  it("rejects the swap before the battle is active", () => {
+    const loaded = ctx();
+
+    expectRejected(() => illusion({ ...loaded, scene: { ...loaded.scene, status: BattleStatus.PENDING } }, [pair]), MAZE_TEXTS.illusionNotActive);
+  });
+
+  it("clearing is allowed outside an active battle", () => {
+    const loaded = ctx({}, { illusionSwap: { pairs: [pair] } });
+
+    expect(illusion({ ...loaded, scene: { ...loaded.scene, status: BattleStatus.PENDING } }, []).scene?.map?.maze?.illusionSwap?.pairs).toEqual([]);
+  });
+
+  it("rejects an enemy-side character", () => {
+    const foe = at(participant("hero2", { controlledBy: "user-2", side: ParticipantSide.ENEMY }), { x: 0, y: 5 });
+
+    expectRejected(() => illusion(ctx({ participants: [at(hero, { x: 0, y: 2 }), foe] }), [pair]), MAZE_TEXTS.illusionInvalid);
+  });
+});
+
+describe("illusion auto-clear through the pipeline", () => {
+  it("a victory that completes the battle leaves no pairs", async () => {
+    const loaded = ctx({ isDM: true }, { illusionSwap: { pairs: [pair] } });
+
+    const killed = loaded.participants.map((p) => (p.basicInfo.id === "gob" ? { ...p, combatStats: { ...p.combatStats, status: CombatStatus.DEAD, currentHp: 0 } } : p));
+
+    const saveBattle = vi.fn(async () => ({ battleId: "b1", version: 3, scene: { status: BattleStatus.COMPLETED, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], fullIds: [], removed: [], events: [] }));
 
     const deps: PipelineDeps = {
       getUserId: async () => loaded.userId,
-      rateLimit: vi.fn(),
-      loadBattle: async () => ({ scene: loaded.scene, meta: loaded.meta, participants: loaded.participants, pending: [], isDM: false, isMember: true }),
-      saveBattle: vi.fn(),
+      rateLimit: vi.fn(async () => ({ allowed: true, count: 1, limit: 30, retryAfterSeconds: 10 })),
+      loadBattle: async () => ({ scene: loaded.scene, meta: loaded.meta, participants: loaded.participants, pending: [], isDM: true, isMember: true }),
+      saveBattle,
       publish: vi.fn(),
       loadRecentEvents: async () => [],
     };
 
     const res = await runBattleMutation(
-      new Request("http://x/api", { method: "POST", body: JSON.stringify({ op: "illusion", pairs: [pair] }) }),
-      { params: { id: "c1", battleId: "b1" }, access: BattleAccess.DM, schema: mazeActionSchema, mutate: vi.fn() } as never,
+      new Request("http://x/api", { method: "POST", body: JSON.stringify({}) }),
+      { params: { id: "c1", battleId: "b1" }, access: BattleAccess.DM, mutate: async () => ({ participants: killed, pending: [], events: [] }) } as never,
       deps,
     );
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
+
+    const saved = (saveBattle.mock.calls as unknown as Array<[unknown, { scene?: ScenePatch }]>)[0][1];
+
+    expect(saved.scene?.status).toBe(BattleStatus.COMPLETED);
+    expect(saved.scene?.map?.maze?.illusionSwap?.pairs).toEqual([]);
   });
 });
 

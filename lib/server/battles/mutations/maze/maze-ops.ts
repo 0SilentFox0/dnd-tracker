@@ -1,6 +1,6 @@
 import { tunnelMutation } from "./maze-tunnel";
 
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { BattleStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { cellKey, inBounds, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import {
   allReachExit,
@@ -234,8 +234,10 @@ const illusion: OpHandler<"illusion"> = (ctx, { map, grid }, body) => {
   const ok = (id: string) => {
     const p = byId.get(id);
 
-    return !!p && p.basicInfo.sourceType === ParticipantSourceType.CHARACTER && onMazeField(p);
+    return !!p && p.basicInfo.sourceType === ParticipantSourceType.CHARACTER && p.basicInfo.side === ParticipantSide.ALLY && onMazeField(p);
   };
+
+  if (body.pairs.length && ctx.scene.status !== BattleStatus.ACTIVE) rejectAction(MAZE_TEXTS.illusionNotActive);
 
   if (!body.pairs.every((p) => ok(p.a) && ok(p.b))) rejectAction(MAZE_TEXTS.illusionInvalid);
 

@@ -21,6 +21,16 @@ export function withModeAfterMutation<T extends ModeAwareOutcome>(
   return active?.mode.server.afterMutation?.({ map: active.map, config: active.config, scene, result }) ?? result;
 }
 
+export function withModeAfterSettle<T extends ModeAwareOutcome>(
+  map: BattleMapConfig | null,
+  scene: { status: BattleSceneState["status"]; round: number },
+  result: T,
+): T {
+  const active = activeModeWithConfig(map);
+
+  return active?.mode.server.afterSettle?.({ map: active.map, config: active.config, scene, result }) ?? result;
+}
+
 export function modeBlockedText(map: BattleMapConfig | null): string | null {
   const active = activeModeWithConfig(map);
 

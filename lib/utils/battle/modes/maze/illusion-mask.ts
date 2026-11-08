@@ -1,10 +1,17 @@
+import { ParticipantSide } from "@/lib/constants/battle";
 import type { QueueEntry } from "@/lib/utils/battle/view/queue";
 import type { BattleAction, BattleParticipant, IllusionDisguise } from "@/types/battle";
 import type { LogLine, TextArg } from "@/types/text";
 
+const NO_NAMES: ReadonlyMap<string, string> = new Map();
+
 export type DisguiseOf = (targetId: string) => IllusionDisguise | undefined;
 
-export const maskParticipant = (p: BattleParticipant, d: IllusionDisguise): BattleParticipant => ({ ...p, basicInfo: { ...p.basicInfo, name: d.name, avatar: d.avatar } });
+/** Замаскований партнер для глядача — ворог: інакше ростер, кільце портрета й точні стати видають союзника */
+export const maskParticipant = (p: BattleParticipant, d: IllusionDisguise): BattleParticipant => ({
+  ...p,
+  basicInfo: { ...p.basicInfo, name: d.name, avatar: d.avatar, side: ParticipantSide.ENEMY },
+});
 
 export const maskParticipantBy = (p: BattleParticipant, disguiseOf: DisguiseOf): BattleParticipant => {
   const d = disguiseOf(p.basicInfo.id);
@@ -26,8 +33,9 @@ function maskArg(arg: TextArg, names: ReadonlyMap<string, string>): TextArg {
 /** Імена в params (рекурсивно) міняються на маску; рядки без TextRef лишаються як є */
 export const maskLogLine = (line: LogLine, names: ReadonlyMap<string, string>): LogLine => (typeof line === "string" || names.size === 0 ? line : (maskArg(line, names) as LogLine));
 
-export function maskAction(e: BattleAction, disguiseOf: DisguiseOf): BattleAction {
-  const names = new Map<string, string>();
+/** `viewerNames` — справжнє ім'я → маска для всіх записів (системні/DM-події без цілей теж згадують партнера) */
+export function maskAction(e: BattleAction, disguiseOf: DisguiseOf, viewerNames: ReadonlyMap<string, string> = NO_NAMES): BattleAction {
+  const names = new Map(viewerNames);
 
   const rename = (id: string, current: string) => {
     const d = disguiseOf(id);
@@ -51,8 +59,8 @@ export function maskAction(e: BattleAction, disguiseOf: DisguiseOf): BattleActio
 }
 
 /** Імперативне читання кешу (readBattle) теж віддає імена під маскою */
-export const maskBattleBy = <T extends { initiativeOrder: BattleParticipant[]; battleLog?: BattleAction[] }>(battle: T, disguiseOf: DisguiseOf): T => ({
+export const maskBattleBy = <T extends { initiativeOrder: BattleParticipant[]; battleLog?: BattleAction[] }>(battle: T, disguiseOf: DisguiseOf, viewerNames?: ReadonlyMap<string, string>): T => ({
   ...battle,
   initiativeOrder: battle.initiativeOrder.map((p) => maskParticipantBy(p, disguiseOf)),
-  ...(battle.battleLog && { battleLog: battle.battleLog.map((e) => maskAction(e, disguiseOf)) }),
+  ...(battle.battleLog && { battleLog: battle.battleLog.map((e) => maskAction(e, disguiseOf, viewerNames)) }),
 });

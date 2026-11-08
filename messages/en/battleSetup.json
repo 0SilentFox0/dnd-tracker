@@ -210,6 +210,7 @@
   "validation": {
     "tooManyMarks": "Too many marks",
     "illusionDuplicate": "A hero cannot be in two illusion pairs",
+    "illusionSelf": "A hero cannot be paired with themselves",
     "background": "Background: an https link, a file or a built-in background is required",
     "barrierNeedsDuration": "A barrier needs a duration",
     "tooManyTerrainCells": "Too many terrain cells",

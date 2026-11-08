@@ -35,7 +35,7 @@ const illusionDisguiseSchema = z.object({
 
 const illusionPairSchema = z
   .object({ a: z.string().min(1).max(64), b: z.string().min(1).max(64), aSees: illusionDisguiseSchema, bSees: illusionDisguiseSchema })
-  .refine((p) => p.a !== p.b);
+  .refine((p) => p.a !== p.b, { message: "battleSetup.validation.illusionSelf" });
 
 const illusionPairsSchema = z.array(illusionPairSchema).max(8).superRefine((pairs, ctx) => {
   const ids = pairs.flatMap((p) => [p.a, p.b]);

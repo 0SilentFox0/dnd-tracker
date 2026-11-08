@@ -30,6 +30,8 @@ export interface ModeServerHooks<C> {
   onStart?(args: { map: BattleMapConfig; config: C; order: BattleParticipant[] }): { participants: BattleParticipant[]; turnIndex: number };
   /** Після кожної не-dryRun мутації (пробудження, події «помітили»). */
   afterMutation?<T extends ModeAwareOutcome>(args: { map: BattleMapConfig; config: C; scene: { status: BattleSceneState["status"]; round: number }; result: T }): T;
+  /** Після afterMutation і перевірки перемоги (статус уже остаточний), лише не-dryRun. */
+  afterSettle?<T extends ModeAwareOutcome>(args: { map: BattleMapConfig; config: C; scene: { status: BattleSceneState["status"]; round: number }; result: T }): T;
   /** Текст відмови для роутів з опцією blockedByMode, або null. */
   blockedText?(config: C): string | null;
   /** Хід пропускається з цим записом журналу, або null. */

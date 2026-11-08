@@ -17,7 +17,7 @@ import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { lineText } from "@/lib/utils/battle/log/lines";
-import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
+import { modeBlockedText, withModeAfterMutation, withModeAfterSettle } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { sweepOrphanedAnchored } from "@/lib/utils/battle/spell/anchored-zone";
@@ -259,7 +259,9 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const placed = swept ? { ...unswept, scene: { ...unswept.scene, map: swept } } : unswept;
 
-  const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
+  const victorious = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
+
+  const result = isDryRun ? victorious : withModeAfterSettle(victorious.scene?.map ?? map, loaded.scene, victorious);
 
   if (isDryRun) {
     return { delta: null, version: loaded.scene.version, response: result.response, preview: await buildScenePreview(userId, loaded, result, options, deps) };

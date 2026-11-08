@@ -30,7 +30,8 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
   emptyConfig: () => emptyMaze(),
   server: {
     onStart: ({ map, order }) => startMaze(map, order),
-    afterMutation: ({ map, scene, result }) => pruneIllusion(result.scene?.map ?? map, scene, withMazeAwareness(map, scene, result)),
+    afterMutation: ({ map, scene, result }) => withMazeAwareness(map, scene, result),
+    afterSettle: ({ map, scene, result }) => pruneIllusion(result.scene?.map ?? map, scene, result),
     blockedText: (maze) => (maze.dark ? API_ERRORS.MAZE_DARK : null),
     autoSkipText: (maze) => (maze.dark ? MAZE_TEXTS.darkSkip : null),
     placeAll: ({ map, config, participants }) => placeMazeParticipants({ ...map, maze: config }, participants),

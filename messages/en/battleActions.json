@@ -163,6 +163,7 @@
     "markUnable": "The participant cannot place a mark",
     "markNoSteps": "Not enough steps for a mark",
     "illusionInvalid": "The illusion can only be cast on heroes standing in the maze",
+    "illusionNotActive": "The illusion can only be cast during an active battle",
     "placement": {
       "outside": "The cell is outside the map",
       "exit": "Nobody can be placed on the exit",

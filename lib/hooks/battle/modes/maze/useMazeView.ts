@@ -134,7 +134,7 @@ export function useMazeMaskValue(): MazeMaskValue {
     const readBattle = () => {
       const b = value.readBattle();
 
-      return b && maskBattleBy(b, disguiseOf);
+      return b && maskBattleBy(b, disguiseOf, view?.disguiseNames);
     };
 
     return { ...masked, readBattle };
