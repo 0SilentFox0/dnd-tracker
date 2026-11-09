@@ -25,6 +25,8 @@ vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) =
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn() }));
 
 import { runCharacterOperation } from "../operation-runner";
+import { advanceOperation } from "../operations/advance";
+import { advanceUndoOperation } from "../operations/advance-undo";
 import { downtimeSetOperation } from "../operations/downtime";
 import { downtimePeriodOperation } from "../operations/downtime-period";
 import { downtimePeriodUndoOperation } from "../operations/downtime-period-undo";
@@ -358,5 +360,44 @@ describe("downtime.period.undo", () => {
     expect(chars("h1").downtime?.lastPeriod?.id).toBe(periodId);
 
     await expect(undo({ periodId, characterIds: ["h1", "h2"] })).resolves.toMatchObject({ periodId });
+  });
+});
+
+describe("downtime training discount end to end", () => {
+  const advance = (input: unknown) => runCharacterOperation(advanceOperation, { campaignId: "camp", characterId: "h1", access: dm() as never }, input as never) as Promise<{ entry: { cost: number; discount?: number } }>;
+
+  const advanceUndo = () => runCharacterOperation(advanceUndoOperation, { campaignId: "camp", characterId: "h1", access: dm() as never }, {} as never);
+
+  it("train period grants a credit, advance spends it, undo order is enforced", async () => {
+    put(hero("h1", { experience: 1000 }, { downtime: { endeavour: { kind: "train", params: { kind: "characteristic", key: "ws" } }, ailments: [] } }));
+
+    const { periodId } = await period({ days: 7, characterIds: ["h1"] });
+
+    const credit = chars("h1").downtime?.training?.discount ?? 0;
+
+    expect(credit).toBeGreaterThan(0);
+
+    const bought = await advance({ kind: "characteristic", key: "ws" });
+
+    expect(bought.entry.discount).toBe(credit);
+    expect(chars("h1").downtime).not.toHaveProperty("training");
+
+    await expect(undo({ periodId, characterIds: ["h1"] })).rejects.toMatchObject({ message: API_ERRORS.DOWNTIME_STALE, status: 409 });
+
+    await advanceUndo();
+
+    expect(chars("h1").downtime?.training?.discount).toBe(credit);
+
+    await expect(undo({ periodId, characterIds: ["h1"] })).resolves.toMatchObject({ periodId });
+  });
+
+  it("a non-wfrp campaign refuses set, period and undo", async () => {
+    put(hero("h1"));
+
+    const rules = DEFAULT_RULES as never;
+
+    await expect(setDowntime(dm(rules), "h1", { endeavour: charm })).rejects.toMatchObject({ message: API_ERRORS.DOWNTIME_UNSUPPORTED, status: 409 });
+    await expect(period({ days: 1, characterIds: ["h1"] }, dm(rules))).rejects.toMatchObject({ message: API_ERRORS.DOWNTIME_UNSUPPORTED, status: 409 });
+    await expect(undo({ periodId: "p", characterIds: ["h1"] }, dm(rules))).rejects.toMatchObject({ message: API_ERRORS.DOWNTIME_UNSUPPORTED, status: 409 });
   });
 });

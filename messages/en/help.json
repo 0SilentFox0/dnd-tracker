@@ -412,6 +412,11 @@
         "heading": "Careers",
         "b0": "The DM creates careers in the campaign's \"Careers\" section: 4 tiers, each with characteristics, skills, talents and trappings. A hero's career and tier are assigned in the \"Advancement\" tab (or in the DM profile).",
         "b1": "Every purchased item from the career tier earns a \"Tick\". When there are enough ticks the DM advances the career tier; if they are short the advance can be forced. \"Out of career\" purchases cost more (multiplier in the campaign rules)."
+      },
+      "s7": {
+        "heading": "Downtime",
+        "b0": "The \"Period passed\" button in the character list (1 to 30 days, choose the heroes) runs downtime in order: endeavours, healing, ailments, then an event from the table. Dead heroes are skipped, unconscious ones do not perform endeavours.",
+        "b1": "Endeavours and ailments are set on the sheet's \"Downtime\" tab. Earned income goes to the purse, successful training gives a discount on the next purchase in Advancement, and the event table is edited in the rules (tables section). Only the latest period can be rolled back, and only until manual changes are made."
       }
     }
   }

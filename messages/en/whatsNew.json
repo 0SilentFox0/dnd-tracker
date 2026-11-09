@@ -1,4 +1,8 @@
 {
+  "2026-11-08-wfrp-downtime": {
+    "title": "Grim d100: downtime",
+    "body": "Between adventures the DM presses \"Period passed\" in the character list: wounds heal, ailments run their course or worsen, every hero performs the chosen endeavour (earn, train, tend a companion, rest), and the event table adds some chance. Endeavours are picked on the \"Downtime\" tab of the sheet; the DM can roll back the latest period."
+  },
   "2026-11-06-wfrp-careers": {
     "title": "Grim d100: careers",
     "body": "In Grim d100 campaigns the DM creates careers with 4 tiers and assigns them to heroes; in-career purchases are cheaper and earn ticks toward the next career tier. Out-of-career purchases cost more."
