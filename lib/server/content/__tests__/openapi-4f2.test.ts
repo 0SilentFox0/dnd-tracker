@@ -18,6 +18,6 @@ describe("OpenAPI 4f-2", () => {
   });
 
   it("stays compact", () => {
-    expect(json(doc).length).toBeLessThan(193_000); // 5h-1 trait effects ~1.4 KB, 5h-2 rules.tables ~7.2 KB, 5h-4 downtime actions (total ~191.7 KB)
+    expect(json(doc).length).toBeLessThan(195_000); // 5h-1 trait effects ~1.4 KB, 5h-2 rules.tables ~7.2 KB, 5h-4 downtime actions, 5h-3 mutation slots ~2 KB (total ~193.7 KB)
   });
 });

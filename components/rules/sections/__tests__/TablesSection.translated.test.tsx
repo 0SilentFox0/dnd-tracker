@@ -23,4 +23,13 @@ describe("TablesSection with loaded battleWfrp", () => {
 
     expect(set.mock.calls.at(-1)?.[1].critHead[0]).toEqual({ max: 20, effects: [{ type: "damage", amount: 1 }], text: "T:battleWfrp.crit.head.1" });
   });
+
+  it("mutation default rows come with translated text keys", () => {
+    render(<TablesSection form={{ campaignId: "c", data: { ...DEFAULT_RULES, tables: {} }, set: vi.fn() } as unknown as Parameters<typeof TablesSection>[0]["form"]} />);
+
+    fireEvent.keyDown(screen.getByRole("combobox", { name: "wfrpTables.slot" }), { key: "Enter" });
+    fireEvent.click(screen.getByRole("option", { name: "wfrpTables.slots.mutationMental" }));
+
+    expect(screen.getByText(/T:wfrpCorruption\.mutations\.mental\.1/)).toBeTruthy();
+  });
 });

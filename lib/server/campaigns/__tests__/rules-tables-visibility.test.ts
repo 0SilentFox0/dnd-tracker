@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const h = vi.hoisted(() => ({ rules: { tables: { critHead: [{ max: 100, text: "x", effects: [] }] } } as Record<string, unknown> }));
+const h = vi.hoisted(() => ({ rules: { tables: { critHead: [{ max: 100, text: "x", effects: [] }], mutationPhysical: [{ max: 100, effects: [{ type: "move", amount: -1 }] }] } } as Record<string, unknown> }));
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -47,5 +47,6 @@ describe("rules.tables visibility", () => {
     const rules = await loadRules("c1");
 
     expect(stripPlayerHiddenRules(rules)).toEqual({ ...rules, tables: {} });
+    expect(stripPlayerHiddenRules(rules).tables.mutationPhysical).toBeUndefined();
   });
 });

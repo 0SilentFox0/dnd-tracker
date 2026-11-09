@@ -8,7 +8,9 @@
     "miscastMinor": "Minor miscast",
     "miscastMajor": "Major miscast",
     "wrath": "Wrath of the Gods",
-    "downtimeEvent": "Downtime events"
+    "downtimeEvent": "Downtime events",
+    "mutationPhysical": "Mutations: physical",
+    "mutationMental": "Mutations: mental"
   },
   "from": "From {n} to",
   "upTo": "Up to, row {n}",
@@ -18,7 +20,10 @@
     "damage": "Extra damage",
     "wounds": "Wounds",
     "condition": "Condition",
-    "marker": "Marker"
+    "marker": "Marker",
+    "characteristic": "Characteristic",
+    "move": "Move",
+    "maxWounds": "Max Wounds"
   },
   "amount": "Amount",
   "condition": "Condition",
@@ -36,5 +41,6 @@
   "customize": "Customize",
   "reset": "Reset to default",
   "defaultHint": "This table uses the built-in rows. Customize to edit a copy.",
-  "customHint": "The last row always ends at 100."
+  "customHint": "The last row always ends at 100.",
+  "characteristic": "Characteristic"
 }

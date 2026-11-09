@@ -1,0 +1,20 @@
+{
+  "mutations": {
+    "physical": {
+      "1": "One limb is twisted and bent, movements turn clumsy.",
+      "2": "The face is warped beyond recognition; people look away.",
+      "3": "The feet have fused into hooves, every step is harder.",
+      "4": "Thick scales cover the skin: tough, but stiff to move in.",
+      "5": "The body swells like a wineskin, shrugging off wounds and sickness.",
+      "6": "Excess muscle strains the skin and hampers walking."
+    },
+    "mental": {
+      "1": "A whisper in the head that does not fade even in sleep.",
+      "2": "Past days crumble like sand: memory keeps failing.",
+      "3": "Distrust of every word, betrayal seen everywhere.",
+      "4": "Nightly terrors steal sleep and dull the reflexes.",
+      "5": "Fanatic faith strengthens the will but severs ties with people.",
+      "6": "The mind has split in two, and one voice is not your own."
+    }
+  }
+}

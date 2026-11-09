@@ -84,4 +84,53 @@ describe("TablesSection", () => {
 
     expect(set).toHaveBeenLastCalledWith("tables", { critHead: null });
   });
+
+  describe("mutation slots", () => {
+    const pick = (label: string) => {
+      fireEvent.keyDown(screen.getByRole("combobox", { name: "wfrpTables.slot" }), { key: "Enter" });
+      fireEvent.click(screen.getByRole("option", { name: label }));
+    };
+
+    it("lists the mutation slots and shows signed default effects", () => {
+      mount();
+
+      fireEvent.keyDown(screen.getByRole("combobox", { name: "wfrpTables.slot" }), { key: "Enter" });
+
+      const options = screen.getAllByRole("option").map((o) => o.textContent);
+
+      expect(options).toEqual(expect.arrayContaining(["wfrpTables.slots.mutationPhysical", "wfrpTables.slots.mutationMental"]));
+
+      fireEvent.click(screen.getByRole("option", { name: "wfrpTables.slots.mutationPhysical" }));
+
+      expect(screen.getByText("gameTerms.characteristics.ag.short -5")).toBeTruthy();
+    });
+
+    it("customize shows effect rows and a characteristic editor with bounds", () => {
+      const set = vi.fn();
+
+      render(<TablesSection form={{ campaignId: "c", data: { ...DEFAULT_RULES, tables: { mutationPhysical: [{ max: 100, effects: [{ type: "characteristic", key: "ag", amount: -5 }] }] } }, set } as unknown as Parameters<typeof TablesSection>[0]["form"]} />);
+
+      pick("wfrpTables.slots.mutationPhysical");
+
+      expect(screen.getByRole("combobox", { name: "wfrpTables.characteristic" })).toBeTruthy();
+
+      const amount = screen.getByRole("textbox", { name: "wfrpTables.amount" });
+
+      fireEvent.change(amount, { target: { value: "-99" } });
+      fireEvent.blur(amount);
+
+      expect(set).toHaveBeenLastCalledWith("tables", { mutationPhysical: [{ max: 100, effects: [{ type: "characteristic", key: "ag", amount: -30 }] }] });
+    });
+
+    it("add effect starts with a characteristic", () => {
+      const set = vi.fn();
+
+      render(<TablesSection form={{ campaignId: "c", data: { ...DEFAULT_RULES, tables: { mutationMental: [{ max: 100, effects: [] }] } }, set } as unknown as Parameters<typeof TablesSection>[0]["form"]} />);
+
+      pick("wfrpTables.slots.mutationMental");
+      fireEvent.click(screen.getByRole("button", { name: "wfrpTables.addEffect" }));
+
+      expect(set).toHaveBeenLastCalledWith("tables", { mutationMental: [{ max: 100, effects: [{ type: "characteristic", key: "ws", amount: -5 }] }] });
+    });
+  });
 });

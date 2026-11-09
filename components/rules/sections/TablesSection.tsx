@@ -7,7 +7,9 @@ import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
+import { CHARACTERISTIC_KEYS } from "@/lib/constants/wfrp-characteristics";
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL } from "@/lib/constants/wfrp-conditions";
+import { MUTATION_EFFECT_LIMITS } from "@/lib/constants/wfrp-mutations";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { DEFAULT_TABLES } from "@/lib/utils/rules/systems";
@@ -22,8 +24,14 @@ const newEffect = (type: TableEffect["type"]): TableEffect => {
 
   if (type === "marker") return { type, key: MARKER_KEYS[0] };
 
+  if (type === "characteristic") return { type, key: CHARACTERISTIC_KEYS[0], amount: -5 };
+
+  if (type === "move" || type === "maxWounds") return { type, amount: -1 };
+
   return { type, amount: 1 };
 };
+
+const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
 
 const withLastHundred = (rows: TableRow[]) => rows.map((r, i) => (i === rows.length - 1 ? { ...r, max: 100 } : r));
 
@@ -42,6 +50,13 @@ function EffectFields({ slot, effect, onChange, onRemove }: { slot: TableSlot; e
           <BoundedNumberInput className="min-h-11 w-20" aria-label={t("levels")} min={1} max={WFRP_CONDITION_MAX_LEVEL} value={effect.levels} onCommit={(levels) => onChange({ ...effect, levels })} />
         </>
       )}
+      {effect.type === "characteristic" && (
+        <>
+          <SelectField aria-label={t("characteristic")} value={effect.key} options={CHARACTERISTIC_KEYS.map((key) => ({ value: key, label: tt(`gameTerms.characteristics.${key}.short`) }))} onValueChange={(key) => onChange({ ...effect, key: key as typeof effect.key })} triggerClassName="min-h-11 w-40" />
+          <BoundedNumberInput className="min-h-11 w-20" aria-label={t("amount")} min={-MUTATION_EFFECT_LIMITS.characteristic} max={MUTATION_EFFECT_LIMITS.characteristic} value={effect.amount} onCommit={(amount) => onChange({ ...effect, amount })} />
+        </>
+      )}
+      {(effect.type === "move" || effect.type === "maxWounds") && <BoundedNumberInput className="min-h-11 w-20" aria-label={t("amount")} min={-MUTATION_EFFECT_LIMITS[effect.type]} max={MUTATION_EFFECT_LIMITS[effect.type]} value={effect.amount} onCommit={(amount) => onChange({ ...effect, amount })} />}
       {effect.type === "marker" && <SelectField aria-label={t("marker")} value={effect.key} options={MARKER_KEYS.map((key) => ({ value: key, label: t(`markers.${key}`) }))} onValueChange={(key) => onChange({ ...effect, key: key as typeof effect.key })} triggerClassName="min-h-11 w-40" />}
       <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={t("removeEffect")} onClick={onRemove}>
         <X className="size-4" />
@@ -85,6 +100,10 @@ function DefaultRows({ slot }: { slot: TableSlot }) {
     if (e.type === "condition") return `${tt(`battleWfrp.conditions.${e.key}.label`)} ${e.levels}`;
 
     if (e.type === "marker") return t(`markers.${e.key}`);
+
+    if (e.type === "characteristic") return `${tt(`gameTerms.characteristics.${e.key}.short`)} ${signed(e.amount)}`;
+
+    if (e.type === "move" || e.type === "maxWounds") return `${t(`effect.${e.type}`)} ${signed(e.amount)}`;
 
     return `${t(`effect.${e.type}`)} ${e.amount}`;
   };

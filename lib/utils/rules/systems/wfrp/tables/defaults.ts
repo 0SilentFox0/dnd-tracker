@@ -66,4 +66,21 @@ export const DEFAULT_TABLES: Record<TableSlot, readonly ResolvedRow[]> = {
     { max: 90, effects: [{ type: "wounds", amount: 2 }], textKey: "wfrpDowntime.events.9" },
     { max: 100, effects: [], textKey: "wfrpDowntime.events.10" },
   ],
+  // verify against 5e book
+  mutationPhysical: [
+    { max: 16, effects: [{ type: "characteristic", key: "ag", amount: -5 }], textKey: "wfrpCorruption.mutations.physical.1" },
+    { max: 33, effects: [{ type: "characteristic", key: "fel", amount: -10 }], textKey: "wfrpCorruption.mutations.physical.2" },
+    { max: 50, effects: [{ type: "move", amount: -1 }], textKey: "wfrpCorruption.mutations.physical.3" },
+    { max: 66, effects: [{ type: "characteristic", key: "t", amount: 5 }, { type: "characteristic", key: "ag", amount: -5 }], textKey: "wfrpCorruption.mutations.physical.4" },
+    { max: 83, effects: [{ type: "maxWounds", amount: 2 }, { type: "characteristic", key: "fel", amount: -5 }], textKey: "wfrpCorruption.mutations.physical.5" },
+    { max: 100, effects: [{ type: "characteristic", key: "s", amount: 5 }, { type: "move", amount: -1 }], textKey: "wfrpCorruption.mutations.physical.6" },
+  ],
+  mutationMental: [
+    { max: 16, effects: [{ type: "characteristic", key: "wp", amount: -5 }], textKey: "wfrpCorruption.mutations.mental.1" },
+    { max: 33, effects: [{ type: "characteristic", key: "int", amount: -5 }], textKey: "wfrpCorruption.mutations.mental.2" },
+    { max: 50, effects: [{ type: "characteristic", key: "fel", amount: -5 }], textKey: "wfrpCorruption.mutations.mental.3" },
+    { max: 66, effects: [{ type: "characteristic", key: "i", amount: -10 }], textKey: "wfrpCorruption.mutations.mental.4" },
+    { max: 83, effects: [{ type: "characteristic", key: "wp", amount: 5 }, { type: "characteristic", key: "fel", amount: -10 }], textKey: "wfrpCorruption.mutations.mental.5" },
+    { max: 100, effects: [{ type: "characteristic", key: "int", amount: -5 }, { type: "characteristic", key: "wp", amount: -5 }], textKey: "wfrpCorruption.mutations.mental.6" },
+  ],
 };
