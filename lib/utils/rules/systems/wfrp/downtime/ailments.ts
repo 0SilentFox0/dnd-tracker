@@ -1,6 +1,5 @@
-import { DIFFICULTY_SL } from "../percentile/difficulty";
-import { resolvePercentileTest } from "../percentile/resolve";
-import { ENDEAVOUR_DIFFICULTY, FESTERING_FAIL_WOUNDS, FESTERING_RENEW_DAYS } from "./constants";
+import { FESTERING_FAIL_WOUNDS, FESTERING_RENEW_DAYS } from "./constants";
+import { rollDowntimeTest } from "./roll";
 import type { Ailment, PeriodSummary } from "./types";
 
 import type { Rng } from "@/lib/utils/common/rng";
@@ -25,11 +24,9 @@ export function tickAilments(ailments: Ailment[], days: number, ctx: { endurance
     } else if (a.kind !== "festering") {
       report.push({ ...base, daysLeft: 0, expired: true });
     } else {
-      const r = resolvePercentileTest({ target: ctx.endurance, slModifier: DIFFICULTY_SL[ENDEAVOUR_DIFFICULTY], doubles: false, mode: "normal", rng: ctx.rng, presetRoll: ctx.presetRolls?.[tests++] });
+      const { test, passed } = rollDowntimeTest(ctx.endurance, ctx.rng, ctx.presetRolls?.[tests++]);
 
-      const test = { roll: r.roll, target: r.target, sl: r.sl, outcome: r.outcome };
-
-      if (r.outcome === "success" || r.outcome === "critical") {
+      if (passed) {
         report.push({ ...base, daysLeft: 0, expired: true, test });
       } else {
         kept.push({ ...a, daysLeft: FESTERING_RENEW_DAYS });

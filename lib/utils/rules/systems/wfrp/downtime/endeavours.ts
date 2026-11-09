@@ -1,8 +1,7 @@
 import { skillTarget } from "../characteristics/derive";
 import type { Characteristics } from "../characteristics/keys";
-import { DIFFICULTY_SL } from "../percentile/difficulty";
-import { resolvePercentileTest } from "../percentile/resolve";
-import { ENDEAVOUR_DIFFICULTY, STATUS_COIN, TEND_DAYS_PER_SL, TEND_HEAL_PER_SL, TRAIN_DISCOUNT_BASE, TRAIN_DISCOUNT_PER_SL } from "./constants";
+import { STATUS_COIN, TEND_DAYS_PER_SL, TEND_HEAL_PER_SL, TRAIN_DISCOUNT_BASE, TRAIN_DISCOUNT_PER_SL } from "./constants";
+import { rollDowntimeTest } from "./roll";
 import { parseStatus } from "./status";
 import type { CoinAmount, Endeavour, TestOutcome, TrainingCredit } from "./types";
 
@@ -42,13 +41,11 @@ export function resolveEndeavour(e: Endeavour, ctx: EndeavourCtx): EndeavourOutc
 
   if (!skill || !t) return {};
 
-  const r = resolvePercentileTest({ target: t.target, slModifier: DIFFICULTY_SL[ENDEAVOUR_DIFFICULTY], doubles: false, mode: "normal", rng: ctx.rng, presetRoll: ctx.presetRoll });
+  const { test, passed } = rollDowntimeTest(t.target, ctx.rng, ctx.presetRoll);
 
-  const test: TestOutcome = { roll: r.roll, target: r.target, sl: r.sl, outcome: r.outcome };
+  if (!passed) return { test };
 
-  if (r.outcome !== "success" && r.outcome !== "critical") return { test };
-
-  const sl = Math.max(1, r.sl);
+  const sl = Math.max(1, test.sl);
 
   switch (e.kind) {
     case "earn": {
@@ -57,7 +54,7 @@ export function resolveEndeavour(e: Endeavour, ctx: EndeavourCtx): EndeavourOutc
       return { test, coins: { coin: STATUS_COIN[status.tier], amount: sl * status.level } };
     }
     case "train":
-      return { test, training: { kind: e.params.kind, key: e.params.key, discount: TRAIN_DISCOUNT_BASE + r.sl * TRAIN_DISCOUNT_PER_SL } };
+      return { test, training: { kind: e.params.kind, key: e.params.key, discount: TRAIN_DISCOUNT_BASE + test.sl * TRAIN_DISCOUNT_PER_SL } };
     case "tend":
       return { test, tend: { patientId: e.params.patientId, heal: sl * TEND_HEAL_PER_SL, days: sl * TEND_DAYS_PER_SL } };
     default:

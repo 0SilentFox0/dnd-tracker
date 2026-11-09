@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { ensureInventory } from "@/lib/server/artifacts/inventory";
 import { normalizeItems, normalizeStash } from "@/lib/utils/inventory/items";
 import { attunedRefs } from "@/lib/utils/items/resolve";
-import type { EquippedItems, StashState } from "@/types/inventory";
+import type { EquippedItems, Purse, StashState } from "@/types/inventory";
 
 export async function loadStashState(tx: Prisma.TransactionClient, characterId: string): Promise<StashState> {
   const inv = await ensureInventory(tx, characterId);
@@ -16,3 +16,5 @@ export async function loadStashState(tx: Prisma.TransactionClient, characterId: 
     attuned: attunedRefs(inv),
   };
 }
+
+export const purseColumns = (purse: Purse) => ({ gold: purse.gp, silver: purse.sp, copper: purse.cp });

@@ -2,8 +2,7 @@ import { CHARACTERISTIC_KEYS, SKILL_ADVANCE_KEY_RE, SPEC_RE } from "../character
 import { type Ailment, AILMENTS_MAX, type CoinAmount, type DowntimeState, type Endeavour, type PeriodSnapshot, type TrainingCredit } from "./types";
 
 import { COINS } from "@/lib/constants/inventory";
-
-const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+import { isRecord } from "@/lib/utils/common/is-record";
 
 const isInt = (v: unknown, min: number, max: number): v is number => typeof v === "number" && Number.isInteger(v) && v >= min && v <= max;
 

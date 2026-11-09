@@ -9,7 +9,7 @@ import type { DowntimePeriodInput, DowntimePeriodUndoInput, DowntimeSetInput } f
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import type { CharacterGate } from "@/lib/server/characters/access";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
-import { loadStashState } from "@/lib/server/characters/core/stash-state";
+import { loadStashState, purseColumns } from "@/lib/server/characters/core/stash-state";
 import { characteristicsJson } from "@/lib/server/characters/core/system-fields";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
@@ -58,10 +58,14 @@ async function loadActiveHeroes(access: CampaignAccessResult, characterIds: stri
 
 const withoutHp = ({ hp: _hp, ...rest }: CharacterResources): CharacterResources => rest;
 
-const purseOf = (income: Income | undefined): { purse?: Purse } => (income ? { purse: income.state.purse } : {});
+const purseOf = (incomes: Income[], id: string): { purse?: Purse } => {
+  const income = incomes.find((i) => i.id === id);
+
+  return income ? { purse: income.state.purse } : {};
+};
 
 async function saveIncomes(tx: Tx, campaignId: string, actorUserId: string, incomes: Income[]) {
-  for (const { id, state } of incomes) await tx.characterInventory.update({ where: { characterId: id }, data: { gold: state.purse.gp, silver: state.purse.sp, copper: state.purse.cp } });
+  for (const { id, state } of incomes) await tx.characterInventory.update({ where: { characterId: id }, data: purseColumns(state.purse) });
 
   await writeInventoryLog(tx, incomes.map(({ id, log }) => ({ campaignId, characterId: id, actorUserId, kind: log.kind, delta: log.delta, note: log.note })));
 }
@@ -168,7 +172,7 @@ export async function passPeriod(access: CampaignAccessResult, input: DowntimePe
 
     await writeCharacterLog(tx, planned.map((p) => ({ campaignId: campaign.id, characterId: p.id, actorUserId: access.userId, kind: CharacterLogKind.DOWNTIME, data: { periodId, days: input.days, summary: p.summary } })));
 
-    return { periodId, characters: planned.map((p) => ({ id: p.id, resources: p.resources, downtime: p.characteristics.downtime as DowntimeState, ...purseOf(incomes.find((i) => i.id === p.id)) })) };
+    return { periodId, characters: planned.map((p) => ({ id: p.id, resources: p.resources, downtime: p.characteristics.downtime as DowntimeState, ...purseOf(incomes, p.id) })) };
   });
 }
 
@@ -236,6 +240,6 @@ export async function undoPeriod(access: CampaignAccessResult, input: DowntimePe
 
     await writeCharacterLog(tx, restored.map((r) => ({ campaignId: campaign.id, characterId: r.id, actorUserId: access.userId, kind: CharacterLogKind.DOWNTIME, data: { periodId, undo: true } })));
 
-    return { periodId, characters: restored.map(({ id, resources, downtime }) => ({ id, resources, downtime, ...purseOf(incomes.find((i) => i.id === id)) })) };
+    return { periodId, characters: restored.map(({ id, resources, downtime }) => ({ id, resources, downtime, ...purseOf(incomes, id) })) };
   });
 }

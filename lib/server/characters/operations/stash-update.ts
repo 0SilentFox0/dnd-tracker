@@ -11,7 +11,7 @@ import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { buildStashView, STASH_ROW_SELECT } from "@/lib/server/characters/core/read-stash";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
-import { loadStashState } from "@/lib/server/characters/core/stash-state";
+import { loadStashState, purseColumns } from "@/lib/server/characters/core/stash-state";
 import { ContentError } from "@/lib/server/content/errors";
 import { writeInventoryLog } from "@/lib/server/inventory/log";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -193,9 +193,7 @@ async function applyStashCore({ access, campaignId, characterId }: CampaignScope
         equipped: result.state.equipped,
         stash: result.state.stash,
         items: result.state.items as unknown as Prisma.InputJsonValue,
-        gold: result.state.purse.gp,
-        silver: result.state.purse.sp,
-        copper: result.state.purse.cp,
+        ...purseColumns(result.state.purse),
         attuned: result.state.attuned ?? [],
       },
     });
