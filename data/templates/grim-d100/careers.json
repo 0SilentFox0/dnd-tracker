@@ -685,5 +685,693 @@
       "Kiln-yard deed",
       "Heavy coat"
     ]
+  },
+  {
+    "name": "Pathfinder",
+    "class": "Ranger",
+    "tier1_name": "Guide",
+    "tier1_status": "Brass 2",
+    "tier1_characteristics": [
+      "i",
+      "ag",
+      "t"
+    ],
+    "tier1_skills": [
+      "survival",
+      "track",
+      "navigation",
+      "stealth",
+      "endurance"
+    ],
+    "tier1_talents": [
+      "Trail Sense",
+      "Road-Worn"
+    ],
+    "tier1_trappings": [
+      "Hunting bow",
+      "Quiver of arrows",
+      "Bedroll",
+      "Waterskin"
+    ],
+    "tier2_name": "Pathfinder",
+    "tier2_status": "Brass 4",
+    "tier2_characteristics": [
+      "bs",
+      "int"
+    ],
+    "tier2_skills": [
+      "perception",
+      "ranged:bow",
+      "climb"
+    ],
+    "tier2_talents": [
+      "Steady Aim",
+      "Weather Eye"
+    ],
+    "tier2_trappings": [
+      "Hand-drawn trail map",
+      "Skinning knife"
+    ],
+    "tier3_name": "Trailblazer",
+    "tier3_status": "Silver 1",
+    "tier3_characteristics": [
+      "wp",
+      "i"
+    ],
+    "tier3_skills": [
+      "animal-care",
+      "stealth",
+      "navigation"
+    ],
+    "tier3_talents": [
+      "Alert Sleeper",
+      "Ambusher"
+    ],
+    "tier3_trappings": [
+      "Compass of bone",
+      "Oilskin cloak"
+    ],
+    "tier4_name": "Wayfinder",
+    "tier4_status": "Silver 3",
+    "tier4_characteristics": [
+      "fel",
+      "bs"
+    ],
+    "tier4_skills": [
+      "ranged:bow",
+      "perception",
+      "survival"
+    ],
+    "tier4_talents": [
+      "Keen Ears",
+      "Steady Aim",
+      "Tough Hide"
+    ],
+    "tier4_trappings": [
+      "Waystone marker",
+      "Longbow"
+    ]
+  },
+  {
+    "name": "Falconer",
+    "class": "Ranger",
+    "tier1_name": "Mews Hand",
+    "tier1_status": "Brass 3",
+    "tier1_characteristics": [
+      "bs",
+      "i",
+      "dex"
+    ],
+    "tier1_skills": [
+      "animal-care",
+      "perception",
+      "ranged:sling",
+      "track",
+      "endurance"
+    ],
+    "tier1_talents": [
+      "Way with Beasts",
+      "Keen Sighting"
+    ],
+    "tier1_trappings": [
+      "Leather glove",
+      "Hood and jesses",
+      "Raw meat pouch",
+      "Lure"
+    ],
+    "tier2_name": "Falconer",
+    "tier2_status": "Silver 1",
+    "tier2_characteristics": [
+      "ag",
+      "fel"
+    ],
+    "tier2_skills": [
+      "ride",
+      "survival",
+      "stealth"
+    ],
+    "tier2_talents": [
+      "Steady Aim",
+      "Watchful"
+    ],
+    "tier2_trappings": [
+      "Trained kestrel",
+      "Perch stand"
+    ],
+    "tier3_name": "Austringer",
+    "tier3_status": "Silver 2",
+    "tier3_characteristics": [
+      "int",
+      "wp"
+    ],
+    "tier3_skills": [
+      "navigation",
+      "intuition",
+      "climb"
+    ],
+    "tier3_talents": [
+      "Ambusher",
+      "Court Manners"
+    ],
+    "tier3_trappings": [
+      "Mews cage",
+      "Fine hunting coat"
+    ],
+    "tier4_name": "Master of Hawks",
+    "tier4_status": "Silver 4",
+    "tier4_characteristics": [
+      "bs",
+      "i"
+    ],
+    "tier4_skills": [
+      "ranged:bow",
+      "cool",
+      "animal-care"
+    ],
+    "tier4_talents": [
+      "Keen Ears",
+      "Steady Aim",
+      "Weather Eye"
+    ],
+    "tier4_trappings": [
+      "Gilded hawk hood",
+      "Master's whistle"
+    ]
+  },
+  {
+    "name": "Ferry Keeper",
+    "class": "Riverfolk",
+    "tier1_name": "Rope Hand",
+    "tier1_status": "Brass 2",
+    "tier1_characteristics": [
+      "s",
+      "t",
+      "ag"
+    ],
+    "tier1_skills": [
+      "row",
+      "swim",
+      "athletics",
+      "endurance",
+      "navigation"
+    ],
+    "tier1_talents": [
+      "Oarsman's Back",
+      "Born Swimmer"
+    ],
+    "tier1_trappings": [
+      "Coil of rope",
+      "Boat hook",
+      "Oilskin jacket",
+      "Tin cup"
+    ],
+    "tier2_name": "Ferry Keeper",
+    "tier2_status": "Brass 3",
+    "tier2_characteristics": [
+      "fel",
+      "i"
+    ],
+    "tier2_skills": [
+      "haggle",
+      "perception",
+      "lore:rivers"
+    ],
+    "tier2_talents": [
+      "River Reader",
+      "Haggler's Instinct"
+    ],
+    "tier2_trappings": [
+      "Flat-bottomed ferry share",
+      "Toll box"
+    ],
+    "tier3_name": "Crossing Master",
+    "tier3_status": "Silver 1",
+    "tier3_characteristics": [
+      "ws",
+      "int"
+    ],
+    "tier3_skills": [
+      "melee:basic",
+      "evaluate",
+      "gossip"
+    ],
+    "tier3_talents": [
+      "Cudgel Work",
+      "Weather Eye"
+    ],
+    "tier3_trappings": [
+      "Iron-bound club",
+      "Lantern"
+    ],
+    "tier4_name": "Lord of the Ford",
+    "tier4_status": "Silver 3",
+    "tier4_characteristics": [
+      "wp",
+      "fel"
+    ],
+    "tier4_skills": [
+      "charm",
+      "navigation",
+      "intuition"
+    ],
+    "tier4_talents": [
+      "Tough Hide",
+      "Parade-Ground Voice",
+      "Crowd Reader"
+    ],
+    "tier4_trappings": [
+      "Ford toll charter",
+      "Heavy cloak"
+    ]
+  },
+  {
+    "name": "Eel Fisher",
+    "class": "Riverfolk",
+    "tier1_name": "Net Mender",
+    "tier1_status": "Brass 1",
+    "tier1_characteristics": [
+      "dex",
+      "ag",
+      "t"
+    ],
+    "tier1_skills": [
+      "swim",
+      "row",
+      "perception",
+      "trade:netting",
+      "endurance"
+    ],
+    "tier1_talents": [
+      "Born Swimmer",
+      "River Reader"
+    ],
+    "tier1_trappings": [
+      "Eel trap",
+      "Net needle",
+      "Wet-weather hat",
+      "Fish knife"
+    ],
+    "tier2_name": "Eel Fisher",
+    "tier2_status": "Brass 2",
+    "tier2_characteristics": [
+      "i",
+      "s"
+    ],
+    "tier2_skills": [
+      "athletics",
+      "ranged:throwing",
+      "lore:rivers"
+    ],
+    "tier2_talents": [
+      "Iron Stomach",
+      "Oarsman's Back"
+    ],
+    "tier2_trappings": [
+      "Small punt",
+      "Barrel of eels"
+    ],
+    "tier3_name": "River Angler",
+    "tier3_status": "Brass 4",
+    "tier3_characteristics": [
+      "int",
+      "wp"
+    ],
+    "tier3_skills": [
+      "survival",
+      "navigation",
+      "haggle"
+    ],
+    "tier3_talents": [
+      "Weather Eye",
+      "Steady Hands"
+    ],
+    "tier3_trappings": [
+      "Weir stakes",
+      "Waders"
+    ],
+    "tier4_name": "Weir Master",
+    "tier4_status": "Silver 2",
+    "tier4_characteristics": [
+      "bs",
+      "fel"
+    ],
+    "tier4_skills": [
+      "ranged:throwing",
+      "gossip",
+      "evaluate"
+    ],
+    "tier4_talents": [
+      "Knife Thrower",
+      "Hearty Eater",
+      "Haggler's Instinct"
+    ],
+    "tier4_trappings": [
+      "Smokehouse key",
+      "Patched sail"
+    ]
+  },
+  {
+    "name": "Dicer",
+    "class": "Rogue",
+    "tier1_name": "Dice Runner",
+    "tier1_status": "Brass 1",
+    "tier1_characteristics": [
+      "int",
+      "fel",
+      "dex"
+    ],
+    "tier1_skills": [
+      "gamble",
+      "gossip",
+      "sleight-of-hand",
+      "charm",
+      "perception"
+    ],
+    "tier1_talents": [
+      "Fast Talker",
+      "Crowd Reader"
+    ],
+    "tier1_trappings": [
+      "Loaded dice",
+      "Greasy deck of cards",
+      "Worn cup",
+      "Pocket knife"
+    ],
+    "tier2_name": "Dicer",
+    "tier2_status": "Brass 3",
+    "tier2_characteristics": [
+      "i",
+      "ag"
+    ],
+    "tier2_skills": [
+      "intuition",
+      "dodge",
+      "stealth"
+    ],
+    "tier2_talents": [
+      "Light Fingers",
+      "Night Owl"
+    ],
+    "tier2_trappings": [
+      "Hidden card sleeve",
+      "Belt purse"
+    ],
+    "tier3_name": "Table Fox",
+    "tier3_status": "Silver 2",
+    "tier3_characteristics": [
+      "wp",
+      "fel"
+    ],
+    "tier3_skills": [
+      "cool",
+      "traps",
+      "perception"
+    ],
+    "tier3_talents": [
+      "Silver Tongue",
+      "Snap Reaction"
+    ],
+    "tier3_trappings": [
+      "Gaming table cloth",
+      "Silver tooth"
+    ],
+    "tier4_name": "Lord of Chances",
+    "tier4_status": "Silver 5",
+    "tier4_characteristics": [
+      "int",
+      "ws"
+    ],
+    "tier4_skills": [
+      "melee:brawling",
+      "gamble",
+      "intuition"
+    ],
+    "tier4_talents": [
+      "Tavern Brawler",
+      "Steel Nerves",
+      "Knife Thrower"
+    ],
+    "tier4_trappings": [
+      "Table-house deed",
+      "Velvet waistcoat"
+    ]
+  },
+  {
+    "name": "Lockbreaker",
+    "class": "Rogue",
+    "tier1_name": "Latch Lifter",
+    "tier1_status": "Brass 1",
+    "tier1_characteristics": [
+      "dex",
+      "ag",
+      "i"
+    ],
+    "tier1_skills": [
+      "lockpicking",
+      "sleight-of-hand",
+      "stealth",
+      "perception",
+      "dodge"
+    ],
+    "tier1_talents": [
+      "Lock Whisperer",
+      "Light Fingers"
+    ],
+    "tier1_trappings": [
+      "Set of picks",
+      "Dark cloak",
+      "Bit of chalk",
+      "Soft-soled shoes"
+    ],
+    "tier2_name": "Lockbreaker",
+    "tier2_status": "Brass 3",
+    "tier2_characteristics": [
+      "int",
+      "wp"
+    ],
+    "tier2_skills": [
+      "traps",
+      "intuition",
+      "gossip"
+    ],
+    "tier2_talents": [
+      "Night Owl",
+      "Keen Ears"
+    ],
+    "tier2_trappings": [
+      "Skeleton keys",
+      "Grappling hook"
+    ],
+    "tier3_name": "Vault Cracker",
+    "tier3_status": "Silver 1",
+    "tier3_characteristics": [
+      "dex",
+      "s"
+    ],
+    "tier3_skills": [
+      "climb",
+      "lockpicking",
+      "perception"
+    ],
+    "tier3_talents": [
+      "Lock Whisperer",
+      "Watchful"
+    ],
+    "tier3_trappings": [
+      "Pry bar",
+      "Shuttered lantern"
+    ],
+    "tier4_name": "Master of Keys",
+    "tier4_status": "Silver 3",
+    "tier4_characteristics": [
+      "fel",
+      "i"
+    ],
+    "tier4_skills": [
+      "charm",
+      "intuition",
+      "melee:brawling"
+    ],
+    "tier4_talents": [
+      "Fast Talker",
+      "Snap Reaction",
+      "Ambusher"
+    ],
+    "tier4_trappings": [
+      "Master key ring",
+      "Forged papers"
+    ]
+  },
+  {
+    "name": "Shieldbearer",
+    "class": "Warrior",
+    "tier1_name": "Shield Hand",
+    "tier1_status": "Silver 1",
+    "tier1_characteristics": [
+      "ws",
+      "t",
+      "s"
+    ],
+    "tier1_skills": [
+      "melee:basic",
+      "melee:parry",
+      "endurance",
+      "athletics",
+      "cool"
+    ],
+    "tier1_talents": [
+      "Shield Drill",
+      "Tough Hide"
+    ],
+    "tier1_trappings": [
+      "Round shield",
+      "Short sword",
+      "Padded jerkin",
+      "Whetstone"
+    ],
+    "tier2_name": "Shieldbearer",
+    "tier2_status": "Silver 2",
+    "tier2_characteristics": [
+      "wp",
+      "i"
+    ],
+    "tier2_skills": [
+      "intimidate",
+      "dodge",
+      "ranged:crossbow"
+    ],
+    "tier2_talents": [
+      "Blade Practice",
+      "Oxen Constitution"
+    ],
+    "tier2_trappings": [
+      "Iron helm",
+      "Rations pack"
+    ],
+    "tier3_name": "Shield Captain",
+    "tier3_status": "Silver 4",
+    "tier3_characteristics": [
+      "ws",
+      "fel"
+    ],
+    "tier3_skills": [
+      "leadership",
+      "melee:two-handed",
+      "intimidate"
+    ],
+    "tier3_talents": [
+      "Parade-Ground Voice",
+      "Last Stand Grit"
+    ],
+    "tier3_trappings": [
+      "Painted shield",
+      "Captain's cloak"
+    ],
+    "tier4_name": "Banner Lord",
+    "tier4_status": "Gold 1",
+    "tier4_characteristics": [
+      "t",
+      "wp"
+    ],
+    "tier4_skills": [
+      "leadership",
+      "cool",
+      "melee:parry"
+    ],
+    "tier4_talents": [
+      "Veteran's Poise",
+      "Steel Nerves",
+      "Battle Instinct"
+    ],
+    "tier4_trappings": [
+      "Company banner",
+      "Plate gorget"
+    ]
+  },
+  {
+    "name": "Sellsword",
+    "class": "Warrior",
+    "tier1_name": "Hireling",
+    "tier1_status": "Brass 4",
+    "tier1_characteristics": [
+      "ws",
+      "bs",
+      "ag"
+    ],
+    "tier1_skills": [
+      "melee:basic",
+      "ranged:crossbow",
+      "dodge",
+      "endurance",
+      "athletics"
+    ],
+    "tier1_talents": [
+      "Blade Practice",
+      "Tavern Brawler"
+    ],
+    "tier1_trappings": [
+      "Hand weapon",
+      "Crossbow and bolts",
+      "Leather jerkin",
+      "Dented flask"
+    ],
+    "tier2_name": "Sellsword",
+    "tier2_status": "Silver 1",
+    "tier2_characteristics": [
+      "s",
+      "t"
+    ],
+    "tier2_skills": [
+      "melee:two-handed",
+      "intimidate",
+      "cool"
+    ],
+    "tier2_talents": [
+      "Steady Aim",
+      "Fencer's Footwork"
+    ],
+    "tier2_trappings": [
+      "Contract scroll",
+      "Whetstone"
+    ],
+    "tier3_name": "Free Lance",
+    "tier3_status": "Silver 3",
+    "tier3_characteristics": [
+      "i",
+      "wp"
+    ],
+    "tier3_skills": [
+      "leadership",
+      "melee:parry",
+      "dodge"
+    ],
+    "tier3_talents": [
+      "Battle Instinct",
+      "Watchful"
+    ],
+    "tier3_trappings": [
+      "Chain shirt",
+      "Captain's pay chest"
+    ],
+    "tier4_name": "Mercenary Captain",
+    "tier4_status": "Gold 1",
+    "tier4_characteristics": [
+      "fel",
+      "ws"
+    ],
+    "tier4_skills": [
+      "leadership",
+      "intimidate",
+      "cool"
+    ],
+    "tier4_talents": [
+      "Veteran's Poise",
+      "Last Stand Grit",
+      "Haggler's Instinct"
+    ],
+    "tier4_trappings": [
+      "Company seal",
+      "Fine boots"
+    ]
   }
 ]
