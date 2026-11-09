@@ -42,18 +42,27 @@ describe("GrantCorruptionDialog", () => {
 
   afterEach(cleanup);
 
-  it("blocks submit for 0, 11, empty points or an empty reason", () => {
+  it("does not submit for 0, 11, empty points or an empty reason", () => {
     open();
 
     for (const [p, r] of [["0", "x"], ["11", "x"], ["", "x"], ["2", "  "]]) {
       fill(p, r);
-
-      expect(submitBtn().disabled).toBe(true);
+      fireEvent.click(submitBtn());
     }
 
-    fill("2", "Warpstone");
+    expect(mocks.grant.mutateOk).not.toHaveBeenCalled();
+  });
 
-    expect(submitBtn().disabled).toBe(false);
+  it("shows a message on the empty reason after a submit attempt", () => {
+    open();
+    fill("2", "");
+
+    expect(screen.queryByText("Вкажіть причину")).toBeNull();
+
+    fireEvent.click(submitBtn());
+
+    expect(screen.getByText("Вкажіть причину")).toBeTruthy();
+    expect(screen.getByLabelText(/Причина/).getAttribute("aria-invalid")).toBe("true");
   });
 
   it("submits points and reason", () => {

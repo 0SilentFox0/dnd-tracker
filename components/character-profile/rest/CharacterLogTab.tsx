@@ -7,6 +7,7 @@ import { useProfile } from "../ProfileContext";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useCharacterLog } from "@/lib/hooks/characters";
+import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { describeCharacterLog } from "@/lib/utils/characters/resources/describe-log";
 
@@ -17,6 +18,8 @@ export function CharacterLogTab() {
 
   const tr = useTranslator();
 
+  const text = useText();
+
   const format = useFormatter();
 
   const { campaignId, characterId } = useProfile();
@@ -24,9 +27,11 @@ export function CharacterLogTab() {
   const log = useCharacterLog(campaignId, characterId);
 
   const describeLine = (e: Parameters<typeof describeCharacterLog>[0]) => {
-    const { key, params } = describeCharacterLog(e);
+    const { key, params, textParams } = describeCharacterLog(e);
 
-    return tr(key, params);
+    const resolved = Object.fromEntries(Object.entries(textParams ?? {}).map(([k, v]) => [k, text(v)]));
+
+    return tr(key, { mutationText: "", ...params, ...resolved });
   };
 
   const entries = log.data?.pages.flatMap((p) => p.entries) ?? [];

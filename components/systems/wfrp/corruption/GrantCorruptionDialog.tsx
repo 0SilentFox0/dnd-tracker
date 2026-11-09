@@ -28,6 +28,8 @@ export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId:
 
   const [reason, setReason] = useState("");
 
+  const [attempted, setAttempted] = useState(false);
+
   const [granted, setGranted] = useState(false);
 
   const result = granted ? (grant.data ?? null) : null;
@@ -38,7 +40,9 @@ export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId:
 
   const n = Number(points);
 
-  const valid = points.trim() !== "" && Number.isInteger(n) && n >= 1 && n <= max && reason.trim() !== "";
+  const pointsValid = points.trim() !== "" && Number.isInteger(n) && n >= 1 && n <= max;
+
+  const valid = pointsValid && reason.trim() !== "";
 
   const close = (o: boolean) => {
     setOpen(o);
@@ -48,16 +52,24 @@ export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId:
       setUndone(false);
       setPoints("1");
       setReason("");
+      setAttempted(false);
     }
   };
 
-  const submit = () =>
+  const submit = () => {
+    if (!valid) {
+      setAttempted(true);
+
+      return;
+    }
+
     void grant.mutateOk({ points: n, reason: reason.trim() }).then((ok) => {
       if (ok) {
         setGranted(true);
         setUndone(false);
       }
     });
+  };
 
   const revert = (r: CorruptionGrantResult) =>
     confirm({
@@ -85,7 +97,7 @@ export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId:
               {undone ? t("undone") : t("undo")}
             </Button>
           ) : (
-            <Button type="button" disabled={!valid || grant.isPending} onClick={submit}>
+            <Button type="button" disabled={grant.isPending} onClick={submit}>
               {t("submit")}
             </Button>
           )
@@ -100,12 +112,13 @@ export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId:
           <div className="space-y-3">
             <label className="block text-sm">
               {t("points")}
-              <Input className="mt-1 min-h-11" type="number" min={1} max={max} inputMode="numeric" aria-invalid={points.trim() !== "" && !valid} value={points} onChange={(e) => setPoints(e.target.value)} />
-              <span className="text-xs text-hud-muted">{t("pointsHint", { max })}</span>
+              <Input className="mt-1 min-h-11" type="number" min={1} max={max} inputMode="numeric" aria-invalid={(attempted || points.trim() !== "") && !pointsValid} value={points} onChange={(e) => setPoints(e.target.value)} />
+              <span className={attempted && !pointsValid ? "text-xs text-destructive" : "text-xs text-hud-muted"}>{t("pointsHint", { max })}</span>
             </label>
             <label className="block text-sm">
               {t("reason")}
-              <Input className="mt-1 min-h-11" maxLength={CORRUPTION_REASON_MAX} value={reason} onChange={(e) => setReason(e.target.value)} />
+              <Input className="mt-1 min-h-11" maxLength={CORRUPTION_REASON_MAX} aria-invalid={attempted && reason.trim() === ""} value={reason} onChange={(e) => setReason(e.target.value)} />
+              {attempted && reason.trim() === "" && <span className="text-xs text-destructive">{t("reasonRequired")}</span>}
             </label>
           </div>
         )}

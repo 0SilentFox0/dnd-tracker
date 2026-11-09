@@ -1,8 +1,10 @@
 import type { CharacterLogEntry } from "@/types/characters";
+import type { LogLine } from "@/types/text";
 
 export interface DescribedLog {
   key: string;
   params?: Record<string, string | number>;
+  textParams?: Record<string, LogLine>;
 }
 
 export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">): DescribedLog {
@@ -73,8 +75,34 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
     case "downtime":
       return { key: d.undo ? "rest.log.downtimeUndo" : "rest.log.downtime", params: { days: num("days") } };
     case "corruption":
-      return d.undo ? { key: "rest.log.corruptionUndo" } : { key: d.mutation === true ? "rest.log.corruptionMutation" : "rest.log.corruption", params: { points: num("points"), total: num("total"), threshold: num("threshold") } };
+      return d.undo ? { key: "rest.log.corruptionUndo" } : describeCorruptionGrant(d);
     case "battle_result":
       return { key: "rest.log.battleResult", params: { hpBefore: num("hpBefore"), hpAfter: num("hpAfter"), maxHp: num("maxHp"), dead: yes(d.dead) } };
   }
+}
+
+function describeCorruptionGrant(d: Record<string, unknown>): DescribedLog {
+  const num = (v: unknown) => (typeof v === "number" ? v : 0);
+
+  const summary = (d.summary ?? {}) as { test?: { roll?: unknown; target?: unknown; sl?: unknown; outcome?: unknown }; mutation?: { text?: LogLine } };
+
+  const { test, mutation } = summary;
+
+  const reason = typeof d.reason === "string" ? d.reason : "";
+
+  return {
+    key: d.mutation === true ? "rest.log.corruptionMutation" : "rest.log.corruption",
+    params: {
+      points: num(d.points),
+      total: num(d.total),
+      threshold: num(d.threshold),
+      hasReason: reason ? "yes" : "no",
+      reason,
+      testState: !test ? "none" : test.outcome === "success" || test.outcome === "critical" ? "passed" : "failed",
+      roll: num(test?.roll),
+      target: num(test?.target),
+      sl: num(test?.sl),
+    },
+    textParams: mutation?.text ? { mutationText: mutation.text } : undefined,
+  };
 }
