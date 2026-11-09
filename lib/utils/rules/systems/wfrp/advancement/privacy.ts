@@ -7,7 +7,7 @@ export function redactLedger(characteristics: Characteristics, viewer: LedgerVie
 
   const { downtime: _downtime, ...rest } = characteristics;
 
-  return { ...rest, ledger: [] };
+  return "ledger" in rest ? { ...rest, ledger: [] } : rest;
 }
 
 /** Fields only `advance` / `advance-undo` (or the DM) may change. */

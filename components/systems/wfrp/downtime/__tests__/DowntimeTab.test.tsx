@@ -62,11 +62,11 @@ describe("DowntimeTab", () => {
     expect(mocks.save).toHaveBeenCalledWith({ endeavour: { kind: "rest", params: {} } });
   });
 
-  it("DM save carries the ailments", () => {
+  it("DM save omits ailments that were not edited", () => {
     mount({ isDM: true, downtime: { endeavour: { kind: "rest", params: {} }, ailments: [ailment] } });
     fireEvent.click(screen.getAllByRole("button", { name: "Зберегти" })[0]);
 
-    expect(mocks.save).toHaveBeenCalledWith({ endeavour: { kind: "rest", params: {} }, ailments: [ailment] });
+    expect(mocks.save).toHaveBeenCalledWith({ endeavour: { kind: "rest", params: {} } });
   });
 
   it("training endeavour shows the target fields; credit row shows the discount", () => {

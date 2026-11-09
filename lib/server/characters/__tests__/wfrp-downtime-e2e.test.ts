@@ -312,6 +312,27 @@ describe("downtime.period.undo", () => {
     expect(result.characters.find((c) => c.id === "h1")?.purse).toEqual({ gp: 0, sp: 0, cp: 0 });
   });
 
+  it("undoes when jsonb returns training and ailment keys in another order", async () => {
+    const { periodId } = await run();
+
+    const { lastPeriod } = (stored("h1").characteristics as { downtime: { lastPeriod: { before: { training?: Record<string, unknown>; ailments: Record<string, unknown>[] }; after: { training?: Record<string, unknown> } } } }).downtime;
+
+    const reverse = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).reverse());
+
+    expect(lastPeriod.after.training).toBeDefined();
+
+    lastPeriod.after.training = reverse(lastPeriod.after.training ?? {});
+
+    if (lastPeriod.before.training) lastPeriod.before.training = reverse(lastPeriod.before.training);
+
+    lastPeriod.before.ailments = lastPeriod.before.ailments.map(reverse);
+
+    await undo({ periodId, characterIds: ["h1", "h2"] });
+
+    expect(chars("h1").downtime?.training).toEqual({ kind: "characteristic", key: "ws", discount: 10 });
+    expect(chars("h1").downtime?.ailments).toEqual([ailment]);
+  });
+
   it("a second undo of the same period is stale (focus 2)", async () => {
     const { periodId } = await run();
 

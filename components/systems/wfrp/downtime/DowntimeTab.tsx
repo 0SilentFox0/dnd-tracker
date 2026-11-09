@@ -49,7 +49,7 @@ export function DowntimeTab() {
       <HudSection title={t("tab.endeavourTitle")}>
         <EndeavourPicker value={endeavour} onChange={(e) => setDraft((d) => ({ ...d, endeavour: e }))} patients={patients} skills={sheet.wfrp?.skills ?? []} />
         <div className="mt-2 flex gap-2">
-          <Button type="button" size="sm" disabled={save.isPending || !isEndeavourValid(endeavour)} onClick={() => send({ endeavour: endeavour ?? null, ...(isDM ? { ailments } : {}) })}>
+          <Button type="button" size="sm" disabled={save.isPending || !isEndeavourValid(endeavour)} onClick={() => send({ endeavour: endeavour ?? null, ...(draft.ailments ? { ailments: draft.ailments } : {}) })}>
             {t("tab.save")}
           </Button>
           <Button type="button" size="sm" variant="outline" disabled={save.isPending || !state.endeavour} onClick={() => send({ endeavour: null })}>

@@ -1,4 +1,5 @@
 import { CHARACTERISTIC_KEYS, SKILL_ADVANCE_KEY_RE, SPEC_RE } from "../characteristics/constants";
+import { MAX_DAYS } from "./constants";
 import { type Ailment, AILMENTS_MAX, type CoinAmount, type DowntimeState, type Endeavour, type PeriodSnapshot, type TrainingCredit } from "./types";
 
 import { COINS } from "@/lib/constants/inventory";
@@ -67,7 +68,7 @@ function readTraining(raw: unknown): TrainingCredit | undefined {
 const isCoinAmount = (v: unknown): v is CoinAmount => isRecord(v) && (COINS as readonly unknown[]).includes(v.coin) && isInt(v.amount, 0, 1e9);
 
 function readSnapshot(raw: unknown): PeriodSnapshot | undefined {
-  if (!isRecord(raw) || !isStr(raw.id, 1, 64) || !isStr(raw.at, 1, 40) || !isInt(raw.days, 1, 30) || !isRecord(raw.summary) || !isRecord(raw.before) || !isRecord(raw.after)) return undefined;
+  if (!isRecord(raw) || !isStr(raw.id, 1, 64) || !isStr(raw.at, 1, 40) || !isInt(raw.days, 1, MAX_DAYS) || !isRecord(raw.summary) || !isRecord(raw.before) || !isRecord(raw.after)) return undefined;
 
   const beforeAilments = readAilments(raw.before.ailments);
 
@@ -75,7 +76,17 @@ function readSnapshot(raw: unknown): PeriodSnapshot | undefined {
 
   if (raw.coins !== undefined && !isCoinAmount(raw.coins)) return undefined;
 
-  return raw as unknown as PeriodSnapshot;
+  const beforeTraining = raw.before.training === undefined ? undefined : readTraining(raw.before.training);
+
+  const afterTraining = raw.after.training === undefined ? undefined : readTraining(raw.after.training);
+
+  if ((raw.before.training !== undefined && !beforeTraining) || (raw.after.training !== undefined && !afterTraining)) return undefined;
+
+  return {
+    ...raw,
+    before: { ...raw.before, ailments: beforeAilments, ...(beforeTraining ? { training: beforeTraining } : {}) },
+    after: { ...raw.after, ...(afterTraining ? { training: afterTraining } : {}) },
+  } as unknown as PeriodSnapshot;
 }
 
 export function readDowntime(raw: unknown): DowntimeState | undefined {

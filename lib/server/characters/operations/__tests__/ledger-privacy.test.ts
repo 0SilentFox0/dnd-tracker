@@ -60,6 +60,22 @@ describe("ledger redaction on list", () => {
   });
 });
 
+describe("redaction leaves rows without wfrp keys alone", () => {
+  it("a d20 hero with {} stays {} for another player; a wfrp hero is redacted", () => {
+    const [d20, wfrp] = redactListedLedgers(
+      [
+        { controlledBy: "p2", characteristics: {} },
+        { controlledBy: "p2", characteristics: { ...stored, downtime: { ailments: [] } } },
+      ],
+      { userId: "p1", isDM: false },
+    );
+
+    expect(d20.characteristics).toEqual({});
+    expect("downtime" in (wfrp.characteristics as object)).toBe(false);
+    expect((wfrp.characteristics as typeof stored).ledger).toEqual([]);
+  });
+});
+
 describe("downtime redaction on list", () => {
   const withDowntime = { ...stored, downtime: { ailments: [] } };
 
