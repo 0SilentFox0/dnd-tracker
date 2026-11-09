@@ -258,7 +258,7 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 
 Створення персонажа wfrp (на `feat/wfrp`, не змерджено; міграція `20261126000000_race_profiles`, expand-only, з RLS). Spec/план — `docs/superpowers/{specs,plans}/2026-11-06-wfrp-5e3*`.
 
-- Таблиця `race_profiles` (`raceId` unique, `campaignId`, `profile` JSON = `SpeciesProfile`: `mods`, `move`, `fate`, `extraWounds`, `talents`, `randomTalentCount`, `randomTalents`, `careerTable`). Профіль живе в окремій таблиці, а не колонкою `Race`. `GET /api/campaigns/:id/race-profiles` (член; невалідні рядки пропускаються), `PUT /api/campaigns/:id/races/:raceId/profile` (DM; перевірка посилань на кар'єри/таланти кампанії через `assertCampaignRefs`).
+- ~~Таблиця `race_profiles`~~ deprecated з 5g-0: профіль — колонка `Race.profile`/`RaceBase.profile` (див. «Межі 5g-0»); раніше (`raceId` unique, `campaignId`, `profile` JSON = `SpeciesProfile`: `mods`, `move`, `fate`, `extraWounds`, `talents`, `randomTalentCount`, `randomTalents`, `careerTable`). Профіль живе в окремій таблиці, а не колонкою `Race`. `GET /api/campaigns/:id/race-profiles` (член; невалідні рядки пропускаються), `PUT /api/campaigns/:id/races/:raceId/profile` (DM; перевірка посилань на кар'єри/таланти кампанії через `assertCampaignRefs`).
 - `RuleSystemDefinition.creation` (`RuleSystemCreation`): `planDraft(picks, ctx)` — чиста валідація вибору і підрахунок `characteristics` + XP (коди помилок `CAREER_*`, `STATS_*`, `POINTS_*`, `TALENT_*`, `FEAT_UNKNOWN`, `PROFILE_NOT_READY`), `rollCreation(rng, profile)` — кидки кар'єри (2), характеристик (2d10 × N) і талантів, `isUsableProfile`. Код — `lib/utils/rules/systems/wfrp/creation/`.
 - Слоти `SystemUi.DraftForm` (майстер `WfrpDraftForm`: вид → кар'єра → характеристики → таланти → особисте) і `SystemUi.RaceProfileEditor` (редактор профілю в `RaceEditForm`; `SpeciesProfileEditor` ліниво, щоб zod не потрапляв у клієнтські entry). Схеми імпортуються з `@/lib/utils/rules/systems/schemas`, не з барелю (zod у графі wfrp ламає `client-imports.test.ts`).
 - API чернеток: `POST …/characters/draft` і `PATCH …/characters/[characterId]/draft` для систем із `creation` — див. [characters.md](characters.md).
@@ -361,3 +361,13 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 - `SkillAdvancesEditor`: спеціалізація з пробілом мовчки блокує кнопку.
 - `templateKey` = назва шаблону (конвенція store), spec казав `grim-d100-empty`.
 - Складність: `DIFFICULTY_SL` зсуває SL, а не ціль — так у WFRP 5e (research §1; у 4e це модифікатор цілі). Значення таблиці звірити з книгою 5e; чи обрізається SL за результатом — теж звірити.
+
+## Межі 5g-0
+
+Інфраструктура шаблону Grim d100 (на `feat/wfrp`, не змерджено; міграція `20261129000000_career_layers_race_profile_column`, expand-only, RLS на `careers_base`). Spec/план — `docs/superpowers/{specs,plans}/2026-11-09-wfrp-5g0*`.
+
+- Профіль виду — `Race.profile`/`RaceBase.profile Json?` (`SpeciesProfile`): клон із шарами не має локальних рядків `races`, тому FK-таблиця `race_profiles` не працювала. `race_profiles` deprecated (бекфіл у міграції, код не читає й не пише, DROP після деплою епіку). Читання — `listRaceProfiles` через шарований читач видів; запис — `saveRaceProfile` через операцію оновлення виду (для базового рядка створює override). Чужий вид тепер 404, не 403.
+- `careers` — шарова модель за зразком `feats` (`CareerBase`, `sourceId`/`sourceHash`), у `BUNDLE_TABLES` після `feats` і в `SYNC_TABLE_SCOPES`. `tiers[].talents` при імпорті через `IMPORT_SPECS` зберігаються як id рис.
+- Sync: видалення в джерелі feat/кар'єри, на яку посилається профіль виду, tier кар'єри чи герой, пропускається з попередженням (`isFeatReferenced`/`isCareerReferenced`); після sync профіль із зниклим `careerId`/`featId` дає `dangling` і не змінюється.
+- Завантажувач: `data/templates/grim-d100/*.json` (відсутній файл = порожній список) → `validateGrimData` (до першого запису) → `ensureSrdTemplate` + `importContent` (feats, careers, races, units, spells, artifacts) → профілі видів за іменами → publish. Команда `pnpm constructor:grim-template [--owner] [--allow-remote]`, `GRIM_DATA_DIR` перевизначає каталог. Ім'я шаблону — `GRIM_TEMPLATE_NAME` (`"Grim d100"`, остаточну обирає користувач у 5g-4).
+- Відкрито: кожен запуск завантажувача піднімає `contentVersion` на 2 навіть без змін (як SRD-завантажувач); інтеграційний тест `layered … nulls references to its override` падає й без 5g-0 (не наш).
