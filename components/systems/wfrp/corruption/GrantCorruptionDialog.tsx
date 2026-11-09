@@ -10,10 +10,8 @@ import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useGrantCorruption, useUndoCorruption } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
-import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { CORRUPTION_REASON_MAX, RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import type { CorruptionGrantResult } from "@/types/corruption";
-
-const REASON_MAX = 80;
 
 export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId: string; characterId: string }) {
   const t = useTranslations("wfrpCorruption.grant");
@@ -107,7 +105,7 @@ export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId:
             </label>
             <label className="block text-sm">
               {t("reason")}
-              <Input className="mt-1 min-h-11" maxLength={REASON_MAX} value={reason} onChange={(e) => setReason(e.target.value)} />
+              <Input className="mt-1 min-h-11" maxLength={CORRUPTION_REASON_MAX} value={reason} onChange={(e) => setReason(e.target.value)} />
             </label>
           </div>
         )}

@@ -9,15 +9,17 @@ import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { CHARACTERISTIC_KEYS } from "@/lib/constants/wfrp-characteristics";
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL } from "@/lib/constants/wfrp-conditions";
-import { MUTATION_EFFECT_LIMITS } from "@/lib/constants/wfrp-mutations";
+import { MUTATION_EFFECT_LIMITS, MUTATION_EFFECTS_MAX } from "@/lib/constants/wfrp-mutations";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { DEFAULT_TABLES } from "@/lib/utils/rules/systems";
-import { MARKER_KEYS, SLOT_EFFECTS, TABLE_SLOTS, type TableEffect, type TableRow, type TableSlot } from "@/lib/utils/rules/tables-schema";
+import { MARKER_KEYS, MUTATION_SLOTS, SLOT_EFFECTS, TABLE_SLOTS, type TableEffect, type TableRow, type TableSlot } from "@/lib/utils/rules/tables-schema";
 
 const MAX_ROWS = 20;
 
 const MAX_EFFECTS = 4;
+
+const effectsMax = (slot: TableSlot) => ((MUTATION_SLOTS as readonly string[]).includes(slot) ? MUTATION_EFFECTS_MAX : MAX_EFFECTS);
 
 const newEffect = (type: TableEffect["type"]): TableEffect => {
   if (type === "condition") return { type, key: WFRP_CONDITION_KEYS[0], levels: 1 };
@@ -85,7 +87,7 @@ function RowFields({ slot, row, index, from, isLast, canRemove, onChange, onRemo
           <EffectFields key={i} slot={slot} effect={effect} onChange={(next) => onChange({ ...row, effects: row.effects.map((x, j) => (j === i ? next : x)) })} onRemove={() => onChange({ ...row, effects: row.effects.filter((_, j) => j !== i) })} />
         ))}
       </ul>
-      <Button type="button" variant="outline" size="sm" className="min-h-11" disabled={row.effects.length >= MAX_EFFECTS} onClick={() => onChange({ ...row, effects: [...row.effects, newEffect(SLOT_EFFECTS[slot][0])] })}>
+      <Button type="button" variant="outline" size="sm" className="min-h-11" disabled={row.effects.length >= effectsMax(slot)} onClick={() => onChange({ ...row, effects: [...row.effects, newEffect(SLOT_EFFECTS[slot][0])] })}>
         <Plus className="mr-1 size-4" />
         {t("addEffect")}
       </Button>

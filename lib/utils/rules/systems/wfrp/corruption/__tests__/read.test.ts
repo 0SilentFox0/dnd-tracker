@@ -58,7 +58,7 @@ describe("readCorruption", () => {
   it("last snapshot", () => {
     expect(readCorruption({ last: snapshot })?.last).toEqual(snapshot);
 
-    for (const bad of [{ ...snapshot, id: undefined }, { ...snapshot, reason: "x".repeat(81) }, { ...snapshot, summary: 1 }, { ...snapshot, before: { points: 1000 } }]) expect(readCorruption({ last: bad })).toBeUndefined();
+    for (const bad of [{ ...snapshot, id: undefined }, { ...snapshot, reason: "x".repeat(81) }, { ...snapshot, summary: 1 }, { ...snapshot, before: { points: 1000 } }]) expect(readCorruption({ points: 4, last: bad })).toEqual({ points: 4, mutations: [] });
   });
 
   it("drops extra keys", () => {

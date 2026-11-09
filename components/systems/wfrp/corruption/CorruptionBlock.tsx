@@ -42,7 +42,7 @@ export function CorruptionBlock() {
             ))}
           </ul>
         )}
-        {sheet.viewer.isDM && <GrantCorruptionDialog campaignId={campaignId} characterId={characterId} />}
+        {sheet.viewer.isDM && !sheet.review.pending && <GrantCorruptionDialog campaignId={campaignId} characterId={characterId} />}
       </div>
     </HudSection>
   );

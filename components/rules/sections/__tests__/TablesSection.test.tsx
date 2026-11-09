@@ -147,5 +147,17 @@ describe("TablesSection", () => {
 
       expect(set).toHaveBeenLastCalledWith("tables", { mutationMental: [{ max: 100, effects: [{ type: "characteristic", key: "ws", amount: -5 }] }] });
     });
+
+    it("caps effects at 3 in a mutation slot but allows 4 elsewhere", () => {
+      const effects = [1, 2, 3].map(() => ({ type: "characteristic" as const, key: "ag" as const, amount: -5 }));
+
+      render(<TablesSection form={{ campaignId: "c", data: { ...DEFAULT_RULES, tables: { mutationPhysical: [{ max: 100, effects }], critHead: [{ max: 100, effects: [...effects, effects[0]].map(() => ({ type: "damage" as const, amount: 1 })).slice(0, 3) }] } }, set: vi.fn() } as unknown as Parameters<typeof TablesSection>[0]["form"]} />);
+
+      expect((screen.getByRole("button", { name: "wfrpTables.addEffect" }) as HTMLButtonElement).disabled).toBe(false);
+
+      pick("wfrpTables.slots.mutationPhysical");
+
+      expect((screen.getByRole("button", { name: "wfrpTables.addEffect" }) as HTMLButtonElement).disabled).toBe(true);
+    });
   });
 });

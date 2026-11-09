@@ -17,9 +17,9 @@ vi.mock("@/lib/hooks/characters", () => ({
 
 type Corruption = { points: number; threshold: number; mutations: unknown[] };
 
-const mount = (corruption: Corruption | undefined, isDM = false, wfrp = true) =>
+const mount = (corruption: Corruption | undefined, isDM = false, wfrp = true, pending = false) =>
   render(
-    <ProfileProvider campaignId="c" characterId="h" canEdit={false} sheet={{ viewer: { isDM, isOwner: !isDM }, ...(wfrp && { wfrp: { corruption } }) } as unknown as CharacterSheet}>
+    <ProfileProvider campaignId="c" characterId="h" canEdit={false} sheet={{ viewer: { isDM, isOwner: !isDM }, review: { pending }, ...(wfrp && { wfrp: { corruption } }) } as unknown as CharacterSheet}>
       <CorruptionBlock />
     </ProfileProvider>,
   );
@@ -62,6 +62,12 @@ describe("CorruptionBlock", () => {
     mount({ points: 0, threshold: 6, mutations: [] }, true);
 
     expect(screen.getByRole("button", { name: "Нарахувати порчу" })).toBeTruthy();
+  });
+
+  it("hides the grant button for a pending hero", () => {
+    mount({ points: 0, threshold: 6, mutations: [] }, true, true, true);
+
+    expect(screen.queryByRole("button", { name: "Нарахувати порчу" })).toBeNull();
   });
 
   it("renders nothing without the wfrp block", () => {

@@ -8,6 +8,7 @@ export { moveOf } from "./wfrp/characteristics/derive";
 export { type CareerState, CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, DEFAULT_CHARACTERISTICS, type LedgerEntry, readCharacteristics, SKILL_ADVANCE_KEY_RE, SKILL_KEY_RE, SPEC_RE } from "./wfrp/characteristics/keys";
 export type { DefenseKind, HitLocation } from "./wfrp/combat/constants";
 export type { WfrpParticipantStats } from "./wfrp/combat/participant";
+export { REASON_MAX as CORRUPTION_REASON_MAX } from "./wfrp/corruption/constants";
 export { GRANT_MAX as CORRUPTION_GRANT_MAX } from "./wfrp/corruption/constants";
 export { modifiersOf } from "./wfrp/corruption/modifiers";
 export { readCorruption } from "./wfrp/corruption/read";

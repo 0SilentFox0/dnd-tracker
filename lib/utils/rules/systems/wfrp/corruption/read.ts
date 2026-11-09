@@ -86,7 +86,5 @@ export function readCorruption(raw: unknown): CorruptionState | undefined {
 
   const last = raw.last === undefined ? undefined : readLast(raw.last);
 
-  if (raw.last !== undefined && !last) return undefined;
-
   return { points: (raw.points as number | undefined) ?? 0, mutations, ...(last ? { last } : {}) };
 }

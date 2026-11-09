@@ -194,7 +194,7 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - Юніти порчі не приймають (`UnitCharacteristicsSchema`); недоступно в активному бою.
 - Поза межами: автоджерела порчі, зняття порчі, Dissolution, токен, шаблони (5g).
 - Namespace `wfrpCorruption` вантажиться посторінково (3 сторінки), рядок `scope-size` 2 KB (uk gzip ≈ 1.2 KB).
-- Бюджет OpenAPI без змін (дії `corruption.*` ≈ 0 KB).
+- Бюджет OpenAPI 193000 → 195000 B (дії `corruption.*`).
 - e2e: `lib/server/characters/__tests__/wfrp-corruption-e2e.test.ts`.
 
 ## Межі 5e-1
