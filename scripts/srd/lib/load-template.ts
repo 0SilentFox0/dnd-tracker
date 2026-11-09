@@ -6,7 +6,7 @@ import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { translateIssue } from "@/lib/i18n/translate-issue";
 import type { Translator } from "@/lib/i18n/translator";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { ImportReport } from "@/types/content-import";
+import type { ImportKind, ImportReport } from "@/types/content-import";
 
 export { SRD_TEMPLATE_NAME };
 
@@ -58,9 +58,9 @@ export async function ensureSrdTemplate(store: TemplateStore, opts: { owner?: st
   return { ...(await store.create({ userId, rules: opts.rules, credits: opts.credits, description })), created: true };
 }
 
-export type RunImport = (kind: SrdKind, rows: Record<string, unknown>[]) => Promise<ImportReport>;
+export type RunImport<K extends ImportKind = SrdKind> = (kind: K, rows: Record<string, unknown>[]) => Promise<ImportReport>;
 
-export type SrdImportResult = { kind: SrdKind; report: ImportReport };
+export type SrdImportResult<K extends ImportKind = SrdKind> = { kind: K; report: ImportReport };
 
 export const CLEARABLE_SPELL_COLUMNS = ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod", "fixedDice", "damageBonus"] as const;
 
@@ -125,13 +125,18 @@ export function withClassIcons(rows: Record<string, unknown>[], data: SrdData, i
   });
 }
 
-export type PrepareRows = (kind: SrdKind, rows: Record<string, unknown>[]) => Promise<Record<string, unknown>[]>;
+export type PrepareRows<K extends ImportKind = SrdKind> = (kind: K, rows: Record<string, unknown>[]) => Promise<Record<string, unknown>[]>;
 
-export async function importSrdData(data: SrdData, run: RunImport, prepare?: PrepareRows): Promise<SrdImportResult[]> {
-  const results: SrdImportResult[] = [];
+export async function importSrdData<K extends ImportKind = SrdKind>(
+  data: Record<K, ReadonlyArray<object>>,
+  run: RunImport<K>,
+  prepare?: PrepareRows<K>,
+  kinds: readonly K[] = SRD_KINDS as unknown as readonly K[],
+): Promise<SrdImportResult<K>[]> {
+  const results: SrdImportResult<K>[] = [];
 
-  for (const kind of SRD_KINDS) {
-    const rows = toImportRows(data[kind]);
+  for (const kind of kinds) {
+    const rows = toImportRows(data[kind] as ReadonlyArray<{ slug: string }>);
 
     results.push({ kind, report: await run(kind, prepare ? await prepare(kind, rows) : rows) });
   }
@@ -139,9 +144,9 @@ export async function importSrdData(data: SrdData, run: RunImport, prepare?: Pre
   return results;
 }
 
-export const hasRowErrors = (results: SrdImportResult[]) => results.some((r) => r.report.counts.error > 0);
+export const hasRowErrors = (results: SrdImportResult<ImportKind>[]) => results.some((r) => r.report.counts.error > 0);
 
-export function formatImportSummary(results: SrdImportResult[], t?: Translator): string[] {
+export function formatImportSummary(results: SrdImportResult<ImportKind>[], t?: Translator): string[] {
   return results.flatMap(({ kind, report: { counts, results: rows } }) => [
     `${kind}: created ${counts.created}, updated ${counts.updated}, skipped ${counts.skipped}, error ${counts.error}`,
     ...rows

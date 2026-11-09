@@ -36,6 +36,7 @@
     "constructor:backfill": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/backfill-content-fields.ts",
     "constructor:srd-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/load-template.ts",
     "constructor:empty-5e-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/empty-template.ts",
+    "constructor:grim-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/grim/load-template.ts",
     "constructor:empty-grim-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/grim/empty-template.ts",
     "i18n:extract": "tsx scripts/i18n/extract-cyrillic.ts",
     "srd:i18n": "tsx --tsconfig tsconfig.scripts.json scripts/srd/i18n/cli.ts",

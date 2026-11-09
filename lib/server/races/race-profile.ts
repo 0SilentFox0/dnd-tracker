@@ -23,7 +23,7 @@ export async function listRaceProfiles(campaignId: string): Promise<RaceProfileI
   });
 }
 
-export async function saveRaceProfile(campaignId: string, raceId: string, profile: SpeciesProfile): Promise<RaceProfileItem> {
+export async function saveRaceProfile(campaignId: string, raceId: string, profile: SpeciesProfile, invalidate: typeof invalidateReference = invalidateReference): Promise<RaceProfileItem> {
   const race = await prisma.race.findFirst({ where: { id: raceId, campaignId }, select: { id: true } });
 
   if (!race) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
@@ -35,7 +35,7 @@ export async function saveRaceProfile(campaignId: string, raceId: string, profil
 
   await withCampaignContentWrite(campaignId, async () => {
     await prisma.race.update({ where: { id: raceId }, data: { profile: profile as unknown as Prisma.InputJsonValue } });
-    afterContentCommit(() => invalidateReference(ReferenceKind.RACES, campaignId));
+    afterContentCommit(() => invalidate(ReferenceKind.RACES, campaignId));
   });
 
   return { raceId, profile };

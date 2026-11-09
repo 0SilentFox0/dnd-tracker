@@ -26,6 +26,8 @@ export const EMPTY_5E_TEMPLATE_NAME = "5e (empty)";
 
 export const EMPTY_GRIM_TEMPLATE_NAME = "Grim d100 (empty)";
 
+export const GRIM_TEMPLATE_NAME = "Grim d100";
+
 export interface DmSection {
   path: string;
   icon: LucideIcon;
