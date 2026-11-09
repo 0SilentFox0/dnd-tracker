@@ -40,17 +40,16 @@ export async function createWfrpDraft(request: Request, campaign: Campaign, acce
 
   if (early) return errorResponse(early, 400);
 
-  const race = await loadOwned(prisma.race.findUnique({ where: { id: data.speciesId }, select: { campaignId: true, name: true } }), campaignId, API_ERRORS.RACE_NOT_FOUND);
+  const race = await loadOwned(prisma.race.findFirst({ where: { id: data.speciesId, campaignId }, select: { campaignId: true, name: true, profile: true } }), campaignId, API_ERRORS.RACE_NOT_FOUND);
 
   if (race instanceof NextResponse) return race;
 
-  const [stored, careers, feats] = await Promise.all([
-    prisma.raceProfile.findUnique({ where: { raceId: data.speciesId }, select: { profile: true } }),
+  const [careers, feats] = await Promise.all([
     prisma.career.findMany({ where: { campaignId }, select: { id: true } }),
     prisma.feat.findMany({ where: { campaignId }, select: { id: true } }),
   ]);
 
-  const profile = parseProfile(stored?.profile);
+  const profile = parseProfile(race.profile);
 
   if (!creation.isUsableProfile(profile)) return errorResponse(API_ERRORS.SPECIES_PROFILE_NOT_READY, 422);
 

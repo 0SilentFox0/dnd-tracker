@@ -13,8 +13,7 @@ vi.mock("@/lib/db", () => {
   const prisma = {
     character: { count: vi.fn(), create: vi.fn(async ({ data }: { data: object }) => ({ id: "h1", ...data })) },
     characterInventory: { create: vi.fn() },
-    race: { findUnique: vi.fn() },
-    raceProfile: { findUnique: vi.fn() },
+    race: { findFirst: vi.fn() },
     career: { findMany: vi.fn() },
     feat: { findMany: vi.fn() },
     $transaction: vi.fn(),
@@ -41,8 +40,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   asUser("player");
   vi.mocked(prisma.character.count).mockResolvedValue(0);
-  vi.mocked(prisma.race.findUnique).mockResolvedValue({ campaignId: "camp", name: "Human" } as never);
-  vi.mocked(prisma.raceProfile.findUnique).mockResolvedValue({ profile } as never);
+  vi.mocked(prisma.race.findFirst).mockResolvedValue({ campaignId: "camp", name: "Human", profile } as never);
   vi.mocked(prisma.career.findMany).mockResolvedValue([{ id: "c1" }, { id: "c2" }] as never);
   vi.mocked(prisma.feat.findMany).mockResolvedValue([{ id: "f1" }, { id: "f2" }] as never);
 });
@@ -72,14 +70,14 @@ describe("createWfrpDraft", () => {
   });
 
   it("species without a profile -> 422, no row", async () => {
-    vi.mocked(prisma.raceProfile.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.race.findFirst).mockResolvedValue({ campaignId: "camp", name: "Human", profile: null } as never);
 
     expect((await post(body())).status).toBe(422);
     expect(prisma.character.create).not.toHaveBeenCalled();
   });
 
   it("species with an empty career table -> 422", async () => {
-    vi.mocked(prisma.raceProfile.findUnique).mockResolvedValue({ profile: { ...profile, careerTable: [] } } as never);
+    vi.mocked(prisma.race.findFirst).mockResolvedValue({ campaignId: "camp", name: "Human", profile: { ...profile, careerTable: [] } } as never);
 
     expect((await post(body())).status).toBe(422);
   });
@@ -114,10 +112,10 @@ describe("createWfrpDraft", () => {
   });
 
   it("foreign or missing species", async () => {
-    vi.mocked(prisma.race.findUnique).mockResolvedValueOnce({ campaignId: "other", name: "Elf" } as never);
+    vi.mocked(prisma.race.findFirst).mockResolvedValueOnce({ campaignId: "other", name: "Elf" } as never);
     expect((await post(body())).status).toBe(403);
 
-    vi.mocked(prisma.race.findUnique).mockResolvedValueOnce(null);
+    vi.mocked(prisma.race.findFirst).mockResolvedValueOnce(null);
     expect((await post(body())).status).toBe(404);
   });
 

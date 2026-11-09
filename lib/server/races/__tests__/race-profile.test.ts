@@ -6,12 +6,14 @@ import { listRaceProfiles, saveRaceProfile } from "@/lib/server/races/race-profi
 import type { SpeciesProfile } from "@/lib/utils/rules/systems";
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: vi.fn(async (_id: string, cb: () => unknown) => cb()) }));
+vi.mock("@/lib/server/content/write-context", () => ({ afterContentCommit: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
-    race: { findUnique: vi.fn() },
+    race: { findFirst: vi.fn(), findMany: vi.fn(), update: vi.fn() },
     career: { count: vi.fn() },
     feat: { count: vi.fn() },
-    raceProfile: { findMany: vi.fn(), upsert: vi.fn() },
   },
 }));
 
@@ -19,26 +21,24 @@ const profile = (over: Partial<SpeciesProfile> = {}): SpeciesProfile => ({ mods:
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(prisma.race.findUnique).mockResolvedValue({ campaignId: "camp" } as never);
+  vi.mocked(prisma.race.findFirst).mockResolvedValue({ id: "r1" } as never);
   vi.mocked(prisma.career.count).mockResolvedValue(1);
   vi.mocked(prisma.feat.count).mockResolvedValue(2);
 });
 
 describe("saveRaceProfile", () => {
-  it("upserts and returns the item", async () => {
+  it("updates the race profile column and returns the item", async () => {
     const p = profile();
 
     expect(await saveRaceProfile("camp", "r1", p)).toEqual({ raceId: "r1", profile: p });
-    expect(prisma.raceProfile.upsert).toHaveBeenCalledWith({ where: { raceId: "r1" }, create: { raceId: "r1", campaignId: "camp", profile: p }, update: { profile: p } });
+    expect(prisma.race.findFirst).toHaveBeenCalledWith({ where: { id: "r1", campaignId: "camp" }, select: { id: true } });
+    expect(prisma.race.update).toHaveBeenCalledWith({ where: { id: "r1" }, data: { profile: p } });
   });
 
-  it("404 for a missing race, 403 for another campaign's race", async () => {
-    vi.mocked(prisma.race.findUnique).mockResolvedValueOnce(null);
+  it("404 for a race outside the campaign", async () => {
+    vi.mocked(prisma.race.findFirst).mockResolvedValueOnce(null);
     await expect(saveRaceProfile("camp", "r1", profile())).rejects.toMatchObject({ status: 404 });
-
-    vi.mocked(prisma.race.findUnique).mockResolvedValueOnce({ campaignId: "other" } as never);
-    await expect(saveRaceProfile("camp", "r1", profile())).rejects.toMatchObject({ status: 403 });
-    expect(prisma.raceProfile.upsert).not.toHaveBeenCalled();
+    expect(prisma.race.update).not.toHaveBeenCalled();
   });
 
   it("rejects a foreign career and a foreign feat", async () => {
@@ -48,21 +48,21 @@ describe("saveRaceProfile", () => {
     vi.mocked(prisma.career.count).mockResolvedValue(1);
     vi.mocked(prisma.feat.count).mockResolvedValue(1);
     await expect(saveRaceProfile("camp", "r1", profile())).rejects.toMatchObject({ status: 400, message: "errors.foreignFeat" });
-    expect(prisma.raceProfile.upsert).not.toHaveBeenCalled();
+    expect(prisma.race.update).not.toHaveBeenCalled();
   });
 });
 
 describe("listRaceProfiles", () => {
   it("scopes to the campaign and skips invalid rows", async () => {
-    vi.mocked(prisma.raceProfile.findMany).mockResolvedValue([{ raceId: "a", profile: profile() }, { raceId: "b", profile: { move: 99 } }] as never);
+    vi.mocked(prisma.race.findMany).mockResolvedValue([{ id: "a", profile: profile() }, { id: "b", profile: { move: 99 } }, { id: "c", profile: null }] as never);
 
     expect((await listRaceProfiles("camp")).map((i) => i.raceId)).toEqual(["a"]);
-    expect(prisma.raceProfile.findMany).toHaveBeenCalledWith({ where: { campaignId: "camp" }, select: { raceId: true, profile: true } });
+    expect(prisma.race.findMany).toHaveBeenCalledWith({ where: { campaignId: "camp" }, select: { id: true, profile: true } });
   });
 });
 
 describe("profileReferences", () => {
-  beforeEach(() => vi.mocked(prisma.raceProfile.findMany).mockResolvedValue([{ profile: profile() }] as never));
+  beforeEach(() => vi.mocked(prisma.race.findMany).mockResolvedValue([{ id: "r1", profile: profile() }] as never));
 
   it("finds careers, talents and random talents", async () => {
     expect(await profileReferences("camp", { careerId: "c1" })).toBe(true);
