@@ -11,7 +11,7 @@ import { markContentDirty } from "@/lib/server/content/write-context";
 import { delegateOf } from "@/lib/server/templates/bundle";
 import { rowHash } from "@/lib/server/templates/sync/hash";
 import { classifyLayered, type LayeredContext, type LayeredDb, type LayerRef, loadLayeredContext, pendingKey, tableOf } from "@/lib/server/templates/sync/layered";
-import { blockedByProfileWarning, isFeatUsedByRaceProfile } from "@/lib/server/templates/sync/profile-refs";
+import { blockedWarning, danglingProfileWarnings, isRowReferenced } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, emptyState, getEntry, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -65,6 +65,8 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
     if (count !== 1) throw new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
   }
 
+  warnings.push(...(await danglingProfileWarnings(db, campaignId)));
+
   return { applied: items.length, ignored: ignored.length, autoAdded: [], warnings };
 }
 
@@ -78,8 +80,8 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending
 
     if (!count) return;
   } else if (i.localId) {
-    if (i.status === "deletedInSource" && i.scope === "feats" && (await isFeatUsedByRaceProfile(db, campaignId, [i.localId, i.key]))) {
-      warnings.push(blockedByProfileWarning(i.name));
+    if (i.status === "deletedInSource" && (i.scope === "feats" || i.scope === "careers") && (await isRowReferenced(db, campaignId, i.scope, [i.localId, i.key]))) {
+      warnings.push(blockedWarning(i.scope, i.name));
 
       return;
     }

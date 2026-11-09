@@ -20,7 +20,7 @@ const readCopy = <T>(v: T | undefined): T | null => (v ? copy(v) : null);
 export function createFakeSyncDb() {
   clearBundleCache();
 
-  const store = new Map<string, Row[]>([...BUNDLE_TABLES.map((t) => [t.delegate, [] as Row[]] as const), ["character", []], ["raceProfile", []]]);
+  const store = new Map<string, Row[]>([...BUNDLE_TABLES.map((t) => [t.delegate, [] as Row[]] as const), ["character", []]]);
 
   const campaigns: Row[] = [];
 
@@ -61,9 +61,6 @@ export function createFakeSyncDb() {
 
         return next;
       },
-    },
-    raceProfile: {
-      findMany: async ({ where }: { where: { campaignId: string } }) => (store.get("raceProfile") ?? []).filter((r) => r.campaignId === where.campaignId).map(copy),
     },
     character: {
       findMany: async ({ where }: { where: { campaignId: string; race?: string; backgroundId?: string } }) =>

@@ -19,7 +19,7 @@ import { indexOf } from "@/lib/server/templates/sync/index";
 import { type LayeredDb,layerOf } from "@/lib/server/templates/sync/layered";
 import { applyLayered, previewLayeredSelection } from "@/lib/server/templates/sync/layered-apply";
 import { assertSrdNameReferences } from "@/lib/server/templates/sync/name-references";
-import { blockedByProfileWarning, isFeatUsedByRaceProfile } from "@/lib/server/templates/sync/profile-refs";
+import { blockedWarning, danglingProfileWarnings, isRowReferenced } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceChanged, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -150,13 +150,13 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
         const backgrounds = await db.background.findMany({ where: { campaignId: ctx.campaignId } });
 
         if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+      }
 
-        if (await isFeatUsedByRaceProfile(db, ctx.campaignId, [i.localId])) {
-          warnings.push(blockedByProfileWarning(i.name));
-          blocked.add(i.localId);
+      if ((t.key === "feats" || t.key === "careers") && (await isRowReferenced(db, ctx.campaignId, t.key, [i.localId]))) {
+        warnings.push(blockedWarning(t.key, i.name));
+        blocked.add(i.localId);
 
-          continue;
-        }
+        continue;
       }
 
       const kind = DETACH_KIND_BY_TABLE[t.key];
@@ -284,6 +284,8 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
   await assertWritable(db, ctx, written, index.sourceIds, new Set(map.values()));
 
   const blocked = await deleteRemoved(db, ctx, selected, warnings);
+
+  warnings.push(...(await danglingProfileWarnings(db, ctx.campaignId)));
 
   if (db.compendiumEntry && db.compendiumSource) {
     await syncCompendiumProvenance(db as CompendiumBundleDb, ctx.sourceBundle.compendium, ctx.campaignId, map, new Set([...selected.values()].filter((i) => i.status !== "deletedInSource").map((i) => i.key)));

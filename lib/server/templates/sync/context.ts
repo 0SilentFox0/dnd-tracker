@@ -12,7 +12,7 @@ import type { LocalRow, SyncContext, SyncState, TableHashes } from "@/lib/server
 import { canReadSource } from "@/lib/utils/api/is-dm";
 import { isCanonicalSrdTemplate, SRD_CONTENT_LOCALES, type SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
 
-export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character" | "raceProfile">;
+export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character">;
 
 const asState = (v: unknown): SyncState => {
   const o = (v ?? {}) as Partial<SyncState>;

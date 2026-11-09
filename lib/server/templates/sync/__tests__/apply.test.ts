@@ -414,7 +414,7 @@ it("skips deleting a feat used by a race profile and reports it as a warning", a
 
   const localFeat = rows("feat", TGT)[0];
 
-  f.addRow("raceProfile", { raceId: "r1", campaignId: TGT, profile: { talents: [localFeat.id], randomTalents: [] } });
+  f.patchRow("race", rows("race", TGT)[0].id as string, { profile: { talents: [localFeat.id], randomTalents: [] } });
   f.removeRow("feat", FEAT);
 
   const result = await applySourceChanges(f.db, TGT, { apply: (await visible()).filter((i) => i.scope === "feats").map(ref), ignore: [] });
