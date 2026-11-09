@@ -667,9 +667,10 @@ model Race {
   choices              Json         @default("[]")
   icon                 String?
   color                String?
+  profile              Json?
   campaign             Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   units                Unit[]
-  profile              RaceProfile?
+  legacyProfile        RaceProfile?
   sourceId             String?
   sourceHash           String?
 
@@ -775,11 +776,31 @@ model Career {
   tiers      Json     @default("[]")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  sourceId   String?
+  sourceHash String?
   campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, name])
   @@index([campaignId])
+  @@index([campaignId, sourceId])
   @@map("careers")
+}
+
+model CareerBase {
+  id               String
+  name             String
+  icon             String?
+  class            String?
+  tiers            Json     @default("[]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@map("careers_base")
 }
 
 model CompendiumSource {
@@ -1564,6 +1585,7 @@ model RaceBase {
   choices              Json     @default("[]")
   icon                 String?
   color                String?
+  profile              Json?
   sourceCampaignId     String
   validFrom            Int
   validTo              Int?
