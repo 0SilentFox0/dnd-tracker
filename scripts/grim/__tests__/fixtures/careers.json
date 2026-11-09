@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Ratcatcher", "class": "Rogue",
+    "tier1_name": "Rat Hunter", "tier1_status": "Brass 2", "tier1_characteristics": ["ws", "ag"], "tier1_skills": ["melee"], "tier1_talents": ["Hardy"], "tier1_trappings": ["Sack", "Trap"],
+    "tier2_name": "Ratcatcher", "tier2_characteristics": ["bs"], "tier2_skills": ["perception"], "tier2_talents": ["Sharp Eyed"], "tier2_trappings": ["Terrier"],
+    "tier3_name": "Exterminator", "tier3_characteristics": ["t"], "tier3_skills": ["stealth"], "tier3_talents": ["Hardy"], "tier3_trappings": ["Poison"],
+    "tier4_name": "Master Exterminator", "tier4_characteristics": ["int"], "tier4_skills": ["lore"], "tier4_talents": ["Sharp Eyed"], "tier4_trappings": ["Guild badge"]
+  },
+  {
+    "name": "Watchman", "class": "Warrior",
+    "tier1_name": "Watch Recruit", "tier1_characteristics": ["s"], "tier1_skills": ["melee"], "tier1_talents": ["Hardy"], "tier1_trappings": ["Cudgel"],
+    "tier2_name": "Watchman", "tier2_characteristics": ["t"], "tier2_skills": ["intimidate"], "tier2_talents": ["Hardy"], "tier2_trappings": ["Lantern"],
+    "tier3_name": "Watch Sergeant", "tier3_characteristics": ["wp"], "tier3_skills": ["leadership"], "tier3_talents": ["Sharp Eyed"], "tier3_trappings": ["Whistle"],
+    "tier4_name": "Watch Captain", "tier4_characteristics": ["fel"], "tier4_skills": ["leadership"], "tier4_talents": ["Sharp Eyed"], "tier4_trappings": ["Seal"]
+  }
+]
