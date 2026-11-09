@@ -4,7 +4,13 @@ import { grimCoverage } from "../coverage";
 import { readGrimData, readGrimManifest } from "../data";
 import { validateGrimData } from "../validate-data";
 
+import { mulberry32 } from "@/lib/utils/common/rng";
 import { nameKey } from "@/lib/utils/content/import";
+import { mergeRules } from "@/lib/utils/rules/schema";
+import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems/wfrp/characteristics/keys";
+import { planDraft } from "@/lib/utils/rules/systems/wfrp/creation/plan";
+import { rollCreation } from "@/lib/utils/rules/systems/wfrp/creation/roll";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
 const data = readGrimData();
 
@@ -59,5 +65,51 @@ describe("grim-d100 catalog", () => {
     const lowlander = data.raceProfiles.find((p) => p.race === "Lowlander");
 
     expect(new Set((lowlander?.profile.careerTable ?? []).map((r) => nameKey(r.careerId)))).toEqual(all);
+  });
+});
+
+describe("creation e2e", () => {
+  const merged = mergeRules(WFRP_RULES, (data.rules ?? {}) as Parameters<typeof mergeRules>[1]);
+
+  if (!merged.ok) throw new Error("rules patch invalid");
+
+  const rules = merged.rules.advancement;
+
+  const careerIds = new Set(data.careers.map((c) => String(c.name)));
+
+  const featIds = new Set(data.feats.map((f) => String(f.name)));
+
+  const ctxOf = (profile: (typeof data.raceProfiles)[number]["profile"]) => ({ profile, rules, careerIds, featIds });
+
+  it.each(data.raceProfiles.map((p, i) => [p.race, i] as const))("%s: every table career plans with rolled stats", (_race, speciesIndex) => {
+    const { profile } = data.raceProfiles[speciesIndex];
+
+    profile.careerTable.forEach(({ careerId }, rowIndex) => {
+      const rolls = rollCreation(mulberry32(1000 * speciesIndex + rowIndex), profile);
+
+      const plan = planDraft({ career: { mode: "choice", careerId }, stats: { mode: "rolled", rolls: rolls.statRolls }, talents: rolls.randomTalents }, ctxOf(profile));
+
+      if (!plan.ok) throw new Error(`${careerId}: ${plan.errors.join(",")}`);
+
+      expect(plan.experience).toBe(rules.creation.careerBonus.choice + rules.creation.statBonus.rolled);
+
+      CHARACTERISTIC_KEYS.forEach((k, i) => expect(plan.characteristics.base[k]).toBe(20 + (profile.mods[k] ?? 0) + rolls.statRolls[i]));
+
+      expect(plan.characteristics.career.careerId).toBe(careerId);
+
+      for (const talent of [...profile.talents, ...rolls.randomTalents]) expect(plan.characteristics.talents[talent]).toBeGreaterThan(0);
+    });
+  });
+
+  it.each(data.raceProfiles.map((p, i) => [p.race, i] as const))("%s: rolled career and free stats plan", (_race, speciesIndex) => {
+    const { profile } = data.raceProfiles[speciesIndex];
+
+    const rolls = rollCreation(mulberry32(1000 * speciesIndex), profile);
+
+    expect(planDraft({ career: { mode: "rolled", careerId: rolls.careerRolls[0].careerId }, stats: { mode: "rolled", rolls: rolls.statRolls }, talents: rolls.randomTalents }, ctxOf(profile)).ok).toBe(true);
+
+    const free = planDraft({ career: { mode: "choice", careerId: profile.careerTable[0].careerId }, stats: { mode: "free", points: Array(10).fill(rules.creation.freeBudget / 10) }, talents: [] }, ctxOf(profile));
+
+    expect(free.ok).toBe(true);
   });
 });
