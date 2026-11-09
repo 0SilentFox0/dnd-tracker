@@ -1,0 +1,689 @@
+[
+  {
+    "name": "Archivist",
+    "class": "Academic",
+    "tier1_name": "Copyist",
+    "tier1_status": "Brass 3",
+    "tier1_characteristics": [
+      "int",
+      "wp",
+      "dex"
+    ],
+    "tier1_skills": [
+      "research",
+      "perception",
+      "lore:herbs",
+      "language:trade-cant",
+      "evaluate"
+    ],
+    "tier1_talents": [
+      "Lettered",
+      "Lamp-Lit Studies"
+    ],
+    "tier1_trappings": [
+      "Quill and ink",
+      "Stack of blank sheets",
+      "Candle stub",
+      "Worn satchel"
+    ],
+    "tier2_name": "Archivist",
+    "tier2_status": "Silver 1",
+    "tier2_characteristics": [
+      "i",
+      "fel"
+    ],
+    "tier2_skills": [
+      "gossip",
+      "cool",
+      "lore:local"
+    ],
+    "tier2_talents": [
+      "Tongue for Tongues",
+      "Keen Ears"
+    ],
+    "tier2_trappings": [
+      "Brass seal",
+      "Ledger"
+    ],
+    "tier3_name": "Keeper of Records",
+    "tier3_status": "Silver 3",
+    "tier3_characteristics": [
+      "int",
+      "wp"
+    ],
+    "tier3_skills": [
+      "intuition",
+      "language:old-script",
+      "research"
+    ],
+    "tier3_talents": [
+      "Night Owl",
+      "Steel Nerves"
+    ],
+    "tier3_trappings": [
+      "Reading lenses",
+      "Oak writing desk"
+    ],
+    "tier4_name": "Master Archivist",
+    "tier4_status": "Gold 1",
+    "tier4_characteristics": [
+      "fel",
+      "i"
+    ],
+    "tier4_skills": [
+      "trade:bookbinding",
+      "evaluate",
+      "cool"
+    ],
+    "tier4_talents": [
+      "Court Manners",
+      "Crowd Reader",
+      "Lamp-Lit Studies"
+    ],
+    "tier4_trappings": [
+      "Ring of cellar keys",
+      "Fine robes",
+      "Sealed commission"
+    ]
+  },
+  {
+    "name": "Bonesetter",
+    "class": "Academic",
+    "tier1_name": "Orderly",
+    "tier1_status": "Brass 4",
+    "tier1_characteristics": [
+      "dex",
+      "int",
+      "wp"
+    ],
+    "tier1_skills": [
+      "heal",
+      "perception",
+      "cool",
+      "lore:herbs",
+      "endurance"
+    ],
+    "tier1_talents": [
+      "Steady Hands",
+      "Iron Stomach"
+    ],
+    "tier1_trappings": [
+      "Roll of linen bandages",
+      "Bone saw",
+      "Pot of salve",
+      "Apron"
+    ],
+    "tier2_name": "Bonesetter",
+    "tier2_status": "Silver 1",
+    "tier2_characteristics": [
+      "i",
+      "t"
+    ],
+    "tier2_skills": [
+      "research",
+      "intuition",
+      "trade:apothecary"
+    ],
+    "tier2_talents": [
+      "Lettered",
+      "Green Thumb"
+    ],
+    "tier2_trappings": [
+      "Splint set",
+      "Herb pouch"
+    ],
+    "tier3_name": "Surgeon",
+    "tier3_status": "Silver 3",
+    "tier3_characteristics": [
+      "dex",
+      "fel"
+    ],
+    "tier3_skills": [
+      "evaluate",
+      "gossip",
+      "lore:anatomy",
+      "cool"
+    ],
+    "tier3_talents": [
+      "Steel Nerves",
+      "Steady Hands"
+    ],
+    "tier3_trappings": [
+      "Surgeon's case",
+      "Lantern"
+    ],
+    "tier4_name": "Master Surgeon",
+    "tier4_status": "Gold 1",
+    "tier4_characteristics": [
+      "int",
+      "wp"
+    ],
+    "tier4_skills": [
+      "language:trade-cant",
+      "research",
+      "heal"
+    ],
+    "tier4_talents": [
+      "Lamp-Lit Studies",
+      "Parade-Ground Voice",
+      "Oxen Constitution"
+    ],
+    "tier4_trappings": [
+      "Tiled consulting room key",
+      "Fine gloves"
+    ]
+  },
+  {
+    "name": "Chandler",
+    "class": "Burgher",
+    "tier1_name": "Shop Hand",
+    "tier1_status": "Brass 3",
+    "tier1_characteristics": [
+      "int",
+      "fel",
+      "dex"
+    ],
+    "tier1_skills": [
+      "haggle",
+      "evaluate",
+      "gossip",
+      "trade:candles",
+      "perception"
+    ],
+    "tier1_talents": [
+      "Haggler's Instinct",
+      "Pack Mule"
+    ],
+    "tier1_trappings": [
+      "Box of tallow candles",
+      "Wick trimmer",
+      "Apron",
+      "Coin purse"
+    ],
+    "tier2_name": "Chandler",
+    "tier2_status": "Silver 2",
+    "tier2_characteristics": [
+      "i",
+      "wp"
+    ],
+    "tier2_skills": [
+      "charm",
+      "intuition",
+      "lore:local"
+    ],
+    "tier2_talents": [
+      "Lettered",
+      "Crowd Reader"
+    ],
+    "tier2_trappings": [
+      "Brass scales",
+      "Order book"
+    ],
+    "tier3_name": "Guild Factor",
+    "tier3_status": "Silver 4",
+    "tier3_characteristics": [
+      "fel",
+      "int"
+    ],
+    "tier3_skills": [
+      "cool",
+      "drink",
+      "trade:tallow"
+    ],
+    "tier3_talents": [
+      "Silver Tongue",
+      "Haggler's Instinct"
+    ],
+    "tier3_trappings": [
+      "Guild token",
+      "Warehouse key"
+    ],
+    "tier4_name": "Trade Magnate",
+    "tier4_status": "Gold 2",
+    "tier4_characteristics": [
+      "wp",
+      "i"
+    ],
+    "tier4_skills": [
+      "charm",
+      "evaluate",
+      "intuition"
+    ],
+    "tier4_talents": [
+      "Court Manners",
+      "Fast Talker",
+      "Tongue for Tongues"
+    ],
+    "tier4_trappings": [
+      "Signet ring",
+      "Fine coat"
+    ]
+  },
+  {
+    "name": "Lamplighter",
+    "class": "Burgher",
+    "tier1_name": "Wick Hand",
+    "tier1_status": "Brass 1",
+    "tier1_characteristics": [
+      "ag",
+      "i",
+      "t"
+    ],
+    "tier1_skills": [
+      "perception",
+      "cool",
+      "climb",
+      "endurance",
+      "gossip"
+    ],
+    "tier1_talents": [
+      "Night Owl",
+      "Snap Reaction"
+    ],
+    "tier1_trappings": [
+      "Long taper pole",
+      "Tinderbox",
+      "Oil flask"
+    ],
+    "tier2_name": "Lamplighter",
+    "tier2_status": "Brass 3",
+    "tier2_characteristics": [
+      "ws",
+      "wp"
+    ],
+    "tier2_skills": [
+      "melee:basic",
+      "intuition",
+      "lore:local"
+    ],
+    "tier2_talents": [
+      "Keen Ears",
+      "Cudgel Work"
+    ],
+    "tier2_trappings": [
+      "Hooded lantern",
+      "Cudgel"
+    ],
+    "tier3_name": "Night Steward",
+    "tier3_status": "Silver 1",
+    "tier3_characteristics": [
+      "i",
+      "fel"
+    ],
+    "tier3_skills": [
+      "evaluate",
+      "haggle",
+      "drink"
+    ],
+    "tier3_talents": [
+      "Watchful",
+      "Crowd Reader"
+    ],
+    "tier3_trappings": [
+      "Ring of lamp-post keys",
+      "Warm cloak"
+    ],
+    "tier4_name": "Lantern Marshal",
+    "tier4_status": "Silver 3",
+    "tier4_characteristics": [
+      "wp",
+      "ws"
+    ],
+    "tier4_skills": [
+      "charm",
+      "cool",
+      "melee:basic"
+    ],
+    "tier4_talents": [
+      "Parade-Ground Voice",
+      "Steel Nerves",
+      "Alert Sleeper"
+    ],
+    "tier4_trappings": [
+      "Brass whistle",
+      "Marshal's sash"
+    ]
+  },
+  {
+    "name": "Herald",
+    "class": "Courtier",
+    "tier1_name": "Page",
+    "tier1_status": "Silver 1",
+    "tier1_characteristics": [
+      "fel",
+      "int",
+      "ag"
+    ],
+    "tier1_skills": [
+      "charm",
+      "gossip",
+      "ride",
+      "perception",
+      "intuition"
+    ],
+    "tier1_talents": [
+      "Court Manners",
+      "Lettered"
+    ],
+    "tier1_trappings": [
+      "Livery tunic",
+      "Messenger satchel",
+      "Small horn"
+    ],
+    "tier2_name": "Herald",
+    "tier2_status": "Silver 3",
+    "tier2_characteristics": [
+      "i",
+      "wp"
+    ],
+    "tier2_skills": [
+      "leadership",
+      "language:court-speech",
+      "lore:heraldry"
+    ],
+    "tier2_talents": [
+      "Silver Tongue",
+      "Tongue for Tongues"
+    ],
+    "tier2_trappings": [
+      "Embroidered tabard",
+      "Wax seal"
+    ],
+    "tier3_name": "Emissary",
+    "tier3_status": "Gold 1",
+    "tier3_characteristics": [
+      "fel",
+      "int"
+    ],
+    "tier3_skills": [
+      "entertain",
+      "intuition",
+      "language:trade-cant"
+    ],
+    "tier3_talents": [
+      "Crowd Reader",
+      "Fast Talker"
+    ],
+    "tier3_trappings": [
+      "Sealed credentials",
+      "Travel chest"
+    ],
+    "tier4_name": "Lord Herald",
+    "tier4_status": "Gold 2",
+    "tier4_characteristics": [
+      "wp",
+      "i"
+    ],
+    "tier4_skills": [
+      "leadership",
+      "cool",
+      "melee:fencing"
+    ],
+    "tier4_talents": [
+      "Parade-Ground Voice",
+      "Steel Nerves",
+      "Fencer's Footwork"
+    ],
+    "tier4_trappings": [
+      "Staff of office",
+      "Gilded chain"
+    ]
+  },
+  {
+    "name": "Masquer",
+    "class": "Courtier",
+    "tier1_name": "Mummer",
+    "tier1_status": "Brass 4",
+    "tier1_characteristics": [
+      "fel",
+      "ag",
+      "dex"
+    ],
+    "tier1_skills": [
+      "performance:mime",
+      "charm",
+      "entertain",
+      "gossip",
+      "intuition"
+    ],
+    "tier1_talents": [
+      "Fast Talker",
+      "Light Fingers"
+    ],
+    "tier1_trappings": [
+      "Painted half-mask",
+      "Patched costume",
+      "Greasepaint pot"
+    ],
+    "tier2_name": "Masquer",
+    "tier2_status": "Silver 2",
+    "tier2_characteristics": [
+      "i",
+      "int"
+    ],
+    "tier2_skills": [
+      "art:costume",
+      "perception",
+      "ride"
+    ],
+    "tier2_talents": [
+      "Court Manners",
+      "Crowd Reader"
+    ],
+    "tier2_trappings": [
+      "Feathered hat",
+      "Props trunk"
+    ],
+    "tier3_name": "Court Masquer",
+    "tier3_status": "Silver 4",
+    "tier3_characteristics": [
+      "fel",
+      "wp"
+    ],
+    "tier3_skills": [
+      "leadership",
+      "language:court-speech",
+      "intuition"
+    ],
+    "tier3_talents": [
+      "Silver Tongue",
+      "Fencer's Footwork"
+    ],
+    "tier3_trappings": [
+      "Brocade doublet",
+      "Letter of invitation"
+    ],
+    "tier4_name": "Master of Revels",
+    "tier4_status": "Gold 1",
+    "tier4_characteristics": [
+      "dex",
+      "ag"
+    ],
+    "tier4_skills": [
+      "melee:fencing",
+      "performance:mime",
+      "cool"
+    ],
+    "tier4_talents": [
+      "Snap Reaction",
+      "Knife Thrower",
+      "Steel Nerves"
+    ],
+    "tier4_trappings": [
+      "Jewelled mask",
+      "Revel chest"
+    ]
+  },
+  {
+    "name": "Shepherd",
+    "class": "Peasant",
+    "tier1_name": "Herd Hand",
+    "tier1_status": "Brass 1",
+    "tier1_characteristics": [
+      "t",
+      "i",
+      "bs"
+    ],
+    "tier1_skills": [
+      "animal-care",
+      "endurance",
+      "survival",
+      "athletics",
+      "lore:local"
+    ],
+    "tier1_talents": [
+      "Way with Beasts",
+      "Weather Eye"
+    ],
+    "tier1_trappings": [
+      "Shepherd's crook",
+      "Wool cloak",
+      "Hide flask",
+      "Whistle"
+    ],
+    "tier2_name": "Shepherd",
+    "tier2_status": "Brass 2",
+    "tier2_characteristics": [
+      "wp",
+      "ag"
+    ],
+    "tier2_skills": [
+      "climb",
+      "melee:basic",
+      "trade:shearing"
+    ],
+    "tier2_talents": [
+      "Keen Sighting",
+      "Hearty Eater"
+    ],
+    "tier2_trappings": [
+      "Sling and stones",
+      "Herding dog"
+    ],
+    "tier3_name": "Drover",
+    "tier3_status": "Brass 4",
+    "tier3_characteristics": [
+      "s",
+      "fel"
+    ],
+    "tier3_skills": [
+      "drive",
+      "haggle",
+      "lore:herbs"
+    ],
+    "tier3_talents": [
+      "Road-Worn",
+      "Trail Sense"
+    ],
+    "tier3_trappings": [
+      "Drover's whip",
+      "Small cart"
+    ],
+    "tier4_name": "Flockmaster",
+    "tier4_status": "Silver 2",
+    "tier4_characteristics": [
+      "t",
+      "wp"
+    ],
+    "tier4_skills": [
+      "haggle",
+      "endurance",
+      "animal-care"
+    ],
+    "tier4_talents": [
+      "Tough Hide",
+      "Alert Sleeper",
+      "Parade-Ground Voice"
+    ],
+    "tier4_trappings": [
+      "Flock tally sticks",
+      "Sturdy boots"
+    ]
+  },
+  {
+    "name": "Charcoal Burner",
+    "class": "Peasant",
+    "tier1_name": "Kiln Hand",
+    "tier1_status": "Brass 1",
+    "tier1_characteristics": [
+      "s",
+      "t",
+      "wp"
+    ],
+    "tier1_skills": [
+      "endurance",
+      "survival",
+      "athletics",
+      "trade:charcoal",
+      "climb"
+    ],
+    "tier1_talents": [
+      "Hearty Eater",
+      "Iron Stomach"
+    ],
+    "tier1_trappings": [
+      "Hatchet",
+      "Soot-stained smock",
+      "Sack of charcoal",
+      "Flint"
+    ],
+    "tier2_name": "Charcoal Burner",
+    "tier2_status": "Brass 2",
+    "tier2_characteristics": [
+      "ws",
+      "dex"
+    ],
+    "tier2_skills": [
+      "melee:basic",
+      "lore:local",
+      "animal-care"
+    ],
+    "tier2_talents": [
+      "Tough Hide",
+      "Green Thumb"
+    ],
+    "tier2_trappings": [
+      "Wooden mallet",
+      "Tarred boots"
+    ],
+    "tier3_name": "Forest Collier",
+    "tier3_status": "Brass 3",
+    "tier3_characteristics": [
+      "t",
+      "int"
+    ],
+    "tier3_skills": [
+      "drive",
+      "haggle",
+      "lore:herbs"
+    ],
+    "tier3_talents": [
+      "Oxen Constitution",
+      "Weather Eye"
+    ],
+    "tier3_trappings": [
+      "Hand cart",
+      "Spare axe-head"
+    ],
+    "tier4_name": "Master Collier",
+    "tier4_status": "Silver 1",
+    "tier4_characteristics": [
+      "s",
+      "fel"
+    ],
+    "tier4_skills": [
+      "haggle",
+      "endurance",
+      "melee:basic"
+    ],
+    "tier4_talents": [
+      "Last Stand Grit",
+      "Haggler's Instinct",
+      "Tavern Brawler"
+    ],
+    "tier4_trappings": [
+      "Kiln-yard deed",
+      "Heavy coat"
+    ]
+  }
+]
