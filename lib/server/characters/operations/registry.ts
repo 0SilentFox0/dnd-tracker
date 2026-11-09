@@ -4,6 +4,8 @@ import { advanceUndoOperation } from "./advance-undo";
 import { arcaneRecoveryOperation } from "./arcane-recovery";
 import { careerAdvanceOperation, careerSetOperation } from "./career";
 import { choicesOperation } from "./choices";
+import { corruptionGrantOperation } from "./corruption";
+import { corruptionUndoOperation } from "./corruption-undo";
 import { createOperation } from "./create";
 import { deleteOperation } from "./delete";
 import { deleteAllOperation } from "./delete-all";
@@ -65,6 +67,8 @@ export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
   "downtime.set": erased(downtimeSetOperation),
   "downtime.period": erased(downtimePeriodOperation),
   "downtime.period.undo": erased(downtimePeriodUndoOperation),
+  "corruption.grant": erased(corruptionGrantOperation),
+  "corruption.undo": erased(corruptionUndoOperation),
   roll: erased(rollOperation),
   ...Object.fromEntries(Object.entries(READ_OPERATIONS).map(([key, op]) => [key, erased(op)])),
 };

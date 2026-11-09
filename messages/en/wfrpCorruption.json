@@ -16,5 +16,9 @@
       "5": "Fanatic faith strengthens the will but severs ties with people.",
       "6": "The mind has split in two, and one voice is not your own."
     }
+  },
+  "errors": {
+    "grantFailed": "Could not grant corruption",
+    "undoFailed": "Could not undo the grant"
   }
 }

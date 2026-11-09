@@ -134,6 +134,8 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/characters/[characterId]/advance', methods: ['DELETE', 'POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/career', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/career/advance', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
+  { route: 'campaigns/[id]/characters/[characterId]/corruption', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
+  { route: 'campaigns/[id]/characters/[characterId]/corruption/undo', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/characters/[characterId]/downtime', methods: ['PUT'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/downtime/period', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]/downtime/period-undo', methods: ['POST'], task: 9, adapter: 'characters', state: "active" },

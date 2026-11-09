@@ -16,6 +16,7 @@ export { useChoiceWizard } from "./useChoiceWizard";
 export { deriveClassFields, useClassEntriesField } from "./useClassEntriesField";
 export { useClassLevelUp } from "./useClassLevelUp";
 export { type LevelUpCharacter, NEW_CLASS, useClassLevelUpForm } from "./useClassLevelUpForm";
+export { useGrantCorruption, useUndoCorruption } from "./useCorruption";
 export { type DmCharacterEditor, useDmCharacterEditor } from "./useDmCharacterEditor";
 export { useDmCharactersPage } from "./useDmCharactersPage";
 export { useDowntime, useDowntimePeriod, useDowntimePeriodUndo } from "./useDowntime";

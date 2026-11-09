@@ -14,6 +14,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
+import { corruptionGrantSchema, corruptionUndoSchema } from "@/lib/schemas/corruption";
 import { downtimePeriodSchema, downtimePeriodUndoSchema, downtimeSetSchema } from "@/lib/schemas/downtime";
 import { advanceSchema, arcaneRecoverySchema, careerAdvanceSchema, careerSetSchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
 import { actionResult } from "@/lib/server/assistant/json";
@@ -38,6 +39,7 @@ export const PROGRESSION_INPUTS = {
   "stash": characterIdSchema, "stash.apply": stashWithId, "transfer": withId(transferSchema),
   advance: withId(advanceSchema), "advance.undo": characterIdSchema,
   "career.set": withId(careerSetSchema), "career.advance": withId(careerAdvanceSchema),
+  "corruption.grant": withId(corruptionGrantSchema), "corruption.undo": withId(corruptionUndoSchema),
   "downtime.set": withId(downtimeSetSchema), "downtime.period": downtimePeriodSchema.strict(), "downtime.period.undo": downtimePeriodUndoSchema.strict(),
   "hit-dice": withId(hitDieSchema), "arcane-recovery": withId(arcaneRecoverySchema), inspiration: withId(inspirationSchema), rest: restSchema.strict(), experience: experienceSchema.strict(),
   roll: serverRoll, sheet: characterIdSchema, progression: characterIdSchema,
