@@ -12,7 +12,6 @@ import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { type CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { parseProfile } from "@/lib/utils/rules/systems/schemas";
@@ -40,9 +39,9 @@ export async function createWfrpDraft(request: Request, campaign: Campaign, acce
 
   if (early) return errorResponse(early, 400);
 
-  const race = await loadOwned(prisma.race.findFirst({ where: { id: data.speciesId, campaignId }, select: { campaignId: true, name: true, profile: true } }), campaignId, API_ERRORS.RACE_NOT_FOUND);
+  const race = await prisma.race.findFirst({ where: { id: data.speciesId, campaignId }, select: { name: true, profile: true } });
 
-  if (race instanceof NextResponse) return race;
+  if (!race) return errorResponse(API_ERRORS.RACE_NOT_FOUND, 404);
 
   const [careers, feats] = await Promise.all([
     prisma.career.findMany({ where: { campaignId }, select: { id: true } }),

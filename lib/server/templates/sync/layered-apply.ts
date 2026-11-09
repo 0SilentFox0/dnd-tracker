@@ -10,7 +10,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { markContentDirty } from "@/lib/server/content/write-context";
 import { delegateOf } from "@/lib/server/templates/bundle";
 import { rowHash } from "@/lib/server/templates/sync/hash";
-import { classifyLayered, type LayeredContext, type LayeredDb, type LayerRef, loadLayeredContext, pendingKey, tableOf } from "@/lib/server/templates/sync/layered";
+import { classifyLayered, type LayeredContext, type LayeredDb, type LayeredEntry, type LayerRef, loadLayeredContext, pendingKey, tableOf } from "@/lib/server/templates/sync/layered";
 import { blockedWarning, danglingProfileWarnings, isRowReferenced } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, emptyState, getEntry, setEntry } from "@/lib/server/templates/sync/state";
@@ -51,7 +51,9 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
 
   const warnings: string[] = [];
 
-  for (const i of items) await applyItem(db, campaignId, i, getEntry(ctx.ignored, i.scope, pendingKey(i.key)) !== undefined, warnings);
+  const entries = new Map(ctx.entries.map((e) => [`${e.t.key}:${e.key}`, e]));
+
+  for (const i of items) await applyItem(db, ctx, entries.get(keyOf(i))!, i, getEntry(ctx.ignored, i.scope, pendingKey(i.key)) !== undefined, warnings);
 
   const advancing = ctx.source.contentVersion > ctx.baseVersion;
 
@@ -70,7 +72,15 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
   return { applied: items.length, ignored: ignored.length, autoAdded: [], warnings };
 }
 
-async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending: boolean, warnings: string[]) {
+async function pinBaseline(db: LayeredDb, campaignId: string, e: LayeredEntry) {
+  const { id: _id, ...columns } = Object.fromEntries(Object.entries(e.baseline!).filter(([k]) => !BASE_ONLY.has(k)));
+
+  await bypassLayer(() => delegateOf(db, e.t).createMany({ data: [{ ...columns, campaignId, sourceId: e.key, sourceHash: rowHash(e.baseline!, e.t) }] }));
+}
+
+async function applyItem(db: LayeredDb, ctx: LayeredContext, e: LayeredEntry, i: SyncItem, pending: boolean, warnings: string[]) {
+  const campaignId = ctx.campaignId;
+
   const t = tableOf(i.scope)!;
 
   const { hideTable } = layeredModels()[t.model];
@@ -91,6 +101,10 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending
     if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], campaignId, kind, [i.localId, i.key]);
 
     await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
+  } else if (i.status === "deletedInSource" && e.baseline && (i.scope === "feats" || i.scope === "careers") && (await isRowReferenced(db, campaignId, i.scope, [i.key]))) {
+    await pinBaseline(db, campaignId, e);
+
+    warnings.push(blockedWarning(i.scope, i.name));
   } else return;
 
   markContentDirty();
@@ -112,9 +126,7 @@ async function keepUnselected(db: LayeredDb, ctx: LayeredContext, all: Map<strin
 
       deferred.push(i);
     } else if ((i.status === "updated" || i.status === "deletedInSource") && e.baseline) {
-      const { id: _id, ...columns } = Object.fromEntries(Object.entries(e.baseline).filter(([k]) => !BASE_ONLY.has(k)));
-
-      await bypassLayer(() => delegateOf(db, e.t).createMany({ data: [{ ...columns, campaignId: ctx.campaignId, sourceId: e.key, sourceHash: rowHash(e.baseline!, e.t) }] }));
+      await pinBaseline(db, ctx.campaignId, e);
     } else continue;
 
     markContentDirty();

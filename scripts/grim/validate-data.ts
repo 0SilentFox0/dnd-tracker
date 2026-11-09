@@ -1,6 +1,5 @@
 import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
 
-import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
@@ -43,16 +42,32 @@ function validateRows(kind: GrimRowKind, rows: Row[], issues: string[]) {
   });
 }
 
-function careerTalentNames(row: Row): string[] {
-  const { value } = coerceRecord(row, IMPORT_SPECS.careers.fields);
+const isGrimKind = (kind: string | undefined): kind is GrimRowKind => (GRIM_ROW_KINDS as readonly string[]).includes(kind ?? "");
 
-  return Array.from({ length: CAREER_TIER_COUNT }, (_, i) => value[careerTierKey(i + 1, "talents")]).flatMap((v) => (Array.isArray(v) ? v.map(String) : []));
+function nestedNames(value: unknown, key: string): string[] {
+  if (Array.isArray(value)) return value.flatMap((v) => nestedNames(v, key));
+
+  if (!value || typeof value !== "object") return [];
+
+  return Object.entries(value).flatMap(([k, v]) => (k === key && typeof v === "string" ? [v] : nestedNames(v, key)));
 }
 
-function validateCareerTalents(data: GrimData, feats: Set<string>, issues: string[]) {
-  data.careers.forEach((row, index) => {
-    for (const talent of careerTalentNames(row)) if (!feats.has(nameKey(talent))) issues.push(`${label("careers", index, row.name)}: unknown talent "${talent}"`);
-  });
+/** Links between row kinds are by name; a name missing from its kind is dropped (or errors) at import, so every one must resolve. */
+function validateLinks(data: GrimData, issues: string[]) {
+  const names = Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, new Set(data[kind].map((r) => nameKey(nameOf(r) ?? "")))])) as Record<GrimRowKind, Set<string>>;
+
+  for (const kind of GRIM_ROW_KINDS)
+    data[kind].forEach((row, index) => {
+      const { value } = coerceRecord(row, IMPORT_SPECS[kind].fields);
+
+      for (const field of IMPORT_SPECS[kind].fields) {
+        const raw = value[field.key];
+
+        const links = field.nestedRef && isGrimKind(field.nestedRef.kind) ? [{ ref: field.nestedRef.kind, names: nestedNames(raw, field.nestedRef.key) }] : isGrimKind(field.ref) ? [{ ref: field.ref, names: (Array.isArray(raw) ? raw : raw ? [raw] : []).map(String) }] : [];
+
+        for (const { ref, names: linked } of links) for (const name of linked) if (!names[ref].has(nameKey(name))) issues.push(`${label(kind, index, row.name)}: unknown ${field.key} "${name}"`);
+      }
+    });
 }
 
 function validateProfiles(data: GrimData, names: { races: Set<string>; careers: Set<string>; feats: Set<string> }, issues: string[]) {
@@ -107,7 +122,7 @@ export function validateGrimData(data: GrimData): GrimValidation {
 
   const names = { races: new Set(data.races.map((r) => nameKey(nameOf(r) ?? ""))), careers: new Set(data.careers.map((r) => nameKey(nameOf(r) ?? ""))), feats: new Set(data.feats.map((r) => nameKey(nameOf(r) ?? ""))) };
 
-  validateCareerTalents(data, names.feats, issues);
+  validateLinks(data, issues);
   validateProfiles(data, names, issues);
   validateRules(data.rules, issues);
 

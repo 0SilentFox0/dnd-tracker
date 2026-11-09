@@ -221,6 +221,38 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     expect((await raw.skill.findFirstOrThrow({ where: { campaignId } })).spellId).toBeNull();
   });
 
+  it("keeps a template-only career held by a species profile when deleted upstream, without a dangling warning", async () => {
+    const campaignId = await fresh();
+
+    const careerId = `${marker}-career-a`;
+
+    await raw.careerBase.create({ data: { id: careerId, name: "Scribe", sourceCampaignId: tpl, validFrom: 1, updatedAt: new Date() } });
+    await raw.race.create({ data: { campaignId, name: "Human", profile: { talents: [], randomTalents: [], careerTable: [{ max: 100, careerId }] } } });
+    invalidateCampaignLayer();
+
+    try {
+      await raw.careerBase.updateMany({ where: { id: careerId }, data: { validTo: 2 } });
+      await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
+
+      const gone = (await diffOf(campaignId)).find((i) => i.key === careerId)!;
+
+      expect(gone.status).toBe("deletedInSource");
+
+      const result = await apply(campaignId, { apply: [ref(gone)], ignore: [] });
+
+      expect(result.warnings).toEqual([expect.stringContaining("Scribe")]);
+      expect(result.warnings).toEqual([expect.stringContaining("not deleted")]);
+      expect(await raw.career.findMany({ where: { campaignId, sourceId: careerId } })).toHaveLength(1);
+      expect((await raw.campaign.findUnique({ where: { id: campaignId } }))?.baseVersion).toBe(2);
+      expect(((await D.career.findMany({ where: { campaignId } })) as Array<{ name: string }>).map((c) => c.name)).toEqual(["Scribe"]);
+    } finally {
+      await raw.career.deleteMany({ where: { campaignId } });
+      await raw.race.deleteMany({ where: { campaignId } });
+      await raw.careerBase.deleteMany({ where: { sourceCampaignId: tpl } });
+      invalidateCampaignLayer();
+    }
+  });
+
   it("an unselected updated row stays at the old version", async () => {
     const campaignId = await fresh();
 

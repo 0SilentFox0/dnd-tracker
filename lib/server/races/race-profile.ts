@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import "server-only";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";

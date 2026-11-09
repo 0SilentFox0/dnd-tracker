@@ -1,5 +1,7 @@
 #!/usr/bin/env tsx
 // pnpm constructor:grim-template [--owner <userId>] [--allow-remote]   (GRIM_DATA_DIR overrides the data dir)
+import { isDeepStrictEqual } from "node:util";
+
 import { assertSeedTarget } from "../seed/seed-library-lib";
 import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData } from "../srd/lib/load-template";
 import { makeTemplateStore } from "../srd/lib/template-store";
@@ -8,7 +10,6 @@ import { validateGrimData } from "./validate-data";
 
 import { GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
-import { bumpContentVersion } from "@/lib/server/campaigns/version";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
 import { saveRaceProfile } from "@/lib/server/races/race-profile";
 import { publishTemplate } from "@/lib/server/templates/publish-service";
@@ -36,6 +37,8 @@ const noop = () => undefined;
 
 const idMap = (rows: Array<{ id: string; name: string }>) => new Map(rows.map((r) => [nameKey(r.name), r.id]));
 
+const asStored = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
+
 function resolveProfile(profile: GrimData["raceProfiles"][number]["profile"], ids: { feats: Map<string, string>; careers: Map<string, string> }): SpeciesProfile {
   const feat = (name: string) => ids.feats.get(nameKey(name)) as string;
 
@@ -54,14 +57,20 @@ async function writeRaceProfiles(campaignId: string, data: GrimData): Promise<nu
 
   const select = { id: true, name: true };
 
-  const [feats, careers, races] = await Promise.all([prisma.feat.findMany({ where, select }), prisma.career.findMany({ where, select }), prisma.race.findMany({ where, select })]).then((lists) => lists.map(idMap));
+  const [feats, careers, raceRows] = await Promise.all([prisma.feat.findMany({ where, select }), prisma.career.findMany({ where, select }), prisma.race.findMany({ where, select: { ...select, profile: true } })]);
+
+  const [featIds, careerIds, races] = [feats, careers, raceRows].map(idMap);
+
+  const stored = new Map(raceRows.map((r) => [r.id, r.profile]));
 
   for (const { race, profile } of data.raceProfiles) {
     const raceId = races.get(nameKey(race));
 
     if (!raceId) throw new Error(`Вид "${race}" не знайдено в шаблоні після імпорту`);
 
-    await saveRaceProfile(campaignId, raceId, resolveProfile(profile, { feats, careers }), noop);
+    const resolved = resolveProfile(profile, { feats: featIds, careers: careerIds });
+
+    if (!isDeepStrictEqual(asStored(resolved), stored.get(raceId))) await saveRaceProfile(campaignId, raceId, resolved, noop);
   }
 
   return data.raceProfiles.length;
@@ -86,6 +95,8 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
 
   console.info(`${GRIM_TEMPLATE_NAME}: ${template.id}${template.created ? " (створено)" : ""}`);
 
+  const { contentVersion: versionBefore } = await prisma.campaign.findUniqueOrThrow({ where: { id: template.id }, select: { contentVersion: true } });
+
   const actor: Actor = { campaignId: template.id, userId: template.dmUserId, isDM: true, via: "session", scopes: null };
 
   const results = await importSrdData(data, (kind, rows) => importContent(actor, kind, { rows, mode: "update", dryRun: false }, OFFLINE_IMPORT_DEPS), undefined, GRIM_ROW_KINDS);
@@ -96,9 +107,12 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
 
   const profiles = await writeRaceProfiles(template.id, data);
 
-  await bumpContentVersion(prisma, template.id);
-
   const published = await publishTemplate(actor);
+
+  const unchanged = published.added + published.changed + published.removed === 0;
+
+  // update-mode import rewrites every row (one version bump each); with nothing published that churn would only prompt clones to sync
+  if (unchanged) await prisma.campaign.update({ where: { id: template.id }, data: { contentVersion: versionBefore } });
 
   console.info(`Версія шаблону ${published.version}: +${published.added} ~${published.changed} -${published.removed}`);
 

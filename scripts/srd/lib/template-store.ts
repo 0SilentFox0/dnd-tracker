@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { isDeepStrictEqual } from "node:util";
 
 import type { TemplateStore } from "./load-template";
 
@@ -31,6 +32,12 @@ export const makeTemplateStore = (name: string, locale: string = DEFAULT_TEMPLAT
     return { id: campaign.id, dmUserId: campaign.dmUserId };
   },
   update: async (id, { rules, credits, description }) => {
+    const current = await prisma.campaign.findUniqueOrThrow({ where: { id }, select: { rules: true, credits: true, description: true, locale: true, templateKey: true } });
+
+    const same = isDeepStrictEqual(current.rules, JSON.parse(JSON.stringify(rules))) && current.credits === credits && current.description === description && current.locale === locale && current.templateKey === name;
+
+    if (same) return;
+
     await prisma.campaign.update({ where: { id }, data: { rules: rules as Prisma.InputJsonObject, credits, description, locale, templateKey: name, contentVersion: { increment: 1 } } });
   },
 });

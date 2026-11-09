@@ -111,10 +111,7 @@ describe("createWfrpDraft", () => {
     expect((await post({ name: "x" })).status).toBe(400);
   });
 
-  it("foreign or missing species", async () => {
-    vi.mocked(prisma.race.findFirst).mockResolvedValueOnce({ campaignId: "other", name: "Elf" } as never);
-    expect((await post(body())).status).toBe(403);
-
+  it("missing species (or one of another campaign) -> 404", async () => {
     vi.mocked(prisma.race.findFirst).mockResolvedValueOnce(null);
     expect((await post(body())).status).toBe(404);
   });

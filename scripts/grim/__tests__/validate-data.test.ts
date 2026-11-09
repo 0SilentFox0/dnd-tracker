@@ -22,7 +22,7 @@ describe("readGrimData", () => {
     expect(data.careers).toHaveLength(2);
     expect(data.feats).toHaveLength(2);
     expect(data.units).toHaveLength(1);
-    expect(data.spells).toEqual([]);
+    expect(data.spells).toHaveLength(1);
     expect(data.artifacts).toEqual([]);
     expect(data.raceProfiles).toHaveLength(1);
   });
@@ -44,7 +44,26 @@ describe("validateGrimData", () => {
     const data = load();
 
     data.careers[0].tier2_talents = ["Missing Talent"];
-    expect(issuesOf(data)).toContain('careers #1 "Ratcatcher": unknown talent "Missing Talent"');
+    expect(issuesOf(data)).toContain('careers #1 "Ratcatcher": unknown tier2_talents "Missing Talent"');
+  });
+
+  it("rejects a unit linking to a spell or race that is not in the data", () => {
+    const data = load();
+
+    data.units[0].knownSpells = ["Ghost Bolt"];
+    data.units[0].raceId = "Nobody";
+
+    const issues = issuesOf(data);
+
+    expect(issues).toContain('units #1 "Giant Rat": unknown knownSpells "Ghost Bolt"');
+    expect(issues).toContain('units #1 "Giant Rat": unknown raceId "Nobody"');
+  });
+
+  it("rejects a nested spell link in a unit that is not in the data", () => {
+    const data = load();
+
+    data.units[0].abilities = [{ name: "Cast", description: "x", spellId: "Ghost Bolt" }];
+    expect(issuesOf(data).some((i) => i.startsWith("units #1") && i.includes('"Ghost Bolt"'))).toBe(true);
   });
 
   it("rejects a profile pointing at an unknown race, career or talent", () => {

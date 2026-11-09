@@ -55,11 +55,22 @@ const rowCounts = async (templateId: string) => ({
   feats: await raw.feat.count({ where: { campaignId: templateId } }),
   careers: await raw.career.count({ where: { campaignId: templateId } }),
   races: await raw.race.count({ where: { campaignId: templateId } }),
+  spells: await raw.spell.count({ where: { campaignId: templateId } }),
   units: await raw.unit.count({ where: { campaignId: templateId } }),
   featBase: await raw.featBase.count({ where: { sourceCampaignId: templateId } }),
   careerBase: await raw.careerBase.count({ where: { sourceCampaignId: templateId } }),
   raceBase: await raw.raceBase.count({ where: { sourceCampaignId: templateId } }),
 });
+
+const unitSpellLinks = async (templateId: string) => {
+  const spell = await raw.spell.findFirstOrThrow({ where: { campaignId: templateId, name: "Rot Touch" }, select: { id: true } });
+
+  const unit = await raw.unit.findFirstOrThrow({ where: { campaignId: templateId, name: "Giant Rat" }, select: { knownSpells: true } });
+
+  return { spellId: spell.id, links: unit.knownSpells };
+};
+
+const versionOf = async (templateId: string) => (await raw.campaign.findUniqueOrThrow({ where: { id: templateId }, select: { contentVersion: true } })).contentVersion;
 
 describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
   let templateId = "";
@@ -78,6 +89,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
 
     await raw.campaign.updateMany({ where: { id: { in: ids } }, data: { baseSourceId: null } });
     await raw.featBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
+    await raw.spellBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.careerBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.raceBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.campaign.deleteMany({ where: { id: { in: ids } } });
@@ -108,11 +120,14 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
 
     templateId = result.templateId;
     expect(result.created).toBe(true);
-    expect(result.counts).toMatchObject({ feats: 2, careers: 2, races: 1, units: 1, raceProfiles: 1 });
+    expect(result.counts).toMatchObject({ feats: 2, careers: 2, races: 1, spells: 1, units: 1, raceProfiles: 1 });
 
     const counts = await rowCounts(templateId);
 
-    expect(counts).toMatchObject({ campaigns: 1, feats: 2, careers: 2, races: 1, units: 1, featBase: 2, careerBase: 2, raceBase: 1 });
+    const { spellId, links } = await unitSpellLinks(templateId);
+
+    expect(links).toEqual([spellId]);
+    expect(counts).toMatchObject({ campaigns: 1, feats: 2, careers: 2, races: 1, spells: 1, units: 1, featBase: 2, careerBase: 2, raceBase: 1 });
   });
 
   it("a clone sees the species with its profile", async () => {
@@ -131,12 +146,18 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
     expect(profiles[0].profile.careerTable.every((r) => (r.careerId as string).length > 10)).toBe(true);
   });
 
-  it("a second run keeps the row counts and the template", async () => {
+  it("a second run keeps the row counts, unit spell links, the template and its contentVersion", async () => {
     const before = await rowCounts(templateId);
+
+    const links = await unitSpellLinks(templateId);
+
+    const version = await versionOf(templateId);
 
     const result = await loadGrimTemplate({ owner: userId, dir: goodDir(), allowRemote: false });
 
     expect(result).toMatchObject({ templateId, created: false });
     expect(await rowCounts(templateId)).toEqual(before);
+    expect(await unitSpellLinks(templateId)).toEqual(links);
+    expect(await versionOf(templateId)).toBe(version);
   });
 });

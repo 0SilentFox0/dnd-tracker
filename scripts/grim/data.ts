@@ -6,7 +6,8 @@ import type { SpeciesProfile } from "@/lib/utils/rules/systems";
 
 export const GRIM_DATA_DIR = process.env.GRIM_DATA_DIR ?? path.join(process.cwd(), "data/templates/grim-d100");
 
-export const GRIM_ROW_KINDS = ["feats", "careers", "races", "units", "spells", "artifacts"] as const;
+/** Import order: a kind comes after every kind it links to by name (units -> races, spells) */
+export const GRIM_ROW_KINDS = ["feats", "careers", "races", "spells", "units", "artifacts"] as const;
 
 export type GrimRowKind = (typeof GRIM_ROW_KINDS)[number];
 

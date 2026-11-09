@@ -56,6 +56,8 @@ describe("bundle: careers table", () => {
   });
 });
 
+const PRE_PROFILE_HASH = "232c56863386a92ff46b2c498307ab2ceda1a4bb";
+
 describe("rowHash stability for species", () => {
   const races = BUNDLE_TABLES.find((t) => t.key === "races")!;
 
@@ -64,8 +66,9 @@ describe("rowHash stability for species", () => {
 
     const legacy = hashJson(pick(row, races.columns.filter((c) => c !== "profile")));
 
-    expect(rowHash({ ...row, profile: null }, races)).toBe(legacy);
-    expect(rowHash(row, races)).toBe(legacy);
+    expect(legacy).toBe(PRE_PROFILE_HASH);
+    expect(rowHash({ ...row, profile: null }, races)).toBe(PRE_PROFILE_HASH);
+    expect(rowHash(row, races)).toBe(PRE_PROFILE_HASH);
     expect(rowHash({ ...row, profile: { move: 4 } }, races)).not.toBe(rowHash(row, races));
   });
 });
