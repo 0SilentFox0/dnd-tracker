@@ -1,7 +1,7 @@
 import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
 import { findForbiddenTerms } from "./forbidden-terms";
 
-import { CAREER_TIER_COUNT,careerTierKey } from "@/lib/constants/import-aliases";
+import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
@@ -13,6 +13,12 @@ import { skillDef } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 export type GrimValidation = { ok: true } | { ok: false; issues: string[] };
 
 const PROFILE_KEYS = ["mods", "move", "fate", "extraWounds", "talents", "randomTalentCount", "randomTalents", "careerTable"] as const;
+
+const PROFILE_LISTS = ["talents", "randomTalents", "careerTable"] as const;
+
+const FEAT_STATS = ["attackBonus", "maxHp", "initiative"];
+
+const isObject = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 
 const STATUS_RE = /^(brass|silver|gold)\s+[1-9]$/i;
 
@@ -90,6 +96,14 @@ function validateProfiles(data: GrimData, names: { races: Set<string>; careers: 
 
     seen.add(nameKey(race));
 
+    if (!isObject(profile)) return void issues.push(`${where}: profile must be an object`);
+
+    const badList = PROFILE_LISTS.filter((key) => key in profile && !Array.isArray(profile[key]));
+
+    for (const key of badList) issues.push(`${where}: profile "${key}" must be an array`);
+
+    if (badList.length > 0) return;
+
     const fakeId = (kind: "career" | "feat", set: Set<string>, name: string) => {
       if (!set.has(nameKey(name))) issues.push(`${where}: unknown ${kind} "${name}"`);
 
@@ -151,7 +165,29 @@ function validateCareerTiers(data: GrimData, issues: string[]) {
 
 function validateProfileKeys(data: GrimData, issues: string[]) {
   data.raceProfiles.forEach(({ race, profile }, index) => {
-    for (const key of PROFILE_KEYS) if (!(key in (profile as object))) issues.push(`race-profiles #${index + 1} "${race}": profile missing "${key}"`);
+    if (!isObject(profile)) return;
+
+    for (const key of PROFILE_KEYS) if (!(key in profile)) issues.push(`race-profiles #${index + 1} "${race}": profile missing "${key}"`);
+  });
+}
+
+function validateFeatAbilities(data: GrimData, issues: string[]) {
+  data.feats.forEach((row, index) => {
+    const abilities = Array.isArray(row.abilities) ? row.abilities : [];
+
+    abilities.forEach((ability: unknown, n) => {
+      const where = `${label("feats", index, row.name)}: abilities[${n}]`;
+
+      const { trigger, effects } = (isObject(ability) ? ability : {}) as { trigger?: { event?: unknown }; effects?: unknown };
+
+      if (trigger?.event !== "passive") issues.push(`${where}: only a passive trigger acts on a wfrp hero`);
+
+      for (const effect of Array.isArray(effects) ? effects : []) {
+        const { kind, stat } = (isObject(effect) ? effect : {}) as { kind?: unknown; stat?: unknown };
+
+        if (kind !== "modifyStat" || typeof stat !== "string" || !FEAT_STATS.includes(stat)) issues.push(`${where}: only modifyStat on ${FEAT_STATS.join("/")} acts on a wfrp hero`);
+      }
+    });
   });
 }
 
@@ -199,6 +235,7 @@ export function validateGrimData(data: GrimData): GrimValidation {
   validateRules(data.rules, issues);
   validateCareerTiers(data, issues);
   validateProfileKeys(data, issues);
+  validateFeatAbilities(data, issues);
   validateTerms(data, issues);
 
   return issues.length === 0 ? { ok: true } : { ok: false, issues };

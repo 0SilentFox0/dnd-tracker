@@ -1,6 +1,6 @@
 import type { GrimData, Row } from "./data";
 
-import { CAREER_TIER_COUNT,careerTierKey } from "@/lib/constants/import-aliases";
+import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules } from "@/lib/utils/rules/schema";
 import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
@@ -13,18 +13,18 @@ const TIERS = Array.from({ length: CAREER_TIER_COUNT }, (_, i) => i + 1);
 
 const nameOf = (row: Row) => (typeof row.name === "string" ? row.name.trim() : "");
 
-function list(row: Row, n: number, part: Part): string[] {
-  const { value } = coerceRecord(row, IMPORT_SPECS.careers.fields);
+const read = (row: Row): Row => coerceRecord(row, IMPORT_SPECS.careers.fields).value;
 
-  const raw = value[careerTierKey(n, part)];
+function list(record: Row, n: number, part: Part): string[] {
+  const raw = record[careerTierKey(n, part)];
 
   return Array.isArray(raw) ? raw.map(String) : [];
 }
 
 const RANK = { brass: 0, silver: 1, gold: 2 } as const;
 
-function statusRank(row: Row, n: number): number | null {
-  const raw = row[careerTierKey(n, "status")];
+function statusRank(record: Row, n: number): number | null {
+  const raw = record[careerTierKey(n, "status")];
 
   if (typeof raw !== "string" || raw.trim() === "") return null;
 
@@ -36,17 +36,19 @@ function statusRank(row: Row, n: number): number | null {
 export function grimCoverage(data: GrimData): string[] {
   const warnings: string[] = [];
 
-  const profiles = data.raceProfiles.map((p) => p.profile);
+  const records = data.careers.map((career) => ({ career, record: read(career) }));
+
+  const profiles = data.raceProfiles.map((p) => p.profile).filter((p) => p && typeof p === "object");
 
   if (profiles.length > 0) {
     const tabled = new Set(profiles.flatMap((p) => (p.careerTable ?? []).map((r) => nameKey(r.careerId))));
 
-    for (const career of data.careers) if (!tabled.has(nameKey(nameOf(career)))) warnings.push(`careers "${nameOf(career)}": not in any species careerTable`);
+    for (const { career } of records) if (!tabled.has(nameKey(nameOf(career)))) warnings.push(`careers "${nameOf(career)}": not in any species careerTable`);
   }
 
   const used = new Set<string>();
 
-  for (const career of data.careers) for (const n of TIERS) list(career, n, "talents").forEach((t) => used.add(nameKey(t)));
+  for (const { record } of records) for (const n of TIERS) list(record, n, "talents").forEach((t) => used.add(nameKey(t)));
 
   for (const p of profiles) {
     (p.talents ?? []).forEach((t) => used.add(nameKey(t)));
@@ -56,7 +58,7 @@ export function grimCoverage(data: GrimData): string[] {
   for (const feat of data.feats) if (!used.has(nameKey(nameOf(feat)))) warnings.push(`feats "${nameOf(feat)}": unused`);
 
   if (data.careers.length > 0) {
-    const advanced = new Set(data.careers.flatMap((c) => TIERS.flatMap((n) => list(c, n, "characteristics"))));
+    const advanced = new Set(records.flatMap(({ record }) => TIERS.flatMap((n) => list(record, n, "characteristics"))));
 
     for (const key of CHARACTERISTIC_KEYS) if (!advanced.has(key)) warnings.push(`characteristic "${key}": no career advances it`);
   }
@@ -65,12 +67,12 @@ export function grimCoverage(data: GrimData): string[] {
 
   const ticks = merged.ok ? merged.rules.advancement.career.ticksRequired[0] : undefined;
 
-  for (const career of data.careers) {
-    const items = (["characteristics", "skills", "talents"] as const).reduce((sum, part) => sum + list(career, 1, part).length, 0);
+  for (const { career, record } of records) {
+    const items = (["characteristics", "skills", "talents"] as const).reduce((sum, part) => sum + list(record, 1, part).length, 0);
 
     if (ticks !== undefined && items < ticks) warnings.push(`careers "${nameOf(career)}": tier 1 lists ${items} items, ticksRequired[0] is ${ticks}`);
 
-    const ranks = TIERS.map((n) => statusRank(career, n));
+    const ranks = TIERS.map((n) => statusRank(record, n));
 
     if (ranks.every((r) => r !== null) && ranks.some((r, i) => i > 0 && (r as number) <= (ranks[i - 1] as number))) warnings.push(`careers "${nameOf(career)}": tier statuses do not rise`);
   }

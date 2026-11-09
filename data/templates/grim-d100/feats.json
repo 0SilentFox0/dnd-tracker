@@ -491,204 +491,204 @@
   {
     "name": "Lettered",
     "type": "general",
-    "description": "Can read and write. The GM allows reading documents and notes that others cannot.",
+    "description": "Can read and write. The DM allows reading documents and notes that others cannot.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Tongue for Tongues",
     "type": "general",
-    "description": "Picks up languages quickly. Each rank, the GM allows a new language to be learned in a short time.",
+    "description": "Picks up languages quickly. Each rank, the DM allows a new language to be learned in a short time.",
     "xpCost": 100,
     "maxRank": 3
   },
   {
     "name": "Court Manners",
     "type": "general",
-    "description": "Knows etiquette of the high halls. The GM grants an edge when mingling with nobles and officials.",
+    "description": "Knows etiquette of the high halls. The DM grants an edge when mingling with nobles and officials.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Silver Tongue",
     "type": "general",
-    "description": "Persuasive speaker. Each rank, the GM grants an edge on Charm-style social tests.",
+    "description": "Persuasive speaker. Each rank, the DM grants an edge on Charm-style social tests.",
     "xpCost": 150,
     "maxRank": 2
   },
   {
     "name": "Haggler's Instinct",
     "type": "general",
-    "description": "Knows what a thing is worth. Each rank, the GM grants an edge when bargaining.",
+    "description": "Knows what a thing is worth. Each rank, the DM grants an edge when bargaining.",
     "xpCost": 100,
     "maxRank": 2
   },
   {
     "name": "Night Owl",
     "type": "general",
-    "description": "Stays alert through the dark hours. The GM waives fatigue penalties for a night without sleep.",
+    "description": "Stays alert through the dark hours. The DM waives fatigue penalties for a night without sleep.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Light Fingers",
     "type": "general",
-    "description": "Nimble hands. Each rank, the GM grants an edge on sleight-of-hand and pickpocketing.",
+    "description": "Nimble hands. Each rank, the DM grants an edge on sleight-of-hand and pickpocketing.",
     "xpCost": 150,
     "maxRank": 2
   },
   {
     "name": "Lock Whisperer",
     "type": "general",
-    "description": "Has a feel for latches and tumblers. Each rank, the GM grants an edge when picking locks.",
+    "description": "Has a feel for latches and tumblers. Each rank, the DM grants an edge when picking locks.",
     "xpCost": 150,
     "maxRank": 2
   },
   {
     "name": "Trail Sense",
     "type": "general",
-    "description": "Rarely loses the path. Each rank, the GM grants an edge on navigation in the wild.",
+    "description": "Rarely loses the path. Each rank, the DM grants an edge on navigation in the wild.",
     "xpCost": 100,
     "maxRank": 2
   },
   {
     "name": "Way with Beasts",
     "type": "general",
-    "description": "Animals trust this character. The GM allows calming or befriending ordinary beasts.",
+    "description": "Animals trust this character. The DM allows calming or befriending ordinary beasts.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Weather Eye",
     "type": "general",
-    "description": "Reads sky and wind. The GM reveals approaching weather ahead of time.",
+    "description": "Reads sky and wind. The DM reveals approaching weather ahead of time.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "River Reader",
     "type": "general",
-    "description": "Understands currents and shoals. The GM grants an edge when crossing or navigating rivers.",
+    "description": "Understands currents and shoals. The DM grants an edge when crossing or navigating rivers.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Born Swimmer",
     "type": "general",
-    "description": "Swims as easily as walking. The GM waives penalties for swimming in calm water.",
+    "description": "Swims as easily as walking. The DM waives penalties for swimming in calm water.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Steady Hands",
     "type": "general",
-    "description": "Precise handiwork. Each rank, the GM grants an edge on delicate work such as surgery or repairs.",
+    "description": "Precise handiwork. Each rank, the DM grants an edge on delicate work such as surgery or repairs.",
     "xpCost": 150,
     "maxRank": 2
   },
   {
     "name": "Green Thumb",
     "type": "general",
-    "description": "Knows herbs and growing things. The GM allows identifying and gathering useful plants.",
+    "description": "Knows herbs and growing things. The DM allows identifying and gathering useful plants.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Iron Stomach",
     "type": "general",
-    "description": "Shrugs off bad food and mild poisons. The GM grants an edge on resisting rot and spoilage.",
+    "description": "Shrugs off bad food and mild poisons. The DM grants an edge on resisting rot and spoilage.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Parade-Ground Voice",
     "type": "general",
-    "description": "A voice that carries over any din. The GM allows issuing orders to a crowd or a group of allies.",
+    "description": "A voice that carries over any din. The DM allows issuing orders to a crowd or a group of allies.",
     "xpCost": 200,
     "maxRank": 1
   },
   {
     "name": "Steel Nerves",
     "type": "general",
-    "description": "Hard to frighten. The GM grants an edge when resisting fear.",
+    "description": "Hard to frighten. The DM grants an edge when resisting fear.",
     "xpCost": 200,
     "maxRank": 1
   },
   {
     "name": "Lamp-Lit Studies",
     "type": "general",
-    "description": "Learns well by candlelight. Each rank, the GM grants an edge on research and study.",
+    "description": "Learns well by candlelight. Each rank, the DM grants an edge on research and study.",
     "xpCost": 100,
     "maxRank": 3
   },
   {
     "name": "Crowd Reader",
     "type": "general",
-    "description": "Senses the mood of a crowd. The GM reveals when a crowd is turning hostile or friendly.",
+    "description": "Senses the mood of a crowd. The DM reveals when a crowd is turning hostile or friendly.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Fast Talker",
     "type": "general",
-    "description": "Talks fast and confusingly. The GM grants an edge when talking one's way out of trouble.",
+    "description": "Talks fast and confusingly. The DM grants an edge when talking one's way out of trouble.",
     "xpCost": 150,
     "maxRank": 1
   },
   {
     "name": "Road-Worn",
     "type": "general",
-    "description": "Seasoned traveller. Each rank, the GM grants an edge when enduring long journeys.",
+    "description": "Hardened to the long road. Each rank, the DM grants an edge when enduring long journeys.",
     "xpCost": 100,
     "maxRank": 2
   },
   {
     "name": "Keen Ears",
     "type": "general",
-    "description": "Hears what others miss. The GM grants an edge on listening tests.",
+    "description": "Hears what others miss. The DM grants an edge on listening tests.",
     "xpCost": 100,
     "maxRank": 1
   },
   {
     "name": "Quick Study",
     "type": "origin",
-    "description": "Lowlander. Picks up a new trade quickly. The GM shortens the time needed to learn a craft.",
+    "description": "Lowlander. Picks up a new trade quickly. The DM shortens the time needed to learn a craft.",
     "maxRank": 1
   },
   {
     "name": "Stone Sense",
     "type": "origin",
-    "description": "Delver. Notices unsound masonry and hollow walls. The GM reveals structural flaws.",
+    "description": "Delver. Notices unsound masonry and hollow walls. The DM reveals structural flaws.",
     "maxRank": 1
   },
   {
     "name": "Deep Sight",
     "type": "origin",
-    "description": "Delver. Sees well in dim light. The GM waives penalties for dim light.",
+    "description": "Delver. Sees well in dim light. The DM waives penalties for dim light.",
     "maxRank": 1
   },
   {
     "name": "Light Step",
     "type": "origin",
-    "description": "Hearthkin. Moves almost silently. The GM grants an edge on sneaking.",
+    "description": "Hearthkin. Moves almost silently. The DM grants an edge on sneaking.",
     "maxRank": 1
   },
   {
     "name": "Underfoot",
     "type": "origin",
-    "description": "Hearthkin. Small enough to go unnoticed. The GM grants an edge when slipping through a crowd.",
+    "description": "Hearthkin. Small enough to go unnoticed. The DM grants an edge when slipping through a crowd.",
     "maxRank": 1
   },
   {
     "name": "Twilight Eyes",
     "type": "origin",
-    "description": "Veyl. Sees clearly at dusk and under starlight. The GM waives penalties for low light.",
+    "description": "Veyl. Sees clearly at dusk and under starlight. The DM waives penalties for low light.",
     "maxRank": 1
   },
   {
     "name": "Long Memory",
     "type": "origin",
-    "description": "Veyl. Carries the memory of generations. The GM may share a relevant piece of old lore.",
+    "description": "Veyl. Carries the memory of generations. The DM may share a relevant piece of old lore.",
     "maxRank": 1
   }
 ]

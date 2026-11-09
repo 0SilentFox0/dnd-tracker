@@ -10,7 +10,7 @@
     "name": "Delver",
     "passiveAbility": {
       "name": "Stoneborn",
-      "description": "Delvers raise their halls inside the mountains and measure kinship in generations of unbroken craft. They are stubborn and grudge-keeping, and trust what is built to last."
+      "description": "Delvers raise their halls inside the mountains and measure kinship in generations of unbroken craft. They are stubborn and exacting, and trust what is built to last."
     }
   },
   {
@@ -24,7 +24,7 @@
     "name": "Veyl",
     "passiveAbility": {
       "name": "Old Blood",
-      "description": "The Veyl are a long-lived people of the deep forests, shaped by memories that outlast empires. They are graceful and aloof, and slow to share what they know."
+      "description": "The Veyl are a long-lived people of the deep forests, shaped by memories that outlast kingdoms. They are graceful and aloof, and slow to share what they know."
     }
   }
 ]

@@ -181,4 +181,45 @@ describe("validateGrimData", () => {
     data.feats[0].abilities = [{ name: "x", trigger: { event: "passive" }, effects: [] }];
     expect(issuesOf(data).some((i) => i.startsWith('feats #1 "Hardy": abilities'))).toBe(true);
   });
+
+  it("scans multi-word, plural, derived and hyphenated forms", () => {
+    const data = load();
+
+    data.feats[0].description = "Daemons of the north, two Empires, Witch-Hunter's warrant, Imperials, Reiklander, Middenheimer, Bögenhafen, Snotlings";
+    data.careers[0].tier1_skills = ["lore:old-world"];
+
+    const issues = issuesOf(data).join("\n");
+
+    for (const term of ["Daemon", "Empire", "Witch Hunter", "Imperial", "Reikland", "Middenheim", "Bögenhafen", "Snotling", "Old World"]) expect(issues).toContain(`forbidden term "${term}"`);
+  });
+
+  it("does not flag words that merely contain a term", () => {
+    const data = load();
+
+    data.feats[0].description = "Sgorfel and Chaoses of Moo, Imperially, a Mooted plan";
+    expect(issuesOf(data).filter((i) => i.includes("forbidden"))).toEqual([]);
+  });
+
+  it("rejects a feat ability that is not a passive modifyStat on an allowed stat", () => {
+    const data = load();
+
+    data.feats[0].abilities = [{ id: "a1", name: "x", trigger: { event: "onHit" }, effects: [{ kind: "modifyStat", stat: "strength", flat: 1 }] }];
+
+    const issues = issuesOf(data);
+
+    expect(issues.some((i) => i.includes("only a passive trigger"))).toBe(true);
+    expect(issues.some((i) => i.includes("only modifyStat on attackBonus/maxHp/initiative"))).toBe(true);
+  });
+
+  it("reports null profile and null profile lists instead of throwing", () => {
+    const data = load();
+
+    (data.raceProfiles[0] as { profile: unknown }).profile = null;
+    expect(issuesOf(data).some((i) => i.includes("profile must be an object"))).toBe(true);
+
+    const other = load();
+
+    (other.raceProfiles[0].profile as unknown as Record<string, unknown>).talents = null;
+    expect(issuesOf(other).some((i) => i.includes('profile "talents" must be an array'))).toBe(true);
+  });
 });
