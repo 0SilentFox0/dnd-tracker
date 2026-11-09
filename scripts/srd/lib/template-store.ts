@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
 import { emptyBundle } from "@/lib/server/templates/bundle";
 import { templateLocaleWhere } from "@/lib/server/templates/locale-filter";
+import { jsonContent } from "@/lib/utils/common/json";
 
 const official = { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL };
 
@@ -34,7 +35,7 @@ export const makeTemplateStore = (name: string, locale: string = DEFAULT_TEMPLAT
   update: async (id, { rules, credits, description }) => {
     const current = await prisma.campaign.findUniqueOrThrow({ where: { id }, select: { rules: true, credits: true, description: true, locale: true, templateKey: true } });
 
-    const same = isDeepStrictEqual(current.rules, JSON.parse(JSON.stringify(rules))) && current.credits === credits && current.description === description && current.locale === locale && current.templateKey === name;
+    const same = isDeepStrictEqual(current.rules, jsonContent(rules)) && current.credits === credits && current.description === description && current.locale === locale && current.templateKey === name;
 
     if (same) return;
 

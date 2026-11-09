@@ -14,6 +14,7 @@ import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/
 import { saveRaceProfile } from "@/lib/server/races/race-profile";
 import { publishTemplate } from "@/lib/server/templates/publish-service";
 import type { Actor } from "@/lib/utils/api/actor";
+import { jsonContent } from "@/lib/utils/common/json";
 import { nameKey } from "@/lib/utils/content/import";
 import { mergeRules } from "@/lib/utils/rules/schema";
 import type { SpeciesProfile } from "@/lib/utils/rules/systems";
@@ -36,8 +37,6 @@ export interface GrimLoadResult {
 const noop = () => undefined;
 
 const idMap = (rows: Array<{ id: string; name: string }>) => new Map(rows.map((r) => [nameKey(r.name), r.id]));
-
-const asStored = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 
 function resolveProfile(profile: GrimData["raceProfiles"][number]["profile"], ids: { feats: Map<string, string>; careers: Map<string, string> }): SpeciesProfile {
   const feat = (name: string) => ids.feats.get(nameKey(name)) as string;
@@ -70,7 +69,7 @@ async function writeRaceProfiles(campaignId: string, data: GrimData): Promise<nu
 
     const resolved = resolveProfile(profile, { feats: featIds, careers: careerIds });
 
-    if (!isDeepStrictEqual(asStored(resolved), stored.get(raceId))) await saveRaceProfile(campaignId, raceId, resolved, noop);
+    if (!isDeepStrictEqual(jsonContent(resolved), stored.get(raceId))) await saveRaceProfile(campaignId, raceId, resolved, noop);
   }
 
   return data.raceProfiles.length;

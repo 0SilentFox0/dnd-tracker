@@ -1,5 +1,3 @@
-import type { Prisma } from "@prisma/client";
-
 import "server-only";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -8,8 +6,9 @@ import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
+import { jsonContentInput } from "@/lib/utils/common/json";
 import type { SpeciesProfile } from "@/lib/utils/rules/systems";
-import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
+import { parseSpeciesProfile, profileRefIds } from "@/lib/utils/rules/systems/profile-refs";
 
 export type RaceProfileItem = { raceId: string; profile: SpeciesProfile };
 
@@ -17,9 +16,9 @@ export async function listRaceProfiles(campaignId: string): Promise<RaceProfileI
   const rows = await prisma.race.findMany({ where: { campaignId }, select: { id: true, profile: true } });
 
   return rows.flatMap(({ id, profile }) => {
-    const parsed = SpeciesProfileSchema.safeParse(profile);
+    const parsed = parseSpeciesProfile(profile);
 
-    return parsed.success ? [{ raceId: id, profile: parsed.data as SpeciesProfile }] : [];
+    return parsed ? [{ raceId: id, profile: parsed }] : [];
   });
 }
 
@@ -28,13 +27,12 @@ export async function saveRaceProfile(campaignId: string, raceId: string, profil
 
   if (!race) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
-  await assertCampaignRefs(campaignId, {
-    career: profile.careerTable.map((r) => r.careerId),
-    feat: [...profile.talents, ...profile.randomTalents.map((r) => r.featId)],
-  });
+  const refs = profileRefIds(profile);
+
+  await assertCampaignRefs(campaignId, { career: refs.careers, feat: refs.feats });
 
   await withCampaignContentWrite(campaignId, async () => {
-    await prisma.race.update({ where: { id: raceId }, data: { profile: profile as unknown as Prisma.InputJsonValue } });
+    await prisma.race.update({ where: { id: raceId }, data: { profile: jsonContentInput(profile) } });
     afterContentCommit(() => invalidate(ReferenceKind.RACES, campaignId));
   });
 

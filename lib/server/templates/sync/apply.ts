@@ -19,7 +19,7 @@ import { indexOf } from "@/lib/server/templates/sync/index";
 import { type LayeredDb,layerOf } from "@/lib/server/templates/sync/layered";
 import { applyLayered, previewLayeredSelection } from "@/lib/server/templates/sync/layered-apply";
 import { assertSrdNameReferences } from "@/lib/server/templates/sync/name-references";
-import { blockedWarning, danglingProfileWarnings, isRowReferenced } from "@/lib/server/templates/sync/profile-refs";
+import { createRefChecker, danglingProfileWarnings } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceChanged, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -136,6 +136,8 @@ function cleanRow(t: BundleTableDef, src: Record<string, unknown>, item: SyncIte
 async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>, warnings: string[]): Promise<Set<string>> {
   const blocked = new Set<string>();
 
+  const refs = createRefChecker(db, ctx.campaignId);
+
   for (const t of [...BUNDLE_TABLES].reverse()) {
     for (const i of selected.values()) {
       if (i.scope !== t.key || i.status !== "deletedInSource" || !i.localId) continue;
@@ -152,8 +154,10 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
         if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
       }
 
-      if ((t.key === "feats" || t.key === "careers") && (await isRowReferenced(db, ctx.campaignId, t.key, [i.localId]))) {
-        warnings.push(blockedWarning(t.key, i.name));
+      const blockedWarning = await refs.blockedBy(t.key, [i.localId], i.name);
+
+      if (blockedWarning) {
+        warnings.push(blockedWarning);
         blocked.add(i.localId);
 
         continue;
@@ -164,6 +168,8 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
       if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], ctx.campaignId, kind, [i.localId]);
 
       await delegateOf(db, t).deleteMany({ where: { id: i.localId, campaignId: ctx.campaignId } });
+
+      refs.deleted(t.key);
     }
   }
 
