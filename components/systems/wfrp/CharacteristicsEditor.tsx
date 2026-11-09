@@ -6,6 +6,7 @@ import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Label } from "@/components/ui/label";
 import type { SectionBinding } from "@/lib/utils/characters/form/bindings";
 import { CHARACTERISTIC_KEYS, type Characteristics } from "@/lib/utils/rules/systems";
+import { value } from "@/lib/utils/rules/systems/wfrp/characteristics";
 
 export function CharacteristicsEditor({ binding: { data, set }, withExtras = true }: { binding: SectionBinding<Characteristics>; withExtras?: boolean }) {
   const t = useTranslations("characters.wfrp");
@@ -26,7 +27,7 @@ export function CharacteristicsEditor({ binding: { data, set }, withExtras = tru
             <Label htmlFor={`char-base-${key}`}>{tg(`${key}.label`)}</Label>
             <BoundedNumberInput id={`char-base-${key}`} min={1} max={100} value={data.base[key]} onCommit={(v) => setPer("base", key, v)} />
             <BoundedNumberInput id={`char-adv-${key}`} aria-label={`${tg(`${key}.label`)}: ${t("advances")}`} min={0} max={100} value={data.advances[key]} onCommit={(v) => setPer("advances", key, v)} />
-            <span className="tabular-nums">{data.base[key] + data.advances[key]}</span>
+            <span className="tabular-nums">{value(data, key)}</span>
           </div>
         ))}
       </div>

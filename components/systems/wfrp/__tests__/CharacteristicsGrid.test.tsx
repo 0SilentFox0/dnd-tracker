@@ -4,11 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CharacteristicsGrid } from "../CharacteristicsGrid";
 
+import { signed } from "@/lib/utils/common/format";
 import type { SheetWfrpBlock } from "@/lib/utils/rules/systems";
 import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
 
 const block = {
-  characteristics: CHARACTERISTIC_KEYS.map((key, i) => ({ key, base: 30 + i, advances: 5, value: 35 + i, bonus: Math.floor((35 + i) / 10) })),
+  characteristics: CHARACTERISTIC_KEYS.map((key, i) => ({ key, base: 30 + i, advances: 5, value: 35 + i, bonus: Math.floor((35 + i) / 10), mod: i === 0 ? -10 : 0 })),
 } as SheetWfrpBlock;
 
 describe("CharacteristicsGrid", () => {
@@ -20,6 +21,12 @@ describe("CharacteristicsGrid", () => {
     expect(screen.getAllByRole("button")).toHaveLength(10);
     expect(screen.getByText("35")).toBeTruthy();
     expect(screen.getByText("44")).toBeTruthy();
+  });
+
+  it("shows the mutation modifier only when non-zero", () => {
+    render(<CharacteristicsGrid block={block} onRoll={() => {}} canRoll />);
+
+    expect(screen.getAllByText(signed(-10))).toHaveLength(1);
   });
 
   it("a click requests a characteristic test", () => {

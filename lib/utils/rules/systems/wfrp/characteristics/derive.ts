@@ -1,18 +1,21 @@
+import { modifiersOf } from "../corruption/modifiers";
 import { skillAdvanceKey, skillDef } from "../skills/catalog";
 import { type CharacteristicKey, type Characteristics, SKILL_ADVANCE_KEY_RE, SPEC_RE } from "./keys";
 
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 
-export const value = (c: Characteristics, key: CharacteristicKey) => c.base[key] + c.advances[key];
+export const value = (c: Characteristics, key: CharacteristicKey) => Math.max(1, c.base[key] + c.advances[key] + (modifiersOf(c.corruption).characteristics[key] ?? 0));
 
 export const bonus = (c: Characteristics, key: CharacteristicKey) => Math.floor(value(c, key) / 10);
 
-export const woundsMax = (c: Characteristics) => bonus(c, "s") + 2 * bonus(c, "t") + bonus(c, "wp") + c.extraWounds * bonus(c, "t");
+export const woundsMax = (c: Characteristics) => Math.max(1, bonus(c, "s") + 2 * bonus(c, "t") + bonus(c, "wp") + c.extraWounds * bonus(c, "t") + modifiersOf(c.corruption).maxWounds);
 
-export const walkYards = (c: Characteristics) => c.move * 2;
+export const moveOf = (c: Characteristics) => Math.max(1, c.move + modifiersOf(c.corruption).move);
 
-export const runYards = (c: Characteristics) => c.move * 4;
+export const walkYards = (c: Characteristics) => moveOf(c) * 2;
+
+export const runYards = (c: Characteristics) => moveOf(c) * 4;
 
 export function skillTarget(c: Characteristics, skillKey: string, spec?: string): { target: number; trained: boolean; characteristic: CharacteristicKey; advances: number } | null {
   const def = skillDef(skillKey);

@@ -1,6 +1,8 @@
 import type { SheetBlockInput, SheetWfrpBlock } from "../../types";
+import { modifiersOf } from "../corruption/modifiers";
+import { corruptionThreshold } from "../corruption/threshold";
 import { parseSkillAdvanceKey, SKILL_CATALOG, skillAdvanceKey, skillDef } from "../skills/catalog";
-import { bonus, runYards, skillTarget, value, walkYards, woundsBreakdown, woundsMax } from "./derive";
+import { bonus, moveOf, runYards, skillTarget, value, walkYards, woundsBreakdown, woundsMax } from "./derive";
 import { CHARACTERISTIC_KEYS } from "./keys";
 
 export function wfrpSheetBlock({ characteristics: c, resources }: SheetBlockInput): SheetWfrpBlock {
@@ -30,13 +32,16 @@ export function wfrpSheetBlock({ characteristics: c, resources }: SheetBlockInpu
 
   skills.sort((a, b) => Number(b.trained) - Number(a.trained) || `${a.key}:${a.spec ?? ""}`.localeCompare(`${b.key}:${b.spec ?? ""}`));
 
+  const mods = modifiersOf(c.corruption);
+
   return {
-    characteristics: CHARACTERISTIC_KEYS.map((key) => ({ key, base: c.base[key], advances: c.advances[key], value: value(c, key), bonus: bonus(c, key) })),
+    characteristics: CHARACTERISTIC_KEYS.map((key) => ({ key, base: c.base[key], advances: c.advances[key], value: value(c, key), bonus: bonus(c, key), mod: mods.characteristics[key] ?? 0 })),
     wounds: { max: woundsMax(c), breakdown: woundsBreakdown(c) },
-    move: { value: c.move, walkYd: walkYards(c), runYd: runYards(c) },
+    move: { value: moveOf(c), walkYd: walkYards(c), runYd: runYards(c) },
     skills,
     fate: c.fate,
     fortune: resources.fortune ?? c.fate,
     sin: resources.sin ?? 0,
+    corruption: { points: c.corruption?.points ?? 0, threshold: corruptionThreshold(c), mutations: c.corruption?.mutations ?? [] },
   };
 }

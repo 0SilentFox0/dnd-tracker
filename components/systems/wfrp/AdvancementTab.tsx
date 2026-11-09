@@ -18,6 +18,7 @@ import { useAdvance, useCharacter } from "@/lib/hooks/characters";
 import { useFeats } from "@/lib/hooks/feats";
 import { CHARACTERISTIC_KEYS, readCharacteristics } from "@/lib/utils/rules/systems";
 import { advanceCost, availableXp, careerPrice } from "@/lib/utils/rules/systems/wfrp/advancement";
+import { value } from "@/lib/utils/rules/systems/wfrp/characteristics";
 import { skillAdvanceKey } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 
 export function AdvancementTab() {
@@ -75,7 +76,7 @@ export function AdvancementTab() {
             <AdvanceRow
               key={key}
               label={tc(`${key}.label`)}
-              value={c.base[key] + c.advances[key]}
+              value={value(c, key)}
               hint={t("advances", { count: c.advances[key] })}
               cost={price("characteristic", key, advanceCost("characteristic", c.advances[key], advancement)).cost}
               outOfCareer={price("characteristic", key, advanceCost("characteristic", c.advances[key], advancement)).outOfCareer}

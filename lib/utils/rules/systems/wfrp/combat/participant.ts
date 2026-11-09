@@ -1,5 +1,6 @@
 import { bonus, value, walkYards } from "../characteristics/derive";
 import { type Characteristics, readCharacteristics } from "../characteristics/keys";
+import { foldCorruption } from "../corruption/fold";
 import type { HitLocation } from "./constants";
 import { LOCATIONS } from "./constants";
 
@@ -37,13 +38,13 @@ function castApOf(gear?: WfrpGear): { castAp?: number } {
   return armour === Math.max(gear.ap.head, gear.ap.body) ? {} : { castAp: armour };
 }
 
-// The XP ledger and downtime are private and unused in battle, so they never enter participant data.
+// The XP ledger and downtime are private and unused in battle; corruption is folded into base values.
 export function wfrpAbilitiesOf(characteristics: Characteristics, gear?: WfrpGear): WfrpParticipantFields {
-  const { downtime: _downtime, ...rest } = characteristics;
+  const { downtime: _downtime, ...rest } = foldCorruption(characteristics);
 
   return {
     characteristics: { ...rest, ledger: [] },
-    wfrp: { sb: bonus(characteristics, "s"), ag: value(characteristics, "ag"), tb: bonus(characteristics, "t"), ap: { ...(gear?.ap ?? NO_ARMOR) }, ...(gear?.flexible && { flexible: true as const }), ...castApOf(gear) },
+    wfrp: { sb: bonus(rest, "s"), ag: value(rest, "ag"), tb: bonus(rest, "t"), ap: { ...(gear?.ap ?? NO_ARMOR) }, ...(gear?.flexible && { flexible: true as const }), ...castApOf(gear) },
   };
 }
 

@@ -6,6 +6,7 @@ import type { planUndo } from "./wfrp/advancement/undo";
 import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
 import type { HitLocation } from "./wfrp/combat/constants";
 import type { WfrpParticipantStats } from "./wfrp/combat/participant";
+import type { Mutation } from "./wfrp/corruption/types";
 import type { planDraft } from "./wfrp/creation/plan";
 import type { isUsableProfile } from "./wfrp/creation/profile";
 import type { rollCreation } from "./wfrp/creation/roll";
@@ -47,13 +48,14 @@ export interface SheetBlockInput {
 }
 
 export interface SheetWfrpBlock {
-  characteristics: { key: CharacteristicKey; base: number; advances: number; value: number; bonus: number }[];
+  characteristics: { key: CharacteristicKey; base: number; advances: number; value: number; bonus: number; mod: number }[];
   wounds: { max: number; breakdown: HpBreakdownLine[] };
   move: { value: number; walkYd: number; runYd: number };
   skills: { key: string; spec?: string; characteristic: CharacteristicKey; target: number; advances: number; trained: boolean; kind: "basic" | "advanced" }[];
   fate: number;
   fortune: number;
   sin: number;
+  corruption: { points: number; threshold: number; mutations: Mutation[] };
 }
 
 export interface SheetTestInput {

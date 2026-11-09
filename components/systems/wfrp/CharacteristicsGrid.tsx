@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { SheetRollRequest } from "../types";
 
 import { cn } from "@/lib/utils";
+import { signed } from "@/lib/utils/common/format";
 import type { SheetWfrpBlock } from "@/lib/utils/rules/systems";
 
 interface Props {
@@ -25,6 +26,7 @@ export function CharacteristicsGrid({ block, onRoll, canRoll }: Props) {
           <>
             <small className="block text-[10px] text-hud-muted">{tg(`${c.key}.short`)}</small>
             <b className="block text-[17px] leading-5">{c.value}</b>
+            {c.mod !== 0 && <small className="block text-[10px] tabular-nums text-hud-muted">{signed(c.mod)}</small>}
             <span className="block text-[15px] font-semibold leading-5 tabular-nums text-hud-muted">{c.bonus}</span>
           </>
         );

@@ -61,6 +61,14 @@ describe("AdvancementTab", () => {
     expect(screen.getAllByRole("button", { name: "Купити · 25" }).length).toBeGreaterThan(0);
   });
 
+  it("shows the characteristic value with mutation modifiers", () => {
+    const effects = [{ type: "characteristic", key: "ws", amount: -10 }];
+
+    mount({ chars: { corruption: { points: 1, mutations: [{ id: "m", at: "2026-01-01T00:00:00.000Z", kind: "physical", roll: 1, text: "x", effects }] } } });
+
+    expect(screen.getByText("20")).toBeTruthy();
+  });
+
   it("buys a characteristic with the right request", () => {
     mount({ experience: 100 });
 

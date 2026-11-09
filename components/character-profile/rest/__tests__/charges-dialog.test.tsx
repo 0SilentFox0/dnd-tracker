@@ -66,7 +66,7 @@ describe("ResourcesDialog: wfrp Sin", () => {
     mockMatchMedia(false);
     h.edit.mutateOk.mockClear();
 
-    const wfrpSheet = { ...sheetFixture, rest, system: "wfrp" as const, wfrp: { characteristics: [], wounds: { max: 10, breakdown: [] }, move: { value: 4, walkYd: 8, runYd: 16 }, skills: [], fate: 2, fortune: 2, sin: 2 } };
+    const wfrpSheet = { ...sheetFixture, rest, system: "wfrp" as const, wfrp: { characteristics: [], wounds: { max: 10, breakdown: [] }, move: { value: 4, walkYd: 8, runYd: 16 }, skills: [], fate: 2, fortune: 2, sin: 2, corruption: { points: 0, threshold: 6, mutations: [] } } };
 
     renderWithConfirm(
       <ProfileProvider campaignId="c" characterId="ch" sheet={wfrpSheet} canEdit={false}>

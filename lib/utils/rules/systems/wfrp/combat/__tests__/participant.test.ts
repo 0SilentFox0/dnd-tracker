@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { wfrpParticipantFields } from "../participant";
+import { wfrpBaseStats, wfrpParticipantFields } from "../participant";
+
+import { value } from "@/lib/utils/rules/systems/wfrp/characteristics";
 
 describe("wfrpParticipantFields", () => {
   it("never carries the XP ledger into participant abilities", () => {
@@ -16,5 +18,20 @@ describe("wfrpParticipantFields", () => {
     const fields = wfrpParticipantFields({ characteristics: { downtime: { ailments: [] } } });
 
     expect("downtime" in fields.characteristics).toBe(false);
+  });
+
+  const mutation = (effects: unknown[]) => ({ id: "m", at: "2026-01-01T00:00:00.000Z", kind: "physical", roll: 1, text: "x", effects });
+
+  it("folds corruption into effective values and never carries it", () => {
+    const fields = wfrpParticipantFields({ characteristics: { corruption: { points: 3, mutations: [mutation([{ type: "characteristic", key: "ws", amount: -10 }, { type: "characteristic", key: "ag", amount: -10 }])] }, downtime: { ailments: [] } } });
+
+    expect("corruption" in fields.characteristics).toBe(false);
+    expect("downtime" in fields.characteristics).toBe(false);
+    expect(value(fields.characteristics, "ws")).toBe(20);
+    expect(fields.wfrp.ag).toBe(20);
+  });
+
+  it("wfrpBaseStats speed uses the mutated move", () => {
+    expect(wfrpBaseStats({ characteristics: { corruption: { points: 0, mutations: [mutation([{ type: "move", amount: -1 }])] } } }).speed).toBe(3 * 2 * 3);
   });
 });
