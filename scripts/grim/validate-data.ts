@@ -1,12 +1,20 @@
 import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
+import { findForbiddenTerms } from "./forbidden-terms";
 
+import { CAREER_TIER_COUNT,careerTierKey } from "@/lib/constants/import-aliases";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
+import { SPEC_RE } from "@/lib/utils/rules/systems";
 import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { skillDef } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 
 export type GrimValidation = { ok: true } | { ok: false; issues: string[] };
+
+const PROFILE_KEYS = ["mods", "move", "fate", "extraWounds", "talents", "randomTalentCount", "randomTalents", "careerTable"] as const;
+
+const STATUS_RE = /^(brass|silver|gold)\s+[1-9]$/i;
 
 const label = (kind: string, index: number, name: unknown) => `${kind} #${index + 1}${typeof name === "string" ? ` "${name}"` : ""}`;
 
@@ -103,6 +111,70 @@ function validateProfiles(data: GrimData, names: { races: Set<string>; careers: 
   });
 }
 
+export function careerSkillIssue(value: string): string | null {
+  const [key, spec] = value.split(":");
+
+  const def = skillDef(key);
+
+  if (!def) return "unknown skill";
+
+  if (def.spec === "none") return spec === undefined ? null : "takes no specialisation";
+
+  if (spec === undefined) return "needs a specialisation";
+
+  if (def.spec === "fixed") return def.specs?.includes(spec) ? null : "unknown specialisation";
+
+  return SPEC_RE.test(spec) ? null : "unknown specialisation";
+}
+
+function validateCareerTiers(data: GrimData, issues: string[]) {
+  data.careers.forEach((row, index) => {
+    const { value } = coerceRecord(row, IMPORT_SPECS.careers.fields);
+
+    const where = label("careers", index, row.name);
+
+    for (let n = 1; n <= CAREER_TIER_COUNT; n++) {
+      const skills = value[careerTierKey(n, "skills")];
+
+      for (const skill of Array.isArray(skills) ? skills.map(String) : []) {
+        const issue = careerSkillIssue(skill);
+
+        if (issue) issues.push(`${where}: ${careerTierKey(n, "skills")} "${skill}" ${issue}`);
+      }
+
+      const status = value[careerTierKey(n, "status")];
+
+      if (typeof status === "string" && status !== "" && !STATUS_RE.test(status.trim())) issues.push(`${where}: ${careerTierKey(n, "status")} "${status}" is not "<Brass|Silver|Gold> <1-9>"`);
+    }
+  });
+}
+
+function validateProfileKeys(data: GrimData, issues: string[]) {
+  data.raceProfiles.forEach(({ race, profile }, index) => {
+    for (const key of PROFILE_KEYS) if (!(key in (profile as object))) issues.push(`race-profiles #${index + 1} "${race}": profile missing "${key}"`);
+  });
+}
+
+function stringLeaves(value: unknown): string[] {
+  if (typeof value === "string") return [value];
+
+  if (Array.isArray(value)) return value.flatMap(stringLeaves);
+
+  return value && typeof value === "object" ? Object.values(value).flatMap(stringLeaves) : [];
+}
+
+function validateTerms(data: GrimData, issues: string[]) {
+  const scan = (where: string, value: unknown) => {
+    const found = new Set(stringLeaves(value).flatMap(findForbiddenTerms));
+
+    for (const term of found) issues.push(`${where}: forbidden term "${term}"`);
+  };
+
+  for (const kind of GRIM_ROW_KINDS) data[kind].forEach((row, index) => scan(label(kind, index, row.name), row));
+
+  data.raceProfiles.forEach(({ race }, index) => scan(`race-profiles #${index + 1} "${race}"`, race));
+}
+
 function validateRules(rules: GrimData["rules"], issues: string[]) {
   if (!rules) return;
 
@@ -125,6 +197,9 @@ export function validateGrimData(data: GrimData): GrimValidation {
   validateLinks(data, issues);
   validateProfiles(data, names, issues);
   validateRules(data.rules, issues);
+  validateCareerTiers(data, issues);
+  validateProfileKeys(data, issues);
+  validateTerms(data, issues);
 
   return issues.length === 0 ? { ok: true } : { ok: false, issues };
 }

@@ -5,6 +5,7 @@ import { isDeepStrictEqual } from "node:util";
 import { assertSeedTarget } from "../seed/seed-library-lib";
 import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData } from "../srd/lib/load-template";
 import { makeTemplateStore } from "../srd/lib/template-store";
+import { grimCoverage } from "./coverage";
 import { GRIM_DATA_DIR, GRIM_ROW_KINDS, type GrimData, readGrimData, readGrimManifest } from "./data";
 import { validateGrimData } from "./validate-data";
 
@@ -81,6 +82,8 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
   const validation = validateGrimData(data);
 
   if (!validation.ok) throw new Error(`Дані Grim d100 невалідні:\n${validation.issues.map((i) => `  ${i}`).join("\n")}`);
+
+  for (const warning of grimCoverage(data)) console.warn(warning);
 
   const manifest = readGrimManifest(dir);
 
