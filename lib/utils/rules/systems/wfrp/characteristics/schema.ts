@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { readCorruption } from "../corruption/read";
+import type { CorruptionState } from "../corruption/types";
 import { readDowntime } from "../downtime/read";
 import type { DowntimeState } from "../downtime/types";
 import { CHARACTERISTIC_KEYS, type CharacteristicKey, SKILL_ADVANCE_KEY_RE } from "./constants";
@@ -46,4 +48,7 @@ export const CharacteristicsSchema = z.object({
   spentArchived: z.number().int().min(0).max(1e9).default(0),
   career: CareerStateSchema.optional(),
   downtime: z.custom<DowntimeState>((v) => readDowntime(v) !== undefined).optional(),
+  corruption: z.custom<CorruptionState>((v) => readCorruption(v) !== undefined).optional(),
 });
+
+export const UnitCharacteristicsSchema = CharacteristicsSchema.omit({ corruption: true });

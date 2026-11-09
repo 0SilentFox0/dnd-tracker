@@ -128,6 +128,9 @@
     "advance": "📈 Розвиток: {key} {from} → {to} (−{cost} досвіду)",
     "downtime": "🕯 Простій: {days} дн.",
     "downtimeUndo": "↩ Відкат простою",
+    "corruption": "☠ Порча +{points} ({total}/{threshold})",
+    "corruptionMutation": "☠ Порча +{points} ({total}/{threshold}) — мутація",
+    "corruptionUndo": "↩ Відкат порчі",
     "careerSet": "🧭 Кар'єра призначена: {name}",
     "careerAdvance": "🧭 Новий рівень кар'єри: {tier}",
     "advanceUndo": "↩ Відкат розвитку: {key} {to} → {from} (+{cost} досвіду)"

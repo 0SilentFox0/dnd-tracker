@@ -25,6 +25,14 @@ describe("describeCharacterLog wfrp", () => {
     expect(describeCharacterLog({ kind: "test", data: { ...data, auto: "failure", reversed: false } }).params).toMatchObject({ auto: "failure", reversed: "no" });
   });
 
+  it("corruption", () => {
+    const params = { points: 2, total: 7, threshold: 6 };
+
+    expect(describeCharacterLog({ kind: "corruption", data: { ...params, mutation: false } })).toEqual({ key: "rest.log.corruption", params });
+    expect(describeCharacterLog({ kind: "corruption", data: { ...params, mutation: true } })).toEqual({ key: "rest.log.corruptionMutation", params });
+    expect(describeCharacterLog({ kind: "corruption", data: { undo: true } }).key).toBe("rest.log.corruptionUndo");
+  });
+
   it("downtime", () => {
     expect(describeCharacterLog({ kind: "downtime", data: { periodId: "p", days: 7, summary: {} } })).toEqual({ key: "rest.log.downtime", params: { days: 7 } });
     expect(describeCharacterLog({ kind: "downtime", data: { undo: true, days: 7 } }).key).toBe("rest.log.downtimeUndo");

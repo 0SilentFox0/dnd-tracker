@@ -72,6 +72,8 @@ export function describeCharacterLog(e: Pick<CharacterLogEntry, "kind" | "data">
       return { key: "rest.log.choicesEdit" };
     case "downtime":
       return { key: d.undo ? "rest.log.downtimeUndo" : "rest.log.downtime", params: { days: num("days") } };
+    case "corruption":
+      return d.undo ? { key: "rest.log.corruptionUndo" } : { key: d.mutation === true ? "rest.log.corruptionMutation" : "rest.log.corruption", params: { points: num("points"), total: num("total"), threshold: num("threshold") } };
     case "battle_result":
       return { key: "rest.log.battleResult", params: { hpBefore: num("hpBefore"), hpAfter: num("hpAfter"), maxHp: num("maxHp"), dead: yes(d.dead) } };
   }

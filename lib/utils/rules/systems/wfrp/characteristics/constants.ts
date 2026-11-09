@@ -1,6 +1,4 @@
-export const CHARACTERISTIC_KEYS = ["ws", "bs", "s", "t", "i", "ag", "dex", "int", "wp", "fel"] as const;
-
-export type CharacteristicKey = (typeof CHARACTERISTIC_KEYS)[number];
+export { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/constants/wfrp-characteristics";
 
 export const SKILL_KEY_RE = /^[a-z][a-z0-9-]{0,39}$/;
 

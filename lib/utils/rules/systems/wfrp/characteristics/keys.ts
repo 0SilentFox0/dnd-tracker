@@ -1,3 +1,5 @@
+import { readCorruption } from "../corruption/read";
+import type { CorruptionState } from "../corruption/types";
 import { readDowntime } from "../downtime/read";
 import type { DowntimeState } from "../downtime/types";
 
@@ -34,6 +36,7 @@ export type Characteristics = {
   spentArchived: number;
   career?: CareerState;
   downtime?: DowntimeState;
+  corruption?: CorruptionState;
 };
 
 const fill = (value: number) => Object.fromEntries(CHARACTERISTIC_KEYS.map((k) => [k, value])) as Record<CharacteristicKey, number>;
@@ -111,6 +114,8 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
 
   const downtime = readDowntime(raw.downtime);
 
+  const corruption = readCorruption(raw.corruption);
+
   return {
     base: readPerKey(raw.base, 1, 100, 30, DEFAULT_CHARACTERISTICS.base),
     advances: readPerKey(raw.advances, 0, 100, 0, DEFAULT_CHARACTERISTICS.advances),
@@ -123,5 +128,6 @@ export function readCharacteristics(row: { characteristics?: unknown }): Charact
     spentArchived: raw.spentArchived === undefined || !isInt(raw.spentArchived, 0, 1e9) ? 0 : raw.spentArchived,
     ...(career ? { career } : {}),
     ...(downtime ? { downtime } : {}),
+    ...(corruption ? { corruption } : {}),
   };
 }

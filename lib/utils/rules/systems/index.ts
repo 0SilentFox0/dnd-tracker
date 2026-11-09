@@ -7,6 +7,10 @@ export { type LedgerViewer, preserveServerOwned, redactLedger } from "./wfrp/adv
 export { type CareerState, CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, DEFAULT_CHARACTERISTICS, type LedgerEntry, readCharacteristics, SKILL_ADVANCE_KEY_RE, SKILL_KEY_RE, SPEC_RE } from "./wfrp/characteristics/keys";
 export type { DefenseKind, HitLocation } from "./wfrp/combat/constants";
 export type { WfrpParticipantStats } from "./wfrp/combat/participant";
+export { GRANT_MAX as CORRUPTION_GRANT_MAX } from "./wfrp/corruption/constants";
+export { readCorruption } from "./wfrp/corruption/read";
+export type { CorruptionState, GrantSnapshot, GrantSummary, Mutation, MutationEffect, MutationKind } from "./wfrp/corruption/types";
+export { EMPTY_CORRUPTION } from "./wfrp/corruption/types";
 export type { CreationCtx, CreationPicks, CreationRolls, PlanDraftResult, SpeciesProfile } from "./wfrp/creation";
 export { STAT_FLOOR } from "./wfrp/creation";
 export type { PeriodHero, PlannedHero } from "./wfrp/downtime/plan-period";

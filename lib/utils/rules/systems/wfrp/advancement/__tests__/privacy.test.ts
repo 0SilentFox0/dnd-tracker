@@ -63,3 +63,24 @@ describe("preserveServerOwned", () => {
     expect(preserveServerOwned(existing, forged).career).toBeUndefined();
   });
 });
+
+describe("corruption privacy", () => {
+  const corruption = { points: 7, mutations: [] };
+
+  it("redactLedger hides corruption and downtime from others, not from owner/DM", () => {
+    const c = { ...existing, corruption, downtime };
+
+    const other = redactLedger(c, { isDM: false, isOwner: false });
+
+    expect("corruption" in other).toBe(false);
+    expect("downtime" in other).toBe(false);
+    expect(other.ledger).toEqual([]);
+    expect(redactLedger(c, { isDM: false, isOwner: true })).toBe(c);
+    expect(redactLedger(c, { isDM: true, isOwner: false })).toBe(c);
+  });
+
+  it("preserveServerOwned keeps the stored corruption", () => {
+    expect(preserveServerOwned({ ...existing, corruption }, { ...DEFAULT_CHARACTERISTICS, corruption: { points: 0, mutations: [] } }).corruption).toEqual(corruption);
+    expect("corruption" in preserveServerOwned(existing, { ...DEFAULT_CHARACTERISTICS, corruption })).toBe(false);
+  });
+});

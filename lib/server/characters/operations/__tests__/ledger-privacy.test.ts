@@ -191,4 +191,32 @@ describe("PATCH cannot bypass the ledger", () => {
 
     expect(saved.career).toMatchObject({ tier: 2 });
   });
+
+  const corruption = { points: 7, mutations: [{ id: "m1", at: "2026-01-01T00:00:00.000Z", kind: "physical" as const, roll: 5, text: "Scales", effects: [] }] };
+
+  const withCorruption = { ...record, characteristics: { ...stored, corruption } };
+
+  it.each([
+    ["DM", { userId: "dm", isDM: true }],
+    ["player", { userId: "p1", isDM: false }],
+  ])("%s: the stored corruption wins over the one in the form", async (_n, viewer) => {
+    const saved = await patch(viewer, { ...stored, corruption: { points: 0, mutations: [] } }, withCorruption);
+
+    expect(saved.corruption).toEqual(corruption);
+  });
+
+  it("another player does not see corruption, owner and DM do", async () => {
+    const run = async (viewer: { userId: string; isDM: boolean }) => {
+      h.access.mockResolvedValue({ ...viewer, campaign: { id: "camp", rules: WFRP_RULES } });
+      h.character.findMany.mockResolvedValue([{ id: "theirs", controlledBy: "p2", characteristics: { ...stored, corruption } }]);
+
+      const gate = await listOperation.gate({ campaignId: "camp", characterId: "" });
+
+      return ((await listOperation.run(gate as never, { compact: false })) as { characteristics: object }[])[0].characteristics;
+    };
+
+    expect("corruption" in (await run({ userId: "p1", isDM: false }))).toBe(false);
+    expect("corruption" in (await run({ userId: "p2", isDM: false }))).toBe(true);
+    expect("corruption" in (await run({ userId: "dm", isDM: true }))).toBe(true);
+  });
 });

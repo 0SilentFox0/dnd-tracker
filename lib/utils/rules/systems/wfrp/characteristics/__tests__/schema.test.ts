@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CHARACTERISTIC_KEYS, CharacteristicsSchema, DEFAULT_CHARACTERISTICS, readCharacteristics } from "../schema";
+import { CHARACTERISTIC_KEYS, CharacteristicsSchema, DEFAULT_CHARACTERISTICS, readCharacteristics, UnitCharacteristicsSchema } from "../schema";
 
 describe("CharacteristicsSchema", () => {
   it("parse({}) gives defaults", () => {
@@ -106,5 +106,15 @@ describe("readCharacteristics matches schema", () => {
       expect(readCharacteristics({ characteristics: { ledger: [entry] } }).ledger[0]).toEqual(entry);
       expect(readCharacteristics({ characteristics: { ledger: [{ ...entry, tick: "skill:melee" }] } }).ledger[0].tick).toBe("skill:melee");
     });
+  });
+});
+
+describe("corruption in schemas", () => {
+  const valid = { points: 2, mutations: [] };
+
+  it("CharacteristicsSchema validates it, UnitCharacteristicsSchema drops it", () => {
+    expect(CharacteristicsSchema.safeParse({ corruption: { points: -1 } }).success).toBe(false);
+    expect(CharacteristicsSchema.safeParse({ corruption: valid }).success).toBe(true);
+    expect("corruption" in UnitCharacteristicsSchema.parse({ corruption: valid })).toBe(false);
   });
 });

@@ -128,6 +128,9 @@
     "advance": "📈 Advance: {key} {from} → {to} (−{cost} XP)",
     "downtime": "🕯 Downtime: {days} d",
     "downtimeUndo": "↩ Downtime undone",
+    "corruption": "☠ Corruption +{points} ({total}/{threshold})",
+    "corruptionMutation": "☠ Corruption +{points} ({total}/{threshold}) — mutation",
+    "corruptionUndo": "↩ Corruption undone",
     "careerSet": "🧭 Career assigned: {name}",
     "careerAdvance": "🧭 Career tier reached: {tier}",
     "advanceUndo": "↩ Advance undone: {key} {to} → {from} (+{cost} XP)"
