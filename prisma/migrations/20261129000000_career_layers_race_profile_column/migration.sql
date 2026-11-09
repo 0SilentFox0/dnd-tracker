@@ -24,4 +24,4 @@ ALTER TABLE "careers_base" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "races" ADD COLUMN "profile" JSONB;
 ALTER TABLE "races_base" ADD COLUMN "profile" JSONB;
 
-UPDATE "races" r SET "profile" = rp."profile" FROM "race_profiles" rp WHERE rp."raceId" = r."id";
+UPDATE "races" r SET "profile" = rp."profile", "updatedAt" = CURRENT_TIMESTAMP FROM "race_profiles" rp WHERE rp."raceId" = r."id";

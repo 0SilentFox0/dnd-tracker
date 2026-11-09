@@ -9,7 +9,7 @@ const db = vi.hoisted(() => {
 
   return {
     $queryRaw: vi.fn(async () => [] as Array<{ id: string }>),
-    spell: delegate(), spellGroup: delegate(), race: delegate(), gameClass: delegate(), feat: delegate(), background: delegate(), unit: delegate(),
+    spell: delegate(), spellGroup: delegate(), race: delegate(), gameClass: delegate(), feat: delegate(), career: delegate(), background: delegate(), unit: delegate(),
     mainSkill: delegate(), skill: delegate(), skillTree: delegate(), artifactSet: delegate(), artifact: delegate(), campaignTrack: delegate(),
     character: delegate(), characterInventory: delegate(), characterSkills: delegate(),
   };
