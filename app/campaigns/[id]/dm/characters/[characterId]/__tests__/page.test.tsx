@@ -39,13 +39,13 @@ describe("DmCharacterPage (server)", () => {
     expect(el.props.children.props.children.props.canEdit).toBe(true);
   });
 
-  it("wfrp: профіль у scope wfrpDowntime", async () => {
+  it("wfrp: профіль у scope wfrpDowntime+wfrpCorruption", async () => {
     readCharacterSheet.mockResolvedValue(NextResponse.json({}));
     wfrp.is = true;
 
     const el = (await DmCharacterPage({ params: Promise.resolve({ id: "c1", characterId: "ch9" }), searchParams: Promise.resolve({}) })) as ReactElement<{ namespaces: string[]; children: ReactElement }>;
 
-    expect(el.props.namespaces).toEqual(["wfrpDowntime"]);
+    expect(el.props.namespaces).toEqual(["wfrpDowntime", "wfrpCorruption"]);
     expect(el.props.children.type).toBe(PrefetchedQuery);
 
     wfrp.is = false;

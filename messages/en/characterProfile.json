@@ -216,7 +216,8 @@
       "dexterityCapped": "Dexterity (cap {cap})",
       "hitDice": "Hit dice: {dice}",
       "bonuses": "Bonuses",
-      "wounds": "SB {sb} + 2 × TB {tb} + WPB {wpb}{extra, plural, =0 {} other { + {extra}}}"
+      "wounds": "SB {sb} + 2 × TB {tb} + WPB {wpb}{extra, plural, =0 {} other { + {extra}}}",
+      "woundsMutation": "Mutations: {amount, number, ::sign-always}"
     },
     "abilityPick": "+{n} {ability, select, strength {STR} dexterity {DEX} constitution {CON} intelligence {INT} wisdom {WIS} charisma {CHA} other {}}",
     "spellOrigin": {

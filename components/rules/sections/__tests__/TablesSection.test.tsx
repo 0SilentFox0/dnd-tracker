@@ -122,6 +122,21 @@ describe("TablesSection", () => {
       expect(set).toHaveBeenLastCalledWith("tables", { mutationPhysical: [{ max: 100, effects: [{ type: "characteristic", key: "ag", amount: -30 }] }] });
     });
 
+    it("never commits a zero effect amount", () => {
+      const set = vi.fn();
+
+      render(<TablesSection form={{ campaignId: "c", data: { ...DEFAULT_RULES, tables: { mutationPhysical: [{ max: 100, effects: [{ type: "characteristic", key: "ag", amount: -5 }] }] } }, set } as unknown as Parameters<typeof TablesSection>[0]["form"]} />);
+
+      pick("wfrpTables.slots.mutationPhysical");
+
+      const amount = screen.getByRole("textbox", { name: "wfrpTables.amount" });
+
+      fireEvent.change(amount, { target: { value: "0" } });
+      fireEvent.blur(amount);
+
+      expect(set).toHaveBeenLastCalledWith("tables", { mutationPhysical: [{ max: 100, effects: [{ type: "characteristic", key: "ag", amount: -1 }] }] });
+    });
+
     it("add effect starts with a characteristic", () => {
       const set = vi.fn();
 

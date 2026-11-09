@@ -31,6 +31,8 @@ const newEffect = (type: TableEffect["type"]): TableEffect => {
   return { type, amount: 1 };
 };
 
+const nonZero = (n: number, prev: number) => n || (prev < 0 ? -1 : 1);
+
 const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
 
 const withLastHundred = (rows: TableRow[]) => rows.map((r, i) => (i === rows.length - 1 ? { ...r, max: 100 } : r));
@@ -53,10 +55,10 @@ function EffectFields({ slot, effect, onChange, onRemove }: { slot: TableSlot; e
       {effect.type === "characteristic" && (
         <>
           <SelectField aria-label={t("characteristic")} value={effect.key} options={CHARACTERISTIC_KEYS.map((key) => ({ value: key, label: tt(`gameTerms.characteristics.${key}.short`) }))} onValueChange={(key) => onChange({ ...effect, key: key as typeof effect.key })} triggerClassName="min-h-11 w-40" />
-          <BoundedNumberInput className="min-h-11 w-20" aria-label={t("amount")} min={-MUTATION_EFFECT_LIMITS.characteristic} max={MUTATION_EFFECT_LIMITS.characteristic} value={effect.amount} onCommit={(amount) => onChange({ ...effect, amount })} />
+          <BoundedNumberInput className="min-h-11 w-20" aria-label={t("amount")} min={-MUTATION_EFFECT_LIMITS.characteristic} max={MUTATION_EFFECT_LIMITS.characteristic} value={effect.amount} onCommit={(amount) => onChange({ ...effect, amount: nonZero(amount, effect.amount) })} />
         </>
       )}
-      {(effect.type === "move" || effect.type === "maxWounds") && <BoundedNumberInput className="min-h-11 w-20" aria-label={t("amount")} min={-MUTATION_EFFECT_LIMITS[effect.type]} max={MUTATION_EFFECT_LIMITS[effect.type]} value={effect.amount} onCommit={(amount) => onChange({ ...effect, amount })} />}
+      {(effect.type === "move" || effect.type === "maxWounds") && <BoundedNumberInput className="min-h-11 w-20" aria-label={t("amount")} min={-MUTATION_EFFECT_LIMITS[effect.type]} max={MUTATION_EFFECT_LIMITS[effect.type]} value={effect.amount} onCommit={(amount) => onChange({ ...effect, amount: nonZero(amount, effect.amount) })} />}
       {effect.type === "marker" && <SelectField aria-label={t("marker")} value={effect.key} options={MARKER_KEYS.map((key) => ({ value: key, label: t(`markers.${key}`) }))} onValueChange={(key) => onChange({ ...effect, key: key as typeof effect.key })} triggerClassName="min-h-11 w-40" />}
       <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={t("removeEffect")} onClick={onRemove}>
         <X className="size-4" />

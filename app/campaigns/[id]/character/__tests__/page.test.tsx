@@ -67,13 +67,13 @@ describe("CharacterPage (server)", () => {
     expect(readCharacterSheet).not.toHaveBeenCalled();
   });
 
-  it("wfrp: профіль у scope wfrpDowntime, homm: без нього", async () => {
+  it("wfrp: профіль у scope wfrpDowntime+wfrpCorruption, homm: без нього", async () => {
     readCharacterSheet.mockResolvedValue(NextResponse.json({}));
     wfrp.is = true;
 
     const scoped = (await render()) as unknown as ReactElement<{ namespaces: string[]; children: ReactElement }>;
 
-    expect(scoped.props.namespaces).toEqual(["wfrpDowntime"]);
+    expect(scoped.props.namespaces).toEqual(["wfrpDowntime", "wfrpCorruption"]);
     expect(scoped.props.children.type).toBe(PrefetchedQuery);
 
     wfrp.is = false;

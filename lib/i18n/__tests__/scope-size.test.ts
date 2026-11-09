@@ -15,6 +15,9 @@ const WFRP_DM_LIMIT_KB = 111;
 // loaded per page via ExtendLocaleScope (character pages, DM characters, DM rules), not in the layout scope; measured uk gzip 1.7 KB
 const WFRP_DOWNTIME_PAGE_LIMIT_KB = 2;
 
+// loaded per page via ExtendLocaleScope (character pages, DM character, DM rules); measured uk gzip 1.2 KB
+const WFRP_CORRUPTION_PAGE_LIMIT_KB = 2;
+
 const ROOT_LIMIT_KB = 20;
 
 const SCOPES = [
@@ -24,6 +27,7 @@ const SCOPES = [
   { name: "wfrp member (campaign + battle + every member extra)", namespaces: [...CAMPAIGN_NAMESPACES, ...WFRP_BATTLE_NAMESPACES, ...WFRP_CAMPAIGN_EXTRA, ...WFRP_MEMBER_EXTRA], limit: WFRP_MEMBER_LIMIT_KB },
   { name: "wfrp DM (member + DM extra)", namespaces: [...CAMPAIGN_NAMESPACES, ...WFRP_BATTLE_NAMESPACES, ...WFRP_CAMPAIGN_EXTRA, ...WFRP_MEMBER_EXTRA, ...WFRP_DM_EXTRA], limit: WFRP_DM_LIMIT_KB },
   { name: "wfrpDowntime page extra", namespaces: ["wfrpDowntime"], limit: WFRP_DOWNTIME_PAGE_LIMIT_KB },
+  { name: "wfrpCorruption page extra", namespaces: ["wfrpCorruption"], limit: WFRP_CORRUPTION_PAGE_LIMIT_KB },
 ] as const;
 
 describe("message scope size", () => {

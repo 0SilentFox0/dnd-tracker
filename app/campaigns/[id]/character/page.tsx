@@ -41,5 +41,5 @@ export default async function CharacterPage({ params, searchParams }: { params: 
     </PrefetchedQuery>
   );
 
-  return (await isWfrpCampaign(id)) ? <ExtendLocaleScope namespaces={["wfrpDowntime"]}>{profile}</ExtendLocaleScope> : profile;
+  return (await isWfrpCampaign(id)) ? <ExtendLocaleScope namespaces={["wfrpDowntime", "wfrpCorruption"]}>{profile}</ExtendLocaleScope> : profile;
 }

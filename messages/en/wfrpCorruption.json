@@ -1,4 +1,44 @@
 {
+  "title": "Corruption",
+  "points": "Corruption points: {points} / threshold {threshold}",
+  "overThreshold": "Over threshold",
+  "noMutations": "No mutations",
+  "mutationsTitle": "Mutations",
+  "kinds": {
+    "physical": "Body",
+    "mental": "Mind"
+  },
+  "effects": {
+    "characteristic": "{name} {amount}",
+    "move": "Move {amount}",
+    "maxWounds": "Max Wounds {amount}"
+  },
+  "chip": {
+    "label": "Corruption",
+    "short": "Cor"
+  },
+  "grant": {
+    "button": "Grant corruption",
+    "title": "Grant corruption",
+    "points": "Points",
+    "pointsHint": "1 to {max}",
+    "reason": "Reason",
+    "submit": "Grant",
+    "result": "Result",
+    "undo": "Undo",
+    "undoConfirm": "Undo the last corruption grant?",
+    "undone": "Undone"
+  },
+  "summary": {
+    "noTest": "No test needed",
+    "test": "Endurance test: {roll} vs {target}, SL {sl}",
+    "passed": "passed",
+    "failed": "failed",
+    "mutation": "New mutation",
+    "typeRoll": "Kind (d100): {roll}",
+    "capped": "Mutation limit reached",
+    "pointsCapped": "Points capped"
+  },
   "mutations": {
     "physical": {
       "1": "One limb is twisted and bent, movements turn clumsy.",

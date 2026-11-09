@@ -1,4 +1,44 @@
 {
+  "title": "Порча",
+  "points": "Пункти порчі: {points} / поріг {threshold}",
+  "overThreshold": "Понад поріг",
+  "noMutations": "Мутацій немає",
+  "mutationsTitle": "Мутації",
+  "kinds": {
+    "physical": "Тіло",
+    "mental": "Розум"
+  },
+  "effects": {
+    "characteristic": "{name} {amount}",
+    "move": "Рух {amount}",
+    "maxWounds": "Макс. Wounds {amount}"
+  },
+  "chip": {
+    "label": "Порча",
+    "short": "Пор."
+  },
+  "grant": {
+    "button": "Нарахувати порчу",
+    "title": "Нарахування порчі",
+    "points": "Пункти",
+    "pointsHint": "Від 1 до {max}",
+    "reason": "Причина",
+    "submit": "Нарахувати",
+    "result": "Результат",
+    "undo": "Відкотити",
+    "undoConfirm": "Відкотити останнє нарахування порчі?",
+    "undone": "Відкотено"
+  },
+  "summary": {
+    "noTest": "Тест не потрібен",
+    "test": "Тест Витривалості: {roll} проти {target}, SL {sl}",
+    "passed": "пройдено",
+    "failed": "провалено",
+    "mutation": "Нова мутація",
+    "typeRoll": "Вид (d100): {roll}",
+    "capped": "Досягнуто ліміт мутацій",
+    "pointsCapped": "Пункти обмежено"
+  },
   "mutations": {
     "physical": {
       "1": "Одна кінцівка скручена й вигнута, рухи стали незграбними.",

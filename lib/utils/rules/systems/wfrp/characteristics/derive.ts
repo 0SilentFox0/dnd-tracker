@@ -44,5 +44,7 @@ export function skillTarget(c: Characteristics, skillKey: string, spec?: string)
 export function woundsBreakdown(c: Characteristics): HpBreakdownLine[] {
   const tb = bonus(c, "t");
 
-  return [{ label: sheetLineKey("wounds"), params: { sb: bonus(c, "s"), tb, wpb: bonus(c, "wp"), extra: c.extraWounds * tb } }];
+  const mutation = modifiersOf(c.corruption).maxWounds;
+
+  return [{ label: sheetLineKey("wounds"), params: { sb: bonus(c, "s"), tb, wpb: bonus(c, "wp"), extra: c.extraWounds * tb } }, ...(mutation ? [{ label: sheetLineKey("woundsMutation"), params: { amount: mutation } }] : [])];
 }

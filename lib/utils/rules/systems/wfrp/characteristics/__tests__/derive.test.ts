@@ -28,6 +28,15 @@ describe("derive", () => {
     expect(lines).toEqual([{ label: "characterProfile.sheet.lines.wounds", params: { sb: 4, tb: 3, wpb: 3, extra: 3 } }]);
   });
 
+  it("woundsBreakdown adds a mutation line when maxWounds is modified", () => {
+    const corruption = { points: 7, mutations: [{ id: "m", at: "x", kind: "physical" as const, roll: 1, text: "t", effects: [{ type: "maxWounds" as const, amount: -2 }] }] };
+
+    const lines = woundsBreakdown(make({ base: { s: 40, t: 35, wp: 30 }, corruption }));
+
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toEqual({ label: "characterProfile.sheet.lines.woundsMutation", params: { amount: -2 } });
+  });
+
   it("walk and run yards", () => {
     const c = make({ move: 5 });
 
