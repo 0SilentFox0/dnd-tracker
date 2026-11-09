@@ -40,5 +40,5 @@ export default async function DMRulesPage({ params }: { params: Promise<{ id: st
     </HudFormPage>
   );
 
-  return (await isWfrpCampaign(id)) ? <ExtendLocaleScope namespaces={["battleWfrp"]}>{form}</ExtendLocaleScope> : form;
+  return (await isWfrpCampaign(id)) ? <ExtendLocaleScope namespaces={["battleWfrp", "wfrpDowntime"]}>{form}</ExtendLocaleScope> : form;
 }

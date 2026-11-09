@@ -27,6 +27,16 @@ describe("system ui registry", () => {
     expect(systemUiOf("homm").AdvancementTab).toBeUndefined();
   });
 
+  it("only wfrp has the downtime tab and the period panel", () => {
+    expect(systemUiOf("wfrp").DowntimeTab).toBeDefined();
+    expect(systemUiOf("wfrp").DowntimePeriodPanel).toBeDefined();
+
+    for (const key of ["homm", "dnd5e"] as const) {
+      expect(systemUiOf(key).DowntimeTab).toBeUndefined();
+      expect(systemUiOf(key).DowntimePeriodPanel).toBeUndefined();
+    }
+  });
+
   it("sheet flags: d20 keeps spells/items/rest kinds/d20 stats, wfrp keeps only spells", () => {
     for (const key of ["homm", "dnd5e"] as const) {
       const sys = RULE_SYSTEM_REGISTRY[key];

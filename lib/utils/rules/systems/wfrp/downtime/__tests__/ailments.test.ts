@@ -6,7 +6,7 @@ import type { Ailment } from "../types";
 
 const rng = () => 0.5;
 
-const a = (kind: Ailment["kind"], daysLeft: number, id = kind): Ailment => ({ id, kind, daysLeft, label: id });
+const a = (kind: Ailment["kind"], daysLeft: number, id: string = kind): Ailment => ({ id, kind, daysLeft, label: id });
 
 describe("tickAilments", () => {
   it.each(["disease", "injury"] as const)("counts down %s and removes it on expiry", (kind) => {

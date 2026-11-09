@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { ExperienceDialog } from "./ExperienceDialog";
 import { RestDialog } from "./RestDialog";
 
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useRest } from "@/lib/hooks/characters";
@@ -22,11 +23,13 @@ export function PartyRestActions({ campaignId, characters }: { campaignId: strin
 
   const confirm = useConfirm();
 
-  const { system } = useRuleSystem({ campaignId });
+  const { system, key } = useRuleSystem({ campaignId });
 
   const [open, setOpen] = useState<"rest" | "xp" | null>(null);
 
   const ooc = rules?.outOfCombat;
+
+  const Panel = key && system?.downtime && ooc?.persistResources ? systemUiOf(key).DowntimePeriodPanel : undefined;
 
   if (!ooc || characters.length === 0 || (!ooc.persistResources && !ooc.xp)) return null;
 
@@ -59,6 +62,7 @@ export function PartyRestActions({ campaignId, characters }: { campaignId: strin
           {t("session")}
         </Button>
       )}
+      {Panel && <Panel campaignId={campaignId} characters={characters} />}
       {ooc.xp && (
         <Button type="button" variant="outline" onClick={() => setOpen("xp")}>
           {t("xp")}

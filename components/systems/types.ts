@@ -5,7 +5,7 @@ import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings
 import type { DifficultyKey } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { CareerData } from "@/types/careers";
-import type { SheetRollBody, SheetRollResult, SheetTotal, WfrpDraftIdentityInput } from "@/types/characters";
+import type { CharacterListItem, SheetRollBody, SheetRollResult, SheetTotal, WfrpDraftIdentityInput } from "@/types/characters";
 import type { Unit } from "@/types/units";
 
 export interface SheetRollRequest {
@@ -82,6 +82,11 @@ export interface EquippedSummaryProps {
   characterId: string;
 }
 
+export interface DowntimePeriodPanelProps {
+  campaignId: string;
+  characters: CharacterListItem[];
+}
+
 export interface SystemUi {
   HeroStats: ComponentType;
   StatsTab: ComponentType<StatsTabProps>;
@@ -98,4 +103,6 @@ export interface SystemUi {
   battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
   ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;
   EquippedSummary?: ComponentType<EquippedSummaryProps>;
+  DowntimeTab?: ComponentType;
+  DowntimePeriodPanel?: ComponentType<DowntimePeriodPanelProps>;
 }

@@ -51,6 +51,7 @@ import type validation from "./messages/uk/validation.json";
 import type wfrpAdvancement from "./messages/uk/wfrpAdvancement.json";
 import type wfrpCareers from "./messages/uk/wfrpCareers.json";
 import type wfrpCreation from "./messages/uk/wfrpCreation.json";
+import type wfrpDowntime from "./messages/uk/wfrpDowntime.json";
 import type wfrpEquipment from "./messages/uk/wfrpEquipment.json";
 import type wfrpEquipmentEditor from "./messages/uk/wfrpEquipmentEditor.json";
 import type wfrpMagic from "./messages/uk/wfrpMagic.json";
@@ -122,6 +123,7 @@ declare module "next-intl" {
       wfrpEquipmentEditor: typeof wfrpEquipmentEditor;
       wfrpTraits: typeof wfrpTraits;
       wfrpTables: typeof wfrpTables;
+      wfrpDowntime: typeof wfrpDowntime;
       wfrpMagic: typeof wfrpMagic;
     };
   }
