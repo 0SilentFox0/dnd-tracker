@@ -31,12 +31,12 @@ export async function grantCorruption(gate: CharacterGate, input: CorruptionGran
 
   const campaignId = access.campaign.id;
 
-  await assertNotInActiveBattle(campaignId, [character.id], API_ERRORS.CORRUPTION_IN_BATTLE);
-
   return prisma.$transaction(async (tx) => {
     const locked = (await lockCharacters(tx, [character.id])).get(character.id);
 
     if (!locked) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+    await assertNotInActiveBattle(campaignId, [character.id], API_ERRORS.CORRUPTION_IN_BATTLE);
 
     const grantId = randomUUID();
 
@@ -57,12 +57,12 @@ export async function undoCorruption(gate: CharacterGate, input: CorruptionUndoI
 
   const campaignId = access.campaign.id;
 
-  await assertNotInActiveBattle(campaignId, [character.id], API_ERRORS.CORRUPTION_IN_BATTLE);
-
   return prisma.$transaction(async (tx) => {
     const locked = (await lockCharacters(tx, [character.id])).get(character.id);
 
     if (!locked) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+    await assertNotInActiveBattle(campaignId, [character.id], API_ERRORS.CORRUPTION_IN_BATTLE);
 
     const result = corruption.planUndo(locked.characteristics.corruption, input.grantId);
 

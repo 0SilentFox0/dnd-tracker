@@ -72,7 +72,7 @@ async function editableData({ access, character }: Gate, input: Parsed) {
 
 const sameCareer = (a?: CareerState | null, b?: CareerState | null) => (!a && !b) || Boolean(a && b && a.careerId === b.careerId && a.tier === b.tier && a.ticks.length === b.ticks.length && a.ticks.every((t, i) => t === b.ticks[i]));
 
-function reconcileCharacteristics(fresh: CharacterRecord, incoming: Characteristics, isDM: boolean, careerBaseline?: CareerState | null): Characteristics {
+export function reconcileCharacteristics(fresh: CharacterRecord, incoming: Characteristics, isDM: boolean, careerBaseline?: CareerState | null): Characteristics {
   const stored = readCharacteristics(fresh);
 
   if (!isDM) return preserveServerOwned(stored, incoming);

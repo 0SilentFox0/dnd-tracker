@@ -247,6 +247,8 @@ export function mergeRules(current: Ruleset, patch: MergePatch): MergeRulesResul
 
   const next = Object.fromEntries((Object.keys(current) as (keyof Ruleset)[]).map((k) => [k, { ...current[k], ...(sections[k] ?? {}) }]));
 
+  if (isRecord(sections.tables)) next.tables = Object.fromEntries(Object.entries(next.tables).filter(([, rows]) => rows !== null));
+
   const groupPatch = sections.encounters?.unitGroups;
 
   if (isRecord(groupPatch)) {

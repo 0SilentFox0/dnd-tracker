@@ -78,7 +78,7 @@ describe("rules.tables wiring", () => {
 
     const reset = set.ok ? mergeRules(set.rules, { tables: { critHead: null } }) : set;
 
-    expect(reset.ok && reset.rules.tables.critHead).toBeNull();
+    expect(reset.ok && "critHead" in reset.rules.tables).toBe(false);
   });
 
   it("mergeRules keeps other slots on a mutation patch and resets with null", () => {
@@ -93,6 +93,7 @@ describe("rules.tables wiring", () => {
 
     const reset = set.ok ? mergeRules(set.rules, { tables: { mutationMental: null } }) : set;
 
-    expect(reset.ok && reset.rules.tables.mutationMental).toBeNull();
+    expect(reset.ok && "mutationMental" in reset.rules.tables).toBe(false);
+    expect(reset.ok && reset.rules.tables.critHead).toHaveLength(5);
   });
 });
