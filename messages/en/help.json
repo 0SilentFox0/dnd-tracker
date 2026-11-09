@@ -417,6 +417,11 @@
         "heading": "Downtime",
         "b0": "The \"Period passed\" button in the character list (1 to 30 days, choose the heroes) runs downtime in order: endeavours, healing, ailments, then an event from the table. Dead heroes are skipped, unconscious ones do not perform endeavours.",
         "b1": "Endeavours and ailments are set on the sheet's \"Downtime\" tab. Earned income goes to the purse, successful training gives a discount on the next purchase in Advancement, and the event table is edited in the rules (tables section). Only the latest period can be rolled back, and only until manual changes are made."
+      },
+      "s8": {
+        "heading": "Corruption and mutations",
+        "b0": "The DM grants corruption with a button on the hero's sheet: 1 to 10 points with a reason. The threshold is the Toughness bonus plus the Willpower bonus. An Endurance test is needed only when the total goes above the threshold; exactly at the threshold there is no test, and every further grant above it tests again. A failure gives a mutation (up to 20 per hero); past the limit the grant adds no new mutation.",
+        "b1": "Mutations are rolled on the \"Mutations: body\" and \"Mutations: mind\" tables in the campaign rules (the tables section). A mutation's effects are a characteristic, Move or max Wounds with a sign. Mutations apply on the sheet and in battle. Only the latest grant can be undone, and corruption cannot be granted or undone during an active battle."
       }
     }
   }

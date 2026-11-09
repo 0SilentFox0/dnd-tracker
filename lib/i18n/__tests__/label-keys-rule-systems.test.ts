@@ -22,6 +22,9 @@ describe("rule system labels have translations", () => {
   expectLabelKeys("wfrpDowntime", "ailments", ["festering", "disease", "injury"]);
   expectLabelKeys("wfrpDowntime", "events", DEFAULT_TABLES.downtimeEvent.map((_, i) => String(i + 1)));
   expectLabelKeys("wfrpTables", "slots", [...TABLE_SLOTS]);
+  expectLabelKeys("wfrpCorruption", "kinds", ["physical", "mental"]);
+  expectLabelKeys("wfrpCorruption", "effects", ["characteristic", "move", "maxWounds"]);
+  expectLabelKeys("wfrpTables", "effect", ["damage", "wounds", "condition", "marker", "characteristic", "move", "maxWounds"]);
   expectLabelKeys("wfrpCorruption", "mutations.physical", DEFAULT_TABLES.mutationPhysical.map((_, i) => String(i + 1)));
   expectLabelKeys("wfrpCorruption", "mutations.mental", DEFAULT_TABLES.mutationMental.map((_, i) => String(i + 1)));
 

@@ -1,4 +1,8 @@
 {
+  "2026-11-09-wfrp-corruption": {
+    "title": "Grim d100: corruption and mutations",
+    "body": "The DM grants a hero corruption points on the sheet's \"Battle\" tab. When the total exceeds the threshold (Toughness bonus + Willpower bonus), the hero takes an Endurance test; a failure adds a permanent body or mind mutation that changes characteristics, Move or Wounds. Points, threshold and mutations are shown on the sheet; the DM can undo the latest grant."
+  },
   "2026-11-08-wfrp-downtime": {
     "title": "Grim d100: downtime",
     "body": "Between adventures the DM presses \"Period passed\" in the character list: wounds heal, ailments run their course or worsen, every hero performs the chosen endeavour (earn, train, tend a companion, rest), and the event table adds some chance. Endeavours are picked on the \"Downtime\" tab of the sheet; the DM can roll back the latest period."

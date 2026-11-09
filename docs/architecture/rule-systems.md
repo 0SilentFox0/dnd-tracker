@@ -30,6 +30,7 @@
 | `cellFeetOf(rules)` | розмір клітинки в футах (`grid/cell-feet.ts`): homm/dnd5e 5, wfrp 6 (2 yd); `CELL_FEET` видалено, `rules` — обов'язковий параметр grid-хелперів (рух, шаблони, досяжність, цілі) | `lib/utils/battle/grid/*` |
 | `traits` | `RuleSystemTraits`: `recipes` (рецепти Traits у галереї вмінь), `unitBuild(row, abilities)` (поля учасника й атаки-Traits юніта), `psychology` (Fear/Terror при приєднанні); d20 не має. Прапорець = наявність `traits` | `RecipeGallery`, `create-participant-from-unit`, `runJoinTriggers` |
 | `downtime` | `RuleSystemDowntime`: `planPeriod`, `validateEndeavour`, `maxDays`; `undefined` у d20 | `downtime-handler.ts`, операції `downtime.*` (`set`, `period`, `period.undo`) |
+| `corruption` | `RuleSystemCorruption`: `planGrant`, `planUndo`, `grantMax`; `undefined` у d20 | `corruption-handler.ts`, операції `corruption.grant`/`corruption.undo` |
 | `battle.supported` | wfrp = `true` (5b-1); `false` → старт бою 409 `SYSTEM_BATTLE_UNSUPPORTED` | `start-mutation`, setup UI |
 | `unusedMechanics` | механіки, що ховаються на сторінці правил | `RulesForm` |
 
@@ -54,6 +55,7 @@
 | `wfrp/tables/` | `roll-table.ts` — спільний `rollTable`; `defaults.ts` (`DEFAULT_TABLES`), `resolve.ts` (`resolveTable`, `rollSlot`) — таблиці критів/miscast/wrath з `rules.tables` ([«Межі 5h-2»](#межі-5h-2)) |
 | `wfrp/traits/` | `constants.ts` (числа-заглушки Traits), `read.ts` (`traitEntries`/`traitEffects`/`sizeStep`), `recipes.ts` (14 рецептів), `unit-build.ts` (`wfrpUnitBuild`), `size.ts` (`sizeHitMod`, `sizeDamageBonus`, `wardRoll`), `psychology.ts` (`wfrpPsychology`), `index.ts` (`WFRP_TRAITS`) |
 | `wfrp/downtime/` | `constants.ts` (числа), `status.ts` (дохід за статусом), `heal.ts`, `ailments.ts` (festering/disease/injury), `endeavours.ts` (earn/train/tend/rest/custom), `event.ts` (`downtimeEvent`), `plan-period.ts`, `read.ts`, `index.ts` — [«Межі 5h-4»](#межі-5h-4) |
+| `wfrp/corruption/` | `constants.ts` (числа), `plan-grant.ts`, `undo.ts`, `modifiers.ts`/`fold.ts` (ефекти мутацій), `threshold.ts`, `read.ts`, `types.ts` — [«Межі 5h-3»](#межі-5h-3) |
 | `wfrp/sheet-test.ts`, `session.ts` | `sheetTest.roll` і `rest.onSession` |
 | `components/systems/wfrp/` | `HeroStats`, `StatsTab`, `StatsFields`, `UnitStatsFields`, `RollDialogBody`, редактори характеристик і навичок |
 
@@ -178,6 +180,23 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - Бюджет OpenAPI → 193000 B (доку 191719, дії `downtime.*`).
 - e2e: `lib/server/characters/__tests__/wfrp-downtime-e2e.test.ts`.
 
+## Межі 5h-3
+
+Порча й мутації: нарахування ДМ з тестом Endurance понад поріг, мутації з таблиць `mutationPhysical`/`mutationMental`, блок порчі на вкладці «Бій» аркуша, відкат останнього нарахування. Spec/план: `docs/superpowers/{specs,plans}/2026-11-09-wfrp-5h3-corruption*`.
+
+- Стан живе в `characteristics.corruption`, без міграцій.
+- Модифікатори лише через `derive` і `foldCorruption` для учасника (знімок бою має ефективні значення без списку мутацій; `maxWounds` учасника береться з рядка героя).
+- Приватність: гравець бачить свої пункти й мутації на аркуші; `list` і учасник бою — без `corruption`; таблиці `mutation*` приховані; журнал `CORRUPTION` — ДМ і власник.
+- `Mutation.text` — `LogLine` (відхилення від спеки): переклад мовою глядача.
+- Капи: `POINTS_MAX`, `MUTATIONS_MAX` (понад ліміт — `capped`, мутації нема).
+- Мінімум 1 для характеристики, Move і Wounds; верхня межа згортання 200. Ефект мутації не буває нульовим (редактор таблиць підставляє ±1).
+- Розклад Wounds (`woundsBreakdown`) показує внесок мутацій окремим рядком, коли він ненульовий.
+- Юніти порчі не приймають (`UnitCharacteristicsSchema`); недоступно в активному бою.
+- Поза межами: автоджерела порчі, зняття порчі, Dissolution, токен, шаблони (5g).
+- Namespace `wfrpCorruption` вантажиться посторінково (3 сторінки), рядок `scope-size` 2 KB (uk gzip ≈ 1.2 KB).
+- Бюджет OpenAPI без змін (дії `corruption.*` ≈ 0 KB).
+- e2e: `lib/server/characters/__tests__/wfrp-corruption-e2e.test.ts`.
+
 ## Межі 5e-1
 
 Таланти й XP-леджер (на `feat/wfrp`, не змерджено; міграція `feats_xp_cost_max_rank`, expand-only). Spec/план — `docs/superpowers/{specs,plans}/2026-11-05-wfrp-5e1*`.
@@ -231,6 +250,7 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - Defensive не реалізовано (`implemented:false`) до тексту книги.
 - Traits: `wfrp/traits/constants.ts` (поріг Ward на d10, кроки й множники Size, критерій SL і рівні `broken` Fear/Terror, Breath: радіус/дальність/без SB, Regenerate 1d10, Night Vision 60 ft, перелік атак-Traits і `TRAIT_SIZES`), `BALANCE_REF_INCOMING`; Terror випереджає Fear, далі більше значення, і Terror також записує fear як протестований з тим самим цільовим числом.
 - Психологія (5h-1): у рушії лише дві сторони (`ally`/`enemy`), нейтральної немає, тож «нейтральний тестер» неможливий. Не тестується пробудження ворогів лабіринту (`withMazeAwareness` чиста, без rng/правил). Прямий `add-participant` (не резерв) тестується через `runPsychology`.
+- Порча (5h-3): `wfrp/corruption/constants.ts` (`GRANT_MAX`, `POINTS_MAX`, `MUTATIONS_MAX`, `PHYSICAL_MAX_ROLL`, тест `endurance`/`challenging`), межі ефектів `lib/constants/wfrp-mutations.ts`, поріг TB + WPB, «рівно на порозі — без тесту», повторний тест при кожному нарахуванні понад поріг, дефолтні таблиці `mutationPhysical`/`mutationMental` (рядки й ефекти).
 - Простій (5h-4): усі числа `wfrp/downtime/constants.ts` (`MAX_DAYS`, `REST_HEAL_MULTIPLIER`, `TEND_*`, `FESTERING_*`, `TRAIN_DISCOUNT_*`, складність `ENDEAVOUR_DIFFICULTY`, `EARN_STATUS_DEFAULT`), дефолтна таблиця `downtimeEvent`, формула доходу за статусом (`status.ts`, `STATUS_COIN`), тести endeavours і механіка festering/disease.
 - Ефекти Traits приймає лише ресурс `units` (guard у `lib/server/content/resources/units.ts`); раси/персонажі/артефакти в d20-кампаніях їх приймають, але вони інертні (M4).
 
