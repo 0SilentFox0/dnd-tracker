@@ -11,7 +11,6 @@ export type { CreationCtx, CreationPicks, CreationRolls, PlanDraftResult, Specie
 export { STAT_FLOOR } from "./wfrp/creation";
 export type { PeriodHero, PlannedHero } from "./wfrp/downtime/plan-period";
 export { readDowntime } from "./wfrp/downtime/read";
-export { AilmentInputSchema, EndeavourSchema } from "./wfrp/downtime/schema";
 export type { Ailment, AilmentKind, DowntimeState, Endeavour, EndeavourKind, PeriodSnapshot, PeriodSummary, TrainingCredit } from "./wfrp/downtime/types";
 export { AILMENTS_MAX } from "./wfrp/downtime/types";
 export type { QualityKey, QualityRef } from "./wfrp/equipment/qualities";
