@@ -7,7 +7,7 @@ describe("background bundle", () => {
   it("places backgrounds after feats and declares origin dependency", () => {
     const keys = BUNDLE_TABLES.map((t) => t.key);
 
-    expect(keys.indexOf("backgrounds")).toBe(keys.indexOf("feats") + 1);
+    expect(keys.indexOf("backgrounds")).toBe(keys.indexOf("feats") + 2);
     expect(BUNDLE_TABLES.find((t) => t.key === "backgrounds")?.fks).toMatchObject({ originFeatId: "feats" });
   });
   it("accepts older bundles and remaps the origin reference", () => {

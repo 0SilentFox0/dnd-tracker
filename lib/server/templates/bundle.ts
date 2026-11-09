@@ -9,7 +9,7 @@ import { type CompendiumBundle, type CompendiumBundleDb,CompendiumBundleSchema }
 
 export type BundleTable = (typeof SYNC_TABLE_SCOPES)[number];
 
-type Delegate = "spellGroup" | "race" | "gameClass" | "feat" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
+type Delegate = "spellGroup" | "race" | "gameClass" | "feat" | "career" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
 
 export interface BundleTableDef {
   key: BundleTable;
@@ -27,6 +27,7 @@ const SCALAR_ENUMS = {
   Race: Prisma.RaceScalarFieldEnum,
   GameClass: Prisma.GameClassScalarFieldEnum,
   Feat: Prisma.FeatScalarFieldEnum,
+  Career: Prisma.CareerScalarFieldEnum,
   Background: Prisma.BackgroundScalarFieldEnum,
   Unit: Prisma.UnitScalarFieldEnum,
   Spell: Prisma.SpellScalarFieldEnum,
@@ -43,6 +44,7 @@ const MODEL_TO_KEY: Record<keyof typeof SCALAR_ENUMS, BundleTable> = {
   Race: "races",
   GameClass: "classes",
   Feat: "feats",
+  Career: "careers",
   Background: "backgrounds",
   Unit: "units",
   Spell: "spells",
@@ -81,6 +83,7 @@ export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
   table("races", "Race", "race"),
   table("classes", "GameClass", "gameClass"),
   table("feats", "Feat", "feat"),
+  table("careers", "Career", "career"),
   table("backgrounds", "Background", "background"),
   table("units", "Unit", "unit"),
   table("spells", "Spell", "spell"),
@@ -112,6 +115,7 @@ export const BundleSchema = z.object({
   ...perTable(() => rowSchema),
   classes: rowSchema.default([]),
   feats: rowSchema.default([]),
+  careers: rowSchema.default([]),
   backgrounds: rowSchema.default([]),
 }) as unknown as z.ZodType<Bundle>;
 
@@ -134,7 +138,7 @@ export function emptyBundle(): Bundle {
 
 export type TemplateDb = Pick<
   Prisma.TransactionClient,
-  "spellGroup" | "race" | "gameClass" | "feat" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
+  "spellGroup" | "race" | "gameClass" | "feat" | "career" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
 > & Partial<CompendiumBundleDb> & Partial<Pick<Prisma.TransactionClient, "campaignContentHide">>;
 
 export class TemplateLeakError extends Error {}

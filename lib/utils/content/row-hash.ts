@@ -11,6 +11,8 @@ export function contentRowHash(model: string, picked: Record<string, unknown>): 
 
   if (model === "Artifact" && row.systemStats == null) delete row.systemStats;
 
+  if (model === "Race" && row.profile == null) delete row.profile;
+
   if (model === "Feat") for (const c of ["xpCost", "maxRank"]) if (row[c] == null) delete row[c];
 
   return hashJson(row);

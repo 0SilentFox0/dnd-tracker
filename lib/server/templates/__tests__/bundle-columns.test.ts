@@ -33,9 +33,12 @@ describe("bundle: spell table", () => {
   });
 });
 
-describe("bundle: race_profiles", () => {
-  it("species profiles are not part of bundles and race columns carry no relation", () => {
+describe("bundle: species profile", () => {
+  it("the legacy race_profiles table is not bundled; the profile is a nullable race column", () => {
+    const races = BUNDLE_TABLES.find((t) => t.key === "races")!;
+
     expect(BUNDLE_TABLES.map((t) => t.model)).not.toContain("RaceProfile");
-    expect(BUNDLE_TABLES.find((t) => t.key === "races")?.columns).not.toContain("profile");
+    expect(races.columns).toContain("profile");
+    expect(races.nullableJson).toContain("profile");
   });
 });

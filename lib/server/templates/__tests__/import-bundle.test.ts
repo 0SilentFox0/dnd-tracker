@@ -23,6 +23,7 @@ function fullBundle(): Bundle {
     races: [{ id: R, name: "Human" }],
     classes: [{ id: CL, name: "Fighter" }],
     feats: [{ id: FT, name: "Alert", type: "origin" }],
+    careers: [{ id: id("n"), name: "Soldier", tiers: [{ name: "Apprentice", talents: [FT] }] }],
     backgrounds: [{ id: id("z"), name: "Sage", originFeatId: FT, choices: [] }],
     units: [{ id: U, name: "u", raceId: R, abilities: [], levelScaling: null }],
     spells: [{ id: SP, name: "s", groupId: G, summonUnitId: U, fx: null, spellEffects: [{ summon: { unitId: U } }] }],
