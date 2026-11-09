@@ -1,0 +1,12 @@
+{
+  "advancement": {
+    "career": {
+      "ticksRequired": [
+        8,
+        10,
+        12
+      ],
+      "outOfCareerMultiplier": 2
+    }
+  }
+}

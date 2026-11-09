@@ -1,0 +1,380 @@
+[
+  {
+    "race": "Lowlander",
+    "profile": {
+      "mods": {},
+      "move": 4,
+      "fate": 2,
+      "extraWounds": 0,
+      "talents": [
+        "Quick Study"
+      ],
+      "randomTalentCount": 3,
+      "randomTalents": [
+        {
+          "featId": "Snap Reaction",
+          "max": 10
+        },
+        {
+          "featId": "Tough Hide",
+          "max": 20
+        },
+        {
+          "featId": "Keen Sighting",
+          "max": 30
+        },
+        {
+          "featId": "Hearty Eater",
+          "max": 40
+        },
+        {
+          "featId": "Silver Tongue",
+          "max": 50
+        },
+        {
+          "featId": "Lettered",
+          "max": 60
+        },
+        {
+          "featId": "Road-Worn",
+          "max": 70
+        },
+        {
+          "featId": "Weather Eye",
+          "max": 80
+        },
+        {
+          "featId": "Night Owl",
+          "max": 90
+        },
+        {
+          "featId": "Steel Nerves",
+          "max": 100
+        }
+      ],
+      "careerTable": [
+        {
+          "careerId": "Archivist",
+          "max": 6
+        },
+        {
+          "careerId": "Bonesetter",
+          "max": 12
+        },
+        {
+          "careerId": "Chandler",
+          "max": 19
+        },
+        {
+          "careerId": "Lamplighter",
+          "max": 25
+        },
+        {
+          "careerId": "Herald",
+          "max": 31
+        },
+        {
+          "careerId": "Masquer",
+          "max": 37
+        },
+        {
+          "careerId": "Shepherd",
+          "max": 44
+        },
+        {
+          "careerId": "Charcoal Burner",
+          "max": 50
+        },
+        {
+          "careerId": "Pathfinder",
+          "max": 56
+        },
+        {
+          "careerId": "Falconer",
+          "max": 62
+        },
+        {
+          "careerId": "Ferry Keeper",
+          "max": 69
+        },
+        {
+          "careerId": "Eel Fisher",
+          "max": 75
+        },
+        {
+          "careerId": "Dicer",
+          "max": 81
+        },
+        {
+          "careerId": "Lockbreaker",
+          "max": 87
+        },
+        {
+          "careerId": "Shieldbearer",
+          "max": 94
+        },
+        {
+          "careerId": "Sellsword",
+          "max": 100
+        }
+      ]
+    }
+  },
+  {
+    "race": "Delver",
+    "profile": {
+      "mods": {
+        "ws": 10,
+        "t": 10,
+        "wp": 20,
+        "ag": -10,
+        "dex": 10,
+        "fel": -10
+      },
+      "move": 3,
+      "fate": 0,
+      "extraWounds": 1,
+      "talents": [
+        "Stone Sense",
+        "Deep Sight"
+      ],
+      "randomTalentCount": 1,
+      "randomTalents": [
+        {
+          "featId": "Oxen Constitution",
+          "max": 25
+        },
+        {
+          "featId": "Steady Hands",
+          "max": 50
+        },
+        {
+          "featId": "Iron Stomach",
+          "max": 75
+        },
+        {
+          "featId": "Steel Nerves",
+          "max": 100
+        }
+      ],
+      "careerTable": [
+        {
+          "careerId": "Archivist",
+          "max": 8
+        },
+        {
+          "careerId": "Bonesetter",
+          "max": 16
+        },
+        {
+          "careerId": "Chandler",
+          "max": 26
+        },
+        {
+          "careerId": "Lamplighter",
+          "max": 32
+        },
+        {
+          "careerId": "Herald",
+          "max": 38
+        },
+        {
+          "careerId": "Charcoal Burner",
+          "max": 48
+        },
+        {
+          "careerId": "Pathfinder",
+          "max": 56
+        },
+        {
+          "careerId": "Ferry Keeper",
+          "max": 62
+        },
+        {
+          "careerId": "Lockbreaker",
+          "max": 72
+        },
+        {
+          "careerId": "Shieldbearer",
+          "max": 88
+        },
+        {
+          "careerId": "Sellsword",
+          "max": 100
+        }
+      ]
+    }
+  },
+  {
+    "race": "Hearthkin",
+    "profile": {
+      "mods": {
+        "ws": -10,
+        "bs": 10,
+        "s": -10,
+        "ag": 10,
+        "dex": 10,
+        "wp": 10,
+        "fel": 10
+      },
+      "move": 3,
+      "fate": 2,
+      "extraWounds": 0,
+      "talents": [
+        "Light Step",
+        "Underfoot"
+      ],
+      "randomTalentCount": 2,
+      "randomTalents": [
+        {
+          "featId": "Iron Stomach",
+          "max": 20
+        },
+        {
+          "featId": "Light Fingers",
+          "max": 40
+        },
+        {
+          "featId": "Green Thumb",
+          "max": 60
+        },
+        {
+          "featId": "Haggler's Instinct",
+          "max": 80
+        },
+        {
+          "featId": "Keen Ears",
+          "max": 100
+        }
+      ],
+      "careerTable": [
+        {
+          "careerId": "Bonesetter",
+          "max": 6
+        },
+        {
+          "careerId": "Chandler",
+          "max": 18
+        },
+        {
+          "careerId": "Lamplighter",
+          "max": 26
+        },
+        {
+          "careerId": "Masquer",
+          "max": 34
+        },
+        {
+          "careerId": "Shepherd",
+          "max": 46
+        },
+        {
+          "careerId": "Charcoal Burner",
+          "max": 52
+        },
+        {
+          "careerId": "Falconer",
+          "max": 58
+        },
+        {
+          "careerId": "Ferry Keeper",
+          "max": 64
+        },
+        {
+          "careerId": "Eel Fisher",
+          "max": 74
+        },
+        {
+          "careerId": "Dicer",
+          "max": 86
+        },
+        {
+          "careerId": "Lockbreaker",
+          "max": 94
+        },
+        {
+          "careerId": "Sellsword",
+          "max": 100
+        }
+      ]
+    }
+  },
+  {
+    "race": "Veyl",
+    "profile": {
+      "mods": {
+        "i": 20,
+        "ag": 10,
+        "dex": 10,
+        "int": 10,
+        "wp": 10,
+        "s": -10,
+        "t": -10
+      },
+      "move": 5,
+      "fate": 0,
+      "extraWounds": 0,
+      "talents": [
+        "Twilight Eyes",
+        "Long Memory"
+      ],
+      "randomTalentCount": 1,
+      "randomTalents": [
+        {
+          "featId": "Keen Sighting",
+          "max": 25
+        },
+        {
+          "featId": "Lamp-Lit Studies",
+          "max": 50
+        },
+        {
+          "featId": "Snap Reaction",
+          "max": 75
+        },
+        {
+          "featId": "Court Manners",
+          "max": 100
+        }
+      ],
+      "careerTable": [
+        {
+          "careerId": "Archivist",
+          "max": 10
+        },
+        {
+          "careerId": "Herald",
+          "max": 22
+        },
+        {
+          "careerId": "Masquer",
+          "max": 32
+        },
+        {
+          "careerId": "Pathfinder",
+          "max": 46
+        },
+        {
+          "careerId": "Falconer",
+          "max": 62
+        },
+        {
+          "careerId": "Eel Fisher",
+          "max": 70
+        },
+        {
+          "careerId": "Lockbreaker",
+          "max": 78
+        },
+        {
+          "careerId": "Shieldbearer",
+          "max": 86
+        },
+        {
+          "careerId": "Sellsword",
+          "max": 100
+        }
+      ]
+    }
+  }
+]

@@ -1,5 +1,13 @@
 {
   "name": "Grim d100",
-  "credits": "",
-  "counts": { "races": 0, "careers": 0, "feats": 0, "units": 0, "spells": 0, "artifacts": 0, "raceProfiles": 0 }
+  "credits": "Original content.",
+  "counts": {
+    "races": 4,
+    "careers": 16,
+    "feats": 50,
+    "units": 0,
+    "spells": 0,
+    "artifacts": 0,
+    "raceProfiles": 4
+  }
 }
