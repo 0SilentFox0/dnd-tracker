@@ -34,7 +34,9 @@
 - `Career`: додати `sourceId`, `sourceHash`, `@@index([campaignId, sourceId])`. Нова модель `CareerBase` за зразком `FeatBase`.
 - Міграція одна, expand-only: ADD COLUMN, `CREATE TABLE career_base` з `ENABLE ROW LEVEL SECURITY`, індекси. Додати до переліку міграцій «WFRP: чекліст перед деплоєм епіку» в `docs/STATUS.md`.
 - Реєстрація `careers`: рядок `table("careers","Career","career")` у `BUNDLE_TABLES`, ключ у `SYNC_TABLE_SCOPES`, `layeredModels` (автоматично), `publishTemplateVersion`, `export-campaign`, `import-bundle`, `assert-no-leak`, `sync/{classify,apply,layered-apply,context}`, тестові `fake-db.ts` і `bundle-columns.test.ts`.
-- Профіль виду лишається в таблиці `race_profiles` (без `id`/`sourceId`/base). У bundle він — вкладене поле `profile` рядка `races`: експорт читає з `race_profiles`, імпорт і sync пишуть назад логікою `saveRaceProfile`, хеш рядка виду (`races`) включає профіль, тож зміна профілю в шаблоні — зміна виду для sync. Видалення виду каскадує профіль, як і досі.
+- Профіль виду стає колонкою: `profile Json?` у `Race` і `RaceBase` (рішення користувача 2026-11-09). Причина: `race_profiles.raceId` — PK і FK на локальний рядок `races`, а клон із шарами читає види з `races_base` без локального рядка; профілі також не потрапляють у bundle/export/import. Колонка-скаляр іде в `hashColumns`, bundle, publish, sync і override без спецкоду.
+- Міграція (в тій самій): `ALTER TABLE races/races_base ADD COLUMN profile jsonb` + бекфіл `UPDATE races SET profile = rp.profile FROM race_profiles rp WHERE rp.race_id = races.id`. Таблицю `race_profiles` не видаляємо (expand-only), вона стає deprecated: код її більше не читає й не пише; видалення — окремим кроком після деплою епіку.
+- Споживачі переводяться на `races.profile`: `lib/server/races/race-profile.ts` (`listRaceProfiles`, `saveRaceProfile`), `create-wfrp-draft.ts`, `profile-usage.ts`, `sync/profile-refs.ts`. API-маршрути, хуки й форма `RaceProfileItem` не змінюються.
 
 ### 2. Ref-integrity у sync
 
@@ -65,12 +67,12 @@
 
 - Нова таблиця має RLS; міграція expand-only; перелік міграцій епіку в STATUS оновити.
 - Не піднімати scope-size і OpenAPI-бюджет (195000) без виміру й запису; 5g-0 нових маршрутів і uk-текстів майже не додає, виміряти в plan.
-- Хеш виду з профілем змінює `sourceHash` усіх наявних видів лише в wfrp-кампаніях (там профілі існують); для d20-видів `profile` відсутній, тож хеш не змінюється. Перевірити тестом, що хеші homm/dnd5e видів стабільні.
+- Нова колонка `profile` не має змінювати `sourceHash` видів без профілю (null/відсутнє не хешується). Перевірити тестом і, якщо хеш змінюється, виключити null-колонку з хешування або дописати перерахунок baseline; хеші homm/dnd5e видів мають лишитися стабільними.
 - Кар'єри з наявних wfrp-кампаній не мають `sourceId`: працюють як локальні рядки, як і інший локальний контент.
 
 ## Відкрито для plan
 
-- `hashColumns` (`lib/db/layer/config.ts:67`) бере лише скалярні поля моделі, тож `profile` в хеш виду не потрапляє автоматично: потрібна явна реалізація (окрема задача) і тест, що хеші видів без профілю (homm/dnd5e) не змінюються.
-- Точне місце вкладення `profile` у bundle-рядку `races` і порядок import (вид має існувати до профілю; кар'єри й таланти до профілю).
+- Запис профілю шарованого виду (`saveRaceProfile`) має йти шляхом override, як інші правки шарових рядків (`lib/server/content/operations.ts`), а не прямим `update` локального рядка; точний шлях з'ясовує задача.
+- Порядок завантаження: види, кар'єри й таланти імпортуються до запису профілів (профіль посилається на кар'єри/таланти за id).
 - Чи `system_stats` артефакту проходить через `IMPORT_SPECS`, чи окремим кроком.
 - Тайм-аут транзакції publish для великих наборів (SRD: ~7 хв, 120 с tx).
