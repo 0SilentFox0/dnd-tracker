@@ -1,14 +1,17 @@
 export * from "./registry";
 export type { RuleSystemKey } from "./types";
-export type { CharacterHpInput, RuleSystemAdvancement, RuleSystemCreation, RuleSystemCurrency, RuleSystemDefinition, RuleSystemDowntime, RuleSystemEquipment, SheetBlockInput, SheetTestInput, SheetTestResult, SheetWfrpBlock, SystemConditionInfo, WeaponProfile } from "./types";
+export type { CharacterHpInput, RuleSystemAdvancement, RuleSystemCorruption, RuleSystemCreation, RuleSystemCurrency, RuleSystemDefinition, RuleSystemDowntime, RuleSystemEquipment, SheetBlockInput, SheetTestInput, SheetTestResult, SheetWfrpBlock, SystemConditionInfo, WeaponProfile } from "./types";
 export type { CareerTierDef } from "./wfrp/advancement/career";
 export type { PurchaseError, PurchaseRequest } from "./wfrp/advancement/plan";
 export { type LedgerViewer, preserveServerOwned, redactLedger } from "./wfrp/advancement/privacy";
+export { moveOf } from "./wfrp/characteristics/derive";
 export { type CareerState, CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, DEFAULT_CHARACTERISTICS, type LedgerEntry, readCharacteristics, SKILL_ADVANCE_KEY_RE, SKILL_KEY_RE, SPEC_RE } from "./wfrp/characteristics/keys";
 export type { DefenseKind, HitLocation } from "./wfrp/combat/constants";
 export type { WfrpParticipantStats } from "./wfrp/combat/participant";
 export { GRANT_MAX as CORRUPTION_GRANT_MAX } from "./wfrp/corruption/constants";
+export { modifiersOf } from "./wfrp/corruption/modifiers";
 export { readCorruption } from "./wfrp/corruption/read";
+export { corruptionThreshold } from "./wfrp/corruption/threshold";
 export type { CorruptionState, GrantSnapshot, GrantSummary, Mutation, MutationEffect, MutationKind } from "./wfrp/corruption/types";
 export { EMPTY_CORRUPTION } from "./wfrp/corruption/types";
 export type { CreationCtx, CreationPicks, CreationRolls, PlanDraftResult, SpeciesProfile } from "./wfrp/creation";

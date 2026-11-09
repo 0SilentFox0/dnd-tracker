@@ -9,6 +9,7 @@ import { wfrpBaseStats, wfrpParticipantFields } from "./combat/participant";
 import { resolveWfrpAttack, wfrpAttackTarget } from "./combat/resolve-attack";
 import { WFRP_ADVANCEMENT } from "./advancement";
 import { WFRP_CONDITIONS } from "./conditions";
+import { WFRP_CORRUPTION } from "./corruption";
 import { WFRP_CREATION } from "./creation";
 import { WFRP_DOWNTIME } from "./downtime";
 import { WFRP_EQUIPMENT } from "./equipment";
@@ -36,6 +37,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   advancement: WFRP_ADVANCEMENT,
   creation: WFRP_CREATION,
   downtime: WFRP_DOWNTIME,
+  corruption: WFRP_CORRUPTION,
   equipment: WFRP_EQUIPMENT,
   traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },

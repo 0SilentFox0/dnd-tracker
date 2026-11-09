@@ -6,7 +6,9 @@ import type { planUndo } from "./wfrp/advancement/undo";
 import type { CharacteristicKey, Characteristics } from "./wfrp/characteristics/keys";
 import type { HitLocation } from "./wfrp/combat/constants";
 import type { WfrpParticipantStats } from "./wfrp/combat/participant";
+import type { planGrant } from "./wfrp/corruption/plan-grant";
 import type { Mutation } from "./wfrp/corruption/types";
+import type { planCorruptionUndo } from "./wfrp/corruption/undo";
 import type { planDraft } from "./wfrp/creation/plan";
 import type { isUsableProfile } from "./wfrp/creation/profile";
 import type { rollCreation } from "./wfrp/creation/roll";
@@ -262,6 +264,12 @@ export interface RuleSystemCombat {
   };
 }
 
+export interface RuleSystemCorruption {
+  planGrant: typeof planGrant;
+  planUndo: typeof planCorruptionUndo;
+  grantMax: number;
+}
+
 export interface RuleSystemDowntime {
   planPeriod: typeof planPeriod;
   validateEndeavour: typeof validateEndeavour;
@@ -288,6 +296,7 @@ export interface RuleSystemDefinition {
   traits?: RuleSystemTraits;
   currency?: RuleSystemCurrency;
   downtime?: RuleSystemDowntime;
+  corruption?: RuleSystemCorruption;
   identity: { alignments: boolean };
   creation?: RuleSystemCreation;
   lineage: boolean;

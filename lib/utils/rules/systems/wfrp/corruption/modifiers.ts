@@ -1,5 +1,5 @@
 import type { CharacteristicKey } from "../characteristics/constants";
-import type { CorruptionState } from "./types";
+import type { CorruptionState, MutationEffect } from "./types";
 
 export type CorruptionModifiers = { characteristics: Partial<Record<CharacteristicKey, number>>; move: number; maxWounds: number };
 
@@ -26,3 +26,5 @@ export function modifiersOf(state?: CorruptionState): CorruptionModifiers {
 
   return { characteristics, move, maxWounds };
 }
+
+export const isMutationEffect = (e: { type: string }): e is MutationEffect => e.type === "characteristic" || e.type === "move" || e.type === "maxWounds";

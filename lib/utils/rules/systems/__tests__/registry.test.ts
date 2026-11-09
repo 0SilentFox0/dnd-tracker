@@ -36,6 +36,12 @@ describe("rule system registry", () => {
     expect(RULE_SYSTEM_REGISTRY.dnd5e.downtime).toBeUndefined();
   });
 
+  it("only wfrp defines corruption", () => {
+    expect(RULE_SYSTEM_REGISTRY.wfrp.corruption?.grantMax).toBe(10);
+    expect(RULE_SYSTEM_REGISTRY.homm.corruption).toBeUndefined();
+    expect(RULE_SYSTEM_REGISTRY.dnd5e.corruption).toBeUndefined();
+  });
+
   it("resolves from rules", () => {
     expect(ruleSystemOf(DEFAULT_RULES).key).toBe("homm");
     expect(systemKeyOf({ system: { key: "wfrp" } })).toBe("wfrp");
