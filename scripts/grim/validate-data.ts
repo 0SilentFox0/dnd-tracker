@@ -1,5 +1,6 @@
 import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
 import { findForbiddenTerms } from "./forbidden-terms";
+import { spellIssues, unitSpellIssues } from "./spells";
 import { unitIssues } from "./units";
 
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
@@ -226,9 +227,17 @@ function validateRules(rules: GrimData["rules"], issues: string[]) {
   if (!merged.ok) merged.issues.forEach((i) => issues.push(`rules: ${i.path.join(".")} ${i.message}`));
 }
 
+function validateSpells(data: GrimData, issues: string[]) {
+  data.spells.forEach((row, index) => {
+    for (const issue of spellIssues(row)) issues.push(`${label("spells", index, row.name)}: ${issue}`);
+  });
+}
+
 function validateUnits(data: GrimData, issues: string[]) {
+  const spellsByName = new Map(data.spells.map((s) => [String(s.name), s]));
+
   data.units.forEach((row, index) => {
-    for (const issue of unitIssues(row)) issues.push(`${label("units", index, row.name)}: ${issue}`);
+    for (const issue of [...unitIssues(row), ...unitSpellIssues(row, spellsByName)]) issues.push(`${label("units", index, row.name)}: ${issue}`);
   });
 }
 
@@ -245,6 +254,7 @@ export function validateGrimData(data: GrimData): GrimValidation {
   validateCareerTiers(data, issues);
   validateProfileKeys(data, issues);
   validateFeatAbilities(data, issues);
+  validateSpells(data, issues);
   validateUnits(data, issues);
   validateTerms(data, issues);
 

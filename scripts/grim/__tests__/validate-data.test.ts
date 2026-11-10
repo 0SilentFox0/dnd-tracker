@@ -279,3 +279,56 @@ describe("validateGrimData: units", () => {
     expect(issuesOf(data)).toEqual(expect.arrayContaining(expected.map((e) => where + e)));
   });
 });
+
+describe("validateGrimData: spells", () => {
+  const where = 'spells #1 "Rot Touch": ';
+
+  type Mutate = (data: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  const arcane: Mutate = (d) => {
+    d.spells[0].casting.magic.kind = "arcane";
+    d.spells[0].casting.magic.cn = 4;
+    d.spells[0].lists = ["School of Embers"];
+  };
+
+  const ingredient = (minGp: number): Mutate => (d) => {
+    arcane(d);
+    Object.assign(d.spells[0].casting.magic, { overcast: "dice" });
+    Object.assign(d.spells[0], { upcastDice: 1, ingredients: [{ name: "Bone", qty: 1, minGp, consumed: true, focus: false }], componentFlags: { v: true, s: true, m: true } });
+  };
+
+  const cases: Array<[string, Mutate, string]> = [
+    ["no casting", (d) => (d.spells[0].casting = undefined), "casting.magic is required"],
+    ["a chaos kind", (d) => (d.spells[0].casting.magic.kind = "chaos"), 'kind "chaos" is not used by Grim spells'],
+    ["a CN above the band", (d) => (d.spells[0].casting.magic.cn = 3), "CN 3 is outside 0–2 for petty"],
+    ["petty dice overcast", (d) => (d.spells[0].casting.magic.overcast = "dice"), 'overcast "dice" is not allowed for petty'],
+    ["targets overcast", (d) => { arcane(d); d.spells[0].casting.magic.overcast = "targets"; }, 'overcast "targets" is not supported by the engine'],
+    ["a long cost", (d) => (d.spells[0].cost = "long"), 'cost must be "action"'],
+    ["a level 2 spell", (d) => (d.spells[0].level = 2), "level must be 1"],
+    ["a foreign list", (d) => (d.spells[0].lists = ["Fenlore"]), "lists must be one of: Cantrips"],
+    ["no list", (d) => (d.spells[0].lists = []), "lists must be one of: Cantrips"],
+    ["a resolution column", (d) => (d.spells[0].resolution = { kind: "auto" }), 'column "resolution" is not used by Grim spells'],
+    ["a 5e condition effect", (d) => (d.spells[0].spellEffects = [{ kind: "applyCondition", condition: "prone", duration: { rounds: 1 } }]), 'effect "applyCondition" is not allowed (dealDamage or heal only)'],
+    ["zero dice with an effect", (d) => (d.spells[0].dice = 0), "dice must be ≥ 1 exactly when the spell has an effect"],
+    ["neither effect nor attribute", (d) => { d.spells[0].spellEffects = []; d.spells[0].dice = 0; }, "spell has neither an effect nor an attribute"],
+    ["a non-wfrp condition", (d) => (d.spells[0].casting.magic.attribute = { condition: "frightened", levels: 1 }), 'attribute condition "frightened" is not a wfrp condition'],
+    ["an ally target on damage", (d) => (d.spells[0].targeting = { kind: "ally", range: 5 }), 'targeting "ally" does not fit a harmful spell'],
+    ["petty ingredients", (d) => { d.spells[0].ingredients = [{ name: "Bone", qty: 1, minGp: 0.05, consumed: true, focus: false }]; d.spells[0].componentFlags = { v: true, s: true, m: true }; }, "ingredients are not allowed for petty"],
+    ["a sub-pence ingredient price", ingredient(0.01), "ingredient price 2.4 p is outside 6–240 p (whole pence)"],
+  ];
+
+  it.each(cases)("rejects %s", (_name, mutate, expected) => {
+    const data = load();
+
+    mutate(data as never);
+    expect(issuesOf(data)).toContain(where + expected);
+  });
+
+  it("rejects a unit that cannot reach the CN of a known spell", () => {
+    const data = load();
+
+    data.units[0].knownSpells = ["Rot Touch"];
+    (data.spells[0].casting as { magic: { cn: number } }).magic.cn = 2;
+    expect(issuesOf(data)).toContain('units #1 "Giant Rat": knownSpells "Rot Touch" CN 2 is above the best SL 1 this unit can reach');
+  });
+});
