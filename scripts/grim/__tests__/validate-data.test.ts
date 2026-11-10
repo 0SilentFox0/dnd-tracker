@@ -23,7 +23,7 @@ describe("readGrimData", () => {
     expect(data.feats).toHaveLength(2);
     expect(data.units).toHaveLength(1);
     expect(data.spells).toHaveLength(1);
-    expect(data.artifacts).toEqual([]);
+    expect(data.artifacts).toHaveLength(2);
     expect(data.raceProfiles).toHaveLength(1);
   });
 });
@@ -330,5 +330,46 @@ describe("validateGrimData: spells", () => {
     data.units[0].knownSpells = ["Rot Touch"];
     (data.spells[0].casting as { magic: { cn: number } }).magic.cn = 2;
     expect(issuesOf(data)).toContain('units #1 "Giant Rat": knownSpells "Rot Touch" CN 2 is above the best SL 1 this unit can reach');
+  });
+});
+
+describe("validateGrimData: artifacts", () => {
+  const w = 'artifacts #1 "Arming Sword": ';
+
+  const a = 'artifacts #2 "Padded Jack": ';
+
+  type Mutate = (sword: Record<string, any>, jack: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  const cases: Array<[string, Mutate, string]> = [
+    ["missing systemStats", (s) => delete s.systemStats, w + "systemStats is required"],
+    ["a range weapon in the melee slot name", (s) => (s.slot = "range_weapon"), w + 'slot "range_weapon" needs a weapon with range'],
+    ["an unused slot", (s) => (s.slot = "ring"), w + 'slot "ring" is not used by Grim items'],
+    ["an unused group", (s) => (s.systemStats.group = "explosives"), w + 'group "explosives" is not used by Grim items'],
+    ["an unimplemented quality", (s) => (s.systemStats.qualities = [{ key: "defensive" }]), w + 'quality "defensive" is not implemented'],
+    ["a flaw as a quality", (s) => (s.systemStats.qualities = [{ key: "slow" }]), w + '"slow" is a flaw, not a quality'],
+    ["damage above the band", (s) => (s.systemStats.damage.flat = 9), w + "damage +9 is outside 1–5 for basic"],
+    ["a price above the band", (s) => (s.systemStats.price = 5000), w + "price 5000 p is outside 6–480 p for basic"],
+    ["a fractional price", (s) => (s.systemStats.price = 10.5), w + "price 10.5 p is outside 6–480 p for basic"],
+    ["reload without ammoCapacity", (s) => (s.systemStats.flaws = [{ key: "reload", value: 1 }]), w + "reload needs ammoCapacity and ammoCapacity needs reload"],
+    ["head AP in the armor slot", (_s, j) => (j.systemStats.locations.head = 1), a + 'slot "armor" must leave head at 0'],
+    ["body armour in the helmet slot", (_s, j) => (j.slot = "helmet"), a + 'slot "helmet" may cover only head'],
+    ["AP above the kind band", (_s, j) => (j.systemStats.locations.body = 2), a + "AP 2 is outside 0–1 for soft"],
+    ["armour in the shield slot", (_s, j) => (j.slot = "shield"), a + 'slot "shield" needs gear with one "shield X" quality'],
+    ["a rare item", (_s, j) => (j.rarity = "rare"), a + "rarity must be common or uncommon"],
+    ["an icon column", (s) => (s.icon = "x"), w + 'column "icon" is not used by Grim items'],
+  ];
+
+  it.each(cases)("rejects %s", (_name, mutate, expected) => {
+    const data = load();
+
+    mutate(data.artifacts[0] as never, data.artifacts[1] as never);
+    expect(issuesOf(data)).toContain(expected);
+  });
+
+  it("reports a zod error with the systemStats path", () => {
+    const data = load();
+
+    (data.artifacts[0].systemStats as { damage: { flat: unknown } }).damage.flat = "x";
+    expect(issuesOf(data).some((i) => i.startsWith(w + "systemStats "))).toBe(true);
   });
 });

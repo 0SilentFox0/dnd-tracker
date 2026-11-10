@@ -1,4 +1,5 @@
 import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
+import { equipmentIssues } from "./equipment";
 import { findForbiddenTerms } from "./forbidden-terms";
 import { spellIssues, unitSpellIssues } from "./spells";
 import { unitIssues } from "./units";
@@ -233,6 +234,12 @@ function validateSpells(data: GrimData, issues: string[]) {
   });
 }
 
+function validateArtifacts(data: GrimData, issues: string[]) {
+  data.artifacts.forEach((row, index) => {
+    for (const issue of equipmentIssues(row)) issues.push(`${label("artifacts", index, row.name)}: ${issue}`);
+  });
+}
+
 function validateUnits(data: GrimData, issues: string[]) {
   const spellsByName = new Map(data.spells.map((s) => [String(s.name), s]));
 
@@ -256,6 +263,7 @@ export function validateGrimData(data: GrimData): GrimValidation {
   validateFeatAbilities(data, issues);
   validateSpells(data, issues);
   validateUnits(data, issues);
+  validateArtifacts(data, issues);
   validateTerms(data, issues);
 
   return issues.length === 0 ? { ok: true } : { ok: false, issues };

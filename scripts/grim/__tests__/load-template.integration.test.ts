@@ -57,6 +57,7 @@ const rowCounts = async (templateId: string) => ({
   races: await raw.race.count({ where: { campaignId: templateId } }),
   spells: await raw.spell.count({ where: { campaignId: templateId } }),
   units: await raw.unit.count({ where: { campaignId: templateId } }),
+  artifacts: await raw.artifact.count({ where: { campaignId: templateId } }),
   featBase: await raw.featBase.count({ where: { sourceCampaignId: templateId } }),
   careerBase: await raw.careerBase.count({ where: { sourceCampaignId: templateId } }),
   raceBase: await raw.raceBase.count({ where: { sourceCampaignId: templateId } }),
@@ -127,14 +128,14 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
 
     templateId = result.templateId;
     expect(result.created).toBe(true);
-    expect(result.counts).toMatchObject({ feats: 2, careers: 2, races: 1, spells: 1, units: 1, raceProfiles: 1 });
+    expect(result.counts).toMatchObject({ feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2, raceProfiles: 1 });
 
     const counts = await rowCounts(templateId);
 
     const { spellId, links } = await unitSpellLinks(templateId);
 
     expect(links).toEqual([spellId]);
-    expect(counts).toMatchObject({ campaigns: 1, feats: 2, careers: 2, races: 1, spells: 1, units: 1, featBase: 2, careerBase: 2, raceBase: 1 });
+    expect(counts).toMatchObject({ campaigns: 1, feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2, featBase: 2, careerBase: 2, raceBase: 1 });
   });
 
   it("a clone sees the species with its profile", async () => {
