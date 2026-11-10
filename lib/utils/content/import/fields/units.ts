@@ -24,6 +24,7 @@ const fields: FieldDef[] = [
   { key: "immunities", type: "list" },
   { key: "knownSpells", type: "refList", ref: "spells" },
   jsonField("statblock"),
+  jsonField("characteristics"),
   { ...jsonField("spellcasting"), nestedRef: { kind: "spells", key: "spellId" } },
   int("proficiencyBonus"),
   int("gridSize"),

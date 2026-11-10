@@ -40,6 +40,7 @@
       "immunities": "Immunities",
       "knownSpells": "Spells",
       "statblock": "Statblock (JSON)",
+      "characteristics": "Characteristics (JSON)",
       "spellcasting": "Monster spellcasting (JSON)",
       "proficiencyBonus": "Proficiency",
       "gridSize": "Map size",

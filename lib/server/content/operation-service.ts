@@ -18,6 +18,7 @@ import { importContent } from "@/lib/server/content/import/import-content";
 import { loadNames } from "@/lib/server/content/import/names";
 import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { assertTraitsSupported } from "@/lib/server/content/traits-guard";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { listSkillTrees, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
@@ -30,6 +31,7 @@ import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
 import { byName } from "@/lib/utils/common/text";
 import { IMPORT_KINDS } from "@/lib/utils/content/import/kinds";
+import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 
 export type ContentOperationId = keyof typeof CONTENT_OPERATIONS;
@@ -186,9 +188,13 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "units.import": {
         const { units } = bodyOf("units.import", body);
 
-        await assertCampaignRefs(actor.campaignId, { spell: units.flatMap((unit) => unit.knownSpells) });
+        const rules = await loadRules(actor.campaignId);
 
-        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, units, await loadRules(actor.campaignId));
+        assertTraitsSupported(ruleSystemOf(rules), units.flatMap((unit) => unit.abilities ?? []));
+
+        await assertCampaignRefs(actor.campaignId, { spell: [...units.flatMap((unit) => unit.knownSpells), ...units.flatMap((unit) => (unit.abilities ?? []).flatMap((a) => (a.perform?.kind === "spell" ? [a.perform.spellId] : [])))] });
+
+        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, units, rules);
 
         invalidate(actor, ReferenceKind.UNITS);
 

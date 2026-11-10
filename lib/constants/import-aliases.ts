@@ -52,6 +52,7 @@ export const FIELD_ALIASES: Record<ImportKind, PerField<readonly string[]>> = {
     immunities: ["імунітети", "імунітет"],
     knownSpells: ["заклинання", "spells", "known spells"],
     statblock: ["статблок (json)", "statblock", "statblock (json)"],
+    characteristics: ["характеристики (json)", "characteristics", "characteristics (json)"],
     spellcasting: ["заклинання монстра (json)", "spellcasting", "monster spellcasting (json)"],
     proficiencyBonus: ["майстерність", "proficiency", "бонус майстерності"],
     gridSize: ["розмір на мапі", "клітинок", "map size"],

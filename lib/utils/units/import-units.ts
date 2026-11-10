@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { ImportUnitRow } from "@/lib/schemas/units";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import { nameKey } from "@/lib/utils/content/import/mapping";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
@@ -33,6 +34,14 @@ export function resolveImportRaces(names: Array<string | undefined>, races: Arra
   };
 }
 
+function importedAbilities(unit: ImportUnitRow): Ability[] {
+  const own = unit.abilities ?? [];
+
+  const taken = new Set(own.map((a) => nameKey(a.name)));
+
+  return [...own, ...specialAbilitiesToAbilities(unit.specialAbilities).filter((a) => !taken.has(nameKey(a.name)))];
+}
+
 export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId: string | null, keepCharacteristics = false): Prisma.UnitCreateManyInput {
   return {
     campaignId,
@@ -52,7 +61,7 @@ export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId
     maxHp: unit.maxHp,
     proficiencyBonus: resolveUnitProficiency(unit),
     attacks: unit.attacks as Prisma.InputJsonValue,
-    abilities: abilitiesJson(specialAbilitiesToAbilities(unit.specialAbilities)),
+    abilities: abilitiesJson(importedAbilities(unit)),
     knownSpells: unit.knownSpells,
     avatar: unit.avatar ?? null,
     cr: unit.cr ?? null,

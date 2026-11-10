@@ -40,6 +40,7 @@
       "immunities": "Імунітети",
       "knownSpells": "Заклинання",
       "statblock": "Статблок (JSON)",
+      "characteristics": "Характеристики (JSON)",
       "spellcasting": "Заклинання монстра (JSON)",
       "proficiencyBonus": "Майстерність",
       "gridSize": "Розмір на мапі",

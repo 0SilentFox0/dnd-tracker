@@ -16,6 +16,17 @@ const [row] = importUnitsSchema.parse({
 }).units;
 
 describe("unit import mapping", () => {
+  it("abilities pass through first; a specialAbility with the same name is skipped", () => {
+    const ward = { id: "ward", name: "Ward 9+", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] };
+
+    const [unit] = importUnitsSchema.parse({ units: [{ name: "Shade", abilities: [ward], specialAbilities: [{ name: "ward 9+", description: "dup", type: "passive" }, { name: "Chill", description: "Cold aura", type: "passive" }] }] }).units;
+
+    const data = toUnitCreateData("c1", unit, null, true) as unknown as { abilities: Array<{ name: string }> };
+
+    expect(data.abilities.map((a) => a.name)).toEqual(["Ward 9+", "Chill"]);
+    expect(data.abilities[0]).toEqual(ward);
+  });
+
   it("раса за назвою без урахування регістру; найстаріша виграє; невідомі — у звіт без дублів", () => {
     const { raceIdOf, unknownRaces } = resolveImportRaces(["гобліни", " Орки ", "Ельфи", "ельфи", undefined, ""], races);
 

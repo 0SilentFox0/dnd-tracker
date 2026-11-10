@@ -10,9 +10,9 @@ import { createUnitSchema, updateUnitSchema } from "@/lib/schemas";
 import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { detachRefs } from "@/lib/server/content/detach-refs";
-import { ContentError, toJsonInput } from "@/lib/server/content/errors";
+import { toJsonInput } from "@/lib/server/content/errors";
+import { assertTraitsSupported } from "@/lib/server/content/traits-guard";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
-import { isTraitEffectKind } from "@/lib/utils/abilities/schema/kinds";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
@@ -26,12 +26,6 @@ async function loadCampaignSystem(campaignId: string): Promise<RuleSystemDefinit
 }
 
 const keepsCharacteristics = (system: RuleSystemDefinition | null) => system?.characteristics.kind === "wfrp";
-
-function assertTraitsSupported(system: RuleSystemDefinition | null, abilities: readonly { effects: readonly { kind: string }[] }[] | undefined) {
-  if (system?.traits || !abilities?.some((a) => a.effects.some((e) => isTraitEffectKind(e.kind)))) return;
-
-  throw new ContentError(API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, 400);
-}
 
 export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSchema>, z.infer<typeof updateUnitSchema>>({
   kind: "units",

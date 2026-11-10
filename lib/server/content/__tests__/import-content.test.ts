@@ -54,6 +54,20 @@ const deps: ImportDeps = { resource: () => resource, loadNames: async (_c, kind)
 const run = (rows: Record<string, unknown>[], mode: ImportMode = "create", dryRun = false, who: Actor = actor) => importContent(who, "units", { rows, mode, dryRun }, deps);
 
 describe("importContent", () => {
+  it("units: characteristics JSON and trait abilities reach the resource body", async () => {
+    const ward = { id: "ward", name: "Ward 9+", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] };
+
+    const report = await run([{ name: "Shade", characteristics: { base: { ws: 45 }, move: 6 }, abilities: [ward] }, { name: "Plain", characteristics: "{}" }]);
+
+    expect(report.results.flatMap((r) => r.issues)).toEqual([]);
+
+    const bodies = create.mock.calls.map((c) => c[1] as { characteristics?: { base: Record<string, number>; move: number }; abilities?: unknown[] });
+
+    expect(bodies[0].characteristics).toMatchObject({ base: { ws: 45 }, move: 6 });
+    expect(bodies[0].abilities).toEqual([ward]);
+    expect(bodies[1].characteristics?.base.ws).toBe(30);
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     names = {
