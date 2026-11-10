@@ -9,7 +9,7 @@ import { HudPill } from "@/components/hud/page";
 import { SelectField, type SelectOptionGroup } from "@/components/ui/select-field";
 import { useBundleFilePicker, useTemplates } from "@/lib/hooks/campaigns";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
-import { isCanonicalSrdTemplate, type SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
+import { isCanonicalTemplate, type SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
 import { groupTemplates, pickVariant } from "@/lib/utils/campaigns/template-variants";
 import type { TemplateCard, TemplateSelection } from "@/types/campaigns";
 
@@ -50,7 +50,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
 
   const selectedGroup = officialGroups.find((g) => Object.values(g.cards).some((c) => c.id === value.templateId));
 
-  const contentLocales = selected && isCanonicalSrdTemplate(selected) ? selected.availableLocales ?? [] : [];
+  const contentLocales = selected && isCanonicalTemplate(selected) ? selected.availableLocales ?? [] : [];
 
   const contentLocale = value.contentLocale ?? (contentLocales.includes(uiLocale) ? uiLocale : "en");
 
@@ -87,7 +87,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
     else {
       const source = templates.find((tpl) => tpl.id === next);
 
-      onChange({ templateId: next === NONE_VALUE ? null : next, ...(source && isCanonicalSrdTemplate(source) ? { contentLocale: uiLocale === "uk" ? "uk" : "en" } : {}) });
+      onChange({ templateId: next === NONE_VALUE ? null : next, ...(source && isCanonicalTemplate(source) ? { contentLocale: uiLocale === "uk" ? "uk" : "en" } : {}) });
     }
   };
 

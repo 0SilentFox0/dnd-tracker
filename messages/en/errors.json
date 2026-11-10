@@ -504,7 +504,7 @@
   "battleCasterPacified": "{state}: cannot deal damage or cast hostile spells",
   "battleSpellIngredientsMissing": "Missing spell ingredients: {list}",
   "templateContentLocale": "Content language can only be selected for an official SRD template. Choose English or Ukrainian.",
-  "srdCanonicalUnavailable": "The official English SRD source is missing or ambiguous. Ask an administrator to check the SRD templates.",
+  "srdCanonicalUnavailable": "The official English source of this template is missing or ambiguous. Ask an administrator to check the official templates.",
   "srdNameReferences": "Select the related name and reference updates together: {rows}",
   "systemLocked": "The rule system cannot be changed while the campaign has characters or units",
   "systemBattleUnsupported": "This rule system does not support battles yet",

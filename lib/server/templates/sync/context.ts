@@ -5,12 +5,12 @@ import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf, SETTINGS_SELECT, settingsOf, type TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
 import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
-import { translationsFor } from "@/lib/server/templates/srd-translations";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { emptyState } from "@/lib/server/templates/sync/state";
 import type { LocalRow, SyncContext, SyncState, TableHashes } from "@/lib/server/templates/sync/types";
+import { templateTranslationsFor } from "@/lib/server/templates/template-translations";
 import { canReadSource } from "@/lib/utils/api/is-dm";
-import { isCanonicalSrdTemplate, SRD_CONTENT_LOCALES, type SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
+import { isCanonicalTemplate, localizationOf, type TemplateContentLocale } from "@/lib/utils/campaigns/template-locales";
 
 export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character">;
 
@@ -49,13 +49,15 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
     db.campaignSourceSync.findUnique({ where: { campaignId } }),
   ]);
 
-  const srdOverlay = isCanonicalSrdTemplate(found);
+  const localization = isCanonicalTemplate(found) ? localizationOf(found) : null;
+
+  const srdOverlay = localization !== null;
 
   const contentLocale = campaign.locale ?? "en";
 
-  if (srdOverlay && !SRD_CONTENT_LOCALES.includes(contentLocale as SrdContentLocale)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
+  if (localization && !localization.locales.includes(contentLocale as TemplateContentLocale)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
 
-  const sourceBundle = srdOverlay ? localizeSrdBundle(rawSourceBundle, translationsFor(contentLocale as SrdContentLocale)) : rawSourceBundle;
+  const sourceBundle = localization ? localizeSrdBundle(rawSourceBundle, templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale)) : rawSourceBundle;
 
   const synced = state?.sourceCampaignId === source.id ? state : null;
 

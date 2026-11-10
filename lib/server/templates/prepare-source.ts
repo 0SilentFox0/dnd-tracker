@@ -1,15 +1,15 @@
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Bundle, TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
 import { exportLocalLayer, exportSkeleton, type LocalLayer } from "@/lib/server/templates/export-campaign";
 import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
 import { latestPublishedVersion } from "@/lib/server/templates/publish";
-import { translationsFor } from "@/lib/server/templates/srd-translations";
+import { templateTranslationsFor } from "@/lib/server/templates/template-translations";
 import { canReadSource } from "@/lib/utils/api/is-dm";
-import { isCanonicalSrdTemplate, isLegacySrdTemplate, SRD_CONTENT_LOCALES, type SrdContentLocale, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate, localizationOf, type TemplateContentLocale, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
 
 export type PreparedLayer = LocalLayer & { sourceId: string; baseVersion: number };
 
@@ -18,7 +18,7 @@ export type PreparedCampaignSource = { id: string; bundle: Bundle; contentLocale
 
 type Options = {
   userId: string;
-  contentLocale?: SrdContentLocale;
+  contentLocale?: TemplateContentLocale;
   mode: "create" | "clone" | "save";
   /** Runs after resolution/authorization, before the sole export. Action callers lock this ID in their transaction. */
   beforeExport?: (resolvedSourceId: string) => Promise<void>;
@@ -47,20 +47,22 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
 
   if (!canReadSource(requested.visibility, requested.members)) throw new ContentError(API_ERRORS.TEMPLATE_FORBIDDEN, 403);
 
-  const overlay = options.mode !== "save" && (isCanonicalSrdTemplate(requested) || isLegacySrdTemplate(requested));
+  const localization = localizationOf(requested);
 
-  if (options.contentLocale !== undefined && (!SRD_CONTENT_LOCALES.includes(options.contentLocale) || !overlay)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
+  const overlay = options.mode !== "save" && localization !== null;
+
+  if (options.contentLocale !== undefined && (!overlay || !localization.locales.includes(options.contentLocale))) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
 
   let source = requested;
 
-  if (overlay) {
-    const candidates = await db.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, templateKey: SRD_TEMPLATE_NAME, OR: [{ locale: "en" }, { locale: null }] }, select: { id: true } });
+  if (overlay && localization) {
+    const candidates = await db.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, templateKey: localization.templateKey, OR: [{ locale: "en" }, { locale: null }] }, select: { id: true } });
 
     if (candidates.length !== 1) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
 
     const canonical = await read(candidates[0].id);
 
-    if (!canonical || !isCanonicalSrdTemplate(canonical)) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
+    if (!canonical || !isCanonicalTemplate(canonical) || canonical.templateKey !== localization.templateKey) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
 
     source = canonical;
   }
@@ -79,11 +81,11 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
     source = locked;
   }
 
-  const contentLocale = overlay ? options.contentLocale ?? (isLegacySrdTemplate(requested) ? "uk" : "en") : source.locale ?? null;
+  const contentLocale = overlay ? options.contentLocale ?? (isLegacyLocalizedTemplate(requested) ? "uk" : "en") : source.locale ?? null;
 
   const identity = { id: source.id, contentVersion: source.contentVersion, source: { kind: source.kind, visibility: source.visibility, templateKey: source.templateKey, locale: source.locale }, contentLocale };
 
-  const translations = overlay ? translationsFor(contentLocale as SrdContentLocale) : null;
+  const translations = overlay && localization ? templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale) : null;
 
   const layered = await layeredSource(db, source, options.mode, !!translations && Object.keys(translations).length > 0);
 

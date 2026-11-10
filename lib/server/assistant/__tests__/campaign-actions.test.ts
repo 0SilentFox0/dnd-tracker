@@ -21,7 +21,7 @@ const h = vi.hoisted(() => ({
   create: vi.fn(), export: vi.fn(async () => ({ settings: {}, formatVersion: 1 })),
 }));
 
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? h.dictionary : {} }));
+vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
 
 vi.mock("@/lib/server/onboarding/facts", () => ({ readOnboardingSnapshot: vi.fn(async () => ({ facts: { role: "dm", dm: { races: 0, units: 0, players: 0, activePlayerCharacters: 0, pendingDrafts: 2, battles: 0, battlesStarted: 0, scenarioPages: 0, decks: 0, tracks: 0, aiKeys: 0 } }, checklistFlag: null })) }));
 vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: vi.fn(async () => "en") }));

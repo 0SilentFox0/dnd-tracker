@@ -4,7 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
-import { isCanonicalSrdTemplate, isLegacySrdTemplate, SRD_CONTENT_LOCALES, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate, localizationOf, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { systemKeyOf } from "@/lib/utils/rules/systems";
 import type { TemplateCard, TemplateList } from "@/types/campaigns";
@@ -26,16 +26,22 @@ const toCard = ({ _count, rules, ...t }: { id: string; name: string; description
   ...t,
   system: systemKeyOf(parseRules(rules)),
   counts: _count,
-  ...(isCanonicalSrdTemplate(t) ? { availableLocales: SRD_CONTENT_LOCALES } : {}),
+  ...(isCanonicalTemplate(t) && { availableLocales: localizationOf(t)?.locales }),
 });
 
 /** Shared by the picker API and the owner's direct tile query. */
 export function visibleTemplates<T extends TemplateIdentity>(templates: T[]): T[] {
-  const canonicalCount = templates.filter(isCanonicalSrdTemplate).length;
+  const canonicalCounts = new Map<string, number>();
 
-  if (canonicalCount > 1) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
+  for (const template of templates) {
+    const key = isCanonicalTemplate(template) ? template.templateKey : null;
 
-  return templates.filter((template) => !isLegacySrdTemplate(template));
+    if (key) canonicalCounts.set(key, (canonicalCounts.get(key) ?? 0) + 1);
+  }
+
+  if ([...canonicalCounts.values()].some((count) => count > 1)) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
+
+  return templates.filter((template) => !isLegacyLocalizedTemplate(template));
 }
 
 export async function listTemplates(userId: string): Promise<TemplateList> {

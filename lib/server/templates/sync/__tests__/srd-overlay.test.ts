@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeSyncDb } from "./fake-sync-db";
 import { id, visible } from "./helpers";
 
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { importBundle } from "@/lib/server/templates/import-bundle";
 import { prepareCampaignSource } from "@/lib/server/templates/prepare-source";
 import { applySourceChanges } from "@/lib/server/templates/sync/apply";
@@ -15,7 +15,7 @@ import type { SyncRef } from "@/types/campaigns";
 
 const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
 
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? dictionary.values : {} }));
+vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
 
 let f: ReturnType<typeof createFakeSyncDb>;
 
@@ -203,5 +203,13 @@ describe("SRD effective name reference graph", () => {
     f.patchCampaign(source, { templateKey: "Custom" });
     await applySourceChanges(f.db, target, { apply: (await diff()).map(ref), ignore: [] });
     expect(local("spell")[0].lists).toEqual(["Missing class"]);
+  });
+});
+
+describe("localized Grim synchronization", () => {
+  it("overlays a Grim clone", async () => {
+    f.patchCampaign(source, { templateKey: GRIM_TEMPLATE_NAME });
+    await makeClone();
+    expect((await loadSyncContext(f.db, target)).srdOverlay).toBe(true);
   });
 });

@@ -3,14 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeSyncDb } from "../sync/__tests__/fake-sync-db";
 import { id } from "../sync/__tests__/helpers";
 
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { EMPTY_GRIM_TEMPLATE_NAME, GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prepareCampaignSource } from "@/lib/server/templates/prepare-source";
 import { hashText } from "@/lib/srd/i18n/catalog";
-import { isCanonicalSrdTemplate, isLegacySrdTemplate, isOfficialSrdTemplate } from "@/lib/utils/campaigns/template-locales";
+import { isCanonicalSrdTemplate, isLegacySrdTemplate, isLocalizableTemplate, isOfficialSrdTemplate } from "@/lib/utils/campaigns/template-locales";
 
 const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
 
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? dictionary.values : {} }));
+vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
 
 const official = { kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME };
 
@@ -91,5 +91,33 @@ describe("SRD source preparation", () => {
 
     expect(beforeExport).toHaveBeenCalledTimes(1);
     expect(result.bundle.spells[0].description).toBe("Locked snapshot");
+  });
+});
+
+describe("Grim source preparation", () => {
+  const grim = { kind: "template", visibility: "official", templateKey: GRIM_TEMPLATE_NAME };
+
+  beforeEach(() => {
+    f.addCampaign({ id: "grim", ...grim, locale: "en" });
+    f.addRow("career", { id: id("c"), campaignId: "grim", name: "Archivist", class: "Academic", tiers: [] });
+    dictionary.values = { ...dictionary.values, [hashText("n", "Archivist")]: "Архіваріус" };
+  });
+
+  it("accepts uk and en content locales for Grim", async () => {
+    const uk = await prepare("grim", { contentLocale: "uk" });
+
+    expect(uk.contentLocale).toBe("uk");
+    expect(await prepare("grim", { contentLocale: "en" })).toMatchObject({ contentLocale: "en" });
+  });
+  it("ambiguity is per template key", async () => {
+    f.addCampaign({ id: "grim2", ...grim, locale: "en" });
+    await expect(prepare("grim", { contentLocale: "uk" })).rejects.toMatchObject({ status: 409 });
+    expect(await prepare("en")).toMatchObject({ id: "en" });
+  });
+  it("recognizes only the official keyed Grim as localizable", () => {
+    expect(isLocalizableTemplate({ ...grim, locale: "en" })).toBe(true);
+    expect(isLocalizableTemplate({ ...grim, templateKey: EMPTY_GRIM_TEMPLATE_NAME })).toBe(false);
+    expect(isLocalizableTemplate({ ...grim, visibility: "private" })).toBe(false);
+    expect(isCanonicalSrdTemplate({ ...grim, locale: "en" })).toBe(false);
   });
 });

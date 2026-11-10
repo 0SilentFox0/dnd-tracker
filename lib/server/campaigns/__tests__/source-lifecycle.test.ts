@@ -22,7 +22,7 @@ vi.mock("@/lib/db", async () => {
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateAllReference: vi.fn() }));
 vi.mock("@/lib/i18n/translator", () => ({ getTranslator: vi.fn(async () => (key: string) => key) }));
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? h.dictionary : {} }));
+vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
 
 const actor = { campaignId: "home", userId: "dm", isDM: true, via: "session" as const, scopes: null };
 

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TemplatePicker } from "@/components/campaigns/templates/TemplatePicker";
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import type { TemplateCard } from "@/types/campaigns";
 
 const card = (id: string, locale: string | null): TemplateCard => ({ id, name: "SRD", description: null, visibility: "official", counts: {}, locale, templateKey: "srd" });
@@ -97,5 +97,15 @@ describe("TemplatePicker: мова шаблону", () => {
     render(<TemplatePicker value={{ templateId: "en1" }} onChange={vi.fn()} />);
 
     expect(screen.queryByLabelText("campaigns.templatePicker.languageLabel")).toBeNull();
+  });
+
+  it("offers the content language for the canonical Grim", () => {
+    official = [{ ...card("grim", "en"), kind: "template", templateKey: GRIM_TEMPLATE_NAME, availableLocales: ["en", "uk"] }];
+
+    const onChange = vi.fn();
+
+    render(<TemplatePicker value={{ templateId: "grim", contentLocale: "en" }} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.languageLabel"), { target: { value: "uk" } });
+    expect(onChange).toHaveBeenLastCalledWith({ templateId: "grim", contentLocale: "uk" });
   });
 });

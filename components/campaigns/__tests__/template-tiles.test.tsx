@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { type TemplateTile, TemplateTiles } from "../templates/TemplateTiles";
 
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 
 afterEach(cleanup);
 
@@ -17,6 +17,17 @@ describe("TemplateTiles SRD source", () => {
     expect(screen.getByRole("link", { name: /5e SRD/ })).toHaveAttribute("href", "/campaigns/canonical");
     expect(screen.getByRole("link", { name: /My copy/ })).toHaveAttribute("href", "/campaigns/private");
     expect(screen.queryByRole("combobox")).toBeNull();
+    expect(screen.getByText("English")).toBeTruthy();
+  });
+});
+
+describe("TemplateTiles Grim source", () => {
+  it("shows the canonical English Grim and hides the legacy uk one", () => {
+    const grim = (id: string, locale: string | null): TemplateTile => ({ id, name: GRIM_TEMPLATE_NAME, description: "d", locale, templateKey: GRIM_TEMPLATE_NAME, kind: "template", visibility: "official" });
+
+    render(<TemplateTiles templates={[grim("canonical", "en"), grim("legacy", "uk")]} />);
+
+    expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.getByText("English")).toBeTruthy();
   });
 });

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { hashText } from "@/lib/srd/i18n/catalog";
 
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? { [hashText("n", "Bless")]: "Благословення" } : {} }));
+vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? { [hashText("n", "Bless")]: "Благословення" } : {} }));
 
 const m = vi.hoisted(() => ({
   db: {
