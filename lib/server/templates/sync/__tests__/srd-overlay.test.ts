@@ -221,6 +221,19 @@ describe("localized Grim synchronization", () => {
     expect(f.campaign(target).rules).toMatchObject(table("Запах паленого волосся."));
     expect(local("career")[0].name).toBe("Архіваріус");
   });
+  it("applies a new spell and a renamed spell-list translation without name-reference errors", async () => {
+    f.addRow("spell", { id: id("1"), campaignId: source, name: "Fenlore", lists: ["Fenlore"] });
+    dictionary.values[hashText("n", "Fenlore")] = "Болотна мудрість";
+    await makeClone();
+    expect(await diff()).toEqual([]);
+    f.addRow("spell", { id: id("2"), campaignId: source, name: "Mire Step", lists: ["Fenlore"] });
+    dictionary.values[hashText("n", "Fenlore")] = "Болотне знання";
+
+    const items = await diff();
+
+    expect(items.length).toBeGreaterThan(0);
+    await applySourceChanges(f.db, target, { apply: items.map(ref), ignore: [] });
+  });
   it("reports a changed rule-table translation", async () => {
     await makeClone();
     dictionary.values[hashText("d", "A smell of scorched hair.")] = "Інший запах.";
