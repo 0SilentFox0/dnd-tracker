@@ -161,8 +161,8 @@
 | 20 | Sour Blood | witchcraft | Thornwitchery | 5 | dice | enemy 30 | 1/1 | dmg | poisoned 1 | Toadstool Cap, 12 (0.05) | The target's blood curdles and burns in its veins. |
 | 21 | Withering Glance | witchcraft | Thornwitchery | 7 | null | enemy 60 | 0/— | — | fatigued 2 | — | A long stare that saps the strength from a body. |
 | 22 | Crow-Knot Curse | witchcraft | Thornwitchery | 10 | dice | enemy 60 | 2/1 | dmg | bleeding 1 | Crow Skull, 36 (0.15) | A knotted cord pulled tight opens old wounds anew. |
-| 23 | Blessing of Mending | blessing | Hearth Rites | 0 | null | ally 10 | 1/— | heal | — | — | A murmured hearth-prayer that closes a cut. |
-| 24 | Blessing of Embers | blessing | Hearth Rites | 0 | null | enemy 30 | 1/— | dmg | — | — | A spark from the hearth leaps at the faithful's foe. |
+| 23 | Hearth Mending | blessing | Hearth Rites | 0 | null | ally 10 | 1/— | heal | — | — | A murmured hearth-prayer that closes a cut. |
+| 24 | Hearth Spark | blessing | Hearth Rites | 0 | null | enemy 30 | 1/— | dmg | — | — | A spark from the hearth leaps at the faithful's foe. |
 | 25 | Hearthward Rebuke | blessing | Hearth Rites | 0 | null | enemy 30 | 0/— | — | prone 1 | — | A stern word that drives a foe to its knees. |
 | 26 | Hush of the Hearth | blessing | Hearth Rites | 0 | null | enemy 30 | 0/— | — | deafened 1 | — | A hush falls over the target like a banked fire. |
 | 27 | Mercy of the Hearth | miracle | Hearth Rites | 6 | null | area ally×4 30 | 2/— | heal | — | — | Warmth spreads through the faithful and wounds close. |
@@ -314,7 +314,7 @@
 | unit | тема | Int / Fel / AP | стеля arcane / prayer | knownSpells |
 |---|---|---|---|---|
 | Ember Acolyte | Cultists | 30 / 30 / 0 | 3 / 3 | Spark Flick, Chill Breath |
-| Ashen Zealot | Cultists | 28 / 30 / 0 | 2 / 3 | Blessing of Embers, Blessing of Mending |
+| Ashen Zealot | Cultists | 28 / 30 / 0 | 2 / 3 | Hearth Spark, Hearth Mending |
 | Masked Oracle | Cultists | 55 / 50 / 2 | 3 / 5 | Dazzle, Muffle, Tripwire Hex |
 | Gilded Voice | Cultists | 65 / 70 / 2 | 4 / 7 | Spark Flick, Ember Dart, Hearthfire Smite |
 | Veil Stalker | Horrors | 30 / 5 / 0 | 3 / 0 | Dazzle, Chill Breath |
@@ -580,7 +580,7 @@ Expected: відповідно до таблиці «Перевірки коду
 | ефект `{ type: "condition", key: "unconscious", levels: 1 }` | `'rules: tables.miscastMinor[0] condition "unconscious" is not allowed'` |
 
   Плюс у `validate-data.test.ts`: `data.rules = { tables: { miscastMinor: [{ max: 50, effects: [] }, { max: 40, effects: [] }] } }` → є рядок, що починається з `"rules: tables.miscastMinor"` (порядок перевіряє наявний `validateRules`); `data.rules = { tables: { wrath: [...rows(7), { max: 100, text: "The Empire falls", effects: [] }] } }` → `'rules: forbidden term "Empire"'`.
-  `forbidden-terms.test.ts`: allows `"Arming Sword"`, `"Blessing of Mending"`, `"Ember Dart"`, `"Mail Hood"`, `"Hedge row"`; flags `["Aethyric Armour", "Aethyric"]`, `["a Zweihander", "Zweihander"]`, `["Blessing of Battle", "Blessing of Battle"]`, `["Gromril plate", "Gromril"]`, `["Bright Wizard", "Bright Wizard"]`.
+  `forbidden-terms.test.ts`: allows `"Arming Sword"`, `"Hearth Mending"`, `"Ember Dart"`, `"Mail Hood"`, `"Hedge row"`; flags `["Aethyric Armour", "Aethyric"]`, `["a Zweihander", "Zweihander"]`, `["Blessing of Battle", "Blessing of Battle"]`, `["Gromril plate", "Gromril"]`, `["Bright Wizard", "Bright Wizard"]`.
 - [ ] **Step 2:** `pnpm test:run scripts/grim/__tests__/tables.test.ts scripts/grim/__tests__/forbidden-terms.test.ts scripts/grim/__tests__/validate-data.test.ts` — FAIL.
 - [ ] **Step 3: `tableIssues`** у `validate-data.ts` за Рішенням 5, викликати з `validateGrimData` після `validateRules`. `validateTerms` додатково сканує `data.rules` під міткою `rules`.
 - [ ] **Step 4: `FORBIDDEN_TERMS`** — новий рядок масиву:

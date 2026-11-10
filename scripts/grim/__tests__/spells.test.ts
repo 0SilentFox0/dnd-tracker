@@ -9,6 +9,19 @@ describe("spellIssues", () => {
   it("accepts the Ember Dart roster row", () => {
     expect(spellIssues(emberDart)).toEqual([]);
   });
+
+  it.each([
+    ["a heal spell targeting an enemy", { effect: "heal", targeting: { kind: "enemy", range: 30 } }, "does not fit a heal spell"],
+    ["a heal spell on an enemy-side area", { effect: "heal", targeting: { kind: "area", side: "enemy", range: 30, shape: { kind: "circle", radius: 10 } } }, "does not fit a heal spell"],
+    ["a damage spell targeting an ally", { effect: "dmg", targeting: { kind: "ally", range: 30 } }, "does not fit a harmful spell"],
+    ["a damage spell on an ally-side area", { effect: "dmg", targeting: { kind: "area", side: "ally", range: 30, shape: { kind: "circle", radius: 10 } } }, "does not fit a harmful spell"],
+  ])("rejects %s", (_label, patch, message) => {
+    const { effect, targeting } = patch;
+
+    const row: Row = { ...emberDart, targeting, spellEffects: [{ kind: effect === "heal" ? "heal" : "dealDamage", amount: { spellRoll: 100 }, ...(effect === "heal" ? {} : { damageType: "magic" }) }], casting: { magic: { cn: 4, kind: "arcane", overcast: "dice", attribute: null } } };
+
+    expect(spellIssues(row).join("\n")).toContain(message);
+  });
 });
 
 describe("castCeiling", () => {

@@ -26,7 +26,7 @@ export const GRIM_RANGED_GROUPS = ["bow", "crossbow", "sling", "throwing", "blac
 
 export const GRIM_WEAPON_GROUPS: readonly WeaponGroup[] = [...GRIM_MELEE_GROUPS, ...GRIM_RANGED_GROUPS];
 
-export const WEAPON_GROUP_BANDS: Record<(typeof GRIM_WEAPON_GROUPS)[number], WeaponBand> = {
+export const WEAPON_GROUP_BANDS: Record<(typeof GRIM_MELEE_GROUPS)[number] | (typeof GRIM_RANGED_GROUPS)[number], WeaponBand> = {
   basic: { flat: [1, 5], addSb: true, weight: [0, 2], price: [6, 480] },
   fencing: { flat: [3, 5], addSb: true, weight: [0, 1], price: [240, 960] },
   brawling: { flat: [0, 3], addSb: true, weight: [0, 1], price: [6, 240] },
@@ -40,7 +40,7 @@ export const WEAPON_GROUP_BANDS: Record<(typeof GRIM_WEAPON_GROUPS)[number], Wea
   sling: { flat: [3, 7], addSb: false, range: [60, 240], weight: [0, 1], price: [6, 60] },
   throwing: { flat: [0, 6], addSb: null, range: [12, 60], weight: [0, 1], price: [6, 240] },
   blackpowder: { flat: [7, 10], addSb: false, range: [30, 360], weight: [0, 3], price: [960, 2880], reload: true },
-} as Record<string, WeaponBand>;
+};
 
 export const ARMOUR_KIND_BANDS: Record<ArmourKind, { ap: Range; weight: Range; price: Range }> = {
   soft: { ap: [0, 1], weight: [0, 2], price: [12, 360] },
@@ -120,7 +120,6 @@ function weaponIssues(slot: string | undefined, w: Extract<WfrpItemStats, { type
   commonRange("weight", w.weight, band.weight, issues, w.group);
   commonRange("price", w.price, band.price, issues, w.group, " p");
 
-
   if (band.twoHanded && !w.twoHanded) issues.push(`group "${w.group}" needs twoHanded`);
 
   const reload = w.flaws.some((f) => f.key === "reload");
@@ -150,7 +149,6 @@ function armourIssues(slot: string | undefined, a: Extract<WfrpItemStats, { type
 
   commonRange("weight", a.weight, band.weight, issues, a.kind);
   commonRange("price", a.price, band.price, issues, a.kind, " p");
-
 }
 
 function gearIssues(slot: string | undefined, g: Extract<WfrpItemStats, { type: "gear" }>, issues: string[]) {
@@ -173,8 +171,6 @@ function gearIssues(slot: string | undefined, g: Extract<WfrpItemStats, { type: 
     commonRange("weight", g.weight, GEAR_BAND.weight, issues, "gear");
     commonRange("price", g.price, GEAR_BAND.price, issues, "gear", " p");
   } else if (isGrimSlot(slot)) issues.push(`slot "${slot}" does not fit gear`);
-
-  if (!Number.isInteger(g.price) && !issues.some((i) => i.startsWith("price"))) issues.push(`price ${g.price} p must be whole pence`);
 }
 
 /** Grim-specific checks of one artifacts.json row; the resource schema is checked by validateRows. */

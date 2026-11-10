@@ -1,7 +1,7 @@
 import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
 import { equipmentIssues } from "./equipment";
 import { findForbiddenTerms } from "./forbidden-terms";
-import { spellIssues, unitSpellIssues } from "./spells";
+import { FORBIDDEN_CONDITIONS, spellIssues, unitSpellIssues } from "./spells";
 import { unitIssues } from "./units";
 
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
@@ -224,8 +224,6 @@ export const GRIM_TABLE_SLOTS = ["miscastMinor", "miscastMajor", "wrath"] as con
 export const GRIM_TABLE_ROWS: readonly [number, number] = [8, 10];
 
 export const TABLE_TEXT_MAX = 120;
-
-const FORBIDDEN_CONDITIONS: readonly string[] = ["unconscious", "surprised"];
 
 export function tableIssues(rules: GrimData["rules"]): string[] {
   const tables = (rules as { tables?: Record<string, TableRow[] | null> } | undefined)?.tables;

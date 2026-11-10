@@ -5,6 +5,7 @@ import type { Row } from "./data";
 import { TRAIT_SIZES, type TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import type { RecipeContext, RecipeValues } from "@/lib/utils/abilities/templates/types";
 import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/utils/rules/systems";
+import { RANGED_DEFAULT_RANGE_FT } from "@/lib/utils/rules/systems/wfrp/traits/constants";
 import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
 
 export const GRIM_UNIT_THEMES = ["Beasts", "Raiders", "Restless Dead", "Cultists", "Constructs", "Horrors"] as const;
@@ -100,7 +101,7 @@ export function unitTraits(row: Row): UnitTraits {
       case "weapon":
       case "breath":
       case "ranged":
-        t.attacks.push({ name: String(a.name), attack: String(a.id), damage: Number(e.damage), magical: e.magical === true, ...(a.id === "ranged" && { rangeFt: Number(e.rangeFt) }) });
+        t.attacks.push({ name: String(a.name), attack: String(a.id), damage: Number(e.damage), magical: e.magical === true, ...(a.id === "ranged" && { rangeFt: e.rangeFt == null ? RANGED_DEFAULT_RANGE_FT : Number(e.rangeFt) }) });
         break;
       default:
         if (NOTE_TRAITS.includes(String(a.id))) t.notes.add(String(a.id));

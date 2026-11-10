@@ -28,7 +28,7 @@ const PENCE_PER_GP = 240;
 
 const INGREDIENT_KINDS: readonly string[] = ["arcane", "hedge", "witchcraft"];
 
-const BAD_ATTRIBUTES: readonly string[] = ["unconscious", "surprised"];
+export const FORBIDDEN_CONDITIONS: readonly string[] = ["unconscious", "surprised"];
 
 const TARGETING_KINDS: readonly string[] = ["ally", "enemy", "area", "template"];
 
@@ -175,7 +175,7 @@ export function spellIssues(row: Row): string[] {
     const condition = String(attribute.condition);
 
     if (!(WFRP_CONDITION_KEYS as readonly string[]).includes(condition)) issues.push(`attribute condition "${condition}" is not a wfrp condition`);
-    else if (BAD_ATTRIBUTES.includes(condition)) issues.push(`attribute condition "${condition}" is not allowed`);
+    else if (FORBIDDEN_CONDITIONS.includes(condition)) issues.push(`attribute condition "${condition}" is not allowed`);
   }
 
   if (row.targeting !== undefined || effects.length > 0 || attribute) targetingIssues(row.targeting, effect, !!attribute, issues);
