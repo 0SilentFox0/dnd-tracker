@@ -21,6 +21,20 @@ function list(record: Row, n: number, part: Part): string[] {
   return Array.isArray(raw) ? raw.map(String) : [];
 }
 
+/** Skill pools per career class; `key:*` admits any specialisation of an open skill. */
+const CLASS_SKILL_POOLS: Record<string, string[]> = {
+  Academic: ["research", "heal", "evaluate", "perception", "cool", "intuition", "gossip", "lore:*", "language:*", "trade:*"],
+  Burgher: ["haggle", "evaluate", "gossip", "charm", "perception", "drink", "cool", "intuition", "lore:local", "trade:*", "melee:basic"],
+  Courtier: ["charm", "gossip", "leadership", "intuition", "perception", "entertain", "ride", "language:*", "lore:*", "performance:*", "art:*", "melee:fencing"],
+  Peasant: ["animal-care", "endurance", "survival", "athletics", "climb", "drive", "haggle", "melee:basic", "lore:local", "trade:*"],
+  Ranger: ["survival", "track", "perception", "stealth", "navigation", "climb", "animal-care", "endurance", "ranged:bow", "ranged:sling"],
+  Riverfolk: ["row", "swim", "athletics", "navigation", "perception", "haggle", "endurance", "melee:basic", "ranged:throwing", "lore:rivers", "trade:*"],
+  Rogue: ["sleight-of-hand", "lockpicking", "stealth", "gamble", "gossip", "perception", "charm", "dodge", "traps", "intuition", "melee:brawling"],
+  Warrior: ["melee:basic", "melee:parry", "melee:two-handed", "ranged:crossbow", "dodge", "endurance", "intimidate", "athletics", "cool", "leadership"],
+};
+
+const inPool = (pool: string[], skill: string) => pool.some((p) => (p.endsWith(":*") ? skill.startsWith(p.slice(0, -1)) : p === skill));
+
 const RANK = { brass: 0, silver: 1, gold: 2 } as const;
 
 function statusRank(record: Row, n: number): number | null {
@@ -72,12 +86,34 @@ export function grimCoverage(data: GrimData): string[] {
 
     if (ticks !== undefined && items < ticks) warnings.push(`careers "${nameOf(career)}": tier 1 lists ${items} items, ticksRequired[0] is ${ticks}`);
 
+    const pool = CLASS_SKILL_POOLS[String(record.class ?? "").trim()];
+
+    if (pool) {
+      const seen = new Set<string>();
+
+      const open = pool.some((p) => p.endsWith(":*"));
+
+      for (const n of TIERS) {
+        const skills = list(record, n, "skills");
+
+        for (const skill of skills) if (!inPool(pool, skill)) warnings.push(`careers "${nameOf(career)}": tier ${n} skill "${skill}" is outside the ${record.class} pool`);
+
+        const exhausted = !open && pool.every((p) => seen.has(p));
+
+        if (n > 1 && skills.length > 0 && !exhausted && skills.every((skill) => seen.has(skill))) warnings.push(`careers "${nameOf(career)}": tier ${n} adds no new skill`);
+
+        skills.forEach((skill) => seen.add(skill));
+      }
+    }
+
     const ranks = TIERS.map((n) => statusRank(record, n));
 
     if (ranks.every((r) => r !== null) && ranks.some((r, i) => i > 0 && (r as number) <= (ranks[i - 1] as number))) warnings.push(`careers "${nameOf(career)}": tier statuses do not rise`);
   }
 
   data.raceProfiles.forEach(({ race, profile }) => {
+    if (!profile || typeof profile !== "object") return;
+
     const fixed = new Set((profile.talents ?? []).map(nameKey));
 
     const distinct = new Set((profile.randomTalents ?? []).map((r) => nameKey(r.featId)).filter((t) => !fixed.has(t))).size;

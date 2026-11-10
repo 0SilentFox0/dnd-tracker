@@ -8,7 +8,7 @@ const load = (): GrimData => structuredClone(readGrimData(path.join(__dirname, "
 
 describe("grimCoverage", () => {
   it("reports only the known fixture gaps", () => {
-    const warnings = grimCoverage(load());
+    const warnings = grimCoverage(load()).filter((w) => !w.includes("pool") && !w.includes("no new skill"));
 
     expect(warnings).toHaveLength(4);
     expect(warnings).toEqual(
@@ -49,5 +49,19 @@ describe("grimCoverage", () => {
 
     data.raceProfiles[0].profile.randomTalentCount = 3;
     expect(grimCoverage(data).some((w) => w.includes("exceeds"))).toBe(true);
+  });
+
+  it("flags a skill outside the class pool and a tier that adds no new skill", () => {
+    const data = load();
+
+    data.careers[0].class = "Warrior";
+    data.careers[0].tier1_skills = ["melee:basic", "melee:parry", "dodge", "cool", "endurance"];
+    data.careers[0].tier2_skills = ["sailing", "intimidate", "athletics"];
+    data.careers[0].tier3_skills = ["melee:basic", "dodge", "cool"];
+
+    const warnings = grimCoverage(data);
+
+    expect(warnings).toContain('careers "Vermin Hunter": tier 2 skill "sailing" is outside the Warrior pool');
+    expect(warnings).toContain('careers "Vermin Hunter": tier 3 adds no new skill');
   });
 });

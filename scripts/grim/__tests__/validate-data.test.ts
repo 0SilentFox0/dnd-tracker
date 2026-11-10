@@ -47,6 +47,20 @@ describe("validateGrimData", () => {
     expect(issuesOf(data)).toContain('careers #1 "Vermin Hunter": unknown tier2_talents "Missing Talent"');
   });
 
+  it("requires links to match the catalog name exactly", () => {
+    const data = load();
+
+    const talent = String(data.feats[0].name);
+
+    data.careers[0].tier2_talents = [talent.toLowerCase()];
+    data.raceProfiles[0].profile.talents = [talent.toUpperCase()];
+
+    const issues = issuesOf(data);
+
+    expect(issues).toContain(`careers #1 "Vermin Hunter": unknown tier2_talents "${talent.toLowerCase()}"`);
+    expect(issues.some((i) => i.includes(`unknown feat "${talent.toUpperCase()}"`))).toBe(true);
+  });
+
   it("rejects a unit linking to a spell or race that is not in the data", () => {
     const data = load();
 

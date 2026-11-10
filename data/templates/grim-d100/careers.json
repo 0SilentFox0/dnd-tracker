@@ -101,7 +101,7 @@
       "perception",
       "cool",
       "lore:herbs",
-      "endurance"
+      "language:old-script"
     ],
     "tier1_talents": [
       "Steady Hands",
@@ -245,7 +245,7 @@
       "i"
     ],
     "tier4_skills": [
-      "charm",
+      "trade:wax-work",
       "evaluate",
       "intuition"
     ],
@@ -272,9 +272,9 @@
     "tier1_skills": [
       "perception",
       "cool",
-      "climb",
-      "endurance",
-      "gossip"
+      "gossip",
+      "trade:lamps",
+      "trade:oil"
     ],
     "tier1_talents": [
       "Night Owl",
@@ -415,8 +415,8 @@
       "i"
     ],
     "tier4_skills": [
-      "leadership",
-      "cool",
+      "art:banners",
+      "performance:oratory",
       "melee:fencing"
     ],
     "tier4_talents": [
@@ -501,8 +501,8 @@
     ],
     "tier4_skills": [
       "melee:fencing",
-      "performance:mime",
-      "cool"
+      "performance:impersonation",
+      "art:masks"
     ],
     "tier4_talents": [
       "Snap Reaction",
@@ -569,7 +569,7 @@
     "tier3_skills": [
       "drive",
       "haggle",
-      "lore:herbs"
+      "trade:wool"
     ],
     "tier3_talents": [
       "Road-Worn",
@@ -588,7 +588,7 @@
     "tier4_skills": [
       "haggle",
       "endurance",
-      "animal-care"
+      "trade:cheesemaking"
     ],
     "tier4_talents": [
       "Tough Hide",
@@ -655,7 +655,7 @@
     "tier3_skills": [
       "drive",
       "haggle",
-      "lore:herbs"
+      "trade:smelting"
     ],
     "tier3_talents": [
       "Oxen Constitution",
@@ -672,8 +672,8 @@
       "fel"
     ],
     "tier4_skills": [
+      "trade:woodcutting",
       "haggle",
-      "endurance",
       "melee:basic"
     ],
     "tier4_talents": [
@@ -740,8 +740,8 @@
     ],
     "tier3_skills": [
       "animal-care",
-      "stealth",
-      "navigation"
+      "ranged:sling",
+      "stealth"
     ],
     "tier3_talents": [
       "Alert Sleeper",
@@ -806,7 +806,7 @@
       "fel"
     ],
     "tier2_skills": [
-      "ride",
+      "climb",
       "survival",
       "stealth"
     ],
@@ -826,8 +826,8 @@
     ],
     "tier3_skills": [
       "navigation",
-      "intuition",
-      "climb"
+      "ranged:bow",
+      "track"
     ],
     "tier3_talents": [
       "Ambusher",
@@ -844,8 +844,8 @@
       "i"
     ],
     "tier4_skills": [
-      "ranged:bow",
-      "cool",
+      "ranged:sling",
+      "survival",
       "animal-care"
     ],
     "tier4_talents": [
@@ -912,8 +912,8 @@
     ],
     "tier3_skills": [
       "melee:basic",
-      "evaluate",
-      "gossip"
+      "ranged:throwing",
+      "trade:ferrying"
     ],
     "tier3_talents": [
       "Cudgel Work",
@@ -930,9 +930,9 @@
       "fel"
     ],
     "tier4_skills": [
-      "charm",
-      "navigation",
-      "intuition"
+      "trade:rope-work",
+      "haggle",
+      "swim"
     ],
     "tier4_talents": [
       "Tough Hide",
@@ -997,7 +997,7 @@
       "wp"
     ],
     "tier3_skills": [
-      "survival",
+      "melee:basic",
       "navigation",
       "haggle"
     ],
@@ -1016,9 +1016,9 @@
       "fel"
     ],
     "tier4_skills": [
+      "trade:smoking-fish",
       "ranged:throwing",
-      "gossip",
-      "evaluate"
+      "athletics"
     ],
     "tier4_talents": [
       "Knife Thrower",
@@ -1083,9 +1083,9 @@
       "fel"
     ],
     "tier3_skills": [
-      "cool",
+      "lockpicking",
       "traps",
-      "perception"
+      "melee:brawling"
     ],
     "tier3_talents": [
       "Silver Tongue",
@@ -1169,9 +1169,9 @@
       "s"
     ],
     "tier3_skills": [
-      "climb",
-      "lockpicking",
-      "perception"
+      "gamble",
+      "charm",
+      "melee:brawling"
     ],
     "tier3_talents": [
       "Lock Whisperer",

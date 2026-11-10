@@ -78,16 +78,40 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     expect(profiles).toHaveLength(4);
 
-    const expected = readGrimData().raceProfiles;
+    const data = readGrimData();
 
-    for (const { profile } of profiles) {
-      const source = expected.find((p) => p.profile.careerTable.length === profile.careerTable.length);
+    const [careers, feats] = await Promise.all([scoped.career.findMany({ where: { campaignId: created.campaign.id }, select: { id: true, name: true } }), scoped.feat.findMany({ where: { campaignId: created.campaign.id }, select: { id: true, name: true, abilities: true } })]);
 
-      expect(source).toBeDefined();
-      expect(profile.careerTable.every((r) => (r.careerId as string).length > 10)).toBe(true);
+    const careerIds = new Set(careers.map((c) => c.id));
+
+    const featIds = new Set(feats.map((f) => f.id));
+
+    const featByName = new Map(feats.map((f) => [f.name, f.id]));
+
+    const careerByName = new Map(careers.map((c) => [c.name, c.id]));
+
+    expect(careers).toHaveLength(data.careers.length);
+    expect(feats).toHaveLength(data.feats.length);
+
+    for (const { race, profile } of data.raceProfiles) {
+      const stored = profiles.find((p) => p.profile.careerTable.length === profile.careerTable.length && p.profile.careerTable.every((r, i) => r.max === profile.careerTable[i].max));
+
+      expect(stored, race).toBeDefined();
+      expect(stored?.profile.careerTable.map((r) => r.careerId)).toEqual(profile.careerTable.map((r) => careerByName.get(r.careerId)));
+      expect(stored?.profile.talents).toEqual(profile.talents.map((t) => featByName.get(t)));
+      expect(stored?.profile.randomTalents.map((r) => r.featId)).toEqual(profile.randomTalents.map((r) => featByName.get(r.featId)));
     }
 
-    expect(profiles.map((p) => p.profile.careerTable.length).sort()).toEqual(expected.map((p) => p.profile.careerTable.length).sort());
+    for (const { profile } of profiles) {
+      expect(profile.careerTable.every((r) => careerIds.has(r.careerId))).toBe(true);
+      expect([...profile.talents, ...profile.randomTalents.map((r) => r.featId)].every((id) => featIds.has(id))).toBe(true);
+    }
+
+    const mechanical = data.feats.filter((f) => Array.isArray(f.abilities) && f.abilities.length > 0);
+
+    expect(mechanical).toHaveLength(20);
+
+    for (const feat of mechanical) expect(feats.find((f) => f.name === feat.name)?.abilities).toEqual(feat.abilities);
   });
 
   it("a second run is a no-op", async () => {

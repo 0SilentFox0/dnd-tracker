@@ -66,9 +66,11 @@ function nestedNames(value: unknown, key: string): string[] {
   return Object.entries(value).flatMap(([k, v]) => (k === key && typeof v === "string" ? [v] : nestedNames(v, key)));
 }
 
-/** Links between row kinds are by name; a name missing from its kind is dropped (or errors) at import, so every one must resolve. */
+const exactName = (row: Row) => (typeof row.name === "string" ? row.name : "");
+
+/** Links between row kinds are by name; a name missing from its kind is dropped (or errors) at import, so every one must resolve, matching the catalog name exactly. */
 function validateLinks(data: GrimData, issues: string[]) {
-  const names = Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, new Set(data[kind].map((r) => nameKey(nameOf(r) ?? "")))])) as Record<GrimRowKind, Set<string>>;
+  const names = Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, new Set(data[kind].map(exactName))])) as Record<GrimRowKind, Set<string>>;
 
   for (const kind of GRIM_ROW_KINDS)
     data[kind].forEach((row, index) => {
@@ -79,7 +81,7 @@ function validateLinks(data: GrimData, issues: string[]) {
 
         const links = field.nestedRef && isGrimKind(field.nestedRef.kind) ? [{ ref: field.nestedRef.kind, names: nestedNames(raw, field.nestedRef.key) }] : isGrimKind(field.ref) ? [{ ref: field.ref, names: (Array.isArray(raw) ? raw : raw ? [raw] : []).map(String) }] : [];
 
-        for (const { ref, names: linked } of links) for (const name of linked) if (!names[ref].has(nameKey(name))) issues.push(`${label(kind, index, row.name)}: unknown ${field.key} "${name}"`);
+        for (const { ref, names: linked } of links) for (const name of linked) if (!names[ref].has(name)) issues.push(`${label(kind, index, row.name)}: unknown ${field.key} "${name}"`);
       }
     });
 }
@@ -90,7 +92,7 @@ function validateProfiles(data: GrimData, names: { races: Set<string>; careers: 
   data.raceProfiles.forEach(({ race, profile }, index) => {
     const where = `race-profiles #${index + 1} "${race}"`;
 
-    if (!names.races.has(nameKey(race))) issues.push(`${where}: unknown race`);
+    if (!names.races.has(race)) issues.push(`${where}: unknown race`);
 
     if (seen.has(nameKey(race))) issues.push(`${where}: duplicate profile`);
 
@@ -105,7 +107,7 @@ function validateProfiles(data: GrimData, names: { races: Set<string>; careers: 
     if (badList.length > 0) return;
 
     const fakeId = (kind: "career" | "feat", set: Set<string>, name: string) => {
-      if (!set.has(nameKey(name))) issues.push(`${where}: unknown ${kind} "${name}"`);
+      if (!set.has(name)) issues.push(`${where}: unknown ${kind} "${name}"`);
 
       return `${kind}:${nameKey(name)}`;
     };
@@ -228,7 +230,7 @@ export function validateGrimData(data: GrimData): GrimValidation {
 
   for (const kind of GRIM_ROW_KINDS) validateRows(kind, data[kind], issues);
 
-  const names = { races: new Set(data.races.map((r) => nameKey(nameOf(r) ?? ""))), careers: new Set(data.careers.map((r) => nameKey(nameOf(r) ?? ""))), feats: new Set(data.feats.map((r) => nameKey(nameOf(r) ?? ""))) };
+  const names = { races: new Set(data.races.map(exactName)), careers: new Set(data.careers.map(exactName)), feats: new Set(data.feats.map(exactName)) };
 
   validateLinks(data, issues);
   validateProfiles(data, names, issues);
