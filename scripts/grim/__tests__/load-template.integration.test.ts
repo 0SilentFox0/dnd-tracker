@@ -97,6 +97,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
     await raw.campaign.updateMany({ where: { id: { in: ids } }, data: { baseSourceId: null } });
     await raw.featBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.spellBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
+    await raw.artifactBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.careerBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.raceBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.unitBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });

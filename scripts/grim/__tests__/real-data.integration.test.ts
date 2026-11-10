@@ -27,6 +27,8 @@ const rowCounts = async (templateId: string) => ({
   careers: await raw.career.count({ where: { campaignId: templateId } }),
   races: await raw.race.count({ where: { campaignId: templateId } }),
   units: await raw.unit.count({ where: { campaignId: templateId } }),
+  spells: await raw.spell.count({ where: { campaignId: templateId } }),
+  artifacts: await raw.artifact.count({ where: { campaignId: templateId } }),
 });
 
 describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
@@ -53,6 +55,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
     await raw.campaign.updateMany({ where: { id: { in: ids } }, data: { baseSourceId: null } });
     await raw.featBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.spellBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
+    await raw.artifactBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.careerBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.raceBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.unitBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
@@ -66,7 +69,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     templateId = result.templateId;
     expect(result.created).toBe(true);
-    expect(result.counts).toMatchObject({ feats: 50, careers: 16, races: 4, units: 30, raceProfiles: 4 });
+    expect(result.counts).toMatchObject({ feats: 50, careers: 16, races: 4, units: 30, spells: 30, artifacts: 56, raceProfiles: 4 });
   });
 
   it("a clone sees every species profile with id-based career tables", async () => {
@@ -134,6 +137,55 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
       expect(unit, String(row.name)).toMatchObject({ level: row.level, maxHp: row.maxHp, speed: row.speed, initiative: row.initiative, gridSize: row.gridSize, statblock: row.statblock, abilities: row.abilities });
       expect(unit?.characteristics, String(row.name)).toMatchObject(row.characteristics as object);
+    }
+  });
+
+  it("a clone carries spells, item stats, miscast tables and unit spell links", async () => {
+    const created = await createCampaignForUser(userId, { name: `${marker}-arsenal`, templateId }, { defer: () => undefined });
+
+    if (!created.ok) throw new Error("clone failed");
+
+    invalidateCampaignLayer();
+
+    const data = readGrimData();
+
+    const campaignId = created.campaign.id;
+
+    const [spells, artifacts, units, campaign] = await Promise.all([
+      scoped.spell.findMany({ where: { campaignId }, select: { id: true, name: true, casting: true, targeting: true, spellEffects: true, ingredients: true, lists: true } }),
+      scoped.artifact.findMany({ where: { campaignId }, select: { name: true, slot: true, rarity: true, systemStats: true } }),
+      scoped.unit.findMany({ where: { campaignId }, select: { name: true, knownSpells: true } }),
+      raw.campaign.findUniqueOrThrow({ where: { id: campaignId }, select: { rules: true } }),
+    ]);
+
+    expect(spells).toHaveLength(data.spells.length);
+    expect(artifacts).toHaveLength(data.artifacts.length);
+
+    for (const row of data.spells) {
+      const spell = spells.find((s) => s.name === row.name);
+
+      expect(spell, String(row.name)).toMatchObject({ casting: row.casting, targeting: row.targeting, spellEffects: row.spellEffects, ingredients: row.ingredients ?? [], lists: row.lists });
+    }
+
+    for (const row of data.artifacts) {
+      const artifact = artifacts.find((a) => a.name === row.name);
+
+      expect(artifact, String(row.name)).toBeDefined();
+      expect(artifact?.slot, String(row.name)).toEqual(row.slot);
+      expect(artifact?.rarity, String(row.name)).toEqual(row.rarity);
+      expect(artifact?.systemStats, String(row.name)).toEqual(row.systemStats);
+    }
+
+    expect((campaign.rules as { tables?: unknown }).tables).toEqual(data.rules?.tables);
+
+    const nameById = new Map(spells.map((s) => [s.id, s.name]));
+
+    for (const row of data.units) {
+      const unit = units.find((u) => u.name === row.name);
+
+      const expected = (row.knownSpells ?? []) as string[];
+
+      expect(((unit?.knownSpells ?? []) as string[]).map((id) => nameById.get(id)).sort(), String(row.name)).toEqual([...expected].sort());
     }
   });
 
