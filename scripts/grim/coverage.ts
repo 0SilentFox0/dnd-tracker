@@ -1,4 +1,5 @@
 import type { GrimData, Row } from "./data";
+import { GRIM_UNIT_LEVELS, GRIM_UNIT_THEMES, unitTraitKeys, unitTraits } from "./units";
 
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
@@ -6,6 +7,7 @@ import { mergeRules } from "@/lib/utils/rules/schema";
 import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
 import { parseStatus } from "@/lib/utils/rules/systems/wfrp/downtime/status";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
 
 type Part = "characteristics" | "skills" | "talents";
 
@@ -45,6 +47,48 @@ function statusRank(record: Row, n: number): number | null {
   const { tier, level } = parseStatus(raw);
 
   return RANK[tier] * 100 + level;
+}
+
+export const UNIT_TRAIT_COVERAGE: readonly string[] = [...TRAIT_RECIPES.map((r) => r.id), "terror", "magical"];
+
+const themeOf = (u: Row) => (u.statblock as { creatureType?: unknown } | undefined)?.creatureType;
+
+function unitCoverage(units: Row[]): string[] {
+  if (units.length === 0) return [];
+
+  const warnings: string[] = [];
+
+  for (const theme of GRIM_UNIT_THEMES) if (!units.some((u) => themeOf(u) === theme)) warnings.push(`units: theme "${theme}" has no unit`);
+
+  for (const level of GRIM_UNIT_LEVELS) if (!units.some((u) => u.level === level)) warnings.push(`units: level ${level} has no unit`);
+
+  const used = new Set(units.flatMap(unitTraitKeys));
+
+  for (const key of UNIT_TRAIT_COVERAGE) if (!used.has(key)) warnings.push(`units: trait "${key}" is used by no unit`);
+
+  for (const u of units) {
+    const keys = unitTraitKeys(u);
+
+    if (unitTraits(u).attacks.length === 0) warnings.push(`units "${nameOf(u)}": no attack`);
+
+    if (keys.includes("terror") && Number(u.level) < 3) warnings.push(`units "${nameOf(u)}": Terror below Elite`);
+
+    if (u.level === 4 && !keys.includes("breath") && !keys.includes("magical")) warnings.push(`units "${nameOf(u)}": Boss without Magical or Breath`);
+  }
+
+  const mean = (g: Row[]) => g.reduce((sum, u) => sum + Number(u.maxHp), 0) / g.length;
+
+  const apMax = (g: Row[]) => Math.max(...g.map((u) => unitTraits(u).ap));
+
+  for (const theme of GRIM_UNIT_THEMES) {
+    const groups = GRIM_UNIT_LEVELS.map((level) => units.filter((u) => themeOf(u) === theme && u.level === level)).filter((g) => g.length > 0);
+
+    if (groups.some((g, i) => i > 0 && mean(g) <= mean(groups[i - 1]))) warnings.push(`units: theme "${theme}" Wounds do not rise with level`);
+
+    if (groups.some((g, i) => i > 0 && apMax(g) < apMax(groups[i - 1]))) warnings.push(`units: theme "${theme}" Armour drops with level`);
+  }
+
+  return warnings;
 }
 
 export function grimCoverage(data: GrimData): string[] {
@@ -120,6 +164,8 @@ export function grimCoverage(data: GrimData): string[] {
 
     if (profile.randomTalentCount > distinct) warnings.push(`race-profiles "${race}": randomTalentCount ${profile.randomTalentCount} exceeds ${distinct} distinct table talents`);
   });
+
+  warnings.push(...unitCoverage(data.units));
 
   return warnings;
 }

@@ -8,7 +8,7 @@ const load = (): GrimData => structuredClone(readGrimData(path.join(__dirname, "
 
 describe("grimCoverage", () => {
   it("reports only the known fixture gaps", () => {
-    const warnings = grimCoverage(load()).filter((w) => !w.includes("pool") && !w.includes("no new skill"));
+    const warnings = grimCoverage(load()).filter((w) => !w.includes("pool") && !w.includes("no new skill") && !w.startsWith("units"));
 
     expect(warnings).toHaveLength(4);
     expect(warnings).toEqual(
@@ -19,6 +19,57 @@ describe("grimCoverage", () => {
         'careers "Watchman": tier 1 lists 3 items, ticksRequired[0] is 10',
       ]),
     );
+  });
+
+  const rat = () => structuredClone(load().units[0]);
+
+  const ab = (id: string, name: string, effect: object) => ({ id, name, trigger: { event: "passive" }, effects: [effect] });
+
+  it("reports bestiary gaps of the one-unit fixture", () => {
+    const warnings = grimCoverage(load());
+
+    expect(warnings).toEqual(expect.arrayContaining(['units: theme "Raiders" has no unit', "units: level 4 has no unit", 'units: trait "ward" is used by no unit', 'units: trait "terror" is used by no unit', 'units: trait "magical" is used by no unit']));
+    expect(warnings).not.toContain('units: trait "bite" is used by no unit');
+  });
+
+  it("says nothing about units when there are none", () => {
+    const data = load();
+
+    data.units = [];
+    expect(grimCoverage(data).filter((w) => w.startsWith("units"))).toEqual([]);
+  });
+
+  it("flags a unit without an attack, Terror below Elite and a plain Boss", () => {
+    const data = load();
+
+    data.units[0].abilities = [ab("size", "Size (Small)", { kind: "wfrpSize", size: "small" })];
+    data.units.push({ ...rat(), name: "Rat Brute", level: 2, abilities: [...(rat().abilities as object[]), ab("fear", "Terror 1", { kind: "wfrpPsychology", psychology: "terror", value: 1 })] });
+    data.units.push({ ...rat(), name: "Rat King", level: 4 });
+
+    const warnings = grimCoverage(data);
+
+    expect(warnings).toContain('units "Giant Rat": no attack');
+    expect(warnings).toContain('units "Rat Brute": Terror below Elite');
+    expect(warnings).toContain('units "Rat King": Boss without Magical or Breath');
+  });
+
+  it("a magical Boss is fine", () => {
+    const data = load();
+
+    data.units.push({ ...rat(), name: "Rat King", level: 4, abilities: [ab("bite", "Bite +6", { kind: "wfrpAttack", attack: "bite", damage: 6, magical: true })] });
+    expect(grimCoverage(data)).not.toContain('units "Rat King": Boss without Magical or Breath');
+  });
+
+  it("flags Wounds that do not rise and Armour that drops within a theme", () => {
+    const data = load();
+
+    data.units[0].abilities = [...(rat().abilities as object[]), ab("armour", "Armour 1", { kind: "wfrpArmour", head: 1, body: 1, arm: 1, leg: 1 })];
+    data.units.push({ ...rat(), name: "Rat Pup", level: 2, maxHp: 4 });
+
+    const warnings = grimCoverage(data);
+
+    expect(warnings).toContain('units: theme "Beasts" Wounds do not rise with level');
+    expect(warnings).toContain('units: theme "Beasts" Armour drops with level');
   });
 
   it("flags an unused feat", () => {
