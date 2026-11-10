@@ -312,6 +312,8 @@
     "refNotFound": "{field}: “{value}” not found ({kind})",
     "noName": "The name is missing",
     "duplicateName": "The name is repeated in the file",
+    "invalidSlug": "Invalid slug (lowercase latin letters, digits, - and _)",
+    "duplicateSlug": "The slug is repeated in the file",
     "alreadyExists": "“{name}” already exists in the campaign",
     "multipleMatches": "Several records named “{name}” — the first one was updated"
   }

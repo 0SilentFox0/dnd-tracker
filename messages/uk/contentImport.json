@@ -312,6 +312,8 @@
     "refNotFound": "{field}: не знайдено «{value}» ({kind})",
     "noName": "Немає назви",
     "duplicateName": "Назва повторюється у файлі",
+    "invalidSlug": "Некоректний slug (латиниця в нижньому регістрі, цифри, - та _)",
+    "duplicateSlug": "Slug повторюється у файлі",
     "alreadyExists": "«{name}» вже є в кампанії",
     "multipleMatches": "Кілька записів «{name}» — оновлено перший"
   }

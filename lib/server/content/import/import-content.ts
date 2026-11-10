@@ -9,6 +9,7 @@ import { assertCan } from "@/lib/server/content/access";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { loadNames } from "@/lib/server/content/import/names";
+import { type KeyRow, loadKeys, writeSlug } from "@/lib/server/content/import/slug";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit, currentContentWrite, markContentDirty } from "@/lib/server/content/write-context";
@@ -16,30 +17,33 @@ import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { coerceRecord, emptyCounts, IMPORT_SPECS, nameKey, refKindsOf } from "@/lib/utils/content/import";
+import { isSlug } from "@/lib/utils/templates/slug";
 import type { IdName } from "@/types/common";
 import type { ImportField, ImportIssue, ImportKind, ImportMode, ImportRecord, ImportReport, ImportRowResult, ImportSpec } from "@/types/content-import";
 
 export interface ImportDeps {
   resource(kind: ImportKind): AnyContentResource;
   loadNames(campaignId: string, kind: ImportKind): Promise<IdName[]>;
+  loadKeys?(campaignId: string, kind: ImportKind): Promise<KeyRow[]>;
+  writeSlug?(campaignId: string, kind: ImportKind, id: string, slug: string): Promise<void>;
   invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
   transactional?: boolean;
 }
 
-export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames, transactional: true };
+export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames, loadKeys, writeSlug, transactional: true };
 
 export const OFFLINE_IMPORT_DEPS: ImportDeps = { ...DEFAULT_IMPORT_DEPS, invalidate: () => undefined };
 
-type NameIndex = { byName: Map<string, string[]>; ids: Set<string> };
+type NameIndex = { byName: Map<string, string[]>; ids: Set<string>; bySlug: Map<string, KeyRow>; slugOf: Map<string, string | null> };
 
-type Plan = { row: number; name?: string; status: ImportRowResult["status"] | "pending"; op?: "create" | "update"; existingId?: string; body?: unknown; issues: ImportIssue[] };
+type Plan = { row: number; name?: string; status: ImportRowResult["status"] | "pending"; op?: "create" | "update"; existingId?: string; slug?: string; storedSlug?: string | null; body?: unknown; issues: ImportIssue[] };
 
-function indexNames(rows: IdName[]): NameIndex {
+function indexNames(rows: Array<IdName & { slug?: string | null }>): NameIndex {
   const byName = new Map<string, string[]>();
 
   for (const r of rows) byName.set(nameKey(r.name), [...(byName.get(nameKey(r.name)) ?? []), r.id]);
 
-  return { byName, ids: new Set(rows.map((r) => r.id)) };
+  return { byName, ids: new Set(rows.map((r) => r.id)), bySlug: new Map(rows.flatMap((r) => (r.slug ? [[r.slug, { ...r, slug: r.slug }] as const] : []))), slugOf: new Map(rows.map((r) => [r.id, r.slug ?? null])) };
 }
 
 const err = (message: string, field?: string, extra?: Partial<ImportIssue>): ImportIssue => ({ ...(field && { field }), level: "error", message, ...extra });
@@ -129,14 +133,22 @@ function zodIssues(error: { issues: ZodLikeIssue[] }): ImportIssue[] {
   });
 }
 
-type PlanCtx = { spec: ImportSpec; resource: AnyContentResource; mode: ImportMode; existing: NameIndex; refs: Map<ImportKind, NameIndex>; seen: Set<string> };
+type PlanCtx = { spec: ImportSpec; resource: AnyContentResource; mode: ImportMode; existing: NameIndex; refs: Map<ImportKind, NameIndex>; seen: Set<string>; seenSlugs: Set<string> };
 
 function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan {
-  const { value: record, issues } = coerceRecord(raw, ctx.spec.fields);
+  const { slug: rawSlug, ...fields } = raw;
+
+  const { value: record, issues } = coerceRecord(fields, ctx.spec.fields);
 
   const name = typeof record.name === "string" ? record.name : undefined;
 
   if (!name) return { row, status: "error", issues: [...issues, err("contentImport.issues.noName", "name")] };
+
+  const slug = typeof rawSlug === "string" && rawSlug ? rawSlug : undefined;
+
+  if (slug !== undefined && !isSlug(slug)) return { row, name, status: "error", issues: [...issues, err("contentImport.issues.invalidSlug", "slug")] };
+
+  if (slug && ctx.seenSlugs.has(slug)) return { row, name, status: "error", issues: [...issues, err("contentImport.issues.duplicateSlug", "slug")] };
 
   const key = nameKey(name);
 
@@ -148,7 +160,11 @@ function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan 
 
   ctx.seen.add(key);
 
-  const matches = ctx.existing.byName.get(key) ?? [];
+  if (slug) ctx.seenSlugs.add(slug);
+
+  const bySlug = slug ? ctx.existing.bySlug.get(slug) : undefined;
+
+  const matches = bySlug ? [bySlug.id] : (ctx.existing.byName.get(key) ?? []);
 
   if (matches.length > 0 && ctx.mode === "create") return { row, name, status: "error", issues: [...issues, err("contentImport.issues.alreadyExists", "name", { params: { name } })] };
 
@@ -170,7 +186,7 @@ function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan 
 
   if (!parsed.success) return { row, name, status: "error", issues: [...issues, ...zodIssues(parsed.error)] };
 
-  return { row, name, status: "pending", op, existingId: matches[0], body: parsed.data, issues };
+  return { row, name, status: "pending", op, existingId: matches[0], slug, storedSlug: matches[0] ? (ctx.existing.slugOf.get(matches[0]) ?? null) : null, body: parsed.data, issues };
 }
 
 function contentErrorIssues(error: ContentError): ImportIssue[] {
@@ -183,14 +199,19 @@ function contentErrorIssues(error: ContentError): ImportIssue[] {
   return [err(error.message, undefined, error.params && { params: error.params }), ...extra];
 }
 
-async function writePlan(resource: AnyContentResource, actor: Actor, plan: Plan) {
-  if (plan.op === "create") return resource.create(actor, plan.body);
+async function writePlan(resource: AnyContentResource, actor: Actor, plan: Plan, kind: ImportKind, deps: ImportDeps) {
+  let id = plan.existingId as string;
 
-  const existing = await resource.find(actor, plan.existingId as string, "write");
+  if (plan.op === "create") id = ((await resource.create(actor, plan.body)) as { id: string }).id;
+  else {
+    const existing = await resource.find(actor, id, "write");
 
-  if (!existing) throw new ContentError(resource.notFound, 404);
+    if (!existing) throw new ContentError(resource.notFound, 404);
 
-  return resource.update(actor, existing, plan.body);
+    await resource.update(actor, existing, plan.body);
+  }
+
+  if (plan.slug && plan.slug !== plan.storedSlug) await deps.writeSlug?.(actor.campaignId, kind, id, plan.slug);
 }
 
 async function checkPlan(resource: AnyContentResource, actor: Actor, plan: Plan): Promise<ImportRowResult> {
@@ -231,9 +252,9 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
 
   const refKinds = refKindsOf(spec);
 
-  const [own, ...refLists] = await Promise.all([deps.loadNames(actor.campaignId, kind), ...refKinds.map((k) => deps.loadNames(actor.campaignId, k))]);
+  const [own, ...refLists] = await Promise.all([(deps.loadKeys ?? deps.loadNames)(actor.campaignId, kind), ...refKinds.map((k) => deps.loadNames(actor.campaignId, k))]);
 
-  const ctx: PlanCtx = { spec, resource, mode: input.mode, existing: indexNames(own), refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])), seen: new Set() };
+  const ctx: PlanCtx = { spec, resource, mode: input.mode, existing: indexNames(own), refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])), seen: new Set(), seenSlugs: new Set() };
 
   const plans = input.rows.map((raw, i) => planRow(raw, i + 1, ctx));
 
@@ -268,7 +289,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
 
           await tx.$executeRaw`SAVEPOINT assistant_import_row`;
           try {
-            await writePlan(resource, actor, plan);
+            await writePlan(resource, actor, plan, kind, deps);
             markContentDirty();
             await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
           } catch (error) {
@@ -276,9 +297,9 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
             await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
             throw error;
           }
-        } else await withCampaignContentWrite(actor.campaignId, () => writePlan(resource, actor, plan));
+        } else await withCampaignContentWrite(actor.campaignId, () => writePlan(resource, actor, plan, kind, deps));
       }
-      else await writePlan(resource, actor, plan);
+      else await writePlan(resource, actor, plan, kind, deps);
 
       wrote = true;
       results.push(toResult(plan));
