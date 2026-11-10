@@ -33,6 +33,7 @@ export interface GrimLoadResult {
   templateId: string;
   created: boolean;
   counts: Record<string, number>;
+  published: { added: number; changed: number; removed: number };
 }
 
 const noop = () => undefined;
@@ -118,7 +119,7 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
 
   console.info(`Версія шаблону ${published.version}: +${published.added} ~${published.changed} -${published.removed}`);
 
-  return { templateId: template.id, created: template.created, counts: { ...Object.fromEntries(GRIM_ROW_KINDS.map((k) => [k, data[k].length])), raceProfiles: profiles } };
+  return { templateId: template.id, created: template.created, published: { added: published.added, changed: published.changed, removed: published.removed }, counts: { ...Object.fromEntries(GRIM_ROW_KINDS.map((k) => [k, data[k].length])), raceProfiles: profiles } };
 }
 
 function parseArgs(args: string[]): GrimLoadArgs {

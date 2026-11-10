@@ -144,7 +144,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     const result = await loadGrimTemplate({ owner: userId, allowRemote: false });
 
-    expect(result).toMatchObject({ templateId, created: false });
+    expect(result).toMatchObject({ templateId, created: false, published: { added: 0, changed: 0, removed: 0 } });
     expect(await rowCounts(templateId)).toEqual(before);
     expect((await raw.campaign.findUniqueOrThrow({ where: { id: templateId }, select: { contentVersion: true } })).contentVersion).toBe(version);
   });

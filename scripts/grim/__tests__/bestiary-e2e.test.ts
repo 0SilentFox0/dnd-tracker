@@ -136,7 +136,7 @@ describe("grim bestiary end to end", () => {
     expect(must(drake.battleData.attacks.find((a) => a.name === "Breath +9"))).toMatchObject({ type: "ranged", range: "36 ft", targetType: "aoe", wfrp: { blastRadius: 2, noSb: true } });
   });
 
-  it("template heroes test Terror on join, take hits and beat four template units", async () => {
+  it("template heroes test Terror on join, take hits and beat four template units with healing between strikes", async () => {
     const party = heroes();
 
     const foes = await Promise.all(E2E_UNITS.map((name, i) => buildUnit(name, `u${i}`)));
@@ -166,16 +166,32 @@ describe("grim bestiary end to end", () => {
 
     const enemyStanding = (c: BattleMutationContext) => c.participants.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY && standing(p));
 
+    const allies = (c: BattleMutationContext) => c.participants.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
+
     const healed = (c: BattleMutationContext): BattleMutationContext => ({ ...c, participants: c.participants.map((p) => (p.basicInfo.side === ParticipantSide.ALLY ? { ...p, combatStats: { ...p.combatStats, currentHp: p.combatStats.maxHp, status: CombatStatus.ACTIVE } } : p)) });
 
-    for (let i = 0; i < 600 && enemyStanding(ctx).length > 0; i++) ctx = healed((await strike(ctx, party[i % party.length].basicInfo.id, enemyStanding(ctx)[0].basicInfo.id, "sw", HIT)).next);
+    const STRIKE_CAP = 600;
+
+    let strikes = 0;
+
+    let hpLost = 0;
+
+    while (strikes < STRIKE_CAP && enemyStanding(ctx).length > 0) {
+      const { next } = await strike(ctx, party[strikes % party.length].basicInfo.id, enemyStanding(ctx)[0].basicInfo.id, "sw", HIT);
+
+      hpLost += allies(next).reduce((sum, p) => sum + p.combatStats.maxHp - p.combatStats.currentHp, 0);
+      ctx = healed(next);
+      strikes++;
+    }
+
+    expect(strikes).toBeLessThan(STRIKE_CAP);
+    expect(hpLost).toBeGreaterThan(0);
 
     for (const foe of foes) {
       expect(part(ctx, foe.basicInfo.id).combatStats.currentHp, foe.basicInfo.name).toBe(0);
       expect(part(ctx, foe.basicInfo.id).combatStats.status, foe.basicInfo.name).not.toBe(CombatStatus.ACTIVE);
     }
 
-    expect(party.every((h) => standing(part(ctx, h.basicInfo.id)))).toBe(true);
   });
 
   it("the Many-Mouthed Thing regenerates at the start of its turn", async () => {
