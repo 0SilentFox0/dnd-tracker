@@ -12,6 +12,7 @@ import { SPEC_RE } from "@/lib/utils/rules/systems";
 import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { skillDef } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
+import type { TableRow } from "@/lib/utils/rules/tables-schema";
 
 export type GrimValidation = { ok: true } | { ok: false; issues: string[] };
 
@@ -213,7 +214,47 @@ function validateTerms(data: GrimData, issues: string[]) {
 
   for (const kind of GRIM_ROW_KINDS) data[kind].forEach((row, index) => scan(label(kind, index, row.name), row));
 
+  scan("rules", data.rules);
+
   data.raceProfiles.forEach(({ race }, index) => scan(`race-profiles #${index + 1} "${race}"`, race));
+}
+
+export const GRIM_TABLE_SLOTS = ["miscastMinor", "miscastMajor", "wrath"] as const;
+
+export const GRIM_TABLE_ROWS: readonly [number, number] = [8, 10];
+
+export const TABLE_TEXT_MAX = 120;
+
+const FORBIDDEN_CONDITIONS: readonly string[] = ["unconscious", "surprised"];
+
+export function tableIssues(rules: GrimData["rules"]): string[] {
+  const tables = (rules as { tables?: Record<string, TableRow[] | null> } | undefined)?.tables;
+
+  if (!tables) return [];
+
+  const issues: string[] = [];
+
+  for (const [slot, rows] of Object.entries(tables)) {
+    if (!(GRIM_TABLE_SLOTS as readonly string[]).includes(slot)) {
+      issues.push(`rules: tables.${slot} is not used by the Grim template`);
+
+      continue;
+    }
+
+    if (!Array.isArray(rows)) continue;
+
+    const [min, max] = GRIM_TABLE_ROWS;
+
+    if (rows.length < min || rows.length > max) issues.push(`rules: tables.${slot} must have ${min}–${max} rows (got ${rows.length})`);
+
+    rows.forEach((row, i) => {
+      if (typeof row.text !== "string" || row.text.length < 1 || row.text.length > TABLE_TEXT_MAX) issues.push(`rules: tables.${slot}[${i}] needs text of 1–${TABLE_TEXT_MAX} characters`);
+
+      for (const e of row.effects ?? []) if (e.type === "condition" && FORBIDDEN_CONDITIONS.includes(e.key)) issues.push(`rules: tables.${slot}[${i}] condition "${e.key}" is not allowed`);
+    });
+  }
+
+  return issues;
 }
 
 function validateRules(rules: GrimData["rules"], issues: string[]) {
@@ -226,6 +267,8 @@ function validateRules(rules: GrimData["rules"], issues: string[]) {
   const merged = mergeRules(WFRP_RULES, patch.data as Parameters<typeof mergeRules>[1]);
 
   if (!merged.ok) merged.issues.forEach((i) => issues.push(`rules: ${i.path.join(".")} ${i.message}`));
+
+  issues.push(...tableIssues(rules));
 }
 
 function validateSpells(data: GrimData, issues: string[]) {
