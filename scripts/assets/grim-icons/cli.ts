@@ -1,8 +1,9 @@
 #!/usr/bin/env tsx
 // pnpm assets:grim-icons prompts [--out <dir>]
-// pnpm assets:grim-icons upload <templateId> --dir <images> [--dry-run] [--allow-remote]
+// pnpm assets:grim-icons upload <templateId> [--dir <images>] [--dry-run] [--allow-remote]
 import { createHash } from "crypto";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 
 import { GRIM_ROW_KINDS, readGrimData } from "../../grim/data";
@@ -18,11 +19,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
 
-const USAGE = "Використання: pnpm assets:grim-icons prompts [--out <dir>] | upload <templateId> --dir <images> [--dry-run] [--allow-remote]";
+const USAGE = "Використання: pnpm assets:grim-icons prompts [--out <dir>] | upload <templateId> [--dir <images>] [--dry-run] [--allow-remote]";
 
 const SUBJECTS_DIR = path.join(__dirname, "..", "icon-subjects");
 
 const DEFAULT_OUT = "docs/assets/icon-prompts/grim-d100";
+
+const DEFAULT_ICONS_DIR = path.join(os.homedir(), "Downloads", "fantasy-tokens", "output-grim", "icons");
 
 const KB = 1024;
 
@@ -62,7 +65,7 @@ function writePrompts(out: string) {
     fs.writeFileSync(path.join(out, `${kind}.csv`), `record_id,name,output_filename,prompt\n${lines.join("\n")}\n`);
   }
 
-  const intro = "Промпти для генерації іконок Grim d100. Збережіть кожне зображення за `output_filename` (PNG 1024x1024) у теці, яку потім передасть `pnpm assets:grim-icons upload`.";
+  const intro = "Промпти для генерації іконок Grim d100. Зображення генерує `generate_grim.py` у `~/Downloads/fantasy-tokens` (вихід `output-grim/icons/<kind>/<файл>.png`, 768 px); `pnpm assets:grim-icons upload <templateId>` бере їх звідти. На зображеннях заборонений будь-який текст.";
 
   fs.writeFileSync(path.join(out, "README.md"), toMarkdown("Іконки Grim d100", intro, asPromptRows));
 
@@ -72,11 +75,11 @@ function writePrompts(out: string) {
 async function uploadIcons(args: string[]) {
   const dryRun = args.includes("--dry-run");
 
-  const dir = flag(args, "--dir");
+  const dir = flag(args, "--dir") ?? DEFAULT_ICONS_DIR;
 
   const templateId = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--dir" && a !== "upload");
 
-  if (!templateId || !dir) throw new Error(USAGE);
+  if (!templateId) throw new Error(USAGE);
 
   if (!dryRun) {
     const { prisma } = await import("@/lib/db");

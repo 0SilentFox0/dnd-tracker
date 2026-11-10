@@ -18,7 +18,9 @@ export const grimSlug = (name: string) =>
 
 const IDENTITY_COLOURS = "neutral gold";
 
-function promptFor(kind: GrimRowKind, name: string, rarity: unknown, subjects: GrimSubjects): string {
+export const GRIM_NO_TEXT = "Image only: absolutely no text, letters, words, numbers, runes, captions, signs, signatures or watermarks anywhere in the picture.";
+
+function basePrompt(kind: GrimRowKind, name: string, rarity: unknown, subjects: GrimSubjects): string {
   const missing = (): never => {
     throw new Error(`Немає субʼєкта іконки: ${kind} "${name}"`);
   };
@@ -35,6 +37,8 @@ function promptFor(kind: GrimRowKind, name: string, rarity: unknown, subjects: G
 
   return composeSkill(subjects.identity[`${kind}:${name}`] ?? missing(), IDENTITY_COLOURS, null);
 }
+
+const promptFor = (kind: GrimRowKind, name: string, rarity: unknown, subjects: GrimSubjects) => `${basePrompt(kind, name, rarity, subjects)} ${GRIM_NO_TEXT}`;
 
 export function grimPromptRows(data: GrimData, subjects: GrimSubjects): GrimPromptRow[] {
   return GRIM_ROW_KINDS.flatMap((kind) =>
