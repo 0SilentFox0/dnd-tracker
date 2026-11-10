@@ -26,6 +26,7 @@ const rowCounts = async (templateId: string) => ({
   feats: await raw.feat.count({ where: { campaignId: templateId } }),
   careers: await raw.career.count({ where: { campaignId: templateId } }),
   races: await raw.race.count({ where: { campaignId: templateId } }),
+  units: await raw.unit.count({ where: { campaignId: templateId } }),
 });
 
 describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
@@ -47,13 +48,14 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
   afterAll(async () => {
     if (!guardPassed) return void (await raw.$disconnect());
 
-    const ids = (await raw.campaign.findMany({ where: { OR: [{ dmUserId: userId }, { name: GRIM_TEMPLATE_NAME, kind: "template" }] }, select: { id: true } })).map((c) => c.id);
+    const ids = (await raw.campaign.findMany({ where: { dmUserId: userId }, select: { id: true } })).map((c) => c.id);
 
     await raw.campaign.updateMany({ where: { id: { in: ids } }, data: { baseSourceId: null } });
     await raw.featBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.spellBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.careerBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.raceBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
+    await raw.unitBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.campaign.deleteMany({ where: { id: { in: ids } } });
     await raw.user.deleteMany({ where: { id: userId } });
     await raw.$disconnect();
@@ -64,7 +66,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     templateId = result.templateId;
     expect(result.created).toBe(true);
-    expect(result.counts).toMatchObject({ feats: 50, careers: 16, races: 4, raceProfiles: 4 });
+    expect(result.counts).toMatchObject({ feats: 50, careers: 16, races: 4, units: 30, raceProfiles: 4 });
   });
 
   it("a clone sees every species profile with id-based career tables", async () => {
@@ -112,6 +114,27 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
     expect(mechanical).toHaveLength(20);
 
     for (const feat of mechanical) expect(feats.find((f) => f.name === feat.name)?.abilities).toEqual(feat.abilities);
+  });
+
+  it("a clone carries every unit with characteristics, traits and theme", async () => {
+    const created = await createCampaignForUser(userId, { name: `${marker}-units`, templateId }, { defer: () => undefined });
+
+    if (!created.ok) throw new Error("clone failed");
+
+    invalidateCampaignLayer();
+
+    const data = readGrimData();
+
+    const units = await scoped.unit.findMany({ where: { campaignId: created.campaign.id }, select: { name: true, level: true, maxHp: true, speed: true, initiative: true, gridSize: true, abilities: true, characteristics: true, statblock: true } });
+
+    expect(units).toHaveLength(data.units.length);
+
+    for (const row of data.units) {
+      const unit = units.find((u) => u.name === row.name);
+
+      expect(unit, String(row.name)).toMatchObject({ level: row.level, maxHp: row.maxHp, speed: row.speed, initiative: row.initiative, gridSize: row.gridSize, statblock: row.statblock, abilities: row.abilities });
+      expect(unit?.characteristics, String(row.name)).toMatchObject(row.characteristics as object);
+    }
   });
 
   it("a second run is a no-op", async () => {

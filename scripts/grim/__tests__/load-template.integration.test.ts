@@ -91,13 +91,14 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
   afterAll(async () => {
     if (!guardPassed) return void (await raw.$disconnect());
 
-    const ids = (await raw.campaign.findMany({ where: { OR: [{ dmUserId: userId }, { name: GRIM_TEMPLATE_NAME, kind: "template" }] }, select: { id: true } })).map((c) => c.id);
+    const ids = (await raw.campaign.findMany({ where: { dmUserId: userId }, select: { id: true } })).map((c) => c.id);
 
     await raw.campaign.updateMany({ where: { id: { in: ids } }, data: { baseSourceId: null } });
     await raw.featBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.spellBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.careerBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.raceBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
+    await raw.unitBase.deleteMany({ where: { sourceCampaignId: { in: ids } } });
     await raw.campaign.deleteMany({ where: { id: { in: ids } } });
     await raw.user.deleteMany({ where: { id: userId } });
     for (const dir of tmpDirs) fs.rmSync(dir, { recursive: true, force: true });
