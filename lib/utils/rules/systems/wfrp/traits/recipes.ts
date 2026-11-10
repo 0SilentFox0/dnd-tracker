@@ -1,4 +1,4 @@
-import { BREATH_DEFAULT_RANGE_FT, NIGHT_VISION_FT, REGENERATE_DICE } from "./constants";
+import { BREATH_DEFAULT_RANGE_FT, NIGHT_VISION_FT, RANGED_DEFAULT_RANGE_FT, REGENERATE_DICE } from "./constants";
 
 import type { Effect, TraitEffect } from "@/lib/utils/abilities/schema";
 import type { Trigger } from "@/lib/utils/abilities/schema";
@@ -33,9 +33,9 @@ const note = (id: string): Recipe => ({
   build: (_v, ctx) => ({ ability: { name: ctx.name, trigger: PASSIVE, effects: [{ kind: "note", text: ctx.name }] } }),
 });
 
-const attack = (id: "bite" | "claw" | "weapon" | "breath", extra: ParamDef[] = []) =>
+const attack = (id: "bite" | "claw" | "weapon" | "breath" | "ranged", extra: ParamDef[] = []) =>
   passive(id, [num("damage", 3, 0, 30), ...extra, MAGICAL], (v) => [
-    trait({ kind: "wfrpAttack", attack: id, damage: Number(v.damage), ...(id === "breath" && { rangeFt: Number(v.rangeFt) }), ...(v.magical === "yes" && { magical: true as const }) }),
+    trait({ kind: "wfrpAttack", attack: id, damage: Number(v.damage), ...((id === "breath" || id === "ranged") && { rangeFt: Number(v.rangeFt) }), ...(v.magical === "yes" && { magical: true as const }) }),
   ]);
 
 export const TRAIT_RECIPES: readonly Recipe[] = [
@@ -55,6 +55,7 @@ export const TRAIT_RECIPES: readonly Recipe[] = [
   attack("claw"),
   attack("weapon"),
   attack("breath", [num("rangeFt", BREATH_DEFAULT_RANGE_FT, 5, 600)]),
+  attack("ranged", [num("rangeFt", RANGED_DEFAULT_RANGE_FT, 5, 600)]),
   passive("nightVision", [], () => [{ kind: "flag", flag: "sense", sense: "darkvision", range: NIGHT_VISION_FT }]),
   note("undead"),
   note("hardy"),

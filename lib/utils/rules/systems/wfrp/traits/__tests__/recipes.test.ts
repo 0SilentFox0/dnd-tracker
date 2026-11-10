@@ -9,8 +9,8 @@ import { AbilitySchema } from "@/lib/utils/abilities/schema";
 const defaults = (r: (typeof TRAIT_RECIPES)[number]) => Object.fromEntries(r.params.map((p) => [p.key, p.default]));
 
 describe("trait recipes", () => {
-  it("has 14 recipes with matching ids and text keys", () => {
-    expect(TRAIT_RECIPES).toHaveLength(14);
+  it("has 15 recipes with matching ids and text keys", () => {
+    expect(TRAIT_RECIPES).toHaveLength(15);
 
     for (const r of TRAIT_RECIPES) {
       expect(r.category).toBe("traits");
@@ -36,6 +36,21 @@ describe("trait recipes", () => {
     const built = breath?.build({ damage: 7, rangeFt: 60, magical: "yes" }, { scope: "ability", name: "B", note: "" });
 
     expect(built && "ability" in built && built.ability.effects[0]).toEqual({ kind: "wfrpAttack", attack: "breath", damage: 7, rangeFt: 60, magical: true });
+  });
+
+  it("builds a ranged attack with its range", () => {
+    const ranged = TRAIT_RECIPES.find((r) => r.id === "ranged");
+
+    const built = ranged?.build({ damage: 4, rangeFt: 150, magical: "no" }, { scope: "ability", name: "Sling +4", note: "" });
+
+    expect(built && "ability" in built && built.ability).toEqual({ name: "Sling +4", trigger: { event: "passive" }, effects: [{ kind: "wfrpAttack", attack: "ranged", damage: 4, rangeFt: 150 }] });
+  });
+
+  it("accepts rangeFt on ranged and still rejects it on bite", () => {
+    const parse = (effect: object) => AbilitySchema.safeParse({ id: "a1", name: "X", trigger: { event: "passive" }, effects: [effect] }).success;
+
+    expect(parse({ kind: "wfrpAttack", attack: "ranged", damage: 4, rangeFt: 150 })).toBe(true);
+    expect(parse({ kind: "wfrpAttack", attack: "bite", damage: 4, rangeFt: 30 })).toBe(false);
   });
 
   it("does not import the editor or template catalog at runtime", () => {

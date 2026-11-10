@@ -50,6 +50,13 @@ describe("wfrpUnitBuild", () => {
     expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "breath", damage: 5, rangeFt: 60 }])]).attacks[0].profile.rangeFt).toBe(60);
   });
 
+  it("builds a ranged profile that adds SB, defaulting the range", () => {
+    const profile = { range: "ranged", rangeFt: 150, damageFlat: 4, addSb: true, qualities: [], flaws: [], twoHanded: false };
+
+    expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "ranged", damage: 4, rangeFt: 150 }])]).attacks[0].profile).toEqual(profile);
+    expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "ranged", damage: 4 }])]).attacks[0].profile.rangeFt).toBe(72);
+  });
+
   it("flags magical attacks and gives duplicate Bites distinct ids", () => {
     const bite = { kind: "wfrpAttack", attack: "bite", damage: 3, magical: true };
 

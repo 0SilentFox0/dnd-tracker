@@ -154,7 +154,8 @@
           "bite": "Bite",
           "claw": "Claw",
           "breath": "Breath",
-          "weapon": "Weapon"
+          "weapon": "Weapon",
+          "ranged": "Ranged"
         }
       }
     }

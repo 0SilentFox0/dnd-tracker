@@ -17,7 +17,7 @@ export const traitFields = {
   wfrpAttack: [
     { name: "attack", input: "select", options: options(TRAIT_ATTACKS) },
     num("damage"),
-    { ...num("rangeFt", true), visibleWhen: (v) => v.attack === "breath" },
+    { ...num("rangeFt", true), visibleWhen: (v) => v.attack === "breath" || v.attack === "ranged" },
     { name: "magical", input: "toggle", optional: true },
   ],
 } as const satisfies Record<string, readonly FieldMeta[]>;

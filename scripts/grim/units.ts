@@ -24,18 +24,21 @@ export interface UnitLevelBand {
   psychologyMax: number;
   attack: Range;
   breath: Range | null;
+  ranged: Range;
   regenerate: boolean;
   magical: boolean;
 }
 
 export const CHARACTERISTIC_MIN = 5;
 
+export const UNIT_RANGED_FT: Range = [24, 300];
+
 // Own threat-tier numbers of the template, not official stat blocks
 export const UNIT_LEVEL_BANDS: Record<GrimUnitLevel, UnitLevelBand> = {
-  1: { charMax: 45, combat: [20, 45], wounds: [3, 14], ap: [0, 1], ward: null, psychologyMax: 1, attack: [1, 5], breath: null, regenerate: false, magical: false },
-  2: { charMax: 55, combat: [30, 55], wounds: [8, 24], ap: [0, 2], ward: null, psychologyMax: 2, attack: [2, 7], breath: null, regenerate: true, magical: false },
-  3: { charMax: 65, combat: [40, 65], wounds: [15, 45], ap: [0, 4], ward: [9, 10], psychologyMax: 3, attack: [4, 9], breath: [6, 10], regenerate: true, magical: true },
-  4: { charMax: 80, combat: [50, 80], wounds: [24, 120], ap: [1, 6], ward: [7, 9], psychologyMax: 4, attack: [6, 12], breath: [7, 12], regenerate: true, magical: true },
+  1: { charMax: 45, combat: [20, 45], wounds: [3, 14], ap: [0, 1], ward: null, psychologyMax: 1, attack: [1, 5], breath: null, ranged: [1, 4], regenerate: false, magical: false },
+  2: { charMax: 55, combat: [30, 55], wounds: [8, 24], ap: [0, 2], ward: null, psychologyMax: 2, attack: [2, 7], breath: null, ranged: [2, 6], regenerate: true, magical: false },
+  3: { charMax: 65, combat: [40, 65], wounds: [15, 45], ap: [0, 4], ward: [9, 10], psychologyMax: 3, attack: [4, 9], breath: [6, 10], ranged: [3, 8], regenerate: true, magical: true },
+  4: { charMax: 80, combat: [50, 80], wounds: [24, 120], ap: [1, 6], ward: [7, 9], psychologyMax: 4, attack: [6, 12], breath: [7, 12], ranged: [5, 10], regenerate: true, magical: true },
 };
 
 export const UNIT_KEYS: readonly string[] = ["name", "level", "maxHp", "speed", "initiative", "gridSize", "statblock", "characteristics", "abilities", "knownSpells", "raceId"];
@@ -59,7 +62,7 @@ export interface UnitTraits {
   ward?: number;
   size: TraitSize;
   psychology: Array<{ kind: "fear" | "terror"; value: number }>;
-  attacks: Array<{ name: string; attack: string; damage: number; magical: boolean }>;
+  attacks: Array<{ name: string; attack: string; damage: number; magical: boolean; rangeFt?: number }>;
   regenerate: boolean;
   notes: Set<string>;
 }
@@ -96,7 +99,8 @@ export function unitTraits(row: Row): UnitTraits {
       case "claw":
       case "weapon":
       case "breath":
-        t.attacks.push({ name: String(a.name), attack: String(a.id), damage: Number(e.damage), magical: e.magical === true });
+      case "ranged":
+        t.attacks.push({ name: String(a.name), attack: String(a.id), damage: Number(e.damage), magical: e.magical === true, ...(a.id === "ranged" && { rangeFt: Number(e.rangeFt) }) });
         break;
       default:
         if (NOTE_TRAITS.includes(String(a.id))) t.notes.add(String(a.id));
@@ -134,6 +138,7 @@ function recipeValues(id: string, e: RawEffect): RecipeValues {
     case "weapon":
       return { damage: Number(e.damage), magical };
     case "breath":
+    case "ranged":
       return { damage: Number(e.damage), rangeFt: Number(e.rangeFt), magical };
     default:
       return {};
@@ -244,10 +249,12 @@ function bandIssues(row: Row, level: GrimUnitLevel, base: Record<CharacteristicK
   for (const p of t.psychology) if (p.value > band.psychologyMax) issues.push(`${p.kind === "terror" ? "Terror" : "Fear"} ${p.value} is above ${band.psychologyMax} ${at}`);
 
   for (const a of t.attacks) {
-    const range = a.attack === "breath" ? band.breath : band.attack;
+    const range = a.attack === "breath" ? band.breath : a.attack === "ranged" ? band.ranged : band.attack;
 
     if (!range) issues.push(`Breath is not allowed ${at}`);
     else if (!inRange(a.damage, range)) issues.push(`attack "${a.name}" damage ${a.damage} is outside ${fmt(range)} ${at}`);
+
+    if (a.attack === "ranged" && !inRange(a.rangeFt ?? 0, UNIT_RANGED_FT)) issues.push(`attack "${a.name}" range ${a.rangeFt} ft is outside ${fmt(UNIT_RANGED_FT)}`);
   }
 
   if (t.regenerate && !band.regenerate) issues.push(`Regenerate is not allowed ${at}`);

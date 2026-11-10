@@ -258,6 +258,8 @@ describe("validateGrimData: units", () => {
     ["the terror id", (r) => r.abilities.push(ab("terror", "Terror 1", { kind: "wfrpPsychology", psychology: "terror", value: 1 })), ['abilities[2] "Terror 1": unknown trait id "terror"']],
     ["a passive regenerate", (r) => r.abilities.push(regenerate("passive")), ['abilities[2] "Regenerate": is not the output of the "regenerate" trait recipe']],
     ["breath without range", (r) => r.abilities.push(ab("breath", "Breath +3", { kind: "wfrpAttack", attack: "breath", damage: 3 })), ['abilities[2] "Breath +3": is not the output of the "breath" trait recipe']],
+    ["a ranged attack above the band", (r) => r.abilities.push(ab("ranged", "Sling +5", { kind: "wfrpAttack", attack: "ranged", damage: 5, rangeFt: 60 })), ['attack "Sling +5" damage 5 is outside 1–4 for level 1']],
+    ["a ranged attack out of range", (r) => r.abilities.push(ab("ranged", "Sling +2", { kind: "wfrpAttack", attack: "ranged", damage: 2, rangeFt: 400 })), ['attack "Sling +2" range 400 ft is outside 24–300']],
     ["a duplicate trait id", (r) => r.abilities.push(ab("bite", "Bite +3", { kind: "wfrpAttack", attack: "bite", damage: 3 })), ['abilities[2] "Bite +3": duplicate trait id "bite"']],
     ["a wrong speed", (r) => (r.speed = 30), ["speed 30 must equal move × 6 = 24"]],
     ["a wrong initiative", (r) => (r.initiative = 10), ["initiative 10 must equal I 30"]],

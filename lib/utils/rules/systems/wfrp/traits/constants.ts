@@ -11,6 +11,8 @@ export const BREATH_BLAST = 2;
 
 export const BREATH_DEFAULT_RANGE_FT = 36;
 
+export const RANGED_DEFAULT_RANGE_FT = 72;
+
 export const TRAIT_MELEE_CELLS = 1;
 
 export const REGENERATE_DICE = "1d10";

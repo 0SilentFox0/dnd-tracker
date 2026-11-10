@@ -28,7 +28,7 @@ describe("grimCoverage", () => {
   it("reports bestiary gaps of the one-unit fixture", () => {
     const warnings = grimCoverage(load());
 
-    expect(warnings).toEqual(expect.arrayContaining(['units: theme "Raiders" has no unit', "units: level 4 has no unit", 'units: trait "ward" is used by no unit', 'units: trait "terror" is used by no unit', 'units: trait "magical" is used by no unit']));
+    expect(warnings).toEqual(expect.arrayContaining(['units: theme "Raiders" has no unit', "units: level 4 has no unit", 'units: trait "ward" is used by no unit', 'units: trait "terror" is used by no unit', 'units: trait "magical" is used by no unit', 'units: trait "ranged" is used by no unit']));
     expect(warnings).not.toContain('units: trait "bite" is used by no unit');
   });
 

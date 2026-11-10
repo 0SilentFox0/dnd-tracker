@@ -116,6 +116,22 @@
         }
       }
     },
+    "ranged": {
+      "label": "Ranged",
+      "hint": "Missile or thrown attack; adds Strength Bonus.",
+      "defaultName": "Ranged",
+      "params": {
+        "damage": "Damage bonus",
+        "rangeFt": "Range, ft",
+        "magical": "Magical attack"
+      },
+      "options": {
+        "magical": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      }
+    },
     "nightVision": {
       "label": "Night Vision",
       "hint": "Sees in the dark.",

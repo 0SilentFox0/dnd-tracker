@@ -20,6 +20,10 @@ describe("unitWounds", () => {
 describe("rebuildTrait", () => {
   it("returns the recipe output for a known id and null otherwise", () => {
     expect(rebuildTrait({ id: "ward", name: "Ward 9+", effects: [{ kind: "wfrpWard", value: 9 }] })).toEqual({ id: "ward", name: "Ward 9+", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] });
+
+    const sling = { id: "ranged", name: "Sling +3", effects: [{ kind: "wfrpAttack", attack: "ranged", damage: 3, rangeFt: 120 }] };
+
+    expect(rebuildTrait(sling)).toEqual({ ...sling, trigger: { event: "passive" } });
     expect(rebuildTrait({ id: "terror", name: "Terror 1", effects: [] })).toBeNull();
   });
 });

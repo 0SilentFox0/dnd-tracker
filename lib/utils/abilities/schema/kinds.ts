@@ -87,7 +87,7 @@ export const PSYCHOLOGY_KINDS = ["fear", "terror"] as const;
 
 export type PsychologyKind = (typeof PSYCHOLOGY_KINDS)[number];
 
-export const TRAIT_ATTACKS = ["bite", "claw", "breath", "weapon"] as const;
+export const TRAIT_ATTACKS = ["bite", "claw", "breath", "weapon", "ranged"] as const;
 
 export type TraitAttack = (typeof TRAIT_ATTACKS)[number];
 

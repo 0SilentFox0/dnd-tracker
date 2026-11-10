@@ -1,7 +1,7 @@
 import { LOCATIONS } from "../combat/constants";
 import { type WfrpParticipantFields,wfrpParticipantFields } from "../combat/participant";
 import { AP_CAP } from "../equipment/constants";
-import { BREATH_BLAST, BREATH_DEFAULT_RANGE_FT, TRAIT_MELEE_CELLS } from "./constants";
+import { BREATH_BLAST, BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT, TRAIT_MELEE_CELLS } from "./constants";
 import { sizeStep, traitEntries } from "./read";
 
 import type { TraitEffect } from "@/lib/utils/abilities/schema";
@@ -22,6 +22,8 @@ function attackProfile(e: AttackEffect): WeaponProfile {
   if (e.attack === "breath") {
     return { range: "ranged", rangeFt: e.rangeFt ?? BREATH_DEFAULT_RANGE_FT, damageFlat: e.damage, addSb: false, qualities: [{ key: "blast", value: BREATH_BLAST }], flaws: [], twoHanded: false };
   }
+
+  if (e.attack === "ranged") return { range: "ranged", rangeFt: e.rangeFt ?? RANGED_DEFAULT_RANGE_FT, damageFlat: e.damage, addSb: true, qualities: [], flaws: [], twoHanded: false };
 
   return { range: "melee", cells: TRAIT_MELEE_CELLS, damageFlat: e.damage, addSb: true, qualities: [], flaws: [], twoHanded: false };
 }
