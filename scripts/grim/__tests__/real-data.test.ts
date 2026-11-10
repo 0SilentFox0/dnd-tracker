@@ -105,7 +105,7 @@ describe("creation e2e", () => {
 
       CHARACTERISTIC_KEYS.forEach((k, i) => expect(plan.characteristics.base[k]).toBe(20 + (profile.mods[k] ?? 0) + rolls.statRolls[i]));
 
-      expect(plan.characteristics.career.careerId).toBe(careerId);
+      expect(plan.characteristics.career?.careerId).toBe(careerId);
 
       for (const talent of [...profile.talents, ...rolls.randomTalents]) expect(plan.characteristics.talents[talent]).toBeGreaterThan(0);
     });

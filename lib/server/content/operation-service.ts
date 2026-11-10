@@ -25,7 +25,7 @@ import { listSkillTrees, saveSkillTree } from "@/lib/server/skills/skill-tree-se
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { publishTemplate } from "@/lib/server/templates/publish-service";
 import { applySafeSource, applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
-import { abilitiesJson, OwnerKind, readAbilities, skillAbilities } from "@/lib/utils/abilities/read";
+import { abilitiesJson, abilitySpellIds, OwnerKind, readAbilities, skillAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
@@ -192,7 +192,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
 
         assertTraitsSupported(ruleSystemOf(rules), units.flatMap((unit) => unit.abilities ?? []));
 
-        await assertCampaignRefs(actor.campaignId, { spell: [...units.flatMap((unit) => unit.knownSpells), ...units.flatMap((unit) => (unit.abilities ?? []).flatMap((a) => (a.perform?.kind === "spell" ? [a.perform.spellId] : [])))] });
+        await assertCampaignRefs(actor.campaignId, { spell: [...units.flatMap((unit) => unit.knownSpells), ...units.flatMap((unit) => abilitySpellIds(unit.abilities))] });
 
         const result = await importUnitsIntoCampaign(prisma, actor.campaignId, units, rules);
 

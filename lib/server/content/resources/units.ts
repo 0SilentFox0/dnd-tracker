@@ -12,7 +12,7 @@ import { defineResource } from "@/lib/server/content/define-resource";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { toJsonInput } from "@/lib/server/content/errors";
 import { assertTraitsSupported } from "@/lib/server/content/traits-guard";
-import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
+import { abilitiesJson, abilitySpellIds, withAbilityIssues } from "@/lib/utils/abilities/read";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
@@ -42,7 +42,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
   find: (actor, id) => prisma.unit.findFirst({ where: { id, campaignId: actor.campaignId } }),
   toItem: (row) => withAbilityIssues("unit", row, toUnit(row)),
   async create(actor, data) {
-    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(data.knownSpells ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...(data.abilities ?? []).flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])] });
+    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(data.knownSpells ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...abilitySpellIds(data.abilities)] });
 
     const system = await loadCampaignSystem(actor.campaignId);
 
@@ -53,7 +53,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
     return unit;
   },
   async update(actor, existing, data) {
-    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(addedIds(data.knownSpells, existing.knownSpells) ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...(data.abilities ?? []).flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])] });
+    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(addedIds(data.knownSpells, existing.knownSpells) ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...abilitySpellIds(data.abilities)] });
 
     const system = await loadCampaignSystem(actor.campaignId);
 
