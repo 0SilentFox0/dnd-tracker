@@ -15,9 +15,9 @@
   "Basic": "Базова", "Blackpowder": "Порохова", "Bow": "Лук", "Brawling": "Кулачна", "Cavalry": "Кавалерійська", "Crossbow": "Арбалет", "Engineering": "Інженерна", "Entangling": "Заплутувальна",
   "Explosives": "Вибухівка", "Fencing": "Фехтувальна", "Flail": "Ціп", "Parry": "Парирувальна", "Polearm": "Держакова", "Sling": "Праща", "Throwing": "Метальна", "Two-handed": "Дворучна", "Weapon Group": "Група зброї",
   "Academic": "Учений", "Burgher": "Городянин", "Courtier": "Придворний", "Peasant": "Селянин", "Ranger": "Мисливець", "Riverfolk": "Річковик", "Rogue": "Волоцюга", "Warrior": "Воїн",
-  "Brass": "Латунь", "Silver": "Срібло", "Gold": "Золото", "Status": "Статус", "gc": "зк", "ss": "шл", "d": "п", "Gold Crown": "золота крона", "Shilling": "шилінг", "Penny": "пенні",
-  "Cantrips": "Замовляння", "Petty": "Дрібна", "Arcane": "Аркана", "Hedge": "Знахарська", "Witchcraft": "Відьомська", "Chaos": "Хаос", "Blessing": "Благословення", "Miracle": "Чудо",
-  "Miscast": "збій магії", "Minor Miscast": "Малий збій магії", "Major Miscast": "Великий збій магії", "Wrath of the Gods": "Гнів богів", "Overcast": "Оверкаст", "Channelling": "Скерування", "Spell": "Заклинання",
+  "Brass": "Латунь", "Silver": "Срібло", "Gold": "Золото", "Status": "Статус",
+  "Cantrips": "Замовляння", "Petty": "Дрібна", "Arcane": "Аркана", "Witchcraft": "Відьомська", "Blessing": "Благословення", "Miracle": "Чудо",
+  "Miscast": "збій магії", "Minor Miscast": "Малий збій магії", "Major Miscast": "Великий збій магії", "Channelling": "Скерування", "Spell": "Заклинання",
   "Critical Wound": "критична рана", "Critical": "Критичне", "Head": "Голова", "Arm": "Рука", "Arms": "Руки", "Body": "Тулуб", "Leg": "Нога", "Legs": "Ноги",
   "Lowlander": "Рівнинець", "Delver": "Копач", "Hearthkin": "Вогнищанин", "Veyl": "Вейл", "School of Embers": "Школа жарин", "School of Gloam": "Школа присмерку", "Fenlore": "Болотне знання", "Thornwitchery": "Терникове чаклунство", "Hearth Rites": "Обряди вогнища"
 }
