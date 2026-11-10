@@ -5,11 +5,12 @@ import { parseCompendium } from "./parse";
 import { kindTable, prismaImportRepository } from "./repository";
 import type { CompendiumReport, ImportInput } from "./service";
 
-import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
 import { templateLocaleWhere } from "@/lib/server/templates/locale-filter";
 import type { Actor } from "@/lib/utils/api/actor";
+import { compendiumTemplateKeys, templateKeyWhere } from "@/lib/utils/templates/registry";
 
 /** Presentation of the same Task19 adapter output; no alternate planner or writes. */
 export function previewPresentation(input: ImportInput, issues: ReadonlyArray<{ code: string; path: string }> = []) {
@@ -35,7 +36,7 @@ async function targets(campaignId: string) {
 export async function importTargetOptions(actor: Actor) {
   await prismaImportRepository.authorize(actor);
 
-  const templates = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME, ...templateLocaleWhere() }, select: { id: true, name: true } });
+  const templates = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, AND: [templateKeyWhere(compendiumTemplateKeys()), templateLocaleWhere()] }, select: { id: true, name: true } });
 
   return { local: await targets(actor.campaignId), templates: await Promise.all(templates.map(async template => ({ ...template, edition: "one" as const, rows: await targets(template.id) }))) };
 }

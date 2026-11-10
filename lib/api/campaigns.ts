@@ -4,7 +4,7 @@ import {
   campaignPatch,
   request,
 } from "@/lib/api/client";
-import type { TemplateContentLocale } from "@/lib/utils/campaigns/template-locales";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 import type { ActiveSessions, Campaign, CampaignMember, CampaignSettings, CampaignWithWarnings } from "@/types/campaigns";
 
 /**

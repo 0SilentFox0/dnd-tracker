@@ -24,7 +24,7 @@ import { listRaceProfiles } from "@/lib/server/races/race-profile";
 import { visible } from "@/lib/server/templates/sync/__tests__/helpers";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
-import { translateText } from "@/lib/srd/i18n/overlay";
+import { translateText } from "@/lib/utils/templates/i18n/overlay";
 import { readTranslations } from "@/scripts/srd/i18n/store";
 
 const marker = `grimloc-${randomUUID()}`;

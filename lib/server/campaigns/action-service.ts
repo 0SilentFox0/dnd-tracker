@@ -31,8 +31,8 @@ import type { Actor } from "@/lib/utils/api/actor";
 import { windowOf } from "@/lib/utils/api/page-of";
 import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
-import type { TemplateContentLocale } from "@/lib/utils/campaigns/template-locales";
 import { ownHandler } from "@/lib/utils/common/own-handler";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 
 export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(20) });
 

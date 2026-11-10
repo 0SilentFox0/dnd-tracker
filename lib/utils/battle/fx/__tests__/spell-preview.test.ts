@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { SPELL_FX_BY_NAME } from "@/data/library/spell-fx-by-name";
 import { SPELLS } from "@/data/library/spells";
 import { textOf } from "@/lib/i18n/test/text";
 import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
@@ -7,7 +8,6 @@ import { linesText } from "@/lib/utils/abilities/segments";
 import { castableOf, previewCastFx, previewSpellFx } from "@/lib/utils/battle/fx/spell-preview";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import { spellRules, toBookSpell } from "@/lib/utils/spells/to-book-spell";
-import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
 const preview = (name: string) => {
   const spell = SPELLS.find((s) => s.name === name);

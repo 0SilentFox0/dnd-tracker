@@ -10,7 +10,7 @@ import type { TargetKind } from "./types";
 
 import "server-only";
 import { invalidateAllReference } from "@/lib/cache/tags";
-import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { updateCampaignRules } from "@/lib/server/campaigns/rules";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
@@ -28,6 +28,7 @@ import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 import { asRecord, jsonContentInput } from "@/lib/utils/common/json";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { compendiumTemplateKeys, templateKeyWhere } from "@/lib/utils/templates/registry";
 import type { ScenarioContent } from "@/types/scenario";
 
 export const kindTable = { "spell-groups": "spellGroups", spells: "spells", units: "units", artifacts: "artifacts", races: "races", classes: "classes", feats: "feats", backgrounds: "backgrounds" } as const;
@@ -49,7 +50,7 @@ const tableOf = (key: string) => BUNDLE_TABLES.find((t) => t.key === key)!;
 type DomainRows = Map<TargetKind, Map<string, JsonRecord>>;
 
 async function addOfficialTemplateChoices(choices: DependencyChoice[], stillPending: Parameters<typeof matchTemplateRows>[0], allowMixedEdition: boolean | undefined) {
-  const official = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME, ...templateLocaleWhere() }, select: { id: true } });
+  const official = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, AND: [templateKeyWhere(compendiumTemplateKeys()), templateLocaleWhere()] }, select: { id: true } });
 
   for (const template of official) {
     const names = await loadNames(template.id);
@@ -64,7 +65,7 @@ async function loadTemplateSnapshots(choices: DependencyChoice[]): Promise<Templ
   const templates: TemplateSnapshot[] = [];
 
   for (const templateId of new Set(choices.map((d) => d.templateId))) {
-    const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME, ...templateLocaleWhere() }, select: { id: true } });
+    const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, AND: [templateKeyWhere(compendiumTemplateKeys()), templateLocaleWhere()] }, select: { id: true } });
 
     if (!template) throw new CompendiumError("DEPENDENCY_TEMPLATE_UNAVAILABLE");
 

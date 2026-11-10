@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { SPELL_FX_BY_NAME } from "../spell-fx-by-name";
-
+import { SPELL_FX_BY_NAME } from "@/data/library/spell-fx-by-name";
 import { SPELLS } from "@/data/library/spells";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 

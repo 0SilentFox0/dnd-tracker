@@ -1,7 +1,5 @@
 import { classOf, hashText, isTranslatable, mapStrings, REF_KEYS, SRD_KINDS, type Translations } from "./catalog";
 
-import type { SrdData, SrdKind } from "@/scripts/srd/lib/types";
-
 const placeholders = (text: string) => (text.match(/\{[^{}]+\}/g) ?? []).sort().join("\0");
 
 export function translateText(tr: Translations, key: string, text: string, parent = "", path: readonly string[] = []): string {
@@ -48,14 +46,16 @@ export function attackNames(row: unknown, tr: Translations): Map<string, string>
   return translatedNames(attacks, tr, "unit attacks", (name) => name.toLowerCase());
 }
 
-export function applyOverlay(data: SrdData, tr: Translations): SrdData {
-  if (!Object.keys(tr).length) return data;
+export function applyOverlay<T extends object>(source: T, tr: Translations): T {
+  const data = source as unknown as Record<string, readonly unknown[]>;
 
-  const maps = Object.fromEntries(SRD_KINDS.map((kind) => [kind, translatedNames(data[kind], tr, kind, kind === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)])) as Record<SrdKind, Map<string, string>>;
+  if (!Object.keys(tr).length) return source;
+
+  const maps = Object.fromEntries(SRD_KINDS.map((kind) => [kind, translatedNames(data[kind], tr, kind, kind === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)])) as Record<string, Map<string, string>>;
 
   const attacks = data.units.map((row) => attackNames(row, tr));
 
-  const out = {} as Record<SrdKind, unknown>;
+  const out: Record<string, unknown> = {};
 
   for (const kind of SRD_KINDS) {
     out[kind] = data[kind].map((row, index) => mapStrings(row, (key, text, parent, path) => {
@@ -67,5 +67,5 @@ export function applyOverlay(data: SrdData, tr: Translations): SrdData {
     }));
   }
 
-  return out as unknown as SrdData;
+  return out as unknown as T;
 }

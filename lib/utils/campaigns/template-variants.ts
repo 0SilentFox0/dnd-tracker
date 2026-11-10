@@ -1,4 +1,5 @@
 import { DEFAULT_TEMPLATE_LOCALE } from "@/lib/constants/campaigns";
+import { templateKeyOf } from "@/lib/utils/templates/registry";
 import type { TemplateCard } from "@/types/campaigns";
 export interface TemplateVariant {
   name: string;
@@ -18,7 +19,7 @@ export function groupTemplates<T extends TemplateVariant>(cards: T[]): TemplateG
   const groups = new Map<string, TemplateGroup<T>>();
 
   for (const card of cards) {
-    const key = card.templateKey ?? card.name;
+    const key = templateKeyOf(card) ?? card.templateKey ?? card.name;
 
     const group = groups.get(key) ?? { key, cards: {}, locales: [] };
 

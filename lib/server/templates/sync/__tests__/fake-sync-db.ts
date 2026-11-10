@@ -34,7 +34,13 @@ export function createFakeSyncDb() {
 
   const db: Record<string, unknown> = {
     campaign: {
-      findMany: async ({ where }: { where?: { templateKey?: string } } = {}) => campaigns.filter((r) => r.kind === "template" && r.visibility === "official" && r.templateKey === (where?.templateKey ?? "5e SRD 5.2") && (r.locale == null || r.locale === "en")).map(copy),
+      findMany: async ({ where }: { where?: { AND?: [{ OR: Array<{ templateKey: { in: string[] } | null; name?: { in: string[] } }> }, unknown] } } = {}) => {
+        const alternatives = where?.AND?.[0].OR ?? [];
+
+        const keyMatches = (r: { templateKey?: string | null; name?: string | null }) => alternatives.some((alt) => (alt.templateKey ? alt.templateKey.in.includes(r.templateKey ?? "") : r.templateKey == null && alt.name?.in.includes(r.name ?? "")));
+
+        return campaigns.filter((r) => r.kind === "template" && r.visibility === "official" && keyMatches(r) && (r.locale == null || r.locale === "en")).map(copy);
+      },
       findUnique: async ({ where }: { where: { id: string } }) => readCopy(campaigns.find((r) => r.id === where.id)),
       update: async ({ where, data }: { where: { id: string }; data: Row }) => {
         clearBundleCache();

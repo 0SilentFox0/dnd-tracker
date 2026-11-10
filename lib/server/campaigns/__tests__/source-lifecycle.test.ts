@@ -9,8 +9,8 @@ import { createFakeSyncDb } from "@/lib/server/templates/sync/__tests__/fake-syn
 import { id } from "@/lib/server/templates/sync/__tests__/helpers";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
-import { hashText } from "@/lib/srd/i18n/catalog";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { hashText } from "@/lib/utils/templates/i18n/catalog";
 
 const h = vi.hoisted(() => ({ base: {} as Record<string, unknown>, dictionary: {} as Record<string, string> }));
 
@@ -22,7 +22,7 @@ vi.mock("@/lib/db", async () => {
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateAllReference: vi.fn() }));
 vi.mock("@/lib/i18n/translator", () => ({ getTranslator: vi.fn(async () => (key: string) => key) }));
-vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
 
 const actor = { campaignId: "home", userId: "dm", isDM: true, via: "session" as const, scopes: null };
 

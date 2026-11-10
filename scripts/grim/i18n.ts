@@ -3,8 +3,8 @@ import * as path from "path";
 import { GRIM_DATA_DIR, GRIM_ROW_KINDS, type GrimData } from "./data";
 import { GRIM_SPELL_LISTS } from "./spells";
 
-import { type CatalogEntry, extractCatalog, type Translations } from "@/lib/srd/i18n/catalog";
-import { translatedNames, translateText } from "@/lib/srd/i18n/overlay";
+import { type CatalogEntry, extractCatalog, type Translations } from "@/lib/utils/templates/i18n/catalog";
+import { translatedNames, translateText } from "@/lib/utils/templates/i18n/overlay";
 
 export const GRIM_I18N_DIR = path.join(GRIM_DATA_DIR, "i18n");
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { BundleSchema } from "@/lib/server/templates/bundle";
-import { TEMPLATE_CONTENT_LOCALES } from "@/lib/utils/campaigns/template-locales";
+import { TEMPLATE_CONTENT_LOCALES } from "@/lib/utils/templates/manifest";
 
 export const MAX_BUNDLE_BYTES = 4 * 1024 * 1024;
 

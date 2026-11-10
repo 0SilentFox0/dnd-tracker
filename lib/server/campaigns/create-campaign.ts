@@ -15,9 +15,9 @@ import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { canReadSource } from "@/lib/utils/api/is-dm";
 import { generateInviteCode, INVITE_CODE_ATTEMPTS, isInviteCodeClash } from "@/lib/utils/campaigns/invite-code";
-import type { TemplateContentLocale } from "@/lib/utils/campaigns/template-locales";
 import { localizedDefaultAttacks } from "@/lib/utils/rules/defaults";
 import { parseRules, type Ruleset } from "@/lib/utils/rules/schema";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 
 export { TemplateLeakError };
 

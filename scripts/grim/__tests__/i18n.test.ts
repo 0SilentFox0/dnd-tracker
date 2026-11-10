@@ -7,7 +7,7 @@ import { GRIM_SPELL_LISTS } from "../spells";
 
 import { emptyBundle } from "@/lib/server/templates/bundle";
 import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
-import { extractCatalog, hashText } from "@/lib/srd/i18n/catalog";
+import { extractCatalog, hashText } from "@/lib/utils/templates/i18n/catalog";
 import { templateOf } from "@/scripts/srd/i18n/templates";
 import { readSrdData } from "@/scripts/srd/lib/data-files";
 

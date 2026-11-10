@@ -1,14 +1,12 @@
 import { createHash } from "crypto";
 
-import type { SrdData, SrdKind } from "@/scripts/srd/lib/types";
-
 export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "feats", "backgrounds", "units", "artifacts"] as const;
 
 export const NAME_KEYS: readonly string[] = ["name", "label", "nameTemplate"];
 
 export const TEXT_KEYS: readonly string[] = ["description", "text", "equipmentText"];
 
-export const REF_KEYS: Readonly<Record<string, SrdKind>> = {
+export const REF_KEYS: Readonly<Record<string, string>> = {
   spellId: "spells",
   groupId: "spell-groups",
   school: "spell-groups",
@@ -71,7 +69,7 @@ export function mapStrings(value: unknown, visit: (key: string, text: string, pa
 
 export type TemplateData = Readonly<Record<string, unknown>>;
 
-export function extractCatalog(data: TemplateData | SrdData, kinds: readonly string[] = SRD_KINDS): CatalogEntry[] {
+export function extractCatalog(data: object, kinds: readonly string[] = SRD_KINDS): CatalogEntry[] {
   const found = new Map<string, CatalogEntry>();
 
   for (const kind of kinds) {

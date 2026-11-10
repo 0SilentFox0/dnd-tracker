@@ -5,14 +5,14 @@ import { id } from "../sync/__tests__/helpers";
 
 import { EMPTY_GRIM_TEMPLATE_NAME, GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prepareCampaignSource } from "@/lib/server/templates/prepare-source";
-import { hashText } from "@/lib/srd/i18n/catalog";
-import { isCanonicalTemplate, isLegacyLocalizedTemplate, isLocalizableTemplate, localizationOf } from "@/lib/utils/campaigns/template-locales";
+import { hashText } from "@/lib/utils/templates/i18n/catalog";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate, isLocalizableTemplate, localizationOf } from "@/lib/utils/templates/registry";
 
 const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
 
-vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
 
-const isSrd = (source: object) => localizationOf(source)?.templateKey === SRD_TEMPLATE_NAME;
+const isSrd = (source: object) => localizationOf(source)?.templateKey === "srd-5.2";
 
 const official = { kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME };
 

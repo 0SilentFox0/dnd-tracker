@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 
 import { FxSpells } from "@/components/battle/dev/spells/FxSpells";
 import type { SpellCardData } from "@/components/battle/dev/spells/types";
+import { SPELL_FX_BY_NAME } from "@/data/library/spell-fx-by-name";
 import { SPELLS } from "@/data/library/spells";
 import { iconPublicUrl } from "@/data/skill-icons";
 import { libraryPreviewSpell, previewSpellFx } from "@/lib/utils/battle/fx/spell-preview";
-import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
 export const metadata = { title: "Spells and effects" };
 

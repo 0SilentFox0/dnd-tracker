@@ -4,9 +4,9 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
-import { isCanonicalTemplate, isLegacyLocalizedTemplate, localizationOf, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { systemKeyOf } from "@/lib/utils/rules/systems";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate, localizationOf, type TemplateIdentity, templateKeyOf } from "@/lib/utils/templates/registry";
 import type { TemplateCard, TemplateList } from "@/types/campaigns";
 
 const select = {
@@ -31,7 +31,7 @@ const toCard = ({ _count, rules, ...t }: { id: string; name: string; description
 
 /** Shared by the picker API and the owner's direct tile query. */
 export function visibleTemplates<T extends TemplateIdentity>(templates: T[]): T[] {
-  const canonicalKeys = templates.filter(isCanonicalTemplate).map((template) => template.templateKey);
+  const canonicalKeys = templates.filter(isCanonicalTemplate).map(templateKeyOf);
 
   if (new Set(canonicalKeys).size !== canonicalKeys.length) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
 

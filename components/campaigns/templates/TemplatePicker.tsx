@@ -9,8 +9,9 @@ import { HudPill } from "@/components/hud/page";
 import { SelectField, type SelectOptionGroup } from "@/components/ui/select-field";
 import { useBundleFilePicker, useTemplates } from "@/lib/hooks/campaigns";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
-import { isCanonicalTemplate, type TemplateContentLocale } from "@/lib/utils/campaigns/template-locales";
 import { groupTemplates, pickVariant } from "@/lib/utils/campaigns/template-variants";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
+import { isCanonicalTemplate } from "@/lib/utils/templates/registry";
 import type { TemplateCard, TemplateSelection } from "@/types/campaigns";
 
 interface TemplatePickerProps {

@@ -4,9 +4,9 @@ import { emptyBundle } from "../bundle";
 import { localizeRules, localizeTemplateBundle } from "../localize-template-bundle";
 import { remapIds } from "../remap-ids";
 
-import { hashText } from "@/lib/srd/i18n/catalog";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 import { itemStatsColumns } from "@/lib/utils/items/item-stats";
+import { hashText } from "@/lib/utils/templates/i18n/catalog";
 
 const tr = Object.fromEntries([
   [hashText("n", "Wizard"), "Чарівник"], [hashText("n", "Fireball"), "Вогняна куля"],

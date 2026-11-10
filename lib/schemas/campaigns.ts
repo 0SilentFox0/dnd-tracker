@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { CampaignStatus, CampaignVisibility } from "@/lib/constants/campaigns";
-import { TEMPLATE_CONTENT_LOCALES } from "@/lib/utils/campaigns/template-locales";
+import { TEMPLATE_CONTENT_LOCALES } from "@/lib/utils/templates/manifest";
 
 export const createCampaignSchema = z.object({
   name: z.string().min(1).max(100),

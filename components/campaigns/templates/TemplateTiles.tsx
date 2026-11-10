@@ -7,9 +7,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { HudCard, HudPill } from "@/components/hud/page";
 import { SelectField } from "@/components/ui/select-field";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
-import { isCanonicalTemplate, isLegacyLocalizedTemplate } from "@/lib/utils/campaigns/template-locales";
 import { groupTemplates, pickVariant, type TemplateGroup } from "@/lib/utils/campaigns/template-variants";
 import type { RuleSystemKey } from "@/lib/utils/rules/systems";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate } from "@/lib/utils/templates/registry";
 
 export interface TemplateTile {
   id: string;

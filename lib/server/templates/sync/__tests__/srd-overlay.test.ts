@@ -10,12 +10,12 @@ import { applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
-import { hashText } from "@/lib/srd/i18n/catalog";
+import { hashText } from "@/lib/utils/templates/i18n/catalog";
 import type { SyncRef } from "@/types/campaigns";
 
 const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
 
-vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
 
 let f: ReturnType<typeof createFakeSyncDb>;
 

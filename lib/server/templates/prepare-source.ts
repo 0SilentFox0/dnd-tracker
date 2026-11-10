@@ -4,12 +4,13 @@ import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Bundle, TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
+import { templateTranslationsFor } from "@/lib/server/templates/dictionaries";
 import { exportLocalLayer, exportSkeleton, type LocalLayer } from "@/lib/server/templates/export-campaign";
 import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { latestPublishedVersion } from "@/lib/server/templates/publish";
-import { templateTranslationsFor } from "@/lib/server/templates/template-translations";
 import { canReadSource } from "@/lib/utils/api/is-dm";
-import { isCanonicalTemplate, isLegacyLocalizedTemplate, localizationOf, type TemplateContentLocale, type TemplateIdentity } from "@/lib/utils/campaigns/template-locales";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate, localizationOf, type TemplateIdentity, templateKeyOf, templateKeyWhere } from "@/lib/utils/templates/registry";
 
 export type PreparedLayer = LocalLayer & { sourceId: string; baseVersion: number };
 
@@ -56,13 +57,13 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
   let source = requested;
 
   if (overlay && localization) {
-    const candidates = await db.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, templateKey: localization.templateKey, OR: [{ locale: "en" }, { locale: null }] }, select: { id: true } });
+    const candidates = await db.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, AND: [templateKeyWhere([localization.templateKey]), { OR: [{ locale: "en" }, { locale: null }] }] }, select: { id: true } });
 
     if (candidates.length !== 1) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
 
     const canonical = await read(candidates[0].id);
 
-    if (!canonical || !isCanonicalTemplate(canonical) || canonical.templateKey !== localization.templateKey) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
+    if (!canonical || !isCanonicalTemplate(canonical) || templateKeyOf(canonical) !== localization.templateKey) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
 
     source = canonical;
   }
@@ -83,9 +84,9 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
 
   const contentLocale = overlay ? options.contentLocale ?? (isLegacyLocalizedTemplate(requested) ? "uk" : "en") : source.locale ?? null;
 
-  const identity = { id: source.id, contentVersion: source.contentVersion, source: { kind: source.kind, visibility: source.visibility, templateKey: source.templateKey, locale: source.locale }, contentLocale };
+  const identity = { id: source.id, contentVersion: source.contentVersion, source: { kind: source.kind, visibility: source.visibility, templateKey: source.templateKey, name: source.name, locale: source.locale }, contentLocale };
 
-  const translations = overlay && localization ? templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale) : null;
+  const translations = overlay && localization ? await templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale) : null;
 
   const layered = await layeredSource(db, source, options.mode, !!translations && Object.keys(translations).length > 0);
 

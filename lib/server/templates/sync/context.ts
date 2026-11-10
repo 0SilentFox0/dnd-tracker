@@ -4,13 +4,14 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf, SETTINGS_SELECT, settingsOf, type TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
+import { templateTranslationsFor } from "@/lib/server/templates/dictionaries";
 import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { emptyState } from "@/lib/server/templates/sync/state";
 import type { LocalRow, SyncContext, SyncState, TableHashes } from "@/lib/server/templates/sync/types";
-import { templateTranslationsFor } from "@/lib/server/templates/template-translations";
 import { canReadSource } from "@/lib/utils/api/is-dm";
-import { isCanonicalTemplate, localizationOf, type TemplateContentLocale } from "@/lib/utils/campaigns/template-locales";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
+import { isCanonicalTemplate, localizationOf } from "@/lib/utils/templates/registry";
 
 export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character">;
 
@@ -57,7 +58,7 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   if (localization && !localization.locales.includes(contentLocale as TemplateContentLocale)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
 
-  const sourceBundle = localization ? localizeTemplateBundle(rawSourceBundle, templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale)) : rawSourceBundle;
+  const sourceBundle = localization ? localizeTemplateBundle(rawSourceBundle, await templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale)) : rawSourceBundle;
 
   const synced = state?.sourceCampaignId === source.id ? state : null;
 

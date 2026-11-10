@@ -1,1 +1,1 @@
-export { applyOverlay } from "../../../lib/srd/i18n/overlay";
+export { applyOverlay } from "../../../lib/utils/templates/i18n/overlay";

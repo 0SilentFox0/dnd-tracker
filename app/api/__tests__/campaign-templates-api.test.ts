@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { hashText } from "@/lib/srd/i18n/catalog";
+import { hashText } from "@/lib/utils/templates/i18n/catalog";
 
-vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? { [hashText("n", "Bless")]: "Благословення" } : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? { [hashText("n", "Bless")]: "Благословення" } : {} }));
 
 const m = vi.hoisted(() => ({
   db: {

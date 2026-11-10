@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { SPELL_FX_BY_NAME } from "@/data/library/spell-fx-by-name";
 import { auraOf, aurasOf, MAX_AURAS } from "@/lib/utils/battle/fx/aura";
-import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 import type { ActiveEffect } from "@/types/battle";
 import { ParticipantSide } from "@/types/battle";
 

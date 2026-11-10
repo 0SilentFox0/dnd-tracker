@@ -1,8 +1,8 @@
 import type { Bundle } from "./bundle";
 
-import { mapStrings, type Translations } from "@/lib/srd/i18n/catalog";
-import { attackNames, translatedNames, translateText } from "@/lib/srd/i18n/overlay";
 import { isRecord } from "@/lib/utils/common/is-record";
+import { mapStrings, type Translations } from "@/lib/utils/templates/i18n/catalog";
+import { attackNames, translatedNames, translateText } from "@/lib/utils/templates/i18n/overlay";
 
 const TABLES = ["spellGroups", "spells", "races", "classes", "feats", "backgrounds", "units", "artifacts", "careers"] as const;
 

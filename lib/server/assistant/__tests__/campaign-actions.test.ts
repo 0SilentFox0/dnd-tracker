@@ -7,8 +7,8 @@ import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { emptyBundle } from "@/lib/server/templates/bundle";
 import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
-import { hashText } from "@/lib/srd/i18n/catalog";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { hashText } from "@/lib/utils/templates/i18n/catalog";
 
 const h = vi.hoisted(() => ({
   campaign: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
@@ -21,7 +21,7 @@ const h = vi.hoisted(() => ({
   create: vi.fn(), export: vi.fn(async () => ({ settings: {}, formatVersion: 1 })),
 }));
 
-vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
 
 vi.mock("@/lib/server/onboarding/facts", () => ({ readOnboardingSnapshot: vi.fn(async () => ({ facts: { role: "dm", dm: { races: 0, units: 0, players: 0, activePlayerCharacters: 0, pendingDrafts: 2, battles: 0, battlesStarted: 0, scenarioPages: 0, decks: 0, tracks: 0, aiKeys: 0 } }, checklistFlag: null })) }));
 vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: vi.fn(async () => "en") }));
