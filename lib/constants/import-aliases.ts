@@ -184,6 +184,7 @@ export const FIELD_ALIASES: Record<ImportKind, PerField<readonly string[]>> = {
     weapon: ["зброя (json)", "weapon", "weapon (json)"],
     armor: ["броня (json)", "armor", "armor (json)"],
     item: ["предмет 5e (json)", "item", "item 5e (json)"],
+    systemStats: ["системні характеристики (json)", "system stats (json)", "system stats"],
     abilities: ABILITIES,
   },
   "artifact-sets": {

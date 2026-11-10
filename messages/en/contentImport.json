@@ -194,6 +194,7 @@
       "icon": "Icon",
       "weapon": "Weapon (JSON)",
       "armor": "Armor (JSON)",
+      "systemStats": "System stats (JSON)",
       "item": "Item 5e (JSON)",
       "abilities": "Abilities"
     },

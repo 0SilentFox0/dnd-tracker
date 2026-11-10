@@ -194,6 +194,7 @@
       "icon": "Іконка",
       "weapon": "Зброя (JSON)",
       "armor": "Броня (JSON)",
+      "systemStats": "Системні характеристики (JSON)",
       "item": "Предмет 5e (JSON)",
       "abilities": "Здібності"
     },
