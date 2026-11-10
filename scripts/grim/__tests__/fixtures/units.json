@@ -1,3 +1,3 @@
 [
-  { "name": "Giant Rat", "level": 1, "initiative": 30, "armorClass": 10, "maxHp": 5, "speed": 4, "strength": 5, "dexterity": 30, "constitution": 20, "intelligence": 10, "wisdom": 20, "charisma": 5, "knownSpells": ["Rot Touch"] }
+  { "name": "Giant Rat", "level": 1, "maxHp": 5, "speed": 24, "initiative": 30, "gridSize": 1, "statblock": { "creatureType": "Beasts" }, "characteristics": { "base": { "ws": 25, "bs": 5, "s": 15, "t": 20, "i": 30, "ag": 35, "dex": 5, "int": 10, "wp": 15, "fel": 5 }, "move": 4 }, "abilities": [{ "id": "size", "name": "Size (Small)", "trigger": { "event": "passive" }, "effects": [{ "kind": "wfrpSize", "size": "small" }] }, { "id": "bite", "name": "Bite +2", "trigger": { "event": "passive" }, "effects": [{ "kind": "wfrpAttack", "attack": "bite", "damage": 2 }] }], "knownSpells": ["Rot Touch"] }
 ]

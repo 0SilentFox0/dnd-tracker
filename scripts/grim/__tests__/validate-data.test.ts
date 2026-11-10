@@ -237,3 +237,43 @@ describe("validateGrimData", () => {
     expect(issuesOf(other).some((i) => i.includes('profile "talents" must be an array'))).toBe(true);
   });
 });
+
+describe("validateGrimData: units", () => {
+  const where = 'units #1 "Giant Rat": ';
+
+  const ab = (id: string, name: string, effect: object, event = "passive") => ({ id, name, trigger: { event }, effects: [effect] });
+
+  const regenerate = (event: string) => ab("regenerate", "Regenerate", { kind: "heal", amount: "1d10", target: "self" }, event);
+
+  type Mutate = (rat: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  const cases: Array<[string, Mutate, string[]]> = [
+    ["a missing characteristic", (r) => delete r.characteristics.base.fel, ["characteristics.base must list all 10 characteristics (missing fel)"]],
+    ["extra characteristics keys", (r) => (r.characteristics.skillAdvances = {}), ["characteristics may hold only base and move (got skillAdvances)"]],
+    ["an unknown theme", (r) => (r.statblock.creatureType = "Dragons"), ["statblock must be { creatureType } with one of: Beasts, Raiders, Restless Dead, Cultists, Constructs, Horrors"]],
+    ["an unknown level", (r) => (r.level = 5), ["level must be one of 1, 2, 3, 4"]],
+    ["a 5e column", (r) => (r.strength = 10), ['column "strength" is not used by Grim units']],
+    ["the attacks column", (r) => (r.attacks = [{ name: "Bite", attackBonus: 2, damageType: "piercing", damageDice: "1d4" }]), ['column "attacks" is not used by Grim units']],
+    ["armour with uneven locations", (r) => r.abilities.push(ab("armour", "Armour 1", { kind: "wfrpArmour", head: 1, body: 0, arm: 0, leg: 0 })), ['abilities[2] "Armour 1": is not the output of the "armour" trait recipe']],
+    ["the terror id", (r) => r.abilities.push(ab("terror", "Terror 1", { kind: "wfrpPsychology", psychology: "terror", value: 1 })), ['abilities[2] "Terror 1": unknown trait id "terror"']],
+    ["a passive regenerate", (r) => r.abilities.push(regenerate("passive")), ['abilities[2] "Regenerate": is not the output of the "regenerate" trait recipe']],
+    ["breath without range", (r) => r.abilities.push(ab("breath", "Breath +3", { kind: "wfrpAttack", attack: "breath", damage: 3 })), ['abilities[2] "Breath +3": is not the output of the "breath" trait recipe']],
+    ["a duplicate trait id", (r) => r.abilities.push(ab("bite", "Bite +3", { kind: "wfrpAttack", attack: "bite", damage: 3 })), ['abilities[2] "Bite +3": duplicate trait id "bite"']],
+    ["a wrong speed", (r) => (r.speed = 30), ["speed 30 must equal move × 6 = 24"]],
+    ["a wrong initiative", (r) => (r.initiative = 10), ["initiative 10 must equal I 30"]],
+    ["a wrong gridSize", (r) => (r.gridSize = 2), ["gridSize 2 must be 1 for size small"]],
+    ["a wrong maxHp", (r) => (r.maxHp = 6), ["maxHp 6 must equal Wounds 5"]],
+    ["a characteristic out of band", (r) => (r.characteristics.base.ws = 60), ['characteristic "ws" 60 is outside 5–45 for level 1', "max(ws, bs) 60 is outside 20–45 for level 1"]],
+    ["Ward on level 1", (r) => r.abilities.push(ab("ward", "Ward 9+", { kind: "wfrpWard", value: 9 })), ["Ward is not allowed for level 1"]],
+    ["Magical on level 1", (r) => (r.abilities[1].effects[0].magical = true), ["Magical is not allowed for level 1"]],
+    ["Regenerate on level 1", (r) => r.abilities.push(regenerate("turnStart")), ["Regenerate is not allowed for level 1"]],
+    ["Fear above the level cap", (r) => r.abilities.push(ab("fear", "Fear 2", { kind: "wfrpPsychology", psychology: "fear", value: 2 })), ["Fear 2 is above 1 for level 1"]],
+  ];
+
+  it.each(cases)("rejects %s", (_name, mutate, expected) => {
+    const data = load();
+
+    mutate(data.units[0] as Record<string, any>); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(issuesOf(data)).toEqual(expect.arrayContaining(expected.map((e) => where + e)));
+  });
+});

@@ -1,5 +1,6 @@
 import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
 import { findForbiddenTerms } from "./forbidden-terms";
+import { unitIssues } from "./units";
 
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
@@ -225,6 +226,12 @@ function validateRules(rules: GrimData["rules"], issues: string[]) {
   if (!merged.ok) merged.issues.forEach((i) => issues.push(`rules: ${i.path.join(".")} ${i.message}`));
 }
 
+function validateUnits(data: GrimData, issues: string[]) {
+  data.units.forEach((row, index) => {
+    for (const issue of unitIssues(row)) issues.push(`${label("units", index, row.name)}: ${issue}`);
+  });
+}
+
 export function validateGrimData(data: GrimData): GrimValidation {
   const issues: string[] = [];
 
@@ -238,6 +245,7 @@ export function validateGrimData(data: GrimData): GrimValidation {
   validateCareerTiers(data, issues);
   validateProfileKeys(data, issues);
   validateFeatAbilities(data, issues);
+  validateUnits(data, issues);
   validateTerms(data, issues);
 
   return issues.length === 0 ? { ok: true } : { ok: false, issues };
