@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { loadRules } from "@/lib/server/campaigns/rules";
+import { parseRules } from "@/lib/utils/rules/schema";
+import { readCharacteristics } from "@/lib/utils/rules/systems";
+import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -12,6 +16,7 @@ vi.mock("@/lib/db", () => ({
     artifact: { findMany: vi.fn(), findFirst: vi.fn() },
   },
 }));
+vi.mock("@/lib/server/campaigns/rules", () => ({ loadRules: vi.fn() }));
 vi.mock("@/lib/server/show/show-store", () => ({ readShowState: vi.fn() }));
 vi.mock("@/lib/utils/battle/store", () => ({ loadBattle: vi.fn() }));
 vi.mock("@/lib/cache/reference-data", () => ({
@@ -26,7 +31,10 @@ vi.mock("@/lib/cache/reference-data", () => ({
 const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null, locale: "uk" as const };
 
 describe("context tools", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(loadRules).mockResolvedValue(parseRules({}));
+  });
 
   it("get_party: лише герої гравців цієї кампанії", async () => {
     vi.mocked(prisma.character.findMany).mockResolvedValue([
@@ -83,6 +91,26 @@ describe("context tools", () => {
     });
   });
 
+  it("get_battle_state wfrp: wounds and characteristics, no hp/ac", async () => {
+    const { loadBattle } = await import("@/lib/utils/battle/store");
+
+    vi.mocked(loadBattle).mockResolvedValue({
+      isDM: true, isMember: true,
+      meta: { name: "Ambush", rules: WFRP_RULES },
+      scene: { status: "active", round: 1, turnIndex: 0 },
+      participants: [{ basicInfo: { name: "Hans", side: "ally" }, combatStats: { currentHp: 7, maxHp: 12, armorClass: 0, status: "active" }, abilities: { characteristics: readCharacteristics({ characteristics: { base: { ws: 35 } } }) } }],
+    } as never);
+    vi.mocked(prisma.battleEvent.findMany).mockResolvedValue([] as never);
+
+    const { getBattleStateTool } = await import("@/lib/ai/tools/battle");
+
+    const out = (await getBattleStateTool.handler(ctx, { battleId: "b1" })) as { participants: Record<string, unknown>[] };
+
+    expect(out.participants[0]).toMatchObject({ name: "Hans", side: "ally", wounds: "7/12", status: "active", characteristics: expect.objectContaining({ ws: 35 }) });
+    expect(out.participants[0]).not.toHaveProperty("ac");
+    expect(out.participants[0]).not.toHaveProperty("hp");
+  });
+
   it("get_battle_state rejects lost DM membership without exposing participants", async () => {
     const { loadBattle } = await import("@/lib/utils/battle/store");
 
@@ -104,6 +132,28 @@ describe("context tools", () => {
     const entry = (await readReferenceTool.handler(ctx, { kind: "unit", id: "u1" })) as { abilitySummary: unknown[] };
 
     expect(entry.abilitySummary).toEqual([expect.stringContaining("summary.effects.damageBonus")]);
+  });
+
+  it("read_reference wfrp: unit characteristics as a map of numbers", async () => {
+    vi.mocked(loadRules).mockResolvedValue(parseRules(WFRP_RULES));
+
+    const { getCachedUnits } = await import("@/lib/cache/reference-data");
+
+    vi.mocked(getCachedUnits).mockResolvedValueOnce([{ id: "u9", name: "Beast", level: 1, abilitySummary: [], characteristics: readCharacteristics({ characteristics: { base: { ws: 35 } } }) }] as never);
+
+    const { readReferenceTool } = await import("@/lib/ai/tools/reference");
+
+    const entry = (await readReferenceTool.handler(ctx, { kind: "unit", id: "u9" })) as { characteristics: Record<string, number> };
+
+    expect(entry.characteristics.ws).toBe(35);
+  });
+
+  it("read_reference artifact returns systemStats", async () => {
+    vi.mocked(prisma.artifact.findFirst).mockResolvedValue({ id: "a1", name: "Blade", systemStats: { kind: "weapon" } } as never);
+
+    const { readReferenceTool } = await import("@/lib/ai/tools/reference");
+
+    expect(await readReferenceTool.handler(ctx, { kind: "artifact", id: "a1" })).toMatchObject({ systemStats: { kind: "weapon" } });
   });
 
   it("read_reference: чужий id — AiToolError", async () => {

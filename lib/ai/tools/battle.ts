@@ -9,7 +9,7 @@ export const getBattleStateTool = defineTool({
   name: "get_battle_state",
   scopes: ["ai"],
   title: "Battle state",
-  description: "State of a battle (the active one when battleId is omitted): round, turn order, participants with side, HP, AC, status, and the last events.",
+  description: "State of a battle (the active one when battleId is omitted): round, turn order, participants with side, HP, AC, status, and the last events; Grim d100 battles show Wounds and characteristics instead of HP/AC.",
   input: z.object({ battleId: z.string().min(1).optional() }),
   handler: (ctx, { battleId }) => readLegacyBattleState(ctx, battleId),
 });

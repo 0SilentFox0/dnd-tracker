@@ -1,4 +1,5 @@
 import "server-only";
+import { wfrpParticipantView } from "@/lib/ai/tools/wfrp-view";
 import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
@@ -32,18 +33,24 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
 
     const t = await getTranslator("en");
 
+    const wfrp = battle.meta.rules?.system?.key === "wfrp";
+
     return {
       name: battle.meta.name,
       status: battle.scene.status,
       round: battle.scene.round,
       currentTurnIndex: battle.scene.turnIndex,
-      participants: battle.participants.map((p) => ({
-        name: p.basicInfo.name,
-        side: p.basicInfo.side,
-        hp: `${p.combatStats.currentHp}/${p.combatStats.maxHp}`,
-        ac: p.combatStats.armorClass,
-        status: p.combatStats.status,
-      })),
+      participants: battle.participants.map((p) =>
+        wfrp
+          ? wfrpParticipantView(p)
+          : {
+              name: p.basicInfo.name,
+              side: p.basicInfo.side,
+              hp: `${p.combatStats.currentHp}/${p.combatStats.maxHp}`,
+              ac: p.combatStats.armorClass,
+              status: p.combatStats.status,
+            },
+      ),
       lastEvents: events.reverse().map((e) => `R${e.round}: ${formatBattleLog(t, { resultText: e.resultText, log: decodeStoredLog(e.details) })}`),
     };
 }

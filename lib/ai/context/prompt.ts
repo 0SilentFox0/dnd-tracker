@@ -2,9 +2,10 @@ import { type ContextBlock, fitContext } from "./budget";
 import { loadFocus } from "./focus";
 
 import "server-only";
-import { partySummary } from "@/lib/ai/tools/party";
+import { type PartyMember, partySummary } from "@/lib/ai/tools/party";
 import { contentToMarkdown, sectionToMarkdown } from "@/lib/ai/tools/scenario-read";
 import { showSummary } from "@/lib/ai/tools/show";
+import { WFRP_SYSTEM_LINE } from "@/lib/ai/tools/wfrp-view";
 import { AI_LIMITS, type AiThreadMode } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
@@ -17,6 +18,7 @@ import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { loadDigestItems } from "@/lib/server/scenario/summary-store";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { systemKeyOf } from "@/lib/utils/rules/systems";
 import { scenarioDigest } from "@/lib/utils/scenario/digest/scenario-digest";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
 import type { AiFocus, AssistantContextDisclosure, ContextBlockId } from "@/types/ai";
@@ -44,6 +46,12 @@ function liveScene(title: string, content: ScenarioContent): string {
   return [`Scene: ${title}`, played.length && `Already played: ${played.join(", ")}`, current ? `Current section:\n${sectionToMarkdown(current)}` : "All sections have been played."].filter(Boolean).join("\n\n");
 }
 
+function promptMember(m: PartyMember) {
+  if ("class" in m) return { id: m.id, name: m.name, level: m.level, class: m.class, race: m.race, armorClass: m.armorClass };
+
+  return { id: m.id, name: m.name, level: m.level, race: m.race, career: m.career, woundsMax: m.woundsMax };
+}
+
 const DIGEST_LABEL = "Campaign digest (DM-only, one line per page; § = section, ✓ = played; (stale) = LLM summary older than the page; read full text via read_scenario_page)";
 
 export type SourceNoteSelection = { source: "session-ui"; selectedKeys: string[] };
@@ -64,6 +72,8 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
 
   if (!policy || !["review", "auto"].includes(policy.executionMode)) throw new ContentError(API_ERRORS.ASSISTANT_EXECUTION_POLICY_UNAVAILABLE, 403);
 
+  const rules = parseRules(campaign.rules);
+
   const role = [
     "You are an assistant to the Dungeon Master (DM) in a tabletop role-playing campaign.",
     `Reply in ${languageName(caller.locale)}. You talk only to the authorized DM; the context is meant only for them and the provider they chose.`,
@@ -72,6 +82,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
     "Always do a fresh read before writing: history, compaction and this summary do not replace current rules, versions and server checks.",
     "Read full records with tools when needed; source notes only via an explicit session UI selection. Do not ask for secrets, credentials, invite tokens, signed URLs or raw compendium JSON.",
     "Scenario markup: **bold**, _italic_, ||DM secret||, :::read … :::, :::say … :::, :::callout … :::, [@Name](character:id).",
+    ...(systemKeyOf(rules) === "wfrp" ? [WFRP_SYSTEM_LINE] : []),
   ].join("\n");
 
   const standing = campaign.aiInstructions?.trim();
@@ -94,7 +105,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
   const effectiveFocus = focus ?? (pageId ? { pageId } : undefined);
 
   const [party, show, focused, notes, digestItems] = await Promise.all([
-    partySummary(campaignId, 20),
+    partySummary(campaignId, 20, rules),
     mode === "live" ? showSummary(campaignId) : Promise.resolve(null),
     effectiveFocus ? loadFocus(campaignId, effectiveFocus) : Promise.resolve(null),
     sourceNoteSelection ? readCompendiumSummary(actor, "notes", { selectedKeys: validateSourceSelection(sourceNoteSelection) }) : Promise.resolve(null),
@@ -104,7 +115,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
   const blocks: ContextBlock[] = [
     ...fixed,
     { id: "campaign", label: "Campaign (data)", maxChars: 3000, value: { name: campaign.name, description: campaign.description } },
-    { id: "party", label: "Party (first 20; the rest via get_party)", maxChars: 4000, value: { items: party.map(({ id, name, level, class: cls, race, armorClass }) => ({ id, name, level, class: cls, race, armorClass })), truncated: party.length === 20, nextOffset: party.length === 20 ? 20 : null } },
+    { id: "party", label: "Party (first 20; the rest via get_party)", maxChars: 4000, value: { items: party.map(promptMember), truncated: party.length === 20, nextOffset: party.length === 20 ? 20 : null } },
     ...(mode === "live" ? [{ id: "rules" as const, label: "Current rules snapshot (data; full rules via tool)", maxChars: 6000, value: parseRules(focused?.kind === "battle" && focused.battle.status !== BattleStatus.PREPARED ? focused.battle.rules ?? {} : campaign.rules) }] : []),
     ...(show ? [{ id: "show" as const, label: "Show (data)", maxChars: 1500, text: show }] : []),
     ...(notes ? [{ id: "notes" as const, label: "Explicitly selected source notes (data)", maxChars: 16500, value: notes.data }] : []),
