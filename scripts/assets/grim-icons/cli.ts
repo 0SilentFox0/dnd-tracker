@@ -7,7 +7,7 @@ import * as path from "path";
 
 import { GRIM_ROW_KINDS, readGrimData } from "../../grim/data";
 import { grimIconGaps, readGrimIcons, writeGrimIcons } from "../../grim/icons";
-import { assertSeedTarget } from "../../seed/seed-library-lib";
+import { assertSeedTarget, assertStorageTarget } from "../../seed/seed-library-lib";
 import { assertCleanPrompt, assertUniqueFiles, type PromptRow, toMarkdown } from "../icon-prompts/compose";
 import { toWebp } from "../tokens-5e/convert";
 import { type GrimPromptRow, grimPromptRows, type GrimSubjects } from "./prompts";
@@ -82,6 +82,8 @@ async function uploadIcons(args: string[]) {
     const { prisma } = await import("@/lib/db");
 
     assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
+
+    assertStorageTarget(process.env.NEXT_PUBLIC_SUPABASE_URL, args.includes("--allow-remote"));
 
     const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, kind: true } });
 

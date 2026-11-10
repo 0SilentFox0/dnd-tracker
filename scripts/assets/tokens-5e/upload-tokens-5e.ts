@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-import { assertSeedTarget } from "../../seed/seed-library-lib";
+import { assertSeedTarget, assertStorageTarget } from "../../seed/seed-library-lib";
 import { readSrdData } from "../../srd/lib/data-files";
 import { ASSET_BUCKET } from "../attach-lib";
 import { mapToTemplate, parseCatalog, TOKEN_SIZE, type TokenKind } from "./catalog";
@@ -41,6 +41,8 @@ async function main() {
 
   if (!dryRun) {
     assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
+
+    assertStorageTarget(process.env.NEXT_PUBLIC_SUPABASE_URL, args.includes("--allow-remote"));
 
     const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, kind: true } });
 

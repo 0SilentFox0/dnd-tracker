@@ -6,7 +6,7 @@ import { falloff, raiseOnKill } from "@/data/library/unit-abilities";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { unitRowStats, type UnitStatsRow } from "@/lib/utils/battle/balance/unit-library";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
-import { artifactRows, assertSeedTarget, findByName, findByNames, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, remapSummonUnits, treeInput, unitAvatar, unitRow } from "@/scripts/seed/seed-library-lib";
+import { artifactRows, assertSeedTarget, assertStorageTarget, findByName, findByNames, mapRaceModifiers, parseArgs, racePassiveData, remapRefs, remapSummonUnits, treeInput, unitAvatar, unitRow } from "@/scripts/seed/seed-library-lib";
 
 describe("seed-library-lib", () => {
   it("parses args", () => {
@@ -19,6 +19,13 @@ describe("seed-library-lib", () => {
     expect(() => assertSeedTarget("postgresql://u:p@db.supabase.co:5432/db", false)).toThrow(/db\.supabase\.co/);
     expect(assertSeedTarget("postgresql://u:p@db.supabase.co:5432/db", true)).toBe("db.supabase.co");
     expect(() => assertSeedTarget(undefined, false)).toThrow();
+  });
+
+  it("refuses a remote Supabase Storage URL without --allow-remote", () => {
+    expect(assertStorageTarget("http://127.0.0.1:54321", false)).toBe("127.0.0.1");
+    expect(() => assertStorageTarget("https://abc.supabase.co", false)).toThrow(/abc\.supabase\.co/);
+    expect(assertStorageTarget("https://abc.supabase.co", true)).toBe("abc.supabase.co");
+    expect(() => assertStorageTarget(undefined, false)).toThrow();
   });
 
   it("finds rows by name case-insensitively", () => {

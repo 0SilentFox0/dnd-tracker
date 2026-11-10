@@ -55,6 +55,18 @@ export function assertSeedTarget(url: string | undefined, allowRemote: boolean):
   return host;
 }
 
+export function assertStorageTarget(url: string | undefined, allowRemote: boolean): string {
+  if (!url) throw new Error("NEXT_PUBLIC_SUPABASE_URL не задано");
+
+  const host = new URL(url).hostname;
+
+  if (!LOCAL_HOSTS.has(host) && !allowRemote) {
+    throw new Error(`Supabase Storage вказує на ${host}, не на localhost. Додайте --allow-remote, якщо це свідомо.`);
+  }
+
+  return host;
+}
+
 export function racePassiveData(race: LibraryRace, iconUrl?: string) {
   const { name, description, appearanceDescription } = race.passive;
 
