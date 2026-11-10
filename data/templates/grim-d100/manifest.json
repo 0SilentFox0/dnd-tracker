@@ -6,8 +6,8 @@
     "careers": 16,
     "feats": 50,
     "units": 30,
-    "spells": 0,
-    "artifacts": 0,
+    "spells": 30,
+    "artifacts": 56,
     "raceProfiles": 4
   }
 }
