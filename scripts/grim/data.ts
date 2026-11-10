@@ -13,6 +13,10 @@ export type GrimRowKind = (typeof GRIM_ROW_KINDS)[number];
 
 export type Row = Record<string, unknown>;
 
+export const DESCRIPTION_MAX = 200;
+
+export const descriptionIssues = (row: Row): string[] => (typeof row.description !== "string" || row.description.length < 1 || row.description.length > DESCRIPTION_MAX ? [`description must be 1–${DESCRIPTION_MAX} characters`] : []);
+
 /** A species profile whose `careerId`/`talents`/`featId` hold names; the loader resolves them to ids */
 export type NamedProfile = SpeciesProfile;
 

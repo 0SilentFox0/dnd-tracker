@@ -4,6 +4,7 @@ import type { Row } from "./data";
 
 import { TRAIT_SIZES, type TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import type { RecipeContext, RecipeValues } from "@/lib/utils/abilities/templates/types";
+import { isRecord } from "@/lib/utils/common/is-record";
 import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/utils/rules/systems";
 import { RANGED_DEFAULT_RANGE_FT } from "@/lib/utils/rules/systems/wfrp/traits/constants";
 import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
@@ -56,6 +57,8 @@ const NOTE_TRAITS: readonly string[] = ["undead", "hardy", "flier", "swarm", "ni
 
 type RawEffect = Record<string, unknown>;
 
+const rangeFtOf = (e: RawEffect, fallback = RANGED_DEFAULT_RANGE_FT) => (e.rangeFt == null ? fallback : Number(e.rangeFt));
+
 export type RawAbility = { id?: unknown; name?: unknown; trigger?: { event?: unknown }; effects?: RawEffect[] };
 
 export interface UnitTraits {
@@ -68,11 +71,9 @@ export interface UnitTraits {
   notes: Set<string>;
 }
 
-const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+export const abilitiesOf = (row: Row): RawAbility[] => (Array.isArray(row.abilities) ? row.abilities.filter(isRecord) : []) as RawAbility[];
 
-export const abilitiesOf = (row: Row): RawAbility[] => (Array.isArray(row.abilities) ? row.abilities.filter(isObject) : []) as RawAbility[];
-
-const first = (a: RawAbility): RawEffect => (Array.isArray(a.effects) && isObject(a.effects[0]) ? a.effects[0] : {});
+const first = (a: RawAbility): RawEffect => (Array.isArray(a.effects) && isRecord(a.effects[0]) ? a.effects[0] : {});
 
 export function unitTraits(row: Row): UnitTraits {
   const t: UnitTraits = { ap: 0, size: "average", psychology: [], attacks: [], regenerate: false, notes: new Set() };
@@ -101,7 +102,7 @@ export function unitTraits(row: Row): UnitTraits {
       case "weapon":
       case "breath":
       case "ranged":
-        t.attacks.push({ name: String(a.name), attack: String(a.id), damage: Number(e.damage), magical: e.magical === true, ...(a.id === "ranged" && { rangeFt: e.rangeFt == null ? RANGED_DEFAULT_RANGE_FT : Number(e.rangeFt) }) });
+        t.attacks.push({ name: String(a.name), attack: String(a.id), damage: Number(e.damage), magical: e.magical === true, ...(a.id === "ranged" && { rangeFt: rangeFtOf(e) }) });
         break;
       default:
         if (NOTE_TRAITS.includes(String(a.id))) t.notes.add(String(a.id));
@@ -140,7 +141,7 @@ function recipeValues(id: string, e: RawEffect): RecipeValues {
       return { damage: Number(e.damage), magical };
     case "breath":
     case "ranged":
-      return { damage: Number(e.damage), rangeFt: Number(e.rangeFt), magical };
+      return { damage: Number(e.damage), rangeFt: rangeFtOf(e, Number(e.rangeFt)), magical };
     default:
       return {};
   }
@@ -188,7 +189,7 @@ function readBase(row: Row, issues: string[]): { base: Record<CharacteristicKey,
 
   const c = row.characteristics;
 
-  if (!isObject(c) || !isObject(c.base)) return fail("characteristics.base is required");
+  if (!isRecord(c) || !isRecord(c.base)) return fail("characteristics.base is required");
 
   const extra = Object.keys(c).filter((k) => k !== "base" && k !== "move");
 
@@ -273,7 +274,7 @@ export function unitIssues(row: Row): string[] {
 
   const statblock = row.statblock;
 
-  if (!isObject(statblock) || Object.keys(statblock).some((k) => k !== "creatureType") || !(GRIM_UNIT_THEMES as readonly unknown[]).includes(statblock.creatureType)) issues.push(`statblock must be { creatureType } with one of: ${GRIM_UNIT_THEMES.join(", ")}`);
+  if (!isRecord(statblock) || Object.keys(statblock).some((k) => k !== "creatureType") || !(GRIM_UNIT_THEMES as readonly unknown[]).includes(statblock.creatureType)) issues.push(`statblock must be { creatureType } with one of: ${GRIM_UNIT_THEMES.join(", ")}`);
 
   abilityIssues(row, issues);
 

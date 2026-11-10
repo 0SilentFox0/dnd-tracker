@@ -1,7 +1,8 @@
-import type { Row } from "./data";
+import { descriptionIssues, type Row } from "./data";
 import { unitTraits } from "./units";
 
 import { WFRP_CONDITION_KEYS } from "@/lib/constants/wfrp-conditions";
+import { isRecord } from "@/lib/utils/common/is-record";
 import { NO_OVERCAST_KINDS, PRAYER_KINDS } from "@/lib/utils/rules/systems/wfrp/magic/constants";
 import type { SpellMagicKind } from "@/lib/utils/spells/model/schema";
 
@@ -32,16 +33,14 @@ export const FORBIDDEN_CONDITIONS: readonly string[] = ["unconscious", "surprise
 
 const TARGETING_KINDS: readonly string[] = ["ally", "enemy", "area", "template"];
 
-const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
-
 const isGrimKind = (kind: unknown): kind is GrimSpellKind => (GRIM_SPELL_KINDS as readonly unknown[]).includes(kind);
 
 export function spellMagicOf(row: Row): { cn: number; kind: string } | null {
   const casting = row.casting;
 
-  const magic = isObject(casting) ? casting.magic : undefined;
+  const magic = isRecord(casting) ? casting.magic : undefined;
 
-  return isObject(magic) && typeof magic.cn === "number" && typeof magic.kind === "string" ? { cn: magic.cn, kind: magic.kind } : null;
+  return isRecord(magic) && typeof magic.cn === "number" && typeof magic.kind === "string" ? { cn: magic.cn, kind: magic.kind } : null;
 }
 
 const SPELL_ROLL = { spellRoll: 100 };
@@ -52,7 +51,7 @@ function effectIssues(effects: unknown[], issues: string[]): string | null {
   let kind: string | null = null;
 
   for (const e of effects) {
-    const k = isObject(e) ? e.kind : undefined;
+    const k = isRecord(e) ? e.kind : undefined;
 
     if (k !== "dealDamage" && k !== "heal") {
       issues.push(`effect "${String(k)}" is not allowed (dealDamage or heal only)`);
@@ -71,7 +70,7 @@ function effectIssues(effects: unknown[], issues: string[]): string | null {
 }
 
 function targetingIssues(targeting: unknown, effect: string | null, hasAttribute: boolean, issues: string[]) {
-  if (!isObject(targeting)) return void issues.push("targeting is required");
+  if (!isRecord(targeting)) return void issues.push("targeting is required");
 
   const { kind, side, shape } = targeting;
 
@@ -104,7 +103,7 @@ function ingredientIssues(row: Row, kind: string | undefined, issues: string[]) 
   if (has) {
     const [first] = list as unknown[];
 
-    const i = isObject(first) ? first : {};
+    const i = isRecord(first) ? first : {};
 
     if (i.qty !== 1 || i.consumed !== true || i.focus !== false) issues.push("ingredient must have qty 1, consumed true, focus false");
 
@@ -115,7 +114,7 @@ function ingredientIssues(row: Row, kind: string | undefined, issues: string[]) 
 
   const flags = row.componentFlags;
 
-  const exact = isObject(flags) && Object.keys(flags).length === 3 && flags.v === true && flags.s === true && flags.m === true;
+  const exact = isRecord(flags) && Object.keys(flags).length === 3 && flags.v === true && flags.s === true && flags.m === true;
 
   if (has !== (flags !== undefined) || (has && !exact)) issues.push("componentFlags must be { v, s, m: true } exactly when there is an ingredient");
 }
@@ -128,7 +127,7 @@ export function spellIssues(row: Row): string[] {
 
   const casting = row.casting;
 
-  const magic = isObject(casting) && isObject(casting.magic) ? casting.magic : null;
+  const magic = isRecord(casting) && isRecord(casting.magic) ? casting.magic : null;
 
   if (!magic) issues.push("casting.magic is required");
   else if (Object.keys(casting as object).length > 1) issues.push("casting may hold only magic");
@@ -167,7 +166,7 @@ export function spellIssues(row: Row): string[] {
 
   if ((effects.length > 0) !== dice >= 1) issues.push("dice must be ≥ 1 exactly when the spell has an effect");
 
-  const attribute = magic && isObject(magic.attribute) ? magic.attribute : null;
+  const attribute = magic && isRecord(magic.attribute) ? magic.attribute : null;
 
   if (effects.length === 0 && !attribute) issues.push("spell has neither an effect nor an attribute");
 
@@ -188,13 +187,13 @@ export function spellIssues(row: Row): string[] {
 
   ingredientIssues(row, kind, issues);
 
-  if (typeof row.description !== "string" || row.description.length < 1 || row.description.length > 200) issues.push("description must be 1–200 characters");
+  issues.push(...descriptionIssues(row));
 
   return issues;
 }
 
 export function castCeiling(unit: Row, kind: string): number {
-  const base = isObject(unit.characteristics) && isObject(unit.characteristics.base) ? unit.characteristics.base : {};
+  const base = isRecord(unit.characteristics) && isRecord(unit.characteristics.base) ? unit.characteristics.base : {};
 
   const stat = (key: string) => (typeof base[key] === "number" ? (base[key] as number) : 0);
 

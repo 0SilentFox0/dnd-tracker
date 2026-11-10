@@ -6,6 +6,7 @@ import { unitIssues } from "./units";
 
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
+import { isRecord } from "@/lib/utils/common/is-record";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
 import { SPEC_RE } from "@/lib/utils/rules/systems";
@@ -21,8 +22,6 @@ const PROFILE_KEYS = ["mods", "move", "fate", "extraWounds", "talents", "randomT
 const PROFILE_LISTS = ["talents", "randomTalents", "careerTable"] as const;
 
 const FEAT_STATS = ["attackBonus", "maxHp", "initiative"];
-
-const isObject = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
 
 const STATUS_RE = /^(brass|silver|gold)\s+[1-9]$/i;
 
@@ -102,7 +101,7 @@ function validateProfiles(data: GrimData, names: { races: Set<string>; careers: 
 
     seen.add(nameKey(race));
 
-    if (!isObject(profile)) return void issues.push(`${where}: profile must be an object`);
+    if (!isRecord(profile)) return void issues.push(`${where}: profile must be an object`);
 
     const badList = PROFILE_LISTS.filter((key) => key in profile && !Array.isArray(profile[key]));
 
@@ -171,7 +170,7 @@ function validateCareerTiers(data: GrimData, issues: string[]) {
 
 function validateProfileKeys(data: GrimData, issues: string[]) {
   data.raceProfiles.forEach(({ race, profile }, index) => {
-    if (!isObject(profile)) return;
+    if (!isRecord(profile)) return;
 
     for (const key of PROFILE_KEYS) if (!(key in profile)) issues.push(`race-profiles #${index + 1} "${race}": profile missing "${key}"`);
   });
@@ -184,12 +183,12 @@ function validateFeatAbilities(data: GrimData, issues: string[]) {
     abilities.forEach((ability: unknown, n) => {
       const where = `${label("feats", index, row.name)}: abilities[${n}]`;
 
-      const { trigger, effects } = (isObject(ability) ? ability : {}) as { trigger?: { event?: unknown }; effects?: unknown };
+      const { trigger, effects } = (isRecord(ability) ? ability : {}) as { trigger?: { event?: unknown }; effects?: unknown };
 
       if (trigger?.event !== "passive") issues.push(`${where}: only a passive trigger acts on a wfrp hero`);
 
       for (const effect of Array.isArray(effects) ? effects : []) {
-        const { kind, stat } = (isObject(effect) ? effect : {}) as { kind?: unknown; stat?: unknown };
+        const { kind, stat } = (isRecord(effect) ? effect : {}) as { kind?: unknown; stat?: unknown };
 
         if (kind !== "modifyStat" || typeof stat !== "string" || !FEAT_STATS.includes(stat)) issues.push(`${where}: only modifyStat on ${FEAT_STATS.join("/")} acts on a wfrp hero`);
       }

@@ -1,4 +1,4 @@
-import type { Row } from "./data";
+import { descriptionIssues, type Row } from "./data";
 
 import { ARTIFACT_RARITY_VALUES } from "@/lib/constants/artifacts";
 import { ARMOUR_KINDS, QUALITY_REGISTRY, type QualityKey, type QualityRef, WEAPON_GROUPS } from "@/lib/utils/rules/systems/wfrp/equipment";
@@ -181,7 +181,7 @@ export function equipmentIssues(row: Row): string[] {
 
   if (!RARITIES.includes(String(row.rarity))) issues.push("rarity must be common or uncommon");
 
-  if (typeof row.description !== "string" || row.description.length < 1 || row.description.length > 200) issues.push("description must be 1–200 characters");
+  issues.push(...descriptionIssues(row));
 
   const slot = typeof row.slot === "string" ? row.slot : undefined;
 
