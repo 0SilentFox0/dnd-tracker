@@ -234,6 +234,18 @@ describe("localized Grim synchronization", () => {
     expect(items.length).toBeGreaterThan(0);
     await applySourceChanges(f.db, target, { apply: items.map(ref), ignore: [] });
   });
+  it("keeps the name-reference exemption when the clone has a local class", async () => {
+    f.addRow("spell", { id: id("1"), campaignId: source, name: "Fenlore", lists: ["Fenlore"] });
+    dictionary.values[hashText("n", "Fenlore")] = "Болотна мудрість";
+    await makeClone();
+    f.addRow("gameClass", { id: id("9"), campaignId: target, name: "Local" });
+    f.addRow("spell", { id: id("2"), campaignId: source, name: "Mire Step", lists: ["Fenlore"] });
+
+    const items = await diff();
+
+    expect(items.length).toBeGreaterThan(0);
+    await expect(applySourceChanges(f.db, target, { apply: items.map(ref), ignore: [] })).resolves.toBeDefined();
+  });
   it("reports a changed rule-table translation", async () => {
     await makeClone();
     dictionary.values[hashText("d", "A smell of scorched hair.")] = "Інший запах.";

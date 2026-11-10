@@ -43,9 +43,9 @@ export function grimI18nIssues(data: GrimData, tr: Translations): string[] {
   const known = new Set(Object.values(GRIM_SPELL_LISTS).flat().map((name) => translateText(tr, "name", name)));
 
   for (const row of data.spells) {
-    const list = Array.isArray(row.lists) ? row.lists[0] : undefined;
-
-    if (typeof list === "string" && !known.has(translateText(tr, "name", list))) issues.push(`spells "${String(row.name)}": list "${list}" does not resolve after translation`);
+    for (const list of Array.isArray(row.lists) ? row.lists : []) {
+      if (typeof list === "string" && !known.has(translateText(tr, "name", list))) issues.push(`spells "${String(row.name)}": list "${list}" does not resolve after translation`);
+    }
   }
 
   return issues;

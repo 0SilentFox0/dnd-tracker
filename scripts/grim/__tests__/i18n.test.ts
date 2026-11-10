@@ -80,6 +80,12 @@ describe("grimI18nIssues", () => {
 
     expect(grimI18nIssues(data, { [hashText("n", a)]: "Одна", [hashText("n", b)]: "Одна" }).join("\n")).toContain("careers");
   });
+
+  it("checks every list of a spell, not only the first", () => {
+    const spells = [{ ...data.spells[0], lists: [...(data.spells[0].lists as string[]), "Unknown School"] }];
+
+    expect(grimI18nIssues({ ...data, spells }, {}).join("\n")).toContain('list "Unknown School"');
+  });
 });
 
 describe("templateOf", () => {
