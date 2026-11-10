@@ -253,6 +253,7 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - Психологія (5h-1): у рушії лише дві сторони (`ally`/`enemy`), нейтральної немає, тож «нейтральний тестер» неможливий. Не тестується пробудження ворогів лабіринту (`withMazeAwareness` чиста, без rng/правил). Прямий `add-participant` (не резерв) тестується через `runPsychology`.
 - Порча (5h-3): `wfrp/corruption/constants.ts` (`GRANT_MAX`, `POINTS_MAX`, `MUTATIONS_MAX`, `PHYSICAL_MAX_ROLL`, тест `endurance`/`challenging`), межі ефектів `lib/constants/wfrp-mutations.ts`, поріг TB + WPB, «рівно на порозі — без тесту», повторний тест при кожному нарахуванні понад поріг, дефолтні таблиці `mutationPhysical`/`mutationMental` (рядки й ефекти).
 - Простій (5h-4): усі числа `wfrp/downtime/constants.ts` (`MAX_DAYS`, `REST_HEAL_MULTIPLIER`, `TEND_*`, `FESTERING_*`, `TRAIN_DISCOUNT_*`, складність `ENDEAVOUR_DIFFICULTY`, `EARN_STATUS_DEFAULT`), дефолтна таблиця `downtimeEvent`, формула доходу за статусом (`status.ts`, `STATUS_COIN`), тести endeavours і механіка festering/disease.
+- Магія й спорядження Grim (5g-3): CN за kind, ціни/вага/AP предметів, діапазони `WEAPON_GROUP_BANDS`/`ARMOUR_KIND_BANDS`, таблиці мискастів шаблону — власні; Trait `ranged` додає SB (рішення користувача; книга, імовірно, цього не робить) і має дальність за замовчуванням 72 фт (`RANGED_DEFAULT_RANGE_FT`).
 - Ефекти Traits приймає лише ресурс `units` (guard у `lib/server/content/resources/units.ts`); раси/персонажі/артефакти в d20-кампаніях їх приймають, але вони інертні (M4).
 
 ## Межі 5e-3
@@ -409,3 +410,18 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 - Сканер заборонених термінів: доповнений список істот GW; `ALLOWED_PHRASES` («moot point», «moot question», «moot court») вирізаються перед скануванням, що закриває залишок 5g-1 про «Moot».
 - Тести: `scripts/grim/__tests__/bestiary-e2e.test.ts` — герої 5g-1 проти юнітів до кінця бою. Цикл вбивства відновлює HP союзників на кожному ударі (інакше відповідні удари вибивають героїв); сумарні втрати HP союзників мають бути > 0 (юніти б'ють у відповідь).
 - `scope-size` і OpenAPI-ліміти не піднімались.
+
+## Межі 5g-3
+
+Магія й спорядження Grim d100 (на `feat/wfrp`, не змерджено; без нових ефектів і міграцій). Spec/план — `docs/superpowers/{specs,plans}/2026-11-10-wfrp-5g3*`.
+
+- Склад: 30 заклинань у 6 kind (`petty`, `arcane`, `hedge`, `witchcraft`, `blessing`, `miracle`) і 6 списках (`GRIM_SPELL_LISTS`), 56 предметів (`artifacts.json`), 3 таблиці мискастів у `rules.json` (`tables`: `miscastMinor`, `miscastMajor`, `wrath`); мискаст бере таблицю кампанії, а не дефолт.
+- Форма заклинання: лише `casting.magic` (`cn`, `kind`, `overcast`, `attribute`), `level: 1`, `cost: "action"`, `spellEffects` — лише `dealDamage`/`heal` зі `spellRoll: 100`; стани — тільки через `attribute` (ключ wfrp-стану, рівні 1–3); overcast лише `null`/`"dice"` (`"targets"` рушій не підтримує). Сила — кубики за моделлю HOMM (`spells/model/dice.ts`), `dieSides` ігнорується.
+- Інгредієнти: максимум один, `minGp` у кронах (пенси/240), `componentFlags.m: true` обов'язковий; поза інгредієнтом `componentFlags` відсутній.
+- Предмети: `slot` ⇄ `systemStats.type` (`weapon`/`range_weapon`/`armor`/`helmet`/`boots` ⇄ weapon/armour; щит = `gear` з рівно однією якістю `shield X`; `item` = `gear` без якостей), діапазони за групою/kind (`equipment.ts`), ціни в пенсах, вага в Enc, лише реалізовані якості (`IMPLEMENTED_QUALITIES`); `reload` ⇔ `ammoCapacity`.
+- Trait `ranged`: `"ranged"` у `TRAIT_ATTACKS`, профіль `wfrpUnitBuild` з `addSb: true`, без Blast, `rangeFt` за замовчуванням `RANGED_DEFAULT_RANGE_FT`; діапазони шкоди — `UNIT_LEVEL_BANDS[level].ranged`, дальність — `UNIT_RANGED_FT`. `TRAIT_RECIPES` = 15, покриття вимагає юніта з `ranged`.
+- Юніти-кастери: лише `knownSpells` (без `abilities` для кастів); валідатор перевіряє стелю — молитва `⌊Fel/10⌋`, інше `⌊Int/10⌋ − AP`; CN вище за стелю є помилкою. 6 кастерів і 4 стрільці.
+- Імпорт: колонка `systemStats` у `IMPORT_SPECS.artifacts` (JSON; лише wfrp, інакше `SYSTEM_STATS_UNSUPPORTED`).
+- Сканер заборонених термінів доповнений і сканує також `rules.json`; `grimInfo` друкує `info:`-рядки (напр. заклинання, яке не знає жоден юніт), це не попередження покриття.
+- Розбіжності зі spec: кастери без `abilities`; overcast `targets` недоступний; кастери обрані за стелею SL (arcane CN 4+ недосяжний для більшості юнітів 5g-2); 9 стрілецьких замість ~8 (потрібен носій `blast`).
+- Тести: `scripts/grim/__tests__/arsenal-e2e.test.ts` (герої з предметами й заклинаннями проти юнітів); інтеграція на локальній БД перевіряє клон (заклинання, `systemStats`, таблиці, `knownSpells`) і no-op повторного запуску.
