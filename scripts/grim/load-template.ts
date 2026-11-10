@@ -3,14 +3,13 @@
 import { isDeepStrictEqual } from "node:util";
 
 import { assertSeedTarget } from "../seed/seed-library-lib";
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData } from "../srd/lib/load-template";
-import { makeTemplateStore } from "../srd/lib/template-store";
+import { formatImportSummary, hasRowErrors, importSrdData } from "../srd/lib/load-template";
+import { ensureTemplate, makeTemplateStore } from "../templates/lib/store";
 import { grimCoverage, grimInfo } from "./coverage";
 import { GRIM_DATA_DIR, GRIM_ROW_KINDS, type GrimData, readGrimData, readGrimManifest } from "./data";
 import { grimIconGaps, grimIconIssues, readGrimIcons, withGrimIcons } from "./icons";
 import { validateGrimData } from "./validate-data";
 
-import { GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
 import { saveRaceProfile } from "@/lib/server/races/race-profile";
@@ -103,9 +102,9 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
 
   assertSeedTarget(process.env.DATABASE_URL, allowRemote);
 
-  const template = await ensureSrdTemplate(makeTemplateStore(GRIM_TEMPLATE_NAME), { owner, rules: merged.rules, credits: manifest.credits ?? "", description: GRIM_TEMPLATE_DESCRIPTION });
+  const template = await ensureTemplate(makeTemplateStore(manifest), { owner, rules: merged.rules, credits: manifest.credits ?? "", description: GRIM_TEMPLATE_DESCRIPTION });
 
-  console.info(`${GRIM_TEMPLATE_NAME}: ${template.id}${template.created ? " (створено)" : ""}`);
+  console.info(`${manifest.names.en}: ${template.id}${template.created ? " (створено)" : ""}`);
 
   const { contentVersion: versionBefore } = await prisma.campaign.findUniqueOrThrow({ where: { id: template.id }, select: { contentVersion: true } });
 

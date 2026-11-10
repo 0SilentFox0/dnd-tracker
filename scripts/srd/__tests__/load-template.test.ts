@@ -1,20 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, parseSrdSeedArgs, type RunImport, SRD_TEMPLATE_DESCRIPTION, staleSpellColumns, type TemplateStore } from "../lib/load-template";
-import { SRD_RULES } from "../lib/rules-preset";
+import { formatImportSummary, hasRowErrors, importSrdData, parseSrdSeedArgs, type RunImport, staleSpellColumns } from "../lib/load-template";
 import { SRD_KINDS, type SrdData } from "../lib/types";
 
 import type { ImportReport } from "@/types/content-import";
-
-const store = (over: Partial<TemplateStore> = {}): TemplateStore => ({
-  findTemplate: vi.fn(async () => null),
-  findOfficialOwner: vi.fn(async () => null),
-  create: vi.fn(async ({ userId }: { userId: string }) => ({ id: "t-new", dmUserId: userId })),
-  update: vi.fn(async () => undefined),
-  ...over,
-});
-
-const opts = { rules: SRD_RULES, credits: "CREDITS" };
 
 const report = (error = 0): ImportReport => ({ dryRun: false, results: error ? [{ row: 2, name: "Fireball", status: "error", issues: [{ level: "error", message: "bad" }] }] : [], counts: { created: 0, updated: 3, skipped: 0, error } });
 
@@ -29,38 +18,6 @@ describe("canonical SRD seed arguments", () => {
 
   it.each([["uk"], ["pl"], [], ["--owner", "owner"]])("rejects --locale %j before a store can be used", (...args) => {
     expect(() => parseSrdSeedArgs(["--locale", ...args])).toThrow(/English|англійськ/i);
-  });
-});
-
-describe("ensureSrdTemplate", () => {
-  it("existing template: rules, credits and description are rewritten, nothing created", async () => {
-    const s = store({ findTemplate: vi.fn(async () => ({ id: "t1", dmUserId: "u1" })) });
-
-    expect(await ensureSrdTemplate(s, opts)).toEqual({ id: "t1", dmUserId: "u1", created: false });
-    expect(s.update).toHaveBeenCalledWith("t1", expect.objectContaining({ rules: SRD_RULES, credits: "CREDITS" }));
-    expect(s.create).not.toHaveBeenCalled();
-  });
-
-  it("new template: owner from --owner, else the owner of an official template, else an error", async () => {
-    const withOwner = store();
-
-    expect(await ensureSrdTemplate(withOwner, { ...opts, owner: "me" })).toEqual({ id: "t-new", dmUserId: "me", created: true });
-    expect(withOwner.create).toHaveBeenCalledWith({ userId: "me", rules: SRD_RULES, credits: "CREDITS", description: SRD_TEMPLATE_DESCRIPTION });
-
-    expect((await ensureSrdTemplate(store({ findOfficialOwner: vi.fn(async () => "homm-owner") }), opts)).dmUserId).toBe("homm-owner");
-    await expect(ensureSrdTemplate(store(), opts)).rejects.toThrow(/--owner/);
-  });
-
-  it("custom description is used for both create and update", async () => {
-    const created = store();
-
-    await ensureSrdTemplate(created, { ...opts, owner: "me", description: "D" });
-    expect(created.create).toHaveBeenCalledWith(expect.objectContaining({ description: "D" }));
-
-    const updated = store({ findTemplate: vi.fn(async () => ({ id: "t1", dmUserId: "u1" })) });
-
-    await ensureSrdTemplate(updated, { ...opts, description: "D" });
-    expect(updated.update).toHaveBeenCalledWith("t1", expect.objectContaining({ description: "D" }));
   });
 });
 

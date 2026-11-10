@@ -5,15 +5,17 @@ import { SRD_RULES } from "../srd/lib/rules-preset";
 import { assertSeedTarget } from "./seed-library-lib";
 
 import { DEMO_CAMPAIGN, DEMO_GM_NOTES, DEMO_IDS, DEMO_SCENE_CONTENT } from "@/data/example-demo-content";
-import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { type Bundle,BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { importBundle } from "@/lib/server/templates/import-bundle";
+import { templateLocaleWhere } from "@/lib/server/templates/locale-filter";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { emptyMaze } from "@/lib/utils/battle/modes/maze/constants";
 import { deriveClassApplication } from "@/lib/utils/characters/classes/application";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
+import { templateKeyWhere } from "@/lib/utils/templates/registry";
 
 const MAPS = {
   world: "/example-demo/maps/world.jpg",
@@ -109,11 +111,11 @@ function rangerAtLevel20(bundle: Bundle, idMap: ReadonlyMap<string, string>) {
 
 async function copySrdLibraries(campaignId: string, userId: string) {
   const source = await prisma.campaign.findFirst({
-    where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, templateKey: SRD_TEMPLATE_NAME, OR: [{ locale: "en" }, { locale: null }] },
+    where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, AND: [templateKeyWhere(["srd-5.2"]), templateLocaleWhere()] },
     select: { id: true, credits: true },
   });
 
-  if (!source) throw new Error(`Official template “${SRD_TEMPLATE_NAME}” was not found.`);
+  if (!source) throw new Error(`Official template “srd-5.2” was not found.`);
 
   const sourceBundle = await exportCampaign(prisma, source.id);
 

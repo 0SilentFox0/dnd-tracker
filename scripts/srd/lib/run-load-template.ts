@@ -1,10 +1,11 @@
 import { readIcons } from "../../assets/tokens-5e/icons-file";
 import { assertSeedTarget } from "../../seed/seed-library-lib";
+import { readManifest } from "../../templates/lib/pack";
+import { ensureTemplate, makeTemplateStore } from "../../templates/lib/store";
 import { SRD_CREDITS } from "./credits";
 import { readSrdData } from "./data-files";
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_NAME, type SrdSeedArgs, staleSpellColumns, withClassIcons, withIcons } from "./load-template";
+import { formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_DESCRIPTION, type SrdSeedArgs, staleSpellColumns, withClassIcons, withIcons } from "./load-template";
 import { SRD_RULES } from "./rules-preset";
-import { makeTemplateStore } from "./template-store";
 
 import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
 import { prisma } from "@/lib/db";
@@ -18,11 +19,13 @@ export async function loadSrdTemplate({ owner, locale, allowRemote }: SrdSeedArg
   try {
     assertSeedTarget(process.env.DATABASE_URL, allowRemote);
 
-    const store = makeTemplateStore(SRD_TEMPLATE_NAME, locale);
+    const manifest = readManifest("srd-5.2");
 
-    const template = await ensureSrdTemplate(store, { owner, rules: SRD_RULES, credits: SRD_CREDITS });
+    const store = makeTemplateStore(manifest, locale);
 
-    console.info(`${SRD_TEMPLATE_NAME} [${locale}]: ${template.id}${template.created ? " (створено)" : ""}`);
+    const template = await ensureTemplate(store, { owner, rules: SRD_RULES, credits: SRD_CREDITS, description: SRD_TEMPLATE_DESCRIPTION });
+
+    console.info(`${manifest.names.en} [${locale}]: ${template.id}${template.created ? " (створено)" : ""}`);
 
     const actor: Actor = { campaignId: template.id, userId: template.dmUserId, isDM: true, via: "session", scopes: null };
 

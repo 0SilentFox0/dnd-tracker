@@ -12,10 +12,11 @@ import { readIcons, writeIcons } from "./icons-file";
 import { expectedTargets, IDENTITY_BUCKET, IDENTITY_SIZE, type IdentityKind, parseIdentityCsv } from "./identity-catalog";
 import { planUploads } from "./identity-plan";
 
-import { CampaignKind, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { CampaignKind } from "@/lib/constants/campaigns";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
+import { templateKeyOf } from "@/lib/utils/templates/registry";
 
 const USAGE = "Використання: pnpm assets:identity-icons <templateId> [--dir <fantasy-tokens>] [--dry-run] [--allow-remote]";
 
@@ -47,9 +48,9 @@ async function main() {
 
     assertStorageTarget(process.env.NEXT_PUBLIC_SUPABASE_URL, args.includes("--allow-remote"));
 
-    const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, kind: true } });
+    const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, templateKey: true, kind: true } });
 
-    if (campaign?.name !== SRD_TEMPLATE_NAME || campaign.kind !== CampaignKind.TEMPLATE) throw new Error(`Кампанія ${templateId} не є офіційним шаблоном «${SRD_TEMPLATE_NAME}»`);
+    if (!campaign || templateKeyOf(campaign) !== "srd-5.2" || campaign.kind !== CampaignKind.TEMPLATE) throw new Error(`Кампанія ${templateId} не є офіційним шаблоном «srd-5.2»`);
   }
 
   const targets = expectedTargets(readSrdData());

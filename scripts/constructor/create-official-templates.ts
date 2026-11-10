@@ -7,6 +7,8 @@ import { prisma } from "@/lib/db";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 
+const HEROES_KEY = "heroes-homm";
+
 const official = { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL };
 
 function report(label: string, result: { campaign: { id: string }; warnings: string[] }, bundle: Awaited<ReturnType<typeof exportCampaign>>) {
@@ -47,6 +49,8 @@ async function main() {
       createdFromId: source.id,
       ...official,
     });
+
+    await prisma.campaign.update({ where: { id: result.campaign.id }, data: { templateKey: HEROES_KEY } });
 
     report("Heroes", result, bundle);
   }

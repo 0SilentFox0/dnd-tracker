@@ -14,10 +14,11 @@ import { toWebp } from "../tokens-5e/convert";
 import { type GrimPromptRow, grimPromptRows, type GrimSubjects } from "./prompts";
 import { GRIM_ICON_BUCKET, GRIM_ICON_SIZE, planGrimUploads } from "./upload";
 
-import { CampaignKind, GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { CampaignKind } from "@/lib/constants/campaigns";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
+import { templateKeyOf } from "@/lib/utils/templates/registry";
 
 const USAGE = "Використання: pnpm assets:grim-icons prompts [--out <dir>] | upload <templateId> [--dir <images>] [--dry-run] [--allow-remote]";
 
@@ -88,9 +89,9 @@ async function uploadIcons(args: string[]) {
 
     assertStorageTarget(process.env.NEXT_PUBLIC_SUPABASE_URL, args.includes("--allow-remote"));
 
-    const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, kind: true } });
+    const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, templateKey: true, kind: true } });
 
-    if (campaign?.name !== GRIM_TEMPLATE_NAME || campaign.kind !== CampaignKind.TEMPLATE) throw new Error(`Кампанія ${templateId} не є шаблоном «${GRIM_TEMPLATE_NAME}»`);
+    if (!campaign || templateKeyOf(campaign) !== "grim-d100" || campaign.kind !== CampaignKind.TEMPLATE) throw new Error(`Кампанія ${templateId} не є шаблоном «grim-d100»`);
   }
 
   const admin = dryRun ? null : createAdminClient();

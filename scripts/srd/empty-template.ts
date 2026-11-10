@@ -1,11 +1,10 @@
 #!/usr/bin/env tsx
 // pnpm constructor:empty-5e-template [--owner <userId>] [--allow-remote]
 import { assertSeedTarget } from "../seed/seed-library-lib";
-import { ensureSrdTemplate } from "./lib/load-template";
+import { readManifest } from "../templates/lib/pack";
+import { ensureTemplate, makeTemplateStore } from "../templates/lib/store";
 import { SRD_RULES } from "./lib/rules-preset";
-import { makeTemplateStore } from "./lib/template-store";
 
-import { EMPTY_5E_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 const DESCRIPTION = "Правила D&D 5e без контенту: класи, раси, заклинання й монстрів ДМ додає сам";
@@ -17,9 +16,11 @@ async function main() {
 
   assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
 
-  const template = await ensureSrdTemplate(makeTemplateStore(EMPTY_5E_TEMPLATE_NAME), { owner, rules: SRD_RULES, credits: "", description: DESCRIPTION });
+  const manifest = readManifest("srd-5.2-empty");
 
-  console.info(`${EMPTY_5E_TEMPLATE_NAME}: ${template.id}${template.created ? " (створено)" : " (оновлено)"}`);
+  const template = await ensureTemplate(makeTemplateStore(manifest), { owner, rules: SRD_RULES, credits: "", description: DESCRIPTION });
+
+  console.info(`${manifest.names.en}: ${template.id}${template.created ? " (створено)" : " (оновлено)"}`);
 }
 
 main()
