@@ -53,6 +53,21 @@ describe("applySourceChanges", () => {
     expect(await visible()).toEqual([]);
   });
 
+  it("copies a new row's slug unless a local row already holds it", async () => {
+    const free = id("f"), taken = id("g");
+
+    f.addRow("spell", { id: free, campaignId: SRC, name: "Free", slug: "free" });
+    f.addRow("spell", { id: taken, campaignId: SRC, name: "Taken", slug: "mine" });
+    f.addRow("spell", { id: id("h"), campaignId: TGT, name: "Own", slug: "mine", sourceId: null });
+
+    const items = (await visible()).filter((i) => i.key === free || i.key === taken);
+
+    await applySourceChanges(f.db, TGT, { apply: items.map(ref), ignore: [] });
+
+    expect(rows("spell", TGT).find((r) => r.name === "Free")!.slug).toBe("free");
+    expect(rows("spell", TGT).find((r) => r.name === "Taken")!.slug).toBeNull();
+  });
+
   it("adds a new unit with its new race and remaps knownSpells to local ids", async () => {
     const R2 = id("q"), U2 = id("w");
 

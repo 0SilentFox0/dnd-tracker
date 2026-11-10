@@ -43,8 +43,11 @@ export async function publishTemplateVersion(db: Prisma.TransactionClient, templ
 
     const current = new Map(rows.map((row) => [row.id, row]));
 
+    const slugFixes = rows.filter((row) => openHashes.get(row.id) === rowHash(row, t) && (open.find((o) => o.id === row.id)?.slug ?? null) !== ((row.slug as string | null | undefined) ?? null));
+
     return {
       t,
+      slugFixes,
       latest: open.reduce((max, row) => Math.max(max, row.validFrom), 0),
       inserts: rows.filter((row) => openHashes.get(row.id) !== rowHash(row, t)),
       closes: [...openHashes].filter(([id, hash]) => !current.has(id) || rowHash(current.get(id)!, t) !== hash).map(([id]) => id),
@@ -52,6 +55,8 @@ export async function publishTemplateVersion(db: Prisma.TransactionClient, templ
       removed: open.filter((row) => !current.has(row.id)).length,
     };
   }));
+
+  for (const { t, slugFixes } of plans) for (const row of slugFixes) await baseDelegate(db, t).updateMany({ where: { sourceCampaignId: templateId, validTo: null, id: row.id }, data: { slug: (row.slug as string | null | undefined) ?? null } });
 
   const touched = plans.some((p) => p.inserts.length || p.closes.length);
 

@@ -23,7 +23,7 @@ export function pairStatus(s: string, b: string | undefined, l: string): SourceS
   return l === b ? "updated" : "conflict";
 }
 
-export const changed = (a: Record<string, unknown>, b: Record<string, unknown>, keys: readonly string[]) => keys.filter((k) => k !== "id" && hashJson(a[k] ?? null) !== hashJson(b[k] ?? null));
+export const changed = (a: Record<string, unknown>, b: Record<string, unknown>, keys: readonly string[]) => keys.filter((k) => k !== "id" && k !== "slug" && hashJson(a[k] ?? null) !== hashJson(b[k] ?? null));
 
 export function item(ctx: Pick<SyncContext, "ignored">, fields: ItemFields): SyncItem {
   const ignoredHash = getEntry(ctx.ignored, fields.scope, fields.key);

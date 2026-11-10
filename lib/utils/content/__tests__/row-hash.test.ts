@@ -15,4 +15,10 @@ describe("contentRowHash", () => {
     expect(contentRowHash("Artifact", { name: "Mail", systemStats: { type: "gear" } })).not.toBe(contentRowHash("Artifact", { name: "Mail" }));
     expect(contentRowHash("Spell", { name: "Bolt", componentFlags: null })).not.toBe(contentRowHash("Spell", { name: "Bolt" }));
   });
+
+  it("slug never affects the hash", () => {
+    const base = contentRowHash("Spell", { name: "Bolt" });
+
+    for (const slug of [undefined, null, "bolt"]) expect(contentRowHash("Spell", { name: "Bolt", slug })).toBe(base);
+  });
 });

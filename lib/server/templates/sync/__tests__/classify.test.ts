@@ -53,6 +53,16 @@ describe("classify", () => {
     expect(rowHash({ ...unit, characteristics: { ...DEFAULT_CHARACTERISTICS, fate: 2 } }, units)).not.toBe(rowHash(unit, units));
   });
 
+  it("a clone row without slug against a source row with slug has no visible changes", () => {
+    expect(visible(ctx({ spells: [spell(S1, "Fireball", { slug: "fireball" })] }, [local(L1, S1, "Fireball")], { spells: [spell(S1, "Fireball")] }))).toEqual([]);
+  });
+
+  it("changedFields never lists slug", () => {
+    const items = classify(ctx({ spells: [spell(S1, "Fireball II", { slug: "fireball" })] }, [local(L1, S1, "Fireball", { slug: null })], { spells: [spell(S1, "Fireball")] }));
+
+    expect(items.find((i) => i.scope === "spells")?.changedFields).toEqual(["name"]);
+  });
+
   it("fresh clone has no visible changes", () => {
     expect(visible(ctx({ spells: [spell(S1, "Fireball")] }, [local(L1, S1, "Fireball")], { spells: [spell(S1, "Fireball")] }))).toEqual([]);
   });

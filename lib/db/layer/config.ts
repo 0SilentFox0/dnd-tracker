@@ -24,7 +24,7 @@ export interface LayerConfig {
 /** Fields that only exist on `<Model>Base` (version window); they never leak into the local shape. */
 export const BASE_ONLY = new Set(["sourceCampaignId", "validFrom", "validTo"]);
 
-const NOT_HASHED = new Set(["campaignId", "createdAt", "updatedAt", "sourceId", "sourceHash"]);
+const NOT_HASHED = new Set(["campaignId", "createdAt", "updatedAt", "sourceId", "sourceHash", "slug"]);
 
 const lower = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
 

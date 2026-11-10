@@ -13,6 +13,7 @@ import { assertNoLeak, findForeignContentIds } from "@/lib/server/templates/asse
 import { BUNDLE_TABLES, type BundleTableDef, delegateOf, pick, settingsOf, TemplateLeakError, toPrismaJson } from "@/lib/server/templates/bundle";
 import { newContentId } from "@/lib/server/templates/ids";
 import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-ids";
+import { dropTakenSlugs } from "@/lib/server/templates/slug-collisions";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
 import { indexOf } from "@/lib/server/templates/sync/index";
@@ -261,12 +262,23 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
   for (const t of BUNDLE_TABLES) {
     const toCreate: Record<string, unknown>[] = [];
 
+    const taken = new Map(ctx.target.rows.filter((r) => r.table === t.key && r.row.slug).map((r) => [String(r.row.slug), r.row.id]));
+
+    const slugs = new Map(
+      dropTakenSlugs(
+        ctx.sourceBundle[t.key].filter((src) => selected.has(`${t.key}:${src.id}`)).map((src) => ({ id: selected.get(`${t.key}:${src.id}`)!.localId ?? map.get(src.id)!, slug: src.slug as string | null | undefined })),
+        taken,
+      ).map((r) => [r.id, r.slug ?? null]),
+    );
+
     for (const src of ctx.sourceBundle[t.key]) {
       const item = selected.get(`${t.key}:${src.id}`);
 
       if (!item) continue;
 
       const data = cleanRow(t, src, item, map, warnings);
+
+      if ("slug" in data) data.slug = slugs.get(item.localId ?? map.get(src.id)!) ?? null;
 
       written.push(data);
 

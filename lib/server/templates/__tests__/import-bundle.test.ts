@@ -104,6 +104,25 @@ describe("importBundle", () => {
     for (const old of idMap.keys()) expect(all.has(old)).toBe(false);
   });
 
+  it("copies a slug, or writes null when another local row already holds it", async () => {
+    const bundle = { ...fullBundle(), spells: [{ id: SP, name: "s", slug: "bolt" }], races: [{ id: R, name: "Human", slug: "human" }] } as unknown as Bundle;
+
+    const free = createFakeDb();
+
+    await importBundle(free.db, bundle, "target");
+
+    expect(rowsOf(free.store, "spell")[0].slug).toBe("bolt");
+
+    const taken = createFakeDb();
+
+    taken.store.get("spell")!.push({ id: "local", campaignId: "target", slug: "bolt" });
+
+    await importBundle(taken.db, bundle, "target");
+
+    expect(rowsOf(taken.store, "spell").find((r) => r.sourceId === SP)!.slug).toBeNull();
+    expect(rowsOf(taken.store, "race")[0].slug).toBe("human");
+  });
+
   it("sends Prisma.DbNull for null in nullable json columns", async () => {
     const created: Array<Record<string, unknown>> = [];
 
