@@ -64,7 +64,7 @@ const bundle = {
   artifactSets: [],
   artifacts: [],
   tracks: [],
-  classes: [], feats: [], backgrounds: [],
+  classes: [], feats: [], backgrounds: [], careers: [],
 };
 
 const json = (body: unknown, url = "http://x") => new Request(url, { method: "POST", body: JSON.stringify(body) });

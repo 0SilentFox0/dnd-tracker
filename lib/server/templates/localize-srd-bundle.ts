@@ -4,7 +4,7 @@ import { mapStrings, type Translations } from "@/lib/srd/i18n/catalog";
 import { attackNames, translatedNames, translateText } from "@/lib/srd/i18n/overlay";
 import { isRecord } from "@/lib/utils/common/is-record";
 
-const TABLES = ["spellGroups", "spells", "races", "classes", "feats", "backgrounds", "units", "artifacts"] as const;
+const TABLES = ["spellGroups", "spells", "races", "classes", "feats", "backgrounds", "units", "artifacts", "careers"] as const;
 
 /** Open only the recognized artifact record; never parse it through a stripping schema. */
 function localizeModifier(record: unknown, tr: Translations, bases: Map<string, string>): unknown {
@@ -37,11 +37,22 @@ function localizeModifier(record: unknown, tr: Translations, bases: Map<string, 
   return JSON.stringify(localized) === JSON.stringify(parsed) ? record : { ...record, value: JSON.stringify(localized) };
 }
 
+export function localizeRules(rules: unknown, tr: Translations): unknown {
+  if (!isRecord(rules) || !isRecord(rules.tables)) return rules;
+
+  const tables = mapStrings(rules.tables, (key, text, parent, path) => translateText(tr, key, text, parent, path));
+
+  return JSON.stringify(tables) === JSON.stringify(rules.tables) ? rules : { ...rules, tables };
+}
+
 /** Localize canonical SRD DB rows; source/language policy belongs to the caller. */
 export function localizeSrdBundle(bundle: Bundle, translations: Translations): Bundle {
   if (!Object.keys(translations).length) return bundle;
 
   const maps = Object.fromEntries(TABLES.map((table) => [table, translatedNames(bundle[table], translations, table, table === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)])) as Record<(typeof TABLES)[number], Map<string, string>>;
+
+  // Templates without classes (Grim) list spells under free-form list names.
+  if (bundle.classes.length === 0) maps.classes = translatedNames([...new Set(bundle.spells.flatMap((spell) => (Array.isArray(spell.lists) ? spell.lists : [])))].filter((name): name is string => typeof name === "string").map((name) => ({ name })), translations, "spell lists");
 
   const attacks = bundle.units.map((row) => attackNames(row, translations));
 
@@ -70,5 +81,5 @@ export function localizeSrdBundle(bundle: Bundle, translations: Translations): B
     });
   }
 
-  return out;
+  return { ...out, rules: localizeRules(bundle.rules, translations) };
 }

@@ -50,6 +50,10 @@ export const classOf = (key: string, parent = "", path: readonly string[] = []):
   if (["armor", "weapons", "tools"].includes(key) &&
     (path.join(".") === `proficiencies.${key}` || path.join(".") === `proficiencies.multiclass.${key}`)) return "d";
 
+  if (key === "trappings" && parent === "tiers") return "d";
+
+  if (key === "class" && path.length === 1) return "n";
+
   return null;
 };
 

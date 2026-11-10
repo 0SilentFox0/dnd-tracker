@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { emptyBundle } from "../bundle";
-import { localizeSrdBundle } from "../localize-srd-bundle";
+import { localizeRules, localizeSrdBundle } from "../localize-srd-bundle";
 import { remapIds } from "../remap-ids";
 
 import { hashText } from "@/lib/srd/i18n/catalog";
@@ -128,4 +128,48 @@ it("localizes case-insensitive artifact bases while keeping unmatched fallback s
   const out = localizeSrdBundle(src, tr);
 
   expect(JSON.parse((out.artifacts[0].modifiers as Array<{ value: string }>)[0].value).property.appliesTo.bases).toEqual(["Меч", "AXE"]);
+});
+
+describe("Grim bundle", () => {
+  const grimTr = Object.fromEntries([
+    [hashText("n", "Archivist"), "Архіваріус"], [hashText("n", "Copyist"), "Переписувач"], [hashText("n", "Academic"), "Учені"],
+    [hashText("d", "Quill and ink"), "Перо й чорнило"], [hashText("d", "A smell of scorched hair."), "Запах паленого волосся."],
+    [hashText("n", "School of Embers"), "Школа Жару"], [hashText("n", "Ember Dart"), "Жарова стріла"],
+  ]);
+
+  it("localizes career names, class, tier names and trappings only", () => {
+    const src = emptyBundle();
+
+    src.careers = [{ id: "career-id", name: "Archivist", class: "Academic", tiers: [{ name: "Copyist", status: "Brass 3", characteristics: ["int"], skills: ["lore:herbs"], talents: ["feat-id"], trappings: ["Quill and ink"] }] }];
+
+    expect(localizeSrdBundle(src, grimTr).careers[0]).toEqual({ id: "career-id", name: "Архіваріус", class: "Учені", tiers: [{ name: "Переписувач", status: "Brass 3", characteristics: ["int"], skills: ["lore:herbs"], talents: ["feat-id"], trappings: ["Перо й чорнило"] }] });
+  });
+  it("leaves species profiles untouched", () => {
+    const src = emptyBundle();
+
+    const profile = { careerTable: [{ careerId: "career-id", max: 50 }], talents: ["feat-id"] };
+
+    src.races = [{ id: "r", name: "Archivist", profile }];
+    expect(localizeSrdBundle(src, grimTr).races[0].profile).toEqual(profile);
+  });
+  it("localizes rule table text without touching effects or other rules", () => {
+    const effects = [{ type: "condition", key: "deafened", levels: 1 }];
+
+    const rules = { advancement: { x: 1 }, tables: { miscastMinor: [{ max: 100, text: "A smell of scorched hair.", effects }] } };
+
+    expect(localizeRules(rules, grimTr)).toEqual({ advancement: { x: 1 }, tables: { miscastMinor: [{ max: 100, text: "Запах паленого волосся.", effects }] } });
+
+    const plain = { advancement: {} };
+
+    expect(localizeRules(plain, grimTr)).toBe(plain);
+  });
+  it("localizes spell list names without classes and rejects colliding lists", () => {
+    const src = emptyBundle();
+
+    src.spells = [{ id: "s", name: "Ember Dart", lists: ["School of Embers"] }];
+    expect(localizeSrdBundle(src, grimTr).spells[0]).toMatchObject({ name: "Жарова стріла", lists: ["Школа Жару"] });
+
+    src.spells = [{ id: "s", name: "A", lists: ["School of Embers"] }, { id: "t", name: "B", lists: ["Ember Dart"] }];
+    expect(() => localizeSrdBundle(src, { ...grimTr, [hashText("n", "Ember Dart")]: "Школа Жару" })).toThrow(/spell lists/);
+  });
 });

@@ -103,10 +103,11 @@ describe("Grim source preparation", () => {
     dictionary.values = { ...dictionary.values, [hashText("n", "Archivist")]: "Архіваріус" };
   });
 
-  it("accepts uk and en content locales for Grim", async () => {
+  it("localizes careers into uk and accepts en for Grim", async () => {
     const uk = await prepare("grim", { contentLocale: "uk" });
 
     expect(uk.contentLocale).toBe("uk");
+    expect(uk.bundle.careers[0].name).toBe("Архіваріус");
     expect(await prepare("grim", { contentLocale: "en" })).toMatchObject({ contentLocale: "en" });
   });
   it("ambiguity is per template key", async () => {

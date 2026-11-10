@@ -207,9 +207,23 @@ describe("SRD effective name reference graph", () => {
 });
 
 describe("localized Grim synchronization", () => {
-  it("overlays a Grim clone", async () => {
-    f.patchCampaign(source, { templateKey: GRIM_TEMPLATE_NAME });
+  const table = (text: string) => ({ tables: { miscastMinor: [{ max: 100, text, effects: [] }] } });
+
+  beforeEach(() => {
+    f.patchCampaign(source, { templateKey: GRIM_TEMPLATE_NAME, rules: table("A smell of scorched hair.") });
+    f.addRow("career", { id: id("c"), campaignId: source, name: "Archivist", class: "Academic", tiers: [] });
+    dictionary.values = { [hashText("d", "A smell of scorched hair.")]: "Запах паленого волосся.", [hashText("n", "Archivist")]: "Архіваріус" };
+  });
+  it("has no immediate diff and stores localized rules and careers", async () => {
     await makeClone();
     expect((await loadSyncContext(f.db, target)).srdOverlay).toBe(true);
+    expect(await diff()).toEqual([]);
+    expect(f.campaign(target).rules).toMatchObject(table("Запах паленого волосся."));
+    expect(local("career")[0].name).toBe("Архіваріус");
+  });
+  it("reports a changed rule-table translation", async () => {
+    await makeClone();
+    dictionary.values[hashText("d", "A smell of scorched hair.")] = "Інший запах.";
+    expect(await diff()).toEqual([expect.objectContaining({ scope: "rules", key: "tables" })]);
   });
 });

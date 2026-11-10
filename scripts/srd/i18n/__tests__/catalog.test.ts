@@ -37,3 +37,12 @@ describe("contextual prose", () => {
     expect(classOf("trigger", "abilities")).toBeNull();
   });
 });
+
+describe("classOf for Grim fields", () => {
+  it("classifies tier trappings and top-level career class only", () => {
+    expect(classOf("trappings", "tiers")).toBe("d");
+    expect(classOf("class", "", ["class"])).toBe("n");
+    expect(classOf("class", "x", ["x", "class"])).toBeNull();
+    expect(classOf("status", "tiers")).toBeNull();
+  });
+});
