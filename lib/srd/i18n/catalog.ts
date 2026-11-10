@@ -24,7 +24,7 @@ export interface CatalogEntry {
   hash: string;
   cls: TextClass;
   en: string;
-  kinds: SrdKind[];
+  kinds: string[];
 }
 
 export type Translations = Record<string, string>;
@@ -69,11 +69,13 @@ export function mapStrings(value: unknown, visit: (key: string, text: string, pa
   return value;
 }
 
-export function extractCatalog(data: SrdData): CatalogEntry[] {
+export type TemplateData = Readonly<Record<string, unknown>>;
+
+export function extractCatalog(data: TemplateData | SrdData, kinds: readonly string[] = SRD_KINDS): CatalogEntry[] {
   const found = new Map<string, CatalogEntry>();
 
-  for (const kind of SRD_KINDS) {
-    mapStrings(data[kind], (key, text, parent, path) => {
+  for (const kind of kinds) {
+    mapStrings((data as TemplateData)[kind], (key, text, parent, path) => {
       const cls = classOf(key, parent, path);
 
       if (cls && isTranslatable(text)) {

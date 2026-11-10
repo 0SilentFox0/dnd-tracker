@@ -1,4 +1,3 @@
-import type { SrdKind } from "../lib/types";
 import { type CatalogEntry, type Translations } from "./catalog";
 import { normalizeCreatureHeader } from "./creature-header";
 import { buildNameMap, fixItalicNames } from "./names";
@@ -7,7 +6,7 @@ import { checkTranslation, type TranslationIssue } from "./validate";
 
 export type Phase = "A" | "B";
 
-const PHASE_A_KINDS: readonly SrdKind[] = ["races", "feats", "backgrounds", "classes"];
+const PHASE_A_KINDS: readonly string[] = ["races", "feats", "backgrounds", "classes", "careers"];
 
 export const inPhase = (entry: CatalogEntry, phase: Phase) => {
   const a = entry.cls === "n" || entry.kinds.some((k) => PHASE_A_KINDS.includes(k));

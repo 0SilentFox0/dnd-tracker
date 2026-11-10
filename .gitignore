@@ -46,3 +46,4 @@ next-env.d.ts
 .superpowers/
 .scenario-import/
 data/templates/srd-5.2/i18n/todo/
+data/templates/grim-d100/i18n/todo/
