@@ -18,6 +18,8 @@ const MECHANICAL_STATS = ["attackBonus", "maxHp", "initiative"];
 
 const abilitiesOf = (feat: Record<string, unknown>) => (feat.abilities ?? []) as Array<{ trigger: { event: string }; effects: Array<{ kind: string; stat: string }> }>;
 
+const ROSTER = [["Bog Leech Swarm", "Beasts", 1], ["Ash Hound", "Beasts", 2], ["Thornback Boar", "Beasts", 2], ["Dusk Stalker", "Beasts", 3], ["Cinder Drake", "Beasts", 4], ["Ditch Cutthroat", "Raiders", 1], ["Ridge Reaver", "Raiders", 2], ["Scarred Brute", "Raiders", 2], ["Broadhelm Captain", "Raiders", 3], ["Red Banner Warlord", "Raiders", 4], ["Mire Skeleton", "Restless Dead", 1], ["Barrow Shambler", "Restless Dead", 2], ["Lantern Wraith", "Restless Dead", 3], ["Oathbound Revenant", "Restless Dead", 3], ["Hollow Queen", "Restless Dead", 4], ["Ember Acolyte", "Cultists", 1], ["Ashen Zealot", "Cultists", 2], ["Brand Bearer", "Cultists", 2], ["Masked Oracle", "Cultists", 3], ["Gilded Voice", "Cultists", 4], ["Clay Drudge", "Constructs", 1], ["Copper Hound", "Constructs", 2], ["Iron Watchman", "Constructs", 2], ["Stonebound Sentinel", "Constructs", 3], ["Forge Colossus", "Constructs", 4], ["Gloom Mite Swarm", "Horrors", 1], ["Pallid Crawler", "Horrors", 2], ["Many-Mouthed Thing", "Horrors", 3], ["Veil Stalker", "Horrors", 3], ["Hunger Below", "Horrors", 4]];
+
 describe("grim-d100 catalog", () => {
   it("passes the validator", () => {
     expect(validateGrimData(data)).toEqual({ ok: true });
@@ -27,10 +29,18 @@ describe("grim-d100 catalog", () => {
     expect(grimCoverage(data)).toEqual([]);
   });
 
+  it("units follow the plan roster: name, theme and level in file order", () => {
+    expect(data.units.map((u) => [u.name, (u.statblock as { creatureType: string }).creatureType, u.level])).toEqual(ROSTER);
+  });
+
+  it("units carry no spells, race, attacks or avatar yet", () => {
+    for (const unit of data.units) for (const key of ["knownSpells", "raceId", "attacks", "avatar"]) expect(unit, `${String(unit.name)}.${key}`).not.toHaveProperty(key);
+  });
+
   it("manifest counts match the data", () => {
     const { counts } = readGrimManifest();
 
-    expect(counts).toEqual({ races: 4, careers: 16, feats: 50, units: 0, spells: 0, artifacts: 0, raceProfiles: 4 });
+    expect(counts).toEqual({ races: 4, careers: 16, feats: 50, units: 30, spells: 0, artifacts: 0, raceProfiles: 4 });
     expect(counts).toEqual({ races: data.races.length, careers: data.careers.length, feats: data.feats.length, units: data.units.length, spells: data.spells.length, artifacts: data.artifacts.length, raceProfiles: data.raceProfiles.length });
   });
 
