@@ -26,7 +26,7 @@ const marker = `grimload-${randomUUID()}`;
 
 const fixtures = path.join(__dirname, "fixtures");
 
-const manifest = { name: GRIM_TEMPLATE_NAME, credits: "", counts: {} };
+const manifest = { key: "grim-d100", system: "wfrp", names: { en: GRIM_TEMPLATE_NAME, uk: GRIM_TEMPLATE_NAME }, locales: ["en", "uk"], rules: { file: "rules.json" }, kinds: [], icons: {}, credits: "", counts: {} };
 
 const tmpDirs: string[] = [];
 

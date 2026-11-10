@@ -1,0 +1,17 @@
+{
+  "key": "srd-5.2-empty",
+  "system": "dnd5e",
+  "names": {
+    "en": "5e (empty)",
+    "uk": "5e (empty)"
+  },
+  "locales": [
+    "en"
+  ],
+  "rules": {
+    "file": "rules.json"
+  },
+  "kinds": [],
+  "icons": {},
+  "counts": {}
+}

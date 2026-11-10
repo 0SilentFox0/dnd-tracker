@@ -1,5 +1,29 @@
 {
-  "name": "Grim d100",
+  "key": "grim-d100",
+  "system": "wfrp",
+  "names": {
+    "en": "Grim d100",
+    "uk": "Grim d100"
+  },
+  "locales": [
+    "en",
+    "uk"
+  ],
+  "rules": {
+    "file": "rules.json"
+  },
+  "kinds": [
+    "feats",
+    "careers",
+    "races",
+    "spells",
+    "units",
+    "artifacts"
+  ],
+  "extras": [
+    "race-profiles"
+  ],
+  "icons": {},
   "credits": "Original content.",
   "counts": {
     "races": 4,
@@ -7,7 +31,6 @@
     "feats": 50,
     "units": 30,
     "spells": 30,
-    "artifacts": 56,
-    "raceProfiles": 4
+    "artifacts": 56
   }
 }

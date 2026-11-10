@@ -66,8 +66,9 @@ describe("grim-d100 catalog", () => {
   it("manifest counts match the data", () => {
     const { counts } = readGrimManifest();
 
-    expect(counts).toEqual({ races: 4, careers: 16, feats: 50, units: 30, spells: 30, artifacts: 56, raceProfiles: 4 });
-    expect(counts).toEqual({ races: data.races.length, careers: data.careers.length, feats: data.feats.length, units: data.units.length, spells: data.spells.length, artifacts: data.artifacts.length, raceProfiles: data.raceProfiles.length });
+    expect(counts).toEqual({ races: 4, careers: 16, feats: 50, units: 30, spells: 30, artifacts: 56 });
+    expect(counts).toEqual({ races: data.races.length, careers: data.careers.length, feats: data.feats.length, units: data.units.length, spells: data.spells.length, artifacts: data.artifacts.length });
+    expect(data.raceProfiles).toHaveLength(4);
   });
 
   it("feat abilities are passive modifyStat on stats that act on a wfrp hero", () => {

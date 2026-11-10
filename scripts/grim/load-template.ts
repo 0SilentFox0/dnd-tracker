@@ -103,7 +103,7 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
 
   assertSeedTarget(process.env.DATABASE_URL, allowRemote);
 
-  const template = await ensureSrdTemplate(makeTemplateStore(GRIM_TEMPLATE_NAME), { owner, rules: merged.rules, credits: manifest.credits, description: GRIM_TEMPLATE_DESCRIPTION });
+  const template = await ensureSrdTemplate(makeTemplateStore(GRIM_TEMPLATE_NAME), { owner, rules: merged.rules, credits: manifest.credits ?? "", description: GRIM_TEMPLATE_DESCRIPTION });
 
   console.info(`${GRIM_TEMPLATE_NAME}: ${template.id}${template.created ? " (створено)" : ""}`);
 

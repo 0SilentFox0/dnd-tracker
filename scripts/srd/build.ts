@@ -20,7 +20,7 @@ async function main() {
 
   const data = buildSrdData(open5e);
 
-  const manifest = writeSrdData(data, SRD_DATA_DIR, new Date().toISOString().slice(0, 10));
+  const manifest = writeSrdData(data, SRD_DATA_DIR);
 
   writeFileSync(join(SRD_DATA_DIR, "coverage-4f5b.json"), `${JSON.stringify(coverage4f5b(data), null, 2)}\n`);
 

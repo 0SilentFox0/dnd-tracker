@@ -1,8 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import { TemplateManifestSchema } from "@/lib/schemas/template-manifest";
 import type { RulesetPatch } from "@/lib/utils/rules/schema";
 import type { SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { TemplateManifest } from "@/lib/utils/templates/manifest";
 
 export const GRIM_DATA_DIR = process.env.GRIM_DATA_DIR ?? path.join(process.cwd(), "data/templates/grim-d100");
 
@@ -22,11 +24,6 @@ export type NamedProfile = SpeciesProfile;
 
 export type GrimData = Record<GrimRowKind, Row[]> & { raceProfiles: Array<{ race: string; profile: NamedProfile }>; rules?: RulesetPatch };
 
-export interface GrimManifest {
-  name: string;
-  credits: string;
-  counts: Record<string, number>;
-}
 
 const readJson = <T>(dir: string, name: string): T | undefined => {
   const file = path.join(dir, `${name}.json`);
@@ -44,4 +41,4 @@ export function readGrimData(dir: string = GRIM_DATA_DIR): GrimData {
   };
 }
 
-export const readGrimManifest = (dir: string = GRIM_DATA_DIR): GrimManifest => JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8")) as GrimManifest;
+export const readGrimManifest = (dir: string = GRIM_DATA_DIR): TemplateManifest => TemplateManifestSchema.parse(JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8")));

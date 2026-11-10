@@ -44,7 +44,7 @@ describe("SRD 5.2 data files", () => {
 
     expect(manifest.counts).toEqual(EXPECTED);
     expect(Object.fromEntries(SRD_KINDS.map((k) => [k, data[k].length]))).toEqual(EXPECTED);
-    expect(manifest.source.sha).toBe(OPEN5E_SHA);
+    expect(manifest.source?.sha).toBe(OPEN5E_SHA);
     expect(manifest.credits).toContain("System Reference Document 5.2");
   });
 
