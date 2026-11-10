@@ -1,4 +1,6 @@
 import type { GrimData, Row } from "./data";
+import { GRIM_ITEM_SLOTS, GRIM_WEAPON_GROUPS, IMPLEMENTED_QUALITIES, itemStatsOf } from "./equipment";
+import { GRIM_SPELL_KINDS, GRIM_SPELL_LISTS, spellMagicOf } from "./spells";
 import { GRIM_UNIT_LEVELS, GRIM_UNIT_THEMES, unitTraitKeys, unitTraits } from "./units";
 
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
@@ -6,6 +8,7 @@ import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import"
 import { mergeRules } from "@/lib/utils/rules/schema";
 import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
 import { parseStatus } from "@/lib/utils/rules/systems/wfrp/downtime/status";
+import { ARMOUR_KINDS, QUALITY_REGISTRY } from "@/lib/utils/rules/systems/wfrp/equipment";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
 
@@ -91,6 +94,60 @@ function unitCoverage(units: Row[]): string[] {
   return warnings;
 }
 
+export const CASTER_THEMES = ["Cultists", "Horrors"] as const;
+
+const knownSpellsOf = (u: Row): string[] => (Array.isArray(u.knownSpells) ? u.knownSpells.map(String) : []);
+
+function spellCoverage(spells: Row[], units: Row[]): string[] {
+  if (spells.length === 0) return [];
+
+  const warnings: string[] = [];
+
+  const kinds = new Set(spells.map((s) => spellMagicOf(s)?.kind));
+
+  for (const kind of GRIM_SPELL_KINDS) if (!kinds.has(kind)) warnings.push(`spells: kind "${kind}" has no spell`);
+
+  const lists = new Set(spells.flatMap((s) => (Array.isArray(s.lists) ? s.lists.map(String) : [])));
+
+  for (const list of new Set(Object.values(GRIM_SPELL_LISTS).flat())) if (!lists.has(list)) warnings.push(`spells: list "${list}" has no spell`);
+
+  if (units.length > 0) for (const theme of CASTER_THEMES) if (!units.some((u) => themeOf(u) === theme && knownSpellsOf(u).length > 0)) warnings.push(`units: theme "${theme}" has no caster`);
+
+  return warnings;
+}
+
+function equipmentCoverage(artifacts: Row[]): string[] {
+  if (artifacts.length === 0) return [];
+
+  const warnings: string[] = [];
+
+  const stats = artifacts.map(itemStatsOf);
+
+  const groups = new Set(stats.map((st) => (st?.type === "weapon" ? st.group : undefined)));
+
+  for (const group of GRIM_WEAPON_GROUPS) if (!groups.has(group)) warnings.push(`artifacts: weapon group "${group}" has no item`);
+
+  const kinds = new Set(stats.map((st) => (st?.type === "armour" ? st.kind : undefined)));
+
+  for (const kind of ARMOUR_KINDS) if (!kinds.has(kind)) warnings.push(`artifacts: armour kind "${kind}" has no item`);
+
+  const slots = new Set(artifacts.map((a) => a.slot));
+
+  for (const slot of GRIM_ITEM_SLOTS) if (slot !== "weapon" && slot !== "range_weapon" && slot !== "item" && !slots.has(slot)) warnings.push(`artifacts: slot "${slot}" has no item`);
+
+  const carried = new Set(stats.flatMap((st) => [...(st?.qualities ?? []), ...(st && "flaws" in st ? (st.flaws ?? []) : [])].map((q) => q.key)));
+
+  for (const key of IMPLEMENTED_QUALITIES) if (!carried.has(key)) warnings.push(`artifacts: ${QUALITY_REGISTRY[key].kind} "${key}" has no carrier`);
+
+  return warnings;
+}
+
+export function grimInfo(data: GrimData): string[] {
+  const known = new Set(data.units.flatMap(knownSpellsOf));
+
+  return data.spells.map((s) => nameOf(s)).filter((name) => !known.has(name)).map((name) => `info: spells "${name}": known by no unit`);
+}
+
 export function grimCoverage(data: GrimData): string[] {
   const warnings: string[] = [];
 
@@ -165,7 +222,7 @@ export function grimCoverage(data: GrimData): string[] {
     if (profile.randomTalentCount > distinct) warnings.push(`race-profiles "${race}": randomTalentCount ${profile.randomTalentCount} exceeds ${distinct} distinct table talents`);
   });
 
-  warnings.push(...unitCoverage(data.units));
+  warnings.push(...unitCoverage(data.units), ...spellCoverage(data.spells, data.units), ...equipmentCoverage(data.artifacts));
 
   return warnings;
 }

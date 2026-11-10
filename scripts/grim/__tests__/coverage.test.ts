@@ -1,14 +1,14 @@
 import * as path from "path";
 import { describe, expect, it } from "vitest";
 
-import { grimCoverage } from "../coverage";
+import { grimCoverage, grimInfo } from "../coverage";
 import { type GrimData, readGrimData } from "../data";
 
 const load = (): GrimData => structuredClone(readGrimData(path.join(__dirname, "fixtures")));
 
 describe("grimCoverage", () => {
   it("reports only the known fixture gaps", () => {
-    const warnings = grimCoverage(load()).filter((w) => !w.includes("pool") && !w.includes("no new skill") && !w.startsWith("units"));
+    const warnings = grimCoverage(load()).filter((w) => !w.includes("pool") && !w.includes("no new skill") && !w.startsWith("units") && !w.startsWith("spells") && !w.startsWith("artifacts"));
 
     expect(warnings).toHaveLength(4);
     expect(warnings).toEqual(
@@ -19,6 +19,35 @@ describe("grimCoverage", () => {
         'careers "Watchman": tier 1 lists 3 items, ticksRequired[0] is 10',
       ]),
     );
+  });
+
+  it("reports magic and equipment gaps of the fixture", () => {
+    const warnings = grimCoverage(load());
+
+    expect(warnings).toEqual(
+      expect.arrayContaining(['spells: kind "arcane" has no spell', 'spells: list "School of Gloam" has no spell', 'artifacts: weapon group "bow" has no item', 'artifacts: armour kind "plate" has no item', 'artifacts: slot "shield" has no item', 'artifacts: quality "blast" has no carrier', 'artifacts: flaw "reload" has no carrier', 'units: theme "Cultists" has no caster']),
+    );
+    expect(warnings).not.toContain('spells: kind "petty" has no spell');
+  });
+
+  it("says nothing about magic or equipment when those files are empty", () => {
+    const data = load();
+
+    data.spells = [];
+    data.artifacts = [];
+
+    const warnings = grimCoverage(data);
+
+    expect(warnings.filter((w) => w.startsWith("spells") || w.startsWith("artifacts"))).toEqual([]);
+    expect(warnings.some((w) => w.includes("has no caster"))).toBe(false);
+  });
+
+  it("lists spells no unit knows", () => {
+    const data = load();
+
+    expect(grimInfo(data)).toEqual([]);
+    data.units[0].knownSpells = [];
+    expect(grimInfo(data)).toEqual(['info: spells "Rot Touch": known by no unit']);
   });
 
   const rat = () => structuredClone(load().units[0]);
