@@ -71,6 +71,8 @@
 | U3 | Цей spec = перший етап епіку «Модулі»; доменні модулі — після merge |
 | U4 | До merge робиться все по пакетах (не лише блокери заливки) |
 | U5 | Дизайн за розділами схвалено |
+| U6 | Ключі шаблонів: `srd-5.2` (з версією), `grim-d100`, `heroes-homm`; порожні оболонки — `srd-5.2-empty`, `grim-d100-empty` (ruling архітектора) |
+| U7 | Heroes стає повноцінним перекладеним шаблоном: EN-база + uk-overlay робляться зараз, у E0, разом із переведенням у пакет |
 
 Рішення архітектора:
 
@@ -263,6 +265,7 @@ export interface RuleSystemDefinition {
 | E0.8 | Переклад за `(kind, slug, поле)`: формат `uk.json` v2 `{ "<kind>/<slug>/<fieldPath>": { text, en } }`; `localizeTemplateBundle` накладає за ключем; хеш `en` лише дає статус `stale` (накладається, але `template:i18n status` показує, `publish` вимагає 0 stale); конвертер зі старого hash-словника; вкладені елементи ключуються за `id`/`name`, інакше за індексом | L | E0.5 |
 | E0.9 | Спільний CLI `scripts/templates/cli.ts` (`build/validate/import/publish/icons/i18n`) на базі `importContent`/`publishTemplate`/`makeTemplateStore`; валідатор з `scripts/grim/validate-data.ts` узагальнено, wfrp-специфіка → `SystemSchemas.validatePack`; адаптери `scripts/templates/srd-5.2/build.ts` (Open5e); `package.json`: `template:*`, старі `constructor:*-template` тонкі аліаси до кінця E0, потім видаляються | L | E0.1, E0.5 |
 | E0.10 | Heroes як пакет `data/templates/heroes-homm/`: `template:export` одноразово читає офіційний шаблон «Heroes» (prodcopy), пише файли зі slug і `rules.json`; `template:import heroes-homm` зіставляє зі збереженням id (за backfilled slug); `data/library` і `seed-library` позначені застарілими для створення шаблону | L | E0.5, E0.9 |
+| E0.10b | Heroes EN-база (U7): англійські name і тексти стають каноном у data-файлах пакета, наявні українські тексти переходять у `i18n/uk.json` за ключем `(kind, slug, поле)`; `locales: ["en","uk"]`; переклад на EN — Sonnet-пакетами за видами з вичиткою термінів HoMM; жива HOMM5 не змінюється | L | E0.8, E0.10 |
 | E0.11 | Правила як дані: `SRD_RULES` (`scripts/srd/lib/rules-preset.ts`) і `WFRP_RULES` → `rules.json` пакета; порожні оболонки (`5e (empty)`, `Grim d100 (empty)`) стають мінімальними пакетами (лише `rules.json`) | M | E0.9 |
 | E0.12 | Generic-тест валідатора + exhaustiveness реєстру + fixture-4-й-пакет | S | E0.9 |
 
@@ -337,6 +340,6 @@ E2 після merge, бо масове перенесення на гілці з
 
 ## 10. Відкриті питання користувачу
 
-1. **Остаточні `templateKey`.** Робочі: `srd-5.2`, `grim-d100` (імена наявних тек), `heroes-homm` (пропозиція). Ключ незмінний після prod-публікації; чи лишаємо `srd-5.2` (з версією) і чи потрібні ключі для порожніх оболонок (`empty-5e`, `empty-grim`)?
+1. ~~Остаточні `templateKey`~~ — вирішено, U6.
 2. **Іконки одразу після E0 чи після E1?** Рекомендація spec: після E0 (E1 не торкається даних і шляхів), іконки Grim і SRD не чекають рефакторингу системи.
-3. **Heroes: англійська база.** Контент Heroes українською (`data/library/units/*.ts`), тож slug фіксуються вручну англійською (R19), а EN-база + uk-overlay (рішення про мову контенту) лишається окремим кроком після E0.10: робимо зараз чи пізніше?
+3. ~~Heroes: англійська база~~ — вирішено, U7 (крок E0.10b).
