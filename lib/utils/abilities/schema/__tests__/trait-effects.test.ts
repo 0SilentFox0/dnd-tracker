@@ -41,7 +41,7 @@ describe("wfrp trait effects", () => {
     const r = parse({ kind: "wfrpAttack", attack: "bite", damage: 3, rangeFt: 30 });
 
     expect(r.success).toBe(false);
-    expect(JSON.stringify(r.error?.issues)).toContain("abilities.validation.traitRangeBreathOnly");
+    expect(JSON.stringify(r.error?.issues)).toContain("abilities.validation.traitRangeOnlyBreathRanged");
   });
 
   it.each(valid)("flags %j outside a passive", (effect) => {

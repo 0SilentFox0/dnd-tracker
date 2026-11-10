@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { rebuildTrait, unitIssues, unitWounds } from "../units";
 
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT } from "@/lib/utils/rules/systems/wfrp/traits/constants";
 
 const all40 = { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, s: 40, t: 40, i: 40, ag: 40, dex: 40, int: 40, wp: 40, fel: 40 };
 
@@ -25,6 +26,12 @@ describe("rebuildTrait", () => {
 
     expect(rebuildTrait(sling)).toEqual({ ...sling, trigger: { event: "passive" } });
     expect(rebuildTrait({ id: "terror", name: "Terror 1", effects: [] })).toBeNull();
+  });
+
+  it.each([["breath", BREATH_DEFAULT_RANGE_FT], ["ranged", RANGED_DEFAULT_RANGE_FT]])("defaults a missing %s range to the recipe default", (id, rangeFt) => {
+    const trait = rebuildTrait({ id, name: "Attack +5", effects: [{ kind: "wfrpAttack", attack: id, damage: 5 }] }) as { effects: Array<{ rangeFt: number }> };
+
+    expect(trait.effects[0].rangeFt).toBe(rangeFt);
   });
 });
 

@@ -37,6 +37,8 @@ export interface ContentResource<Row = unknown, Create = unknown, Update = unkno
   /** External preparation (e.g. image storage) runs before taking the content-write lock. */
   prepareCreate?(actor: Actor, input: Create): Promise<Create>;
   prepareUpdate?(actor: Actor, existing: Row, input: Update): Promise<Update>;
+  /** side-effect-free validation run for dry-run import rows */
+  checkImport?(actor: Actor, input: Create | Update): Promise<void>;
   create(actor: Actor, input: Create): Promise<Row>;
   update(actor: Actor, existing: Row, input: Update): Promise<Row>;
   remove(actor: Actor, existing: Row): Promise<void>;

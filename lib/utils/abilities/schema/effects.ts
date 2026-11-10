@@ -315,7 +315,7 @@ const WfrpAttackSchema = z
     rangeFt: z.number().int().min(5).max(600).optional(),
     magical: z.literal(true).optional(),
   })
-  .refine((e) => e.rangeFt === undefined || e.attack === "breath" || e.attack === "ranged", { message: "abilities.validation.traitRangeBreathOnly", path: ["rangeFt"] });
+  .refine((e) => e.rangeFt === undefined || e.attack === "breath" || e.attack === "ranged", { message: "abilities.validation.traitRangeOnlyBreathRanged", path: ["rangeFt"] });
 
 export const TRAIT_EFFECTS = [WfrpArmourSchema, WfrpWardSchema, WfrpSizeSchema, WfrpPsychologySchema, WfrpAttackSchema] as const;
 

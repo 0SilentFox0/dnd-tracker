@@ -6,7 +6,7 @@ import { TRAIT_SIZES, type TraitSize } from "@/lib/utils/abilities/schema/kinds"
 import type { RecipeContext, RecipeValues } from "@/lib/utils/abilities/templates/types";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/utils/rules/systems";
-import { RANGED_DEFAULT_RANGE_FT } from "@/lib/utils/rules/systems/wfrp/traits/constants";
+import { BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT } from "@/lib/utils/rules/systems/wfrp/traits/constants";
 import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
 
 export const GRIM_UNIT_THEMES = ["Beasts", "Raiders", "Restless Dead", "Cultists", "Constructs", "Horrors"] as const;
@@ -141,7 +141,7 @@ function recipeValues(id: string, e: RawEffect): RecipeValues {
       return { damage: Number(e.damage), magical };
     case "breath":
     case "ranged":
-      return { damage: Number(e.damage), rangeFt: rangeFtOf(e, Number(e.rangeFt)), magical };
+      return { damage: Number(e.damage), rangeFt: rangeFtOf(e, id === "breath" ? BREATH_DEFAULT_RANGE_FT : RANGED_DEFAULT_RANGE_FT), magical };
     default:
       return {};
   }

@@ -193,6 +193,20 @@ async function writePlan(resource: AnyContentResource, actor: Actor, plan: Plan)
   return resource.update(actor, existing, plan.body);
 }
 
+async function checkPlan(resource: AnyContentResource, actor: Actor, plan: Plan): Promise<ImportRowResult> {
+  if (plan.status !== "pending" || !resource.checkImport) return toResult(plan);
+
+  try {
+    await resource.checkImport(actor, plan.body);
+
+    return toResult(plan);
+  } catch (error) {
+    if (!(error instanceof ContentError)) throw error;
+
+    return { ...toResult(plan), status: "error", issues: [...plan.issues, ...contentErrorIssues(error)] };
+  }
+}
+
 const toResult = ({ row, name, status, op, issues }: Plan): ImportRowResult => ({
   row,
   ...(name && { name }),
@@ -223,7 +237,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
 
   const plans = input.rows.map((raw, i) => planRow(raw, i + 1, ctx));
 
-  if (input.dryRun) return report(true, plans.map(toResult));
+  if (input.dryRun) return report(true, await Promise.all(plans.map((plan) => checkPlan(resource, actor, plan))));
 
   const results: ImportRowResult[] = [];
 

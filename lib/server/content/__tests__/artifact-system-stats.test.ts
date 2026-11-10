@@ -43,6 +43,24 @@ describe("artifact systemStats", () => {
     expect(db.artifact.create).not.toHaveBeenCalled();
   });
 
+  it("dry-run preview rejects systemStats in a d20 campaign", async () => {
+    setRules({});
+
+    const rows = [{ name: "Plate", slot: "armor", systemStats: armour }];
+
+    const report = await importContent(actor, "artifacts", { rows, mode: "create", dryRun: true }, { resource: () => artifactsResource, loadNames: async () => [] });
+
+    expect(report.results[0].status).toBe("error");
+    expect(JSON.stringify(report.results)).toContain(API_ERRORS.SYSTEM_STATS_UNSUPPORTED);
+    expect(db.artifact.create).not.toHaveBeenCalled();
+
+    setRules(WFRP_RULES);
+
+    const ok = await importContent(actor, "artifacts", { rows, mode: "create", dryRun: true }, { resource: () => artifactsResource, loadNames: async () => [] });
+
+    expect(ok.results[0].status).toBe("created");
+  });
+
   it("wfrp campaign stores valid stats", async () => {
     setRules(WFRP_RULES);
     await createContent(artifactsResource, actor, { name: "Mail", slot: "armor", systemStats: armour });

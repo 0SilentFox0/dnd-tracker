@@ -345,7 +345,7 @@
     ]
   },
   {
-    "name": "Herald",
+    "name": "Crier",
     "class": "Courtier",
     "tier1_name": "Page",
     "tier1_status": "Silver 1",
@@ -370,7 +370,7 @@
       "Messenger satchel",
       "Small horn"
     ],
-    "tier2_name": "Herald",
+    "tier2_name": "Crier",
     "tier2_status": "Silver 3",
     "tier2_characteristics": [
       "i",
@@ -408,7 +408,7 @@
       "Sealed credentials",
       "Travel chest"
     ],
-    "tier4_name": "Lord Herald",
+    "tier4_name": "High Crier",
     "tier4_status": "Gold 2",
     "tier4_characteristics": [
       "wp",
@@ -601,7 +601,7 @@
     ]
   },
   {
-    "name": "Charcoal Burner",
+    "name": "Ashburner",
     "class": "Peasant",
     "tier1_name": "Kiln Hand",
     "tier1_status": "Brass 1",
@@ -627,7 +627,7 @@
       "Sack of charcoal",
       "Flint"
     ],
-    "tier2_name": "Charcoal Burner",
+    "tier2_name": "Ashburner",
     "tier2_status": "Brass 2",
     "tier2_characteristics": [
       "ws",

@@ -70,7 +70,7 @@
           "max": 25
         },
         {
-          "careerId": "Herald",
+          "careerId": "Crier",
           "max": 31
         },
         {
@@ -82,7 +82,7 @@
           "max": 44
         },
         {
-          "careerId": "Charcoal Burner",
+          "careerId": "Ashburner",
           "max": 50
         },
         {
@@ -175,11 +175,11 @@
           "max": 32
         },
         {
-          "careerId": "Herald",
+          "careerId": "Crier",
           "max": 38
         },
         {
-          "careerId": "Charcoal Burner",
+          "careerId": "Ashburner",
           "max": 48
         },
         {
@@ -269,7 +269,7 @@
           "max": 46
         },
         {
-          "careerId": "Charcoal Burner",
+          "careerId": "Ashburner",
           "max": 52
         },
         {
@@ -343,7 +343,7 @@
           "max": 10
         },
         {
-          "careerId": "Herald",
+          "careerId": "Crier",
           "max": 22
         },
         {

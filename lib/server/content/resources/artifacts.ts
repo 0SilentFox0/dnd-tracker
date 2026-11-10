@@ -69,6 +69,9 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   list: (actor) => readArtifactsList(actor.campaignId),
   find: (actor, id, purpose) => prisma.artifact.findFirst({ where: { id, campaignId: actor.campaignId }, ...(purpose === "read" && { include: withSet }) }),
   toItem: (row) => withAbilityIssues("artifact", row),
+  checkImport: async (actor, data) => {
+    await systemStatsColumn(actor.campaignId, data.systemStats);
+  },
   prepareCreate: async (actor, data) => {
     await systemStatsColumn(actor.campaignId, data.systemStats);
 
