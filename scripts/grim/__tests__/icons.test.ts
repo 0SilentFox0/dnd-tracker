@@ -4,7 +4,7 @@ import * as path from "path";
 import { describe, expect, it } from "vitest";
 
 import { GRIM_ROW_KINDS, type GrimData } from "../data";
-import { grimIconGaps, grimIconIssues, type GrimIcons, readGrimIcons, withGrimIcons, writeGrimIcons } from "../icons";
+import { grimIconGaps, grimIconIssues, type GrimIcons, mergeGrimIcons, readGrimIcons, withGrimIcons, writeGrimIcons } from "../icons";
 
 const data: GrimData = { feats: [{ name: "Steady Aim" }], careers: [{ name: "Archivist" }], races: [{ name: "Lowlander" }], spells: [{ name: "Dazzle" }], units: [{ name: "Ash Hound" }, { name: "Clay Drudge" }], artifacts: [{ name: "Spear" }], raceProfiles: [] };
 
@@ -31,6 +31,15 @@ describe("grim icons", () => {
   it("reports a gap per catalog entry when icons are empty", () => {
     expect(grimIconGaps(data, empty())).toHaveLength(GRIM_ROW_KINDS.reduce((n, k) => n + data[k].length, 0));
     expect(grimIconGaps(data, empty())).toContain('icons: spells "Dazzle" has no icon');
+  });
+
+  it("merges uploads over old icons and prunes names outside the catalog", () => {
+    const old = { ...empty(), units: { "Ash Hound": "https://x.test/old.webp", Gone: "https://x.test/gone.webp" } };
+
+    const merged = mergeGrimIcons(old, { ...empty(), units: { "Ash Hound": "https://x.test/new.webp" }, careers: { Archivist: "https://x.test/c.webp" } }, data);
+
+    expect(merged.units).toEqual({ "Ash Hound": "https://x.test/new.webp" });
+    expect(merged.careers).toEqual({ Archivist: "https://x.test/c.webp" });
   });
 
   it("reads a missing file as empty kinds and round-trips sorted", () => {

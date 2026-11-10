@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { GRIM_ROW_KINDS, readGrimData } from "../../grim/data";
-import { grimIconGaps, readGrimIcons, writeGrimIcons } from "../../grim/icons";
+import { emptyGrimIcons, grimIconGaps, type GrimIcons, mergeGrimIcons, readGrimIcons, writeGrimIcons } from "../../grim/icons";
 import { assertSeedTarget, assertStorageTarget } from "../../seed/seed-library-lib";
 import { assertCleanPrompt, assertUniqueFiles, type PromptRow, toMarkdown } from "../icon-prompts/compose";
 import { toWebp } from "../tokens-5e/convert";
@@ -94,7 +94,7 @@ async function uploadIcons(args: string[]) {
 
   const ensured = new Set<string>();
 
-  const uploaded = Object.fromEntries(GRIM_ROW_KINDS.map((k) => [k, {} as Record<string, string>])) as ReturnType<typeof readGrimIcons>;
+  const uploaded: GrimIcons = emptyGrimIcons();
 
   const errors: string[] = [];
 
@@ -147,15 +147,7 @@ async function uploadIcons(args: string[]) {
   const data = readGrimData();
 
   if (!dryRun) {
-    const old = readGrimIcons();
-
-    const next = Object.fromEntries(
-      GRIM_ROW_KINDS.map((kind) => {
-        const valid = new Set(data[kind].map((r) => String(r.name)));
-
-        return [kind, Object.fromEntries(Object.entries({ ...old[kind], ...uploaded[kind] }).filter(([name]) => valid.has(name)))];
-      }),
-    ) as ReturnType<typeof readGrimIcons>;
+    const next = mergeGrimIcons(readGrimIcons(), uploaded, data);
 
     writeGrimIcons(next);
 

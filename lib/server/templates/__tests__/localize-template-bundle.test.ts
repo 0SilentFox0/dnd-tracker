@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { emptyBundle } from "../bundle";
-import { localizeRules, localizeSrdBundle } from "../localize-srd-bundle";
+import { localizeRules, localizeTemplateBundle } from "../localize-template-bundle";
 import { remapIds } from "../remap-ids";
 
 import { hashText } from "@/lib/srd/i18n/catalog";
@@ -31,13 +31,13 @@ function fixture() {
   return bundle;
 }
 
-describe("localizeSrdBundle", () => {
+describe("localizeTemplateBundle", () => {
   it("localizes DB prose and name references while retaining all ID references", () => {
     const src = fixture();
 
     const original = structuredClone(src);
 
-    const out = localizeSrdBundle(src, tr);
+    const out = localizeTemplateBundle(src, tr);
 
     expect(out.classes[0]).toMatchObject({ id: "class-id", name: "Чарівник", spellList: "Чарівник", features: [{ abilities: [{ id: "rage", name: "Лють" }] }], choices: [{ spells: { lists: ["Чарівник"] } }] });
     expect(out.spells[0]).toMatchObject({ id: "spell-id", name: "Вогняна куля", groupId: "Fireball", lists: ["Чарівник"], casting: { text: "reaction", trigger: "Коли атакують" } });
@@ -56,7 +56,7 @@ describe("localizeSrdBundle", () => {
     const remapped = remapIds(out, new Map([["Fireball", "local-spell"]]));
 
     expect(JSON.parse((remapped.artifacts[0].modifiers as typeof modifiers).find((m) => m.type === "itemStats")?.value ?? "null").spells[0].spellId).toBe("local-spell");
-    expect(localizeSrdBundle(out, tr)).toEqual(out);
+    expect(localizeTemplateBundle(out, tr)).toEqual(out);
     expect(src).toEqual(original);
   });
 
@@ -75,15 +75,15 @@ describe("localizeSrdBundle", () => {
     src.credits = "Fireball";
     src.mainSkills = [{ id: "main", name: "Fireball" }];
 
-    const out = localizeSrdBundle(src, tr);
+    const out = localizeTemplateBundle(src, tr);
 
     expect(out.artifacts[0].modifiers).toEqual(records);
     expect(out.rules).toBe(src.rules);
     expect(out.settings).toBe(src.settings);
     expect(out.mainSkills).toBe(src.mainSkills);
     expect(out.credits).toBe("Fireball");
-    expect(localizeSrdBundle(src, {})).toBe(src);
-    expect(localizeSrdBundle(src, { [hashText("n", "Missing")]: "Відсутній" })).toEqual(src);
+    expect(localizeTemplateBundle(src, {})).toBe(src);
+    expect(localizeTemplateBundle(src, { [hashText("n", "Missing")]: "Відсутній" })).toEqual(src);
   });
 
   it("keeps unknown serialized fields when a recognized item field changes", () => {
@@ -91,7 +91,7 @@ describe("localizeSrdBundle", () => {
 
     src.artifacts = [{ id: "a", modifiers: [{ type: "itemStats", value: '{"property":{"nameTemplate":"{base} of {param}","future":{"label":"Fire"}},"future":{"name":"Fireball"}}' }] }];
 
-    const out = localizeSrdBundle(src, tr);
+    const out = localizeTemplateBundle(src, tr);
 
     const record = (out.artifacts[0].modifiers as Array<{ value: string }>)[0];
 
@@ -103,13 +103,13 @@ describe("localizeSrdBundle", () => {
       const src = emptyBundle();
 
       src[table] = [{ id: "a", name: "Wizard" }, { id: "b", name: "Fireball" }];
-      expect(() => localizeSrdBundle(src, { ...tr, [hashText("n", "Fireball")]: "Чарівник" })).toThrow(/Колізія/);
+      expect(() => localizeTemplateBundle(src, { ...tr, [hashText("n", "Fireball")]: "Чарівник" })).toThrow(/Колізія/);
     }
 
     const src = fixture();
 
     src.units[0].attacks = [{ name: "Bite" }, { name: "Claw" }];
-    expect(() => localizeSrdBundle(src, { ...tr, [hashText("n", "Claw")]: "УКУС" })).toThrow(/Колізія/);
+    expect(() => localizeTemplateBundle(src, { ...tr, [hashText("n", "Claw")]: "УКУС" })).toThrow(/Колізія/);
   });
 });
 
@@ -117,7 +117,7 @@ it("rejects artifact collisions using the base-item resolver's trimmed case-inse
   const src = emptyBundle();
 
   src.artifacts = [{ id: "a", name: "Sword" }, { id: "b", name: "Axe" }];
-  expect(() => localizeSrdBundle(src, { [hashText("n", "Sword")]: " Меч ", [hashText("n", "Axe")]: "МЕЧ" })).toThrow(/Колізія/);
+  expect(() => localizeTemplateBundle(src, { [hashText("n", "Sword")]: " Меч ", [hashText("n", "Axe")]: "МЕЧ" })).toThrow(/Колізія/);
 });
 
 it("localizes case-insensitive artifact bases while keeping unmatched fallback spelling", () => {
@@ -125,7 +125,7 @@ it("localizes case-insensitive artifact bases while keeping unmatched fallback s
 
   src.artifacts = [{ id: "a", name: "Sword", ...itemStatsColumns({ property: { appliesTo: { kinds: ["weapon"], bases: [" sword ", "AXE"] } } }) }];
 
-  const out = localizeSrdBundle(src, tr);
+  const out = localizeTemplateBundle(src, tr);
 
   expect(JSON.parse((out.artifacts[0].modifiers as Array<{ value: string }>)[0].value).property.appliesTo.bases).toEqual(["Меч", "AXE"]);
 });
@@ -142,7 +142,7 @@ describe("Grim bundle", () => {
 
     src.careers = [{ id: "career-id", name: "Archivist", class: "Academic", tiers: [{ name: "Copyist", status: "Brass 3", characteristics: ["int"], skills: ["lore:herbs"], talents: ["feat-id"], trappings: ["Quill and ink"] }] }];
 
-    expect(localizeSrdBundle(src, grimTr).careers[0]).toEqual({ id: "career-id", name: "Архіваріус", class: "Учені", tiers: [{ name: "Переписувач", status: "Brass 3", characteristics: ["int"], skills: ["lore:herbs"], talents: ["feat-id"], trappings: ["Перо й чорнило"] }] });
+    expect(localizeTemplateBundle(src, grimTr).careers[0]).toEqual({ id: "career-id", name: "Архіваріус", class: "Учені", tiers: [{ name: "Переписувач", status: "Brass 3", characteristics: ["int"], skills: ["lore:herbs"], talents: ["feat-id"], trappings: ["Перо й чорнило"] }] });
   });
   it("leaves species profiles untouched", () => {
     const src = emptyBundle();
@@ -150,7 +150,7 @@ describe("Grim bundle", () => {
     const profile = { careerTable: [{ careerId: "career-id", max: 50 }], talents: ["feat-id"] };
 
     src.races = [{ id: "r", name: "Archivist", profile }];
-    expect(localizeSrdBundle(src, grimTr).races[0].profile).toEqual(profile);
+    expect(localizeTemplateBundle(src, grimTr).races[0].profile).toEqual(profile);
   });
   it("localizes rule table text without touching effects or other rules", () => {
     const effects = [{ type: "condition", key: "deafened", levels: 1 }];
@@ -167,9 +167,9 @@ describe("Grim bundle", () => {
     const src = emptyBundle();
 
     src.spells = [{ id: "s", name: "Ember Dart", lists: ["School of Embers"] }];
-    expect(localizeSrdBundle(src, grimTr).spells[0]).toMatchObject({ name: "Жарова стріла", lists: ["Школа Жару"] });
+    expect(localizeTemplateBundle(src, grimTr).spells[0]).toMatchObject({ name: "Жарова стріла", lists: ["Школа Жару"] });
 
     src.spells = [{ id: "s", name: "A", lists: ["School of Embers"] }, { id: "t", name: "B", lists: ["Ember Dart"] }];
-    expect(() => localizeSrdBundle(src, { ...grimTr, [hashText("n", "Ember Dart")]: "Школа Жару" })).toThrow(/spell lists/);
+    expect(() => localizeTemplateBundle(src, { ...grimTr, [hashText("n", "Ember Dart")]: "Школа Жару" })).toThrow(/spell lists/);
   });
 });

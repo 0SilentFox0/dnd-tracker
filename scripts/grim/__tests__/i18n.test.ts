@@ -6,7 +6,7 @@ import { grimCatalog, grimI18nIssues } from "../i18n";
 import { GRIM_SPELL_LISTS } from "../spells";
 
 import { emptyBundle } from "@/lib/server/templates/bundle";
-import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
+import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { extractCatalog, hashText } from "@/lib/srd/i18n/catalog";
 import { templateOf } from "@/scripts/srd/i18n/templates";
 import { readSrdData } from "@/scripts/srd/lib/data-files";
@@ -45,7 +45,7 @@ describe("grimCatalog", () => {
     expect(catalog.some((e) => e.en === "Brass 3" || e.en === "lore:herbs")).toBe(false);
   });
 
-  it("hashes match localizeSrdBundle on DB-shaped careers", () => {
+  it("hashes match localizeTemplateBundle on DB-shaped careers", () => {
     const career = data.careers.find((c) => c.name === "Archivist");
 
     if (!career) throw new Error("Archivist missing");
@@ -56,7 +56,7 @@ describe("grimCatalog", () => {
 
     bundle.careers = [{ id: "c1", name: "Archivist", class: "Academic", tiers: [{ name: "Copyist", trappings: [trapping] }] }];
 
-    const out = localizeSrdBundle(bundle, { [hashText("d", trapping)]: "X" });
+    const out = localizeTemplateBundle(bundle, { [hashText("d", trapping)]: "X" });
 
     expect((out.careers[0].tiers as Array<{ trappings: string[] }>)[0].trappings).toEqual(["X"]);
   });

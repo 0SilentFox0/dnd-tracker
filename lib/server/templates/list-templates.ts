@@ -31,15 +31,9 @@ const toCard = ({ _count, rules, ...t }: { id: string; name: string; description
 
 /** Shared by the picker API and the owner's direct tile query. */
 export function visibleTemplates<T extends TemplateIdentity>(templates: T[]): T[] {
-  const canonicalCounts = new Map<string, number>();
+  const canonicalKeys = templates.filter(isCanonicalTemplate).map((template) => template.templateKey);
 
-  for (const template of templates) {
-    const key = isCanonicalTemplate(template) ? template.templateKey : null;
-
-    if (key) canonicalCounts.set(key, (canonicalCounts.get(key) ?? 0) + 1);
-  }
-
-  if ([...canonicalCounts.values()].some((count) => count > 1)) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
+  if (new Set(canonicalKeys).size !== canonicalKeys.length) throw new ContentError(API_ERRORS.SRD_CANONICAL_UNAVAILABLE, 409);
 
   return templates.filter((template) => !isLegacyLocalizedTemplate(template));
 }

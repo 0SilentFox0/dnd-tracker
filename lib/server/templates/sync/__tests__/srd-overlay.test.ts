@@ -48,7 +48,7 @@ describe("localized SRD synchronization", () => {
   it("has no immediate diff and uses persisted locale rather than interface locale", async () => {
     await makeClone();
     expect(await diff()).toEqual([]);
-    expect((await loadSyncContext(f.db, target)).srdOverlay).toBe(true);
+    expect((await loadSyncContext(f.db, target)).templateOverlay).toBe(true);
   });
   it("handles English fallback, new translations, revisions, and apply followed by no diff", async () => {
     await makeClone();
@@ -216,7 +216,7 @@ describe("localized Grim synchronization", () => {
   });
   it("has no immediate diff and stores localized rules and careers", async () => {
     await makeClone();
-    expect((await loadSyncContext(f.db, target)).srdOverlay).toBe(true);
+    expect((await loadSyncContext(f.db, target)).templateOverlay).toBe(true);
     expect(await diff()).toEqual([]);
     expect(f.campaign(target).rules).toMatchObject(table("Запах паленого волосся."));
     expect(local("career")[0].name).toBe("Архіваріус");

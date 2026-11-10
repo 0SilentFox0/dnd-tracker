@@ -11,12 +11,24 @@ export const GRIM_ICON_COLUMN: Record<GrimRowKind, "icon" | "avatar"> = { feats:
 
 const fileIn = (dir: string) => path.join(dir, "icons.json");
 
+export const emptyGrimIcons = (): GrimIcons => Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, {}])) as GrimIcons;
+
 export function readGrimIcons(dir: string = GRIM_DATA_DIR): GrimIcons {
   const file = fileIn(dir);
 
   const stored: Partial<GrimIcons> = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
 
-  return Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, stored[kind] ?? {}])) as GrimIcons;
+  return Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, stored[kind] ?? emptyGrimIcons()[kind]])) as GrimIcons;
+}
+
+export function mergeGrimIcons(old: GrimIcons, uploaded: GrimIcons, data: GrimData): GrimIcons {
+  return Object.fromEntries(
+    GRIM_ROW_KINDS.map((kind) => {
+      const valid = new Set(data[kind].map((r) => String(r.name)));
+
+      return [kind, Object.fromEntries(Object.entries({ ...old[kind], ...uploaded[kind] }).filter(([name]) => valid.has(name)))];
+    }),
+  ) as GrimIcons;
 }
 
 export function writeGrimIcons(icons: GrimIcons, dir: string = GRIM_DATA_DIR): void {

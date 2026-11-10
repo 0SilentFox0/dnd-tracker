@@ -2,8 +2,6 @@ import { CampaignKind, CampaignVisibility, GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME
 
 export const TEMPLATE_CONTENT_LOCALES = ["en", "uk"] as const;
 export type TemplateContentLocale = (typeof TEMPLATE_CONTENT_LOCALES)[number];
-export const SRD_CONTENT_LOCALES = TEMPLATE_CONTENT_LOCALES;
-export type SrdContentLocale = TemplateContentLocale;
 export type TemplateIdentity = { kind?: string; visibility?: string; templateKey?: string | null; locale?: string | null };
 export type TemplateLocalization = { templateKey: string; locales: readonly TemplateContentLocale[] };
 
@@ -23,7 +21,3 @@ export function localizationOf(source: TemplateIdentity): TemplateLocalization |
 export const isLocalizableTemplate = (source: TemplateIdentity): boolean => localizationOf(source) !== null;
 export const isCanonicalTemplate = (source: TemplateIdentity): boolean => isLocalizableTemplate(source) && (source.locale == null || source.locale === "en");
 export const isLegacyLocalizedTemplate = (source: TemplateIdentity): boolean => isLocalizableTemplate(source) && source.locale === "uk";
-
-export const isOfficialSrdTemplate = (source: TemplateIdentity): boolean => isLocalizableTemplate(source) && source.templateKey === SRD_TEMPLATE_NAME;
-export const isCanonicalSrdTemplate = (source: TemplateIdentity): boolean => isOfficialSrdTemplate(source) && (source.locale == null || source.locale === "en");
-export const isLegacySrdTemplate = (source: TemplateIdentity): boolean => isOfficialSrdTemplate(source) && source.locale === "uk";

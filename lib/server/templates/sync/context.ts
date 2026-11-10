@@ -4,7 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf, SETTINGS_SELECT, settingsOf, type TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
-import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
+import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { emptyState } from "@/lib/server/templates/sync/state";
 import type { LocalRow, SyncContext, SyncState, TableHashes } from "@/lib/server/templates/sync/types";
@@ -51,13 +51,13 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   const localization = isCanonicalTemplate(found) ? localizationOf(found) : null;
 
-  const srdOverlay = localization !== null;
+  const templateOverlay = localization !== null;
 
   const contentLocale = campaign.locale ?? "en";
 
   if (localization && !localization.locales.includes(contentLocale as TemplateContentLocale)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
 
-  const sourceBundle = localization ? localizeSrdBundle(rawSourceBundle, templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale)) : rawSourceBundle;
+  const sourceBundle = localization ? localizeTemplateBundle(rawSourceBundle, templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale)) : rawSourceBundle;
 
   const synced = state?.sourceCampaignId === source.id ? state : null;
 
@@ -67,7 +67,7 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   return {
     campaignId,
-    srdOverlay,
+    templateOverlay,
     source,
     sourceBundle,
     target: { settings: settingsOf(campaign), rules: campaign.rules, credits: campaign.credits ?? null, rows },

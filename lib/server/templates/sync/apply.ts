@@ -194,7 +194,7 @@ async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnT
   const resulting = [...effective.values()];
 
   // Templates without classes (Grim) have no providers for spell-list names.
-  if (ctx.srdOverlay && resulting.some((r) => r.table === "classes")) {
+  if (ctx.templateOverlay && resulting.some((r) => r.table === "classes")) {
     const selectedLocalIds = new Set([...selected.values()].map((item) => item.localId ?? map.get(item.key)).filter((id): id is string => !!id));
 
     assertSrdNameReferences(ctx.target.rows, resulting, selectedLocalIds, { rows: [...index.sourceIndex.values()], sourceToLocal: map });

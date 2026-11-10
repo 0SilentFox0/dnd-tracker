@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { BundleSchema } from "@/lib/server/templates/bundle";
-import { SRD_CONTENT_LOCALES } from "@/lib/utils/campaigns/template-locales";
+import { TEMPLATE_CONTENT_LOCALES } from "@/lib/utils/campaigns/template-locales";
 
 export const MAX_BUNDLE_BYTES = 4 * 1024 * 1024;
 
@@ -15,4 +15,4 @@ export const saveAsTemplateSchema = z.object({
   description: z.string().optional(),
 });
 
-export const cloneCampaignSchema = saveAsTemplateSchema.extend({ contentLocale: z.enum(SRD_CONTENT_LOCALES).optional() });
+export const cloneCampaignSchema = saveAsTemplateSchema.extend({ contentLocale: z.enum(TEMPLATE_CONTENT_LOCALES).optional() });

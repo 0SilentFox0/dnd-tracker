@@ -5,7 +5,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import type { Bundle, TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
 import { exportLocalLayer, exportSkeleton, type LocalLayer } from "@/lib/server/templates/export-campaign";
-import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
+import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { latestPublishedVersion } from "@/lib/server/templates/publish";
 import { templateTranslationsFor } from "@/lib/server/templates/template-translations";
 import { canReadSource } from "@/lib/utils/api/is-dm";
@@ -93,5 +93,5 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
 
   const bundle = await cachedExport(db, source.id, source.contentVersion);
 
-  return { ...identity, bundle: translations ? localizeSrdBundle(bundle, translations) : bundle };
+  return { ...identity, bundle: translations ? localizeTemplateBundle(bundle, translations) : bundle };
 }

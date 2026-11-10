@@ -45,8 +45,8 @@ export function localizeRules(rules: unknown, tr: Translations): unknown {
   return JSON.stringify(tables) === JSON.stringify(rules.tables) ? rules : { ...rules, tables };
 }
 
-/** Localize canonical SRD DB rows; source/language policy belongs to the caller. */
-export function localizeSrdBundle(bundle: Bundle, translations: Translations): Bundle {
+/** Localize canonical template DB rows (SRD, Grim); source/language policy belongs to the caller. */
+export function localizeTemplateBundle(bundle: Bundle, translations: Translations): Bundle {
   if (!Object.keys(translations).length) return bundle;
 
   const maps = Object.fromEntries(TABLES.map((table) => [table, translatedNames(bundle[table], translations, table, table === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)])) as Record<(typeof TABLES)[number], Map<string, string>>;

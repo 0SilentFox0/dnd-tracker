@@ -6,11 +6,13 @@ import { id } from "../sync/__tests__/helpers";
 import { EMPTY_GRIM_TEMPLATE_NAME, GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prepareCampaignSource } from "@/lib/server/templates/prepare-source";
 import { hashText } from "@/lib/srd/i18n/catalog";
-import { isCanonicalSrdTemplate, isLegacySrdTemplate, isLocalizableTemplate, isOfficialSrdTemplate } from "@/lib/utils/campaigns/template-locales";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate, isLocalizableTemplate, localizationOf } from "@/lib/utils/campaigns/template-locales";
 
 const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
 
 vi.mock("@/lib/server/templates/template-translations", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
+
+const isSrd = (source: object) => localizationOf(source)?.templateKey === SRD_TEMPLATE_NAME;
 
 const official = { kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME };
 
@@ -29,10 +31,10 @@ beforeEach(() => {
 
 describe("SRD source preparation", () => {
   it("recognizes only official keyed SRD templates, with en/null canonical and uk legacy", () => {
-    expect(isCanonicalSrdTemplate({ ...official, locale: null })).toBe(true);
-    expect(isLegacySrdTemplate({ ...official, locale: "uk" })).toBe(true);
-    expect(isOfficialSrdTemplate({ ...official, visibility: "private" })).toBe(false);
-    expect(isOfficialSrdTemplate({ name: SRD_TEMPLATE_NAME } as object)).toBe(false);
+    expect(isSrd(official) && isCanonicalTemplate({ ...official, locale: null })).toBe(true);
+    expect(isLegacyLocalizedTemplate({ ...official, locale: "uk" })).toBe(true);
+    expect(isSrd({ ...official, visibility: "private" })).toBe(false);
+    expect(isSrd({ name: SRD_TEMPLATE_NAME })).toBe(false);
   });
   it.each(["en", "uk"] as const)("prepares %s from canonical IDs and falls back to English text", async (contentLocale) => {
     const result = await prepare("en", { contentLocale });
@@ -119,6 +121,6 @@ describe("Grim source preparation", () => {
     expect(isLocalizableTemplate({ ...grim, locale: "en" })).toBe(true);
     expect(isLocalizableTemplate({ ...grim, templateKey: EMPTY_GRIM_TEMPLATE_NAME })).toBe(false);
     expect(isLocalizableTemplate({ ...grim, visibility: "private" })).toBe(false);
-    expect(isCanonicalSrdTemplate({ ...grim, locale: "en" })).toBe(false);
+    expect(isSrd({ ...grim, locale: "en" })).toBe(false);
   });
 });
