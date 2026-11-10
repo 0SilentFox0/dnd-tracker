@@ -39,6 +39,10 @@
 | D11 | Slug-формат рядка: `^[a-z0-9][a-z0-9_-]*$` (SRD має `srd-2024_aboleth`) | наявні slug SRD не перейменовуємо |
 | D12 | `TEMPLATE_CONTENT_LOCALES` лишається tuple-константою в коді (для `z.enum`); `manifest.locales` валідовано проти неї | маніфест не може бути джерелом tuple |
 | D13 | Шлях нових іконок: `templates/<templateKey>/<kind>/<slug>-<sha8>.webp`; старі URL (`<templateId>/…`, `sets/…`) чинні. `attach-assets` не змінюється | R7; `templateKey` змінює значення, тож шлях `sets/<slug(templateKey)>` для нових attach зміниться — прийнятно |
+| D14 | `ContentKind` виводиться з runtime-списку `CONTENT_KINDS` у нейтральному модулі (`lib/constants/content-kinds.ts`); `lib/server/content/define-resource.ts` його реекспортує. `lib/utils/templates/**` не імпортує з `lib/server/**` навіть типів | `manifest.ts` client-safe і потрібен zod-схемі та `scripts/`; один список замість дубля з exhaustiveness-перевіркою |
+| D15 | `localizationOf().templateKey` — завжди ключ пакета з реєстру, не значення колонки. Запити до БД за ключем пакета йдуть лише через `templateKeyWhere(keys)` (`registry.ts`), яка до backfill покриває `templateKey = null` і ключ-назву; джерела compendium-import = `compendiumTemplateKeys()`. Обидві знімаються/спрощуються разом із `LEGACY_KEY_BY_NAME` у 4.4 | Review Focus 3: prod до backfill; словники ключовано ключем пакета |
+| D16 | `groupTemplates` ключує `templateKeyOf(card) ?? card.templateKey ?? card.name`: сирий `templateKey` лишається для ключів поза реєстром (приватні шаблони, `heroes-homm` до 5.1) | без нього такі картки групувалися б за назвою |
+| D17 | `manifest.names` містить усі `TEMPLATE_CONTENT_LOCALES` незалежно від `manifest.locales` (в оболонках `names.uk = names.en`); `spell-fx-by-name` живе в `data/library/` (кириличні ключі, `data/**` поза i18n-лінтом). У частині 3 `SRD_KINDS` у `lib/utils/templates/i18n/{catalog,overlay}.ts` замінюється видами з `manifest.kinds` | тип spec 4.2; `lib/` під забороною кирилиці |
 
 ## Файлова структура
 
