@@ -80,3 +80,14 @@ Coverage (попередження, у реальному каталозі по�
 - Точні числа ростера (діапазони за рівнем, таблиця «Ростер»).
 - Місце helper-а спільного предиката Trait-ефектів (ресурс + імпорт).
 - Чи піднімати бюджет OpenAPI.
+
+## Уточнення за кодом (план, 2026-11-10)
+
+Рішення користувача не змінюються; нижче — факти коду, знайдені при складанні [плану](../plans/2026-11-10-wfrp-5g2-bestiary.md) (розділ «Перевірки коду»).
+
+- Характеристик wfrp **10** (`CHARACTERISTIC_KEYS`: ws, bs, s, t, i, ag, dex, int, wp, fel), не 8; валідатор вимагає всі 10 у `characteristics.base` і `move`.
+- `loadGrimTemplate` імпортує юнітів генеричним шляхом (`importContent` → `IMPORT_SPECS.units` → `createUnitSchema` → `unitsResource`), не через `importUnitSchema`. Там `abilities` уже є, а Traits для не-wfrp уже відхиляє ресурс; **бракує колонки `characteristics`** (`coerceRecord` відкидає її як `unknownField`). Тому §1 доповнюється: `jsonField("characteristics")` в `UNITS_IMPORT` і підпис `contentImport.fields.units.characteristics` у `messages/{uk,en}` (два нові ключі, всупереч «нових текстів немає»; `scope-size` перевіряється тестом). `importUnitSchema.abilities` (legacy `POST /units/import`) лишається, як вирішено.
+- Дозволені ефекти здібностей юніта — вихід рецептів `TRAIT_RECIPES`: крім `wfrpArmour/Ward/Size/Psychology/Attack`, `heal` і `note`, ще `flag` (Night Vision); Regenerate має тригер `turnStart`. Покриття «Trait реєстру» включає й note-рецепти (Night Vision, Undead, Hardy, Flier, Swarm).
+- Ризик 1: `unit.level` читає fair-баланс wfrp (`fair.ts` групує за тіром) і бібліотека (групування «тір»); XP не читає. Рівень загрози 1–4 сумісний із цим значенням, поле лишається `level`.
+- Атаки юнітів — лише Trait-атаки (`unitAttackSchema` не має wfrp-профілю); колонка `attacks` у `units.json` порожня. `maxHp` юніта бій бере з колонки (Wounds не виводяться), `initiative`/`speed` — з характеристик; план фіксує формулу Wounds і рівність похідних колонок.
+- У `Unit` немає поля опису: однорядкові описи юнітів лишаються в плані (для 5g-4).
