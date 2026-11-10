@@ -30,6 +30,7 @@
     "import-artifact-icons": "tsx scripts/import/import-artifact-icons.ts",
     "import-wiki-icons": "tsx scripts/import/import-wiki-icon-bundle.ts",
     "import-unit-icons": "tsx scripts/import/import-unit-icon-bundle.ts",
+    "assets:grim-icons": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/assets/grim-icons/cli.ts",
     "assets:icon-prompts": "tsx --tsconfig tsconfig.scripts.json scripts/assets/build-icon-prompts.ts",
     "constructor:official-templates": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/create-official-templates.ts",
     "constructor:copy-heroes": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/copy-test-heroes.ts",

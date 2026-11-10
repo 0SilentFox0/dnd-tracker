@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { grimCoverage, grimInfo } from "../coverage";
 import { readGrimData, readGrimManifest } from "../data";
+import { grimIconIssues, readGrimIcons } from "../icons";
 import { validateGrimData } from "../validate-data";
 
 import { mulberry32 } from "@/lib/utils/common/rng";
@@ -27,6 +28,10 @@ const CASTERS = ["Ember Acolyte", "Ashen Zealot", "Masked Oracle", "Gilded Voice
 const ROSTER = [["Bog Leech Swarm", "Beasts", 1], ["Ash Hound", "Beasts", 2], ["Thornback Boar", "Beasts", 2], ["Dusk Stalker", "Beasts", 3], ["Cinder Drake", "Beasts", 4], ["Ditch Cutthroat", "Raiders", 1], ["Ridge Reaver", "Raiders", 2], ["Scarred Brute", "Raiders", 2], ["Broadhelm Captain", "Raiders", 3], ["Red Banner Warlord", "Raiders", 4], ["Mire Skeleton", "Restless Dead", 1], ["Barrow Shambler", "Restless Dead", 2], ["Lantern Wraith", "Restless Dead", 3], ["Oathbound Revenant", "Restless Dead", 3], ["Hollow Queen", "Restless Dead", 4], ["Ember Acolyte", "Cultists", 1], ["Ashen Zealot", "Cultists", 2], ["Brand Bearer", "Cultists", 2], ["Masked Oracle", "Cultists", 3], ["Gilded Voice", "Cultists", 4], ["Clay Drudge", "Constructs", 1], ["Copper Hound", "Constructs", 2], ["Iron Watchman", "Constructs", 2], ["Stonebound Sentinel", "Constructs", 3], ["Forge Colossus", "Constructs", 4], ["Gloom Mite Swarm", "Horrors", 1], ["Pallid Crawler", "Horrors", 2], ["Many-Mouthed Thing", "Horrors", 3], ["Veil Stalker", "Horrors", 3], ["Hunger Below", "Horrors", 4]];
 
 describe("grim-d100 catalog", () => {
+  it("icons.json has no stale or invalid entries", () => {
+    expect(grimIconIssues(data, readGrimIcons())).toEqual([]);
+  });
+
   it("passes the validator", () => {
     expect(validateGrimData(data)).toEqual({ ok: true });
   });

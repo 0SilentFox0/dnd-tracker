@@ -7,6 +7,7 @@ import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData } f
 import { makeTemplateStore } from "../srd/lib/template-store";
 import { grimCoverage, grimInfo } from "./coverage";
 import { GRIM_DATA_DIR, GRIM_ROW_KINDS, type GrimData, readGrimData, readGrimManifest } from "./data";
+import { grimIconGaps, grimIconIssues, readGrimIcons, withGrimIcons } from "./icons";
 import { validateGrimData } from "./validate-data";
 
 import { GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
@@ -82,7 +83,13 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
 
   const validation = validateGrimData(data);
 
-  if (!validation.ok) throw new Error(`Дані Grim d100 невалідні:\n${validation.issues.map((i) => `  ${i}`).join("\n")}`);
+  const icons = readGrimIcons(dir);
+
+  const issues = [...(validation.ok ? [] : validation.issues), ...grimIconIssues(data, icons)];
+
+  if (issues.length > 0) throw new Error(`Дані Grim d100 невалідні:\n${issues.map((i) => `  ${i}`).join("\n")}`);
+
+  for (const gap of grimIconGaps(data, icons)) console.warn(gap);
 
   for (const warning of grimCoverage(data)) console.warn(warning);
 
@@ -104,7 +111,7 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
 
   const actor: Actor = { campaignId: template.id, userId: template.dmUserId, isDM: true, via: "session", scopes: null };
 
-  const results = await importSrdData(data, (kind, rows) => importContent(actor, kind, { rows, mode: "update", dryRun: false }, OFFLINE_IMPORT_DEPS), undefined, GRIM_ROW_KINDS);
+  const results = await importSrdData(withGrimIcons(data, icons), (kind, rows) => importContent(actor, kind, { rows, mode: "update", dryRun: false }, OFFLINE_IMPORT_DEPS), undefined, GRIM_ROW_KINDS);
 
   for (const line of formatImportSummary(results)) console.info(line);
 
