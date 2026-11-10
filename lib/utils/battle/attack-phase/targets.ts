@@ -83,7 +83,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
     ? [...chosen.filter(enemyOf(attacker)), ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id))]
     : piercing
       ? byId([...new Set([...piercingTargets(map, order, attacker, chosen[0].basicInfo.id), ...targetIds])])
-      : blast
+      : blast && map
         ? blastTargets({ map, order, attacker, centre: chosen[0], radius: blast, rules })
         : cleave
             ? [chosen[0], ...cleaveTargets(map, order, attacker, chosen[0], (attack.maxTargets ?? 1) - 1)]

@@ -190,6 +190,10 @@ function readBase(row: Row, issues: string[]): { base: Record<CharacteristicKey,
 
   const base = c.base;
 
+  const unknownBase = Object.keys(base).filter((k) => !(CHARACTERISTIC_KEYS as readonly string[]).includes(k));
+
+  if (unknownBase.length > 0) issues.push(`characteristics.base has unknown keys (${unknownBase.join(", ")})`);
+
   const missing = CHARACTERISTIC_KEYS.filter((k) => !Number.isInteger(base[k]));
 
   if (missing.length > 0) return fail(`characteristics.base must list all ${CHARACTERISTIC_KEYS.length} characteristics (missing ${missing.join(", ")})`);

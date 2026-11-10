@@ -30,4 +30,10 @@ describe("unitIssues", () => {
 
     expect(unitIssues(row)).toEqual([]);
   });
+
+  it("rejects an unknown key inside characteristics.base", () => {
+    const row = { name: "Ash Hound", level: 2, maxHp: 11, speed: 42, initiative: 40, gridSize: 1, statblock: { creatureType: "Beasts" }, characteristics: { base: { ws: 38, bs: 5, s: 30, t: 30, i: 40, ag: 40, dex: 5, int: 12, wp: 25, fel: 5, corruption: 3 }, move: 7 }, abilities: [] };
+
+    expect(unitIssues(row)).toContain("characteristics.base has unknown keys (corruption)");
+  });
 });
