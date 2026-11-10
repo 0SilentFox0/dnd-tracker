@@ -425,3 +425,18 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 - Сканер заборонених термінів доповнений і сканує також `rules.json`; `grimInfo` друкує `info:`-рядки (напр. заклинання, яке не знає жоден юніт), це не попередження покриття.
 - Розбіжності зі spec: кастери без `abilities`; overcast `targets` недоступний; кастери обрані за стелею SL (arcane CN 4+ недосяжний для більшості юнітів 5g-2); 9 стрілецьких замість ~8 (потрібен носій `blast`).
 - Тести: `scripts/grim/__tests__/arsenal-e2e.test.ts` (герої з предметами й заклинаннями проти юнітів); інтеграція на локальній БД перевіряє клон (заклинання, `systemStats`, таблиці, `knownSpells`) і no-op повторного запуску.
+
+## Межі 5g-4
+
+Завершення шаблону Grim d100 (на `feat/wfrp`, не змерджено; без міграцій). Spec/план — `docs/superpowers/{specs,plans}/2026-11-10-wfrp-5g4*`.
+
+- Реєстр локалізацій: `TEMPLATE_LOCALIZATIONS` (`lib/utils/campaigns/template-locales.ts`) — SRD і Grim, обидва `en/uk`; канонічний — офіційний `en` на кожен `templateKey` (два `en` Grim → 409 при клонуванні Grim і в списку, SRD клонується як раніше). Код помилки `SRD_CANONICAL_UNAVAILABLE` лишився спільним, змінено лише текст.
+- Що локалізується: назви й описи всіх видів, кар'єри з рівнями й спорядженням (`trappings`), `rules.tables[slot][i].text`, списки заклинань однією мапою імен для всіх місць (колізія двох списків — помилка до запису й при локалізації). Не локалізуються: `status` рівнів («Brass 3» парсить простій), ключі навичок, `profile` виду (текстових полів немає), `creatureType` юнітів.
+- Sync uk-клону Grim одразу після створення порожній, включно з правилами (`rulesHashes` рахує `tables` локалізованими з обох боків).
+- uk-словник Grim: `data/templates/grim-d100/i18n/uk.json` (покриття 100 %, `status`), глосарій `i18n/glossary/uk.json`; пайплайн — `pnpm srd:i18n <cmd> <locale> --template grim`, валідатор `grimI18nIssues`. Словник серверний, у клієнтські scope не потрапляє.
+- Перейменування (щоб не збігатися з іменами GW): кар'єра `Herald` → `Crier` (її рівні `Page, Crier, Emissary, High Crier`), `Charcoal Burner` → `Ashburner` (рівень 2 → `Ashburner`); `race-profiles.json` оновлено.
+- Іконки: 186 записів у `icons.json` за іменем; зображень у репозиторії немає — їх генерує користувач зовні за промптами (`pnpm assets:grim-icons prompts`), завантаження (`upload`, `--allow-remote`) лише за користувачем. `grimIconGaps` (відсутні іконки) — попередження CLI, не помилка валідатора; валідатор відхиляє лише зайві/невалідні записи `icons.json`. Іконки підмішуються в рядки через `withGrimIcons` під час `importContent`.
+- AI: рядок про рульову систему (`WFRP_SYSTEM_LINE`) додається лише для `wfrp`, для `homm`/`dnd5e` промпт і інструменти без змін; `get_party`, `read_character`, `get_battle_state` віддають wfrp-проєкції (Wounds, кар'єра, характеристики), `read_reference` артефакта вже віддавав `systemStats`.
+- CSV: `races.profile` не імпортується й не експортується (посилання за id; профіль редагується лише в UI виду) — фіксує тест `import-export.test.ts`. Round-trip `careers` (`tier1..4_*`, таланти за назвою) і `artifacts.systemStats` покрито тестами.
+- Хвости 5g-3 закрито: M2 (`dryRun` прев'ю тепер бачить `SYSTEM_STATS_UNSUPPORTED`), M7 (ключ), `NaN` в `recipeValues` без `rangeFt`.
+- Розбіжності зі spec (повністю — «Перевірки коду» плану): реєстр без `kinds`; `races.profile` без текстових полів; `rules.tables[slot][i].text` замість `.rows`; Herald — і кар'єра, і рівень; `grimIconGaps` замість попередження в `grimCoverage`; зображення зовнішні; рядок AI лише для wfrp; `read_reference` без змін; `SRD_CANONICAL_UNAVAILABLE` збережено.

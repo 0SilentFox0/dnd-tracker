@@ -157,7 +157,9 @@
 - **Ефекти заклинань** — `scripts/srd/overrides/spells.ts`; заклинання, які рушій не виражає, явно перелічено в `scripts/srd/__tests__/fixtures/dm-resolved-spells.json` (164 «голих», фікстуру перегенерувати після кожного нового override; перевіряє `spell-coverage.test.ts`).
 - **Вміння видів/класів/рис** — `scripts/srd/overrides/{races,classes,feats,race-choices}.ts`; повнота й дублікати — `abilities-completeness.test.ts`. Деталі моделі — [abilities.md](abilities.md#srd-52-повнота-механік).
 
-### Мова контенту SRD: один канонічний шаблон
+### Мова контенту офіційних шаблонів
+
+Реєстр `TEMPLATE_LOCALIZATIONS` (`lib/utils/campaigns/template-locales.ts`) перелічує локалізовані офіційні шаблони: SRD 5.2 і Grim d100 (обидва `en/uk`). Для кожного `templateKey` канонічний — один офіційний англійський шаблон; словники лежать у `data/templates/<template>/i18n/uk.json`, CLI — `pnpm srd:i18n <cmd> <locale> [--template srd|grim]` (за замовчуванням `srd`); `apply` відмовляє при колізіях імен і нерезолвлених списках заклинань. Нижче описано SRD; Grim працює так само, додатково локалізуючи кар'єри, `rules.tables[*].text` і списки заклинань (межі — «Межі 5g-4» у [rule-systems.md](rule-systems.md)).
 
 Англійський офіційний `5e SRD 5.2` — єдине джерело; `uk` накладається під час створення клону та source-sync. Спек: `docs/superpowers/specs/2026-10-31-srd-template-overlay-design.md`.
 
@@ -181,6 +183,16 @@
 - **Повторний запуск:** SRD оновлює за назвами, Heroes друкує «вже існує»; скрипти довго пишуть у prod (SRD ≈ кілька хвилин).
 - **Іконки Heroes** посилаються на префікс HOMM5 у сховищі; кеш довідника — до 300 с (`REFERENCE_REVALIDATE_SECONDS`), шаблони з'являються в майстрі не одразу.
 - `PLATFORM_ADMIN_USER_IDS` у Vercel Production = id власника; діє з наступним деплоєм.
+
+### Grim d100 (runbook, нічого не виконано)
+
+1. Передумова: епік `feat/wfrp` змерджено, 10 міграцій (перелік — [STATUS](../STATUS.md), п.1) застосовано на prod деплоєм.
+2. Репетиція на prodcopy: свіжа копія, `pnpm constructor:grim-template --owner <id>` (локально), другий запуск → `+0 ~0 -0`, клон `en` і `uk` через UI, sync порожній.
+3. Свіжий бекап prod (`DIRECT_URL`).
+4. `pnpm constructor:grim-template --owner <id> --allow-remote` з prod-`DATABASE_URL`; власник — `dmUserId` наявних офіційних шаблонів.
+5. Перевірка: picker пропонує Grim з мовами `en/uk`; клон `uk` — український контент.
+6. Іконки окремим кроком: PNG за `docs/assets/icon-prompts/grim-d100/`, QA на вшитий текст, `pnpm assets:grim-icons upload <templateId> --dir <images> --allow-remote`, коміт `icons.json`, повторний `constructor:grim-template --allow-remote` (публікує іконки новою версією).
+7. Після деплою епіку — окрема міграція DROP `race_profiles` (STATUS п.1).
 
 ## Оновлення з джерела (етап 3)
 
