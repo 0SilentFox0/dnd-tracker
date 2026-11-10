@@ -2,9 +2,10 @@ import type { ZodType } from "zod";
 
 import "server-only";
 import type { ReferenceKindValue } from "@/lib/cache/tags";
+import type { ContentKind } from "@/lib/constants/content-kinds";
 import type { AccessLevel, Actor } from "@/lib/utils/api/actor";
 
-export type ContentKind = "units" | "races" | "classes" | "feats" | "backgrounds" | "careers" | "spells" | "spell-groups" | "main-skills" | "skills" | "artifacts" | "artifact-sets" | "tracks";
+export type { ContentKind } from "@/lib/constants/content-kinds";
 
 export type FindPurpose = "read" | "write";
 

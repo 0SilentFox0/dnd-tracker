@@ -1,16 +1,8 @@
+import { CONTENT_KINDS } from "@/lib/constants/content-kinds";
 import type { ICON_BUCKETS } from "@/lib/constants/storage";
-import type { ContentKind } from "@/lib/server/content/define-resource";
 
 export const TEMPLATE_CONTENT_LOCALES = ["en", "uk"] as const;
 export type TemplateContentLocale = (typeof TEMPLATE_CONTENT_LOCALES)[number];
-
-export const CONTENT_KINDS = ["units", "races", "classes", "feats", "backgrounds", "careers", "spells", "spell-groups", "main-skills", "skills", "artifacts", "artifact-sets", "tracks"] as const satisfies readonly ContentKind[];
-
-type MissingKind = Exclude<ContentKind, (typeof CONTENT_KINDS)[number]>;
-
-const kindsExhaustive: [MissingKind] extends [never] ? true : never = true;
-
-void kindsExhaustive;
 
 export const PACK_KINDS = [...CONTENT_KINDS, "skillTrees"] as const;
 export type PackKind = (typeof PACK_KINDS)[number];
