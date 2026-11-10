@@ -248,6 +248,7 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - Blast: радіус X клітинок і цілі на клітинку (`extract-wfrp-attacks.ts:10`, `attack-phase/targets.ts`); на карті Blast б'є всіх у радіусі, союзників теж (рішення користувача 2026-11-07), крім самого атакувальника.
 - `attackBonus`: `flat` таланту трактується як кількість SL (`flat: 2` = +2 SL); якщо таланти задають відсотки, потрібен перерахунок `flat / 10`.
 - Defensive не реалізовано (`implemented:false`) до тексту книги.
+- Бестіарій Grim (5g-2): числа юнітів задані за рівнем загрози (`UNIT_LEVEL_BANDS` у `scripts/grim/units.ts`), не з офіційних стат-блоків; формула Wounds юніта (множники Size ×2/×4/×8, Swarm ×5, Hardy +TB) — власна.
 - Traits: `wfrp/traits/constants.ts` (поріг Ward на d10, кроки й множники Size, критерій SL і рівні `broken` Fear/Terror, Breath: радіус/дальність/без SB, Regenerate 1d10, Night Vision 60 ft, перелік атак-Traits і `TRAIT_SIZES`), `BALANCE_REF_INCOMING`; Terror випереджає Fear, далі більше значення, і Terror також записує fear як протестований з тим самим цільовим числом.
 - Психологія (5h-1): у рушії лише дві сторони (`ally`/`enemy`), нейтральної немає, тож «нейтральний тестер» неможливий. Не тестується пробудження ворогів лабіринту (`withMazeAwareness` чиста, без rng/правил). Прямий `add-participant` (не резерв) тестується через `runPsychology`.
 - Порча (5h-3): `wfrp/corruption/constants.ts` (`GRANT_MAX`, `POINTS_MAX`, `MUTATIONS_MAX`, `PHYSICAL_MAX_ROLL`, тест `endurance`/`challenging`), межі ефектів `lib/constants/wfrp-mutations.ts`, поріг TB + WPB, «рівно на порозі — без тесту», повторний тест при кожному нарахуванні понад поріг, дефолтні таблиці `mutationPhysical`/`mutationMental` (рядки й ефекти).
@@ -394,3 +395,16 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 - Назви Charcoal Burner (кар'єра) і Herald (рівень) впізнавані з WFRP: рішення за користувачем.
 - Короткі терміни сканера («Moot», «Gor») можуть давати хибні спрацювання на звичайних словах («moot point»); суфікс `ers?` ловить і «Reiker».
 - Trim посилань відбувається в `coerceRecord` ще до валідатора: пробіл по краях посилання валідатор не бачить.
+
+## Межі 5g-2
+
+Бестіарій Grim d100 (на `feat/wfrp`, не змерджено; без нових ефектів і міграцій). Spec/план — `docs/superpowers/{specs,plans}/2026-11-10-wfrp-5g2*`.
+
+- Склад: 30 юнітів у `data/templates/grim-d100/units.json` — 6 тем (`statblock.creatureType`: Beasts, Raiders, Restless Dead, Cultists, Constructs, Horrors) × 4 рівні загрози в `level`. `level` безпечний: fair-баланс і бібліотека читають його як тір, а не як 5e-рівень.
+- `abilities` юніта — лише вихід рецептів Traits 5h-1 (`id` = id рецепта; Fear і Terror мають `"fear"`); `attacks`, `knownSpells`, `raceId`, `avatar` у рядках відсутні, атаки юніта — лише Trait-атаки. Описів юнітів у БД немає.
+- Wounds (`maxHp`): `average = SB + 2·TB + WPB`; за Size: tiny = 1, little = TB, small = 2·TB + WPB, average без Trait Size, large ×2, enormous ×4, monstrous ×8; Swarm ×5; Hardy + TB (після множників); мінімум 1. Hardy і Swarm у рушії інертні, тож їхній вплив запечено в `maxHp`. Похідні колонки: `initiative = I`, `speed = move × 6`, `gridSize` за Size (tiny–average 1, large 2, enormous/monstrous 3).
+- Діапазони за рівнем — `UNIT_LEVEL_BANDS` у `scripts/grim/units.ts` (максимум характеристик, Combat, Wounds, AP, Ward, Psychology, атаки, Breath, Regenerate/Magical лише з рівня 2/3). Валідатор (`unitIssues`) відхиляє вихід за діапазон, `grimCoverage` лише попереджає: тема без юніта, рівень без юніта, Trait, якого не вживає жоден юніт.
+- Імпорт: `IMPORT_SPECS.units` отримав JSON-колонку `characteristics` (без неї завантажувач губив характеристики юнітів; зберігається лише у wfrp-кампанії); legacy `POST /units/import` приймає `abilities` з тією ж перевіркою Traits, що й ресурс (спільний `lib/server/content/traits-guard.ts`, `assertTraitsSupported`).
+- Сканер заборонених термінів: доповнений список істот GW; `ALLOWED_PHRASES` («moot point», «moot question», «moot court») вирізаються перед скануванням, що закриває залишок 5g-1 про «Moot».
+- Тести: `scripts/grim/__tests__/bestiary-e2e.test.ts` — герої 5g-1 проти юнітів до кінця бою. Цикл вбивства відновлює HP союзників на кожному ударі (інакше відповідні удари вибивають героїв), тому твердження «герої на ногах» слабке.
+- `scope-size` і OpenAPI-ліміти не піднімались.
