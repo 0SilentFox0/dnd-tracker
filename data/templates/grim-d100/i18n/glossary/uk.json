@@ -1,0 +1,23 @@
+{
+  "Weapon Skill": "Володіння зброєю", "WS": "ВЗ", "Ballistic Skill": "Стрільба", "BS": "СТ", "Strength": "Сила", "S": "С", "Toughness": "Статура", "T": "Ст",
+  "Initiative": "Ініціатива", "I": "Ін", "Agility": "Спритність", "Ag": "Сп", "Dexterity": "Моторика", "Dex": "Мт", "Intelligence": "Інтелект", "Int": "Інт",
+  "Willpower": "Воля", "WP": "Вл", "Fellowship": "Чарівність", "Fel": "Чр", "Characteristic": "характеристика", "Characteristics": "характеристики",
+  "Wounds": "Рани", "Wound": "Рана", "Fate": "Доля", "Fortune": "Удача", "Resilience": "Стійкість", "Resolve": "Рішучість", "Corruption": "Порча", "Mutation": "мутація",
+  "Momentum": "Імпульс", "Success Levels": "Рівні успіху", "Success Level": "Рівень успіху", "SL": "РУ", "Casting Number": "Складність касту", "CN": "СН", "Advantage": "Перевага",
+  "Move": "Рух", "Armour": "Броня", "Armour Points": "Очки броні", "AP": "ОБ", "Test": "Тест", "Experience": "Досвід", "Talent": "Талант", "Talents": "Таланти", "Skill": "Навичка", "Skills": "Навички",
+  "Career": "Кар'єра", "Tier": "Рівень", "Trappings": "Спорядження", "Species": "Вид", "Reach": "Досяжність", "Encumbrance": "Навантаження", "Specialisation": "Спеціалізація",
+  "Ablaze": "Горіння", "Bleeding": "Кровотеча", "Blinded": "Осліплений", "Broken": "Зламаний", "Deafened": "Оглушений звуком", "Entangled": "Сплутаний", "Fatigued": "Втома",
+  "Poisoned": "Отруєння", "Prone": "Лежить", "Stunned": "Оглушення", "Surprised": "Захоплений зненацька", "Unconscious": "Непритомний", "Winded": "Перехопило подих", "Disarmed": "Роззброєно", "Crippled": "Скалічено",
+  "Damaging": "Руйнівна", "Impale": "Пробивна", "Penetrating": "Проникна", "Hack": "Рубальна", "Pummel": "Оглушальна", "Precise": "Точна", "Accurate": "Влучна", "Blast": "Вибух", "Pistol": "Пістоль",
+  "Shield": "Щит", "Defensive": "Захисна", "Fast": "Швидка", "Flexible": "Гнучка", "Distract": "Відволікання", "Entangle": "Заплутування", "Wrap": "Обкручування", "Spread": "Розкид",
+  "Trap Blade": "Пастка для клинка", "Unbreakable": "Незламна", "Inflict": "Накладає", "Repeater": "Багатозарядна", "Imprecise": "Неточна", "Undamaging": "Нешкідлива", "Unreliable": "Ненадійна",
+  "Dangerous": "Небезпечна", "Slow": "Повільна", "Reload": "Перезарядка", "Quality": "Властивість", "Flaw": "Вада", "Flaws": "Вади",
+  "Basic": "Базова", "Blackpowder": "Порохова", "Bow": "Лук", "Brawling": "Кулачна", "Cavalry": "Кавалерійська", "Crossbow": "Арбалет", "Engineering": "Інженерна", "Entangling": "Заплутувальна",
+  "Explosives": "Вибухівка", "Fencing": "Фехтувальна", "Flail": "Ціп", "Parry": "Парирувальна", "Polearm": "Держакова", "Sling": "Праща", "Throwing": "Метальна", "Two-handed": "Дворучна", "Weapon Group": "Група зброї",
+  "Academic": "Учений", "Burgher": "Городянин", "Courtier": "Придворний", "Peasant": "Селянин", "Ranger": "Мисливець", "Riverfolk": "Річковик", "Rogue": "Волоцюга", "Warrior": "Воїн",
+  "Brass": "Латунь", "Silver": "Срібло", "Gold": "Золото", "Status": "Статус", "gc": "зк", "ss": "шл", "d": "п", "Gold Crown": "золота крона", "Shilling": "шилінг", "Penny": "пенні",
+  "Cantrips": "Замовляння", "Petty": "Дрібна", "Arcane": "Аркана", "Hedge": "Знахарська", "Witchcraft": "Відьомська", "Chaos": "Хаос", "Blessing": "Благословення", "Miracle": "Чудо",
+  "Miscast": "збій магії", "Minor Miscast": "Малий збій магії", "Major Miscast": "Великий збій магії", "Wrath of the Gods": "Гнів богів", "Overcast": "Оверкаст", "Channelling": "Скерування", "Spell": "Заклинання",
+  "Critical Wound": "критична рана", "Critical": "Критичне", "Head": "Голова", "Arm": "Рука", "Arms": "Руки", "Body": "Тулуб", "Leg": "Нога", "Legs": "Ноги",
+  "Lowlander": "Рівнинець", "Delver": "Копач", "Hearthkin": "Вогнищанин", "Veyl": "Вейл", "School of Embers": "Школа жарин", "School of Gloam": "Школа присмерку", "Fenlore": "Болотне знання", "Thornwitchery": "Терникове чаклунство", "Hearth Rites": "Обряди вогнища"
+}
