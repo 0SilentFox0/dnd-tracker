@@ -4,10 +4,10 @@ import type { PackHooks } from "../types";
 import { wfrpDataOf } from "./common";
 
 import { prisma } from "@/lib/db";
-import { saveRaceProfile } from "@/lib/server/races/race-profile";
 import { jsonContent } from "@/lib/utils/common/json";
 import { nameKey } from "@/lib/utils/content/import";
 import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
+import { saveRaceProfile } from "@/systems/wfrp/server/race-profile";
 
 type Ctx = Parameters<NonNullable<PackHooks["afterImport"]>>[0];
 

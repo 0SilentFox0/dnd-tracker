@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 import { profileReferences } from "@/lib/server/races/profile-usage";
-import { listRaceProfiles, saveRaceProfile } from "@/lib/server/races/race-profile";
 import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
+import { listRaceProfiles, saveRaceProfile } from "@/systems/wfrp/server/race-profile";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), ReferenceKind: { RACES: "races" } }));

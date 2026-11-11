@@ -40,6 +40,10 @@
     "reason": "route"
   },
   {
+    "file": "app/api/campaigns/[id]/race-profiles/route.ts",
+    "reason": "route"
+  },
+  {
     "file": "app/api/campaigns/[id]/races/[raceId]/profile/route.ts",
     "reason": "route"
   },
@@ -65,10 +69,6 @@
   },
   {
     "file": "lib/server/races/profile-usage.ts",
-    "reason": "content-kind"
-  },
-  {
-    "file": "lib/server/races/race-profile.ts",
     "reason": "content-kind"
   },
   {

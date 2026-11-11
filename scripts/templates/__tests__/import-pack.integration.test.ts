@@ -19,7 +19,7 @@ vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invali
 import { importPack } from "../lib/import-pack";
 
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
-import { listRaceProfiles } from "@/lib/server/races/race-profile";
+import { listRaceProfiles } from "@/systems/wfrp/server/race-profile";
 
 const marker = `grimload-${randomUUID()}`;
 

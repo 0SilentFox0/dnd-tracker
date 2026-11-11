@@ -23,7 +23,6 @@ import { grimData } from "../systems/wfrp/__tests__/pack-helpers";
 import { GRIM_SPELL_LISTS } from "../systems/wfrp/spells";
 
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
-import { listRaceProfiles } from "@/lib/server/races/race-profile";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { visible } from "@/lib/server/templates/sync/__tests__/helpers";
@@ -33,6 +32,7 @@ import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 import { translateAt } from "@/lib/utils/templates/i18n/overlay";
 import { slugify } from "@/lib/utils/templates/slug";
 import { readTranslations } from "@/scripts/templates/lib/i18n-store";
+import { listRaceProfiles } from "@/systems/wfrp/server/race-profile";
 
 const marker = `grimloc-${randomUUID()}`;
 

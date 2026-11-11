@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { saveRaceProfile } from "@/lib/server/races/race-profile";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { saveRaceProfile } from "@/systems/wfrp/server/race-profile";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
-vi.mock("@/lib/server/races/race-profile", () => ({ saveRaceProfile: vi.fn() }));
+vi.mock("@/systems/wfrp/server/race-profile", () => ({ saveRaceProfile: vi.fn() }));
 
 const valid = { move: 4, fate: 2, careerTable: [{ max: 100, careerId: "c1" }] };
 

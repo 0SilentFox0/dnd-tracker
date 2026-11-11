@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { listRaceProfiles } from "@/lib/server/races/race-profile";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { listRaceProfiles } from "@/systems/wfrp/server/race-profile";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
-vi.mock("@/lib/server/races/race-profile", () => ({ listRaceProfiles: vi.fn() }));
+vi.mock("@/systems/wfrp/server/race-profile", () => ({ listRaceProfiles: vi.fn() }));
 
 const get = async () => {
   const { GET } = await import("../route");

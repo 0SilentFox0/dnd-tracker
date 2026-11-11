@@ -1,6 +1,6 @@
 import "server-only";
-import { listRaceProfiles } from "@/lib/server/races/race-profile";
 import { profileRefIds } from "@/systems/wfrp/server/profile-refs";
+import { listRaceProfiles } from "@/systems/wfrp/server/race-profile";
 
 export async function profileReferences(campaignId: string, ref: { careerId?: string; featId?: string }): Promise<boolean> {
   const items = await listRaceProfiles(campaignId);

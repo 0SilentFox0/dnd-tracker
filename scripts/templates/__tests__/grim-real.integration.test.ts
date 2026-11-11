@@ -17,7 +17,7 @@ import { importPack } from "../lib/import-pack";
 import { grimData } from "../systems/wfrp/__tests__/pack-helpers";
 
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
-import { listRaceProfiles } from "@/lib/server/races/race-profile";
+import { listRaceProfiles } from "@/systems/wfrp/server/race-profile";
 
 const marker = `grimreal-${randomUUID()}`;
 

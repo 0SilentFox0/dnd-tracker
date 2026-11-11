@@ -15,7 +15,7 @@ vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invali
 vi.mock("@/lib/server/campaigns/version", () => ({ bumpContentVersion: vi.fn() }));
 
 import { profileReferences } from "@/lib/server/races/profile-usage";
-import { listRaceProfiles, saveRaceProfile } from "@/lib/server/races/race-profile";
+import { listRaceProfiles, saveRaceProfile } from "@/systems/wfrp/server/race-profile";
 
 const marker = `rprof-${randomUUID()}`;
 
