@@ -41,7 +41,7 @@ const resource = defineResource({
   remove: async () => {},
 });
 
-const deps = (): ImportDeps => ({ resource: () => resource, loadNames: async () => [], loadKeys: async () => keys, writeSlug });
+const deps = (): ImportDeps => ({ resource: () => resource, loadKeys: async () => keys, writeSlug });
 
 const run = (rows: Record<string, unknown>[], mode: ImportMode = "update", dryRun = false) => importContent(actor, "units", { rows, mode, dryRun }, deps());
 

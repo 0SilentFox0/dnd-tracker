@@ -62,7 +62,7 @@ it("imports perform names as IDs and exports them for another campaign", async (
   const abilities = cells[IMPORT_SPECS.units.fields.findIndex((f) => f.key === "abilities")];
 
   expect(abilities).toContain('"spellId":"Druidcraft"');
-  await importContent({ ...actor, campaignId: "c2" }, "units", { rows: [{ name: "Dragon", abilities }], mode: "create", dryRun: false }, { ...deps, loadNames: async (_c, k) => (k === "spells" ? [{ id: "c2-spell", name: "Druidcraft" }] : []) });
+  await importContent({ ...actor, campaignId: "c2" }, "units", { rows: [{ name: "Dragon", abilities }], mode: "create", dryRun: false }, { ...deps, loadKeys: async (_c, k) => (k === "spells" ? [{ id: "c2-spell", name: "Druidcraft", slug: null }] : []) });
   expect(stored.abilities).toMatchObject([{ perform: { spellId: "c2-spell" } }]);
 });
 

@@ -8,7 +8,6 @@ import type { ContentImportInput } from "@/lib/schemas/content-import";
 import { assertCan } from "@/lib/server/content/access";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
-import { loadNames } from "@/lib/server/content/import/names";
 import { type KeyRow, loadKeys, tableOfKind, writeSlug } from "@/lib/server/content/import/slug";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { withCampaignContentWrite, withCampaignRuntimeWrite } from "@/lib/server/content/write";
@@ -24,7 +23,6 @@ import type { ImportField, ImportIssue, ImportKind, ImportMode, ImportRecord, Im
 
 export interface ImportDeps {
   resource(kind: ImportKind): AnyContentResource;
-  loadNames(campaignId: string, kind: ImportKind): Promise<IdName[]>;
   loadKeys(campaignId: string, kind: ImportKind): Promise<KeyRow[]>;
   writeSlug(campaignId: string, kind: ImportKind, id: string, slug: string): Promise<void>;
   invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
@@ -32,7 +30,7 @@ export interface ImportDeps {
   skipUnchanged?: boolean;
 }
 
-export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames, loadKeys, writeSlug, transactional: true };
+export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadKeys, writeSlug, transactional: true };
 
 export const OFFLINE_IMPORT_DEPS: ImportDeps = { ...DEFAULT_IMPORT_DEPS, invalidate: () => undefined, skipUnchanged: true };
 
@@ -315,7 +313,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
 
   const refKinds = refKindsOf(spec);
 
-  const [own, ...refLists] = await Promise.all([deps.loadKeys(actor.campaignId, kind), ...refKinds.map((k) => deps.loadNames(actor.campaignId, k))]);
+  const [own, ...refLists] = await Promise.all([deps.loadKeys(actor.campaignId, kind), ...refKinds.map((k) => deps.loadKeys(actor.campaignId, k))]);
 
   const ctx: PlanCtx = { spec, resource, mode: input.mode, existing: indexNames(own), refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])), seen: new Set(), seenSlugs: new Set(), incomingSlugs: new Set(input.rows.flatMap((r) => (typeof r.slug === "string" && r.slug ? [r.slug] : []))), claimed: new Set() };
 
