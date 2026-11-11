@@ -221,7 +221,7 @@
   {
     "slug": "set-sar-issus",
     "name": "Regalia of Sar-Issa",
-    "description": "Full set: level 1-2 spells hit up to 2 targets.\n\nThe archmage Sar-Issa left the Silver League not books but objects: a crown, a robe, a staff and a ring, each infused with one of the schools. Whoever gathers all four will hear them hum in unison, and the simplest spell will split in two.",
+    "description": "Full set: level 1–2 spells hit up to 2 targets.\n\nThe archmage Sar-Issa left the Silver League not books but objects: a crown, a robe, a staff and a ring, each infused with one of the schools. Whoever gathers all four will hear them hum in unison, and the simplest spell will split in two.",
     "abilities": [
       {
         "id": "sar-issus-split",
