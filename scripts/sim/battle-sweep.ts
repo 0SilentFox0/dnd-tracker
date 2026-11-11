@@ -48,6 +48,7 @@ import { createStartMutation } from "@/lib/server/battles/mutations/start/start-
 import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mutations/unit-control/unit-control-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
+import { abilityLabel } from "@/lib/utils/abilities/build/resolve";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
@@ -64,7 +65,9 @@ import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/sto
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { rollDiceList } from "@/lib/utils/common/dice";
+import { ruleSystemByKey } from "@/lib/utils/rules/systems";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, writeUnlocked } from "@/lib/utils/skills/progression";
+import { spellEffects } from "@/lib/utils/spells/model/read";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 
 try {
@@ -166,7 +169,7 @@ type Cov = { source: string; owner: string; name: string; event: string; effects
 
 const coverage = new Map<string, Cov>();
 
-const spellStats = new Map<string, { school: string; level: number; casts: number; ok: number; noEffect: number; rejected: string[]; samples: string[]; kinds: string }>();
+const spellStats = new Map<string, { school: string; level: number; casts: number; ok: number; noEffect: number; failed: number; blocked: number; rejected: string[]; samples: string[]; kinds: string }>();
 
 const treeChecks: string[] = [];
 
@@ -556,6 +559,8 @@ function passiveViaModifiers(p: any, a: any): boolean {
 
       if (r.entries.some((en: any) => { const label = typeof en.label === "string" ? en.label : JSON.stringify(en.label ?? "");
 
+ if (JSON.stringify(en.label) === JSON.stringify(abilityLabel(a))) return true;
+
  return label === a.name || label === a.source.name || label.includes(a.name) || label.includes(a.source.name); })) return true;
     }
   }
@@ -564,6 +569,11 @@ function passiveViaModifiers(p: any, a: any): boolean {
 }
 
 // ---------- дії ----------
+/** Ключі рядків логу «ціль імунна / не діє на героїв» — каст без змін через них не помилка */
+const IMMUNITY_LINE = /abilityText\.log\.(?:immune|immuneTo|notOnHeroes)\b|battleActions\.[\w.]*[iI]mmune\b|battleLog\.[\w.]*immunityNote\b/;
+
+const brokenSpells = new Set<string>();
+
 const triedSpells = new Map<string, number>();
 
 const triedAbilities = new Map<string, number>();
@@ -632,6 +642,18 @@ async function castSpell(actor: any, spell: any) {
 
   const diceRolls = dice.count > 0 ? rollDiceList(`${dice.count}d${dice.sides}`, rng) : [];
 
+  const effectKinds: string[] = (spell.spellEffects ?? []).map((e: any) => e.kind);
+
+  if (effectKinds.some((k) => k === "heal" || k === "hot")) {
+    for (const id of (targets as string[]).length ? (targets as string[]) : friendsOf(actor).map((x: any) => x.basicInfo.id)) {
+      const t = byId(id);
+
+      if (t && alive(t) && t.combatStats.currentHp >= t.combatStats.maxHp) await call("participants", PATCH(id), { currentHp: Math.max(1, Math.floor(t.combatStats.maxHp / 2)) });
+    }
+  }
+
+  const nothingToCleanse = effectKinds.length > 0 && effectKinds.every((k) => k === "cleanse") && (targets as string[]).every((id) => !byId(id)?.battleData.activeEffects.length);
+
   const watched = [...new Set([...(targets as string[]), ...P().map((p: any) => p.basicInfo.id)])];
 
   const before = snap(watched);
@@ -644,9 +666,11 @@ async function castSpell(actor: any, spell: any) {
 
   const saveRolls = (targets as string[]).map((id) => ({ participantId: id, roll: 1 }));
 
-  const r = await call("spell", SPELL, { casterId: actor.basicInfo.id, spellId: spell.id, targetIds: targets, diceRolls, saveRolls });
-
   const s = spellStats.get(spell.id) as NonNullable<ReturnType<typeof spellStats.get>>;
+
+  const castRoll = PROFILE.judge === "server" && s.ok === 0 && s.failed > 0 ? 1 : undefined;
+
+  const r = await call("spell", SPELL, { casterId: actor.basicInfo.id, spellId: spell.id, targetIds: targets, diceRolls, saveRolls, ...(castRoll && { castRoll }) });
 
   s.casts++;
 
@@ -660,7 +684,11 @@ async function castSpell(actor: any, spell: any) {
 
   const onlyNote = (spell.spellEffects ?? []).every((e: any) => e.kind === "note" || (e.kind === "createTerrain" && !state.map));
 
-  if (changed || onlyNote) s.ok++; else { s.noEffect++; issue("warn", `${spell.name} (${actor.basicInfo.name}): каст пройшов, але жодних змін у цілей`); }
+  const castFailed = r.log.some((e: any) => e.actionType === "spell" && e.actionDetails?.system && ruleSystemByKey(e.actionDetails.system.key)?.combat.details?.failed(e.actionDetails.system));
+
+  const blocked = IMMUNITY_LINE.test(JSON.stringify(r.log));
+
+  if (castFailed) s.failed++; else if (changed || onlyNote) s.ok++; else if (blocked || nothingToCleanse || brokenSpells.has(spell.id)) s.blocked++; else { s.noEffect++; issue("warn", `${spell.name} (${actor.basicInfo.name}): каст пройшов, але жодних змін у цілей`); }
 
   if (s.samples.length < 2) s.samples.push(r.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 400));
 
@@ -854,7 +882,7 @@ function coverageReport(): string[] {
   for (const [, s] of [...spellStats.entries()].sort((a, b) => a[1].school.localeCompare(b[1].school) || a[1].level - b[1].level)) {
     const name = (s as any).name;
 
-    out.push(`- ${s.casts === 0 ? "⚪" : s.ok > 0 ? "✅" : "❌"} ${s.school} L${s.level} ${name}: кастів ${s.casts}, з ефектом ${s.ok}, без ефекту ${s.noEffect}${s.rejected.length ? `, відхилено: ${[...new Set(s.rejected)].join("; ")}` : ""}`);
+    out.push(`- ${s.casts === 0 ? "⚪" : s.ok > 0 ? "✅" : "❌"} ${s.school} L${s.level} ${name}: кастів ${s.casts}, з ефектом ${s.ok}, без ефекту ${s.noEffect}${s.failed ? `, невдалих кидків каста ${s.failed}` : ""}${s.blocked ? `, без цілі для ефекту (імунітет/нічого знімати) ${s.blocked}` : ""}${s.rejected.length ? `, відхилено: ${[...new Set(s.rejected)].join("; ")}` : ""}`);
   }
 
   return out;
@@ -913,7 +941,16 @@ async function main() {
 
   const spells = new Map(spellRows.map((s: any) => [s.id, s]));
 
-  for (const s of spellRows as any[]) spellStats.set(s.id, { name: s.name, school: s.spellGroup?.name ?? "-", level: s.level, casts: 0, ok: 0, noEffect: 0, rejected: [], samples: [], kinds: (s.spellEffects ?? []).map((e: any) => e.kind).join("+") } as any);
+  for (const row of spellRows as any[]) {
+    const raw = Array.isArray(row.spellEffects) ? row.spellEffects : [];
+
+    if (spellEffects(row).length !== raw.length) {
+      brokenSpells.add(row.id);
+      issue("warn", `${row.name}: ${raw.length - spellEffects(row).length} з ${raw.length} ефектів заклинання недійсні (kind: ${raw.map((e: any) => e?.kind).join(", ")}) — дані, а не рушій`);
+    }
+  }
+
+  for (const s of spellRows as any[]) spellStats.set(s.id, { name: s.name, school: s.spellGroup?.name ?? "-", level: s.level, casts: 0, ok: 0, noEffect: 0, failed: 0, blocked: 0, rejected: [], samples: [], kinds: (s.spellEffects ?? []).map((e: any) => e.kind).join("+") } as any);
 
   const report: string[] = [`# Battle sweep: ${campaign.name} (${PROFILE.key})`, "", ...(treeChecks.length ? ["## Дерева", ...treeChecks.map((t) => `- ${t}`)] : [])];
 
@@ -1012,6 +1049,8 @@ async function systemChecks(spells: Map<string, any>) {
 
   const target = foesOf(hero())[0];
 
+  const ammoAtStart = P().flatMap((p) => (p.battleData.ammo && Object.keys(p.battleData.ammo).length ? [{ ...p.battleData.ammo } as Record<string, number>] : []))[0];
+
   const roll = PROFILE.judge === "server" ? { serverRoll: true } : { d20Roll: 20 };
 
   const r = await call("attack", ATTACK, { attackerId: heroId, targetId: target.basicInfo.id, attackId: weapon.id, ...roll, damageRolls: rollDiceList(heroAttackDamageParts(hero(), weapon).formula, rng), endTurn: false });
@@ -1021,10 +1060,8 @@ async function systemChecks(spells: Map<string, any>) {
   if (PROFILE.judge === "server") tcheck("сервер кидає d100 за атаку", r.status === 200 && slotRoll >= 1 && slotRoll <= 100, `${r.status}; кидок у деталях дії ${slotRoll}`);
   else tcheck("d20-атака героя", r.status === 200 && diceSidesOf(r.log).has(20), `${r.status}; кубики d${[...diceSidesOf(r.log)].join(",d")}`);
 
-  const withAmmo = P().find((p) => p.battleData.ammo && Object.keys(p.battleData.ammo).length);
-
   if (PROFILE.judge === "server") {
-    if (withAmmo) tcheck("боєзапас засіяно на старті", Object.values(withAmmo.battleData.ammo as Record<string, number>).every((n) => n > 0), JSON.stringify(withAmmo.battleData.ammo))
+    if (ammoAtStart) tcheck("боєзапас засіяно на старті", Object.values(ammoAtStart).every((n) => n > 0), JSON.stringify(ammoAtStart))
     else tskip("боєзапас", "жоден учасник бою не має зброї з боєзапасом у даних шаблону");
   }
 

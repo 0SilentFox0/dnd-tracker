@@ -48,6 +48,15 @@ export async function openTemplateRun(profile: SweepProfile, campaignId: string 
     dropTemplate = imported.cleanup;
   }
 
+  try {
+    return await seedHeroes(profile, campaign, dropTemplate);
+  } catch (e) {
+    await dropTemplate();
+    throw e;
+  }
+}
+
+async function seedHeroes(profile: SweepProfile, campaign: any, dropTemplate: () => Promise<void>): Promise<TemplateRun> {
   const races = await prisma.race.findMany({ where: { campaignId: campaign.id }, orderBy: { name: "asc" } });
 
   const classes = (await prisma.gameClass.findMany({ where: { campaignId: campaign.id }, orderBy: { name: "asc" } })).sort((x, y) => Number(y.caster !== "none") - Number(x.caster !== "none"));
@@ -58,8 +67,14 @@ export async function openTemplateRun(profile: SweepProfile, campaignId: string 
 
   const heroIds: string[] = [];
 
-  for (const spec of heroSpecsFor(races, classes, profile.heroCount)) {
-    const row = await prisma.character.create({ data: heroRowData(spec, profile, { campaignId: campaign.id, controlledBy: campaign.dmUserId, spellIds: picked.map((s) => s.id) }) as any });
+  const artifacts = await prisma.artifact.findMany({ where: { campaignId: campaign.id }, select: { id: true, slot: true, systemStats: true } });
+
+  const ammoWeapon = artifacts.find((a) => (a.systemStats as { ammoCapacity?: number } | null)?.ammoCapacity);
+
+  for (const [i, spec] of heroSpecsFor(races, classes, profile.heroCount).entries()) {
+    const data = heroRowData(spec, profile, { campaignId: campaign.id, controlledBy: campaign.dmUserId, spellIds: picked.map((s) => s.id) });
+
+    const row = await prisma.character.create({ data: { ...data, ...(i === 0 && ammoWeapon && { inventory: { create: { equipped: { weapon: ammoWeapon.id } } } }) } as any });
 
     heroIds.push(row.id);
   }
