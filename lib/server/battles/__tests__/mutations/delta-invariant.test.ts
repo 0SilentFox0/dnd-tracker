@@ -13,6 +13,7 @@ import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import type { MutationResult, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { BattleMeta, BattleSceneState, SnapshotState, StoredBattleEvent, StoredParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState, eventToBattleAction, joinParticipant, prepareSave, splitParticipant } from "@/lib/utils/battle/store";
 import { KNOWLEDGE_EVENT_TYPES, summarizeKnowledge } from "@/lib/utils/battle/view/knowledge";
@@ -38,7 +39,7 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
     turnIndex: 0,
     version: 1,
     eventSeq: 0,
-    pendingMoraleCheck: null, pendingCritChoice: null, momentum: {},
+    pendingMoraleCheck: null, pendingCritChoice: null,
     startedAt: new Date("2026-01-01T00:00:00.000Z"),
     completedAt: null,
     ...init.scene,
@@ -112,8 +113,7 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
       }
 
       scene = {
-        ...scene,
-        ...outcome.scene,
+        ...applyScenePatch(scene, outcome.scene ?? {}),
         version: scene.version + 1,
         eventSeq: clearHistory ? created.length : scene.eventSeq + created.length,
       };

@@ -5,10 +5,11 @@ import { runAttackPhase } from "../run-attack-phase";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { momentumOf, sceneOf, slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
-import type { BattleAttack, BattleParticipant, SceneMomentum } from "@/types/battle";
+import type { SceneMomentum } from "@/systems/wfrp/rules/slots";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", maxTargets: 2, damageType: "slashing" };
 
@@ -36,7 +37,7 @@ const MISS = 0.795;
 const order = () => [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY), fighter("u", ParticipantSide.ENEMY)];
 
 const run = (targetIds: string[], strikes: number[], rng: () => number, momentum?: SceneMomentum, damageRolls = targetIds.map(() => 4)) =>
-  runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds, attackRolls: strikes, damageRolls }, battleId: "b", userId: "u", isDM: true, rng, momentum });
+  runAttackPhase({ rules: WFRP_RULES, battle: { initiativeOrder: order(), currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds, attackRolls: strikes, damageRolls }, battleId: "b", userId: "u", isDM: true, rng, sceneState: momentum && sceneOf(momentum) });
 
 const used = (r: ReturnType<typeof run>) => r.allBattleActions.map((a) => attackOf(a.actionDetails)?.momentumUsed === true);
 
@@ -80,7 +81,7 @@ describe("wfrp scene momentum in the attack phase", () => {
 
     expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation", "attack"]);
     expect(used(r)).toEqual([false, false, true]);
-    expect(r.momentum).toEqual({ ally: true });
+    expect(momentumOf(r.sceneState)).toEqual({ ally: true });
   });
 
   it("starts from the momentum passed in and spends it on the first strike", () => {
@@ -93,10 +94,10 @@ describe("wfrp scene momentum in the attack phase", () => {
     const r = run(["t"], [30], byCall(MISS, HIT, MISS));
 
     expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
-    expect(r.momentum).toEqual({ enemy: true });
+    expect(momentumOf(r.sceneState)).toEqual({ enemy: true });
   });
 
   it("a lost strike gives the defending side the Momentum when none is passed in", () => {
-    expect(run(["t"], [80], byCall(HIT, HIT, MISS)).momentum).toEqual({ enemy: true });
+    expect(momentumOf(run(["t"], [80], byCall(HIT, HIT, MISS)).sceneState)).toEqual({ enemy: true });
   });
 });

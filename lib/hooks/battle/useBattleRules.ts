@@ -5,14 +5,11 @@ import { useMemo } from "react";
 import { useBattleSceneData } from "./useBattleScene";
 
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { SceneMomentum } from "@/types/battle";
-
-const NO_MOMENTUM: SceneMomentum = {};
-
+import type { ParticipantSide } from "@/types/battle";
 export function useBattleRules() {
   const { battle } = useBattleSceneData();
 
-  const { rules, momentum } = battle;
+  const { rules, system } = battle;
 
   return useMemo(() => {
     const { combat, d20Stats, distance, progression, spells, magic } = ruleSystemOf(rules);
@@ -26,7 +23,7 @@ export function useBattleRules() {
       magic: !!magic,
       distance,
       woundsLabel: progression.hpTerm === "wounds" ? ("wounds" as const) : ("hp" as const),
-      momentum: momentum ?? NO_MOMENTUM,
+      sceneHeldBy: (side: ParticipantSide) => combat.sceneHeldBy?.(system, side) ?? false,
     };
-  }, [rules, momentum]);
+  }, [rules, system]);
 }

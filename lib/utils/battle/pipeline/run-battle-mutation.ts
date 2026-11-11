@@ -20,6 +20,7 @@ import { lineText } from "@/lib/utils/battle/log/lines";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { sweepOrphanedAnchored } from "@/lib/utils/battle/spell/anchored-zone";
 import { sweepDeadZones } from "@/lib/utils/battle/spell/zone-triggers";
 import type {
@@ -275,11 +276,8 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const delta = await deps.saveBattle(loaded, result, write);
 
-  const { map: _map, ...scenePatch } = result.scene ?? {};
-
   const after: BattleSceneState = {
-    ...loaded.scene,
-    ...scenePatch,
+    ...applyScenePatch(loaded.scene, result.scene ?? {}),
     version: delta.version,
     eventSeq: delta.events.at(-1)?.seq ?? loaded.scene.eventSeq,
   };

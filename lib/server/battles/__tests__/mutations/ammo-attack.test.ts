@@ -9,6 +9,7 @@ import { validateAttackPreview } from "@/lib/server/battles/dice";
 import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const bow: BattleAttack = { id: "bow", name: "Bow", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d6", damageType: "piercing", ammo: { capacity: 2, reload: 1 } };
@@ -74,7 +75,7 @@ describe("attack mutation ammo", () => {
     const emptied = await attackMutation(ctx, body("bow", true));
 
     expect(ammoOf(emptied.participants).reload).toEqual({ bow: 1 });
-    ctx = { ...ctx, participants: emptied.participants.map(fresh), scene: { ...ctx.scene, ...emptied.scene } };
+    ctx = { ...ctx, participants: emptied.participants.map(fresh), scene: applyScenePatch(ctx.scene, emptied.scene ?? {}) };
 
     const owner = ctx.participants.findIndex((p) => p.basicInfo.id === "a");
 

@@ -21,12 +21,12 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { removeEffects } from "@/lib/utils/battle/conditions";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import { baseMovement } from "@/lib/utils/battle/grid/path";
-import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { BattleAction, BattleMapConfig, BattleParticipant, SceneMomentum } from "@/types/battle";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export interface RunCoreActionInput {
@@ -37,14 +37,14 @@ export interface RunCoreActionInput {
   round: number;
   rng: () => number;
   battleId: string;
-  momentum?: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
 export interface RunCoreActionResult {
   participants: BattleParticipant[];
   messages: LogLine[];
   actions?: BattleAction[];
-  momentum?: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
 const TIMED_ACTIONS = {
@@ -170,7 +170,7 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   if (reach) return reject(reach);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules }, momentum: input.momentum ?? NO_MOMENTUM };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules }, sceneState: input.sceneState };
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: actor.basicInfo.id, targetId, attack, currentRound: round, battleId: input.battleId, rng, label: "readied" });
 
@@ -178,5 +178,5 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   const spent = { ...fresh, battleData: { ...fresh.battleData, readied: undefined }, actionFlags: { ...fresh.actionFlags, hasUsedReaction: true } };
 
-  return { participants: replaceParticipant(flow.ps, spent), messages: [], actions: [battleAction], momentum: flow.momentum };
+  return { participants: replaceParticipant(flow.ps, spent), messages: [], actions: [battleAction], sceneState: flow.sceneState };
 }

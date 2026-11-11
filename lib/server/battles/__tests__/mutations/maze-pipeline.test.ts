@@ -16,6 +16,7 @@ import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
 import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { BattleMeta, BattleSceneState, SnapshotState, StoredBattleEvent, StoredParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState, eventToBattleAction, joinParticipant, prepareSave, splitParticipant } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -32,7 +33,7 @@ const mapOf = (over: Partial<MazeConfig> = {}, size = 8): BattleMapConfig => maz
 
 const scene0: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
 };
 
 /** Сховище в пам'яті з тими самими split/join, prepareSave і знімками, що й saveBattle, плюс карта бою */
@@ -85,9 +86,7 @@ function memoryBattle(participants: BattleParticipant[], map: BattleMapConfig) {
 
       if (outcome.scene?.map !== undefined) meta.map = wire(outcome.scene.map);
 
-      const { map: _map, ...patch } = outcome.scene ?? {};
-
-      scene = { ...scene, ...patch, version: scene.version + 1, eventSeq: scene.eventSeq + created.length };
+      scene = { ...applyScenePatch(scene, outcome.scene ?? {}), version: scene.version + 1, eventSeq: scene.eventSeq + created.length };
 
       return delta;
     },

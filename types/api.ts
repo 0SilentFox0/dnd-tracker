@@ -21,8 +21,9 @@ import type {
 } from "@/lib/schemas/battles";
 import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAudioState } from "@/types/audio";
-import type { BattleMapConfig, MazeConfig, SceneMomentum, TerrainDiff } from "@/types/battle";
+import type { BattleMapConfig, MazeConfig, TerrainDiff } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -80,8 +81,8 @@ export interface BattleScene {
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
   pendingCritChoice?: PendingCritChoice | null;
-  /** відсутнє = жетонів немає */
-  momentum?: SceneMomentum;
+  /** Стан сцени, яким керує система; відсутнє = немає */
+  system?: SystemSlot;
   map?: BattleMapConfig | null;
   /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
   audio?: BattleAudioState | null;
@@ -102,8 +103,8 @@ export interface ClientBattleDelta {
     turnIndex: number;
     pendingMoraleCheck: unknown;
     pendingCritChoice: PendingCritChoice | null;
-    /** відсутнє = жетонів немає */
-    momentum?: SceneMomentum;
+    /** відсутнє = без змін станом сцени не керує жодна система */
+    system?: SystemSlot;
     /** null — дату скинуто (reset, відкат завершеного бою) */
     startedAt?: string | null;
     completedAt?: string | null;

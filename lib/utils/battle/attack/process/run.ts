@@ -19,7 +19,6 @@ import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/b
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
-import { heldBy, NO_MOMENTUM, settle } from "@/lib/utils/battle/momentum";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
@@ -67,7 +66,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: rngOf(params), map: params.map, rules: params.rules, crit: params.crit }, momentum: params.momentum ?? NO_MOMENTUM };
+  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: rngOf(params), map: params.map, rules: params.rules, crit: params.crit }, sceneState: params.sceneState };
 
   const run: AttackRun = { params, flow, before, attackerId, targetId, existedBefore: activeEffectIds(flow.ps) };
 
@@ -133,12 +132,12 @@ function spendAttackAction(run: AttackRun): void {
   put(flow, params.offHand && ruleSystemOf(flow.ctx.rules).combat.actionEconomy.bonusAction ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
 }
 
-function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons" | "momentum">, hit: boolean): ProcessAttackResult {
+function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons" | "sceneState">, hit: boolean): ProcessAttackResult {
   const { flow, attackerId, targetId, existedBefore } = run;
 
   flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
 
-  return { ...r, summons: flow.summons, momentum: flow.momentum, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
+  return { ...r, summons: flow.summons, sceneState: flow.sceneState, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
 }
 
 function abortedResult(run: AttackRun): ProcessAttackResult {
@@ -151,7 +150,7 @@ function abortedResult(run: AttackRun): ProcessAttackResult {
   return {
     success: false,
     summons: flow.summons,
-    momentum: flow.momentum,
+    sceneState: flow.sceneState,
     attackRoll: abortedRoll(run),
     targetUpdated: getP(flow, targetId),
     attackerUpdated: getP(flow, attackerId),
@@ -208,10 +207,6 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
 
   const rules = flow.ctx.rules;
 
-  const sides = { attacker: attacker.basicInfo.side, target: target.basicInfo.side };
-
-  const held = { attacker: heldBy(flow.momentum, sides.attacker), defender: heldBy(flow.momentum, sides.target) };
-
   const r = resolve({
     attacker,
     target,
@@ -220,17 +215,13 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
     rules,
     rng: flow.ctx.rng,
     manualRoll: params.d20Roll,
-    momentum: held,
+    sceneState: flow.sceneState,
     fortune: params.fortune,
   });
 
-  const { next, gained } = settle(flow.momentum, sides, r.momentum);
-
-  flow.momentum = next;
+  if (r.scene) flow.sceneState = r.scene;
 
   flow.messages.push(...r.lines);
-
-  if (gained) flow.messages.push(textRef("battleLog.percentile.momentum"));
 
   if (r.fortune) {
     const spender = getP(flow, attackerId);

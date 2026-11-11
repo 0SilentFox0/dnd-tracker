@@ -78,7 +78,7 @@ describe("turn events", () => {
 
     const b = makeParticipant({ id: "b", abilities: [tired] });
 
-    const scene = { id: "b1", campaignId: "c1", status: "active" as const, round: 1, turnIndex: 1, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null };
+    const scene = { id: "b1", campaignId: "c1", status: "active" as const, round: 1, turnIndex: 1, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null };
 
     const r = advanceTurn({ rules: DEFAULT_RULES, participants: [a, b], pending: [], scene });
 

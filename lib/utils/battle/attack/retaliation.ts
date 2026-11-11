@@ -9,11 +9,11 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
-import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant, SceneMomentum } from "@/types/battle";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 type Kind = AttackType;
 
@@ -33,13 +33,13 @@ export interface RetaliationInput {
   crit?: CritPicker;
   map?: BattleMapConfig | null;
   rules: Ruleset;
-  momentum?: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
 export interface RetaliationResult {
   participants: BattleParticipant[];
   battleAction: BattleAction;
-  momentum: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
 function weaponFor(defender: BattleParticipant, participants: BattleParticipant[], kind: Kind): { attack: BattleAttack; bonusPercent: number } | null {
@@ -86,7 +86,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   if (!weapon) return null;
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules: input.rules, crit: input.crit }, momentum: input.momentum ?? NO_MOMENTUM };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules: input.rules, crit: input.crit }, sceneState: input.sceneState };
 
   if (!provoked && !unlimited) {
     put(flow, {
@@ -98,5 +98,5 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: defenderId, targetId: attackerId, attack: weapon.attack, currentRound: round, battleId, rng, bonusPercent: weapon.bonusPercent, label: "retaliation" });
 
-  return { participants: flow.ps, battleAction, momentum: flow.momentum };
+  return { participants: flow.ps, battleAction, sceneState: flow.sceneState };
 }

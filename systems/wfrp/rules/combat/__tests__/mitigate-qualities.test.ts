@@ -88,7 +88,7 @@ describe("resolveWfrpAttack qualities", () => {
   };
 
   const run = (attack: BattleAttack, manualRoll = 30) =>
-    resolveWfrpAttack({ attacker: fighter("a"), target: fighter("t"), attack, participants: [], rules: WFRP_RULES, rng: () => 0.5, manualRoll, momentum: { attacker: false, defender: false } });
+    resolveWfrpAttack({ attacker: fighter("a"), target: fighter("t"), attack, participants: [], rules: WFRP_RULES, rng: () => 0.5, manualRoll, sceneState: undefined });
 
   const q = (qualities: QualityRef[], flaws: QualityRef[] = [], type: BattleAttack["type"] = AttackType.MELEE): BattleAttack => ({ ...sword, type, system: ATTACK_SLOT.write({ qualities, flaws }) });
 

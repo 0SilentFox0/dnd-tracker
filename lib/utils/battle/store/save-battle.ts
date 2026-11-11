@@ -13,7 +13,6 @@ import { joinParticipant, splitParticipant } from "./split-participant";
 import type {
   BattleDelta,
   BattleMutationOutcome,
-  BattleSceneState,
   LoadedBattle,
   ParticipantColumns,
   StoredBattleEvent,
@@ -25,7 +24,7 @@ import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { encodeLog } from "@/lib/utils/battle/log/codec";
 import { formatBattleLog } from "@/lib/utils/battle/log/lines";
-import { hasMomentum } from "@/lib/utils/battle/momentum";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -141,9 +140,7 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
     return { ...e, resultText, details: { ...e.details, log: encodeLog(log) } };
   });
 
-  const { map: _map, ...scenePatch } = outcome.scene ?? {};
-
-  const nextScene: BattleSceneState = { ...scene, ...scenePatch };
+  const nextScene = applyScenePatch(scene, outcome.scene ?? {});
 
   const delta: BattleDelta = {
     battleId: scene.id,
@@ -154,7 +151,7 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
       turnIndex: nextScene.turnIndex,
       pendingMoraleCheck: nextScene.pendingMoraleCheck,
       pendingCritChoice: nextScene.pendingCritChoice,
-      momentum: nextScene.momentum,
+      ...(nextScene.sceneState && { sceneState: nextScene.sceneState }),
     },
     upserted: [...diff.created, ...diff.updated.map((u) => u.next)].map((p) => joinParticipant(p, scene.id)),
     fullIds: [...diff.created, ...diff.updated.filter((u) => u.snapshotChanged).map((u) => u.next)].map((p) => p.columns.id),
@@ -196,7 +193,7 @@ export async function saveBattle(
         ...(patch.turnIndex !== undefined && { currentTurnIndex: patch.turnIndex }),
         ...(patch.pendingMoraleCheck !== undefined && { pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck) }),
         ...(patch.pendingCritChoice !== undefined && { pendingCritChoice: jsonOrNull(patch.pendingCritChoice) }),
-        ...(patch.momentum !== undefined && { momentum: hasMomentum(patch.momentum) ? patch.momentum : Prisma.DbNull }),
+        ...(patch.sceneState !== undefined && { systemState: patch.sceneState ? (patch.sceneState as unknown as Prisma.InputJsonValue) : Prisma.DbNull }),
         ...(patch.startedAt !== undefined && { startedAt: patch.startedAt }),
         ...(patch.completedAt !== undefined && { completedAt: patch.completedAt }),
         ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),

@@ -12,15 +12,16 @@ import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
 import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardLabel, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
-import { momentumPatch } from "@/lib/utils/battle/momentum";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { sceneStatePatch } from "@/lib/utils/battle/scene-state";
 import { hasAnchors } from "@/lib/utils/battle/spell/anchored-zone";
 import { zoneMove } from "@/lib/utils/battle/spell/zone-triggers";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
-import type { BattleMapConfig, BattleParticipant, GridPoint, SceneMomentum, TerrainCell } from "@/types/battle";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 
@@ -80,7 +81,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
     return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [], trail: { from: mover.battleData.position, path: pathFrom(search, mover, data.to) ?? [] } });
   }
 
-  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx), momentum: ctx.scene.momentum });
+  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx), sceneState: ctx.scene.sceneState });
 
   const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
 
@@ -88,7 +89,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   const stopAt = full.findIndex((c) => cellKey(c) === cellKey(out.destination));
 
-  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events, momentum: out.momentum, trail: { from: mover.battleData.position, path: stopAt >= 0 ? full.slice(0, stopAt + 1) : full } });
+  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events, sceneState: out.sceneState, trail: { from: mover.battleData.position, path: stopAt >= 0 ? full.slice(0, stopAt + 1) : full } });
 }
 
 interface MoveOutcome {
@@ -97,13 +98,13 @@ interface MoveOutcome {
   hazard: TerrainCell | null;
   messages: LogLine[];
   events: NewBattleEvent[];
-  momentum?: SceneMomentum;
+  sceneState?: SystemSlot;
   /** шлях пройдено вільно від from; лише тоді спрацьовують зони заклинань */
   trail?: { from: GridPoint | undefined; path: GridPoint[] };
 }
 
-function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents, momentum, trail }: MoveOutcome): MutationResult {
-  const patch = momentum ? momentumPatch(ctx.scene.momentum, momentum) : {};
+function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents, sceneState, trail }: MoveOutcome): MutationResult {
+  const patch = sceneStatePatch(ctx.scene.sceneState, sceneState);
 
   const scene = Object.keys(patch).length > 0 ? { scene: patch } : {};
 

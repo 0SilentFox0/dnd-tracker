@@ -2,9 +2,10 @@ import type { BattleStatus } from "@/lib/constants/battle";
 import type { PsychologyKind } from "@/lib/utils/abilities/schema/kinds";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleAudioState } from "@/types/audio";
-import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, IngredientStock, PendingHit, SceneMomentum } from "@/types/battle";
+import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, IngredientStock, PendingHit } from "@/types/battle";
 
 export interface BattleSceneState {
   id: string;
@@ -16,7 +17,7 @@ export interface BattleSceneState {
   eventSeq: number;
   pendingMoraleCheck: unknown | null;
   pendingCritChoice: StoredPendingCritChoice | null;
-  momentum: SceneMomentum;
+  sceneState?: SystemSlot;
   startedAt: Date | null;
   completedAt: Date | null;
 }
@@ -114,8 +115,8 @@ export interface LoadedBattle {
 }
 
 export type ScenePatch = Partial<
-  Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "momentum" | "startedAt" | "completedAt">
-> & { map?: BattleMapConfig | null; rules?: Ruleset };
+  Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "startedAt" | "completedAt">
+> & { map?: BattleMapConfig | null; rules?: Ruleset; sceneState?: SystemSlot | null };
 
 export interface BattleMutationOutcome {
   scene?: ScenePatch;
@@ -130,7 +131,7 @@ export interface BattleMutationOutcome {
 export interface BattleDelta {
   battleId: string;
   version: number;
-  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "momentum">;
+  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice"> & { sceneState?: SystemSlot };
   upserted: BattleParticipant[];
   /** нові учасники й ті, чий знімок змінився */
   fullIds: string[];

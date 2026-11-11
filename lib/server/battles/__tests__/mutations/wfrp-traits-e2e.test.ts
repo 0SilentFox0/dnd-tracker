@@ -8,6 +8,7 @@ import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mut
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
@@ -84,7 +85,7 @@ const strike = (c: BattleMutationContext, attackerId: string, targetId: string, 
   return attackMutation({ ...ctx, rng: firstThen(...rng) }, attackBodySchema.parse({ attackerId, targetId, attackId, d20Roll: roll, damageRolls: [4], endTurn }));
 };
 
-const advance = (ctx: BattleMutationContext, out: Awaited<ReturnType<typeof strike>>): BattleMutationContext => ({ ...ctx, participants: out.participants, scene: { ...ctx.scene, ...out.scene } });
+const advance = (ctx: BattleMutationContext, out: Awaited<ReturnType<typeof strike>>): BattleMutationContext => ({ ...ctx, participants: out.participants, scene: applyScenePatch(ctx.scene, out.scene ?? {}) });
 
 const part = (ctx: BattleMutationContext, id: string) => must(ctx.participants.find((p) => p.basicInfo.id === id));
 

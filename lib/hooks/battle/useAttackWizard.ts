@@ -28,7 +28,7 @@ import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();
 
-  const { dice, momentum, fortune } = useBattleRules();
+  const { dice, sceneHeldBy, fortune } = useBattleRules();
 
   const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
 
@@ -86,7 +86,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const percentile = {
     target: dice === 100 && attacker && attack ? percentileTargetOf(attacker, attack, scene.battle.rules) : null,
-    momentum: !!attacker && !!momentum[attacker.basicInfo.side],
+    momentum: !!attacker && sceneHeldBy(attacker.basicInfo.side),
     weaponTargets: dice === 100 && attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, percentileTargetOf(attacker, a, scene.battle.rules)?.target])) : {},
   };
 

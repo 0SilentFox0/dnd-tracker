@@ -11,10 +11,11 @@ import { pathTo } from "@/lib/utils/battle/grid/path";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { momentumOf, sceneOf, slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
-import type { BattleAttack, BattleMapConfig, BattleParticipant, SceneMomentum } from "@/types/battle";
+import type { SceneMomentum } from "@/systems/wfrp/rules/slots";
+import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 // the WFRP system has no reactions yet; the engine plumbing is still verified with them switched on
 vi.mock("@/lib/utils/rules/systems", async (importOriginal) => {
@@ -64,9 +65,9 @@ const opportunity = (rules: typeof wfrp, rolls: () => () => number, momentum?: S
 
   const path = pathTo(map, ps, ps[0], { x: 3, y: 2 }, 10) ?? [];
 
-  const input = { participants: ps, moverId: "m", path, start: { x: 0, y: 2 }, map, round: 1, battleId: "b1", rules, rng: rolls(), momentum };
+  const input = { participants: ps, moverId: "m", path, start: { x: 0, y: 2 }, map, round: 1, battleId: "b1", rules, rng: rolls(), sceneState: momentum && sceneOf(momentum) };
 
-  return { direct: resolveOpportunityAttacks(input), moved: resolveMovement5e({ map, participants: ps, mover: ps[0], to: { x: 3, y: 2 }, path, budget: 10, cost: 3, round: 1, battleId: "b1", rules, rng: rolls(), momentum }) };
+  return { direct: resolveOpportunityAttacks(input), moved: resolveMovement5e({ map, participants: ps, mover: ps[0], to: { x: 3, y: 2 }, path, budget: 10, cost: 3, round: 1, battleId: "b1", rules, rng: rolls(), sceneState: momentum && sceneOf(momentum) }) };
 };
 
 describe("opportunity attacks", () => {
@@ -74,48 +75,48 @@ describe("opportunity attacks", () => {
     const { direct, moved } = opportunity(wfrp, () => byCall(HIT, MISS));
 
     expect(direct.actions).toHaveLength(1);
-    expect(direct.momentum).toEqual({ ally: true });
-    expect(moved.momentum).toEqual({ ally: true });
+    expect(momentumOf(direct.sceneState)).toEqual({ ally: true });
+    expect(momentumOf(moved.sceneState)).toEqual({ ally: true });
   });
 
   it("an existing token of the reacting side is spent", () => {
     const { direct } = opportunity(wfrp, () => byCall(HIT, MISS), { ally: true });
 
     expect(used(direct.actions[0])).toBe(true);
-    expect(direct.momentum).toEqual({ ally: true });
+    expect(momentumOf(direct.sceneState)).toEqual({ ally: true });
   });
 
   it("passes the incoming value through when nothing is resolved", () => {
     const { moved } = opportunity({ ...wfrp, actions: { ...wfrp.actions, opportunityAttacks: false } }, () => byCall(HIT, MISS), { enemy: true });
 
-    expect(moved.momentum).toEqual({ enemy: true });
+    expect(momentumOf(moved.sceneState)).toEqual({ enemy: true });
   });
 
   it("d20 rules leave the empty momentum untouched", () => {
     const { direct, moved } = opportunity({ ...DEFAULT_RULES, actions: { ...DEFAULT_RULES.actions, enabled: true } }, () => () => 0.99);
 
-    expect(direct.momentum).toEqual({});
-    expect(moved.momentum).toEqual({});
+    expect(direct.sceneState).toBeUndefined();
+    expect(moved.sceneState).toBeUndefined();
   });
 });
 
 describe("legendary attack", () => {
   const run = (rules: typeof wfrp, rng: () => number, momentum?: SceneMomentum) =>
-    legendaryAttack({ participants: [mk("boss", ParticipantSide.ENEMY, 0), mk("hero", ParticipantSide.ALLY, 1)], actorId: "boss", attackIndex: 0, targetId: "hero", map, rules, round: 1, rng, battleId: "b1", momentum });
+    legendaryAttack({ participants: [mk("boss", ParticipantSide.ENEMY, 0), mk("hero", ParticipantSide.ALLY, 1)], actorId: "boss", attackIndex: 0, targetId: "hero", map, rules, round: 1, rng, battleId: "b1", sceneState: momentum && sceneOf(momentum) });
 
   it("the winning side gains Momentum", () => {
-    expect(run(wfrp, byCall(HIT, MISS)).momentum).toEqual({ enemy: true });
+    expect(momentumOf(run(wfrp, byCall(HIT, MISS)).sceneState)).toEqual({ enemy: true });
   });
 
   it("an existing token is spent", () => {
     const out = run(wfrp, byCall(HIT, MISS), { enemy: true });
 
     expect(used(out.action)).toBe(true);
-    expect(out.momentum).toEqual({ enemy: true });
+    expect(momentumOf(out.sceneState)).toEqual({ enemy: true });
   });
 
   it("d20 rules keep it empty", () => {
-    expect(run(DEFAULT_RULES, () => 0.99).momentum).toEqual({});
+    expect(run(DEFAULT_RULES, () => 0.99).sceneState).toBeUndefined();
   });
 });
 
@@ -125,27 +126,27 @@ describe("readied attack", () => {
 
     const ready = { ...a, battleData: { ...a.battleData, readied: { kind: "attack" as const, round: 1 } } };
 
-    return runCoreAction({ participants: [ready, mk("foe", ParticipantSide.ENEMY, 1)], body: { action: "readiedAttack", participantId: "a", targetId: "foe" }, map, rules, round: 1, rng, battleId: "b1", momentum });
+    return runCoreAction({ participants: [ready, mk("foe", ParticipantSide.ENEMY, 1)], body: { action: "readiedAttack", participantId: "a", targetId: "foe" }, map, rules, round: 1, rng, battleId: "b1", sceneState: momentum && sceneOf(momentum) });
   };
 
   it("the winning side gains Momentum", () => {
-    expect(run(wfrp, byCall(HIT, MISS)).momentum).toEqual({ ally: true });
+    expect(momentumOf(run(wfrp, byCall(HIT, MISS)).sceneState)).toEqual({ ally: true });
   });
 
   it("an existing token is spent", () => {
     const out = run(wfrp, byCall(HIT, MISS), { ally: true });
 
     expect(out.actions?.[0] && used(out.actions[0])).toBe(true);
-    expect(out.momentum).toEqual({ ally: true });
+    expect(momentumOf(out.sceneState)).toEqual({ ally: true });
   });
 
   it("d20 rules keep it empty", () => {
-    expect(run(DEFAULT_RULES, () => 0.99).momentum).toEqual({});
+    expect(run(DEFAULT_RULES, () => 0.99).sceneState).toBeUndefined();
   });
 
   it("other core actions return no momentum", () => {
-    const out = runCoreAction({ participants: [mk("a", ParticipantSide.ALLY, 0)], body: { action: "dodge", participantId: "a" }, map: null, rules: wfrp, round: 1, rng: () => 0.5, battleId: "b1", momentum: { ally: true } });
+    const out = runCoreAction({ participants: [mk("a", ParticipantSide.ALLY, 0)], body: { action: "dodge", participantId: "a" }, map: null, rules: wfrp, round: 1, rng: () => 0.5, battleId: "b1", sceneState: sceneOf({ ally: true }) });
 
-    expect(out.momentum).toBeUndefined();
+    expect(out.sceneState).toBeUndefined();
   });
 });

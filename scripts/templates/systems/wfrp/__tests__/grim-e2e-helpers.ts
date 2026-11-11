@@ -8,6 +8,7 @@ import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mut
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { coerceRecord, IMPORT_SPECS } from "@/lib/utils/content/import";
 import { mergeRules } from "@/lib/utils/rules/schema";
@@ -96,7 +97,7 @@ export async function strike(ctx: BattleMutationContext, attackerId: string, tar
 
   const out = await attackMutation({ ...ready, rng: firstThen(...rng) }, attackBodySchema.parse({ attackerId, targetId, attackId, d20Roll: roll, damageRolls: [4], endTurn }));
 
-  const next: BattleMutationContext = { ...ready, participants: out.participants, pending: out.pending ?? ready.pending, scene: { ...ready.scene, ...out.scene } };
+  const next: BattleMutationContext = { ...ready, participants: out.participants, pending: out.pending ?? ready.pending, scene: applyScenePatch(ready.scene, out.scene ?? {}) };
 
   return { out, next };
 }

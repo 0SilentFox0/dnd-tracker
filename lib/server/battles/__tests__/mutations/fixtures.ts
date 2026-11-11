@@ -24,7 +24,7 @@ export function context(over: Partial<BattleMutationContext> = {}): BattleMutati
       turnIndex: 0,
       version: 2,
       eventSeq: 3,
-      pendingMoraleCheck: null, pendingCritChoice: null, momentum: {},
+      pendingMoraleCheck: null, pendingCritChoice: null,
       startedAt: null,
       completedAt: null,
     },

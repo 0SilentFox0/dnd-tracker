@@ -12,9 +12,11 @@ import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -64,7 +66,7 @@ describe("wfrp battle end to end (engine)", () => {
 
       rolls.push(out.events.length);
       lastEvents = JSON.stringify(out.events);
-      ctx = { ...ctx, participants: out.participants, pending: out.pending ?? ctx.pending, scene: { ...ctx.scene, ...out.scene } };
+      ctx = { ...ctx, participants: out.participants, pending: out.pending ?? ctx.pending, scene: applyScenePatch(ctx.scene, out.scene ?? {}) };
     };
 
     await step("a", "t");
@@ -136,7 +138,7 @@ describe("wfrp battle end to end (engine)", () => {
     expect(hp({ ...ctx, participants: out.participants }, "t")).toBe(12);
     expect(JSON.stringify(out.events)).toContain("battleWfrp.log.tick.bleeding");
 
-    const afterTurn: BattleMutationContext = { ...ctx, participants: out.participants, scene: { ...ctx.scene, ...out.scene } };
+    const afterTurn: BattleMutationContext = { ...ctx, participants: out.participants, scene: applyScenePatch(ctx.scene, out.scene ?? {}) };
 
     const tested = conditionTestMutation(afterTurn, { participantId: "t", condition: "bleeding", roll: 10 });
 
@@ -147,7 +149,7 @@ describe("wfrp battle end to end (engine)", () => {
     expect(() => conditionTestMutation({ ...afterTurn, participants: tested.participants }, { participantId: "t", condition: "bleeding", roll: 10 })).toThrow(API_ERRORS.CONDITION_TEST_UNAVAILABLE);
   });
 
-  describe("scene momentum", () => {
+  describe("scene state", () => {
     const wfrpCtx = (over: Partial<BattleMutationContext["scene"]> = {}, metaOver: Partial<BattleMutationContext["meta"]> = {}): BattleMutationContext => {
       const base = context({ participants: [fighter("a", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });
 
@@ -159,18 +161,18 @@ describe("wfrp battle end to end (engine)", () => {
     it("a won attack writes the side token to the scene, the next attack of that side spends it", async () => {
       const won = await attackMutation({ ...wfrpCtx(), rng: firstThen(0.295, 0.795) }, body());
 
-      expect(won.scene?.momentum).toEqual({ ally: true });
+      expect(momentumOf(won.scene?.sceneState ?? undefined)).toEqual({ ally: true });
 
-      const next = await attackMutation({ ...wfrpCtx({ momentum: { ally: true } }), rng: firstThen(0.295, 0.795) }, body());
+      const next = await attackMutation({ ...wfrpCtx({ sceneState: sceneOf({ ally: true }) }), rng: firstThen(0.295, 0.795) }, body());
 
       expect(next.events.length).toBeGreaterThan(0);
-      expect(next.scene?.momentum).toBeUndefined();
+      expect(next.scene?.sceneState).toBeUndefined();
     });
 
     it("a lost attack hands the token to the defender", async () => {
-      const lost = await attackMutation({ ...wfrpCtx({ momentum: { ally: true } }), rng: firstThen(0.795, 0.295) }, body({ endTurn: true, d20Roll: 80 }));
+      const lost = await attackMutation({ ...wfrpCtx({ sceneState: sceneOf({ ally: true }) }), rng: firstThen(0.795, 0.295) }, body({ endTurn: true, d20Roll: 80 }));
 
-      expect(lost.scene?.momentum).toEqual({ enemy: true });
+      expect(momentumOf(lost.scene?.sceneState ?? undefined)).toEqual({ enemy: true });
       expect(lost.scene?.turnIndex).toBeDefined();
     });
 
@@ -179,46 +181,46 @@ describe("wfrp battle end to end (engine)", () => {
 
       const won = await attackMutation({ ...start, rng: firstThen(0.295, 0.795) }, body());
 
-      expect(won.scene?.momentum).toEqual({ ally: true });
+      expect(momentumOf(won.scene?.sceneState ?? undefined)).toEqual({ ally: true });
 
-      const afterWin = { ...start, participants: won.participants, scene: { ...start.scene, ...won.scene } };
+      const afterWin = { ...start, participants: won.participants, scene: applyScenePatch(start.scene, won.scene ?? {}) };
 
       const enemyTurn = { ...afterWin, scene: { ...afterWin.scene, turnIndex: 1 } };
 
       const stolen = await attackMutation({ ...enemyTurn, rng: firstThen(0.295, 0.795) }, body({ attackerId: "t", targetId: "a" }));
 
-      expect(stolen.scene?.momentum).toEqual({ enemy: true });
+      expect(momentumOf(stolen.scene?.sceneState ?? undefined)).toEqual({ enemy: true });
 
       const parts = afterWin.participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false }));
 
       const snapshot = { seq: 4, state: buildSnapshotState({ ...afterWin.scene, status: "active" }, parts, diffParticipants(parts, parts)) };
 
-      const now = { ...enemyTurn, participants: stolen.participants, scene: { ...enemyTurn.scene, ...stolen.scene } };
+      const now = { ...enemyTurn, participants: stolen.participants, scene: applyScenePatch(enemyTurn.scene, stolen.scene ?? {}) };
 
       const restored = await createRollbackMutation(vi.fn(async () => [snapshot]), vi.fn(async () => true))(now, { actionIndex: 5 });
 
-      expect(restored.scene?.momentum).toEqual({ ally: true });
+      expect(momentumOf(restored.scene?.sceneState ?? undefined)).toEqual({ ally: true });
     });
 
     const swordHero = { ...hero, battleData: { ...hero.battleData, attacks: [{ id: "sword", name: "Sword", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" } as BattleAttack] } };
 
     const d20Body = (roll: number) => attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: roll, damageRolls: [4] });
 
-    it("a d20 battle never emits scene.momentum", async () => {
+    it("a d20 battle never emits a scene state", async () => {
       const out = await attackMutation(context({ participants: [swordHero, goblin], isDM: true }), d20Body(15));
 
-      expect(out.scene?.momentum).toBeUndefined();
+      expect(out.scene?.sceneState).toBeUndefined();
     });
 
     it("a crit-choice pause leaves scene momentum alone and the resume equals an unpaused run", async () => {
       const base = context({ participants: [swordHero, goblin], isDM: true, userId: "dm" });
 
-      const on: BattleMutationContext = { ...base, meta: { ...base.meta, critChoiceByDm: true }, scene: { ...base.scene, momentum: { enemy: true } } };
+      const on: BattleMutationContext = { ...base, meta: { ...base.meta, critChoiceByDm: true }, scene: { ...base.scene, sceneState: sceneOf({ enemy: true }) } };
 
       const paused = await attackMutation(on, d20Body(20));
 
       expect(paused.scene?.pendingCritChoice).toBeTruthy();
-      expect(paused.scene).not.toHaveProperty("momentum");
+      expect(paused.scene).not.toHaveProperty("sceneState");
 
       const { seed } = paused.scene?.pendingCritChoice as unknown as { seed: number };
 
@@ -228,7 +230,7 @@ describe("wfrp battle end to end (engine)", () => {
 
       const plain = await attackMutation({ ...on, meta: { ...on.meta, critChoiceByDm: false } }, d20Body(20), resume);
 
-      expect(resumed.scene?.momentum).toEqual(plain.scene?.momentum);
+      expect(resumed.scene?.sceneState).toEqual(plain.scene?.sceneState);
       expect(resumed.participants.map((p) => p.combatStats.currentHp)).toEqual(plain.participants.map((p) => p.combatStats.currentHp));
     });
   });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { heldBy, momentumPatch, settle } from "@/lib/utils/battle/momentum";
+import { heldBy, settle } from "../momentum";
 
 const sides = { attacker: "ally", target: "enemy" } as const;
 
@@ -27,11 +27,9 @@ describe("settle", () => {
   });
 });
 
-describe("heldBy / momentumPatch", () => {
-  it("reads the side and patches only on change", () => {
+describe("heldBy", () => {
+  it("reads the side", () => {
     expect(heldBy({ ally: true }, "ally")).toBe(true);
     expect(heldBy({ ally: true }, "enemy")).toBe(false);
-    expect(momentumPatch({ ally: true }, { ally: true })).toEqual({});
-    expect(momentumPatch({}, { ally: true })).toEqual({ momentum: { ally: true } });
   });
 });

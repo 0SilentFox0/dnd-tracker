@@ -3,7 +3,6 @@ import { toPublicPendingCrit } from "@/lib/utils/battle/crit-choice/public";
 import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
 import type { MapModeKey } from "@/lib/utils/battle/modes";
 import { isModeMapKey, modeDeltas } from "@/lib/utils/battle/modes/client";
-import { hasMomentum } from "@/lib/utils/battle/momentum";
 import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
@@ -94,7 +93,7 @@ export function buildClientDelta(args: {
       turnIndex: after.turnIndex,
       pendingMoraleCheck: after.pendingMoraleCheck,
       pendingCritChoice: toPublicPendingCrit(after.pendingCritChoice),
-      ...(hasMomentum(after.momentum) && { momentum: after.momentum }),
+      ...(after.sceneState && { system: after.sceneState }),
       ...(after.startedAt ? { startedAt: after.startedAt.toISOString() } : before.scene.startedAt && { startedAt: null }),
       ...(after.completedAt
         ? { completedAt: after.completedAt.toISOString() }

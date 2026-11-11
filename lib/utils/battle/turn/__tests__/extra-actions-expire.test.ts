@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { SAVE_SUCCESS_EFFECTS } from "@/lib/constants/save-critical-effects";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack/critical";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
@@ -12,7 +13,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
 };
 
 const withPool = (p: BattleParticipant, pending: number): BattleParticipant => ({ ...p, battleData: { ...p.battleData, pendingExtraActions: pending } });
@@ -77,7 +78,7 @@ describe("unused extra actions expire at the end of the turn", () => {
 
     expect(pool(toTarget.participants, "gob")).toBe(1);
 
-    const after = advanceTurn({ rules: DEFAULT_RULES, participants: toTarget.participants, pending: [], scene: { ...scene, ...toTarget.scene } });
+    const after = advanceTurn({ rules: DEFAULT_RULES, participants: toTarget.participants, pending: [], scene: applyScenePatch(scene, toTarget.scene ?? {}) });
 
     expect(pool(after.participants, "gob")).toBe(0);
     expect(after.participants.find((p) => p.basicInfo.id === "gob")?.battleData.activeEffects).toHaveLength(0);

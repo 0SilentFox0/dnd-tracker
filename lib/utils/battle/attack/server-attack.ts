@@ -11,7 +11,6 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { type ActionFlow, appendHpChanges, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { heldBy, settle } from "@/lib/utils/battle/momentum";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { parseDiceLenient, rollDie, rollGroups } from "@/lib/utils/common/dice";
@@ -54,17 +53,11 @@ function judgeServerWfrp(flow: ActionFlow, input: Pick<ServerAttackInput, "attac
 
   const target = getP(flow, targetId);
 
-  const sides = { attacker: attacker.basicInfo.side, target: target.basicInfo.side };
+  const r = resolve({ attacker, target, attack: input.attack, participants: flow.ps, rules: flow.ctx.rules, rng: input.rng, sceneState: flow.sceneState });
 
-  const r = resolve({ attacker, target, attack: input.attack, participants: flow.ps, rules: flow.ctx.rules, rng: input.rng, momentum: { attacker: heldBy(flow.momentum, sides.attacker), defender: heldBy(flow.momentum, sides.target) } });
-
-  const settled = settle(flow.momentum, sides, r.momentum);
-
-  flow.momentum = settled.next;
+  if (r.scene) flow.sceneState = r.scene;
 
   flow.messages.push(...r.lines);
-
-  if (settled.gained) flow.messages.push(textRef("battleLog.percentile.momentum"));
 
   return { roll: r.attackRoll, targetAC: r.defenseValue ?? 0, isHit: r.isHit };
 }

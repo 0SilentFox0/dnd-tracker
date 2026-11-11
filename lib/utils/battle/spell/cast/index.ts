@@ -6,7 +6,6 @@ import { actionReason } from "@/lib/utils/battle/actions/reasons";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
 import { beginConcentration, tagConcentration, uniqueCastId } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
-import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import { applyAnchoredZones } from "@/lib/utils/battle/spell/cast/anchored-zone";
 import { applyCastAttribute, rollCastTest, settleCastTest } from "@/lib/utils/battle/spell/cast/cast-test";
@@ -48,7 +47,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const unhidden = removeEffects(caster, (e) => e.effects.some((x) => x.type === HIDDEN_MARKER));
 
-  const flow: ActionFlow = { ps: withSelf(allParticipants, unhidden.participant), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map, rules: params.rules, crit: params.crit }, momentum: NO_MOMENTUM };
+  const flow: ActionFlow = { ps: withSelf(allParticipants, unhidden.participant), messages: [], summons: [], ctx: { round: currentRound, rng, map: params.map, rules: params.rules, crit: params.crit } };
 
   const before = flow.ps;
 

@@ -6,6 +6,7 @@ import type { QualityRef } from "./equipment/qualities";
 import type { PercentileAttackDetails, PercentileCastDetails } from "./percentile/details";
 
 import { defineSlot } from "@/lib/utils/rules/systems/slot";
+import type { ParticipantSide } from "@/types/battle";
 
 const isRec = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
@@ -50,4 +51,12 @@ export const ACTION_SLOT = defineSlot<WfrpActionSlot>("wfrp", (raw) => {
   const cast = isRec(raw.cast) ? (raw.cast as unknown as PercentileCastDetails) : undefined;
 
   return attack || cast ? { ...(attack && { attack }), ...(cast && { cast }) } : undefined;
+});
+
+export type SceneMomentum = Partial<Record<ParticipantSide, true>>;
+
+export const SCENE_SLOT = defineSlot<SceneMomentum>("wfrp", (raw) => {
+  if (!isRec(raw)) return undefined;
+
+  return Object.fromEntries(Object.entries(raw).filter(([, v]) => v === true)) as SceneMomentum;
 });

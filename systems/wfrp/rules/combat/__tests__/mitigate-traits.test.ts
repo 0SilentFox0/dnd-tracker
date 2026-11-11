@@ -76,7 +76,7 @@ describe("resolveWfrpAttack size", () => {
   };
 
   const target = (attack: BattleAttack, a: ReturnType<typeof fighter>, t: ReturnType<typeof fighter>) =>
-    attackOf(resolveWfrpAttack({ attacker: a, target: t, attack, participants: [a, t], rules: WFRP_RULES, rng: () => 0.5, manualRoll: 30, momentum: { attacker: false, defender: false } }).attackRoll)?.target;
+    attackOf(resolveWfrpAttack({ attacker: a, target: t, attack, participants: [a, t], rules: WFRP_RULES, rng: () => 0.5, manualRoll: 30, sceneState: undefined }).attackRoll)?.target;
 
   it("average vs large gives +10 to hit, melee and ranged", () => {
     expect(target(sword, fighter("a"), fighter("t", "large"))).toBe(50);

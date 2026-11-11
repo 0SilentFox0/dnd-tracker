@@ -15,8 +15,8 @@ import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
 import { withLines } from "@/lib/utils/battle/log/lines";
-import { momentumPatch } from "@/lib/utils/battle/momentum";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { sceneStatePatch } from "@/lib/utils/battle/scene-state";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
@@ -119,7 +119,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
           map: ctx.meta.map,
           rules: ctx.meta.rules,
           hitSpells,
-          momentum: ctx.scene.momentum,
+          sceneState: ctx.scene.sceneState,
         });
 
         const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
@@ -134,7 +134,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
 
         const events = actions.map(battleActionToEvent);
 
-        const patch = momentumPatch(ctx.scene.momentum, phase.momentum);
+        const patch = sceneStatePatch(ctx.scene.sceneState, phase.sceneState);
 
         if (!endTurn) return { participants: order, pending: ctx.pending, events, ...(Object.keys(patch).length > 0 && { scene: patch }) };
 

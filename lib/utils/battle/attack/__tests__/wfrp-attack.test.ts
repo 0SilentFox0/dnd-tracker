@@ -7,10 +7,11 @@ import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { momentumOf, sceneOf, slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
-import type { BattleAttack, BattleParticipant, SceneMomentum } from "@/types/battle";
+import type { SceneMomentum } from "@/systems/wfrp/rules/slots";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };
 
@@ -46,7 +47,7 @@ function strike(roll: number, defenderRoll: number, opts: { attack?: BattleAttac
     battleId: "b",
     rng,
     rules: opts.rules ?? WFRP_RULES,
-    momentum: opts.momentum,
+    sceneState: opts.momentum && sceneOf(opts.momentum),
   });
 }
 
@@ -107,35 +108,35 @@ describe("WFRP percentile attack", () => {
   });
 
   it("winner gains Momentum for the side, spending adds an SL", () => {
-    expect(strike(30, 80).momentum).toEqual({ ally: true });
+    expect(momentumOf(strike(30, 80).sceneState)).toEqual({ ally: true });
 
     const spent = strike(30, 80, { momentum: { ally: true } });
 
     expect(attackOf(spent.attackRoll)).toMatchObject({ sl: 2, momentumUsed: true });
-    expect(spent.momentum).toEqual({ ally: true });
+    expect(momentumOf(spent.sceneState)).toEqual({ ally: true });
 
-    expect(strike(70, 10, { momentum: { ally: true } }).momentum).toEqual({ enemy: true });
+    expect(momentumOf(strike(70, 10, { momentum: { ally: true } }).sceneState)).toEqual({ enemy: true });
   });
 
   it("the defender's Momentum is spent when it applies and the loser side never keeps one", () => {
     const won = strike(30, 80, { momentum: { enemy: true } });
 
     expect(attackOf(won.attackRoll)?.defender?.sl).toBe((attackOf(strike(30, 80).attackRoll)?.defender?.sl ?? 0) + 1);
-    expect(won.momentum).toEqual({ ally: true });
+    expect(momentumOf(won.sceneState)).toEqual({ ally: true });
 
-    expect(strike(30, 80, { momentum: { ally: true, enemy: true } }).momentum).toEqual({ ally: true });
+    expect(momentumOf(strike(30, 80, { momentum: { ally: true, enemy: true } }).sceneState)).toEqual({ ally: true });
 
     const defended = strike(70, 10, { momentum: { enemy: true } });
 
-    expect(defended.momentum).toEqual({ enemy: true });
+    expect(momentumOf(defended.sceneState)).toEqual({ enemy: true });
   });
 
-  it("server attacks read and write flow.momentum", () => {
+  it("server attacks read and write flow.sceneState", () => {
     const attacker = fighter("a", ParticipantSide.ENEMY);
 
     const target = fighter("t", ParticipantSide.ALLY);
 
-    const flow = (momentum: SceneMomentum): ActionFlow => ({ ps: [attacker, target], messages: [], summons: [], ctx: { round: 1, rng: seq(0.1), rules: WFRP_RULES }, momentum });
+    const flow = (momentum: SceneMomentum): ActionFlow => ({ ps: [attacker, target], messages: [], summons: [], ctx: { round: 1, rng: seq(0.1), rules: WFRP_RULES }, sceneState: sceneOf(momentum) });
 
     const input = (f: ActionFlow) => ({ flow: f, attackerId: "a", targetId: "t", attack: sword, currentRound: 1, battleId: "b", rng: f.ctx.rng, label: "retaliation" as const });
 
@@ -143,14 +144,14 @@ describe("WFRP percentile attack", () => {
 
     resolveServerAttack(input(f1));
 
-    expect(f1.momentum).toEqual({ enemy: true });
+    expect(momentumOf(f1.sceneState)).toEqual({ enemy: true });
 
     const f2 = flow({ enemy: true });
 
     const r = resolveServerAttack(input(f2));
 
     expect(attackOf(r.battleAction.actionDetails)?.momentumUsed).toBe(true);
-    expect(f2.momentum).toEqual({ enemy: true });
+    expect(momentumOf(f2.sceneState)).toEqual({ enemy: true });
   });
 
   it("outnumbering adds a bonus to the attacker target", () => {

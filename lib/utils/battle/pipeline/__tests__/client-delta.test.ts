@@ -6,6 +6,7 @@ import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 const p = (id: string, hp = 10, side = ParticipantSide.ALLY): BattleParticipant => {
@@ -16,7 +17,7 @@ const p = (id: string, hp = 10, side = ParticipantSide.ALLY): BattleParticipant 
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 2, turnIndex: 1, version: 7,
-  eventSeq: 10, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: new Date("2026-01-01"), completedAt: null,
+  eventSeq: 10, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: new Date("2026-01-01"), completedAt: null,
 };
 
 const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date() };
@@ -44,13 +45,13 @@ describe("buildClientDelta", () => {
     expect(d.scene).toMatchObject({ status: "active", round: 2, turnIndex: 0, startedAt: "2026-01-01T00:00:00.000Z" });
   });
 
-  it("momentum у scene лише коли є жетони", () => {
+  it("system у scene лише коли є стан сцени", () => {
     const a = p("a");
 
-    const run = (momentum: BattleSceneState["momentum"]) =>
+    const run = (sceneState: BattleSceneState["sceneState"]) =>
       buildClientDelta({
         before: { scene, meta, participants: [a], pending: [] },
-        after: { ...scene, version: 8, momentum },
+        after: { ...scene, version: 8, sceneState },
         participants: [a],
         pending: [],
         stored: [],
@@ -58,8 +59,8 @@ describe("buildClientDelta", () => {
         log: [],
       });
 
-    expect(run({ enemy: true }).scene.momentum).toEqual({ enemy: true });
-    expect("momentum" in run({}).scene).toBe(false);
+    expect(momentumOf(run(sceneOf({ enemy: true })).scene.system)).toEqual({ enemy: true });
+    expect("system" in run(undefined).scene).toBe(false);
   });
 
   it("карта чи зміни місцевості в scene лише тоді, коли вона змінилась", () => {

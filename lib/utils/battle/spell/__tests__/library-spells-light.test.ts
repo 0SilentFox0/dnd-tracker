@@ -9,6 +9,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { movementBudget } from "@/lib/utils/battle/grid";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
@@ -44,7 +45,7 @@ const unit = (id: string, side: ParticipantSide = ParticipantSide.ALLY, over: { 
 };
 
 const scene = (round: number, turnIndex: number): BattleSceneState => ({
-  id: "b", campaignId: "c", status: "active", round, turnIndex, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null,
+  id: "b", campaignId: "c", status: "active", round, turnIndex, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
 });
 
 const get = (ps: BattleParticipant[], id: string) => findParticipant(ps, id) as BattleParticipant;
@@ -71,7 +72,7 @@ function turnsOf(ps: BattleParticipant[], id: string, count: number, start = sce
     const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: s, rng: seq(0.99) });
 
     order = out.participants;
-    s = { ...s, ...out.scene };
+    s = applyScenePatch(s, out.scene ?? {});
 
     if (order[s.turnIndex].basicInfo.id === id) seen.push(order[s.turnIndex]);
   }

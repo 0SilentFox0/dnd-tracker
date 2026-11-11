@@ -9,9 +9,9 @@ import { assertAttackAllowed } from "@/lib/utils/battle/attack-phase/request";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
-import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleAction, BattleMapConfig, BattleParticipant, SceneMomentum } from "@/types/battle";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface LegendaryAttackInput {
   participants: BattleParticipant[];
@@ -23,10 +23,10 @@ export interface LegendaryAttackInput {
   round: number;
   rng: () => number;
   battleId: string;
-  momentum?: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
-export function legendaryAttack(input: LegendaryAttackInput): { participants: BattleParticipant[]; action: BattleAction; attackName: string; momentum: SceneMomentum } {
+export function legendaryAttack(input: LegendaryAttackInput): { participants: BattleParticipant[]; action: BattleAction; attackName: string; sceneState?: SystemSlot } {
   const { participants, actorId, targetId, map, rules, round, rng, battleId } = input;
 
   const actor = findParticipant(participants, actorId) ?? reject(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
@@ -45,9 +45,9 @@ export function legendaryAttack(input: LegendaryAttackInput): { participants: Ba
 
   if (reach) return reject(reach);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules }, momentum: input.momentum ?? NO_MOMENTUM };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules }, sceneState: input.sceneState };
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: actorId, targetId, attack, currentRound: round, battleId, rng, label: "legendary" });
 
-  return { participants: flow.ps, action: battleAction, attackName: attack.name, momentum: flow.momentum };
+  return { participants: flow.ps, action: battleAction, attackName: attack.name, sceneState: flow.sceneState };
 }

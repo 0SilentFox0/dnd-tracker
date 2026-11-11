@@ -49,7 +49,7 @@ beforeEach(() => {
   const enemy = createMockParticipant({ basicInfo: { ...hero.basicInfo, id: "enemy", side: "enemy" } });
 
   fixture.row = { id: "b", campaignId: "c", name: "Battle", version: 3, participants: [], map: null, audio: null };
-  fixture.loaded = { scene: { id: "b", campaignId: "c", status: "active", round: 1, turnIndex: 0, version: 3, eventSeq: 0, pendingMoraleCheck: null, momentum: {}, startedAt: null, completedAt: null }, meta: { name: "Battle", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: new Date(0) }, participants: [hero, enemy], pending: [], isMember: true, isDM: true };
+  fixture.loaded = { scene: { id: "b", campaignId: "c", status: "active", round: 1, turnIndex: 0, version: 3, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null }, meta: { name: "Battle", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: new Date(0) }, participants: [hero, enemy], pending: [], isMember: true, isDM: true };
   fixture.saves = []; fixture.rolls = 0; fixture.content = {};
 });
 

@@ -33,7 +33,7 @@ import type { armourAp, parseWfrpStats } from "@/systems/wfrp/rules/equipment/ar
 import type { encumbrance } from "@/systems/wfrp/rules/equipment/encumbrance";
 import type { QUALITY_REGISTRY } from "@/systems/wfrp/rules/equipment/qualities";
 import type { wfrpUnitBuild } from "@/systems/wfrp/rules/traits/unit-build";
-import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAttack, BattleParticipant, ParticipantSide } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { LogLine } from "@/types/text";
 
@@ -73,7 +73,8 @@ export interface ResolveAttackCtx {
   rules: Ruleset;
   rng: Rng;
   manualRoll?: number;
-  momentum: { attacker: boolean; defender: boolean };
+  /** Scene-level state of the system, as the previous attack left it */
+  sceneState?: SystemSlot;
   fortune?: { kind: FortuneKind; manualReroll?: number };
 }
 
@@ -85,7 +86,8 @@ export interface ResolvedAttack {
   defenseValue?: number;
   /** Test lines for the log */
   lines: LogLine[];
-  momentum: { spent: boolean; gainedBy: "attacker" | "defender" | null };
+  /** Next scene state; absent = unchanged */
+  scene?: SystemSlot;
   /** Only when Fortune actually took effect */
   fortune?: { kind: FortuneKind; firstRoll?: number };
   fortuneLine?: LogLine;
@@ -253,6 +255,8 @@ export interface RuleSystemCombat {
   tieBreak?(p: BattleParticipant): number;
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
+  /** Whether the scene state gives this side a standing advantage (Momentum) */
+  sceneHeldBy?(state: SystemSlot | undefined, side: ParticipantSide): boolean;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
   attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { characteristic: CharacteristicKey; target: number };
   mitigateDamage?(ctx: MitigateCtx): MitigateResult;

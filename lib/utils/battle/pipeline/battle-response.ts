@@ -5,7 +5,6 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { battleChannelName, battleDmChannelName, userChannelName } from "@/lib/pusher/channels";
 import { toPublicPendingCrit } from "@/lib/utils/battle/crit-choice/public";
-import { hasMomentum } from "@/lib/utils/battle/momentum";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
@@ -50,7 +49,7 @@ export function toBattleResponse(
     pendingSummons: hide ? redactParticipantsForPlayers(pending) : pending,
     pendingMoraleCheck: scene.pendingMoraleCheck,
     pendingCritChoice: toPublicPendingCrit(scene.pendingCritChoice),
-    ...(hasMomentum(scene.momentum) && { momentum: scene.momentum }),
+    ...(scene.sceneState && { system: scene.sceneState }),
     map: meta.map,
     audio: meta.audio ?? null,
     rules: hide ? stripPlayerHiddenRules(meta.rules) : meta.rules,

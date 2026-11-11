@@ -5,6 +5,7 @@ import { diffParticipants } from "@/lib/utils/battle/store/diff-participants";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { BattleSceneState } from "@/lib/utils/battle/store/types";
+import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 
 const scene: BattleSceneState = {
   id: "b1",
@@ -14,7 +15,7 @@ const scene: BattleSceneState = {
   turnIndex: 1,
   version: 5,
   eventSeq: 9,
-  pendingMoraleCheck: null, pendingCritChoice: null, momentum: {},
+  pendingMoraleCheck: null, pendingCritChoice: null,
   startedAt: null,
   completedAt: null,
 };
@@ -34,13 +35,13 @@ describe("buildSnapshotState", () => {
     expect(state.removed).toBeUndefined();
   });
 
-  it("momentum сцени потрапляє у знімок; порожній — ключа немає", () => {
+  it("стан сцени потрапляє у знімок; без нього — ключа немає", () => {
     const before = [splitParticipant(createMockParticipant(), { orderIndex: 0, isPending: false })];
 
-    const withTokens = buildSnapshotState({ ...scene, momentum: { ally: true } }, before, diffParticipants(before, before));
+    const withTokens = buildSnapshotState({ ...scene, sceneState: sceneOf({ ally: true }) }, before, diffParticipants(before, before));
 
-    expect(withTokens.scene.momentum).toEqual({ ally: true });
-    expect("momentum" in buildSnapshotState(scene, before, diffParticipants(before, before)).scene).toBe(false);
+    expect(momentumOf(withTokens.scene.sceneState)).toEqual({ ally: true });
+    expect("sceneState" in buildSnapshotState(scene, before, diffParticipants(before, before)).scene).toBe(false);
   });
 
   it("бій із картою — зберігає місцевість (без фону); порожня місцевість — null", () => {

@@ -5,11 +5,12 @@ import { type PercentileTestResult, resolvePercentileTest } from "../percentile"
 import type { PercentileAttackDetails } from "../percentile/details";
 import { DIFFICULTY_SL } from "../percentile/difficulty";
 import { applyFortune } from "../percentile/fortune";
-import { ACTION_SLOT, ATTACK_SLOT } from "../slots";
+import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from "../slots";
 import { sizeHitMod } from "../traits/size";
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from "./constants";
 import { hitLocation } from "./location";
 import { percentileLines } from "./log";
+import { heldBy, settle } from "./momentum";
 import { resolveOpposed } from "./opposed";
 import { participantChars } from "./participant";
 
@@ -40,12 +41,26 @@ function isOutnumbering(attacker: BattleParticipant, target: BattleParticipant, 
   return near(target, attacker.basicInfo.side) >= 2 * near(attacker, target.basicInfo.side);
 }
 
-function toResult(details: PercentileAttackDetails, isHit: boolean, momentum: ResolvedAttack["momentum"]): ResolvedAttack {
+const sidesOf = (ctx: ResolveAttackCtx) => ({ attacker: ctx.attacker.basicInfo.side, target: ctx.target.basicInfo.side });
+
+const heldOf = (ctx: ResolveAttackCtx) => {
+  const m = SCENE_SLOT.read(ctx.sceneState) ?? {};
+
+  const sides = sidesOf(ctx);
+
+  return { m, sides, attacker: heldBy(m, sides.attacker), defender: heldBy(m, sides.target) };
+};
+
+function toResult(ctx: ResolveAttackCtx, details: PercentileAttackDetails, isHit: boolean, momentum: { spent: boolean; gainedBy: "attacker" | "defender" | null }): ResolvedAttack {
+  const { m, sides } = heldOf(ctx);
+
+  const { next, gained } = settle(m, sides, momentum);
+
   return {
     isHit,
-    momentum,
+    scene: SCENE_SLOT.write(next),
     defenseValue: details.defender?.target ?? 0,
-    lines: percentileLines(details, isHit),
+    lines: [...percentileLines(details, isHit), ...(gained ? [textRef("battleLog.percentile.momentum")] : [])],
     attackRoll: {
       isHit,
       isCritical: details.doubles && isHit,
@@ -106,7 +121,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
       const isHit = (test.outcome === "success" || test.outcome === "critical") && !fumbled(test.roll);
 
-      return { roll: test.roll, result: toResult(detailsOf(test, test.sl), isHit, { spent: false, gainedBy: null }) };
+      return { roll: test.roll, result: toResult(ctx, detailsOf(test, test.sl), isHit, { spent: false, gainedBy: null }) };
     };
 
     const { result, fortune } = applyFortune<ReturnType<typeof rangedOnce>>((preset) => rangedOnce(preset), ctx.fortune, (r) => r.result.isHit, manualRoll);
@@ -118,7 +133,9 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   const dodge = skillTarget(d, "dodge")?.target ?? value(d, "ag");
 
-  const spent = ctx.momentum.attacker;
+  const held = heldOf(ctx);
+
+  const spent = held.attacker;
 
   const meleeOnce = (presetRolls: { attacker?: number; defender?: number }) => {
     const result = resolveOpposed({
@@ -128,7 +145,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
         { kind: "dodge", target: dodge + selfTestMod(target, "test") },
       ],
       attackerSlMod: (spent ? MOMENTUM_SL_BONUS : 0) + slBonus,
-      defenderSlMod: ctx.momentum.defender ? MOMENTUM_SL_BONUS : 0,
+      defenderSlMod: held.defender ? MOMENTUM_SL_BONUS : 0,
       rng,
       presetRolls,
     });
@@ -139,7 +156,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
       ...(spent && { momentumUsed: true }),
     });
 
-    return { roll: result.attacker.roll, defenderRaw: result.defender.rawRoll, resolved: toResult(details, result.isHit && !fumbled(result.attacker.roll), { spent, gainedBy: result.attackerWon ? "attacker" : "defender" }) };
+    return { roll: result.attacker.roll, defenderRaw: result.defender.rawRoll, resolved: toResult(ctx, details, result.isHit && !fumbled(result.attacker.roll), { spent, gainedBy: result.attackerWon ? "attacker" : "defender" }) };
   };
 
   const { result, fortune } = applyFortune<ReturnType<typeof meleeOnce>>(

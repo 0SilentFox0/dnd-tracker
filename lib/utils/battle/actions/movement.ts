@@ -5,11 +5,11 @@ import { actionReason } from "./reasons";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
-import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import { battleActionToEvent, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleMapConfig, BattleParticipant, GridPoint, SceneMomentum } from "@/types/battle";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export interface Movement5eInput {
@@ -24,7 +24,7 @@ export interface Movement5eInput {
   battleId: string;
   rules: Ruleset;
   rng: () => number;
-  momentum?: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
 export interface Movement5eResult {
@@ -34,7 +34,7 @@ export interface Movement5eResult {
   spent: number;
   messages: LogLine[];
   events: NewBattleEvent[];
-  momentum: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
 export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
@@ -56,7 +56,7 @@ export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
 
   const opportunity =
     rules.actions.opportunityAttacks && path && start
-      ? resolveOpportunityAttacks({ participants, moverId: mover.basicInfo.id, path, start, map, round: input.round, battleId: input.battleId, rules, rng: input.rng, momentum: input.momentum })
+      ? resolveOpportunityAttacks({ participants, moverId: mover.basicInfo.id, path, start, map, round: input.round, battleId: input.battleId, rules, rng: input.rng, sceneState: input.sceneState })
       : null;
 
   if (opportunity) {
@@ -98,5 +98,5 @@ export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
     if (t) after = replaceParticipant(after, { ...t, battleData: { ...t.battleData, position: cell } });
   }
 
-  return { participants: after, moved, destination, spent, messages, events, momentum: opportunity?.momentum ?? input.momentum ?? NO_MOMENTUM };
+  return { participants: after, moved, destination, spent, messages, events, sceneState: opportunity?.sceneState ?? input.sceneState };
 }

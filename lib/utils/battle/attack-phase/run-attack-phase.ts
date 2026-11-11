@@ -18,14 +18,14 @@ import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { lineOfFire } from "@/lib/utils/battle/grid";
 import { withLines } from "@/lib/utils/battle/log/lines";
-import { NO_MOMENTUM } from "@/lib/utils/battle/momentum";
 import type { ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
 import { type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant, SceneMomentum } from "@/types/battle";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
   battle: {
@@ -43,14 +43,14 @@ export type AttackPhaseInput = {
   map?: BattleMapConfig | null;
   rules: Ruleset;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
-  momentum?: SceneMomentum;
+  sceneState?: SystemSlot;
 };
 
 export type AttackPhaseResult = {
   finalInitiativeOrder: BattleParticipant[];
   allBattleActions: BattleAction[];
   summons: SummonRequest[];
-  momentum: SceneMomentum;
+  sceneState?: SystemSlot;
 };
 
 interface PhaseCtx {
@@ -68,7 +68,7 @@ interface PhaseState {
   actions: BattleAction[];
   summons: SummonRequest[];
   heldBack: ActiveEffect[];
-  momentum: SceneMomentum;
+  sceneState?: SystemSlot;
 }
 
 interface StrikeOpts {
@@ -124,7 +124,7 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const ctx: PhaseCtx = { input, request, rng, dice: damageDiceCursor(data.damageRolls, damageFormula, rng), expanded, effectsBeforeVolley: activeEffectIds([attacker]) };
 
-  const st: PhaseState = { order: initiativeOrder, attacker: { ...attacker }, actions: [], summons: [], heldBack: [], momentum: input.momentum ?? NO_MOMENTUM };
+  const st: PhaseState = { order: initiativeOrder, attacker: { ...attacker }, actions: [], summons: [], heldBack: [], sceneState: input.sceneState };
 
   const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
 
@@ -145,7 +145,7 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
     finalInitiativeOrder: restoreHeldBack(st.order, attacker.basicInfo.id, st.heldBack),
     allBattleActions: st.actions,
     summons: st.summons,
-    momentum: st.momentum,
+    sceneState: st.sceneState,
   };
 }
 
@@ -231,7 +231,7 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
     map: input.map,
     rules: input.rules,
     hitSpells: input.hitSpells,
-    momentum: st.momentum,
+    sceneState: st.sceneState,
     rng,
     crit: input.crit,
     recordDice: true,
@@ -240,7 +240,7 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
 
   if (attackResult.success) ctx.dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical) && !ruleSystemOf(input.rules).combat.mitigateDamage);
 
-  st.momentum = attackResult.momentum;
+  st.sceneState = attackResult.sceneState;
   st.order = mergeParticipants(st.order, attackResult.allParticipantsUpdated ?? []);
   st.attacker = attackResult.attackerUpdated;
   st.summons.push(...attackResult.summons);
@@ -283,12 +283,12 @@ function retaliate(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, att
     crit: input.crit,
     map: input.map,
     rules: input.rules,
-    momentum: st.momentum,
+    sceneState: st.sceneState,
   });
 
   if (!retaliation) return;
 
-  st.momentum = retaliation.momentum;
+  st.sceneState = retaliation.sceneState;
   st.order = mergeParticipants(st.order, retaliation.participants);
   st.attacker = findParticipant(retaliation.participants, attacker.basicInfo.id) ?? st.attacker;
   st.actions.push(retaliation.battleAction);

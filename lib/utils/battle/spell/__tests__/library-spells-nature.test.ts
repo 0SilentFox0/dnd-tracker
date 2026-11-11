@@ -13,6 +13,7 @@ import { hasAdvantage } from "@/lib/utils/battle/attack/bonus";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { applyResistance } from "@/lib/utils/battle/resistance";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
@@ -52,7 +53,7 @@ const unit = (id: string, side: ParticipantSide = ParticipantSide.ENEMY, hp = 10
   };
 };
 
-const scene: BattleSceneState = { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {}, startedAt: null, completedAt: null };
+const scene: BattleSceneState = { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null };
 
 const FAIL = 1;
 
@@ -92,7 +93,7 @@ function toTurnOf(id: string, ps: BattleParticipant[], s: BattleSceneState = sce
     const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: st, rng: seq(0.99) });
 
     order = out.participants;
-    st = { ...st, ...out.scene };
+    st = applyScenePatch(st, out.scene ?? {});
 
     if (order[st.turnIndex]?.basicInfo.id === id) return { order, scene: st };
   }

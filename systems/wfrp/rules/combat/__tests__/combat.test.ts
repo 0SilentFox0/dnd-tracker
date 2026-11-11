@@ -180,7 +180,7 @@ describe("resolveWfrpAttack conditions", () => {
   const cond = (p: BattleParticipant, key: WfrpConditionKey, levels?: number) => applyWfrpConditionTo(p, { key, levels, round: 1, sourceName: textRef("battleWfrp.log.removed", { target: "x", condition: "y" }) }).participant;
 
   const run = (attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack) =>
-    resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, manualRoll: 30, momentum: { attacker: false, defender: false } });
+    resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, manualRoll: 30, sceneState: undefined });
 
   it("attacker condition lowers the attack target", () => {
     expect(attackOf(run(cond(fighter("a"), "stunned", 1), fighter("t"), sword).attackRoll)?.target).toBe(30);
@@ -253,7 +253,7 @@ describe("resolveWfrpAttack fortune", () => {
 
     const target = fighter("t");
 
-    return resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, momentum: { attacker: false, defender: false }, ...extra });
+    return resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, sceneState: undefined, ...extra });
   };
 
   it("melee reroll after a miss rerolls the attacker against the same defender roll", () => {
@@ -316,7 +316,7 @@ describe("resolveWfrpAttack attackBonus talent", () => {
   const run = (attack: BattleAttack, attacker: BattleParticipant) => {
     const target = fighter("t");
 
-    return resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, momentum: { attacker: false, defender: false }, manualRoll: 30 });
+    return resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, sceneState: undefined, manualRoll: 30 });
   };
 
   it.each([

@@ -177,7 +177,7 @@ describe("crit-choice mutation", () => {
       getUserId: vi.fn(async () => "u"),
       rateLimit: vi.fn(async () => ({ allowed: true, count: 1, limit: 30, retryAfterSeconds: 10 })),
       loadBattle: vi.fn(async () => loaded(isDM)),
-      saveBattle: vi.fn(async () => ({ battleId: "b1", version: 3, scene: { status: BattleStatus.ACTIVE, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {} }, upserted: [], fullIds: [], removed: [], events: [] })),
+      saveBattle: vi.fn(async () => ({ battleId: "b1", version: 3, scene: { status: BattleStatus.ACTIVE, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], fullIds: [], removed: [], events: [] })),
       publish: vi.fn(),
       loadRecentEvents: vi.fn(async () => []),
     });

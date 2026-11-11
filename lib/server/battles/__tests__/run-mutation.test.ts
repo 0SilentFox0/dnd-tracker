@@ -32,7 +32,7 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
       turnIndex: 0,
       version: 3,
       eventSeq: 4,
-      pendingMoraleCheck: null, pendingCritChoice: null, momentum: {},
+      pendingMoraleCheck: null, pendingCritChoice: null,
       startedAt: null,
       completedAt: null,
     },
@@ -55,7 +55,7 @@ function delta(): BattleDelta {
   return {
     battleId: "b1",
     version: 4,
-    scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null, momentum: {} },
+    scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null },
     upserted: [],
     fullIds: [],
     removed: [],
