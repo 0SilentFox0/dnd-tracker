@@ -9,6 +9,8 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import { splitParticipant } from "@/lib/utils/battle/store";
 import { redactLogForPlayers, redactParticipantsForPlayers } from "@/lib/utils/battle/view";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import { castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
@@ -64,14 +66,14 @@ describe("wfrp magic end to end (engine)", () => {
 
     const hit = await cast(ctx, { casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [], castRoll: 20 } as never);
 
-    const hitDetails = (hit.events[0].details as { actionDetails: { percentileCast: { outcome: string; overcastSteps?: number } } }).actionDetails.percentileCast;
+    const hitDetails = castOf((hit.events[0].details as { actionDetails: { system?: SystemSlot } }).actionDetails);
 
     apply(hit);
 
     const conditions = ruleSystemOf(WFRP_RULES).conditions as NonNullable<ReturnType<typeof ruleSystemOf>["conditions"]>;
 
-    expect(hitDetails.outcome).toBe("success");
-    expect(hitDetails.overcastSteps).toBe(1);
+    expect(hitDetails?.outcome).toBe("success");
+    expect(hitDetails?.overcastSteps).toBe(1);
     expect(conditions.list(find(ctx.participants, "gob"))).toContainEqual(expect.objectContaining({ key: "ablaze" }));
     expect(find(ctx.participants, "hero").battleData.channelledSl).toBe(0);
     expect(find(ctx.participants, "gob").combatStats.currentHp).toBeLessThan(goblin.combatStats.currentHp);
@@ -90,7 +92,7 @@ describe("wfrp magic end to end (engine)", () => {
     ctx.participants.forEach((p, i) => expect(splitParticipant(p, { orderIndex: i, isPending: false }).snapshotHash).toMatch(/\S/));
   });
 
-  it("enemy caster miscast: the player view has no miscast line, text, condition or percentileCast.miscast", async () => {
+  it("enemy caster miscast: the player view has no miscast line, text, condition or cast miscast", async () => {
     const enemyMage = (): BattleParticipant => {
       const m = mage();
 
@@ -113,7 +115,7 @@ describe("wfrp magic end to end (engine)", () => {
 
     expect(changed).toBe(true);
     expect(JSON.stringify(seen).replace('"miscast":null', "")).not.toMatch(/miscast/i);
-    expect(seen[0].actionDetails.percentileCast?.miscast).toBeNull();
+    expect(castOf(seen[0].actionDetails)?.miscast).toBeNull();
 
     const raw = out.participants.find((p) => p.basicInfo.id === "foe") as BattleParticipant;
 

@@ -7,6 +7,8 @@ import { context, goblin, participant } from "@/lib/server/battles/__tests__/mut
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import { castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
@@ -51,7 +53,7 @@ const run = (row: Spell, body: Record<string, unknown>, opts: { wfrp?: boolean; 
   );
 };
 
-const details = (out: { events: { details?: unknown }[] }) => (out.events[0].details as { actionDetails: { percentileCast?: { roll: number; outcome: string; miscast?: string | null } }; lines?: unknown }).actionDetails;
+const details = (out: { events: { details?: unknown }[] }) => (out.events[0].details as { actionDetails: { system?: SystemSlot } }).actionDetails;
 
 const hp = (out: { participants: BattleParticipant[] }, id: string) => out.participants.find((p) => p.basicInfo.id === id)?.combatStats.currentHp as number;
 
@@ -73,20 +75,20 @@ describe("spell mutation in WFRP", () => {
   it("a passed test applies the spell and records the cast", async () => {
     const out = await run(bolt, { castRoll: 30 });
 
-    expect(details(out).percentileCast).toMatchObject({ roll: 30, outcome: "success" });
+    expect(castOf(details(out))).toMatchObject({ roll: 30, outcome: "success" });
     expect(hp(out, "gob")).toBeLessThan(goblin.combatStats.currentHp);
   });
 
   it("serverRoll ignores castRoll", async () => {
     const out = await run(bolt, { castRoll: 30, serverRoll: true });
 
-    expect(details(out).percentileCast).toBeDefined();
+    expect(castOf(details(out))).toBeDefined();
   });
 
   it("a failed test answers with an event and no damage", async () => {
     const out = await run(bolt, { castRoll: 60 });
 
-    expect(details(out).percentileCast?.outcome).toBe("failure");
+    expect(castOf(details(out))?.outcome).toBe("failure");
     expect(out.events).toHaveLength(1);
     expect(hp(out, "gob")).toBe(goblin.combatStats.currentHp);
     expect(out.participants.find((p) => p.basicInfo.id === "hero")?.actionFlags.hasUsedAction).toBe(true);
@@ -96,7 +98,7 @@ describe("spell mutation in WFRP", () => {
     const out = await run(bolt, { castRoll: 60, preview: true });
 
     expect(out.events).toEqual([]);
-    expect(JSON.stringify(out.response)).not.toContain("percentileCast");
+    expect(JSON.stringify(out.response)).not.toContain("\"cast\"");
   });
 
   it("a save spell is a system mismatch", async () => {
@@ -118,7 +120,7 @@ describe("spell mutation in WFRP", () => {
   it("Fortune reroll with a point is spent", async () => {
     const out = await run(bolt, { castRoll: 90, fortune: "reroll", fortuneRoll: 30 }, { c: caster(1) });
 
-    expect(details(out).percentileCast?.outcome).toBe("success");
+    expect(castOf(details(out))?.outcome).toBe("success");
     expect(out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.fortune).toBe(0);
   });
 });
@@ -127,7 +129,7 @@ describe("spell mutation in WFRP, fizzle with Fortune", () => {
   it("spends Fortune exactly once", async () => {
     const out = await run(bolt, { castRoll: 90, fortune: "reroll", fortuneRoll: 80 }, { c: caster(2) });
 
-    expect(details(out).percentileCast?.outcome).toBe("failure");
+    expect(castOf(details(out))?.outcome).toBe("failure");
     expect(hp(out, "gob")).toBe(goblin.combatStats.currentHp);
     expect(out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.fortune).toBe(1);
   });
@@ -166,7 +168,7 @@ describe("spell mutation in WFRP, ingredients", () => {
   it("casts without an ingredient, even with an empty stock", async () => {
     const out = await cast({ castRoll: 30 }, stocked(0));
 
-    expect(details(out).percentileCast?.outcome).toBe("success");
+    expect(castOf(details(out))?.outcome).toBe("success");
     expect(stockOf(out)?.items).toHaveLength(0);
   });
 
@@ -174,14 +176,14 @@ describe("spell mutation in WFRP, ingredients", () => {
     const out = await cast({ castRoll: 77, useIngredient: true }, stocked());
 
     expect(stockOf(out)?.items[0].used).toBe(1);
-    expect(details(out).percentileCast?.miscast).toBeNull();
+    expect(castOf(details(out))?.miscast).toBeNull();
     expect(JSON.stringify(out.events)).toContain("wfrpMagic.log.ingredientAverts");
   });
 
   it("the same doubles without it miscasts", async () => {
     const out = await cast({ castRoll: 77 }, stocked());
 
-    expect(details(out).percentileCast?.miscast).toBe("minor");
+    expect(castOf(details(out))?.miscast).toBe("minor");
   });
 
   it("the ingredient is spent even when nothing needed averting", async () => {

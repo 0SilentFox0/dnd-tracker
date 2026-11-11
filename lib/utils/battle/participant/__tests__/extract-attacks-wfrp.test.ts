@@ -117,7 +117,7 @@ describe("wfrp weapon attacks in play", () => {
 
     attacker.abilities = { ...attacker.abilities, ...wfrpAbilitiesOf(strong) };
 
-    const ctx = { attacker, target: makeParticipant({ id: "t", hp: 10, maxHp: 10 }), weapon: 3, amount: 5, netSl: 1, location: "body" as const, crit: false, rng: () => 0.5, rules: WFRP_RULES, attack: { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack };
+    const ctx = { attacker, target: makeParticipant({ id: "t", hp: 10, maxHp: 10 }), weapon: 3, amount: 5, margin: 1, location: "body" as const, crit: false, rng: () => 0.5, rules: WFRP_RULES, attack: { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack };
 
     const sbLabel = dynamicTextRef("battleWfrp.damage.steps.sb");
 

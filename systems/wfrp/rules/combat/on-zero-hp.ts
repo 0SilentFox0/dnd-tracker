@@ -1,5 +1,6 @@
 import { applyWfrpCrit } from "./crit-effect";
 import { rollCrit } from "./crit-table";
+import { asLocation } from "./location";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
@@ -26,7 +27,7 @@ export function wfrpOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
 
   // a doubles crit (ctx.crit) was already rolled for this blow
   if (!ctx.manual && !ctx.crit) {
-    const applied = applyWfrpCrit(next, { ...rollCrit(ctx.location ?? "body", ctx.rules, ctx.rng), bonusDamage: 0 }, ctx.round ?? 0);
+    const applied = applyWfrpCrit(next, { ...rollCrit(asLocation(ctx.location), ctx.rules, ctx.rng), bonusDamage: 0 }, ctx.round ?? 0);
 
     next = applied.participant;
     messages.push(applied.message);

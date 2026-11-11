@@ -8,6 +8,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { QUALITY_REGISTRY, type QualityRef } from "@/systems/wfrp/rules/equipment/qualities";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import { ATTACK_SLOT } from "@/systems/wfrp/rules/slots";
@@ -22,7 +23,7 @@ const ctx = ({ qualities, flaws, noSb, ...extra }: { qualities?: QualityRef[]; f
   target: withAp(makeParticipant({ id: "t", hp: 10, maxHp: 10 }), extra.body ?? 4),
   weapon: 4,
   amount: 5,
-  netSl: extra.netSl ?? 1,
+  margin: extra.netSl ?? 1,
   location: "body" as const,
   crit: false,
   rng: () => 0.5,
@@ -92,9 +93,9 @@ describe("resolveWfrpAttack qualities", () => {
   const q = (qualities: QualityRef[], flaws: QualityRef[] = [], type: BattleAttack["type"] = AttackType.MELEE): BattleAttack => ({ ...sword, type, system: ATTACK_SLOT.write({ qualities, flaws }) });
 
   it("Accurate +10 and Imprecise -10 shift the target", () => {
-    expect(run(q([{ key: "accurate" }])).attackRoll.percentile?.target).toBe(50);
-    expect(run(q([], [{ key: "imprecise" }])).attackRoll.percentile?.target).toBe(30);
-    expect(run(q([{ key: "accurate" }], [], AttackType.RANGED)).attackRoll.percentile?.target).toBe(50);
+    expect(attackOf(run(q([{ key: "accurate" }])).attackRoll)?.target).toBe(50);
+    expect(attackOf(run(q([], [{ key: "imprecise" }])).attackRoll)?.target).toBe(30);
+    expect(attackOf(run(q([{ key: "accurate" }], [], AttackType.RANGED)).attackRoll)?.target).toBe(50);
   });
 
   it("Dangerous fumbles on a roll of 91+ even when it would hit", () => {
@@ -109,6 +110,6 @@ describe("resolveWfrpAttack qualities", () => {
   });
 
   it("no wfrp payload: unchanged", () => {
-    expect(run(sword).attackRoll.percentile?.target).toBe(40);
+    expect(attackOf(run(sword).attackRoll)?.target).toBe(40);
   });
 });

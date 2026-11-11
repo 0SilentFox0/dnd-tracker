@@ -6,8 +6,8 @@ import { lineText } from "@/lib/utils/battle/log/lines";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, SPELL_ONLY_KINDS, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
-import type { PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -98,11 +98,11 @@ interface FinishInput {
   battleId: string;
   round: number;
   sourceEffects: Array<{ kind: string }>;
-  cast?: PercentileCastDetails;
+  details?: SystemSlot;
   fizzled?: boolean;
 }
 
-export function finishSpellAction(state: SpellCastState, { before, targetsBefore, allParticipants, battleId, round, sourceEffects, cast, fizzled }: FinishInput): CastSpellResult {
+export function finishSpellAction(state: SpellCastState, { before, targetsBefore, allParticipants, battleId, round, sourceEffects, details, fizzled }: FinishInput): CastSpellResult {
   const { flow, spell, caster } = state;
 
   const def = spell.definition;
@@ -150,7 +150,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     ...meta,
     ...(applied.length > 0 && { appliedEffects: applied }),
     spellSlotUsed: state.castLevel,
-    ...(cast && { percentileCast: cast }),
+    ...(details && { system: details }),
     ...(state.grant?.key && { spellGrantKey: state.grant.key }),
     ...(state.grant?.label && { spellGrantLabel: state.grant.label }),
     ...(state.chosenCastLevel !== undefined && { castLevel: state.chosenCastLevel }),
@@ -177,7 +177,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     ...(state.transforms.length > 0 && { transforms: state.transforms }),
     messages: flow.messages,
     ...(spellDamage && { spellDamage }),
-    ...(cast && { cast }),
+    ...(details && { details }),
     ...(fizzled && { fizzled }),
   };
 }

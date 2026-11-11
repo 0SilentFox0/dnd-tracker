@@ -31,13 +31,13 @@ export function getLogEntryDetailItems(action: BattleAction, wounds = false): Lo
 
   if (d?.weaponName) push(textRef("battleLog.details.weapon"), d.weaponName);
 
-  if (d?.attackRoll != null && !d.percentile) {
+  if (d?.attackRoll != null && !d.system) {
     const bonus = d.attackBonus != null ? " + " + d.attackBonus : "";
 
     push(textRef("battleLog.details.attackRoll"), d.attackRoll + bonus + " = " + (d.totalAttackValue ?? ""));
   }
 
-  if (d?.targetAC != null && !d.percentile) push(textRef("battleLog.details.targetAc"), String(d.targetAC));
+  if (d?.targetAC != null && !d.system) push(textRef("battleLog.details.targetAc"), String(d.targetAC));
 
   if (d?.isHit === true) push(undefined, textRef("battleLog.details.hit"));
 

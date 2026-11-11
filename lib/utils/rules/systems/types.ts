@@ -7,7 +7,7 @@ import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { DieFx } from "@/lib/utils/battle/fx/dice/types";
 import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
-import type { AttackRollResult, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
@@ -32,7 +32,6 @@ import type { planPeriod } from "@/systems/wfrp/rules/downtime/plan-period";
 import type { armourAp, parseWfrpStats } from "@/systems/wfrp/rules/equipment/armour";
 import type { encumbrance } from "@/systems/wfrp/rules/equipment/encumbrance";
 import type { QUALITY_REGISTRY } from "@/systems/wfrp/rules/equipment/qualities";
-import type { PercentileOutcome } from "@/systems/wfrp/rules/percentile";
 import type { wfrpUnitBuild } from "@/systems/wfrp/rules/traits/unit-build";
 import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
@@ -80,9 +79,12 @@ export interface ResolveAttackCtx {
 
 export interface ResolvedAttack {
   isHit: boolean;
+  /** margin, location and system carry the test details */
   attackRoll: AttackRollResult;
-  netSl: number;
-  location: HitLocation;
+  /** Written to actionDetails.targetAC (0 when there is no defence value) */
+  defenseValue?: number;
+  /** Test lines for the log */
+  lines: LogLine[];
   momentum: { spent: boolean; gainedBy: "attacker" | "defender" | null };
   /** Only when Fortune actually took effect */
   fortune?: { kind: FortuneKind; firstRoll?: number };
@@ -103,8 +105,8 @@ export interface MitigateCtx {
   weapon: number;
   /** 0 means the target is immune (d20 damage was resisted to nothing); otherwise positive, weapon damage is in `weapon` */
   amount: number;
-  netSl: number;
-  location: HitLocation;
+  margin: number;
+  location: string;
   /** The attack roll was a critical (WFRP: doubles on a hit) */
   crit: boolean;
   attackRoll?: number;
@@ -193,16 +195,14 @@ export interface CastTestCtx {
   fortune?: { kind: FortuneKind; manualReroll?: number };
 }
 
-export type MiscastKind = "minor" | "major" | "wrath";
-
 export interface CastTestResult {
   success: boolean;
-  sl: number;
+  margin: number;
   overcastSteps: number;
-  miscast: MiscastKind | null;
+  miscast: string | null;
   /** Prayers neither use nor spend banked channelling */
   keepChannelled?: true;
-  percentile: PercentileCastDetails & { outcome: PercentileOutcome };
+  details: SystemSlot;
   lines: LogLine[];
   fortune?: { kind: FortuneKind; firstRoll?: number };
 }
@@ -217,7 +217,7 @@ export interface RuleSystemMagic {
   /** Numbers a caster sees before rolling: casting and channelling targets, banked SL and armour penalty */
   castPreview(caster: BattleParticipant, kind?: SpellMagicKind): { target: number; channelTarget: number; channelled: number; armourSl: number };
   channel(p: BattleParticipant, ctx: { rules: Ruleset; rng: Rng; presetRoll?: number }): { participant: BattleParticipant; lines: LogLine[]; miscast: "minor" | "major" | null };
-  miscast(ps: BattleParticipant[], casterId: string, kind: MiscastKind, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences; presetRoll?: number }): SystemConditionResult;
+  miscast(ps: BattleParticipant[], casterId: string, kind: string, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences; presetRoll?: number }): SystemConditionResult;
   attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
   /** Token badge for banked channelling */
   badge(p: BattleParticipant): ActiveEffect | null;

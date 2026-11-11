@@ -76,13 +76,13 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
   const targetBefore = getP(flow, targetId);
 
   put(flow, applyDamageToTarget(targetBefore, guarded.targetDamage));
-  applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical, p.attackRoll.percentile?.location);
+  applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical, p.attackRoll.location);
 
   if (guarded.guardianId) {
     const guardian = getP(flow, guarded.guardianId);
 
     put(flow, applyDamageToTarget(guardian, guarded.guardianDamage));
-    applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical, p.attackRoll.percentile?.location);
+    applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical, p.attackRoll.location);
 
     if (hitDamage.afterHit && guarded.guardianDamage > 0) {
       const applied = hitDamage.afterHit(getP(flow, guarded.guardianId), p.currentRound);

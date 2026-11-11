@@ -4,7 +4,7 @@ import { qualityFumbleFrom, qualityToHit } from "../equipment/quality-effects";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import { DIFFICULTY_SL } from "../percentile/difficulty";
 import { applyFortune } from "../percentile/fortune";
-import { ATTACK_SLOT } from "../slots";
+import { ACTION_SLOT, ATTACK_SLOT } from "../slots";
 import { sizeHitMod } from "../traits/size";
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from "./constants";
 import { hitLocation } from "./location";
@@ -15,6 +15,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { percentileLines } from "@/lib/utils/battle/attack/process/percentile-log";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
@@ -42,9 +43,9 @@ function isOutnumbering(attacker: BattleParticipant, target: BattleParticipant, 
 function toResult(details: PercentileAttackDetails, isHit: boolean, momentum: ResolvedAttack["momentum"]): ResolvedAttack {
   return {
     isHit,
-    netSl: details.netSl,
-    location: details.location,
     momentum,
+    defenseValue: details.defender?.target ?? 0,
+    lines: percentileLines(details, isHit),
     attackRoll: {
       isHit,
       isCritical: details.doubles && isHit,
@@ -53,7 +54,9 @@ function toResult(details: PercentileAttackDetails, isHit: boolean, momentum: Re
       attackBonus: 0,
       advantageUsed: false,
       chosenD20: details.roll,
-      percentile: details,
+      system: ACTION_SLOT.write({ attack: details }),
+      margin: details.netSl,
+      location: details.location,
     },
   };
 }
@@ -92,7 +95,9 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const fortuneLine = textRef(fortune.kind === "reroll" ? "battleWfrp.log.fortuneReroll" : "battleWfrp.log.fortuneSl", { name: attacker.basicInfo.name, first: fortune.firstRoll ?? 0 });
 
-    return { ...r, fortune, fortuneLine, attackRoll: { ...r.attackRoll, percentile: r.attackRoll.percentile && { ...r.attackRoll.percentile, fortune } } };
+    const attack = ACTION_SLOT.read(r.attackRoll.system)?.attack;
+
+    return { ...r, fortune, fortuneLine, attackRoll: { ...r.attackRoll, ...(attack && { system: ACTION_SLOT.write({ attack: { ...attack, fortune } }) }) } };
   };
 
   if (attackKindOf(attack.type) === AttackType.RANGED) {

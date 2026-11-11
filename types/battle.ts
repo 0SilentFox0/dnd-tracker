@@ -11,7 +11,6 @@ import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { PsychologyKind } from "@/lib/utils/abilities/schema/kinds";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
-import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
@@ -741,8 +740,7 @@ export interface BattleAction {
     /** Другий d20 (перевага/недолік) і кубик, що пішов у розрахунок */
     secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
     chosenD20?: number;
-    percentile?: PercentileAttackDetails;
-    percentileCast?: PercentileCastDetails;
+    system?: SystemSlot;
     // Для урону:
     damageRolls?: Array<{
       dice: string;

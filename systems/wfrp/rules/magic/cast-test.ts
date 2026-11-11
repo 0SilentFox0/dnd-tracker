@@ -3,6 +3,7 @@ import { participantChars } from "../combat/participant";
 import { selfTestMod } from "../conditions/test-mod";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import { applyFortune } from "../percentile/fortune";
+import { ACTION_SLOT } from "../slots";
 import { armourSl } from "./armour";
 import { CAST_SKILL, MAJOR_MISCAST_ROLLS, MAX_OVERCAST_STEPS, NO_OVERCAST_KINDS, OVERCAST_SL_STEP, PRAY_SKILL, PRAYER_KINDS } from "./constants";
 
@@ -66,11 +67,11 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
   return {
     success,
-    sl: test.sl,
+    margin: test.sl,
     overcastSteps,
     miscast,
     ...(prayer && { keepChannelled: true as const }),
-    percentile: { roll: test.roll, target: test.target, sl: test.sl, cn, channelled, armourSl: armour, doubles: test.doubles, outcome, overcastSteps, miscast, ...(fortune && { fortune }) },
+    details: ACTION_SLOT.write({ cast: { roll: test.roll, target: test.target, sl: test.sl, cn, channelled, armourSl: armour, doubles: test.doubles, outcome, overcastSteps, miscast, ...(fortune && { fortune }) } }),
     lines,
     ...(fortune && { fortune }),
   };

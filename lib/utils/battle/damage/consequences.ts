@@ -5,7 +5,7 @@ import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentr
 import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle/death-saves";
 import { revertOnZero } from "@/lib/utils/battle/transform/revert";
 import type { Ruleset } from "@/lib/utils/rules";
-import { type HitLocation, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { RuleSystemMagic } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -19,7 +19,7 @@ export interface DamageConsequencesInput {
   rules?: Ruleset;
   rng: () => number;
   participants: BattleParticipant[];
-  location?: HitLocation;
+  location?: string;
   round?: number;
 }
 

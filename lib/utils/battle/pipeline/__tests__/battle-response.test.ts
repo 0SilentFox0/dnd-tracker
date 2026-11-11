@@ -173,3 +173,26 @@ describe("приховані miscast-стани ворога", () => {
     expect((dm.payload as typeof delta).upserted[0].battleData.activeEffects).toEqual([hiddenEffect]);
   });
 });
+
+describe("P7: деталі дії у Pusher-каналах", () => {
+  const attack = { roll: 30, target: 45, sl: 1, netSl: 2, location: "arm", doubles: false, defender: { kind: "parry", roll: 52, sl: -1, target: 40 } };
+
+  const cast = { roll: 44, target: 40, sl: -1, cn: 3, channelled: 0, armourSl: 0, doubles: true, outcome: "failure", overcastSteps: 0, miscast: "minor" };
+
+  const visibleFoe = { ...goblin, basicInfo: { ...goblin.basicInfo, id: "foe", side: ParticipantSide.ENEMY } };
+
+  const entry = (actorId: string, data: object) => ({ actionIndex: 1, actionType: "attack", actorId, targets: [{ participantId: "hero", participantName: "x" }], actionDetails: { system: { key: "wfrp", data } }, log: [] }) as never;
+
+  const delta = (log: never[]) => ({ battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log });
+
+  it("публічний канал без захисника й miscast, dm-канал повний", () => {
+    const [pub, dm] = buildPusherMessages({ before: scene, after: scene, rules: WFRP_RULES, participants: [hero, visibleFoe], delta: delta([entry("foe", { attack, cast })]) });
+
+    const publicJson = JSON.stringify(pub.payload);
+
+    expect(publicJson).not.toContain("defender");
+    expect(publicJson).not.toContain("minor");
+    expect(JSON.stringify(dm.payload)).toContain("defender");
+    expect(JSON.stringify(dm.payload)).toContain("minor");
+  });
+});

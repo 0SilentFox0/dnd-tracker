@@ -5,6 +5,7 @@ import { sizeDamageBonus, wardRoll } from "../traits/size";
 import { applyWfrpCrit } from "./crit-effect";
 import { rollCrit } from "./crit-table";
 import { computeWfrpDamage } from "./damage";
+import { asLocation } from "./location";
 import { participantStats } from "./participant";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
@@ -20,7 +21,9 @@ const step = (key: string, value: number): MitigateStep => ({
 const totalLabel = textRef("battleWfrp.damage.total");
 
 export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
-  const { attacker, target, location } = ctx;
+  const { attacker, target } = ctx;
+
+  const location = asLocation(ctx.location);
 
   if (ctx.amount <= 0) return { amount: 0, steps: [], totalLabel };
 
@@ -38,14 +41,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
   const { effect, steps: qualitySteps } = qualityEffects(
     { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] },
-    { attackRoll: ctx.attackRoll ?? 0, netSl: ctx.netSl, crit: ctx.crit, sb, ap },
+    { attackRoll: ctx.attackRoll ?? 0, netSl: ctx.margin, crit: ctx.crit, sb, ap },
   );
 
   const appliedSb = slot?.noSb ? 0 : sb;
 
-  const size = sizeDamageBonus(attacker, target, ctx.weapon + appliedSb + ctx.netSl);
+  const size = sizeDamageBonus(attacker, target, ctx.weapon + appliedSb + ctx.margin);
 
-  const base = computeWfrpDamage({ weapon: ctx.weapon, sb: appliedSb, netSl: ctx.netSl, size, tb: participantStats(target)?.tb ?? 0, ap, extra: qualitySteps, minDamage: effect.minDamage });
+  const base = computeWfrpDamage({ weapon: ctx.weapon, sb: appliedSb, netSl: ctx.margin, size, tb: participantStats(target)?.tb ?? 0, ap, extra: qualitySteps, minDamage: effect.minDamage });
 
   const steps = base.steps.filter((s) => s.key === "weapon" || s.value !== 0).map((s) => step(s.key, s.value));
 

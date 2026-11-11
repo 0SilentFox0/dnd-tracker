@@ -146,7 +146,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
     settleCastTest(state, settle);
 
-    return finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, cast: settle.cast.percentile, fizzled: true });
+    return finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, details: settle.cast.details, fizzled: true });
   }
 
   const concentrates = !!params.rules?.concentration.enabled && def.concentration === true;
@@ -222,7 +222,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   if (settle) settleCastTest(state, settle);
 
-  const result = finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, ...(test && { cast: test.percentile }) });
+  const result = finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, ...(test && { details: test.details }) });
 
   return tag ? { ...result, concentration: tag } : result;
 }

@@ -46,30 +46,30 @@ describe("buildAttackResultFx", () => {
   });
 
   describe("d100", () => {
-    const percentile: PercentileAttackDetails = { roll: 30, target: 45, sl: 1, netSl: 3, location: "arm", doubles: false, defender: { kind: "parry", roll: 60, sl: -2, target: 40 }, momentumUsed: true };
+    const attack: PercentileAttackDetails = { roll: 30, target: 45, sl: 1, netSl: 3, location: "arm", doubles: false, defender: { kind: "parry", roll: 60, sl: -2, target: 40 }, momentumUsed: true };
 
-    const entry = { actionIndex: 7, actionType: "attack", actorId: "me", targets: [{ participantId: "a" }], actionDetails: { percentile } } as unknown as BattleAction;
+    const system = { key: "wfrp", data: { attack } };
+
+    const entry = { actionIndex: 7, actionType: "attack", actorId: "me", targets: [{ participantId: "a" }], actionDetails: { system } } as unknown as BattleAction;
 
     const hit = [{ kind: "hit" as const, targetId: "a", damage: 4, downed: false }];
 
-    it("exact: percentile з журналу цього удару, із захисником", () => {
+    it("exact: слот з журналу цього удару, із прапорцем exact", () => {
       const fx = buildAttackResultFx({ ...base, log: [entry], results: hit, exactOf: () => true });
 
-      expect((fx as { percentile?: unknown }).percentile).toEqual(percentile);
+      expect(fx).toMatchObject({ system, exact: true });
     });
 
-    it("не exact: без захисника, SL = чистий результат", () => {
+    it("не exact: слот лишається, прапорця exact немає (приховує UI системи)", () => {
       const fx = buildAttackResultFx({ ...base, log: [entry], results: hit });
 
-      const p = (fx as { percentile: PercentileAttackDetails }).percentile;
-
-      expect(p).not.toHaveProperty("defender");
-      expect(p).toMatchObject({ roll: 30, target: 45, sl: 3, netSl: 3, location: "arm" });
+      expect(fx).toMatchObject({ system });
+      expect(fx).not.toHaveProperty("exact");
     });
 
-    it("запис уже побачений або без percentile (d20) — поля немає", () => {
-      expect(buildAttackResultFx({ ...base, log: [entry], seen: new Set([7]), results: hit })).not.toHaveProperty("percentile");
-      expect(buildAttackResultFx({ ...base, log: [], results: hit })).not.toHaveProperty("percentile");
+    it("запис уже побачений або без слота (d20) — поля немає", () => {
+      expect(buildAttackResultFx({ ...base, log: [entry], seen: new Set([7]), results: hit })).not.toHaveProperty("system");
+      expect(buildAttackResultFx({ ...base, log: [], results: hit })).not.toHaveProperty("system");
     });
   });
 });

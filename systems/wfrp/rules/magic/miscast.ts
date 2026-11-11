@@ -6,14 +6,14 @@ import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engin
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { ApplyDamageConsequences, MiscastKind, SystemConditionResult } from "@/lib/utils/rules/systems/types";
+import type { ApplyDamageConsequences, SystemConditionResult } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export function wfrpMiscast(
   ps: BattleParticipant[],
   casterId: string,
-  kind: MiscastKind,
+  kind: string,
   ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences; presetRoll?: number },
 ): SystemConditionResult {
   const caster = findParticipant(ps, casterId);

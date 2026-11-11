@@ -12,7 +12,9 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { coerceRecord, IMPORT_SPECS } from "@/lib/utils/content/import";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import { slotChars, slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { extractWfrpAttacks } from "@/systems/wfrp/rules/combat/extract-attacks";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
@@ -75,7 +77,7 @@ function castBody(ctx: BattleMutationContext, casterId: string, targetId: string
 
 const castOn = (ctx: BattleMutationContext, casterId: string) => ({ ...ctx, scene: { ...ctx.scene, turnIndex: ctx.participants.findIndex((p) => p.basicInfo.id === casterId) }, rng: () => 0.5 });
 
-const percentile = (out: { events: { details?: unknown }[] }) => (out.events[0].details as { actionDetails: { percentileCast: { outcome: string; overcastSteps?: number; armourSl?: number; miscast?: string } } }).actionDetails.percentileCast;
+const percentile = (out: { events: { details?: unknown }[] }) => castOf((out.events[0].details as { actionDetails: { system?: SystemSlot } }).actionDetails);
 
 describe("grim arsenal and magic end to end", () => {
   it("template gear gives the hero AP, a sword and a crossbow", () => {
@@ -129,7 +131,7 @@ describe("grim arsenal and magic end to end", () => {
     const details = percentile(out);
 
     expect(details).toMatchObject({ outcome: "success", overcastSteps: 1 });
-    expect(details.armourSl).toBe(0);
+    expect(details?.armourSl).toBe(0);
     expect(part({ ...ctx, participants: out.participants }, "u0").combatStats.currentHp).toBeLessThan(oracle.combatStats.currentHp);
 
     const conditions = ruleSystemOf(rules).conditions as NonNullable<ReturnType<typeof ruleSystemOf>["conditions"]>;
@@ -146,7 +148,7 @@ describe("grim arsenal and magic end to end", () => {
 
     const minor = ((data.rules?.tables as unknown as Record<string, { text: string }[]>).miscastMinor ?? []).map((r) => r.text);
 
-    expect(percentile(out).miscast).toBe("minor");
+    expect(percentile(out)?.miscast).toBe("minor");
 
     const events = JSON.stringify(out.events);
 
@@ -163,7 +165,7 @@ describe("grim arsenal and magic end to end", () => {
 
     const out = await cast(ctx, castBody(ctx, "u0", "h0", 5));
 
-    expect(percentile(out).outcome).toBe("success");
+    expect(percentile(out)?.outcome).toBe("success");
     expect(part({ ...ctx, participants: out.participants }, "h0").combatStats.currentHp).toBeLessThan(hero.combatStats.currentHp);
   });
 

@@ -1,6 +1,6 @@
 import { type Characteristics, DEFAULT_CHARACTERISTICS } from "../characteristics/keys";
 import type { WfrpParticipantStats } from "../combat/participant";
-import { PARTICIPANT_SLOT } from "../slots";
+import { ACTION_SLOT, PARTICIPANT_SLOT } from "../slots";
 
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant } from "@/types/battle";
@@ -19,3 +19,7 @@ export const withStats = <T extends BattleParticipant>(p: T, patch: Partial<Wfrp
 export const slotStats = (slot: SystemSlot | undefined) => PARTICIPANT_SLOT.read(slot)?.stats;
 
 export const slotChars = (slot: SystemSlot | undefined) => PARTICIPANT_SLOT.read(slot)?.characteristics;
+
+export const attackOf = (src: { system?: SystemSlot } | undefined) => ACTION_SLOT.read(src?.system)?.attack;
+
+export const castOf = (src: { system?: SystemSlot } | undefined) => ACTION_SLOT.read(src?.system)?.cast;

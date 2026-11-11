@@ -19,7 +19,6 @@ import { critNameRef } from "@/lib/utils/battle/attack/critical";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { effectName } from "@/lib/utils/battle/common/terms";
 import { dealsNoDamage, findEffectMarker } from "@/lib/utils/battle/participant/state";
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import { type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
@@ -33,7 +32,7 @@ export interface ComputeHitDamageParams {
   attack: BattleAttack;
   damageRolls: number[];
   allParticipants: BattleParticipant[];
-  attackRoll: { isCritical: boolean; criticalEffect?: CriticalEffect; percentile?: PercentileAttackDetails };
+  attackRoll: { isCritical: boolean; criticalEffect?: CriticalEffect; margin?: number; location?: string; totalAttackValue?: number };
   rules: Ruleset;
   damageMultiplier?: number;
   currentRound: number;
@@ -263,17 +262,17 @@ function mitigateHit(
 ): { amount: number; steps: DamageStep[]; rows: DamageRow[]; afterHit?: MitigateResult["afterHit"] } | null {
   const hook = ruleSystemOf(params.rules).combat.mitigateDamage;
 
-  const details = params.attackRoll.percentile;
+  const { margin, location, totalAttackValue } = params.attackRoll;
 
-  if (!hook || !details) return null;
+  if (!hook || margin === undefined) return null;
 
   const result = hook({
     ...input,
     weapon: input.weapon + (params.attack.damageBonus ?? 0),
-    netSl: details.netSl,
-    location: details.location,
+    margin,
+    location: location ?? "",
     crit: params.attackRoll.isCritical,
-    attackRoll: details.roll,
+    attackRoll: totalAttackValue,
     attack: params.attack,
     rng: params.rng ?? Math.random,
     rules: params.rules,

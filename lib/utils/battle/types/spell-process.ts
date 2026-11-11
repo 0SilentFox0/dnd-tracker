@@ -2,8 +2,8 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { TransformRequest } from "@/lib/utils/battle/transform/types";
-import type { PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { SpellDice } from "@/lib/utils/spells/model/dice";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
@@ -62,7 +62,7 @@ export interface CastSpellResult {
   reason?: "systemMismatch";
   /** тест провалено: ціна витрачена, ефектів немає */
   fizzled?: boolean;
-  cast?: PercentileCastDetails;
+  details?: SystemSlot;
   /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
   spellDamage?: TerrainDamage;
   /** мітка концентрації цього касту — для зони, що згасає разом із нею */

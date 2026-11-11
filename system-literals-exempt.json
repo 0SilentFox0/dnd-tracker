@@ -72,7 +72,7 @@
   "lib/utils/rules/defaults.ts": 1,
   "lib/utils/rules/schema.ts": 2,
   "lib/utils/rules/systems/index.ts": 33,
-  "lib/utils/rules/systems/types.ts": 26,
+  "lib/utils/rules/systems/types.ts": 25,
   "lib/utils/rules/tables-schema.ts": 9,
   "scripts/assets/tokens-5e/upload-identity-icons.ts": 4,
   "scripts/assets/tokens-5e/upload-tokens-5e.ts": 4,

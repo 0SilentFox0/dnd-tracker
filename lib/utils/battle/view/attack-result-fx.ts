@@ -4,7 +4,7 @@ import { retaliationOutcome } from "./retaliation";
 import { volleyResults } from "./volley-results";
 
 import type { AttackOutcomeSummary } from "@/lib/utils/battle/flows";
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 import type { ResultFx, StrikeFx } from "@/types/battle-scene";
 
@@ -35,14 +35,8 @@ interface AttackResultFxInput {
   knowledge?: BattleKnowledge;
 }
 
-function percentileOf(log: BattleAction[], seen: ReadonlySet<number>, attackerId: string, targetId: string, exact: boolean): PercentileAttackDetails | undefined {
-  const p = log.find((x) => !seen.has(x.actionIndex) && x.actionType === "attack" && x.actorId === attackerId && x.targets[0]?.participantId === targetId && x.actionDetails.percentile)?.actionDetails.percentile;
-
-  if (!p || exact) return p;
-
-  const { defender: _defender, ...rest } = p;
-
-  return { ...rest, sl: p.netSl };
+function systemOf(log: BattleAction[], seen: ReadonlySet<number>, attackerId: string, targetId: string): SystemSlot | undefined {
+  return log.find((x) => !seen.has(x.actionIndex) && x.actionType === "attack" && x.actorId === attackerId && x.targets[0]?.participantId === targetId && x.actionDetails.system)?.actionDetails.system;
 }
 
 export function buildAttackResultFx({ results, log, seen, attackerId, d20, weapon, nameOf, exactOf = () => false, knowledge }: AttackResultFxInput): ResultFx {
@@ -54,7 +48,9 @@ export function buildAttackResultFx({ results, log, seen, attackerId, d20, weapo
 
   const targetName = nameOf(first.targetId);
 
-  const percentile = percentileOf(log, seen, attackerId, first.targetId, exactOf(first.targetId));
+  const system = systemOf(log, seen, attackerId, first.targetId);
+
+  const exact = system && exactOf(first.targetId) ? { exact: true as const } : undefined;
 
   const strikes: StrikeFx[] | undefined = results.length > 1 ? results.map((r) => ({ targetName: nameOf(r.targetId), kind: r.kind, damage: r.damage, downed: r.downed, splash: r.splash })) : undefined;
 
@@ -64,7 +60,7 @@ export function buildAttackResultFx({ results, log, seen, attackerId, d20, weapo
       targetName,
       d20,
       known: formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, knowledge)),
-      ...(percentile && { percentile }),
+      ...(system && { system, ...exact }),
       ...(strikes && { strikes }),
       ...(retaliation && { retaliation }),
       ...(crit?.type === "fail" && { critFail: crit }),
@@ -78,7 +74,7 @@ export function buildAttackResultFx({ results, log, seen, attackerId, d20, weapo
     downed: first.downed,
     d20,
     weapon,
-    ...(percentile && { percentile }),
+    ...(system && { system, ...exact }),
     ...(strikes && { strikes }),
     ...(retaliation && { retaliation }),
     ...(crit?.type === "success" && { critEffect: crit }),

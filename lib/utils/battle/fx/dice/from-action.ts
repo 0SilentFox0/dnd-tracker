@@ -1,6 +1,7 @@
 import { MAX_INITIATIVE_DICE, MAX_SAVES_SHOWN } from "./layout";
 import type { DieFx } from "./types";
 
+import { ruleSystemByKey } from "@/lib/utils/rules/systems";
 import type { BattleAction, DiceRollGroup } from "@/types/battle";
 
 export interface DiceThrowSpec {
@@ -19,10 +20,6 @@ type RollKind = DiceRollGroup["kind"];
 // влучання і шкода в одній пачці нечитабельні — кожна фаза кидається окремо, у порядку подій
 const PHASES: RollKind[][] = [["attack"], ["save"], ["damage"], ["heal"], ["morale"], ["initiative"]];
 
-export function percentileDice(roll: number): [{ sides: 10; value: number; tens: true }, { sides: 10; value: number; units: true }] {
-  return [{ sides: 10, value: Math.floor((roll === 100 ? 0 : roll) / 10) || 10, tens: true }, { sides: 10, value: roll % 10 || 10, units: true }];
-}
-
 const PERCENTILE_SEED_BASE = 1_000_003;
 
 export function diceThrowsOf(action: BattleAction): DiceThrowSpec[] {
@@ -30,9 +27,11 @@ export function diceThrowsOf(action: BattleAction): DiceThrowSpec[] {
 
   if (action.isCancelled) return [];
 
-  const { percentile } = action.actionDetails;
+  const { system } = action.actionDetails;
 
-  const percentileThrow: DiceThrowSpec[] = percentile ? [{ seed: PERCENTILE_SEED_BASE + action.actionIndex, groups: [percentileDice(percentile.roll)] }] : [];
+  const systemDice = system ? (ruleSystemByKey(system.key)?.combat.details?.diceFx(system) ?? []) : [];
+
+  const percentileThrow: DiceThrowSpec[] = systemDice.length ? [{ seed: PERCENTILE_SEED_BASE + action.actionIndex, groups: [systemDice] }] : [];
 
   if (!rolls?.length) return percentileThrow;
 

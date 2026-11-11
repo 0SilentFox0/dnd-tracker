@@ -7,6 +7,7 @@ import { processAttack } from "@/lib/utils/battle/attack/process";
 import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { armourAp } from "@/systems/wfrp/rules/equipment";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
@@ -62,7 +63,7 @@ describe("WFRP damage", () => {
   it("weapon + SB + net SL - TB - AP", () => {
     const r = strike(30, 80, { target: { ap: 2 } });
 
-    expect(r.attackRoll.percentile).toMatchObject({ netSl: 5, location: "head", doubles: false });
+    expect(attackOf(r.attackRoll)).toMatchObject({ netSl: 5, location: "head", doubles: false });
     expect(r.targetUpdated.combatStats.currentHp).toBe(20 - (4 + 3 + 5 - 3 - 2));
     expect(r.battleAction.actionDetails.damageSteps?.t.map((s) => s.value)).toEqual([4, 3, 5, -3, -2]);
   });
@@ -80,8 +81,8 @@ describe("WFRP damage", () => {
 
     const r = strike(30, 80, { target });
 
-    expect(r.attackRoll.percentile?.location).toBe("head");
-    expect(r.battleAction.actionDetails.damageSteps?.t.map((s) => s.value)).toEqual([4, 3, r.attackRoll.percentile?.netSl, -3, -1]);
+    expect(attackOf(r.attackRoll)?.location).toBe("head");
+    expect(r.battleAction.actionDetails.damageSteps?.t.map((s) => s.value)).toEqual([4, 3, attackOf(r.attackRoll)?.netSl, -3, -1]);
   });
 
   it("labels and sides come from the system contract", () => {
@@ -103,13 +104,13 @@ describe("WFRP damage", () => {
   it("a doubles hit rolls the location crit table", () => {
     const r = strike(22, 90);
 
-    expect(r.attackRoll.percentile).toMatchObject({ doubles: true, location: "arm" });
+    expect(attackOf(r.attackRoll)).toMatchObject({ doubles: true, location: "arm" });
 
     const [effect] = crits(r.targetUpdated);
 
     expect(effect.name).toBe("crit.wfrp.arm.5.disarmed");
     expect(effect.effects).toEqual([{ type: "disarmed", value: 1 }]);
-    expect(r.targetUpdated.combatStats.currentHp).toBe(20 - (4 + 3 + (r.attackRoll.percentile?.netSl ?? 0) - 3 + 4));
+    expect(r.targetUpdated.combatStats.currentHp).toBe(20 - (4 + 3 + (attackOf(r.attackRoll)?.netSl ?? 0) - 3 + 4));
     expect(logOf(r)).toContain("battleWfrp.log.critHit");
   });
 

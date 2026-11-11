@@ -1,7 +1,6 @@
 import { buildOffTurnAction, type BuildOffTurnParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
 import { spendRidersOnMiss } from "./process/hit-rider";
-import { percentileLines } from "./process/percentile-log";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
 import { critDamageRolls, critDoublesDice } from "./crit-dice";
 import { applyCriticalEffect, critFlavorOf } from "./critical";
@@ -63,11 +62,11 @@ function judgeServerWfrp(flow: ActionFlow, input: Pick<ServerAttackInput, "attac
 
   flow.momentum = settled.next;
 
-  flow.messages.push(...percentileLines(r.attackRoll.percentile, r.isHit));
+  flow.messages.push(...r.lines);
 
   if (settled.gained) flow.messages.push(textRef("battleLog.percentile.momentum"));
 
-  return { roll: r.attackRoll, targetAC: r.attackRoll.percentile?.defender?.target ?? 0, isHit: r.isHit };
+  return { roll: r.attackRoll, targetAC: r.defenseValue ?? 0, isHit: r.isHit };
 }
 
 function judgeServerD20(flow: ActionFlow, input: Pick<ServerAttackInput, "attackerId" | "targetId" | "attack" | "rng" | "label" | "currentRound">): ServerJudged {

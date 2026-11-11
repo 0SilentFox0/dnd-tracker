@@ -60,10 +60,17 @@ describe("percentileDice", () => {
   it("d100-дія дає пару d10 першою пачкою", () => {
     const pct = { roll: 45, target: 50, sl: 0, netSl: 0, location: "body", doubles: false } as never;
 
-    const specs = diceThrowsOf(action({ actionDetails: { percentile: pct } }));
+    const specs = diceThrowsOf(action({ actionDetails: { system: { key: "wfrp", data: { attack: pct } } } }));
 
     expect(specs).toHaveLength(1);
     expect(specs[0].groups[0]).toEqual(percentileDice(45));
+  });
+
+  it("P9: лише каст або чужий ключ — без кидка d100", () => {
+    const cast = { roll: 45, target: 50, sl: 0, cn: 3, channelled: 0, armourSl: 0, doubles: false, outcome: "failure", overcastSteps: 0, miscast: null };
+
+    expect(diceThrowsOf(action({ actionDetails: { system: { key: "wfrp", data: { cast } } } }))).toEqual([]);
+    expect(diceThrowsOf(action({ actionDetails: { system: { key: "zzz", data: { attack: { roll: 45 } } } } }))).toEqual([]);
   });
 
   it("d20-дія без змін", () => {

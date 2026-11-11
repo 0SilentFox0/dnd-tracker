@@ -8,6 +8,7 @@ import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant, SceneMomentum } from "@/types/battle";
 
@@ -54,8 +55,8 @@ describe("WFRP percentile attack", () => {
     const r = strike(30, 80);
 
     expect(r.success).toBe(true);
-    expect(r.attackRoll.percentile).toMatchObject({ roll: 30, target: 40, sl: 1, netSl: 5, defender: { roll: 80 } });
-    expect(r.battleAction.actionDetails.percentile?.location).toBe("head");
+    expect(attackOf(r.attackRoll)).toMatchObject({ roll: 30, target: 40, sl: 1, netSl: 5, defender: { roll: 80 } });
+    expect(attackOf(r.battleAction.actionDetails)?.location).toBe("head");
   });
 
   it("miss when the attacker fails", () => {
@@ -76,7 +77,7 @@ describe("WFRP percentile attack", () => {
   it("tie goes to the attacker", () => {
     const r = strike(30, 30);
 
-    expect(r.attackRoll.percentile?.netSl).toBe(0);
+    expect(attackOf(r.attackRoll)?.netSl).toBe(0);
     expect(r.success).toBe(true);
   });
 
@@ -88,7 +89,7 @@ describe("WFRP percentile attack", () => {
     const r = strike(20, 99, { attack: bow });
 
     expect(r.success).toBe(true);
-    expect(r.attackRoll.percentile?.defender).toBeUndefined();
+    expect(attackOf(r.attackRoll)?.defender).toBeUndefined();
   });
 
   it("doubles on a hit are critical, on a miss they only log", () => {
@@ -110,7 +111,7 @@ describe("WFRP percentile attack", () => {
 
     const spent = strike(30, 80, { momentum: { ally: true } });
 
-    expect(spent.attackRoll.percentile).toMatchObject({ sl: 2, momentumUsed: true });
+    expect(attackOf(spent.attackRoll)).toMatchObject({ sl: 2, momentumUsed: true });
     expect(spent.momentum).toEqual({ ally: true });
 
     expect(strike(70, 10, { momentum: { ally: true } }).momentum).toEqual({ enemy: true });
@@ -119,7 +120,7 @@ describe("WFRP percentile attack", () => {
   it("the defender's Momentum is spent when it applies and the loser side never keeps one", () => {
     const won = strike(30, 80, { momentum: { enemy: true } });
 
-    expect(won.attackRoll.percentile?.defender?.sl).toBe((strike(30, 80).attackRoll.percentile?.defender?.sl ?? 0) + 1);
+    expect(attackOf(won.attackRoll)?.defender?.sl).toBe((attackOf(strike(30, 80).attackRoll)?.defender?.sl ?? 0) + 1);
     expect(won.momentum).toEqual({ ally: true });
 
     expect(strike(30, 80, { momentum: { ally: true, enemy: true } }).momentum).toEqual({ ally: true });
@@ -148,7 +149,7 @@ describe("WFRP percentile attack", () => {
 
     const r = resolveServerAttack(input(f2));
 
-    expect(r.battleAction.actionDetails.percentile?.momentumUsed).toBe(true);
+    expect(attackOf(r.battleAction.actionDetails)?.momentumUsed).toBe(true);
     expect(f2.momentum).toEqual({ enemy: true });
   });
 
@@ -161,8 +162,8 @@ describe("WFRP percentile attack", () => {
 
     const friend = fighter("f", ParticipantSide.ALLY, { position: cell(1, 1) });
 
-    expect(strike(30, 80, { attacker, target }).attackRoll.percentile?.target).toBe(40);
-    expect(strike(30, 80, { attacker, target, others: [friend] }).attackRoll.percentile?.target).toBe(50);
+    expect(attackOf(strike(30, 80, { attacker, target }).attackRoll)?.target).toBe(40);
+    expect(attackOf(strike(30, 80, { attacker, target, others: [friend] }).attackRoll)?.target).toBe(50);
   });
 
   it("an unconscious target aborts without crashing", () => {
@@ -173,20 +174,20 @@ describe("WFRP percentile attack", () => {
     const r = strike(30, 80, { target: down });
 
     expect(r.success).toBe(false);
-    expect(r.attackRoll.percentile).toBeUndefined();
+    expect(attackOf(r.attackRoll)).toBeUndefined();
   });
 
   it("missing characteristics fall back to defaults without NaN", () => {
     const r = strike(25, 90, { attacker: fighter("a", ParticipantSide.ALLY, { characteristics: false }), target: fighter("t", ParticipantSide.ENEMY, { characteristics: false }) });
 
-    expect(r.attackRoll.percentile?.target).toBe(30);
-    expect(Number.isNaN(r.attackRoll.percentile?.netSl)).toBe(false);
+    expect(attackOf(r.attackRoll)?.target).toBe(30);
+    expect(Number.isNaN(attackOf(r.attackRoll)?.netSl)).toBe(false);
   });
 
   it("rules without combat hooks use the d20 path", () => {
     const r = strike(15, 50, { rules: DEFAULT_RULES as typeof WFRP_RULES });
 
-    expect(r.attackRoll.percentile).toBeUndefined();
+    expect(attackOf(r.attackRoll)).toBeUndefined();
     expect(r.attackRoll.chosenD20).toBe(15);
   });
 });

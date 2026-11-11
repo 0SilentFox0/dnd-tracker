@@ -5,6 +5,7 @@ import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell, CastSpellParams } from "@/lib/utils/battle/types/spell-process";
 import type { SpellDefinition, SpellMagic } from "@/lib/utils/spells/model/schema";
+import { castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { conditionLevel } from "@/systems/wfrp/rules/conditions/levels";
 import { caster as wfrpCaster } from "@/systems/wfrp/rules/magic/__tests__/fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
@@ -51,8 +52,8 @@ describe("castSpell in a percentile magic system", () => {
     expect(r.fizzled).toBeUndefined();
     expect(hpLost(r)).toBe(3);
     expect(r.casterUpdated.spellcasting.spellSlots).toEqual({});
-    expect(r.cast).toMatchObject({ roll: 30, outcome: "success", cn: 2 });
-    expect(r.battleAction.actionDetails.percentileCast).toBe(r.cast);
+    expect(castOf(r.battleAction.actionDetails)).toMatchObject({ roll: 30, outcome: "success", cn: 2 });
+    expect(r.details).toBe(r.battleAction.actionDetails.system);
     expect(r.casterUpdated.actionFlags.hasUsedAction).toBe(true);
   });
 
@@ -66,7 +67,7 @@ describe("castSpell in a percentile magic system", () => {
     expect(hpLost(r)).toBe(0);
     expect(r.casterUpdated.actionFlags.hasUsedAction).toBe(true);
     expect(r.casterUpdated.battleData.channelledSl).toBe(0);
-    expect(r.cast?.outcome).toBe("failure");
+    expect(castOf(r.battleAction.actionDetails)?.outcome).toBe("failure");
   });
 
   it("overcast steps raise the cast level: two extra dice per upcastDice", () => {
@@ -76,7 +77,7 @@ describe("castSpell in a percentile magic system", () => {
 
     const over = run(spellOf(magicOf({ overcast: "dice" }), { upcastDice: 1 }), { castTest: { roll: 3 } }, caster);
 
-    expect(over.cast?.overcastSteps).toBe(2);
+    expect(castOf(over.battleAction.actionDetails)?.overcastSteps).toBe(2);
     expect(hpLost(plain)).toBe(3);
     expect(hpLost(over)).toBe(9);
     expect(over.battleAction.actionDetails.spellSlotUsed).toBe(3);
@@ -112,14 +113,14 @@ describe("castSpell in a percentile magic system", () => {
     const r = run(spellOf(magicOf()), { castTest: { roll: 77 }, rng: () => 0.1 });
 
     expect(r.fizzled).toBe(true);
-    expect(r.cast?.miscast).toBe("minor");
+    expect(castOf(r.battleAction.actionDetails)?.miscast).toBe("minor");
     expect(conditionLevel(r.casterUpdated, "fatigued")).toBe(1);
   });
 
   it("a DM cast skips the test", () => {
     const r = run(spellOf(undefined), { isDMCast: true });
 
-    expect(r.cast).toBeUndefined();
+    expect(r.details).toBeUndefined();
     expect(hpLost(r)).toBe(3);
   });
 
@@ -138,7 +139,7 @@ describe("castSpell in a percentile magic system", () => {
   it("a dry run rolls no test and spends nothing it reports", () => {
     const r = run(spellOf(magicOf({ cn: 9 })), { dryRun: true });
 
-    expect(r.cast).toBeUndefined();
+    expect(r.details).toBeUndefined();
     expect(r.fizzled).toBeUndefined();
   });
 
@@ -148,7 +149,7 @@ describe("castSpell in a percentile magic system", () => {
     const r = run(spellOf(magicOf()), { castTest: { roll: 90, fortune: "reroll", fortuneRoll: 30 } }, caster);
 
     expect(r.fizzled).toBeUndefined();
-    expect(r.cast?.fortune).toMatchObject({ kind: "reroll", firstRoll: 90 });
+    expect(castOf(r.battleAction.actionDetails)?.fortune).toMatchObject({ kind: "reroll", firstRoll: 90 });
     expect(r.casterUpdated.battleData.fortune).toBe(1);
   });
 });
@@ -160,7 +161,7 @@ describe("prayers in castSpell", () => {
     const r = run(spellOf(magicOf({ kind: "blessing", cn: 0 })), { castTest: { roll: 22 } }, caster);
 
     expect(r.casterUpdated.battleData.channelledSl).toBe(2);
-    expect(r.cast?.miscast).toBe("wrath");
+    expect(castOf(r.battleAction.actionDetails)?.miscast).toBe("wrath");
     expect(r.casterUpdated.battleData.sin).toBe(3);
     expect(r.messages.some((m) => typeof m !== "string" && m.message === "wfrpMagic.log.wrath")).toBe(true);
   });
@@ -172,13 +173,13 @@ describe("ingredients avert a miscast", () => {
 
     const r = run(spellOf(magicOf({ kind: "blessing", cn: 0 })), { castTest: { roll: 22 }, ingredientUsed: true }, caster);
 
-    expect(r.cast?.miscast).toBe("wrath");
+    expect(castOf(r.battleAction.actionDetails)?.miscast).toBe("wrath");
   });
 
   it("cancels the miscast and logs it", () => {
     const r = run(spellOf(magicOf({ cn: 9 })), { castTest: { roll: 77 }, ingredientUsed: true });
 
-    expect(r.cast?.miscast).toBeNull();
+    expect(castOf(r.battleAction.actionDetails)?.miscast).toBeNull();
     expect(r.messages.some((m) => typeof m !== "string" && m.message === "wfrpMagic.log.ingredientAverts")).toBe(true);
     expect(conditionLevel(r.casterUpdated, "fatigued") + conditionLevel(r.casterUpdated, "deafened") + conditionLevel(r.casterUpdated, "stunned") + conditionLevel(r.casterUpdated, "blinded")).toBe(0);
     expect(r.casterUpdated.combatStats.currentHp).toBe(20);

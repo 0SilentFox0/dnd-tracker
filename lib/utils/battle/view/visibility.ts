@@ -1,11 +1,11 @@
 import { type BattleKnowledge, resolveObservedTraits } from "./knowledge";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { lineKey, textRef } from "@/lib/i18n/text-ref";
+import { lineKey } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf, systemKeyOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipantPatch } from "@/types/api";
 import type { ActiveEffect, BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -34,14 +34,6 @@ export function alwaysSeesEnemyStats(order: BattleParticipant[], userId: string)
   return mine.length > 0 && mine.every((p) => canSeeEnemyHp(p, order));
 }
 
-function hideDefense(line: LogLine): LogLine {
-  if (typeof line === "string" || line.message !== "battleLog.percentile.opposed") return line;
-
-  const { roll, target, sl, netSl } = line.params ?? {};
-
-  return textRef("battleLog.percentile.opposedHidden", { roll: roll ?? 0, target: target ?? 0, sl: sl ?? 0, netSl: netSl ?? 0 });
-}
-
 export const PLAYER_VIEWER: Viewer = { userId: null, isDM: false, readOnly: true, canSeeEnemyHp: false };
 
 export interface RedactionCtx {
@@ -54,7 +46,11 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const { participants } = ctx;
 
-  const conditions = ruleSystemOf(ctx.rules).conditions;
+  const system = ruleSystemOf(ctx.rules);
+
+  const conditions = system.conditions;
+
+  const hook = system.combat.details;
 
   const conceal = conditions?.concealLine ?? ((l: LogLine) => l);
 
@@ -70,29 +66,35 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer, ctx: Redaction
 
   const actor = participants.find((x) => x.basicInfo.id === e.actorId);
 
-  const casterConditions = (!!details.percentileCast?.miscast || !!e.log?.some(isMiscastLine)) && (!actor || !canSeeExactStats(actor, viewer));
+  const sys = details.system;
 
-  const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, percentile, ...rest } = details;
+  const actorHidden = !actor || !canSeeExactStats(actor, viewer);
+
+  const casterConditions = ((!!sys && !!hook?.actorSecret(sys)) || !!e.log?.some(isMiscastLine)) && actorHidden;
+
+  const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, system: _s, ...rest } = details;
 
   const hideNumbers = concealed || !e.targets?.length;
 
   const stripsNumbers = hideNumbers && ("targetAC" in details || "damageBreakdown" in details || "damageRows" in details);
 
-  const stripsDefender = percentile?.defender !== undefined;
+  const redacted = sys && hook && sys.key === systemKeyOf(ctx.rules) ? hook.redact(sys, { hideNumbers, hideActor: casterConditions }) : undefined;
 
   const visible = casterConditions ? e.log?.filter((l) => !isMiscastLine(l)) : e.log;
 
-  const lines = visible?.map((l) => (concealed || casterConditions ? conceal(hideDefense(l)) : hideDefense(l)));
+  const redactLine = hook?.redactLine ?? ((l: LogLine) => l);
+
+  const lines = visible?.map((l) => (concealed || casterConditions ? conceal(redactLine(l)) : redactLine(l)));
 
   const linesChanged = !!lines && (lines.length !== e.log?.length || lines.some((l, i) => l !== e.log?.[i]));
 
-  if (!stripsNumbers && !stripsDefender && !linesChanged && !casterConditions) return e;
+  if (!stripsNumbers && redacted === sys && !linesChanged && !casterConditions) return e;
 
-  const base = hideNumbers ? rest : details;
+  const { system: _drop, ...full } = details;
 
-  const withDefender = stripsDefender && percentile ? { ...base, percentile: { ...percentile, defender: undefined } } : base;
+  const base = hideNumbers ? rest : full;
 
-  const actionDetails = casterConditions && withDefender.percentileCast ? { ...withDefender, percentileCast: { ...withDefender.percentileCast, miscast: null } } : withDefender;
+  const actionDetails = redacted ? { ...base, system: redacted } : base;
 
   return { ...e, actionDetails, ...(lines && { log: lines }) };
 }

@@ -8,6 +8,7 @@ import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilitie
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
@@ -71,6 +72,6 @@ describe("berserk on a d100 system", () => {
 
     const r = runBerserkTurn({ rules: WFRP_RULES, participants: [berserker, wfrp("v", ParticipantSide.ENEMY)], restrictedBy: berserker, participantId: "b", bonusPercent: 0, round: 1, battleId: "x", actionIndex: 0, rng: seq(0.795) });
 
-    expect(r.actions[0].actionDetails.percentile?.roll).toBe(80);
+    expect(attackOf(r.actions[0].actionDetails)?.roll).toBe(80);
   });
 });

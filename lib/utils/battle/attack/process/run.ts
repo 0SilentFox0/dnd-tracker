@@ -3,7 +3,6 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { spendRidersOnMiss } from "./hit-rider";
 import { handleMiss } from "./miss";
-import { percentileLines } from "./percentile-log";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -229,7 +228,7 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
 
   flow.momentum = next;
 
-  flow.messages.push(...percentileLines(r.attackRoll.percentile, r.isHit));
+  flow.messages.push(...r.lines);
 
   if (gained) flow.messages.push(textRef("battleLog.percentile.momentum"));
 
@@ -241,7 +240,7 @@ function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolv
     if (r.fortuneLine) flow.messages.push(r.fortuneLine);
   }
 
-  return { second: undefined, targetAC: r.attackRoll.percentile?.defender?.target ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
+  return { second: undefined, targetAC: r.defenseValue ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
 }
 
 function judgeHit(run: AttackRun, rolled: AttackRollResult, targetAC: number, actionModifiers: Modifiers): { isHit: boolean; attackRoll: AttackRollResult } {
@@ -272,9 +271,9 @@ function withRollDetails<T extends { actionDetails: BattleAction["actionDetails"
 
   const damage = (action.actionDetails.damageRolls ?? []).flatMap((r) => r.results);
 
-  if (attackRoll.percentile) action.actionDetails.percentile = attackRoll.percentile;
+  if (attackRoll.system) action.actionDetails.system = attackRoll.system;
 
-  if (!params.recordDice || attackRoll.percentile) return action;
+  if (!params.recordDice || attackRoll.system) return action;
 
   action.actionDetails.diceRolls = attackDiceRolls({
     attackerId,

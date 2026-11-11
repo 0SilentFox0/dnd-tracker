@@ -253,10 +253,10 @@ describe("attack roll bounds", () => {
     expect(attackBodySchema.safeParse({ attackerId: "a", targetId: "t", attackRolls: [55, 101] }).success).toBe(false);
   });
 
-  it("wfrp takes d20Roll 100 with empty damageRolls and reports it in the percentile", async () => {
+  it("wfrp takes d20Roll 100 with empty damageRolls and reports it in the system slot", async () => {
     const out = await attackMutation({ ...wfrp(), rng: () => 0.5 }, parse({ d20Roll: 100 }));
 
-    expect(JSON.stringify(out.events)).toMatch(/"percentile":\{[^}]*"roll":100/);
+    expect(JSON.stringify(out.events)).toMatch(/"attack":\{[^}]*"roll":100/);
     expect(out.participants.find((p) => p.basicInfo.id === "t")!.combatStats.currentHp).toBe(20);
   });
 

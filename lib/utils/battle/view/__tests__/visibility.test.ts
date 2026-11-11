@@ -5,6 +5,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { alwaysSeesEnemyStats, canSeeEnemyHp, canSeeExactStats, hiddenTargetSteps, PLAYER_VIEWER, redactLogForPlayers, redactParticipantsForPlayers, sanitizeLogEntry } from "@/lib/utils/battle/view";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import { attackOf, castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleParticipant } from "@/types/battle";
 import type { BattleAction, DamageStep } from "@/types/battle";
 
@@ -13,6 +14,8 @@ const side = (s: ParticipantSide) => {
 
   return { ...p, basicInfo: { ...p.basicInfo, side: s } };
 };
+
+const slot = (data: object, key = "wfrp") => ({ key, data });
 
 const WFRP: Ruleset = { ...DEFAULT_RULES, system: { key: "wfrp" } };
 
@@ -53,11 +56,11 @@ describe("видимість", () => {
 
     const percentile = { roll: 30, target: 45, sl: 1, netSl: 2, location: "arm", doubles: false, defender: { kind: "parry", roll: 52, sl: -1, target: 40 } };
 
-    const e = { actionDetails: { percentile }, log: ["head", opposed] } as unknown as BattleAction;
+    const e = { actionDetails: { system: slot({ attack: percentile }) }, log: ["head", opposed] } as unknown as BattleAction;
 
     const seen = sanitizeLogEntry(e, player, ctxOf());
 
-    expect(seen.actionDetails.percentile?.defender).toBeUndefined();
+    expect(attackOf(seen.actionDetails)?.defender).toBeUndefined();
     expect(seen.log?.[0]).toBe("head");
     expect(seen.log?.[1]).toEqual({ message: "battleLog.percentile.opposedHidden", params: { roll: 30, target: 45, sl: 1, netSl: 2 } });
     expect(JSON.stringify(seen)).not.toContain("52");
@@ -102,7 +105,7 @@ describe("видимість", () => {
 
     const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 2, source: "s" } };
 
-    const entry = (miscast: string | null) => ({ actorId: "w", targets: [{ participantId: "h", participantName: "x" }], actionDetails: { percentileCast: { miscast } }, log: [applied] }) as unknown as BattleAction;
+    const entry = (miscast: string | null) => ({ actorId: "w", targets: [{ participantId: "h", participantName: "x" }], actionDetails: { system: slot({ cast: { miscast } }) }, log: [applied] }) as unknown as BattleAction;
 
     const ctx = ctxOf([wizard, hero]);
 
@@ -113,7 +116,7 @@ describe("видимість", () => {
     expect(sanitizeLogEntry(entry("minor"), player, ctxOf([wizard, hero], DEFAULT_RULES)).log).toEqual([applied]);
   });
 
-  it("wfrp: miscast ворожого заклинача: ні рядка, ні джерела стану, ні percentileCast.miscast; свої й ДМ бачать усе", () => {
+  it("wfrp: miscast ворожого заклинача: ні рядка, ні джерела стану, ні cast miscast; свої й ДМ бачать усе", () => {
     const wizard = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "w" } } as BattleParticipant;
 
     const mine = { ...side(ParticipantSide.ALLY), basicInfo: { ...side(ParticipantSide.ALLY).basicInfo, id: "m" } } as BattleParticipant;
@@ -126,12 +129,12 @@ describe("видимість", () => {
 
     const cast = { message: "wfrpMagic.log.cast", params: { name: "x" } };
 
-    const entry = (actorId: string, miscast: string | null) => ({ actorId, targets: [], actionDetails: { percentileCast: { miscast, sl: 1 } }, log: [cast, miscastLine, wrathLine, applied] }) as unknown as BattleAction;
+    const entry = (actorId: string, miscast: string | null) => ({ actorId, targets: [], actionDetails: { system: slot({ cast: { miscast, sl: 1 } }) }, log: [cast, miscastLine, wrathLine, applied] }) as unknown as BattleAction;
 
     const seen = sanitizeLogEntry(entry("w", "minor"), player, ctxOf([wizard, mine]));
 
     expect(seen.log).toEqual([cast]);
-    expect(seen.actionDetails.percentileCast).toEqual({ miscast: null, sl: 1 });
+    expect(castOf(seen.actionDetails)).toEqual({ miscast: null, sl: 1 });
     expect(JSON.stringify(seen)).not.toMatch(/miscast\./);
 
     const channel = { actorId: "w", targets: [], actionDetails: {}, log: [cast, miscastLine, applied] } as unknown as BattleAction;
@@ -246,7 +249,7 @@ describe("redactLogForPlayers", () => {
   it("ховає рівень, ціль тесту, захист і числа броні для ворога", () => {
     const percentile = { roll: 30, target: 45, sl: 1, netSl: 2, location: "arm", doubles: false, defender: { kind: "parry", roll: 52, sl: -1, target: 40 } };
 
-    const e = entry("e", [applied, pass], { targetAC: 15, damageBreakdown: "x", damageRows: [], percentile });
+    const e = entry("e", [applied, pass], { targetAC: 15, damageBreakdown: "x", damageRows: [], system: slot({ attack: percentile }) });
 
     const { entries, changed } = redactLogForPlayers([e], ctxOf([enemy, ally]));
 
@@ -256,7 +259,7 @@ describe("redactLogForPlayers", () => {
     expect(entries[0].actionDetails).not.toHaveProperty("targetAC");
     expect(entries[0].actionDetails).not.toHaveProperty("damageBreakdown");
     expect(entries[0].actionDetails).not.toHaveProperty("damageRows");
-    expect(entries[0].actionDetails.percentile?.defender).toBeUndefined();
+    expect(attackOf(entries[0].actionDetails)?.defender).toBeUndefined();
   });
 
   it("запис про союзника без прихованих полів — той самий об'єкт, changed: false", () => {
@@ -269,7 +272,7 @@ describe("redactLogForPlayers", () => {
   });
 
   it("ідемпотентно: другий прохід дорівнює першому і нічого не змінює", () => {
-    const e = entry("e", [applied], { targetAC: 15, percentile: { roll: 1, target: 2, sl: 0, netSl: 0, location: "arm", doubles: false, defender: { kind: "parry", roll: 5, sl: 0, target: 4 } } });
+    const e = entry("e", [applied], { targetAC: 15, system: slot({ attack: { roll: 1, target: 2, sl: 0, netSl: 0, location: "arm", doubles: false, defender: { kind: "parry", roll: 5, sl: 0, target: 4 } } }) });
 
     const once = sanitizeLogEntry(e, PLAYER_VIEWER, ctxOf([enemy]));
 
@@ -293,5 +296,93 @@ describe("concealLine через контракт системи", () => {
 
   it("wfrp — applied приховано", () => {
     expect(sanitizeLogEntry(e, PLAYER_VIEWER, ctxOf([enemy])).log?.[0]).toMatchObject({ message: "battleWfrp.log.appliedHidden" });
+  });
+});
+
+describe("деталі дії через combat.details (D77, P1-P6)", () => {
+  const enemy = { ...side(ParticipantSide.ENEMY), basicInfo: { ...side(ParticipantSide.ENEMY).basicInfo, id: "e" } } as BattleParticipant;
+
+  const ally = { ...side(ParticipantSide.ALLY), basicInfo: { ...side(ParticipantSide.ALLY).basicInfo, id: "f" } } as BattleParticipant;
+
+  const attack = { roll: 30, target: 45, sl: 1, netSl: 2, location: "arm", doubles: false, defender: { kind: "parry", roll: 52, sl: -1, target: 40 }, opposed: true };
+
+  const cast = { roll: 44, target: 40, sl: -1, cn: 3, channelled: 0, armourSl: 0, doubles: true, outcome: "failure", overcastSteps: 0, miscast: "minor" };
+
+  const miscastLine = { message: "wfrpMagic.log.miscast", params: { name: "x", effect: { message: "wfrpMagic.miscast.minor.3" } } };
+
+  const opposed = { message: "battleLog.percentile.opposed", params: { roll: 30, target: 45, sl: 1, defRoll: 52, defTarget: 40, defSl: -1, defense: "x", netSl: 2 } };
+
+  const entry = (over: object) => ({ actorId: "f", targets: [{ participantId: "f", participantName: "x" }], actionDetails: {}, log: [], ...over }) as unknown as BattleAction;
+
+  it("P1: видима ціль — без defender, решта чисел є; DM отримує той самий об'єкт", () => {
+    const e = entry({ actionDetails: { targetAC: 40, system: slot({ attack }) } });
+
+    const seen = sanitizeLogEntry(e, player, ctxOf([ally]));
+
+    expect(attackOf(seen.actionDetails)).toEqual({ roll: 30, target: 45, sl: 1, netSl: 2, location: "arm", doubles: false, opposed: true });
+    expect(seen.actionDetails.targetAC).toBe(40);
+    expect(sanitizeLogEntry(e, { ...player, isDM: true }, ctxOf([ally]))).toBe(e);
+  });
+
+  it("P2: прихована ціль або без цілей — частини attack немає, cast лишається, targetAC прибрано", () => {
+    for (const e of [entry({ targets: [{ participantId: "e", participantName: "x" }], actionDetails: { targetAC: 40, system: slot({ attack, cast }) } }), entry({ targets: [], actionDetails: { targetAC: 40, system: slot({ attack, cast }) } })]) {
+      const seen = sanitizeLogEntry(e, player, ctxOf([enemy, ally]));
+
+      expect(attackOf(seen.actionDetails)).toBeUndefined();
+      expect(castOf(seen.actionDetails)).toBeDefined();
+      expect(seen.actionDetails).not.toHaveProperty("targetAC");
+    }
+  });
+
+  it("P2: слот лише з attack на прихованій цілі зникає цілком", () => {
+    const seen = sanitizeLogEntry(entry({ targets: [], actionDetails: { system: slot({ attack }) } }), player, ctxOf([ally]));
+
+    expect(seen.actionDetails).not.toHaveProperty("system");
+  });
+
+  it("P3: ворожий кастер невидимий — miscast null, рядок miscast прибрано; видимий кастер без змін", () => {
+    const hidden = sanitizeLogEntry(entry({ actorId: "e", actionDetails: { system: slot({ cast }) }, log: ["ok", miscastLine] }), player, ctxOf([enemy, ally]));
+
+    expect(castOf(hidden.actionDetails)?.miscast).toBeNull();
+    expect(hidden.log).toEqual(["ok"]);
+
+    const own = entry({ actorId: "f", actionDetails: { system: slot({ cast }) }, log: ["ok"] });
+
+    expect(sanitizeLogEntry(own, player, ctxOf([enemy, ally]))).toBe(own);
+  });
+
+  it("P4: opposed -> opposedHidden для кожного гравця; повторна редакція дорівнює одинарній", () => {
+    const e = entry({ actionDetails: { system: slot({ attack }) }, log: [opposed] });
+
+    const once = sanitizeLogEntry(e, player, ctxOf([ally]));
+
+    expect(once.log?.[0]).toMatchObject({ message: "battleLog.percentile.opposedHidden" });
+    expect(sanitizeLogEntry(once, player, ctxOf([ally]))).toBe(once);
+  });
+
+  it("P5: слот чужої системи видаляється для гравця (wfrp- і d20-кампанії), DM бачить", () => {
+    const e = entry({ actionDetails: { system: slot({ attack }, "zzz") } });
+
+    for (const rules of [WFRP, DEFAULT_RULES]) {
+      expect(sanitizeLogEntry(e, player, ctxOf([ally], rules)).actionDetails).not.toHaveProperty("system");
+      expect(sanitizeLogEntry(e, { ...player, isDM: true }, ctxOf([ally], rules))).toBe(e);
+    }
+  });
+
+  it("P5: слот wfrp у d20-кампанії (немає хука) видаляється", () => {
+    const seen = sanitizeLogEntry(entry({ actionDetails: { system: slot({ attack }) } }), player, ctxOf([ally], DEFAULT_RULES));
+
+    expect(seen.actionDetails).not.toHaveProperty("system");
+  });
+
+  it("P6: запис без секретів — той самий об'єкт (changed: false)", () => {
+    const { defender: _d, ...open } = attack;
+
+    const e = entry({ actionDetails: { system: slot({ attack: open, cast: { ...cast, miscast: null } }) } });
+
+    const { entries, changed } = redactLogForPlayers([e], ctxOf([ally]));
+
+    expect(changed).toBe(false);
+    expect(entries[0]).toBe(e);
   });
 });

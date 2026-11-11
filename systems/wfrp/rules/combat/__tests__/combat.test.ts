@@ -20,6 +20,7 @@ import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtu
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -122,7 +123,7 @@ describe("mitigateWfrpDamage", () => {
 
     const target = makeParticipant({ id: "t", hp: 10, maxHp: 10 });
 
-    return { attacker, target, weapon: 4, amount, netSl: 2, location: "body" as const, crit: false, rng, rules: WFRP_RULES, attack: { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack };
+    return { attacker, target, weapon: 4, amount, margin: 2, location: "body" as const, crit: false, rng, rules: WFRP_RULES, attack: { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack };
   };
 
   it("every step carries a label and side, plus totalLabel", () => {
@@ -182,16 +183,16 @@ describe("resolveWfrpAttack conditions", () => {
     resolveWfrpAttack({ attacker, target, attack, participants: [attacker, target], rules: WFRP_RULES, rng: () => 0.5, manualRoll: 30, momentum: { attacker: false, defender: false } });
 
   it("attacker condition lowers the attack target", () => {
-    expect(run(cond(fighter("a"), "stunned", 1), fighter("t"), sword).attackRoll.percentile?.target).toBe(30);
+    expect(attackOf(run(cond(fighter("a"), "stunned", 1), fighter("t"), sword).attackRoll)?.target).toBe(30);
   });
 
   it("prone target is easier to hit with ranged only if it has the bonus", () => {
-    expect(run(fighter("a"), cond(fighter("t"), "prone"), bow).attackRoll.percentile?.target).toBe(40);
-    expect(run(fighter("a"), cond(fighter("t"), "prone"), sword).attackRoll.percentile?.target).toBe(60);
+    expect(attackOf(run(fighter("a"), cond(fighter("t"), "prone"), bow).attackRoll)?.target).toBe(40);
+    expect(attackOf(run(fighter("a"), cond(fighter("t"), "prone"), sword).attackRoll)?.target).toBe(60);
   });
 
   it("defender condition lowers the defense target", () => {
-    expect(run(fighter("a"), cond(fighter("t"), "fatigued", 2), sword).attackRoll.percentile?.defender?.target).toBe(20);
+    expect(attackOf(run(fighter("a"), cond(fighter("t"), "fatigued", 2), sword).attackRoll)?.defender?.target).toBe(20);
   });
 
   describe("crits", () => {
@@ -260,16 +261,16 @@ describe("resolveWfrpAttack fortune", () => {
 
     expect(r.isHit).toBe(true);
     expect(r.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
-    expect(r.attackRoll.percentile?.defender?.roll).toBe(51);
-    expect(r.attackRoll.percentile?.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
+    expect(attackOf(r.attackRoll)?.defender?.roll).toBe(51);
+    expect(attackOf(r.attackRoll)?.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
   });
 
   it("melee reroll is not spent when the first roll hits", () => {
     const r = run(sword, { manualRoll: 20, fortune: { kind: "reroll", manualReroll: 10 } });
 
     expect(r.fortune).toBeUndefined();
-    expect(r.attackRoll.percentile?.fortune).toBeUndefined();
-    expect(r.attackRoll.percentile?.roll).toBe(20);
+    expect(attackOf(r.attackRoll)?.fortune).toBeUndefined();
+    expect(attackOf(r.attackRoll)?.roll).toBe(20);
   });
 
   it("ranged reroll after a miss", () => {
@@ -283,7 +284,7 @@ describe("resolveWfrpAttack fortune", () => {
     const r = run(bow, { manualRoll: 90, rng: () => 0.05, fortune: { kind: "reroll" } });
 
     expect(r.isHit).toBe(true);
-    expect(r.attackRoll.percentile?.roll).toBe(6);
+    expect(attackOf(r.attackRoll)?.roll).toBe(6);
   });
 
   it("sl adds one SL even on a miss", () => {
@@ -291,9 +292,9 @@ describe("resolveWfrpAttack fortune", () => {
 
     const boosted = run(sword, { manualRoll: 90, fortune: { kind: "sl" } });
 
-    expect(boosted.netSl).toBe(plain.netSl + 1);
+    expect(boosted.attackRoll.margin).toBe((plain.attackRoll.margin ?? 0) + 1);
     expect(boosted.fortune).toEqual({ kind: "sl" });
-    expect(boosted.attackRoll.percentile?.fortune).toEqual({ kind: "sl" });
+    expect(attackOf(boosted.attackRoll)?.fortune).toEqual({ kind: "sl" });
   });
 });
 
@@ -326,13 +327,13 @@ describe("resolveWfrpAttack attackBonus talent", () => {
 
     const boosted = run(attack, fighter("a", 2));
 
-    expect(boosted.netSl).toBe(plain.netSl + 2);
-    expect(boosted.attackRoll.percentile?.target).toBe(plain.attackRoll.percentile?.target);
-    expect(boosted.attackRoll.percentile?.roll).toBe(plain.attackRoll.percentile?.roll);
+    expect(boosted.attackRoll.margin).toBe((plain.attackRoll.margin ?? 0) + 2);
+    expect(attackOf(boosted.attackRoll)?.target).toBe(attackOf(plain.attackRoll)?.target);
+    expect(attackOf(boosted.attackRoll)?.roll).toBe(attackOf(plain.attackRoll)?.roll);
   });
 
   it("respects attackKind", () => {
-    expect(run(sword, fighter("a", 2, "ranged")).netSl).toBe(run(sword, fighter("a")).netSl);
-    expect(run(bow, fighter("a", 2, "ranged")).netSl).toBe(run(bow, fighter("a")).netSl + 2);
+    expect(run(sword, fighter("a", 2, "ranged")).attackRoll.margin).toBe(run(sword, fighter("a")).attackRoll.margin);
+    expect(run(bow, fighter("a", 2, "ranged")).attackRoll.margin).toBe((run(bow, fighter("a")).attackRoll.margin ?? 0) + 2);
   });
 });

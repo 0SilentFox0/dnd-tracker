@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import { applyWfrpConditionTo } from "../../conditions/apply";
+import { ACTION_SLOT } from "../../slots";
 import { wfrpCastTest } from "../cast-test";
 import { MAX_OVERCAST_STEPS } from "../constants";
 import { caster } from "./fixtures";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { CastTestCtx } from "@/lib/utils/rules/systems/types";
 import type { SpellMagic } from "@/lib/utils/spells/model/schema";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+
+const castOf = (r: { details: SystemSlot }) => ACTION_SLOT.read(r.details)?.cast;
 
 const spell = { id: "s", name: "Bolt", level: 1, groupId: null, definition: {} } as unknown as CastTestCtx["spell"];
 
@@ -21,10 +25,10 @@ describe("wfrpCastTest", () => {
     const r = run(30);
 
     expect(r.success).toBe(true);
-    expect(r.sl).toBe(2);
+    expect(r.margin).toBe(2);
     expect(r.overcastSteps).toBe(0);
     expect(r.miscast).toBeNull();
-    expect(r.percentile).toMatchObject({ roll: 30, target: 50, cn: 2, outcome: "success" });
+    expect(castOf(r)).toMatchObject({ roll: 30, target: 50, cn: 2, outcome: "success" });
   });
 
   it("caps overcast steps", () => {
@@ -37,21 +41,21 @@ describe("wfrpCastTest", () => {
     const r = run(30, { cn: 3 });
 
     expect(r.success).toBe(false);
-    expect(r.percentile.outcome).toBe("failure");
+    expect(castOf(r)?.outcome).toBe("failure");
   });
 
   it("channelled SL carries a cast over CN", () => {
     const r = wfrpCastTest({ caster: caster({ channelledSl: 2 }), spell, magic: { cn: 4, kind: "arcane", overcast: null }, rules: WFRP_RULES, rng: mulberry32(1), presetRoll: 30 });
 
     expect(r.success).toBe(true);
-    expect(r.percentile.channelled).toBe(2);
+    expect(castOf(r)?.channelled).toBe(2);
   });
 
   it("overcast steps come from surplus SL for dice overcast only", () => {
         const high = (overcast: SpellMagic["overcast"], kind: SpellMagic["kind"] = "arcane") =>
       wfrpCastTest({ caster: caster({ channelledSl: 1 }), spell, magic: { cn: 2, kind, overcast }, rules: WFRP_RULES, rng: mulberry32(1), presetRoll: 3 });
 
-    expect(high("dice").sl).toBe(6);
+    expect(high("dice").margin).toBe(6);
     expect(high("dice").overcastSteps).toBe(2);
     expect(high("dice", "petty").overcastSteps).toBe(0);
     expect(high(null).overcastSteps).toBe(0);
@@ -61,7 +65,7 @@ describe("wfrpCastTest", () => {
     const r = run(33, { cn: 2 });
 
     expect(r.success).toBe(true);
-    expect(r.percentile.outcome).toBe("critical");
+    expect(castOf(r)?.outcome).toBe("critical");
     expect(r.miscast).toBe("minor");
     expect(r.lines[0]).toMatchObject({ message: "wfrpMagic.log.castCritical" });
   });
@@ -70,7 +74,7 @@ describe("wfrpCastTest", () => {
     const r = run(33, { cn: 8 });
 
     expect(r.success).toBe(false);
-    expect(r.percentile.outcome).toBe("failure");
+    expect(castOf(r)?.outcome).toBe("failure");
     expect(r.overcastSteps).toBe(0);
     expect(r.miscast).toBe("minor");
     expect(r.lines[0]).toMatchObject({ message: "wfrpMagic.log.castFail" });
@@ -92,13 +96,13 @@ describe("wfrpCastTest", () => {
 
     const r = wfrpCastTest({ caster: tired, spell, magic: { cn: 2, kind: "arcane", overcast: null }, rules: WFRP_RULES, rng: mulberry32(1), presetRoll: 30 });
 
-    expect(r.percentile.target).toBe(30);
+    expect(castOf(r)?.target).toBe(30);
   });
 
   it("Fortune sl adds a level and is reported", () => {
     const r = run(30, {}, { fortune: { kind: "sl" } });
 
-    expect(r.sl).toBe(3);
+    expect(r.margin).toBe(3);
     expect(r.fortune).toEqual({ kind: "sl" });
   });
 
@@ -106,7 +110,7 @@ describe("wfrpCastTest", () => {
     const r = run(30, {}, { fortune: { kind: "reroll", manualReroll: 10 } });
 
     expect(r.fortune).toBeUndefined();
-    expect(r.percentile.roll).toBe(30);
+    expect(castOf(r)?.roll).toBe(30);
   });
 
   it("Fortune reroll replaces a failed roll", () => {
@@ -145,7 +149,7 @@ describe("prayers", () => {
     const r = pray(30, "blessing");
 
     expect(r.success).toBe(true);
-    expect(r.percentile).toMatchObject({ target: 35, cn: 0 });
+    expect(castOf(r)).toMatchObject({ target: 35, cn: 0 });
     expect(r.overcastSteps).toBe(0);
   });
 
@@ -156,14 +160,14 @@ describe("prayers", () => {
   it("Miracle with CN 2 fails on SL 1", () => {
     const r = pray(25, "miracle", { cn: 2 });
 
-    expect(r.percentile.sl).toBe(1);
+    expect(castOf(r)?.sl).toBe(1);
     expect(r.success).toBe(false);
   });
 
   it("uses the Pray skill advances", () => {
     const r = wfrpCastTest({ caster: caster({ base: { fel: 35 }, skillAdvances: { pray: 10 } }), spell, magic: { cn: 0, kind: "blessing", overcast: null }, rules: WFRP_RULES, rng: mulberry32(1), presetRoll: 30 });
 
-    expect(r.percentile.target).toBe(45);
+    expect(castOf(r)?.target).toBe(45);
   });
 
   it("doubles with units at or below Sin bring wrath", () => {
@@ -181,7 +185,7 @@ describe("prayers", () => {
     const r = pray(60, "miracle", { channelledSl: 3, cn: 1 });
 
     expect(r.success).toBe(false);
-    expect(r.percentile.channelled).toBe(0);
+    expect(castOf(r)?.channelled).toBe(0);
     expect(r.keepChannelled).toBe(true);
   });
 

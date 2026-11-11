@@ -2,7 +2,7 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
-import { type HitLocation, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, SceneMomentum } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -38,7 +38,7 @@ export function fire(flow: ActionFlow, event: AbilityEvent): AbilityRunResult {
   return r;
 }
 
-export function applyFlowDamage(flow: ActionFlow, before: BattleParticipant, amount: number, crit?: boolean, location?: HitLocation): void {
+export function applyFlowDamage(flow: ActionFlow, before: BattleParticipant, amount: number, crit?: boolean, location?: string): void {
   const { rules } = flow.ctx;
 
   if (!rules || amount <= 0 || !(rules.deathSaves.enabled || rules.concentration.enabled || before.battleData.transform || ruleSystemOf(rules).combat.onZeroHp)) return;

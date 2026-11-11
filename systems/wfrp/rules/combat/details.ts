@@ -1,7 +1,7 @@
 import { ACTION_SLOT } from "../slots";
 
 import { textRef } from "@/lib/i18n/text-ref";
-import { percentileDice } from "@/lib/utils/battle/fx/dice";
+import { percentileDice } from "@/lib/utils/battle/fx/dice/percentile";
 import type { RuleSystemActionDetails } from "@/lib/utils/rules/systems/types";
 import type { LogLine } from "@/types/text";
 
