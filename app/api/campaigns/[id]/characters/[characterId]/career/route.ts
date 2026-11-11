@@ -1,1 +1,1 @@
-export { POST } from "@/lib/server/characters/operations/career";
+export { POST } from "@/systems/wfrp/server/operations/career";

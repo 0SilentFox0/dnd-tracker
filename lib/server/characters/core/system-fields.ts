@@ -1,5 +1,3 @@
-import type { Prisma } from "@prisma/client";
-
 import type { CreateCharacterInput } from "./create-character-schema";
 import type { UpdateCharacterInput } from "./update-character-schema";
 
@@ -37,5 +35,3 @@ export function normalizeCharacterInput<T extends CreateCharacterInput | UpdateC
 
   return { ...data, characteristics, level: 1, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 10, archetype: null, class: "", classes: [], initiative: rules.initiative.heroMin, speed: 30 };
 }
-
-export const characteristicsJson = (c: object) => c as Prisma.InputJsonObject;

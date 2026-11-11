@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-import { requireCharacterAccess } from "../access";
-import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
-
+import { requireCharacterAccess } from "@/lib/server/characters/access";
+import { characterRoute, defineCharacterOperation, gateOptions } from "@/lib/server/characters/operation-runner";
 import { undoAdvance } from "@/systems/wfrp/server/advance-handler";
 
 export const advanceUndoOperation = defineCharacterOperation({

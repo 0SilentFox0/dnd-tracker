@@ -14,18 +14,17 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
-import { advanceSchema, arcaneRecoverySchema, careerAdvanceSchema, careerSetSchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
+import { arcaneRecoverySchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
 import { actionResult } from "@/lib/server/assistant/json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
+import { SYSTEM_SERVER } from "@/lib/server/systems/registry";
 import type { Actor } from "@/lib/utils/api/actor";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
-import { corruptionGrantSchema, corruptionUndoSchema } from "@/systems/wfrp/server/corruption-schemas";
-import { downtimePeriodSchema, downtimePeriodUndoSchema, downtimeSetSchema } from "@/systems/wfrp/server/downtime-schemas";
 
 const withId = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => schema.extend(characterIdSchema.shape).strict();
 
@@ -33,20 +32,17 @@ const stashWithId = z.union(stashActionSchema.options.map(schema => schema.exten
 
 const serverRoll = z.union(sheetRollSchema.options.map(schema => schema.extend({ ...characterIdSchema.shape, mode: z.literal("server") }).strict()));
 
-export const PROGRESSION_INPUTS = {
+export const PROGRESSION_INPUTS: Record<string, z.ZodType> = {
   "level-up": withId(LevelUpBodySchema), choices: withId(ChoicesBodySchema), resources: withId(resourcesEditSchema),
   "inventory.patch": withId(updateInventorySchema), "inventory": characterIdSchema,
   "stash": characterIdSchema, "stash.apply": stashWithId, "transfer": withId(transferSchema),
-  advance: withId(advanceSchema), "advance.undo": characterIdSchema,
-  "career.set": withId(careerSetSchema), "career.advance": withId(careerAdvanceSchema),
-  "corruption.grant": withId(corruptionGrantSchema), "corruption.undo": withId(corruptionUndoSchema),
-  "downtime.set": withId(downtimeSetSchema), "downtime.period": downtimePeriodSchema.strict(), "downtime.period.undo": downtimePeriodUndoSchema.strict(),
   "hit-dice": withId(hitDieSchema), "arcane-recovery": withId(arcaneRecoverySchema), inspiration: withId(inspirationSchema), rest: restSchema.strict(), experience: experienceSchema.strict(),
   roll: serverRoll, sheet: characterIdSchema, progression: characterIdSchema,
   "progression.learn": characterIdSchema.extend({ nodeId: z.string().min(1) }).strict(),
   "progression.unlearn": characterIdSchema.extend({ nodeIds: z.array(z.string().min(1)).min(1).max(100) }).strict(),
   "progression.reset": characterIdSchema, "progression.seen-level": characterIdSchema,
-  log: characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.log": characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.free-artifacts": z.object({})
+  log: characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.log": characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.free-artifacts": z.object({}),
+  ...Object.fromEntries(Object.values(SYSTEM_SERVER).flatMap(system => Object.entries(system.operations ?? {}).map(([key, { input }]) => [key, input])))
 };
 export const progressionReads = new Set(["inventory", "stash", "sheet", "progression", "log", "stash.log", "stash.free-artifacts"]);
 
@@ -77,7 +73,7 @@ async function progressionFingerprint(actor: Actor, input: Record<string, unknow
 }
 
 export async function runCharacterProgression(actor: Actor, operation: string, raw: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
-  const schema = PROGRESSION_INPUTS[operation as keyof typeof PROGRESSION_INPUTS];
+  const schema = PROGRESSION_INPUTS[operation];
 
   if (!schema) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);
 

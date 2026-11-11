@@ -1,1 +1,1 @@
-export { POST } from "@/lib/server/characters/operations/downtime-period-undo";
+export { POST } from "@/systems/wfrp/server/operations/downtime-period-undo";

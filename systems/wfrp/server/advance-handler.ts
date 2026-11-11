@@ -4,9 +4,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import type { AdvanceInput } from "@/lib/schemas/out-of-combat";
 import type { CharacterGate } from "@/lib/server/characters/access";
-import { characteristicsJson } from "@/lib/server/characters/core/system-fields";
+import { characteristicsJson } from "@/lib/server/characters/core/characteristics-json";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
@@ -16,6 +15,7 @@ import { availableXp, planPurchase, planUndo } from "@/systems/wfrp/rules/advanc
 import type { PurchaseError } from "@/systems/wfrp/rules/advancement/plan";
 import type { Characteristics, LedgerEntry } from "@/systems/wfrp/rules/characteristics/keys";
 import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import type { AdvanceInput } from "@/systems/wfrp/server/progression-schemas";
 
 export type AdvanceResult = { characteristics: Characteristics; experience: number; available: number; entry: LedgerEntry };
 

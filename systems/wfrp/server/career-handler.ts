@@ -2,9 +2,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import type { CareerAdvanceInput, CareerSetInput } from "@/lib/schemas/out-of-combat";
 import type { CharacterGate } from "@/lib/server/characters/access";
-import { characteristicsJson } from "@/lib/server/characters/core/system-fields";
+import { characteristicsJson } from "@/lib/server/characters/core/characteristics-json";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
@@ -12,6 +11,7 @@ import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import { planCareerAdvance, planCareerSet } from "@/systems/wfrp/rules/advancement";
 import type { Characteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import type { CareerAdvanceInput, CareerSetInput } from "@/systems/wfrp/server/progression-schemas";
 
 export type CareerResult = { characteristics: Characteristics };
 

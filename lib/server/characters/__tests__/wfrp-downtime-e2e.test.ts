@@ -25,11 +25,6 @@ vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) =
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn() }));
 
 import { runCharacterOperation } from "../operation-runner";
-import { advanceOperation } from "../operations/advance";
-import { advanceUndoOperation } from "../operations/advance-undo";
-import { downtimeSetOperation } from "../operations/downtime";
-import { downtimePeriodOperation } from "../operations/downtime-period";
-import { downtimePeriodUndoOperation } from "../operations/downtime-period-undo";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
@@ -38,6 +33,11 @@ import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { type Characteristics, DEFAULT_CHARACTERISTICS, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import type { DowntimePeriodResult } from "@/systems/wfrp/rules/downtime/api-types";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { advanceOperation } from "@/systems/wfrp/server/operations/advance";
+import { advanceUndoOperation } from "@/systems/wfrp/server/operations/advance-undo";
+import { downtimeSetOperation } from "@/systems/wfrp/server/operations/downtime";
+import { downtimePeriodOperation } from "@/systems/wfrp/server/operations/downtime-period";
+import { downtimePeriodUndoOperation } from "@/systems/wfrp/server/operations/downtime-period-undo";
 
 const INT4_MAX = 2_147_483_647;
 

@@ -41,17 +41,6 @@ export const experienceSchema = z.object({
 
 export type ExperienceInput = z.infer<typeof experienceSchema>;
 
-export const advanceSchema = z.object({ kind: z.enum(["characteristic", "skill", "talent"]), key: z.string().min(1).max(60) });
-
-export type AdvanceInput = z.infer<typeof advanceSchema>;
-
-export const careerSetSchema = z.object({ careerId: z.string().min(1).max(60) });
-
-export const careerAdvanceSchema = z.object({ force: z.boolean().optional() });
-
-export type CareerSetInput = z.infer<typeof careerSetSchema>;
-export type CareerAdvanceInput = z.infer<typeof careerAdvanceSchema>;
-
 export const inspirationSchema = z.object({ value: z.boolean() });
 
 export const resourcesEditSchema = z

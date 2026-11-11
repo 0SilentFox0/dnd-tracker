@@ -1,8 +1,7 @@
-import { requireCharacterAccess } from "../access";
-import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
-
-import { advanceSchema } from "@/lib/schemas/out-of-combat";
+import { requireCharacterAccess } from "@/lib/server/characters/access";
+import { characterRoute, defineCharacterOperation, gateOptions } from "@/lib/server/characters/operation-runner";
 import { advanceCharacter } from "@/systems/wfrp/server/advance-handler";
+import { advanceSchema } from "@/systems/wfrp/server/progression-schemas";
 
 export const advanceOperation = defineCharacterOperation({
   name: "advance",

@@ -1,17 +1,9 @@
 import { type CharacterOperation } from "../operation-runner";
-import { advanceOperation } from "./advance";
-import { advanceUndoOperation } from "./advance-undo";
 import { arcaneRecoveryOperation } from "./arcane-recovery";
-import { careerAdvanceOperation, careerSetOperation } from "./career";
 import { choicesOperation } from "./choices";
-import { corruptionGrantOperation } from "./corruption";
-import { corruptionUndoOperation } from "./corruption-undo";
 import { createOperation } from "./create";
 import { deleteOperation } from "./delete";
 import { deleteAllOperation } from "./delete-all";
-import { downtimeSetOperation } from "./downtime";
-import { downtimePeriodOperation } from "./downtime-period";
-import { downtimePeriodUndoOperation } from "./downtime-period-undo";
 import { experienceOperation } from "./experience";
 import { getOperation } from "./get";
 import { goalsOperation } from "./goals";
@@ -32,6 +24,8 @@ import { stashUpdateOperation } from "./stash-update";
 import { tokensCreateOperation } from "./tokens-create";
 import { tokensDeleteOperation } from "./tokens-delete";
 import { transferOperation } from "./transfer";
+
+import { SYSTEM_SERVER } from "@/lib/server/systems/registry";
 
 const erased = (op: unknown) => op as CharacterOperation;
 
@@ -60,15 +54,7 @@ export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
   inspiration: erased(inspirationOperation),
   rest: erased(restOperation),
   experience: erased(experienceOperation),
-  advance: erased(advanceOperation),
-  "advance.undo": erased(advanceUndoOperation),
-  "career.set": erased(careerSetOperation),
-  "career.advance": erased(careerAdvanceOperation),
-  "downtime.set": erased(downtimeSetOperation),
-  "downtime.period": erased(downtimePeriodOperation),
-  "downtime.period.undo": erased(downtimePeriodUndoOperation),
-  "corruption.grant": erased(corruptionGrantOperation),
-  "corruption.undo": erased(corruptionUndoOperation),
   roll: erased(rollOperation),
+  ...Object.fromEntries(Object.values(SYSTEM_SERVER).flatMap(system => Object.entries(system.operations ?? {}).map(([key, { operation }]) => [key, operation]))),
   ...Object.fromEntries(Object.entries(READ_OPERATIONS).map(([key, op]) => [key, erased(op)])),
 };

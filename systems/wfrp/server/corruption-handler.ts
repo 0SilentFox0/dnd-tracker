@@ -6,7 +6,7 @@ import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import type { CharacterGate } from "@/lib/server/characters/access";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
-import { characteristicsJson } from "@/lib/server/characters/core/system-fields";
+import { characteristicsJson } from "@/lib/server/characters/core/characteristics-json";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";

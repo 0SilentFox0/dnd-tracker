@@ -23,10 +23,6 @@ vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) =
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn() }));
 
 import { runCharacterOperation } from "../operation-runner";
-import { advanceOperation } from "../operations/advance";
-import { corruptionGrantOperation } from "../operations/corruption";
-import { corruptionUndoOperation } from "../operations/corruption-undo";
-import { downtimeSetOperation } from "../operations/downtime";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
@@ -39,6 +35,10 @@ import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import { PARTICIPANT_SLOT } from "@/systems/wfrp/rules/slots";
 import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 import { corruptionGrantSchema, corruptionUndoSchema } from "@/systems/wfrp/server/corruption-schemas";
+import { advanceOperation } from "@/systems/wfrp/server/operations/advance";
+import { corruptionGrantOperation } from "@/systems/wfrp/server/operations/corruption";
+import { corruptionUndoOperation } from "@/systems/wfrp/server/operations/corruption-undo";
+import { downtimeSetOperation } from "@/systems/wfrp/server/operations/downtime";
 
 const hero = (id: string, over: Partial<Row> = {}, characteristics: Partial<Characteristics> = {}): Row => ({
   id,

@@ -1,8 +1,7 @@
-import { requireCharacterAccess } from "../access";
-import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
-
-import { careerAdvanceSchema, careerSetSchema } from "@/lib/schemas/out-of-combat";
+import { requireCharacterAccess } from "@/lib/server/characters/access";
+import { characterRoute, defineCharacterOperation, gateOptions } from "@/lib/server/characters/operation-runner";
 import { advanceCareer, setCareer } from "@/systems/wfrp/server/career-handler";
+import { careerAdvanceSchema, careerSetSchema } from "@/systems/wfrp/server/progression-schemas";
 
 export const careerSetOperation = defineCharacterOperation({
   name: "career-set",

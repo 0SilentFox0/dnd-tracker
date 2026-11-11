@@ -1,6 +1,5 @@
-import { requireCharacterAccess } from "../access";
-import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
-
+import { requireCharacterAccess } from "@/lib/server/characters/access";
+import { characterRoute, defineCharacterOperation, gateOptions } from "@/lib/server/characters/operation-runner";
 import { grantCorruption } from "@/systems/wfrp/server/corruption-handler";
 import { corruptionGrantSchema } from "@/systems/wfrp/server/corruption-schemas";
 

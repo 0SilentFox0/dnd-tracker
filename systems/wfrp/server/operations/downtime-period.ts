@@ -1,5 +1,4 @@
-import { campaignGate, characterRoute, defineCharacterOperation } from "../operation-runner";
-
+import { campaignGate, characterRoute, defineCharacterOperation } from "@/lib/server/characters/operation-runner";
 import { passPeriod } from "@/systems/wfrp/server/downtime-handler";
 import { downtimePeriodSchema } from "@/systems/wfrp/server/downtime-schemas";
 

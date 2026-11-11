@@ -1,1 +1,1 @@
-export { PUT } from "@/lib/server/characters/operations/downtime";
+export { PUT } from "@/systems/wfrp/server/operations/downtime";
