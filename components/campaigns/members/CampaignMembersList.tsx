@@ -6,7 +6,7 @@ import { Crown, ShieldOff, X } from "lucide-react";
 import { HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { CampaignRole } from "@/lib/constants/campaigns";
-import { useSetCampaignMemberRole, useRemoveCampaignMember } from "@/lib/hooks/campaigns";
+import { useRemoveCampaignMember,useSetCampaignMemberRole } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
 import type { CampaignMembership, PublicUser } from "@/types/campaigns";
 
@@ -65,51 +65,50 @@ export function CampaignMembersList({
       {members.map((member) => (
         <div
           key={member.id}
-          className="flex items-center justify-between border-b border-hud-raised p-2 last:border-b-0"
+          className="flex items-center justify-between gap-2 border-b border-hud-raised p-2 last:border-b-0"
         >
-          <div className="flex items-center gap-2">
-            <span className="text-hud-bone">{member.user.displayName}</span>
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="min-w-0 break-words text-hud-bone">{member.user.displayName}</span>
             <HudPill tone={member.role === CampaignRole.DM ? "gold" : "bone"}>{member.role === CampaignRole.DM ? t("roles.dm") : t("roles.player")}</HudPill>
           </div>
-          {isDM && member.role === CampaignRole.PLAYER && (
-            <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center">
+            {isDM && member.role === CampaignRole.PLAYER && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title={t("members.promote")}
+                  aria-label={t("members.promote")}
+                  onClick={() => void handlePromoteMember(member.id)}
+                  disabled={roleChangingId === member.id}
+                >
+                  <Crown className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title={t("members.remove")}
+                  aria-label={t("members.remove")}
+                  onClick={() => void handleRemoveMember(member.id)}
+                  disabled={removingMemberId === member.id}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            {isOwner && member.role === CampaignRole.DM && member.userId !== ownerId && (
               <Button
                 variant="ghost"
-                size="sm"
-                onClick={() => void handlePromoteMember(member.id)}
+                size="icon"
+                title={t("members.demote")}
+                aria-label={t("members.demote")}
+                onClick={() => void handleDemoteMember(member.id)}
                 disabled={roleChangingId === member.id}
               >
-                <Crown className="h-4 w-4 mr-1" />
-                {t("members.promote")}
+                <ShieldOff className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => void handleRemoveMember(member.id)}
-                disabled={removingMemberId === member.id}
-              >
-                {removingMemberId === member.id ? (
-                  t("members.removing")
-                ) : (
-                  <>
-                    <X className="h-4 w-4 mr-1" />
-                    {t("members.remove")}
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-          {isOwner && member.role === CampaignRole.DM && member.userId !== ownerId && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => void handleDemoteMember(member.id)}
-              disabled={roleChangingId === member.id}
-            >
-              <ShieldOff className="h-4 w-4 mr-1" />
-              {t("members.demote")}
-            </Button>
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>
