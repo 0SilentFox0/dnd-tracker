@@ -47,6 +47,9 @@
 | D19 | `loadKeys`/`writeSlug` обовʼязкові в `ImportDeps`; одна мапа kind→table | мовчки пропущений slug ламає перейменування рядка (Review Focus 1) |
 | D20 | `TEMPLATES_DIR` визначено лише в `scripts/templates/lib/pack.ts` | env-перевизначення потрібне тестам fixture-pack (частина 4) |
 | D21 | import-bundle не читає `takenSlugs` з БД: ціль завжди нова/очищена кампанія; колізії slug перевіряються лише всередині bundle (D5 для sync/apply без змін) | дельти замість читань |
+| D22 | Підготовка i18n-каталогу системи (careers-reshape, псевдовид `spellLists`, `grimI18nIssues`) переходить у `PackHooks` (4.1): `i18nRows?(pack)` та `i18nIssues?(pack, tr)`; `catalogOf` іде через `PACK_HOOKS[manifest.system]`, мапа `PREPARED` в `i18n-convert.ts` зникає. У 4.1 `Pack.rules` лишається optional до створення `rules.json` у 4.3. Рядок `"spellLists"` у `localize-template-bundle.ts` — витік wfrp у core, для E1 (R12) | звірка частини 3 (Opus): 4.4 видаляє `scripts/grim/data.ts`, від якого залежить `PREPARED` |
+| D23 | Список таблиць у `localizeTemplateBundle` виводиться з `CONTENT_KINDS` через `tableKey()` (`lib/server/assistant/actions/content-dependencies.ts`), без жорсткого `TABLE_KINDS`; `hashText` переїздить у `scripts/templates/lib/i18n-convert.ts`, щоб `keys.ts` лишався client-safe. `scripts/srd/i18n/{batches,names}` переносяться в `scripts/templates/lib/` у 4.4 | звірка частини 3: без цього 5.3 (Heroes: main-skills, skills, artifact-sets) лишає англійське |
+| D24 | Прийнято без змін: `en` у `uk.json` (3,3 МБ, лише серверний dynamic import); ключі за індексом для масивів без `id`/`name`; формат todo-файлів `{key,c,en}`/`{key,text}`; slug backfill на prod одразу після деплою v2-словників (пункт чекліста merge/deploy у STATUS) | звірка частини 3 |
 
 ## Файлова структура
 
