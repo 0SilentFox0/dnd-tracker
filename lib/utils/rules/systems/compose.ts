@@ -131,6 +131,8 @@ function merge(prev: Record<string, unknown>, part: Record<string, unknown>, pat
 
     const current = prev[key];
 
+    if (value === current) continue;
+
     if (current === undefined) out[key] = value;
     else if (Array.isArray(current) && Array.isArray(value)) out[key] = [...current, ...value];
     else if (isPlain(current) && isPlain(value) && !ctx.kinds.groups?.includes(at)) {

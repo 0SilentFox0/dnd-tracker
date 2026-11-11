@@ -72,6 +72,13 @@ describe("composeParts", () => {
     expect(out.nested.fn()).toBe("base");
   });
 
+  it("does not duplicate arrays a builder spreads from prev", () => {
+    const out = composeParts(base, [add("m1", (prev) => ({ hooks: prev.hooks, nested: { ...prev.nested, list: prev.nested.list } }))], kinds);
+
+    expect(out.hooks).toEqual(["base"]);
+    expect(out.nested.list).toEqual([1]);
+  });
+
   it("unions dictionaries and rejects a collision", () => {
     expect(composeParts(base, [add("m1", () => ({ dict: { b: 2 } }))], kinds).dict).toEqual({ a: 1, b: 2 });
     expect(() => composeParts(base, [add("m1", () => ({ dict: { a: 2 } }))], kinds)).toThrow(/duplicate key "a"/);
