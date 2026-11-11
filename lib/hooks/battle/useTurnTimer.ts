@@ -11,19 +11,13 @@ const TICK_MS = 500;
 
 const silent = { onConflict: () => undefined };
 
-/** Таймер ходу бою: показує залишок, а коли час вийшов — клієнт ДМа або власника ходу завершує хід. */
-export function useTurnTimer(): { secondsLeft: number | null } {
-  const { campaignId, battleId, battle, viewer, turn, anyPending } = useBattleScene();
+/** Залишок часу ходу (лише відображення, без побічних ефектів). */
+export function useTurnCountdown(): { secondsLeft: number | null; totalSeconds: number | null } {
+  const { battle, turn } = useBattleScene();
 
-  const { mutate } = useNextTurn(campaignId, battleId, silent);
-
-  const { turnStartedAt, turnTimerSeconds: seconds, status, version } = battle;
+  const { turnStartedAt, turnTimerSeconds: seconds, status } = battle;
 
   const running = !!seconds && status === BattleStatus.ACTIVE && !!turnStartedAt && !!turn.current;
-
-  const mine = viewer.isDM || (!!viewer.userId && turn.current?.basicInfo.controlledBy === viewer.userId);
-
-  const paused = !!battle.pendingCritChoice || anyPending;
 
   const [now, setNow] = useState(() => Date.now());
 
@@ -37,11 +31,26 @@ export function useTurnTimer(): { secondsLeft: number | null } {
 
   const secondsLeft = running ? Math.max(0, Math.ceil((seconds * 1000 - (now - new Date(turnStartedAt).getTime())) / 1000)) : null;
 
+  return { secondsLeft, totalSeconds: running ? seconds : null };
+}
+
+/** Таймер ходу бою: а коли час вийшов — клієнт ДМа або власника ходу завершує хід. */
+export function useTurnTimer(): { secondsLeft: number | null } {
+  const { campaignId, battleId, battle, viewer, turn, anyPending } = useBattleScene();
+
+  const { mutate } = useNextTurn(campaignId, battleId, silent);
+
+  const { secondsLeft } = useTurnCountdown();
+
+  const mine = viewer.isDM || (!!viewer.userId && turn.current?.basicInfo.controlledBy === viewer.userId);
+
+  const paused = !!battle.pendingCritChoice || anyPending;
+
   const expired = secondsLeft === 0 && mine && !paused;
 
   useEffect(() => {
     if (expired) mutate({ auto: true });
-  }, [expired, version, mutate]);
+  }, [expired, battle.version, mutate]);
 
   return { secondsLeft };
 }

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Heart, Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
-import { EffectLine, HealthBar, HpFigure, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
+import { EffectLine, HealthBar, HpFigure, SlotGrid, TurnTimerBar, ZoomablePortrait } from "@/components/battle/hud";
 import { ReactionSpellButton } from "@/components/battle/turn/ReactionSpellButton";
 import { ReadiedAttackButton } from "@/components/battle/turn/ReadiedAttackButton";
 import { useSystemBattleUi } from "@/components/battle/use-system-battle-ui";
@@ -66,6 +66,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
           )}
         </div>
       </div>
+      {!compact && <TurnTimerBar />}
       {!compact && spells && <SlotGrid participant={hero} />}
       {!compact && (charges.length > 0 || pools.length > 0) && (
         <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-hud-text">
