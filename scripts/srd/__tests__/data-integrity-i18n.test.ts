@@ -22,7 +22,7 @@ import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { importContent } from "@/lib/server/content/import/import-content";
 import type { Actor } from "@/lib/utils/api/actor";
 import { extractKeyed, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
-import { applyOverlay } from "@/lib/utils/templates/i18n/overlay";
+import { applyOverlay } from "../lib/apply-overlay";
 
 const SCHEMAS = {
   "spell-groups": { create: createSpellGroupSchema, update: updateSpellGroupSchema },

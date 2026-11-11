@@ -36,17 +36,6 @@ export function arraySegments(array: readonly unknown[]): string[] {
   return array.map((_, i) => (ids[i] && byId ? `[#${ids[i]}]` : slugs[i] && byName ? `[=${slugs[i]}]` : `[${i}]`));
 }
 
-export const arraySegment = (array: readonly unknown[], index: number): string => arraySegments(array)[index];
-
-/** `containers[i]` is the value that `path[i]` indexes into. */
-export function fieldPathOf(path: readonly (string | number)[], containers: readonly unknown[]): string {
-  return path.reduce<string>((out, segment, i) => {
-    if (typeof segment === "number") return `${out}${arraySegment(containers[i] as unknown[], segment)}`;
-
-    return out ? `${out}.${segment}` : segment;
-  }, "");
-}
-
 export interface KeyedSite { fieldPath: string; key: string; parent: string; path: readonly string[]; text: string }
 
 /** Like `mapStrings`, but each string also gets its stable field path. */

@@ -1,30 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { extractKeyed, fieldPathOf, rulesKeyed, statusOf } from "../keys";
+import { arraySegments, extractKeyed, rulesKeyed, statusOf } from "../keys";
 
-describe("fieldPathOf", () => {
+describe("arraySegments", () => {
   it("addresses array elements by id, unique name or index", () => {
-    const abilities = [{ id: "rage", name: "Rage" }, { id: "calm", name: "Calm" }];
-
-    expect(fieldPathOf(["abilities", 0, "description"], [{ abilities }, abilities, abilities[0]])).toBe("abilities[#rage].description");
-
-    const tiers = [{ name: "Copy Ist" }, { name: "Archivist" }];
-
-    expect(fieldPathOf(["tiers", 1, "trappings", 2], [{ tiers }, tiers, tiers[1], ["a", "b", "c"]])).toBe("tiers[=archivist].trappings[2]");
+    expect(arraySegments([{ id: "rage", name: "Rage" }, { id: "calm", name: "Calm" }])).toEqual(["[#rage]", "[#calm]"]);
+    expect(arraySegments([{ name: "Copy Ist" }, { name: "Archivist" }])).toEqual(["[=copy-ist]", "[=archivist]"]);
   });
 
   it("falls back to the index for duplicate names, duplicate ids and unnamed elements", () => {
-    const dupNames = [{ name: "Bite" }, { name: "bite" }];
-
-    expect(fieldPathOf(["attacks", 1, "name"], [{ attacks: dupNames }, dupNames, dupNames[1]])).toBe("attacks[1].name");
-
-    const dupIds = [{ id: "a", name: "X" }, { id: "a", name: "Y" }];
-
-    expect(fieldPathOf(["list", 0], [{ list: dupIds }, dupIds])).toBe("list[=x]");
-
-    const plain = [{ max: 1 }];
-
-    expect(fieldPathOf(["rows", 0, "text"], [{ rows: plain }, plain, plain[0]])).toBe("rows[0].text");
+    expect(arraySegments([{ name: "Bite" }, { name: "bite" }])).toEqual(["[0]", "[1]"]);
+    expect(arraySegments([{ id: "a", name: "X" }, { id: "a", name: "Y" }])).toEqual(["[=x]", "[=y]"]);
+    expect(arraySegments([{ max: 1 }])).toEqual(["[0]"]);
   });
 });
 

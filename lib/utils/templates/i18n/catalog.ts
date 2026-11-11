@@ -2,19 +2,7 @@ export const NAME_KEYS: readonly string[] = ["name", "label", "nameTemplate"];
 
 export const TEXT_KEYS: readonly string[] = ["description", "text", "equipmentText"];
 
-export const REF_KEYS: Readonly<Record<string, string>> = {
-  spellId: "spells",
-  groupId: "spell-groups",
-  school: "spell-groups",
-  lists: "classes",
-  spellList: "classes",
-  originFeatId: "feats",
-  bases: "artifacts",
-};
-
 export type TextClass = "n" | "d";
-
-export type Translations = Record<string, string>;
 
 // Paths omit array indices, so seed rows and DB rows share the same context.
 export const classOf = (key: string, parent = "", path: readonly string[] = []): TextClass | null => {

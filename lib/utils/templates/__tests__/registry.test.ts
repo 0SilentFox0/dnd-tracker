@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { describe, expect, it } from "vitest";
 
-import { isCanonicalTemplate, LEGACY_KEY_BY_NAME, localizationOf, TEMPLATE_REGISTRY, templateKeyOf, templateKeyWhere, templateOf, templatesOfSystem } from "../registry";
+import { isCanonicalTemplate, LEGACY_KEY_BY_NAME, localizationOf, TEMPLATE_REGISTRY, templateKeyOf, templateKeyWhere, templateOf } from "../registry";
 
 const official = { kind: "template", visibility: "official" };
 
@@ -15,10 +15,9 @@ describe("TEMPLATE_REGISTRY", () => {
     expect(Object.keys(TEMPLATE_REGISTRY).sort()).toEqual(folders.sort());
   });
 
-  it("finds a pack and the packs of a system", () => {
+  it("finds a pack", () => {
     expect(templateOf("srd-5.2")?.system).toBe("dnd5e");
     expect(templateOf("toString")).toBeUndefined();
-    expect(templatesOfSystem("wfrp").map((m) => m.key).sort()).toEqual(["grim-d100", "grim-d100-empty"]);
   });
 });
 

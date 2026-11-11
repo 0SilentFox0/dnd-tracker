@@ -19,8 +19,6 @@ export type TemplateLocalization = { templateKey: string; locales: readonly Temp
 
 export const templateOf = (key: string): TemplateManifest | undefined => (Object.hasOwn(TEMPLATE_REGISTRY, key) ? TEMPLATE_REGISTRY[key] : undefined);
 
-export const templatesOfSystem = (system: string): TemplateManifest[] => Object.values(TEMPLATE_REGISTRY).filter((manifest) => manifest.system === system);
-
 export function templateKeyOf(source: { templateKey?: string | null; name?: string | null }): string | null {
   if (source.templateKey && templateOf(source.templateKey)) return source.templateKey;
 

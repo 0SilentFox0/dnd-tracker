@@ -8,7 +8,7 @@ import { SRD_KINDS, type SrdData } from "./types";
 
 import { DEFAULT_TEMPLATE_LOCALE } from "@/lib/constants/campaigns";
 import { TemplateManifestSchema } from "@/lib/schemas/template-manifest";
-import { applyOverlay } from "@/lib/utils/templates/i18n/overlay";
+import { applyOverlay } from "./apply-overlay";
 import type { TemplateManifest } from "@/lib/utils/templates/manifest";
 
 const fileOf = (dir: string, name: string) => path.join(dir, `${name}.json`);
