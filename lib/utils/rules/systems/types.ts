@@ -282,6 +282,8 @@ export interface RuleSystemDefinition {
     sheetBlock(input: SheetBlockInput): SystemSlot | undefined;
     /** Merges an incoming edit into the stored value; throws ContentError on a conflict */
     reconcile?(stored: unknown, incoming: unknown, ctx: { isDM: boolean; baseline?: unknown }): unknown;
+    /** Drops server-owned fields from the blob of a newly created character */
+    initial?(value: SystemData): SystemData;
     redact?(value: unknown, viewer: { isDM: boolean; isOwner: boolean }): unknown;
   };
   resources?: {

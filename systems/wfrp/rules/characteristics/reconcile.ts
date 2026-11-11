@@ -1,4 +1,4 @@
-import { preserveServerOwned, redactLedger } from "../advancement/privacy";
+import { preserveServerOwned, redactLedger, withoutLedgers } from "../advancement/privacy";
 import { type CareerState, type Characteristics, DEFAULT_CHARACTERISTICS, readCharacteristics } from "./keys";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -23,11 +23,11 @@ export const reconcileCharacteristics: NonNullable<RuleSystemDefinition["charact
 
   if (moved || careerMoved) throw new ContentError(API_ERRORS.CHARACTERISTICS_CHANGED, 409);
 
-  const { downtime: _downtime, corruption: _corruption, ...rest } = incoming;
-
-  return { ...rest, ...(stored.downtime ? { downtime: stored.downtime } : {}), ...(stored.corruption ? { corruption: stored.corruption } : {}) };
+  return { ...withoutLedgers(incoming), ...(stored.downtime ? { downtime: stored.downtime } : {}), ...(stored.corruption ? { corruption: stored.corruption } : {}) };
 };
 
 export const redactCharacteristics: NonNullable<RuleSystemDefinition["characteristics"]["redact"]> = (value, viewer) => redactLedger(value as Characteristics, viewer);
+
+export const initialCharacteristics: NonNullable<RuleSystemDefinition["characteristics"]["initial"]> = value => withoutLedgers(value);
 
 export const isEmptyCharacteristics = (v: unknown) => v == null || (typeof v === "object" && Object.keys(v).length === 0) || hashJson(v) === hashJson(DEFAULT_CHARACTERISTICS);

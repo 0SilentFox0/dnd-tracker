@@ -1,7 +1,7 @@
 import { WFRP_ADVANCEMENT } from "./rules/advancement";
 import { woundsBreakdown, woundsMax } from "./rules/characteristics/derive";
 import { DEFAULT_CHARACTERISTICS, readCharacteristics } from "./rules/characteristics/keys";
-import { isEmptyCharacteristics, reconcileCharacteristics, redactCharacteristics } from "./rules/characteristics/reconcile";
+import { initialCharacteristics, isEmptyCharacteristics, reconcileCharacteristics, redactCharacteristics } from "./rules/characteristics/reconcile";
 import { wfrpSheetBlock } from "./rules/characteristics/sheet-block";
 import { wfrpActionDetails } from "./rules/combat/details";
 import { extractWfrpAttacks } from "./rules/combat/extract-attacks";
@@ -37,7 +37,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
       return { total: woundsMax(c), breakdown: woundsBreakdown(c) };
     },
   },
-  characteristics: { persisted: true, defaults: () => structuredClone(DEFAULT_CHARACTERISTICS) as unknown as SystemData, isEmpty: isEmptyCharacteristics, sheetBlock: wfrpSheetBlock, reconcile: reconcileCharacteristics, redact: redactCharacteristics },
+  characteristics: { persisted: true, defaults: () => structuredClone(DEFAULT_CHARACTERISTICS) as unknown as SystemData, isEmpty: isEmptyCharacteristics, sheetBlock: wfrpSheetBlock, reconcile: reconcileCharacteristics, redact: redactCharacteristics, initial: initialCharacteristics },
   resources: {
     limits: (row) => ({ fateMax: readCharacteristics(row).fate }),
     seed: (characteristics) => ({ fortune: readCharacteristics({ characteristics }).fate }),

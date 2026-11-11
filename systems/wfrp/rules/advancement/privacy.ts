@@ -2,10 +2,16 @@ import type { Characteristics } from "../characteristics/keys";
 
 export type LedgerViewer = { isDM: boolean; isOwner: boolean };
 
+export function withoutLedgers<T extends Partial<Characteristics>>(characteristics: T): Omit<T, "downtime" | "corruption"> {
+  const { downtime: _downtime, corruption: _corruption, ...rest } = characteristics;
+
+  return rest;
+}
+
 export function redactLedger(characteristics: Characteristics, viewer: LedgerViewer): Characteristics {
   if (viewer.isDM || viewer.isOwner) return characteristics;
 
-  const { downtime: _downtime, corruption: _corruption, ...rest } = characteristics;
+  const rest = withoutLedgers(characteristics);
 
   return "ledger" in rest ? { ...rest, ledger: [] } : rest;
 }
