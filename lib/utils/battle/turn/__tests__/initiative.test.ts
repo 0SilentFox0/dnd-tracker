@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import srdRules from "@/data/templates/srd-5.2/rules.json";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { calculateInitiative, sortByInitiative } from "@/lib/utils/battle/turn/initiative";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { parseRules } from "@/lib/utils/rules/schema";
+import { parseRules, RulesetSchema } from "@/lib/utils/rules/schema";
 import { ALWAYS_FIRST_ABILITY } from "@/scripts/constructor/backfill/always-first";
-import { SRD_RULES } from "@/scripts/srd/lib/rules-preset";
+
+const SRD_RULES = RulesetSchema.parse(srdRules);
 
 const withBase = (id: string, baseInitiative: number, abilities = [] as ReturnType<typeof resolved>[]) => {
   const p = makeParticipant({ id, abilities });

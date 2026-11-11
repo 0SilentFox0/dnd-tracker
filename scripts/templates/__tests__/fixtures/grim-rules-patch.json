@@ -1,0 +1,357 @@
+{
+  "advancement": {
+    "career": {
+      "ticksRequired": [
+        8,
+        10,
+        12
+      ],
+      "outOfCareerMultiplier": 2
+    }
+  },
+  "tables": {
+    "miscastMinor": [
+      {
+        "max": 10,
+        "text": "A smell of scorched hair clings to you, and nothing worse.",
+        "effects": []
+      },
+      {
+        "max": 20,
+        "text": "Your ears ring with a sound only you can hear.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 30,
+        "text": "A wave of weariness drags at your limbs.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "fatigued",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 40,
+        "text": "Your nose bleeds freely.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 50,
+        "text": "Sparks jump between your teeth.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "Your vision swims with afterimages.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 70,
+        "text": "The spell recoils and knocks you off your feet.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "A cold spasm locks your jaw.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 90,
+        "text": "Pain lances behind your eyes.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "Raw power scours you from the inside.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "fatigued",
+            "levels": 1
+          },
+          {
+            "type": "wounds",
+            "amount": 2
+          }
+        ]
+      }
+    ],
+    "miscastMajor": [
+      {
+        "max": 10,
+        "text": "Your shadow tears loose and claws at you before fading.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "max": 20,
+        "text": "Flames lick up your sleeves.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "ablaze",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 30,
+        "text": "Blood seeps from your eyes and ears.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 40,
+        "text": "The world tilts and you collapse, twitching.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 50,
+        "text": "A thunderclap bursts beside your head.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 1
+          },
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 60,
+        "text": "Searing light fills your eyes.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 1
+          },
+          {
+            "type": "wounds",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "max": 70,
+        "text": "Unseen things whisper your name until you flee.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "broken",
+            "levels": 2
+          }
+        ]
+      },
+      {
+        "max": 80,
+        "text": "Your heart stutters under the backlash.",
+        "effects": [
+          {
+            "type": "wounds",
+            "amount": 4
+          },
+          {
+            "type": "condition",
+            "key": "fatigued",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 90,
+        "text": "Fire bursts from your mouth and hands.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "ablaze",
+            "levels": 2
+          },
+          {
+            "type": "wounds",
+            "amount": 3
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "The backlash hurls you down, senseless and bleeding.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 3
+          },
+          {
+            "type": "wounds",
+            "amount": 5
+          }
+        ]
+      }
+    ],
+    "wrath": [
+      {
+        "max": 12,
+        "text": "A hush falls and your next breath tastes of ash.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "fatigued",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 25,
+        "text": "Your words catch in a throat gone dry.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "stunned",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 37,
+        "text": "A ringing like a great bell fills your skull.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "deafened",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 50,
+        "text": "Your knees buckle under an unseen weight.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "prone",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 62,
+        "text": "Shame burns in you until you can barely act.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "broken",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 75,
+        "text": "Your palms split open as if scourged.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "bleeding",
+            "levels": 1
+          },
+          {
+            "type": "wounds",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "max": 87,
+        "text": "Light pours from the sky into your eyes.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "blinded",
+            "levels": 1
+          }
+        ]
+      },
+      {
+        "max": 100,
+        "text": "Hearthfire scorches your skin for your failings.",
+        "effects": [
+          {
+            "type": "condition",
+            "key": "ablaze",
+            "levels": 1
+          },
+          {
+            "type": "wounds",
+            "amount": 2
+          }
+        ]
+      }
+    ]
+  }
+}

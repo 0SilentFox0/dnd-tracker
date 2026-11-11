@@ -8,10 +8,8 @@ import { unitIssues } from "./units";
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
-import { mergeRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
 import { SPEC_RE } from "@/lib/utils/rules/systems";
 import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { skillDef } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 import type { TableRow } from "@/lib/utils/rules/tables-schema";
 
@@ -171,16 +169,6 @@ export function tableIssues(rules: WfrpData["rules"]): string[] {
 }
 
 function validateRules(rules: WfrpData["rules"], issues: string[]) {
-  if (!rules) return;
-
-  const patch = RulesetPatchSchema.safeParse(rules);
-
-  if (!patch.success) return void patch.error.issues.forEach((i) => issues.push(`rules: ${i.path.join(".")} ${i.message}`));
-
-  const merged = mergeRules(WFRP_RULES, patch.data as Parameters<typeof mergeRules>[1]);
-
-  if (!merged.ok) merged.issues.forEach((i) => issues.push(`rules: ${i.path.join(".")} ${i.message}`));
-
   issues.push(...tableIssues(rules));
 }
 

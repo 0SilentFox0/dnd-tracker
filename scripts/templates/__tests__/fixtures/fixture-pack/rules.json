@@ -1,4 +1,171 @@
 {
+  "morale": {
+    "enabled": false,
+    "cap": 3
+  },
+  "criticals": {
+    "critOn": 20,
+    "fumbleOn": 1,
+    "effects": false,
+    "doubleDice": true,
+    "disabledSuccess": [],
+    "disabledFail": []
+  },
+  "formulas": {
+    "saveDcBase": 8,
+    "proficiencyBase": 2,
+    "proficiencyEvery": 4
+  },
+  "heroScaling": {
+    "meleeDiceByLevel": null,
+    "rangedDiceByLevel": null,
+    "hpBaseLevels": 3,
+    "hpConCoefficient": 1.5
+  },
+  "initiative": {
+    "heroMin": 0,
+    "heroMax": 20,
+    "mode": "roll"
+  },
+  "defaultAttacks": {
+    "meleeName": "Unarmed Strike",
+    "rangedName": "Ranged Attack",
+    "weaponName": "Weapon"
+  },
+  "saves": {
+    "proficiency": true
+  },
+  "deathSaves": {
+    "enabled": true,
+    "unitsDieAtZero": true
+  },
+  "concentration": {
+    "enabled": true,
+    "dcCap": null
+  },
+  "conditions": {
+    "enabled": true,
+    "exhaustion": "2024"
+  },
+  "actions": {
+    "enabled": true,
+    "opportunityAttacks": true,
+    "retaliation": false,
+    "variant": "2024"
+  },
+  "classes": {
+    "enabled": true
+  },
+  "outOfCombat": {
+    "persistResources": true,
+    "longRestHitDice": "all",
+    "xp": true,
+    "inspiration": true
+  },
+  "encounters": {
+    "balance": "xp",
+    "edition": "2024",
+    "autoXp": true
+  },
+  "items": {
+    "enabled": true,
+    "attunementLimit": 3
+  },
+  "spellIngredients": {
+    "enabled": true,
+    "autoPay": true
+  },
+  "advancement": {
+    "characteristic": {
+      "brackets": [
+        {
+          "upTo": 5,
+          "cost": 25
+        },
+        {
+          "upTo": 10,
+          "cost": 30
+        },
+        {
+          "upTo": 15,
+          "cost": 40
+        },
+        {
+          "upTo": 20,
+          "cost": 50
+        },
+        {
+          "upTo": 25,
+          "cost": 70
+        },
+        {
+          "upTo": 30,
+          "cost": 90
+        },
+        {
+          "upTo": 35,
+          "cost": 120
+        },
+        {
+          "upTo": 40,
+          "cost": 150
+        }
+      ],
+      "max": 40
+    },
+    "skill": {
+      "brackets": [
+        {
+          "upTo": 5,
+          "cost": 10
+        },
+        {
+          "upTo": 10,
+          "cost": 15
+        },
+        {
+          "upTo": 15,
+          "cost": 20
+        },
+        {
+          "upTo": 20,
+          "cost": 30
+        },
+        {
+          "upTo": 25,
+          "cost": 40
+        },
+        {
+          "upTo": 30,
+          "cost": 60
+        }
+      ],
+      "max": 30
+    },
+    "talentCostMultiplier": 1,
+    "career": {
+      "ticksRequired": [
+        10,
+        12,
+        14
+      ],
+      "outOfCareerMultiplier": 2
+    },
+    "creation": {
+      "careerBonus": {
+        "rolled": 50,
+        "choice": 25,
+        "free": 0
+      },
+      "statBonus": {
+        "rolled": 50,
+        "rearranged": 25,
+        "free": 0
+      },
+      "freeBudget": 100
+    }
+  },
+  "tables": {},
   "system": {
     "key": "dnd5e"
   }

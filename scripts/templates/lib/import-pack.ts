@@ -1,5 +1,4 @@
 import { assertSeedTarget } from "../../seed/seed-library-lib";
-import { SRD_RULES } from "../../srd/lib/rules-preset";
 import { PACK_HOOKS } from "../systems";
 import { catalogOfPack } from "./i18n-convert";
 import { readTranslations } from "./i18n-store";
@@ -22,8 +21,6 @@ import { publishTemplate } from "@/lib/server/templates/publish-service";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isImportKind } from "@/lib/utils/content/import";
 import { RulesetSchema } from "@/lib/utils/rules/schema";
-import { mergeRules } from "@/lib/utils/rules/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { statusOf } from "@/lib/utils/templates/i18n/keys";
 import type { PackKind } from "@/lib/utils/templates/manifest";
 import type { ImportKind, ImportReport } from "@/types/content-import";
@@ -37,19 +34,6 @@ export interface ImportPackOptions { owner?: string; dryRun?: boolean; allowRemo
 const counts = (created = 0, updated = 0, skipped = 0, errors = 0): KindCounts => ({ created, updated, skipped, errors });
 
 const fromReport = ({ counts: c }: ImportReport): KindCounts => counts(c.created, c.updated, c.skipped, c.error);
-
-/** Until every pack carries a full rules.json (4.3) a patch or a missing file falls back to the system default. */
-function rulesOf(pack: Pack) {
-  if ((pack.rules as { system?: unknown } | undefined)?.system) return RulesetSchema.parse(pack.rules);
-
-  if (pack.manifest.system !== "wfrp") return SRD_RULES;
-
-  const merged = mergeRules(WFRP_RULES, (pack.rules ?? {}) as Parameters<typeof mergeRules>[1]);
-
-  if (!merged.ok) throw new Error("rules.json does not pass the rules schema");
-
-  return merged.rules;
-}
 
 function describeReport(kind: string, report: ImportReport, t: Awaited<ReturnType<typeof getTranslator>>): string[] {
   const { counts: c, results } = report;
@@ -126,7 +110,7 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   if (dryRun && !existing) return { templateId: null, created: true, perKind: Object.fromEntries(manifest.kinds.map((kind) => [kind, counts(pack.rows[kind]?.length ?? 0)])) };
 
-  const template = dryRun && existing ? { id: existing.id, dmUserId: existing.dmUserId, created: false } : await ensureTemplate(store, { owner: opts.owner, rules: rulesOf(pack), credits: manifest.credits ?? "" });
+  const template = dryRun && existing ? { id: existing.id, dmUserId: existing.dmUserId, created: false } : await ensureTemplate(store, { owner: opts.owner, rules: RulesetSchema.parse(pack.rules), credits: manifest.credits ?? "" });
 
   console.info(`${manifest.names.en}: ${template.id}${template.created ? " (created)" : ""}${dryRun ? " (dry run)" : ""}`);
 

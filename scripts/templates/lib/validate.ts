@@ -7,6 +7,7 @@ import { type Pack, type PackRow, TEMPLATES_DIR } from "./pack";
 import { TemplateManifestSchema } from "@/lib/schemas/template-manifest";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { coerceRecord, IMPORT_SPECS, isImportKind, nameKey } from "@/lib/utils/content/import";
+import { RulesetSchema } from "@/lib/utils/rules/schema";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems/registry";
 import { statusOf } from "@/lib/utils/templates/i18n/keys";
 import type { PackKind, TemplateManifest } from "@/lib/utils/templates/manifest";
@@ -45,9 +46,13 @@ function manifestIssues(pack: Pack, registry: Readonly<Record<string, TemplateMa
 }
 
 function rulesIssues(pack: Pack): PackIssue[] {
-  const key = (pack.rules as { system?: { key?: unknown } } | undefined)?.system?.key;
+  if (pack.rules === undefined) return [error(`rules: ${pack.manifest.rules.file} is missing`)];
 
-  return key !== undefined && key !== pack.manifest.system ? [error(`rules: system.key "${String(key)}" does not match manifest system "${pack.manifest.system}"`)] : [];
+  const parsed = RulesetSchema.safeParse(pack.rules);
+
+  if (!parsed.success) return parsed.error.issues.map((i) => error(`rules: ${i.path.join(".") || "rules"} ${i.message}`));
+
+  return parsed.data.system.key === pack.manifest.system ? [] : [error(`rules: system.key "${parsed.data.system.key}" does not match manifest system "${pack.manifest.system}"`)];
 }
 
 function rowIssues(kind: PackKind, rows: PackRow[]): PackIssue[] {

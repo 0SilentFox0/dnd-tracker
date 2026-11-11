@@ -31,7 +31,7 @@ export type PackRow = { slug: string; name?: string; origin?: { template: string
 
 export interface Pack {
   manifest: TemplateManifest;
-  /** a patch until 4.3 gives every pack a full rules.json */
+  /** undefined when the file is missing; the validator reports it */
   rules?: Ruleset;
   rows: Partial<Record<PackKind, PackRow[]>>;
   extras: Record<string, unknown>;

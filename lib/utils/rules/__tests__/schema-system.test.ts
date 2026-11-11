@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_RULES } from "../defaults";
-import { mergeRules, parseRules, RulesetPatchSchema } from "../schema";
+import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "../schema";
 
+import srdRules from "@/data/templates/srd-5.2/rules.json";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { SRD_RULES } from "@/scripts/srd/lib/rules-preset";
+
+const SRD_RULES = RulesetSchema.parse(srdRules);
 
 describe("rules.system", () => {
   it("falls back to homm for empty rules", () => {

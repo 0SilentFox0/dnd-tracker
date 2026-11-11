@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import srdRules from "@/data/templates/srd-5.2/rules.json";
 import { DEFAULT_RULES, MECHANIC_REGISTRY } from "@/lib/utils/rules";
-import { mergeRules, parseRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
-import { SRD_RULES } from "@/scripts/srd/lib/rules-preset";
+import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "@/lib/utils/rules/schema";
+
+const SRD_RULES = RulesetSchema.parse(srdRules);
 
 const OFF = { enabled: false, attunementLimit: 3 };
 

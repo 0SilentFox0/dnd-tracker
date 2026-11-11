@@ -135,10 +135,10 @@ describe("validatePack: wfrp", () => {
     expect(issuesOf(data).some((i) => i.startsWith("races #1") && i.includes("name is required"))).toBe(true);
   });
 
-  it("rejects an invalid rules patch", () => {
+  it("rejects invalid rules", () => {
     const data = load();
 
-    data.rules = { morale: { enabled: "yes" } } as never;
+    data.rules = { ...data.rules, morale: { enabled: "yes" } } as never;
     expect(issuesOf(data).some((i) => i.startsWith("rules:"))).toBe(true);
   });
 
@@ -393,12 +393,12 @@ describe("validatePack: wfrp artifacts", () => {
   it("checks rules tables order and scans rules for forbidden terms", () => {
     const data = load();
 
-    data.rules = { tables: { miscastMinor: [{ max: 50, effects: [] }, { max: 40, effects: [] }] } } as WfrpData["rules"];
+    data.rules = { ...data.rules, tables: { miscastMinor: [{ max: 50, effects: [] }, { max: 40, effects: [] }] } } as WfrpData["rules"];
     expect(issuesOf(data).some((i) => i.startsWith("rules: tables.miscastMinor"))).toBe(true);
 
     const rows = Array.from({ length: 7 }, (_, n) => ({ max: (n + 1) * 10, text: "t", effects: [] }));
 
-    data.rules = { tables: { wrath: [...rows, { max: 100, text: "The Empire falls", effects: [] }] } } as WfrpData["rules"];
+    data.rules = { ...data.rules, tables: { wrath: [...rows, { max: 100, text: "The Empire falls", effects: [] }] } } as WfrpData["rules"];
     expect(issuesOf(data)).toContain('rules: forbidden term "Empire"');
   });
 });
