@@ -9,6 +9,7 @@ export const API_ERRORS = {
   CAMPAIGN_NOT_FOUND: "errors.campaignNotFound",
   TEMPLATE_CONTENT_LOCALE: "errors.templateContentLocale",
   SRD_CANONICAL_UNAVAILABLE: "errors.srdCanonicalUnavailable",
+  TEMPLATE_NOT_READY: "errors.templateNotReady",
   SRD_NAME_REFERENCES: "errors.srdNameReferences",
   SOURCE_NONE: "errors.sourceNone",
   SOURCE_NOT_FOUND: "errors.sourceNotFound",

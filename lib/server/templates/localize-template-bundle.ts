@@ -72,6 +72,9 @@ function localizeTree(row: Record<string, unknown>, maps: Record<Table, Map<stri
   return { ...row, race: race(row.race), skills: mapped };
 }
 
+/** True when any content row of the bundle has no slug, so a slug-keyed dictionary cannot reach it. */
+export const hasUnsluggedRows = (bundle: Bundle): boolean => TABLES.some((table) => bundle[table].some((row) => !slugOf(row)));
+
 /** Localize canonical template DB rows (SRD, Grim, Heroes); source/language policy belongs to the caller. A row without a slug stays English. */
 export function localizeTemplateBundle(bundle: Bundle, translations: TranslationsV2): Bundle {
   if (!Object.keys(translations).length) return bundle;

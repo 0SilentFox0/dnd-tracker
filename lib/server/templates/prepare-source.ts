@@ -6,7 +6,7 @@ import type { Bundle, TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
 import { templateTranslationsFor } from "@/lib/server/templates/dictionaries";
 import { exportLocalLayer, exportSkeleton, type LocalLayer } from "@/lib/server/templates/export-campaign";
-import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
+import { localizedExport } from "@/lib/server/templates/localized-export";
 import { latestPublishedVersion } from "@/lib/server/templates/publish";
 import { canReadSource } from "@/lib/utils/api/is-dm";
 import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
@@ -92,7 +92,7 @@ export async function prepareCampaignSource(db: TemplateDb, sourceId: string, op
 
   if (layered) return { ...identity, ...layered };
 
-  const bundle = await cachedExport(db, source.id, source.contentVersion);
+  const bundle = translations ? await localizedExport(db, source.id, source.contentVersion, translations) : await cachedExport(db, source.id, source.contentVersion);
 
-  return { ...identity, bundle: translations ? localizeTemplateBundle(bundle, translations) : bundle };
+  return { ...identity, bundle };
 }
