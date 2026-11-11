@@ -3,9 +3,9 @@ import * as path from "path";
 
 import { type AppliedLine, inPhase, mergeApplied, missing, type Phase, planBatches } from "../../srd/i18n/batches";
 import { buildNameMap, namesIn } from "../../srd/i18n/names";
-import { catalogOf, convertV1, issuesOf } from "./i18n-convert";
+import { catalogOf, convertV1, i18nIssuesOf } from "./i18n-convert";
 import { readGlossary, readTranslations, writeTranslations } from "./i18n-store";
-import { packPath, TEMPLATES_DIR } from "./pack";
+import { packPath, readPack, TEMPLATES_DIR } from "./pack";
 
 import { type KeyedString, statusOf } from "@/lib/utils/templates/i18n/keys";
 
@@ -66,7 +66,7 @@ function apply(key: string, locale: string, files: string[], dir: string) {
 
   const { merged, accepted, rejected } = mergeApplied(readTranslations(key, locale, dir), lines, catalogOf(key, dir), readGlossary(key, locale, dir));
 
-  const issues = issuesOf(key, merged, dir);
+  const issues = i18nIssuesOf(readPack(key, dir), merged);
 
   if (issues.length > 0) {
     for (const issue of issues) console.error(issue);

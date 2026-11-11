@@ -1,4 +1,4 @@
-import { descriptionIssues, type Row } from "./data";
+import { descriptionIssues, type Row } from "./common";
 
 import { ARTIFACT_RARITY_VALUES } from "@/lib/constants/artifacts";
 import { ARMOUR_KINDS, QUALITY_REGISTRY, type QualityKey, type QualityRef, WEAPON_GROUPS } from "@/lib/utils/rules/systems/wfrp/equipment";

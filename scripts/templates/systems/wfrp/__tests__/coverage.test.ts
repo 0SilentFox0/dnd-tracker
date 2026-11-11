@@ -1,10 +1,10 @@
-import * as path from "path";
 import { describe, expect, it } from "vitest";
 
+import type { WfrpData } from "../common";
 import { grimCoverage, grimInfo } from "../coverage";
-import { type GrimData, readGrimData } from "../data";
+import { fixtureData } from "./pack-helpers";
 
-const load = (): GrimData => structuredClone(readGrimData(path.join(__dirname, "fixtures")));
+const load = (): WfrpData => structuredClone(fixtureData());
 
 describe("grimCoverage", () => {
   it("reports only the known fixture gaps", () => {

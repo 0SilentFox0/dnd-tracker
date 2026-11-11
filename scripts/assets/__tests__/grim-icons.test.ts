@@ -4,7 +4,7 @@ import * as path from "path";
 import { describe, expect, it } from "vitest";
 
 import { GRIM_ROW_KINDS, readGrimData } from "../../grim/data";
-import { findForbiddenTerms } from "../../grim/forbidden-terms";
+import { findForbiddenTerms } from "../../templates/grim-d100/forbidden-terms";
 import { grimPromptRows,type GrimSubjects } from "../grim-icons/prompts";
 import { GRIM_ICON_BUCKET, GRIM_ICON_SIZE, planGrimUploads } from "../grim-icons/upload";
 

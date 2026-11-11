@@ -1,4 +1,4 @@
-import { readGrimData } from "../data";
+import { grimData } from "./pack-helpers";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
@@ -19,7 +19,7 @@ import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 import { unitCreateData } from "@/lib/utils/units/unit-create-data";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
-export const data = readGrimData();
+export const data = grimData();
 
 const merged = mergeRules(WFRP_RULES, (data.rules ?? {}) as Parameters<typeof mergeRules>[1]);
 

@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { readGrimData } from "../data";
-import { grimCatalog, grimI18nIssues } from "../i18n";
+import { catalogOf } from "../../../lib/i18n-convert";
+import { wfrpI18nIssues } from "../i18n";
+import { grimPack } from "./pack-helpers";
 
 import { statusOf } from "@/lib/utils/templates/i18n/keys";
 import { checkTranslation } from "@/scripts/srd/i18n/validate";
 import { readTranslations } from "@/scripts/templates/lib/i18n-store";
 
-const data = readGrimData();
+const pack = grimPack();
 
-const catalog = grimCatalog(data);
+const catalog = catalogOf("grim-d100");
 
 const uk = readTranslations("grim-d100", "uk");
 
@@ -21,7 +22,7 @@ describe("grim uk dictionary", () => {
   });
 
   it("has no cross-entry issues", () => {
-    expect(grimI18nIssues(data, uk)).toEqual([]);
+    expect(wfrpI18nIssues(pack, uk)).toEqual([]);
   });
 
   it("keeps numbers, dice and placeholders", () => {

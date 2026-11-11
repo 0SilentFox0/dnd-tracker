@@ -1,9 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { TEMPLATES_DIR } from "./pack";
+import { type IconsFile, TEMPLATES_DIR } from "./pack";
 
-export type IconsFile = Record<string, Record<string, string>>;
+export type { IconsFile };
 
 type Slugged = { slug?: unknown };
 

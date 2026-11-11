@@ -1,0 +1,11 @@
+{
+  "key": "grim-fixture",
+  "system": "wfrp",
+  "names": { "en": "Grim fixture", "uk": "Grim fixture" },
+  "locales": ["en"],
+  "rules": { "file": "rules.json" },
+  "kinds": ["feats", "careers", "races", "spells", "units", "artifacts"],
+  "extras": ["race-profiles"],
+  "icons": {},
+  "counts": { "feats": 2, "careers": 2, "races": 1, "spells": 1, "units": 1, "artifacts": 2 }
+}

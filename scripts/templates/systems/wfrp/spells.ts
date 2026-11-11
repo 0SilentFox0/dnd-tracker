@@ -1,4 +1,4 @@
-import { descriptionIssues, type Row } from "./data";
+import { descriptionIssues, type Row } from "./common";
 import { unitTraits } from "./units";
 
 import { WFRP_CONDITION_KEYS } from "@/lib/constants/wfrp-conditions";

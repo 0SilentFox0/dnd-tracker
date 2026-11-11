@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Row } from "../data";
+import type { Row } from "../common";
 import { castCeiling, spellIssues } from "../spells";
 
 const emberDart: Row = {"name":"Ember Dart","level":1,"cost":"action","description":"A hissing dart of flame that leaves its mark smouldering.","casting":{"magic":{"cn":4,"kind":"arcane","overcast":"dice","attribute":{"condition":"ablaze","levels":1}}},"targeting":{"kind":"enemy","range":90},"dice":1,"upcastDice":1,"spellEffects":[{"kind":"dealDamage","amount":{"spellRoll":100},"damageType":"magic"}],"ingredients":[{"name":"Charred Bone Chip","qty":1,"minGp":0.05,"consumed":true,"focus":false}],"componentFlags":{"v":true,"s":true,"m":true},"lists":["School of Embers"]};

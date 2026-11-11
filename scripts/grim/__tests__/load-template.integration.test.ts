@@ -24,7 +24,7 @@ import { listRaceProfiles } from "@/lib/server/races/race-profile";
 
 const marker = `grimload-${randomUUID()}`;
 
-const fixtures = path.join(__dirname, "fixtures");
+const fixtures = path.join(__dirname, "../../templates/__tests__/fixtures/grim-fixture");
 
 const manifest = { key: "grim-d100", system: "wfrp", names: { en: GRIM_TEMPLATE_NAME, uk: GRIM_TEMPLATE_NAME }, locales: ["en", "uk"], rules: { file: "rules.json" }, kinds: [], icons: {}, credits: "", counts: {} };
 

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { grimCoverage, grimInfo } from "../coverage";
+import { readPack } from "../../templates/lib/pack";
+import { validatePack } from "../../templates/lib/validate";
+import { grimCoverage, grimInfo } from "../../templates/systems/wfrp/coverage";
 import { GRIM_ROW_KINDS, readGrimData, readGrimManifest } from "../data";
 import { grimIconIssues, readGrimIcons } from "../icons";
-import { validateGrimData } from "../validate-data";
 
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { nameKey } from "@/lib/utils/content/import";
@@ -34,7 +35,7 @@ describe("grim-d100 catalog", () => {
   });
 
   it("passes the validator", () => {
-    expect(validateGrimData(data)).toEqual({ ok: true });
+    expect(validatePack(readPack("grim-d100")).filter((issue) => issue.level === "error")).toEqual([]);
   });
 
   it("has no coverage warnings", () => {

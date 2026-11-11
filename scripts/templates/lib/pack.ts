@@ -2,7 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { TemplateManifestSchema } from "@/lib/schemas/template-manifest";
-import type { TemplateManifest } from "@/lib/utils/templates/manifest";
+import type { Ruleset } from "@/lib/utils/rules/schema";
+import type { PackKind, TemplateManifest } from "@/lib/utils/templates/manifest";
 
 export const TEMPLATES_DIR = process.env.TEMPLATES_DIR ?? path.join(process.cwd(), "data/templates");
 
@@ -24,9 +25,17 @@ export function readManifest(key: string, dir = TEMPLATES_DIR): TemplateManifest
   return manifest;
 }
 
-export interface PackData {
-  rows: Record<string, { slug: string }[]>;
-  rules?: unknown;
+export type IconsFile = Record<string, Record<string, string>>;
+
+export type PackRow = { slug: string; name?: string; origin?: { template: string; slug: string } } & Record<string, unknown>;
+
+export interface Pack {
+  manifest: TemplateManifest;
+  /** a patch until 4.3 gives every pack a full rules.json */
+  rules?: Ruleset;
+  rows: Partial<Record<PackKind, PackRow[]>>;
+  extras: Record<string, unknown>;
+  icons: IconsFile;
 }
 
 const readJsonIf = <T>(key: string, file: string, dir: string): T | undefined => {
@@ -35,11 +44,20 @@ const readJsonIf = <T>(key: string, file: string, dir: string): T | undefined =>
   return fs.existsSync(target) ? (JSON.parse(fs.readFileSync(target, "utf8")) as T) : undefined;
 };
 
-/** Rows of every kind the manifest lists (a missing file is an empty kind) plus the rules file. */
-export function readPack(key: string, dir = TEMPLATES_DIR): PackData {
+export function readPack(key: string, dir = TEMPLATES_DIR): Pack {
   const manifest = readManifest(key, dir);
 
-  const rows = Object.fromEntries(manifest.kinds.map((kind) => [kind, readJsonIf<{ slug: string }[]>(key, `${kind}.json`, dir) ?? []]));
+  const rows = Object.fromEntries(
+    manifest.kinds.map((kind) => {
+      const found = readJsonIf<PackRow[]>(key, `${kind}.json`, dir);
 
-  return { rows, rules: readJsonIf(key, manifest.rules.file, dir) };
+      if (!found) throw new Error(`Pack "${key}" lists kind "${kind}" but ${kind}.json is missing`);
+
+      return [kind, found];
+    }),
+  );
+
+  const extras = Object.fromEntries((manifest.extras ?? []).map((name) => [name, readJsonIf<unknown>(key, `${name}.json`, dir)]));
+
+  return { manifest, rules: readJsonIf<Ruleset>(key, manifest.rules.file, dir), rows, extras, icons: readJsonIf<IconsFile>(key, "icons.json", dir) ?? {} };
 }

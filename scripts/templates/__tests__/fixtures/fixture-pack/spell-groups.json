@@ -1,0 +1,14 @@
+[
+  {
+    "slug": "fix-school-evocation",
+    "name": "Evocation",
+    "color": "#d0432c",
+    "icon": "flame"
+  },
+  {
+    "slug": "fix-school-enchantment",
+    "name": "Enchantment",
+    "color": "#d0569a",
+    "icon": "heart"
+  }
+]

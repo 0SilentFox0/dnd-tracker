@@ -1,22 +1,22 @@
-import * as path from "path";
 import { describe, expect, it } from "vitest";
 
-import { readGrimData } from "../data";
-import { grimCatalog, grimI18nIssues } from "../i18n";
+import { catalogOfPack } from "../../../lib/i18n-convert";
+import { wfrpI18nIssues } from "../i18n";
 import { GRIM_SPELL_LISTS } from "../spells";
+import { fixturePack, grimData, grimPack } from "./pack-helpers";
 
 import { emptyBundle } from "@/lib/server/templates/bundle";
 import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { catalogOf } from "@/scripts/templates/lib/i18n-convert";
 
-const data = readGrimData();
+const pack = grimPack();
 
-const fixtures = readGrimData(path.join(__dirname, "fixtures"));
+const data = grimData();
 
 const SRD_CATALOG_SIZE = 8137;
 
-describe("grimCatalog", () => {
-  const catalog = grimCatalog(data);
+describe("wfrp catalog", () => {
+  const catalog = catalogOfPack(pack);
 
   const has = (cls: "n" | "d", en: string) => catalog.some((e) => e.cls === cls && e.en === en);
 
@@ -62,29 +62,29 @@ describe("grimCatalog", () => {
   });
 
   it("works on fixtures", () => {
-    expect(grimCatalog(fixtures).length).toBeGreaterThan(0);
+    expect(catalogOfPack(fixturePack()).length).toBeGreaterThan(0);
   });
 });
 
-describe("grimI18nIssues", () => {
+describe("wfrpI18nIssues", () => {
   it("is empty for no translations", () => {
-    expect(grimI18nIssues(data, {})).toEqual([]);
+    expect(wfrpI18nIssues(pack, {})).toEqual([]);
   });
 
   it("flags colliding spell lists and careers", () => {
     const lists = { "spellLists/school-of-embers/name": { text: "Школа", en: "School of Embers" }, "spellLists/school-of-gloam/name": { text: "Школа", en: "School of Gloam" } };
 
-    expect(grimI18nIssues(data, lists).join("\n")).toContain("spell lists");
+    expect(wfrpI18nIssues(pack, lists).join("\n")).toContain("spell lists");
 
     const [a, b] = data.careers.map((c) => ({ slug: String(c.slug), name: String(c.name) }));
 
-    expect(grimI18nIssues(data, { [`careers/${a.slug}/name`]: { text: "Одна", en: a.name }, [`careers/${b.slug}/name`]: { text: "Одна", en: b.name } }).join("\n")).toContain("careers");
+    expect(wfrpI18nIssues(pack, { [`careers/${a.slug}/name`]: { text: "Одна", en: a.name }, [`careers/${b.slug}/name`]: { text: "Одна", en: b.name } }).join("\n")).toContain("careers");
   });
 
   it("checks every list of a spell, not only the first", () => {
-    const spells = [{ ...data.spells[0], lists: [...(data.spells[0].lists as string[]), "Unknown School"] }];
+    const spells = [{ ...data.spells[0], lists: [...(data.spells[0].lists as string[]), "Unknown School"] }] as never;
 
-    expect(grimI18nIssues({ ...data, spells }, {}).join("\n")).toContain('list "Unknown School"');
+    expect(wfrpI18nIssues({ ...pack, rows: { ...pack.rows, spells } }, {}).join("\n")).toContain('list "Unknown School"');
   });
 });
 

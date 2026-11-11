@@ -1,11 +1,11 @@
-import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind, type NamedProfile, type Row } from "./data";
+import type { Pack } from "../../lib/pack";
+import type { PackIssue } from "../types";
+import { type NamedProfile, type Row, type WfrpData, wfrpDataOf } from "./common";
 import { equipmentIssues } from "./equipment";
-import { findForbiddenTerms } from "./forbidden-terms";
 import { FORBIDDEN_CONDITIONS, spellIssues, unitSpellIssues } from "./spells";
 import { unitIssues } from "./units";
 
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
-import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
@@ -14,9 +14,8 @@ import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { skillDef } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 import type { TableRow } from "@/lib/utils/rules/tables-schema";
-import { isSlug } from "@/lib/utils/templates/slug";
 
-export type GrimValidation = { ok: true } | { ok: false; issues: string[] };
+const label = (kind: string, index: number, name: unknown) => `${kind} #${index + 1}${typeof name === "string" ? ` "${name}"` : ""}`;
 
 const PROFILE_KEYS = ["mods", "move", "fate", "extraWounds", "talents", "randomTalentCount", "randomTalents", "careerTable"] as const;
 
@@ -26,84 +25,9 @@ const FEAT_STATS = ["attackBonus", "maxHp", "initiative"];
 
 const STATUS_RE = /^(brass|silver|gold)\s+[1-9]$/i;
 
-const label = (kind: string, index: number, name: unknown) => `${kind} #${index + 1}${typeof name === "string" ? ` "${name}"` : ""}`;
-
-const nameOf = (row: Row) => (typeof row.name === "string" ? row.name.trim() : undefined);
-
-function validateRows(kind: GrimRowKind, rows: Row[], issues: string[]) {
-  const spec = IMPORT_SPECS[kind];
-
-  const schema = CONTENT_RESOURCES[kind].schemas.create;
-
-  const seen = new Set<string>();
-
-  const slugs = new Set<string>();
-
-  rows.forEach((raw, index) => {
-    const where = label(kind, index, raw.name);
-
-    const { slug, ...fields } = raw;
-
-    const { value: record, issues: coerced } = coerceRecord(fields, spec.fields);
-
-    if (slug !== undefined) {
-      if (typeof slug !== "string" || !isSlug(slug)) issues.push(`${where}: invalid slug`);
-      else if (slugs.has(slug)) issues.push(`${where}: duplicate slug "${slug}"`);
-
-      slugs.add(String(slug));
-    }
-
-    for (const i of coerced) issues.push(`${where}: ${i.field ?? ""} ${i.message}`.replace(/\s+/g, " "));
-
-    const name = nameOf(record);
-
-    if (!name) return void issues.push(`${where}: name is required`);
-
-    if (seen.has(nameKey(name))) issues.push(`${where}: duplicate name`);
-
-    seen.add(nameKey(name));
-
-    const resolved = Object.fromEntries(Object.entries(record).filter(([key]) => !spec.fields.find((f) => f.key === key)?.ref));
-
-    const parsed = schema.safeParse(spec.toBody ? spec.toBody(resolved, "create") : resolved);
-
-    if (!parsed.success) for (const i of parsed.error.issues) issues.push(`${where}: ${i.path.join(".") || "row"} ${i.message}`);
-  });
-}
-
-const isGrimKind = (kind: string | undefined): kind is GrimRowKind => (GRIM_ROW_KINDS as readonly string[]).includes(kind ?? "");
-
-function nestedNames(value: unknown, key: string): string[] {
-  if (Array.isArray(value)) return value.flatMap((v) => nestedNames(v, key));
-
-  if (!value || typeof value !== "object") return [];
-
-  return Object.entries(value).flatMap(([k, v]) => (k === key && typeof v === "string" ? [v] : nestedNames(v, key)));
-}
-
-const withoutSlug = ({ slug: _slug, ...rest }: Row): Row => rest;
-
 const exactName = (row: Row) => (typeof row.name === "string" ? row.name : "");
 
-/** Links between row kinds are by name; a name missing from its kind is dropped (or errors) at import, so every one must resolve, matching the catalog name exactly. */
-function validateLinks(data: GrimData, issues: string[]) {
-  const names = Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, new Set(data[kind].map(exactName))])) as Record<GrimRowKind, Set<string>>;
-
-  for (const kind of GRIM_ROW_KINDS)
-    data[kind].forEach((row, index) => {
-      const { value } = coerceRecord(withoutSlug(row), IMPORT_SPECS[kind].fields);
-
-      for (const field of IMPORT_SPECS[kind].fields) {
-        const raw = value[field.key];
-
-        const links = field.nestedRef && isGrimKind(field.nestedRef.kind) ? [{ ref: field.nestedRef.kind, names: nestedNames(raw, field.nestedRef.key) }] : isGrimKind(field.ref) ? [{ ref: field.ref, names: (Array.isArray(raw) ? raw : raw ? [raw] : []).map(String) }] : [];
-
-        for (const { ref, names: linked } of links) for (const name of linked) if (!names[ref].has(name)) issues.push(`${label(kind, index, row.name)}: unknown ${field.key} "${name}"`);
-      }
-    });
-}
-
-function validateProfiles(data: GrimData, names: { races: Set<string>; careers: Set<string>; feats: Set<string> }, issues: string[]) {
+function validateProfiles(data: WfrpData, names: { races: Set<string>; careers: Set<string>; feats: Set<string> }, issues: string[]) {
   const seen = new Set<string>();
 
   data.raceProfiles.forEach(({ race, profile }, index) => {
@@ -160,7 +84,7 @@ export function careerSkillIssue(value: string): string | null {
   return SPEC_RE.test(spec) ? null : "unknown specialisation";
 }
 
-function validateCareerTiers(data: GrimData, issues: string[]) {
+function validateCareerTiers(data: WfrpData, issues: string[]) {
   data.careers.forEach((row, index) => {
     const { value } = coerceRecord(row, IMPORT_SPECS.careers.fields);
 
@@ -182,7 +106,7 @@ function validateCareerTiers(data: GrimData, issues: string[]) {
   });
 }
 
-function validateProfileKeys(data: GrimData, issues: string[]) {
+function validateProfileKeys(data: WfrpData, issues: string[]) {
   data.raceProfiles.forEach(({ race, profile }, index) => {
     if (!isRecord(profile)) return;
 
@@ -190,7 +114,7 @@ function validateProfileKeys(data: GrimData, issues: string[]) {
   });
 }
 
-function validateFeatAbilities(data: GrimData, issues: string[]) {
+function validateFeatAbilities(data: WfrpData, issues: string[]) {
   data.feats.forEach((row, index) => {
     const abilities = Array.isArray(row.abilities) ? row.abilities : [];
 
@@ -210,35 +134,13 @@ function validateFeatAbilities(data: GrimData, issues: string[]) {
   });
 }
 
-function stringLeaves(value: unknown): string[] {
-  if (typeof value === "string") return [value];
-
-  if (Array.isArray(value)) return value.flatMap(stringLeaves);
-
-  return value && typeof value === "object" ? Object.values(value).flatMap(stringLeaves) : [];
-}
-
-function validateTerms(data: GrimData, issues: string[]) {
-  const scan = (where: string, value: unknown) => {
-    const found = new Set(stringLeaves(value).flatMap(findForbiddenTerms));
-
-    for (const term of found) issues.push(`${where}: forbidden term "${term}"`);
-  };
-
-  for (const kind of GRIM_ROW_KINDS) data[kind].forEach((row, index) => scan(label(kind, index, row.name), row));
-
-  scan("rules", data.rules);
-
-  data.raceProfiles.forEach(({ race }, index) => scan(`race-profiles #${index + 1} "${race}"`, race));
-}
-
 export const GRIM_TABLE_SLOTS = ["miscastMinor", "miscastMajor", "wrath"] as const;
 
 export const GRIM_TABLE_ROWS: readonly [number, number] = [8, 10];
 
 export const TABLE_TEXT_MAX = 120;
 
-export function tableIssues(rules: GrimData["rules"]): string[] {
+export function tableIssues(rules: WfrpData["rules"]): string[] {
   const tables = (rules as { tables?: Record<string, TableRow[] | null> } | undefined)?.tables;
 
   if (!tables) return [];
@@ -268,7 +170,7 @@ export function tableIssues(rules: GrimData["rules"]): string[] {
   return issues;
 }
 
-function validateRules(rules: GrimData["rules"], issues: string[]) {
+function validateRules(rules: WfrpData["rules"], issues: string[]) {
   if (!rules) return;
 
   const patch = RulesetPatchSchema.safeParse(rules);
@@ -282,19 +184,19 @@ function validateRules(rules: GrimData["rules"], issues: string[]) {
   issues.push(...tableIssues(rules));
 }
 
-function validateSpells(data: GrimData, issues: string[]) {
+function validateSpells(data: WfrpData, issues: string[]) {
   data.spells.forEach((row, index) => {
     for (const issue of spellIssues(row)) issues.push(`${label("spells", index, row.name)}: ${issue}`);
   });
 }
 
-function validateArtifacts(data: GrimData, issues: string[]) {
+function validateArtifacts(data: WfrpData, issues: string[]) {
   data.artifacts.forEach((row, index) => {
     for (const issue of equipmentIssues(row)) issues.push(`${label("artifacts", index, row.name)}: ${issue}`);
   });
 }
 
-function validateUnits(data: GrimData, issues: string[]) {
+function validateUnits(data: WfrpData, issues: string[]) {
   const spellsByName = new Map(data.spells.map((s) => [String(s.name), s]));
 
   data.units.forEach((row, index) => {
@@ -302,14 +204,12 @@ function validateUnits(data: GrimData, issues: string[]) {
   });
 }
 
-export function validateGrimData(data: GrimData): GrimValidation {
-  const issues: string[] = [];
 
-  for (const kind of GRIM_ROW_KINDS) validateRows(kind, data[kind], issues);
+export function wfrpIssues(data: WfrpData): string[] {
+  const issues: string[] = [];
 
   const names = { races: new Set(data.races.flatMap((r) => (typeof r.slug === "string" ? [r.slug] : []))), careers: new Set(data.careers.map(exactName)), feats: new Set(data.feats.map(exactName)) };
 
-  validateLinks(data, issues);
   validateProfiles(data, names, issues);
   validateRules(data.rules, issues);
   validateCareerTiers(data, issues);
@@ -318,7 +218,8 @@ export function validateGrimData(data: GrimData): GrimValidation {
   validateSpells(data, issues);
   validateUnits(data, issues);
   validateArtifacts(data, issues);
-  validateTerms(data, issues);
 
-  return issues.length === 0 ? { ok: true } : { ok: false, issues };
+  return issues;
 }
+
+export const validateWfrpPack = (pack: Pack): PackIssue[] => wfrpIssues(wfrpDataOf(pack)).map((message) => ({ level: "error", message }));

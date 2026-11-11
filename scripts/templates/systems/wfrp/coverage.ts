@@ -1,4 +1,4 @@
-import type { GrimData, Row } from "./data";
+import type { Row, WfrpData } from "./common";
 import { GRIM_ITEM_SLOTS, GRIM_WEAPON_GROUPS, IMPLEMENTED_QUALITIES, itemStatsOf } from "./equipment";
 import { GRIM_SPELL_KINDS, GRIM_SPELL_LISTS, spellMagicOf } from "./spells";
 import { GRIM_UNIT_LEVELS, GRIM_UNIT_THEMES, unitTraitKeys, unitTraits } from "./units";
@@ -142,13 +142,13 @@ function equipmentCoverage(artifacts: Row[]): string[] {
   return warnings;
 }
 
-export function grimInfo(data: GrimData): string[] {
+export function grimInfo(data: WfrpData): string[] {
   const known = new Set(data.units.flatMap(knownSpellsOf));
 
   return data.spells.map((s) => nameOf(s)).filter((name) => !known.has(name)).map((name) => `info: spells "${name}": known by no unit`);
 }
 
-export function grimCoverage(data: GrimData): string[] {
+export function grimCoverage(data: WfrpData): string[] {
   const warnings: string[] = [];
 
   const records = data.careers.map((career) => ({ career, record: read(career) }));

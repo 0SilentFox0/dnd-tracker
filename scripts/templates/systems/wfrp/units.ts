@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 
-import type { Row } from "./data";
+import type { Row } from "./common";
 
 import { TRAIT_SIZES, type TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import type { RecipeContext, RecipeValues } from "@/lib/utils/abilities/templates/types";

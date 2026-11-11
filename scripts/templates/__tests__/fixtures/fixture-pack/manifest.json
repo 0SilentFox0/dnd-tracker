@@ -1,0 +1,26 @@
+{
+  "key": "fixture-pack",
+  "system": "dnd5e",
+  "names": {
+    "en": "Fixture pack",
+    "uk": "Fixture pack"
+  },
+  "locales": [
+    "en",
+    "uk"
+  ],
+  "rules": {
+    "file": "rules.json"
+  },
+  "kinds": [
+    "spell-groups",
+    "spells",
+    "feats"
+  ],
+  "icons": {},
+  "counts": {
+    "spell-groups": 2,
+    "spells": 2,
+    "feats": 2
+  }
+}

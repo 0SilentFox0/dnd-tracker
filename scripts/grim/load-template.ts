@@ -1,14 +1,16 @@
 #!/usr/bin/env tsx
 // pnpm constructor:grim-template [--owner <userId>] [--allow-remote]   (GRIM_DATA_DIR overrides the data dir)
+import * as path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 
 import { assertSeedTarget } from "../seed/seed-library-lib";
 import { formatImportSummary, hasRowErrors, importSrdData } from "../srd/lib/load-template";
+import type { Pack } from "../templates/lib/pack";
 import { ensureTemplate, makeTemplateStore } from "../templates/lib/store";
-import { grimCoverage, grimInfo } from "./coverage";
+import { validatePack } from "../templates/lib/validate";
+import { grimCoverage, grimInfo } from "../templates/systems/wfrp/coverage";
 import { GRIM_DATA_DIR, GRIM_ROW_KINDS, type GrimData, readGrimData, readGrimManifest } from "./data";
 import { grimIconGaps, grimIconIssues, readGrimIcons, withGrimIcons } from "./icons";
-import { validateGrimData } from "./validate-data";
 
 import { prisma } from "@/lib/db";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
@@ -82,11 +84,15 @@ async function writeRaceProfiles(campaignId: string, data: GrimData): Promise<nu
 export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote }: GrimLoadArgs): Promise<GrimLoadResult> {
   const data = readGrimData(dir);
 
-  const validation = validateGrimData(data);
+  const manifest = readGrimManifest(dir);
+
+  const pack: Pack = { manifest, rules: data.rules as Pack["rules"], rows: Object.fromEntries(GRIM_ROW_KINDS.map((kind) => [kind, data[kind]])) as Pack["rows"], extras: { "race-profiles": data.raceProfiles }, icons: {} };
+
+  const validation = validatePack(pack, { dir: path.dirname(dir) }).filter((issue) => issue.level === "error" && !issue.message.startsWith("manifest: counts"));
 
   const icons = readGrimIcons(dir);
 
-  const issues = [...(validation.ok ? [] : validation.issues), ...grimIconIssues(data, icons)];
+  const issues = [...validation.map((issue) => issue.message), ...grimIconIssues(data, icons)];
 
   if (issues.length > 0) throw new Error(`Дані Grim d100 невалідні:\n${issues.map((i) => `  ${i}`).join("\n")}`);
 
@@ -95,8 +101,6 @@ export async function loadGrimTemplate({ owner, dir = GRIM_DATA_DIR, allowRemote
   for (const warning of grimCoverage(data)) console.warn(warning);
 
   for (const line of grimInfo(data)) console.info(line);
-
-  const manifest = readGrimManifest(dir);
 
   const merged = mergeRules(WFRP_RULES, (data.rules ?? {}) as Parameters<typeof mergeRules>[1]);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Row } from "../data";
+import type { Row } from "../common";
 import { equipmentIssues } from "../equipment";
 
 const rows: Row[] = [

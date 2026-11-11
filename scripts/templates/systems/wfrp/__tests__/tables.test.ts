@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { tableIssues } from "../validate-data";
+import { tableIssues } from "../validate";
 
 const rows = (n: number) => Array.from({ length: n }, (_, i) => ({ max: i === n - 1 ? 100 : (i + 1) * 10, text: "t", effects: [] as object[] }));
 

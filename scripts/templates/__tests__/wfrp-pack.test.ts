@@ -1,21 +1,25 @@
-import * as path from "path";
 import { describe, expect, it } from "vitest";
 
-import { type GrimData, readGrimData } from "../data";
-import { careerSkillIssue, validateGrimData } from "../validate-data";
+import { validatePack } from "../lib/validate";
+import { PACK_ADAPTERS } from "../systems";
+import { fixturePack, FIXTURES_DIR } from "../systems/wfrp/__tests__/pack-helpers";
+import { type WfrpData, wfrpDataOf } from "../systems/wfrp/common";
+import { careerSkillIssue } from "../systems/wfrp/validate";
 
-const fixtures = path.join(__dirname, "fixtures");
+const base = fixturePack();
 
-const load = (): GrimData => structuredClone(readGrimData(fixtures));
+const load = (): WfrpData => structuredClone(wfrpDataOf(base));
 
-const issuesOf = (data: GrimData) => {
-  const result = validateGrimData(data);
+const issuesOf = (data: WfrpData): string[] => {
+  const { raceProfiles, rules, ...rows } = data;
 
-  return result.ok ? [] : result.issues;
+  const pack = { ...base, rows: rows as typeof base.rows, extras: { "race-profiles": raceProfiles }, rules: rules as typeof base.rules };
+
+  return [...validatePack(pack, { dir: FIXTURES_DIR }), ...(PACK_ADAPTERS["grim-d100"].validate?.(pack) ?? [])].filter((issue) => issue.level === "error").map((issue) => issue.message);
 };
 
-describe("readGrimData", () => {
-  it("reads present files and treats missing ones as empty", () => {
+describe("readPack on the wfrp fixture", () => {
+  it("reads the kind files, extras and rules", () => {
     const data = load();
 
     expect(data.races).toHaveLength(1);
@@ -28,9 +32,9 @@ describe("readGrimData", () => {
   });
 });
 
-describe("validateGrimData", () => {
+describe("validatePack: wfrp", () => {
   it("accepts the good fixture", () => {
-    expect(validateGrimData(load())).toEqual({ ok: true });
+    expect(issuesOf(load())).toEqual([]);
   });
 
   it("rejects a duplicate career name", () => {
@@ -251,7 +255,7 @@ describe("validateGrimData", () => {
   });
 });
 
-describe("validateGrimData: units", () => {
+describe("validatePack: wfrp units", () => {
   const where = 'units #1 "Giant Rat": ';
 
   const ab = (id: string, name: string, effect: object, event = "passive") => ({ id, name, trigger: { event }, effects: [effect] });
@@ -293,7 +297,7 @@ describe("validateGrimData: units", () => {
   });
 });
 
-describe("validateGrimData: spells", () => {
+describe("validatePack: wfrp spells", () => {
   const where = 'spells #1 "Rot Touch": ';
 
   type Mutate = (data: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -346,7 +350,7 @@ describe("validateGrimData: spells", () => {
   });
 });
 
-describe("validateGrimData: artifacts", () => {
+describe("validatePack: wfrp artifacts", () => {
   const w = 'artifacts #1 "Arming Sword": ';
 
   const a = 'artifacts #2 "Padded Jack": ';
@@ -389,12 +393,12 @@ describe("validateGrimData: artifacts", () => {
   it("checks rules tables order and scans rules for forbidden terms", () => {
     const data = load();
 
-    data.rules = { tables: { miscastMinor: [{ max: 50, effects: [] }, { max: 40, effects: [] }] } } as GrimData["rules"];
+    data.rules = { tables: { miscastMinor: [{ max: 50, effects: [] }, { max: 40, effects: [] }] } } as WfrpData["rules"];
     expect(issuesOf(data).some((i) => i.startsWith("rules: tables.miscastMinor"))).toBe(true);
 
     const rows = Array.from({ length: 7 }, (_, n) => ({ max: (n + 1) * 10, text: "t", effects: [] }));
 
-    data.rules = { tables: { wrath: [...rows, { max: 100, text: "The Empire falls", effects: [] }] } } as GrimData["rules"];
+    data.rules = { tables: { wrath: [...rows, { max: 100, text: "The Empire falls", effects: [] }] } } as WfrpData["rules"];
     expect(issuesOf(data)).toContain('rules: forbidden term "Empire"');
   });
 });

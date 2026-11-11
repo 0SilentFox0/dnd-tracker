@@ -13,9 +13,9 @@ const scoped = createScopedDatabase(raw.$extends(contentLayer()));
 vi.mock("@/lib/db", () => ({ get prisma() { return scoped; } }));
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 
+import { GRIM_SPELL_LISTS } from "../../templates/systems/wfrp/spells";
 import { readGrimData } from "../data";
 import { loadGrimTemplate } from "../load-template";
-import { GRIM_SPELL_LISTS } from "../spells";
 
 import { GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
@@ -122,7 +122,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
 
     const minor = (campaign.rules as { tables: { miscastMinor: { text: string }[] } }).tables.miscastMinor[0].text;
 
-    expect(minor).toBe(translateAt(tr, "rules/_/miscastMinor[0].text", (data.rules?.tables as { miscastMinor: { text: string }[] }).miscastMinor[0].text));
+    expect(minor).toBe(translateAt(tr, "rules/_/miscastMinor[0].text", (data.rules?.tables as unknown as { miscastMinor: { text: string }[] }).miscastMinor[0].text));
 
     if (locale === "uk") {
       const known = new Set(Object.values(GRIM_SPELL_LISTS).flat().map((list) => translateAt(uk, `spellLists/${slugify(list)}/name`, list)));
