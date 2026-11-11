@@ -56,7 +56,7 @@ describe("message scope size", () => {
   });
 
   it("a d20 campaign gets no system namespace", () => {
-    for (const slot of ["battle", "campaign", "member", "dm", "character", "dmCharacters", "dmCharacter", "dmRules"] as const) {
+    for (const slot of ["battle", "campaign", "member", "dm", "character", "dmCharacters", "dmCharacter", "dmRules", "draft"] as const) {
       expect(systemScope("homm", slot)).toEqual([]);
       expect(systemScope("dnd5e", slot)).toEqual([]);
       expect(systemScope(null, slot)).toEqual([]);

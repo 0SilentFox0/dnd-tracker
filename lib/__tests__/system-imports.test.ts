@@ -9,7 +9,9 @@ const BARREL = "lib/utils/rules/systems/index.ts";
 
 const BARREL_MAX_SYSTEM_IMPORT_LINES = 0;
 
-const REASON = /^(route|content-kind|ruleset-section|e1:\d+\.\d+)$/;
+const REASON = /^(route|content-kind|ruleset-section)$/;
+
+const MAX_EXEMPT_FILES = 30;
 
 describe("system imports ratchet", () => {
   const exempt = readImportsExempt();
@@ -18,6 +20,8 @@ describe("system imports ratchet", () => {
     expect(new Set(exempt.map((e) => e.file)).size).toBe(exempt.length);
     expect(exempt.filter((e) => !REASON.test(e.reason)).map((e) => e.file)).toEqual([]);
   });
+
+  it("the list stays within the E1 target", () => expect(exempt.length).toBeLessThanOrEqual(MAX_EXEMPT_FILES));
 
   it("every entry exists and still imports @/systems/ (lower the list)", () => {
     const stale = exempt.filter((e) => !fs.existsSync(path.join(ROOT, e.file)) || !importsSystem(fs.readFileSync(path.join(ROOT, e.file), "utf8")) || isImportAllowed(e.file));

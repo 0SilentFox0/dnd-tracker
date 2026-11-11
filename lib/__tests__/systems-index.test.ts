@@ -55,6 +55,24 @@ describe("systems index", () => {
     expect(registry).not.toContain("ZETA_SYSTEM");
   });
 
+  it("two full systems (wfrp + d6pool) keep the same order in every block of every root", () => {
+    const root = fixture(["wfrp", "d6pool"]);
+
+    for (const id of ["wfrp", "d6pool"]) for (const layer of new Set(ROOT_SPECS.flatMap((spec) => spec.blocks.map((b) => b.layer(id))))) write(root, layer, "export {};\n");
+
+    syncSystemsIndex(root);
+
+    for (const spec of ROOT_SPECS) {
+      const text = fs.readFileSync(path.join(root, spec.file), "utf8");
+
+      expect(text.indexOf("D6POOL"), spec.file).toBeGreaterThan(-1);
+      expect(text.indexOf("D6POOL"), spec.file).toBeLessThan(text.indexOf("WFRP"));
+      expect(text.lastIndexOf("d6pool"), spec.file).toBeLessThan(text.lastIndexOf("wfrp"));
+    }
+
+    expect(syncSystemsIndex(root, "check").stale).toEqual([]);
+  });
+
   it("is idempotent", () => {
     const root = fixture(["alpha"]);
 

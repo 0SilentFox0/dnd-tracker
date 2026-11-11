@@ -10,6 +10,7 @@ export const WFRP_META = {
     dm: ["wfrpCareers", "wfrpCreation", "wfrpEquipmentEditor", "wfrpTraits", "wfrpTables"],
     pages: {
       character: ["wfrpDowntime", "wfrpCorruption"],
+      draft: ["wfrpCreation"],
       dmCharacter: ["wfrpDowntime", "wfrpCorruption"],
       dmCharacters: ["wfrpDowntime"],
       dmRules: ["battleWfrp", "wfrpDowntime", "wfrpCorruption"],

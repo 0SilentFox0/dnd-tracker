@@ -76,7 +76,7 @@ export interface ActiveEffect {
   armed?: boolean;
   charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
-  /** Stripped server-side from non-DM views of participants whose stats the viewer cannot see (WFRP miscast conditions) */
+  /** Stripped server-side from non-DM views of participants whose stats the viewer cannot see (e.g. a concealed miscast condition) */
   concealed?: true;
   abilityEffects?: StaticEffect[];
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null; personal?: boolean };
@@ -546,13 +546,13 @@ export interface BattleParticipantBattleData {
   /** Атаки дії «Атака», що лишилися цього ходу */
   attacksLeft?: number;
   inspiration?: boolean;
-  /** WFRP Fortune left this battle; seeded at battle start from the sheet (saved fortune, else Fate) */
+  /** Fortune left this battle; seeded at battle start from the sheet (saved fortune, else Fate) */
   fortune?: number;
-  /** WFRP channelled SL banked for the next cast; lost on damage */
+  /** Channelled SL banked for the next cast; lost on damage */
   channelledSl?: number;
-  /** WFRP Sin snapshot from the sheet; read-only in battle (the DM edits it on the sheet) */
+  /** Sin snapshot from the sheet; read-only in battle (the DM edits it on the sheet) */
   sin?: number;
-  /** WFRP condition keys whose end test was already attempted this turn */
+  /** Condition keys whose end test was already attempted this turn */
   conditionTests?: string[];
   /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
   inspirationSpent?: boolean;

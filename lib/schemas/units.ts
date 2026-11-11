@@ -176,7 +176,7 @@ export const importUnitSchema = z.object({
     )
     .default([]),
   knownSpells: z.array(z.string()).describe("Campaign spell ids the unit can cast").default([]),
-  abilities: AbilitiesSchema.describe("Unit abilities; rule-system traits only in a wfrp campaign").optional(),
+  abilities: AbilitiesSchema.describe("Unit abilities; rule-system traits only where the system defines them").optional(),
   statblock: UnitStatblockSchema.default({}),
   spellcasting: UnitSpellcastingSchema.default({ spells: [] }),
   avatar: unitAvatarSchema,

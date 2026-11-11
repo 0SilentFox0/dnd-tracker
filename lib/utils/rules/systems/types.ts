@@ -90,7 +90,7 @@ export interface MitigateCtx {
   amount: number;
   margin: number;
   location: string;
-  /** The attack roll was a critical (WFRP: doubles on a hit) */
+  /** The attack roll was a critical (a system may double damage on a hit) */
   crit: boolean;
   attackRoll?: number;
   attack: BattleAttack;
@@ -102,7 +102,7 @@ export interface MitigateResult {
   amount: number;
   steps: MitigateStep[];
   totalLabel: LogLine;
-  /** Follow-up applied to the target after the hit (e.g. a WFRP critical wound) */
+  /** Follow-up applied to the target after the hit (e.g. a critical wound) */
   afterHit?(target: BattleParticipant, round: number): { participant: BattleParticipant; message: LogLine };
 }
 
@@ -154,7 +154,7 @@ export interface RuleSystemConditions {
   apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
   reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };
   turnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult & { downed: boolean };
-  /** Called when a downed participant's turn is skipped (e.g. WFRP bleeding out) */
+  /** Called when a downed participant's turn is skipped (e.g. bleeding out) */
   skippedTurn?(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng }): SystemConditionResult;
   /** Downed allies stay at 0 HP after a victory (healing raises them) */
   keepDownedAfterVictory?: true;

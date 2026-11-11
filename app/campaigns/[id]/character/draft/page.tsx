@@ -6,11 +6,11 @@ import { CharacterStatus, CharacterType, type GoalKind } from "@/lib/constants/c
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { prisma } from "@/lib/db";
 import { ExtendLocaleScope } from "@/lib/i18n/extend-locale-scope";
+import { systemScope } from "@/lib/i18n/system-scope";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { draftEditInitial } from "@/lib/server/characters/choices/draft-initial";
 import { validateAbilityScores } from "@/lib/utils/characters/generate";
 import { parseRules } from "@/lib/utils/rules/schema";
-import type { WfrpDraftIdentityInput } from "@/systems/wfrp/api/types";
 import type { DraftInput } from "@/types/characters";
 
 export default async function PlayerDraftPage({ params }: { params: Promise<{ id: string }> }) {
@@ -54,7 +54,7 @@ export default async function PlayerDraftPage({ params }: { params: Promise<{ id
   const DraftForm = systemUiOf(rules.system.key).DraftForm;
 
   if (DraftForm) {
-    const initialIdentity: WfrpDraftIdentityInput = {
+    const initialIdentity = {
       name: c.name,
       alignment: c.alignment ?? undefined,
       background: c.background ?? undefined,
@@ -63,7 +63,7 @@ export default async function PlayerDraftPage({ params }: { params: Promise<{ id
     };
 
     return (
-      <ExtendLocaleScope namespaces={["wfrpCreation"]}>
+      <ExtendLocaleScope namespaces={systemScope(rules.system.key, "draft")}>
         <DraftForm campaignId={id} characterId={c.id} initialIdentity={initialIdentity} />
       </ExtendLocaleScope>
     );

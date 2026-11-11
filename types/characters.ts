@@ -322,7 +322,7 @@ export interface CharacterResources {
   exhaustion?: number;
   shortRestOpen?: boolean;
   fortune?: number;
-  /** WFRP Sin 0-10; only the DM changes it, battle never writes it */
+  /** Sin 0-10; only the DM changes it, battle never writes it */
   sin?: number;
 }
 

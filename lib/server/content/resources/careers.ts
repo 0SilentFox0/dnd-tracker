@@ -27,7 +27,7 @@ async function careerInUse(campaignId: string, careerId: string) {
 }
 
 export const careersResource = defineResource<Career, z.infer<typeof createCareerSchema>, z.infer<typeof updateCareerSchema>>({
-  kind: "careers", idParam: "careerId", label: "Careers", description: "WFRP careers: four tiers with characteristics, skills, talents and trappings.", path: "/careers", listFields: ["class"],
+  kind: "careers", idParam: "careerId", label: "Careers", description: "Careers: four tiers with characteristics, skills, talents and trappings.", path: "/careers", listFields: ["class"],
   schemas: { create: createCareerSchema, update: updateCareerSchema }, errors: [409],
   access: { list: "member", item: "dm" }, invalidates: [ReferenceKind.CAREERS], notFound: API_ERRORS.CAREER_NOT_FOUND,
   list: async (actor) => (await getCachedCareers(actor.campaignId)).map(toCareerData),

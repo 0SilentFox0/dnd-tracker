@@ -77,19 +77,19 @@ export function CompactHero() {
 
   const t = useTranslations("characterProfile.hero");
 
-  const wfrp = systemUiOf(sheet.system).hideProgression;
+  const hideProgression = systemUiOf(sheet.system).hideProgression;
 
-  const hp = sheet.rest?.hp ? t(wfrp ? "woundsCurrent" : "hpCurrent", { current: sheet.rest.hp.current, max: sheet.rest.hp.max }) : t(wfrp ? "woundsTotal" : "hpTotal", { total: sheet.hp.total });
+  const hp = sheet.rest?.hp ? t(hideProgression ? "woundsCurrent" : "hpCurrent", { current: sheet.rest.hp.current, max: sheet.rest.hp.max }) : t(hideProgression ? "woundsTotal" : "hpTotal", { total: sheet.hp.total });
 
   return (
     <div className="flex items-center justify-between gap-2 px-4 pt-2 text-xs text-hud-muted">
       <span className="hud-sc truncate text-sm text-hud-ink">
         {sheet.identity.name}
-        {!wfrp && ` · ${sheet.identity.level}`}
+        {!hideProgression && ` · ${sheet.identity.level}`}
       </span>
       <span className="shrink-0 tabular-nums">
         {hp}
-        {!wfrp && ` · AC ${sheet.armorClass.total} · ${t("short.toHit")} ${sheet.bestToHit === null ? "—" : signed(sheet.bestToHit)}`}
+        {!hideProgression && ` · AC ${sheet.armorClass.total} · ${t("short.toHit")} ${sheet.bestToHit === null ? "—" : signed(sheet.bestToHit)}`}
       </span>
     </div>
   );

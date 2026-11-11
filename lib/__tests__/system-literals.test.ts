@@ -1,6 +1,8 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { countLiterals, isLiteralAllowed, literalTokens, readLiteralsExempt, scanLiterals } from "@/scripts/shared/system-ratchet";
+import { countLiterals, isLiteralAllowed, literalTokens, readImportsExempt, readLiteralsExempt, ROOT, scanLiterals, sourceFiles, SYSTEM_ROOTS } from "@/scripts/shared/system-ratchet";
 
 describe("system literals ratchet", () => {
   const exempt = readLiteralsExempt();
@@ -48,5 +50,27 @@ describe("system literals ratchet", () => {
     expect(isLiteralAllowed("scripts/sim/battle-sweep/run.ts", tokens)).toBe(false);
     expect(isLiteralAllowed("lib/utils/battle/foo.ts", tokens)).toBe(false);
     expect(isLiteralAllowed("scripts/templates/lib/foo.ts", tokens)).toBe(false);
+  });
+});
+
+describe("wfrp leaks outside the allowed files", () => {
+  const ALLOWED = new Set([...readImportsExempt().map((e) => e.file), "lib/onboarding/whats-new.ts", "lib/constants/api-errors.ts", "lib/server/assistant/actions/character-coverage.ts", "app/campaigns/[id]/dm/careers/careers-client.tsx"]);
+
+  const literals = readLiteralsExempt();
+
+  it("only route / content-kind / ruleset-section files, whats-new, api-errors, character-coverage and the careers page mention wfrp", () => {
+    const leaks = Object.keys(literals).filter((file) => /wfrp/i.test(fs.readFileSync(path.join(ROOT, file), "utf8")) && !ALLOWED.has(file));
+
+    expect(leaks).toEqual([]);
+  });
+
+  it("no core file compares to the wfrp key or names its constants", () => {
+    const roots = new Set(SYSTEM_ROOTS);
+
+    const offenders = sourceFiles(["lib", "app", "components", "types"])
+      .filter((file) => !roots.has(file) && !readImportsExempt().some((e) => e.file === file) && file !== "lib/constants/api-errors.ts")
+      .filter((file) => /=== "wfrp"|isWfrpCampaign|\bWFRP_|\.wfrp\b|\b(?:system|characteristics)\.kind === "d20"/.test(fs.readFileSync(path.join(ROOT, file), "utf8")));
+
+    expect(offenders).toEqual([]);
   });
 });

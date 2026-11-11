@@ -67,7 +67,7 @@ export function initiativeSlot(order: BattleParticipant[], p: BattleParticipant,
   return at === -1 ? order.length : at;
 }
 
-/** Порядок: initiative (desc) → baseInitiative (desc) → dexterity / WFRP Agility (desc). */
+/** Порядок: initiative (desc) → baseInitiative (desc) → dexterity / system tie-break stat (desc). */
 export function sortByInitiative(participants: BattleParticipant[]): BattleParticipant[] {
   return [...participants].sort(compareInitiative);
 }

@@ -5,6 +5,7 @@ import { systemUiOf } from "@/components/systems";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { ExtendLocaleScope } from "@/lib/i18n/extend-locale-scope";
+import { systemScope } from "@/lib/i18n/system-scope";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -22,11 +23,13 @@ export default async function NewPlayerCharacterPage({ params, searchParams }: {
 
   if (existing) redirect(`/campaigns/${id}/character`);
 
-  const DraftForm = systemUiOf(parseRules(campaign.rules).system.key).DraftForm;
+  const systemKey = parseRules(campaign.rules).system.key;
+
+  const DraftForm = systemUiOf(systemKey).DraftForm;
 
   if (DraftForm) {
     return (
-      <ExtendLocaleScope namespaces={["wfrpCreation"]}>
+      <ExtendLocaleScope namespaces={systemScope(systemKey, "draft")}>
         <DraftForm campaignId={id} />
       </ExtendLocaleScope>
     );

@@ -4,7 +4,7 @@ import { D20_META } from "./d20/meta";
 import { WFRP_META } from "@/systems/wfrp/meta";
 // </systems:generated>
 
-export type SystemPageScope = "character" | "dmCharacters" | "dmCharacter" | "dmRules";
+export type SystemPageScope = "character" | "dmCharacters" | "dmCharacter" | "dmRules" | "draft";
 
 export interface SystemI18n {
   battle?: readonly string[];

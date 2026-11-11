@@ -48,10 +48,6 @@
     "reason": "route"
   },
   {
-    "file": "app/campaigns/[id]/character/draft/page.tsx",
-    "reason": "e1:5.1"
-  },
-  {
     "file": "lib/schemas/careers.ts",
     "reason": "content-kind"
   },
