@@ -9,6 +9,7 @@ import { getTranslator } from "@/lib/i18n/translator";
 import { listTracks } from "@/lib/server/audio/track-store";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { loadRules, readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
+import { parseSystemData } from "@/lib/server/characters/core/system-fields";
 import { assertCan } from "@/lib/server/content/access";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -194,7 +195,11 @@ export async function runContentOperation(operationId: ContentOperationId, actor
 
         await assertCampaignRefs(actor.campaignId, { spell: [...units.flatMap((unit) => unit.knownSpells), ...units.flatMap((unit) => abilitySpellIds(unit.abilities))] });
 
-        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, units, rules);
+        const persisted = ruleSystemOf(rules).characteristics.persisted;
+
+        const narrowed = persisted ? units.map((unit) => (unit.characteristics ? { ...unit, characteristics: parseSystemData(rules, unit.characteristics, "unitCharacteristics") } : unit)) : units;
+
+        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, narrowed, rules);
 
         invalidate(actor, ReferenceKind.UNITS);
 

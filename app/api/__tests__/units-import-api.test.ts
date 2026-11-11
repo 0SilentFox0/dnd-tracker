@@ -54,6 +54,20 @@ describe("POST units/import", () => {
     expect(db.unit.createMany.mock.calls[0][0].data[0]).toMatchObject({ abilities: [ward], characteristics: { base: expect.objectContaining({ ws: 45 }), move: 6 } });
   });
 
+  it("wfrp: невалідні characteristics — 400; неповні добудовуються дефолтами", async () => {
+    db.campaign.findUnique.mockResolvedValue({ rules: WFRP_RULES } as never);
+
+    const bad = await post({ units: [{ name: "Shade", characteristics: { base: { ws: "x" }, move: "fast" } }] });
+
+    expect(bad.status).toBe(400);
+    expect(db.unit.createMany).not.toHaveBeenCalled();
+
+    const ok = await post({ units: [{ name: "Shade", characteristics: { base: { ws: 45 } } }] });
+
+    expect(ok.status).toBe(200);
+    expect(db.unit.createMany.mock.calls[0][0].data[0].characteristics).toMatchObject({ base: expect.objectContaining({ ws: 45, bs: expect.any(Number) }), move: expect.any(Number) });
+  });
+
   it("звіт з невідомими расами, атаки з усіма полями, інвалідує units", async () => {
     const attack = { name: "Лук", type: "ranged", targetType: "aoe", attackBonus: 4, damageType: "piercing", damageDice: "1d6", maxTargets: 2, damageDistribution: [60, 40], guaranteedDamage: 1 };
 
