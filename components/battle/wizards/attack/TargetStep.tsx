@@ -4,12 +4,16 @@ import { type AttackWizardModel,btn, primaryBtn } from "./shared";
 
 import { HealthLabel } from "@/components/battle/hud";
 import { TargetButton } from "@/components/battle/wizards/TargetButton";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
+import type { LogLine } from "@/types/text";
 
 export function TargetStep({ wizard: { state, view, actions } }: { wizard: AttackWizardModel }) {
   const tw = useTranslations("battleWizards.attack.target");
 
   const tc = useTranslations("common.actions");
+
+  const text = useText();
 
   return (
     <>
@@ -20,9 +24,11 @@ export function TargetStep({ wizard: { state, view, actions } }: { wizard: Attac
             participant={t}
             tone="enemy"
             selected={state.targetIds.includes(t.basicInfo.id)}
+            disabled={view.unreachable.has(t.basicInfo.id)}
             onClick={() => actions.toggleTarget(t.basicInfo.id)}
             trailing={
               <span className="ml-auto flex items-center gap-2">
+                {view.unreachable.has(t.basicInfo.id) && <span className="text-xs text-[#e9a08f]">{text(view.unreachable.get(t.basicInfo.id) as LogLine)}</span>}
                 {view.cover.has(t.basicInfo.id) && <span className="text-xs text-[#e0a050]" title={tw("cover")}>🧱 ×0.5</span>}
                 <HealthLabel participant={t} />
               </span>

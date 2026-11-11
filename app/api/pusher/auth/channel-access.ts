@@ -1,5 +1,6 @@
+import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
-import { BATTLE_CHANNEL_PREFIX, NOTIFY_CHANNEL_PREFIX, SHOW_CHANNEL_PREFIX, USER_CHANNEL_PREFIX } from "@/lib/pusher/channels";
+import { BATTLE_CHANNEL_PREFIX, BATTLE_DM_CHANNEL_PREFIX, NOTIFY_CHANNEL_PREFIX, SHOW_CHANNEL_PREFIX, USER_CHANNEL_PREFIX } from "@/lib/pusher/channels";
 
 export async function isChannelAllowedForUser(channelName: string, userId: string): Promise<boolean> {
   if (channelName.startsWith(USER_CHANNEL_PREFIX)) {
@@ -8,6 +9,19 @@ export async function isChannelAllowedForUser(channelName: string, userId: strin
 
   if (channelName.startsWith(NOTIFY_CHANNEL_PREFIX)) {
     return channelName.slice(NOTIFY_CHANNEL_PREFIX.length) === userId;
+  }
+
+  if (channelName.startsWith(BATTLE_DM_CHANNEL_PREFIX)) {
+    const battleId = channelName.slice(BATTLE_DM_CHANNEL_PREFIX.length);
+
+    if (!battleId) return false;
+
+    const battle = await prisma.battleScene.findUnique({
+      where: { id: battleId },
+      select: { campaign: { select: { members: { where: { userId, role: CampaignRole.DM }, select: { userId: true } } } } },
+    });
+
+    return !!battle && battle.campaign.members.length > 0;
   }
 
   if (channelName.startsWith(BATTLE_CHANNEL_PREFIX)) {

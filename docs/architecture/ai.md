@@ -35,6 +35,8 @@
 - Кожен маршрут — лише ДМ і в межах кампанії (`requireDM` через `guarded()`; кожен запит до БД фільтрується за `campaignId`, а треди — ще й за `userId`); маршрути ключів — `requireAuth` (ключ належить користувачеві).
 - `AI_KEYS_SECRET`/`_PREV` не логувати й не комітити.
 
+- **Дані системи в AI.** Проєкції героїв/юнітів/учасників і рядок промпту дає `SystemServer.ai` (`promptLine`, `heroSelect`, `party`, `hero`, `participantView`, `unitView`; wfrp — `systems/wfrp/server/ai.ts`), `party`/`reference`/`prompt`/`read-service` викликають хук і не знають ключів систем; d20 не має `ai`. Контракт — [rule-systems.md](rule-systems.md).
+
 ## Читання великих сценаріїв і мікро NPC (`feat/ai-scenario-reading`)
 
 Спека: `docs/archive/superpowers/specs/2026-10-30-ai-scenario-reading-and-micro-npc-design.md`.

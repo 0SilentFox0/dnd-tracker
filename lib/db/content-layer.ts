@@ -5,7 +5,8 @@ import { baseRowsCache, baseRowsKey, type CampaignLayer, invalidateCampaignLayer
 import { BASE_ONLY, campaignRelations, isLayered, type LayerConfig, layeredModels, otherRelationKeys, type Relation } from "@/lib/db/layer/config";
 import { orderKeys, sortRows } from "@/lib/db/layer/sort";
 import { afterContentCommit, currentContentWrite, currentTransaction, markContentDirty } from "@/lib/server/content/write-context";
-import { hashJson, stableStringify } from "@/lib/utils/battle/store/stable-json";
+import { stableStringify } from "@/lib/utils/battle/store/stable-json";
+import { contentRowHash } from "@/lib/utils/content/row-hash";
 
 export { invalidateCampaignLayer, layerStats };
 
@@ -479,7 +480,7 @@ async function materialize(ctx: Ctx, config: LayerConfig, campaignId: string, la
   await local(ctx, config).createMany({ data: bases.map((b) => {
     const { id: _id, ...shaped } = asLocalShape(b, campaignId);
 
-    return { ...shaped, sourceHash: hashJson(Object.fromEntries(config.hashColumns.filter((c) => c in b).map((c) => [c, b[c]]))) };
+    return { ...shaped, sourceHash: contentRowHash(config.model, Object.fromEntries(config.hashColumns.filter((c) => c in b).map((c) => [c, b[c]]))) };
   }) });
 
   touch(campaignId);

@@ -5,6 +5,8 @@
     "skills": "Skills",
     "choices": "Choices",
     "magic": "Magic",
+    "advancement": "Advancement",
+    "downtime": "Downtime",
     "items": "Inventory",
     "story": "Story",
     "log": "Log",
@@ -21,8 +23,20 @@
       "initiative": "Init",
       "speed": "Speed",
       "toHit": "Hit",
-      "proficiency": "Prof"
-    }
+      "proficiency": "Prof",
+      "wounds": "Wnd",
+      "move": "Move",
+      "fate": "Fate",
+      "fortune": "Fort",
+      "sin": "Sin"
+    },
+    "wounds": "Wounds",
+    "woundsCurrent": "Wounds {current} / {max}",
+    "woundsTotal": "Wounds {total}",
+    "move": "Move (walk/run)",
+    "fate": "Fate",
+    "fortune": "Fortune",
+    "sin": "Sin"
   },
   "combat": {
     "roll": "Roll",
@@ -42,7 +56,8 @@
     "skills": "SKILLS",
     "passives": "Passive: perception {perception} · investigation {investigation} · insight {insight}",
     "languages": "Languages: {list}",
-    "proficiencies": "Proficiencies: {list}"
+    "proficiencies": "Proficiencies: {list}",
+    "untrained": "Untrained skill: the test is not possible"
   },
   "magic": {
     "saveDC": "Spell save DC",
@@ -200,7 +215,9 @@
       "noArmor": "No armor",
       "dexterityCapped": "Dexterity (cap {cap})",
       "hitDice": "Hit dice: {dice}",
-      "bonuses": "Bonuses"
+      "bonuses": "Bonuses",
+      "wounds": "SB {sb} + 2 × TB {tb} + WPB {wpb}{extra, plural, =0 {} other { + {extra}}}",
+      "woundsMutation": "Mutations: {amount, number, ::sign-always}"
     },
     "abilityPick": "+{n} {ability, select, strength {STR} dexterity {DEX} constitution {CON} intelligence {INT} wisdom {WIS} charisma {CHA} other {}}",
     "spellOrigin": {
@@ -263,5 +280,9 @@
       "description": "Description",
       "equipmentNote": "The DM hands out equipment and money manually."
     }
+  },
+  "wfrp": {
+    "characteristics": "CHARACTERISTICS",
+    "skills": "SKILLS"
   }
 }

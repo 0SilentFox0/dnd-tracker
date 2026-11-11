@@ -18,7 +18,9 @@ export {
   useBattleCoreAction,
   useBonusAction,
   useCastSpell,
+  useChannel,
   useCompleteBattle,
+  useConditionTest,
   useCritChoice,
   useDeleteAllBattles,
   useInitiativeReorder,
@@ -38,10 +40,12 @@ export {
   useRollbackBattleAction,
   useScaleBattleUnits,
   useStartBattle,
+  useSystemCondition,
   useUnitControl,
   useUpdateBattleParticipant,
 } from "./useBattles";
 export { useBattleSummary } from "./useBattleSummary";
 export { useDeleteBattleCard } from "./useDeleteBattleCard";
 export { useResetBattleCard } from "./useResetBattleCard";
+export type { SystemConditionBody } from "@/lib/api/battle-ops";
 export type { BattleConditionsBody, CoreActionBody } from "@/lib/api/battles";

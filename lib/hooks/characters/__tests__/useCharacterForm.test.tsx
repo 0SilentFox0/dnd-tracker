@@ -34,6 +34,29 @@ describe("useCharacterForm", () => {
     expect(result.current.basicInfo.data.name).toBe("Ліра");
   });
 
+  it("requireRace: false пропускає відсутню расу", async () => {
+    const onSubmit = vi.fn();
+
+    const { result } = renderHook(() => useCharacterForm({ onSubmit, requireRace: false }));
+
+    act(() => result.current.basicInfo.set("class", "Воїн"));
+    act(() => result.current.basicInfo.set("controlledBy", "u1"));
+    await act(() => result.current.actions.handleSubmit({ preventDefault: vi.fn() } as unknown as React.FormEvent));
+    expect(result.current.status.error).toBeNull();
+    expect(onSubmit).toHaveBeenCalled();
+  });
+
+  it("requireClass: false пропускає відсутній клас, за замовчуванням клас обов'язковий", async () => {
+    const onSubmit = vi.fn();
+
+    const { result } = renderHook(() => useCharacterForm({ onSubmit, requireRace: false, requireClass: false }));
+
+    act(() => result.current.basicInfo.set("controlledBy", "u1"));
+    await act(() => result.current.actions.handleSubmit({ preventDefault: vi.fn() } as unknown as React.FormEvent));
+    expect(result.current.status.error).toBeNull();
+    expect(onSubmit).toHaveBeenCalled();
+  });
+
   it("submit без раси чи класу не викликає onSubmit і дає повідомлення", async () => {
     const onSubmit = vi.fn();
 

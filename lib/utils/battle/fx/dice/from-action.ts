@@ -1,10 +1,12 @@
 import { MAX_INITIATIVE_DICE, MAX_SAVES_SHOWN } from "./layout";
+import type { DieFx } from "./types";
 
-import type { BattleAction, DiceRollGroup, DieSides } from "@/types/battle";
+import { ruleSystemByKey } from "@/lib/utils/rules/systems";
+import type { BattleAction, DiceRollGroup } from "@/types/battle";
 
 export interface DiceThrowSpec {
   seed: number;
-  groups: Array<Array<{ sides: DieSides; value: number; chosen?: boolean; dropped?: boolean }>>;
+  groups: DieFx[][];
 }
 
 const toDie = (group: DiceRollGroup) => {
@@ -18,12 +20,22 @@ type RollKind = DiceRollGroup["kind"];
 // влучання і шкода в одній пачці нечитабельні — кожна фаза кидається окремо, у порядку подій
 const PHASES: RollKind[][] = [["attack"], ["save"], ["damage"], ["heal"], ["morale"], ["initiative"]];
 
+const PERCENTILE_SEED_BASE = 1_000_003;
+
 export function diceThrowsOf(action: BattleAction): DiceThrowSpec[] {
   const rolls = action.actionDetails.diceRolls;
 
-  if (action.isCancelled || !rolls?.length) return [];
+  if (action.isCancelled) return [];
 
-  return PHASES.flatMap((kinds, phase) => {
+  const { system } = action.actionDetails;
+
+  const systemDice = system ? (ruleSystemByKey(system.key)?.combat.details?.diceFx(system) ?? []) : [];
+
+  const percentileThrow: DiceThrowSpec[] = systemDice.length ? [{ seed: PERCENTILE_SEED_BASE + action.actionIndex, groups: [systemDice] }] : [];
+
+  if (!rolls?.length) return percentileThrow;
+
+  return [...percentileThrow, ...PHASES.flatMap((kinds, phase) => {
     const own = rolls.filter((g) => kinds.includes(g.kind));
 
     if (!own.length) return [];
@@ -33,5 +45,5 @@ export function diceThrowsOf(action: BattleAction): DiceThrowSpec[] {
     const groups = kinds.includes("save") ? [own.slice(0, MAX_SAVES_SHOWN).flatMap(toDie)] : kinds.includes("initiative") ? pooled(MAX_INITIATIVE_DICE) : own.map(toDie);
 
     return [{ seed: action.actionIndex * PHASES.length + phase, groups }];
-  });
+  })];
 }

@@ -128,7 +128,7 @@ describe("summonInline: аура-атака", () => {
   const ctx = (round = 3, rolls: number[] = [0.9]) => {
     let i = 0;
 
-    return { map, round, rng: () => rolls[i++ % rolls.length] };
+    return { map, round, rules: DEFAULT_RULES, rng: () => rolls[i++ % rolls.length] };
   };
 
   it("ворог входить у 10 фт: атака заклинанням, на влучання — шкода", async () => {

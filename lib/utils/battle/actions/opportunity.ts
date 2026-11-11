@@ -11,6 +11,7 @@ import { meleeReachCells } from "@/lib/utils/battle/grid/attack-reach";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -24,6 +25,7 @@ export interface OpportunityInput {
   battleId: string;
   rules: Ruleset;
   rng: () => number;
+  sceneState?: SystemSlot;
 }
 
 export interface OpportunityResult {
@@ -32,15 +34,16 @@ export interface OpportunityResult {
   cost: number;
   actions: BattleAction[];
   messages: LogLine[];
+  sceneState?: SystemSlot;
 }
 
-const canProvoke = (e: BattleParticipant, moverId: string) => canReact(e) && isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
+const canProvoke = (e: BattleParticipant, moverId: string, rules: Ruleset) => canReact(e, rules) && isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
 
 /** `stopAt` — клітинка, де мувер упав. */
 export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityResult {
   const { moverId, path, start, round, battleId, rules, rng } = input;
 
-  const flow: ActionFlow = { ps: input.participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules } };
+  const flow: ActionFlow = { ps: input.participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules }, sceneState: input.sceneState };
 
   const actions: BattleAction[] = [];
 
@@ -48,7 +51,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
   const mover0 = findParticipant(flow.ps, moverId);
 
-  if (!mover0 || hasEffectMarker(mover0, EffectMarker.DISENGAGED)) return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages };
+  if (!mover0 || hasEffectMarker(mover0, EffectMarker.DISENGAGED)) return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages, sceneState: flow.sceneState };
 
   const size = sizeOf(mover0);
 
@@ -80,7 +83,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
     for (const { id, reach } of enemies) {
       const e = findParticipant(flow.ps, id);
 
-      if (!e || !canProvoke(e, moverId)) continue;
+      if (!e || !canProvoke(e, moverId, rules)) continue;
 
       const { attack, range } = meleeOf(e);
 
@@ -106,7 +109,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
       if (!after || !isActive(after)) {
         messages.push(...flow.messages);
 
-        return { participants: flow.ps, stopAt: from, cost: i, actions, messages };
+        return { participants: flow.ps, stopAt: from, cost: i, actions, messages, sceneState: flow.sceneState };
       }
     }
 
@@ -115,5 +118,5 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
   messages.push(...flow.messages);
 
-  return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages };
+  return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages, sceneState: flow.sceneState };
 }

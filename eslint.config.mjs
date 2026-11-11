@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { defineConfig } from "eslint/config";
+import { builtinRules } from "eslint/use-at-your-own-risk";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import typescriptParser from "@typescript-eslint/parser";
@@ -50,6 +51,66 @@ const DICE_SCENE_FILE = "components/battle/fx/dice/scene.ts";
 const MODE_IMPORT_PATTERN = {
   group: ["@/lib/utils/battle/modes/maze*", "@/lib/hooks/battle/modes/maze*", "@/components/battle/modes/maze*"],
   message: "Режим карти — лише через реєстр (@/lib/utils/battle/modes, @/components/battle/modes).",
+};
+
+const SYSTEM_IMPORT_PATTERN = {
+  group: ["@/lib/utils/rules/systems/d20*", "@/components/systems/d20*"],
+  message: "Рульова система — лише через реєстр (@/lib/utils/rules/systems, @/components/systems).",
+};
+
+const SYSTEM_IDS = readdirSync(new URL("./systems", import.meta.url), { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name);
+
+const SYSTEM_ROOTS = [
+  "lib/utils/rules/systems/meta.ts",
+  "lib/utils/rules/systems/registry.ts",
+  "components/systems/registry.ts",
+  "lib/server/systems/registry.ts",
+  "lib/utils/abilities/schema/system-effects.ts",
+  "lib/utils/abilities/registry/effects/system-rows.ts",
+  "scripts/templates/systems/index.ts",
+];
+
+const SYSTEM_IMPORT_EXEMPT = JSON.parse(readFileSync(new URL("./system-imports-exempt.json", import.meta.url), "utf8")).map((e) => e.file.replace(/[[\]]/g, "\\$&"));
+
+const SYSTEM_ZONE_PATTERN = { group: ["@/systems/*", "@/systems/**"], message: "Система — лише через реєстри (D38): корені SYSTEM_ROOTS або system-imports-exempt.json" };
+
+const SYSTEM_OWNED_FILES = ["lib/utils/rules/systems/**", "lib/hooks/systems/**", "components/systems/**", "systems/**"];
+
+const SYSTEM_SELF_PATTERNS = (id) => [
+  ...(SYSTEM_IDS.length > 1 ? [{ group: SYSTEM_IDS.filter((o) => o !== id).map((o) => `@/systems/${o}/**`), message: "Система не імпортує іншу систему." }] : []),
+  { group: ["@/app", "@/app/*", "@/scripts", "@/scripts/*"], message: "Система не залежить від app і scripts." },
+  SYSTEM_IMPORT_PATTERN,
+  MODE_IMPORT_PATTERN,
+  THREE_IMPORT_PATTERN,
+];
+
+const SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*"], message: "rules/** — чиста логіка без сервера." };
+
+const SYSTEM_SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*", "@/systems/*/server", "@/systems/*/server/*"], message: "ui/** і hooks/** не імпортують сервер." };
+
+const API_UTILS_IMPORT_PATTERN = { group: ["@/lib/utils/api/*", "!@/lib/utils/api/content-error"], message: "rules/** — лише @/lib/utils/api/content-error з утиліт API." };
+
+const SYSTEM_API_IMPORT_PATTERN = { group: ["@/systems/*/api", "@/systems/*/api/*"], allowTypeImports: true, message: "ui/** не ходить в API — використайте хук із systems/<id>/hooks." };
+
+const SYSTEM_LAYERS = (id) => {
+  const self = SYSTEM_SELF_PATTERNS(id);
+
+  const layer = (dir, paths, patterns, extraIgnores = []) => ({
+    files: [`systems/${id}/${dir}/**/*.{ts,tsx}`],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...extraIgnores],
+    rules: { "no-restricted-imports": ["error", { paths, patterns: [...self, ...patterns] }] },
+  });
+
+  return [
+    layer("*", RESTRICTED_PATHS, []),
+    layer("rules", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SERVER_IMPORT_PATTERN, API_UTILS_IMPORT_PATTERN]),
+    layer("ui", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, SYSTEM_API_IMPORT_PATTERN, SYSTEM_SERVER_IMPORT_PATTERN]),
+    layer("hooks", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SYSTEM_SERVER_IMPORT_PATTERN]),
+    layer("api", RESTRICTED_PATHS, []),
+    layer("server", RESTRICTED_PATHS, []),
+  ].map((block, i) => (i === 0 ? { ...block, files: [`systems/${id}/**/*.{ts,tsx}`] } : block));
 };
 
 const MODE_OWNED_FILES = [
@@ -175,7 +236,7 @@ const eslintConfig = defineConfig([
           next: ["const", "let", "var", "if", "class", "function", "block", "return"],
         },
       ],
-      "import/no-cycle": [2, { maxDepth: 1 }],
+      "import/no-cycle": [2, { maxDepth: 6 }],
       "react/jsx-key": "warn",
     },
   },
@@ -197,14 +258,14 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "systems/**/*.{ts,tsx}"],
     ignores: ["components/ui/**"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
       "no-restricted-globals": [
@@ -227,7 +288,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -239,20 +300,20 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
   },
   {
     files: ["lib/utils/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...DB_IN_UTILS_EXEMPT, ...MODE_OWNED_FILES.filter((g) => g.startsWith("lib/utils"))],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...DB_IN_UTILS_EXEMPT, ...MODE_OWNED_FILES.filter((g) => g.startsWith("lib/utils")), ...SYSTEM_OWNED_FILES.filter((g) => g.startsWith("lib/utils"))],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -265,7 +326,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN, AI_IN_ASSISTANT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN, AI_IN_ASSISTANT_PATTERN],
         },
       ],
     },
@@ -292,6 +353,34 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: SYSTEM_OWNED_FILES.filter((g) => g.startsWith("lib/")).map((glob) => `${glob}/*.{ts,tsx}`),
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
+    files: ["lib/utils/rules/systems/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH], patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
+    files: ["components/systems/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: RESTRICTED_PATHS,
+          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+        },
+      ],
+    },
+  },
+  ...SYSTEM_IDS.flatMap(SYSTEM_LAYERS),
+  {
     files: ["components/battle/modes/**/*.{ts,tsx}"],
     ignores: ["**/__tests__/**"],
     rules: {
@@ -305,13 +394,19 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "types/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...SYSTEM_ROOTS, ...SYSTEM_IMPORT_EXEMPT, "scripts/templates/systems/*/**", "scripts/assets/grim-icons/**"],
+    plugins: { systems: { rules: { zone: builtinRules.get("no-restricted-imports") } } },
+    rules: { "systems/zone": ["error", { patterns: [SYSTEM_ZONE_PATTERN] }] },
+  },
+  {
     files: [DICE_SCENE_FILE],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           paths: DIALOG_RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN],
         },
       ],
     },

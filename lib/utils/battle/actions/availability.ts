@@ -8,6 +8,8 @@ import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { bothOnMap, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
+import type { Ruleset } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -28,10 +30,10 @@ export function coreActionCost(key: CoreActionKey, actor: BattleParticipant, par
 
 export const isAttackAction = (key: CoreActionKey) => key === "grapple" || key === "shove";
 
-export const standUpCost = (p: BattleParticipant) => Math.ceil(baseMovement(p) / STAND_UP_COST_DIVISOR);
+export const standUpCost = (p: BattleParticipant, rules: Ruleset) => Math.ceil(baseMovement(p, rules) / STAND_UP_COST_DIVISOR);
 
-export function canStandUp(p: BattleParticipant): boolean {
-  return hasCondition(p, "prone") && baseMovement(p) > 0 && remainingMovement(p) >= standUpCost(p);
+export function canStandUp(p: BattleParticipant, rules: Ruleset): boolean {
+  return hasCondition(p, "prone") && baseMovement(p, rules) > 0 && remainingMovement(p, rules) >= standUpCost(p, rules);
 }
 
 export function coreActionTargets(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined): BattleParticipant[] {
@@ -44,15 +46,15 @@ export function coreActionTargets(key: CoreActionKey, actor: BattleParticipant, 
   return participants.filter((p) => p.basicInfo.id !== actor.basicInfo.id && !p.battleData.reserved && sideOk(p) && (!bothOnMap(map, actor, p) || isAdjacent(actor, p)));
 }
 
-export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, targetId?: string): LogLine | null {
+export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, rules: Ruleset, targetId?: string): LogLine | null {
   const { target } = CORE_ACTION_REGISTRY[key];
 
   if (key === "standUp") {
     if (!hasCondition(actor, "prone")) return actionReason("notProne");
 
-    if (baseMovement(actor) <= 0) return actionReason("standSpeedZero");
+    if (baseMovement(actor, rules) <= 0) return actionReason("standSpeedZero");
 
-    if (!canStandUp(actor)) return actionReason("standNoMovement");
+    if (!canStandUp(actor, rules)) return actionReason("standNoMovement");
   }
 
   if (key === "escape" && !hasCondition(actor, "grappled")) return actionReason("notGrappled");
@@ -66,14 +68,16 @@ export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant,
   return null;
 }
 
-export function coreActionAvailability(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined): CoreActionAvailability {
+export function coreActionAvailability(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, rules: Ruleset): CoreActionAvailability {
   const cost = coreActionCost(key, actor, participants);
+
+  if (cost === "bonusAction" && !ruleSystemOf(rules).combat.actionEconomy.bonusAction) return { ok: false, reason: actionReason("noBonusAction") };
 
   if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) return { ok: false, reason: actionReason("bonusUsed") };
 
   if (cost === "action" && actor.actionFlags.hasUsedAction && !(isAttackAction(key) && canAttackFromPool(actor))) return { ok: false, reason: actionReason("actionUsed") };
 
-  const reason = validateCoreAction(key, actor, participants, map);
+  const reason = validateCoreAction(key, actor, participants, map, rules);
 
   return reason ? { ok: false, reason } : { ok: true };
 }

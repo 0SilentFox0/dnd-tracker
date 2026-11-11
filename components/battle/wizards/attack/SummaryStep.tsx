@@ -44,7 +44,6 @@ export function SummaryStep({ wizard: { state, view, actions } }: { wizard: Atta
         </div>
       )}
       {state.waitingCrit && <CritWaitingNote />}
-      {state.error && <p className="mt-2 text-sm text-[#e9a08f]">{text(state.error)}</p>}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button type="button" disabled={submitting} onClick={actions.back} className={cn(btn, "border-white/25")}>← {tc("back")}</button>
         <button type="button" disabled={submitting} onClick={actions.submit} className={cn(btn, primaryBtn)}>

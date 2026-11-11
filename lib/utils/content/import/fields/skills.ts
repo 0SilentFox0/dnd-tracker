@@ -5,6 +5,7 @@ import type { ImportRecord } from "@/types/content-import";
 const fields: FieldDef[] = [
   nameField(),
   textField("description"),
+  textField("appearanceDescription"),
   textField("icon"),
   textField("image"),
   { key: "mainSkillId", type: "ref", ref: "main-skills" },
@@ -26,7 +27,7 @@ export const SKILLS_IMPORT = defineSpec({
       mainSkillData: pick(record, ["mainSkillId"]),
     };
 
-    const body = pick(record, ["abilities", "image"]);
+    const body = pick(record, ["abilities", "image", "appearanceDescription"]);
 
     for (const [key, group] of Object.entries(groups)) if (op === "create" || Object.keys(group).length > 0) body[key] = group;
 

@@ -5,10 +5,11 @@ import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtu
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { hpOf, placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { flag, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const roar = resolved({ trigger: { event: "battleStart" }, effects: [{ kind: "dealDamage", amount: 4, target: "allEnemies" }] });
 
-const ctx = { round: 1, rng: () => 0 };
+const ctx = { round: 1, rng: () => 0, rules: DEFAULT_RULES };
 
 describe("сплячі й вибулі в лабіринті не діють", () => {
   const hero = makeParticipant({ id: "h", side: ParticipantSide.ALLY, hp: 20, maxHp: 20 });

@@ -9,6 +9,7 @@ const h = vi.hoisted(() => ({ replace: vi.fn(), editorMounts: 0, sheetQuery: { d
 vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: () => new Set<string>(), useNotifications: () => ({ data: undefined }) }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }) }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
+vi.mock("@/systems/wfrp/ui/equipment/EquippedArmourSummary", () => ({ EquippedArmourSummary: () => <div data-testid="wfrp-equipped-summary" /> }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null }));
 vi.mock("@/lib/hooks/campaigns", async (orig) => ({ ...(await orig<object>()), useCampaignRules: () => ({ data: undefined }) }));
 vi.mock("@/lib/hooks/skills", () => ({ useCharacterProgression: () => ({ view: null }) }));
@@ -131,6 +132,43 @@ describe("CharacterProfile — перегляд", () => {
     expect(screen.getByLabelText("characterProfile.hero.toHit")).toHaveTextContent("—");
   });
 
+  it("wfrp: блок атак і «Цілей за атаку» сховані", () => {
+    h.sheetQuery.data = withSheet({ system: "wfrp" });
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.queryByRole("button", { name: /Довгий лук/ })).toBeNull();
+    expect(screen.queryByText("characterProfile.combat.attacks")).toBeNull();
+    expect(screen.queryByText("characterProfile.combat.targets")).toBeNull();
+  });
+
+  it("wfrp: вкладка «Інвентар» відкривається без 5e-секцій і показує підсумок екіпірування", async () => {
+    h.sheetQuery.data = withSheet({ system: "wfrp", items: { ...sheetFixture.items, sets: [], attunement: undefined } });
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="items" />);
+
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.items" })).toHaveAttribute("data-state", "active");
+    expect(screen.queryByText(/characterProfile\.sets/)).toBeNull();
+    expect(screen.queryByText(/inventory\.tab\.attunement/)).toBeNull();
+    expect(await screen.findByTestId("wfrp-equipped-summary")).toBeTruthy();
+  });
+
+  it("wfrp: вкладки «Інвентар» і «Магія» є (5f, 5d-2); d20 має обидві", () => {
+    h.sheetQuery.data = withSheet({ system: "wfrp", spells: [] });
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="magic" />);
+
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.magic" })).toBeTruthy();
+    expect(screen.getByText("wfrpMagic.ui.sheet.empty")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "characterProfile.magic.book" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.items" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.story" })).toBeTruthy();
+
+    cleanup();
+    h.sheetQuery.data = sheetFixture;
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.magic" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.items" })).toBeTruthy();
+  });
+
   it("гравець не бачить «Редагувати», ДМ бачить", () => {
     const { unmount } = renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 
@@ -177,5 +215,16 @@ describe("CharacterProfile — редагування ДМа", () => {
 
     expect(screen.getByRole("dialog")).toHaveAccessibleName("characterProfile.spellBook.title");
     expect(screen.getByText("Мітка мисливця")).toBeTruthy();
+  });
+
+  it("wfrp: в редакторі є «Магія» і «Речі»", async () => {
+    h.sheetQuery.data = withSheet({ system: "wfrp", viewer: { isDM: true, isOwner: false } });
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
+
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.edit" }));
+    expect(await screen.findByRole("tab", { name: "common.tabs.basic" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.magic" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.things" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.story" })).toBeTruthy();
   });
 });

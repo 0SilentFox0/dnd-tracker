@@ -25,6 +25,7 @@ import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { encodeLog } from "@/lib/utils/battle/log/codec";
 import { formatBattleLog } from "@/lib/utils/battle/log/lines";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -141,13 +142,13 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
     return { ...e, resultText, details: { ...e.details, log: encodeLog(log) } };
   });
 
-  const { map: _map, ...scenePatch } = outcome.scene ?? {};
+  const nextPatched = applyScenePatch(scene, outcome.scene ?? {});
 
-  const moved = (scenePatch.round ?? scene.round) !== scene.round || (scenePatch.turnIndex ?? scene.turnIndex) !== scene.turnIndex || (scenePatch.status ?? scene.status) !== scene.status;
+  const moved = nextPatched.round !== scene.round || nextPatched.turnIndex !== scene.turnIndex || nextPatched.status !== scene.status;
 
   const turnStartedAt = moved ? new Date() : (scene.turnStartedAt ?? null);
 
-  const nextScene: BattleSceneState = { ...scene, ...scenePatch, turnStartedAt };
+  const nextScene: BattleSceneState = { ...nextPatched, turnStartedAt };
 
   const delta: BattleDelta = {
     battleId: scene.id,
@@ -159,6 +160,7 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
       pendingMoraleCheck: nextScene.pendingMoraleCheck,
       pendingCritChoice: nextScene.pendingCritChoice,
       turnStartedAt,
+      ...(nextScene.sceneState && { sceneState: nextScene.sceneState }),
     },
     upserted: [...diff.created, ...diff.updated.map((u) => u.next)].map((p) => joinParticipant(p, scene.id)),
     fullIds: [...diff.created, ...diff.updated.filter((u) => u.snapshotChanged).map((u) => u.next)].map((p) => p.columns.id),
@@ -200,6 +202,7 @@ export async function saveBattle(
         ...(patch.turnIndex !== undefined && { currentTurnIndex: patch.turnIndex }),
         ...(patch.pendingMoraleCheck !== undefined && { pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck) }),
         ...(patch.pendingCritChoice !== undefined && { pendingCritChoice: jsonOrNull(patch.pendingCritChoice) }),
+        ...(patch.sceneState !== undefined && { systemState: patch.sceneState ? (patch.sceneState as unknown as Prisma.InputJsonValue) : Prisma.DbNull }),
         ...(patch.startedAt !== undefined && { startedAt: patch.startedAt }),
         ...(turnStartedAt !== (scene.turnStartedAt ?? null) && { turnStartedAt }),
         ...(patch.completedAt !== undefined && { completedAt: patch.completedAt }),

@@ -7,6 +7,7 @@ import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { damageDiceSlots, heroAttackDamageParts, heroDamageContext } from "@/lib/utils/battle/damage/hero-damage";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const base = createMockParticipant();
@@ -22,7 +23,7 @@ const sword: BattleAttack = { id: "s", name: "Меч", type: AttackType.MELEE, a
 const maxDamage: CriticalEffect = { id: 2, type: "success", flavorCount: 0, effect: { type: "max_damage" } };
 
 const hit = (attacker: BattleParticipant, attack: BattleAttack, rolls: number[], crit = false) =>
-  computeHitDamage({
+  computeHitDamage({ rules: DEFAULT_RULES,
     attacker,
     target,
     attack,
@@ -33,7 +34,7 @@ const hit = (attacker: BattleParticipant, attack: BattleAttack, rolls: number[],
   }).physicalDamage;
 
 const preview = (attacker: BattleParticipant, rolls: number[]) =>
-  computeDamageBreakdown({ attacker, target, attack: sword, damageRolls: rolls, allParticipants: [attacker, target] }).finalDamage;
+  computeDamageBreakdown({ rules: DEFAULT_RULES, attacker, target, attack: sword, damageRolls: rolls, allParticipants: [attacker, target] }).finalDamage;
 
 describe("шкода атаки: числа до дедупу", () => {
   it("герой 5 рівня, один кидок — кубики рівня середнім: 5 + 7 + 5 + 2 + 2 (бонус зброї)", () => {

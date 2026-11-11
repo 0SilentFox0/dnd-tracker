@@ -48,6 +48,7 @@ export const REJECT = {
   badStrikeRoll: "battleLog.reject.badStrikeRoll",
   rollsRequired: "battleLog.reject.rollsRequired",
   oneTargetRequired: "battleLog.reject.oneTargetRequired",
+  fortuneNotFree: "battleLog.reject.fortuneNotFree",
   barrierDuration: "battleLog.reject.barrierDuration",
   mapOccupied: "battleLog.reject.mapOccupied",
   rollbackLimit: "battleLog.reject.rollbackLimit",

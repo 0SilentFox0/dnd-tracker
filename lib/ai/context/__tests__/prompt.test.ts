@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const caller = { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session" as const, scopes: null }, channel: "chat" as const, tokenId: null, threadId: null, locale: "uk" as const };
 
@@ -44,6 +45,23 @@ describe("buildInstructions", () => {
     const out = await buildInstructions({ caller: { ...caller, locale }, campaignId: "camp1", mode: "live", pageId: null });
 
     expect(out).toContain(expected);
+  });
+
+  it("d20 prompt has no rule system line; wfrp adds it and the wounds party", async () => {
+    const { buildInstructions } = await import("@/lib/ai/context/prompt");
+
+    const { partySummary } = await import("@/lib/ai/tools/party");
+
+    expect(await buildInstructions({ caller, campaignId: "camp1", mode: "live", pageId: null })).not.toContain("Rule system:");
+
+    vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ name: "Грім", description: "d", rules: WFRP_RULES } as never);
+    vi.mocked(partySummary).mockResolvedValueOnce([{ id: "c1", name: "Ганс", level: 1, race: "Людина", notes: null, woundsMax: 11, fate: 2, career: { name: "Archivist", tier: 1, tierName: "Copyist" }, characteristics: {} }] as never);
+
+    const out = await buildInstructions({ caller, campaignId: "camp1", mode: "live", pageId: null });
+
+    expect(out).toContain("Rule system: Grim d100");
+    expect(out).toMatch(/"woundsMax":\s*11/);
+    expect(out).not.toContain("armorClass");
   });
 
   it("scenario: вся сторінка + focus", async () => {

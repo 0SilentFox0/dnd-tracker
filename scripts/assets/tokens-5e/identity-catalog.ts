@@ -1,9 +1,8 @@
 import type { ClassFeatureGroup, SrdData } from "../../srd/lib/types";
-import type { IconKind } from "./icons-file";
 
 import { parseTable } from "@/lib/utils/content/import/table";
 
-export type IdentityKind = Extract<IconKind, "features" | "races" | "classes" | "subclasses" | "backgrounds" | "feats">;
+export type IdentityKind = "features" | "races" | "classes" | "subclasses" | "backgrounds" | "feats";
 
 export interface IdentityTarget { kind: IdentityKind; key: string; recordId: string }
 

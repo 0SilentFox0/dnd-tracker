@@ -14,8 +14,10 @@
     "enemyUnits": "Enemy units (this battle only)",
     "buff": "Strengthen",
     "buffHint": "HP and damage ×1.1, stacks",
+    "buffHintWounds": "Wounds and damage ×1.1, stacks",
     "debuff": "Weaken",
     "debuffHint": "HP and damage ÷1.1, stacks",
+    "debuffHintWounds": "Wounds and damage ÷1.1, stacks",
     "participants": "Participants",
     "nobody": "Nobody on the field",
     "rollInitiative": "Roll initiative",
@@ -28,6 +30,7 @@
   },
   "row": {
     "scaleHp": "{value} HP",
+    "scaleWounds": "{value} Wounds",
     "scaleDamage": "{value} damage",
     "controls": "Controls:",
     "changeHp": "Change HP",
@@ -90,6 +93,7 @@
   },
   "revive": {
     "message": "<b>{name}</b> has fallen. Revive with 1 HP?",
+    "messageWounds": "<b>{name}</b> has fallen. Revive with 1 Wound?",
     "action": "Revive",
     "hide": "Hide"
   },

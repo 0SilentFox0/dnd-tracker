@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { ASSET_BUCKET } from "../../assets/attach-lib";
-import { readIcons } from "../../assets/tokens-5e/icons-file";
 import { expectedTargets, IDENTITY_BUCKET } from "../../assets/tokens-5e/identity-catalog";
+import { readIcons } from "../../templates/lib/icons-file";
 import { readSrdData } from "../lib/data-files";
 
 const data = readSrdData();
 
-const icons = readIcons();
+const icons = readIcons("srd-5.2");
 
 it.each(["spells", "units", "artifacts"] as const)("%s: every icon slug exists in the template and URL is a webp from the right bucket", (kind) => {
   const slugs = new Set((data[kind] as Array<{ slug: string }>).map((r) => r.slug));

@@ -5,6 +5,7 @@ import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-ef
 import { hiddenEffect } from "@/lib/utils/battle/actions/effects";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const cure: CastableSpell = {
@@ -23,7 +24,7 @@ describe("каст знімає «Схований»", () => {
 
     const hidden = upsertTimedEffect(c, hiddenEffect("c"), 1);
 
-    const cast = (p: BattleParticipant) => castSpell({ caster: p, spell: cure, targetIds: ["c"], allParticipants: [p], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) });
+    const cast = (p: BattleParticipant) => castSpell({ rules: DEFAULT_RULES, caster: p, spell: cure, targetIds: ["c"], allParticipants: [p], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) });
 
     const after = cast(hidden).allParticipantsUpdated.find((p) => p.basicInfo.id === "c");
 

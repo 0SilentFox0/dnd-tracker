@@ -17,7 +17,6 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { signed } from "@/lib/utils/common/format";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -81,7 +80,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
       key,
       rounds: effect.duration.rounds,
       levels: effect.levels,
-      saveEnds: effect.saveEnds ? saveEndsFor(owner, effect.saveEnds.ability, (ctx.rules ?? DEFAULT_RULES).formulas.saveDcBase) : undefined,
+      saveEnds: effect.saveEnds ? saveEndsFor(owner, effect.saveEnds.ability, ctx.rules.formulas.saveDcBase) : undefined,
       source,
       sourceName: ability.name,
       timedKey: `${ability.key}#${input.effectIndex}@${input.ownerId}`,
@@ -92,7 +91,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
     ps = result.participants;
     messages.push(...result.messages);
 
-    if (effect.escapeDc && owner && !result.blocked) ps = updateParticipant(ps, id, (p) => withEscapeDc(p, `${ability.key}#${input.effectIndex}@${input.ownerId}`, spellSaveDc(owner, undefined, (ctx.rules ?? DEFAULT_RULES).formulas.saveDcBase)));
+    if (effect.escapeDc && owner && !result.blocked) ps = updateParticipant(ps, id, (p) => withEscapeDc(p, `${ability.key}#${input.effectIndex}@${input.ownerId}`, spellSaveDc(owner, undefined, ctx.rules.formulas.saveDcBase)));
   }
 
   return { participants: ps, messages };

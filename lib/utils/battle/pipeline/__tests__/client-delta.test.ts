@@ -6,6 +6,7 @@ import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 const p = (id: string, hp = 10, side = ParticipantSide.ALLY): BattleParticipant => {
@@ -42,6 +43,24 @@ describe("buildClientDelta", () => {
     expect(d.order).toBeUndefined();
     expect(d.pending).toBeUndefined();
     expect(d.scene).toMatchObject({ status: "active", round: 2, turnIndex: 0, startedAt: "2026-01-01T00:00:00.000Z" });
+  });
+
+  it("system у scene лише коли є стан сцени", () => {
+    const a = p("a");
+
+    const run = (sceneState: BattleSceneState["sceneState"]) =>
+      buildClientDelta({
+        before: { scene, meta, participants: [a], pending: [] },
+        after: { ...scene, version: 8, sceneState },
+        participants: [a],
+        pending: [],
+        stored: [],
+        fullIds: [],
+        log: [],
+      });
+
+    expect(momentumOf(run(sceneOf({ enemy: true })).scene.system)).toEqual({ enemy: true });
+    expect("system" in run(undefined).scene).toBe(false);
   });
 
   it("карта чи зміни місцевості в scene лише тоді, коли вона змінилась", () => {

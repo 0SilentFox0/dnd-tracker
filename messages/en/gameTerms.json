@@ -166,5 +166,135 @@
     "description": "What the ability and stat abbreviations mean",
     "main": "Core abilities:",
     "other": "Other stats:"
+  },
+  "ruleSystem": {
+    "homm": "HoMM (simplified d20)",
+    "dnd5e": "D&D 5e",
+    "wfrp": "Grim d100"
+  },
+  "difficulty": {
+    "veryEasy": "Very easy",
+    "easy": "Easy",
+    "average": "Average",
+    "challenging": "Challenging",
+    "difficult": "Difficult",
+    "hard": "Hard",
+    "veryHard": "Very hard"
+  },
+  "characteristics": {
+    "ws": {
+      "label": "Weapon Skill",
+      "short": "WS"
+    },
+    "bs": {
+      "label": "Ballistic Skill",
+      "short": "BS"
+    },
+    "s": {
+      "label": "Strength",
+      "short": "S"
+    },
+    "t": {
+      "label": "Toughness",
+      "short": "T"
+    },
+    "i": {
+      "label": "Initiative",
+      "short": "I"
+    },
+    "ag": {
+      "label": "Agility",
+      "short": "Ag"
+    },
+    "dex": {
+      "label": "Dexterity",
+      "short": "Dex"
+    },
+    "int": {
+      "label": "Intelligence",
+      "short": "Int"
+    },
+    "wp": {
+      "label": "Willpower",
+      "short": "WP"
+    },
+    "fel": {
+      "label": "Fellowship",
+      "short": "Fel"
+    }
+  },
+  "wfrpSkills": {
+    "athletics": "Athletics",
+    "charm": "Charm",
+    "climb": "Climb",
+    "cool": "Cool",
+    "drink": "Drink",
+    "dodge": "Dodge",
+    "drive": "Drive",
+    "endurance": "Endurance",
+    "entertain": "Entertain",
+    "gamble": "Gamble",
+    "gossip": "Gossip",
+    "haggle": "Haggle",
+    "intimidate": "Intimidate",
+    "intuition": "Intuition",
+    "leadership": "Leadership",
+    "navigation": "Navigation",
+    "survival": "Outdoor survival",
+    "perception": "Perception",
+    "ride": "Ride",
+    "row": "Row",
+    "stealth": "Stealth",
+    "swim": "Swim",
+    "melee": "Melee",
+    "ranged": "Ranged",
+    "animal-care": "Animal care",
+    "channelling": "Channelling",
+    "evaluate": "Evaluate",
+    "heal": "Heal",
+    "lockpicking": "Lockpicking",
+    "pray": "Pray",
+    "research": "Research",
+    "signs": "Secret signs",
+    "traps": "Set trap",
+    "sleight-of-hand": "Sleight of hand",
+    "track": "Track",
+    "lore": "Lore",
+    "language": "Language",
+    "trade": "Trade",
+    "art": "Art",
+    "performance": "Performance"
+  },
+  "wfrpSpecs": {
+    "melee": {
+      "basic": "Basic",
+      "cavalry": "Cavalry",
+      "fencing": "Fencing",
+      "flail": "Flail",
+      "parry": "Parry",
+      "polearm": "Polearm",
+      "two-handed": "Two-handed",
+      "brawling": "Brawling"
+    },
+    "ranged": {
+      "bow": "Bow",
+      "crossbow": "Crossbow",
+      "blackpowder": "Blackpowder",
+      "engineering": "Engineering",
+      "entangling": "Entangling",
+      "explosives": "Explosives",
+      "sling": "Sling",
+      "throwing": "Throwing"
+    }
+  },
+  "testOutcome": {
+    "critical": "Critical success",
+    "success": "Success",
+    "failure": "Failure",
+    "fumble": "Fumble"
+  },
+  "distanceUnit": {
+    "ft": "ft",
+    "yd": "yd"
   }
 }

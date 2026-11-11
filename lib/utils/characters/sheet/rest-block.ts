@@ -5,6 +5,7 @@ import { hitDicePool } from "@/lib/utils/characters/resources/hit-dice";
 import { readResources } from "@/lib/utils/characters/resources/schema";
 import { isConsumablePool } from "@/lib/utils/items/pools";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import type { BattleParticipant } from "@/types/battle";
 import type { SheetRest } from "@/types/characters";
 import type { ResolvedClassEntry } from "@/types/classes";
@@ -23,6 +24,8 @@ export function buildRestBlock(input: {
   const { participant: p, character: c } = input;
 
   const persist = ooc.persistResources;
+
+  const levels = input.rules ? ruleSystemOf(input.rules).progression.levels : true;
 
   const r = persist ? readResources(c.resources) : {};
 
@@ -47,6 +50,6 @@ export function buildRestBlock(input: {
       : [],
     arcaneRecovery: offer && { budget: offer.budget, maxSlotLevel: offer.maxSlotLevel, used: offer.used, slots: offer.slots },
     inspiration: ooc.inspiration ? !!c.inspiration : null,
-    xp: ooc.xp ? { value: experience, next: xpForLevel(c.level + 1), levelUp: levelUpAvailable({ level: c.level, experience }, input.maxLevel) } : null,
+    xp: ooc.xp ? { value: experience, next: levels ? xpForLevel(c.level + 1) : null, levelUp: levels && levelUpAvailable({ level: c.level, experience }, input.maxLevel) } : null,
   };
 }

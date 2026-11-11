@@ -83,6 +83,8 @@ export function buildUnitUpdatePayload(form: Partial<Unit>, unit: Unit | undefin
 
   const payload: Partial<Unit> = { ...rest, knownSpells: form.knownSpells ?? unit?.knownSpells ?? [] };
 
+  if (unit && JSON.stringify(payload.characteristics) === JSON.stringify(unit.characteristics)) delete payload.characteristics;
+
   if (avatar === undefined || cleanAvatar(avatar) === (unit?.avatar ?? null)) return payload;
 
   return { ...payload, avatar: cleanAvatar(avatar) };

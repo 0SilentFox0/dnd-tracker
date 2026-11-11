@@ -40,6 +40,8 @@
     "prereqText": "Other prerequisites (text)",
     "prereqTextPlaceholder": "E.g. Spellcasting Feature",
     "repeatable": "Repeatable",
+    "xpCost": "XP cost (per rank)",
+    "maxRank": "Max rank",
     "description": "Description"
   },
   "list": {

@@ -44,6 +44,7 @@ import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
+import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { IngredientPlan } from "@/lib/utils/spells/ingredients/plan";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -85,6 +86,7 @@ interface CastPlan {
   expected: ReturnType<typeof casterSpellDice>;
   diceRolls: number[];
   saves: ReturnType<typeof splitSaveRolls>;
+  serverRolls: boolean;
 }
 
 export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
@@ -120,6 +122,12 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const { legendaryAbility, free, grant } = source;
 
+    const tested = !!ruleSystemOf(ctx.meta.rules).magic && !free && !legendaryAbility && !grant;
+
+    if (tested && (!definition.casting?.magic || definition.resolution.kind !== "auto" || definition.cost === "long")) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH);
+
+    if (data.fortune && (!tested || !ruleSystemOf(ctx.meta.rules).combat.fortune || (caster.battleData.fortune ?? 0) < 1)) throw new BattleRuleError("action_rejected", API_ERRORS.NO_FORTUNE);
+
     if (!data.preview && !legendaryAbility) assertActionAvailable(ctx, caster, spell, free);
 
     if (hasEffectMarker(caster, "disable_spell_casting")) {
@@ -134,7 +142,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const castLevel = (grant ? data.castLevel : undefined) ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
 
-    const ingredients = ingredientsGate(caster, spell, ctx.meta.rules, source);
+    const ingredients = ingredientsGate(caster, spell, ctx.meta.rules, source, { optional: ruleSystemOf(ctx.meta.rules).magic?.ingredients === "avertMiscast", use: !!data.useIngredient });
 
     if (definition.cost === "long" && !free && !data.preview) {
       const long = beginLongCast(ctx, order, caster, spell, data, { grantKey: grant?.key, castLevel, hasGrant: !!grant });
@@ -151,6 +159,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
       map: ctx.meta.map,
+      rules: ctx.meta.rules,
       targetCell: data.targetCell,
       castLevel,
       upcastTargets: definition.upcastTargets,
@@ -164,7 +173,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       const orphan = resolution.targetIds.some((id) => {
         const t = findParticipant(order, id);
 
-        return !t || objectsNear(order, caster.basicInfo.id, spell.id, t, reach).length === 0;
+        return !t || objectsNear(order, caster.basicInfo.id, spell.id, t, reach, ctx.meta.rules).length === 0;
       });
 
       if (orphan) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_SPELL_NO_OBJECT_NEAR);
@@ -192,7 +201,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const saves = splitSaveRolls(ctx, order, data.saveRolls);
 
-    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, ingredients, castLevel, resolution, expected, diceRolls, saves };
+    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, ingredients, castLevel, resolution, expected, diceRolls, saves, serverRolls: !!options.serverRolls };
 
     return runWithCritChoice(ctx, {
       action: "spell",
@@ -221,7 +230,7 @@ function assertActionAvailable(ctx: BattleMutationContext, caster: BattlePartici
   const { definition } = spell;
 
   if (definition.cost === "reaction" && !free) {
-    const blocker = reactionBlocker(caster);
+    const blocker = reactionBlocker(caster, ctx.meta.rules);
 
     if (blocker) throw ruleErrorOf("action_rejected", blocker);
   } else assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });
@@ -280,7 +289,12 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
     crit,
     map: ctx.meta.map,
     rules: ctx.meta.rules,
+    ...(data.preview && { dryRun: true }),
+    ...(plan.ingredients && { ingredientUsed: true }),
+    ...(!free && !legendaryAbility && !grant && { castTest: { roll: data.castRoll, serverRoll: data.serverRoll ?? (plan.serverRolls ? true : undefined), fortune: data.fortune, fortuneRoll: data.fortuneRoll } }),
   });
+
+  if (result.reason === "systemMismatch") throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH);
 
   if (!result.success) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT);
 
@@ -293,7 +307,7 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
     presetSaveIds: new Set(trusted.map((s) => s.participantId)),
   });
 
-  if (groups.length > 0) result.battleAction.actionDetails.diceRolls = groups;
+  if (groups.length > 0 && !result.fizzled) result.battleAction.actionDetails.diceRolls = groups;
 
   if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
 
@@ -313,10 +327,24 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
   return finalizeCast(plan, result, rng);
 }
 
+function fizzleResult({ ctx, caster, ingredients }: CastPlan, result: ReturnType<typeof castSpell>): MutationResult {
+  const stock = caster.battleData.ingredientStock;
+
+  if (!ingredients || !stock) return { participants: result.allParticipantsUpdated, pending: ctx.pending, events: [battleActionToEvent(result.battleAction)] };
+
+  const participants = updateParticipant(result.allParticipantsUpdated, caster.basicInfo.id, (p) => spendIngredients(p, ingredients));
+
+  const action = withLines(result.battleAction, [textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients, currencyValueOf(ctx.meta.rules)) })]);
+
+  return { participants, pending: ctx.pending, events: [battleActionToEvent(action)] };
+}
+
 async function finalizeCast(plan: CastPlan, result: ReturnType<typeof castSpell>, rng: Rng): Promise<MutationResult> {
   const { ctx, spell, caster, resolution, deps } = plan;
 
   const { legendaryAbility, grant } = plan.source;
+
+  if (result.fizzled) return fizzleResult(plan, result);
 
   const summoned = await applyAbilitySummons(result.summons.map((r) => (r.inline && resolution.centre ? { ...r, atCell: resolution.centre } : r)), result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps, map: ctx.meta.map, round: ctx.scene.round });
 
@@ -339,7 +367,7 @@ async function finalizeCast(plan: CastPlan, result: ReturnType<typeof castSpell>
 
   if (ingredients && stock) {
     summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => spendIngredients(p, ingredients));
-    summoned.messages.push(textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients) }));
+    summoned.messages.push(textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients, currencyValueOf(ctx.meta.rules)) }));
   }
 
   const action = withLines(result.battleAction, summoned.messages);

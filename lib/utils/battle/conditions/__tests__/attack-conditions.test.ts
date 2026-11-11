@@ -10,6 +10,7 @@ import { requestedTargetIds, validateAttackRequest } from "@/lib/utils/battle/at
 import { applyCondition5e, type Condition5eKey } from "@/lib/utils/battle/conditions";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const bow: BattleAttack = { ...CLAWS, id: "bow", type: AttackType.RANGED };
@@ -29,7 +30,7 @@ const ally = (at?: { x: number; y: number }) => placed("a", { side: ParticipantS
 const foe = (at?: { x: number; y: number }) => placed("e", { at });
 
 const reasons = (ps: BattleParticipant[], attack: BattleAttack, withTarget = true) => {
-  const r = rollModeReasons(ps.find((p) => p.basicInfo.id === "a") as BattleParticipant, attack, ps, withTarget ? { targetId: "e" } : {});
+  const r = rollModeReasons(ps.find((p) => p.basicInfo.id === "a") as BattleParticipant, attack, ps, withTarget ? { targetId: "e", rules: DEFAULT_RULES } : { rules: DEFAULT_RULES });
 
   return { advantage: r.advantage.map((l) => textOf(l)), disadvantage: r.disadvantage.map((l) => textOf(l)) };
 };
@@ -85,7 +86,7 @@ describe("5e стани в кидку атаки", () => {
 
 describe("крит з 5 фт", () => {
   const strike = (ps: BattleParticipant[], attack: BattleAttack) =>
-    processAttack({
+    processAttack({ rules: DEFAULT_RULES,
       attacker: ps[0],
       target: ps[1],
       attack,
@@ -119,7 +120,7 @@ describe("зачарований", () => {
     const ps = withCondition([ally(), foe(), placed("other")], "a", "charmed", "e");
 
     expect(requestedTargetIds({ targetId: "e" })).toEqual(["e"]);
-    expect(() => validateAttackRequest(scope(ps), { attackerId: "a", targetId: "e", d20Roll: 10, damageRolls: [1] })).toThrow(REJECT.charmedTarget);
+    expect(() => validateAttackRequest(scope(ps), { attackerId: "a", targetId: "e", d20Roll: 10, damageRolls: [1] }, DEFAULT_RULES)).toThrow(REJECT.charmedTarget);
   });
 
   it("ворожі заклинання: джерело викидається, інша ціль ок", () => {

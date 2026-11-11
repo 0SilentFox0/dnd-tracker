@@ -39,9 +39,9 @@ export function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
   artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   names: Ruleset["defaultAttacks"] = DEFAULT_RULES.defaultAttacks,
-  opts: { fiveE?: boolean; items?: { enabled: boolean; attuned: readonly string[] } } = {},
+  opts: { fiveE?: boolean; items?: { enabled: boolean; attuned: readonly string[] }; attacksOf?: () => ExtractedAttack[] } = {},
 ): ExtractedAttack[] {
-  const weapons = extractWeaponAttacks(character, artifactsById, !!opts.fiveE, names, opts.items);
+  const weapons = opts.attacksOf ? opts.attacksOf() : extractWeaponAttacks(character, artifactsById, !!opts.fiveE, names, opts.items);
 
   return [...weapons, ...defaultAttacks(names, !!opts.fiveE).filter((d) => !weapons.some((w) => w.type === d.type))];
 }

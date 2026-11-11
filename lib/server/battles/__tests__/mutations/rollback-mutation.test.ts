@@ -7,6 +7,7 @@ import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
+import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
 
 const ctx = context({ scene: { ...context().scene, eventSeq: 6, status: "completed" } });
@@ -85,6 +86,20 @@ describe("rollback mutation", () => {
 
       expect(out.scene?.map?.maze).toEqual(maze);
     });
+  });
+
+  it("стан сцени зі знімка відновлюється; старий знімок без нього — очищений", async () => {
+    const now = { ...ctx, scene: { ...ctx.scene, sceneState: sceneOf({ enemy: true }) } };
+
+    const withTokens = buildSnapshotState({ ...ctx.scene, status: "active", sceneState: sceneOf({ ally: true }) }, s, diffParticipants(s, s));
+
+    const restored = await createRollbackMutation(vi.fn(async () => [{ seq: 4, state: withTokens }]), vi.fn(async () => true))(now, { actionIndex: 5 });
+
+    expect(momentumOf(restored.scene?.sceneState ?? undefined)).toEqual({ ally: true });
+
+    const legacy = await createRollbackMutation(vi.fn(async () => [snapshot]), vi.fn(async () => true))(now, { actionIndex: 5 });
+
+    expect(legacy.scene?.sceneState).toBeNull();
   });
 
   it("немає знімків — action_rejected", async () => {

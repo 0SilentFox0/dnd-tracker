@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { SPELL_LEVELS } from "@/components/spells/form/spell-form-defaults";
-import { defaultSpellForm, formToPayload, spellFormIssue, spellToForm } from "@/lib/utils/spells/model/form";
+import { asMagicSpell, DEFAULT_SPELL_MAGIC, defaultSpellForm, formToPayload, spellFormIssue, spellToForm, withSpellMagic } from "@/lib/utils/spells/model/form";
 import type { Spell } from "@/types/spells";
 
 const row: Spell = {
@@ -85,4 +85,34 @@ describe("форма заклинання", () => {
 });
 it("keeps manual execution mode until DM explicitly configures mechanics", () => {
   expect(formToPayload(spellToForm({ ...row, executionMode: "manual" }))).toMatchObject({ executionMode: "manual" });
+});
+
+describe("magic form round-trip", () => {
+  const base = () => defaultSpellForm();
+
+  it("withSpellMagic writes casting.magic and keeps other casting keys", () => {
+    const form = withSpellMagic({ ...base(), casting: { trigger: "t" } }, { cn: 6, kind: "arcane", overcast: "dice", attribute: { condition: "stunned", levels: 1 } });
+
+    expect(form.casting).toEqual({ trigger: "t", magic: { cn: 6, kind: "arcane", overcast: "dice", attribute: { condition: "stunned", levels: 1 } } });
+  });
+
+  it("removing magic drops an empty casting", () => {
+    expect(withSpellMagic(withSpellMagic(base(), DEFAULT_SPELL_MAGIC), undefined).casting).toBeUndefined();
+  });
+
+  it("form -> payload -> form keeps magic", () => {
+    const form = asMagicSpell(withSpellMagic(base(), { cn: 8, kind: "witchcraft", overcast: "targets" }));
+
+    const payload = formToPayload({ ...form, name: "Bolt" });
+
+    expect(payload.casting?.magic).toEqual({ cn: 8, kind: "witchcraft", overcast: "targets" });
+    expect(payload.resolution).toEqual({ kind: "auto" });
+  });
+
+  it("asMagicSpell defaults magic, forces auto resolution and drops the long cost", () => {
+    const form = asMagicSpell({ ...base(), cost: "long", resolution: { kind: "attack" } });
+
+    expect(form.casting?.magic).toEqual(DEFAULT_SPELL_MAGIC);
+    expect([form.resolution.kind, form.cost]).toEqual(["auto", "action"]);
+  });
 });

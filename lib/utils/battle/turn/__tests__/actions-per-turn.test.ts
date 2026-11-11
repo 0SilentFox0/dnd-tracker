@@ -5,6 +5,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -17,7 +18,7 @@ const bloodlust = resolved({
 
 const kill = { type: "kill", actorId: "h", targetId: "e" } as AbilityEvent;
 
-const killOnce = (ps: BattleParticipant[]) => runAbilities(ps, kill, { round: 1, rng: seq(0) }).participants;
+const killOnce = (ps: BattleParticipant[]) => runAbilities(ps, kill, { rules: DEFAULT_RULES, round: 1, rng: seq(0) }).participants;
 
 const hero = () => makeParticipant({ id: "h", abilities: [bloodlust] });
 
@@ -33,11 +34,11 @@ describe("actionsPerTurn", () => {
 
     expect(h.battleData.activeEffects.filter((e) => e.abilityKey?.startsWith(bloodlust.key))).toHaveLength(2);
 
-    const first = processStartOfTurn(h, 2, ps);
+    const first = processStartOfTurn(h, 2, ps, undefined, undefined, DEFAULT_RULES);
 
     expect(first.participant.battleData.pendingExtraActions).toBe(2);
 
-    const second = processStartOfTurn({ ...first.participant, battleData: { ...first.participant.battleData, pendingExtraActions: 1 } }, 3, ps);
+    const second = processStartOfTurn({ ...first.participant, battleData: { ...first.participant.battleData, pendingExtraActions: 1 } }, 3, ps, undefined, undefined, DEFAULT_RULES);
 
     expect(second.participant.battleData.pendingExtraActions).toBe(2);
   });
@@ -45,7 +46,7 @@ describe("actionsPerTurn", () => {
   it("no grant without the effect", () => {
     const h = hero();
 
-    expect(processStartOfTurn(h, 2, [h, foe()]).participant.battleData.pendingExtraActions ?? 0).toBe(0);
+    expect(processStartOfTurn(h, 2, [h, foe()], undefined, undefined, DEFAULT_RULES).participant.battleData.pendingExtraActions ?? 0).toBe(0);
   });
 
   it("nothing once the effect has expired", () => {
@@ -53,12 +54,12 @@ describe("actionsPerTurn", () => {
 
     const short = { ...ps[0], battleData: { ...ps[0].battleData, activeEffects: ps[0].battleData.activeEffects.map((e) => ({ ...e, duration: 1 })) } };
 
-    const last = processStartOfTurn(short, 2, [short, foe()]).participant;
+    const last = processStartOfTurn(short, 2, [short, foe()], undefined, undefined, DEFAULT_RULES).participant;
 
     expect(last.battleData.pendingExtraActions).toBe(1);
 
     const spent = { ...endTurnCleanup(last), battleData: { ...endTurnCleanup(last).battleData, pendingExtraActions: 0 } };
 
-    expect(processStartOfTurn(spent, 3, [spent, foe()]).participant.battleData.pendingExtraActions ?? 0).toBe(0);
+    expect(processStartOfTurn(spent, 3, [spent, foe()], undefined, undefined, DEFAULT_RULES).participant.battleData.pendingExtraActions ?? 0).toBe(0);
   });
 });

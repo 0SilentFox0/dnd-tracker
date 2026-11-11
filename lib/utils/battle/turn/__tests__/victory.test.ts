@@ -5,6 +5,8 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAction } from "@/types/battle";
 
 describe("completeBattle", () => {
@@ -18,6 +20,22 @@ describe("completeBattle", () => {
     expect(updatedParticipants[0].combatStats.status).toBe("active");
     expect(battleAction.hpChanges).toEqual([expect.objectContaining({ participantId: "hero", oldHp: 0, newHp: downed.combatStats.maxHp, change: -downed.combatStats.maxHp })]);
     expect(battleAction.actionDetails.battleResult).toBe("victory");
+  });
+
+  it("wfrp: непритомний союзник лишається з 0 HP після перемоги; dnd5e/homm піднімає", () => {
+    const base = createMockParticipant();
+
+    const downed = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "hero", side: ParticipantSide.ALLY }, combatStats: { ...base.combatStats, currentHp: 0, status: "unconscious" } });
+
+    const wfrp = completeBattle([downed], "victory", 3, WFRP_RULES);
+
+    expect(wfrp.updatedParticipants[0].combatStats).toMatchObject({ currentHp: 0, status: "unconscious" });
+    expect(wfrp.battleAction.hpChanges).toEqual([]);
+
+    const homm = completeBattle([downed], "victory", 3, DEFAULT_RULES);
+
+    expect(homm.updatedParticipants[0].combatStats.status).toBe("active");
+    expect(homm.updatedParticipants[0].combatStats.currentHp).toBeGreaterThan(0);
   });
 
   it("applyVictoryCompletion не дублює зміни HP за хід — лише відроджених", () => {

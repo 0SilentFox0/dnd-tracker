@@ -1,5 +1,6 @@
 import { countDownRoundEffects } from "./effects";
 import { initiativeSlot } from "./initiative";
+import { runJoinTriggers } from "./join-triggers";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
@@ -8,7 +9,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 /**
@@ -23,13 +24,14 @@ export function processStartOfRound(
   currentRound: number,
   pendingSummons: BattleParticipant[] = [],
   rng: Rng = Math.random,
-  map?: BattleMapConfig | null,
-  rules?: Ruleset,
+  map: BattleMapConfig | null | undefined,
+  rules: Ruleset,
 ): {
   updatedInitiativeOrder: BattleParticipant[];
   message: LogLine;
   triggerMessages: LogLine[];
   lairMessages: LogLine[];
+  psychology: { lines: LogLine[]; targets: BattleAction["targets"] };
 } {
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
   const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
@@ -50,13 +52,16 @@ export function processStartOfRound(
 
   let order = updatedOrder;
 
+  let psychology: { lines: LogLine[]; targets: BattleAction["targets"] } = { lines: [], targets: [] };
+
   if (newSummonIds.size > 0) {
     order = applyBakedAuras(order, newSummonIds);
 
-    const joined = runAbilities(order, { type: "battleStart", newcomerIds: [...newSummonIds] }, ctx);
+    const joined = runJoinTriggers(order, ctx, [...newSummonIds]);
 
     order = joined.participants;
     messages.push(...joined.messages);
+    psychology = joined.psychology;
   }
 
   const round = runAbilities(order, { type: "roundStart" }, ctx);
@@ -69,6 +74,7 @@ export function processStartOfRound(
     updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),
     message: textRef("battleLog.round.start", { round: currentRound }),
     triggerMessages: messages,
+    psychology,
     lairMessages: sortedOrder.filter((p) => p.battleData.lair?.active && isActive(p) && p.battleData.resolvedAbilities.some((a) => a.limits?.lair)).map((p) => textRef("battleLog.round.lair", { name: p.basicInfo.name })),
   };
 }

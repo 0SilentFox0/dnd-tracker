@@ -5,6 +5,7 @@ import { castSpell } from "@/lib/utils/battle/spell";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { pickOne, rollDiceList } from "@/lib/utils/common/dice";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -18,6 +19,7 @@ export interface HitSpellInput {
   attackKind?: AttackKind;
   map?: BattleMapConfig | null;
   rng: () => number;
+  rules: Ruleset;
 }
 
 export function castHitSpell(input: HitSpellInput): { participants: BattleParticipant[]; messages: LogLine[] } {
@@ -37,7 +39,7 @@ export function castHitSpell(input: HitSpellInput): { participants: BattlePartic
 
   const diceRolls = dice.count > 0 ? rollDiceList(`${dice.count}d${dice.sides}`, rng) : [];
 
-  const result = castSpell({ caster: attacker, spell, targetIds: [targetId], allParticipants: participants, currentRound: input.round, battleId: input.battleId, diceRolls, rng, isDMCast: true, map: input.map });
+  const result = castSpell({ caster: attacker, spell, targetIds: [targetId], allParticipants: participants, currentRound: input.round, battleId: input.battleId, diceRolls, rng, rules: input.rules, isDMCast: true, map: input.map });
 
   return { participants: result.allParticipantsUpdated, messages: [`🌑 ${attacker.basicInfo.name}: ${spell.name} → ${target.basicInfo.name}`, ...result.messages] };
 }

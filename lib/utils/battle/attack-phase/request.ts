@@ -11,6 +11,8 @@ import { type ActorScope, requireActor } from "@/lib/utils/battle/common/control
 import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
 import { BattleAccessError, BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export interface AttackRequest {
@@ -22,6 +24,7 @@ export interface AttackRequest {
   attackRoll?: number;
   /** Один кидок на ціль (для multi-target); якщо length === targets.length, використовується для кожної цілі */
   attackRolls?: number[];
+  serverRoll?: boolean;
   /** Сирі другі d20 на ціль (null — без другого); сервер вирішує перевагу/недолік сам */
   secondRolls?: (number | null)[];
   advantageRoll?: number;
@@ -31,6 +34,8 @@ export interface AttackRequest {
   offHand?: boolean;
   useInspiration?: boolean;
   cunningStrike?: CunningStrikeEffect[];
+  fortune?: "reroll" | "sl";
+  fortuneRoll?: number;
 }
 
 export function requestedTargetIds(data: Pick<AttackRequest, "targetId" | "targetIds">): string[] {
@@ -86,8 +91,14 @@ export interface ValidatedAttackRequest {
   usePerTargetRolls: boolean;
 }
 
-export function validateAttackRequest(scope: ActorScope, data: AttackRequest): ValidatedAttackRequest {
+export function validateAttackRequest(scope: ActorScope, data: AttackRequest, rules: Ruleset): ValidatedAttackRequest {
   const order = scope.participants;
+
+  const maxRoll = ruleSystemOf(rules).combat.dice;
+
+  if ([data.d20Roll, data.attackRoll, ...(data.attackRolls ?? [])].some((roll) => roll != null && roll > maxRoll)) {
+    throw new BattleRuleError("invalid_dice", API_ERRORS.ROLL_OUT_OF_RANGE);
+  }
 
   const singleRoll = data.d20Roll ?? data.attackRoll;
 
@@ -97,7 +108,7 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
 
   const usePerTargetRolls = Array.isArray(data.attackRolls) && data.attackRolls.length === chosenTargets.length;
 
-  if (!singleRoll && !usePerTargetRolls) {
+  if (!singleRoll && !usePerTargetRolls && !data.serverRoll) {
     throw new BattleRuleError("action_rejected", REJECT.rollRequired);
   }
 
@@ -113,6 +124,10 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
 
   if (order[scope.scene.turnIndex]?.basicInfo.id !== attacker.basicInfo.id) {
     throw new BattleRuleError("action_rejected", REJECT.notAttackerTurn);
+  }
+
+  if (data.fortune && (!ruleSystemOf(rules).combat.fortune || (attacker.battleData.fortune ?? 0) < 1 || chosenTargets.length !== 1)) {
+    throw new BattleRuleError("action_rejected", API_ERRORS.NO_FORTUNE);
   }
 
   if (data.offHand && !isFiveE(attacker)) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NOT_ALLOWED);

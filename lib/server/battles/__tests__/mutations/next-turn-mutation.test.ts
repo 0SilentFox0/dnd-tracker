@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const base = createMockParticipant();
 
@@ -14,7 +15,7 @@ const ctx = {
     createMockParticipant({ basicInfo: { ...base.basicInfo, id: "gob", side: ParticipantSide.ENEMY, controlledBy: "dm" } }),
   ],
   pending: [],
-  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map: null, createdAt: new Date() },
+  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map: null, rules: DEFAULT_RULES, createdAt: new Date() },
   userId: "user-1",
   isDM: false,
 } as unknown as BattleMutationContext;

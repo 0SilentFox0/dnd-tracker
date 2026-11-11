@@ -14,7 +14,7 @@ export interface ManeuverInput {
   map?: BattleMapConfig | null;
   round: number;
   rng: Rng;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface ManeuverResult {

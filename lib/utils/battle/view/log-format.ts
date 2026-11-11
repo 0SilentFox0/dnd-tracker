@@ -14,11 +14,11 @@ const itemText = (t: Translator, i: LogDetailItem) =>
   i.kind === "damage" ? formatText(t, textRef("battleLog.details.damage", { rows: i.raw ?? i.rows.map((row) => rowText(t, row)).join("; ") })) : i.label ? `${formatText(t, i.label)}: ${formatText(t, i.text)}` : formatText(t, i.text);
 
 /** Рядки розгорнутого блоку деталей запису логу */
-export function getLogEntryDetailLines(action: BattleAction, t: Translator): string[] {
-  return getLogEntryDetailItems(action).map((item) => itemText(t, item));
+export function getLogEntryDetailLines(action: BattleAction, t: Translator, wounds = false): string[] {
+  return getLogEntryDetailItems(action, wounds).map((item) => itemText(t, item));
 }
 
-export function getLogEntryDetailItems(action: BattleAction): LogDetailItem[] {
+export function getLogEntryDetailItems(action: BattleAction, wounds = false): LogDetailItem[] {
   const d = action.actionDetails;
 
   const lines: LogDetailItem[] = [];
@@ -31,13 +31,13 @@ export function getLogEntryDetailItems(action: BattleAction): LogDetailItem[] {
 
   if (d?.weaponName) push(textRef("battleLog.details.weapon"), d.weaponName);
 
-  if (d?.attackRoll != null) {
+  if (d?.attackRoll != null && !d.system) {
     const bonus = d.attackBonus != null ? " + " + d.attackBonus : "";
 
     push(textRef("battleLog.details.attackRoll"), d.attackRoll + bonus + " = " + (d.totalAttackValue ?? ""));
   }
 
-  if (d?.targetAC != null) push(textRef("battleLog.details.targetAc"), String(d.targetAC));
+  if (d?.targetAC != null && !d.system) push(textRef("battleLog.details.targetAc"), String(d.targetAC));
 
   if (d?.isHit === true) push(undefined, textRef("battleLog.details.hit"));
 
@@ -64,7 +64,7 @@ export function getLogEntryDetailItems(action: BattleAction): LogDetailItem[] {
     action.hpChanges.forEach((h) => {
       const sign = h.change > 0 ? "-" : "+";
 
-      push(h.participantName, sign + Math.abs(h.change) + " HP");
+      push(h.participantName, textRef(wounds ? "battleLog.details.woundsChange" : "battleLog.details.hpChange", { value: sign + Math.abs(h.change) }));
     });
   }
 

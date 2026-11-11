@@ -9,6 +9,7 @@ import { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel"
 import { BattleStatus } from "@/lib/constants/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { hasAnyCondition5e } from "@/lib/utils/battle/conditions";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface DmParticipantActions {
@@ -76,7 +77,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
     onConditions: isActive ? (p) => setConditionsId(p.basicInfo.id) : undefined,
     onToggleLair: isActive ? (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { lairActive: !p.battleData.lair?.active } }) : undefined,
     onLegendary: isActive ? (p) => setLegendaryId(p.basicInfo.id) : undefined,
-    conditionsEnabled: (battle.rules?.conditions.enabled ?? false) || (battle.initiativeOrder ?? []).some(hasAnyCondition5e),
+    conditionsEnabled: (battle.rules?.conditions.enabled ?? false) || !!(battle.rules && ruleSystemOf(battle.rules).conditions) || (battle.initiativeOrder ?? []).some(hasAnyCondition5e),
     onKill: isActive ? (p) => update(p, { kill: true }) : undefined,
     onDone,
     unitControl: unitControl.row,
@@ -89,6 +90,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
   return {
     row,
     conditions: { target: conditionsTarget, custom: battle.rules?.conditions.custom, close: () => setConditionsId(null), submit: actions.conditions.mutate, isPending: actions.conditions.isPending },
+    systemConditions: { submit: actions.systemCondition.mutate, isPending: actions.systemCondition.isPending },
     legendary: { target: legendaryTarget, close: () => setLegendaryId(null) },
     initiative: {
       roll: rollInitiative,

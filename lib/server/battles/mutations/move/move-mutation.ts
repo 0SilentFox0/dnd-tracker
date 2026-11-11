@@ -13,12 +13,14 @@ import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit,
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { sceneStatePatch } from "@/lib/utils/battle/scene-state";
 import { hasAnchors } from "@/lib/utils/battle/spell/anchored-zone";
 import { zoneMove } from "@/lib/utils/battle/spell/zone-triggers";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -61,7 +63,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   assertCanAct(ctx, mover.basicInfo.id);
 
-  const budget = moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null }, mover);
+  const budget = moveBudget({ map, dmUserId: ctx.isDM ? ctx.userId : null, rules }, mover);
 
   const search = searchPaths(map, participants, mover, budget);
 
@@ -79,7 +81,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
     return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [], trail: { from: mover.battleData.position, path: pathFrom(search, mover, data.to) ?? [] } });
   }
 
-  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx) });
+  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx), sceneState: ctx.scene.sceneState });
 
   const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
 
@@ -87,7 +89,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   const stopAt = full.findIndex((c) => cellKey(c) === cellKey(out.destination));
 
-  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events, trail: { from: mover.battleData.position, path: stopAt >= 0 ? full.slice(0, stopAt + 1) : full } });
+  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events, sceneState: out.sceneState, trail: { from: mover.battleData.position, path: stopAt >= 0 ? full.slice(0, stopAt + 1) : full } });
 }
 
 interface MoveOutcome {
@@ -96,11 +98,16 @@ interface MoveOutcome {
   hazard: TerrainCell | null;
   messages: LogLine[];
   events: NewBattleEvent[];
+  sceneState?: SystemSlot;
   /** шлях пройдено вільно від from; лише тоді спрацьовують зони заклинань */
   trail?: { from: GridPoint | undefined; path: GridPoint[] };
 }
 
-function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents, trail }: MoveOutcome): MutationResult {
+function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents, sceneState, trail }: MoveOutcome): MutationResult {
+  const patch = sceneStatePatch(ctx.scene.sceneState, sceneState);
+
+  const scene = Object.keys(patch).length > 0 ? { scene: patch } : {};
+
   const events = [...(messages.length ? [systemEvent(ctx.scene.round, lineText(messages, "; "))] : []), ...attackEvents];
 
   const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, rngOf(ctx), ctx.meta.rules);
@@ -113,11 +120,11 @@ function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, m
 
   const map = ctx.meta.map;
 
-  if (!trail?.from || !map || !(map.spellZones || hasAnchors(resolved.participants)) || !after || !isActive(after)) return { ...resolved, pending: ctx.pending };
+  if (!trail?.from || !map || !(map.spellZones || hasAnchors(resolved.participants)) || !after || !isActive(after)) return { ...resolved, pending: ctx.pending, ...scene };
 
   const zones = zoneMove({ map, participants: resolved.participants, moved: after, from: trail.from, path: trail.path, round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });
 
-  return { participants: zones.participants, events: [...resolved.events, ...(zones.messages.length ? [systemEvent(ctx.scene.round, lineText(zones.messages, "; "))] : [])], pending: ctx.pending };
+  return { participants: zones.participants, events: [...resolved.events, ...(zones.messages.length ? [systemEvent(ctx.scene.round, lineText(zones.messages, "; "))] : [])], pending: ctx.pending, ...scene };
 }
 
 function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {

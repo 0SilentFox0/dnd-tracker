@@ -6,7 +6,7 @@ import { Crosshair } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { canReadiedAttack, useBattleSceneData, useReadiedAttack } from "@/lib/hooks/battle";
+import { canReadiedAttack, useBattleRules, useBattleSceneData, useReadiedAttack } from "@/lib/hooks/battle";
 import type { BattleParticipant } from "@/types/battle";
 
 const TARGET_BUTTON = "border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-[var(--gold)]/50 disabled:opacity-40";
@@ -51,5 +51,7 @@ function ReadiedAttackPicker({ participant }: { participant: BattleParticipant }
 export function ReadiedAttackButton({ participant }: { participant: BattleParticipant }) {
   const { battle } = useBattleSceneData();
 
-  return canReadiedAttack(!!battle.rules?.actions.enabled, participant) ? <ReadiedAttackPicker participant={participant} /> : null;
+  const { actionEconomy } = useBattleRules();
+
+  return actionEconomy.reaction && canReadiedAttack(!!battle.rules?.actions.enabled, participant) ? <ReadiedAttackPicker participant={participant} /> : null;
 }

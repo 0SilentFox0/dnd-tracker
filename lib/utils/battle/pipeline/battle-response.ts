@@ -3,11 +3,14 @@ import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
-import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
+import { battleChannelName, battleDmChannelName, userChannelName } from "@/lib/pusher/channels";
 import { toPublicPendingCrit } from "@/lib/utils/battle/crit-choice/public";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
+import { redactLogForPlayers, redactParticipantsForPlayers, redactPatchesForPlayers } from "@/lib/utils/battle/view/visibility";
+import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -31,6 +34,8 @@ export function toBattleResponse(
 ): BattleScene {
   const { meta } = loaded;
 
+  const hide = view && !view.isDM;
+
   return {
     id: scene.id,
     campaignId: scene.campaignId,
@@ -40,13 +45,14 @@ export function toBattleResponse(
     participants: scene.status === BattleStatus.PREPARED ? meta.setup : [],
     currentRound: scene.round,
     currentTurnIndex: scene.turnIndex,
-    initiativeOrder: participants,
-    pendingSummons: pending,
+    initiativeOrder: hide ? redactParticipantsForPlayers(participants) : participants,
+    pendingSummons: hide ? redactParticipantsForPlayers(pending) : pending,
     pendingMoraleCheck: scene.pendingMoraleCheck,
     pendingCritChoice: toPublicPendingCrit(scene.pendingCritChoice),
+    ...(scene.sceneState && { system: scene.sceneState }),
     map: meta.map,
     audio: meta.audio ?? null,
-    rules: meta.rules,
+    rules: hide ? stripPlayerHiddenRules(meta.rules) : meta.rules,
     turnTimerSeconds: meta.turnTimerSeconds ?? null,
     battleLog: log.entries,
     ...(log.mode === "append" && { battleLogMode: "append" as const }),
@@ -61,23 +67,46 @@ export function toBattleResponse(
   };
 }
 
+export function redactDeltaForPlayers(delta: ClientBattleDelta, participants: BattleParticipant[], rules: Ruleset): { delta: ClientBattleDelta; changed: boolean } {
+  const { entries, changed: logChanged } = redactLogForPlayers(delta.log, { participants, rules });
+
+  const upserted = redactParticipantsForPlayers(delta.upserted);
+
+  const patched = delta.patched && redactPatchesForPlayers(delta.patched, participants);
+
+  const pending = delta.pending && redactParticipantsForPlayers(delta.pending);
+
+  const changed = logChanged || upserted !== delta.upserted || patched !== delta.patched || pending !== delta.pending;
+
+  return { delta: changed ? { ...delta, log: entries, upserted, ...(patched && { patched }), ...(pending && { pending }) } : delta, changed };
+}
+
+function fitOrRefetch(delta: ClientBattleDelta): ClientBattleDelta | BattleRefetchSignal {
+  const fits = Buffer.byteLength(JSON.stringify(delta), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
+
+  return fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true, ...(delta.redacted && { redacted: true as const }) };
+}
+
 export function buildPusherMessages(args: {
   before: BattleSceneState;
   after: BattleSceneState;
   participants: BattleParticipant[];
+  rules: Ruleset;
   pending?: BattleParticipant[];
   wasAwaiting?: boolean;
   delta: ClientBattleDelta;
 }): PusherMessage[] {
-  const { before, after, participants, pending = [], wasAwaiting = false, delta } = args;
+  const { before, after, participants, rules, pending = [], wasAwaiting = false, delta } = args;
 
   const channel = battleChannelName(after.id);
 
-  const fits = Buffer.byteLength(JSON.stringify(delta), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
+  const { delta: redactedDelta, changed } = redactDeltaForPlayers(delta, participants, rules);
 
-  const payload: ClientBattleDelta | BattleRefetchSignal = fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true };
+  const publicDelta: ClientBattleDelta = changed ? { ...redactedDelta, redacted: true } : delta;
 
-  const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload }];
+  const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload: fitOrRefetch(publicDelta) }];
+
+  if (changed) messages.push({ channel: battleDmChannelName(after.id), event: "battle-delta", payload: fitOrRefetch(delta) });
 
   const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status || wasAwaiting;
 

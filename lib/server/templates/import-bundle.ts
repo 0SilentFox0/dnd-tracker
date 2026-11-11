@@ -3,6 +3,7 @@ import { assertNoLeak, findForeignContentIds } from "./assert-no-leak";
 import { type Bundle, BUNDLE_TABLES, BundleInvalidError, BundleSchema, delegateOf, pick, type TemplateDb,toPrismaJson } from "./bundle";
 import { CONTENT_ID_RE, newContentId } from "./ids";
 import { collectKeysAndStrings, remapIds } from "./remap-ids";
+import { dropTakenSlugs } from "./slug-collisions";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { type CompendiumBundleDb,importCompendiumSection } from "@/lib/server/compendium-import/bundle";
@@ -76,7 +77,7 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
   const hashes: TableHashes = {};
 
   const writes = BUNDLE_TABLES.map((t) => {
-    const rows = bundle[t.key].map((row) => {
+    const rows = dropTakenSlugs(bundle[t.key].map((row) => {
       const clean = pick(row, t.columns);
 
       for (const [col, target] of Object.entries(t.fks)) {
@@ -98,8 +99,8 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
 
       const stored = !layer ? { id: idMap.get(row.id)!, sourceId: row.id, sourceHash } : isOverride(row.id) ? { id: newContentId(), sourceId: row.id, sourceHash: layer.overrides[row.id] } : { id: idMap.get(row.id)!, sourceId: null, sourceHash: null };
 
-      return toPrismaJson({ ...remapped, ...stored, campaignId: targetCampaignId }, t);
-    });
+      return { ...remapped, ...stored, campaignId: targetCampaignId } as Record<string, unknown> & { id: string; slug?: string | null };
+    }), new Map()).map((row) => toPrismaJson(row, t));
 
     return { t, rows };
   });

@@ -60,7 +60,11 @@ export const defaultReadDeps: BattleReadDeps = {
   loadAccess: (args) => loadBattleAccess(prisma, args),
   loadEventsBefore: (battleId, page) => loadEventsBefore(prisma, battleId, page),
   loadAllEvents: (battleId) => loadAllEvents(prisma, battleId),
-  loadParticipants: async (args) => (await loadBattle(prisma, args))?.participants ?? [],
+  loadRedactionCtx: async (args) => {
+    const loaded = await loadBattle(prisma, args);
+
+    return loaded && { participants: loaded.participants, rules: loaded.meta.rules };
+  },
 };
 
 /** All store helpers, including saveBattle's transaction, reuse the intent connection. */

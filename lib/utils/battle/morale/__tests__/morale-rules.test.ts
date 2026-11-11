@@ -5,6 +5,7 @@ import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { needsMoraleCheck } from "@/lib/utils/battle/view";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 function withCap(morale: number, moraleCap?: number, withMin = false): BattleParticipant {
@@ -43,7 +44,7 @@ describe("morale rules", () => {
       effect,
       targetIds: ["p"],
       event: { type: "hit", actorId: "p", targetId: "p", attackKind: "melee", damage: 10 },
-      ctx: { round: 1, rng: seq(0.5) },
+      ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
     });
 
     expect(r.participants[0].combatStats.morale).toBe(1);

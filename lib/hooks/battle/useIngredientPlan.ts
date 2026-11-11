@@ -6,6 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 
 import { COIN_VALUE } from "@/lib/constants/inventory";
 import { useTranslator } from "@/lib/i18n/use-translator";
+import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { trackedIngredients } from "@/lib/utils/spells/ingredients";
 import { planIngredients } from "@/lib/utils/spells/ingredients/plan";
 import { formatMissing, summarizeIngredients } from "@/lib/utils/spells/ingredients/summary";
@@ -17,12 +18,19 @@ export interface IngredientLine {
   missing: string;
   payGp: number;
   blocked: boolean;
+  /** the caster chooses whether to spend it (cancels a miscast) */
+  optional?: boolean;
+  use?: boolean;
 }
 
-export function useIngredientPlan(caster: BattleParticipant | null, spell: { ingredients?: SpellIngredient[] } | null, skip: boolean): IngredientLine | null {
+export function useIngredientPlan(caster: BattleParticipant | null, spell: { ingredients?: SpellIngredient[] } | null, skip: boolean, use = false): IngredientLine | null {
   const t = useTranslator("spells");
 
-  const rule = useBattleScene().battle.rules?.spellIngredients;
+  const rules = useBattleScene().battle.rules;
+
+  const rule = rules?.spellIngredients;
+
+  const optional = !!rules && ruleSystemOf(rules).magic?.ingredients === "avertMiscast";
 
   const stock = caster?.battleData.ingredientStock;
 
@@ -32,11 +40,13 @@ export function useIngredientPlan(caster: BattleParticipant | null, spell: { ing
 
   const autoPay = !!rule?.autoPay;
 
-  const plan = useMemo(() => (enabled && stock && list ? planIngredients(list, stock, { autoPay }) : null), [enabled, stock, list, autoPay]);
+  const value = useMemo(() => (rules ? currencyValueOf(rules) : COIN_VALUE), [rules]);
+
+  const plan = useMemo(() => (enabled && stock && list ? planIngredients(list, stock, { autoPay, value }) : null), [enabled, stock, list, autoPay, value]);
 
   if (!plan || !list) return null;
 
   const need = summarizeIngredients(trackedIngredients(list), { minGp: (gp) => t("ingredients.minGpShort", { gp }), consumed: t("ingredients.consumedShort") });
 
-  return { need, missing: formatMissing(plan.missing), payGp: plan.spendCp / COIN_VALUE.gp, blocked: !plan.ok };
+  return { need, missing: formatMissing(plan.missing), payGp: plan.spendCp / value.gp, blocked: !plan.ok && (!optional || use), optional, use };
 }

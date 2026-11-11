@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Генерує моделі `<Model>Base` (базове сховище опублікованих версій шаблону) з 13 контентних моделей
+ * Генерує моделі `<Model>Base` (базове сховище опублікованих версій шаблону) з 14 контентних моделей
  * і вставляє їх у prisma/schema.prisma між маркерами. Ідемпотентно.
  *
  *   pnpm exec tsx scripts/db/gen-base-models.ts
@@ -23,6 +23,7 @@ export const CONTENT_MODELS = [
   "Feat",
   "Background",
   "MainSkill",
+  "Career",
 ] as const;
 
 const BEGIN = "// BEGIN GENERATED BASE MODELS (scripts/db/gen-base-models.ts)";
@@ -76,12 +77,15 @@ function baseModel(name: string, lines: string[], modelNames: Set<string>): stri
 
   const body = [...fields, ...VERSION_FIELDS].map((f) => `  ${f}`).join("\n");
 
+  const slugIndex = fields.some((f) => f.startsWith("slug ")) ? ["  @@index([sourceCampaignId, slug])"] : [];
+
   return [
     `model ${name}Base {`,
     body,
     "",
     "  @@id([id, validFrom])",
     "  @@index([sourceCampaignId, validFrom, validTo])",
+    ...slugIndex,
     `  @@map("${table}_base")`,
     "}",
   ].join("\n");

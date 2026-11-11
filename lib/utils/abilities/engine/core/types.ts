@@ -12,7 +12,7 @@ export interface AbilityRunContext {
   rng: Rng;
   depth?: number;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
   crit?: CritPicker;
 }
 

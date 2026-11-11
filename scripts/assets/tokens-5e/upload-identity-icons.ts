@@ -5,17 +5,19 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-import { assertSeedTarget } from "../../seed/seed-library-lib";
+import { assertSeedTarget, assertStorageTarget } from "../../seed/seed-library-lib";
 import { readSrdData } from "../../srd/lib/data-files";
+import { readIcons, writeIcons } from "../../templates/lib/icons-file";
 import { toWebp } from "./convert";
-import { readIcons, writeIcons } from "./icons-file";
 import { expectedTargets, IDENTITY_BUCKET, IDENTITY_SIZE, type IdentityKind, parseIdentityCsv } from "./identity-catalog";
 import { planUploads } from "./identity-plan";
 
-import { CampaignKind, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
+import { CampaignKind } from "@/lib/constants/campaigns";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
+import { templateAssetPath } from "@/lib/utils/common/image-url";
+import { templateKeyOf } from "@/lib/utils/templates/registry";
 
 const USAGE = "Використання: pnpm assets:identity-icons <templateId> [--dir <fantasy-tokens>] [--dry-run] [--allow-remote]";
 
@@ -45,9 +47,11 @@ async function main() {
 
     assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
 
-    const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, kind: true } });
+    assertStorageTarget(process.env.NEXT_PUBLIC_SUPABASE_URL, args.includes("--allow-remote"));
 
-    if (campaign?.name !== SRD_TEMPLATE_NAME || campaign.kind !== CampaignKind.TEMPLATE) throw new Error(`Кампанія ${templateId} не є офіційним шаблоном «${SRD_TEMPLATE_NAME}»`);
+    const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, templateKey: true, kind: true } });
+
+    if (!campaign || templateKeyOf(campaign) !== "srd-5.2" || campaign.kind !== CampaignKind.TEMPLATE) throw new Error(`Кампанія ${templateId} не є офіційним шаблоном «srd-5.2»`);
   }
 
   const targets = expectedTargets(readSrdData());
@@ -101,7 +105,7 @@ async function main() {
       ensured.add(bucket);
     }
 
-    const objectName = `${templateId}/${target.kind}/${target.key.replaceAll("/", "_")}-${createHash("sha1").update(webp).digest("hex").slice(0, 8)}.webp`;
+    const objectName = templateAssetPath("srd-5.2", target.kind, target.key.replaceAll("/", "_"), createHash("sha1").update(webp).digest("hex").slice(0, 8));
 
     const { error } = await admin.storage.from(bucket).upload(objectName, webp, staticAssetUploadOptions("image/webp"));
 
@@ -119,7 +123,7 @@ async function main() {
   for (const e of errors) console.warn(`  не завантажено: ${e}`);
 
   if (!dryRun) {
-    const old = readIcons();
+    const old = readIcons("srd-5.2");
 
     const next = { ...old };
 
@@ -129,7 +133,7 @@ async function main() {
       next[kind] = Object.fromEntries(Object.entries({ ...old[kind], ...uploaded[kind] }).filter(([key]) => valid.has(key)));
     }
 
-    writeIcons(next);
+    writeIcons("srd-5.2", next);
   }
 
   if (errors.length > 0 || missing.length > 0) process.exitCode = 1;

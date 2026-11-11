@@ -9,11 +9,13 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { movementBudget } from "@/lib/utils/battle/grid";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const spellOf = (key: string): CastableSpell => {
@@ -55,7 +57,7 @@ function cast(key: string, caster: BattleParticipant, targetIds: string[], all: 
 
   if (!resolved.ok) throw new Error(textOf(resolved.error));
 
-  return castSpell({ caster, spell, targetIds: resolved.targetIds, allParticipants: all, currentRound: o.round ?? 1, battleId: "b", diceRolls: o.dice ?? [], saveRolls: o.saveRolls, rng: seq(0.5) });
+  return castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: resolved.targetIds, allParticipants: all, currentRound: o.round ?? 1, battleId: "b", diceRolls: o.dice ?? [], saveRolls: o.saveRolls, rng: seq(0.5) });
 }
 
 /** Ходить по колу, повертає учасника на початку кожного його ходу. */
@@ -67,10 +69,10 @@ function turnsOf(ps: BattleParticipant[], id: string, count: number, start = sce
   const seen: BattleParticipant[] = [];
 
   for (let i = 0; i < count * order.length * 2 && seen.length < count; i++) {
-    const out = advanceTurn({ participants: order, pending: [], scene: s, rng: seq(0.99) });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: s, rng: seq(0.99) });
 
     order = out.participants;
-    s = { ...s, ...out.scene };
+    s = applyScenePatch(s, out.scene ?? {});
 
     if (order[s.turnIndex].basicInfo.id === id) seen.push(order[s.turnIndex]);
   }
@@ -85,7 +87,7 @@ const bow: BattleAttack = { id: "bw", name: "Лук", type: AttackType.RANGED, a
 const armed = (p: BattleParticipant) => ({ ...p, battleData: { ...p.battleData, attacks: [sword, bow] } });
 
 function attack(attacker: BattleParticipant, target: BattleParticipant, weapon: BattleAttack, d20: number, dmg = 8) {
-  return processAttack({ attacker, target, attack: weapon, d20Roll: d20, damageRolls: [dmg], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.99) });
+  return processAttack({ rules: DEFAULT_RULES, attacker, target, attack: weapon, d20Roll: d20, damageRolls: [dmg], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.99) });
 }
 
 const hits = (r: ReturnType<typeof attack>) => !eventTextOf(r.battleAction).includes("промах");
@@ -131,7 +133,7 @@ describe("Поспіх (+3 ініціативи, +10 фт швидкості, 3 
 
     const ps = cast("haste", c, ["a"], [c, foe, slow]).allParticipantsUpdated;
 
-    const out = advanceTurn({ participants: ps, pending: [], scene: scene(1, 2), rng: seq(0.99) });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: ps, pending: [], scene: scene(1, 2), rng: seq(0.99) });
 
     expect(out.scene.round).toBe(2);
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["c", "e", "a"]);
@@ -143,11 +145,11 @@ describe("Поспіх (+3 ініціативи, +10 фт швидкості, 3 
 
     const a = unit("a");
 
-    const before = movementBudget(a);
+    const before = movementBudget(a, DEFAULT_RULES);
 
     const ps = cast("haste", c, ["a"], [c, a]).allParticipantsUpdated;
 
-    expect(movementBudget(get(ps, "a"))).toBe(before + 2);
+    expect(movementBudget(get(ps, "a"), DEFAULT_RULES)).toBe(before + 2);
   });
 });
 

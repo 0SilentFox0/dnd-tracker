@@ -66,8 +66,8 @@ async function fresh() {
 }
 
 describe("layered sync parity", () => {
-  it("hashes the same columns as the template bundle for all tables", () => {
-    for (const t of BUNDLE_TABLES) expect([...layeredModels()[t.model].hashColumns].sort(), t.key).toEqual([...t.columns].sort());
+  it("hashes the same columns as the template bundle for all tables (slug is a key, never hashed)", () => {
+    for (const t of BUNDLE_TABLES) expect([...layeredModels()[t.model].hashColumns].sort(), t.key).toEqual(t.columns.filter((column) => column !== "slug").sort());
   });
 });
 
@@ -143,6 +143,24 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     expect(await raw.spell.count({ where: { campaignId } })).toBe(0);
   });
 
+  it("a local edit of a base artifact without systemStats is no conflict while the source is unchanged", async () => {
+    const campaignId = await fresh();
+
+    const id = `${marker}-artifact-a`;
+
+    await raw.artifactBase.create({ data: { id, name: "Mail", slot: "armor", sourceCampaignId: tpl, validFrom: 1 } });
+    invalidateCampaignLayer();
+
+    try {
+      await inWrite(campaignId, (tx) => tx.artifact.update({ where: { id }, data: { name: "Mine" } }));
+
+      expect((await diffOf(campaignId)).filter((i) => i.key === id)).toEqual([]);
+    } finally {
+      await raw.artifact.deleteMany({ where: { campaignId } });
+      await raw.artifactBase.deleteMany({ where: { sourceCampaignId: tpl } });
+    }
+  });
+
   it("a hidden base row stays hidden after a patch", async () => {
     const campaignId = await fresh();
 
@@ -201,6 +219,68 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     await apply(campaignId, { apply: [ref(gone)], ignore: [] });
 
     expect((await raw.skill.findFirstOrThrow({ where: { campaignId } })).spellId).toBeNull();
+  });
+
+  it("keeps a template-only career held by a species profile when deleted upstream, without a dangling warning", async () => {
+    const campaignId = await fresh();
+
+    const careerId = `${marker}-career-a`;
+
+    await raw.careerBase.create({ data: { id: careerId, name: "Scribe", sourceCampaignId: tpl, validFrom: 1, updatedAt: new Date() } });
+    await raw.race.create({ data: { campaignId, name: "Human", profile: { talents: [], randomTalents: [], careerTable: [{ max: 100, careerId }] } } });
+    invalidateCampaignLayer();
+
+    try {
+      await raw.careerBase.updateMany({ where: { id: careerId }, data: { validTo: 2 } });
+      await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
+
+      const gone = (await diffOf(campaignId)).find((i) => i.key === careerId)!;
+
+      expect(gone.status).toBe("deletedInSource");
+
+      const result = await apply(campaignId, { apply: [ref(gone)], ignore: [] });
+
+      expect(result.warnings).toEqual([expect.stringContaining("Scribe")]);
+      expect(result.warnings).toEqual([expect.stringContaining("not deleted")]);
+      expect(await raw.career.findMany({ where: { campaignId, sourceId: careerId } })).toHaveLength(1);
+      expect((await raw.campaign.findUnique({ where: { id: campaignId } }))?.baseVersion).toBe(2);
+      expect(((await D.career.findMany({ where: { campaignId } })) as Array<{ name: string }>).map((c) => c.name)).toEqual(["Scribe"]);
+    } finally {
+      await raw.career.deleteMany({ where: { campaignId } });
+      await raw.race.deleteMany({ where: { campaignId } });
+      await raw.careerBase.deleteMany({ where: { sourceCampaignId: tpl } });
+      invalidateCampaignLayer();
+    }
+  });
+
+  it("keeps a template-only artifact held in a character inventory when deleted upstream", async () => {
+    const campaignId = await fresh();
+
+    const artifactId = `${marker}-artifact-a`;
+
+    await raw.artifactBase.create({ data: { id: artifactId, name: "Crown", slot: "head", sourceCampaignId: tpl, validFrom: 1 } });
+    invalidateCampaignLayer();
+
+    try {
+      const character = await raw.character.create({ data: { campaignId, type: "pc", controlledBy: marker, name: "Hero", class: "Fighter", race: "Human", updatedAt: new Date() } });
+
+      await raw.characterInventory.create({ data: { characterId: character.id, backpack: [{ artifactId }] } });
+      await raw.artifactBase.updateMany({ where: { id: artifactId }, data: { validTo: 2 } });
+      await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
+
+      const gone = (await diffOf(campaignId)).find((i) => i.key === artifactId)!;
+
+      expect(gone.status).toBe("deletedInSource");
+
+      const result = await apply(campaignId, { apply: [ref(gone)], ignore: [] });
+
+      expect(result.warnings).toEqual([expect.stringContaining("Crown")]);
+      expect(result.warnings).toEqual([expect.stringContaining("not deleted")]);
+    } finally {
+      await raw.character.deleteMany({ where: { campaignId } });
+      await raw.artifactBase.deleteMany({ where: { sourceCampaignId: tpl } });
+      invalidateCampaignLayer();
+    }
   });
 
   it("an unselected updated row stays at the old version", async () => {

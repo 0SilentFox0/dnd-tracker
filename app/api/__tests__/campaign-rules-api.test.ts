@@ -8,7 +8,18 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
-vi.mock("@/lib/db", () => ({ prisma: { $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }), campaign: { update: vi.fn(async () => ({})), findUnique: vi.fn() } } }));
+vi.mock("@/lib/db", () => {
+  const counts = { character: { count: async () => 0 }, unit: { count: async () => 0 } };
+
+  return {
+    prisma: {
+      ...counts,
+      $transaction: async (callback: (tx: object) => unknown) =>
+        callback({ ...counts, $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
+      campaign: { update: vi.fn(async () => ({})), findUnique: vi.fn() },
+    },
+  };
+});
 
 const params = { params: Promise.resolve({ id: "c1" }) };
 
@@ -31,7 +42,7 @@ describe("campaign rules API", () => {
     const res = await GET(new Request("http://x"), params);
 
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(DEFAULT_RULES);
+    expect(await res.json()).toEqual({ ...DEFAULT_RULES, systemLocked: false });
   });
 
   it("GET: кампанії немає — 404", async () => {
@@ -50,9 +61,10 @@ describe("campaign rules API", () => {
   it("PATCH від ДМ зливає по секціях і зберігає злитий об'єкт", async () => {
     const res = await patch({ morale: { enabled: false } });
 
-    const body = await res.json();
+    const { systemLocked, ...body } = await res.json();
 
     expect(res.status).toBe(200);
+    expect(systemLocked).toBe(false);
     expect(body.morale).toEqual({ enabled: false, cap: 3 });
     expect(body.criticals).toEqual(DEFAULT_RULES.criticals);
     expect(prisma.campaign.update).toHaveBeenCalledWith({ where: { id: "c1" }, data: { rules: body } });

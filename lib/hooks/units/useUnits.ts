@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { unitKeys, unitWriteKeys } from "./keys";
 
 import { createUnit, deleteAllUnits, deleteUnit, getUnit, getUnits, updateUnit } from "@/lib/api/units";
+import { invalidateCampaignRules } from "@/lib/hooks/campaigns/invalidate";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { Unit } from "@/types/units";
@@ -28,9 +29,12 @@ export function useUnit(campaignId: string, unitId: string) {
 }
 
 export function useCreateUnit(campaignId: string) {
+  const queryClient = useQueryClient();
+
   return useCrudMutation({
     mutationFn: (data: Partial<Unit>) => createUnit(campaignId, data),
     invalidateKeys: unitWriteKeys(campaignId),
+    onSuccess: () => invalidateCampaignRules(queryClient, campaignId),
   });
 }
 

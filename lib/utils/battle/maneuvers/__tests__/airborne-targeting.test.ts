@@ -8,6 +8,7 @@ import { participantAttackIntent } from "@/lib/utils/battle/flows/attack-intent"
 import { placeParticipants } from "@/lib/utils/battle/grid";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { needsBonusTarget } from "@/lib/utils/battle/view";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleScene } from "@/types/api";
 
 const airborne = () => perform([unit("g", { side: ParticipantSide.ALLY, at: { x: 2, y: 2 }, abilities: [ABILITIES.dive] }), unit("e", { at: { x: 3, y: 2 } })], "dive", { map: MAP, targetCell: { x: 9, y: 9 } }).participants;
@@ -20,7 +21,7 @@ describe("у повітрі — поза досяжністю", () => {
   it("клік по ньому не стає атакою", () => {
     const ps = airborne();
 
-    const scene = { battle: { map: MAP, initiativeOrder: ps, currentRound: 1, currentTurnIndex: 1 } as Pick<BattleScene, "map" | "initiativeOrder" | "currentRound" | "currentTurnIndex">, turn: { current: byId(ps, "e"), isMyTurn: true }, anyPending: false, attackReady: true };
+    const scene = { battle: { map: MAP, rules: DEFAULT_RULES, initiativeOrder: ps, currentRound: 1, currentTurnIndex: 1 } as Pick<BattleScene, "map" | "rules" | "initiativeOrder" | "currentRound" | "currentTurnIndex">, turn: { current: byId(ps, "e"), isMyTurn: true }, anyPending: false, attackReady: true };
 
     expect(participantAttackIntent(scene, "g")).toBeNull();
   });

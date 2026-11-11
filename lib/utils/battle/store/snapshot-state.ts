@@ -9,11 +9,12 @@ import type {
 
 import type { MapModeKey } from "@/lib/utils/battle/modes";
 import { modeSnapshotSlice } from "@/lib/utils/battle/modes/server";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleMapConfig, TerrainCell } from "@/types/battle";
 
 export interface SnapshotState {
   /** terrain і конфіги режимів лише для боїв із картою; старі знімки без поля — цю частину карти при відкаті не чіпаємо */
-  scene: Pick<BattleSceneState, "round" | "turnIndex" | "status" | "pendingMoraleCheck"> & {
+  scene: Pick<BattleSceneState, "round" | "turnIndex" | "status" | "pendingMoraleCheck"> & { sceneState?: SystemSlot } & {
     terrain?: Record<string, TerrainCell> | null;
   } & Partial<Record<MapModeKey, unknown>>;
   participants: Array<{ columns: ParticipantColumns; state: ParticipantState }>;
@@ -37,6 +38,7 @@ export function buildSnapshotState(
       turnIndex: scene.turnIndex,
       status: scene.status,
       pendingMoraleCheck: scene.pendingMoraleCheck,
+      ...(scene.sceneState && { sceneState: scene.sceneState }),
       ...(map && { terrain: map.terrain ?? null, ...modeSnapshotSlice(map) }),
     },
     participants: before.map((p) => ({ columns: p.columns, state: p.state })),

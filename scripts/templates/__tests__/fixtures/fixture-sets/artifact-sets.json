@@ -1,0 +1,4 @@
+[
+  { "slug": "set-keep", "name": "Keep Set", "description": "A set that stays.", "abilities": [], "artifactIds": [] },
+  { "slug": "set-drop", "name": "Drop Set", "description": "A set that is pruned.", "abilities": [], "artifactIds": [] }
+]

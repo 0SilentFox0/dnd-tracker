@@ -10,6 +10,7 @@ import { isActionScopedTrigger, type Trigger, TriggerSchema } from "./triggers";
 
 import type { ErrorParams } from "@/lib/constants/api-errors";
 import { CLASS_COLUMN_KEY_RE } from "@/lib/constants/classes";
+import { isSystemEffectKind } from "@/lib/utils/abilities/registry/effects/system-rows";
 
 export const LimitsSchema = z.object({
   perBattle: z.number().int().min(1).optional(),
@@ -29,7 +30,7 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
   const issues: EffectIssue[] = [];
 
   if (trigger.event === "passive") {
-    if (effect.kind !== "note" && effect.kind !== "restoreSpellSlotLevels" && !isStaticEffect(effect)) {
+    if (effect.kind !== "note" && effect.kind !== "restoreSpellSlotLevels" && !isSystemEffectKind(effect.kind) && !isStaticEffect(effect)) {
       issues.push({ message: "abilities.validation.passiveEffectKinds" });
     }
 
@@ -49,6 +50,8 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
 
     return issues;
   }
+
+  if (isSystemEffectKind(effect.kind)) issues.push({ message: "abilities.validation.passiveEffectKinds" });
 
   if ("target" in effect && isAreaTarget(effect.target)) {
     issues.push({ message: "abilities.validation.areaOnlyPassive" });

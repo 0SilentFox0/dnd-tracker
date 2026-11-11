@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "lowlander",
+    "name": "Lowlander",
+    "passiveAbility": {
+      "name": "Many Roads",
+      "description": "Lowlanders settle wherever trade and farmland meet, and take on the habits of every neighbour they meet. Their adaptable, restless nature leaves them at home in almost any trade."
+    }
+  },
+  {
+    "slug": "delver",
+    "name": "Delver",
+    "passiveAbility": {
+      "name": "Stoneborn",
+      "description": "Delvers raise their halls inside the mountains and measure kinship in generations of unbroken craft. They are stubborn and exacting, and trust what is built to last."
+    }
+  },
+  {
+    "slug": "hearthkin",
+    "name": "Hearthkin",
+    "passiveAbility": {
+      "name": "Hearth and Home",
+      "description": "Hearthkin are small folk who prize a full table, a warm fire and a quiet life. Their cheer hides a nimble, practical streak that surprises anyone who mistakes comfort for softness."
+    }
+  },
+  {
+    "slug": "veyl",
+    "name": "Veyl",
+    "passiveAbility": {
+      "name": "Old Blood",
+      "description": "The Veyl are a long-lived people of the deep forests, shaped by memories that outlast kingdoms. They are graceful and aloof, and slow to share what they know."
+    }
+  }
+]

@@ -5,6 +5,8 @@
     "skills": "Вміння",
     "choices": "Вибори",
     "magic": "Магія",
+    "advancement": "Розвиток",
+    "downtime": "Простій",
     "items": "Інвентар",
     "story": "Історія",
     "log": "Журнал",
@@ -21,8 +23,20 @@
       "initiative": "Ініц",
       "speed": "Швидк",
       "toHit": "Влуч",
-      "proficiency": "Майст"
-    }
+      "proficiency": "Майст",
+      "wounds": "Рани",
+      "move": "Рух",
+      "fate": "Доля",
+      "fortune": "Удача",
+      "sin": "Гріх"
+    },
+    "wounds": "Рани",
+    "woundsCurrent": "Рани {current} / {max}",
+    "woundsTotal": "Рани {total}",
+    "move": "Рух (кроком/бігом)",
+    "fate": "Доля",
+    "fortune": "Удача",
+    "sin": "Гріх"
   },
   "combat": {
     "roll": "Кинути",
@@ -42,7 +56,8 @@
     "skills": "НАВИЧКИ",
     "passives": "Пасивні: сприйняття {perception} · розслідування {investigation} · проникливість {insight}",
     "languages": "Мови: {list}",
-    "proficiencies": "Володіння: {list}"
+    "proficiencies": "Володіння: {list}",
+    "untrained": "Навичка не розвинена: тест неможливий"
   },
   "magic": {
     "saveDC": "СЛ заклинань",
@@ -200,7 +215,9 @@
       "noArmor": "Без броні",
       "dexterityCapped": "Спритність (межа {cap})",
       "hitDice": "Кістки хітів: {dice}",
-      "bonuses": "Бонуси"
+      "bonuses": "Бонуси",
+      "wounds": "БС {sb} + 2 × БСт {tb} + БВл {wpb}{extra, plural, =0 {} other { + {extra}}}",
+      "woundsMutation": "Мутації: {amount, number, ::sign-always}"
     },
     "abilityPick": "+{n} {ability, select, strength {СИЛ} dexterity {СПР} constitution {ТІЛ} intelligence {ІНТ} wisdom {МУД} charisma {ХАР} other {}}",
     "spellOrigin": {
@@ -263,5 +280,9 @@
       "description": "Опис",
       "equipmentNote": "Спорядження й гроші видає ДМ вручну."
     }
+  },
+  "wfrp": {
+    "characteristics": "ХАРАКТЕРИСТИКИ",
+    "skills": "НАВИЧКИ"
   }
 }

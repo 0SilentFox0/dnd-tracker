@@ -9,7 +9,7 @@ import { type CompendiumBundle, type CompendiumBundleDb,CompendiumBundleSchema }
 
 export type BundleTable = (typeof SYNC_TABLE_SCOPES)[number];
 
-type Delegate = "spellGroup" | "race" | "gameClass" | "feat" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
+type Delegate = "spellGroup" | "race" | "gameClass" | "feat" | "career" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
 
 export interface BundleTableDef {
   key: BundleTable;
@@ -27,6 +27,7 @@ const SCALAR_ENUMS = {
   Race: Prisma.RaceScalarFieldEnum,
   GameClass: Prisma.GameClassScalarFieldEnum,
   Feat: Prisma.FeatScalarFieldEnum,
+  Career: Prisma.CareerScalarFieldEnum,
   Background: Prisma.BackgroundScalarFieldEnum,
   Unit: Prisma.UnitScalarFieldEnum,
   Spell: Prisma.SpellScalarFieldEnum,
@@ -43,6 +44,7 @@ const MODEL_TO_KEY: Record<keyof typeof SCALAR_ENUMS, BundleTable> = {
   Race: "races",
   GameClass: "classes",
   Feat: "feats",
+  Career: "careers",
   Background: "backgrounds",
   Unit: "units",
   Spell: "spells",
@@ -81,6 +83,7 @@ export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
   table("races", "Race", "race"),
   table("classes", "GameClass", "gameClass"),
   table("feats", "Feat", "feat"),
+  table("careers", "Career", "career"),
   table("backgrounds", "Background", "background"),
   table("units", "Unit", "unit"),
   table("spells", "Spell", "spell"),
@@ -91,6 +94,13 @@ export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
   table("artifacts", "Artifact", "artifact"),
   table("tracks", "CampaignTrack", "campaignTrack"),
 ];
+
+const TABLE_KEY_OF_KIND: Readonly<Record<string, BundleTable>> = { "spell-groups": "spellGroups", "main-skills": "mainSkills", "artifact-sets": "artifactSets" };
+
+/** The one map from a content/pack kind to its bundle table key; kinds named like their table pass through. */
+export const tableKey = (kind: string): string => TABLE_KEY_OF_KIND[kind] ?? kind;
+
+export const tableOfKind = (kind: string): BundleTableDef | undefined => BUNDLE_TABLES.find((t) => t.key === tableKey(kind));
 
 const perTable = <T>(make: () => T) => Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, make()])) as Record<BundleTable, T>;
 
@@ -112,6 +122,7 @@ export const BundleSchema = z.object({
   ...perTable(() => rowSchema),
   classes: rowSchema.default([]),
   feats: rowSchema.default([]),
+  careers: rowSchema.default([]),
   backgrounds: rowSchema.default([]),
 }) as unknown as z.ZodType<Bundle>;
 
@@ -134,7 +145,7 @@ export function emptyBundle(): Bundle {
 
 export type TemplateDb = Pick<
   Prisma.TransactionClient,
-  "spellGroup" | "race" | "gameClass" | "feat" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
+  "spellGroup" | "race" | "gameClass" | "feat" | "career" | "background" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack" | "campaign"
 > & Partial<CompendiumBundleDb> & Partial<Pick<Prisma.TransactionClient, "campaignContentHide">>;
 
 export class TemplateLeakError extends Error {}

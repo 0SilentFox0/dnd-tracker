@@ -101,6 +101,34 @@ const OPERATIONS: Record<string, Loader> = {
       return { schema: battleConditionsSchema, mutate: battleConditionsMutation };
     },
   }),
+  "condition-test": operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "attack",
+    load: async () => {
+      const { conditionTestMutation, conditionTestSchema } = await import("@/lib/server/battles/mutations/condition-test/condition-test-mutation");
+
+      return { schema: conditionTestSchema, mutate: conditionTestMutation };
+    },
+  }),
+  channel: operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "attack",
+    load: async () => {
+      const { channelMutation, channelSchema } = await import("@/lib/server/battles/mutations/channel/channel-mutation");
+
+      return { schema: channelSchema, mutate: channelMutation };
+    },
+  }),
+  "system-condition": operation({
+    access: DM,
+    load: async () => {
+      const { systemConditionMutation, systemConditionSchema } = await import("@/lib/server/battles/mutations/system-condition/system-condition-mutation");
+
+      return { schema: systemConditionSchema, mutate: systemConditionMutation };
+    },
+  }),
   "initiative-reorder": operation({
     access: DM,
     load: async () => {

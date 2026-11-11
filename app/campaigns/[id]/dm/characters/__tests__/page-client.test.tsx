@@ -4,6 +4,7 @@ import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 
 const deleteAllCharacters = vi.fn(async () => ({}));
 
@@ -28,6 +29,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 vi.mock("@/components/common/OptimizedImage", () => ({ OptimizedImage: () => null }));
+vi.mock("@/lib/hooks/systems", () => ({ useRuleSystem: () => ({ key: "dnd5e", system: RULE_SYSTEM_REGISTRY.dnd5e, ready: true }) }));
 
 import { DMCharactersClient } from "@/app/campaigns/[id]/dm/characters/page-client";
 

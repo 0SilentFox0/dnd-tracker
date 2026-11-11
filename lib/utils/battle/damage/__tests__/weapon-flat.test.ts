@@ -9,6 +9,7 @@ import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage/breakdown";
 import { WEAPON_FLAT_LABEL } from "@/lib/utils/battle/damage/weapon-flat";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const weapon = (damageDice: string): BattleAttack => ({ id: "w", name: "Меч", type: AttackType.MELEE, attackBonus: 0, damageDice, damageType: "slashing" });
@@ -20,7 +21,7 @@ const attacker = asUnit(makeParticipant({ id: "a" }));
 const target = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, hp: 99, maxHp: 99 });
 
 const hit = (attack: BattleAttack, damageRolls: number[], attackRoll: { isCritical: boolean; criticalEffect?: CriticalEffect } = { isCritical: false }) =>
-  computeHitDamage({ attacker, target, attack, damageRolls, allParticipants: [attacker, target], attackRoll, currentRound: 1 });
+  computeHitDamage({ rules: DEFAULT_RULES, attacker, target, attack, damageRolls, allParticipants: [attacker, target], attackRoll, currentRound: 1 });
 
 const stat = getAttackAbilityModifier(attacker.abilities, AttackType.MELEE);
 
@@ -53,7 +54,7 @@ describe("бонус зброї «+N» у damageDice", () => {
   it("клієнтський розклад збігається з сервером; крит не подвоює бонус", () => {
     const attack = weapon("3d8+15");
 
-    const params = { attacker, target, attack, damageRolls: [4, 5, 6], allParticipants: [attacker, target] };
+    const params = { rules: DEFAULT_RULES, attacker, target, attack, damageRolls: [4, 5, 6], allParticipants: [attacker, target] };
 
     const server = hit(attack, [4, 5, 6]);
 
@@ -84,7 +85,7 @@ describe("бонус зброї «+N» у damageDice", () => {
 
       const d = withUnit("d", ParticipantSide.ENEMY, dice);
 
-      const r = resolveRetaliation({ participants: [a, d], attackerId: "a", defenderId: "d", attack: weapon(dice), attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85) });
+      const r = resolveRetaliation({ rules: DEFAULT_RULES, participants: [a, d], attackerId: "a", defenderId: "d", attack: weapon(dice), attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85) });
 
       return r?.participants.find((p) => p.basicInfo.id === "a")?.combatStats.currentHp;
     };

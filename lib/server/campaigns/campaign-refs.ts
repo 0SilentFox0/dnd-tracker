@@ -5,7 +5,7 @@ import { ContentError } from "@/lib/server/content/errors";
 
 type RefId = string | null | undefined;
 
-export type CampaignRefKind = "spell" | "spellGroup" | "mainSkill" | "skill" | "artifactSet" | "race";
+export type CampaignRefKind = "spell" | "spellGroup" | "mainSkill" | "skill" | "artifactSet" | "race" | "feat" | "career";
 
 export type CampaignRefs = Partial<Record<CampaignRefKind, RefId | RefId[]>>;
 
@@ -35,6 +35,14 @@ const REF_KINDS: Record<CampaignRefKind, { count: Counter; message: string }> = 
   race: {
     count: (campaignId, ids) => prisma.race.count({ where: { campaignId, id: { in: ids } } }),
     message: API_ERRORS.FOREIGN_RACE,
+  },
+  feat: {
+    count: (campaignId, ids) => prisma.feat.count({ where: { campaignId, id: { in: ids } } }),
+    message: API_ERRORS.FOREIGN_FEAT,
+  },
+  career: {
+    count: (campaignId, ids) => prisma.career.count({ where: { campaignId, id: { in: ids } } }),
+    message: API_ERRORS.FOREIGN_CAREER,
   },
 };
 

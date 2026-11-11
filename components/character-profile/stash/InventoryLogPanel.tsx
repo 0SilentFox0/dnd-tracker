@@ -9,12 +9,15 @@ import { HudSection } from "@/components/hud/form";
 import { HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useInventoryLog } from "@/lib/hooks/characters";
+import { useCurrency } from "@/lib/hooks/systems";
 import { useTranslator } from "@/lib/i18n/use-translator";
 
 export function InventoryLogPanel() {
   const { campaignId, characterId } = useProfile();
 
   const t = useTranslator("inventory");
+
+  const currency = useCurrency(campaignId);
 
   const format = useFormatter();
 
@@ -29,7 +32,7 @@ export function InventoryLogPanel() {
         <ul>
           {entries.map((e) => (
             <li key={e.id} className="break-words border-b border-hud-raised py-1.5 text-xs text-hud-muted">
-              {format.dateTime(new Date(e.createdAt), { day: "2-digit", month: "2-digit", year: "numeric" })} · {e.actor.displayName ?? "—"} · <span className="text-hud-ink">{describeLog(e, t)}</span>
+              {format.dateTime(new Date(e.createdAt), { day: "2-digit", month: "2-digit", year: "numeric" })} · {e.actor.displayName ?? "—"} · <span className="text-hud-ink">{describeLog(e, t, currency.label)}</span>
             </li>
           ))}
         </ul>

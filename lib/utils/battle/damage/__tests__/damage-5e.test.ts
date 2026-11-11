@@ -8,6 +8,7 @@ import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { heroAttackDamageParts, heroDamageContext } from "@/lib/utils/battle/damage/hero-damage";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const base = createMockParticipant();
@@ -31,7 +32,7 @@ const javelin: BattleAttack = { id: "j", name: "Дротик", type: AttackType.
 
 
 const hit = (attacker: BattleParticipant, attack: BattleAttack, rolls: number[]) =>
-  computeHitDamage({ attacker, target, attack, damageRolls: rolls, allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1 }).physicalDamage;
+  computeHitDamage({ rules: DEFAULT_RULES, attacker, target, attack, damageRolls: rolls, allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1 }).physicalDamage;
 
 const withAbility = (p: BattleParticipant, effect: { kind: "flag"; flag: "twoWeaponFighting" }): BattleParticipant => ({
   ...p,

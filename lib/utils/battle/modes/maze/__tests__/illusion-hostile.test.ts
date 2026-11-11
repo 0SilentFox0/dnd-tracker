@@ -11,6 +11,7 @@ import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { IllusionPair } from "@/types/battle";
 
 const ally = ParticipantSide.ALLY;
@@ -55,8 +56,8 @@ describe("illusion foes in the engine", () => {
   const ids = (ps: { basicInfo: { id: string } }[]) => ps.map((p) => p.basicInfo.id);
 
   it("melee reach includes the partner only while the pair is active", () => {
-    expect(ids(enemiesInReach(withPair, order, a, a.battleData.attacks[0]))).toEqual(["b"]);
-    expect(ids(enemiesInReach(noPair, order, a, a.battleData.attacks[0]))).toEqual([]);
+    expect(ids(enemiesInReach(withPair, order, a, a.battleData.attacks[0], DEFAULT_RULES))).toEqual(["b"]);
+    expect(ids(enemiesInReach(noPair, order, a, a.battleData.attacks[0], DEFAULT_RULES))).toEqual([]);
   });
 
   it("cleave extra targets include the partner only while the pair is active", () => {
@@ -71,8 +72,8 @@ describe("illusion foes in the engine", () => {
 
     const targeting = { kind: "enemy" as const, range: 60, maxTargets: 1 };
 
-    expect(resolveSpellTargets(order, a, spell, targeting, ["b"], { map: withPair })).toMatchObject({ ok: true, targetIds: ["b"] });
-    expect(resolveSpellTargets(order, a, spell, targeting, ["b"], { map: noPair }).ok).toBe(false);
+    expect(resolveSpellTargets(order, a, spell, targeting, ["b"], { map: withPair, rules: DEFAULT_RULES })).toMatchObject({ ok: true, targetIds: ["b"] });
+    expect(resolveSpellTargets(order, a, spell, targeting, ["b"], { map: noPair, rules: DEFAULT_RULES }).ok).toBe(false);
   });
 });
 
@@ -90,7 +91,7 @@ describe("attack-roll spell on an illusion partner", () => {
 
     const partner = makeParticipant({ id: "b", hp: 50, maxHp: 50 });
 
-    return castSpell({ caster, spell, targetIds: ["b"], allParticipants: [caster, partner], currentRound: 1, battleId: "x", diceRolls: [3], dice: { count: 1, sides: 6 }, attackRolls: [{ participantId: "b", roll }], rng: () => 0.5, map });
+    return castSpell({ caster, spell, targetIds: ["b"], allParticipants: [caster, partner], currentRound: 1, battleId: "x", diceRolls: [3], dice: { count: 1, sides: 6 }, attackRolls: [{ participantId: "b", roll }], rng: () => 0.5, rules: DEFAULT_RULES, map });
   };
 
   it("rolls against AC like against a real enemy (a natural 1 misses)", () => {

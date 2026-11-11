@@ -1,0 +1,73 @@
+[
+  {
+    "slug": "fix-alert",
+    "name": "Alert",
+    "type": "origin",
+    "prerequisite": {},
+    "repeatable": false,
+    "description": "You gain the following benefits.\n\n**Initiative Proficiency.** When you roll Initiative, you can add your Proficiency Bonus to the roll.\n\n**Initiative Swap.** Immediately after you roll Initiative, you can swap your Initiative with the Initiative of one willing ally in the same combat. You can't make this swap if you or the ally has the Incapacitated condition.",
+    "abilities": [
+      {
+        "id": "initiative-proficiency",
+        "name": "Initiative Proficiency",
+        "description": "You gain the following benefits.\n\n**Initiative Proficiency.** When you roll Initiative, you can add your Proficiency Bonus to the roll.\n\n**Initiative Swap.** Immediately after you roll Initiative, you can swap your Initiative with the Initiative of one willing ally in the same combat. You can't make this swap if you or the ally has the Incapacitated condition.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": {
+              "formula": "prof"
+            }
+          }
+        ]
+      },
+      {
+        "id": "alert",
+        "name": "Alert",
+        "description": "You gain the following benefits.\n\n**Initiative Proficiency.** When you roll Initiative, you can add your Proficiency Bonus to the roll.\n\n**Initiative Swap.** Immediately after you roll Initiative, you can swap your Initiative with the Initiative of one willing ally in the same combat. You can't make this swap if you or the ally has the Incapacitated condition.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Alert"
+          }
+        ]
+      }
+    ],
+    "choices": []
+  },
+  {
+    "slug": "fix-archery",
+    "name": "Archery",
+    "type": "fightingStyle",
+    "prerequisite": {
+      "text": "Fighting Style Feature"
+    },
+    "repeatable": false,
+    "description": "You gain a +2 bonus to attack rolls you make with Ranged weapons.",
+    "abilities": [
+      {
+        "id": "archery",
+        "name": "Archery",
+        "description": "You gain a +2 bonus to attack rolls you make with Ranged weapons.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 2,
+            "attackKind": "ranged"
+          }
+        ]
+      }
+    ],
+    "choices": []
+  }
+]

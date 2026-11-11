@@ -8,6 +8,7 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
 import { logFields } from "@/lib/utils/battle/log/lines";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -99,7 +100,9 @@ export function completeBattle(
 
   const restored = initiativeOrder.map(restoreCharm);
 
-  const revived = result === "victory" ? restored.filter(revivesOnVictory) : [];
+  const keepDowned = !!rules && !!ruleSystemOf(rules).conditions?.keepDownedAfterVictory;
+
+  const revived = result === "victory" && !keepDowned ? restored.filter(revivesOnVictory) : [];
 
   const updatedParticipants = restored.map((p) =>
     revived.includes(p) ? { ...clearDeathSaves(p), combatStats: { ...p.combatStats, currentHp: reviveHp(p), status: CombatStatus.ACTIVE } } : p,

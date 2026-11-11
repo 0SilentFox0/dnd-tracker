@@ -116,7 +116,8 @@
     "levelUp": "Підняти рівень",
     "dead": "Загинув",
     "statLevel": "Рів",
-    "statInitiative": "Ініц"
+    "statInitiative": "Ініц",
+    "wounds": "Рани"
   },
   "review": {
     "pendingTitle": "Очікують схвалення",
@@ -228,5 +229,21 @@
     "levelUpConfirm": "Підняти",
     "levelUpDoneIncreased": "Рівень піднято! {ability}: +1. Магічні слоти оновлено.",
     "levelUpDoneMaxed": "Рівень піднято! Усі характеристики на максимумі. Магічні слоти оновлено."
+  },
+  "wfrp": {
+    "characteristics": "Характеристики",
+    "skills": "Навички",
+    "base": "База",
+    "advances": "Підвищення",
+    "total": "Разом",
+    "move": "Рух",
+    "fate": "Доля",
+    "extraWounds": "Додаткові рани",
+    "skillSearch": "Пошук навички",
+    "skill": "Навичка",
+    "spec": "Спеціалізація",
+    "addSkill": "Додати",
+    "noSkillAdvances": "Підвищень навичок ще немає",
+    "removeSkill": "Прибрати: {name}"
   }
 }

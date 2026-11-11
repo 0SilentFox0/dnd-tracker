@@ -2,7 +2,7 @@
 
 import { type ReactNode, useState } from "react";
 
-import { SAVE_ABILITY_KEYS, SAVE_ON_SUCCESS_KEYS, SPELL_RESOLUTION_KEYS, SPELL_SIDE_KEYS, TARGETING_KINDS, TEMPLATE_SHAPE_KEYS } from "./spell-form-defaults";
+import { resolutionKeysOf, SAVE_ABILITY_KEYS, SAVE_ON_SUCCESS_KEYS, SPELL_SIDE_KEYS, TARGETING_KINDS, TEMPLATE_SHAPE_KEYS } from "./spell-form-defaults";
 
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Input } from "@/components/ui/input";
@@ -59,12 +59,13 @@ interface SpellTargetingFieldsProps {
   value: TargetingValue;
   onChange: (value: TargetingValue) => void;
   classesEnabled?: boolean;
+  magic?: boolean;
   idPrefix?: string;
   children?: ReactNode;
 }
 
 /** `children` render between the targeting block and the check (the template zone switch lives there). */
-export function SpellTargetingFields({ value, onChange, classesEnabled = false, idPrefix = "", children }: SpellTargetingFieldsProps) {
+export function SpellTargetingFields({ value, onChange, classesEnabled = false, magic = false, idPrefix = "", children }: SpellTargetingFieldsProps) {
   const t = useTranslator();
 
   const { targeting, resolution } = value;
@@ -75,7 +76,7 @@ export function SpellTargetingFields({ value, onChange, classesEnabled = false, 
 
   const options = (keys: string[], prefix: string) => keys.map((k) => ({ value: k, label: t(`${prefix}.${k}`) }));
 
-  const resolutionOptions = options(SPELL_RESOLUTION_KEYS, "spellEditor.power.resolution");
+  const resolutionOptions = options(resolutionKeysOf(magic), "spellEditor.power.resolution");
 
   return (
     <>

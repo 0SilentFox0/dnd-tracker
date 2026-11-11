@@ -4,6 +4,11 @@ export type Coin = (typeof COINS)[number];
 
 export const COIN_VALUE: Record<Coin, number> = { gp: 100, sp: 10, cp: 1 };
 
+export const DEFAULT_CURRENCY: { value: Record<Coin, number>; labelKeys: Record<Coin, string> } = {
+  value: COIN_VALUE,
+  labelKeys: { gp: "inventory.coins.gp", sp: "inventory.coins.sp", cp: "inventory.coins.cp" },
+};
+
 export const InventoryLogKind = {
   MONEY_SPEND: "money_spend",
   MONEY_GAIN: "money_gain",

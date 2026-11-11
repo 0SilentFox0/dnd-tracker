@@ -1,4 +1,5 @@
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { DamageRow } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -14,6 +15,10 @@ export interface AttackRollResult {
   chosenD20: number;
   /** другий d20 для переваги/недоліку; serverRolled — якщо клієнт його не надіслав */
   secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean; manual?: boolean };
+  /** d20 never writes these three */
+  system?: SystemSlot;
+  margin?: number;
+  location?: string;
 }
 
 export interface AttackResult {

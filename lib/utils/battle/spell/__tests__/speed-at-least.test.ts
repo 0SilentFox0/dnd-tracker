@@ -4,6 +4,7 @@ import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { moveBudget } from "@/lib/utils/battle/grid";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 40, rows: 10, background: null, opacity: 0.3 };
@@ -35,9 +36,9 @@ const rider = (speed: number, extraMovement = 0): BattleParticipant => {
 };
 
 const budgetAfterCast = (caster: BattleParticipant): number => {
-  const r = castSpell({ caster, spell: vehicle, targetIds: ["c"], allParticipants: [caster], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4, map });
+  const r = castSpell({ rules: DEFAULT_RULES, caster, spell: vehicle, targetIds: ["c"], allParticipants: [caster], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4, map });
 
-  return moveBudget({ map, dmUserId: null }, r.allParticipantsUpdated.find((p) => p.basicInfo.id === "c") as BattleParticipant);
+  return moveBudget({ rules: DEFAULT_RULES, map, dmUserId: null }, r.allParticipantsUpdated.find((p) => p.basicInfo.id === "c") as BattleParticipant);
 };
 
 describe("speed atLeast (Summon Vehicle) and the move budget of a player owner", () => {

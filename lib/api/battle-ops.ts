@@ -9,6 +9,7 @@ import type {
   AuraZoneData,
   BattleMutationResponse,
   BonusActionData,
+  ChannelData,
   CritChoiceData,
   MapBackgroundData,
   MapMotionData,
@@ -30,6 +31,12 @@ export type WithVersion<T> = T & { expectedVersion?: number };
 export type BattleConditionsBody =
   | { action: "apply"; participantId: string; condition: Condition5eKey | CustomConditionKey; rounds?: number; levels?: number; saveEnds?: { ability: AbilityKey; dc: number } }
   | { action: "remove"; participantId: string; condition: Condition5eKey | CustomConditionKey };
+
+export type SystemConditionBody =
+  | { action: "apply"; participantId: string; condition: string; levels?: number; rounds?: number }
+  | { action: "remove"; participantId: string; condition: string; all?: boolean };
+
+export type ConditionTestBody = { participantId: string; condition: string; roll?: number; serverRoll?: boolean };
 
 export type InitiativeRollBody = Record<string, never>;
 
@@ -91,6 +98,7 @@ export const battleOps = {
   mapWeather: op<MapWeatherData>({ path: "/map-weather", retryOnConflict: true }),
   bonusAction: op<BonusActionData>({ path: "/bonus-action" }),
   castSpell: op<SpellCastData, AttackResponse>({ path: "/spell", mapResponse: withHpChanges }),
+  channel: op<ChannelData>({ path: "/channel" }),
   start: op<object>({ path: "/start", invalidate: BATTLES_AND_ACTIVE }),
   reset: op<object>({ path: "/reset", invalidate: BATTLES }),
   complete: op<{ result?: "victory" | "defeat" }>({ path: "/complete", invalidate: BATTLES_AND_ACTIVE }),
@@ -98,6 +106,8 @@ export const battleOps = {
   addParticipant: op<AddParticipantData>({ path: "/add-participant" }),
   reveal: op<{ participantIds: string[] }>({ path: "/reveal-participant" }),
   conditions: op<BattleConditionsBody>({ path: "/conditions" }),
+  systemCondition: op<SystemConditionBody>({ path: "/system-condition" }),
+  conditionTest: op<ConditionTestBody>({ path: "/condition-test" }),
   initiativeReorder: op<InitiativeReorderBody>({ path: "/initiative-reorder" }),
   initiativeRoll: op<InitiativeRollBody>({ path: "/initiative-roll" }),
   coreAction: op<CoreActionBody>({ path: "/core-action" }),

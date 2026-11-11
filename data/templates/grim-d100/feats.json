@@ -1,0 +1,744 @@
+[
+  {
+    "slug": "blade-practice",
+    "name": "Blade Practice",
+    "type": "general",
+    "description": "+1 SL on melee attack tests per rank, from steady drilling with a blade.",
+    "xpCost": 150,
+    "maxRank": 2,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Blade Practice",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "melee"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "steady-aim",
+    "name": "Steady Aim",
+    "type": "general",
+    "description": "+1 SL on ranged attack tests per rank; a calm breath before every shot.",
+    "xpCost": 150,
+    "maxRank": 2,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Steady Aim",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "ranged"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "battle-instinct",
+    "name": "Battle Instinct",
+    "type": "general",
+    "description": "+1 SL on all attack tests; a sixth sense for the flow of a fight.",
+    "xpCost": 250,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Battle Instinct",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "tough-hide",
+    "name": "Tough Hide",
+    "type": "general",
+    "description": "+2 Wounds per rank; weathered skin that shrugs off knocks.",
+    "xpCost": 150,
+    "maxRank": 3,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Tough Hide",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "oxen-constitution",
+    "name": "Oxen Constitution",
+    "type": "general",
+    "description": "+3 Wounds per rank; stamina that outlasts the rest of the party.",
+    "xpCost": 200,
+    "maxRank": 2,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Oxen Constitution",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "snap-reaction",
+    "name": "Snap Reaction",
+    "type": "general",
+    "description": "+5 Initiative per rank; the body moves before the mind finishes the thought.",
+    "xpCost": 100,
+    "maxRank": 3,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Snap Reaction",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "tavern-brawler",
+    "name": "Tavern Brawler",
+    "type": "general",
+    "description": "+1 SL on melee attack tests; years of scraps in crowded taprooms.",
+    "xpCost": 100,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Tavern Brawler",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "melee"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "keen-sighting",
+    "name": "Keen Sighting",
+    "type": "general",
+    "description": "+1 SL on ranged attack tests; a sharp eye for distant targets.",
+    "xpCost": 100,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Keen Sighting",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "ranged"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "shield-drill",
+    "name": "Shield Drill",
+    "type": "general",
+    "description": "+1 SL on melee attack tests and +2 Wounds; formation training with a shield.",
+    "xpCost": 250,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Shield Drill",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "melee"
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "watchful",
+    "name": "Watchful",
+    "type": "general",
+    "description": "+5 Initiative; always half-ready for trouble.",
+    "xpCost": 100,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Watchful",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "last-stand-grit",
+    "name": "Last Stand Grit",
+    "type": "general",
+    "description": "+3 Wounds; stands firm when others would fall.",
+    "xpCost": 200,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Last Stand Grit",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ambusher",
+    "name": "Ambusher",
+    "type": "general",
+    "description": "+1 SL on ranged attack tests and +5 Initiative; patient and quick from cover.",
+    "xpCost": 200,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Ambusher",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "ranged"
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "fencer-s-footwork",
+    "name": "Fencer's Footwork",
+    "type": "general",
+    "description": "+1 SL on melee attack tests and +5 Initiative; light, precise steps.",
+    "xpCost": 200,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Fencer's Footwork",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "melee"
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "oarsman-s-back",
+    "name": "Oarsman's Back",
+    "type": "general",
+    "description": "+2 Wounds; a back built by long hours at the oars.",
+    "xpCost": 100,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Oarsman's Back",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cudgel-work",
+    "name": "Cudgel Work",
+    "type": "general",
+    "description": "+1 SL on melee attack tests; knows how to use a stick and a street corner.",
+    "xpCost": 150,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Cudgel Work",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "melee"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "knife-thrower",
+    "name": "Knife Thrower",
+    "type": "general",
+    "description": "+1 SL on ranged attack tests; a knack for throwing blades true.",
+    "xpCost": 150,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Knife Thrower",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1,
+            "attackKind": "ranged"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "veteran-s-poise",
+    "name": "Veteran's Poise",
+    "type": "general",
+    "description": "+1 SL on all attack tests and +5 Initiative; the calm of someone who has seen it all before.",
+    "xpCost": 300,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Veteran's Poise",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "hearty-eater",
+    "name": "Hearty Eater",
+    "type": "general",
+    "description": "+2 Wounds per rank; a strong stomach and the strength it brings.",
+    "xpCost": 100,
+    "maxRank": 2,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Hearty Eater",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "alert-sleeper",
+    "name": "Alert Sleeper",
+    "type": "general",
+    "description": "+5 Initiative per rank; wakes at the faintest rustle.",
+    "xpCost": 150,
+    "maxRank": 2,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Alert Sleeper",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "pack-mule",
+    "name": "Pack Mule",
+    "type": "general",
+    "description": "+2 Wounds; used to hauling heavy loads for days.",
+    "xpCost": 100,
+    "maxRank": 1,
+    "abilities": [
+      {
+        "id": "a1",
+        "name": "Pack Mule",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "lettered",
+    "name": "Lettered",
+    "type": "general",
+    "description": "Can read and write. The DM allows reading documents and notes that others cannot.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "tongue-for-tongues",
+    "name": "Tongue for Tongues",
+    "type": "general",
+    "description": "Picks up languages quickly. Each rank, the DM allows a new language to be learned in a short time.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "court-manners",
+    "name": "Court Manners",
+    "type": "general",
+    "description": "Knows etiquette of the high halls. The DM grants an edge when mingling with nobles and officials.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "silver-tongue",
+    "name": "Silver Tongue",
+    "type": "general",
+    "description": "Persuasive speaker. Each rank, the DM grants an edge on Charm-style social tests.",
+    "xpCost": 150,
+    "maxRank": 2
+  },
+  {
+    "slug": "haggler-s-instinct",
+    "name": "Haggler's Instinct",
+    "type": "general",
+    "description": "Knows what a thing is worth. Each rank, the DM grants an edge when bargaining.",
+    "xpCost": 100,
+    "maxRank": 2
+  },
+  {
+    "slug": "night-owl",
+    "name": "Night Owl",
+    "type": "general",
+    "description": "Stays alert through the dark hours. The DM waives fatigue penalties for a night without sleep.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "light-fingers",
+    "name": "Light Fingers",
+    "type": "general",
+    "description": "Nimble hands. Each rank, the DM grants an edge on sleight-of-hand and pickpocketing.",
+    "xpCost": 150,
+    "maxRank": 2
+  },
+  {
+    "slug": "lock-whisperer",
+    "name": "Lock Whisperer",
+    "type": "general",
+    "description": "Has a feel for latches and tumblers. Each rank, the DM grants an edge when picking locks.",
+    "xpCost": 150,
+    "maxRank": 2
+  },
+  {
+    "slug": "trail-sense",
+    "name": "Trail Sense",
+    "type": "general",
+    "description": "Rarely loses the path. Each rank, the DM grants an edge on navigation in the wild.",
+    "xpCost": 100,
+    "maxRank": 2
+  },
+  {
+    "slug": "way-with-beasts",
+    "name": "Way with Beasts",
+    "type": "general",
+    "description": "Animals trust this character. The DM allows calming or befriending ordinary beasts.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "weather-eye",
+    "name": "Weather Eye",
+    "type": "general",
+    "description": "Reads sky and wind. The DM reveals approaching weather ahead of time.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "river-reader",
+    "name": "River Reader",
+    "type": "general",
+    "description": "Understands currents and shoals. The DM grants an edge when crossing or navigating rivers.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "born-swimmer",
+    "name": "Born Swimmer",
+    "type": "general",
+    "description": "Swims as easily as walking. The DM waives penalties for swimming in calm water.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "steady-hands",
+    "name": "Steady Hands",
+    "type": "general",
+    "description": "Precise handiwork. Each rank, the DM grants an edge on delicate work such as surgery or repairs.",
+    "xpCost": 150,
+    "maxRank": 2
+  },
+  {
+    "slug": "green-thumb",
+    "name": "Green Thumb",
+    "type": "general",
+    "description": "Knows herbs and growing things. The DM allows identifying and gathering useful plants.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "iron-stomach",
+    "name": "Iron Stomach",
+    "type": "general",
+    "description": "Shrugs off bad food and mild poisons. The DM grants an edge on resisting rot and spoilage.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "parade-ground-voice",
+    "name": "Parade-Ground Voice",
+    "type": "general",
+    "description": "A voice that carries over any din. The DM allows issuing orders to a crowd or a group of allies.",
+    "xpCost": 200,
+    "maxRank": 1
+  },
+  {
+    "slug": "steel-nerves",
+    "name": "Steel Nerves",
+    "type": "general",
+    "description": "Hard to frighten. The DM grants an edge when resisting fear.",
+    "xpCost": 200,
+    "maxRank": 1
+  },
+  {
+    "slug": "lamp-lit-studies",
+    "name": "Lamp-Lit Studies",
+    "type": "general",
+    "description": "Learns well by candlelight. Each rank, the DM grants an edge on research and study.",
+    "xpCost": 100,
+    "maxRank": 3
+  },
+  {
+    "slug": "crowd-reader",
+    "name": "Crowd Reader",
+    "type": "general",
+    "description": "Senses the mood of a crowd. The DM reveals when a crowd is turning hostile or friendly.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "fast-talker",
+    "name": "Fast Talker",
+    "type": "general",
+    "description": "Talks fast and confusingly. The DM grants an edge when talking one's way out of trouble.",
+    "xpCost": 150,
+    "maxRank": 1
+  },
+  {
+    "slug": "road-worn",
+    "name": "Road-Worn",
+    "type": "general",
+    "description": "Hardened to the long road. Each rank, the DM grants an edge when enduring long journeys.",
+    "xpCost": 100,
+    "maxRank": 2
+  },
+  {
+    "slug": "keen-ears",
+    "name": "Keen Ears",
+    "type": "general",
+    "description": "Hears what others miss. The DM grants an edge on listening tests.",
+    "xpCost": 100,
+    "maxRank": 1
+  },
+  {
+    "slug": "quick-study",
+    "name": "Quick Study",
+    "type": "origin",
+    "description": "Lowlander. Picks up a new trade quickly. The DM shortens the time needed to learn a craft.",
+    "maxRank": 1
+  },
+  {
+    "slug": "stone-sense",
+    "name": "Stone Sense",
+    "type": "origin",
+    "description": "Delver. Notices unsound masonry and hollow walls. The DM reveals structural flaws.",
+    "maxRank": 1
+  },
+  {
+    "slug": "deep-sight",
+    "name": "Deep Sight",
+    "type": "origin",
+    "description": "Delver. Sees well in dim light. The DM waives penalties for dim light.",
+    "maxRank": 1
+  },
+  {
+    "slug": "light-step",
+    "name": "Light Step",
+    "type": "origin",
+    "description": "Hearthkin. Moves almost silently. The DM grants an edge on sneaking.",
+    "maxRank": 1
+  },
+  {
+    "slug": "underfoot",
+    "name": "Underfoot",
+    "type": "origin",
+    "description": "Hearthkin. Small enough to go unnoticed. The DM grants an edge when slipping through a crowd.",
+    "maxRank": 1
+  },
+  {
+    "slug": "twilight-eyes",
+    "name": "Twilight Eyes",
+    "type": "origin",
+    "description": "Veyl. Sees clearly at dusk and under starlight. The DM waives penalties for low light.",
+    "maxRank": 1
+  },
+  {
+    "slug": "long-memory",
+    "name": "Long Memory",
+    "type": "origin",
+    "description": "Veyl. Carries the memory of generations. The DM may share a relevant piece of old lore.",
+    "maxRank": 1
+  }
+]

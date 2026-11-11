@@ -8,6 +8,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const spell = (key: string, groupId = "Світло"): CastableSpell => {
@@ -35,7 +36,7 @@ const unicorn = (side: ParticipantSide = ParticipantSide.ALLY): BattleParticipan
 };
 
 function cast(key: string, order: BattleParticipant[], targetId: string, groupId?: string, rng = seq(0.5)) {
-  return castSpell({
+  return castSpell({ rules: DEFAULT_RULES,
     caster: order[0],
     spell: spell(key, groupId),
     targetIds: [targetId],

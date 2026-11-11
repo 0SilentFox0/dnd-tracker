@@ -4,9 +4,11 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { SAVE_SUCCESS_EFFECTS } from "@/lib/constants/save-critical-effects";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack/critical";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const scene: BattleSceneState = {
@@ -26,7 +28,7 @@ const twoActionsPerTurn = resolved({ trigger: { event: "passive" }, effects: [{ 
 
 describe("unused extra actions expire at the end of the turn", () => {
   it("the ending participant's pool is emptied", () => {
-    const out = advanceTurn({ participants: [hero(2), goblin], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero(2), goblin], pending: [], scene });
 
     expect(pool(out.participants)).toBe(0);
   });
@@ -34,13 +36,13 @@ describe("unused extra actions expire at the end of the turn", () => {
   it("a participant who went down on its own turn loses the pool too", () => {
     const down = { ...hero(1), combatStats: { ...hero(1).combatStats, currentHp: 0, status: "unconscious" as const } };
 
-    const out = advanceTurn({ participants: [down, goblin, makeParticipant({ id: "ally" })], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [down, goblin, makeParticipant({ id: "ally" })], pending: [], scene });
 
     expect(pool(out.participants)).toBe(0);
   });
 
   it("other participants' pools are untouched when someone else's turn ends", () => {
-    const out = advanceTurn({ participants: [hero(0), makeParticipant({ id: "ally" }), withPool(goblin, 1)], pending: [], scene });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [hero(0), makeParticipant({ id: "ally" }), withPool(goblin, 1)], pending: [], scene });
 
     expect(out.scene.turnIndex).toBe(1);
     expect(pool(out.participants, "gob")).toBe(1);
@@ -49,19 +51,19 @@ describe("unused extra actions expire at the end of the turn", () => {
   it("a grant received outside the own turn does not carry into it", () => {
     const h = hero(1);
 
-    expect(processStartOfTurn(h, 2, [h, goblin]).participant.battleData.pendingExtraActions ?? 0).toBe(0);
+    expect(processStartOfTurn(h, 2, [h, goblin], undefined, undefined, DEFAULT_RULES).participant.battleData.pendingExtraActions ?? 0).toBe(0);
   });
 
   it("actionsPerTurn still refills the pool at the turn start", () => {
     const h = hero(0, [twoActionsPerTurn]);
 
-    expect(processStartOfTurn(h, 2, [h, goblin]).participant.battleData.pendingExtraActions).toBe(1);
+    expect(processStartOfTurn(h, 2, [h, goblin], undefined, undefined, DEFAULT_RULES).participant.battleData.pendingExtraActions).toBe(1);
   });
 
   it("a morale extra turn gets the actionsPerTurn pool of a normal turn", () => {
     const marked = { ...hero(0, [twoActionsPerTurn]), actionFlags: { ...hero(0).actionFlags, hasUsedAction: true, hasExtraTurn: true } };
 
-    const out = advanceTurn({ participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: [marked, goblin], pending: [], scene: { ...scene, turnIndex: 1 } });
 
     expect(out.scene.turnIndex).toBe(0);
     expect(pool(out.participants)).toBe(1);
@@ -72,11 +74,11 @@ describe("unused extra actions expire at the end of the turn", () => {
 
     const target = applyCriticalEffect(makeParticipant({ id: "gob", side: ParticipantSide.ENEMY }), crit, 1, { offTurn: true });
 
-    const toTarget = advanceTurn({ participants: [hero(0), target], pending: [], scene });
+    const toTarget = advanceTurn({ rules: DEFAULT_RULES, participants: [hero(0), target], pending: [], scene });
 
     expect(pool(toTarget.participants, "gob")).toBe(1);
 
-    const after = advanceTurn({ participants: toTarget.participants, pending: [], scene: { ...scene, ...toTarget.scene } });
+    const after = advanceTurn({ rules: DEFAULT_RULES, participants: toTarget.participants, pending: [], scene: applyScenePatch(scene, toTarget.scene ?? {}) });
 
     expect(pool(after.participants, "gob")).toBe(0);
     expect(after.participants.find((p) => p.basicInfo.id === "gob")?.battleData.activeEffects).toHaveLength(0);

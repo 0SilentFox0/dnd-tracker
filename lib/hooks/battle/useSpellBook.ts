@@ -2,6 +2,7 @@
 
 import { useMemo, useReducer, useState } from "react";
 
+import { useBattleRules } from "./useBattleRules";
 import { useBattleScene } from "./useBattleScene";
 import { useBattleSpellLibrary } from "./useBattleSpellLibrary";
 import { useIngredientPlan } from "./useIngredientPlan";
@@ -14,6 +15,7 @@ import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import {
   buildSpellPick,
   casterUsesUniversalSlot,
+  castPreviewOf,
   costBlocked,
   defaultGrant,
   grantLabel as grantLabelOf,
@@ -48,6 +50,8 @@ export function useSpellBook(
 ) {
   const scene = useBattleScene();
 
+  const { magic, fortune } = useBattleRules();
+
   const text = useText();
 
   const [finishLong, setFinishLong] = useState(false);
@@ -61,7 +65,9 @@ export function useSpellBook(
 
   const special = options.legendary;
 
-  const bypassCost = free || !!special;
+  const costFree = free || !!special;
+
+  const bypassCost = costFree || magic;
 
   const spells = useBattleSpellLibrary(caster, { isOpen, free, specialSpellId: special?.spellId, reactionsOnly: options.reactionsOnly });
 
@@ -79,8 +85,10 @@ export function useSpellBook(
 
   const map = scene.battle.map ?? null;
 
+  const build = (s: BookSpell, opts: { castLevel?: number; test?: boolean } = {}) => buildSpellPick(order, caster, s, map, { castLevel: opts.castLevel, castTest: magic && !costFree && opts.test !== false });
+
   if (flow.step === "book" && special && spells[0]) {
-    dispatch({ type: "PICK", pick: buildSpellPick(order, caster, spells[0], map, { castLevel: caster?.spellcasting.grants?.find((g) => g.spellId === special.spellId)?.castLevel }) });
+    dispatch({ type: "PICK", pick: build(spells[0], { castLevel: caster?.spellcasting.grants?.find((g) => g.spellId === special.spellId)?.castLevel }) });
   }
 
   const { targets, onMap, inRange, filteredOut, hover, aimPreviewAt, mapTargeting, chain, state } = useSpellBookTargets(caster, flow, dispatch);
@@ -93,7 +101,7 @@ export function useSpellBook(
 
   const { grantsOf, grantOf, canSlot, slotChoices, selectedGrant, sourceOptions, castLevelOptions, formulaOf } = spellSourceModel(caster, flow, selected, bypassCost);
 
-  const ingredients = useIngredientPlan(caster, selected, bypassCost || !!selectedGrant || !!selected?.grantKey);
+  const ingredients = useIngredientPlan(caster, selected, costFree || !!selectedGrant || !!selected?.grantKey, state.useIngredient ?? false);
 
   useSpellCastSubmit({ caster, selected, flow: { state, dispatch }, cast: { free, legendaryKey: special?.abilityKey, finishLong }, onDone: options.onDone });
 
@@ -101,7 +109,10 @@ export function useSpellBook(
 
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
+  const castPreview = magic && caster && selected && state.pick?.castTest ? castPreviewOf(caster, scene.battle.rules, selected.casting?.magic?.kind) : null;
+
   const view = {
+    cast: castPreview && { ...castPreview, cn: selected?.casting?.magic?.cn ?? 0, fortune: { available: fortune && (caster?.battleData.fortune ?? 0) >= 1, left: caster?.battleData.fortune ?? 0, value: state.castFortune ?? null } },
     spells,
     byLevel,
     selected,
@@ -128,6 +139,7 @@ export function useSpellBook(
     sourceValue: flow.grantKey ? `grant:${flow.grantKey}` : flow.slotKey ? `slot:${flow.slotKey}` : "",
     castLevelOptions,
     castLevelValue: flow.castLevel ?? selectedGrant?.castLevel,
+    magic,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, bypassCost || spells.some((s) => s.level === level && !!grantOf(s))),
     slotCostLabel: (s: BookSpell) => {
       const parts = [special ? textRef("battleWizards.flow.cost.special") : undefined, labelOf(s)].filter((p): p is LogLine => p !== undefined && p !== "");
@@ -170,7 +182,7 @@ export function useSpellBook(
 
       dispatch({
         type: "PICK",
-        pick: buildSpellPick(order, caster, s, map, { castLevel: grant?.castLevel ?? first?.castLevel }),
+        pick: build(s, { castLevel: grant?.castLevel ?? first?.castLevel, test: !grant }),
         ...(first && { slotKey: first.key }),
         ...(grant?.key && { grantKey: grant.key }),
         ...(grant?.upcast && grant.castLevel !== undefined && { castLevel: grant.castLevel }),
@@ -179,7 +191,7 @@ export function useSpellBook(
     setSlot: (key: string) => {
       const option = selected && slotChoices.find((o) => o.key === key);
 
-      if (selected && option) dispatch({ type: "SET_SLOT", slotKey: key, pick: buildSpellPick(order, caster, selected, map, { castLevel: option.castLevel }) });
+      if (selected && option) dispatch({ type: "SET_SLOT", slotKey: key, pick: build(selected, { castLevel: option.castLevel }) });
     },
     setSource: (value: string) => {
       if (!selected) return;
@@ -192,13 +204,13 @@ export function useSpellBook(
         dispatch({
           type: "SET_GRANT",
           grantKey: grant.key,
-          pick: buildSpellPick(order, caster, selected, map, { castLevel: grant.castLevel }),
+          pick: build(selected, { castLevel: grant.castLevel, test: false }),
           ...(grant.upcast && grant.castLevel !== undefined && { castLevel: grant.castLevel }),
         });
       }
     },
     setCastLevel: (castLevel: number) => {
-      if (selected && selectedGrant) dispatch({ type: "SET_CAST_LEVEL", castLevel, pick: buildSpellPick(order, caster, selected, map, { castLevel }) });
+      if (selected && selectedGrant) dispatch({ type: "SET_CAST_LEVEL", castLevel, pick: build(selected, { castLevel, test: false }) });
     },
     setOption: (index: number) => dispatch({ type: "SET_OPTION", index }),
     setInputCount: (count: number) => dispatch({ type: "SET_INPUT", count }),
@@ -239,6 +251,9 @@ export function useSpellBook(
 
       if (state.pick?.needsAttackRolls) state.targetIds.forEach((id) => state.attacks[id] === undefined && dispatch({ type: "SET_ATTACK", id, value: rollDie(20, cryptoRandom) }));
     },
+    setCastRoll: (roll?: number, second?: number) => dispatch({ type: "SET_CAST_ROLL", roll, second }),
+    setUseIngredient: (value: boolean) => dispatch({ type: "SET_CAST_INGREDIENT", value }),
+    setCastFortune: (value: "reroll" | "sl" | null) => dispatch({ type: "SET_CAST_FORTUNE", value }),
     toSummary: () => dispatch({ type: "TO_SUMMARY" }),
     back: () => dispatch({ type: "BACK" }),
     submit: () => dispatch({ type: "SUBMIT" }),

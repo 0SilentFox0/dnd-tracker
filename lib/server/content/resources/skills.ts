@@ -59,6 +59,7 @@ export const skillsResource = defineResource<SkillRow, CreateSkillInput, UpdateS
       data: {
         campaignId: actor.campaignId,
         image: data.image ?? null,
+        appearanceDescription: data.appearanceDescription || null,
         ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
         name: basicInfo.name,
         description: basicInfo.description || null,

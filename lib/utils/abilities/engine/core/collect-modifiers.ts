@@ -1,5 +1,5 @@
-import { resolveFlat } from "./amount";
 import { staticEffectStrength } from "./effect-strength";
+import { resolveFlat } from "./flat";
 import { findParticipant, isActive, isDormant, isEscaped, resolvedAbilitiesOf } from "./participants";
 
 import { textRef } from "@/lib/i18n/text-ref";

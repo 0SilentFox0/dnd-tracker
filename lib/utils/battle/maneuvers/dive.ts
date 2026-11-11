@@ -37,7 +37,7 @@ function victimOf(ps: BattleParticipant[], actor: BattleParticipant, map: Battle
 }
 
 /** Приземлення на початку ходу: удар по тому, хто на клітинці (без карти — по цілі), і посадка на найближчу вільну клітинку. */
-export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: BattleMapConfig | null; rng: Rng; rules?: Ruleset }): ManeuverResult {
+export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: BattleMapConfig | null; rng: Rng; rules: Ruleset }): ManeuverResult {
   const actor = findParticipant(ps, actorId);
 
   const airborne = actor?.battleData.airborne;

@@ -4,8 +4,9 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
-const ctx = { round: 1, rng: seq(0) };
+const ctx = { round: 1, rng: seq(0), rules: DEFAULT_RULES };
 
 const hit = { type: "hit" as const, actorId: "a", targetId: "e", attackKind: "melee" as const, damage: 6 };
 
@@ -28,11 +29,11 @@ describe("runAbilities", () => {
 
     let ps = [makeParticipant({ id: "a", abilities: [once] }), makeParticipant({ id: "e", side: ParticipantSide.ENEMY })];
 
-    ps = runAbilities(ps, hit, { round: 1, rng: seq(0.9) }).participants;
+    ps = runAbilities(ps, hit, { rules: DEFAULT_RULES, round: 1, rng: seq(0.9) }).participants;
     expect(ps[0].combatStats.morale).toBe(0);
-    ps = runAbilities(ps, hit, { round: 1, rng: seq(0.1) }).participants;
+    ps = runAbilities(ps, hit, { rules: DEFAULT_RULES, round: 1, rng: seq(0.1) }).participants;
     expect(ps[0].combatStats.morale).toBe(1);
-    ps = runAbilities(ps, hit, { round: 1, rng: seq(0.1) }).participants;
+    ps = runAbilities(ps, hit, { rules: DEFAULT_RULES, round: 1, rng: seq(0.1) }).participants;
     expect(ps[0].combatStats.morale).toBe(1);
   });
 
@@ -126,7 +127,7 @@ describe("resolveDowned", () => {
 
     const plain = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "changeMorale", delta: 1 }] }, { id: "p" });
 
-    const run = (a: typeof lucky) => runAbilities([makeParticipant({ id: "a", abilities: [a] }), makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], hit, { round: 1, rng: () => 0 }).messages;
+    const run = (a: typeof lucky) => runAbilities([makeParticipant({ id: "a", abilities: [a] }), makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], hit, { rules: DEFAULT_RULES, round: 1, rng: () => 0 }).messages;
 
     expect(run(lucky).every((m) => textOf(m).endsWith(" (шанс 40 %)"))).toBe(true);
     expect(run(lucky).length).toBeGreaterThan(0);
@@ -141,7 +142,7 @@ describe("resolveDowned", () => {
     const r = runAbilities(
       [makeParticipant({ id: "a", abilities: [seduce] }), makeParticipant({ id: "e", side: ParticipantSide.ENEMY, abilities: [enemyChance] })],
       hit,
-      { round: 1, rng: () => 0.99 },
+      { rules: DEFAULT_RULES, round: 1, rng: () => 0.99 },
     );
 
     expect(r.messages.map((m) => textOf(m))).toEqual(["🎲 Спокуса: не спрацювало (шанс 15 %)"]);

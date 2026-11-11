@@ -22,22 +22,25 @@ import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
 import { classPools } from "@/lib/utils/abilities/class-columns";
 import { readChoiceList } from "@/lib/utils/abilities/read";
+import { initAmmo } from "@/lib/utils/battle/ammo";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { classProficiencies, withGrantedProficiencies } from "@/lib/utils/battle/proficiency/collect";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { choiceSelections, selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
-import { classHp, classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
+import { classSaves, classSpellcastingAbility } from "@/lib/utils/characters/classes";
 import { applyClassArmor } from "@/lib/utils/characters/classes/armor-class";
-import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
+import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { applyCharacterResources, storedCharacterState } from "@/lib/utils/characters/resources/battle";
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
+import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { ResolvedClassEntry } from "@/types/classes";
 
 async function resolveCharacterClassEntries(character: CharacterFromPrisma, rules: Ruleset, context?: CampaignSpellContext): Promise<ResolvedClassEntry[]> {
@@ -77,12 +80,24 @@ async function loadCharacterBuildRefs(character: CharacterFromPrisma, rules: Rul
 
   const resolvedClasses = resolvedEntries.some((e) => e.class) ? resolvedEntries : null;
 
-  const attacks = extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, { fiveE: !!resolvedClasses, items: { enabled: rules.items.enabled, attuned: attunedRefs(character.inventory) } });
+  const { attacksOf } = ruleSystemOf(rules).combat;
+
+  const attacks = extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, {
+    fiveE: !!resolvedClasses,
+    items: { enabled: rules.items.enabled, attuned: attunedRefs(character.inventory) },
+    ...(attacksOf && { attacksOf: () => attacksOf({ rows: artifactRows }) }),
+  });
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 
   return { skills, artifactRows, consumables, equippedArtifacts, completed, resolvedClasses, attacks, race };
 }
+
+const ammoOf = (attacks: BattleAttack[]) => {
+  const ammo = initAmmo(attacks);
+
+  return ammo ? { ammo } : {};
+};
 
 type BuildRefs = Awaited<ReturnType<typeof loadCharacterBuildRefs>>;
 
@@ -145,6 +160,16 @@ async function characterSpellcasting(character: CharacterFromPrisma, refs: Build
   };
 }
 
+async function characterTalentGroups(character: CharacterFromPrisma, rules: Ruleset, context: CampaignSpellContext | undefined) {
+  const advancement = ruleSystemOf(rules).advancement;
+
+  const talents = advancement?.talentsOf(character) ?? {};
+
+  if (!advancement || Object.keys(talents).length === 0) return [];
+
+  return advancement.talentGroups(talents, await loadFeatsById(character.campaignId, true, context?.featsById));
+}
+
 function finalizeCharacter(participant: BattleParticipant, character: CharacterFromPrisma, classMode: boolean, spellcastingAbility: string | null | undefined, rules: Ruleset): BattleParticipant {
   const baked = bakePassives(participant);
 
@@ -185,6 +210,8 @@ export async function createBattleParticipantFromCharacter(
 
   const { selections, schoolMastery, grantPools, spellcastingAbility, spellcasting } = await characterSpellcasting(character, refs, proficiencyBonus, context);
 
+  const equipmentGear = ruleSystemOf(rules).equipment?.armourAp(artifactRows.filter((r) => !r.carried).map(({ row, slot }) => ({ slot, systemStats: row.systemStats })));
+
   const archetype = heroArchetype(resolvedClasses ? null : (character as { archetype?: string | null }).archetype);
 
   const meleeDice = heroDiceTable(rules, "melee");
@@ -209,7 +236,9 @@ export async function createBattleParticipantFromCharacter(
     ? DND_SKILLS.filter((k) => (rawSkills as Record<string, unknown>)[k] === true)
     : [];
 
-  const computedMaxHp = resolvedClasses ? classHp(resolvedClasses, character.constitution) : heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
+  const computedMaxHp = characterBaseHp(character, { entries: resolvedClasses, formula: heroHpFormula(rules.heroScaling), rules, characteristics: character.characteristics }).total;
+
+  const choiceGroups = [...(selections?.groups ?? []), ...(await characterTalentGroups(character, rules, context))];
 
   const resolvedAbilities = [
     ...collectCharacterAbilities({
@@ -219,14 +248,16 @@ export async function createBattleParticipantFromCharacter(
     completedSets: completed.sets,
     consumables: consumables.map(({ itemId, row }) => ({ itemId, row })),
     ...(resolvedClasses && { classes: resolvedClasses }),
-    ...(selections && selections.groups.length > 0 && { choiceGroups: selections.groups }),
+    ...(choiceGroups.length > 0 && { choiceGroups }),
   }),
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
-  const ingredientStock = rules.spellIngredients.enabled && character.controlledBy && character.controlledBy !== CONTROLLED_BY_DM ? buildIngredientStock(character.inventory, { withPurse: rules.spellIngredients.autoPay }) : undefined;
+  const ingredientStock = rules.spellIngredients.enabled && character.controlledBy && character.controlledBy !== CONTROLLED_BY_DM ? buildIngredientStock(character.inventory, { withPurse: rules.spellIngredients.autoPay, value: currencyValueOf(rules) }) : undefined;
 
   const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...grantPools };
+
+  const baseStats = ruleSystemOf(rules).combat.baseStats?.(character);
 
   const participant: BattleParticipant = {
     basicInfo: {
@@ -243,8 +274,8 @@ export async function createBattleParticipantFromCharacter(
     },
     abilities: {
       level: character.level,
-      initiative: character.initiative,
-      baseInitiative: character.initiative,
+      initiative: baseStats?.initiative ?? character.initiative,
+      baseInitiative: baseStats?.initiative ?? character.initiative,
       strength: character.strength,
       dexterity: character.dexterity,
       constitution: character.constitution,
@@ -258,6 +289,7 @@ export async function createBattleParticipantFromCharacter(
       raceId: (race as { id?: string } | null)?.id,
       moraleCap: moraleCapFromRules(rules),
       ...(resolvedClasses && { damageModel: "5e" as const }),
+      ...systemSlotOf(ruleSystemOf(rules).combat.participantFields?.(character, equipmentGear)),
       heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,
@@ -273,7 +305,7 @@ export async function createBattleParticipantFromCharacter(
       currentHp: computedMaxHp,
       tempHp: 0,
       armorClass: character.armorClass,
-      speed: character.speed,
+      speed: baseStats?.speed ?? character.speed,
       morale: (character as { morale?: number }).morale || 0,
       status: computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
       minTargets: character.minTargets ?? 1,
@@ -290,6 +322,7 @@ export async function createBattleParticipantFromCharacter(
       abilityUsage: {},
       ...(Object.keys(pools).length > 0 && { pools }),
       ...(ingredientStock && { ingredientStock }),
+      ...ammoOf(attacks),
       pendingExtraActions: 0,
     },
     actionFlags: {

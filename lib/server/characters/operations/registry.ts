@@ -25,10 +25,12 @@ import { tokensCreateOperation } from "./tokens-create";
 import { tokensDeleteOperation } from "./tokens-delete";
 import { transferOperation } from "./transfer";
 
+import { mergeSystemOperations } from "@/lib/server/systems/registry";
+
 const erased = (op: unknown) => op as CharacterOperation;
 
 /** Assistant entry points keyed by action name: the same pure `(gate, input)` cores the HTTP routes use. */
-export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
+const CORE_OPERATIONS: Record<string, CharacterOperation> = {
   create: erased(createOperation),
   list: erased(listOperation),
   roster: erased(rosterOperation),
@@ -55,3 +57,5 @@ export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
   roll: erased(rollOperation),
   ...Object.fromEntries(Object.entries(READ_OPERATIONS).map(([key, op]) => [key, erased(op)])),
 };
+
+export const CHARACTER_OPERATIONS = mergeSystemOperations(CORE_OPERATIONS, ({ operation }) => operation);

@@ -8,6 +8,7 @@ import type { UnitStats } from "@/lib/utils/battle/balance";
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster, unitMember } from "@/lib/utils/battle/balance";
 import { pickXpRoster, resolveXpDifficulty, type XpEdition } from "@/lib/utils/battle/balance/xp-budget";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
@@ -31,7 +32,7 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
   const [library, heroes] = await Promise.all([
     loadUnitLibraryStats(campaignId, rules),
-    allyParticipants.characterIds.length > 0 ? loadCharacterBalanceStats(campaignId, allyParticipants.characterIds) : [],
+    allyParticipants.characterIds.length > 0 ? loadCharacterBalanceStats(campaignId, allyParticipants.characterIds, rules) : [],
   ]);
 
   const members: Parameters<typeof buildPartyPower>[0] = heroes.map(({ stats }) => ({ stats: heroMember(stats), hero: true }));
@@ -49,7 +50,7 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
     allyCount += quantity;
   }
 
-  const party = buildPartyPower(members);
+  const party = buildPartyPower(members, rules ? ruleSystemOf(rules).combat.hitModel : undefined);
 
   const allyStats: AllyStats = {
     dpr: round1(party.dpr),

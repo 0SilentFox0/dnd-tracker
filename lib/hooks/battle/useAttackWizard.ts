@@ -4,12 +4,14 @@ import { useMemo, useReducer } from "react";
 
 import { useAttackSubmit } from "./useAttackSubmit";
 import { useAttackTargets } from "./useAttackTargets";
+import { useBattleRules } from "./useBattleRules";
 import { useBattleScene } from "./useBattleScene";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
+import { ammoStatus } from "@/lib/utils/battle/ammo";
 import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { CUNNING_STRIKE_LABELS, cunningStrikeOffer, toggleCunningStrike } from "@/lib/utils/battle/attack/cunning-strike";
@@ -17,14 +19,17 @@ import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
-import { attackFlow, type AttackMode, forcedFor, initialAttackFlow, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
+import { attackFlow, type AttackFlowAction, type AttackMode, forcedFor, initialAttackFlow, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { canSeeExactStats, strikeDamageSteps, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();
+
+  const { dice, serverJudged, sceneState, fortune } = useBattleRules();
 
   const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
 
@@ -40,7 +45,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
-  const { targets, enemyTargets, cover, visible } = useAttackTargets(attacker, attack, state.step);
+  const { targets, enemyTargets, cover, unreachable, visible } = useAttackTargets(attacker, attack, state.step);
 
   const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
 
@@ -80,6 +85,15 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     [attacker, attacks, order, isOpen],
   );
 
+  const attackTarget = ruleSystemOf(scene.battle.rules).combat.attackTarget;
+
+  const judged = {
+    target: serverJudged && attacker && attack ? (attackTarget?.(attacker, attack) ?? null) : null,
+    sceneState,
+    attackerSide: attacker?.basicInfo.side,
+    weaponTargets: serverJudged && attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, attackTarget?.(attacker, a)?.target])) : {},
+  };
+
   const unknownDefense = state.strikes.some((s) => {
     const t = byId(s.targetId);
 
@@ -101,7 +115,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const preselectAll = (chosen: BattleAttack) => {
     if (!hitsAll) return;
 
-    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen).filter(visible) : enemyTargets;
+    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen, scene.battle.rules).filter(visible) : enemyTargets;
 
     dispatch({ type: "SET_TARGETS", ids: inReach.map((p) => p.basicInfo.id) });
   };
@@ -120,6 +134,9 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     return rollOutcomeOf(attacker, target, attack, attackCtx, { d20, second, mode: currentMode });
   };
 
+  const rollAction = (d20?: number, second?: number): AttackFlowAction =>
+    serverJudged ? { type: "ROLL", d20, outcome: "hit", judge: "server", damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)), ...(second !== undefined && { second }) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20 ?? 0, second) };
+
   useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
   const cunningOffer = useMemo(() => (attacker && !state.offHand && isOpen ? cunningStrikeOffer(attacker, scene.battle.currentRound) : null), [attacker, state.offHand, isOpen, scene.battle.currentRound]);
@@ -130,7 +147,9 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       maxEffects: cunningOffer.maxEffects,
       sneakDice: cunningOffer.sneakDice,
     },
-    attack, attacks, targets, steps, estimate, cover, unknownDefense, previews,
+    fortune: { available: serverJudged && fortune && (attacker?.battleData.fortune ?? 0) >= 1 && state.targetIds.length === 1, left: attacker?.battleData.fortune ?? 0 },
+    ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.ammo?.capacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.ammo.capacity, capacity: a.ammo.capacity }] as const] : []))) : {},
+    attack, attacks, targets, steps, estimate, cover, unreachable, unknownDefense, previews, dice, serverJudged, judged,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
     reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
@@ -192,9 +211,10 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       dispatch({ type: "CONFIRM_TARGETS", forced });
     },
-    selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
+    selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.filter((p) => !unreachable.has(p.basicInfo.id)).map((p) => p.basicInfo.id) }),
     toggleCunning: (effect: CunningStrikeEffect) => cunningOffer && dispatch({ type: "SET_CUNNING_STRIKE", effects: toggleCunningStrike(state.cunningStrike ?? [], effect, cunningOffer) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
+    setFortune: (value: "reroll" | "sl" | null) => dispatch({ type: "SET_FORTUNE", value }),
     setInspiration: (value: boolean) => {
       const t = byId(state.strikes[0]?.targetId ?? "");
 
@@ -202,13 +222,15 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       dispatch({ type: "SET_INSPIRATION", value, forced });
     },
-    roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
+    roll: (d20: number, second?: number) => dispatch(rollAction(d20, second)),
     aiRoll: () => {
-      const d20 = rollDie(20, cryptoRandom);
+      if (serverJudged) return dispatch(rollAction());
+
+      const d20 = rollDie(dice, cryptoRandom);
 
       const second = currentMode === "normal" ? undefined : rollDie(20, cryptoRandom);
 
-      dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) });
+      dispatch(rollAction(d20, second));
     },
     damage: (values: number[]) => dispatch({ type: "DAMAGE", values }),
     back: () => dispatch({ type: "BACK" }),

@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 
 import { PlayerDraftForm } from "@/components/characters/player-draft/PlayerDraftForm";
-import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
+import { systemUiOf } from "@/components/systems";
+import { CharacterStatus, CharacterType, type GoalKind } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { prisma } from "@/lib/db";
+import { ExtendLocaleScope } from "@/lib/i18n/extend-locale-scope";
+import { systemScope } from "@/lib/i18n/system-scope";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { draftEditInitial } from "@/lib/server/characters/choices/draft-initial";
 import { validateAbilityScores } from "@/lib/utils/characters/generate";
@@ -46,7 +49,27 @@ export default async function PlayerDraftPage({ params }: { params: Promise<{ id
 
   if (!c) redirect(`/campaigns/${id}/character`);
 
-  const { choices, scores } = await draftEditInitial(c, parseRules(campaign.rules));
+  const rules = parseRules(campaign.rules);
+
+  const DraftForm = systemUiOf(rules.system.key).DraftForm;
+
+  if (DraftForm) {
+    const initialIdentity = {
+      name: c.name,
+      alignment: c.alignment ?? undefined,
+      background: c.background ?? undefined,
+      avatar: c.avatar ?? undefined,
+      goals: ((c.goals as Array<{ text: string; kind: GoalKind }> | null) ?? []).map(({ text, kind }) => ({ text, kind })),
+    };
+
+    return (
+      <ExtendLocaleScope namespaces={systemScope(rules.system.key, "draft")}>
+        <DraftForm campaignId={id} characterId={c.id} initialIdentity={initialIdentity} />
+      </ExtendLocaleScope>
+    );
+  }
+
+  const { choices, scores } = await draftEditInitial(c, rules);
 
   const archetype = HERO_ARCHETYPE_KEYS.find((k) => k === c.archetype) ?? "warrior";
 

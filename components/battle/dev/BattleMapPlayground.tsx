@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useBattleMapPlayground } from "@/lib/hooks/battle/useBattleMapPlayground";
 import { cn } from "@/lib/utils";
 import { remainingMovement } from "@/lib/utils/battle/grid";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const FIELD = "h-8 w-full rounded-md border border-hud-rule bg-black/30 px-2 text-sm";
 
@@ -81,7 +82,7 @@ export function BattleMapPlayground() {
           <HudPanel className="text-sm">
             <div className="font-semibold">{active.basicInfo.name}</div>
             <div className="text-hud-muted">
-              HP {active.combatStats.currentHp}/{active.combatStats.maxHp} · Movement left: {remainingMovement(active)} cells
+              HP {active.combatStats.currentHp}/{active.combatStats.maxHp} · Movement left: {remainingMovement(active, DEFAULT_RULES)} cells
             </div>
             {attack && (
               <div className="text-hud-muted">

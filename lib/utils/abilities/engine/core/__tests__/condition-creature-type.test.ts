@@ -6,6 +6,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { ConditionSchema } from "@/lib/utils/abilities/schema";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const owner = makeParticipant({ id: "a" });
 
@@ -39,7 +40,7 @@ describe("targetCreatureType", () => {
 
     const before = [caster, dragon, undead, unknown];
 
-    const out = runAbilities(before, { type: "spellCast", phase: "after", actorId: "a", targetIds: ["dragon", "undead", "unknown"] }, { round: 1, rng: () => 0.5 });
+    const out = runAbilities(before, { type: "spellCast", phase: "after", actorId: "a", targetIds: ["dragon", "undead", "unknown"] }, { rules: DEFAULT_RULES, round: 1, rng: () => 0.5 });
 
     expect(out.participants.slice(1).map((p, i) => before[i + 1].combatStats.currentHp - p.combatStats.currentHp)).toEqual([3, 0, 0]);
   });

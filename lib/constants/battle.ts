@@ -121,8 +121,6 @@ export const isRecharge = (value: unknown): value is RechargeThreshold => (RECHA
 
 export const MIN_CRIT_ON = 2;
 
-export const CELL_FEET = 5;
-
 export const FIRE_WAVE_NO_MAP_VICTIMS = 2;
 
 export const AURA_RADIUS_CELLS = 2;

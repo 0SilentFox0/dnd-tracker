@@ -14,7 +14,8 @@
   },
   "rollLabel": {
     "save": "Рятівний кидок: {ability}",
-    "check": "Перевірка: {ability}"
+    "check": "Перевірка: {ability}",
+    "test": "Тест: {label}"
   },
   "restDialog": {
     "title": "Відпочинок",
@@ -26,7 +27,10 @@
   "party": {
     "rest": "Відпочинок",
     "closeRest": "Завершити відпочинок",
-    "xp": "Досвід"
+    "xp": "Досвід",
+    "session": "Нова сесія",
+    "sessionConfirmTitle": "Почати нову сесію?",
+    "sessionConfirm": "Удача кожного персонажа відновиться до значення Долі."
   },
   "xpDialog": {
     "title": "Досвід",
@@ -46,14 +50,23 @@
     "tempHp": "Тимч. HP",
     "exhaustion": "Виснаження",
     "charge": "{name} (з {uses})",
-    "chargeSpent": "{name}: витрачено"
+    "chargeSpent": "{name}: витрачено",
+    "sin": "Гріх"
   },
   "sheetRoll": {
     "roll": "Кинути",
     "inspirationAria": "Натхнення",
     "inspiration": "✦ Натхнення — перевага, натхнення буде витрачено",
     "autoFail": "Автопровал",
-    "result": "d20 {rolls}{mode, select, advantage { з перевагою} disadvantage { з перешкодою} other {}} · {bonus}"
+    "result": "d20 {rolls}{mode, select, advantage { з перевагою} disadvantage { з перешкодою} other {}} · {bonus}",
+    "difficulty": "Складність",
+    "target": "ціль {target}",
+    "reversed": "реверс",
+    "sl": "РУ {sl}",
+    "auto": {
+      "success": "автоуспіх",
+      "failure": "автопровал"
+    }
   },
   "hitDice": {
     "aria": "Кістки хітів",
@@ -78,7 +91,8 @@
     "shortRest": "Короткий відпочинок",
     "xp": "Досвід {value}",
     "xpNext": " / {next}",
-    "levelUp": "· доступне підвищення рівня"
+    "levelUp": "· доступне підвищення рівня",
+    "fortune": "Удача {current}/{max}"
   },
   "dm": {
     "resources": "Ресурси",
@@ -98,6 +112,8 @@
     "more": "Показати ще",
     "system": "Система",
     "roll": "🎲 {hasLabel, select, yes {{label}} other {Кидок}}: {autoFail, select, yes {автопровал} other {{rolls} → {total}{mode, select, advantage { (перевага)} disadvantage { (перешкода)} other {}}}}{inspiration, select, yes { · натхнення} other {}}",
+    "test": "🎲 {label}: {roll} проти {target} · {outcome, select, critical {критичний успіх} success {успіх} failure {провал} other {фатальний провал}}, РУ {sl}{reversed, select, yes { · реверс} other {}}{auto, select, success { · автоуспіх} failure { · автопровал} other {}}",
+    "session": "🎭 Нова сесія: Удача відновлена",
     "shortRest": "☕ Короткий відпочинок",
     "longRest": "🛏 Довгий відпочинок",
     "restClosed": "Відпочинок завершено",
@@ -108,6 +124,15 @@
     "inspirationRemoved": "✦ Натхнення знято",
     "resourcesEdit": "ДМ змінив ресурси",
     "choicesEdit": "✎ Змінено вибори (раса, риси, опції класу)",
-    "battleResult": "⚔ Після бою: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · загинув} other {}}"
+    "battleResult": "⚔ Після бою: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · загинув} other {}}",
+    "advance": "📈 Розвиток: {key} {from} → {to} (−{cost} досвіду)",
+    "downtime": "🕯 Простій: {days} дн.",
+    "downtimeUndo": "↩ Відкат простою",
+    "corruption": "☠ Порча +{points} ({total}/{threshold}){hasReason, select, yes { · {reason}} other {}}{testState, select, passed { · Витривалість {roll} проти {target}, РУ {sl}: успіх} failed { · Витривалість {roll} проти {target}, РУ {sl}: провал} other {}}",
+    "corruptionMutation": "☠ Порча +{points} ({total}/{threshold}){hasReason, select, yes { · {reason}} other {}}{testState, select, passed { · Витривалість {roll} проти {target}, РУ {sl}: успіх} failed { · Витривалість {roll} проти {target}, РУ {sl}: провал} other {}} — мутація: {mutationText}",
+    "corruptionUndo": "↩ Відкат порчі",
+    "careerSet": "🧭 Кар'єра призначена: {name}",
+    "careerAdvance": "🧭 Новий рівень кар'єри: {tier}",
+    "advanceUndo": "↩ Відкат розвитку: {key} {to} → {from} (+{cost} досвіду)"
   }
 }

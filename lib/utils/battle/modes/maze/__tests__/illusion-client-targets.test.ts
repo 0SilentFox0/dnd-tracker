@@ -7,6 +7,7 @@ import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { spellTargetCandidates } from "@/lib/utils/battle/flows";
 import { targetMarks } from "@/lib/utils/battle/grid/map-view";
 import { bonusTargetCandidates } from "@/lib/utils/battle/view";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, IllusionPair } from "@/types/battle";
 
@@ -26,8 +27,8 @@ describe("client target pickers treat an illusion partner as hostile", () => {
   it("map target marks include the partner", () => {
     const sword = { id: "s", name: "Sword", type: AttackType.MELEE } as BattleAttack;
 
-    expect(targetMarks(withPair, [a, b, c], a, [sword]).get("2:1")).toBe("target");
-    expect(targetMarks(mazeMap({ illusionSwap: { pairs: [] } }), [a, b, c], a, [sword]).has("2:1")).toBe(false);
+    expect(targetMarks(withPair, [a, b, c], a, [sword], DEFAULT_RULES).get("2:1")).toBe("target");
+    expect(targetMarks(mazeMap({ illusionSwap: { pairs: [] } }), [a, b, c], a, [sword], DEFAULT_RULES).has("2:1")).toBe(false);
   });
 
   it("spell candidates: partner is an enemy target, not an ally target", () => {

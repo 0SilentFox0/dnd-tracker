@@ -5,6 +5,8 @@ import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentr
 import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle/death-saves";
 import { revertOnZero } from "@/lib/utils/battle/transform/revert";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { RuleSystemMagic } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -17,6 +19,8 @@ export interface DamageConsequencesInput {
   rules?: Ruleset;
   rng: () => number;
   participants: BattleParticipant[];
+  location?: string;
+  round?: number;
 }
 
 export interface DamageConsequencesResult {
@@ -80,6 +84,14 @@ function concentrationFallout(input: DamageConsequencesInput, participant: Battl
   return { participant: findParticipant(r.participants, participant.basicInfo.id) ?? participant, participants: r.participants, messages: r.messages };
 }
 
+function loseChannelled(result: DamageConsequencesResult, magic: RuleSystemMagic | undefined, amount: number): DamageConsequencesResult {
+  if (!magic || amount <= 0) return result;
+
+  const participant = magic.onDamaged(result.participant);
+
+  return participant === result.participant ? result : { ...result, participant, participants: replaceParticipant(result.participants, participant) };
+}
+
 export function applyDamageConsequences(input: DamageConsequencesInput): DamageConsequencesResult {
   const reverted = revertOnZero(input.before, input.after, input.amount);
 
@@ -94,6 +106,10 @@ export function applyDamageConsequences(input: DamageConsequencesInput): DamageC
   const { after, rules, participants } = input;
 
   if (!rules) return { participant: after, participants, messages: [] };
+
+  const system = ruleSystemOf(rules);
+
+  if (system.combat.onZeroHp) return loseChannelled(system.combat.onZeroHp({ ...input, rules }), system.magic, input.amount);
 
   const hero = heroGoesDown(input, rules);
 
@@ -115,6 +131,10 @@ export function settleStatusChange(before: BattleParticipant, after: BattleParti
   const none = { participant: after, participants, messages: [] as string[] };
 
   if (!rules) return none;
+
+  const onZeroHp = ruleSystemOf(rules).combat.onZeroHp;
+
+  if (onZeroHp) return onZeroHp({ before, after, amount: 0, rules, rng: () => 0, participants, manual: true });
 
   let next = after;
 

@@ -5,6 +5,7 @@ import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { predictAttack } from "@/lib/utils/battle/attack";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const bow: BattleAttack = { id: "b", name: "Лук", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d6", damageType: "piercing" };
@@ -22,7 +23,7 @@ const exposed = resolved({ name: "Мітка мисливця", trigger: { event
 const foe = (id: string, abilities: ReturnType<typeof resolved>[] = []) => makeParticipant({ id, side: ParticipantSide.ENEMY, abilities, hp: 50, maxHp: 50 });
 
 const run = (order: BattleParticipant[], data: Partial<AttackPhaseInput["data"]>) =>
-  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
+  runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
 
 const chosen = (r: ReturnType<typeof run>, i = 0) => r.allBattleActions.filter((e) => e.actionType === "attack")[i].actionDetails as { chosenD20?: number; secondRoll?: { mode: string; value: number; serverRolled: boolean } };
 
@@ -80,18 +81,18 @@ describe("manual advantage / disadvantage", () => {
 
 describe("predictAttack: forced mode and its reasons", () => {
   it("no abilities → not forced", () => {
-    expect(predictAttack(attacker, foe("t"), bow, [attacker, foe("t")])).toMatchObject({ mode: "normal", forced: false });
+    expect(predictAttack(attacker, foe("t"), bow, [attacker, foe("t")], { rules: DEFAULT_RULES })).toMatchObject({ mode: "normal", forced: false });
   });
 
   it("an ability → forced with the ability name as the reason", () => {
     const t = foe("t", [exposed]);
 
-    expect(predictAttack(attacker, t, bow, [attacker, t])).toMatchObject({ mode: "advantage", forced: true, reasons: { advantage: ["Мітка мисливця"], disadvantage: [] } });
+    expect(predictAttack(attacker, t, bow, [attacker, t], { rules: DEFAULT_RULES })).toMatchObject({ mode: "advantage", forced: true, reasons: { advantage: ["Мітка мисливця"], disadvantage: [] } });
   });
 
   it("both cancel → forced normal", () => {
     const t = foe("t", [exposed, hindering]);
 
-    expect(predictAttack(attacker, t, bow, [attacker, t])).toMatchObject({ mode: "normal", forced: true });
+    expect(predictAttack(attacker, t, bow, [attacker, t], { rules: DEFAULT_RULES })).toMatchObject({ mode: "normal", forced: true });
   });
 });

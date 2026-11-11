@@ -7,6 +7,7 @@ import { getDeck } from "@/lib/server/show/deck-store";
 
 export default async function DemoDeckPreviewPage({ params }: { params: Promise<{ id: string; deckId: string }> }) {
   const { id, deckId } = await params;
+
   const { isDemo } = await requireCampaignDMOrDemo(id);
 
   if (!isDemo) notFound();

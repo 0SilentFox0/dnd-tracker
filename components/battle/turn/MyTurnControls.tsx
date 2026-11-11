@@ -10,8 +10,9 @@ import { TurnCountdown } from "./TurnCountdown";
 import { AiRollButton, DiceGrid } from "@/components/battle/hud/DiceInput";
 import { modeUiOf } from "@/components/battle/modes";
 import { MapStripRow } from "@/components/battle/scene/MapStrip";
+import { useSystemBattleUi } from "@/components/battle/use-system-battle-ui";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
-import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
+import { useAttackWizard, useAuraZones, useBattleRules, useBattleScene, useBonusSpells, useChannelAction, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack } from "@/lib/utils/battle/flows";
@@ -36,6 +37,8 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const { anyPending, battle, intents } = useBattleScene();
 
+  const { actionEconomy, magic, spells } = useBattleRules();
+
   const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, mapPick, setAttackReady } = intents;
 
   const turn = usePlayerTurn(hero, useBonusSpells(hero));
@@ -43,6 +46,10 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
   const attack = useAttackWizard(hero, turn.actions.afterAction);
 
   const book = useSpellBook(hero, { onDone: turn.actions.afterAction });
+
+  const channel = useChannelAction(hero, turn.actions.afterAction);
+
+  const systemUi = useSystemBattleUi();
 
   const zone = useAuraZones(hero);
 
@@ -58,7 +65,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const actionAbilities = usableAbilities(hero, "action", battle.currentRound);
 
-  const hasMagic = Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
+  const hasMagic = (!magic && Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0)) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
 
   const { phase, status: { actionUsed, attackLeft, skipped } } = turn;
 
@@ -104,9 +111,10 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
       {(turn.phase === "acting" || turn.phase === "countdown") && (
         <ActionGrid
           turn={turn}
+          channelLabel={systemUi?.ChannelLabel && <systemUi.ChannelLabel />}
           pending={anyPending}
-          available={{ magic: hasMagic, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
-          actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
+          available={{ channel: !!systemUi?.ChannelDialog && magic && hasMagic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
+          actions={{ channel: channel.actions.open, attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
         />
       )}
       {turn.phase === "acting" && ui?.TurnControls && <ui.TurnControls hero={hero} />}
@@ -125,8 +133,9 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
       {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.actions.endTurn()} onStay={turn.actions.stay} />}
       <AttackWizard wizard={attack} />
       <SpellBook book={book} />
+      {magic && systemUi?.ChannelDialog && <systemUi.ChannelDialog channel={channel} />}
       {battle.rules?.actions.enabled && <CoreActionsDialog participant={hero} open={coreOpen} onOpenChange={setCoreOpen} onDone={turn.actions.afterAction} />}
-      <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} onOffHand={() => attack.actions.open(undefined, undefined, { offHand: true })} />
+      {actionEconomy.bonusAction && <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} onOffHand={() => attack.actions.open(undefined, undefined, { offHand: true })} />}
       <BonusActionPicker participant={hero} trigger="action" open={abilityOpen} onOpenChange={setAbilityOpen} onDone={turn.actions.afterAction} />
     </>
   );

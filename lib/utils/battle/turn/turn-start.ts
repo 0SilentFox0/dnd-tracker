@@ -19,6 +19,7 @@ import { resolvePendingHits } from "@/lib/utils/battle/spell/pending-hits";
 import { zoneTurnStart } from "@/lib/utils/battle/spell/zone-triggers";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -79,6 +80,7 @@ interface StartOfTurnDamage {
   expiredEffects: LogLine[];
   hazard?: StartOfTurnHazard;
   killedByRules: boolean;
+  systemDowned: boolean;
 }
 
 // DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
@@ -88,7 +90,7 @@ function applyStartOfTurnDamage(
   currentRound: number,
   rng: Rng,
   map: BattleMapConfig | null | undefined,
-  rules: Ruleset | undefined,
+  rules: Ruleset,
 ): StartOfTurnDamage {
   let updatedParticipant = participant;
 
@@ -103,6 +105,8 @@ function applyStartOfTurnDamage(
   let hazardResult: StartOfTurnHazard | undefined;
 
   let killedByRules = false;
+
+  let systemDowned = false;
 
   if (updatedParticipant.battleData.pendingHits?.length) {
     const hits = resolvePendingHits(replaceParticipant(allParticipants, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules });
@@ -140,6 +144,15 @@ function applyStartOfTurnDamage(
     others = dotRules?.participants ?? others;
     killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
     damageMessages.push(...dotResult.damageMessages, ...(dotRules?.messages ?? []));
+
+    const ticks = ruleSystemOf(rules).conditions?.turnStart(replaceParticipant(others, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules, applyDamage: applyDamageConsequences });
+
+    if (ticks) {
+      others = ticks.participants;
+      updatedParticipant = findParticipant(others, updatedParticipant.basicInfo.id) ?? updatedParticipant;
+      damageMessages.push(...ticks.messages);
+      systemDowned = ticks.downed;
+    }
 
     const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant, undefined, others) : null;
 
@@ -186,7 +199,7 @@ function applyStartOfTurnDamage(
     };
   }
 
-  return { participant: updatedParticipant, others, damageMessages, healMessages, expiredEffects, hazard: hazardResult, killedByRules };
+  return { participant: updatedParticipant, others, damageMessages, healMessages, expiredEffects, hazard: hazardResult, killedByRules, systemDowned };
 }
 
 // Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
@@ -216,8 +229,8 @@ export function processStartOfTurn(
   currentRound: number,
   allParticipants: BattleParticipant[],
   rng: Rng = Math.random,
-  map?: BattleMapConfig | null,
-  rules?: Ruleset,
+  map: BattleMapConfig | null | undefined,
+  rules: Ruleset,
 ): StartOfTurnResult {
   const recharged = rechargePools({ ...participant }, rng);
 
@@ -245,7 +258,7 @@ export function processStartOfTurn(
       },
     };
     statusChanged = true;
-  } else if (killedByRules) {
+  } else if (killedByRules || damage.systemDowned) {
     statusChanged = true;
   }
 

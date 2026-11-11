@@ -18,7 +18,7 @@ import { attunedRefs, attunementRequired, heldRefs, itemChargesOf, pruneAttuned,
 import { parseRules, type Ruleset } from "@/lib/utils/rules/schema";
 import type { StashArtifact, StashView } from "@/types/inventory";
 
-export const STASH_ROW_SELECT = { id: true, name: true, icon: true, rarity: true, slot: true, description: true, bonuses: true, modifiers: true } as const;
+export const STASH_ROW_SELECT = { id: true, name: true, icon: true, rarity: true, slot: true, description: true, bonuses: true, modifiers: true, systemStats: true } as const;
 
 type InventoryRow = { equipped: unknown; stash: unknown; attuned?: unknown; items: unknown; gold: number; silver: number; copper: number };
 
@@ -52,6 +52,7 @@ export async function buildStashView(tx: Prisma.TransactionClient, campaignId: s
         rarity: row.rarity,
         slot: row.slot,
         description: row.description,
+        ...(row.systemStats != null && { systemStats: row.systemStats }),
         ...(canEquipOffHand(row, true) && { light: true }),
         ...(!isUniqueRow(row) && { gear: true as const }),
         ...(itemsOn && attunementRequired(ref, byId) && { attunement: attuned.includes(ref) ? ("attuned" as const) : ("required" as const) }),

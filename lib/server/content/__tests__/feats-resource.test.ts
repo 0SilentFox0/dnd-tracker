@@ -6,11 +6,14 @@ const nameTaken = vi.hoisted(() => vi.fn());
 
 const inUse = vi.hoisted(() => vi.fn());
 
+const inProfile = vi.hoisted(() => vi.fn());
+
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: db }));
 vi.mock("@/lib/cache/reference-data", () => ({ getCachedFeats: vi.fn(async () => []) }));
 vi.mock("@/lib/server/feats/feat-name", () => ({ featNameTaken: nameTaken }));
 vi.mock("@/lib/server/feats/feat-usage", () => ({ featInUse: inUse }));
+vi.mock("@/lib/server/races/profile-usage", () => ({ profileReferences: inProfile }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createFeatSchema } from "@/lib/schemas";
@@ -26,6 +29,7 @@ describe("featsResource", () => {
     vi.clearAllMocks();
     nameTaken.mockResolvedValue(false);
     inUse.mockResolvedValue(false);
+    inProfile.mockResolvedValue(false);
   });
 
   it("creates with schema defaults; a taken name is 409", async () => {
@@ -54,5 +58,16 @@ describe("featsResource", () => {
     await featsResource.remove(actor, existing);
 
     expect(db.feat.deleteMany).toHaveBeenCalledWith({ where: { id: "f1", campaignId: "c1" } });
+  });
+
+  it("delete: 409 FEAT_IN_SPECIES_TABLE after the in-use check", async () => {
+    inProfile.mockResolvedValue(true);
+
+    await expect(featsResource.remove(actor, existing)).rejects.toMatchObject({ status: 409, message: API_ERRORS.FEAT_IN_SPECIES_TABLE });
+    expect(inProfile).toHaveBeenCalledWith("c1", { featId: "f1" });
+    expect(db.feat.deleteMany).not.toHaveBeenCalled();
+
+    inUse.mockResolvedValue(true);
+    await expect(featsResource.remove(actor, existing)).rejects.toMatchObject({ message: API_ERRORS.FEAT_IN_USE });
   });
 });

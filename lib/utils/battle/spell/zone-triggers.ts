@@ -126,7 +126,7 @@ function spellZonesMove(args: Parameters<typeof zoneMove>[0]): ZoneMoveResult {
       if (fired.failed && map.spellZones[zoneId].triggers.onExit?.pull) {
         const stop = pullTarget(map, ps, moved, zoneId, map.spellZones[zoneId].centre, last);
 
-        moved = { ...moved, battleData: { ...moved.battleData, position: stop, movementUsed: Math.max(moved.battleData.movementUsed ?? 0, movementBudget(moved)) } };
+        moved = { ...moved, battleData: { ...moved.battleData, position: stop, movementUsed: Math.max(moved.battleData.movementUsed ?? 0, movementBudget(moved, args.rules)) } };
 
         return { participants: replaceParticipant(ps, moved), moved, messages: [...messages, textRef("battleLog.spellFx.zonePull", { name: moved.basicInfo.name, spell: map.spellZones[zoneId].spellName })] };
       }

@@ -4,12 +4,16 @@ import { isConsumablePool } from "@/lib/utils/items/pools";
 import type { AbilityPool } from "@/types/battle";
 import type { CharacterResources, ResourcesEditBody } from "@/types/characters";
 
-export function editResources(r: CharacterResources, patch: ResourcesEditBody, maxHp?: number, pools: Record<string, Pick<AbilityPool, "max" | "rest"> & { regain?: number }> = {}): CharacterResources {
-  if (patch.reset) return {};
+export function editResources(r: CharacterResources, patch: ResourcesEditBody, maxHp?: number, pools: Record<string, Pick<AbilityPool, "max" | "rest"> & { regain?: number }> = {}, opts?: { fateMax?: number }): CharacterResources {
+  if (patch.reset) return opts?.fateMax === undefined ? {} : compactResources({ fortune: opts.fateMax, sin: r.sin });
 
   let next: CharacterResources = { ...r };
 
-  if (patch.tempHp !== undefined) next.tempHp = patch.tempHp;
+  if (patch.tempHp !== undefined && opts?.fateMax === undefined) next.tempHp = patch.tempHp;
+
+  if (patch.fortune !== undefined && opts?.fateMax !== undefined) next.fortune = Math.min(opts.fateMax, Math.max(0, patch.fortune));
+
+  if (patch.sin !== undefined && opts?.fateMax !== undefined) next.sin = patch.sin;
 
   if (patch.exhaustion !== undefined) next.exhaustion = patch.exhaustion;
 

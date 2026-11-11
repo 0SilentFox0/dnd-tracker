@@ -6,12 +6,13 @@ import { onslaught } from "@/data/library/units/mages";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 describe("Натиск", () => {
   const ability = resolved(onslaught, { type: "unit", id: "kshatriya" });
 
   const fire = (round: number, ps = [makeParticipant({ id: "a", abilities: [ability] })]) =>
-    runAbilities(ps, { type: "bonusAction", actorId: "a", abilityKey: ability.key, targetIds: [] }, { round, rng: seq(0) });
+    runAbilities(ps, { type: "bonusAction", actorId: "a", abilityKey: ability.key, targetIds: [] }, { rules: DEFAULT_RULES, round, rng: seq(0) });
 
   it("дає +2 до атаки і +3 до ініціативи", () => {
     const { participants } = fire(1);

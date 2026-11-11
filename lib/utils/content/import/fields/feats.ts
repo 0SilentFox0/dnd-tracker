@@ -9,6 +9,8 @@ export const FEATS_IMPORT = defineSpec({
     { key: "type", type: "enum", enumValues: FEAT_TYPES },
     jsonField("prerequisite"),
     { key: "repeatable", type: "bool" },
+    { key: "xpCost", type: "int" },
+    { key: "maxRank", type: "int" },
     textField("description"),
     abilitiesField(),
     jsonField("choices"),

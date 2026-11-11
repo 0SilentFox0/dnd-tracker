@@ -58,23 +58,39 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     offTurn: p.offTurn,
     obstacle: p.obstacle,
     rng: flow.ctx.rng,
+    rules: flow.ctx.rules,
   });
 
   put(flow, hitDamage.updatedAttacker);
   put(flow, hitDamage.updatedTarget);
+
+  if (hitDamage.afterHit) {
+    const applied = hitDamage.afterHit(getP(flow, targetId), p.currentRound);
+
+    put(flow, applied.participant);
+    flow.messages.push(applied.message);
+  }
 
   const guarded = splitGuardedDamage(flow.ps, targetId, hitDamage.totalFinalDamage);
 
   const targetBefore = getP(flow, targetId);
 
   put(flow, applyDamageToTarget(targetBefore, guarded.targetDamage));
-  applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical);
+  applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical, p.attackRoll.location);
 
   if (guarded.guardianId) {
     const guardian = getP(flow, guarded.guardianId);
 
     put(flow, applyDamageToTarget(guardian, guarded.guardianDamage));
-    applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical);
+    applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical, p.attackRoll.location);
+
+    if (hitDamage.afterHit && guarded.guardianDamage > 0) {
+      const applied = hitDamage.afterHit(getP(flow, guarded.guardianId), p.currentRound);
+
+      put(flow, applied.participant);
+      flow.messages.push(applied.message);
+    }
+
     flow.messages.push(textRef("battleLog.attack.guard", { guardian: guardian.basicInfo.name, damage: guarded.guardianDamage, target: getP(flow, targetId).basicInfo.name }));
     settleDowned(flow, guarded.guardianId, attackerId);
   }
@@ -126,6 +142,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
       attackKind: attackKindOf(attack.type),
       map: flow.ctx.map,
       rng: flow.ctx.rng,
+      rules: flow.ctx.rules,
     });
 
     flow.ps = cast.participants;
@@ -188,7 +205,7 @@ function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, h
 
     if (amount <= 0) continue;
 
-    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size);
+    const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size, flow.ctx.rules);
 
     const r = dealResistedHits(flow.ps, victims.map((targetId) => ({ targetId, amount })), { actorId: attackerId, damageType: "fire", rules: flow.ctx.rules, rng: flow.ctx.rng });
 

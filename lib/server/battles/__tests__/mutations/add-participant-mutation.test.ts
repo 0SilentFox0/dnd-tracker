@@ -9,6 +9,10 @@ import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { trait } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 function deps(over = {}) {
@@ -17,6 +21,7 @@ function deps(over = {}) {
     loadUnit: vi.fn(async () => ({ id: "u1", campaignId: "c1" }) as never),
     fromCharacter: vi.fn(async () => participant("new-ch")),
     fromUnit: vi.fn(async (_u: unknown, _b: string, _s: unknown, n: number) => participant(`new-u${n}`)),
+    buildContext: vi.fn(async () => undefined),
     ...over,
   };
 }
@@ -55,6 +60,17 @@ describe("add-participant mutation", () => {
     await createAddParticipantMutation(d)(context({ meta: { ...context().meta, rules } }), { sourceId: "ch1", type: "character", side: "ally", quantity: 1 });
 
     expect(d.fromCharacter).toHaveBeenCalledWith(expect.anything(), "b1", "ally", undefined, undefined, { rules });
+  });
+
+  it("героя будують з контекстом кампанії (артефакти екіпірування)", async () => {
+    const campaignContext = { artifactsById: { a1: {} } } as never;
+
+    const d = deps({ buildContext: vi.fn(async () => campaignContext) });
+
+    await createAddParticipantMutation(d)(context(), { sourceId: "ch1", type: "character", side: "ally", quantity: 1 });
+
+    expect(d.buildContext).toHaveBeenCalledWith("c1", expect.objectContaining({ id: "ch1" }));
+    expect(d.fromCharacter).toHaveBeenCalledWith(expect.anything(), "b1", "ally", undefined, campaignContext, expect.anything());
   });
 
   it("reserved — у резерв, черга не змінюється", async () => {
@@ -191,5 +207,29 @@ describe("add-participant у лабіринті", () => {
     expect(added[0].battleData.position).toEqual({ x: 3, y: 3 });
 
     await expect(add(mazeCtx(), { sourceId: "u1", type: "unit", side: "enemy", quantity: 1, position: { x: 5, y: 0 } })).rejects.toMatchObject({ code: "action_rejected" });
+  });
+});
+
+describe("add-participant: психологія wfrp", () => {
+  const fearful = (id: string) => ({ ...participant(id, { side: ParticipantSide.ENEMY, controlledBy: "dm" }), battleData: { ...goblin.battleData, resolvedAbilities: [trait([{ kind: "wfrpPsychology", psychology: "fear", value: 1 }])] } });
+
+  const wfrpHero = { ...hero, abilities: { ...hero.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS) } };
+
+  const run = (rules?: typeof WFRP_RULES) => {
+    const base = context({ participants: [wfrpHero, goblin] });
+
+    return createAddParticipantMutation(deps({ fromUnit: vi.fn(async () => fearful("imp")) }))({ ...base, ...(rules && { meta: { ...base.meta, rules } }) }, { sourceId: "u1", type: "unit", side: "enemy", quantity: 1 });
+  };
+
+  it("доданий напряму юніт із Fear тестує наявних героїв окремою подією", async () => {
+    const out = await run(WFRP_RULES);
+
+    expect(out.events).toHaveLength(2);
+    expect(out.events[1].targets).toEqual([{ participantId: "hero", participantName: hero.basicInfo.name }]);
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.psychologyTested).toEqual({ fear: 1 });
+  });
+
+  it("d20 без додаткової події", async () => {
+    expect((await run()).events).toHaveLength(1);
   });
 });

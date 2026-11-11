@@ -4,7 +4,8 @@
   },
   "form": {
     "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",
-    "saveFailed": "Could not save the rules"
+    "saveFailed": "Could not save the rules",
+    "unusedInSystem": "This system does not use this mechanic; its settings have no effect."
   },
   "diceTable": {
     "reset": "Reset to defaults",
@@ -12,7 +13,11 @@
   },
   "validation": {
     "initiativeOrder": "Minimum initiative is greater than the maximum",
-    "criticalsOrder": "Fumble must be lower than crit"
+    "criticalsOrder": "Fumble must be lower than crit",
+    "unknownSystem": "Unknown rule system",
+    "tablesOrder": "Rows must be in ascending order of the upper bound",
+    "tablesLast": "The last row must end at 100",
+    "tablesEffect": "This effect type is not allowed in this table"
   },
   "sections": {
     "morale": {
@@ -164,6 +169,14 @@
     "spellIngredients": {
       "label": "Spell ingredients",
       "description": "Costly or consumed material components are checked when casting in battle and spent from the hero's inventory items; a shortfall can be covered with gold from the wallet. Non-consumed components only have to be in the inventory and are never spent. Spending is kept after the battle only with the \"persist resources\" out-of-combat rule on. Existing spells without ingredients are unchanged."
+    },
+    "advancement": {
+      "label": "Advancement",
+      "description": "Advance prices, career ticks and out-of-career multiplier."
+    },
+    "tables": {
+      "label": "Tables",
+      "description": "Critical, miscast and Wrath of the Gods tables; untouched tables keep the built-in rows."
     }
   },
   "customConditions": {
@@ -190,5 +203,10 @@
     "meleeAttack": "Unarmed Strike",
     "rangedAttack": "Ranged Attack",
     "weapon": "Weapon"
+  },
+  "system": {
+    "label": "Rule system",
+    "description": "Defines how the campaign rolls tests, computes hit points and balances encounters.",
+    "lockedHint": "The system cannot be changed while the campaign has characters or units."
   }
 }

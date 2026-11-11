@@ -4,11 +4,11 @@ import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { joinLines, lineKey, textRef } from "@/lib/i18n/text-ref";
 import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { processStartOfRound } from "@/lib/utils/battle/turn/round-start";
+import { skippedTurnAt } from "@/lib/utils/battle/turn/skipped-turn";
 import { processEndOfTurn } from "@/lib/utils/battle/turn/turn-end";
 import { processStartOfTurn, type StartOfTurnResult } from "@/lib/utils/battle/turn/turn-start";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
@@ -25,7 +25,7 @@ export interface AdvanceTurnLoopParams {
   pendingSummons: BattleParticipant[];
   rng?: () => number;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface AdvanceTurnLoopResult {
@@ -52,12 +52,12 @@ interface LoopEnv {
   logBase: number;
   pendingSummons: BattleParticipant[];
   rng: () => number;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 const stateBeforeForEntry = () => undefined;
 
-function systemEntry(st: LoopState, env: LoopEnv, round: number, text: LogLine | LogLine[], tag: string): BattleAction {
+function systemEntry(st: LoopState, env: LoopEnv, round: number, text: LogLine | LogLine[], tag: string, targets: BattleAction["targets"] = []): BattleAction {
   return {
     id: `${tag}-${round}-${Date.now()}-${st.attempts}`,
     battleId: env.battleId,
@@ -66,7 +66,7 @@ function systemEntry(st: LoopState, env: LoopEnv, round: number, text: LogLine |
     timestamp: new Date(),
     ...SYSTEM_ACTOR,
     actionType: "ability",
-    targets: [],
+    targets,
     actionDetails: {},
     ...logFields(text),
     hpChanges: [],
@@ -101,6 +101,8 @@ function roundTransition(st: LoopState, env: LoopEnv, previousRound: number): vo
   if (roundResult.triggerMessages.length > 0) {
     st.log.push(systemEntry(st, env, st.round, [textRef("battleLog.triggers.roundStart", { round: st.round }), ...roundResult.triggerMessages], "triggers-round"));
   }
+
+  if (roundResult.psychology.lines.length > 0) st.log.push(systemEntry(st, env, st.round, roundResult.psychology.lines, "psychology-round", roundResult.psychology.targets));
 }
 
 function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnResult, before: BattleParticipant): void {
@@ -229,7 +231,7 @@ export function runAdvanceTurnLoop(
 
     if (!nextParticipant) break;
 
-    const dyingRoll = st.round > previousRound ? rollDyingAt(st.order, st.index, params.rules, rng) : null;
+    const dyingRoll = st.round > previousRound ? skippedTurnAt(st.order, st.index, { rules: params.rules, rng, round: st.round }) : null;
 
     if (dyingRoll) {
       st.order = dyingRoll.participants;

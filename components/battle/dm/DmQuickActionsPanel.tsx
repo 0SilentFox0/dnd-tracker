@@ -11,8 +11,9 @@ import { DmParticipantRow } from "./DmParticipantRow";
 import { LegendaryActionDialog } from "./LegendaryActionDialog";
 
 import { HUD_SURFACE } from "@/components/hud";
+import { systemUiOf } from "@/components/systems";
 import { BattleStatus } from "@/lib/constants/battle";
-import { type BattlePageDialogs, useBattleScene, useDmParticipantActions } from "@/lib/hooks/battle";
+import { type BattlePageDialogs, useBattleRules, useBattleScene, useDmParticipantActions } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { isLiveScalable } from "@/lib/utils/battle/balance/live-scale";
 import type { BattleParticipant } from "@/types/battle";
@@ -68,6 +69,8 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const { battle, viewer, dmControl, actions } = useBattleScene();
 
+  const { hpTerm } = useBattleRules();
+
   const [ownOpen, setOwnOpen] = useState(false);
 
   const open = panel ? panel.open : ownOpen;
@@ -76,7 +79,9 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const closePanel = () => setOpen(false);
 
-  const { row, refreshSources, randomUnits, conditions, legendary, initiative } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
+  const { row, refreshSources, randomUnits, conditions, systemConditions, legendary, initiative } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
+
+  const SystemDialog = battle.rules ? systemUiOf(battle.rules.system.key).battleConditionsDialog : undefined;
 
   if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 
@@ -162,8 +167,8 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
             {canScale && (
               <PanelSection title={t("panel.enemyUnits")} className="grid grid-cols-2 gap-2 pt-2">
-                <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t("panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
-                <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t("panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
+                <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t(hpTerm === "wounds" ? "panel.buffHintWounds" : "panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
+                <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t(hpTerm === "wounds" ? "panel.debuffHintWounds" : "panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
               </PanelSection>
             )}
           </div>
@@ -192,7 +197,11 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         </div>
       </div>
 
-      <ConditionsDialog participant={conditions.target} custom={conditions.custom} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
+      {SystemDialog ? (
+        <SystemDialog participant={conditions.target} onClose={conditions.close} onSubmit={systemConditions.submit} isPending={systemConditions.isPending} />
+      ) : (
+        <ConditionsDialog participant={conditions.target} custom={conditions.custom} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
+      )}
       <InitiativeOrderDialog participants={initiative.orderTarget} onClose={initiative.closeOrder} onSubmit={initiative.submitOrder} isPending={initiative.isReordering} />
       <LegendaryActionDialog participant={legendary.target} onClose={legendary.close} />
 

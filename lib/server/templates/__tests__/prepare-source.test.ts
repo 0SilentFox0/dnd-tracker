@@ -3,16 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeSyncDb } from "../sync/__tests__/fake-sync-db";
 import { id } from "../sync/__tests__/helpers";
 
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prepareCampaignSource } from "@/lib/server/templates/prepare-source";
-import { hashText } from "@/lib/srd/i18n/catalog";
-import { isCanonicalSrdTemplate, isLegacySrdTemplate, isOfficialSrdTemplate } from "@/lib/utils/campaigns/template-locales";
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
+import { isCanonicalTemplate, isLegacyLocalizedTemplate, isLocalizableTemplate, localizationOf } from "@/lib/utils/templates/registry";
 
-const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
+const dictionary = vi.hoisted(() => ({ values: {} as TranslationsV2 }));
 
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? dictionary.values : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
 
-const official = { kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME };
+const isSrd = (source: object) => localizationOf(source)?.templateKey === "srd-5.2";
+
+const official = { kind: "template", visibility: "official", templateKey: "srd-5.2" };
 
 let f: ReturnType<typeof createFakeSyncDb>;
 
@@ -22,17 +23,17 @@ beforeEach(() => {
   f = createFakeSyncDb();
   f.addCampaign({ id: "en", ...official, locale: "en" });
   f.addCampaign({ id: "uk", ...official, locale: "uk" });
-  f.addRow("spell", { id: id("s"), campaignId: "en", name: "Bless", description: "Missing prose" });
+  f.addRow("spell", { id: id("s"), campaignId: "en", slug: "bless", name: "Bless", description: "Missing prose" });
   f.addRow("spell", { id: id("l"), campaignId: "uk", name: "Legacy stored" });
-  dictionary.values = { [hashText("n", "Bless")]: "Благословення" };
+  dictionary.values = { "spells/bless/name": { text: "Благословення", en: "Bless" } };
 });
 
 describe("SRD source preparation", () => {
   it("recognizes only official keyed SRD templates, with en/null canonical and uk legacy", () => {
-    expect(isCanonicalSrdTemplate({ ...official, locale: null })).toBe(true);
-    expect(isLegacySrdTemplate({ ...official, locale: "uk" })).toBe(true);
-    expect(isOfficialSrdTemplate({ ...official, visibility: "private" })).toBe(false);
-    expect(isOfficialSrdTemplate({ name: SRD_TEMPLATE_NAME } as object)).toBe(false);
+    expect(isSrd(official) && isCanonicalTemplate({ ...official, locale: null })).toBe(true);
+    expect(isLegacyLocalizedTemplate({ ...official, locale: "uk" })).toBe(true);
+    expect(isSrd({ ...official, visibility: "private" })).toBe(false);
+    expect(isSrd({ name: "5e SRD 5.2" })).toBe(false);
   });
   it.each(["en", "uk"] as const)("prepares %s from canonical IDs and falls back to English text", async (contentLocale) => {
     const result = await prepare("en", { contentLocale });
@@ -91,5 +92,34 @@ describe("SRD source preparation", () => {
 
     expect(beforeExport).toHaveBeenCalledTimes(1);
     expect(result.bundle.spells[0].description).toBe("Locked snapshot");
+  });
+});
+
+describe("Grim source preparation", () => {
+  const grim = { kind: "template", visibility: "official", templateKey: "grim-d100" };
+
+  beforeEach(() => {
+    f.addCampaign({ id: "grim", ...grim, locale: "en" });
+    f.addRow("career", { id: id("c"), campaignId: "grim", slug: "archivist", name: "Archivist", class: "Academic", tiers: [] });
+    dictionary.values = { ...dictionary.values, "careers/archivist/name": { text: "Архіваріус", en: "Archivist" } };
+  });
+
+  it("localizes careers into uk and accepts en for Grim", async () => {
+    const uk = await prepare("grim", { contentLocale: "uk" });
+
+    expect(uk.contentLocale).toBe("uk");
+    expect(uk.bundle.careers[0].name).toBe("Архіваріус");
+    expect(await prepare("grim", { contentLocale: "en" })).toMatchObject({ contentLocale: "en" });
+  });
+  it("ambiguity is per template key", async () => {
+    f.addCampaign({ id: "grim2", ...grim, locale: "en" });
+    await expect(prepare("grim", { contentLocale: "uk" })).rejects.toMatchObject({ status: 409 });
+    expect(await prepare("en")).toMatchObject({ id: "en" });
+  });
+  it("recognizes only the official keyed Grim as localizable", () => {
+    expect(isLocalizableTemplate({ ...grim, locale: "en" })).toBe(true);
+    expect(isLocalizableTemplate({ ...grim, templateKey: "grim-d100-empty" })).toBe(false);
+    expect(isLocalizableTemplate({ ...grim, visibility: "private" })).toBe(false);
+    expect(isSrd({ ...grim, locale: "en" })).toBe(false);
   });
 });

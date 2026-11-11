@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 describe("лікування союзників", () => {
   it("у повідомленні видно, чиє вміння лікує", () => {
@@ -12,7 +13,7 @@ describe("лікування союзників", () => {
 
     const agrail = makeParticipant({ id: "Аграїл", hp: 10, maxHp: 171 });
 
-    const r = runAbilities([ivan, agrail], { type: "roundStart" }, { round: 2, rng: seq(0) });
+    const r = runAbilities([ivan, agrail], { type: "roundStart" }, { rules: DEFAULT_RULES, round: 2, rng: seq(0) });
 
     expect(r.messages.map((m) => textOf(m))).toContain("💚 Сила життя (Айвен): Аграїл +5 HP");
   });

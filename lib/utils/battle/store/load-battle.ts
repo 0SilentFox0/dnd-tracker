@@ -8,6 +8,7 @@ import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole, isDemoKind } from "@/lib/constants/campaigns";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import { parseRulesCached } from "@/lib/utils/rules/schema";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
@@ -114,6 +115,7 @@ export async function loadBattle(
       eventSeq: true,
       pendingMoraleCheck: true,
       pendingCritChoice: true,
+      systemState: true,
       map: true,
       audio: true,
       rules: true,
@@ -142,6 +144,7 @@ export async function loadBattle(
     eventSeq: row.eventSeq,
     pendingMoraleCheck: row.pendingMoraleCheck ?? null,
     pendingCritChoice: (row.pendingCritChoice ?? null) as StoredPendingCritChoice | null,
+    ...(row.systemState && { sceneState: row.systemState as unknown as SystemSlot }),
     startedAt: row.startedAt,
     turnStartedAt: row.turnStartedAt,
     completedAt: row.completedAt,

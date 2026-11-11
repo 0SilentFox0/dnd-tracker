@@ -40,5 +40,6 @@ export function toUnit(row: Prisma.UnitGetPayload<object>): Unit {
     saveProficiencies: readSaveProficiencies(row.saveProficiencies),
     statblock: (row.statblock ?? {}) as Unit["statblock"],
     spellcasting: (row.spellcasting ?? {}) as unknown as Unit["spellcasting"],
+    characteristics: (row.characteristics ?? undefined) as Unit["characteristics"],
   };
 }

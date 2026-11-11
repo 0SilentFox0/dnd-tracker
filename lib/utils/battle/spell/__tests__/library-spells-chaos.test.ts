@@ -14,6 +14,7 @@ import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const CHAOS = "chaos";
@@ -66,7 +67,7 @@ function cast(key: string, caster: BattleParticipant, order: BattleParticipant[]
 
   if (!res.ok) throw new Error(textOf(res.error));
 
-  return castSpell({ caster, spell: sp, targetIds: res.targetIds, allParticipants: order, currentRound: over.round ?? 1, battleId: "b", diceRolls: over.rolls ?? [], saveRolls: over.saves ?? [], rng: seq(0.99) });
+  return castSpell({ rules: DEFAULT_RULES, caster, spell: sp, targetIds: res.targetIds, allParticipants: order, currentRound: over.round ?? 1, battleId: "b", diceRolls: over.rolls ?? [], saveRolls: over.saves ?? [], rng: seq(0.99) });
 }
 
 const scene = (turnIndex: number, round = 1): BattleSceneState => ({ id: "b", campaignId: "camp", status: "active", round, turnIndex, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null });
@@ -78,7 +79,7 @@ function advanceTo(order: BattleParticipant[], s: BattleSceneState, id: string, 
   let sc = s;
 
   for (let i = 0; i < maxSteps; i++) {
-    const r = advanceTurn({ participants: ps, pending: [], scene: sc, rng: seq(0.99) });
+    const r = advanceTurn({ rules: DEFAULT_RULES, participants: ps, pending: [], scene: sc, rng: seq(0.99) });
 
     ps = r.participants;
     sc = { ...sc, ...r.scene } as BattleSceneState;
@@ -180,7 +181,7 @@ describe("Хаос: заклинання", () => {
 
     const { ps } = advanceTo(r.allParticipantsUpdated, scene(0), "e");
 
-    expect(hasDisadvantage(P(ps, "e"), melee, ps)).toBe(true);
+    expect(hasDisadvantage(P(ps, "e"), melee, ps, { rules: DEFAULT_RULES })).toBe(true);
   });
 
   it("Крижаний болт: невигідність у наступний хід ворога, який уже ходив цього раунду", () => {
@@ -192,7 +193,7 @@ describe("Хаос: заклинання", () => {
 
     const { ps } = advanceTo(r.allParticipantsUpdated, scene(1), "e");
 
-    expect(hasDisadvantage(P(ps, "e"), melee, ps)).toBe(true);
+    expect(hasDisadvantage(P(ps, "e"), melee, ps, { rules: DEFAULT_RULES })).toBe(true);
   });
 
   it("Блискавка: шкода + −2 ініціативи, що не переставляє чергу в наступному раунді", () => {

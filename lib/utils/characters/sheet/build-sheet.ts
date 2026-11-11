@@ -13,11 +13,13 @@ import type { ChoiceSelections } from "@/lib/utils/characters/choices/selections
 import { buildClassProgression, hitDiceLabel } from "@/lib/utils/characters/classes";
 import { classTableLines } from "@/lib/utils/characters/classes/columns";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
+import { readResources } from "@/lib/utils/characters/resources/schema";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import { heroHpFormula, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
 import type { ResolvedClassEntry } from "@/types/classes";
@@ -50,6 +52,7 @@ export interface SheetInput {
     proficiencies: unknown;
     spellcastingAbility: string | null;
     archetype: string | null;
+    characteristics?: unknown;
     primaryAbility: string | null;
     background: string | null;
     goals: unknown;
@@ -113,27 +116,33 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const showSubrace = !!input.choices && (!!classEntries || input.choices.selections.lineage !== null);
 
-  const hp = characterBaseHp(c, { entries: input.classes, formula: input.rules && heroHpFormula(input.rules.heroScaling) });
+  const hp = characterBaseHp(c, { entries: input.classes, formula: input.rules && heroHpFormula(input.rules.heroScaling), rules: input.rules, characteristics: c.characteristics });
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 
   const { spellSaveDC, spellAttackBonus } = p.spellcasting;
 
+  const system = input.rules ? ruleSystemOf(input.rules) : null;
+
+  const systemSlot = system?.characteristics.sheetBlock({ characteristics: c.characteristics, resources: readResources(c.resources) });
+
   const grid = Object.fromEntries(ARTIFACT_GRID_9.map((cell) => [cell.key, input.artifacts.find((a) => a.slot === cell.key) ?? null]));
 
   return {
+    system: system?.key ?? "homm",
+    ...(systemSlot && { systemSlot }),
     viewer: input.viewer,
     review: { pending: c.status === CharacterStatus.PENDING, note: c.status === CharacterStatus.PENDING ? (c.reviewNote ?? null) : null },
     maxLevel: input.maxLevel,
     identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).key ?? "universal", subclass: c.subclass, race: c.race, ...(showSubrace && c.subrace && { subrace: c.subrace }), raceIcon: input.raceIcon, alignment: c.alignment },
-    abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
+    abilities: systemSlot ? [] : ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
     primaryAbility: primary,
-    proficiency: prof,
+    proficiency: systemSlot ? 0 : prof,
     hp: {
       total: p.combatStats.maxHp,
       lines: [...hp.breakdown.map((b) => ({ ...b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: sheetLineKey("bonuses"), value: signed(hpBonus) }] : [])],
     },
-    armorClass: armorTotal(p),
+    armorClass: systemSlot ? { total: 0, lines: [] } : armorTotal(p),
     initiative: calculateInitiative(p),
     speed: p.combatStats.speed,
     morale: p.combatStats.morale,
@@ -143,11 +152,11 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     proficiencies: [...new Set([...proficiencyList(c.proficiencies), ...(input.choices?.selections.tools ?? [])])],
     attacks,
     bestToHit: attacks.length ? Math.max(...attacks.map((a) => a.toHit.total)) : null,
-    saves: ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
-    skills,
-    passives: { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
+    saves: systemSlot ? [] : ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
+    skills: systemSlot ? [] : skills,
+    passives: systemSlot ? { perception: 0, investigation: 0, insight: 0 } : { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: c.spellcastingAbility as AbilityKey, saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
-    hitDice: classEntries ? hitDiceLabel(classEntries) : null,
+    hitDice: classEntries && !systemSlot ? hitDiceLabel(classEntries) : null,
     ...(classEntries && { classTable: classTableLines(classEntries), classProgression: classEntries.flatMap((e) => (e.class ? [buildClassProgression(e.class, e)] : [])) }),
     pact: pactSlot(p),
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),

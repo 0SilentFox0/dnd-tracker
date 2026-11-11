@@ -11,6 +11,7 @@ import { BattleSceneContext, BattleSceneDataContext } from "@/lib/hooks/battle";
 import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { renderWithConfirm } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleScene } from "@/types/api";
 
 vi.unmock("next-intl");
@@ -28,7 +29,7 @@ function renderList(isDM: boolean) {
 
   const updateParticipant = { mutate: vi.fn(), isPending: false };
 
-  const battle = { initiativeOrder: [gob], pendingSummons: [imp], currentTurnIndex: 0, currentRound: 1, battleLog: [], knowledge: undefined } as unknown as BattleScene;
+  const battle = { initiativeOrder: [gob], pendingSummons: [imp], currentTurnIndex: 0, currentRound: 1, battleLog: [], knowledge: undefined, rules: DEFAULT_RULES } as unknown as BattleScene;
 
   const value = {
     battle, viewer: { userId: "u", isDM, readOnly: false, canSeeEnemyHp: false }, turn: { current: gob }, roster: { allies: [], enemies: [gob], reserve: isDM ? [imp] : [] }, awaiting: null, effects: new Map(), select: vi.fn(),

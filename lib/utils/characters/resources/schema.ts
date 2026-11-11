@@ -14,6 +14,8 @@ const shape = {
   charges: z.record(z.string().min(1).max(300), z.object({ used: count, rest: z.enum(["short", "long"]).nullable(), regain: z.number().int().min(1).optional() })).optional(),
   exhaustion: z.number().int().min(0).max(MAX_EXHAUSTION).optional(),
   shortRestOpen: z.boolean().optional(),
+  fortune: z.number().int().min(0).max(9).optional(),
+  sin: z.number().int().min(0).max(10).optional(),
 };
 
 export const CharacterResourcesSchema: z.ZodType<CharacterResources> = z.object(shape);

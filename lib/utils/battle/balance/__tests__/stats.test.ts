@@ -9,6 +9,7 @@ import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { getCharacterStats, getUnitStats } from "@/lib/utils/battle/balance";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import { SkillLevel } from "@/types/skill-tree";
 
@@ -131,7 +132,7 @@ describe("баланс: середня шкода з кубиків", () => {
 
     const target = makeParticipant({ id: "t", side: ParticipantSide.ENEMY, hp: 999, maxHp: 999 });
 
-    const hit = computeHitDamage({ attacker: p, target, attack, damageRolls: [5, 6, 5, 6], allParticipants: [p, target], attackRoll: { isCritical: false }, currentRound: 1 });
+    const hit = computeHitDamage({ rules: DEFAULT_RULES, attacker: p, target, attack, damageRolls: [5, 6, 5, 6], allParticipants: [p, target], attackRoll: { isCritical: false }, currentRound: 1 });
 
     const estimate = getUnitStats({ id: "u", name: "u", maxHp: 20, level: 7, strength: 16, dexterity: 10, attacks: [attack] }).dpr;
 

@@ -13,6 +13,7 @@ import { inputDiceOf } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice, upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { type AimScene, SKILL_AREA_TEMPLATE, type SkillRadius, skillRadiusArea, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -40,7 +41,7 @@ export function spellTargetSide(s: BookSpell | null): SpellPick["targetSide"] {
 
 const AUTO_TARGETING = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"];
 
-export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null, opts: { castLevel?: number } = {}): SpellPick {
+export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null, opts: { castLevel?: number; castTest?: boolean } = {}): SpellPick {
   const def = spellDefinition(s);
 
   const { targeting } = def;
@@ -91,6 +92,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     ...(choose && { options: choose.options.map(describeEffect) }),
     needsSaves: def.resolution.kind === "save" && !auto,
     ...(def.resolution.kind === "attack" && !auto && { needsAttackRolls: true }),
+    ...(opts.castTest && { castTest: true }),
     ...(input && { inputDice: { ...input, sides: dice.sides } }),
     ...(s.grantKey && s.hostSpellId && { inline: { spellId: s.hostSpellId, grantKey: s.grantKey } }),
     diceSlots: Array.from({ length: input ? 1 : dice.count }, () => dice.sides),
@@ -111,7 +113,7 @@ export function withInputCount(pick: SpellPick, count: number): SpellPick {
 export function spellAimTargets(scene: AimScene, pick: SpellPick, aim: GridPoint): BattleParticipant[] {
   if (pick.skillRadius) return skillRadiusArea(scene, pick.skillRadius, aim).targets;
 
-  const targets = pick.template ? templateArea(scene.map, scene.participants, scene.caster, pick.template, aim).targets : [];
+  const targets = pick.template ? templateArea(scene.map, scene.participants, scene.caster, pick.template, aim, scene.rules).targets : [];
 
   return targets.filter((p) => matchesTargetFilter(p, pick.filter, { spellLevel: pick.level, castLevel: pick.castLevel }));
 }
@@ -127,10 +129,10 @@ export function spellTargetCandidates(order: BattleParticipant[], caster: Battle
 }
 
 /** Дзеркалить серверну перевірку: поза картою чи без дальності обмеження немає. */
-export function spellTargetInRange(map: BattleMapConfig | null, caster: BattleParticipant | null, target: BattleParticipant, range: number | undefined): boolean {
+export function spellTargetInRange(map: BattleMapConfig | null, caster: BattleParticipant | null, target: BattleParticipant, range: number | undefined, rules: Ruleset): boolean {
   if (!map || !caster || !isOnMap(caster) || target.battleData.position === undefined) return true;
 
-  const inRange = range === undefined || footprintDistance(cellsOf(caster), cellsOf(target)) <= feetToCells(range);
+  const inRange = range === undefined || footprintDistance(cellsOf(caster), cellsOf(target)) <= feetToCells(range, rules);
 
   return inRange && !modeTargetHiddenText(map, caster, [target]);
 }

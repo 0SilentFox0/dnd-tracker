@@ -1,0 +1,52 @@
+{
+  "locations": {
+    "head": "Head",
+    "arm": "Arms",
+    "body": "Body",
+    "leg": "Legs"
+  },
+  "summary": {
+    "title": "Armour",
+    "penalty": "Armour penalty: -{sl} SL",
+    "flexible": "Flexible armour: no penalty",
+    "shield": "Shield: +{value} AP (head, arms, body)"
+  },
+  "qualities": {
+    "damaging": "Damaging",
+    "impale": "Impale",
+    "penetrating": "Penetrating",
+    "hack": "Hack",
+    "pummel": "Pummel",
+    "precise": "Precise",
+    "accurate": "Accurate",
+    "blast": "Blast",
+    "pistol": "Pistol",
+    "shield": "Shield",
+    "defensive": "Defensive",
+    "fast": "Fast",
+    "flexible": "Flexible",
+    "distract": "Distract",
+    "entangle": "Entangle",
+    "wrap": "Wrap",
+    "spread": "Spread",
+    "trapBlade": "Trap Blade",
+    "unbreakable": "Unbreakable",
+    "inflict": "Inflict",
+    "repeater": "Repeater",
+    "imprecise": "Imprecise",
+    "undamaging": "Undamaging",
+    "unreliable": "Unreliable",
+    "dangerous": "Dangerous",
+    "slow": "Slow",
+    "reload": "Reload"
+  },
+  "money": {
+    "gc": "gc",
+    "ss": "ss",
+    "d": "d"
+  },
+  "encumbrance": {
+    "label": "Carried: {carried} / {limit}",
+    "over": "Overencumbered: carrying more than the limit"
+  }
+}

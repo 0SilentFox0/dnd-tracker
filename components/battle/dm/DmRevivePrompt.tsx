@@ -3,10 +3,12 @@
 import { useTranslations } from "next-intl";
 import { HeartPulse, Skull, X } from "lucide-react";
 
-import { useDownedHeroPrompt } from "@/lib/hooks/battle";
+import { useBattleRules, useDownedHeroPrompt } from "@/lib/hooks/battle";
 
 export function DmRevivePrompt() {
   const t = useTranslations("battleDm.revive");
+
+  const { hpTerm } = useBattleRules();
 
   const { heroes, isPending, revive, dismiss } = useDownedHeroPrompt();
 
@@ -18,7 +20,7 @@ export function DmRevivePrompt() {
         <div key={p.basicInfo.id} role="alert" className="flex min-h-12 items-center gap-2.5 border border-hud-danger/50 bg-hud-surface/95 px-3 text-sm text-hud-text">
           <Skull className="size-4 shrink-0 text-hud-danger" />
           <span className="min-w-0 flex-1">
-            {t.rich("message", { name: p.basicInfo.name, b: (chunks) => <b className="hud-sc text-[var(--ink)]">{chunks}</b> })}
+            {t.rich(hpTerm === "wounds" ? "messageWounds" : "message", { name: p.basicInfo.name, b: (chunks) => <b className="hud-sc text-[var(--ink)]">{chunks}</b> })}
           </span>
           <button
             type="button"

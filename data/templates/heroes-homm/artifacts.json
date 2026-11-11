@@ -1,0 +1,658 @@
+[
+  {
+    "slug": "armor-of-valor",
+    "name": "Armor of Valor",
+    "description": "When an ally drops below 30% HP, all allies heal 5% max HP each round for 2 rounds (1 use per battle).\n\nThe armor was consecrated in the cathedral of Elrath, and a griffin is embossed on the breastplate, sheltering its chicks with its wings. When one of the comrades bleeds, the wings seem to unfold over the whole squad.",
+    "rarity": "epic",
+    "slot": "armor",
+    "setId": "Regalia of Dawn",
+    "abilities": [
+      {
+        "id": "armor-of-valor-wings",
+        "name": "Griffin Wings",
+        "trigger": {
+          "event": "roundStart"
+        },
+        "condition": {
+          "type": "any",
+          "conditions": [
+            {
+              "type": "hpBelow",
+              "who": "self",
+              "percent": 30
+            },
+            {
+              "type": "hpBelow",
+              "who": "anyAlly",
+              "percent": 30
+            }
+          ]
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "hot",
+            "healPerRound": {
+              "percentOf": "maxHp",
+              "value": 5
+            },
+            "duration": {
+              "rounds": 2
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cape-of-the-lions-mane",
+    "name": "Cape of the Lion's Mane",
+    "description": "Whoever hits an ally becomes a \"Tormentor\" for 2 rounds; the wearer's attacks against the \"Tormentor\" deal +10% damage.\n\nThe cape is sewn from the mane of a lion that died defending his pride. Every time one of the comrades is wounded, the mane on the wearer's shoulders bristles, and he already knows whom to punish.",
+    "rarity": "epic",
+    "slot": "cloak",
+    "setId": "Spirit of the Lion",
+    "abilities": [
+      {
+        "id": "cape-of-the-lions-mane-mark",
+        "name": "Tormentor",
+        "trigger": {
+          "event": "hit",
+          "role": "target",
+          "whose": "ally"
+        },
+        "effects": [
+          {
+            "kind": "mark",
+            "markId": "godric-offender",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "eventActor"
+          }
+        ]
+      },
+      {
+        "id": "cape-of-the-lions-mane-bonus",
+        "name": "Tormentor: Damage",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "hasMark",
+          "who": "eventTarget",
+          "markId": "godric-offender",
+          "bySelf": true
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "crown-of-leadership",
+    "name": "Crown of Leadership",
+    "description": "Morale +1 for the wearer and all allies.\n\nA modest golden circlet without a single gem, for a true commander needs no ornaments. It is enough that the troops see it above the ranks: the warriors nearby grow bolder and charge forward more often, without waiting for an order.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Regalia of Dawn",
+    "abilities": [
+      {
+        "id": "crown-of-leadership-spark",
+        "name": "Spark of Courage",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "crown-of-sar-issus",
+    "name": "Crown of Sar-Issa",
+    "description": "Light spells heal all allies for 5% max HP (2 times per battle).\n\nA thin silver circlet glows with a soft morning light when the wearer touches Light magic. This light does not blind; it settles on the allies' shoulders like a warm palm.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Regalia of Sar-Issa",
+    "abilities": [
+      {
+        "id": "crown-of-sar-issus-light",
+        "name": "Light of the Crown",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Light"
+        },
+        "limits": {
+          "perBattle": 2
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 5
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cuirass-of-the-dwarven-kings",
+    "name": "Cuirass of the Dwarven Kings",
+    "description": "When the wearer is hit, all allies attack the offender with advantage for 1 round.\n\nA blow to this cuirass rings out like the evening bell in Grimheim. Hearing it, the comrades turn toward whoever dared to strike, and become merciless.",
+    "rarity": "epic",
+    "slot": "armor",
+    "setId": "Armor of the Dwarven Kings",
+    "abilities": [
+      {
+        "id": "cuirass-of-the-dwarven-kings-toll",
+        "name": "Clang of the Cuirass",
+        "trigger": {
+          "event": "hit",
+          "role": "target"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "eventActor",
+            "duration": {
+              "rounds": 1
+            },
+            "flag": "advantageForAttackers"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cursed-ring",
+    "name": "Cursed Ring",
+    "description": "A kill releases a poison cloud: all enemies are poisoned for 15% of the wearer's attack damage each round, for 2 rounds (1 use per round).\n\nThieves pried the diamond out of the ring of the slain necromancer Funk, and the curse found them all the same. Now the ring exhales a poisonous mist every time a life is cut short nearby.",
+    "rarity": "epic",
+    "slot": "ring",
+    "setId": "Claws of Yggshail",
+    "abilities": [
+      {
+        "id": "cursed-ring-cloud",
+        "name": "Poison Cloud",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": {
+              "percentOf": "ownerAttack",
+              "value": 15
+            },
+            "damageType": "poison",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "greaves-of-the-dwarven-kings",
+    "name": "Greaves of the Dwarven Kings",
+    "description": "Lethal blow (1 use per battle): Semgrun is left with 30% HP, allies' morale +1.\n\nThey say the dwarven kings never fell; they were carried off the field still alive and cursing. These greaves have grown into the stone underfoot, and no blow can knock their wearer off his feet the first time.",
+    "rarity": "epic",
+    "slot": "boots",
+    "setId": "Armor of the Dwarven Kings",
+    "abilities": [
+      {
+        "id": "greaves-of-the-dwarven-kings-stand",
+        "name": "Kings Do Not Fall",
+        "trigger": {
+          "event": "lethalDamage"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 30
+            },
+            "revive": true,
+            "target": "self"
+          },
+          {
+            "kind": "changeMorale",
+            "delta": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "helm-of-the-dwarven-kings",
+    "name": "Helm of the Dwarven Kings",
+    "description": "Allies are immune to Blindness and Slow.\n\nThe helm of the kings remembers every gaze that tried to blind it and every spell that sought to bind its wearer's legs. Now that memory protects everyone who stands with him in the same line.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Armor of the Dwarven Kings",
+    "abilities": [
+      {
+        "id": "helm-of-the-dwarven-kings-ward",
+        "name": "Vigilance of Kings",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "allAllies",
+            "flag": "spellImmunity",
+            "spellIds": [
+              "blindness",
+              "slow"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "lion-crown",
+    "name": "Lion Crown",
+    "description": "Morale +1.\n\nA golden crown with a lion's maw on the brow does not adorn; it inspires. The knight wearing it feels a lion awaken in his chest and charges into battle before the enemy can raise a shield.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Spirit of the Lion",
+    "abilities": [
+      {
+        "id": "lion-crown-courage",
+        "name": "Courage of the Lion",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "moonblade",
+    "name": "Moonblade",
+    "description": "+15% damage to a target with less than 50% HP.\n\nA blade for the off hand, thin as a young moon's sickle. It barely gleams in the darkness of the Dungeon, but it unerringly finds already wounded flesh, as a predator finishes off weakened prey.",
+    "rarity": "legendary",
+    "slot": "shield",
+    "setId": "Claws of Yggshail",
+    "abilities": [
+      {
+        "id": "moonblade-finisher",
+        "name": "Finishing Blow",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "hpBelow",
+          "who": "eventTarget",
+          "percent": 50
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necklace-of-the-bloody-claw",
+    "name": "Necklace of the Bloody Claw",
+    "description": "A kill heals the wearer for 15% max HP.\n\nThe fangs of the werewolf Bloody Claw, who ravaged villages near Talongard until the Dragon Knight cut him down. The beast's thirst still lives in them and gives the wearer the strength of every felled enemy.",
+    "rarity": "epic",
+    "slot": "amulet",
+    "setId": "Claws of Yggshail",
+    "abilities": [
+      {
+        "id": "necklace-of-the-bloody-claw-feast",
+        "name": "Bloodthirst",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 15
+            },
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necklace-of-the-lion",
+    "name": "Necklace of the Lion",
+    "description": "Lethal blow (1 use per battle): Godric rises with 25% HP, allies' morale +1.\n\nA lion's fang on a heavy chain warms the chest like a second heart. When the first heart is ready to stop, the second beats in its place, and the knight rises, to the astonishment and horror of his enemies.",
+    "rarity": "epic",
+    "slot": "amulet",
+    "setId": "Spirit of the Lion",
+    "abilities": [
+      {
+        "id": "necklace-of-the-lion-rise",
+        "name": "Second Heart",
+        "trigger": {
+          "event": "lethalDamage"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 25
+            },
+            "revive": true,
+            "target": "self"
+          },
+          {
+            "kind": "changeMorale",
+            "delta": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necklace-of-victory",
+    "name": "Necklace of Victory",
+    "description": "A kill of an enemy by anyone in the party gives allies +1 morale (1 use per round).\n\nThe Order of the Marshals of Victory, founded in the war of the Fourth Eclipse (its founder was Ivan Griffin). Every victory won is reflected in the gold of the order, and the army beside the bearer grows a little bolder.",
+    "rarity": "epic",
+    "slot": "amulet",
+    "setId": "Regalia of Dawn",
+    "abilities": [
+      {
+        "id": "necklace-of-victory-glory",
+        "name": "Glory",
+        "trigger": {
+          "event": "kill",
+          "role": "killerSide"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ring-of-celerity",
+    "name": "Ring of Celerity",
+    "description": "+15% damage to a target at full HP.\n\nPlatinum wings of Ilat, consecrated back in the Falcon Empire, embrace the stone of this ring. They say the winds of eternity blow at the back of whoever wears it, and the first strike against a careless enemy is always the deepest.",
+    "rarity": "epic",
+    "slot": "ring",
+    "setId": "Archer's Dream",
+    "abilities": [
+      {
+        "id": "ring-of-celerity-fresh",
+        "name": "First Strike",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "hpAbove",
+          "who": "eventTarget",
+          "percent": 99
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ring-of-sar-issus",
+    "name": "Ring of Sar-Issa",
+    "description": "Nature spells restore 1 spell slot (1 use per battle).\n\nThe ring is entwined with a living shoot that has not withered for several centuries. Nature magic is not spent with it; it returns like water to a river after rain.",
+    "rarity": "epic",
+    "slot": "ring",
+    "setId": "Regalia of Sar-Issa",
+    "abilities": [
+      {
+        "id": "ring-of-sar-issus-nature",
+        "name": "Cycle",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Nature"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "restoreSpellSlot",
+            "count": 1,
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "robe-of-sar-issus",
+    "name": "Robe of Sar-Issa",
+    "description": "Darkness spells lower the morale of all enemies by 1 (1 use per battle).\n\nThe blue-and-gold silk of the archmage's robe hides a part of his power. When a dark word flies from the wearer's lips, the robe's shadow spreads across the field, and enemies suddenly feel very small.",
+    "rarity": "epic",
+    "slot": "armor",
+    "setId": "Regalia of Sar-Issa",
+    "abilities": [
+      {
+        "id": "robe-of-sar-issus-dark",
+        "name": "Shadow of the Mantle",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Darkness"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": -1,
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "shield-of-the-dwarven-kings",
+    "name": "Shield of the Dwarven Kings",
+    "description": "At the start of battle, Semgrun takes allies under guard: 20% of their damage is redirected to the bearer.\n\nThe king who bore this shield never once retreated and never once let a comrade beside him fall. The shield still remembers that oath and draws to itself the blows meant for others.",
+    "rarity": "legendary",
+    "slot": "shield",
+    "setId": "Armor of the Dwarven Kings",
+    "abilities": [
+      {
+        "id": "shield-of-the-dwarven-kings-guard",
+        "name": "Shield Oath",
+        "trigger": {
+          "event": "battleStart"
+        },
+        "effects": [
+          {
+            "kind": "guard",
+            "percent": 20,
+            "duration": {
+              "rounds": 99
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "staff-of-sar-issus",
+    "name": "Staff of Sar-Issa",
+    "description": "Chaos spells set all enemies ablaze: 1d6 fire damage each round, for 2 rounds (1 use per round).\n\nThe staff's finial is a crystal in which a spark of primordial fire is frozen. Every Chaos spell stirs it, and then the flame slips off the crystal and seeks out enemies on its own.",
+    "rarity": "legendary",
+    "slot": "weapon",
+    "setId": "Regalia of Sar-Issa",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "bludgeoning",
+      "attackType": "melee"
+    },
+    "abilities": [
+      {
+        "id": "staff-of-sar-issus-chaos",
+        "name": "Spark of Chaos",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Chaos"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": "1d6",
+            "damageType": "fire",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "treeborn-quiver",
+    "name": "Treeborn Quiver",
+    "description": "A kill returns a bonus action (1 use per round).\n\nThe quiver was grown, not sewn: the Treeborn nurtured it from the bark of an old oak, and it always smells of resin. The moment an enemy falls, the quiver rustles softly, and the archer's hand is already reaching for the next arrow.",
+    "rarity": "epic",
+    "slot": "cloak",
+    "setId": "Archer's Dream",
+    "abilities": [
+      {
+        "id": "treeborn-quiver-refresh",
+        "name": "Rustle of the Quiver",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "grantAction",
+            "refreshBonusAction": true,
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "unicorn-horn-bow",
+    "name": "Unicorn Horn Bow",
+    "description": "A ranged attack can hit 1 additional target; the primary target takes full damage, each additional one takes 50%; each gets a separate attack roll.\n\nThe bowstring is braided from a unicorn's mane, and the bow's limbs are carved from its horn, which the unicorn itself gave to the forest. An arrow from it does not fly; it glides between raindrops and finds two targets where another archer sees one.",
+    "rarity": "legendary",
+    "slot": "range_weapon",
+    "setId": "Archer's Dream",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "ranged"
+    },
+    "abilities": [
+      {
+        "id": "unicorn-horn-bow-two-targets",
+        "name": "Twin Shot",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxTargets",
+            "flat": 1
+          },
+          {
+            "kind": "flag",
+            "flag": "multiTargetFalloff",
+            "percent": 50
+          }
+        ]
+      }
+    ]
+  }
+]

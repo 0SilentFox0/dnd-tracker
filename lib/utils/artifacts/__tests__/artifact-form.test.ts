@@ -19,4 +19,13 @@ describe("buildArtifactPayload", () => {
   it("includes weapon only for weapon slots", () => {
     expect(buildArtifactPayload({ ...base, slot: "weapon" }, "edit").weapon).toEqual({ damageDice: "1d8" });
   });
+
+  it("sends systemStats when set, null on edit when cleared, nothing when untouched", () => {
+    const stats = { type: "gear", weight: 1, price: 2, qualities: [] };
+
+    expect(buildArtifactPayload({ ...base, systemStats: stats }, "create").systemStats).toEqual(stats);
+    expect(buildArtifactPayload({ ...base, systemStats: null }, "edit").systemStats).toBeNull();
+    expect(buildArtifactPayload({ ...base, systemStats: null }, "create")).not.toHaveProperty("systemStats");
+    expect(buildArtifactPayload(base, "edit")).not.toHaveProperty("systemStats");
+  });
 });

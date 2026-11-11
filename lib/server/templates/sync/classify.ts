@@ -23,7 +23,7 @@ export function pairStatus(s: string, b: string | undefined, l: string): SourceS
   return l === b ? "updated" : "conflict";
 }
 
-export const changed = (a: Record<string, unknown>, b: Record<string, unknown>, keys: readonly string[]) => keys.filter((k) => k !== "id" && hashJson(a[k] ?? null) !== hashJson(b[k] ?? null));
+export const changed = (a: Record<string, unknown>, b: Record<string, unknown>, keys: readonly string[]) => keys.filter((k) => k !== "id" && k !== "slug" && hashJson(a[k] ?? null) !== hashJson(b[k] ?? null));
 
 export function item(ctx: Pick<SyncContext, "ignored">, fields: ItemFields): SyncItem {
   const ignoredHash = getEntry(ctx.ignored, fields.scope, fields.key);
@@ -107,7 +107,9 @@ function classifyRules(ctx: SyncContext, ruleLabel: (key: string) => string): Sy
   return MECHANIC_KEYS.flatMap((key): SyncItem[] => {
     const s = hashJson(src[key]);
 
-    const status = pairStatus(s, ctx.baseline.rules[key], hashJson(loc[key]));
+    const l = hashJson(loc[key]);
+
+    const status = pairStatus(s, ctx.baseline.rules[key] ?? l, l);
 
     if (!status) return [];
 

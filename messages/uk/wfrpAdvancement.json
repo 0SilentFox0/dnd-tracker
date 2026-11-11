@@ -1,0 +1,36 @@
+{
+  "ui": {
+    "balance": "Доступний досвід",
+    "characteristics": "Характеристики",
+    "skills": "Навички",
+    "talents": "Таланти",
+    "ledger": "Журнал розвитку",
+    "buy": "Купити · {cost}",
+    "buyNew": "Купити",
+    "undo": "Відкотити",
+    "atLimit": "Ліміт",
+    "maxRank": "Макс. ранг",
+    "noCost": "—",
+    "needXp": "Недостатньо досвіду",
+    "advances": "Покращень: {count}",
+    "rank": "Ранг {rank}/{max}",
+    "rankOnly": "Ранг {rank}",
+    "unknownTalent": "Невідомий талант",
+    "noTalents": "У каталозі немає талантів із ціною в досвіді.",
+    "ledgerEmpty": "Покупок ще не було.",
+    "spent": "{cost} досвіду",
+    "newSkill": "Нова навичка",
+    "spec": "Спеціалізація",
+    "outOfCareer": "Поза кар'єрою ×{multiplier}"
+  },
+  "career": {
+    "title": "Кар'єра",
+    "none": "Кар'єру не призначено.",
+    "pick": "Оберіть кар'єру",
+    "assign": "Призначити",
+    "tier": "Рівень {tier}/4",
+    "ticks": "Позначок {have}/{need}",
+    "advance": "Підвищити",
+    "forceBody": "Позначок {have}/{need}. Підвищити попри це?"
+  }
+}

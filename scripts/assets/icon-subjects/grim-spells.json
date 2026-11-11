@@ -1,0 +1,122 @@
+{
+  "Spark Flick": {
+    "palette": "neutral gold",
+    "subject": "a single bright spark flung from a snapping finger and thumb, trailing tiny glowing flecks"
+  },
+  "Soothing Touch": {
+    "palette": "neutral gold",
+    "subject": "an open palm laid on a bruised forearm, soft warm light easing the wound"
+  },
+  "Chill Breath": {
+    "palette": "neutral gold",
+    "subject": "a thin plume of frosty breath drifting from pursed lips, ice crystals forming in the air"
+  },
+  "Dazzle": {
+    "palette": "neutral gold",
+    "subject": "a sudden burst of blinding glittering light between two raised fingers, scattering rays"
+  },
+  "Muffle": {
+    "palette": "neutral gold",
+    "subject": "a hand pressing a soft grey cloth of silence over swirling fading sound waves"
+  },
+  "Tripwire Hex": {
+    "palette": "neutral gold",
+    "subject": "a nearly invisible glowing thread stretched low across a stone floor, tiny runes at each end"
+  },
+  "Ember Dart": {
+    "palette": "fire",
+    "subject": "a small flaming dart streaking forward, trailing sparks and a thin line of smoke"
+  },
+  "Searing Brand": {
+    "palette": "fire",
+    "subject": "a glowing red-hot brand pressed into charred skin, a spiral rune burning in orange fire"
+  },
+  "Smoke Veil": {
+    "palette": "fire",
+    "subject": "thick swirling grey smoke curtain lit from within by dull orange embers"
+  },
+  "Cinder Cloud": {
+    "palette": "fire",
+    "subject": "a roiling cloud of glowing cinders and ash billowing outward, flickering with red light"
+  },
+  "Pyre Lance": {
+    "palette": "fire",
+    "subject": "a long spear of concentrated white-orange flame hurtling forward, wreathed in roaring fire"
+  },
+  "Shade Bolt": {
+    "palette": "necrotic",
+    "subject": "a streaking bolt of solid darkness with a cold violet-black glow trailing wisps of shadow"
+  },
+  "Grasping Shadows": {
+    "palette": "necrotic",
+    "subject": "dark clawed hands of shadow reaching up from the floor to seize at ankles"
+  },
+  "Gloam Daze": {
+    "palette": "necrotic",
+    "subject": "a spiral of dim shadowy motes swirling around a dazed pale face, eyes unfocused"
+  },
+  "Pall of Dread": {
+    "palette": "necrotic",
+    "subject": "a heavy black shroud of fear descending, ghostly screaming faces pressed in the folds"
+  },
+  "Hollow Scream": {
+    "palette": "necrotic",
+    "subject": "a ghostly open mouth screaming, shockwaves of dark sickly green energy rippling outward"
+  },
+  "Mending Moss": {
+    "palette": "nature",
+    "subject": "a patch of glowing green moss spreading over a wound, tiny leaves unfurling"
+  },
+  "Fen Fog": {
+    "palette": "nature",
+    "subject": "low pale marsh fog rolling across dark water, reeds and faint will-o-wisp glints in the mist"
+  },
+  "Bramble Snare": {
+    "palette": "nature",
+    "subject": "thick thorny brambles erupting from the ground and coiling tightly around a boot"
+  },
+  "Sour Blood": {
+    "palette": "nature",
+    "subject": "a vial-shaped drop of dark green curdled blood spreading through veins in a clenched hand"
+  },
+  "Withering Glance": {
+    "palette": "nature",
+    "subject": "an eye with a dying leaf-green iris, nearby plants browning and crumbling to dust"
+  },
+  "Crow-Knot Curse": {
+    "palette": "nature",
+    "subject": "a black crow feather tied in a tight knot of red thread, dark green glow around it"
+  },
+  "Hearth Mending": {
+    "palette": "radiant",
+    "subject": "gentle golden firelight knitting together a torn cloth and cracked skin, tiny floating embers"
+  },
+  "Hearth Spark": {
+    "palette": "radiant",
+    "subject": "a small bright golden flame floating above an open palm, warm and steady"
+  },
+  "Hearthward Rebuke": {
+    "palette": "radiant",
+    "subject": "a golden flaming hand raised in a stern warding gesture, blazing light pushing back"
+  },
+  "Hush of the Hearth": {
+    "palette": "radiant",
+    "subject": "a calm circle of warm golden glow quieting swirling noise, a finger raised to lips"
+  },
+  "Mercy of the Hearth": {
+    "palette": "radiant",
+    "subject": "a kneeling figure bathed in soft golden fire as wounds close, radiant sparks rising"
+  },
+  "Hearthfire Smite": {
+    "palette": "radiant",
+    "subject": "a sword blade wreathed in blazing golden fire striking down in a bright arc"
+  },
+  "Stilling Word": {
+    "palette": "radiant",
+    "subject": "a single glowing golden rune hanging in the air, rings of light freezing a rushing figure"
+  },
+  "Last Light": {
+    "palette": "radiant",
+    "subject": "a lone golden flame guttering in vast darkness, casting a final stubborn halo"
+  }
+}

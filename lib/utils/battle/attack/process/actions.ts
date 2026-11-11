@@ -8,6 +8,7 @@ import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { immunityNote } from "@/lib/utils/battle/resistance";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -161,6 +162,7 @@ export interface BuildOffTurnParams {
   currentRound: number;
   critFlavor?: CritFlavor;
   title?: LogLine;
+  rules: Ruleset;
 }
 
 export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
@@ -174,9 +176,17 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
 
   const head = { title: p.title ?? textRef("battleLog.offTurn.titles.retaliation"), attacker: retaliator.basicInfo.name, target: target.basicInfo.name, d20, crit: critText };
 
-  const summary = hit
-    ? textRef("battleLog.offTurn.hit", { ...head, damage: hit.hitDamage.totalFinalDamage, plainCrit: !crit && attackRoll.isCritical ? plainCrit : "" })
-    : textRef("battleLog.offTurn.miss", head);
+  const plainCritText = !crit && attackRoll.isCritical ? plainCrit : "";
+
+  const pct = attackRoll.system ? attackRoll.totalAttackValue : undefined;
+
+  const summary = pct !== undefined
+    ? hit
+      ? textRef("battleLog.offTurn.hitPercentile", { ...head, roll: pct, damage: hit.hitDamage.totalFinalDamage, plainCrit: plainCritText })
+      : textRef("battleLog.offTurn.missPercentile", { ...head, roll: pct })
+    : hit
+      ? textRef("battleLog.offTurn.hit", { ...head, damage: hit.hitDamage.totalFinalDamage, plainCrit: plainCritText })
+      : textRef("battleLog.offTurn.miss", head);
 
   const immune = hit && hit.hitDamage.totalFinalDamage === 0 ? immunityNote(target.basicInfo.name, hit.hitDamage.damageSteps) : "";
 
@@ -186,6 +196,7 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
       isHit: !!hit,
       isCritical: !!hit && attackRoll.isCritical,
       isCriticalFail: attackRoll.isCriticalFail,
+      ...(attackRoll.system && { system: attackRoll.system }),
       ...(crit && { criticalEffect: critDetails(crit, p.critFlavor) }),
       ...(hit && {
         damageRolls: damageRollDetails(attack, hit.damageRolls),

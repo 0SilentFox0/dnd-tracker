@@ -39,6 +39,30 @@ describe("character profile (en)", () => {
     expect(container.textContent).not.toMatch(/characterProfile\./);
   });
 
+  it("class is shown in d20 and hidden in wfrp", async () => {
+    const d20 = await inProfile(withSheet({ system: "dnd5e", identity: { ...sheetFixture.identity, className: "Paladin" } }), <ProfileHero />);
+
+    expect(d20.container.textContent).toContain("Paladin");
+    cleanup();
+
+    const wfrp = await inProfile(withSheet({ system: "wfrp", identity: { ...sheetFixture.identity, className: "Paladin" } }), <ProfileHero />);
+
+    expect(wfrp.container.textContent).not.toContain("Paladin");
+  });
+
+  it("alignment is shown in d20 and hidden in wfrp", async () => {
+    const identity = { ...sheetFixture.identity, alignment: "Lawful Good" };
+
+    const d20 = await inProfile(withSheet({ system: "dnd5e", identity }), <ProfileHero />);
+
+    expect(d20.container.textContent).toContain("Lawful Good");
+    cleanup();
+
+    const wfrp = await inProfile(withSheet({ system: "wfrp", identity }), <ProfileHero />);
+
+    expect(wfrp.container.textContent).not.toContain("Lawful Good");
+  });
+
   it("goals render English headings and kinds", async () => {
     const { container } = await inProfile(sheetFixture, <GoalList />);
 

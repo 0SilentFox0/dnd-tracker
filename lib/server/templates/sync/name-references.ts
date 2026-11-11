@@ -1,8 +1,8 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import type { BundleTable } from "@/lib/server/templates/bundle";
-import { mapStrings } from "@/lib/srd/i18n/catalog";
 import { isRecord } from "@/lib/utils/common/is-record";
+import { mapStrings } from "@/lib/utils/templates/i18n/catalog";
 
 type Entry = { table: BundleTable; row: Record<string, unknown> };
 type NameRef = { table: "classes" | "artifacts"; name: string };

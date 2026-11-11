@@ -14,8 +14,10 @@
     "enemyUnits": "Ворожі юніти (лише цей бій)",
     "buff": "Підсилити",
     "buffHint": "HP і шкода ×1.1, стакається",
+    "buffHintWounds": "Рани і шкода ×1.1, стакається",
     "debuff": "Послабити",
     "debuffHint": "HP і шкода ÷1.1, стакається",
+    "debuffHintWounds": "Рани і шкода ÷1.1, стакається",
     "participants": "Учасники бою",
     "nobody": "Нікого на полі",
     "rollInitiative": "Кинути ініціативу",
@@ -28,6 +30,7 @@
   },
   "row": {
     "scaleHp": "{value} HP",
+    "scaleWounds": "{value} Рани",
     "scaleDamage": "{value} шкода",
     "controls": "Керує:",
     "changeHp": "Змінити HP",
@@ -90,6 +93,7 @@
   },
   "revive": {
     "message": "<b>{name}</b> впав. Повернути до життя з 1 HP?",
+    "messageWounds": "<b>{name}</b> впав. Повернути до життя з 1 раною?",
     "action": "Повернути",
     "hide": "Сховати"
   },

@@ -60,3 +60,41 @@ describe("ResourcesDialog: persistent charges", () => {
     expect(h.edit.mutateOk).toHaveBeenCalledWith({ hp: 10, tempHp: 0, exhaustion: 0, charges: { "pool:item:wand": 0, "pool:grant:feat%3Amagic-initiate:sp-guidance": 0 } });
   });
 });
+
+describe("ResourcesDialog: wfrp Sin", () => {
+  it("shows a Sin field only for wfrp and sends it on save", () => {
+    mockMatchMedia(false);
+    h.edit.mutateOk.mockClear();
+
+    const wfrpSheet = { ...sheetFixture, rest, system: "wfrp" as const, wfrp: { characteristics: [], wounds: { max: 10, breakdown: [] }, move: { value: 4, walkYd: 8, runYd: 16 }, skills: [], fate: 2, fortune: 2, sin: 2, corruption: { points: 0, threshold: 6, mutations: [] } } };
+
+    renderWithConfirm(
+      <ProfileProvider campaignId="c" characterId="ch" sheet={wfrpSheet} canEdit={false}>
+        <ResourcesDialog rest={rest} open onOpenChange={vi.fn()} />
+      </ProfileProvider>,
+    );
+
+    const input = screen.getByLabelText("rest.resources.sin");
+
+    fireEvent.change(input, { target: { value: "5" } });
+
+    const form = input.closest("form");
+
+    if (!form) throw new Error("Resources form missing");
+
+    fireEvent.submit(form);
+
+    expect(h.edit.mutateOk).toHaveBeenCalledWith(expect.objectContaining({ sin: 5 }));
+  });
+
+  it("d20 has no Sin field", () => {
+    mockMatchMedia(false);
+    renderWithConfirm(
+      <ProfileProvider campaignId="c" characterId="ch" sheet={{ ...sheetFixture, rest }} canEdit={false}>
+        <ResourcesDialog rest={rest} open onOpenChange={vi.fn()} />
+      </ProfileProvider>,
+    );
+
+    expect(screen.queryByLabelText("rest.resources.sin")).toBeNull();
+  });
+});

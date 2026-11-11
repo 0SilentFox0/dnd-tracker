@@ -65,6 +65,7 @@ model Campaign {
   races                Race[]
   classes              GameClass[]
   backgrounds          Background[]
+  careers              Career[]
   feats                Feat[]
   scenarioPages        ScenarioPage[]
   skillTrees           SkillTree[]
@@ -146,6 +147,7 @@ model Character {
   languages           Json                @default("[]")
   proficiencies       Json                @default("{}")
   skillTreeProgress   Json                @default("{}")
+  characteristics     Json                @default("{}")
   seenLevel           Int?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
@@ -226,11 +228,13 @@ model Unit {
   saveProficiencies    Json     @default("[]")
   statblock            Json     @default("{}")
   spellcasting         Json     @default("{}")
+  characteristics      Json     @default("{}")
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   race                 Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
   spellsSummoning      Spell[]  @relation("SpellSummonUnit")
   sourceId             String?
   sourceHash           String?
+  slug                 String?
 
   @@index([campaignId])
   @@index([raceId])
@@ -296,6 +300,7 @@ model Spell {
   spellGroup            SpellGroup? @relation(fields: [groupId], references: [id])
   sourceId              String?
   sourceHash            String?
+  slug                  String?
 
   @@index([campaignId])
   @@index([groupId])
@@ -326,6 +331,7 @@ model SpellGroup {
   mainSkills MainSkill[]
   sourceId   String?
   sourceHash String?
+  slug       String?
 
   @@index([campaignId])
   @@index([campaignId, sourceId])
@@ -349,6 +355,8 @@ model Artifact {
   artifactSet ArtifactSet? @relation(fields: [setId], references: [id])
   sourceId    String?
   sourceHash  String?
+  slug        String?
+  systemStats Json?        @map("system_stats")
 
   @@index([campaignId])
   @@index([setId])
@@ -369,6 +377,7 @@ model ArtifactSet {
   artifacts   Artifact[]
   sourceId    String?
   sourceHash  String?
+  slug        String?
 
   @@index([campaignId])
   @@index([campaignId, sourceId])
@@ -435,6 +444,7 @@ model SkillTree {
   campaign        Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   sourceId        String?
   sourceHash      String?
+  slug            String?
 
   @@index([campaignId, race])
   @@index([campaignId, sourceId])
@@ -466,6 +476,7 @@ model BattleScene {
   currentTurnIndex   Int                 @default(0)
   pendingMoraleCheck Json?
   pendingCritChoice  Json?
+  systemState        Json?               @map("system_state")
   map                Json?
   audio              Json?
   rules              Json?
@@ -498,6 +509,7 @@ model CampaignTrack {
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   sourceId    String?
   sourceHash  String?
+  slug        String?
 
   @@index([campaignId, sortOrder])
   @@index([campaignId, sourceId])
@@ -639,6 +651,7 @@ model Skill {
   grantedSpell            Spell?      @relation("SkillGrantedSpell", fields: [grantedSpellId], references: [id])
   sourceId                String?
   sourceHash              String?
+  slug                    String?
 
   @@index([campaignId])
   @@index([campaignId, id])
@@ -652,27 +665,42 @@ model Skill {
 }
 
 model Race {
-  id                   String   @id @default(cuid())
+  id                   String       @id @default(cuid())
   campaignId           String
   name                 String
-  availableSkills      Json     @default("[]")
-  disabledSkills       Json     @default("[]")
+  availableSkills      Json         @default("[]")
+  disabledSkills       Json         @default("[]")
   passiveAbility       Json?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  spellSlotProgression Json     @default("[]")
-  abilities            Json     @default("[]")
-  choices              Json     @default("[]")
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  spellSlotProgression Json         @default("[]")
+  abilities            Json         @default("[]")
+  choices              Json         @default("[]")
   icon                 String?
   color                String?
-  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  profile              Json?
+  campaign             Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   units                Unit[]
+  legacyProfile        RaceProfile?
   sourceId             String?
   sourceHash           String?
+  slug                 String?
 
   @@index([campaignId, name])
   @@index([campaignId, sourceId])
   @@map("races")
+}
+
+model RaceProfile {
+  raceId     String   @id
+  campaignId String
+  profile    Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  race       Race     @relation(fields: [raceId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("race_profiles")
 }
 
 model GameClass {
@@ -696,6 +724,7 @@ model GameClass {
   updatedAt           DateTime @updatedAt
   sourceId            String?
   sourceHash          String?
+  slug                String?
   campaign            Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId, name])
@@ -711,6 +740,8 @@ model Feat {
   type         String   @default("general")
   prerequisite Json     @default("{}")
   repeatable   Boolean  @default(false)
+  xpCost       Int?
+  maxRank      Int?
   description  String?
   abilities    Json     @default("[]")
   choices      Json     @default("[]")
@@ -718,6 +749,7 @@ model Feat {
   updatedAt    DateTime @updatedAt
   sourceId     String?
   sourceHash   String?
+  slug         String?
   campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId, name])
@@ -740,6 +772,7 @@ model Background {
   updatedAt          DateTime    @updatedAt
   sourceId           String?
   sourceHash         String?
+  slug               String?
   campaign           Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   characters         Character[]
 
@@ -747,6 +780,26 @@ model Background {
   @@index([originFeatId])
   @@index([campaignId, sourceId])
   @@map("backgrounds")
+}
+
+model Career {
+  id         String   @id @default(cuid())
+  campaignId String
+  name       String
+  icon       String?
+  class      String?
+  tiers      Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  sourceId   String?
+  sourceHash String?
+  slug       String?
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, name])
+  @@index([campaignId])
+  @@index([campaignId, sourceId])
+  @@map("careers")
 }
 
 model CompendiumSource {
@@ -815,6 +868,7 @@ model MainSkill {
   skills              Skill[]
   sourceId            String?
   sourceHash          String?
+  slug                String?
 
   @@index([campaignId])
   @@index([spellGroupId])
@@ -1336,12 +1390,15 @@ model UnitBase {
   saveProficiencies    Json     @default("[]")
   statblock            Json     @default("{}")
   spellcasting         Json     @default("{}")
+  characteristics      Json     @default("{}")
+  slug                 String?
   sourceCampaignId     String
   validFrom            Int
   validTo              Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("units_base")
 }
 
@@ -1394,12 +1451,14 @@ model SpellBase {
   ingredients           Json     @default("[]")
   componentFlags        Json?
   summonUnitId          String?
+  slug                  String?
   sourceCampaignId      String
   validFrom             Int
   validTo               Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("spells_base")
 }
 
@@ -1409,12 +1468,14 @@ model SpellGroupBase {
   color            String?
   icon             String?
   createdAt        DateTime @default(now())
+  slug             String?
   sourceCampaignId String
   validFrom        Int
   validTo          Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("spell_groups_base")
 }
 
@@ -1430,12 +1491,15 @@ model ArtifactBase {
   icon             String?
   createdAt        DateTime @default(now())
   abilities        Json     @default("[]")
+  slug             String?
+  systemStats      Json?    @map("system_stats")
   sourceCampaignId String
   validFrom        Int
   validTo          Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("artifacts_base")
 }
 
@@ -1447,12 +1511,14 @@ model ArtifactSetBase {
   icon             String?
   createdAt        DateTime @default(now())
   abilities        Json     @default("[]")
+  slug             String?
   sourceCampaignId String
   validFrom        Int
   validTo          Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("artifact_sets_base")
 }
 
@@ -1461,12 +1527,14 @@ model SkillTreeBase {
   race             String
   skills           Json     @default("[]")
   createdAt        DateTime @default(now())
+  slug             String?
   sourceCampaignId String
   validFrom        Int
   validTo          Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("skill_trees_base")
 }
 
@@ -1479,12 +1547,14 @@ model CampaignTrackBase {
   durationSec      Int?
   sortOrder        Int      @default(0)
   createdAt        DateTime @default(now())
+  slug             String?
   sourceCampaignId String
   validFrom        Int
   validTo          Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("campaign_tracks_base")
 }
 
@@ -1507,12 +1577,14 @@ model SkillBase {
   spellEnhancementData    Json     @default("{}")
   appearanceDescription   String? // опис вигляду для довідника гравців (редагує DM)
   abilities               Json     @default("[]")
+  slug                    String?
   sourceCampaignId        String
   validFrom               Int
   validTo                 Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("skills_base")
 }
 
@@ -1529,12 +1601,15 @@ model RaceBase {
   choices              Json     @default("[]")
   icon                 String?
   color                String?
+  profile              Json?
+  slug                 String?
   sourceCampaignId     String
   validFrom            Int
   validTo              Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("races_base")
 }
 
@@ -1556,12 +1631,14 @@ model GameClassBase {
   spellList           String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime
+  slug                String?
   sourceCampaignId    String
   validFrom           Int
   validTo             Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("classes_base")
 }
 
@@ -1572,17 +1649,21 @@ model FeatBase {
   type             String   @default("general")
   prerequisite     Json     @default("{}")
   repeatable       Boolean  @default(false)
+  xpCost           Int?
+  maxRank          Int?
   description      String?
   abilities        Json     @default("[]")
   choices          Json     @default("[]")
   createdAt        DateTime @default(now())
   updatedAt        DateTime
+  slug             String?
   sourceCampaignId String
   validFrom        Int
   validTo          Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("feats_base")
 }
 
@@ -1598,12 +1679,14 @@ model BackgroundBase {
   equipmentText      String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime
+  slug               String?
   sourceCampaignId   String
   validFrom          Int
   validTo            Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("backgrounds_base")
 }
 
@@ -1617,13 +1700,34 @@ model MainSkillBase {
   role                String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime
+  slug                String?
   sourceCampaignId    String
   validFrom           Int
   validTo             Int?
 
   @@id([id, validFrom])
   @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
   @@map("main_skills_base")
+}
+
+model CareerBase {
+  id               String
+  name             String
+  icon             String?
+  class            String?
+  tiers            Json     @default("[]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+  slug             String?
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
+  @@map("careers_base")
 }
 
 // END GENERATED BASE MODELS

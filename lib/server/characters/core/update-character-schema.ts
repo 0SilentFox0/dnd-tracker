@@ -5,6 +5,7 @@ import { HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { BackgroundSelectionFields } from "@/lib/schemas/choices";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
+import { SystemDataSchema } from "@/lib/schemas/common";
 
 export const updateCharacterSchema = z.object({
   ...BackgroundSelectionFields,
@@ -65,6 +66,8 @@ export const updateCharacterSchema = z.object({
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
 
   archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
-}).superRefine((value, ctx) => {
-  if (value.class === "" && !value.classes?.length) ctx.addIssue({ code: "custom", path: ["class"], message: "Required" });
+  characteristics: SystemDataSchema.optional(),
+  systemBaseline: z.unknown().optional(),
 });
+
+export type UpdateCharacterInput = z.infer<typeof updateCharacterSchema>;

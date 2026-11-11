@@ -10,7 +10,8 @@ import { ContentError } from "@/lib/server/content/errors";
 import { markContentDirty } from "@/lib/server/content/write-context";
 import { delegateOf } from "@/lib/server/templates/bundle";
 import { rowHash } from "@/lib/server/templates/sync/hash";
-import { classifyLayered, type LayeredContext, type LayeredDb, type LayerRef, loadLayeredContext, pendingKey, tableOf } from "@/lib/server/templates/sync/layered";
+import { classifyLayered, type LayeredContext, type LayeredDb, type LayeredEntry, type LayerRef, loadLayeredContext, pendingKey, tableOf } from "@/lib/server/templates/sync/layered";
+import { createRefChecker, danglingProfileWarnings, type RefChecker } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, emptyState, getEntry, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -48,7 +49,13 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
 
   const { items, ignored } = sourceSelection(all, refs);
 
-  for (const i of items) await applyItem(db, campaignId, i, getEntry(ctx.ignored, i.scope, pendingKey(i.key)) !== undefined);
+  const warnings: string[] = [];
+
+  const entries = new Map(ctx.entries.map((e) => [`${e.t.key}:${e.key}`, e]));
+
+  const checker = createRefChecker(db, campaignId);
+
+  for (const i of items) await applyItem(db, ctx, checker, entries.get(keyOf(i))!, i, getEntry(ctx.ignored, i.scope, pendingKey(i.key)) !== undefined, warnings);
 
   const advancing = ctx.source.contentVersion > ctx.baseVersion;
 
@@ -62,10 +69,20 @@ export async function applyLayered(db: LayeredDb, campaignId: string, layer: Lay
     if (count !== 1) throw new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
   }
 
-  return { applied: items.length, ignored: ignored.length, autoAdded: [], warnings: [] };
+  warnings.push(...(await danglingProfileWarnings(db, campaignId)));
+
+  return { applied: items.length, ignored: ignored.length, autoAdded: [], warnings };
 }
 
-async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending: boolean) {
+async function pinBaseline(db: LayeredDb, campaignId: string, e: LayeredEntry) {
+  const { id: _id, ...columns } = Object.fromEntries(Object.entries(e.baseline!).filter(([k]) => !BASE_ONLY.has(k)));
+
+  await bypassLayer(() => delegateOf(db, e.t).createMany({ data: [{ ...columns, campaignId, sourceId: e.key, sourceHash: rowHash(e.baseline!, e.t) }] }));
+}
+
+async function applyItem(db: LayeredDb, ctx: LayeredContext, refs: RefChecker, e: LayeredEntry, i: SyncItem, pending: boolean, warnings: string[]) {
+  const campaignId = ctx.campaignId;
+
   const t = tableOf(i.scope)!;
 
   const { hideTable } = layeredModels()[t.model];
@@ -75,12 +92,30 @@ async function applyItem(db: LayeredDb, campaignId: string, i: SyncItem, pending
 
     if (!count) return;
   } else if (i.localId) {
+    const blockedWarning = i.status === "deletedInSource" ? await refs.blockedBy(i.scope, [i.localId, i.key], i.name) : null;
+
+    if (blockedWarning) {
+      warnings.push(blockedWarning);
+
+      return;
+    }
+
     const kind = i.status === "deletedInSource" ? DETACH_KIND_BY_TABLE[i.scope] : undefined;
 
     if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], campaignId, kind, [i.localId, i.key]);
 
     await bypassLayer(() => delegateOf(db, t).deleteMany({ where: { id: i.localId!, campaignId } }));
-  } else return;
+
+    refs.deleted(i.scope);
+  } else {
+    const pinned = i.status === "deletedInSource" && e.baseline ? await refs.blockedBy(i.scope, [i.key], i.name) : null;
+
+    if (!pinned) return;
+
+    await pinBaseline(db, campaignId, e);
+
+    warnings.push(pinned);
+  }
 
   markContentDirty();
 }
@@ -101,9 +136,7 @@ async function keepUnselected(db: LayeredDb, ctx: LayeredContext, all: Map<strin
 
       deferred.push(i);
     } else if ((i.status === "updated" || i.status === "deletedInSource") && e.baseline) {
-      const { id: _id, ...columns } = Object.fromEntries(Object.entries(e.baseline).filter(([k]) => !BASE_ONLY.has(k)));
-
-      await bypassLayer(() => delegateOf(db, e.t).createMany({ data: [{ ...columns, campaignId: ctx.campaignId, sourceId: e.key, sourceHash: rowHash(e.baseline!, e.t) }] }));
+      await pinBaseline(db, ctx.campaignId, e);
     } else continue;
 
     markContentDirty();

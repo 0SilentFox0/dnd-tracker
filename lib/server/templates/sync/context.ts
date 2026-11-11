@@ -4,15 +4,16 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf, SETTINGS_SELECT, settingsOf, type TemplateDb } from "@/lib/server/templates/bundle";
 import { cachedExport } from "@/lib/server/templates/bundle-cache";
-import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
-import { translationsFor } from "@/lib/server/templates/srd-translations";
+import { templateTranslationsFor } from "@/lib/server/templates/dictionaries";
+import { localizedExport } from "@/lib/server/templates/localized-export";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { emptyState } from "@/lib/server/templates/sync/state";
 import type { LocalRow, SyncContext, SyncState, TableHashes } from "@/lib/server/templates/sync/types";
 import { canReadSource } from "@/lib/utils/api/is-dm";
-import { isCanonicalSrdTemplate, SRD_CONTENT_LOCALES, type SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
+import { isCanonicalTemplate, localizationOf } from "@/lib/utils/templates/registry";
 
-export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character">;
+export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character" | "characterInventory">;
 
 const asState = (v: unknown): SyncState => {
   const o = (v ?? {}) as Partial<SyncState>;
@@ -43,19 +44,21 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   const source = { id: found.id, name: found.name, kind: found.kind, contentVersion: found.contentVersion };
 
-  const [rawSourceBundle, rows, state] = await Promise.all([
-    cachedExport(db, source.id, source.contentVersion),
-    loadTargetRows(db, campaignId),
-    db.campaignSourceSync.findUnique({ where: { campaignId } }),
-  ]);
+  const localization = isCanonicalTemplate(found) ? localizationOf(found) : null;
 
-  const srdOverlay = isCanonicalSrdTemplate(found);
+  const templateOverlay = localization !== null;
 
   const contentLocale = campaign.locale ?? "en";
 
-  if (srdOverlay && !SRD_CONTENT_LOCALES.includes(contentLocale as SrdContentLocale)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
+  if (localization && !localization.locales.includes(contentLocale as TemplateContentLocale)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
 
-  const sourceBundle = srdOverlay ? localizeSrdBundle(rawSourceBundle, translationsFor(contentLocale as SrdContentLocale)) : rawSourceBundle;
+  const translations = localization ? await templateTranslationsFor(localization.templateKey, contentLocale as TemplateContentLocale) : null;
+
+  const [sourceBundle, rows, state] = await Promise.all([
+    translations ? localizedExport(db, source.id, source.contentVersion, translations) : cachedExport(db, source.id, source.contentVersion),
+    loadTargetRows(db, campaignId),
+    db.campaignSourceSync.findUnique({ where: { campaignId } }),
+  ]);
 
   const synced = state?.sourceCampaignId === source.id ? state : null;
 
@@ -65,7 +68,7 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   return {
     campaignId,
-    srdOverlay,
+    templateOverlay,
     source,
     sourceBundle,
     target: { settings: settingsOf(campaign), rules: campaign.rules, credits: campaign.credits ?? null, rows },

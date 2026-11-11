@@ -88,6 +88,7 @@
     "bonus_action": "bonus action",
     "ability": "ability",
     "end_turn": "end of turn",
+    "turnStart": "turn start",
     "skip_turn": "turn skipped",
     "morale_skip": "morale",
     "retaliation": "retaliation",

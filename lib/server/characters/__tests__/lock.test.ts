@@ -1,14 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { lockCharacters } from "@/lib/server/characters/lock";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 
 describe("lockCharacters", () => {
   it("returns parsed resources and experience per id", async () => {
-    const tx = { $queryRaw: vi.fn(async () => [{ id: "a", resources: { hp: 3, junk: 1 }, experience: 40 }]) };
+    const tx = { $queryRaw: vi.fn(async () => [{ id: "a", resources: { hp: 3, junk: 1 }, experience: 40, characteristics: null }]) };
 
     const map = await lockCharacters(tx as never, ["a"]);
 
-    expect(map.get("a")).toEqual({ id: "a", resources: { hp: 3 }, experience: 40 });
+    expect(map.get("a")).toEqual({ id: "a", resources: { hp: 3 }, experience: 40, characteristics: null });
   });
 
   it("no ids → no query", async () => {

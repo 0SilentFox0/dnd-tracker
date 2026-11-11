@@ -8,6 +8,7 @@ import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { diceCount } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { BattleAttack } from "@/types/battle";
 
@@ -76,7 +77,7 @@ describe("processAttack crit with doubleDice", () => {
 describe("breakdown preview with doubleDice", () => {
   const rules = parseRules({ criticals: { doubleDice: true, effects: false } });
 
-  const preview = (damageRolls: number[], extra: object = {}) => computeDamageBreakdown({ attacker: hero, target, attack: rapier, damageRolls, allParticipants: [hero, target], isCritical: true, ...extra }).totalDamage;
+  const preview = (damageRolls: number[], extra: object = {}) => computeDamageBreakdown({ attacker: hero, target, attack: rapier, damageRolls, allParticipants: [hero, target], rules: DEFAULT_RULES, isCritical: true, ...extra }).totalDamage;
 
   it("doubles dice, not the modifier, and matches the server", () => {
     expect(preview([5, 3], { rules })).toBe(5 + 3 + 4);

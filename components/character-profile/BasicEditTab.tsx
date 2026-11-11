@@ -7,11 +7,13 @@ import { useProfile } from "./ProfileContext";
 
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import type { DmCharacterEditor } from "@/lib/hooks/characters";
 import { useClassMode } from "@/lib/hooks/classes";
 import { classHp, hitDiceLabel } from "@/lib/utils/characters/classes";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 
 export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor; onDeleted: () => void }) {
@@ -41,8 +43,8 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
 
   return (
     <div className="space-y-6">
-      <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={options.members} races={options.races} classMode={classUi ? classMode : undefined} />
-      {classMode.enabled && !classUi && (
+      <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={options.members} races={options.races} hideProgression={systemUiOf(sheet.system).hideProgression} hideLineage={!RULE_SYSTEM_REGISTRY[sheet.system].lineage} hideClass={!RULE_SYSTEM_REGISTRY[sheet.system].classes} hideAlignment={!RULE_SYSTEM_REGISTRY[sheet.system].identity.alignments} classMode={classUi ? classMode : undefined} />
+      {classMode.enabled && !classUi && !systemUiOf(sheet.system).hideProgression && (
         <Button type="button" variant="outline" size="sm" onClick={() => setConverting(true)}>
           {t("toClasses")}
         </Button>

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
+import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { type DialogState, useAwaitingDmDialog } from "./useAwaitingDmDialog";
 import { useBattleActions } from "./useBattleActions";
@@ -93,7 +93,9 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     [show, t],
   );
 
-  const { connectionState } = usePusherBattleSync(campaignId, battleId, userId, onTurnStarted);
+  const { data: isDM = false } = useQuery({ queryKey: battleQueryKey(campaignId, battleId), queryFn: skipToken, select: (b: BattleScene) => b.isDM === true });
+
+  const { connectionState } = usePusherBattleSync(campaignId, battleId, userId, onTurnStarted, isDM);
 
   const { data: battle, isLoading } = useBattle(campaignId, battleId, { pausePolling: connectionState === "connected" });
 
@@ -134,7 +136,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const order = battle?.initiativeOrder;
 
-  const effects = useDisplayEffectMap(order ?? NO_ORDER);
+  const effects = useDisplayEffectMap(order ?? NO_ORDER, battle?.rules);
 
   const dmControl = useMemo<DmControl>(() => ({ id: dmControlledId, set: setDmControlledId }), [dmControlledId]);
 

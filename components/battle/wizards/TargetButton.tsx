@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import type { BattleParticipant } from "@/types/battle";
 
 const TONE = {
-  enemy: { on: "border-[var(--enemy)] bg-[var(--enemy)]/15", off: "border-white/15", extra: "", portrait: 36 },
+  enemy: { on: "border-[var(--enemy)] bg-[var(--enemy)]/15", off: "border-white/15", extra: "disabled:opacity-50", portrait: 36 },
   gold: { on: "border-[var(--gold)] bg-[var(--gold)]/10", off: "border-white/15", extra: "", portrait: 36 },
   parchment: { on: "border-[#7a2a1f] bg-[#7a2a1f]/10", off: "border-[#2a2018]/20", extra: "disabled:opacity-50", portrait: 32 },
 } as const;

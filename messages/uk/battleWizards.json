@@ -21,7 +21,13 @@
     "weapon": {
       "melee": "ближній",
       "ranged": "дальній",
-      "toHit": "{kind} · {bonus} до влучання"
+      "toHit": "{kind} · {bonus} до влучання",
+      "toHitPercent": "{kind} · {target}% до влучання",
+      "ammo": {
+        "badge": "Набої {left}/{capacity}",
+        "empty": "Немає набоїв",
+        "reloading": "Перезарядка"
+      }
     },
     "target": {
       "cover": "Між стрільцем і ціллю є перешкода",
@@ -39,6 +45,19 @@
         "normal": "Звичайний",
         "advantage": "Перевага",
         "disadvantage": "Недолік"
+      },
+      "d100": {
+        "mode": {
+          "server": "Авто",
+          "manual": "Ручний"
+        },
+        "target": "Ціль {target}% · {label}",
+        "damageDice": "Шкода зброї: {dice} (кидається автоматично)",
+        "momentum": {
+          "held": "Momentum: {side}",
+          "none": "Momentum немає",
+          "side": "ваша сторона"
+        }
       }
     },
     "damage": {
@@ -51,7 +70,23 @@
       "unknown": "невідомо",
       "estimate": "Орієнтовно",
       "cunning": "Підступний удар · замість кубиків Прихованої атаки ({dice}d6)",
-      "submit": "Атакувати"
+      "submit": "Атакувати",
+      "d100": {
+        "roll": "Кидок {roll} проти {target}",
+        "sl": "РУ {sl} · захист {defSl} · чистий {net}",
+        "net": "РУ {net}",
+        "location": "Локація: {location}",
+        "locations": {
+          "head": "голова",
+          "arm": "рука",
+          "body": "тулуб",
+          "leg": "нога"
+        },
+        "momentum": {
+          "gained": "Momentum отримано",
+          "spent": "Momentum витрачено"
+        }
+      }
     }
   },
   "spell": {
@@ -113,7 +148,8 @@
     "ingredients": {
       "need": "Потрібно: {list}",
       "missing": "Бракує: {list}",
-      "autoPay": "Буде сплачено {gp} gp з гаманця"
+      "autoPay": "Буде сплачено {gp} gp з гаманця",
+      "use": "Використати інгредієнт (скасує збій)"
     }
   },
   "bonus": {

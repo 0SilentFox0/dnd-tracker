@@ -6,6 +6,7 @@ import { createSpellSchema } from "@/lib/schemas/spells";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { classFeatureAbilities } from "@/lib/utils/abilities/read";
 import { castSpell } from "@/lib/utils/battle/spell/cast";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { assertManualActivation } from "@/lib/utils/spells/model/execution";
 import { readSpellDefinition, spellDefinitionColumns } from "@/lib/utils/spells/model/read";
 
@@ -42,7 +43,7 @@ describe("imported manual domain contracts", () => {
 
     const definition = readSpellDefinition({ id: "s", executionMode: "manual" } as Parameters<typeof readSpellDefinition>[0]);
 
-    const result = castSpell({ caster, spell: { id: "s", name: "Manual", level: 1, groupId: null, definition }, targetIds: ["c"], allParticipants: [caster], currentRound: 1, battleId: "b", diceRolls: [], isDMCast });
+    const result = castSpell({ rules: DEFAULT_RULES, caster, spell: { id: "s", name: "Manual", level: 1, groupId: null, definition }, targetIds: ["c"], allParticipants: [caster], currentRound: 1, battleId: "b", diceRolls: [], isDMCast });
 
     expect(result.success).toBe(false);
     expect(result.casterUpdated).toEqual(before);

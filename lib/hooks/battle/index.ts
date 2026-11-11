@@ -12,6 +12,7 @@ export { useBattleFxQueue } from "./useBattleFxQueue";
 export { type BattleMapScene, useBattleMapScene } from "./useBattleMapScene";
 export { type BattlePageDialogs, useBattlePageDialogs } from "./useBattlePageDialogs";
 export { RESYNC_AFTER_HIDDEN_MS, useBattleResync } from "./useBattleResync";
+export { useBattleRules } from "./useBattleRules";
 export {
   BattleSceneContext,
   BattleSceneDataContext,
@@ -22,6 +23,8 @@ export {
 } from "./useBattleScene";
 export { useBattleTitle } from "./useBattleTitle";
 export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
+export { useChannelAction } from "./useChannelAction";
+export { type ConditionTestItem, type ConditionTestPanel, useConditionTestPanel } from "./useConditionTestPanel";
 export { canReadiedAttack, type CoreActionChoice, useCoreActions, useReadiedAttack } from "./useCoreActions";
 export { type CritChoiceRow, useCritChoiceDialog } from "./useCritChoiceDialog";
 export { useDmCaster } from "./useDmCaster";

@@ -23,6 +23,7 @@ import type {
 } from "@/lib/schemas/battles";
 import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, MazeConfig, TerrainDiff } from "@/types/battle";
 
@@ -86,6 +87,8 @@ export interface BattleScene {
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
   pendingCritChoice?: PendingCritChoice | null;
+  /** Стан сцени, яким керує система; відсутнє = немає */
+  system?: SystemSlot;
   map?: BattleMapConfig | null;
   /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
   audio?: BattleAudioState | null;
@@ -106,6 +109,8 @@ export interface ClientBattleDelta {
     turnIndex: number;
     pendingMoraleCheck: unknown;
     pendingCritChoice: PendingCritChoice | null;
+    /** відсутнє = без змін станом сцени не керує жодна система */
+    system?: SystemSlot;
     /** null — дату скинуто (reset, відкат завершеного бою) */
     startedAt?: string | null;
     /** коли почався поточний хід (для таймера ходу) */
@@ -128,6 +133,8 @@ export interface ClientBattleDelta {
   cancelledFrom?: number;
   /** зведення знань після відкату: вікно журналу клієнта не бачить подій за його межами */
   knowledge?: BattleKnowledge;
+  /** публічна дельта з журналом, відредагованим для гравців; ДМ бере повну з dm-каналу */
+  redacted?: true;
 }
 
 export interface BattleEventsPage {
@@ -160,6 +167,8 @@ export interface BattleRefetchSignal {
   battleId: string;
   version: number;
   refetch: true;
+  /** публічний сигнал при редакції журналу: ДМ чекає свій dm-сигнал, а не рефетчить двічі */
+  redacted?: true;
 }
 
 export interface BattleMutationResponse<R = Record<string, unknown>> {
@@ -199,6 +208,8 @@ export type MapMotionData = z.infer<typeof mapMotionSchema>;
 export type AbilityActionData = z.infer<typeof abilityActionSchema>;
 
 export type PatchParticipantData = z.infer<typeof patchParticipantSchema>;
+
+export type ChannelData = { participantId: string; roll?: number; serverRoll?: true };
 
 export type SpellCastData = Omit<z.input<typeof castSpellSchema>, "targetIds" | "diceRolls"> & { targetIds: string[]; diceRolls: number[] };
 

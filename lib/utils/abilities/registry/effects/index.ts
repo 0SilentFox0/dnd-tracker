@@ -28,12 +28,14 @@ import {
   modifyStatFields,
 } from "./static";
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
+import { SYSTEM_EFFECT_ROWS } from "./system-rows";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Translator } from "@/lib/i18n/translator";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
-import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
+import type { Ability, AnyEffect, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS, MANEUVERS } from "@/lib/utils/abilities/schema/kinds";
+import type { SystemEffect } from "@/lib/utils/abilities/schema/system-effects";
 import { joinSegments, seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
@@ -44,16 +46,17 @@ export type { EffectApplyInput, EffectApplyResult };
 interface EffectDefinition<K extends EffectKind> {
   kind: K;
   static: boolean;
+  pickable?: false;
   fields: readonly FieldMeta[];
-  describe: (e: Extract<Effect, { kind: K }>) => Segment[];
-  apply: (input: EffectApplyInput<Extract<Effect, { kind: K }>>) => EffectApplyResult;
+  describe: (e: Extract<AnyEffect, { kind: K }>) => Segment[];
+  apply: (input: EffectApplyInput<Extract<AnyEffect, { kind: K }>>) => EffectApplyResult;
 }
 
 const AMOUNT: FieldMeta = { name: "amount", input: "amount" };
 
 const REQUIRED_DURATION: FieldMeta = { ...DURATION_FIELD, optional: false };
 
-export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
+const BASE_EFFECT_REGISTRY: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: EffectDefinition<K> } = {
   modifyStat: { kind: "modifyStat", static: true, fields: modifyStatFields, describe: describeModifyStat, apply: (i) => applyStatic(i, describeEffectText) },
   damageBonus: { kind: "damageBonus", static: true, fields: damageBonusFields, describe: describeDamageBonus, apply: (i) => applyStatic(i, describeEffectText) },
   flag: {
@@ -166,6 +169,10 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     },
   },
 };
+
+const SYSTEM_EFFECT_REGISTRY = Object.fromEntries(SYSTEM_EFFECT_ROWS.map((r) => [r.kind, r.row]));
+
+export const EFFECT_REGISTRY = { ...BASE_EFFECT_REGISTRY, ...SYSTEM_EFFECT_REGISTRY } as { [K in EffectKind]: EffectDefinition<K> };
 
 export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   const def = EFFECT_REGISTRY[input.effect.kind] as EffectDefinition<EffectKind>;

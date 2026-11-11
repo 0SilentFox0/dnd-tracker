@@ -61,6 +61,11 @@
       "subtitle": "Hero origin, skills and starting choices",
       "keywords": "origin"
     },
+    "careers": {
+      "title": "Careers",
+      "subtitle": "Careers and their four tiers",
+      "keywords": "career"
+    },
     "feats": {
       "title": "Feats",
       "subtitle": "5e feats: origin, general, fighting styles, epic boons",

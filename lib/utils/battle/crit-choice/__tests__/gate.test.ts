@@ -8,6 +8,7 @@ import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const info = { source: "attack", kind: "success", actorId: "a", targetId: "t" } as const;
@@ -60,14 +61,14 @@ describe("crit picker plumbing", () => {
   it("calculateAttackRoll кличе picker на 20 і 1, не кличе на 10", () => {
     const crit = vi.fn(() => critEffectsFor("attack", "success")[0]);
 
-    calculateAttackRoll(attacker, sword, 20, undefined, undefined, { targetId: "t", crit });
+    calculateAttackRoll(attacker, sword, 20, undefined, undefined, { rules: DEFAULT_RULES, targetId: "t", crit });
     expect(crit).toHaveBeenLastCalledWith({ source: "attack", kind: "success", actorId: "a", targetId: "t" });
 
-    calculateAttackRoll(attacker, sword, 1, undefined, undefined, { targetId: "t", crit });
+    calculateAttackRoll(attacker, sword, 1, undefined, undefined, { rules: DEFAULT_RULES, targetId: "t", crit });
     expect(crit).toHaveBeenLastCalledWith({ source: "attack", kind: "fail", actorId: "a", targetId: "t" });
 
     crit.mockClear();
-    calculateAttackRoll(attacker, sword, 10, undefined, undefined, { targetId: "t", crit });
+    calculateAttackRoll(attacker, sword, 10, undefined, undefined, { rules: DEFAULT_RULES, targetId: "t", crit });
     expect(crit).not.toHaveBeenCalled();
   });
 
@@ -80,7 +81,7 @@ describe("crit picker plumbing", () => {
 
     const crit = vi.fn(() => critEffectsFor("attack", "fail")[0]);
 
-    resolveRetaliation({
+    resolveRetaliation({ rules: DEFAULT_RULES,
       participants: [unit("a", ParticipantSide.ALLY), unit("d", ParticipantSide.ENEMY)],
       attackerId: "a",
       defenderId: "d",

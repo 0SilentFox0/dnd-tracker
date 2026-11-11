@@ -11,8 +11,10 @@ import { SpellFormEffects } from "./SpellFormEffects";
 import { SpellFormPowerFields } from "./SpellFormPowerFields";
 
 import { HudForm, type HudTab } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import type { IdName } from "@/types/common";
 
 export interface SpellFormBodyProps {
@@ -41,13 +43,19 @@ export function SpellFormBody({
 
   const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
+  const { key, system } = useRuleSystem({ campaignId });
+
+  const Fields = key && systemUiOf(key).SpellMagicFields;
+
+  const magic = system?.magic && Fields ? { conditions: system.conditions?.catalog ?? [], Fields } : undefined;
+
   const tabs: HudTab<SpellFormTabId>[] = [
     {
       id: SPELL_FORM_TAB.basic,
       label: t("spellEditor.tabs.basic"),
       content: (
         <>
-          <SpellFormBasicFields formData={formData} setFormData={setFormData} spellGroups={spellGroups} />
+          <SpellFormBasicFields formData={formData} setFormData={setFormData} spellGroups={spellGroups} magic={!!magic} />
           <SpellComponentsFields formData={formData} setFormData={setFormData} />
         </>
       ),
@@ -55,7 +63,7 @@ export function SpellFormBody({
     {
       id: SPELL_FORM_TAB.roll,
       label: t("spellEditor.tabs.power"),
-      content: <SpellFormPowerFields formData={formData} setFormData={setFormData} classesEnabled={classesEnabled} />,
+      content: <SpellFormPowerFields formData={formData} setFormData={setFormData} classesEnabled={classesEnabled} magic={magic} />,
     },
     {
       id: SPELL_FORM_TAB.effects,

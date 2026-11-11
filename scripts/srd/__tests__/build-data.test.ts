@@ -14,8 +14,8 @@ describe("build helpers", () => {
     expect(() => assertKnown("spell overrides", ["x", "y"], new Set(["x"]))).toThrow(/spell overrides: unknown y/);
   });
 
-  it("toImportRows drops slug only", () => {
-    expect(toImportRows([{ slug: "s", name: "N", level: 1 }])).toEqual([{ name: "N", level: 1 }]);
+  it("toImportRows keeps the slug for the import layer", () => {
+    expect(toImportRows([{ slug: "s", name: "N", level: 1 } as { slug: string }])).toEqual([{ slug: "s", name: "N", level: 1 }]);
   });
 
   it("writes files and a manifest, reads them back", () => {
@@ -23,7 +23,7 @@ describe("build helpers", () => {
 
     const data: SrdData = { "spell-groups": [{ slug: "g", name: "G", color: "#000000", icon: "eye" }], spells: [], races: [], classes: [], feats: [], backgrounds: [], units: [], artifacts: [] };
 
-    const manifest = writeSrdData(data, dir, "2026-10-23");
+    const manifest = writeSrdData(data, dir);
 
     expect(manifest.counts).toEqual({ "spell-groups": 1, spells: 0, races: 0, classes: 0, feats: 0, backgrounds: 0, units: 0, artifacts: 0 });
     expect(readSrdManifest(dir)).toEqual(manifest);

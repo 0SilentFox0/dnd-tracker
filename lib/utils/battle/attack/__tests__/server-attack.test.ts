@@ -7,8 +7,9 @@ import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
-const flowOf = (ps: ReturnType<typeof swordUnit>[], rng: () => number): ActionFlow => ({ ps, messages: [], summons: [], ctx: { round: 1, rng } });
+const flowOf = (ps: ReturnType<typeof swordUnit>[], rng: () => number): ActionFlow => ({ ps, messages: [], summons: [], ctx: { round: 1, rng, rules: DEFAULT_RULES } });
 
 describe("resolveServerAttack", () => {
   it("заголовок залежить від label; відсіч збігається з resolveRetaliation", () => {

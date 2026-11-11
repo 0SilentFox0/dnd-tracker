@@ -49,4 +49,13 @@ describe("dmSectionsFor", () => {
     expect(paths(dmTilesFor(ctx))).toContain("rules");
     expect(paths(dmTilesFor(ctx))).not.toContain("spell-groups");
   });
+
+  it("careers appear only in wfrp campaigns, never on templates", () => {
+    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: false, systemKey: "wfrp" }))).toContain("careers");
+    expect(paths(dmTilesFor({ isTemplate: false, classesEnabled: false, systemKey: "wfrp" }))).toContain("careers");
+
+    for (const systemKey of ["dnd5e", "homm", undefined]) expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: true, systemKey }))).not.toContain("careers");
+
+    expect(paths(dmSectionsFor({ isTemplate: true, classesEnabled: false, systemKey: "wfrp" }))).not.toContain("careers");
+  });
 });

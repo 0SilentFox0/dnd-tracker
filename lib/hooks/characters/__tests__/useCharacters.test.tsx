@@ -68,3 +68,15 @@ describe("мутації персонажа інвалідують баланс 
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: characterKeys.roster("c") }));
   });
 });
+
+describe("створення персонажа інвалідує правила кампанії", () => {
+  it("systemLocked оновлюється", async () => {
+    const { invalidate, wrapper } = setup();
+
+    const { result } = renderHook(() => run(useCreateCharacter("c")), { wrapper });
+
+    await act(() => result.current({}));
+
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["campaign-rules", "c"] }));
+  });
+});

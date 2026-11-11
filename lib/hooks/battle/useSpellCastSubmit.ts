@@ -8,7 +8,7 @@ import { useCritPause } from "./useCritPause";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { type SpellFlowAction, type SpellFlowState, spellPayload } from "@/lib/utils/battle/flows";
-import { buildSpellResultFx } from "@/lib/utils/battle/view";
+import { buildSpellResultFx, castDetailsOf } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -28,9 +28,9 @@ export function useSpellCastSubmit({ caster, selected, flow: { state, dispatch }
 
   const t = useTranslations("battleWizards.spell");
 
-  const finish = (changes: HpChanges) => {
+  const finish = (changes: HpChanges, seen: Set<number>) => {
     dispatch({ type: "SUCCESS" });
-    scene.result.show(buildSpellResultFx(selected?.name ?? t("fallbackName"), changes, state.targetIds.length));
+    scene.result.show(buildSpellResultFx(selected?.name ?? t("fallbackName"), changes, state.targetIds.length, caster ? castDetailsOf(scene.readBattle()?.battleLog ?? [], seen, caster.basicInfo.id) : undefined));
     onDone?.();
   };
 
@@ -40,7 +40,7 @@ export function useSpellCastSubmit({ caster, selected, flow: { state, dispatch }
     onResolved: (seen) => {
       const log = scene.readBattle()?.battleLog ?? [];
 
-      finish(log.filter((e) => !seen.has(e.actionIndex) && e.actorId === caster?.basicInfo.id).flatMap((e) => e.hpChanges ?? []));
+      finish(log.filter((e) => !seen.has(e.actionIndex) && e.actorId === caster?.basicInfo.id).flatMap((e) => e.hpChanges ?? []), seen);
     },
     onCancelled: () => dispatch({ type: "FAIL", error: textRef("battleWizards.critCancelled") }),
   });
@@ -65,7 +65,7 @@ export function useSpellCastSubmit({ caster, selected, flow: { state, dispatch }
         return;
       }
 
-      finish(res?.hpChanges ?? []);
+      finish(res?.hpChanges ?? [], seen);
     } catch (e) {
       dispatch({ type: "FAIL", error: e instanceof Error ? e.message : textRef("battleWizards.spell.failed") });
     }

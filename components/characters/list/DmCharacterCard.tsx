@@ -6,10 +6,12 @@ import { Pencil, Trash2, TrendingUp } from "lucide-react";
 import { HeroPortrait } from "@/components/character-profile/HeroPortrait";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard, HudPill, HudStatChip } from "@/components/hud/page";
+import { systemUiOf } from "@/components/systems";
 import { CharacterType } from "@/lib/constants/characters";
 import { levelUpAvailable } from "@/lib/constants/experience";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useClassMode } from "@/lib/hooks/classes";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { currentHp } from "@/lib/utils/characters/resources/hp";
 import { heroHpFormula } from "@/lib/utils/rules";
@@ -34,17 +36,25 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const classMode = useClassMode(campaignId);
 
+  const { key: systemKey, system, ready } = useRuleSystem({ campaignId });
+
+  const d20Stats = !!system?.d20Stats;
+
+  const hideProgression = !ready || systemUiOf(systemKey).hideProgression;
+
+  const wounds = system?.progression.hpTerm === "wounds";
+
   const classPick = classMode.enabled && !!character.classes?.length;
 
   const entries = classMode.enabled && character.classes?.length ? resolveClassEntries(character.classes, classMode.byId) : null;
 
   const ooc = rules?.outOfCombat;
 
-  const maxHp = characterBaseHp(character, { entries, formula: rules && heroHpFormula(rules.heroScaling) }).total;
+  const maxHp = characterBaseHp(character, { entries, formula: rules && heroHpFormula(rules.heroScaling), rules, characteristics: character.characteristics }).total;
 
   const hp = ooc?.persistResources && character.resources ? currentHp(character.resources, maxHp) : maxHp;
 
-  const levelReady = !!ooc?.xp && levelUpAvailable({ level: character.level, experience: character.experience ?? 0 }, maxLevel);
+  const levelReady = !hideProgression && !!ooc?.xp && levelUpAvailable({ level: character.level, experience: character.experience ?? 0 }, maxLevel);
 
   const isNpc = character.type === CharacterType.NPC_HERO;
 
@@ -56,7 +66,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
           <p className="hud-sc truncate text-lg leading-6 text-hud-ink">{character.name}</p>
           <p className="truncate text-xs text-hud-muted">
             {character.race}
-            {character.subrace ? ` (${character.subrace})` : ""} · {character.class}
+            {character.subrace ? ` (${character.subrace})` : ""}{system?.classes && ` · ${character.class}`}
           </p>
           <div className="flex min-w-0 items-center gap-1.5">
             <HudPill tone={isNpc ? "silver" : "gold"}>{isNpc ? t("npcHero") : t("player")}</HudPill>
@@ -71,7 +81,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
           onTriggerClick={(e) => e.preventDefault()}
           actions={[
             { label: tc("edit"), icon: Pencil, href: `/campaigns/${campaignId}/dm/characters/${character.id}` },
-            ...(actions.onLevelUp && !classPick
+            ...(actions.onLevelUp && !classPick && !hideProgression
               ? [{ label: t("levelUp"), icon: TrendingUp, onSelect: actions.onLevelUp, disabled: busy }]
               : []),
             { label: tc("delete"), icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },
@@ -79,10 +89,10 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
         />}
       </div>
       <div className="flex gap-1.5">
-        <HudStatChip short={t("statLevel")} value={character.level} />
-        <HudStatChip short="HP" label="HP" value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />
-        <HudStatChip short="AC" value={character.armorClass} />
-        <HudStatChip short={t("statInitiative")} value={character.initiative} />
+        {!hideProgression && <HudStatChip short={t("statLevel")} value={character.level} />}
+        {ready && <HudStatChip short={wounds ? t("wounds") : "HP"} label={wounds ? t("wounds") : "HP"} value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />}
+        {d20Stats && <HudStatChip short="AC" value={character.armorClass} />}
+        {d20Stats && <HudStatChip short={t("statInitiative")} value={character.initiative} />}
       </div>
     </HudCard>
   );

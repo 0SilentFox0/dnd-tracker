@@ -1,6 +1,7 @@
 import { isDormant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import { attackRangeCells, cellsOf, footprintDistance, isOnMap, nearestTo } from "@/lib/utils/battle/grid";
-import { isHostile,modeSees } from "@/lib/utils/battle/modes/engine";
+import { isHostile, modeSees } from "@/lib/utils/battle/modes/engine";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface ChainStep {
@@ -11,10 +12,11 @@ export interface ChainStep {
   /** Попередня ціль (може бути вже мертвою — стрибок іде від її клітинки). */
   from: BattleParticipant;
   hit: ReadonlySet<string>;
+  rules: Ruleset;
 }
 
-export function nextChainTarget({ map, order, attacker, attack, from, hit }: ChainStep): BattleParticipant | undefined {
-  const range = attackRangeCells(attack.range);
+export function nextChainTarget({ map, order, attacker, attack, from, hit, rules }: ChainStep): BattleParticipant | undefined {
+  const range = attackRangeCells(attack.range, rules);
 
   const origin = cellsOf(from);
 

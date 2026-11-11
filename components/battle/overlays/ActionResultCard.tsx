@@ -7,15 +7,24 @@ import { X } from "lucide-react";
 import { useInCornerStack } from "@/components/battle/scene/CornerStack";
 import { useMapStripSlot, useNoticeStack } from "@/components/battle/scene/MapStrip";
 import { HUD_SURFACE } from "@/components/hud";
-import { useActionResult } from "@/lib/hooks/battle";
+import { systemUiByKey } from "@/components/systems";
+import { useActionResult, useBattleRules } from "@/lib/hooks/battle";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
+import { ruleSystemByKey } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { ActionResultFx } from "@/types/battle-scene";
 
 const TONE = { hit: "text-[#e9705a]", crit: "text-[#ffd36a]", miss: "text-[#8f8f96]" } as const;
 
 // десктоп завжди рендерить картку в CornerStack, тож «fixed» — лише телефон до появи стеку сповіщень
 const PLACEMENT = { slot: "mb-1", stack: "", corner: "w-[300px]", fixed: "fixed inset-x-4 top-14 z-50 mx-auto max-w-md" } as const;
+
+function SystemLines({ system, hit, exact }: { system?: SystemSlot; hit: boolean; exact: boolean }) {
+  const Result = system && systemUiByKey(system.key)?.ActionResult;
+
+  return Result ? <Result details={system} hit={hit} exact={exact} /> : null;
+}
 
 type AttackFx = Exclude<ActionResultFx, { kind: "spell" }>;
 
@@ -28,6 +37,8 @@ function AttackBody({ fx }: { fx: AttackFx }) {
   const t = useTranslations("battle.result");
 
   const text = useText();
+
+  const { serverJudged } = useBattleRules();
 
   const critFail = fx.kind === "miss" ? fx.critFail : undefined;
 
@@ -46,12 +57,22 @@ function AttackBody({ fx }: { fx: AttackFx }) {
           ))}
         </ul>
       ) : fx.kind === "miss" ? (
-        <div className="mt-1 text-sm">{fx.targetName} · d20 {fx.d20} · AC {fx.known}</div>
+        serverJudged ? (
+          <>
+            <div className="mt-1 text-sm">{fx.targetName}</div>
+            <SystemLines system={fx.system} hit={false} exact={!!fx.exact} />
+          </>
+        ) : (
+          <div className="mt-1 text-sm">{fx.targetName} · d20 {fx.d20} · AC {fx.known}</div>
+        )
       ) : (
-        <div className="mt-1 flex items-baseline justify-between gap-3 text-sm">
-          <span className="truncate">{fx.targetName}{fx.downed ? ` · ${t("downed")}` : ""}</span>
-          <span className={cn("hud-sc shrink-0 text-2xl font-extrabold", TONE[fx.kind])}>−{fx.damage}</span>
-        </div>
+        <>
+          <div className="mt-1 flex items-baseline justify-between gap-3 text-sm">
+            <span className="truncate">{fx.targetName}{fx.downed ? ` · ${t("downed")}` : ""}</span>
+            <span className={cn("hud-sc shrink-0 text-2xl font-extrabold", TONE[fx.kind])}>−{fx.damage}</span>
+          </div>
+          <SystemLines system={fx.system} hit exact={!!fx.exact} />
+        </>
       )}
       {effect && (
         <div className="mt-1 text-sm">
@@ -70,6 +91,7 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: "spell" }> }) {
   return (
     <>
       <div className="hud-sc text-lg font-extrabold tracking-[.06em] text-hud-gold-bright">{fx.spellName}</div>
+      <SystemLines system={fx.system} hit exact />
       {fx.changes.length > 0 ? (
         <ul className="mt-1 space-y-0.5 text-sm">
           {fx.changes.map((c) => (
@@ -79,7 +101,7 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: "spell" }> }) {
             </li>
           ))}
         </ul>
-      ) : (
+      ) : fx.system && ruleSystemByKey(fx.system.key)?.combat.details?.failed(fx.system) ? null : (
         <div className="mt-1 text-sm text-[var(--hud-muted)]">{fx.targetCount > 0 ? t("appliedTargets", { count: fx.targetCount }) : t("applied")}</div>
       )}
     </>

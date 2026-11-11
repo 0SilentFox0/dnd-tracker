@@ -3,7 +3,7 @@ import { rollCheck } from "@/lib/utils/battle/checks/roll-check";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
-import type { SheetRollResult, SheetRollSubject } from "@/types/characters";
+import type { SheetD20RollResult, SheetRollSubject } from "@/types/characters";
 
 function sheetRollLabel(subject: SheetRollSubject, t: Translator): string {
   if ("skill" in subject) return t(`gameTerms.dndSkills.${subject.skill}`);
@@ -13,8 +13,8 @@ function sheetRollLabel(subject: SheetRollSubject, t: Translator): string {
   return t(subject.kind === "save" ? "rest.rollLabel.save" : "rest.rollLabel.check", { ability });
 }
 
-export function rollFromSheet(p: BattleParticipant, subject: SheetRollSubject, opts: { rules: Ruleset; rng: () => number; inspiration: boolean; t: Translator }): SheetRollResult {
-  const base = { label: sheetRollLabel(subject, opts.t), inspirationUsed: opts.inspiration };
+export function rollFromSheet(p: BattleParticipant, subject: SheetRollSubject, opts: { rules: Ruleset; rng: () => number; inspiration: boolean; t: Translator }): SheetD20RollResult {
+  const base = { kind: "d20" as const, label: sheetRollLabel(subject, opts.t), inspirationUsed: opts.inspiration };
 
   const shared = { participants: [p], rules: opts.rules, rng: opts.rng, advantage: opts.inspiration };
 

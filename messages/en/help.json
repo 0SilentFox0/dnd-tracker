@@ -375,5 +375,54 @@
         }
       }
     }
+  },
+  "dm-rule-systems": {
+    "title": "Rule systems",
+    "summary": "How to pick a campaign system (HoMM, D&D 5e, Grim d100), what changes on the sheet and when the system can no longer be changed.",
+    "sections": {
+      "s0": {
+        "heading": "What a rule system is",
+        "b0": "The system defines how dice, characteristics and combat work in the campaign. HoMM and D&D 5e play on a d20 and six ability scores. Grim d100 uses percentile tests: roll a d100 and try to roll no higher than the target number."
+      },
+      "s1": {
+        "heading": "How to pick one and when it locks",
+        "b0": "Pick the system in the campaign rules, the \"System\" section. A template sets the initial value, so a campaign made from the Grim d100 template plays by Grim d100 right away. Once the campaign has its first character or unit, the system is locked: changing it would break sheets that already exist."
+      },
+      "s2": {
+        "heading": "Characteristics, skills, Wounds and Fate",
+        "b0": "In Grim d100 a character has ten characteristics, skills with advances and specializations, Wounds instead of hit points, Move, and Fate and Fortune. Level and archetype are hidden. The sheet shows a characteristics grid and a skills list; Wounds and Move are derived from the characteristics.",
+        "b1": "Grim d100 units carry the same characteristics field."
+      },
+      "s3": {
+        "heading": "Sheet tests, new session and battles",
+        "b0": "Click a characteristic or skill to open the test dialog: choose a difficulty and roll a d100. The log records the result, the target number and success levels (SL), and a critical success or failure. The \"New session\" button in the party rest menu restores Fortune to the Fate value.",
+        "b1": "Battles and magic work in Grim d100: the log records d100 tests, SL and miscasts."
+      },
+      "s4": {
+        "heading": "Magic",
+        "b0": "In a Grim d100 campaign spells have a Casting Number (CN), a kind (Arcane or Petty) and a lore. These fields, the overcast dice and the lore attribute are set in the spell editor, and heroes see their known spells in the Magic tab of the sheet.",
+        "b1": "In battle the Channelling button banks SL for the next cast. Casting is a d100 test: the total SL against the CN decides success, overcast strengthens the spell, and doubles cause a miscast. Spells without magic data and long casts are unavailable in Grim d100."
+      },
+      "s5": {
+        "heading": "Advancement and experience",
+        "b0": "In Grim d100 a hero spends experience (XP) on characteristics, skills and talents. The \"Advancement\" tab on the sheet shows the available XP, the price of the next step and a \"Buy\" button; the hero's owner and the DM can see it. Prices and limits come from the campaign rules (the \"Advancement\" section), and a talent's price is set in the talent editor (cost per rank and maximum rank).",
+        "b1": "Every purchase goes into the advancement log. The DM can undo the last purchase with the \"Undo\" button: the XP comes back, and undo is blocked if the data was edited by hand after the purchase. Purchased talents work in battle with their effects."
+      },
+      "s6": {
+        "heading": "Careers",
+        "b0": "The DM creates careers in the campaign's \"Careers\" section: 4 tiers, each with characteristics, skills, talents and trappings. A hero's career and tier are assigned in the \"Advancement\" tab (or in the DM profile).",
+        "b1": "Every purchased item from the career tier earns a \"Tick\". When there are enough ticks the DM advances the career tier; if they are short the advance can be forced. \"Out of career\" purchases cost more (multiplier in the campaign rules)."
+      },
+      "s7": {
+        "heading": "Downtime",
+        "b0": "The \"Period passed\" button in the character list (1 to 30 days, choose the heroes) runs downtime in order: endeavours, healing, ailments, then an event from the table. Dead heroes are skipped, unconscious ones do not perform endeavours.",
+        "b1": "Endeavours and ailments are set on the sheet's \"Downtime\" tab. Earned income goes to the purse, successful training gives a discount on the next purchase in Advancement, and the event table is edited in the rules (tables section). Only the latest period can be rolled back, and only until manual changes are made."
+      },
+      "s8": {
+        "heading": "Corruption and mutations",
+        "b0": "The DM grants corruption with a button on the hero's sheet: 1 to 10 points with a reason. The threshold is the Toughness bonus plus the Willpower bonus. An Endurance test is needed only when the total goes above the threshold; exactly at the threshold there is no test, and every further grant above it tests again. A failure gives a mutation (up to 20 per hero); past the limit the grant adds no new mutation.",
+        "b1": "Mutations are rolled on the \"Mutations: body\" and \"Mutations: mind\" tables in the campaign rules (the tables section). A mutation's effects are a characteristic, Move or max Wounds with a sign. Mutations apply on the sheet and in battle. Only the latest grant can be undone, and corruption cannot be granted or undone during an active battle."
+      }
+    }
   }
 }

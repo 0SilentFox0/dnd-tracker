@@ -1,0 +1,93 @@
+{
+  "tab": {
+    "endeavourTitle": "Endeavour",
+    "ailmentsTitle": "Ailments",
+    "summaryTitle": "Last period",
+    "noEndeavour": "No endeavour chosen",
+    "noAilments": "No ailments",
+    "noSummary": "No period has passed yet",
+    "save": "Save",
+    "clear": "Clear",
+    "trainingCredit": "Training discount ({key}): -{discount}"
+  },
+  "endeavours": {
+    "earn": "Earn",
+    "train": "Train",
+    "tend": "Tend a patient",
+    "rest": "Rest",
+    "custom": "Custom"
+  },
+  "endeavourHints": {
+    "earn": "A Trade or Charm test earns coins.",
+    "train": "Success discounts the next advance.",
+    "tend": "The patient heals faster thanks to your test.",
+    "rest": "Double Wound recovery.",
+    "custom": "Free text, no mechanical effect."
+  },
+  "params": {
+    "skill": "Skill",
+    "trade": "Trade",
+    "charm": "Charm",
+    "spec": "Specialisation",
+    "trainKind": "What to train",
+    "trainKey": "Target",
+    "patient": "Patient",
+    "text": "Description",
+    "characteristic": "Characteristic",
+    "skillKind": "Skill"
+  },
+  "ailments": {
+    "festering": "Festering wound",
+    "disease": "Disease",
+    "injury": "Injury"
+  },
+  "ailmentForm": {
+    "label": "Label",
+    "days": "Days",
+    "add": "Add ailment",
+    "remove": "Remove"
+  },
+  "summary": {
+    "skippedDead": "Dead: skipped",
+    "skippedIncapacitated": "Unconscious: endeavour skipped",
+    "healed": "Wounds healed: {count}",
+    "coins": "Income: {amount} {coin}",
+    "discount": "Training discount: -{count}",
+    "patientAbsent": "Patient is not among the period's heroes",
+    "expired": "{label}: expired",
+    "event": "Event ({roll}): {text}",
+    "daysLeft": "{label}: {count} days left",
+    "test": "{roll} vs {target} · {outcome, select, critical {critical success} success {success} failure {failure} other {fumble}}, SL {sl}",
+    "wounds": "Wounds lost: {count}"
+  },
+  "panel": {
+    "button": "Time passes",
+    "title": "Downtime period",
+    "days": "Days",
+    "daysHint": "From 1 to {max}",
+    "heroes": "Heroes",
+    "all": "All",
+    "submit": "Pass the period",
+    "result": "Period summary",
+    "undo": "Undo period",
+    "undoConfirm": "Undo the period for all heroes?",
+    "undone": "Period undone"
+  },
+  "errors": {
+    "saveFailed": "Could not save the endeavour",
+    "periodFailed": "Could not pass the period",
+    "undoFailed": "Could not undo the period"
+  },
+  "events": {
+    "1": "The week passed quietly, with no trouble and no news.",
+    "2": "A dice game sparked a tavern brawl; it ended with curses only.",
+    "3": "A night fight in an alley left you bruised and wounded.",
+    "4": "A petty thief snatched a purse, but you ran him down.",
+    "5": "A local merchant invited you to supper.",
+    "6": "A cold night under open sky sapped your strength: you are fatigued.",
+    "7": "Strange rumours of cultists drift through the market.",
+    "8": "An old acquaintance is back in town and seeks your company.",
+    "9": "A vicious brawl with a street gang left deep wounds.",
+    "10": "Sudden luck: a lost purse lay on the road, though it was empty."
+  }
+}

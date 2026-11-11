@@ -15,6 +15,7 @@
     "classes": "Classes",
     "feats": "Feats",
     "backgrounds": "Backgrounds",
+    "careers": "Careers",
     "artifacts": "Artifacts",
     "artifact-sets": "Artifact sets"
   },
@@ -39,6 +40,7 @@
       "immunities": "Immunities",
       "knownSpells": "Spells",
       "statblock": "Statblock (JSON)",
+      "characteristics": "Characteristics (JSON)",
       "spellcasting": "Monster spellcasting (JSON)",
       "proficiencyBonus": "Proficiency",
       "gridSize": "Map size",
@@ -84,6 +86,7 @@
     "skills": {
       "name": "Name",
       "description": "Description",
+      "appearanceDescription": "Appearance description",
       "icon": "Icon",
       "image": "Image",
       "mainSkillId": "Main skill",
@@ -138,6 +141,8 @@
       "type": "Type",
       "prerequisite": "Prerequisites (JSON)",
       "repeatable": "Repeatable",
+      "xpCost": "XP cost",
+      "maxRank": "Max rank",
       "description": "Description",
       "abilities": "Abilities",
       "choices": "Choices (JSON)"
@@ -152,6 +157,35 @@
       "toolProficiencies": "Tools (JSON)",
       "equipmentText": "Equipment (given by the DM)"
     },
+    "careers": {
+      "name": "Name",
+      "icon": "Icon",
+      "class": "Class",
+      "tier1_name": "Tier 1 name",
+      "tier1_status": "Tier 1 status",
+      "tier1_characteristics": "Tier 1 characteristics",
+      "tier1_skills": "Tier 1 skills",
+      "tier1_talents": "Tier 1 talents",
+      "tier1_trappings": "Tier 1 trappings",
+      "tier2_name": "Tier 2 name",
+      "tier2_status": "Tier 2 status",
+      "tier2_characteristics": "Tier 2 characteristics",
+      "tier2_skills": "Tier 2 skills",
+      "tier2_talents": "Tier 2 talents",
+      "tier2_trappings": "Tier 2 trappings",
+      "tier3_name": "Tier 3 name",
+      "tier3_status": "Tier 3 status",
+      "tier3_characteristics": "Tier 3 characteristics",
+      "tier3_skills": "Tier 3 skills",
+      "tier3_talents": "Tier 3 talents",
+      "tier3_trappings": "Tier 3 trappings",
+      "tier4_name": "Tier 4 name",
+      "tier4_status": "Tier 4 status",
+      "tier4_characteristics": "Tier 4 characteristics",
+      "tier4_skills": "Tier 4 skills",
+      "tier4_talents": "Tier 4 talents",
+      "tier4_trappings": "Tier 4 trappings"
+    },
     "artifacts": {
       "name": "Name",
       "description": "Description",
@@ -161,6 +195,7 @@
       "icon": "Icon",
       "weapon": "Weapon (JSON)",
       "armor": "Armor (JSON)",
+      "systemStats": "System stats (JSON)",
       "item": "Item 5e (JSON)",
       "abilities": "Abilities"
     },
@@ -278,6 +313,8 @@
     "refNotFound": "{field}: “{value}” not found ({kind})",
     "noName": "The name is missing",
     "duplicateName": "The name is repeated in the file",
+    "invalidSlug": "Invalid slug (lowercase latin letters, digits, - and _)",
+    "duplicateSlug": "The slug is repeated in the file",
     "alreadyExists": "“{name}” already exists in the campaign",
     "multipleMatches": "Several records named “{name}” — the first one was updated"
   }

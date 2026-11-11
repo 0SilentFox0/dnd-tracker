@@ -27,8 +27,8 @@ describe("rollInitiative", () => {
     const out = rollInitiative([bakePassives(mk("a", { dex: 14, bonus: 1, abilities: [flat] })), mk("b", { dex: 10 })], seq(d20(10), d20(12), 0.1, 0.2));
 
     expect(out.rolls).toEqual([
-      { id: "a", d20: 10, total: 15 },
-      { id: "b", d20: 12, total: 12 },
+      { id: "a", roll: 10, sides: 20, total: 15 },
+      { id: "b", roll: 12, sides: 20, total: 12 },
     ]);
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["a", "b"]);
     expect(out.participants[0].abilities.initiative).toBe(15);
@@ -82,6 +82,6 @@ describe("rollInitiative", () => {
   it("works for a single participant", () => {
     const out = rollInitiative([mk("a", { dex: 12 })], seq(d20(7), 0.3));
 
-    expect(out.rolls).toEqual([{ id: "a", d20: 7, total: 8 }]);
+    expect(out.rolls).toEqual([{ id: "a", roll: 7, sides: 20, total: 8 }]);
   });
 });

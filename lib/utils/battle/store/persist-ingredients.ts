@@ -2,26 +2,27 @@ import type { Prisma } from "@prisma/client";
 
 import { persistedHeroes } from "./persist-resources";
 
-import { COIN_VALUE, InventoryLogKind } from "@/lib/constants/inventory";
+import { type Coin, COIN_VALUE, InventoryLogKind } from "@/lib/constants/inventory";
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import { normalizeItems } from "@/lib/utils/inventory/items";
 import { spendCoins, toCopper, walletToPurse } from "@/lib/utils/inventory/money";
 import { spendConsumables } from "@/lib/utils/items/consumables";
 import type { Ruleset } from "@/lib/utils/rules";
+import { currencyValueOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 
 type Wallet = { gold: number; silver: number; copper: number };
 
-export function spendCp(wallet: Wallet, cp: number): Wallet {
+export function spendCp(wallet: Wallet, cp: number, value: Record<Coin, number> = COIN_VALUE): Wallet {
   const purse = walletToPurse(wallet);
 
-  const wholeGp = Math.floor(cp / COIN_VALUE.gp);
+  const wholeGp = Math.floor(cp / value.gp);
 
-  const rest = cp - wholeGp * COIN_VALUE.gp;
+  const rest = cp - wholeGp * value.gp;
 
-  const afterGp = toCopper(purse) < cp ? null : spendCoins(purse, wholeGp, "gp");
+  const afterGp = toCopper(purse, value) < cp ? null : spendCoins(purse, wholeGp, "gp", value);
 
-  const next = (afterGp && spendCoins(afterGp, rest, "cp")) ?? { gp: 0, sp: 0, cp: 0 };
+  const next = (afterGp && spendCoins(afterGp, rest, "cp", value)) ?? { gp: 0, sp: 0, cp: 0 };
 
   return { gold: next.gp, silver: next.sp, copper: next.cp };
 }
@@ -54,6 +55,8 @@ export async function persistIngredients(
 
   const inventoryOf = new Map(inventories.map((i) => [i.characterId, i]));
 
+  const value = currencyValueOf(battle.rules);
+
   const logs: Prisma.InventoryLogCreateManyInput[] = [];
 
   for (const { characterId, byItem, usedCp } of spent) {
@@ -63,11 +66,11 @@ export async function persistIngredients(
 
     const { items, used } = spendConsumables(normalizeItems(inv.items), byItem);
 
-    const before = toCopper(walletToPurse(inv));
+    const before = toCopper(walletToPurse(inv), value);
 
-    const wallet = usedCp > 0 ? spendCp(inv, usedCp) : inv;
+    const wallet = usedCp > 0 ? spendCp(inv, usedCp, value) : inv;
 
-    const paidCp = before - toCopper(walletToPurse(wallet));
+    const paidCp = before - toCopper(walletToPurse(wallet), value);
 
     if (used.length === 0 && paidCp <= 0) continue;
 

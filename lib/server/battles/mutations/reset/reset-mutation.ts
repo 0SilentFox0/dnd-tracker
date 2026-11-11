@@ -17,6 +17,7 @@ export function resetMutation(ctx: BattleMutationContext): MutationResult {
       turnIndex: 0,
       pendingMoraleCheck: null,
       pendingCritChoice: null,
+      sceneState: null,
       startedAt: null,
       completedAt: null,
       ...(map && { map }),

@@ -1,0 +1,157 @@
+{
+  "conditions": {
+    "bleeding": {
+      "label": "Bleeding",
+      "description": "At turn start −1 Wounds per level; 10% chance per level to fall unconscious"
+    },
+    "fatigued": {
+      "label": "Fatigued",
+      "description": "−10 to tests per level"
+    },
+    "poisoned": {
+      "label": "Poisoned",
+      "description": "−10 to tests per level"
+    },
+    "stunned": {
+      "label": "Stunned",
+      "description": "No action; −10 to tests per level"
+    },
+    "ablaze": {
+      "label": "Ablaze",
+      "description": "At turn start d10 + level − 1 damage"
+    },
+    "broken": {
+      "label": "Broken",
+      "description": "−10 to tests per level"
+    },
+    "entangled": {
+      "label": "Entangled",
+      "description": "Cannot move; −10 to tests per level"
+    },
+    "prone": {
+      "label": "Prone",
+      "description": "Cannot move; melee attacks against it get +20"
+    },
+    "surprised": {
+      "label": "Surprised",
+      "description": "No action; attacks against it get +20"
+    },
+    "blinded": {
+      "label": "Blinded",
+      "description": "−20 to own attacks; attacks against it get +20"
+    },
+    "deafened": {
+      "label": "Deafened",
+      "description": "Cannot hear"
+    },
+    "unconscious": {
+      "label": "Unconscious",
+      "description": "Cannot act or move"
+    }
+  },
+  "log": {
+    "applied": "{target}: {condition}{level, plural, =1 {} other { ×#}} ({source})",
+    "appliedHidden": "{target}: {condition} ({source})",
+    "removed": "{target}: {condition} removed",
+    "reduced": "{target}: {condition} ×{level}",
+    "tick": {
+      "bleedOut": "{name} bleeds out",
+      "bleeding": "{name}: bleeding, −{damage} Wounds",
+      "ablaze": "{name}: burning, −{damage} Wounds",
+      "faint": "{name} faints from blood loss"
+    },
+    "endTestSuccess": "{name}: {condition} — test {roll} / {target}, SL {sl}: success",
+    "endTestFail": "{name}: {condition} — test {roll} / {target}, SL {sl}: failure",
+    "endTestSuccessHidden": "{name}: {condition} — test {roll}, SL {sl}: success",
+    "endTestFailHidden": "{name}: {condition} — test {roll}, SL {sl}: failure",
+    "stand": "{name} gets up",
+    "fortuneReroll": "{name} spends Fortune: reroll (first roll {first})",
+    "fortuneSl": "{name} spends Fortune: +1 SL",
+    "critHit": "🩸 Critical wound for {target} (+{bonus} damage): {text}",
+    "critWound": "🩸 Critical wound for {target}: {text}",
+    "unconscious": "💤 {name} drops to 0 Wounds and falls unconscious",
+    "psychologyPass": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: resisted",
+    "psychologyFail": "{name}: {kind} {value} from {source} — test {roll} / {target}, SL {sl}: failed",
+    "psychologyPassHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: resisted",
+    "psychologyFailHidden": "{name}: {kind} {value} from {source} — test {roll}, SL {sl}: failed"
+  },
+  "psychology": {
+    "fear": "Fear",
+    "terror": "Terror"
+  },
+  "ui": {
+    "rollTitle": "Attack roll · d100",
+    "dialog": {
+      "title": "Conditions",
+      "level": "Levels",
+      "rounds": "Rounds (empty = permanent)",
+      "permanent": "permanent",
+      "apply": "Apply",
+      "reduce": "−1",
+      "remove": "Remove",
+      "current": "Current",
+      "none": "No conditions"
+    },
+    "test": {
+      "attempt": "Try to end: {condition}",
+      "stand": "Stand up",
+      "auto": "Auto",
+      "manual": "Manual"
+    },
+    "fortune": {
+      "label": "Fortune",
+      "off": "Off",
+      "reroll": "Reroll",
+      "sl": "+1 SL",
+      "left": "Fortune left: {count}",
+      "firstRoll": "First roll",
+      "secondRoll": "Second roll (reroll)",
+      "used": "Fortune: reroll (first roll {first})",
+      "usedSl": "Fortune: +1 SL"
+    }
+  },
+  "crit": {
+    "head": {
+      "1": "The blow only rings through the skull.",
+      "2": "A split brow floods the eyes with blood.",
+      "3": "Skull ringing, the world swims.",
+      "4": "The helm cracks and the foe sways like a drunkard.",
+      "5": "The skull caves in, and consciousness gutters like a candle."
+    },
+    "arm": {
+      "1": "The arm bones ache from the strike.",
+      "2": "A deep cut, blood seeping through the sleeve.",
+      "3": "Fingers spasm open and the weapon drops.",
+      "4": "An artery is opened, blood spurts forth.",
+      "5": "The arm hangs limp, the weapon slips away."
+    },
+    "body": {
+      "1": "Ribs creak but hold.",
+      "2": "Breath is knocked out, wheezing and coughing.",
+      "3": "A ragged wound in the flank, the blood will not stop.",
+      "4": "The blade bites deep, guts afire.",
+      "5": "A chest blow topples the foe, darkness closing in."
+    },
+    "leg": {
+      "1": "The knee buckles for a moment.",
+      "2": "A shin wound leaves a trail of blood.",
+      "3": "Legs swept, the foe sprawls in the mud.",
+      "4": "Tendon severed, the foe falls screaming.",
+      "5": "The knee is shattered, no more walking."
+    }
+  },
+  "damage": {
+    "steps": {
+      "weapon": "Weapon",
+      "sb": "Strength bonus",
+      "netSl": "Net SL",
+      "tb": "Toughness bonus",
+      "ap": "Armour",
+      "ward": "Ward: d10 {roll} vs {ward}, hit negated",
+      "size": "Size",
+      "minimum": "Minimum damage",
+      "crit": "Critical wound"
+    },
+    "total": "Total damage"
+  }
+}

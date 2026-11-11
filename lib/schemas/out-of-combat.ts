@@ -8,7 +8,7 @@ const characterIds = z.array(z.string().min(1).max(100)).min(1).max(50);
 
 const useInspiration = z.boolean().optional();
 
-export const restSchema = z.object({ kind: z.enum(["short", "long", "close"]), characterIds });
+export const restSchema = z.object({ kind: z.enum(["short", "long", "close", "session"]), characterIds });
 
 export type RestInput = z.infer<typeof restSchema>;
 
@@ -20,10 +20,14 @@ export type ArcaneRecoveryInput = z.infer<typeof arcaneRecoverySchema>;
 
 export type HitDieInput = z.infer<typeof hitDieSchema>;
 
+const difficulty = z.string().max(40).optional();
+
 export const sheetRollSchema = z.union([
   z.object({ kind: z.literal("check"), skill: z.enum(DND_SKILLS), useInspiration }),
   z.object({ kind: z.literal("check"), ability: z.enum(ABILITY_KEYS), useInspiration }),
   z.object({ kind: z.literal("save"), ability: z.enum(ABILITY_KEYS), useInspiration }),
+  z.object({ kind: z.literal("test"), characteristic: z.string().max(40), difficulty }).strict(),
+  z.object({ kind: z.literal("test"), skill: z.string().max(60), spec: z.string().max(60).optional(), difficulty }).strict(),
 ]);
 
 export type SheetRollInput = z.infer<typeof sheetRollSchema>;
@@ -45,6 +49,8 @@ export const resourcesEditSchema = z
     tempHp: z.number().int().min(0).max(999).optional(),
     exhaustion: z.number().int().min(0).max(MAX_EXHAUSTION).optional(),
     dead: z.boolean().optional(),
+    fortune: z.number().int().min(0).max(9).optional(),
+    sin: z.number().int().min(0).max(10).optional(),
     reset: z.literal(true).optional(),
     charges: z.record(z.string().min(1).max(300), z.number().int().min(0).max(999)).optional(),
   })

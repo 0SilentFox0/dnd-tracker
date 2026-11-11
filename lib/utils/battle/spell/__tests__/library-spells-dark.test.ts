@@ -23,6 +23,7 @@ import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const spell = (key: string): CastableSpell => {
@@ -65,7 +66,7 @@ const find = (ps: BattleParticipant[], id: string) => ps.find((p) => p.basicInfo
 function cast(key: string, targetIds: string[], ps: BattleParticipant[], opts: { dice?: number[]; save?: number; casterId?: string } = {}) {
   const c = find(ps, opts.casterId ?? "mage");
 
-  return castSpell({
+  return castSpell({ rules: DEFAULT_RULES,
     caster: c,
     spell: spell(key),
     targetIds,
@@ -85,7 +86,7 @@ function turnsOf(ps: BattleParticipant[], id: string, n: number, rng = seq(0.99)
   let order = ps;
 
   for (let i = 0; i < n; i++) {
-    const r = processStartOfTurn(find(order, id), i + 2, order, rng);
+    const r = processStartOfTurn(find(order, id), i + 2, order, rng, undefined, DEFAULT_RULES);
 
     order = r.participants;
     seen.push(find(order, id));
@@ -96,7 +97,7 @@ function turnsOf(ps: BattleParticipant[], id: string, n: number, rng = seq(0.99)
 }
 
 function hit(attacker: BattleParticipant, target: BattleParticipant, ps: BattleParticipant[], d20 = 15, dmg = [8], attack = claw) {
-  return processAttack({ attacker, target, attack, d20Roll: d20, damageRolls: dmg, allParticipants: ps, currentRound: 1, battleId: "b", rng: seq(0.5) });
+  return processAttack({ rules: DEFAULT_RULES, attacker, target, attack, d20Roll: d20, damageRolls: dmg, allParticipants: ps, currentRound: 1, battleId: "b", rng: seq(0.5) });
 }
 
 const dealt = (r: ReturnType<typeof hit>) => r.damage?.finalDamage ?? 0;
@@ -150,9 +151,9 @@ describe("Темрява — бібліотечні заклинання", () =>
     const ps = cast("slow", ["orc"], [hero(), fast, slowGob]).allParticipantsUpdated;
 
     expect(calculateInitiative(find(ps, "orc"), ps)).toBe(9);
-    expect(movementBudget(find(ps, "orc"))).toBe(movementBudget(fast) - 2);
+    expect(movementBudget(find(ps, "orc"), DEFAULT_RULES)).toBe(movementBudget(fast, DEFAULT_RULES) - 2);
 
-    const loop = runAdvanceTurnLoop({ initiativeOrder: ps, currentTurnIndex: 2, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99) });
+    const loop = runAdvanceTurnLoop({ rules: DEFAULT_RULES, initiativeOrder: ps, currentTurnIndex: 2, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99) });
 
     const ids = loop.updatedInitiativeOrder.map((p) => p.basicInfo.id);
 
@@ -245,7 +246,7 @@ describe("Темрява — бібліотечні заклинання", () =>
 
       const order = [find(ps, "orc"), find(ps, "mage"), find(ps, "gob")];
 
-      expect(() => runAttackPhase({ battle: { initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "claw" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
+      expect(() => runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "claw" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
     });
 
     it("сліпий ворог не може атакувати здалеку", () => {
@@ -253,7 +254,7 @@ describe("Темрява — бібліотечні заклинання", () =>
 
       const order = [find(ps, "orc"), find(ps, "mage"), find(ps, "gob")];
 
-      expect(() => runAttackPhase({ battle: { initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "bow" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
+      expect(() => runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 }, data: { attackerId: "orc", targetId: "mage", d20Roll: 15, damageRolls: [5], attackId: "bow" }, battleId: "b", userId: "dm", isDM: true, rng: seq(0.5) })).toThrow();
     });
 
     it("сліпий ворог не може чаклувати (spell-mutation) — обидва свої ходи", async () => {
@@ -296,7 +297,7 @@ describe("Темрява — бібліотечні заклинання", () =>
 
     expect(find(cast("berserk", ["h"], [hero(), enemyHero]).allParticipantsUpdated, "h").battleData.activeEffects).toHaveLength(0);
 
-    const loop = runAdvanceTurnLoop({ initiativeOrder: [find(ps, "mage"), find(ps, "orc"), find(ps, "gob")], currentTurnIndex: 0, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99, 0.99, 0.5) });
+    const loop = runAdvanceTurnLoop({ rules: DEFAULT_RULES, initiativeOrder: [find(ps, "mage"), find(ps, "orc"), find(ps, "gob")], currentTurnIndex: 0, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99, 0.99, 0.5) });
 
     expect(find(loop.updatedInitiativeOrder, "gob").combatStats.currentHp).toBeLessThan(100);
     expect(loop.newLogEntries.some((e) => eventTextOf(e).includes("Шал"))).toBe(true);
@@ -310,7 +311,7 @@ describe("Темрява — бібліотечні заклинання", () =>
     expect(orc.basicInfo.side).toBe(ParticipantSide.ALLY);
     expect(orc.basicInfo.controlledBy).toBe("user-1");
 
-    const start = processStartOfTurn(orc, 2, ps, seq(0.5));
+    const start = processStartOfTurn(orc, 2, ps, seq(0.5), undefined, DEFAULT_RULES);
 
     expect(start.participant.basicInfo.side).toBe(ParticipantSide.ALLY);
 
@@ -332,7 +333,7 @@ describe("Темрява — бібліотечні заклинання", () =>
   it("Прокляття Потойбіччя: шкода всім ворогам і −1 мораль", () => {
     const ps = world();
 
-    const r = castSpell({ caster: ps[0], spell: spell("curse-of-the-netherworld"), targetIds: ["orc", "gob"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [3, 3, 3, 3], rng: seq(0.5) });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: ps[0], spell: spell("curse-of-the-netherworld"), targetIds: ["orc", "gob"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [3, 3, 3, 3], rng: seq(0.5) });
 
     for (const id of ["orc", "gob"]) {
       const p = find(r.allParticipantsUpdated, id);

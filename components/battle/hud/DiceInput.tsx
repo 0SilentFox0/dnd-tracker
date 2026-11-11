@@ -30,7 +30,7 @@ export function DiceGrid({ sides, value, onPick, highlight }: { sides: number; v
 }
 
 /** One die field: focus selects the content, a new digit replaces the old one, Backspace clears. */
-export function DieInput({ sides, value, onChange, label, className }: { sides: number; value: number | undefined; onChange: (v: number | undefined) => void; label: string; className?: string }) {
+export function DieInput({ sides, value, onChange, label, className, strict }: { sides: number; value: number | undefined; onChange: (v: number | undefined) => void; label: string; className?: string; strict?: boolean }) {
   return (
     <input
       aria-label={label}
@@ -39,7 +39,7 @@ export function DieInput({ sides, value, onChange, label, className }: { sides: 
       value={value ?? ""}
       onFocus={(e) => e.target.select()}
       onChange={(e) => {
-        const v = parseDieInput(e.target.value, sides);
+        const v = parseDieInput(e.target.value, sides, strict);
 
         if (v !== null) onChange(v);
       }}

@@ -1,0 +1,137 @@
+{
+  "wizard": {
+    "title": "Create a hero",
+    "titleEdit": "Edit hero",
+    "aside": "Step by step: species, career, characteristics, talents, details.",
+    "stepOf": "Step {current} of {total}",
+    "steps": {
+      "species": "Species",
+      "career": "Career",
+      "stats": "Characteristics",
+      "talents": "Talents",
+      "identity": "Details"
+    },
+    "back": "Back",
+    "next": "Next",
+    "submit": "Create hero",
+    "submitEdit": "Save",
+    "submitting": "Saving…",
+    "skipHint": "Esc or tap to skip the animation",
+    "failed": "Could not save the hero"
+  },
+  "species": {
+    "hint": "Species sets characteristic bonuses, movement, fate and starting talents.",
+    "loading": "Loading species…",
+    "notReadyTitle": "Species are not ready yet",
+    "notReadyBody": "The GM has not set up species profiles for character creation yet. Ask your GM.",
+    "stats": "Move {move} · Fate {fate} · Extra wounds {wounds}",
+    "mods": "Bonuses: {mods}",
+    "noMods": "no bonuses",
+    "talents": "Talents: {names}"
+  },
+  "career": {
+    "hint": "A career sets starting skills and the advancement path.",
+    "modes": {
+      "rolled": "Roll",
+      "choice": "Choose from table",
+      "free": "Free choice"
+    },
+    "bonus": "+{xp} experience",
+    "roll": "Roll careers",
+    "rollFirst": "Roll the dice to get two careers to choose from.",
+    "rollFirstRolled": "Roll the dice to get your career; it cannot be changed.",
+    "rolledFinal": "The roll is final: no rerolls.",
+    "rolledAt": "Roll {roll}",
+    "pickLabel": "Career",
+    "pickPlaceholder": "Pick a career",
+    "emptyTable": "The species table has no careers.",
+    "modeLabel": "How to choose"
+  },
+  "stats": {
+    "hint": "Each characteristic: 20 + species bonus + value.",
+    "modes": {
+      "rolled": "Roll",
+      "rearranged": "Roll and rearrange",
+      "free": "Free distribution"
+    },
+    "bonus": "+{xp} experience",
+    "roll": "Roll characteristics",
+    "rollFirst": "Roll 2d10 for each characteristic.",
+    "up": "Move up",
+    "down": "Move down",
+    "swapHint": "Swap values with the arrow buttons.",
+    "budget": "Spent {spent} of {budget}",
+    "value": "Value: {characteristic}",
+    "total": "Total {total}",
+    "dec": "Less",
+    "inc": "More",
+    "modeLabel": "How to set"
+  },
+  "talents": {
+    "hint": "Fixed species talents and random ones from the table.",
+    "fixed": "Species talents",
+    "noneFixed": "This species gives no fixed talents.",
+    "random": "Random talents ({count})",
+    "noRandom": "This species has no random talents.",
+    "roll": "Roll talents",
+    "rollFirst": "Roll the dice for random talents."
+  },
+  "identity": {
+    "hint": "Name and story. Mechanics are already set.",
+    "name": "Name",
+    "namePlaceholder": "What is the hero called?",
+    "alignment": "Alignment",
+    "alignmentPlaceholder": "Choose an alignment",
+    "background": "Biography",
+    "backgroundPlaceholder": "A short backstory",
+    "avatar": "Portrait",
+    "goals": "Goals",
+    "goalPlaceholder": "Personal goal",
+    "addGoal": "Add goal",
+    "removeGoal": "Remove goal",
+    "experience": "Starting experience: {xp}",
+    "reopenNote": "Only the details change: mechanics and experience stay."
+  },
+  "errors": {
+    "PROFILE_NOT_READY": "The species profile is not ready",
+    "CAREER_NOT_IN_TABLE": "The career is not in the species table",
+    "CAREER_UNKNOWN": "Unknown career",
+    "STATS_LENGTH": "A value is needed for every characteristic",
+    "STATS_RANGE": "Values must be between 2 and 20",
+    "STATS_NOT_PERMUTATION": "The arrangement must use the same values",
+    "POINTS_RANGE": "Values must be between 4 and 18",
+    "POINTS_BUDGET": "The values must add up to the budget",
+    "TALENT_COUNT": "Too many talents",
+    "TALENT_NOT_IN_TABLE": "The talent is not from the species table",
+    "FEAT_UNKNOWN": "Unknown talent"
+  },
+  "editor": {
+    "title": "Species profile for character creation",
+    "hint": "Bonuses, movement, fate and roll tables. A species with no careers in its table is unavailable to players.",
+    "loading": "Loading profile…",
+    "mods": "Characteristic bonuses",
+    "move": "Move",
+    "fate": "Fate",
+    "extraWounds": "Extra wounds",
+    "randomTalentCount": "Random talent count",
+    "talents": "Fixed talents",
+    "talentsPlaceholder": "Add a talent",
+    "careerTable": "Career table (d100)",
+    "randomTalents": "Random talent table (d100)",
+    "max": "Up to",
+    "career": "Career",
+    "feat": "Talent",
+    "addRow": "Add row",
+    "removeRow": "Remove row",
+    "removeTalent": "Remove talent",
+    "save": "Save profile",
+    "saving": "Saving…",
+    "saved": "Profile saved",
+    "saveFailed": "Could not save the profile",
+    "errors": {
+      "tableAscending": "Limits must increase",
+      "tableEnd": "The last limit must be 100",
+      "invalid": "Check the values and table choices"
+    }
+  }
+}

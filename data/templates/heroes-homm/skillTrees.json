@@ -1,0 +1,1932 @@
+[
+  {
+    "slug": "dark-elves",
+    "race": "Dark Elves",
+    "skills": {
+      "mainSkills": [
+        {
+          "id": "attack",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
+          "name": "Attack",
+          "color": "#b3312c",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "reward"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "brutality"
+                },
+                {
+                  "id": "sequence"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "cleaving-strike"
+                },
+                {
+                  "id": "stunning-strike"
+                },
+                {
+                  "id": "armor-break"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "attack-basic",
+            "expert": "attack-expert",
+            "advanced": "attack-advanced"
+          }
+        },
+        {
+          "id": "defense",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
+          "name": "Defense",
+          "color": "#4f6d8a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "readiness"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "last-stand"
+                },
+                {
+                  "id": "magic-ward"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "endurance"
+                },
+                {
+                  "id": "resilience"
+                },
+                {
+                  "id": "guardian"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "defense-basic",
+            "expert": "defense-expert",
+            "advanced": "defense-advanced"
+          }
+        },
+        {
+          "id": "ranged",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
+          "name": "Ranged",
+          "color": "#3d7a3a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "double-shot"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "bullseye"
+                },
+                {
+                  "id": "arrow-cloud"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "crippling-shot"
+                },
+                {
+                  "id": "piercing-bolt"
+                },
+                {
+                  "id": "deflecting-arrow"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "ranged-basic",
+            "expert": "ranged-expert",
+            "advanced": "ranged-advanced"
+          }
+        },
+        {
+          "id": "dark",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
+          "name": "Darkness",
+          "color": "#5b3a7a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "dark-master"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "deaths-march"
+                },
+                {
+                  "id": "devourer"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "master-of-pain"
+                },
+                {
+                  "id": "master-of-mind"
+                },
+                {
+                  "id": "master-of-curses"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "darkness",
+          "levelSkillIds": {
+            "basic": "dark-basic",
+            "expert": "dark-expert",
+            "advanced": "dark-advanced"
+          }
+        },
+        {
+          "id": "chaos",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos.webp",
+          "name": "Chaos",
+          "color": "#d4561e",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "pyrokinesis"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "mana-burst"
+                },
+                {
+                  "id": "infernal-power"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "master-of-storms"
+                },
+                {
+                  "id": "master-of-fire"
+                },
+                {
+                  "id": "master-of-ice"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "chaos",
+          "levelSkillIds": {
+            "basic": "chaos-basic",
+            "expert": "chaos-expert",
+            "advanced": "chaos-advanced"
+          }
+        },
+        {
+          "id": "racial",
+          "name": "Racial",
+          "color": "gainsboro",
+          "levels": {},
+          "levelSkillIds": {
+            "basic": "racial-dark-elves-basic",
+            "expert": "racial-dark-elves-expert",
+            "advanced": "racial-dark-elves-advanced"
+          }
+        }
+      ],
+      "ultimateSkill": {
+        "id": "racial-dark-elves-ultimate"
+      }
+    }
+  },
+  {
+    "slug": "demons",
+    "race": "Demons",
+    "skills": {
+      "mainSkills": [
+        {
+          "id": "attack",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
+          "name": "Attack",
+          "color": "#b3312c",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "reward"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "brutality"
+                },
+                {
+                  "id": "sequence"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "cleaving-strike"
+                },
+                {
+                  "id": "stunning-strike"
+                },
+                {
+                  "id": "armor-break"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "attack-basic",
+            "expert": "attack-expert",
+            "advanced": "attack-advanced"
+          }
+        },
+        {
+          "id": "defense",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
+          "name": "Defense",
+          "color": "#4f6d8a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "readiness"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "last-stand"
+                },
+                {
+                  "id": "magic-ward"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "endurance"
+                },
+                {
+                  "id": "resilience"
+                },
+                {
+                  "id": "guardian"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "defense-basic",
+            "expert": "defense-expert",
+            "advanced": "defense-advanced"
+          }
+        },
+        {
+          "id": "ranged",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
+          "name": "Ranged",
+          "color": "#3d7a3a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "double-shot"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "bullseye"
+                },
+                {
+                  "id": "arrow-cloud"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "crippling-shot"
+                },
+                {
+                  "id": "piercing-bolt"
+                },
+                {
+                  "id": "deflecting-arrow"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "ranged-basic",
+            "expert": "ranged-expert",
+            "advanced": "ranged-advanced"
+          }
+        },
+        {
+          "id": "dark",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
+          "name": "Darkness",
+          "color": "#5b3a7a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "dark-master"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "deaths-march"
+                },
+                {
+                  "id": "devourer"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "master-of-pain"
+                },
+                {
+                  "id": "master-of-mind"
+                },
+                {
+                  "id": "master-of-curses"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "darkness",
+          "levelSkillIds": {
+            "basic": "dark-basic",
+            "expert": "dark-expert",
+            "advanced": "dark-advanced"
+          }
+        },
+        {
+          "id": "leadership",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
+          "name": "Leadership",
+          "color": "#c9a227",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "success"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "inspiration"
+                },
+                {
+                  "id": "vengeance"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "empathy"
+                },
+                {
+                  "id": "restoration"
+                },
+                {
+                  "id": "retribution"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "leadership-basic",
+            "expert": "leadership-expert",
+            "advanced": "leadership-advanced"
+          }
+        },
+        {
+          "id": "chaos",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos.webp",
+          "name": "Chaos",
+          "color": "#d4561e",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "pyrokinesis"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "mana-burst"
+                },
+                {
+                  "id": "infernal-power"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "master-of-storms"
+                },
+                {
+                  "id": "master-of-fire"
+                },
+                {
+                  "id": "master-of-ice"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "chaos",
+          "levelSkillIds": {
+            "basic": "chaos-basic",
+            "expert": "chaos-expert",
+            "advanced": "chaos-advanced"
+          }
+        },
+        {
+          "id": "racial",
+          "name": "Racial",
+          "color": "gainsboro",
+          "levels": {},
+          "levelSkillIds": {
+            "basic": "racial-demons-basic",
+            "expert": "racial-demons-expert",
+            "advanced": "racial-demons-advanced"
+          }
+        }
+      ],
+      "ultimateSkill": {
+        "id": "racial-demons-ultimate"
+      }
+    }
+  },
+  {
+    "slug": "dwarves",
+    "race": "Dwarves",
+    "skills": {
+      "mainSkills": [
+        {
+          "id": "leadership",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
+          "name": "Leadership",
+          "color": "#c9a227",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "success"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "inspiration"
+                },
+                {
+                  "id": "vengeance"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "empathy"
+                },
+                {
+                  "id": "restoration"
+                },
+                {
+                  "id": "retribution"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "leadership-basic",
+            "expert": "leadership-expert",
+            "advanced": "leadership-advanced"
+          }
+        },
+        {
+          "id": "ranged",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
+          "name": "Ranged",
+          "color": "#3d7a3a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "double-shot"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "bullseye"
+                },
+                {
+                  "id": "arrow-cloud"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "crippling-shot"
+                },
+                {
+                  "id": "piercing-bolt"
+                },
+                {
+                  "id": "deflecting-arrow"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "ranged-basic",
+            "expert": "ranged-expert",
+            "advanced": "ranged-advanced"
+          }
+        },
+        {
+          "id": "attack",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
+          "name": "Attack",
+          "color": "#b3312c",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "reward"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "brutality"
+                },
+                {
+                  "id": "sequence"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "cleaving-strike"
+                },
+                {
+                  "id": "stunning-strike"
+                },
+                {
+                  "id": "armor-break"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "attack-basic",
+            "expert": "attack-expert",
+            "advanced": "attack-advanced"
+          }
+        },
+        {
+          "id": "defense",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
+          "name": "Defense",
+          "color": "#4f6d8a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "readiness"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "last-stand"
+                },
+                {
+                  "id": "magic-ward"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "endurance"
+                },
+                {
+                  "id": "resilience"
+                },
+                {
+                  "id": "guardian"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "defense-basic",
+            "expert": "defense-expert",
+            "advanced": "defense-advanced"
+          }
+        },
+        {
+          "id": "light",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light.webp",
+          "name": "Light",
+          "color": "#e8c547",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "benediction"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "eternal-light"
+                },
+                {
+                  "id": "divine-power"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "righteous-wrath"
+                },
+                {
+                  "id": "granting-protection"
+                },
+                {
+                  "id": "granting-blessing"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "light",
+          "levelSkillIds": {
+            "basic": "light-basic",
+            "expert": "light-expert",
+            "advanced": "light-advanced"
+          }
+        },
+        {
+          "id": "racial",
+          "name": "Racial",
+          "color": "gainsboro",
+          "levels": {},
+          "levelSkillIds": {
+            "basic": "racial-dwarves-basic",
+            "expert": "racial-dwarves-expert",
+            "advanced": "racial-dwarves-advanced"
+          }
+        }
+      ],
+      "ultimateSkill": {
+        "id": "racial-dwarves-ultimate"
+      }
+    }
+  },
+  {
+    "slug": "elves",
+    "race": "Elves",
+    "skills": {
+      "mainSkills": [
+        {
+          "id": "leadership",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
+          "name": "Leadership",
+          "color": "#c9a227",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "success"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "inspiration"
+                },
+                {
+                  "id": "vengeance"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "empathy"
+                },
+                {
+                  "id": "restoration"
+                },
+                {
+                  "id": "retribution"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "leadership-basic",
+            "expert": "leadership-expert",
+            "advanced": "leadership-advanced"
+          }
+        },
+        {
+          "id": "ranged",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
+          "name": "Ranged",
+          "color": "#3d7a3a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "double-shot"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "bullseye"
+                },
+                {
+                  "id": "arrow-cloud"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "crippling-shot"
+                },
+                {
+                  "id": "piercing-bolt"
+                },
+                {
+                  "id": "deflecting-arrow"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "ranged-basic",
+            "expert": "ranged-expert",
+            "advanced": "ranged-advanced"
+          }
+        },
+        {
+          "id": "attack",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
+          "name": "Attack",
+          "color": "#b3312c",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "reward"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "brutality"
+                },
+                {
+                  "id": "sequence"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "cleaving-strike"
+                },
+                {
+                  "id": "stunning-strike"
+                },
+                {
+                  "id": "armor-break"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "attack-basic",
+            "expert": "attack-expert",
+            "advanced": "attack-advanced"
+          }
+        },
+        {
+          "id": "defense",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
+          "name": "Defense",
+          "color": "#4f6d8a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "readiness"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "last-stand"
+                },
+                {
+                  "id": "magic-ward"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "endurance"
+                },
+                {
+                  "id": "resilience"
+                },
+                {
+                  "id": "guardian"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "defense-basic",
+            "expert": "defense-expert",
+            "advanced": "defense-advanced"
+          }
+        },
+        {
+          "id": "nature",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature.webp",
+          "name": "Nature",
+          "color": "#6b8e23",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "natures-wrath"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "call-of-the-beast"
+                },
+                {
+                  "id": "natures-poison"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "forest-lord"
+                },
+                {
+                  "id": "life-force"
+                },
+                {
+                  "id": "thorns"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "nature",
+          "levelSkillIds": {
+            "basic": "nature-basic",
+            "expert": "nature-expert",
+            "advanced": "nature-advanced"
+          }
+        },
+        {
+          "id": "racial",
+          "name": "Racial",
+          "color": "gainsboro",
+          "levels": {},
+          "levelSkillIds": {
+            "basic": "racial-elves-basic",
+            "expert": "racial-elves-expert",
+            "advanced": "racial-elves-advanced"
+          }
+        }
+      ],
+      "ultimateSkill": {
+        "id": "racial-elves-ultimate"
+      }
+    }
+  },
+  {
+    "slug": "humans",
+    "race": "Humans",
+    "skills": {
+      "mainSkills": [
+        {
+          "id": "leadership",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
+          "name": "Leadership",
+          "color": "#c9a227",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "success"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "inspiration"
+                },
+                {
+                  "id": "vengeance"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "empathy"
+                },
+                {
+                  "id": "restoration"
+                },
+                {
+                  "id": "retribution"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "leadership-basic",
+            "expert": "leadership-expert",
+            "advanced": "leadership-advanced"
+          }
+        },
+        {
+          "id": "ranged",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
+          "name": "Ranged",
+          "color": "#3d7a3a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "double-shot"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "bullseye"
+                },
+                {
+                  "id": "arrow-cloud"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "crippling-shot"
+                },
+                {
+                  "id": "piercing-bolt"
+                },
+                {
+                  "id": "deflecting-arrow"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "ranged-basic",
+            "expert": "ranged-expert",
+            "advanced": "ranged-advanced"
+          }
+        },
+        {
+          "id": "attack",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
+          "name": "Attack",
+          "color": "#b3312c",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "reward"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "brutality"
+                },
+                {
+                  "id": "sequence"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "cleaving-strike"
+                },
+                {
+                  "id": "stunning-strike"
+                },
+                {
+                  "id": "armor-break"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "attack-basic",
+            "expert": "attack-expert",
+            "advanced": "attack-advanced"
+          }
+        },
+        {
+          "id": "defense",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
+          "name": "Defense",
+          "color": "#4f6d8a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "readiness"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "last-stand"
+                },
+                {
+                  "id": "magic-ward"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "endurance"
+                },
+                {
+                  "id": "resilience"
+                },
+                {
+                  "id": "guardian"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "defense-basic",
+            "expert": "defense-expert",
+            "advanced": "defense-advanced"
+          }
+        },
+        {
+          "id": "light",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light.webp",
+          "name": "Light",
+          "color": "#e8c547",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "benediction"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "eternal-light"
+                },
+                {
+                  "id": "divine-power"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "righteous-wrath"
+                },
+                {
+                  "id": "granting-protection"
+                },
+                {
+                  "id": "granting-blessing"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "light",
+          "levelSkillIds": {
+            "basic": "light-basic",
+            "expert": "light-expert",
+            "advanced": "light-advanced"
+          }
+        },
+        {
+          "id": "racial",
+          "name": "Racial",
+          "color": "gainsboro",
+          "levels": {},
+          "levelSkillIds": {
+            "basic": "racial-humans-basic",
+            "expert": "racial-humans-expert",
+            "advanced": "racial-humans-advanced"
+          }
+        }
+      ],
+      "ultimateSkill": {
+        "id": "racial-humans-ultimate"
+      }
+    }
+  },
+  {
+    "slug": "mages",
+    "race": "Mages",
+    "skills": {
+      "mainSkills": [
+        {
+          "id": "light",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light.webp",
+          "name": "Light",
+          "color": "#e8c547",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "benediction"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "eternal-light"
+                },
+                {
+                  "id": "divine-power"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "righteous-wrath"
+                },
+                {
+                  "id": "granting-protection"
+                },
+                {
+                  "id": "granting-blessing"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "light",
+          "levelSkillIds": {
+            "basic": "light-basic",
+            "expert": "light-expert",
+            "advanced": "light-advanced"
+          }
+        },
+        {
+          "id": "dark",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
+          "name": "Darkness",
+          "color": "#5b3a7a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "dark-master"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "deaths-march"
+                },
+                {
+                  "id": "devourer"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "master-of-pain"
+                },
+                {
+                  "id": "master-of-mind"
+                },
+                {
+                  "id": "master-of-curses"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "darkness",
+          "levelSkillIds": {
+            "basic": "dark-basic",
+            "expert": "dark-expert",
+            "advanced": "dark-advanced"
+          }
+        },
+        {
+          "id": "chaos",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos.webp",
+          "name": "Chaos",
+          "color": "#d4561e",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "pyrokinesis"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "mana-burst"
+                },
+                {
+                  "id": "infernal-power"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "master-of-storms"
+                },
+                {
+                  "id": "master-of-fire"
+                },
+                {
+                  "id": "master-of-ice"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "chaos",
+          "levelSkillIds": {
+            "basic": "chaos-basic",
+            "expert": "chaos-expert",
+            "advanced": "chaos-advanced"
+          }
+        },
+        {
+          "id": "nature",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature.webp",
+          "name": "Nature",
+          "color": "#6b8e23",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "natures-wrath"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "call-of-the-beast"
+                },
+                {
+                  "id": "natures-poison"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "forest-lord"
+                },
+                {
+                  "id": "life-force"
+                },
+                {
+                  "id": "thorns"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "nature",
+          "levelSkillIds": {
+            "basic": "nature-basic",
+            "expert": "nature-expert",
+            "advanced": "nature-advanced"
+          }
+        },
+        {
+          "id": "defense",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
+          "name": "Defense",
+          "color": "#4f6d8a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "readiness"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "last-stand"
+                },
+                {
+                  "id": "magic-ward"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "endurance"
+                },
+                {
+                  "id": "resilience"
+                },
+                {
+                  "id": "guardian"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "defense-basic",
+            "expert": "defense-expert",
+            "advanced": "defense-advanced"
+          }
+        },
+        {
+          "id": "leadership",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
+          "name": "Leadership",
+          "color": "#c9a227",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "success"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "inspiration"
+                },
+                {
+                  "id": "vengeance"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "empathy"
+                },
+                {
+                  "id": "restoration"
+                },
+                {
+                  "id": "retribution"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "leadership-basic",
+            "expert": "leadership-expert",
+            "advanced": "leadership-advanced"
+          }
+        },
+        {
+          "id": "racial",
+          "name": "Racial",
+          "color": "gainsboro",
+          "levels": {},
+          "levelSkillIds": {
+            "basic": "racial-mages-basic",
+            "expert": "racial-mages-expert",
+            "advanced": "racial-mages-advanced"
+          }
+        }
+      ],
+      "ultimateSkill": {
+        "id": "racial-mages-ultimate"
+      }
+    }
+  },
+  {
+    "slug": "necromancers",
+    "race": "Necromancers",
+    "skills": {
+      "mainSkills": [
+        {
+          "id": "ranged",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
+          "name": "Ranged",
+          "color": "#3d7a3a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "double-shot"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "bullseye"
+                },
+                {
+                  "id": "arrow-cloud"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "crippling-shot"
+                },
+                {
+                  "id": "piercing-bolt"
+                },
+                {
+                  "id": "deflecting-arrow"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "ranged-basic",
+            "expert": "ranged-expert",
+            "advanced": "ranged-advanced"
+          }
+        },
+        {
+          "id": "attack",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
+          "name": "Attack",
+          "color": "#b3312c",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "reward"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "brutality"
+                },
+                {
+                  "id": "sequence"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "cleaving-strike"
+                },
+                {
+                  "id": "stunning-strike"
+                },
+                {
+                  "id": "armor-break"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "attack-basic",
+            "expert": "attack-expert",
+            "advanced": "attack-advanced"
+          }
+        },
+        {
+          "id": "defense",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
+          "name": "Defense",
+          "color": "#4f6d8a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "readiness"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "last-stand"
+                },
+                {
+                  "id": "magic-ward"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "endurance"
+                },
+                {
+                  "id": "resilience"
+                },
+                {
+                  "id": "guardian"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "levelSkillIds": {
+            "basic": "defense-basic",
+            "expert": "defense-expert",
+            "advanced": "defense-advanced"
+          }
+        },
+        {
+          "id": "dark",
+          "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
+          "name": "Darkness",
+          "color": "#5b3a7a",
+          "levels": {
+            "basic": {
+              "circle1": [
+                {
+                  "id": "dark-master"
+                }
+              ],
+              "circle2": [
+                {
+                  "id": "deaths-march"
+                },
+                {
+                  "id": "devourer"
+                }
+              ],
+              "circle3": [
+                {
+                  "id": "master-of-pain"
+                },
+                {
+                  "id": "master-of-mind"
+                },
+                {
+                  "id": "master-of-curses"
+                }
+              ]
+            },
+            "expert": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            },
+            "advanced": {
+              "circle1": [],
+              "circle2": [],
+              "circle3": []
+            }
+          },
+          "spellGroupId": "darkness",
+          "levelSkillIds": {
+            "basic": "dark-basic",
+            "expert": "dark-expert",
+            "advanced": "dark-advanced"
+          }
+        },
+        {
+          "id": "racial",
+          "name": "Racial",
+          "color": "gainsboro",
+          "levels": {},
+          "levelSkillIds": {
+            "basic": "racial-necromancers-basic",
+            "expert": "racial-necromancers-expert",
+            "advanced": "racial-necromancers-advanced"
+          }
+        }
+      ],
+      "ultimateSkill": {
+        "id": "racial-necromancers-ultimate"
+      }
+    }
+  }
+]

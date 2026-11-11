@@ -7,6 +7,7 @@ import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { segmentsLine } from "@/lib/utils/abilities/segments";
 import { hashJson } from "@/lib/utils/battle/store/stable-json";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { monsterSenseAbilities,multiattackAbilities } from "@/lib/utils/units/monster";
 
 const CYRILLIC = /[А-Яа-яІіЇїЄєҐґ]/;
@@ -16,7 +17,7 @@ function messagesOf(effect: Effect) {
 
   const ability = resolved({ name: "Spark", trigger: { event: "hit", role: "attacker" }, effects: [effect] });
 
-  return applyEffect({ participants: ps, ability, effectIndex: 0, ownerId: "o", effect, targetIds: ["t"], event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 10 }, ctx: { round: 1, rng: seq(0.5) } }).messages;
+  return applyEffect({ participants: ps, ability, effectIndex: 0, ownerId: "o", effect, targetIds: ["t"], event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 10 }, ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES } }).messages;
 }
 
 describe("log lines carry keys, not a rendered locale", () => {

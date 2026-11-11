@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Crosshair, Swords } from "lucide-react";
 
@@ -10,11 +10,11 @@ import { useProfile } from "./ProfileContext";
 
 import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import { AttackType } from "@/lib/constants/battle";
-import type { DndSkill } from "@/lib/constants/skills";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
-import { cn } from "@/lib/utils";
 import { signed } from "@/lib/utils/common/format";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import type { SheetLine } from "@/types/characters";
 
 function Row({ label, value, lines }: { label: string; value: string; lines?: SheetLine[] }) {
@@ -42,39 +42,20 @@ export function CombatTab() {
 
   const { data: rules } = useCampaignRules(campaignId);
 
+  const Ui = systemUiOf(sheet.system);
+
+  const { attacks: showAttacks, d20Stats } = RULE_SYSTEM_REGISTRY[sheet.system];
+
   const [openAttack, setOpenAttack] = useState<string | null>(null);
 
   const [rollRequest, setRollRequest] = useState<SheetRollRequest | null>(null);
 
   const canRoll = !!sheet.rest && (sheet.viewer.isOwner || sheet.viewer.isDM);
 
-  const rollable = (request: SheetRollRequest, children: ReactNode) =>
-    canRoll ? (
-      <button type="button" title={t("roll")} onClick={() => setRollRequest(request)} className="flex w-full justify-between gap-2 text-left">
-        <span className="sr-only">{t("roll")}: </span>
-        {children}
-      </button>
-    ) : (
-      <div className="flex w-full justify-between gap-2">{children}</div>
-    );
-
   return (
     <>
-      <HudSection title={t("abilities")}>
-        <div className="grid grid-cols-6 gap-1">
-          {sheet.abilities.map((a) => (
-            <div key={a.key} className={cn("min-w-0 rounded-lg border bg-hud-field py-1 text-center", a.isPrimary ? "border-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-gold)]" : "border-hud-line")}>
-              <small className="block text-[10px] text-hud-muted">
-                {tg(`abilities.${a.key}.short`)}
-                {a.isPrimary ? " ★" : ""}
-              </small>
-              <b className="block text-[17px] leading-5">{a.score}</b>
-              <span className={cn("block text-[15px] font-semibold leading-5 tabular-nums", a.isPrimary ? "text-hud-gold" : "text-hud-muted")}>{signed(a.mod)}</span>
-            </div>
-          ))}
-        </div>
-        {sheet.primaryAbility && <p className="mt-1.5 text-xs text-hud-muted">{t("primaryHint")}</p>}
-      </HudSection>
+      <Ui.StatsTab section="top" onRoll={setRollRequest} canRoll={canRoll} />
+      {showAttacks && (
       <HudSection title={t("attacks")}>
         {sheet.attacks.length === 0 ? (
           <EmptyState title={t("noAttacks")} className="border-hud-rule py-6 text-hud-muted" />
@@ -102,59 +83,20 @@ export function CombatTab() {
           ))
         )}
       </HudSection>
+      )}
       <HudSection title={t("defense")}>
-        <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
-        <Row label={tg("stats.initiative")} value={String(sheet.initiative)} />
-        <Row label={tg("stats.speed")} value={String(sheet.speed)} />
-        {rules?.morale.enabled !== false && <Row label={tg("stats.moral")} value={signed(sheet.morale)} />}
-        <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
+        {d20Stats && (
+          <>
+            <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
+            <Row label={tg("stats.initiative")} value={String(sheet.initiative)} />
+            <Row label={tg("stats.speed")} value={String(sheet.speed)} />
+          </>
+        )}
+        {d20Stats && rules?.morale.enabled !== false && <Row label={tg("stats.moral")} value={signed(sheet.morale)} />}
+        {showAttacks && <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />}
         {sheet.immunities.length > 0 && <Row label={t("immunities")} value={sheet.immunities.join(", ")} />}
       </HudSection>
-      <HudSection title={t("saves")}>
-        <ul className="grid grid-cols-2 gap-x-4 text-sm">
-          {sheet.saves.map((s) => (
-            <li key={s.key} className="border-b border-hud-raised py-1">
-              {rollable(
-                { label: t("saveRoll", { ability: tg(`abilities.${s.ability}.label`) }), subject: { kind: "save", ability: s.ability } },
-                <>
-                  <span className="min-w-0 truncate">
-                    {s.proficient ? (s.expertise ? "●● " : "● ") : ""}
-                    {tg(`abilities.${s.ability}.label`)}
-                    {s.expertise && <span className="ml-1 text-xs text-hud-muted">×2</span>}
-                  </span>
-                  <span className="tabular-nums">{signed(s.bonus)}</span>
-                </>,
-              )}
-            </li>
-          ))}
-        </ul>
-      </HudSection>
-      <HudSection title={t("skills")}>
-        <ul className="grid grid-cols-2 gap-x-4 text-sm">
-          {sheet.skills.map((s) => (
-            <li key={s.key} className="border-b border-hud-raised py-1">
-              {rollable(
-                { label: tg(`dndSkills.${s.key as DndSkill}`), subject: { kind: "check", skill: s.key as DndSkill } },
-                <>
-                  <span className="min-w-0 truncate">
-                    {s.proficient ? "● " : ""}
-                    {tg(`dndSkills.${s.key as DndSkill}`)}
-                  </span>
-                  <span className="tabular-nums">{signed(s.bonus)}</span>
-                </>,
-              )}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 text-xs text-hud-muted">
-          {t("passives", sheet.passives)}
-        </p>
-        {(sheet.languages.length > 0 || sheet.proficiencies.length > 0) && (
-          <p className="mt-1 text-xs text-hud-muted">
-            {[sheet.languages.length ? t("languages", { list: sheet.languages.join(", ") }) : null, sheet.proficiencies.length ? t("proficiencies", { list: sheet.proficiencies.join(", ") }) : null].filter(Boolean).join(" · ")}
-          </p>
-        )}
-      </HudSection>
+      <Ui.StatsTab section="bottom" onRoll={setRollRequest} canRoll={canRoll} />
       {canRoll && <SheetRollDialog request={rollRequest} onClose={() => setRollRequest(null)} />}
     </>
   );

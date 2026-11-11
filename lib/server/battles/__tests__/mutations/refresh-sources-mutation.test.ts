@@ -20,6 +20,7 @@ function deps(over = {}) {
     loadUnit: vi.fn(async (id: string) => (id === "gone" ? null : ({ id, campaignId: "c1" } as never))),
     fromCharacter: vi.fn(async () => fresh("x")),
     fromUnit: vi.fn(async () => fresh("x")),
+    buildContext: vi.fn(async () => undefined),
     ...over,
   };
 }
@@ -62,5 +63,18 @@ describe("refresh-sources mutation", () => {
     expect(eventTextOf(out.events[0])).toBe("Оновлено з бібліотеки: 1 учасників");
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "m", "f", "s", "sum"]);
     expect(out.participants[1]).toBe(missing);
+  });
+
+  it("героїв перебудовують з контекстом кампанії, збудованим один раз", async () => {
+    const campaignContext = { artifactsById: { a1: {} } } as never;
+
+    const d = deps({ buildContext: vi.fn(async () => campaignContext) });
+
+    await createRefreshSourcesMutation(d)(context({ participants: [hero, participant("hero2", { sourceType: "character", sourceId: "ch2" }), gob] }));
+
+    expect(d.buildContext).toHaveBeenCalledTimes(1);
+    expect(d.buildContext).toHaveBeenCalledWith("c1", [expect.objectContaining({ id: "ch1" }), expect.objectContaining({ id: "ch2" })]);
+    expect(d.fromCharacter).toHaveBeenCalledTimes(2);
+    expect((d.fromCharacter.mock.calls as unknown[][]).every((c) => c[4] === campaignContext)).toBe(true);
   });
 });

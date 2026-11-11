@@ -10,6 +10,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
@@ -18,6 +19,7 @@ import type { LogLine } from "@/types/text";
 
 export type { CriticalEffect };
 export { AttackType, ParticipantSide };
+
 export { SkillLevel };
 
 /**
@@ -74,6 +76,8 @@ export interface ActiveEffect {
   armed?: boolean;
   charmOrigin?: { side: ParticipantSide; controlledBy: string };
   abilityKey?: string;
+  /** Stripped server-side from non-DM views of participants whose stats the viewer cannot see (e.g. a concealed miscast condition) */
+  concealed?: true;
   abilityEffects?: StaticEffect[];
   source?: { participantId: string; name: string; abilityName?: string; icon?: string | null; personal?: boolean };
   /** постійний ефект (пасивне персональне вміння, зона аури) — без відліку раундів */
@@ -147,6 +151,15 @@ export interface BattleAttack {
   damageBonus?: number;
   /** Категорія зброї 5e (з опису предмета); відсутня — вважається володінням */
   weaponCategory?: "simple" | "martial";
+  /** Opaque rule-system data (the system's codec narrows it) */
+  system?: SystemSlot;
+  ammo?: { capacity: number; reload?: number };
+  reachCells?: number;
+  blastRadius?: number;
+  /** Shootable while enemies are adjacent */
+  ignoresEngagement?: true;
+  /** Damage comes from `damageDice`/`damageBonus` only, without hero level dice */
+  noLevelDice?: true;
 }
 
 /**
@@ -176,6 +189,8 @@ export interface BattleParticipantBasicInfo {
  * Характеристики учасника бою
  */
 export interface BattleParticipantAbilities {
+  /** Opaque rule-system data (the system's codec narrows it) */
+  system?: SystemSlot;
   creatureType?: string;
   cr?: number;
   damageModel?: "5e";
@@ -540,6 +555,11 @@ export interface IngredientStock {
 
 export interface BattleParticipantBattleData {
   ingredientStock?: IngredientStock;
+  /** attack id → shots left; seeded at battle start from the weapon capacity, never persisted between battles */
+  ammo?: Record<string, number>;
+  psychologyTested?: Partial<Record<string, number>>;
+  /** attack id → owner turn ends left until the magazine refills */
+  reload?: Record<string, number>;
   pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
@@ -550,6 +570,14 @@ export interface BattleParticipantBattleData {
   /** Атаки дії «Атака», що лишилися цього ходу */
   attacksLeft?: number;
   inspiration?: boolean;
+  /** Fortune left this battle; seeded at battle start from the sheet (saved fortune, else Fate) */
+  fortune?: number;
+  /** Channelled SL banked for the next cast; lost on damage */
+  channelledSl?: number;
+  /** Sin snapshot from the sheet; read-only in battle (the DM edits it on the sheet) */
+  sin?: number;
+  /** Condition keys whose end test was already attempted this turn */
+  conditionTests?: string[];
   /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
   inspirationSpent?: boolean;
   /** Цього ходу була атака дією легкою ближньою зброєю основної руки */
@@ -734,6 +762,7 @@ export interface BattleAction {
     /** Другий d20 (перевага/недолік) і кубик, що пішов у розрахунок */
     secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean };
     chosenD20?: number;
+    system?: SystemSlot;
     // Для урону:
     damageRolls?: Array<{
       dice: string;

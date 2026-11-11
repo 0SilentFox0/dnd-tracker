@@ -9,6 +9,7 @@ import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engin
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import { applyResistance, hasImmunity } from "@/lib/utils/battle/resistance";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { racePassiveData } from "@/scripts/seed/seed-library-lib";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -139,7 +140,7 @@ describe("race innate passives reach the battle participant", () => {
 
     const foe = { ...(await build(null)), basicInfo: { ...(await build(null)).basicInfo, id: "foe", side: ParticipantSide.ENEMY } };
 
-    const { participants } = runAbilities([human, ally, foe], { type: "battleStart" }, { round: 1, rng: seq(0.5) });
+    const { participants } = runAbilities([human, ally, foe], { type: "battleStart" }, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
     const [h, a, f] = participants;
 
@@ -166,11 +167,11 @@ describe("race innate passives reach the battle participant", () => {
 
     const event = { type: "attack", phase: "before", actorId: elf.basicInfo.id, targetId: "foe", attackKind: "melee" } as const;
 
-    const first = runAbilities([elf, foe], event, { round: 1, rng: seq(0.5) });
+    const first = runAbilities([elf, foe], event, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
     expect(first.actionModifiers[elf.basicInfo.id]).toEqual([{ kind: "flag", flag: "advantage", attackKind: "all" }]);
 
-    const second = runAbilities(first.participants, event, { round: 1, rng: seq(0.5) });
+    const second = runAbilities(first.participants, event, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
     expect(second.actionModifiers[elf.basicInfo.id]).toBeUndefined();
   });

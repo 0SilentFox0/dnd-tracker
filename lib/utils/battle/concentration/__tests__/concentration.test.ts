@@ -36,7 +36,7 @@ const caster = (): BattleParticipant => {
 
 const foe = (id: string) => makeParticipant({ id, side: ParticipantSide.ENEMY, hp: 100, maxHp: 100 });
 
-const cast = (spell: CastableSpell, ps: BattleParticipant[], rules?: Ruleset) =>
+const cast = (spell: CastableSpell, ps: BattleParticipant[], rules: Ruleset = DEFAULT_RULES) =>
   castSpell({ caster: ps[0], spell, targetIds: ["e1", "e2"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5), rules });
 
 const effectsOf = (ps: BattleParticipant[], id: string) => ps.find((p) => p.basicInfo.id === id)?.battleData.activeEffects ?? [];

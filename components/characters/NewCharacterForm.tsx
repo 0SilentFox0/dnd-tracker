@@ -9,10 +9,9 @@ import { CharacterAbilitiesSection } from "@/components/characters/abilities/Cha
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CHARACTER_FORM_TAB, type CharacterFormTabId } from "@/components/characters/character-form-tabs";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
-import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
-import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { CharacterChoicesTab } from "@/components/choices/CharacterChoicesTab";
 import { HudForm, HudFormPage, HudSection, type HudTab } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import type { CharacterTypeValue } from "@/lib/constants/characters";
 import { useCampaignMembers } from "@/lib/hooks/campaigns";
@@ -20,9 +19,12 @@ import type { ChoiceRefsView } from "@/lib/hooks/characters";
 import { useCharacterForm, useChoiceRefs, useCreateCharacter } from "@/lib/hooks/characters";
 import { useClassMode } from "@/lib/hooks/classes";
 import { useRaces } from "@/lib/hooks/races";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import { pruneFormChoices } from "@/lib/utils/characters/choices/prune";
 
-export function NewCharacterForm({ campaignId: id, characterType }: { campaignId: string; characterType: CharacterTypeValue }) {
+type NewCharacterFormProps = { campaignId: string; characterType: CharacterTypeValue; systemKey: string };
+
+export function NewCharacterForm({ campaignId: id, characterType, systemKey }: NewCharacterFormProps) {
   const router = useRouter();
 
   const t = useTranslations("characters");
@@ -37,19 +39,25 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
 
   const classMode = useClassMode(id);
 
+  const { system } = useRuleSystem({ key: systemKey });
+
+  const Ui = systemUiOf(systemKey);
+
   const refsRef = useRef<ChoiceRefsView | null>(null);
 
   const {
     status: { isLoading, error },
     formData,
     basicInfo,
-    abilityScores,
-    combatStats,
     skills,
     abilities,
     actions: { handleSubmit, setFormData },
+    ...bindings
   } = useCharacterForm({
     type: characterType,
+    requireRace: system.lineage,
+    requireClass: system.classes,
+    seedCharacteristics: system.characteristics.defaults,
     recommendScores: classMode.byId,
     onSubmit: async (data) => {
       await create.mutateAsync(refsRef.current?.ready ? pruneFormChoices(data, refsRef.current) : data);
@@ -71,28 +79,19 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     {
       id: CHARACTER_FORM_TAB.basic,
       label: tc("tabs.basic"),
-      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} classMode={classMode.enabled ? classMode : undefined} />,
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system.lineage} hideClass={!system.classes} hideAlignment={!system.identity.alignments} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,
       label: t("form.tabs.combat"),
-      content: (
-        <>
-          <HudSection title={t("form.sections.abilityScores")}>
-            <CharacterAbilityScores abilityScores={abilityScores} />
-          </HudSection>
-          <HudSection title={t("form.sections.combatParams")}>
-            <CharacterCombatParams campaignId={id} combatStats={combatStats} classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />
-          </HudSection>
-        </>
-      ),
+      content: Ui && <Ui.StatsFields bindings={{ basicInfo, skills, abilities, ...bindings }} campaignId={id} mode="create" classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.skills,
       label: tc("tabs.abilities"),
       content: (
         <>
-          <CharacterSkillsSection skills={skills} />
+          {Ui && !Ui.hideProgression && <CharacterSkillsSection skills={skills} />}
           <HudSection title={t("form.sections.personalAbility")}>
             <CharacterAbilitiesSection campaignId={id} abilities={abilities} />
           </HudSection>

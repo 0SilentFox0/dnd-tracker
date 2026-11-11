@@ -13,12 +13,14 @@ import { assertNoLeak, findForeignContentIds } from "@/lib/server/templates/asse
 import { BUNDLE_TABLES, type BundleTableDef, delegateOf, pick, settingsOf, TemplateLeakError, toPrismaJson } from "@/lib/server/templates/bundle";
 import { newContentId } from "@/lib/server/templates/ids";
 import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-ids";
+import { dropTakenSlugs } from "@/lib/server/templates/slug-collisions";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
 import { indexOf } from "@/lib/server/templates/sync/index";
 import { type LayeredDb,layerOf } from "@/lib/server/templates/sync/layered";
 import { applyLayered, previewLayeredSelection } from "@/lib/server/templates/sync/layered-apply";
 import { assertSrdNameReferences } from "@/lib/server/templates/sync/name-references";
+import { createRefChecker, danglingProfileWarnings } from "@/lib/server/templates/sync/profile-refs";
 import { keyOf, sourceChanged, sourceSelection } from "@/lib/server/templates/sync/selection";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -132,7 +134,11 @@ function cleanRow(t: BundleTableDef, src: Record<string, unknown>, item: SyncIte
   return data;
 }
 
-async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>) {
+async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>, warnings: string[]): Promise<Set<string>> {
+  const blocked = new Set<string>();
+
+  const refs = createRefChecker(db, ctx.campaignId);
+
   for (const t of [...BUNDLE_TABLES].reverse()) {
     for (const i of selected.values()) {
       if (i.scope !== t.key || i.status !== "deletedInSource" || !i.localId) continue;
@@ -149,13 +155,26 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
         if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
       }
 
+      const blockedWarning = await refs.blockedBy(t.key, [i.localId], i.name);
+
+      if (blockedWarning) {
+        warnings.push(blockedWarning);
+        blocked.add(i.localId);
+
+        continue;
+      }
+
       const kind = DETACH_KIND_BY_TABLE[t.key];
 
       if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], ctx.campaignId, kind, [i.localId]);
 
       await delegateOf(db, t).deleteMany({ where: { id: i.localId, campaignId: ctx.campaignId } });
+
+      refs.deleted(t.key);
     }
   }
+
+  return blocked;
 }
 
 async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnType<typeof indexOf>, selected: Map<string, SyncItem>, map: Map<string, string>) {
@@ -175,7 +194,8 @@ async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnT
 
   const resulting = [...effective.values()];
 
-  if (ctx.srdOverlay) {
+  // Templates without classes have no providers for spell-list names.
+  if (ctx.templateOverlay && ctx.sourceBundle.classes.length > 0) {
     const selectedLocalIds = new Set([...selected.values()].map((item) => item.localId ?? map.get(item.key)).filter((id): id is string => !!id));
 
     assertSrdNameReferences(ctx.target.rows, resulting, selectedLocalIds, { rows: [...index.sourceIndex.values()], sourceToLocal: map });
@@ -242,12 +262,23 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
   for (const t of BUNDLE_TABLES) {
     const toCreate: Record<string, unknown>[] = [];
 
+    const taken = new Map(ctx.target.rows.filter((r) => r.table === t.key && r.row.slug).map((r) => [String(r.row.slug), r.row.id]));
+
+    const slugs = new Map(
+      dropTakenSlugs(
+        ctx.sourceBundle[t.key].filter((src) => selected.has(`${t.key}:${src.id}`)).map((src) => ({ id: selected.get(`${t.key}:${src.id}`)!.localId ?? map.get(src.id)!, slug: src.slug as string | null | undefined })),
+        taken,
+      ).map((r) => [r.id, r.slug ?? null]),
+    );
+
     for (const src of ctx.sourceBundle[t.key]) {
       const item = selected.get(`${t.key}:${src.id}`);
 
       if (!item) continue;
 
       const data = cleanRow(t, src, item, map, warnings);
+
+      if ("slug" in data) data.slug = slugs.get(item.localId ?? map.get(src.id)!) ?? null;
 
       written.push(data);
 
@@ -271,11 +302,13 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
 
   await assertWritable(db, ctx, written, index.sourceIds, new Set(map.values()));
 
-  await deleteRemoved(db, ctx, selected);
+  const blocked = await deleteRemoved(db, ctx, selected, warnings);
+
+  warnings.push(...(await danglingProfileWarnings(db, ctx.campaignId)));
 
   if (db.compendiumEntry && db.compendiumSource) {
     await syncCompendiumProvenance(db as CompendiumBundleDb, ctx.sourceBundle.compendium, ctx.campaignId, map, new Set([...selected.values()].filter((i) => i.status !== "deletedInSource").map((i) => i.key)));
-    for (const item of selected.values()) if (item.status === "deletedInSource" && item.localId) await db.compendiumEntry.deleteMany({ where: { campaignId: ctx.campaignId, localId: item.localId } });
+    for (const item of selected.values()) if (item.status === "deletedInSource" && item.localId && !blocked.has(item.localId)) await db.compendiumEntry.deleteMany({ where: { campaignId: ctx.campaignId, localId: item.localId } });
   }
 
   if (ctx.sourceBundle.compendium?.pages.length) warnings.push((await getTranslator(await localeOrRequest(), "campaigns"))("sync.compendiumNotSynced"));

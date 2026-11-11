@@ -7,6 +7,7 @@ import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, SPELL_ONLY_KINDS, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -97,9 +98,11 @@ interface FinishInput {
   battleId: string;
   round: number;
   sourceEffects: Array<{ kind: string }>;
+  details?: SystemSlot;
+  fizzled?: boolean;
 }
 
-export function finishSpellAction(state: SpellCastState, { before, targetsBefore, allParticipants, battleId, round, sourceEffects }: FinishInput): CastSpellResult {
+export function finishSpellAction(state: SpellCastState, { before, targetsBefore, allParticipants, battleId, round, sourceEffects, details, fizzled }: FinishInput): CastSpellResult {
   const { flow, spell, caster } = state;
 
   const def = spell.definition;
@@ -107,7 +110,8 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
   const casterId = caster.basicInfo.id;
 
   settleAllDowned(state, before);
-  fire(flow, { type: "spellCast", phase: "after", actorId: casterId, targetIds: state.targetIds, ...state.info });
+
+  if (!fizzled) fire(flow, { type: "spellCast", phase: "after", actorId: casterId, targetIds: state.targetIds, ...state.info });
 
   const { dealt, healed, hits } = hpTotals(state, before);
 
@@ -119,7 +123,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
   const params = { name: caster.basicInfo.name, spell: spell.name };
 
-  const head = parts.length > 0 ? textRef("battleActions.spell.castCaption", { ...params, caption: joinLines(parts, ", ") }) : textRef("battleActions.spell.cast", params);
+  const head = fizzled ? textRef("battleActions.spell.fizzled", params) : parts.length > 0 ? textRef("battleActions.spell.castCaption", { ...params, caption: joinLines(parts, ", ") }) : textRef("battleActions.spell.cast", params);
 
   const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, lineText([head, ...flow.messages], " | "));
 
@@ -146,6 +150,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     ...meta,
     ...(applied.length > 0 && { appliedEffects: applied }),
     spellSlotUsed: state.castLevel,
+    ...(details && { system: details }),
     ...(state.grant?.key && { spellGrantKey: state.grant.key }),
     ...(state.grant?.label && { spellGrantLabel: state.grant.label }),
     ...(state.chosenCastLevel !== undefined && { castLevel: state.chosenCastLevel }),
@@ -172,5 +177,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     ...(state.transforms.length > 0 && { transforms: state.transforms }),
     messages: flow.messages,
     ...(spellDamage && { spellDamage }),
+    ...(details && { details }),
+    ...(fizzled && { fizzled }),
   };
 }

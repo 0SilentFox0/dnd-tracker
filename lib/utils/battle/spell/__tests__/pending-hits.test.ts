@@ -8,6 +8,7 @@ import { castSpell } from "@/lib/utils/battle/spell";
 import { resolvePendingHits } from "@/lib/utils/battle/spell/pending-hits";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/turn-start";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 40, rows: 10, background: null, opacity: 0.3 };
@@ -29,7 +30,7 @@ const swarm: CastableSpell = {
 const cast = (target: BattleParticipant) => {
   const c = caster();
 
-  return castSpell({ caster: c, spell: swarm, targetIds: ["f"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3, 3, 3, 3, 3, 3, 3], rng: () => 0.4, map });
+  return castSpell({ rules: DEFAULT_RULES, caster: c, spell: swarm, targetIds: ["f"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3, 3, 3, 3, 3, 3, 3], rng: () => 0.4, map });
 };
 
 const hp = (ps: BattleParticipant[], id = "f") => ps.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
@@ -57,7 +58,7 @@ describe("dealDamage.delayIfBeyond", () => {
   it("without a map the hit is immediate", () => {
     const c = caster();
 
-    const r = castSpell({ caster: c, spell: swarm, targetIds: ["f"], allParticipants: [c, foe(14)], currentRound: 1, battleId: "b", diceRolls: [3, 3, 3, 3, 3, 3, 3, 3], rng: () => 0.4 });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: swarm, targetIds: ["f"], allParticipants: [c, foe(14)], currentRound: 1, battleId: "b", diceRolls: [3, 3, 3, 3, 3, 3, 3, 3], rng: () => 0.4 });
 
     expect(hp(r.allParticipantsUpdated)).toBeLessThan(200);
   });
@@ -83,23 +84,23 @@ describe("resolvePendingHits", () => {
   it("nothing arrives before the round, then damage once and the record is removed", () => {
     const ps = withPending(foe(14));
 
-    const early = resolvePendingHits(ps, "c", { round: 2, rng });
+    const early = resolvePendingHits(ps, "c", { rules: DEFAULT_RULES, round: 2, rng });
 
     expect(hp(early.participants)).toBe(200);
     expect(early.participants.find((p) => p.basicInfo.id === "c")?.battleData.pendingHits).toHaveLength(1);
 
-    const hit = resolvePendingHits(ps, "c", { round: 3, rng });
+    const hit = resolvePendingHits(ps, "c", { rules: DEFAULT_RULES, round: 3, rng });
 
     expect(hp(hit.participants)).toBe(176);
     expect(hit.participants.find((p) => p.basicInfo.id === "c")?.battleData.pendingHits).toBeUndefined();
 
-    expect(hp(resolvePendingHits(hit.participants, "c", { round: 4, rng }).participants)).toBe(176);
+    expect(hp(resolvePendingHits(hit.participants, "c", { rules: DEFAULT_RULES, round: 4, rng }).participants)).toBe(176);
   });
 
   it("dead target: the record is dropped without damage", () => {
     const ps = withPending(foe(14)).map((p) => (p.basicInfo.id === "f" ? { ...p, combatStats: { ...p.combatStats, currentHp: 0, status: CombatStatus.DEAD } } : p));
 
-    const r = resolvePendingHits(ps, "c", { round: 3, rng });
+    const r = resolvePendingHits(ps, "c", { rules: DEFAULT_RULES, round: 3, rng });
 
     expect(hp(r.participants)).toBe(0);
     expect(r.participants.find((p) => p.basicInfo.id === "c")?.battleData.pendingHits).toBeUndefined();
@@ -111,7 +112,7 @@ describe("resolvePendingHits", () => {
 
     const casterP = ps.find((p) => p.basicInfo.id === "c") as BattleParticipant;
 
-    const r = processStartOfTurn(casterP, 3, ps, rng, map);
+    const r = processStartOfTurn(casterP, 3, ps, rng, map, DEFAULT_RULES);
 
     expect(hp(r.participants)).toBe(176);
     expect(textsOf(r.damageMessages).join(" ")).toContain("влучає");
@@ -119,6 +120,6 @@ describe("resolvePendingHits", () => {
 
     const downed = { ...casterP, combatStats: { ...casterP.combatStats, currentHp: 0, status: CombatStatus.DEAD } };
 
-    expect(hp(processStartOfTurn(downed, 3, ps.map((p) => (p === casterP ? downed : p)), rng, map).participants)).toBe(176);
+    expect(hp(processStartOfTurn(downed, 3, ps.map((p) => (p === casterP ? downed : p)), rng, map, DEFAULT_RULES).participants)).toBe(176);
   });
 });

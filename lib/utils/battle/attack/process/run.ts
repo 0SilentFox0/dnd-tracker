@@ -25,6 +25,8 @@ import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import { rngOf } from "@/lib/utils/common/rng";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { RuleSystemCombat } from "@/lib/utils/rules/systems/types";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type { ProcessAttackParams, ProcessAttackResult };
@@ -48,8 +50,15 @@ interface DiceState {
 
 type SecondRoll = AttackRollResult["secondRoll"];
 
+interface Judged {
+  second: SecondRoll;
+  targetAC: number;
+  isHit: boolean;
+  attackRoll: AttackRollResult;
+}
+
 export function processAttack(params: ProcessAttackParams): ProcessAttackResult {
-  const { attacker, target, attack, d20Roll, advantageRoll, disadvantageRoll, allParticipants, currentRound } = params;
+  const { attacker, target, attack, d20Roll, allParticipants, currentRound } = params;
 
   const attackerId = attacker.basicInfo.id;
 
@@ -57,7 +66,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: rngOf(params), map: params.map, rules: params.rules, crit: params.crit } };
+  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: rngOf(params), map: params.map, rules: params.rules, crit: params.crit }, sceneState: params.sceneState };
 
   const run: AttackRun = { params, flow, before, attackerId, targetId, existedBefore: activeEffectIds(flow.ps) };
 
@@ -67,30 +76,13 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (!isAttackable(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) return abortedResult(run);
 
-  const rolled = calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, {
-    participants: flow.ps,
-    extra: actionModifiers[attackerId],
-    targetId,
-    targetExtra: actionModifiers[targetId],
-    rng: flow.ctx.rng,
-    manualMode: params.rollMode,
-    rules: flow.ctx.rules,
-    map: flow.ctx.map,
-    inspiration: params.inspiration,
-    crit: flow.ctx.crit,
-  });
+  const resolveHook = ruleSystemOf(flow.ctx.rules).combat.resolveAttack;
 
-  const second = rolled.secondRoll;
+  const judged = resolveHook ? judgeBySystem(run, resolveHook) : judgeD20(run, actionModifiers);
 
-  if (second) {
-    flow.messages.push(textRef("battleLog.roll.second", { mode: textRef(second.mode === "advantage" ? "battleLog.roll.advantage" : "battleLog.roll.disadvantage"), manual: second.manual ? textRef("battleLog.roll.manualTag") : "", value: second.value, server: second.serverRolled ? textRef("battleLog.roll.serverTag") : "", chosen: rolled.chosenD20 }));
-  }
+  const { second, targetAC, isHit, attackRoll } = judged;
 
   const dice: DiceState = { slots: damageDiceSlots(getP(flow, attackerId), attack), damageFrom: params.serverRolled?.damageFrom, damageRolls: params.damageRolls };
-
-  const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);
-
-  const { isHit, attackRoll } = judgeHit(run, rolled, targetAC, actionModifiers);
 
   const critFlavor = attackRoll.criticalEffect
     ? critFlavorOf(attackRoll.criticalEffect, getP(flow, attackerId).basicInfo.name, getP(flow, targetId).basicInfo.name, {
@@ -137,15 +129,15 @@ function spendAttackAction(run: AttackRun): void {
 
   const attacker = getP(flow, attackerId);
 
-  put(flow, params.offHand ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
+  put(flow, params.offHand && ruleSystemOf(flow.ctx.rules).combat.actionEconomy.bonusAction ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, params.attack));
 }
 
-function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult {
+function consume(run: AttackRun, r: Omit<ProcessAttackResult, "summons" | "sceneState">, hit: boolean): ProcessAttackResult {
   const { flow, attackerId, targetId, existedBefore } = run;
 
   flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
 
-  return { ...r, summons: flow.summons, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
+  return { ...r, summons: flow.summons, sceneState: flow.sceneState, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
 }
 
 function abortedResult(run: AttackRun): ProcessAttackResult {
@@ -158,12 +150,88 @@ function abortedResult(run: AttackRun): ProcessAttackResult {
   return {
     success: false,
     summons: flow.summons,
-    attackRoll: calculateAttackRoll(getP(flow, attackerId), params.attack, params.d20Roll, params.advantageRoll, params.disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules, map: flow.ctx.map, inspiration: params.inspiration }),
+    sceneState: flow.sceneState,
+    attackRoll: abortedRoll(run),
     targetUpdated: getP(flow, targetId),
     attackerUpdated: getP(flow, attackerId),
     allParticipantsUpdated: flow.ps,
     battleAction,
   };
+}
+
+function abortedRoll(run: AttackRun): AttackRollResult {
+  const { flow, attackerId, params } = run;
+
+  if (ruleSystemOf(flow.ctx.rules).combat.resolveAttack) {
+    return { isHit: false, isCritical: false, isCriticalFail: false, totalAttackValue: params.d20Roll, attackBonus: 0, advantageUsed: false, chosenD20: params.d20Roll };
+  }
+
+  return calculateAttackRoll(getP(flow, attackerId), params.attack, params.d20Roll, params.advantageRoll, params.disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules, map: flow.ctx.map, inspiration: params.inspiration });
+}
+
+function judgeD20(run: AttackRun, actionModifiers: Modifiers): Judged {
+  const { flow, attackerId, targetId, params } = run;
+
+  const { attack, d20Roll, advantageRoll, disadvantageRoll } = params;
+
+  const rolled = calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, {
+    participants: flow.ps,
+    extra: actionModifiers[attackerId],
+    targetId,
+    targetExtra: actionModifiers[targetId],
+    rng: flow.ctx.rng,
+    manualMode: params.rollMode,
+    rules: flow.ctx.rules,
+    map: flow.ctx.map,
+    inspiration: params.inspiration,
+    crit: flow.ctx.crit,
+  });
+
+  const second = rolled.secondRoll;
+
+  if (second) {
+    flow.messages.push(textRef("battleLog.roll.second", { mode: textRef(second.mode === "advantage" ? "battleLog.roll.advantage" : "battleLog.roll.disadvantage"), manual: second.manual ? textRef("battleLog.roll.manualTag") : "", value: second.value, server: second.serverRolled ? textRef("battleLog.roll.serverTag") : "", chosen: rolled.chosenD20 }));
+  }
+
+  const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);
+
+  return { second, targetAC, ...judgeHit(run, rolled, targetAC, actionModifiers) };
+}
+
+function judgeBySystem(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): Judged {
+  const { flow, attackerId, targetId, params } = run;
+
+  const attacker = getP(flow, attackerId);
+
+  const target = getP(flow, targetId);
+
+  const rules = flow.ctx.rules;
+
+  const r = resolve({
+    attacker,
+    target,
+    attack: params.attack,
+    participants: flow.ps,
+    rules,
+    rng: flow.ctx.rng,
+    manualRoll: params.d20Roll,
+    sceneState: flow.sceneState,
+    fortune: params.fortune,
+  });
+
+  if (r.scene) flow.sceneState = r.scene;
+
+  flow.messages.push(...r.lines);
+
+  if (r.fortune) {
+    const spender = getP(flow, attackerId);
+
+    put(flow, { ...spender, battleData: { ...spender.battleData, fortune: Math.max(0, (spender.battleData.fortune ?? 0) - 1) } });
+
+    if (r.fortuneLine) flow.messages.push(r.fortuneLine);
+  }
+
+  return { second: undefined, targetAC: r.defenseValue ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
 }
 
 function judgeHit(run: AttackRun, rolled: AttackRollResult, targetAC: number, actionModifiers: Modifiers): { isHit: boolean; attackRoll: AttackRollResult } {
@@ -194,7 +262,9 @@ function withRollDetails<T extends { actionDetails: BattleAction["actionDetails"
 
   const damage = (action.actionDetails.damageRolls ?? []).flatMap((r) => r.results);
 
-  if (!params.recordDice) return action;
+  if (attackRoll.system) action.actionDetails.system = attackRoll.system;
+
+  if (!params.recordDice || attackRoll.system) return action;
 
   action.actionDetails.diceRolls = attackDiceRolls({
     attackerId,
@@ -213,7 +283,7 @@ function withRollDetails<T extends { actionDetails: BattleAction["actionDetails"
 function doubleCritDice(run: AttackRun, attackRoll: AttackRollResult, dice: DiceState): void {
   const { flow, attackerId, params } = run;
 
-  if (!critDoublesDice(flow.ctx.rules, attackRoll.isCritical)) return;
+  if (!critDoublesDice(flow.ctx.rules, attackRoll.isCritical) || ruleSystemOf(flow.ctx.rules).combat.mitigateDamage) return;
 
   const doubled = critDamageRolls({ formula: heroAttackDamageParts(getP(flow, attackerId), params.attack).formula, rolls: dice.damageRolls, rng: flow.ctx.rng });
 

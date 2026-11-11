@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyVampirism } from "@/lib/utils/battle/attack/process/hit-effects";
 import { castSpell } from "@/lib/utils/battle/spell";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const vamp = (percent: number, hp = 10) => makeParticipant({ id: "v", hp, maxHp: 30, abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "lifesteal", percent }] })] });
@@ -27,7 +28,7 @@ describe("lifesteal", () => {
 
     const spell = { id: "vamp", name: "Вампіризм", level: 5, groupId: null, definition: { dice: 0, cost: "action" as const, targeting: { kind: "ally" as const }, resolution: { kind: "auto" as const }, effects: [{ kind: "flag" as const, flag: "lifesteal" as const, percent: 50, duration: { rounds: 3 } }], raceModifiers: [] } };
 
-    const r = castSpell({ caster, spell, targetIds: ["a"], allParticipants: [caster, ally, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5) });
+    const r = castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: ["a"], allParticipants: [caster, ally, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5) });
 
     expect(applyVampirism(r.allParticipantsUpdated, "a", 10, "ranged").vampirismHeal).toBe(5);
   });

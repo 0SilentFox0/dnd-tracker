@@ -7,6 +7,7 @@ import { castHitSpell } from "@/lib/utils/battle/attack/process/hit-spell";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const spellOf = (key: string): CastableSpell => {
   const s = SPELLS.find((x) => x.key === key);
@@ -24,7 +25,7 @@ const victim = (abilities: ReturnType<typeof resolved>[] = []) => makeParticipan
 function run(ids: string[], keys: string[], target: ReturnType<typeof victim>, rng = seq(0, 0.99)) {
   const attacker = mistress(ids);
 
-  return castHitSpell({
+  return castHitSpell({ rules: DEFAULT_RULES,
     attacker,
     targetId: "v",
     participants: [attacker, target],
@@ -81,7 +82,7 @@ describe("castHitSpell", () => {
 
     const map = mazeMap({ illusionSwap: { pairs: [{ a: "m", b: "v", aSees: { name: "X" }, bSees: { name: "Y" } }] } }, 12);
 
-    const hpAfter = (rng: () => number) => castHitSpell({ attacker, targetId: "v", participants: [attacker, target], spells: new Map([["bolt", bolt]]), round: 1, battleId: "b", map, rng }).participants.find((p) => p.basicInfo.id === "v")!.combatStats.currentHp;
+    const hpAfter = (rng: () => number) => castHitSpell({ attacker, targetId: "v", participants: [attacker, target], spells: new Map([["bolt", bolt]]), round: 1, battleId: "b", rules: DEFAULT_RULES, map, rng }).participants.find((p) => p.basicInfo.id === "v")!.combatStats.currentHp;
 
     expect(hpAfter(seq(0.99))).toBeLessThan(50);
     expect(hpAfter(seq(0))).toBe(50);

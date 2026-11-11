@@ -16,7 +16,7 @@ afterEach(cleanup);
 const renderRow = (masked: boolean) =>
   renderWithConfirm(
     <TooltipProvider>
-      <ParticipantRow participant={createMockParticipant()} effects={[]} exact acText="12" current={false} masked={masked} impact={null} onSelect={vi.fn()} />
+      <ParticipantRow participant={createMockParticipant()} effects={[]} view={{ exact: true, acText: "12", wounds: false, current: false, masked }} impact={null} onSelect={vi.fn()} />
     </TooltipProvider>,
   );
 

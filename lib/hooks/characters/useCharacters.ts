@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys, characterWriteKeys } from "./keys";
 
@@ -12,6 +12,7 @@ import {
   updateCharacter,
 } from "@/lib/api/characters";
 import { type CharacterTypeValue } from "@/lib/constants/characters";
+import { invalidateCampaignRules } from "@/lib/hooks/campaigns/invalidate";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { skillKeys } from "@/lib/hooks/skills/keys";
 import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
@@ -43,9 +44,12 @@ export function useCharacter(campaignId: string, characterId: string) {
 }
 
 export function useCreateCharacter(campaignId: string) {
+  const queryClient = useQueryClient();
+
   return useCrudMutation({
     mutationFn: (data: CharacterFormData) => createCharacter(campaignId, data),
     invalidateKeys: characterWriteKeys(campaignId),
+    onSuccess: () => invalidateCampaignRules(queryClient, campaignId),
   });
 }
 

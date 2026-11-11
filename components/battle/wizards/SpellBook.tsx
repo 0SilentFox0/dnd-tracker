@@ -72,7 +72,7 @@ export function SpellBook({ book }: { book: Book }) {
       {view.mapTargeting && selected && <SpellAimPanel book={book} spellName={selected.name} />}
       <SpellCastDialog book={book} />
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={showDetail && !wide ? `← ${tw("toList")}` : tw("title")} size="lg" className={cn(HUD_SURFACE, "spellbook-dialog max-w-[980px] border-none p-2.5 shadow-2xl")}>
-      <SpellBookPages byLevel={byLevel} page={{ level: state.level, slotOf: view.slotLeft, onLevel: actions.setLevel }} pick={{ pickedId: state.pick?.spellId ?? null, onPick: actions.pick, formulaOf: view.formulaOf, badgeOf: (s) => [view.grantLabel(s), view.wideningOf(s)?.badge].filter(Boolean).map((l) => text(l as LogLine)).join(" · ") || undefined }} layout={{ wide, showDetail }} detail={detailPage || null} />
+      <SpellBookPages byLevel={byLevel} page={{ level: state.level, slotOf: view.slotLeft, hideSlots: view.magic, onLevel: actions.setLevel }} pick={{ pickedId: state.pick?.spellId ?? null, onPick: actions.pick, formulaOf: view.formulaOf, badgeOf: (s) => [view.grantLabel(s), view.wideningOf(s)?.badge].filter(Boolean).map((l) => text(l as LogLine)).join(" · ") || undefined }} layout={{ wide, showDetail }} detail={detailPage || null} />
       {showDetail && !wide && canGoBack(state) && <button type="button" onClick={actions.back} className="spell-book spell-book-accent hud-sc mt-2 h-10 w-full text-sm">← {tc("back")}</button>}
     </ResponsiveDialog>
     </>

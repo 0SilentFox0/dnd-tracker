@@ -2,6 +2,7 @@ import { describe, expect,it } from "vitest";
 
 import { AttackType,ParticipantSide } from "@/lib/constants/battle";
 import { processAttack } from "@/lib/utils/battle/attack";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { BattleAttack,BattleParticipant } from "@/types/battle";
 
 describe("Multi-target Attack Logic", () => {
@@ -84,7 +85,7 @@ describe("Multi-target Attack Logic", () => {
   };
 
   it("can process a single attack from a multi-target attacker", () => {
-    const result = processAttack({
+    const result = processAttack({ rules: DEFAULT_RULES,
       attacker: mockAttacker,
       target: mockTarget,
       attack: mockAttack,
@@ -107,7 +108,7 @@ describe("Multi-target Attack Logic", () => {
     };
 
     // First attack
-    const result1 = processAttack({
+    const result1 = processAttack({ rules: DEFAULT_RULES,
       attacker: mockAttacker,
       target: mockTarget,
       attack: mockAttack,
@@ -119,7 +120,7 @@ describe("Multi-target Attack Logic", () => {
     });
 
     // Second attack using updated attacker from first attack
-    const result2 = processAttack({
+    const result2 = processAttack({ rules: DEFAULT_RULES,
       attacker: result1.attackerUpdated,
       target: target2,
       attack: mockAttack,

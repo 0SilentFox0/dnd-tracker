@@ -15,7 +15,7 @@ import { useTranslator } from "@/lib/i18n/use-translator";
 import { toggleItem } from "@/lib/utils/common/collections";
 import type { FeatFormData, FeatType } from "@/types/choices";
 
-export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormData; set: React.Dispatch<React.SetStateAction<FeatFormData>> } }) {
+export function FeatBasicsTab({ form: { data, set }, advancement }: { form: { data: FeatFormData; set: React.Dispatch<React.SetStateAction<FeatFormData>> }; advancement: boolean }) {
   const t = useTranslations("feats");
 
   const tg = useTranslator("gameTerms");
@@ -41,6 +41,7 @@ export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormD
         <Input id="feat-name" value={data.name} required onChange={(e) => patch({ name: e.target.value })} />
       </div>
       <ImageUpload value={data.icon ?? ""} onChange={(icon) => patch({ icon })} label={t("form.icon")} fallbackText={data.name} allowFile={false} />
+      {!advancement && (
       <div className="space-y-2">
         <Label htmlFor="feat-type">{t("form.type")}</Label>
         <select id="feat-type" className={HUD_SELECT_CLASS} value={data.type} onChange={(e) => patch({ type: e.target.value as FeatType })}>
@@ -51,8 +52,23 @@ export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormD
           ))}
         </select>
       </div>
+      )}
+      {advancement && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="feat-xp-cost">{t("form.xpCost")}</Label>
+            <Input id="feat-xp-cost" type="number" min={0} value={data.xpCost ?? ""} onChange={(e) => patch({ xpCost: e.target.value === "" ? null : Number(e.target.value) })} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="feat-max-rank">{t("form.maxRank")}</Label>
+            <Input id="feat-max-rank" type="number" min={1} max={20} value={data.maxRank ?? ""} onChange={(e) => patch({ maxRank: e.target.value === "" ? null : Number(e.target.value) })} />
+          </div>
+        </div>
+      )}
       <fieldset className="space-y-2">
         <legend className="hud-sc text-sm">{t("form.prerequisites")}</legend>
+        {!advancement && (
+        <>
         <label className="flex items-center gap-2 text-sm">
           {t("form.minLevel")}
           <Input type="number" min={1} max={MAX_CLASS_LEVEL} className="w-20" value={prereq.level ?? ""} onChange={(e) => setPrereq({ ...prereq, level: e.target.value ? Number(e.target.value) : undefined })} />
@@ -67,6 +83,8 @@ export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormD
             </label>
           ))}
         </div>
+        </>
+        )}
         <Input aria-label={t("form.prereqText")} placeholder={t("form.prereqTextPlaceholder")} value={prereq.text ?? ""} onChange={(e) => setPrereq({ ...prereq, text: e.target.value || undefined })} />
       </fieldset>
       <label className="flex items-center gap-2 text-sm">

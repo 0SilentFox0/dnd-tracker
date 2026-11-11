@@ -12,12 +12,13 @@ import {
   withFreshIds,
 } from "@/lib/utils/abilities/editor";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
+import { isSystemEffectKind } from "@/lib/utils/abilities/registry/effects/system-rows";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import { type Ability, AbilitySchema, type EffectKind, type TriggerEvent } from "@/lib/utils/abilities/schema";
 
 const EVENTS = Object.keys(TRIGGER_REGISTRY) as TriggerEvent[];
 
-const KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
+const KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter((k) => !isSystemEffectKind(k));
 
 describe("editor helpers", () => {
   it("newEffect валідний для кожного виду в кожному дозволеному тригері", () => {

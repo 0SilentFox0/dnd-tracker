@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { defaultPipelineDeps, defaultReadDeps } from "@/lib/server/battles/pipeline-deps";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/server/battles/pipeline-deps", () => ({
   defaultPipelineDeps: {
@@ -16,7 +17,7 @@ vi.mock("@/lib/server/battles/pipeline-deps", () => ({
     loadRecentEvents: vi.fn(),
     loadKnowledge: vi.fn(),
   },
-  defaultReadDeps: { getUserId: vi.fn(), loadAccess: vi.fn(), loadEventsBefore: vi.fn(), loadAllEvents: vi.fn(), loadParticipants: vi.fn() },
+  defaultReadDeps: { getUserId: vi.fn(), loadAccess: vi.fn(), loadEventsBefore: vi.fn(), loadAllEvents: vi.fn(), loadRedactionCtx: vi.fn() },
 }));
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn(), requireAuth: vi.fn() }));
@@ -47,6 +48,7 @@ beforeEach(() => {
   deps.loadRecentEvents.mockResolvedValue([{ actionIndex: 3, resultText: "Удар" } as never]);
   readDeps.getUserId.mockResolvedValue("user-1");
   readDeps.loadAccess.mockResolvedValue({ version: 9, isMember: true });
+  readDeps.loadRedactionCtx.mockResolvedValue({ participants: [hero, goblin], rules: DEFAULT_RULES });
   readDeps.loadEventsBefore.mockResolvedValue({ events: [{ actionIndex: 1, resultText: "Старт" } as never], hasMore: false });
 });
 
@@ -108,13 +110,12 @@ describe("GET /battles/[battleId]/summary", () => {
     readDeps.loadAllEvents.mockResolvedValue([
       { round: 4, actorId: hero.basicInfo.id, actionDetails: {}, hpChanges: [{ participantId: goblin.basicInfo.id, participantName: "g", oldHp: 7, newHp: 0, change: 7 }] } as never,
     ]);
-    readDeps.loadParticipants.mockResolvedValue([hero, goblin]);
 
     const res = await GET(new Request("http://x/api"), params);
 
     expect(res.status).toBe(200);
     expect(readDeps.loadAllEvents).toHaveBeenCalledWith("b1");
-    expect(readDeps.loadParticipants).toHaveBeenCalledWith({ battleId: "b1", campaignId: "c1", userId: "user-1" });
+    expect(readDeps.loadRedactionCtx).toHaveBeenCalledWith({ battleId: "b1", campaignId: "c1", userId: "user-1" });
     expect(await res.json()).toMatchObject({ rounds: 4, heroes: [expect.objectContaining({ damageDealt: 7, kills: 1 })] });
   });
 

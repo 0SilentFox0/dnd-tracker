@@ -1,0 +1,52 @@
+{
+  "locations": {
+    "head": "Голова",
+    "arm": "Руки",
+    "body": "Тулуб",
+    "leg": "Ноги"
+  },
+  "summary": {
+    "title": "Броня",
+    "penalty": "Штраф за броню: −{sl} РУ",
+    "flexible": "Гнучка броня: без штрафу",
+    "shield": "Щит: +{value} ОБ (голова, руки, тулуб)"
+  },
+  "qualities": {
+    "damaging": "Руйнівна",
+    "impale": "Пробивна",
+    "penetrating": "Проникна",
+    "hack": "Рубальна",
+    "pummel": "Оглушальна",
+    "precise": "Точна",
+    "accurate": "Влучна",
+    "blast": "Вибух",
+    "pistol": "Пістоль",
+    "shield": "Щит",
+    "defensive": "Захисна",
+    "fast": "Швидка",
+    "flexible": "Гнучка",
+    "distract": "Відволікання",
+    "entangle": "Заплутування",
+    "wrap": "Обкручування",
+    "spread": "Розкид",
+    "trapBlade": "Пастка для клинка",
+    "unbreakable": "Незламна",
+    "inflict": "Накладає",
+    "repeater": "Багатозарядна",
+    "imprecise": "Неточна",
+    "undamaging": "Нешкідлива",
+    "unreliable": "Ненадійна",
+    "dangerous": "Небезпечна",
+    "slow": "Повільна",
+    "reload": "Перезарядка"
+  },
+  "money": {
+    "gc": "зк",
+    "ss": "шл",
+    "d": "п"
+  },
+  "encumbrance": {
+    "label": "Несете: {carried} / {limit}",
+    "over": "Перевантаження: вага понад ліміт"
+  }
+}

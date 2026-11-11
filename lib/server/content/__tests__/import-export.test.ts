@@ -1,3 +1,4 @@
+import type { Career } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -10,6 +11,7 @@ import { exampleCsv } from "@/lib/server/content/import/example";
 import { exportCsv } from "@/lib/server/content/import/export";
 import { buildOpenApi } from "@/lib/server/content/openapi";
 import type { Actor } from "@/lib/utils/api/actor";
+import { careerToImportRecord } from "@/lib/utils/careers/import-record";
 import { autoMap, IMPORT_SPECS, parseTable, transformRow } from "@/lib/utils/content/import";
 import type { IdName } from "@/types/common";
 import type { ImportKind } from "@/types/content-import";
@@ -18,6 +20,7 @@ const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session"
 
 const NAMES: Partial<Record<ImportKind, IdName[]>> = {
   races: [{ id: "r1", name: "Гноми" }, { id: "r2", name: "Ельфи" }],
+  feats: [{ id: "f1", name: "Lettered" }],
   spells: [{ id: "s1", name: "Вогонь, сильний" }, { id: "s2", name: "Лід" }],
 };
 
@@ -57,6 +60,29 @@ describe("exampleCsv", () => {
     expect(rows.flatMap((r) => r.issues)).toEqual([]);
   });
 
+  it("wfrp-шаблони: units/artifacts/careers мають WFRP-колонки й читаються без помилок", async () => {
+    const tEn = await getTranslator("en");
+
+    const units = readBack(await exampleCsv(actor, "units", { loadNames, locale: "en" }), "units");
+
+    const characteristics = IMPORT_SPECS.units.fields.find((f) => f.key === "characteristics");
+
+    expect(units.table.headers).toContain(tEn(characteristics!.labelKey));
+    expect(units.rows.flatMap((r) => r.issues)).toEqual([]);
+
+    const artifacts = readBack(await exampleCsv(actor, "artifacts", { loadNames, locale: "en" }), "artifacts");
+
+    expect(IMPORT_SPECS.artifacts.fields.map((f) => f.key)).toContain("systemStats");
+    expect(artifacts.table.headers).toContain(tEn(IMPORT_SPECS.artifacts.fields.find((f) => f.key === "systemStats")!.labelKey));
+    expect(artifacts.rows.flatMap((r) => r.issues)).toEqual([]);
+
+    const careers = readBack(await exampleCsv(actor, "careers", { loadNames, locale: "en" }), "careers");
+
+    for (const n of [1, 2, 3, 4]) expect(careers.table.headers).toEqual(expect.arrayContaining([tEn(`contentImport.fields.careers.tier${n}_name`)]));
+
+    expect(careers.rows.flatMap((r) => r.issues)).toEqual([]);
+  });
+
   it("гравець — 403", async () => {
     await expect(exampleCsv({ ...actor, isDM: false }, "units", { loadNames, locale: "uk" })).rejects.toMatchObject({ status: 403 });
   });
@@ -94,6 +120,36 @@ describe("exportCsv", () => {
 
     expect(rows[0].issues).toEqual([]);
     expect(rows[0].value.item).toEqual({ ...item, spells: [{ ...item.spells[0], spellId: "Вогонь, сильний" }] });
+  });
+
+  it("кар'єра: рівні, таланти за назвою й спорядження повертаються як у записі", async () => {
+    const record = { id: "c1", name: "Archivist", class: "Academic", tiers: [{ name: "Copyist", status: "Brass 3", characteristics: ["int"], skills: ["research"], talents: ["f1"], trappings: ["Quill and ink", "Candle stub"] }] };
+
+    const importRecord = careerToImportRecord(record as unknown as Career);
+
+    const csv = await exportCsv(actor, "careers", { loadRecords: async () => [importRecord], loadNames, locale: "en" });
+
+    const { rows } = readBack(csv, "careers");
+
+    const { id: _id, ...expected } = importRecord;
+
+    expect(rows[0].issues).toEqual([]);
+    expect(rows[0].value).toEqual({ ...expected, tier1_talents: ["Lettered"] });
+  });
+
+  it("артефакт: systemStats зброї (Light Crossbow) зберігається в JSON колонці", async () => {
+    const systemStats = { type: "weapon", group: "crossbow", range: 180, damage: { addSb: false, flat: 7 }, qualities: [], flaws: [{ key: "reload", value: 1 }], twoHanded: true, ammoCapacity: 1, weight: 2, price: 600 };
+
+    const csv = await exportCsv(actor, "artifacts", { loadRecords: async () => [{ id: "lc", name: "Light Crossbow", slot: "range_weapon", systemStats }], loadNames, locale: "en" });
+
+    const { rows } = readBack(csv, "artifacts");
+
+    expect(rows[0].issues).toEqual([]);
+    expect(rows[0].value.systemStats).toEqual(systemStats);
+  });
+
+  it("раси: колонки profile немає (профіль редагується лише в UI виду)", () => {
+    expect(IMPORT_SPECS.races.fields.map((f) => f.key)).not.toContain("profile");
   });
 
   it("токен без content:read — 403", async () => {

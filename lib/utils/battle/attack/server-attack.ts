@@ -12,7 +12,10 @@ import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { type ActionFlow, appendHpChanges, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { parseDiceLenient, rollDie, rollGroups } from "@/lib/utils/common/dice";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { RuleSystemCombat } from "@/lib/utils/rules/systems/types";
 import type { BattleAction, BattleAttack } from "@/types/battle";
 import type { TextRef } from "@/types/text";
 
@@ -37,13 +40,30 @@ export interface ServerAttackInput {
   label: ServerAttackLabel;
 }
 
-/** Мутує `flow.ps`; без дії та тригерів «перед/після атаки». */
-export function resolveServerAttack(input: ServerAttackInput): { battleAction: BattleAction; hit: boolean; downed: boolean } {
-  const { flow, attackerId, targetId, attack, currentRound: round, battleId, rng, label } = input;
+interface ServerJudged {
+  roll: AttackRollResult;
+  targetAC: number;
+  isHit: boolean;
+}
 
-  const before = flow.ps;
+function judgeServerBySystem(flow: ActionFlow, input: Pick<ServerAttackInput, "attackerId" | "targetId" | "attack" | "rng">, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): ServerJudged {
+  const { attackerId, targetId } = input;
 
-  const existedBefore = activeEffectIds(before);
+  const attacker = getP(flow, attackerId);
+
+  const target = getP(flow, targetId);
+
+  const r = resolve({ attacker, target, attack: input.attack, participants: flow.ps, rules: flow.ctx.rules, rng: input.rng, sceneState: flow.sceneState });
+
+  if (r.scene) flow.sceneState = r.scene;
+
+  flow.messages.push(...r.lines);
+
+  return { roll: r.attackRoll, targetAC: r.defenseValue ?? 0, isHit: r.isHit };
+}
+
+function judgeServerD20(flow: ActionFlow, input: Pick<ServerAttackInput, "attackerId" | "targetId" | "attack" | "rng" | "label" | "currentRound">): ServerJudged {
+  const { attackerId, targetId, attack, rng, label } = input;
 
   const first = rollDie(20, rng);
 
@@ -53,22 +73,35 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
   if (roll.secondRoll) flow.messages.push(textRef("battleLog.offTurn.second", { noun: LABELS[label].noun, mode: textRef(roll.secondRoll.mode === "advantage" ? "battleLog.roll.advantage" : "battleLog.roll.disadvantage"), value: roll.secondRoll.value }));
 
-  if (roll.isCriticalFail && roll.criticalEffect) put(flow, applyCriticalEffect(getP(flow, attackerId), roll.criticalEffect, round, { offTurn: true }));
+  if (roll.isCriticalFail && roll.criticalEffect) put(flow, applyCriticalEffect(getP(flow, attackerId), roll.criticalEffect, input.currentRound, { offTurn: true }));
 
   const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps);
 
   const guaranteedHit = findFlags(flow.ps, attackerId, "guaranteedHit").length > 0;
 
-  const isHit = !roll.isCriticalFail && (roll.isCritical || guaranteedHit || roll.totalAttackValue >= targetAC);
+  return { roll, targetAC, isHit: !roll.isCriticalFail && (roll.isCritical || guaranteedHit || roll.totalAttackValue >= targetAC) };
+}
+
+/** Мутує `flow.ps`; без дії та тригерів «перед/після атаки». */
+export function resolveServerAttack(input: ServerAttackInput): { battleAction: BattleAction; hit: boolean; downed: boolean } {
+  const { flow, attackerId, targetId, attack, currentRound: round, battleId, rng, label } = input;
+
+  const before = flow.ps;
+
+  const existedBefore = activeEffectIds(before);
+
+  const resolveHook = ruleSystemOf(flow.ctx.rules).combat.resolveAttack;
+
+  const { roll, targetAC, isHit } = resolveHook ? judgeServerBySystem(flow, input, resolveHook) : judgeServerD20(flow, input);
 
   let hit: BuildOffTurnParams["hit"] = null;
 
   if (isHit) {
     const formula = heroAttackDamageParts(getP(flow, attackerId), attack).formula;
 
-    const single = rollGroups(parseDiceLenient(formula).groups, rng);
+    const single = attack.noLevelDice ? [] : rollGroups(parseDiceLenient(formula).groups, rng);
 
-    const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
+    const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) && !ruleSystemOf(flow.ctx.rules).combat.mitigateDamage ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
 
     const { hitDamage } = resolveHit({
       flow,
@@ -104,6 +137,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
     currentRound: round,
     critFlavor,
     title: LABELS[label].title,
+    rules: flow.ctx.rules,
   });
 
   appendHpChanges(battleAction, before, flow.ps);

@@ -5,19 +5,21 @@ import { useMemo } from "react";
 import { LogTimeline } from "./LogTimeline";
 
 import { BattleLogLoadEarlier } from "@/components/battle/log/BattleLogLoadEarlier";
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleRules, useBattleScene } from "@/lib/hooks/battle";
 import { sanitizeLogEntry } from "@/lib/utils/battle/view";
 
 export function BattleLog() {
   const { battle, viewer, log } = useBattleScene();
 
-  const { battleLog, initiativeOrder } = battle;
+  const { hpTerm } = useBattleRules();
 
-  const entries = useMemo(() => [...(battleLog ?? [])].reverse().map((e) => sanitizeLogEntry(e, viewer)), [battleLog, viewer]);
+  const { battleLog, initiativeOrder, rules } = battle;
+
+  const entries = useMemo(() => [...(battleLog ?? [])].reverse().map((e) => sanitizeLogEntry(e, viewer, { participants: initiativeOrder, rules })), [battleLog, viewer, initiativeOrder, rules]);
 
   return (
     <>
-      <LogTimeline entries={entries} participants={initiativeOrder} focus={log.focus} />
+      <LogTimeline entries={entries} participants={initiativeOrder} focus={log.focus} wounds={hpTerm === "wounds"} />
       <BattleLogLoadEarlier />
     </>
   );

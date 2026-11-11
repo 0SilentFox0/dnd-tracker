@@ -1,3 +1,4 @@
+import type { SystemData } from "@/lib/utils/rules/systems/slot";
 import type { CharacterFormData } from "@/types/characters";
 
 export interface SectionBinding<S> {
@@ -21,6 +22,18 @@ function sectionBinding<T extends FieldSection>(formData: CharacterFormData, set
   };
 }
 
+export interface SystemBinding {
+  data: SystemData | undefined;
+  update: (fn: (prev: SystemData | undefined) => SystemData) => void;
+}
+
+function characteristicsBinding(formData: CharacterFormData, setFormData: SetFormData): SystemBinding {
+  return {
+    data: formData.characteristics,
+    update: (fn) => setFormData((prev) => ({ ...prev, characteristics: fn(prev.characteristics) })),
+  };
+}
+
 export function buildCharacterFormBindings(formData: CharacterFormData, setFormData: SetFormData, handlers: CharacterFormHandlers) {
   return {
     basicInfo: sectionBinding(formData, setFormData, "basicInfo"),
@@ -29,6 +42,7 @@ export function buildCharacterFormBindings(formData: CharacterFormData, setFormD
     skills: { data: formData.skills, handlers },
     spellcasting: sectionBinding(formData, setFormData, "spellcasting"),
     abilities: sectionBinding(formData, setFormData, "abilities"),
+    characteristics: characteristicsBinding(formData, setFormData),
   };
 }
 

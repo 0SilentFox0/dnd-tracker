@@ -10,6 +10,8 @@ vi.mock("@/lib/db", () => ({ prisma: { unit: { findMany: db.unitFindMany }, spel
 
 import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library";
 import { computeFairScaling } from "@/lib/utils/battle/balance/fair";
+import * as fromUnit from "@/lib/utils/battle/participant/from-unit";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const row = (id: string, level: number, maxHp: number, attacks: unknown, knownSpells: string[] = []) => ({
   id, name: id, maxHp, level, raceId: null, strength: 10, dexterity: 10, maxTargets: 1, attacks, knownSpells,
@@ -72,5 +74,29 @@ describe("loadUnitLibraryStats: заклинання юнітів", () => {
     const library = await loadUnitLibraryStats("camp");
 
     expect(library.filter((u) => u.summon).map((u) => u.unitId).sort()).toEqual(["imp", "phoenix"]);
+  });
+});
+
+describe("loadUnitLibraryStats: правила системи", () => {
+  beforeEach(() => {
+    db.unitFindMany.mockReset();
+    db.spellFindMany.mockReset();
+    db.spellFindMany.mockResolvedValue([]);
+    db.unitFindMany.mockResolvedValue([row("orc", 1, 10, [{ damageDice: "1d6", type: "melee" }])]);
+  });
+
+  it("wfrp-правила доходять до побудови учасника, d20 — без них", async () => {
+    const spy = vi.spyOn(fromUnit, "createBattleParticipantFromUnit");
+
+    await loadUnitLibraryStats("camp", { ...DEFAULT_RULES, system: { key: "wfrp" } });
+
+    expect(spy.mock.calls[0][5]).toEqual(expect.objectContaining({ system: { key: "wfrp" } }));
+
+    spy.mockClear();
+
+    await loadUnitLibraryStats("camp");
+
+    expect(spy.mock.calls[0][5]).toBeUndefined();
+    spy.mockRestore();
   });
 });

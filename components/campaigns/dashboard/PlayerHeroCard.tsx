@@ -8,10 +8,13 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { HudPanel, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { CharacterStatus } from "@/lib/constants/characters";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import type { PlayerDashboardData } from "@/types/campaigns";
 
 export function PlayerHeroCard({ campaignId, data }: { campaignId: string; data: PlayerDashboardData }) {
   const t = useTranslations("dashboard.hero");
+
+  const { system } = useRuleSystem({ campaignId });
 
   const base = `/campaigns/${campaignId}`;
 
@@ -43,7 +46,7 @@ export function PlayerHeroCard({ campaignId, data }: { campaignId: string; data:
         <div className="min-w-0 flex-1">
           <h2 className="hud-sc truncate text-lg text-hud-ink">{hero.name}</h2>
           <p className="truncate text-sm text-hud-muted">
-            {hero.race} · {hero.class}
+            {hero.race}{system?.classes && ` · ${hero.class}`}
           </p>
           <p className="text-xs text-hud-muted">
             {t("stats", { level: hero.level, armorClass: hero.armorClass, speed: hero.speed })}

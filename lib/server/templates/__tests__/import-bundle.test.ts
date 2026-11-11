@@ -23,6 +23,7 @@ function fullBundle(): Bundle {
     races: [{ id: R, name: "Human" }],
     classes: [{ id: CL, name: "Fighter" }],
     feats: [{ id: FT, name: "Alert", type: "origin" }],
+    careers: [{ id: id("n"), name: "Soldier", tiers: [{ name: "Apprentice", talents: [FT] }] }],
     backgrounds: [{ id: id("z"), name: "Sage", originFeatId: FT, choices: [] }],
     units: [{ id: U, name: "u", raceId: R, abilities: [], levelScaling: null }],
     spells: [{ id: SP, name: "s", groupId: G, summonUnitId: U, fx: null, spellEffects: [{ summon: { unitId: U } }] }],
@@ -101,6 +102,22 @@ describe("importBundle", () => {
     for (const t of BUNDLE_TABLES) for (const r of rowsOf(store, t.delegate)) collectKeysAndStrings({ ...r, sourceId: null }, all);
 
     for (const old of idMap.keys()) expect(all.has(old)).toBe(false);
+  });
+
+  it("copies a slug, or writes null for a duplicate slug inside the bundle", async () => {
+    const dup = id("m");
+
+    const bundle = { ...fullBundle(), spells: [{ id: SP, name: "s", slug: "bolt" }, { id: dup, name: "t", slug: "bolt" }], races: [{ id: R, name: "Human", slug: "human" }] } as unknown as Bundle;
+
+    const { db, store } = createFakeDb();
+
+    await importBundle(db, bundle, "target");
+
+    const spells = rowsOf(store, "spell");
+
+    expect(spells.find((r) => r.sourceId === SP)!.slug).toBe("bolt");
+    expect(spells.find((r) => r.sourceId === dup)!.slug).toBeNull();
+    expect(rowsOf(store, "race")[0].slug).toBe("human");
   });
 
   it("sends Prisma.DbNull for null in nullable json columns", async () => {

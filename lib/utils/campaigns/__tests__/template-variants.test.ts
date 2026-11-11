@@ -18,7 +18,11 @@ describe("groupTemplates", () => {
   });
 
   it("без templateKey групує за name", () => {
-    expect(groupTemplates([card("a", "Heroes"), card("b", "HoMM")]).map((g) => g.key)).toEqual(["Heroes", "HoMM"]);
+    expect(groupTemplates([card("a", "Mine"), card("b", "HoMM")]).map((g) => g.key)).toEqual(["Mine", "HoMM"]);
+  });
+
+  it("легасі-назва офіційного шаблону групується за ключем пакета", () => {
+    expect(groupTemplates([card("a", "Heroes"), card("b", "5e SRD 5.2")]).map((g) => g.key)).toEqual(["heroes-homm", "srd-5.2"]);
   });
 });
 

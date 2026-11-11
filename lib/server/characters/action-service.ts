@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { CHARACTER_OPERATIONS } from "./operations/registry";
 import { assertSafeCharacterAvatar } from "./avatar-input";
+import { characterIdSchema } from "./character-id-schema";
 import { withCharacterOperation } from "./operation-context";
 import { actorDmAccess, runCharacterOperation as runOperationCore } from "./operation-runner";
 import { characterReferenceHash } from "./reference-state";
@@ -23,7 +24,7 @@ import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 
-export const characterIdSchema = z.object({ characterId: z.string().min(1).max(100) });
+export { characterIdSchema };
 export const CHARACTER_INPUTS = {
   create: createCharacterSchema,
   list: z.object({ type: z.enum(["player", "npc_hero"]).optional(), compact: z.boolean().optional(), status: z.enum(["pending", "active"]).optional() }),

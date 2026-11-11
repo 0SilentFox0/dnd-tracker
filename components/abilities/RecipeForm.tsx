@@ -8,6 +8,7 @@ import { FieldErrors } from "./FieldErrors";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
+import { useRecipeText } from "@/lib/hooks/abilities/useRecipeText";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ParamDef, Recipe, RecipeValues } from "@/lib/utils/abilities/templates";
 
@@ -36,7 +37,13 @@ export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFor
 
   const tr = useTranslator("abilityRegistry");
 
+  const root = useTranslator();
+
+  const text = useRecipeText();
+
   const optionLabel = (p: ParamDef, value: string) => {
+    if (recipe.textKey) return root(`${recipe.textKey}.options.${p.key}.${value}`);
+
     const key = recipeOptionKey(p, value);
 
     if (!key) return p.key === "delta" && Number(value) > 0 ? `+${value}` : value;
@@ -83,7 +90,7 @@ export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFor
       )}
       {recipe.params.map((p) => (
         <div key={p.key} className="space-y-1">
-          <Label htmlFor={`recipe-${recipe.id}-${p.key}`}>{tr(`templates.${recipe.id}.params.${p.key}`)}</Label>
+          <Label htmlFor={`recipe-${recipe.id}-${p.key}`}>{text(recipe, `params.${p.key}`)}</Label>
           {control(p)}
           {p.kind === "dice" && <FieldErrors errors={diceIssues} testId="recipe-errors" id={diceErrorsId} />}
         </div>

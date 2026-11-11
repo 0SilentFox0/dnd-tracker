@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
+
 const invalidateReference = vi.hoisted(() => vi.fn());
 
 vi.mock("server-only", () => ({}));
@@ -11,11 +13,11 @@ import type { ZodType } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { exampleOf } from "@/lib/constants/import-aliases";
-import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
+import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createCareerSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import { type AnyContentResource, defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
-import { compactImportReport, importContent, type ImportDeps } from "@/lib/server/content/import/import-content";
+import { compactImportReport, importContent } from "@/lib/server/content/import/import-content";
 import type { Actor } from "@/lib/utils/api/actor";
 import { IMPORT_KINDS, IMPORT_SPECS } from "@/lib/utils/content/import";
 import type { IdName } from "@/types/common";
@@ -49,11 +51,25 @@ const resource = defineResource({
   remove: async () => {},
 });
 
-const deps: ImportDeps = { resource: () => resource, loadNames: async (_c, kind) => names[kind] ?? [] };
+const deps = stubImportDeps({ resource: () => resource, loadNames: async (_c, kind) => names[kind] ?? [] });
 
 const run = (rows: Record<string, unknown>[], mode: ImportMode = "create", dryRun = false, who: Actor = actor) => importContent(who, "units", { rows, mode, dryRun }, deps);
 
 describe("importContent", () => {
+  it("units: characteristics JSON and trait abilities reach the resource body", async () => {
+    const ward = { id: "ward", name: "Ward 9+", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] };
+
+    const report = await run([{ name: "Shade", characteristics: { base: { ws: 45 }, move: 6 }, abilities: [ward] }, { name: "Plain", characteristics: "{}" }]);
+
+    expect(report.results.flatMap((r) => r.issues)).toEqual([]);
+
+    const bodies = create.mock.calls.map((c) => c[1] as { characteristics?: Record<string, unknown>; abilities?: unknown[] });
+
+    expect(bodies[0].characteristics).toMatchObject({ base: { ws: 45 }, move: 6 });
+    expect(bodies[0].abilities).toEqual([ward]);
+    expect(bodies[1].characteristics).toEqual({});
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     names = {
@@ -202,7 +218,7 @@ describe("importContent", () => {
   it("deps.invalidate замінює інвалідацію кешу Next (скрипти поза Next)", async () => {
     const invalidate = vi.fn();
 
-    await importContent(actor, "units", { rows: [{ name: "Біс" }], mode: "create", dryRun: false }, { resource: () => resource, loadNames: async (_c, kind) => names[kind] ?? [], invalidate });
+    await importContent(actor, "units", { rows: [{ name: "Біс" }], mode: "create", dryRun: false }, stubImportDeps({ resource: () => resource, loadNames: async (_c, kind) => names[kind] ?? [], invalidate }));
 
     expect(invalidate).toHaveBeenCalledWith(["units"], "c1");
     expect(invalidateReference).not.toHaveBeenCalled();
@@ -218,6 +234,7 @@ const CREATE: Record<ImportKind, ZodType> = {
   races: createRaceSchema,
   classes: createClassSchema,
   backgrounds: createBackgroundSchema,
+  careers: createCareerSchema,
   feats: createFeatSchema,
   artifacts: createArtifactSchema,
   "artifact-sets": createArtifactSetSchema,
@@ -229,7 +246,7 @@ describe("importContent: кожен вид", () => {
 
     const kindResource: AnyContentResource = { ...resource, schemas: { create: CREATE[kind], update: CREATE[kind] } };
 
-    const report = await importContent(actor, kind, { rows: [row], mode: "create", dryRun: true }, { resource: () => kindResource, loadNames: async () => [] });
+    const report = await importContent(actor, kind, { rows: [row], mode: "create", dryRun: true }, stubImportDeps({ resource: () => kindResource, loadNames: async () => [] }));
 
     expect(report.results[0]).toMatchObject({ status: "created", issues: [] });
   });
@@ -253,7 +270,7 @@ describe("compactImportReport", () => {
 it("background import resolves origin names and rejects unresolved explicit origin refs", async () => {
   const resourceForBackgrounds: AnyContentResource = { ...resource, schemas: { create: createBackgroundSchema, update: createBackgroundSchema } };
 
-  const deps: ImportDeps = { resource: () => resourceForBackgrounds, loadNames: async (_c, kind) => kind === "feats" ? [{ id: "f", name: "Alert" }] : [] };
+  const deps = stubImportDeps({ resource: () => resourceForBackgrounds, loadNames: async (_c, kind) => kind === "feats" ? [{ id: "f", name: "Alert" }] : [] });
 
   const good = await importContent(actor, "backgrounds", { rows: [{ name: "Criminal", originFeatId: "Alert" }], mode: "create", dryRun: true }, deps);
 

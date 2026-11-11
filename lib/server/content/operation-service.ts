@@ -8,7 +8,8 @@ import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { listTracks } from "@/lib/server/audio/track-store";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
-import { readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
+import { loadRules, readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
+import { parseSystemData } from "@/lib/server/characters/core/system-fields";
 import { assertCan } from "@/lib/server/content/access";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -18,18 +19,20 @@ import { importContent } from "@/lib/server/content/import/import-content";
 import { loadNames } from "@/lib/server/content/import/names";
 import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { assertTraitsSupported } from "@/lib/server/content/traits-guard";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { listSkillTrees, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { publishTemplate } from "@/lib/server/templates/publish-service";
 import { applySafeSource, applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
-import { abilitiesJson, OwnerKind, readAbilities, skillAbilities } from "@/lib/utils/abilities/read";
+import { abilitiesJson, abilitySpellIds, OwnerKind, readAbilities, skillAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
 import { byName } from "@/lib/utils/common/text";
 import { IMPORT_KINDS } from "@/lib/utils/content/import/kinds";
+import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 
 export type ContentOperationId = keyof typeof CONTENT_OPERATIONS;
@@ -186,9 +189,17 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "units.import": {
         const { units } = bodyOf("units.import", body);
 
-        await assertCampaignRefs(actor.campaignId, { spell: units.flatMap((unit) => unit.knownSpells) });
+        const rules = await loadRules(actor.campaignId);
 
-        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, units);
+        assertTraitsSupported(ruleSystemOf(rules), units.flatMap((unit) => unit.abilities ?? []));
+
+        await assertCampaignRefs(actor.campaignId, { spell: [...units.flatMap((unit) => unit.knownSpells), ...units.flatMap((unit) => abilitySpellIds(unit.abilities))] });
+
+        const persisted = ruleSystemOf(rules).characteristics.persisted;
+
+        const narrowed = persisted ? units.map((unit) => (unit.characteristics ? { ...unit, characteristics: parseSystemData(rules, unit.characteristics, "unitCharacteristics") } : unit)) : units;
+
+        const result = await importUnitsIntoCampaign(prisma, actor.campaignId, narrowed, rules);
 
         invalidate(actor, ReferenceKind.UNITS);
 

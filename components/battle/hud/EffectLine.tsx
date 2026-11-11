@@ -8,12 +8,12 @@ import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 import { effectName } from "@/lib/utils/battle/common/terms";
-import { effectSummary } from "@/lib/utils/battle/view";
+import { type DisplayEffect, effectSummary } from "@/lib/utils/battle/view";
 import type { ActiveEffect } from "@/types/battle";
 
 const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-hud-gold" : "text-hud-danger");
 
-function EffectChip({ effect }: { effect: ActiveEffect }) {
+function EffectChip({ effect, hideLevel }: { effect: DisplayEffect; hideLevel?: boolean }) {
   const t = useTranslator("abilityRegistry");
 
   const text = useText();
@@ -28,6 +28,7 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
         <span tabIndex={0} aria-label={`${name}: ${summary.join("; ")}`} className={cn("relative flex h-5 cursor-help items-center gap-1.5 whitespace-nowrap text-[13px] leading-5", tone(effect))}>
           <EffectIcon effect={effect} size={20} />
           <span className="text-hud-text">{name}</span>
+          {!hideLevel && effect.level !== undefined && effect.level > 1 && <span className="text-hud-text">×{effect.level}</span>}
           {!effect.permanent && <span className="opacity-70">{effect.duration}</span>}
         </span>
       </TooltipTrigger>
@@ -39,7 +40,7 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
   );
 }
 
-export function EffectLine({ effects, max = 2 }: { effects: readonly ActiveEffect[]; max?: number }) {
+export function EffectLine({ effects, max = 2, hideLevels }: { effects: readonly DisplayEffect[]; max?: number; hideLevels?: boolean }) {
   const t = useTranslations("battle.hud.effects");
 
   const [expanded, setExpanded] = useState(false);
@@ -52,7 +53,7 @@ export function EffectLine({ effects, max = 2 }: { effects: readonly ActiveEffec
 
   return (
     <div className={cn("mt-1.5 flex items-center gap-x-3", open ? "flex-wrap gap-y-1" : "h-5 overflow-hidden")}>
-      {shown.map((e) => <EffectChip key={e.id} effect={e} />)}
+      {shown.map((e) => <EffectChip key={e.id} effect={e} hideLevel={hideLevels} />)}
       {overflow && (
         <button
           type="button"

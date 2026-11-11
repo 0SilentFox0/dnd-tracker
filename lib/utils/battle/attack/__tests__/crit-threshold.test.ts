@@ -11,7 +11,7 @@ describe("critThresholdOf", () => {
 
   it("без модифікаторів = critOn правил", () => {
     expect(critThresholdOf(DEFAULT_RULES, [attacker], attacker.basicInfo.id)).toBe(20);
-    expect(critThresholdOf(undefined, [attacker], attacker.basicInfo.id)).toBe(20);
+    expect(critThresholdOf(DEFAULT_RULES, [attacker], attacker.basicInfo.id)).toBe(20);
     expect(critThresholdOf({ criticals: { ...DEFAULT_RULES.criticals, critOn: 19 } }, [attacker], attacker.basicInfo.id)).toBe(19);
   });
 

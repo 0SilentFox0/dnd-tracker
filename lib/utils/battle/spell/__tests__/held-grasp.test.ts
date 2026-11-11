@@ -38,7 +38,7 @@ const cast = (dc: number, target = at(makeParticipant({ id: "f", side: Participa
 
   const c = { ...base, spellcasting: { ...base.spellcasting, spellSaveDC: dc, spellSlots: { "2": { max: 2, current: 2 } } } };
 
-  return castSpell({ caster: c, spell: grasp("dexterity"), targetIds: ["f"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map });
+  return castSpell({ rules: DEFAULT_RULES, caster: c, spell: grasp("dexterity"), targetIds: ["f"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map });
 };
 
 const foeOf = (ps: BattleParticipant[] | undefined) => ps?.find((p) => p.basicInfo.id === "f") as BattleParticipant;

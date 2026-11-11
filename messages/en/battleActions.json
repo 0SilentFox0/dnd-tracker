@@ -2,6 +2,8 @@
   "reject": {
     "actionUsed": "Action already used",
     "bonusUsed": "Bonus action already used",
+    "noBonusAction": "This system has no bonus actions",
+    "noReaction": "This system has no reactions",
     "targetMissing": "The target is not in the battle",
     "readiedMissing": "No attack has been readied",
     "enemyRequired": "The target must be a living enemy",
@@ -134,6 +136,7 @@
     "captionDamage": "damage: {dealt}",
     "captionDamageHits": "damage: {dealt} ({hits})",
     "captionHeal": "healing: {healed} HP",
+    "fizzled": "{name} fails to cast {spell}",
     "cast": "{name} casts {spell}",
     "castCaption": "{name} casts {spell} ({caption})",
     "noSlots": "{name}: {spell} is unavailable — no spell slots"

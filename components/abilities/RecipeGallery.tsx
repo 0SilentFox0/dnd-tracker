@@ -12,7 +12,9 @@ import { useAbilityText } from "./use-ability-text";
 import { HudChipTabs } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { useRecipeText } from "@/lib/hooks/abilities/useRecipeText";
 import { useRecipeValues } from "@/lib/hooks/abilities/useRecipeValues";
+import { useRuleSystem } from "@/lib/hooks/systems/useRuleSystem";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { summarizeAbility } from "@/lib/utils/abilities/summary";
@@ -45,6 +47,12 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const { campaignId } = useAbilityEditor();
 
+  const text = useRecipeText();
+
+  const rule = useRuleSystem({ campaignId });
+
+  const traitRecipes = useMemo(() => (rule.ready ? (rule.system.traits?.recipes ?? []) : []), [rule]);
+
   const [category, setCategory] = useState<RecipeCategory | typeof ALL>(ALL);
 
   const [selected, setSelected] = useState<Recipe | null>(null);
@@ -59,9 +67,9 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const form = useRecipeValues(selected, ctx);
 
-  const recipes = useMemo(() => RECIPES.filter((r) => r.scopes.includes(scope) && (category === ALL || r.category === category)), [scope, category]);
+  const recipes = useMemo(() => [...RECIPES, ...traitRecipes].filter((r) => r.scopes.includes(scope) && (category === ALL || r.category === category)), [scope, category, traitRecipes]);
 
-  const cardCtx = useMemo(() => (r: Recipe) => ({ scope, name: tr(`templates.${r.id}.defaultName`), note }), [scope, tr, note]);
+  const cardCtx = useMemo(() => (r: Recipe) => ({ scope, name: text(r, "defaultName"), note }), [scope, text, note]);
 
   const close = () => {
     setCategory(ALL);
@@ -89,7 +97,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const choose = (recipe: Recipe) => {
     if (recipe.params.length > 0) {
-      setName(tr(`templates.${recipe.id}.defaultName`));
+      setName(text(recipe, "defaultName"));
       setSelected(recipe);
 
       return;
@@ -111,9 +119,9 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const scratch = () => pickAbilities([{ id: "", ...buildScratchAbility({ name: tr("templates.custom.defaultName"), note }) }]);
 
-  const categories = [ALL, ...RECIPE_CATEGORIES] as const;
+  const categories = [ALL, ...RECIPE_CATEGORIES, ...(traitRecipes.some((r) => r.scopes.includes(scope)) ? (["traits"] as const) : [])] as const;
 
-  const title = copying ? t("copyTitle") : selected ? tr(`templates.${selected.id}.label`) : t(scope === "spell" ? "addSpellTitle" : "addTitle");
+  const title = copying ? t("copyTitle") : selected ? text(selected, "label") : t(scope === "spell" ? "addSpellTitle" : "addTitle");
 
   const footer = selected ? (
     <>
@@ -164,8 +172,8 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
               return (
                 <Button key={r.id} type="button" variant="outline" className="h-auto w-full flex-col items-start gap-1 whitespace-normal py-2 text-left" onClick={() => choose(r)}>
-                  <span className="font-medium">{tr(`templates.${r.id}.label`)}</span>
-                  <span className="text-xs font-normal text-muted-foreground">{tr(`templates.${r.id}.hint`)}</span>
+                  <span className="font-medium">{text(r, "label")}</span>
+                  <span className="text-xs font-normal text-muted-foreground">{text(r, "hint")}</span>
                   {built.ok && <Preview result={built.result} />}
                 </Button>
               );

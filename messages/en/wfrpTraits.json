@@ -1,0 +1,161 @@
+{
+  "recipes": {
+    "armour": {
+      "label": "Armour",
+      "hint": "Armour Points on every hit location.",
+      "defaultName": "Armour",
+      "params": {
+        "ap": "Armour Points"
+      }
+    },
+    "ward": {
+      "label": "Ward",
+      "hint": "Ignores a wound on a d10 roll of at least this value.",
+      "defaultName": "Ward",
+      "params": {
+        "value": "Ward value (1-10)"
+      }
+    },
+    "size": {
+      "label": "Size",
+      "hint": "Larger creatures hit harder and are easier to hit.",
+      "defaultName": "Size",
+      "params": {
+        "size": "Size"
+      },
+      "options": {
+        "size": {
+          "tiny": "Tiny",
+          "little": "Little",
+          "small": "Small",
+          "average": "Average",
+          "large": "Large",
+          "enormous": "Enormous",
+          "monstrous": "Monstrous"
+        }
+      }
+    },
+    "fear": {
+      "label": "Fear / Terror",
+      "hint": "Enemies must pass a Cool test or become broken.",
+      "defaultName": "Fear / Terror",
+      "params": {
+        "psychology": "Kind",
+        "value": "Rating"
+      },
+      "options": {
+        "psychology": {
+          "fear": "Fear",
+          "terror": "Terror"
+        }
+      }
+    },
+    "regenerate": {
+      "label": "Regenerate",
+      "hint": "Heals 1d10 Wounds at the start of its turn.",
+      "defaultName": "Regenerate"
+    },
+    "bite": {
+      "label": "Bite",
+      "hint": "Natural bite attack.",
+      "defaultName": "Bite",
+      "params": {
+        "damage": "Damage bonus",
+        "magical": "Magical attack"
+      },
+      "options": {
+        "magical": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      }
+    },
+    "claw": {
+      "label": "Claw",
+      "hint": "Natural claw attack.",
+      "defaultName": "Claw",
+      "params": {
+        "damage": "Damage bonus",
+        "magical": "Magical attack"
+      },
+      "options": {
+        "magical": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      }
+    },
+    "weapon": {
+      "label": "Weapon",
+      "hint": "Natural weapon attack.",
+      "defaultName": "Weapon",
+      "params": {
+        "damage": "Damage bonus",
+        "magical": "Magical attack"
+      },
+      "options": {
+        "magical": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      }
+    },
+    "breath": {
+      "label": "Breath",
+      "hint": "Ranged blast attack.",
+      "defaultName": "Breath",
+      "params": {
+        "damage": "Damage bonus",
+        "rangeFt": "Range, ft",
+        "magical": "Magical attack"
+      },
+      "options": {
+        "magical": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      }
+    },
+    "ranged": {
+      "label": "Ranged",
+      "hint": "Missile or thrown attack; adds Strength Bonus.",
+      "defaultName": "Ranged",
+      "params": {
+        "damage": "Damage bonus",
+        "rangeFt": "Range, ft",
+        "magical": "Magical attack"
+      },
+      "options": {
+        "magical": {
+          "no": "No",
+          "yes": "Yes"
+        }
+      }
+    },
+    "nightVision": {
+      "label": "Night Vision",
+      "hint": "Sees in the dark.",
+      "defaultName": "Night Vision"
+    },
+    "undead": {
+      "label": "Undead",
+      "hint": "Narrative trait.",
+      "defaultName": "Undead"
+    },
+    "hardy": {
+      "label": "Hardy",
+      "hint": "Narrative trait.",
+      "defaultName": "Hardy"
+    },
+    "flier": {
+      "label": "Flier",
+      "hint": "Narrative trait.",
+      "defaultName": "Flier"
+    },
+    "swarm": {
+      "label": "Swarm",
+      "hint": "Narrative trait.",
+      "defaultName": "Swarm"
+    }
+  }
+}

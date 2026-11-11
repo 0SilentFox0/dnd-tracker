@@ -7,6 +7,7 @@ import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantag
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { applyResistance } from "@/lib/utils/battle/resistance";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack } from "@/types/battle";
 
 const bow: BattleAttack = { name: "Лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d8", damageType: "piercing" };
@@ -32,15 +33,15 @@ describe("readers", () => {
     const base = calculateAttackBonus(makeParticipant({ id: "z" }), bow);
 
     expect(calculateAttackBonus(archer, bow) - base).toBe(1);
-    expect(hasAdvantage(archer, bow)).toBe(true);
-    expect(hasDisadvantage(archer, bow, [archer, shade], { targetId: "s" })).toBe(true);
+    expect(hasAdvantage(archer, bow, [archer], undefined, { rules: DEFAULT_RULES })).toBe(true);
+    expect(hasDisadvantage(archer, bow, [archer, shade], { rules: DEFAULT_RULES, targetId: "s" })).toBe(true);
   });
 
   it("поріг криту з пасивки", () => {
     const p = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "critThreshold", flat: -1 }] })] });
 
-    expect(calculateAttackRoll(p, bow, 19).isCritical).toBe(true);
-    expect(calculateAttackRoll(makeParticipant({ id: "b" }), bow, 19).isCritical).toBe(false);
+    expect(calculateAttackRoll(p, bow, 19, undefined, undefined, { rules: DEFAULT_RULES }).isCritical).toBe(true);
+    expect(calculateAttackRoll(makeParticipant({ id: "b" }), bow, 19, undefined, undefined, { rules: DEFAULT_RULES }).isCritical).toBe(false);
   });
 
   it("шкода: пасивка + extra дії, подійний скіл не рахується", () => {
@@ -82,7 +83,7 @@ describe("readers", () => {
 
     const archer = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1 }] })] });
 
-    const r = predictAttack(archer, target, bow, [archer, target]);
+    const r = predictAttack(archer, target, bow, [archer, target], { rules: DEFAULT_RULES });
 
     expect(r.targetAC).toBe(16);
     expect(r.totalBonus).toBe(calculateAttackBonus(makeParticipant({ id: "z" }), bow) + 1);
@@ -101,7 +102,7 @@ describe("calculateAttackRoll: rng", () => {
 
     const bow = { id: "b", name: "Лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d6", damageType: "piercing" } as BattleAttack;
 
-    const pick = (v: number) => calculateAttackRoll(p, bow, 20, undefined, undefined, { rng: () => v }).criticalEffect?.id;
+    const pick = (v: number) => calculateAttackRoll(p, bow, 20, undefined, undefined, { rules: DEFAULT_RULES, rng: () => v }).criticalEffect?.id;
 
     expect(pick(0)).toBe(1);
     expect(pick(0.999)).not.toBe(1);

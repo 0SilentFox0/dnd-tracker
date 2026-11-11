@@ -60,7 +60,7 @@ function SpellSelection() {
 
   const [, setMapAim] = useState<MapAim | null>(null);
 
-  useSpellMapTargeting(state, dispatch, { caster, order: [caster, target], map, active: state.step === "targets", candidates: [target], inRange: who => spellTargetInRange(map, caster, who, 60), setMapAim, setMapPick });
+  useSpellMapTargeting(state, dispatch, { rules: DEFAULT_RULES, caster, order: [caster, target], map, active: state.step === "targets", candidates: [target], inRange: who => spellTargetInRange(map, caster, who, 60, DEFAULT_RULES), setMapAim, setMapPick });
 
   return <section><h1>Вибір заклинання</h1><button onClick={() => {
     dispatch({ type: "OPEN", casterId: caster.basicInfo.id, level: 0 });

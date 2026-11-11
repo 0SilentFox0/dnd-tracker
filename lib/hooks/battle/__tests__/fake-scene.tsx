@@ -13,6 +13,8 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { buildDisplayEffects, deriveScene, turnQueue } from "@/lib/utils/battle/view";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import type { SceneMomentum } from "@/systems/wfrp/rules/slots";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -39,6 +41,8 @@ export interface FakeSceneOptions {
   playerView?: boolean;
   critPending?: boolean;
   resultOpen?: boolean;
+  system?: string;
+  momentum?: SceneMomentum;
 }
 
 function participant(id: string, name: string, side: ParticipantSide, over: Partial<{ hp: number; ac: number; controlledBy: string }> = {}): BattleParticipant {
@@ -75,7 +79,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const battle = {
     id: "b1", campaignId: "c1", name: "Засідка", status: opts.status ?? "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
-    initiativeOrder: order, pendingSummons: [], rules: DEFAULT_RULES, battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? opts.playerView ?? false,
+    initiativeOrder: order, pendingSummons: [], rules: opts.system ? { ...DEFAULT_RULES, system: { key: opts.system } } : DEFAULT_RULES, ...(opts.momentum && { system: sceneOf(opts.momentum) }), battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? opts.playerView ?? false,
     campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingCritChoice: opts.critPending ? { triggers: [{ key: "k", source: "attack", kind: "success", actorId: "me", targetId: "gob" }] } : null, map: opts.map ?? null, audio: opts.audio ?? null,
   } as BattleScene;
 
@@ -88,6 +92,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const actions = {
     attack: mutation(),
     castSpell: mutation(),
+    channel: mutation(),
     bonusAction: mutation(),
     abilityAction: mutation(),
     nextTurn: mutation(),
@@ -109,6 +114,8 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     maze: mutation(),
     unitControl: mutation(),
     conditions: mutation(),
+    systemCondition: mutation(),
+    conditionTest: mutation(),
     initiativeRoll: mutation(),
     initiativeReorder: mutation(),
     coreAction: mutation(),

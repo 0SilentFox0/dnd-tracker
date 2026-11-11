@@ -46,6 +46,8 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
 
   const tActions = useTranslations("common.actions");
 
+
+
   const isEdit = !!battleId;
 
   const title = isEdit ? t("title.edit") : t("title.create");
@@ -89,9 +91,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: t("tabs.units"),
       content: (
         <div className="space-y-4">
-          {!isEdit && (
-            <AutopickCard hasAllies={participants.allies.exists} races={data.races} balance={balance} />
-          )}
+          {!isEdit && <AutopickCard hasAllies={participants.allies.exists} races={data.races} balance={balance} />}
           <UnitsListCard units={data.units} entityStats={data.entityStats?.unitStats ?? null} selection={participants.selection} actions={participants.actions} />
         </div>
       ),
@@ -101,7 +101,8 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
       label: t("tabs.roster", { count: participants.list.length }),
       content: (
         <div>
-          {setup.encounters.balance === "xp" ? <XpBalanceSummary xp={setup.xp} units={data.units} /> : <BalanceSummary fair={setup.fair} />}
+          {setup.balanceKind === "xp" && <XpBalanceSummary xp={setup.xp} units={data.units} />}
+          {setup.balanceKind === "fair" && <BalanceSummary fair={setup.fair} />}
           <div className="grid gap-4 md:grid-cols-2">
             {sidePanel(ParticipantSide.ALLY)}
             {sidePanel(ParticipantSide.ENEMY)}

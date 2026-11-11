@@ -6,6 +6,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAttack } from "@/types/battle";
 
@@ -44,7 +45,7 @@ describe("percentOf ownerAttack", () => {
 
     const event = { type: "hit", actorId: "h", targetId: "e", attackKind: "melee", damage: 5 } as AbilityEvent;
 
-    const r = runAbilities(ps, event, { round: 1, rng: seq(0) });
+    const r = runAbilities(ps, event, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
 
     expect(r.participants[1].battleData.activeEffects[0].dotDamage?.damagePerRound).toBe(expected);
   });

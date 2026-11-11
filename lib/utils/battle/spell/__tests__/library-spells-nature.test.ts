@@ -13,6 +13,7 @@ import { hasAdvantage } from "@/lib/utils/battle/attack/bonus";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { applyResistance } from "@/lib/utils/battle/resistance";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
@@ -20,6 +21,7 @@ import { advanceTurn } from "@/lib/utils/battle/turn";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const spell = (key: string): CastableSpell => {
@@ -66,7 +68,7 @@ function cast(key: string, order: BattleParticipant[], targetIds: string[], opts
 
   if (!resolved.ok) throw new Error(textOf(resolved.error));
 
-  return castSpell({
+  return castSpell({ rules: DEFAULT_RULES,
     caster,
     spell: def,
     targetIds: resolved.targetIds,
@@ -88,10 +90,10 @@ function toTurnOf(id: string, ps: BattleParticipant[], s: BattleSceneState = sce
   let st = s;
 
   for (let i = 0; i < 20; i++) {
-    const out = advanceTurn({ participants: order, pending: [], scene: st, rng: seq(0.99) });
+    const out = advanceTurn({ rules: DEFAULT_RULES, participants: order, pending: [], scene: st, rng: seq(0.99) });
 
     order = out.participants;
-    st = { ...st, ...out.scene };
+    st = applyScenePatch(st, out.scene ?? {});
 
     if (order[st.turnIndex]?.basicInfo.id === id) return { order, scene: st };
   }
@@ -100,7 +102,7 @@ function toTurnOf(id: string, ps: BattleParticipant[], s: BattleSceneState = sce
 }
 
 function meleeBy(attackerId: string, targetId: string, order: BattleParticipant[], turnIndex: number) {
-  return runAttackPhase({
+  return runAttackPhase({ rules: DEFAULT_RULES,
     battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: turnIndex },
     data: { attackerId, targetId, attackId: "claw", d20Roll: 15, damageRolls: [3] },
     battleId: "b1",
@@ -203,7 +205,7 @@ describe("Місячний промінь (moonbeam)", () => {
     const ps = r.allParticipantsUpdated;
 
     expect(byId(ps, "e1").combatStats.currentHp).toBe(85);
-    expect(hasAdvantage(byId(ps, "mage"), claw, ps, undefined, { targetId: "e1" })).toBe(true);
+    expect(hasAdvantage(byId(ps, "mage"), claw, ps, undefined, { rules: DEFAULT_RULES, targetId: "e1" })).toBe(true);
   });
 
   it("підсвічування тримається 2 ходи цілі, на третьому знімається", () => {
@@ -390,7 +392,7 @@ describe("Відродження лісу (forest-rebirth)", () => {
     expect(byId(ps, "s1").combatStats).toMatchObject({ currentHp: 15, status: "active" });
     expect(byId(ps, "e2").combatStats.status).toBe("dead");
 
-    const after = advanceTurn({ participants: ps, pending: [], scene, rng: seq(0.99) });
+    const after = advanceTurn({ rules: DEFAULT_RULES, participants: ps, pending: [], scene, rng: seq(0.99) });
 
     expect(after.participants[after.scene.turnIndex ?? -1].basicInfo.id).toBe("a1");
   });

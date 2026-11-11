@@ -15,9 +15,9 @@ vi.mock("@/components/battle/fx/auras/AuraCanvas", () => ({
 vi.mock("@/components/battle/fx/frames/CanvasFrame", () => ({ CanvasFrame: () => <span data-testid="hit-frame" /> }));
 
 import SpellBattlePreviewPanel from "@/components/spells/preview/SpellBattlePreviewPanel";
+import { SPELL_FX_BY_NAME } from "@/data/library/spell-fx-by-name";
 import { SPELLS } from "@/data/library/spells";
 import { libraryPreviewSpell, type PreviewSpell } from "@/lib/utils/battle/fx/spell-preview";
-import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
 function spellNamed(name: string): PreviewSpell {
   const s = SPELLS.find((x) => x.name === name);

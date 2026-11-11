@@ -1,7 +1,7 @@
 import type { ZodType } from "zod";
 
 import type { PusherMessage } from "./battle-response";
-import { buildPusherMessages, toBattleResponse } from "./battle-response";
+import { buildPusherMessages, redactDeltaForPlayers, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
 import { guardTurnOrder } from "./turn-order-guard";
 
@@ -20,6 +20,7 @@ import { lineText } from "@/lib/utils/battle/log/lines";
 import { modeBlockedText, withModeAfterMutation, withModeAfterSettle } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { sweepOrphanedAnchored } from "@/lib/utils/battle/spell/anchored-zone";
 import { sweepDeadZones } from "@/lib/utils/battle/spell/zone-triggers";
 import type {
@@ -43,7 +44,7 @@ import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
 import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
-import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
+import { alwaysSeesEnemyStats, redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -131,7 +132,7 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
   };
 }
 
-function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
+function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean, rules: Ruleset): MutationResult {
   const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
 
   if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(dismissed.messages, "; "))] };
@@ -140,7 +141,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(reverted.messages, "; "))] };
 
-  const cleared = clearFallenEffects(result.participants);
+  const cleared = clearFallenEffects(result.participants, rules);
 
   if (cleared !== result.participants) result = { ...result, participants: cleared };
 
@@ -191,10 +192,12 @@ type PreviewDeps = Pick<PipelineDeps, "loadRecentEvents" | "loadKnowledge">;
 async function buildScenePreview(userId: string, loaded: LoadedBattle, result: MutationResult, options: PreviewOptions, deps: PreviewDeps) {
   const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
 
-  const [entries, knowledge] = await Promise.all([
+  const [recent, knowledge] = await Promise.all([
     options.includeRecentEvents ? deps.loadRecentEvents(loaded.scene.id, options.includeRecentEvents) : [],
     needsKnowledge ? deps.loadKnowledge?.(loaded.scene.id) : undefined,
   ]);
+
+  const entries = loaded.isDM ? recent : redactLogForPlayers(recent, { participants: loaded.participants, rules: loaded.meta.rules }).entries;
 
   const battle = toBattleResponse(
     loaded,
@@ -212,7 +215,7 @@ async function buildScenePreview(userId: string, loaded: LoadedBattle, result: M
 export function readScenePreview(userId: string, loaded: LoadedBattle, options: PreviewOptions, deps: PreviewDeps) {
   const unchanged = guardTurnOrder(loaded.scene, loaded.participants, { participants: loaded.participants, pending: loaded.pending, events: [] });
 
-  const placed = withPlacement(loaded.meta.map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, unchanged, false);
+  const placed = withPlacement(loaded.meta.map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, unchanged, false, loaded.meta.rules);
 
   return buildScenePreview(userId, loaded, withVictory(loaded.scene, placed, loaded.meta.rules), options, deps);
 }
@@ -251,7 +254,7 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const mutatedMap = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-  const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+  const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun, loaded.meta.rules);
 
   const swept = sweepDeadZones(mutatedMap, unswept.participants);
 
@@ -275,11 +278,8 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const delta = await deps.saveBattle(loaded, result, write);
 
-  const { map: _map, ...scenePatch } = result.scene ?? {};
-
   const after: BattleSceneState = {
-    ...loaded.scene,
-    ...scenePatch,
+    ...applyScenePatch(loaded.scene, result.scene ?? {}),
     version: delta.version,
     eventSeq: delta.events.at(-1)?.seq ?? loaded.scene.eventSeq,
     turnStartedAt: delta.scene?.turnStartedAt ?? null,
@@ -312,9 +312,11 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   if (loaded.scene.status === BattleStatus.ACTIVE && after.status !== BattleStatus.ACTIVE) deps.onLeftActive?.(campaignId, battleId);
 
-  deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaiting !== null, delta: clientDelta }));
+  deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, rules: loaded.meta.rules, pending: result.pending, wasAwaiting: awaiting !== null, delta: clientDelta }));
 
-  return { delta: clientDelta, version: clientDelta.version, ...(result.response && { response: result.response }) };
+  const reply = ctx.isDM ? clientDelta : redactDeltaForPlayers(clientDelta, result.participants, loaded.meta.rules).delta;
+
+  return { delta: reply, version: clientDelta.version, ...(result.response && { response: result.response }) };
 }
 
 /** Read-only guards shared by intent preview and execution; never invokes a mutation. */

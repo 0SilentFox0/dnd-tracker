@@ -6,6 +6,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Condition } from "@/lib/utils/abilities/schema";
 import { eventRollMode } from "@/lib/utils/battle/attack/roll";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -33,7 +34,7 @@ function scene(opts: { allyAt?: GridPoint; targetAt?: GridPoint } = {}) {
 
 const hit = (rollMode?: "advantage" | "disadvantage"): AbilityEvent => ({ type: "hit", actorId: "r", targetId: "t", attackKind: "melee", damage: 5, ...(rollMode && { rollMode }) });
 
-const hpAfter = (ps: BattleParticipant[], event: AbilityEvent) => runAbilities(ps, event, { round: 1, rng: seq(0.5) }).participants.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp;
+const hpAfter = (ps: BattleParticipant[], event: AbilityEvent) => runAbilities(ps, event, { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) }).participants.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp;
 
 describe("Sneak Attack conditions", () => {
   it("advantage alone is enough, even without a map", () => {
@@ -54,7 +55,7 @@ describe("Sneak Attack conditions", () => {
   });
 
   it("once per turn", () => {
-    const first = runAbilities(scene(), hit("advantage"), { round: 1, rng: seq(0.5) });
+    const first = runAbilities(scene(), hit("advantage"), { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) });
 
     expect(hpAfter(first.participants, hit("advantage"))).toBe(43);
   });

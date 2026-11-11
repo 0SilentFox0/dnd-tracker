@@ -715,3 +715,49 @@ describe("runBattleMutation: зони без концентрації", () => {
     expect(saved[1].scene?.map?.spellZones).toBeUndefined();
   });
 });
+
+describe("runBattleMutation: редакція журналу", () => {
+  const wfrpMeta = { ...loaded().meta, rules: { ...DEFAULT_RULES, system: { key: "wfrp" as const } } };
+
+  const wfrpLoaded = (over: Partial<LoadedBattle> = {}) => loaded({ meta: wfrpMeta, ...over });
+
+  const applied = { message: "battleWfrp.log.applied", params: { target: "x", condition: "c", level: 3, source: "s" } };
+
+  const enc = (log: unknown[]) => ({ seq: 5, type: "attack", round: 1, actorId: null, targets: [{ participantId: "gob", participantName: "Гоблін" }], details: { log }, hpChanges: [], resultText: "" });
+
+  const withLog = () => deps({ loadBattle: vi.fn(async () => wfrpLoaded()), saveBattle: vi.fn(async () => ({ ...delta(), events: [enc([applied])] as never })) });
+
+  const lineOf = (json: { delta: { log: { log: { message: string }[] }[] } }) => json.delta.log[0].log[0].message;
+
+  it("гравцю — відредагована відповідь, ДМу — повна", async () => {
+    const player = await (await runBattleMutation(req(), { params, access: "member", mutate: noop }, withLog())).json();
+
+    expect(lineOf(player)).toBe("battleWfrp.log.appliedHidden");
+
+    const dm = await (await runBattleMutation(req(), { params, access: "member", mutate: noop }, { ...withLog(), loadBattle: vi.fn(async () => wfrpLoaded({ isDM: true })) })).json();
+
+    expect(lineOf(dm)).toBe("battleWfrp.log.applied");
+  });
+
+  it("Pusher: публічне повідомлення redacted, dm-канал — повне", async () => {
+    const d = withLog();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, { ...d, loadBattle: vi.fn(async () => wfrpLoaded({ isDM: true })) });
+
+    const [pub, dm] = vi.mocked(d.publish).mock.calls[0][0];
+
+    expect(pub.payload).toMatchObject({ redacted: true });
+    expect(dm.channel).toBe("private-battle-dm-b1");
+    expect(dm.payload).not.toHaveProperty("redacted");
+  });
+
+  it("прев'ю (dryRun) гравця відредаговане, ДМ — сире", async () => {
+    const entry = { id: "b1-5", targets: [{ participantId: "gob", participantName: "x" }], actionDetails: {}, log: [applied] } as never;
+
+    const run = (isDM: boolean) =>
+      runBattleMutation(req(), { params, access: "member", dryRun: () => true, includeRecentEvents: 10, mutate: noop }, deps({ loadRecentEvents: vi.fn(async () => [entry]), loadBattle: vi.fn(async () => wfrpLoaded({ isDM })) }));
+
+    expect((await (await run(false)).json()).battleLog[0].log[0].message).toBe("battleWfrp.log.appliedHidden");
+    expect((await (await run(true)).json()).battleLog[0].log[0].message).toBe("battleWfrp.log.applied");
+  });
+});

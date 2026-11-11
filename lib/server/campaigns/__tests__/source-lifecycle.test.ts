@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { BUNDLE_TABLES, emptyBundle } from "@/lib/server/templates/bundle";
@@ -9,10 +8,10 @@ import { createFakeSyncDb } from "@/lib/server/templates/sync/__tests__/fake-syn
 import { id } from "@/lib/server/templates/sync/__tests__/helpers";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
-import { hashText } from "@/lib/srd/i18n/catalog";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 
-const h = vi.hoisted(() => ({ base: {} as Record<string, unknown>, dictionary: {} as Record<string, string> }));
+const h = vi.hoisted(() => ({ base: {} as Record<string, unknown>, dictionary: {} as TranslationsV2 }));
 
 vi.mock("@/lib/db", async () => {
   const { createScopedDatabase } = await import("@/lib/server/content/write-context");
@@ -22,11 +21,11 @@ vi.mock("@/lib/db", async () => {
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateAllReference: vi.fn() }));
 vi.mock("@/lib/i18n/translator", () => ({ getTranslator: vi.fn(async () => (key: string) => key) }));
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? h.dictionary : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
 
 const actor = { campaignId: "home", userId: "dm", isDM: true, via: "session" as const, scopes: null };
 
-const official = { kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME, members: [] };
+const official = { kind: "template", visibility: "official", templateKey: "srd-5.2", members: [] };
 
 let f: ReturnType<typeof createFakeSyncDb>;
 
@@ -35,11 +34,11 @@ let createdCount: number;
 beforeEach(() => {
   f = createFakeSyncDb();
   createdCount = 0;
-  h.dictionary = { [hashText("n", "Bless")]: "Благословення" };
+  h.dictionary = { "spells/bless/name": { text: "Благословення", en: "Bless" } };
   f.addCampaign({ id: "home", name: "Home", kind: "campaign", members: [{ role: "dm" }], locale: "uk" });
   f.addCampaign({ id: "canonical", ...official, locale: "en" });
   f.addCampaign({ id: "legacy", ...official, locale: "uk" });
-  f.addRow("spell", { id: id("s"), campaignId: "canonical", name: "Bless" });
+  f.addRow("spell", { id: id("s"), campaignId: "canonical", slug: "bless", name: "Bless" });
 
   const tx = f.db as unknown as Record<string, unknown>;
 

@@ -1,0 +1,25 @@
+[
+  {
+    "slug": "chaos",
+    "name": "Chaos",
+    "color": "#ec1c0c",
+    "icon": "flame"
+  },
+  {
+    "slug": "darkness",
+    "name": "Darkness",
+    "color": "#7a1fe6",
+    "icon": "moon"
+  },
+  {
+    "slug": "light",
+    "name": "Light",
+    "color": "#f2b300",
+    "icon": "sun"
+  },
+  {
+    "slug": "nature",
+    "name": "Nature",
+    "color": "#12a52b"
+  }
+]

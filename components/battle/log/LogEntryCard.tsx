@@ -24,12 +24,13 @@ const ICON: Record<BattleAction["actionType"], LucideIcon> = {
   retaliation: Shield,
 };
 
-export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onToggle, actions }: {
+export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onToggle, actions, wounds }: {
   entry: BattleAction;
   actor: BattleParticipant | undefined;
   open: boolean;
   onToggle: (actionIndex: number) => void;
   actions?: ReactNode;
+  wounds?: boolean;
 }) {
   const t = useTranslations("battle.log");
 
@@ -69,7 +70,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
             {open ? t("hideDetails") : t("details")}
           </button>
         )}
-        {open && <LogEntryDetails action={entry} />}
+        {open && <LogEntryDetails action={entry} wounds={wounds} />}
       </div>
       {actions && <div className="shrink-0 self-start">{actions}</div>}
     </div>

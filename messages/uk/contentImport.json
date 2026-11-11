@@ -15,6 +15,7 @@
     "classes": "Класи",
     "feats": "Риси",
     "backgrounds": "Передісторії",
+    "careers": "Кар'єри",
     "artifacts": "Артефакти",
     "artifact-sets": "Сети артефактів"
   },
@@ -39,6 +40,7 @@
       "immunities": "Імунітети",
       "knownSpells": "Заклинання",
       "statblock": "Статблок (JSON)",
+      "characteristics": "Характеристики (JSON)",
       "spellcasting": "Заклинання монстра (JSON)",
       "proficiencyBonus": "Майстерність",
       "gridSize": "Розмір на мапі",
@@ -84,6 +86,7 @@
     "skills": {
       "name": "Назва",
       "description": "Опис",
+      "appearanceDescription": "Опис вигляду",
       "icon": "Іконка",
       "image": "Зображення",
       "mainSkillId": "Основний скіл",
@@ -138,6 +141,8 @@
       "type": "Тип",
       "prerequisite": "Передумови (JSON)",
       "repeatable": "Повторювана",
+      "xpCost": "Ціна в досвіді",
+      "maxRank": "Макс. ранг",
       "description": "Опис",
       "abilities": "Здібності",
       "choices": "Вибори (JSON)"
@@ -152,6 +157,35 @@
       "toolProficiencies": "Інструменти (JSON)",
       "equipmentText": "Спорядження (видає ДМ)"
     },
+    "careers": {
+      "name": "Назва",
+      "icon": "Іконка",
+      "class": "Клас",
+      "tier1_name": "Рівень 1: назва",
+      "tier1_status": "Рівень 1: статус",
+      "tier1_characteristics": "Рівень 1: характеристики",
+      "tier1_skills": "Рівень 1: навички",
+      "tier1_talents": "Рівень 1: таланти",
+      "tier1_trappings": "Рівень 1: спорядження",
+      "tier2_name": "Рівень 2: назва",
+      "tier2_status": "Рівень 2: статус",
+      "tier2_characteristics": "Рівень 2: характеристики",
+      "tier2_skills": "Рівень 2: навички",
+      "tier2_talents": "Рівень 2: таланти",
+      "tier2_trappings": "Рівень 2: спорядження",
+      "tier3_name": "Рівень 3: назва",
+      "tier3_status": "Рівень 3: статус",
+      "tier3_characteristics": "Рівень 3: характеристики",
+      "tier3_skills": "Рівень 3: навички",
+      "tier3_talents": "Рівень 3: таланти",
+      "tier3_trappings": "Рівень 3: спорядження",
+      "tier4_name": "Рівень 4: назва",
+      "tier4_status": "Рівень 4: статус",
+      "tier4_characteristics": "Рівень 4: характеристики",
+      "tier4_skills": "Рівень 4: навички",
+      "tier4_talents": "Рівень 4: таланти",
+      "tier4_trappings": "Рівень 4: спорядження"
+    },
     "artifacts": {
       "name": "Назва",
       "description": "Опис",
@@ -161,6 +195,7 @@
       "icon": "Іконка",
       "weapon": "Зброя (JSON)",
       "armor": "Броня (JSON)",
+      "systemStats": "Системні характеристики (JSON)",
       "item": "Предмет 5e (JSON)",
       "abilities": "Здібності"
     },
@@ -278,6 +313,8 @@
     "refNotFound": "{field}: не знайдено «{value}» ({kind})",
     "noName": "Немає назви",
     "duplicateName": "Назва повторюється у файлі",
+    "invalidSlug": "Некоректний slug (латиниця в нижньому регістрі, цифри, - та _)",
+    "duplicateSlug": "Slug повторюється у файлі",
     "alreadyExists": "«{name}» вже є в кампанії",
     "multipleMatches": "Кілька записів «{name}» — оновлено перший"
   }

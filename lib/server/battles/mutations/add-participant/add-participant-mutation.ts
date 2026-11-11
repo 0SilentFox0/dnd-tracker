@@ -6,6 +6,7 @@ import { UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { prisma } from "@/lib/db";
 import { textRef } from "@/lib/i18n/text-ref";
 import { mapCellSchema } from "@/lib/schemas/battles";
+import { buildCampaignContextForStart } from "@/lib/server/battles/mutations/start/start-build-context";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { canStand } from "@/lib/utils/battle/grid/occupancy";
 import { modeEnter, modePlaceOne } from "@/lib/utils/battle/modes/server";
@@ -17,6 +18,9 @@ import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 import { calculateInitiative, compareInitiative, initiativeSlot } from "@/lib/utils/battle/turn/initiative";
+import { runPsychology } from "@/lib/utils/battle/turn/join-triggers";
+import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export const addParticipantSchema = z.object({
@@ -39,6 +43,7 @@ export interface AddParticipantDeps {
   loadUnit(id: string, campaignId: string): Promise<UnitRow | null>;
   fromCharacter: typeof createBattleParticipantFromCharacter;
   fromUnit: typeof createBattleParticipantFromUnit;
+  buildContext(campaignId: string, character: CharacterRow): Promise<CampaignSpellContext | undefined>;
 }
 
 const defaultDeps: AddParticipantDeps = {
@@ -50,6 +55,7 @@ const defaultDeps: AddParticipantDeps = {
   loadUnit: (id, campaignId) => prisma.unit.findFirst({ where: { id, campaignId } }) as Promise<UnitRow | null>,
   fromCharacter: createBattleParticipantFromCharacter,
   fromUnit: createBattleParticipantFromUnit,
+  buildContext: async (campaignId, character) => (await buildCampaignContextForStart(campaignId, [character as never], [])).campaignContext,
 };
 
 /** A unit added mid-battle copies the multipliers of a same-source enemy on the field or in the reserve; none there means ×1. */
@@ -104,7 +110,9 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
         throw new BattleAccessError(404, API_ERRORS.CHARACTER_NOT_FOUND);
       }
 
-      added.push(await deps.fromCharacter(character, battleId, side, undefined, undefined, { rules: ctx.meta.rules }));
+      const campaignContext = await deps.buildContext(ctx.scene.campaignId, character);
+
+      added.push(await deps.fromCharacter(character, battleId, side, undefined, campaignContext, { rules: ctx.meta.rules }));
     } else {
       const unit = await deps.loadUnit(data.sourceId, ctx.scene.campaignId);
 
@@ -162,11 +170,16 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       order = [...order.slice(0, at), p, ...order.slice(at)];
     }
 
+    const { participants, psychology } = runPsychology(order, { round: ctx.scene.round, rng: rngOf(ctx), rules: ctx.meta.rules, map: ctx.meta.map }, [...addedIds]);
+
     return {
-      participants: order,
+      participants,
       pending: ctx.pending,
       ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
-      events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.added", { names: added.map((p) => p.basicInfo.name).join(", ") }), added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })))],
+      events: [
+        dmEvent(ctx.scene.round, textRef("battleLog.dm.added", { names: added.map((p) => p.basicInfo.name).join(", ") }), added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name }))),
+        ...(psychology.lines.length > 0 ? [dmEvent(ctx.scene.round, psychology.lines, psychology.targets)] : []),
+      ],
     };
   };
 }

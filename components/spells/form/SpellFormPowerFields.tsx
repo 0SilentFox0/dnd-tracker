@@ -1,10 +1,13 @@
 "use client";
 
+import type { ComponentType } from "react";
+
 import { DIE_SIDES } from "./spell-form-defaults";
 import type { SpellFormFieldsProps } from "./SpellFormBasicFields";
 import { SpellTargetingFields } from "./SpellTargetingFields";
 
 import { HudSection } from "@/components/hud/form";
+import type { SpellMagicFieldsProps } from "@/components/systems";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CommaListInput } from "@/components/ui/comma-list-input";
@@ -16,7 +19,12 @@ import { useTranslator } from "@/lib/i18n/use-translator";
 import { clamp } from "@/lib/utils/common/clamp";
 
 
-export function SpellFormPowerFields({ formData, setFormData, classesEnabled = false }: SpellFormFieldsProps & { classesEnabled?: boolean }) {
+export interface SpellMagicSystem {
+  conditions: SpellMagicFieldsProps["conditions"];
+  Fields: ComponentType<SpellMagicFieldsProps>;
+}
+
+export function SpellFormPowerFields({ formData, setFormData, classesEnabled = false, magic }: SpellFormFieldsProps & { classesEnabled?: boolean; magic?: SpellMagicSystem }) {
   const t = useTranslator();
 
   const { targeting, resolution } = formData;
@@ -32,7 +40,8 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
         <BoundedNumberInput id="dice" min={0} max={40} value={formData.dice} onCommit={(dice) => setFormData({ ...formData, dice })} className="w-24" />
         <p className="mt-1 text-xs text-muted-foreground">{tp("baseDiceHint")}</p>
       </div>
-      <SpellTargetingFields value={{ targeting, resolution }} onChange={(next) => setFormData({ ...formData, ...next })} classesEnabled={classesEnabled}>
+      {magic && <magic.Fields formData={formData} setFormData={setFormData} conditions={magic.conditions} />}
+      <SpellTargetingFields value={{ targeting, resolution }} onChange={(next) => setFormData({ ...formData, ...next })} classesEnabled={classesEnabled} magic={!!magic}>
         {targeting.kind === "template" && (
           <>
             <div className="col-span-2 flex items-center gap-2">
@@ -54,7 +63,7 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
           </>
         )}
       </SpellTargetingFields>
-      {(classesEnabled || formData.fixedDice !== undefined || formData.damageBonus != null) && (
+      {!magic && (classesEnabled || formData.fixedDice !== undefined || formData.damageBonus != null) && (
         <div className="col-span-2">
           <HudSection title="5e">
             <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">

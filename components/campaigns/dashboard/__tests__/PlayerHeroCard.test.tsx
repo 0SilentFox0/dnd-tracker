@@ -1,12 +1,21 @@
 // @vitest-environment happy-dom
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlayerHeroCard } from "@/components/campaigns/dashboard/PlayerHeroCard";
 import { CharacterStatus } from "@/lib/constants/characters";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import type { DashboardHero, PlayerDashboardData } from "@/types/campaigns";
 
+const mocks = vi.hoisted(() => ({ system: vi.fn() }));
+
+vi.mock("@/lib/hooks/systems", () => ({ useRuleSystem: mocks.system }));
+
 afterEach(cleanup);
+
+const withSystem = (key?: "dnd5e" | "wfrp") => mocks.system.mockReturnValue(key ? { key, system: RULE_SYSTEM_REGISTRY[key], ready: true } : { key: undefined, system: undefined, ready: false });
+
+beforeEach(() => withSystem("dnd5e"));
 
 const hero: DashboardHero = { id: "h1", name: "Зехір", level: 3, race: "Ельф", class: "Маг", avatar: null, armorClass: 14, speed: 30, status: CharacterStatus.ACTIVE, reviewNote: null, seenLevel: 3 };
 
@@ -17,6 +26,16 @@ describe("PlayerHeroCard", () => {
     render(<PlayerHeroCard campaignId="c1" data={{ hero: null, activeBattle: null, hasWorld: false }} />);
 
     expect(screen.getByRole("link", { name: "dashboard.hero.create" }).getAttribute("href")).toBe("/campaigns/c1/character");
+  });
+
+  it("hides the class in wfrp and while rules load", () => {
+    withSystem("wfrp");
+    render(<PlayerHeroCard campaignId="c1" data={data()} />);
+    expect(screen.getByText("Ельф")).toBeTruthy();
+    cleanup();
+    withSystem();
+    render(<PlayerHeroCard campaignId="c1" data={data()} />);
+    expect(screen.getByText("Ельф")).toBeTruthy();
   });
 
   it("shows hero stats and the initial fallback without avatar", () => {

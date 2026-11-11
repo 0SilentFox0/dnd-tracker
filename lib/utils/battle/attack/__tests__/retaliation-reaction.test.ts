@@ -11,6 +11,7 @@ import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -19,7 +20,7 @@ const defender = (abilities?: ResolvedAbility[]) => swordUnit("d", ParticipantSi
 
 const attacker = () => swordUnit("a", ParticipantSide.ALLY);
 
-const startTurn = (d: BattleParticipant) => processStartOfTurn(d, 2, [attacker(), d]).participant;
+const startTurn = (d: BattleParticipant) => processStartOfTurn(d, 2, [attacker(), d], undefined, undefined, DEFAULT_RULES).participant;
 
 describe("перемикач rules.actions.retaliation", () => {
   const off = parseRules({ actions: { retaliation: false } });
@@ -81,7 +82,7 @@ describe("відсіч і втрачена реакція", () => {
 
     expect(retaliate(spent)).toBeNull();
 
-    const restored = runAbilities(spent, { type: "turnStart", actorId: "d" }, { round: 2, rng: seq(0.5) }).participants;
+    const restored = runAbilities(spent, { type: "turnStart", actorId: "d" }, { rules: DEFAULT_RULES, round: 2, rng: seq(0.5) }).participants;
 
     expect(restored.find((p) => p.basicInfo.id === "d")?.battleData.retaliationsUsed).toBe(0);
     expect(retaliate(restored)).not.toBeNull();

@@ -15,6 +15,7 @@ import { CharacterType } from "@/lib/constants/characters";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { sharedEnemyRace } from "@/lib/utils/battle/balance/setup";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattlePreparationParticipant } from "@/types/battle";
 
 export interface BattleSetupInitial {
@@ -34,6 +35,10 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
 
   const encounters = rules?.encounters ?? DEFAULT_RULES.encounters;
 
+  const ruleSystem = ruleSystemOf({ system: rules?.system ?? DEFAULT_RULES.system });
+
+  const balanceKind: "fair" | "xp" = encounters.balance === "xp" ? "xp" : "fair";
+
   const participants = useBattleParticipants(initial?.participants);
 
   const mapEditor = useBattleMapEditor(initial?.map);
@@ -44,7 +49,7 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
 
   const enemyRaceId = useMemo(() => sharedEnemyRace(participants.list, entityStats), [participants.list, entityStats]);
 
-  const fair = useFairBalance(participants.list, entityStats, battleId ? enemyRaceId : balance.race);
+  const fair = useFairBalance(participants.list, entityStats, battleId ? enemyRaceId : balance.race, ruleSystem.combat.hitModel);
 
   const xp = useXpBalance(participants.list, entityStats, encounters);
 
@@ -64,6 +69,7 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
     mapEditor,
     fair,
     encounters,
+    balanceKind,
     xp,
   };
 }

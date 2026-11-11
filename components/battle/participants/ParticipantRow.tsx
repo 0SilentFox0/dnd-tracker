@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Shield, VenetianMask } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
-import { EffectLine, HealthBar, HealthLabel, hitFlashClass, HitFloat, Portrait } from "@/components/battle/hud";
+import { EffectLine, HealthBar, HealthLabel, hitFlashClass, HitFloat, HpFigure, Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
 import { useCreatureTypeLabel } from "@/lib/i18n/use-creature-type";
 import { useText } from "@/lib/i18n/use-text";
@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 import { legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import { isDown } from "@/lib/utils/battle/participant/state";
-import { hpRatio } from "@/lib/utils/battle/view";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import { type DisplayEffect, hpRatio } from "@/lib/utils/battle/view";
+import type { BattleParticipant } from "@/types/battle";
 
 function Pips({ count, filled, color }: { count: number; filled: number; color: string }) {
   return (
@@ -39,16 +39,27 @@ function DeathSavePips({ saves }: { saves: NonNullable<BattleParticipant["battle
   );
 }
 
-export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, exact, acText, current, masked, impact, onSelect }: {
-  participant: BattleParticipant;
-  effects: readonly ActiveEffect[];
+export interface ParticipantRowView {
   exact: boolean;
-  acText: string;
+  acText: string | null;
+  wounds: boolean;
   current: boolean;
   masked: boolean;
+}
+
+interface ParticipantRowProps {
+  participant: BattleParticipant;
+  effects: readonly DisplayEffect[];
+  view: ParticipantRowView;
   impact: FxImpact | null;
   onSelect: (id: string) => void;
-}) {
+}
+
+const sameView = (a: ParticipantRowView, b: ParticipantRowView) => a.exact === b.exact && a.acText === b.acText && a.wounds === b.wounds && a.current === b.current && a.masked === b.masked;
+
+const sameProps = (a: ParticipantRowProps, b: ParticipantRowProps) => a.participant === b.participant && a.effects === b.effects && a.impact === b.impact && a.onSelect === b.onSelect && sameView(a.view, b.view);
+
+export const ParticipantRow = memo(function ParticipantRow({ participant: live, effects, view: { exact, acText, wounds, current, masked }, impact, onSelect }: ParticipantRowProps) {
   const text = useText();
 
   const tMask = useTranslations("battleDm.maze.toolbar");
@@ -56,8 +67,6 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
   const creatureTypeLabel = useCreatureTypeLabel();
 
   const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impact);
-
-  const { currentHp, maxHp } = participant.combatStats;
 
   const down = isDown(participant);
 
@@ -76,17 +85,19 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
           {masked && <VenetianMask aria-label={tMask("illusion")} className="ml-1 size-4 shrink-0 text-[var(--hud-muted)]" />}
-          {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-hud-text")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}
+          {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-hud-text")}><HpFigure participant={participant} wounds={wounds} /></span> : <HealthLabel participant={participant} />}
         </div>
         <HealthBar participant={participant} exact={exact} />
-        <EffectLine effects={effects} />
+        <EffectLine effects={effects} hideLevels={!exact} />
         {participant.battleData.deathSaves && <DeathSavePips saves={participant.battleData.deathSaves} />}
         {badge && <div className="mt-1 text-xs text-[var(--hud-muted)]">{text(badge)}</div>}
       </div>
-      <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-hud-soft">
-        {acText}
-        <Shield className="size-4 text-[var(--hud-muted)]" />
-      </span>
+      {acText !== null && (
+        <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-hud-soft">
+          {acText}
+          <Shield className="size-4 text-[var(--hud-muted)]" />
+        </span>
+      )}
     </div>
   );
-});
+}, sameProps);

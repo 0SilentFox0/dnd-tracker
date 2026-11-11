@@ -13,6 +13,8 @@ export interface DieSlot {
   value: number;
   chosen?: boolean;
   dropped?: boolean;
+  tens?: boolean;
+  units?: boolean;
   row: number;
   col: number;
   rowLength: number;

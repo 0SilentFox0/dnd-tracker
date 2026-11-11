@@ -8,6 +8,7 @@ import { buildSpellPick, canGoBack, initialSpellFlow, rollsComplete, spellAimTar
 import { castSpell } from "@/lib/utils/battle/spell/cast";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -243,7 +244,7 @@ describe("шаблон і дальність", () => {
     const pick = buildSpellPick([hero, corner, edge, outside], hero, exact, wideMap);
 
     expect(pick.template).toMatchObject({ exact: true });
-    expect(spellAimTargets({ map: wideMap, participants: [hero, corner, edge, outside], caster: hero }, pick, { x: 6, y: 6 }).map(p => p.basicInfo.id)).toEqual(["corner", "edge"]);
+    expect(spellAimTargets({ rules: DEFAULT_RULES, map: wideMap, participants: [hero, corner, edge, outside], caster: hero }, pick, { x: 6, y: 6 }).map(p => p.basicInfo.id)).toEqual(["corner", "edge"]);
   });
 
   it("fixed monster cantrip preview keeps its base dice", () => {
@@ -460,9 +461,9 @@ describe("шаблон і дальність", () => {
 
       const pick = buildSpellPick(participants, area, bolt, map);
 
-      expect(spellAimTargets({ map, participants, caster: area }, pick, { x: 6, y: 0 }).map((p) => p.basicInfo.id)).toEqual(["f"]);
-      expect(spellAimTargets({ map, participants, caster: area }, ball, { x: 6, y: 0 }).map((p) => p.basicInfo.id)).toEqual(["f", "f2", "a"]);
-      expect(spellAimTargets({ map, participants, caster: area }, ray, { x: 6, y: 0 })).toEqual([]);
+      expect(spellAimTargets({ rules: DEFAULT_RULES, map, participants, caster: area }, pick, { x: 6, y: 0 }).map((p) => p.basicInfo.id)).toEqual(["f"]);
+      expect(spellAimTargets({ rules: DEFAULT_RULES, map, participants, caster: area }, ball, { x: 6, y: 0 }).map((p) => p.basicInfo.id)).toEqual(["f", "f2", "a"]);
+      expect(spellAimTargets({ rules: DEFAULT_RULES, map, participants, caster: area }, ray, { x: 6, y: 0 })).toEqual([]);
     });
 
     it("reducer: радіус проходить шлях шаблону — точка, превʼю, targetCell у payload", () => {
@@ -511,11 +512,11 @@ describe("шаблон і дальність", () => {
   });
 
   it("spellTargetInRange: без карти, дальності чи позиції — у дальності", () => {
-    expect(spellTargetInRange(map, hero, foe, 30)).toBe(true);
-    expect(spellTargetInRange(map, hero, foe, 25)).toBe(false);
-    expect(spellTargetInRange(null, hero, foe, 5)).toBe(true);
-    expect(spellTargetInRange(map, hero, foe, undefined)).toBe(true);
-    expect(spellTargetInRange(map, hero, placed("x", ParticipantSide.ENEMY), 5)).toBe(true);
+    expect(spellTargetInRange(map, hero, foe, 30, DEFAULT_RULES)).toBe(true);
+    expect(spellTargetInRange(map, hero, foe, 25, DEFAULT_RULES)).toBe(false);
+    expect(spellTargetInRange(null, hero, foe, 5, DEFAULT_RULES)).toBe(true);
+    expect(spellTargetInRange(map, hero, foe, undefined, DEFAULT_RULES)).toBe(true);
+    expect(spellTargetInRange(map, hero, placed("x", ParticipantSide.ENEMY), 5, DEFAULT_RULES)).toBe(true);
   });
 
   it("WAIT_CRIT: відправка → очікування вибору ДМ → результат; поза відправкою ігнорується", () => {
@@ -579,16 +580,16 @@ it("AoE preview і server cast вражають невидимого учасн�
 
   const aim = { x: 5, y: 5 };
 
-  const preview = spellAimTargets({ map, participants, caster }, pick, aim).map((p) => p.basicInfo.id);
+  const preview = spellAimTargets({ rules: DEFAULT_RULES, map, participants, caster }, pick, aim).map((p) => p.basicInfo.id);
 
-  const resolution = resolveSpellTargets(participants, caster, spell, spell.definition.targeting, [], { map, targetCell: aim });
+  const resolution = resolveSpellTargets(participants, caster, spell, spell.definition.targeting, [], { rules: DEFAULT_RULES, map, targetCell: aim });
 
   expect(preview).toEqual(["invisible"]);
   expect(resolution).toMatchObject({ ok: true, targetIds: preview });
 
   if (!resolution.ok) throw new Error(textOf(resolution.error));
 
-  const result = castSpell({ caster, spell, targetIds: resolution.targetIds, allParticipants: participants, currentRound: 1, battleId: "b", diceRolls: [4], map, rng: () => 0.5 });
+  const result = castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: resolution.targetIds, allParticipants: participants, currentRound: 1, battleId: "b", diceRolls: [4], map, rng: () => 0.5 });
 
   expect(result.success).toBe(true);
   expect(result.allParticipantsUpdated.find((p) => p.basicInfo.id === "invisible")?.combatStats.currentHp).toBe(16);

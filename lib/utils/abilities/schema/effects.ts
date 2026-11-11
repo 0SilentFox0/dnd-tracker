@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
 import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, MANEUVERS, STAT_KEYS, type StatKey } from "./kinds";
+import { SYSTEM_EFFECT_SCHEMAS,type SystemEffect } from "./system-effects";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
@@ -303,13 +304,18 @@ export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFEC
 
 export const RandomOfSchema = z.object({ kind: z.literal("randomOf"), options: z.array(NonRandomEffectSchema).min(2) });
 
-export const EffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema]);
+export const BaseEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema]);
 
-export type Effect = z.infer<typeof EffectSchema>;
+// system kinds exist at runtime only: the static Effect type stays the spell-compatible base union (see AnyEffect)
+export const EffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, ...(SYSTEM_EFFECT_SCHEMAS as unknown as typeof BASE_EFFECTS), RandomOfSchema]) as unknown as typeof BaseEffectSchema;
+
+export type Effect = z.infer<typeof BaseEffectSchema>;
+
+export type AnyEffect = Effect | SystemEffect;
 
 export type NonRandomEffect = z.infer<typeof NonRandomEffectSchema>;
 
-export type EffectKind = Effect["kind"];
+export type EffectKind = AnyEffect["kind"];
 
 export type StaticEffect = Extract<Effect, { kind: "modifyStat" | "damageBonus" | "flag" }>;
 

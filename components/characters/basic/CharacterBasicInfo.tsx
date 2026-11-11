@@ -20,6 +20,10 @@ interface CharacterBasicInfoProps {
   campaignMembers?: CampaignMember[];
   races?: Race[];
   isPlayerView?: boolean;
+  hideProgression?: boolean;
+  hideLineage?: boolean;
+  hideClass?: boolean;
+  hideAlignment?: boolean;
   classMode?: { classes: GameClassData[]; byId: Record<string, GameClassData> };
 }
 
@@ -28,6 +32,10 @@ export function CharacterBasicInfo({
   campaignMembers = [],
   races = [],
   isPlayerView = false,
+  hideProgression = false,
+  hideLineage = false,
+  hideClass = false,
+  hideAlignment = false,
   classMode,
 }: CharacterBasicInfoProps) {
   const t = useTranslations("characters.form.basic");
@@ -87,6 +95,8 @@ export function CharacterBasicInfo({
         </div>
       )}
 
+      {!hideLineage && (
+        <>
       <div className="w-full min-w-0">
         <Label htmlFor="race">{t("race")}</Label>
         <SelectField
@@ -110,7 +120,9 @@ export function CharacterBasicInfo({
         containerClassName="w-full min-w-0"
         className="w-full"
       />
-      {classMode ? (
+        </>
+      )}
+      {hideClass ? null : classMode ? (
         <CharacterClassesField value={data.classes ?? []} classes={classMode.classes} onChange={setClasses} />
       ) : (
         <>
@@ -135,7 +147,7 @@ export function CharacterBasicInfo({
         />
         </>
       )}
-      {!isPlayerView && !classMode && (
+      {!isPlayerView && !classMode && !hideProgression && (
         <div className="w-full min-w-0">
           <Label htmlFor="archetype">{t("archetype")}</Label>
           <SelectField
@@ -150,6 +162,7 @@ export function CharacterBasicInfo({
         </div>
       )}
 
+      {!hideLineage && !hideAlignment && (
       <div className="w-full min-w-0">
         <Label htmlFor="alignment">{t("alignment")}</Label>
         <SelectField
@@ -162,8 +175,9 @@ export function CharacterBasicInfo({
           triggerClassName="w-full"
         />
       </div>
+      )}
 
-      {!classMode && (
+      {!classMode && !hideProgression && (
         <div className="col-span-2 grid grid-cols-3 gap-2">
           <LabeledInput
             id="level"

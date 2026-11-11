@@ -10,6 +10,7 @@ import { applyBalanceDamageMultiplier, balanceDamageMultiplier, scaleAdditionalD
 import { rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const club: BattleAttack = { id: "c", name: "Палиця", type: AttackType.MELEE, attackBonus: 0, damageDice: "2d6", damageType: "bludgeoning" };
@@ -29,7 +30,7 @@ const fireSpell: CastableSpell = {
 };
 
 const hit = (a: BattleParticipant, t: BattleParticipant = target) =>
-  computeHitDamage({ attacker: a, target: t, attack: club, damageRolls: [3, 3], allParticipants: [a, t], attackRoll: { isCritical: false }, currentRound: 1 });
+  computeHitDamage({ rules: DEFAULT_RULES, attacker: a, target: t, attack: club, damageRolls: [3, 3], allParticipants: [a, t], attackRoll: { isCritical: false }, currentRound: 1 });
 
 describe("damageMultiplier юніта", () => {
   it("відсутній або некоректний = ×1", () => {
@@ -75,7 +76,7 @@ describe("damageMultiplier юніта", () => {
 
       const c = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } } };
 
-      const r = castSpell({ caster: c, spell: fireSpell, targetIds: ["t"], allParticipants: [c, t], currentRound: 1, battleId: "b", diceRolls: [10] });
+      const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: fireSpell, targetIds: ["t"], allParticipants: [c, t], currentRound: 1, battleId: "b", diceRolls: [10] });
 
       return 99 - (r.allParticipantsUpdated.find((p) => p.basicInfo.id === "t")?.combatStats.currentHp ?? 99);
     };
@@ -98,7 +99,7 @@ describe("множник застосовується рівно раз на к�
   const timesMultiplier = (r: ReturnType<typeof hit>) => rowLines(r.damageCalculation.breakdown).filter((l) => l.includes("Рівний бій")).length;
 
   const crit = (effectType: CriticalEffectType, a: BattleParticipant, t: BattleParticipant = target, extra: Partial<Parameters<typeof computeHitDamage>[0]> = {}) =>
-    computeHitDamage({
+    computeHitDamage({ rules: DEFAULT_RULES,
       attacker: a,
       target: t,
       attack: club,
@@ -131,7 +132,7 @@ describe("множник застосовується рівно раз на к�
   it("частка шкоди між цілями береться від уже масштабованої шкоди", () => {
     const base = hit(attacker);
 
-    const result = computeHitDamage({ attacker: scaled(attacker, 1.5), target, attack: club, damageRolls: [3, 3], allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1, damageMultiplier: 0.5 });
+    const result = computeHitDamage({ rules: DEFAULT_RULES, attacker: scaled(attacker, 1.5), target, attack: club, damageRolls: [3, 3], allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1, damageMultiplier: 0.5 });
 
     expect(result.physicalDamage).toBe(Math.round(base.physicalDamage * 1.5));
     expect(result.totalFinalDamage).toBe(Math.floor(result.physicalDamage * 0.5));
@@ -139,9 +140,9 @@ describe("множник застосовується рівно раз на к�
   });
 
   it("контратака bonusPercent: множник до бонусу, один раз", () => {
-    const base = computeHitDamage({ attacker, target, attack: club, damageRolls: [3, 3], allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1, bonusPercent: 50 });
+    const base = computeHitDamage({ rules: DEFAULT_RULES, attacker, target, attack: club, damageRolls: [3, 3], allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1, bonusPercent: 50 });
 
-    const result = computeHitDamage({ attacker: scaled(attacker, 1.5), target, attack: club, damageRolls: [3, 3], allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1, bonusPercent: 50 });
+    const result = computeHitDamage({ rules: DEFAULT_RULES, attacker: scaled(attacker, 1.5), target, attack: club, damageRolls: [3, 3], allParticipants: [attacker, target], attackRoll: { isCritical: false }, currentRound: 1, bonusPercent: 50 });
 
     const unscaled = hit(attacker).physicalDamage;
 
@@ -163,7 +164,7 @@ describe("множник застосовується рівно раз на к�
 
       const c = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } } };
 
-      const out = castSpell({ caster: c, spell: aoe, targetIds: ["t1", "t2"], allParticipants: [c, t1, t2], currentRound: 1, battleId: "b", diceRolls: [10], saveRolls: saves });
+      const out = castSpell({ rules: DEFAULT_RULES, caster: c, spell: aoe, targetIds: ["t1", "t2"], allParticipants: [c, t1, t2], currentRound: 1, battleId: "b", diceRolls: [10], saveRolls: saves });
 
       return ["t1", "t2"].map((id) => 99 - (out.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 99));
     };

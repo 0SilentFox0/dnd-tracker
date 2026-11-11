@@ -13,6 +13,7 @@ import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { type Segment, uniqueLines } from "@/lib/utils/abilities/segments";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { targetingLabel } from "@/lib/utils/spells/model/labels";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
@@ -129,6 +130,7 @@ export function previewCastFx(castable: CastableSpell): SpellFxResult {
       diceRolls: Array.from({ length: Math.max(1, castable.definition.dice) }, () => 4),
       saveRolls: targetIds.map((participantId) => ({ participantId, roll: 1 })),
       rng: () => 0.01,
+      rules: DEFAULT_RULES,
     });
 
     if (!result.success) return failed("the spell did not take effect");

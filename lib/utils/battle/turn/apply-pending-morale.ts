@@ -22,7 +22,7 @@ export function applyPendingMoraleCheck(
   battleId: string,
   battleLogLength: number,
   rng: () => number = Math.random,
-  rules?: Ruleset,
+  rules: Ruleset,
 ): ApplyPendingMoraleResult {
   const { participantId, d10Roll, moraleResult } = payload;
 

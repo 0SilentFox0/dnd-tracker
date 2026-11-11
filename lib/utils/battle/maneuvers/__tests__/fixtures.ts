@@ -5,6 +5,7 @@ import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { byId, CLAWS, hpOf, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export const MAP: BattleMapConfig = testMap(20);
@@ -25,6 +26,6 @@ export function perform(ps: BattleParticipant[], ability: keyof typeof ABILITIES
   return runAbilities(
     ps,
     { type: "action", actorId: "g", abilityKey: ABILITIES[ability].key, targetIds: opts.targetIds ?? [], ...(opts.targetCell && { targetCell: opts.targetCell }) },
-    { round: opts.round ?? 1, rng: opts.rng ?? (() => 0), ...(opts.map && { map: opts.map }) },
+    { rules: DEFAULT_RULES, round: opts.round ?? 1, rng: opts.rng ?? (() => 0), ...(opts.map && { map: opts.map }) },
   );
 }

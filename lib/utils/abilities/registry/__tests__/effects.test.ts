@@ -7,6 +7,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { applyEffect, describeEffect as describeEffectSegments, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { renderSegments } from "@/lib/utils/abilities/segments";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const t = await ukT();
 
@@ -23,7 +24,7 @@ function run(effect: Effect, targetIds: string[], ps = [makeParticipant({ id: "o
     effect,
     targetIds,
     event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 10 },
-    ctx: { round: 1, rng: seq(0.5) },
+    ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
   });
 }
 

@@ -6,6 +6,7 @@ import { buildMockParticipants } from "./mock-participants";
 
 import { CombatStatus, DEFAULT_BATTLE_MAP, MAZE_MARK_SYMBOLS } from "@/lib/constants/battle";
 import { aimView, cellKey, cellsOf, deriveTrajectory, type MapAim, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks, templateArea } from "@/lib/utils/battle/grid";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, MazeMarkSymbol, SpellTemplate } from "@/types/battle";
 
 export type BattleMapPlaygroundMode = "move" | "attack" | "template" | "maze-mark";
@@ -74,16 +75,16 @@ export function useBattleMapPlayground(snapshot: BattleMapPlaygroundSnapshot = {
 
   const mapAim = useMemo<MapAim>(() => ({ template: DEMO_TEMPLATE, casterId: active.basicInfo.id, range: DEMO_RANGE, onAim: () => undefined }), [active.basicInfo.id]);
 
-  const aimed = mode === "template" ? ((hover && aimView({ map, participants }, mapAim, hover)) || (aim && aimView({ map, participants }, mapAim, aim))) : null;
+  const aimed = mode === "template" ? ((hover && aimView({ map, participants, rules: DEFAULT_RULES }, mapAim, hover)) || (aim && aimView({ map, participants, rules: DEFAULT_RULES }, mapAim, aim))) : null;
 
   const marks = useMemo(
-    () => (mode === "move" ? moveZoneMarks(map, participants, active) : mode === "attack" && attack ? targetMarks(map, participants, active, [attack]) : new Map()),
+    () => (mode === "move" ? moveZoneMarks(map, participants, active, { rules: DEFAULT_RULES }) : mode === "attack" && attack ? targetMarks(map, participants, active, [attack], DEFAULT_RULES) : new Map()),
     [mode, map, participants, active, attack],
   );
 
-  const costs = useMemo(() => moveMarks(map, participants, active), [map, participants, active]);
+  const costs = useMemo(() => moveMarks(map, participants, active, { rules: DEFAULT_RULES }), [map, participants, active]);
 
-  const trajectory = mode === "attack" ? deriveTrajectory({ map, participants, marks, current: active }, hover) : null;
+  const trajectory = mode === "attack" ? deriveTrajectory({ map, participants, marks, current: active, rules: DEFAULT_RULES }, hover) : null;
 
   const hud = useMemo(() => new Map(participants.map((p) => [p.basicInfo.id, { exact: true }])), [participants]);
 
@@ -133,9 +134,9 @@ export function useBattleMapPlayground(snapshot: BattleMapPlaygroundSnapshot = {
       }
 
       if (mode === "template") {
-        if (!aimView({ map, participants }, mapAim, p)) return pushLog({ key: "outOfRange", params: {} });
+        if (!aimView({ map, participants, rules: DEFAULT_RULES }, mapAim, p)) return pushLog({ key: "outOfRange", params: {} });
 
-        const hit = templateArea(map, participants, active, DEMO_TEMPLATE, p).targets;
+        const hit = templateArea(map, participants, active, DEMO_TEMPLATE, p, DEFAULT_RULES).targets;
 
         setAim(p);
         pushLog({ key: "template", params: { cell: key, names: hit.map((q) => q.basicInfo.name).join(", ") } });

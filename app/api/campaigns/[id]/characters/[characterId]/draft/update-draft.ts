@@ -14,12 +14,16 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { storedDraftChoices } from "@/lib/utils/characters/choices/picks";
 import { validateAbilityScores } from "@/lib/utils/characters/generate";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { patchWfrpDraft } from "@/systems/wfrp/server/draft/patch-wfrp-draft";
 import type { CharacterClassEntry } from "@/types/classes";
 
 export async function updateDraft(request: Request, campaignId: string, characterId: string): Promise<NextResponse> {
   const access = await requireCampaignAccess(campaignId);
 
   if (access instanceof NextResponse) return access;
+
+  if (ruleSystemOf(access.campaign.rules).creation) return patchWfrpDraft(request, campaignId, characterId, access);
 
   const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: { campaignId: true, controlledBy: true, status: true, race: true, goals: true, skills: true, backgroundId: true, backgroundChoices: true, backgroundFeatPicks: true, raceChoices: true, feats: true, classes: true } }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND);
 

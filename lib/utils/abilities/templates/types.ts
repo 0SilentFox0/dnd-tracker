@@ -3,7 +3,7 @@ import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 export type RecipeScope = "ability" | "spell";
 
-export type RecipeCategory = "defense" | "offense" | "support" | "resource" | "control";
+export type RecipeCategory = "defense" | "offense" | "support" | "resource" | "control" | "traits";
 
 export type ParamDef = {
   key: string;
@@ -24,6 +24,7 @@ export type Recipe = {
   id: string;
   category: RecipeCategory;
   scopes: readonly RecipeScope[];
+  textKey?: string;
   params: readonly ParamDef[];
   build: (v: RecipeValues, ctx: RecipeContext) => RecipeResult;
 };

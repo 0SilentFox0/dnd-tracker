@@ -10,6 +10,7 @@ import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-s
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 const foe = (id: string, abilities: { creatureType?: string; cr?: number }, fly?: number) => {
@@ -82,7 +83,7 @@ describe("modifyStat atLeast for armor and speed", () => {
   it("speed at least 60 raises the movement budget", () => {
     const p = withEffect("speed", 60);
 
-    expect(movementBudget({ ...p, combatStats: { ...p.combatStats, speed: 30 } })).toBe(12);
+    expect(movementBudget({ ...p, combatStats: { ...p.combatStats, speed: 30 } }, DEFAULT_RULES)).toBe(12);
   });
 
   it("schema: armor/speed atLeast needs a duration, abilities stay capped at 30", () => {

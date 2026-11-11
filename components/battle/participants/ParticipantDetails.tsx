@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 
 import { HitFrame } from "@/components/battle/fx/PortraitFx";
-import { EffectIcon, HealthBar, HealthLabel, hitFlashClass, HitFloat, ZoomablePortrait } from "@/components/battle/hud";
+import { EffectIcon, HealthBar, HealthLabel, hitFlashClass, HitFloat, HpFigure, ZoomablePortrait } from "@/components/battle/hud";
 import { MonsterStatblock } from "@/components/common/MonsterStatblock";
-import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
+import { useBattleRules, useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { lineKey } from "@/lib/i18n/text-ref";
 import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
@@ -62,6 +62,8 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
 
   const { battle, viewer, effects: allEffects } = useBattleSceneData();
 
+  const { d20Stats, hpTerm } = useBattleRules();
+
   const impactFor = useFxImpacts();
 
   const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impactFor(live.basicInfo.id));
@@ -86,12 +88,12 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
         <ZoomablePortrait flashKey={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(!change?.impact && hitFlashClass(change))} />
         <div>
           <div className="hud-sc text-[22px] font-bold leading-7">{participant.basicInfo.name}</div>
-          {exact ? <div className="text-sm text-hud-text">{participant.combatStats.currentHp} / {participant.combatStats.maxHp}</div> : <HealthLabel participant={participant} />}
+          {exact ? <div className="text-sm text-hud-text"><HpFigure participant={participant} wounds={hpTerm === "wounds"} /></div> : <HealthLabel participant={participant} />}
         </div>
       </div>
       <HealthBar participant={participant} exact={exact} className="mt-3" />
       {statblock && <Section title={t("statblock")}><MonsterStatblock block={statblock} /></Section>}
-      <Section title={t("armor")}>
+      {d20Stats && <Section title={t("armor")}>
         <div className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
           <span>{exact ? t("ac") : t("acBetween")}</span>
           <span className="font-medium text-[var(--ink)]">{exact ? getEffectiveArmorClass(participant, battle.initiativeOrder) : formatKnownArmorClass(known)}</span>
@@ -101,7 +103,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
             {t("evidence", { hit: e.hit ? "hit" : "miss", total: e.total, actor: e.actorName, round: e.round })}
           </div>
         ))}
-      </Section>
+      </Section>}
       <Section title={t("effects")}>
         {effects.length === 0 && <div className="py-2 text-sm text-[var(--hud-muted)]">{t("none")}</div>}
         {effects.map((e) => <EffectRow key={e.id} effect={e} />)}

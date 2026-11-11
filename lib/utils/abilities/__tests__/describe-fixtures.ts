@@ -5,6 +5,7 @@ import { EFFECT_REGISTRY } from "../registry/effects";
 import { FLAG_REGISTRY } from "../registry/effects/flags";
 import { TRIGGER_REGISTRY } from "../registry/triggers";
 import type { Ability, Condition, Effect, EffectKind, FlagKey, Limits, Trigger } from "../schema";
+import type { SystemEffect } from "../schema/system-effects";
 
 import type { Locale } from "@/lib/i18n/config";
 import type { Translator } from "@/lib/i18n/translator";
@@ -12,7 +13,7 @@ import { CONDITION_5E_KEYS, CONDITION_KEYS } from "@/lib/utils/abilities/schema/
 
 const duration = { rounds: 2 };
 
-const BASE_EFFECTS: Record<Exclude<EffectKind, "help" | "push">, Effect> = {
+const BASE_EFFECTS: Record<Exclude<EffectKind, "help" | "push" | SystemEffect["kind"]>, Effect> = {
   modifyStat: { kind: "modifyStat", stat: "armor", flat: 2 },
   damageBonus: { kind: "damageBonus", filter: { kind: "melee" }, percent: 10 },
   flag: { kind: "flag", flag: "guaranteedHit" },
@@ -98,6 +99,14 @@ const VARIANT_EFFECTS: Effect[] = [
   { kind: "maneuver", maneuver: "fireBurst", percentOfAttack: 120 },
 ];
 
+const TRAIT_FIXTURES = [
+  { kind: "wfrpArmour", head: 1, body: 2, arm: 3, leg: 4 },
+  { kind: "wfrpWard", value: 9 },
+  { kind: "wfrpSize", size: "large" },
+  { kind: "wfrpPsychology", psychology: "terror", value: 2 },
+  { kind: "wfrpAttack", attack: "breath", damage: 5, rangeFt: 36, magical: true },
+] as const satisfies readonly SystemEffect[];
+
 const MERGED_EFFECTS: Effect[] = [
   { kind: "help", target: "eventTarget" },
   { kind: "push", feet: 10, from: "caster", target: "eventTarget" },
@@ -112,7 +121,7 @@ const MERGED_EFFECTS: Effect[] = [
   { kind: "damageBonus", filter: { kind: "magic" }, flat: { spellRoll: 50 } },
 ];
 
-export const EFFECT_FIXTURES: Effect[] = [...Object.values(BASE_EFFECTS), ...FLAG_FIXTURES, ...VARIANT_EFFECTS, ...MERGED_EFFECTS];
+export const EFFECT_FIXTURES: Effect[] = [...Object.values(BASE_EFFECTS), ...FLAG_FIXTURES, ...VARIANT_EFFECTS, ...MERGED_EFFECTS, ...(TRAIT_FIXTURES as unknown as Effect[])];
 
 const isStatic = (e: Effect) => EFFECT_REGISTRY[e.kind].static;
 

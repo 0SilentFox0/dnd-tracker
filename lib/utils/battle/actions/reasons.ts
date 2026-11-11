@@ -4,6 +4,8 @@ import type { TextArg, TextRef } from "@/types/text";
 export const ACTION_REASONS = [
   "actionUsed",
   "bonusUsed",
+  "noBonusAction",
+  "noReaction",
   "targetMissing",
   "readiedMissing",
   "enemyRequired",

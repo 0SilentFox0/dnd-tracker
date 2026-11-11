@@ -24,7 +24,7 @@ function counted<P extends object>(original: FunctionComponent<P> | MemoExoticCo
     return inner(props);
   };
 
-  return "type" in original ? memo(Counted) : Counted;
+  return "type" in original ? memo(Counted, (original as { compare?: ((a: P, b: P) => boolean) | null }).compare ?? undefined) : Counted;
 }
 
 vi.mock("@/components/battle/participants/ParticipantList", async (orig) => {
@@ -53,6 +53,7 @@ import { battleQueryKey } from "@/lib/hooks/battles";
 import { ConfirmContext } from "@/lib/hooks/common";
 import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -81,7 +82,7 @@ const order = [
 
 const battle = {
   id: "b1", campaignId: "c1", name: "Засідка", status: "active", participants: [], currentRound: 1, currentTurnIndex: 0,
-  initiativeOrder: order, pendingSummons: [], battleLog: [], createdAt: "", version: 5, isDM: false,
+  initiativeOrder: order, pendingSummons: [], battleLog: [], createdAt: "", version: 5, isDM: false, rules: DEFAULT_RULES,
   campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingCritChoice: null,
 } as unknown as BattleScene;
 

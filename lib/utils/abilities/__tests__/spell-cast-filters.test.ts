@@ -4,6 +4,7 @@ import { makeParticipant, resolved } from "./fixtures";
 
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
 const trig = (extra: object) => ({ event: "spellCast", phase: "after", role: "caster", ...extra }) as never;
@@ -23,7 +24,7 @@ describe("spellCast filters", () => {
   ])("filter %o on %o fires=%s", (filter, over, fires) => {
     const caster = makeParticipant({ id: "c", abilities: [resolved({ trigger: trig(filter), effects: [{ kind: "changeMorale", delta: 1 }] })] });
 
-    const r = runAbilities([caster, makeParticipant({ id: "t" })], cast(over), { round: 1, rng: () => 0 });
+    const r = runAbilities([caster, makeParticipant({ id: "t" })], cast(over), { rules: DEFAULT_RULES, round: 1, rng: () => 0 });
 
     expect(r.participants.find((p) => p.basicInfo.id === "c")?.combatStats.morale === 1).toBe(fires);
   });

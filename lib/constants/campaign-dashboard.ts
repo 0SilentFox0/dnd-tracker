@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Award, BookOpen, Contact, Cpu, Gem, GitBranch, GraduationCap, Images, Map as MapIcon, Music, Network, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
+import { Award, BookOpen, Briefcase, Contact, Cpu, Gem, GitBranch, GraduationCap, Images, Map as MapIcon, Music, Network, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
 
 import { dmTilesFor } from "@/lib/constants/campaigns";
 
@@ -36,6 +36,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "races", href: dm("races"), icon: Shield, group: "libraries" },
   { key: "classes", href: dm("classes"), icon: GraduationCap, group: "libraries" },
   { key: "backgrounds", href: dm("backgrounds"), icon: Award, group: "libraries" },
+  { key: "careers", href: dm("careers"), icon: Briefcase, group: "libraries" },
   { key: "feats", href: dm("feats"), icon: Award, group: "libraries" },
   { key: "spell-groups", href: dm("spell-groups"), icon: Wand2, group: "libraries" },
   { key: "rules", href: dm("rules"), icon: Scale, group: "libraries" },
@@ -50,6 +51,7 @@ const CAMPAIGN_LEVEL_KEYS = new Set(["info", "acquaintances"]);
 export interface DashboardContext {
   isTemplate: boolean;
   classesEnabled: boolean;
+  systemKey?: string;
 }
 
 export const DEFAULT_DASHBOARD_CONTEXT: DashboardContext = { isTemplate: false, classesEnabled: false };

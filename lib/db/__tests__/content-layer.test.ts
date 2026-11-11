@@ -9,8 +9,8 @@ import { createScopedDatabase, currentTransaction } from "@/lib/server/content/w
 describe("layer config derived from the schema", () => {
   const models = layeredModels();
 
-  it("covers all 13 content models with their base twins and hide tables", () => {
-    expect(Object.keys(models).sort()).toEqual(["Artifact", "ArtifactSet", "Background", "CampaignTrack", "Feat", "GameClass", "MainSkill", "Race", "Skill", "SkillTree", "Spell", "SpellGroup", "Unit"]);
+  it("covers all 14 content models with their base twins and hide tables", () => {
+    expect(Object.keys(models).sort()).toEqual(["Artifact", "ArtifactSet", "Background", "CampaignTrack", "Career", "Feat", "GameClass", "MainSkill", "Race", "Skill", "SkillTree", "Spell", "SpellGroup", "Unit"]);
     expect(models.GameClass).toMatchObject({ local: "gameClass", base: "gameClassBase", hideTable: "classes" });
     expect(models.Spell).toMatchObject({ local: "spell", base: "spellBase", hideTable: "spells" });
   });
@@ -28,7 +28,7 @@ describe("layer config derived from the schema", () => {
   });
 
   it("lists the campaign relations that hold layered rows", () => {
-    expect(Object.keys(campaignRelations()).sort()).toEqual(["artifactSets", "artifacts", "backgrounds", "classes", "feats", "mainSkills", "races", "skillTrees", "skills", "spellGroups", "spells", "tracks", "units"]);
+    expect(Object.keys(campaignRelations()).sort()).toEqual(["artifactSets", "artifacts", "backgrounds", "careers", "classes", "feats", "mainSkills", "races", "skillTrees", "skills", "spellGroups", "spells", "tracks", "units"]);
   });
 
   it("base field sets exclude the local-only columns", () => {

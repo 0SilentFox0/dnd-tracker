@@ -4,6 +4,7 @@ import { context, participant } from "./fixtures";
 
 import { initiativeRollMutation } from "@/lib/server/battles/mutations/initiative/initiative-roll-mutation";
 import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
+import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 
@@ -17,7 +18,7 @@ describe("rollback of an initiative roll", () => {
 
     const rolled = initiativeRollMutation(start, {});
 
-    const after = { ...start, participants: rolled.participants, scene: { ...start.scene, ...rolled.scene, eventSeq: 8 } };
+    const after = { ...start, participants: rolled.participants, scene: { ...applyScenePatch(start.scene, rolled.scene ?? {}), eventSeq: 8 } };
 
     const split = before.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false }));
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { diceThrowsOf, MAX_INITIATIVE_DICE } from "@/lib/utils/battle/fx/dice";
+import { diceThrowsOf, MAX_INITIATIVE_DICE, percentileDice } from "@/lib/utils/battle/fx/dice";
 import type { BattleAction } from "@/types/battle";
 
 const action = (over: Partial<BattleAction> & { actionDetails: BattleAction["actionDetails"] }): BattleAction =>
@@ -46,5 +46,34 @@ describe("diceThrowsOf", () => {
     expect(specs[0].groups).toEqual([[{ sides: 20, value: 1 }, { sides: 20, value: 2 }, { sides: 20, value: 3 }]]);
     expect(diceThrowsOf(ev(15))[0].groups[0]).toHaveLength(MAX_INITIATIVE_DICE);
     expect(diceThrowsOf(ev(3))[0].seed).toBe(diceThrowsOf(ev(3))[0].seed);
+  });
+});
+
+describe("percentileDice", () => {
+  it("ділить d100 на десятки й одиниці", () => {
+    expect(percentileDice(100)).toEqual([{ sides: 10, value: 10, tens: true }, { sides: 10, value: 10, units: true }]);
+    expect(percentileDice(70)).toEqual([{ sides: 10, value: 7, tens: true }, { sides: 10, value: 10, units: true }]);
+    expect(percentileDice(7)).toEqual([{ sides: 10, value: 10, tens: true }, { sides: 10, value: 7, units: true }]);
+    expect(percentileDice(45)).toEqual([{ sides: 10, value: 4, tens: true }, { sides: 10, value: 5, units: true }]);
+  });
+
+  it("d100-дія дає пару d10 першою пачкою", () => {
+    const pct = { roll: 45, target: 50, sl: 0, netSl: 0, location: "body", doubles: false } as never;
+
+    const specs = diceThrowsOf(action({ actionDetails: { system: { key: "wfrp", data: { attack: pct } } } }));
+
+    expect(specs).toHaveLength(1);
+    expect(specs[0].groups[0]).toEqual(percentileDice(45));
+  });
+
+  it("P9: лише каст або чужий ключ — без кидка d100", () => {
+    const cast = { roll: 45, target: 50, sl: 0, cn: 3, channelled: 0, armourSl: 0, doubles: false, outcome: "failure", overcastSteps: 0, miscast: null };
+
+    expect(diceThrowsOf(action({ actionDetails: { system: { key: "wfrp", data: { cast } } } }))).toEqual([]);
+    expect(diceThrowsOf(action({ actionDetails: { system: { key: "zzz", data: { attack: { roll: 45 } } } } }))).toEqual([]);
+  });
+
+  it("d20-дія без змін", () => {
+    expect(diceThrowsOf(action({ actionDetails: { diceRolls: [{ kind: "attack", rollerId: "a", dice: [{ sides: 20, value: 9 }] }] } }))).toHaveLength(1);
   });
 });

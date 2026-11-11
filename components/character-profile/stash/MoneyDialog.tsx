@@ -11,6 +11,7 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { type Coin, COINS } from "@/lib/constants/inventory";
 import { useStashAction } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
+import type { CurrencyView } from "@/lib/hooks/systems";
 import type { Purse } from "@/types/inventory";
 
 export type MoneyMode = "spend" | "gain" | "set";
@@ -20,11 +21,12 @@ const FORM_ID = "money-form";
 interface MoneyDialogProps {
   mode: MoneyMode;
   purse: Purse;
+  currency?: CurrencyView;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProps) {
+export function MoneyDialog({ mode, purse, currency, open, onOpenChange }: MoneyDialogProps) {
   const { campaignId, characterId } = useProfile();
 
   const t = useTranslations("inventory");
@@ -32,6 +34,8 @@ export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProp
   const action = useStashAction(campaignId, characterId);
 
   const notify = useNotify();
+
+  const label = (c: Coin) => (currency ? currency.label(c) : t(`coins.${c}`));
 
   const [amount, setAmount] = useState("1");
 
@@ -75,7 +79,7 @@ export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProp
         {mode === "set" ? (
           <div className="grid grid-cols-3 gap-2">
             {COINS.map((c) => (
-              <Input key={c} type="number" min={0} step={1} inputMode="numeric" aria-label={t(`coins.${c}`)} value={set[c]} onChange={(e) => setSet({ ...set, [c]: e.target.value })} className="h-11" />
+              <Input key={c} type="number" min={0} step={1} inputMode="numeric" aria-label={label(c)} value={set[c]} onChange={(e) => setSet({ ...set, [c]: e.target.value })} className="h-11" />
             ))}
           </div>
         ) : (
@@ -84,7 +88,7 @@ export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProp
               <Input type="number" min={1} step={1} inputMode="numeric" aria-label={t("money.amount")} value={amount} onChange={(e) => setAmount(e.target.value)} className="h-11 min-w-0 flex-1" autoFocus />
               <select aria-label={t("money.coin")} value={coin} onChange={(e) => setCoin(e.target.value as Coin)} className="h-11 rounded-md border border-hud-line bg-hud-field px-2 text-hud-ink">
                 {COINS.map((c) => (
-                  <option key={c} value={c}>{t(`coins.${c}`)}</option>
+                  <option key={c} value={c}>{label(c)}</option>
                 ))}
               </select>
             </div>

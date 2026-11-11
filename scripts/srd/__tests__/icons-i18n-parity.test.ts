@@ -1,9 +1,10 @@
 import { expect, it } from "vitest";
 
-import type { IconsFile } from "../../assets/tokens-5e/icons-file";
 import { expectedTargets, IDENTITY_BUCKET } from "../../assets/tokens-5e/identity-catalog";
+import { withIcons } from "../../templates/lib/icons-file";
+import type { IconsFile, PackRow } from "../../templates/lib/pack";
+import { withClassIcons } from "../../templates/systems/d20/prepare";
 import { readSrdData, toImportRows } from "../lib/data-files";
-import { withClassIcons, withIcons } from "../lib/load-template";
 
 const fakeIcons = (): IconsFile => {
   const icons: IconsFile = { features: {}, races: {}, classes: {}, subclasses: {}, backgrounds: {}, feats: {}, spells: {}, units: {}, artifacts: {} };
@@ -27,9 +28,9 @@ const iconPaths = (locale: string) => {
   const icons = fakeIcons();
 
   return (["races", "classes", "backgrounds", "feats"] as const).flatMap((kind) => {
-    const merged = withIcons(kind, data, toImportRows(data[kind]), icons);
+    const merged = withIcons(toImportRows(data[kind]) as PackRow[], icons[kind]);
 
-    return flatten(kind === "classes" ? withClassIcons(merged, data, icons) : merged, kind);
+    return flatten(kind === "classes" ? withClassIcons(merged, icons) : merged, kind);
   });
 };
 

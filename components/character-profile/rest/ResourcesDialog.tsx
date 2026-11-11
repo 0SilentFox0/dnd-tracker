@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,12 +14,15 @@ import { useEditResources } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
 import { MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
 import { GRANT_POOL_PREFIX, ITEM_POOL_PREFIX } from "@/lib/utils/items/pools";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import type { ResourcesEditBody, SheetRest } from "@/types/characters";
 
 const FORM_ID = "resources-edit-form";
 
 export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest; open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { campaignId, characterId } = useProfile();
+  const { campaignId, characterId, sheet } = useProfile();
+
+  const { d20Stats } = RULE_SYSTEM_REGISTRY[sheet.system];
 
   const t = useTranslations("rest.resources");
 
@@ -32,6 +36,10 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
 
   const [temp, setTemp] = useState(String(rest.hp?.temp ?? 0));
 
+  const Ui = systemUiOf(sheet.system);
+
+  const [extra, setExtra] = useState(() => Ui.resourceDefaults?.(sheet) ?? {});
+
   const [exhaustion, setExhaustion] = useState(String(rest.exhaustion ?? 0));
 
   const itemCharges = rest.charges.filter((c) => c.key.startsWith(ITEM_POOL_PREFIX) || c.key.startsWith(GRANT_POOL_PREFIX));
@@ -42,9 +50,9 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
 
   const send = (body: ResourcesEditBody) => void edit.mutateOk(body).then((ok) => ok && onOpenChange(false));
 
-  const filled = [hp, temp, exhaustion].every((v) => v.trim() !== "");
+  const filled = [hp, temp, exhaustion, ...Object.values(extra)].every((v) => v.trim() !== "");
 
-  const save = () => filled && send({ hp: Number(hp), tempHp: Number(temp), exhaustion: Number(exhaustion), ...(Object.keys(changedCharges).length > 0 && { charges: changedCharges }) });
+  const save = () => filled && send({ hp: Number(hp), tempHp: Number(temp), exhaustion: Number(exhaustion), ...Object.fromEntries(Object.entries(extra).map(([key, value]) => [key, Number(value)])), ...(Object.keys(changedCharges).length > 0 && { charges: changedCharges }) });
 
   const toggleDead = async () => {
     if (rest.dead || (await confirm({ title: t("deadConfirmTitle"), confirmLabel: t("deadConfirm"), destructive: true }))) send({ dead: !rest.dead });
@@ -75,14 +83,19 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
           <Label htmlFor="res-hp">{t("hp", { max: rest.hp?.max ?? "—" })}</Label>
           <Input id="res-hp" type="number" min={0} value={hp} onChange={(e) => setHp(e.target.value)} />
         </div>
-        <div>
-          <Label htmlFor="res-temp">{t("tempHp")}</Label>
-          <Input id="res-temp" type="number" min={0} value={temp} onChange={(e) => setTemp(e.target.value)} />
-        </div>
-        <div>
-          <Label htmlFor="res-exh">{t("exhaustion")}</Label>
-          <Input id="res-exh" type="number" min={0} max={MAX_EXHAUSTION} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
-        </div>
+        {d20Stats && (
+          <>
+            <div>
+              <Label htmlFor="res-temp">{t("tempHp")}</Label>
+              <Input id="res-temp" type="number" min={0} value={temp} onChange={(e) => setTemp(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="res-exh">{t("exhaustion")}</Label>
+              <Input id="res-exh" type="number" min={0} max={MAX_EXHAUSTION} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
+            </div>
+          </>
+        )}
+        {Ui.ResourceFields && <Ui.ResourceFields sheet={sheet} values={extra} onChange={(key, value) => setExtra((prev) => ({ ...prev, [key]: value }))} />}
         {itemCharges.map((c) => (
           <div key={c.key} className="col-span-3 grid grid-cols-[1fr_6rem] items-center gap-2">
             <Label htmlFor={`res-charge-${c.key}`}>{t("charge", { name: c.name, uses: c.uses })}</Label>

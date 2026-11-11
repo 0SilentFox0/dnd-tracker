@@ -1,6 +1,7 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleAudioState } from "@/types/audio";
 import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, IngredientStock, PendingHit } from "@/types/battle";
@@ -15,6 +16,7 @@ export interface BattleSceneState {
   eventSeq: number;
   pendingMoraleCheck: unknown | null;
   pendingCritChoice: StoredPendingCritChoice | null;
+  sceneState?: SystemSlot;
   startedAt: Date | null;
   turnStartedAt?: Date | null;
   completedAt: Date | null;
@@ -61,6 +63,9 @@ export interface ParticipantState {
   escaped?: boolean;
   mazeWakeRound?: number;
   ingredientStock?: IngredientStock;
+  ammo?: Record<string, number>;
+  psychologyTested?: Partial<Record<string, number>>;
+  reload?: Record<string, number>;
   spellSlotsCurrent: Record<string, number>;
 }
 
@@ -112,7 +117,7 @@ export interface LoadedBattle {
 
 export type ScenePatch = Partial<
   Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "startedAt" | "completedAt">
-> & { map?: BattleMapConfig | null; rules?: Ruleset };
+> & { map?: BattleMapConfig | null; rules?: Ruleset; sceneState?: SystemSlot | null };
 
 export interface BattleMutationOutcome {
   scene?: ScenePatch;
@@ -127,7 +132,7 @@ export interface BattleMutationOutcome {
 export interface BattleDelta {
   battleId: string;
   version: number;
-  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "turnStartedAt">;
+  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "turnStartedAt"> & { sceneState?: SystemSlot };
   upserted: BattleParticipant[];
   /** нові учасники й ті, чий знімок змінився */
   fullIds: string[];

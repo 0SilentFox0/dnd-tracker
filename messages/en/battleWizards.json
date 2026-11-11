@@ -21,7 +21,13 @@
     "weapon": {
       "melee": "melee",
       "ranged": "ranged",
-      "toHit": "{kind} · {bonus} to hit"
+      "toHit": "{kind} · {bonus} to hit",
+      "toHitPercent": "{kind} · {target}% to hit",
+      "ammo": {
+        "badge": "Ammo {left}/{capacity}",
+        "empty": "Out of ammo",
+        "reloading": "Reloading"
+      }
     },
     "target": {
       "cover": "There is an obstacle between the attacker and the target",
@@ -39,6 +45,19 @@
         "normal": "Normal",
         "advantage": "Advantage",
         "disadvantage": "Disadvantage"
+      },
+      "d100": {
+        "mode": {
+          "server": "Auto",
+          "manual": "Manual"
+        },
+        "target": "Target {target}% · {label}",
+        "damageDice": "Weapon damage: {dice} (rolled automatically)",
+        "momentum": {
+          "held": "Momentum: {side}",
+          "none": "No Momentum",
+          "side": "your side"
+        }
       }
     },
     "damage": {
@@ -51,7 +70,23 @@
       "unknown": "unknown",
       "estimate": "Estimate",
       "cunning": "Cunning Strike · instead of Sneak Attack dice ({dice}d6)",
-      "submit": "Attack"
+      "submit": "Attack",
+      "d100": {
+        "roll": "Roll {roll} vs {target}",
+        "sl": "SL {sl} · defense {defSl} · net {net}",
+        "net": "SL {net}",
+        "location": "Location: {location}",
+        "locations": {
+          "head": "head",
+          "arm": "arm",
+          "body": "body",
+          "leg": "leg"
+        },
+        "momentum": {
+          "gained": "Momentum gained",
+          "spent": "Momentum spent"
+        }
+      }
     }
   },
   "spell": {
@@ -113,7 +148,8 @@
     "ingredients": {
       "need": "Required: {list}",
       "missing": "Missing: {list}",
-      "autoPay": "{gp} gp will be paid from the purse"
+      "autoPay": "{gp} gp will be paid from the purse",
+      "use": "Use ingredient (cancels a miscast)"
     }
   },
   "bonus": {

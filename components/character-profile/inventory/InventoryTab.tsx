@@ -18,10 +18,12 @@ import { PurseBar } from "./PurseBar";
 
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HudPanel } from "@/components/hud/page";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useInventory } from "@/lib/hooks/characters";
 import { useSeenOnOpen } from "@/lib/hooks/notifications";
+import { useCurrency } from "@/lib/hooks/systems";
 import type { SpecialItem } from "@/types/inventory";
 
 export function InventoryTab() {
@@ -30,6 +32,10 @@ export function InventoryTab() {
   const t = useTranslations("inventory.tab");
 
   const inv = useInventory(campaignId, characterId, sheet);
+
+  const currency = useCurrency(campaignId);
+
+  const EquippedSummary = systemUiOf(sheet.system).EquippedSummary;
 
   const newIds = useSeenOnOpen(campaignId, { types: ["item"], enabled: sheet.viewer.isOwner && !sheet.viewer.isDM });
 
@@ -68,6 +74,7 @@ export function InventoryTab() {
         <div className="space-y-3">
           {sheet.items.attunement && <p className="text-xs text-hud-muted">{t("attunement", { used: sheet.items.attunement.used, limit: sheet.items.attunement.limit })}</p>}
           <EquipmentGrid inv={inv} />
+          {EquippedSummary && <EquippedSummary campaignId={campaignId} characterId={characterId} />}
           {inv.access.pending ? (
             <EmptyState title={t("pending")} />
           ) : (
@@ -75,7 +82,7 @@ export function InventoryTab() {
               <QueryState query={inv.backpack.query}>
                 {(view) => (
                   <>
-                    <PurseBar purse={view.purse} access={inv.access} onMode={setMoney} />
+                    <PurseBar purse={view.purse} access={inv.access} onMode={setMoney} currency={currency} />
                     <BackpackGrid inv={inv} onAdd={onAdd} newIds={newIds} />
                     <p className="text-xs text-hud-muted">{t("combatNote")}</p>
                   </>
@@ -125,7 +132,7 @@ export function InventoryTab() {
       />
       {grantOpen && <GrantArtifactDialog open onOpenChange={setGrantOpen} />}
       {editing && <ItemDialog item={editing === "new" ? null : editing} open onOpenChange={(o) => !o && setEditing(null)} />}
-      {money && inv.purse && <MoneyDialog mode={money} purse={inv.purse} open onOpenChange={(o) => !o && setMoney(null)} />}
+      {money && inv.purse && <MoneyDialog mode={money} purse={inv.purse} currency={currency} open onOpenChange={(o) => !o && setMoney(null)} />}
       {transfer && <TransferArtifactDialog artifact={transfer.artifact} source={transfer.source} open onOpenChange={(o) => !o && setTransfer(null)} />}
     </div>
   );

@@ -1,0 +1,40 @@
+{
+  "key": "heroes-homm",
+  "system": "homm",
+  "names": {
+    "en": "Heroes",
+    "uk": "Heroes"
+  },
+  "locales": [
+    "en",
+    "uk"
+  ],
+  "rules": {
+    "file": "rules.json"
+  },
+  "kinds": [
+    "spell-groups",
+    "spells",
+    "races",
+    "units",
+    "main-skills",
+    "skills",
+    "artifact-sets",
+    "artifacts",
+    "skillTrees",
+    "tracks"
+  ],
+  "icons": {},
+  "counts": {
+    "spell-groups": 4,
+    "spells": 54,
+    "races": 7,
+    "units": 153,
+    "main-skills": 11,
+    "skills": 120,
+    "artifact-sets": 6,
+    "artifacts": 20,
+    "skillTrees": 7,
+    "tracks": 97
+  }
+}

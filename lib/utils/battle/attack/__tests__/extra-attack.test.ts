@@ -25,7 +25,7 @@ const validate = (p: BattleParticipant): string => {
   const target = makeParticipant({ id: "t", side: "enemy" as never });
 
   try {
-    validateAttackRequest({ userId: "u", isDM: true, participants: [{ ...p, battleData: { ...p.battleData, attacks: [sword] } }, target], scene: { turnIndex: 0 } }, { attackerId: "f", targetId: "t", d20Roll: 10, damageRolls: [1] });
+    validateAttackRequest({ userId: "u", isDM: true, participants: [{ ...p, battleData: { ...p.battleData, attacks: [sword] } }, target], scene: { turnIndex: 0 } }, { attackerId: "f", targetId: "t", d20Roll: 10, damageRolls: [1] }, DEFAULT_RULES);
 
     return "ok";
   } catch (e) {
@@ -109,8 +109,8 @@ describe("extra attack", () => {
   it("pool keeps the turn open", () => {
     const used = spendAttack(fighter, [fighter], sword);
 
-    expect(turnExhausted(used, [])).toBe(false);
-    expect(turnExhausted(spendAttack(used, [used], sword), [])).toBe(true);
+    expect(turnExhausted(used, [], DEFAULT_RULES)).toBe(false);
+    expect(turnExhausted(spendAttack(used, [used], sword), [], DEFAULT_RULES)).toBe(true);
   });
 
   it("validateAttackRequest allows a second attack via the pool and rejects a third", () => {

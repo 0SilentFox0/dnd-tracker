@@ -4,6 +4,7 @@ import { makeParticipant, resolved, seq } from "./fixtures";
 
 import { textOf } from "@/lib/i18n/test/text";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 import type { ActiveEffect } from "@/types/battle";
 
@@ -18,7 +19,7 @@ const cleanse = (includeConditions?: boolean) => {
 
   const event = { type: "bonusAction", actorId: "a", abilityKey: ability.key } as AbilityEvent;
 
-  return runAbilities([p], event, { round: 1, rng: seq(0) });
+  return runAbilities([p], event, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
 };
 
 describe("cleanse", () => {

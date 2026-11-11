@@ -1,0 +1,46 @@
+{
+  "slot": "Таблиця",
+  "slots": {
+    "critHead": "Критичне: голова",
+    "critArm": "Критичне: рука",
+    "critBody": "Критичне: тулуб",
+    "critLeg": "Критичне: нога",
+    "miscastMinor": "Малий збій магії",
+    "miscastMajor": "Великий збій магії",
+    "wrath": "Гнів богів",
+    "downtimeEvent": "Події простою",
+    "mutationPhysical": "Мутації: тіло",
+    "mutationMental": "Мутації: розум"
+  },
+  "from": "Від {n} до",
+  "upTo": "До, рядок {n}",
+  "text": "Текст, рядок {n}",
+  "effectType": "Тип ефекту",
+  "effect": {
+    "damage": "Додатковий урон",
+    "wounds": "Рани",
+    "condition": "Стан",
+    "marker": "Маркер",
+    "characteristic": "Характеристика",
+    "move": "Рух",
+    "maxWounds": "Макс. Wounds"
+  },
+  "amount": "Кількість",
+  "condition": "Стан",
+  "levels": "Рівні",
+  "marker": "Маркер",
+  "markers": {
+    "winded": "Перехопило подих",
+    "disarmed": "Роззброєно",
+    "crippled": "Скалічено"
+  },
+  "addRow": "Додати рядок",
+  "removeRow": "Видалити рядок {n}",
+  "addEffect": "Додати ефект",
+  "removeEffect": "Видалити ефект",
+  "customize": "Налаштувати",
+  "reset": "Скинути до дефолту",
+  "defaultHint": "Ця таблиця використовує вбудовані рядки. Натисніть «Налаштувати», щоб редагувати копію.",
+  "customHint": "Останній рядок завжди закінчується на 100.",
+  "characteristic": "Характеристика"
+}

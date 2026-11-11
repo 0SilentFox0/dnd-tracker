@@ -119,7 +119,7 @@ describe("applyCondition 5e", () => {
       effect: cond("prone"),
       targetIds: ["t"],
       event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 5 },
-      ctx: { round: 1, rng: seq(0.5) },
+      ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
     });
 
     expect(target(second).battleData.activeEffects).toHaveLength(2);
@@ -133,7 +133,7 @@ describe("applyCondition 5e", () => {
     const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "o2" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })];
 
     const run = (participants: BattleParticipant[], ownerId: string) =>
-      applyEffect({ participants, ability, effectIndex: 0, ownerId, effect, targetIds: ["t"], event: { type: "hit", actorId: ownerId, targetId: "t", attackKind: "melee", damage: 5 }, ctx: { round: 1, rng: seq(0.5) } });
+      applyEffect({ participants, ability, effectIndex: 0, ownerId, effect, targetIds: ["t"], event: { type: "hit", actorId: ownerId, targetId: "t", attackKind: "melee", damage: 5 }, ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES } });
 
     const both = run(run(ps, "o").participants, "o2");
 
@@ -154,7 +154,7 @@ describe("applyCondition 5e", () => {
       effect: { kind: "cleanse", includeConditions: true, target: "eventTarget" },
       targetIds: ["t"],
       event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 5 },
-      ctx: { round: 1, rng: seq(0.5) },
+      ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
     });
 
     expect(target(cleansed).combatStats.maxHp).toBe(20);
@@ -167,7 +167,7 @@ describe("exhaustion speed", () => {
 
     const r = apply(cond("exhaustion", { levels: 2 }), { target: base });
 
-    expect(movementBudget(target(r))).toBeLessThan(movementBudget(base));
+    expect(movementBudget(target(r), DEFAULT_RULES)).toBeLessThan(movementBudget(base, DEFAULT_RULES));
   });
 });
 

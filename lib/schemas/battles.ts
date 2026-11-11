@@ -181,29 +181,37 @@ export const attackBodySchema = z
     targetId: z.string().optional(),
     targetIds: z.array(z.string()).optional(),
     attackId: z.string().optional(),
-    d20Roll: z.number().min(1).max(20).optional(),
-    attackRoll: z.number().min(1).max(20).optional(),
-    attackRolls: z.array(z.number().min(1).max(20)).optional(),
+    d20Roll: z.number().int().min(1).max(100).optional(),
+    attackRoll: z.number().int().min(1).max(100).optional(),
+    attackRolls: z.array(z.number().int().min(1).max(100)).optional(),
+    /** сервер кидає d20/d100 сам; кидки клієнта не потрібні й ігноруються */
+    serverRoll: z.boolean().optional(),
     /** другий d20 на ціль у порядку attackRolls; сервер сам вирішує перевагу/недолік */
-    secondRolls: z.array(z.number().min(1).max(20).nullable()).optional(),
-    advantageRoll: z.number().min(1).max(20).optional(),
-    disadvantageRoll: z.number().min(1).max(20).optional(),
+    secondRolls: z.array(z.number().int().min(1).max(20).nullable()).optional(),
+    advantageRoll: z.number().int().min(1).max(20).optional(),
+    disadvantageRoll: z.number().int().min(1).max(20).optional(),
     /** вибір гравця; сервер застосовує, лише коли навички не задають режим */
     rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
     damageRolls: z.array(z.number()).default([]),
     offHand: z.boolean().optional(),
     useInspiration: z.boolean().optional(),
+    fortune: z.enum(["reroll", "sl"]).optional(),
+    fortuneRoll: z.number().int().min(1).max(100).optional(),
     /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
     cunningStrike: z.array(z.enum(CUNNING_STRIKE_EFFECTS)).min(1).max(3).optional(),
     endTurn: z.boolean().default(false),
   })
   .refine(
-    (d) => d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
+    (d) => d.serverRoll === true || d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
     { message: REJECT.rollsRequired, path: ["d20Roll"] },
   )
   .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {
     message: REJECT.oneTargetRequired,
     path: ["targetIds"],
+  })
+  .refine((d) => !d.fortune || ((d.targetIds?.length ?? 0) + (d.targetId ? 1 : 0) === 1), {
+    message: REJECT.oneTargetRequired,
+    path: ["fortune"],
   });
 
 export const auraZoneSchema = z.object({
@@ -263,7 +271,12 @@ export const castSpellSchema = z.object({
   optionIndex: z.number().int().min(0).max(6).optional(),
   inputCount: z.number().int().min(0).max(40).optional(),
   slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
-});
+  castRoll: z.number().int().min(1).max(100).optional(),
+  serverRoll: z.literal(true).optional(),
+  fortune: z.enum(["reroll", "sl"]).optional(),
+  fortuneRoll: z.number().int().min(1).max(100).optional(),
+  useIngredient: z.literal(true).optional(),
+}).refine((d) => !d.fortune || !d.free, { message: REJECT.fortuneNotFree, path: ["fortune"] });
 
 export type SpellRequestData = z.infer<typeof castSpellSchema>;
 

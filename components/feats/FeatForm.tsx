@@ -39,9 +39,9 @@ export function FeatForm({ campaignId, feat }: { campaignId: string; feat: FeatD
   };
 
   const tabs: HudTab<FeatFormTabId>[] = [
-    { id: "basics", label: tc("tabs.basic"), content: <FeatBasicsTab form={editor.form} /> },
+    { id: "basics", label: tc("tabs.basic"), content: <FeatBasicsTab form={editor.form} advancement={editor.status.advancement} /> },
     { id: "abilities", label: tc("tabs.abilities"), invalid: invalid.abilities, content: <AbilityListEditor campaignId={campaignId} value={data.abilities} onChange={(abilities) => set((p) => ({ ...p, abilities }))} onValidityChange={track("abilities")} /> },
-    { id: "choices", label: tc("tabs.choices"), invalid: invalid.choices, content: <ChoiceListEditor campaignId={campaignId} owner="feat" value={data.choices} onChange={(choices) => set((p) => ({ ...p, choices }))} onValidityChange={track("choices")} /> },
+    ...(editor.status.advancement ? [] : [{ id: "choices" as const, label: tc("tabs.choices"), invalid: invalid.choices, content: <ChoiceListEditor campaignId={campaignId} owner="feat" value={data.choices} onChange={(choices) => set((p) => ({ ...p, choices }))} onValidityChange={track("choices")} /> }]),
   ];
 
   return (

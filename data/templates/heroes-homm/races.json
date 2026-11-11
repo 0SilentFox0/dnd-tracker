@@ -1,0 +1,761 @@
+[
+  {
+    "slug": "dark-elves",
+    "name": "Dark Elves",
+    "color": "#6b2d5c",
+    "availableSkills": [
+      "Attack",
+      "Defense",
+      "Ranged",
+      "Darkness",
+      "Chaos"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-dark-elves.webp",
+      "name": "Darkvision",
+      "description": "+2 to Dexterity, +1 to Charisma. The hero's first attack in battle is made with advantage.",
+      "statModifiers": {
+        "charisma": {
+          "bonus": true
+        },
+        "dexterity": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "A dark elf's eyes see where others run into solid darkness: every movement of the enemy glows for him with a dim violet fire. He freezes in the shadows, waiting for the first strike, and strikes so that the victim long fails to understand where death came from."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "dark-elves-stats",
+        "name": "Dark Elves: Attributes",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "dexterity",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "charisma",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "dark-elves-darkvision",
+        "name": "Darkvision",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "advantage",
+            "attackKind": "all"
+          }
+        ]
+      },
+      {
+        "id": "dark-elves-fighting-style",
+        "name": "Fighting Style",
+        "description": "Melee damage +15%, spell damage -10%.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 15
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "demons",
+    "name": "Demons",
+    "color": "#b3261e",
+    "availableSkills": [
+      "Attack",
+      "Defense",
+      "Ranged",
+      "Darkness",
+      "Leadership",
+      "Chaos"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-demons.webp",
+      "name": "Hellish Blood",
+      "description": "+2 to Strength, +1 to Charisma. Fire resistance 50%.",
+      "statModifiers": {
+        "charisma": {
+          "bonus": true
+        },
+        "strength": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Not blood but molten lava flows through a demon's veins, and his skin is covered with crimson cracks when flames flare nearby. Fire licks his shoulders like an old acquaintance and dies out without leaving burns. Only smoke rises from his scorched cloak."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "demons-stats",
+        "name": "Demons: Attributes",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "strength",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "charisma",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "demons-hellblood",
+        "name": "Hellish Blood",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": 50
+          }
+        ]
+      },
+      {
+        "id": "demons-fighting-style",
+        "name": "Fighting Style",
+        "description": "Melee damage +15%, ranged damage -10%.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 15
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "dwarves",
+    "name": "Dwarves",
+    "color": "#8a6a3b",
+    "availableSkills": [
+      "Leadership",
+      "Ranged",
+      "Attack",
+      "Defense",
+      "Light"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-dwarves.webp",
+      "name": "Clan Stoneskin",
+      "description": "+2 to Constitution, +1 to Strength. +1 to Armor Class.",
+      "statModifiers": {
+        "strength": {
+          "bonus": true
+        },
+        "constitution": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "The dwarf stands as if grown from the rock itself: broad shoulders, a beard braided with iron rings, and skin that darkens and hardens like granite. Blades grate against it and glance off, leaving only sparks. The ancestors of the mountains seem to have invested a part of their toughness in him."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "dwarves-stats",
+        "name": "Dwarves: Attributes",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "constitution",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "strength",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "dwarves-stoneskin",
+        "name": "Clan Stoneskin",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "armor",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "dwarves-fighting-style",
+        "name": "Fighting Style",
+        "description": "Melee damage +10%, ranged damage -10%.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 10
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "elves",
+    "name": "Elves",
+    "color": "#3f8f3a",
+    "availableSkills": [
+      "Leadership",
+      "Ranged",
+      "Attack",
+      "Defense",
+      "Nature"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-elves.webp",
+      "name": "Eye of the Forest",
+      "description": "+2 to Dexterity, +1 to Wisdom. All of the hero's attacks get +1 to the attack roll.",
+      "statModifiers": {
+        "wisdom": {
+          "bonus": true
+        },
+        "dexterity": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "The elf squints, and the forest seems to tell him where a branch will sway and where a shadow will flit. His gaze catches the slightest gap in the enemy's defense, whether between plates of armor or between sword strikes. Birds do not fall silent near him; they know he is one of their own."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "elves-stats",
+        "name": "Elves: Attributes",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "dexterity",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "wisdom",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "elves-forest-eye",
+        "name": "Eye of the Forest",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "elves-fighting-style",
+        "name": "Fighting Style",
+        "description": "Ranged damage +20%, melee damage -15%.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": 20
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": -15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "humans",
+    "name": "Humans",
+    "color": "#c9a227",
+    "availableSkills": [
+      "Leadership",
+      "Ranged",
+      "Attack",
+      "Defense",
+      "Light"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-humans.webp",
+      "name": "Army Training",
+      "description": "+2 to Strength, +1 to Charisma. At the start of battle, the hero and all allies get +1 morale for 2 rounds.",
+      "statModifiers": {
+        "charisma": {
+          "bonus": true
+        },
+        "strength": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Before the first clash, a short horn signal sounds, and the ranks of imperial warriors straighten as if by a string. The commander casts one glance over the line, and even recruits feel an entire army standing behind them. Helmets rise, shields lock together, and fear recedes before the shared rhythm of footsteps."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "humans-stats",
+        "name": "Humans: Attributes",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "strength",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "charisma",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "humans-army-drill",
+        "name": "Army Training",
+        "trigger": {
+          "event": "battleStart"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1,
+            "target": "allAllies",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "humans-fighting-style",
+        "name": "Fighting Style",
+        "description": "Melee damage +10%.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "mages",
+    "name": "Mages",
+    "color": "#2f6fb3",
+    "availableSkills": [
+      "Light",
+      "Darkness",
+      "Chaos",
+      "Nature",
+      "Defense",
+      "Leadership"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-mages.webp",
+      "name": "Magic Ward",
+      "description": "+2 to Intelligence, +1 to Wisdom. Spell damage resistance 15%.",
+      "statModifiers": {
+        "wisdom": {
+          "bonus": true
+        },
+        "intelligence": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Years in the libraries of the Academy left ink stains on his fingers and, on his shoulders, an invisible shell of calibrated formulas. Hostile spells glide over it like rain on glass and lose part of their strength before they strike. The mage does not even flinch: he knows this magic better than those who call it."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "mages-stats",
+        "name": "Mages: Attributes",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "intelligence",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "wisdom",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "mages-ward",
+        "name": "Magic Ward",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "spell",
+            "percent": 15
+          }
+        ]
+      },
+      {
+        "id": "mages-fighting-style",
+        "name": "Fighting Style",
+        "description": "Spell damage +15%, melee damage -20%.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 15
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": -20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necromancers",
+    "name": "Necromancers",
+    "color": "#5b3f8c",
+    "availableSkills": [
+      "Ranged",
+      "Attack",
+      "Defense",
+      "Darkness"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-necromancers.webp",
+      "name": "Undead Body",
+      "description": "+2 to Intelligence, +1 to Constitution. The hero's morale is always 0. Immunity to poison damage.",
+      "statModifiers": {
+        "constitution": {
+          "bonus": true
+        },
+        "intelligence": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "A necromancer's skin is cold as a gravestone, and his heart has long since stopped beating. Poison runs off him without finding living flesh, and neither courage nor terror touches his hollow gaze. He crossed the line beyond which one feels anything long ago."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "necromancers-stats",
+        "name": "Necromancers: Attributes",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "intelligence",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "constitution",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "necromancers-undead-body",
+        "name": "Undead Body",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "ignoreMorale"
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "poison",
+            "percent": 100
+          }
+        ]
+      },
+      {
+        "id": "necromancers-fighting-style",
+        "name": "Fighting Style",
+        "description": "Spell damage +10%, melee damage -10%.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 10
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -120,6 +120,6 @@ describe("blockedByMode", () => {
 
     const blocked = definitions.filter((name): name is string => name !== null).sort();
 
-    expect(blocked).toEqual(["ability-action", "attack", "aura-zone", "bonus-action", "core-action", "maze-mark", "morale-check", "spell"]);
+    expect(blocked).toEqual(["ability-action", "attack", "aura-zone", "bonus-action", "channel", "condition-test", "core-action", "maze-mark", "morale-check", "spell"]);
   });
 });

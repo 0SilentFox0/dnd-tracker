@@ -9,6 +9,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
+import { loadRules } from "@/lib/server/campaigns/rules";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { abilityRegistryOf, flowSegments, linesText } from "@/lib/utils/abilities/segments";
 
 const kindSchema = z.enum(["unit", "spell", "race", "skill", "artifact"]);
@@ -24,7 +26,9 @@ async function listOf(campaignId: string, kind: Kind, locale: Locale): Promise<E
 
     const registry = abilityRegistryOf(await getTranslator(locale));
 
-    return units.map((u) => ({ ...u, abilitySummary: linesText(registry, (u.abilitySummary ?? []).map(flowSegments)) })) as unknown as Entry[];
+    const unitView = systemServerOf(await loadRules(campaignId)).ai?.unitView;
+
+    return units.map((u) => ({ ...u, abilitySummary: linesText(registry, (u.abilitySummary ?? []).map(flowSegments)), ...(unitView && u.characteristics && unitView(u)) })) as unknown as Entry[];
   }
 
   if (kind === "spell") return (await getCachedSpells(campaignId)) as unknown as Entry[];

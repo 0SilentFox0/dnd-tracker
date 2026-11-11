@@ -8,14 +8,14 @@ import { dmEvent } from "@/lib/utils/battle/store";
 import { enterChangedTurn } from "@/lib/utils/battle/turn/enter-turn";
 import { rollInitiative } from "@/lib/utils/battle/turn/roll-initiative";
 import { rngOf } from "@/lib/utils/common/rng";
-import type { DiceRollGroup } from "@/types/battle";
+import type { DiceRollGroup, DieSides } from "@/types/battle";
 
 export const initiativeRollSchema = z.object({});
 
 export function initiativeRollMutation(ctx: BattleMutationContext, _body: z.infer<typeof initiativeRollSchema>): MutationResult {
   const rng = rngOf(ctx);
 
-  const rolled = rollInitiative(ctx.participants, rng);
+  const rolled = rollInitiative(ctx.participants, rng, ctx.meta.rules);
 
   const { rolls } = rolled;
 
@@ -29,7 +29,7 @@ export function initiativeRollMutation(ctx: BattleMutationContext, _body: z.infe
 
   const targets = rolls.map((r) => ({ participantId: r.id, participantName: nameOf.get(r.id) ?? "" }));
 
-  const diceRolls: DiceRollGroup[] = rolls.map((r) => ({ kind: "initiative", rollerId: r.id, dice: [{ sides: 20, value: r.d20 }] }));
+  const diceRolls: DiceRollGroup[] = rolls.map((r) => ({ kind: "initiative", rollerId: r.id, dice: [{ sides: r.sides as DieSides, value: r.roll }] }));
 
   return {
     participants,

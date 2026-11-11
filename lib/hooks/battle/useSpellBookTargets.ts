@@ -38,14 +38,14 @@ export function useSpellBookTargets(caster: BattleParticipant | null, flow: Spel
 
   const filteredOut = (t: BattleParticipant) => !matchesTargetFilter(t, flow.pick?.filter, { spellLevel: flow.pick?.level ?? 0, castLevel: flow.pick?.castLevel });
 
-  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range) && !filteredOut(t);
+  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range, scene.battle.rules) && !filteredOut(t);
 
   const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
   const touchedAt = (cell: GridPoint | null | undefined) => {
     const aim = aimPick?.template?.shape === "emanation" ? caster?.battleData.position : cell;
 
-    return map && caster && aimPick && aim ? spellAimTargets({ map, participants: order, caster }, aimPick, aim) : [];
+    return map && caster && aimPick && aim ? spellAimTargets({ map, participants: order, caster, rules: scene.battle.rules }, aimPick, aim) : [];
   };
 
   const onMap = !!map && !!caster && isOnMap(caster);
@@ -56,7 +56,7 @@ export function useSpellBookTargets(caster: BattleParticipant | null, flow: Spel
   const mapCandidates = useMemo(() => targets.filter(isOnMap), [targets]);
 
   const hover = useSpellMapTargeting(flow, dispatch, {
-    caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, filteredOut, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
+    caster, order, map, rules: scene.battle.rules, active: mapTargeting, candidates: mapCandidates, inRange, filteredOut, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
   });
 
   const aimPreviewAt = (cell: GridPoint) => ({ targets: touchedAt(cell).filter(visible).map((p) => ({ participant: p, ally: !!caster && !isHostile(map, caster, p) })) });

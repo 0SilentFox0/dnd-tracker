@@ -51,7 +51,7 @@ const setup = (cast = inline(), foes: BattleParticipant[] = [foe()]) => {
 
   const w = ward();
 
-  return all(castSpell({ caster: { ...h, spellcasting: { ...h.spellcasting, spellSlots: { "3": { max: 1, current: 1 } } } }, spell: spell(cast), targetIds: ["w"], allParticipants: [h, w, ...foes], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map }));
+  return all(castSpell({ rules: DEFAULT_RULES, caster: { ...h, spellcasting: { ...h.spellcasting, spellSlots: { "3": { max: 1, current: 1 } } } }, spell: spell(cast), targetIds: ["w"], allParticipants: [h, w, ...foes], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.5, map }));
 };
 
 const strike = (ps: BattleParticipant[], attackerId: string, targetId: string, seed = () => 0.5) => {
@@ -155,7 +155,7 @@ describe("auto reactions", () => {
 
     const bolt: CastableSpell = { id: "bolt", name: "Синтетичний промінь", level: 0, groupId: null, definition: { dice: 1, cost: "action", targeting: { kind: "enemy", range: 60 }, resolution: { kind: "attack" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [] } };
 
-    const r = castSpell({ caster: f, spell: bolt, targetIds: ["w"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [3], rng: () => 0.5, map });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: f, spell: bolt, targetIds: ["w"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [3], rng: () => 0.5, map });
 
     expect(hp(all(r), "f")).toBeLessThan(100);
     expect(reacted(all(r))).toBe(true);

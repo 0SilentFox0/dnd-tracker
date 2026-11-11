@@ -1,17 +1,19 @@
 import { type aimView, deriveTrajectory, type MapScene } from "./map-scene";
 
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 interface ComposeMapViewInput {
   scene: MapScene;
   map: BattleMapConfig;
+  rules: Ruleset;
   current: BattleParticipant | null;
   hover: { cell: GridPoint | null; preview: ReturnType<typeof aimView> };
   overlay: Pick<BattleMapView, "returnId" | "impactFor" | "effects" | "round" | "mode"> & { pendingStroke: ReadonlySet<string> };
 }
 
 /** Вид карти для рендера: сцена + прев'ю під курсором + службові накладки. */
-export function composeMapView({ scene, map, current, hover, overlay }: ComposeMapViewInput): BattleMapView {
+export function composeMapView({ scene, map, rules, current, hover, overlay }: ComposeMapViewInput): BattleMapView {
   const { preview, cell } = hover;
 
   const { returnId, pendingStroke, ...rest } = overlay;
@@ -23,7 +25,7 @@ export function composeMapView({ scene, map, current, hover, overlay }: ComposeM
     ...scene.view,
     ...preview,
     marks,
-    trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, cell),
+    trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current, rules }, cell),
     ...(returnId && { returnId }),
     ...(pendingStroke.size > 0 && { pendingStroke }),
     ...rest,

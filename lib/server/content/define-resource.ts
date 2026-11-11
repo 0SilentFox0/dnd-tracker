@@ -2,9 +2,10 @@ import type { ZodType } from "zod";
 
 import "server-only";
 import type { ReferenceKindValue } from "@/lib/cache/tags";
+import type { ContentKind } from "@/lib/constants/content-kinds";
 import type { AccessLevel, Actor } from "@/lib/utils/api/actor";
 
-export type ContentKind = "units" | "races" | "classes" | "feats" | "backgrounds" | "spells" | "spell-groups" | "main-skills" | "skills" | "artifacts" | "artifact-sets" | "tracks";
+export type { ContentKind } from "@/lib/constants/content-kinds";
 
 export type FindPurpose = "read" | "write";
 
@@ -37,6 +38,8 @@ export interface ContentResource<Row = unknown, Create = unknown, Update = unkno
   /** External preparation (e.g. image storage) runs before taking the content-write lock. */
   prepareCreate?(actor: Actor, input: Create): Promise<Create>;
   prepareUpdate?(actor: Actor, existing: Row, input: Update): Promise<Update>;
+  /** side-effect-free validation run for dry-run import rows */
+  checkImport?(actor: Actor, input: Create | Update): Promise<void>;
   create(actor: Actor, input: Create): Promise<Row>;
   update(actor: Actor, existing: Row, input: Update): Promise<Row>;
   remove(actor: Actor, existing: Row): Promise<void>;

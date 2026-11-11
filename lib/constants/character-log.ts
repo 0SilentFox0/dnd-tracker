@@ -1,16 +1,23 @@
 export const CharacterLogKind = {
   CHECK: "check",
   SAVE: "save",
+  TEST: "test",
+  SESSION: "session",
   SHORT_REST: "short_rest",
   LONG_REST: "long_rest",
   REST_CLOSED: "rest_closed",
   HIT_DIE: "hit_die",
   ARCANE_RECOVERY: "arcane_recovery",
   XP: "xp",
+  ADVANCE: "advance",
+  CAREER_SET: "career_set",
+  CAREER_ADVANCE: "career_advance",
   INSPIRATION: "inspiration",
   RESOURCES_EDIT: "resources_edit",
   CHOICES_EDIT: "choices_edit",
   BATTLE_RESULT: "battle_result",
+  DOWNTIME: "downtime",
+  CORRUPTION: "corruption",
 } as const;
 
 export type CharacterLogKindValue = (typeof CharacterLogKind)[keyof typeof CharacterLogKind];

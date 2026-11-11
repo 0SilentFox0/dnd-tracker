@@ -50,7 +50,10 @@ export interface AttackFlowState {
   picked?: boolean;
   offHand?: boolean;
   inspiration?: boolean;
+  /** server-judged systems decide hit/miss on the server, so there is no damage step */
+  judge?: "server";
   cunningStrike?: CunningStrikeEffect[];
+  fortune?: "reroll" | "sl";
 }
 
 export type AttackFlowAction =
@@ -62,8 +65,9 @@ export type AttackFlowAction =
   | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
+  | { type: "SET_FORTUNE"; value: "reroll" | "sl" | null }
   | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
-  | { type: "ROLL"; d20: number; second?: number; outcome: RollOutcome }
+  | { type: "ROLL"; d20?: number; second?: number; outcome: RollOutcome; judge?: "server"; damage?: number[] }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
   | { type: "SUBMIT" }
@@ -86,6 +90,14 @@ const prevHit = (strikes: Strike[], before: number) => {
   return -1;
 };
 
+const withSingleFortune = (s: AttackFlowState): AttackFlowState => {
+  if (s.targetIds.length <= 1) return s;
+
+  const { fortune: _f, ...rest } = s;
+
+  return rest;
+};
+
 export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowState {
   switch (a.type) {
     case "OPEN":
@@ -97,12 +109,17 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "TOGGLE_TARGET": {
       if (s.maxTargets <= 1) return { ...s, targetIds: [a.id] };
 
-      if (s.targetIds.includes(a.id)) return { ...s, targetIds: s.targetIds.filter((id) => id !== a.id) };
+      if (s.targetIds.includes(a.id)) return withSingleFortune({ ...s, targetIds: s.targetIds.filter((id) => id !== a.id) });
 
-      return s.targetIds.length >= s.maxTargets ? s : { ...s, targetIds: [...s.targetIds, a.id] };
+      return s.targetIds.length >= s.maxTargets ? s : withSingleFortune({ ...s, targetIds: [...s.targetIds, a.id] });
     }
     case "SET_TARGETS":
-      return { ...s, targetIds: a.ids.slice(0, s.maxTargets) };
+      return withSingleFortune({ ...s, targetIds: a.ids.slice(0, s.maxTargets) });
+    case "SET_FORTUNE": {
+      const { fortune: _old, ...rest } = s;
+
+      return a.value ? { ...rest, fortune: a.value } : rest;
+    }
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0
         ? s
@@ -125,9 +142,11 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "SET_CUNNING_STRIKE":
       return { ...s, cunningStrike: a.effects.length > 0 ? a.effects : undefined };
     case "ROLL": {
-      const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: [] } : st));
+      const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: a.damage ?? [] } : st));
 
-      if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1 };
+      if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1, ...(a.judge && { judge: a.judge }) };
+
+      if (a.judge) return { ...s, strikes, step: "submitting", judge: a.judge, error: undefined };
 
       const first = nextHit(strikes, 0);
 
@@ -161,8 +180,11 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
       return s.step === "submitting" ? { ...s, waitingCrit: true } : s;
     case "SUCCESS":
       return { ...s, step: "result", results: a.results, error: undefined, waitingCrit: false };
-    case "FAIL":
-      return { ...s, waitingCrit: false, step: s.strikes.some(isHit) ? "summary" : "roll", index: s.strikes.some(isHit) ? s.index : s.strikes.length - 1, error: a.error };
+    case "FAIL": {
+      const toSummary = s.strikes.some(isHit) && s.judge !== "server";
+
+      return { ...s, waitingCrit: false, step: toSummary ? "summary" : "roll", index: toSummary ? s.index : s.strikes.length - 1, error: a.error };
+    }
     case "CLOSE":
       return initialAttackFlow;
   }
@@ -180,6 +202,13 @@ export function forcedModeOf(p: Pick<PredictedAttack, "mode" | "forced" | "reaso
   return { mode: "normal", reason: textRef("battleWizards.flow.forced.cancelled", { advantage: joinLines(advantage, ", "), disadvantage: joinLines(disadvantage, ", ") }) };
 }
 
+/** server-judged: the roll source is fixed by the first strike; undefined while it is still free to choose */
+export function lockedRollSource(s: Pick<AttackFlowState, "strikes" | "index">): "server" | "manual" | undefined {
+  if (s.index === 0 || s.strikes.length === 0) return undefined;
+
+  return s.strikes[0].d20 === undefined ? "server" : "manual";
+}
+
 export function strikeMode(s: Pick<AttackFlowState, "mode">, strike: Strike | undefined): AttackMode {
   return strike?.forced?.mode ?? s.mode;
 }
@@ -193,6 +222,8 @@ export function effectiveD20(strike: Strike, mode: AttackMode): number {
 }
 
 export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
+  const serverRoll = s.strikes.some((st) => st.d20 === undefined);
+
   const manual = s.mode !== "normal" && s.strikes.some((st) => !st.forced);
 
   const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(s.inspiration && { useInspiration: true }), ...(s.cunningStrike && { cunningStrike: s.cunningStrike }), ...(manual && { rollMode: s.mode }), endTurn: false };
@@ -205,9 +236,11 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
     return {
       ...base,
       targetIds: [st.targetId],
-      attackRoll: st.d20,
-      ...(st.second !== undefined && mode === "advantage" && { advantageRoll: st.second }),
-      ...(st.second !== undefined && mode === "disadvantage" && { disadvantageRoll: st.second }),
+      ...(serverRoll ? { serverRoll } : { attackRoll: st.d20 }),
+      ...(st.second !== undefined && s.judge !== "server" && mode === "advantage" && { advantageRoll: st.second }),
+      ...(st.second !== undefined && s.judge !== "server" && mode === "disadvantage" && { disadvantageRoll: st.second }),
+      ...(s.fortune && { fortune: s.fortune }),
+      ...(s.fortune === "reroll" && s.judge === "server" && st.second !== undefined && !serverRoll && { fortuneRoll: st.second }),
       damageRolls: isHit(st) ? st.damage : [],
     } as AttackData & { endTurn: boolean };
   }
@@ -218,8 +251,8 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
   return {
     ...base,
     targetIds: s.strikes.map((st) => st.targetId),
-    attackRolls: s.strikes.map((st) => st.d20 ?? 0),
-    ...(s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
+    ...(serverRoll ? { serverRoll } : { attackRolls: s.strikes.map((st) => st.d20 ?? 0) }),
+    ...(s.judge !== "server" && s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };
 }

@@ -7,8 +7,8 @@ import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { emptyBundle } from "@/lib/server/templates/bundle";
 import { clearBundleCache } from "@/lib/server/templates/bundle-cache";
-import { hashText } from "@/lib/srd/i18n/catalog";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 
 const h = vi.hoisted(() => ({
   campaign: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
@@ -17,11 +17,11 @@ const h = vi.hoisted(() => ({
   apiToken: { update: vi.fn(), create: vi.fn() },
   aiThread: { update: vi.fn() },
   $queryRaw: vi.fn<(query: TemplateStringsArray, ...values: unknown[]) => Promise<Array<{ id: string }>>>(async () => [{ id: "c" }]),
-  dictionary: {} as Record<string, string>,
+  dictionary: {} as TranslationsV2,
   create: vi.fn(), export: vi.fn(async () => ({ settings: {}, formatVersion: 1 })),
 }));
 
-vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? h.dictionary : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? h.dictionary : {} }));
 
 vi.mock("@/lib/server/onboarding/facts", () => ({ readOnboardingSnapshot: vi.fn(async () => ({ facts: { role: "dm", dm: { races: 0, units: 0, players: 0, activePlayerCharacters: 0, pendingDrafts: 2, battles: 0, battlesStarted: 0, scenarioPages: 0, decks: 0, tracks: 0, aiKeys: 0 } }, checklistFlag: null })) }));
 vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: vi.fn(async () => "en") }));
@@ -167,10 +167,10 @@ describe("localized campaign action sources", () => {
     vi.clearAllMocks();
     clearBundleCache();
     canonical = "canonical";
-    h.dictionary = { [hashText("n", "Bless")]: "Благословення" };
+    h.dictionary = { "spells/bless/name": { text: "Благословення", en: "Bless" } };
     h.campaign.findMany.mockImplementation(async () => [{ id: canonical }]);
     h.campaign.findUnique.mockImplementation(async ({ where }) => where.id === "c" ? { ...row, locale: "uk" } : { ...identity, id: where.id, locale: where.id === "legacy" ? "uk" : "en" });
-    h.export.mockResolvedValue({ ...emptyBundle(), spells: [{ id: "c" + "s".repeat(24), name: "Bless" }] } as never);
+    h.export.mockResolvedValue({ ...emptyBundle(), spells: [{ id: "c" + "s".repeat(24), slug: "bless", name: "Bless" }] } as never);
     h.create.mockResolvedValue({ campaign: { id: "new", name: "N" }, warnings: [] });
   });
   it("preview and execute resolve the same language and canonical bundle, exporting once per phase", async () => {
@@ -191,7 +191,7 @@ describe("localized campaign action sources", () => {
 
     const expected = requestDigest(await campaignState(actor, "create", input));
 
-    if (change === "translation") h.dictionary[hashText("n", "Bless")] = "Нова назва";
+    if (change === "translation") h.dictionary["spells/bless/name"] = { text: "Нова назва", en: "Bless" };
 
     if (change === "canonical") canonical = "replacement";
 

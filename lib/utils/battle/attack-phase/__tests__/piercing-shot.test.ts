@@ -6,6 +6,7 @@ import { piercingShot } from "@/data/library/unit-abilities";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const MAP = testMap();
@@ -17,7 +18,7 @@ const piercing = resolved(piercingShot());
 const at = (id: string, pos: GridPoint, side: ParticipantSide = ParticipantSide.ENEMY, abilities: ReturnType<typeof resolved>[] = []) => placed(id, { side, at: pos, hp: 50, abilities, attacks: [bow] });
 
 const run = (order: BattleParticipant[], map: BattleMapConfig | null) =>
-  runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetId: "t", attackRoll: 15, damageRolls: [4, 4, 4, 4, 4, 4] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map });
+  runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetId: "t", attackRoll: 15, damageRolls: [4, 4, 4, 4, 4, 4] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map });
 
 const hpOf = (r: ReturnType<typeof run>, id: string) => r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
 

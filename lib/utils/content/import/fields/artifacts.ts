@@ -12,6 +12,7 @@ export const ARTIFACTS_IMPORT = defineSpec({
     textField("icon"),
     jsonField("weapon"),
     jsonField("armor"),
+    jsonField("systemStats"),
     { ...jsonField("item"), nestedRef: { kind: "spells", key: "spellId" } },
     abilitiesField(),
   ],

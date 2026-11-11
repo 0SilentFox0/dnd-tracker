@@ -11,6 +11,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface LegendaryAttackInput {
@@ -23,9 +24,10 @@ export interface LegendaryAttackInput {
   round: number;
   rng: () => number;
   battleId: string;
+  sceneState?: SystemSlot;
 }
 
-export function legendaryAttack(input: LegendaryAttackInput): { participants: BattleParticipant[]; action: BattleAction; attackName: string } {
+export function legendaryAttack(input: LegendaryAttackInput): { participants: BattleParticipant[]; action: BattleAction; attackName: string; sceneState?: SystemSlot } {
   const { participants, actorId, targetId, map, rules, round, rng, battleId } = input;
 
   const actor = findParticipant(participants, actorId) ?? reject(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
@@ -40,13 +42,13 @@ export function legendaryAttack(input: LegendaryAttackInput): { participants: Ba
 
   assertAttackAllowed(actor, attack, [target]);
 
-  const reach = attackReachError(map, participants, actor, attack, [target]);
+  const reach = attackReachError(map, participants, actor, attack, [target], rules);
 
   if (reach) return reject(reach);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules }, sceneState: input.sceneState };
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: actorId, targetId, attack, currentRound: round, battleId, rng, label: "legendary" });
 
-  return { participants: flow.ps, action: battleAction, attackName: attack.name };
+  return { participants: flow.ps, action: battleAction, attackName: attack.name, sceneState: flow.sceneState };
 }

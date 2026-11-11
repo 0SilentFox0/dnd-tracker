@@ -17,7 +17,10 @@ import { logger } from "@/lib/utils/common/logger";
 import { spellGrantFields, spellPoolKey } from "@/lib/utils/items/pools";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
 import { bestMentalAbility, isMonster5e, monsterSaveDc, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
+import type { ResolvedAbility } from "@/types/abilities";
 import type { AbilityPool, BattleAttack, BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
 import type { Unit } from "@/types/units";
 
@@ -149,13 +152,17 @@ function unitLegendary(unit: UnitFromPrisma, monster: boolean, statblock: UnitSt
     : undefined;
 }
 
-function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, monster: boolean, statblock: UnitStatblock): BattleParticipant["abilities"] {
+type UnitTraits = ReturnType<NonNullable<ReturnType<typeof ruleSystemOf>["traits"]>["unitBuild"]>;
+
+function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, monster: boolean, statblock: UnitStatblock, traits?: UnitTraits): BattleParticipant["abilities"] {
   const saveProficiencies = monster ? readSaveProficiencies(unit.saveProficiencies) : [];
+
+  const baseStats = ruleSystemOf(rules).combat.baseStats?.(unit);
 
   return {
     level: unit.level,
-    initiative: unit.initiative,
-    baseInitiative: unit.initiative,
+    initiative: baseStats?.initiative ?? unit.initiative,
+    baseInitiative: baseStats?.initiative ?? unit.initiative,
     strength: unit.strength,
     dexterity: unit.dexterity,
     constitution: unit.constitution,
@@ -168,19 +175,20 @@ function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, mon
     raceId: race?.id,
     moraleCap: moraleCapFromRules(rules),
     ...(monster && { damageModel: "5e" as const }),
+    ...systemSlotOf(traits ? traits.fields : ruleSystemOf(rules).combat.participantFields?.(unit)),
     ...(statblock.creatureType && { creatureType: statblock.creatureType }),
     ...(monster && unit.cr != null && { cr: unit.cr }),
     ...(saveProficiencies.length > 0 && { saveProficiencies }),
   };
 }
 
-function unitCombatStats(unit: UnitFromPrisma): BattleParticipant["combatStats"] {
+function unitCombatStats(unit: UnitFromPrisma, rules: Ruleset): BattleParticipant["combatStats"] {
   return {
     maxHp: unit.maxHp,
     currentHp: unit.maxHp,
     tempHp: 0,
     armorClass: unit.armorClass,
-    speed: unit.speed,
+    speed: ruleSystemOf(rules).combat.baseStats?.(unit).speed ?? unit.speed,
     gridSize: unit.gridSize ?? 1,
     morale: (unit as { morale?: number }).morale || 0,
     status: CombatStatus.ACTIVE,
@@ -189,19 +197,14 @@ function unitCombatStats(unit: UnitFromPrisma): BattleParticipant["combatStats"]
   };
 }
 
-function unitBattleData(unit: UnitFromPrisma, race: UnitRace, monster: boolean, statblock: UnitStatblock, pools: Record<string, AbilityPool>): BattleParticipant["battleData"] {
+function unitBattleData(unit: UnitFromPrisma, monster: boolean, statblock: UnitStatblock, pools: Record<string, AbilityPool>, resolvedAbilities: ResolvedAbility[], traits?: UnitTraits): BattleParticipant["battleData"] {
   const legendary = unitLegendary(unit, monster, statblock);
 
   return {
-    attacks: unitBattleAttacks(unit),
+    attacks: [...unitBattleAttacks(unit), ...(traits?.attacks ?? [])],
     activeEffects: [],
     equippedArtifacts: [],
-    resolvedAbilities: [
-      ...collectUnitAbilities(unit, race),
-      ...(monster ? multiattackAbilities(unit) : []),
-      ...monsterSenseAbilities(unit, statblock.senses),
-      ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
-    ],
+    resolvedAbilities,
     abilityUsage: {},
     pendingExtraActions: 0,
     ...(legendary && { legendary }),
@@ -233,6 +236,15 @@ export async function createBattleParticipantFromUnit(
 
   const { spellcasting, pools } = monsterSpellcasting(unit, rules);
 
+  const resolvedAbilities = [
+    ...collectUnitAbilities(unit, race),
+    ...(monster ? multiattackAbilities(unit) : []),
+    ...monsterSenseAbilities(unit, statblock.senses),
+    ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
+  ];
+
+  const traits = ruleSystemOf(rules).traits?.unitBuild(unit, resolvedAbilities);
+
   const participant: BattleParticipant = {
     basicInfo: {
       id: `${unit.id}-${instanceNumber}-${Date.now()}`,
@@ -247,10 +259,10 @@ export async function createBattleParticipantFromUnit(
       controlledBy: CONTROLLED_BY_DM,
       ...(xp !== null && { xp }),
     },
-    abilities: unitAbilities(unit, race, rules, monster, statblock),
-    combatStats: unitCombatStats(unit),
+    abilities: unitAbilities(unit, race, rules, monster, statblock, traits),
+    combatStats: unitCombatStats(unit, rules),
     spellcasting,
-    battleData: unitBattleData(unit, race, monster, statblock, pools),
+    battleData: unitBattleData(unit, monster, statblock, pools, resolvedAbilities, traits),
     actionFlags: {
       hasUsedAction: false,
       hasUsedBonusAction: false,

@@ -1,6 +1,7 @@
 import type { CritEffectFx } from "@/lib/utils/battle/view/crit-outcome";
 import type { QueueEntry } from "@/lib/utils/battle/view/queue";
 import type { RetaliationOutcome } from "@/lib/utils/battle/view/retaliation";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant } from "@/types/battle";
 
 /** Удар по одній цілі багатоцільової атаки */
@@ -13,9 +14,9 @@ export interface StrikeFx {
 }
 
 export type ResultFx =
-  | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string; retaliation?: RetaliationOutcome; critEffect?: CritEffectFx; strikes?: StrikeFx[] }
-  | { kind: "miss"; targetName: string; d20: number; known: string; retaliation?: RetaliationOutcome; critFail?: CritEffectFx; strikes?: StrikeFx[] }
-  | { kind: "spell"; spellName: string; changes: { name: string; change: number }[]; targetCount: number }
+  | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string; system?: SystemSlot; exact?: true; retaliation?: RetaliationOutcome; critEffect?: CritEffectFx; strikes?: StrikeFx[] }
+  | { kind: "miss"; targetName: string; d20: number; known: string; system?: SystemSlot; exact?: true; retaliation?: RetaliationOutcome; critFail?: CritEffectFx; strikes?: StrikeFx[] }
+  | { kind: "spell"; spellName: string; changes: { name: string; change: number }[]; targetCount: number; system?: SystemSlot }
   | { kind: "morale-extra" | "morale-skip"; name: string; d10: number; morale: number };
 
 export type ActionResultFx = Extract<ResultFx, { kind: "hit" | "crit" | "miss" | "spell" }>;

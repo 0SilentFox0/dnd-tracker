@@ -1,0 +1,3646 @@
+[
+  {
+    "slug": "armor-break",
+    "name": "Armor Break",
+    "description": "A melee hit has a 40% chance to reduce the target's AC by 1 for 2 rounds.",
+    "appearanceDescription": "The blow lands squarely on the rivets, and the pauldron dangles from a single strap. Through the split mail the shirt beneath shows, and the next strike already knows where to aim.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/armor-break.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "armor-break",
+        "name": "Armor Break",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "melee"
+        },
+        "limits": {
+          "chance": 40
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "armor",
+            "flat": -1,
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "arrow-cloud",
+    "name": "Cloud of Arrows",
+    "description": "Bonus action, once per battle: every enemy takes 50% of your attack's average damage (piercing).",
+    "appearanceDescription": "For a moment the sky above the enemy line darkens, as if a flock of starlings had swept in. Then the flock falls, and leaves no place to hide.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/arrow-cloud.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "arrow-cloud",
+        "name": "Cloud of Arrows",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "ownerAttack",
+              "value": 50
+            },
+            "damageType": "piercing",
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "attack-advanced",
+    "name": "Advanced Attack",
+    "description": "Melee attack damage +20% (replaces Basic Attack).",
+    "appearanceDescription": "Blows land one after another, like nails under a carpenter's hammer. The warrior no longer thinks about his stance; his body finds the gap in the defense on its own.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack-advanced.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "attack-advanced",
+        "name": "Advanced Attack",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "attack-basic",
+    "name": "Basic Attack",
+    "description": "Melee attack damage +10%.",
+    "appearanceDescription": "The first lessons of the fencing yard: keep the elbow in, strike from the shoulder, never look away. The blade is still a little heavy, but it already knows where to go.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack-basic.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "attack-basic",
+        "name": "Basic Attack",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "attack-expert",
+    "name": "Expert Attack",
+    "description": "Melee attack damage +30% (replaces Advanced Attack).",
+    "appearanceDescription": "The steel sings short and dull, and every note is somebody's split cuirass. Veterans say such a warrior strikes before the opponent can decide how to defend.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack-expert.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "attack-expert",
+        "name": "Expert Attack",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 30
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "banish",
+    "name": "Banish",
+    "description": "Creatures summoned by an enemy appear weakened, losing 50% of their HP.",
+    "appearanceDescription": "The druid speaks an old word, and the alien creatures summoned from other worlds begin to flicker and fade. Their outlines drift like smoke above a campfire.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/banish.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "banish",
+        "name": "Banish",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "banishSummons",
+            "percent": 50
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "benediction",
+    "name": "Benediction",
+    "description": "Light spells up to level 4 affect all allies.",
+    "appearanceDescription": "Unseen wings unfold over the battlefield, and their shadow falls on every ally at once. One word from the mage, and the whole company shines like stained glass in the sun.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/benediction.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "benediction",
+        "name": "Benediction",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "all",
+            "school": "Light",
+            "maxLevel": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "brutality",
+    "name": "Brutality",
+    "description": "Melee attacks become critical hits on a 19–20 on the d20 roll.",
+    "appearanceDescription": "A cold butcher's zeal flares in the warrior's eyes. He does not look for a beautiful blow; he looks for the one after which the opponent does not get up again.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/brutality.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "brutality",
+        "name": "Brutality",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker",
+          "attackKind": "melee"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "critThreshold",
+            "flat": -1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "bullseye",
+    "name": "Bullseye",
+    "description": "Once per battle, your ranged attack is guaranteed to hit.",
+    "appearanceDescription": "The archer holds his breath and the world around falls silent: no shouts, no clatter, only the target and a thin line to it. The arrow flies as if drawn by a thread.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/bullseye.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "bullseye",
+        "name": "Bullseye",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "guaranteedHit"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "call-of-the-beast",
+    "name": "Call of the Phoenix",
+    "description": "Unlocks a new spell, \"Call of the Phoenix\": summons a Phoenix that grows with the caster's level and is reborn once per battle.",
+    "appearanceDescription": "The druid sounds a horn carved from a stag's antler, and the forest answers not with a roar but with the crackle of flames. A fiery bird rises above the trees, remembering ancient oaths.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/call-of-the-beast.webp",
+    "mainSkillId": "Nature",
+    "grantedSpellId": "Call of the Phoenix",
+    "abilities": [
+      {
+        "id": "call-of-the-beast",
+        "name": "Call of the Phoenix",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Grants the spell \"Call of the Phoenix\"."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "chaos-advanced",
+    "name": "Advanced Chaos Magic",
+    "description": "Unlocks access to \"Chaos\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "Flame and thunder now obey the mage like trained beasts. He casts spells carelessly, almost lazily, and the ground beneath his enemies begins to smoke.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos-advanced.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "chaos-advanced",
+        "name": "Advanced Chaos Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Chaos\" school spells of levels 1–4; spell dice of this school are d8."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "chaos-basic",
+    "name": "Basic Chaos Magic",
+    "description": "Unlocks access to \"Chaos\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "Sparks leap between the apprentice's fingers, and he does not always know where they will fly. Yet even these first flashes leave black scorch marks on the enemy's shields.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos-basic.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "chaos-basic",
+        "name": "Basic Chaos Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Chaos\" school spells of levels 1–2; spell dice of this school are d6."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "chaos-expert",
+    "name": "Expert Chaos Magic",
+    "description": "Unlocks access to \"Chaos\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "The sky above this mage darkens with clouds that appear from nowhere. When he raises his staff, even his allies involuntarily step back.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos-expert.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "chaos-expert",
+        "name": "Expert Chaos Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Chaos\" school spells of levels 1–5; spell dice of this school are d10."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "chosen-elemental",
+    "name": "Chosen Elemental",
+    "description": "Grants the spell to summon the chosen elemental (it is not in the library; the DM adds the spell manually).",
+    "appearanceDescription": "The druid makes a pact with one of the elements, and from then on it answers his call in its familiar form. Some hear in it the crackle of flames, others the rush of the surf.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/chosen-elemental.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "chosen-elemental",
+        "name": "Chosen Elemental",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "The DM adds the spell to summon the chosen elemental."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cleaving-strike",
+    "name": "Cleaving Strike",
+    "description": "A melee hit has a 40% chance to cause bleeding: the target takes 20% of your attack's average damage (slashing) each round for 2 rounds.",
+    "appearanceDescription": "The blade enters at a slant and leaves with a hoarse rustle, leaving a wound that refuses to close. The enemy still stands, but the grass beneath him is already darkening.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/cleaving-strike.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "cleaving-strike",
+        "name": "Cleaving Strike",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "melee"
+        },
+        "limits": {
+          "chance": 40
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": {
+              "percentOf": "ownerAttack",
+              "value": 20
+            },
+            "damageType": "slashing",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "compensation",
+    "name": "Compensation",
+    "description": "During an attack, a random level 1–3 spell sometimes triggers. The engine does not cast random spells; the DM plays out the effect.",
+    "appearanceDescription": "The mana in the mage's veins is restless and now and then bursts out on its own, without permission. No one, not even he, knows which spell it will flare into this time.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/compensation.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "compensation",
+        "name": "Compensation",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "An attack may trigger a random level 1–3 spell; the DM plays it out."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "crippling-shot",
+    "name": "Crippling Shot",
+    "description": "A ranged hit has a 40% chance: the target attacks with disadvantage for 1 round.",
+    "appearanceDescription": "The arrow sinks into the wrist, and the sword in the enemy's hand suddenly feels heavy and foreign. He still strikes, but every swing comes through pain.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/crippling-shot.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "crippling-shot",
+        "name": "Crippling Shot",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "limits": {
+          "chance": 40
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 1
+            },
+            "flag": "disadvantage"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "dark-advanced",
+    "name": "Advanced Dark Magic",
+    "description": "Unlocks access to \"Darkness\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "Shadows obey the mage like a pack of hounds and find their prey on their own. Curses settle thick and long, like soot on walls.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark-advanced.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "dark-advanced",
+        "name": "Advanced Dark Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Darkness\" school spells of levels 1–4; spell dice of this school are d8."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "dark-basic",
+    "name": "Basic Dark Magic",
+    "description": "Unlocks access to \"Darkness\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "The first curses come out feeble, like breath on a frosty night. Yet the enemy already feels a strange heaviness in his arms and does not know where it comes from.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark-basic.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "dark-basic",
+        "name": "Basic Dark Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Darkness\" school spells of levels 1–2; spell dice of this school are d6."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "dark-expert",
+    "name": "Expert Dark Magic",
+    "description": "Unlocks access to \"Darkness\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "When this mage speaks a spell, the candles in the enemy camp go out on their own. Even brave veterans feel something alien stirring in their thoughts.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark-expert.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "dark-expert",
+        "name": "Expert Dark Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Darkness\" school spells of levels 1–5; spell dice of this school are d10."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "dark-master",
+    "name": "Master of Darkness",
+    "description": "Darkness spells up to level 4 affect all enemies.",
+    "appearanceDescription": "The mage's shadow stretches across the whole battlefield and touches every enemy at once. A single curse, and the entire company bows its head under an invisible burden.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-master.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "dark-master",
+        "name": "Master of Darkness",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "all",
+            "school": "Darkness",
+            "maxLevel": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "deaths-march",
+    "name": "Death's March",
+    "description": "Darkness school spell damage +25%.",
+    "appearanceDescription": "Black seals appear on the mage's fingers, pulsing in time with his heart. His curses now taste of grave earth and hold more firmly.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/deaths-march.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "deaths-march",
+        "name": "Death's March",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic",
+              "school": "Darkness"
+            },
+            "percent": 25
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "defense-advanced",
+    "name": "Advanced Defense",
+    "description": "Physical damage resistance 20% (replaces Basic Defense).",
+    "appearanceDescription": "The warrior catches blows as calmly as if brushing away flies. Heavy axes die against the shield's metal rim, leaving only a dull hum.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense-advanced.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "defense-advanced",
+        "name": "Advanced Defense",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "physical",
+            "percent": 20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "defense-basic",
+    "name": "Basic Defense",
+    "description": "Physical damage resistance 10%.",
+    "appearanceDescription": "The recruit learns to take a blow on the shield at an angle so that steel glances off rather than lands. The bruises still ache, but his arms no longer sag.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense-basic.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "defense-basic",
+        "name": "Basic Defense",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "physical",
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "defense-expert",
+    "name": "Expert Defense",
+    "description": "Physical damage resistance 30% (replaces Advanced Defense).",
+    "appearanceDescription": "He stands in the middle of the clash like a rock in the surf: the waves strike, break and roll back. The enemies begin to think their weapons have gone dull.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense-expert.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "defense-expert",
+        "name": "Expert Defense",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "physical",
+            "percent": 30
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "deflecting-arrow",
+    "name": "Deflecting Arrow",
+    "description": "A ranged hit has a 40% chance to reduce the target's initiative by 2 for 2 rounds.",
+    "appearanceDescription": "The arrow strikes the edge of the shield with such force that the enemy is turned half a step. While he catches his balance, the battle has already moved on without him.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/deflecting-arrow.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "deflecting-arrow",
+        "name": "Deflecting Arrow",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "limits": {
+          "chance": 40
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": -2,
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "devourer",
+    "name": "Devourer",
+    "description": "Bonus action on a dead unit, 2 times per battle: restores 1 spell slot.",
+    "appearanceDescription": "The mage bends over the fallen, and a pale smoke rises from the body and is drawn into his nostrils. The dead have no use for this power anymore, but the living will.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/devourer.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "devourer",
+        "name": "Devourer",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "condition": {
+          "type": "targetDead"
+        },
+        "limits": {
+          "perBattle": 2
+        },
+        "effects": [
+          {
+            "kind": "restoreSpellSlot",
+            "count": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "divine-power",
+    "name": "Divine Power",
+    "description": "Light school spell damage +25%.",
+    "appearanceDescription": "Mana becomes pure as a mountain spring, without a trace of the murk of doubt. Every Light spell sounds louder and shines brighter than before.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/divine-power.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "divine-power",
+        "name": "Divine Power",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic",
+              "school": "Light"
+            },
+            "percent": 25
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "double-shot",
+    "name": "Double Shot",
+    "description": "A ranged attack can hit 1 more target (+1 to the maximum number of targets).",
+    "appearanceDescription": "Two arrows lie on the bowstring together, a finger's width apart. They part in flight like swallows, and each finds its own enemy.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/double-shot.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "double-shot",
+        "name": "Double Shot",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxTargets",
+            "flat": 1,
+            "attackKind": "ranged"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "empathy",
+    "name": "Empathy",
+    "description": "When an ally passes a morale check, they gain +1 initiative for 2 rounds (the effect stacks).",
+    "appearanceDescription": "Another's courage spreads like a spark through dry grass. One soldier charges forward, and those beside him can no longer stand still.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/empathy.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "empathy",
+        "name": "Empathy",
+        "trigger": {
+          "event": "moraleCheck",
+          "result": "success",
+          "whose": "ally"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 1,
+            "target": "eventActor",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ],
+        "stackable": true
+      }
+    ]
+  },
+  {
+    "slug": "endurance",
+    "name": "Endurance",
+    "description": "Maximum HP + 2 × hero level.",
+    "appearanceDescription": "Years in the saddle and on the march have made the body hard as a rawhide strap. Where another would have fallen, this one merely spits blood and lifts his sword.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/endurance.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "endurance",
+        "name": "Endurance",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxHp",
+            "flat": {
+              "formula": "2*hero_level"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "eternal-light",
+    "name": "Eternal Light",
+    "description": "Unlocks a new spell, \"Eternal Light\": a powerful heal on an ally followed by ongoing regeneration.",
+    "appearanceDescription": "The mage comes to know a light that burns not in the sky but deep within every living creature. Now he can fan that small flame even in one who is barely breathing.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/eternal-light.webp",
+    "mainSkillId": "Light",
+    "grantedSpellId": "Eternal Light",
+    "abilities": [
+      {
+        "id": "eternal-light",
+        "name": "Eternal Light",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Grants the spell \"Eternal Light\"."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "eternal-warriors",
+    "name": "Eternal Warriors",
+    "description": "Elemental summoning spells summon 2 creatures each.",
+    "appearanceDescription": "Instead of one sentinel of flame or stone, two appear, twins moving in the same rhythm. They know no weariness and no fear.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/eternal-warriors.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "eternal-warriors",
+        "name": "Eternal Warriors",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "extraSummons",
+            "count": 1,
+            "spellIds": [
+              "summon-fire-elemental",
+              "summon-water-elemental",
+              "summon-air-elemental",
+              "summon-earth-elemental"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "fire-attack",
+    "name": "Fire Attack",
+    "description": "Each of your attack hits additionally deals fire damage equal to 15% of your attack's average damage.",
+    "appearanceDescription": "The hero's blade glows like one just drawn from the forge, and every blow leaves a scorched mark on the enemy. The air around the blade shimmers with heat.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/fire-attack.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "fire-attack",
+        "name": "Fire Attack",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "not",
+          "condition": {
+            "type": "attackKind",
+            "kind": "magic"
+          }
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "ownerAttack",
+              "value": 15
+            },
+            "damageType": "fire",
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "force-arrow",
+    "name": "Force Arrow",
+    "description": "The arrow pierces the target and strikes another enemy for 50% of the damage dealt.",
+    "appearanceDescription": "An arrow loosed with such force that the bowstring hums for several seconds passes through the first enemy without slowing. The second does not even have time to understand where it came from.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/force-arrow.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "force-arrow",
+        "name": "Force Arrow",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "eventDamage",
+              "value": 50
+            },
+            "damageType": "piercing",
+            "target": "otherEnemy"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "forest-lord",
+    "name": "Lord of the Forest",
+    "description": "The Nature control spells \"Roots\" and \"Entangle\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The druid stamps his foot, and the ground beneath the enemy line cracks, releasing gnarled roots. They seize several ankles at once, pull them down and do not let go.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/forest-lord.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "forest-lord",
+        "name": "Lord of the Forest",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "roots",
+              "entangle"
+            ],
+            "maxTargets": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "forest-roots",
+    "name": "Forest Roots",
+    "description": "Grants the spell \"Roots\".",
+    "appearanceDescription": "The druid learns the language of the roots that have held the forest in place for millennia. Now he can ask them to hold an enemy too.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/forest-roots.webp",
+    "mainSkillId": "Nature",
+    "grantedSpellId": "Roots",
+    "abilities": [
+      {
+        "id": "forest-roots",
+        "name": "Forest Roots",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Grants the spell \"Roots\"."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "granting-blessing",
+    "name": "Granting Blessing",
+    "description": "The spells \"Divine Strength\" and \"Cleansing\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The blessing falls on the company like warm summer rain, washing away curses and filling weapons with light. The warriors glance at one another, not understanding where this lightness came from.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/granting-blessing.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "granting-blessing",
+        "name": "Granting Blessing",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "divine-strength",
+              "cleansing"
+            ],
+            "maxTargets": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "granting-protection",
+    "name": "Granting Protection",
+    "description": "The spells \"Evasion\" and \"Stoneskin\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The mage spreads his arms, and transparent shields like dragonfly wings unfold over the company. Arrows and blades glance off them, striking pale sparks.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/granting-protection.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "granting-protection",
+        "name": "Granting Protection",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "evasion",
+              "stoneskin"
+            ],
+            "maxTargets": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "guardian",
+    "name": "Guardian",
+    "description": "Bonus action on an ally: for 1 round you take 50% of the damage from attacks against them.",
+    "appearanceDescription": "The hero steps beside a wounded comrade and sets his shield under blows meant for someone else. Steel strikes steel, and half the pain goes to the one who chose it.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/guardian.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "guardian",
+        "name": "Guardian",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "effects": [
+          {
+            "kind": "guard",
+            "percent": 50,
+            "duration": {
+              "rounds": 1
+            },
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "infernal-power",
+    "name": "Infernal Power",
+    "description": "Chaos school spell damage +25%.",
+    "appearanceDescription": "The mage grasps the secrets of destruction, written in ash on pages that do not burn. His fire turns white and his thunder deafening.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/infernal-power.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "infernal-power",
+        "name": "Infernal Power",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic",
+              "school": "Chaos"
+            },
+            "percent": 25
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "inspiration",
+    "name": "Inspiration",
+    "description": "Bonus action, 2 times per battle: an ally gains +1 morale for 2 rounds.",
+    "appearanceDescription": "The commander puts a hand on a fighter's shoulder and says a few words no one else hears. The fighter squares his shoulders, and fire burns in his gaze again.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/inspiration.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "inspiration",
+        "name": "Inspiration",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perBattle": 2
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1,
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "last-stand",
+    "name": "Last Stand",
+    "description": "Once per battle, lethal damage does not kill you; you are left with 1 HP.",
+    "appearanceDescription": "The blow that was meant to be the last drives the hero to his knees, but not to the ground. He rises, holding on to the banner pole, and for a moment the enemies fall back.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/last-stand.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "last-stand",
+        "name": "Last Stand",
+        "trigger": {
+          "event": "lethalDamage"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": 1,
+            "revive": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "leadership-advanced",
+    "name": "Advanced Leadership",
+    "description": "Morale +2 (skill owner only; replaces Basic Leadership).",
+    "appearanceDescription": "Soldiers search for their commander with their eyes in the middle of the clash and calm down when they see his banner. The formation holds where another would long since have scattered.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership-advanced.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "leadership-advanced",
+        "name": "Advanced Leadership",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "leadership-basic",
+    "name": "Basic Leadership",
+    "description": "Morale +1 (skill owner only).",
+    "appearanceDescription": "A few well-chosen words by the campfire, and the company laughs for the first time in a week. The next morning they march more briskly than the day before.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership-basic.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "leadership-basic",
+        "name": "Basic Leadership",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "leadership-expert",
+    "name": "Expert Leadership",
+    "description": "Morale +3 (skill owner only; replaces Advanced Leadership).",
+    "appearanceDescription": "His name is shouted when charging and whispered when binding wounds. Men follow such a commander even into a hopeless battle, and sometimes win it.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership-expert.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "leadership-expert",
+        "name": "Expert Leadership",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "life-force",
+    "name": "Life Force",
+    "description": "At the start of each round, each of your allies restores 3% of their maximum HP.",
+    "appearanceDescription": "A barely perceptible green light radiates from the druid, like fireflies on a summer night. Scratches close and weariness melts away like dew in the sun.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/life-force.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "life-force",
+        "name": "Life Force",
+        "trigger": {
+          "event": "roundStart"
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 3
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "life-lord",
+    "name": "Lord of Life",
+    "description": "Nature school spell damage +15%.",
+    "appearanceDescription": "The druid hears the heartbeats of all living creatures around him and can weave their rhythm into his spells. His magic pulses like living flesh.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/life-lord.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "life-lord",
+        "name": "Lord of Life",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic",
+              "school": "Nature"
+            },
+            "percent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "light-advanced",
+    "name": "Advanced Light Magic",
+    "description": "Unlocks access to \"Light\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "The light no longer trembles but pours evenly, like honey from a jug. Allies feel it on their backs before the spell is even finished.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light-advanced.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "light-advanced",
+        "name": "Advanced Light Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Light\" school spells of levels 1–4; spell dice of this school are d8."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "light-basic",
+    "name": "Basic Light Magic",
+    "description": "Unlocks access to \"Light\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "The first prayers sound uncertain, but a faint glow already trembles above the palms. It does not heal wounds, but the pain subsides.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light-basic.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "light-basic",
+        "name": "Basic Light Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Light\" school spells of levels 1–2; spell dice of this school are d6."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "light-expert",
+    "name": "Expert Light Magic",
+    "description": "Unlocks access to \"Light\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "When the mage raises his hands, shadows on the battlefield shorten and sparks kindle in the eyes of the wounded. His light can be seen from beyond the hills, like dawn.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light-expert.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "light-expert",
+        "name": "Expert Light Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Light\" school spells of levels 1–5; spell dice of this school are d10."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "magic-ward",
+    "name": "Magic Ward",
+    "description": "Spell damage resistance +15%.",
+    "appearanceDescription": "The wards sewn under the cloak's lining warm quietly when hostile sorcery is worked nearby. The flames of spells flow around the hero like water around a stone.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/magic-ward.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "magic-ward",
+        "name": "Magic Ward",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "spell",
+            "percent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "mana-burst",
+    "name": "Mana Burst",
+    "description": "When an enemy casts a spell targeting you, there is a 50% chance (up to 2 times per battle) that the caster takes 50% of your attack's average damage (force).",
+    "appearanceDescription": "The enemy spell strikes the hero and shatters like glass, and the shards fly back at the one who cast it. The enemy mage recoils, wiping blood from his nose.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/mana-burst.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "mana-burst",
+        "name": "Mana Burst",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "target"
+        },
+        "condition": {
+          "type": "actorIsEnemy"
+        },
+        "limits": {
+          "perBattle": 2,
+          "chance": 50
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "ownerAttack",
+              "value": 50
+            },
+            "damageType": "force",
+            "target": "eventActor"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "master-of-curses",
+    "name": "Master of Curses",
+    "description": "The spells \"Weakness\" and \"Frailty\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The mage speaks a single word, and the curse clings to several enemies at once, like burrs to a cloak. Their armor dulls and their swords grow heavier.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-curses.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "master-of-curses",
+        "name": "Master of Curses",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "weakness",
+              "frailty"
+            ],
+            "maxTargets": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "master-of-fire",
+    "name": "Master of Fire",
+    "description": "The target of your spells \"Fireball\", \"Fire Wall\" and \"Armageddon\" takes −30% AC for 1 round.",
+    "appearanceDescription": "The mage's flame does not merely burn; it softens metal. The enemies' armor turns red and sags, and the straps on it smolder and snap.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-fire.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "master-of-fire",
+        "name": "Master of Fire",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "spellIds": [
+            "fireball",
+            "fire-wall",
+            "armageddon"
+          ]
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "armor",
+            "percent": -30,
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "master-of-ice",
+    "name": "Master of Ice",
+    "description": "The target of your spells \"Ice Bolt\", \"Circle of Winter\" and \"Deep Freeze\" attacks with disadvantage for 1 round.",
+    "appearanceDescription": "Frost covers the enemy's fingers, and the sword hilt freezes to the gauntlet. Every swing is now stiff and late, like a movement in a dream.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-ice.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "master-of-ice",
+        "name": "Master of Ice",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "spellIds": [
+            "ice-bolt",
+            "circle-of-winter",
+            "deep-freeze"
+          ]
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 1
+            },
+            "flag": "disadvantage"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "master-of-mind",
+    "name": "Master of Mind",
+    "description": "The spells \"Slow\" and \"Confusion\" work over an area, up to 3 targets.",
+    "appearanceDescription": "A gray fog drifts over the enemy line, and the soldiers' thoughts grow viscous as a swamp. The commander's order reaches them as if through a thick layer of water.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-mind.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "master-of-mind",
+        "name": "Master of Mind",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "slow",
+              "confusion"
+            ],
+            "maxTargets": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "master-of-pain",
+    "name": "Master of Pain",
+    "description": "The spells \"Plague\" and \"Suffering\" work over an area, up to 3 targets.",
+    "appearanceDescription": "Pain creeps from one victim to the next, like a crack across ice. The enemy warriors writhe one after another, not understanding who struck them.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-pain.webp",
+    "mainSkillId": "Darkness",
+    "abilities": [
+      {
+        "id": "master-of-pain",
+        "name": "Master of Pain",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "plague",
+              "suffering"
+            ],
+            "maxTargets": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "master-of-storms",
+    "name": "Master of Storms",
+    "description": "The target of your spells \"Lightning Bolt\" and \"Chain Lightning\" takes −5 initiative for 2 rounds.",
+    "appearanceDescription": "Lightning leaves a trembling hum in the enemy's body that makes the muscles twitch and the knees shake. For a long time he moves in jerks, like a marionette with tangled strings.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-storms.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "master-of-storms",
+        "name": "Master of Storms",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "spellIds": [
+            "lightning-bolt",
+            "chain-lightning"
+          ]
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": -5,
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "nature-advanced",
+    "name": "Advanced Nature Magic",
+    "description": "Unlocks access to \"Nature\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "Vines reach for the druid like hounds for their master, and the birds fall silent when he speaks. His spells smell of resin and thunderstorms.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature-advanced.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "nature-advanced",
+        "name": "Advanced Nature Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks access to \"Nature\" school spells of levels 1–4; spell dice of this school are d8."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "nature-basic",
+    "name": "Basic Nature Magic",
+    "description": "Unlocks \"Nature\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "The druid presses a palm to the ground, and the grass beneath answers with a faint tremor. The forest is only listening to him for now, but it no longer turns away.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature-basic.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "nature-basic",
+        "name": "Basic Nature Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks \"Nature\" school spells of levels 1–2; spell dice of this school are d6."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "nature-expert",
+    "name": "Expert Nature Magic",
+    "description": "Unlocks \"Nature\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "Wherever this druid treads, sprouts break through the stones. The forest speaks with his voice, and woe to anyone who enters it with an axe.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature-expert.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "nature-expert",
+        "name": "Expert Nature Magic",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Unlocks \"Nature\" school spells of levels 1–5; spell dice of this school are d10."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "natures-poison",
+    "name": "Nature's Poison",
+    "description": "The target of each of your hostile Nature spells is poisoned: each round, 15% of your attack's average damage as poison, for 2 rounds.",
+    "appearanceDescription": "Every spell the druid casts carries pollen, sap and a sting. Enemy wounds swell and turn blue, and their breathing grows rasping and heavy.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/natures-poison.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "natures-poison",
+        "name": "Nature's Poison",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "spellIds": [
+            "roots",
+            "thorny-vines",
+            "moonbeam",
+            "wasp-swarm",
+            "entangle",
+            "earthquake",
+            "nature-storm"
+          ]
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": {
+              "percentOf": "ownerAttack",
+              "value": 15
+            },
+            "damageType": "poison",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "natures-wrath",
+    "name": "Nature's Wrath",
+    "description": "Nature spells up to level 4 affect everyone: healing affects all allies, damage and control affect all enemies.",
+    "appearanceDescription": "The druid flings his arms wide, and the whole forest around him draws breath along with him. A single spell rolls across the field like wind over grass and spares not a single blade.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/natures-wrath.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "natures-wrath",
+        "name": "Nature's Wrath",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "all",
+            "school": "Nature",
+            "maxLevel": 4
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-agrael",
+    "name": "Agrael: Flame Aura",
+    "description": "All allies (including Agrael himself) deal +10% damage. The damage type does not change.",
+    "appearanceDescription": "Agrael stands in a heat haze, and thin tongues of crimson flame dance within it. Everyone nearby feels fire seep into their blood, making their blows hotter and fiercer.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "agrael-fire-aura",
+        "name": "Flame Aura",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 10,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-beatrice",
+    "name": "Beatrice: Double Shackles",
+    "description": "Control spells (Roots, Entangle, Slow, Blindness, Confusion, Berserk, Puppet Master) affect an area: up to 2 targets.",
+    "appearanceDescription": "Beatrice weaves magic like a spider spins a web: two shimmering threads stretch from her fingers, and each finds its victim. Two enemies freeze at once, like marionettes whose strings were tugged by a single hand.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "beatrice-double-bind",
+        "name": "Double Shackles",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "roots",
+              "entangle",
+              "slow",
+              "blindness",
+              "confusion",
+              "berserk",
+              "puppet-master"
+            ],
+            "maxTargets": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-godric",
+    "name": "Godric: Unyielding",
+    "description": "Godric: morale never drops below +1. While any ally has ≤ 15% HP, he deals +20% damage.",
+    "appearanceDescription": "The knight stands like a rock in the midst of a storm, and no horror wipes the calm from his face. But when a comrade falls beside him, cold anger flares in his eyes, and the mace comes down with the force of a mountain landslide.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "godric-steadfast",
+        "name": "Unyielding",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "minMorale",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "godric-wrath",
+        "name": "Unyielding: Wrath for Allies",
+        "trigger": {
+          "event": "passive"
+        },
+        "condition": {
+          "type": "hpBelow",
+          "who": "anyAlly",
+          "percent": 15
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-isabel",
+    "name": "Isabel: Horns of Dawn",
+    "description": "At the start of battle, all allies gain +2 initiative and +10% damage for 2 rounds.",
+    "appearanceDescription": "Isabel raises a silver horn to her lips, and its clear call rolls across the field like the first ray of sun over the mist. Warriors square their shoulders, grip their sword hilts and surge forward before the enemy can form ranks.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "isabel-dawn-horns",
+        "name": "Horns of Dawn",
+        "trigger": {
+          "event": "battleStart"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 2,
+            "target": "allAllies",
+            "duration": {
+              "rounds": 2
+            }
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 10,
+            "target": "allAllies",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-ivan",
+    "name": "Ivan: First Shot",
+    "description": "Initiative 999: Ivan always goes first. The first ranged attack of the battle has advantage.",
+    "appearanceDescription": "Ivan moves before the horns can sound: the bowstring is already drawn, his gaze has already found the target. The first arrow flies in silence while the enemies are only reaching for their weapons.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "ivan-swift",
+        "name": "First Shot: Speed",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 999
+          }
+        ]
+      },
+      {
+        "id": "ivan-first-shot",
+        "name": "First Shot",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "advantage",
+            "attackKind": "ranged"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-kha-beleth",
+    "name": "Kha-Beleth: Wrath of the Abyss",
+    "description": "Kha-Beleth: every attack hits all enemies for full damage.",
+    "appearanceDescription": "Kha-Beleth swings, and a trail of black flame follows the blade, spreading across the field like a tide. The blow was meant for one, but the fire of the Abyss finds every enemy, wherever they stand.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "kha-beleth-abyss-wrath",
+        "name": "Wrath of the Abyss",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "attackHitsAllEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-markel",
+    "name": "Markal: Call of the Avatar",
+    "description": "Markal knows an additional spell, \"Avatar\", which summons an Avatar of Death (the DM may replace the unit in the spell).",
+    "appearanceDescription": "Markal speaks a name that must not be written, and the air around him thickens, taking shape. From shadow and shimmer rises the Avatar, a silent, majestic figure that bows its head only to the one who called it.",
+    "mainSkillId": "Personal",
+    "grantedSpellId": "Avatar",
+    "abilities": [
+      {
+        "id": "markel-avatar",
+        "name": "Call of the Avatar",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Grants the \"Avatar\" spell."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-raelag",
+    "name": "Raelag: Yggshail's Venom",
+    "description": "Raelag: after a hit, the target is poisoned: each round, 10% of the attack's average damage, for 3 rounds. Does not stack; a repeated hit refreshes the duration.",
+    "appearanceDescription": "Raelag holds blades coated in a dull green film that faintly smokes in the air. A scratch from them seems trivial until the wound begins to burn and blacken, and icy fire creeps through the veins.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "raelag-venom",
+        "name": "Yggshail's Venom",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": {
+              "percentOf": "ownerAttack",
+              "value": 10
+            },
+            "damageType": "poison",
+            "duration": {
+              "rounds": 3
+            },
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-semgrun",
+    "name": "Semgrun: Elusive",
+    "description": "Semgrun: the first attack of each enemy against the owner each round has disadvantage (the enemy receives a mark for 1 round).",
+    "appearanceDescription": "Semgrun seems to dissolve into the air just as a blade descends: only a shadow and a faint breath of wind remain. The enemy strikes at emptiness, while Semgrun already stands a step to the left, smiling.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "semgrun-elusive",
+        "name": "Elusive",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "target"
+        },
+        "condition": {
+          "type": "not",
+          "condition": {
+            "type": "hasMark",
+            "who": "eventActor",
+            "markId": "semgrun-evaded",
+            "bySelf": true
+          }
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "disadvantageForAttackers"
+          },
+          {
+            "kind": "mark",
+            "markId": "semgrun-evaded",
+            "duration": {
+              "rounds": 1
+            },
+            "target": "eventActor"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "personal-zehir",
+    "name": "Zehir: Student of All Schools",
+    "description": "The first spell of each school (Light, Darkness, Chaos, Nature) in a battle grants +15% spell damage until the end of the battle; school bonuses stack (up to +60%). From level 4: +2 3rd-level slots and +1 4th-level slot. Can learn spells of all schools (the DM unlocks them in the tree).",
+    "appearanceDescription": "Four spheres circle around him: gold, black, fiery and green. Each flares when Zehir first draws power from it. The more spheres awaken, the brighter his gaze burns and the heavier his spells hum.",
+    "mainSkillId": "Personal",
+    "abilities": [
+      {
+        "id": "zehir-school-light",
+        "name": "Student of All Schools: Light",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Light"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 15,
+            "target": "self",
+            "duration": {
+              "rounds": 99
+            }
+          }
+        ]
+      },
+      {
+        "id": "zehir-school-dark",
+        "name": "Student of All Schools: Darkness",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Darkness"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 15,
+            "target": "self",
+            "duration": {
+              "rounds": 99
+            }
+          }
+        ]
+      },
+      {
+        "id": "zehir-school-chaos",
+        "name": "Student of All Schools: Chaos",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Chaos"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 15,
+            "target": "self",
+            "duration": {
+              "rounds": 99
+            }
+          }
+        ]
+      },
+      {
+        "id": "zehir-school-nature",
+        "name": "Student of All Schools: Nature",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Nature"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 15,
+            "target": "self",
+            "duration": {
+              "rounds": 99
+            }
+          }
+        ]
+      },
+      {
+        "id": "zehir-arcane-reserve",
+        "name": "Student of All Schools: Mana Reserve",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "spellSlots",
+            "flat": {
+              "formula": "min(1, max(0, hero_level - 3)) * 2"
+            },
+            "spellLevels": [
+              3
+            ]
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "spellSlots",
+            "flat": {
+              "formula": "min(1, max(0, hero_level - 3))"
+            },
+            "spellLevels": [
+              4
+            ]
+          }
+        ]
+      },
+      {
+        "id": "zehir-all-schools",
+        "name": "Student of All Schools",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "note",
+            "text": "Can learn spells of all schools; the DM unlocks them in the skill tree."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "piercing-bolt",
+    "name": "Armor-Piercing Bolt",
+    "description": "A ranged hit has a 40% chance to reduce the target's AC by 1 for 2 rounds.",
+    "appearanceDescription": "A faceted arrowhead, tempered in oil and ash, pierces plate like waxed paper. Through the hole you can already see where the armor holds weakest.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/piercing-bolt.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "piercing-bolt",
+        "name": "Armor-Piercing Bolt",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "limits": {
+          "chance": 40
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "armor",
+            "flat": -1,
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "pyrokinesis",
+    "name": "Pyrokinesis",
+    "description": "The target of each of your Chaos spells catches fire: each round, 20% of your attack's average damage as fire, for 3 rounds.",
+    "appearanceDescription": "After each spell, flames remain on the enemies that neither water nor sand can quench. They crawl over clothing and hair until they have eaten their fill.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/pyrokinesis.webp",
+    "mainSkillId": "Chaos",
+    "abilities": [
+      {
+        "id": "pyrokinesis",
+        "name": "Pyrokinesis",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Chaos"
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": {
+              "percentOf": "ownerAttack",
+              "value": 20
+            },
+            "damageType": "fire",
+            "duration": {
+              "rounds": 3
+            },
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-dark-elves-advanced",
+    "name": "Bloodlust (Advanced)",
+    "description": "Each kill made by the hero personally grants +1 action per turn until the end of the battle; maximum +2.",
+    "appearanceDescription": "With each death, a crimson haze thickens around the dark elf. He laughs softly and gladly, and the blades in his hands flicker twice as often.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-elemental-vision.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "dark-elves-bloodlust-advanced",
+        "name": "Bloodlust (Advanced)",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "actionsPerTurn",
+            "flat": 1,
+            "target": "self",
+            "duration": {
+              "rounds": 99
+            }
+          }
+        ],
+        "stackable": true,
+        "maxStacks": 2
+      }
+    ]
+  },
+  {
+    "slug": "racial-dark-elves-basic",
+    "name": "Bloodlust (Basic)",
+    "description": "Each kill made by the hero personally grants +1 action per turn until the end of the battle; maximum +1.",
+    "appearanceDescription": "An enemy falls, and the dark elf draws a deep breath of the scent of blood. His pupils widen, and his movements grow sharper and faster, as if someone had tightened a bowstring inside his body.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-dark-ritual.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "dark-elves-bloodlust-basic",
+        "name": "Bloodlust (Basic)",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "actionsPerTurn",
+            "flat": 1,
+            "target": "self",
+            "duration": {
+              "rounds": 99
+            }
+          }
+        ],
+        "stackable": true,
+        "maxStacks": 1
+      }
+    ]
+  },
+  {
+    "slug": "racial-dark-elves-expert",
+    "name": "Bloodlust (Expert)",
+    "description": "Each kill made by the hero personally grants +1 action per turn until the end of the battle; maximum +3.",
+    "appearanceDescription": "After the third victim, the dark elf becomes an almost blurred shadow with violet eyes. Blood steams on his armor, and enemies cannot even raise their shields in time.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-rage-of-the-elements.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "dark-elves-bloodlust-expert",
+        "name": "Bloodlust (Expert)",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "actionsPerTurn",
+            "flat": 1,
+            "target": "self",
+            "duration": {
+              "rounds": 99
+            }
+          }
+        ],
+        "stackable": true,
+        "maxStacks": 3
+      }
+    ]
+  },
+  {
+    "slug": "racial-dark-elves-ultimate",
+    "name": "Blood Ritual",
+    "description": "The hero sees enemies' HP. Attacks against targets with HP ≤ 50% have advantage and +20% damage.",
+    "appearanceDescription": "The dark elf draws a blade across his palm, and his blood flares with a violet glow. Now he sees how the enemies' hearts beat and hears which of them are already weakening. He pounces on the wounded like a wolf on a stricken deer.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-empowered-spells.webp",
+    "mainSkillId": "Ultimate",
+    "abilities": [
+      {
+        "id": "dark-elves-blood-ritual-sight",
+        "name": "Blood Ritual",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "seeEnemyHp"
+          }
+        ]
+      },
+      {
+        "id": "dark-elves-blood-ritual-strike",
+        "name": "Blood Ritual: Finishing Blow",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "hpBelow",
+          "who": "eventTarget",
+          "percent": 50
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "advantage",
+            "attackKind": "all"
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-demons-advanced",
+    "name": "Opening the Gates (Advanced)",
+    "description": "Bonus action, 1 use per battle: summons a random Tier 5 unit of the \"Demons\" group from the campaign bestiary. The charge does not depend on spell slots.",
+    "appearanceDescription": "The demon draws a fiery circle in the air, and it collapses into a roiling abyss. From the whirl steps a horned figure wreathed in tongues of flame, at once seeking prey.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-advanced.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "demons-gating-advanced",
+        "name": "Opening the Gates (Advanced)",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "summon",
+            "group": "Demons",
+            "tier": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-demons-basic",
+    "name": "Opening the Gates (Basic)",
+    "description": "Bonus action, 1 use per battle: summons a random Tier 3 unit of the \"Demons\" group from the campaign bestiary. The charge does not depend on spell slots.",
+    "appearanceDescription": "The air beside the hero tears open in a crimson rift, from which heat blasts and a distant howl is heard. Through it, shaking off ash, a small imp climbs out and bares its fangs.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-basic.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "demons-gating-basic",
+        "name": "Opening the Gates (Basic)",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "summon",
+            "group": "Demons",
+            "tier": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-demons-expert",
+    "name": "Opening the Gates (Expert)",
+    "description": "Bonus action, 1 use per battle: summons a random Tier 7 unit of the \"Demons\" group from the campaign bestiary. The charge does not depend on spell slots.",
+    "appearanceDescription": "The ground rises into a stone arch, within which the Inferno itself blazes. Through the gate, lowering its horns, steps a gigantic lord of hell, and the stones crack beneath his steps.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-expert.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "demons-gating-expert",
+        "name": "Opening the Gates (Expert)",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "summon",
+            "group": "Demons",
+            "tier": 7
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-demons-ultimate",
+    "name": "Hellish Land",
+    "description": "Action, 1 use per battle: until the end of the battle, all enemies take 10 fire damage each round.",
+    "appearanceDescription": "The demon slams his palm against the ground, and veins of molten lava race across it. The grass ignites, the stones glow red, and every enemy feels the soles of their boots begin to smoke. The fire does not die while the battle lasts.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-ultimate.webp",
+    "mainSkillId": "Ultimate",
+    "abilities": [
+      {
+        "id": "demons-hellfire-land",
+        "name": "Hellish Land",
+        "trigger": {
+          "event": "action"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": 10,
+            "damageType": "fire",
+            "duration": {
+              "rounds": 99
+            },
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-dwarves-advanced",
+    "name": "Runic Armor (Advanced)",
+    "description": "Resistance to all damage 15%.",
+    "appearanceDescription": "The runes on the dwarf's armor flare in a chain, joining into a network of glowing lines. Flame, steel and magic alike break against it like waves against a shore.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-advanced.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "dwarves-rune-armor-advanced",
+        "name": "Runic Armor (Advanced)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "all",
+            "percent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-dwarves-basic",
+    "name": "Runic Armor (Basic)",
+    "description": "Resistance to all damage 10%.",
+    "appearanceDescription": "A single rune awakens on the dwarf's breastplate, and a warm amber light runs along the metal. Blows that strike him sound dull, as if hitting a cliff.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-basic.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "dwarves-rune-armor-basic",
+        "name": "Runic Armor (Basic)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "all",
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-dwarves-expert",
+    "name": "Runic Armor (Expert)",
+    "description": "Resistance to all damage 20%.",
+    "appearanceDescription": "The dwarf's whole armor blazes with runes, like a smith's workpiece just pulled from the forge. Heat radiates from him, and enemy blades glance off, leaving only scratches.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-expert.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "dwarves-rune-armor-expert",
+        "name": "Runic Armor (Expert)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "all",
+            "percent": 20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-dwarves-ultimate",
+    "name": "Runic Attack",
+    "description": "After each hit, the hero gains one of 4 random runes for 1 round: fury (+20% damage), armor (+2 AC), speed (+3 initiative) or life (heals 10% max HP).",
+    "appearanceDescription": "When the dwarf's hammer lands, a spark flies from the metal and forms a rune in midair. It flares red, blue, gold or green, and the dwarf at once feels its gift: fury in the muscles, stone in the skin, wind in the legs or the warmth of a living spring.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-ultimate.webp",
+    "mainSkillId": "Ultimate",
+    "abilities": [
+      {
+        "id": "dwarves-rune-strike",
+        "name": "Runic Attack",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "effects": [
+          {
+            "kind": "randomOf",
+            "options": [
+              {
+                "kind": "damageBonus",
+                "filter": {
+                  "kind": "all"
+                },
+                "percent": 20,
+                "target": "self",
+                "duration": {
+                  "rounds": 1
+                }
+              },
+              {
+                "kind": "modifyStat",
+                "stat": "armor",
+                "flat": 2,
+                "target": "self",
+                "duration": {
+                  "rounds": 1
+                }
+              },
+              {
+                "kind": "modifyStat",
+                "stat": "initiative",
+                "flat": 3,
+                "target": "self",
+                "duration": {
+                  "rounds": 1
+                }
+              },
+              {
+                "kind": "heal",
+                "amount": {
+                  "percentOf": "maxHp",
+                  "value": 10
+                },
+                "target": "self"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-elves-advanced",
+    "name": "Hunter (Advanced)",
+    "description": "Bonus action: marks up to 2 enemies; for 1 round all attacks against marked targets have advantage.",
+    "appearanceDescription": "The hunter whistles like a forest bird, and two enemies suddenly notice glowing leaf prints on their armor. There is no hiding from these marks, in smoke or in a crowd.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-advanced.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "elves-avenger-advanced",
+        "name": "Hunter (Advanced)",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 1
+            },
+            "flag": "advantageForAttackers"
+          }
+        ],
+        "maxTargets": 2
+      }
+    ]
+  },
+  {
+    "slug": "racial-elves-basic",
+    "name": "Hunter (Basic)",
+    "description": "Bonus action: marks 1 enemy; for 1 round all attacks against marked targets have advantage.",
+    "appearanceDescription": "The elf narrows his eyes, and a barely visible green mark like a leaf flares above the chosen enemy's head. Now every archer of the company can see where to aim.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-basic.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "elves-avenger-basic",
+        "name": "Hunter (Basic)",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 1
+            },
+            "flag": "advantageForAttackers"
+          }
+        ],
+        "maxTargets": 1
+      }
+    ]
+  },
+  {
+    "slug": "racial-elves-expert",
+    "name": "Hunter (Expert)",
+    "description": "Bonus action: marks up to 3 enemies; for 1 round all attacks against marked targets have advantage.",
+    "appearanceDescription": "The hunter's gaze sweeps the battlefield, and three enemies at once feel a chill between their shoulder blades. An emerald mark trembles above each of them, and arrows seem to reach for it on their own.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-expert.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "elves-avenger-expert",
+        "name": "Hunter (Expert)",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 1
+            },
+            "flag": "advantageForAttackers"
+          }
+        ],
+        "maxTargets": 3
+      }
+    ]
+  },
+  {
+    "slug": "racial-elves-ultimate",
+    "name": "Incredible Luck",
+    "description": "The hero's attacks are critical on a roll of 18–20 (critical threshold −2).",
+    "appearanceDescription": "It seems the forest itself guides this elf's hand: the wind falls still just as the bowstring sings, and a sunbeam falls on a gap in the enemy's armor. The arrow goes in where no mortal's shot would land.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-ultimate.webp",
+    "mainSkillId": "Ultimate",
+    "abilities": [
+      {
+        "id": "elves-incredible-luck",
+        "name": "Incredible Luck",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "critThreshold",
+            "flat": -2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-humans-advanced",
+    "name": "Counterstrike (Advanced)",
+    "description": "The first creature to attack the hero in melee each round is answered with a riposte (reaction) that deals +25% bonus damage.",
+    "appearanceDescription": "The knight takes the blow on his pauldron, spins on his heel and strikes the attacker's exposed flank. The motion is honed by thousands of drills on the parade ground under the watch of grizzled veterans.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-advanced.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "humans-counter-advanced",
+        "name": "Counterstrike (Advanced)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "counterAttack",
+            "attackKinds": [
+              "melee"
+            ],
+            "bonusPercent": 25
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-humans-basic",
+    "name": "Counterstrike (Basic)",
+    "description": "The first creature to attack the hero in melee each round is answered with a riposte (reaction) that deals +15% bonus damage.",
+    "appearanceDescription": "The shield shudders from the blow, and at that very instant a sword slips out from under its edge in a short, vicious reply. The enemy has not yet had time to step back, but already feels the steel.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-basic.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "humans-counter-basic",
+        "name": "Counterstrike (Basic)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "counterAttack",
+            "attackKinds": [
+              "melee"
+            ],
+            "bonusPercent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-humans-expert",
+    "name": "Counterstrike (Expert)",
+    "description": "The first creature to attack the hero in melee each round is answered with a riposte (reaction) that deals +40% bonus damage.",
+    "appearanceDescription": "Every attack on a warrior of the Empire is an invitation. He catches the foe's blade with his crossguard, turns it aside and returns the strike with such force that it rings like a temple bell.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-expert.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "humans-counter-expert",
+        "name": "Counterstrike (Expert)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "counterAttack",
+            "attackKinds": [
+              "melee"
+            ],
+            "bonusPercent": 40
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-humans-ultimate",
+    "name": "Guardian Angel",
+    "description": "Action, 1 use per battle: resurrects a dead ally with 50% of their maximum HP.",
+    "appearanceDescription": "The sky above the battlefield splits in a blinding streak, and a winged guardian in silver plate descends from it. He bends over the fallen, touches their brow, and they draw breath again, as if waking from a heavy sleep.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-ultimate.webp",
+    "mainSkillId": "Ultimate",
+    "abilities": [
+      {
+        "id": "humans-guardian-angel",
+        "name": "Guardian Angel",
+        "trigger": {
+          "event": "action"
+        },
+        "condition": {
+          "type": "targetDead"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 50
+            },
+            "revive": true,
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-mages-advanced",
+    "name": "Omniscience (Advanced)",
+    "description": "+2 4th-level spell slots and +2 5th-level slots.",
+    "appearanceDescription": "Two additional rings of runes shimmer around the mage, slowly turning in opposite directions. He draws power from them like water from a deep well.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-advanced.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "mages-omniscience-advanced",
+        "name": "Omniscience (Advanced)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "spellSlots",
+            "flat": 2,
+            "spellLevels": [
+              4,
+              5
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-mages-basic",
+    "name": "Omniscience (Basic)",
+    "description": "+1 4th-level spell slot and +1 5th-level slot.",
+    "appearanceDescription": "Another scroll, written in tiny runes, unrolls in the mage's memory. What seemed unreachable yesterday now waits at his fingertips.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-basic.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "mages-omniscience-basic",
+        "name": "Omniscience (Basic)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "spellSlots",
+            "flat": 1,
+            "spellLevels": [
+              4,
+              5
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-mages-expert",
+    "name": "Omniscience (Expert)",
+    "description": "+3 4th-level spell slots and +3 5th-level slots.",
+    "appearanceDescription": "The sphere of knowledge around the mage grows into a whole constellation of runes, each singing its own note. He holds in his head spells that others spend their lives learning.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-expert.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "mages-omniscience-expert",
+        "name": "Omniscience (Expert)",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "spellSlots",
+            "flat": 3,
+            "spellLevels": [
+              4,
+              5
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-mages-ultimate",
+    "name": "Mark of the Mage",
+    "description": "Bonus action, 2 times per battle: refreshes this turn's main action (allowing a second spell to be cast).",
+    "appearanceDescription": "The mage traces a shining sign in the air, and time around him freezes for a moment: raindrops hang suspended, flames stand still. In that silence he has time to speak one more spell before the world moves again.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-ultimate.webp",
+    "mainSkillId": "Ultimate",
+    "abilities": [
+      {
+        "id": "mages-mage-sign",
+        "name": "Mark of the Mage",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perBattle": 2
+        },
+        "effects": [
+          {
+            "kind": "grantAction",
+            "refreshAction": true,
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "racial-necromancers-advanced",
+    "name": "Raise Dead (Advanced)",
+    "description": "Action, 1 use per battle: up to 2 downed units in the battle (not heroes, from either side) revive with 90% max HP and switch to the necromancer's side.",
+    "appearanceDescription": "The necromancer's whisper spreads across the field like a cold wind. Two of the fallen open their eyes at once, rise swaying, and turn to face their former comrades.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-advanced.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "necromancers-raise-advanced",
+        "name": "Raise Dead (Advanced)",
+        "trigger": {
+          "event": "action"
+        },
+        "condition": {
+          "type": "targetDead"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "raiseDead",
+            "hpPercent": 90,
+            "target": "eventTarget"
+          }
+        ],
+        "maxTargets": 2
+      }
+    ]
+  },
+  {
+    "slug": "racial-necromancers-basic",
+    "name": "Raise Dead (Basic)",
+    "description": "Action, 1 use per battle: up to 1 downed unit in the battle (not heroes, from either side) revives with 90% max HP and switches to the necromancer's side.",
+    "appearanceDescription": "The necromancer stretches out a bony hand, and pale threads of light rise from the ground over the body of the fallen. The corpse twitches, leans on its weapon and stands, now with an empty green fire in its eye sockets.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-basic.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "necromancers-raise-basic",
+        "name": "Raise Dead (Basic)",
+        "trigger": {
+          "event": "action"
+        },
+        "condition": {
+          "type": "targetDead"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "raiseDead",
+            "hpPercent": 90,
+            "target": "eventTarget"
+          }
+        ],
+        "maxTargets": 1
+      }
+    ]
+  },
+  {
+    "slug": "racial-necromancers-expert",
+    "name": "Raise Dead (Expert)",
+    "description": "Action, 1 use per battle: up to 3 downed units in the battle (not heroes, from either side) revive with 90% max HP and switch to the necromancer's side.",
+    "appearanceDescription": "A heavy bell tolls above the battlefield, and the ground trembles as if something vast breathes beneath it. Three dead rise, shaking off blood and dust, and silently fall into formation behind the necromancer.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-expert.webp",
+    "mainSkillId": "Racial",
+    "abilities": [
+      {
+        "id": "necromancers-raise-expert",
+        "name": "Raise Dead (Expert)",
+        "trigger": {
+          "event": "action"
+        },
+        "condition": {
+          "type": "targetDead"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "raiseDead",
+            "hpPercent": 90,
+            "target": "eventTarget"
+          }
+        ],
+        "maxTargets": 3
+      }
+    ]
+  },
+  {
+    "slug": "racial-necromancers-ultimate",
+    "name": "Banshee Wail",
+    "description": "Action, 1 use per battle: the morale of all enemies −3.",
+    "appearanceDescription": "The necromancer opens his mouth, and the piercing shriek of a specter bursts out, shattering windowpanes and rattling shields. Enemies feel icy fingers clutch their hearts, and their weapons suddenly grow impossibly heavy.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-ultimate.webp",
+    "mainSkillId": "Ultimate",
+    "abilities": [
+      {
+        "id": "necromancers-banshee-howl",
+        "name": "Banshee Wail",
+        "trigger": {
+          "event": "action"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": -3,
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ranged-advanced",
+    "name": "Advanced Ranged",
+    "description": "Ranged attack damage +20% (replaces Basic Ranged).",
+    "appearanceDescription": "The archer accounts for the wind without glancing at the pennants; he feels it on his skin. A second arrow is already on the string while the first is still in flight.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged-advanced.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "ranged-advanced",
+        "name": "Advanced Ranged",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": 20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ranged-basic",
+    "name": "Basic Ranged",
+    "description": "Ranged attack damage +10%.",
+    "appearanceDescription": "Straw dummies at the edge of camp gradually sprout arrows exactly where a person's heart would be. The hand still trembles at full draw, but the eye no longer errs.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged-basic.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "ranged-basic",
+        "name": "Basic Ranged",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ranged-expert",
+    "name": "Expert Ranged",
+    "description": "Ranged attack damage +30% (replaces Advanced Ranged).",
+    "appearanceDescription": "They say such archers can hit the gap in a visor from two hundred paces. The enemy hears only a whistle, and then nothing at all.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged-expert.webp",
+    "mainSkillId": "Ranged",
+    "abilities": [
+      {
+        "id": "ranged-expert",
+        "name": "Expert Ranged",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": 30
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "readiness",
+    "name": "Readiness",
+    "description": "Once per round, before a melee attack against you, the attacker takes 50% of your attack's average damage. If this kills them, their attack is canceled.",
+    "appearanceDescription": "The hero does not wait for the blow; he meets it. The enemy steps in to swing and runs onto a point that was already waiting right there.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/readiness.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "readiness",
+        "name": "Readiness",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "target",
+          "attackKind": "melee"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "ownerAttack",
+              "value": 50
+            },
+            "target": "eventActor"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "resilience",
+    "name": "Resilience",
+    "description": "Once per battle, when you are hit at HP ≤ 15%, all negative effects and conditions are removed from you.",
+    "appearanceDescription": "At the brink of death, something stubborn and primal flares in the chest. Poison evaporates from the blood, spells shed from the shoulders like frost, and the hero sees clearly again.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/resilience.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "resilience",
+        "name": "Resilience",
+        "trigger": {
+          "event": "hit",
+          "role": "target"
+        },
+        "condition": {
+          "type": "hpBelow",
+          "who": "self",
+          "percent": 15
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "cleanse",
+            "includeConditions": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "restoration",
+    "name": "Restoration",
+    "description": "Your negative morale is treated as 0.",
+    "appearanceDescription": "Even after the worst defeat, the hero is the first to rise from the mud and shake out his cloak. Despair runs off him like rainwater off armor.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/restoration.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "restoration",
+        "name": "Restoration",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "noNegativeMorale"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "retribution",
+    "name": "Retribution",
+    "description": "Physical damage +5% for each point of your morale.",
+    "appearanceDescription": "The higher the company's spirit, the heavier its sword falls. The battle cry turns into strength in the hands, and every blow carries the wrath of all who stand beside him.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/retribution.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "retribution",
+        "name": "Retribution",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "physical"
+            },
+            "percent": {
+              "formula": "5*morale"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "reward",
+    "name": "Reward",
+    "description": "When you kill an enemy, you immediately regain your main action (at most 1 time per turn).",
+    "appearanceDescription": "The enemy's body is still falling, and the warrior is already turning to the next. The blood on his blade has no time to cool; for him the battle has only just warmed up.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/reward.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "reward",
+        "name": "Reward",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "limits": {
+          "perTurn": 1
+        },
+        "effects": [
+          {
+            "kind": "grantAction",
+            "refreshAction": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "righteous-wrath",
+    "name": "Righteous Wrath",
+    "description": "The \"Righteous Might\" and \"Haste\" spells affect an area: up to 3 targets.",
+    "appearanceDescription": "Sacred wrath spreads from the mage in a wave, and several warriors at once feel their arms fill with strength. Golden halos flare briefly above their heads.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/righteous-wrath.webp",
+    "mainSkillId": "Light",
+    "abilities": [
+      {
+        "id": "righteous-wrath",
+        "name": "Righteous Wrath",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "spellIds": [
+              "righteous-might",
+              "haste"
+            ],
+            "maxTargets": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "sequence",
+    "name": "Sequence",
+    "description": "Each of your hits places a \"Sequence\" mark on the target for 2 rounds (marks stack). Physical damage to the target +2% for each of your marks on it.",
+    "appearanceDescription": "The first blow is reconnaissance, the second a promise, the third a verdict. The warrior strikes the same spot again and again, and the enemy's shield cracks ever louder.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/sequence.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "sequence-mark",
+        "name": "Sequence",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "effects": [
+          {
+            "kind": "mark",
+            "markId": "sequence",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "eventTarget"
+          }
+        ]
+      },
+      {
+        "id": "sequence-bonus",
+        "name": "Sequence",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "physical"
+            },
+            "percent": 2,
+            "perMark": "sequence"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "stunning-strike",
+    "name": "Stunning Strike",
+    "description": "A melee hit has a 40% chance to reduce the target's initiative by 2 for 2 rounds.",
+    "appearanceDescription": "The hilt strikes the helmet with a ring that sets the opponent's world swimming. He still swings, but his movements have turned slow, as if through thick honey.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/stunning-strike.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "stunning-strike",
+        "name": "Stunning Strike",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "melee"
+        },
+        "limits": {
+          "chance": 40
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": -2,
+            "target": "eventTarget",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "success",
+    "name": "Success",
+    "description": "Each of your successful morale checks grants +8% to all damage for 3 rounds (the effect stacks).",
+    "appearanceDescription": "Fortune favors the bold, and the hero feels her breath on the back of his neck. Every successful surge adds to his strength, and he races forward on the wave of his own ardor.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/success.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "success",
+        "name": "Success",
+        "trigger": {
+          "event": "moraleCheck",
+          "result": "success",
+          "whose": "self"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 8,
+            "duration": {
+              "rounds": 3
+            }
+          }
+        ],
+        "stackable": true
+      }
+    ]
+  },
+  {
+    "slug": "thorn-armor",
+    "name": "Thorn Armor",
+    "description": "Once per battle, when you are hit by a physical attack, the attacker takes 100% of the damage dealt to you.",
+    "appearanceDescription": "The armor is covered in tiny spikes like a hedgehog's hide, and anyone who strikes too hard leaves their own flesh upon them. The clang of the blow and the attacker's cry sound at once.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/thorn-armor.webp",
+    "mainSkillId": "Defense",
+    "abilities": [
+      {
+        "id": "thorn-armor",
+        "name": "Thorn Armor",
+        "trigger": {
+          "event": "hit",
+          "role": "target"
+        },
+        "condition": {
+          "type": "not",
+          "condition": {
+            "type": "attackKind",
+            "kind": "magic"
+          }
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "eventDamage",
+              "value": 100
+            },
+            "target": "eventActor"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "thorns",
+    "name": "Thorns",
+    "description": "When you or any of your allies is hit by a melee attack, the attacker takes 15% of the damage dealt to the target (piercing).",
+    "appearanceDescription": "The skin of the druid and his companions is covered with thin bark with thorns as sharp as blackthorn. Anyone who strikes at close range pulls back a hand bloodied to the elbow.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/thorns.webp",
+    "mainSkillId": "Nature",
+    "abilities": [
+      {
+        "id": "thorns",
+        "name": "Thorns",
+        "trigger": {
+          "event": "hit",
+          "role": "target",
+          "attackKind": "melee"
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "eventDamage",
+              "value": 15
+            },
+            "damageType": "piercing",
+            "target": "eventActor"
+          }
+        ]
+      },
+      {
+        "id": "thorns-allies",
+        "name": "Thorns",
+        "trigger": {
+          "event": "hit",
+          "role": "target",
+          "whose": "ally",
+          "attackKind": "melee"
+        },
+        "effects": [
+          {
+            "kind": "dealDamage",
+            "amount": {
+              "percentOf": "eventDamage",
+              "value": 15
+            },
+            "damageType": "piercing",
+            "target": "eventActor"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "vengeance",
+    "name": "Vengeance",
+    "description": "Each enemy killed by your side grants you +1 morale; each ally's death gives −2 morale (morale is capped at ±3).",
+    "appearanceDescription": "Every felled enemy kindles cold joy in the hero's heart, every fallen comrade black sorrow. He counts them all, and the tally can be seen in his eyes.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/vengeance.webp",
+    "mainSkillId": "Leadership",
+    "abilities": [
+      {
+        "id": "vengeance-kill",
+        "name": "Vengeance",
+        "trigger": {
+          "event": "kill",
+          "role": "killerSide"
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": 1
+          }
+        ]
+      },
+      {
+        "id": "vengeance-loss",
+        "name": "Vengeance",
+        "trigger": {
+          "event": "kill",
+          "role": "victimSide"
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": -2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "zeal",
+    "name": "Zeal",
+    "description": "Bonus action: for 1 round, physical damage +15%, but AC −1.",
+    "appearanceDescription": "The warrior casts caution aside along with his shield and charges forward with a battle roar. He is exposed, but each of his blows now weighs more than two.",
+    "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/zeal.webp",
+    "mainSkillId": "Attack",
+    "abilities": [
+      {
+        "id": "zeal",
+        "name": "Zeal",
+        "trigger": {
+          "event": "bonusAction"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "physical"
+            },
+            "percent": 15,
+            "duration": {
+              "rounds": 1
+            }
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "armor",
+            "flat": -1,
+            "duration": {
+              "rounds": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -166,5 +166,135 @@
     "description": "Пояснення скорочень характеристик та параметрів",
     "main": "Основні характеристики:",
     "other": "Інші параметри:"
+  },
+  "ruleSystem": {
+    "homm": "HoMM (спрощена d20)",
+    "dnd5e": "D&D 5e",
+    "wfrp": "Grim d100"
+  },
+  "difficulty": {
+    "veryEasy": "Дуже легко",
+    "easy": "Легко",
+    "average": "Звичайно",
+    "challenging": "Непросто",
+    "difficult": "Важко",
+    "hard": "Дуже важко",
+    "veryHard": "Надзвичайно важко"
+  },
+  "characteristics": {
+    "ws": {
+      "label": "Володіння зброєю",
+      "short": "ВЗ"
+    },
+    "bs": {
+      "label": "Стрільба",
+      "short": "СТ"
+    },
+    "s": {
+      "label": "Сила",
+      "short": "С"
+    },
+    "t": {
+      "label": "Статура",
+      "short": "Ст"
+    },
+    "i": {
+      "label": "Ініціатива",
+      "short": "Ін"
+    },
+    "ag": {
+      "label": "Спритність",
+      "short": "Сп"
+    },
+    "dex": {
+      "label": "Моторика",
+      "short": "Мт"
+    },
+    "int": {
+      "label": "Інтелект",
+      "short": "Інт"
+    },
+    "wp": {
+      "label": "Воля",
+      "short": "Вл"
+    },
+    "fel": {
+      "label": "Чарівність",
+      "short": "Чр"
+    }
+  },
+  "wfrpSkills": {
+    "athletics": "Атлетика",
+    "charm": "Чарівність",
+    "climb": "Лазіння",
+    "cool": "Витримка",
+    "drink": "Витривалість до хмелю",
+    "dodge": "Ухилення",
+    "drive": "Керування возом",
+    "endurance": "Витривалість",
+    "entertain": "Розваги",
+    "gamble": "Азартні ігри",
+    "gossip": "Пліткування",
+    "haggle": "Торгування",
+    "intimidate": "Залякування",
+    "intuition": "Інтуїція",
+    "leadership": "Лідерство",
+    "navigation": "Навігація",
+    "survival": "Виживання просто неба",
+    "perception": "Сприйняття",
+    "ride": "Верхова їзда",
+    "row": "Веслування",
+    "stealth": "Скритність",
+    "swim": "Плавання",
+    "melee": "Ближній бій",
+    "ranged": "Дальній бій",
+    "animal-care": "Догляд за тваринами",
+    "channelling": "Скерування",
+    "evaluate": "Оцінювання",
+    "heal": "Лікування",
+    "lockpicking": "Злам замків",
+    "pray": "Молитва",
+    "research": "Дослідження",
+    "signs": "Таємні знаки",
+    "traps": "Пастки",
+    "sleight-of-hand": "Спритність рук",
+    "track": "Вистежування",
+    "lore": "Знання",
+    "language": "Мова",
+    "trade": "Ремесло",
+    "art": "Мистецтво",
+    "performance": "Виступ"
+  },
+  "wfrpSpecs": {
+    "melee": {
+      "basic": "Базовий",
+      "cavalry": "Кавалерійський",
+      "fencing": "Фехтування",
+      "flail": "Ціп",
+      "parry": "Парирування",
+      "polearm": "Древкова зброя",
+      "two-handed": "Дворучний",
+      "brawling": "Кулачний бій"
+    },
+    "ranged": {
+      "bow": "Лук",
+      "crossbow": "Арбалет",
+      "blackpowder": "Порохова зброя",
+      "engineering": "Облогова зброя",
+      "entangling": "Пута",
+      "explosives": "Вибухівка",
+      "sling": "Праща",
+      "throwing": "Метальна зброя"
+    }
+  },
+  "testOutcome": {
+    "critical": "Критичний успіх",
+    "success": "Успіх",
+    "failure": "Провал",
+    "fumble": "Фатальний провал"
+  },
+  "distanceUnit": {
+    "ft": "фт",
+    "yd": "ярд"
   }
 }

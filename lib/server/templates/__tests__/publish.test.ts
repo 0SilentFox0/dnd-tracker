@@ -110,6 +110,20 @@ describe.skipIf(!isLocalDevDatabaseEnv())("publishTemplateVersion", () => {
     expect(await raw.spellGroupBase.count({ where: { sourceCampaignId: ids.template, validTo: null } })).toBe(2);
   });
 
+  it("a slug-only change updates the open base row without a new version", async () => {
+    const before = await version();
+
+    await raw.spell.update({ where: { id: rid(spell) }, data: { slug: `${marker}-spell` } });
+
+    expect(await publish()).toMatchObject({ added: 0, changed: 0, removed: 0 });
+    expect(await version()).toBe(before);
+
+    const rows = await history(spell);
+
+    expect(rows.at(-1)).toMatchObject({ validTo: null, slug: `${marker}-spell` });
+    expect(rows.filter((r: any) => r.validTo === null)).toHaveLength(1);
+  });
+
   it("base rows belong to the template that published them", async () => {
     expect(await publish(ids.other)).toMatchObject({ added: 0, changed: 0, removed: 0 });
     expect(await raw.spellBase.count({ where: { sourceCampaignId: ids.other } })).toBe(0);

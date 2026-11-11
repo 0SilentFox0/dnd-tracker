@@ -21,23 +21,23 @@ describe("advanceAfterRemoval", () => {
   const next = makeParticipant({ id: "next", side: ParticipantSide.ENEMY });
 
   it("хід переходить до наступного після прибраного", () => {
-    const out = advanceAfterRemoval({ participants: [prev, next], pending: [], scene, before: 1 });
+    const out = advanceAfterRemoval({ rules: DEFAULT_RULES, participants: [prev, next], pending: [], scene, before: 1 });
 
     expect(out.scene.turnIndex).toBe(1);
   });
 
   it("кінець ходу попереднього не спрацьовує вдруге", () => {
-    const out = advanceAfterRemoval({ participants: [prev, next], pending: [], scene, before: 1 });
+    const out = advanceAfterRemoval({ rules: DEFAULT_RULES, participants: [prev, next], pending: [], scene, before: 1 });
 
     expect(hpOf(out.participants, "prev")).toBe(20);
 
-    const plain = advanceTurn({ participants: [prev, next], pending: [], scene: { ...scene, turnIndex: 0 } });
+    const plain = advanceTurn({ rules: DEFAULT_RULES, participants: [prev, next], pending: [], scene: { ...scene, turnIndex: 0 } });
 
     expect(hpOf(plain.participants, "prev")).toBe(17);
   });
 
   it("прибраний був першим у черзі — ходить новий перший", () => {
-    const out = advanceAfterRemoval({ participants: [prev, next], pending: [], scene: { ...scene, turnIndex: 0 }, before: 0 });
+    const out = advanceAfterRemoval({ rules: DEFAULT_RULES, participants: [prev, next], pending: [], scene: { ...scene, turnIndex: 0 }, before: 0 });
 
     expect(out.scene.turnIndex).toBe(0);
     expect(hpOf(out.participants, "prev")).toBe(20);

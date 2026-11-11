@@ -17,3 +17,10 @@ describe("parseDieInput", () => {
     expect(parseDieInput("0", 8)).toBeNull();
   });
 });
+
+describe("parseDieInput strict", () => {
+  it("rejects an over-range number instead of trimming its tail", () => {
+    expect(parseDieInput("101", 100, true)).toBeNull();
+    expect(parseDieInput("100", 100, true)).toBe(100);
+  });
+});

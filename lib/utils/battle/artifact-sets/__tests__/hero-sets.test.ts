@@ -12,6 +12,7 @@ import { splitGuardedDamage } from "@/lib/utils/battle/attack/process/guard";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -29,7 +30,7 @@ const foe = (id: string, hp = 50, maxHp = 50) => makeParticipant({ id, side: Par
 
 const withFlags = (p: BattleParticipant, flags: Partial<BattleParticipant["actionFlags"]>): BattleParticipant => ({ ...p, actionFlags: { ...p.actionFlags, ...flags } });
 
-const ctx = { round: 1, rng: seq(0) };
+const ctx = { round: 1, rng: seq(0), rules: DEFAULT_RULES };
 
 describe("Мрія лучника", () => {
   const { pieces, set } = abilitiesOf("set-archers-dream");
@@ -45,7 +46,7 @@ describe("Мрія лучника", () => {
 
     const attacker = { ...baked, battleData: { ...baked.battleData, attacks: [shot] } };
 
-    const r = runAttackPhase({
+    const r = runAttackPhase({ rules: DEFAULT_RULES,
       battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
       data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 2], damageRolls: [4, 4] },
       battleId: "b",
@@ -65,7 +66,7 @@ describe("Мрія лучника", () => {
 
       const attacker = { ...baked, combatStats: { ...baked.combatStats, maxTargets: 2 }, battleData: { ...baked.battleData, attacks: [shot] } };
 
-      const r = runAttackPhase({
+      const r = runAttackPhase({ rules: DEFAULT_RULES,
         battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
         data: { attackerId: "ivan", targetIds: ["t1", "t2"], attackRolls: [15, 15], damageRolls: [8, 4, 8, 4] },
         battleId: "b",
@@ -205,7 +206,7 @@ describe("Обладунки гномських королів", () => {
   it("руни: перша опція дістається всім союзникам", () => {
     const ps = [semgrun(set), ally, foe("e")];
 
-    const r = runAbilities(ps, hitSemgrun, { round: 1, rng: seq(0) });
+    const r = runAbilities(ps, hitSemgrun, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
 
     for (const id of ["semgrun", "a"]) {
       expect(collectModifiers(r.participants, id, { damage: { kind: "melee" } }).percent).toBe(10);
@@ -448,14 +449,14 @@ describe("Кігті Ігг-Шайла", () => {
     const hit = { type: "hit", actorId: "raelag", targetId: "e", attackKind: AttackType.MELEE, damage: 5 } as const;
 
     it("шанс 25 %: ціль без реакції", () => {
-      const r = runAbilities([raelag(set), foe("e")], hit, { round: 1, rng: seq(0) });
+      const r = runAbilities([raelag(set), foe("e")], hit, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
 
       expect(r.participants[1].battleData.activeEffects.some((e) => e.effects.some((x) => x.type === "no_reaction"))).toBe(true);
       expect(r.participants[1].actionFlags.hasUsedReaction).toBe(true);
     });
 
     it("невдалий кидок: без ефекту", () => {
-      const r = runAbilities([raelag(set), foe("e")], hit, { round: 1, rng: seq(0.99) });
+      const r = runAbilities([raelag(set), foe("e")], hit, { rules: DEFAULT_RULES, round: 1, rng: seq(0.99) });
 
       expect(r.participants[1].battleData.activeEffects).toHaveLength(0);
       expect(r.participants[1].actionFlags.hasUsedReaction).toBe(false);
@@ -476,7 +477,7 @@ describe("Кігті Ігг-Шайла", () => {
 
       const target = { ...t, battleData: { ...t.battleData, attacks: [sword], resolvedAbilities: [counter] } };
 
-      return runAttackPhase({
+      return runAttackPhase({ rules: DEFAULT_RULES,
         battle: { initiativeOrder: [attacker, target], currentRound: 1, currentTurnIndex: 0 },
         data: { attackerId: "raelag", targetIds: ["tgt"], d20Roll: 15, damageRolls: [3] },
         battleId: "b",

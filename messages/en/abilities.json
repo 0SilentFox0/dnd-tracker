@@ -171,7 +171,8 @@
     "columnNotPool": "Column “{label}” is not a pool",
     "attackNotFound": "The attack was not found among the unit's attacks",
     "spellNotFound": "The spell was not found in the library",
-    "diceFormat": "A dice formula like 1d6 or 2d8+1 is required"
+    "diceFormat": "A dice formula like 1d6 or 2d8+1 is required",
+    "traitRangeOnlyBreathRanged": "Range (rangeFt) is only valid for the Breath and Ranged trait attacks"
   },
   "read": {
     "partialInvalid": "Some of the stored abilities have invalid data — fix or remove them before saving",

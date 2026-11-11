@@ -1,6 +1,7 @@
 import { z, type ZodType } from "zod";
 
 import "server-only";
+import { careerTierSchema } from "@/lib/schemas/careers";
 import { ChoiceSchema, FeatPrerequisiteSchema, SpellGrantPolicySchema } from "@/lib/schemas/choices";
 import { ClassColumnSchema } from "@/lib/schemas/classes";
 import { UnitSpellcastingSchema, UnitSpellGrantSchema, UnitStatblockSchema } from "@/lib/schemas/units";
@@ -52,6 +53,7 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [ChoiceSchema, "Choice"],
   [FeatPrerequisiteSchema, "FeatPrerequisite"],
   [RulesetPatchSchema, "RulesetPatch"],
+  [careerTierSchema, "CareerTier"],
   [UnitStatblockSchema, "UnitStatblock"],
   [UnitSpellcastingSchema, "UnitSpellcasting"],
   [UnitSpellGrantSchema, "UnitSpellGrant"],

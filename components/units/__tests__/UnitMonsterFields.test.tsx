@@ -10,7 +10,7 @@ afterEach(cleanup);
 
 const t = makeT();
 
-const editor = (cr: number | null, change = vi.fn()): UnitFormFieldsState => ({ form: { data: { cr, statblock: { senses: { blindsight: 30 } }, spellcasting: { spells: [{ spellId: "breath", perBattle: 1, recharge: 5 }] } }, change }, options: { races: [], spells: [{ id: "breath", name: "Подих" }], fiveE: true }, abilities: { errors: 0 } }) as never;
+const editor = (cr: number | null, change = vi.fn()): UnitFormFieldsState => ({ form: { data: { cr, statblock: { senses: { blindsight: 30 } }, spellcasting: { spells: [{ spellId: "breath", perBattle: 1, recharge: 5 }] } }, change }, options: { races: [], spells: [{ id: "breath", name: "Подих" }], fiveE: true, system: "homm" }, abilities: { errors: 0 } }) as never;
 
 describe("monster unit form", () => {
   it("adds statblock and grant tabs only for CR units", () => {

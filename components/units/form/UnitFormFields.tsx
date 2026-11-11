@@ -3,16 +3,15 @@
 import { UNIT_FORM_TAB, type UnitFormTabId } from "./unit-form-tabs";
 import { UnitAttacks } from "./UnitAttacks";
 import { UnitBasicInfo } from "./UnitBasicInfo";
-import { UnitFiveEFields } from "./UnitFiveEFields";
 import { UnitImmunities } from "./UnitImmunities";
 import { UnitKnownSpells } from "./UnitKnownSpells";
 import { UnitSpellcastingFields } from "./UnitSpellcastingFields";
 import { UnitStatblockFields } from "./UnitStatblockFields";
 
 import { AbilityListEditor } from "@/components/abilities";
-import { AbilityScoresGrid } from "@/components/common/AbilityScoresGrid";
 import { IconUrlField } from "@/components/common/IconUrlField";
-import { HudSection, type HudTab } from "@/components/hud/form";
+import { type HudTab } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import type { UnitFormFieldsState } from "@/lib/hooks/units";
 import type { Translator } from "@/lib/i18n/translator";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
@@ -27,7 +26,9 @@ interface UnitFormFieldsProps {
 export function unitFormTabs({ campaignId, editor, abilityIssues, t }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
   const { data: formData, change } = editor.form;
 
-  const { races, spells, fiveE } = editor.options;
+  const { races, spells, fiveE, system } = editor.options;
+
+  const Ui = system && systemUiOf(system);
 
   return [
     {
@@ -36,11 +37,6 @@ export function unitFormTabs({ campaignId, editor, abilityIssues, t }: UnitFormF
       content: (
         <div className="space-y-4">
           <UnitBasicInfo formData={formData} races={races} onChange={change} />
-          {(fiveE || formData.cr != null) && (
-            <HudSection title="5e">
-              <UnitFiveEFields formData={formData} onChange={change} />
-            </HudSection>
-          )}
           <IconUrlField
             id="avatar"
             label={t("units.basic.avatar")}
@@ -48,9 +44,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues, t }: UnitFormF
             onChange={(avatar) => change({ avatar: avatar || null })}
             fallbackText={formData.name || "?"}
           />
-          <HudSection title={t("units.basic.abilityScores")}>
-            <AbilityScoresGrid data={formData} set={(key, value) => change({ [key]: value })} />
-          </HudSection>
+          {Ui && <Ui.UnitStatsFields formData={formData} onChange={change} fiveE={fiveE} />}
         </div>
       ),
     },

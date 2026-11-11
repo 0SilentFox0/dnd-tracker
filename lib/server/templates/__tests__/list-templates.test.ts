@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { listTemplates } from "@/lib/server/templates/list-templates";
 
 const findMany = vi.fn();
@@ -19,7 +18,7 @@ describe("listTemplates", () => {
     expect(findMany.mock.calls[0][0].select).toMatchObject({ locale: true, templateKey: true });
   });
 
-  const srd = (id: string, locale: string | null) => ({ id, kind: "template", name: SRD_TEMPLATE_NAME, description: null, visibility: "official", credits: "CC-BY", locale, templateKey: SRD_TEMPLATE_NAME, _count: { classes: 12 } });
+  const srd = (id: string, locale: string | null) => ({ id, kind: "template", name: "5e SRD 5.2", description: null, visibility: "official", credits: "CC-BY", locale, templateKey: "srd-5.2", _count: { classes: 12 } });
 
   it("lists one canonical SRD with both content languages and preserves private same-key templates", async () => {
     findMany.mockResolvedValueOnce([srd("english", null), srd("legacy", "uk")]).mockResolvedValueOnce([{ ...srd("private", "uk"), visibility: "private" }]);
@@ -35,5 +34,19 @@ describe("listTemplates", () => {
   it("rejects ambiguous canonical SRD sources rather than silently grouping them", async () => {
     findMany.mockResolvedValueOnce([srd("english", "en"), srd("old-english", null)]).mockResolvedValueOnce([]);
     await expect(listTemplates("owner")).rejects.toMatchObject({ status: 409 });
+  });
+
+  const grim = (id: string, locale: string | null) => ({ ...srd(id, locale), name: "Grim d100", templateKey: "grim-d100", _count: { careers: 3 } });
+
+  it("offers both content languages for the canonical Grim", async () => {
+    findMany.mockResolvedValueOnce([grim("grim", "en")]).mockResolvedValueOnce([]);
+    expect((await listTemplates("owner")).official[0]).toMatchObject({ id: "grim", availableLocales: ["en", "uk"] });
+  });
+
+  it("rejects two canonical Grim sources but allows one SRD plus one Grim", async () => {
+    findMany.mockResolvedValueOnce([grim("a", "en"), grim("b", null)]).mockResolvedValueOnce([]);
+    await expect(listTemplates("owner")).rejects.toMatchObject({ status: 409 });
+    findMany.mockResolvedValueOnce([srd("srd", "en"), grim("grim", "en")]).mockResolvedValueOnce([]);
+    expect((await listTemplates("owner")).official).toHaveLength(2);
   });
 });

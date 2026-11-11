@@ -5,6 +5,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -24,7 +25,7 @@ const semgrun = resolved({
 const marked = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "advantageForAttackers" }] });
 
 const strike = (target: BattleParticipant, rng: () => number, d20 = 18) =>
-  processAttack({ attacker: attacker(), target, attack: sword, d20Roll: d20, damageRolls: [4], allParticipants: [attacker(), target], currentRound: 1, battleId: "b", rng });
+  processAttack({ rules: DEFAULT_RULES, attacker: attacker(), target, attack: sword, d20Roll: d20, damageRolls: [4], allParticipants: [attacker(), target], currentRound: 1, battleId: "b", rng });
 
 describe("server-rolled second d20", () => {
   it("Семгрун-style disadvantage without a client roll uses the server roll and logs it", () => {
@@ -48,8 +49,8 @@ describe("server-rolled second d20", () => {
   it("predictAttack mode reads advantage/disadvantage flags for the wizard", () => {
     const target = makeParticipant({ id: "s", side: ParticipantSide.ENEMY, abilities: [marked] });
 
-    expect(predictAttack(attacker(), target, sword, [attacker(), target]).mode).toBe("advantage");
-    expect(predictAttack(attacker(), makeParticipant({ id: "p", side: ParticipantSide.ENEMY }), sword, [attacker()]).mode).toBe("normal");
+    expect(predictAttack(attacker(), target, sword, [attacker(), target], { rules: DEFAULT_RULES }).mode).toBe("advantage");
+    expect(predictAttack(attacker(), makeParticipant({ id: "p", side: ParticipantSide.ENEMY }), sword, [attacker()], { rules: DEFAULT_RULES }).mode).toBe("normal");
   });
 
   it("predictAttack mode includes certain before-phase triggers, but not chance-based ones", () => {
@@ -65,8 +66,8 @@ describe("server-rolled second d20", () => {
       return { ...p, battleData: { ...p.battleData, attacks: [sword] } };
     };
 
-    expect(predictAttack(withAbility(firstShot), target, sword, [withAbility(firstShot), target]).mode).toBe("advantage");
-    expect(predictAttack(withAbility(lucky), target, sword, [withAbility(lucky), target]).mode).toBe("normal");
-    expect(predictAttack(attacker(), makeParticipant({ id: "s", side: ParticipantSide.ENEMY, abilities: [semgrun] }), sword, [attacker()]).mode).toBe("disadvantage");
+    expect(predictAttack(withAbility(firstShot), target, sword, [withAbility(firstShot), target], { rules: DEFAULT_RULES }).mode).toBe("advantage");
+    expect(predictAttack(withAbility(lucky), target, sword, [withAbility(lucky), target], { rules: DEFAULT_RULES }).mode).toBe("normal");
+    expect(predictAttack(attacker(), makeParticipant({ id: "s", side: ParticipantSide.ENEMY, abilities: [semgrun] }), sword, [attacker()], { rules: DEFAULT_RULES }).mode).toBe("disadvantage");
   });
 });

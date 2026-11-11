@@ -20,6 +20,8 @@ export function characterToFormData(
   raceProgression?: SpellSlotProgression[],
 ): CharacterFormData {
   return {
+    characteristics: character.characteristics,
+    systemBaseline: character.characteristics ?? null,
     basicInfo: {
       name: character.name || "",
       type: (character.type as CharacterTypeValue) || CharacterType.PLAYER,
@@ -109,8 +111,9 @@ export function formDataToCharacter(
 ): Omit<
   Character,
   "id" | "campaignId" | "createdAt" | "updatedAt" | "user" | "inventory"
-> {
+> & { systemBaseline?: unknown } {
   return {
+    ...(formData.characteristics && { characteristics: formData.characteristics, systemBaseline: formData.systemBaseline }),
     type: formData.basicInfo.type,
     controlledBy: formData.basicInfo.controlledBy,
     name: formData.basicInfo.name,

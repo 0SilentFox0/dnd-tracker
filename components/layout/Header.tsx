@@ -69,9 +69,9 @@ export function Header() {
 
   const isPlayerPage = !isDMPage && isCampaignPage;
 
-  const classesEnabled = !!useCampaignRules(isDMPage ? campaignId ?? "" : "").data?.classes.enabled;
+  const rules = useCampaignRules(isDMPage ? campaignId ?? "" : "").data;
 
-  const dmSections = dmSectionsFor({ isTemplate, classesEnabled });
+  const dmSections = dmSectionsFor({ isTemplate, classesEnabled: !!rules?.classes.enabled, systemKey: rules?.system.key });
 
   const isBattlePage = BATTLE_PATH.test(pathname ?? "");
 

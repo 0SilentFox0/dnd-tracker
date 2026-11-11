@@ -1,0 +1,17 @@
+{
+  "key": "grim-d100-empty",
+  "system": "wfrp",
+  "names": {
+    "en": "Grim d100 (empty)",
+    "uk": "Grim d100 (empty)"
+  },
+  "locales": [
+    "en"
+  ],
+  "rules": {
+    "file": "rules.json"
+  },
+  "kinds": [],
+  "icons": {},
+  "counts": {}
+}

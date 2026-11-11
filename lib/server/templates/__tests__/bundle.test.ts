@@ -72,6 +72,7 @@ describe("derived foreign keys", () => {
       races: {},
       classes: {},
       feats: {},
+      careers: {},
       backgrounds: { originFeatId: "feats" },
       units: { raceId: "races" },
       spells: { groupId: "spellGroups", [summonFk]: "units" },

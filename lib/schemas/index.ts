@@ -3,6 +3,7 @@ export * from "./artifacts";
 export * from "./backgrounds";
 export * from "./battles";
 export * from "./campaigns";
+export * from "./careers";
 export * from "./character-goals";
 export * from "./character-tokens";
 export * from "./choices";

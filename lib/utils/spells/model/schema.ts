@@ -7,7 +7,21 @@ import { DICE_RE } from "@/lib/utils/abilities/schema/kinds";
 
 export const SPELL_COSTS = ["action", "bonusAction", "reaction", "long"] as const;
 
+export const SPELL_MAGIC_KINDS = ["petty", "arcane", "hedge", "witchcraft", "chaos", "blessing", "miracle"] as const;
+
+export type SpellMagicKind = (typeof SPELL_MAGIC_KINDS)[number];
+
+export const SpellMagicSchema = z.object({
+  cn: z.number().int().min(0).max(30),
+  kind: z.enum(SPELL_MAGIC_KINDS),
+  overcast: z.enum(["dice", "targets"]).nullable().default(null),
+  attribute: z.object({ condition: z.string().min(1).max(40), levels: z.number().int().min(1).max(3) }).optional(),
+});
+
+export type SpellMagic = z.infer<typeof SpellMagicSchema>;
+
 export const SpellCastingTimeSchema = z.object({
+  magic: SpellMagicSchema.optional(),
   rounds: z.number().int().min(2).max(144000).optional(),
   text: z.string().trim().min(1).max(500).optional(),
   trigger: z.string().trim().min(1).max(1000).optional(),

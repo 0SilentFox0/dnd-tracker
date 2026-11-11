@@ -20,7 +20,6 @@ import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/stat
 import { spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import { rollGroups } from "@/lib/utils/common/dice";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -51,7 +50,7 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   const pseudoAttack: BattleAttack = { name: spell.name, type: adjacent ? "melee" : "ranged", attackBonus: 0, damageDice: "", damageType: "magic", ...(range !== undefined && { range: String(range) }) };
 
-  const { mode } = forcedRollMode(rollModeReasons(caster, pseudoAttack, flow.ps, { targetId: id, map: flow.ctx.map }));
+  const { mode } = forcedRollMode(rollModeReasons(caster, pseudoAttack, flow.ps, { targetId: id, map: flow.ctx.map, rules: flow.ctx.rules }));
 
   const { roll, rolls } = rollD20WithMode(mode, state.rng, state.attackRolls.find((a) => a.participantId === id)?.roll);
 
@@ -79,7 +78,7 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   const kind: CritKind | null = crit && hit ? "success" : fumble ? "fail" : null;
 
-  const rules = flow.ctx.rules ?? DEFAULT_RULES;
+  const rules = flow.ctx.rules;
 
   const effect = kind && rules.criticals.effects ? pickAttackCrit(state, id, kind) : undefined;
 
@@ -120,7 +119,7 @@ function pickAttackCrit(state: SpellCastState, id: string, kind: CritKind): Crit
 
   if (flow.ctx.crit) return flow.ctx.crit(info);
 
-  const c = (flow.ctx.rules ?? DEFAULT_RULES).criticals;
+  const c = flow.ctx.rules.criticals;
 
   return randomCritEffect("attack", kind, state.rng, { success: c.disabledSuccess, fail: c.disabledFail });
 }
@@ -182,7 +181,7 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
     // союзник кастера сам хоче провалити корисне заклинання — опір не витрачається
     const { roll, mod, bonus, total } = r;
 
-    const saveCrit = !!flow.ctx.crit && (flow.ctx.rules ?? DEFAULT_RULES).criticals.effects && !r.autoFail && (roll === 20 || roll === 1);
+    const saveCrit = !!flow.ctx.crit && flow.ctx.rules.criticals.effects && !r.autoFail && (roll === 20 || roll === 1);
 
     // нат. 20/1 визначають результат лише там, де діють криті; Легендарний опір діє вже на цей результат
     const base = saveCrit ? { ...r, success: roll === 20 } : r;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildUnitCreatePayload, buildUnitFormData, buildUnitUpdatePayload, emptyUnitFormDefaults } from "@/lib/utils/units/unit-form";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import type { Unit } from "@/types/units";
 
 const unit = { id: "u1", name: "Гоблін", raceId: "r1", knownSpells: ["s1"], attacks: null, avatar: "https://x/a.png" } as unknown as Unit;
@@ -11,6 +12,13 @@ describe("unit form", () => {
 
     expect(buildUnitUpdatePayload(buildUnitFormData(monster), monster)).toMatchObject({ statblock: monster.statblock, spellcasting: monster.spellcasting });
   });
+  it("does not resend unchanged characteristics", () => {
+    const f = buildUnitFormData({ ...unit, characteristics: DEFAULT_CHARACTERISTICS });
+
+    expect(buildUnitUpdatePayload(f, { ...unit, characteristics: DEFAULT_CHARACTERISTICS })).not.toHaveProperty("characteristics");
+    expect(buildUnitUpdatePayload({ ...f, characteristics: { ...DEFAULT_CHARACTERISTICS, fate: 1 } }, { ...unit, characteristics: DEFAULT_CHARACTERISTICS })).toHaveProperty("characteristics");
+  });
+
   it("бере raceId юніта й нормалізує масиви", () => {
     const f = buildUnitFormData(unit);
 

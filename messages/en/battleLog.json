@@ -82,7 +82,9 @@
     "spell": "Spell",
     "spellLevel": "{name} (level {level})",
     "healing": "Healing",
-    "d10": "d10 roll"
+    "d10": "d10 roll",
+    "hpChange": "{value} HP",
+    "woundsChange": "{value} Wounds"
   },
   "attack": {
     "critHit": "Critical hit — {name}!{flavor}",
@@ -102,6 +104,8 @@
     "obstacle": "🧱 obstacle: damage ×0.5 → {damage}"
   },
   "offTurn": {
+    "hitPercentile": "{title}: {attacker} → {target}: d100 {roll}, {damage} damage{plainCrit}{crit}",
+    "missPercentile": "{title}: {attacker} → {target}: d100 {roll}, miss{crit}",
     "hit": "{title}: {attacker} → {target}: d20 {d20}, {damage} damage{plainCrit}{crit}",
     "miss": "{title}: {attacker} → {target}: d20 {d20}, miss{crit}",
     "second": "🎲 {noun}, {mode}: second d20 = {value}",
@@ -153,6 +157,7 @@
     "turnEnd": "End of turn"
   },
   "turn": {
+    "skipUnconscious": "{name} is unconscious — turn skipped",
     "recharged": "🔄 {pool} recharged ({roll})",
     "notRecharged": "🔄 {pool} did not recharge ({roll})",
     "skipLost": "💫 {name} loses the action ({source})",
@@ -338,6 +343,7 @@
     "badStrikeRoll": "Invalid attack roll for target {target}",
     "rollsRequired": "d20Roll, attackRoll or attackRolls is required",
     "oneTargetRequired": "At least one target is required",
+    "fortuneNotFree": "Fortune does not apply to a free cast",
     "barrierDuration": "A barrier needs a duration in rounds",
     "mapOccupied": "The cell is occupied or outside the field",
     "rollbackLimit": "This action can no longer be rolled back: only the last {count} states are kept after the battle ends",
@@ -376,5 +382,17 @@
     "applied": "🐾 {name} transforms: {unit} ({hp} HP, AC {ac})",
     "reverted": "🐾 {name} returns to the normal form",
     "formLost": "🐾 {name}: the form is lost{hasOverflow, select, true {, {overflow} damage carries over to the normal form} other {}}"
+  },
+  "percentile": {
+    "test": "🎲 Test: {roll} vs {target} (SL {sl})",
+    "opposedHidden": "🎲 Opposed: {roll} vs {target} (SL {sl}), net {netSl}",
+    "opposed": "🎲 Opposed: {roll} vs {target} (SL {sl}) — defence {defense}: {defRoll} vs {defTarget} (SL {defSl}), net {netSl}",
+    "doublesMiss": "🎲 Doubles on a miss — no critical applied",
+    "momentum": "⚡ Momentum goes to the winner",
+    "defense": {
+      "parry": "parry",
+      "dodge": "dodge",
+      "shield": "shield"
+    }
   }
 }

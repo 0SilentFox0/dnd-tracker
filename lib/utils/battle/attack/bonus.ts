@@ -1,4 +1,4 @@
-import { AttackType, CELL_FEET } from "@/lib/constants/battle";
+import { AttackType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
@@ -10,11 +10,13 @@ import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { effectName } from "@/lib/utils/battle/common/terms";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
+import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { isObscured } from "@/lib/utils/battle/grid/terrain";
 import { uniqueLines } from "@/lib/utils/battle/log/lines";
 import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects, isWeaponProficient } from "@/lib/utils/battle/proficiency";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -40,7 +42,7 @@ export type RollMode = "advantage" | "disadvantage" | "normal";
 
 export type RollModeReasons = { advantage: LogLine[]; disadvantage: LogLine[] };
 
-type SourceOpts = { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; map?: BattleMapConfig | null; inspiration?: boolean };
+type SourceOpts = { rules: Ruleset; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; map?: BattleMapConfig | null; inspiration?: boolean };
 
 const OBSCURED_ATTACKER_LABEL = textRef("battleLog.rollMode.obscuredAttacker");
 
@@ -49,7 +51,7 @@ const OBSCURED_TARGET_LABEL = textRef("battleLog.rollMode.obscuredTarget");
 const labels = (entries: { label: LogLine }[]) => entries.map((e) => e.label);
 
 /** Що з навичок/ефектів дає перевагу чи недолік — назви джерел. */
-export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[] = [attacker], opts: SourceOpts = {}): RollModeReasons {
+export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], opts: SourceOpts): RollModeReasons {
   const kind = attackKindOf(attack.type);
 
   const ps = withSelf(participants, attacker);
@@ -64,7 +66,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
   const senses = (viewer: BattleParticipant, other: BattleParticipant | undefined, blindOnly = false) => {
     if (!other || !isOnMap(viewer) || !isOnMap(other)) return false;
 
-    const feet = footprintDistance(cellsOf(viewer), cellsOf(other)) * CELL_FEET;
+    const feet = footprintDistance(cellsOf(viewer), cellsOf(other)) * cellFeetOf(opts.rules);
 
     return collectModifiers(ps, viewer.basicInfo.id, { flag: "sense" }).flags.some((f) => f.flag === "sense" && (f.sense === "blindsight" || (!blindOnly && f.sense === "truesight")) && f.range >= feet);
   };
@@ -102,7 +104,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     ...frightenedLabels,
     ...(attackerBlind ? [OBSCURED_ATTACKER_LABEL] : []),
     ...(armorPenalty(attacker) && armorPenaltyAffects(attackAbilityFor(attacker, attack)) ? [ARMOR_PENALTY_LABEL] : []),
-    ...(target ? rangeDisadvantageReasons(opts.map, ps, attacker, attack, target) : []),
+    ...(target ? rangeDisadvantageReasons(opts.map, ps, attacker, attack, target, opts.rules) : []),
   ];
 
   return { advantage: uniqueLines(advantage), disadvantage: uniqueLines(disadvantage) };
@@ -121,8 +123,8 @@ export function hasAdvantage(
   attacker: BattleParticipant,
   attack: BattleAttack,
   participants: BattleParticipant[] = [attacker],
-  extra?: StaticEffect[],
-  opts: { targetId?: string; targetExtra?: StaticEffect[] } = {},
+  extra: StaticEffect[] | undefined,
+  opts: { targetId?: string; targetExtra?: StaticEffect[]; rules: Ruleset },
 ): boolean {
   return rollModeReasons(attacker, attack, participants, { ...opts, extra }).advantage.length > 0;
 }
@@ -131,7 +133,7 @@ export function hasDisadvantage(
   attacker: BattleParticipant,
   attack: BattleAttack,
   participants: BattleParticipant[] = [attacker],
-  opts: SourceOpts = {},
+  opts: SourceOpts,
 ): boolean {
   return rollModeReasons(attacker, attack, participants, opts).disadvantage.length > 0;
 }
@@ -139,10 +141,10 @@ export function hasDisadvantage(
 // Тригери з шансом < 100 % не передбачаємо — їх кидає сервер.
 const CERTAIN_ONLY = () => 0.9999;
 
-function previewBefore(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], round: number) {
+function previewBefore(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[], round: number, rules: Ruleset) {
   const ps = withSelf(withSelf(participants, target), attacker);
 
-  const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type), ...attackSourceOf(attack) }, { round, rng: CERTAIN_ONLY });
+  const r = runAbilities(ps, { type: "attack", phase: "before", actorId: attacker.basicInfo.id, targetId: target.basicInfo.id, attackKind: attackKindOf(attack.type), ...attackSourceOf(attack) }, { round, rng: CERTAIN_ONLY, rules });
 
   const self = findParticipant(r.participants, attacker.basicInfo.id) ?? attacker;
 
@@ -157,13 +159,11 @@ export function predictAttack(
   target: BattleParticipant,
   attack: BattleAttack,
   participants: BattleParticipant[],
-  round = 1,
-  map?: BattleMapConfig | null,
-  opts: { inspiration?: boolean } = {},
+  { round = 1, map, ...opts }: { rules: Ruleset; round?: number; map?: BattleMapConfig | null; inspiration?: boolean },
 ): PredictedAttack {
-  const { ps, self, extra, targetExtra } = previewBefore(attacker, target, attack, participants, round);
+  const { ps, self, extra, targetExtra } = previewBefore(attacker, target, attack, participants, round, opts.rules);
 
-  const reasons = rollModeReasons(self, attack, ps, { extra, targetId: target.basicInfo.id, targetExtra, map, inspiration: opts.inspiration });
+  const reasons = rollModeReasons(self, attack, ps, { extra, targetId: target.basicInfo.id, targetExtra, map, inspiration: opts.inspiration, rules: opts.rules });
 
   return {
     totalBonus: calculateAttackBonus(self, attack, ps, extra),

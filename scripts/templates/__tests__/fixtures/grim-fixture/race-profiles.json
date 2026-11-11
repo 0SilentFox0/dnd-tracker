@@ -1,0 +1,6 @@
+[
+  {
+    "race": "hollander",
+    "profile": { "mods": { "ws": 2 }, "move": 4, "fate": 2, "extraWounds": 0, "talents": ["Hardy"], "randomTalentCount": 1, "randomTalents": [{ "max": 100, "featId": "Sharp Eyed" }], "careerTable": [{ "max": 50, "careerId": "Vermin Hunter" }, { "max": 100, "careerId": "Watchman" }] }
+  }
+]

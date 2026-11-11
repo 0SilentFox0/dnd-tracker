@@ -1,0 +1,59 @@
+{
+  "editor": {
+    "hint": "Optional. Values affect battle: armour, shield, weapon.",
+    "ap": "AP: {location}",
+    "armourKind": "Armour type",
+    "qualities": "Qualities",
+    "flaws": "Flaws",
+    "addQuality": "Add",
+    "pickQuality": "Pick a quality",
+    "qualityValue": "Value",
+    "removeQuality": "Remove: {name}",
+    "group": "Weapon group",
+    "attackKind": "Attack type",
+    "melee": "Melee",
+    "ranged": "Ranged",
+    "reach": "Reach",
+    "range": "Range, feet",
+    "ammo": "Ammo capacity (empty: unlimited)",
+    "damageFlat": "Damage, flat bonus",
+    "addSb": "Add SB to damage",
+    "twoHanded": "Two-handed",
+    "weight": "Weight",
+    "price": "Price, pence",
+    "invalid": "Check the values: AP 0-8, quality values 1-20.",
+    "clear": "Remove stats"
+  },
+  "groups": {
+    "basic": "Basic",
+    "cavalry": "Cavalry",
+    "fencing": "Fencing",
+    "brawling": "Brawling",
+    "flail": "Flail",
+    "parry": "Parry",
+    "polearm": "Polearm",
+    "twohanded": "Two-handed",
+    "bow": "Bow",
+    "crossbow": "Crossbow",
+    "blackpowder": "Blackpowder",
+    "engineering": "Engineering",
+    "entangling": "Entangling",
+    "sling": "Sling",
+    "throwing": "Throwing",
+    "explosives": "Explosives"
+  },
+  "reaches": {
+    "personal": "Personal",
+    "very-short": "Very short",
+    "short": "Short",
+    "average": "Average",
+    "long": "Long",
+    "very-long": "Very long",
+    "massive": "Massive"
+  },
+  "armourKinds": {
+    "soft": "Soft",
+    "mail": "Mail",
+    "plate": "Plate"
+  }
+}

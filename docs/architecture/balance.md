@@ -23,3 +23,7 @@ Summon targets (units a spell or ability summons by `unitId`, `summonedUnitIds` 
 ## XP mode (5e)
 
 `rules.encounters { balance: "fair" | "xp", edition: "2014" | "2024" }`. In `xp` the setup shows `XpBalanceSummary` (`setupXpBudget` → `computeXpBudget` in `balance/xp-budget.ts`: DMG 2014 per-hero thresholds × the monster-count multiplier with the party-size step, or DMG 2024 per-hero budget without a multiplier; units without CR go to `missingCr`, NPC enemies are ignored); the battle start skips `scaleEnemiesForFairBattle`; autopick (`balance-post`, `xpDifficulty`) uses `pickXpRoster` (one unit kind, the band from the chosen threshold up to the next one). Unit XP comes from `unitXp` (manual `xp`, else the CR table); `UnitStats` carries `cr`/`xp`, a CR unit's spell DC adds its best Int/Wis/Cha modifier and its weapon DPR is multiplied by `multiattack`.
+
+## WFRP hit model
+
+The wfrp `hitModel` (`systems/wfrp/rules/combat/hit-model.ts`): `durability` also scales by the defender's TB (on top of AP and Ward), so wfrp fair scaling changes even for units without Traits. The `damage` formula no longer adds SB to `noSb` weapons or to participants with no attacks.

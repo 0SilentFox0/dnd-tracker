@@ -31,6 +31,26 @@
     "title": "Map motion",
     "body": "In battle the DM can turn on the Motion tool: the map background scrolls endlessly under the fixed grid, as if the heroes were running. Pick the axis, direction and speed, pause and resume; players see changes at once. Motion is purely visual and does not affect turns or range."
   },
+  "2026-11-09-wfrp-corruption": {
+    "title": "Grim d100: corruption and mutations",
+    "body": "The DM grants a hero corruption points on the sheet's \"Battle\" tab. When the total exceeds the threshold (Toughness bonus + Willpower bonus), the hero takes an Endurance test; a failure adds a permanent body or mind mutation that changes characteristics, Move or Wounds. Points, threshold and mutations are shown on the sheet; the DM can undo the latest grant."
+  },
+  "2026-11-08-wfrp-downtime": {
+    "title": "Grim d100: downtime",
+    "body": "Between adventures the DM presses \"Period passed\" in the character list: wounds heal, ailments run their course or worsen, every hero performs the chosen endeavour (earn, train, tend a companion, rest), and the event table adds some chance. Endeavours are picked on the \"Downtime\" tab of the sheet; the DM can roll back the latest period."
+  },
+  "2026-11-06-wfrp-careers": {
+    "title": "Grim d100: careers",
+    "body": "In Grim d100 campaigns the DM creates careers with 4 tiers and assigns them to heroes; in-career purchases are cheaper and earn ticks toward the next career tier. Out-of-career purchases cost more."
+  },
+  "2026-11-05-wfrp-advancement": {
+    "title": "Grim d100: advancement",
+    "body": "In Grim d100 campaigns a hero spends XP on characteristics, skills and talents in the \"Advancement\" tab of the sheet. Prices come from the campaign rules, a talent's price is set in its editor, and the DM can undo the last purchase. Purchased talents work in battle."
+  },
+  "2026-11-05-wfrp-magic": {
+    "title": "Grim d100: magic",
+    "body": "In Grim d100 campaigns spells have a Casting Number, a kind (Arcane or Petty), a lore and effects. The sheet gets a Magic tab; in battle there is a Channelling action and a d100 casting test with success levels, overcast and miscast on doubles. Spell magic fields are set in the editor."
+  },
   "2026-11-04-player-view": {
     "title": "Player view",
     "body": "The DM can switch a battle or the show page to the player view (button in the corner or the P key) and show exactly what players see, without any controls. The mode is per window, so keep one window as the DM and share the other. Enemy traits you see may be incomplete, because the DM has no observed knowledge of them."
@@ -38,6 +58,10 @@
   "2026-11-04-battle-initiative": {
     "title": "Initiative in battle",
     "body": "The DM can re-roll initiative at any moment: everyone sees the d20 rolls, and the new order stays for the rest of the battle without changing between rounds. The order can also be set by hand by dragging portraits on the track, or through a dialog with up/down arrows on a phone."
+  },
+  "2026-11-04-rule-system-wfrp": {
+    "title": "Rule systems: Grim d100",
+    "body": "Campaign rules now let you pick a system: HoMM, D&D 5e or Grim d100. Grim d100 adds characteristics, skills, Wounds, Fate/Fortune, d100 tests from the sheet with difficulty and success levels, and a \"New session\" action. The system can be changed while the campaign has no characters or units. Battles in Grim d100 arrive in the next part."
   },
   "2026-10-31-user-palettes": {
     "title": "Color palettes",

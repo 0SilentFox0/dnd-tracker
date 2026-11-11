@@ -6,6 +6,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveRetaliation, type RetaliationInput } from "@/lib/utils/battle/attack/retaliation";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -24,7 +25,7 @@ const attacker = (over: Parameters<typeof unit>[1] = {}) => unit("a", over);
 const defender = (over: Parameters<typeof unit>[1] = {}) => unit("d", { side: ParticipantSide.ENEMY, ...over });
 
 function retaliate(a: BattleParticipant, d: BattleParticipant, over: Partial<RetaliationInput> = {}, others: BattleParticipant[] = []) {
-  return resolveRetaliation({
+  return resolveRetaliation({ rules: DEFAULT_RULES,
     participants: [a, d, ...others],
     attackerId: a.basicInfo.id,
     defenderId: d.basicInfo.id,

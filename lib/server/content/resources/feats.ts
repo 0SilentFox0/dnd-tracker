@@ -12,6 +12,7 @@ import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { featNameTaken } from "@/lib/server/feats/feat-name";
 import { featAsiUsedByBackground, featInUse } from "@/lib/server/feats/feat-usage";
+import { profileReferences } from "@/lib/server/races/profile-usage";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
 import { choiceSpellIds, readChoices } from "@/lib/utils/characters/choices/read";
@@ -53,6 +54,8 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
         type: data.type,
         prerequisite: toInputJson(data.prerequisite),
         repeatable: data.repeatable,
+        xpCost: data.xpCost ?? null,
+        maxRank: data.maxRank ?? null,
         description: data.description ?? null,
         abilities: abilitiesJson(data.abilities),
         choices: toInputJson(data.choices),
@@ -77,6 +80,8 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
   },
   async remove(actor, existing) {
     if (await featInUse(actor.campaignId, existing.id)) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+
+    if (await profileReferences(actor.campaignId, { featId: existing.id })) throw new ContentError(API_ERRORS.FEAT_IN_SPECIES_TABLE, 409);
 
     await prisma.feat.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
   },

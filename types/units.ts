@@ -3,6 +3,7 @@ import { AttackType } from "@/lib/constants/battle";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
+import type { SystemData } from "@/lib/utils/rules/systems/slot";
 
 export interface UnitAttack {
   name: string;
@@ -61,4 +62,5 @@ export interface Unit {
   saveProficiencies?: AbilityKey[];
   statblock?: UnitStatblock;
   spellcasting?: UnitSpellcasting;
+  characteristics?: SystemData;
 }

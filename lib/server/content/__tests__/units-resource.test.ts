@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const db = vi.hoisted(() => ({
   race: { count: vi.fn() },
   spell: { count: vi.fn(), updateMany: vi.fn() },
+  campaign: { findUnique: vi.fn(async () => ({ rules: {} })) },
   unit: { create: vi.fn(), update: vi.fn(), deleteMany: vi.fn(), findFirst: vi.fn() },
 }));
 
@@ -11,9 +12,12 @@ vi.mock("@/lib/db", () => ({ prisma: db }));
 vi.mock("@/lib/cache/reference-data", () => ({ getCachedUnits: vi.fn(async () => []) }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { createUnitSchema } from "@/lib/schemas/units";
 import { ContentError } from "@/lib/server/content/errors";
 import { unitsResource } from "@/lib/server/content/resources/units";
 import type { Actor } from "@/lib/utils/api/actor";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
 
@@ -21,6 +25,46 @@ describe("unitsResource", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     db.unit.deleteMany.mockResolvedValue({ count: 2 });
+  });
+
+  it("drops characteristics for d20 campaigns, keeps them for wfrp", async () => {
+    db.unit.create.mockResolvedValue({ id: "u1" });
+    db.unit.update.mockResolvedValue({ id: "u1" });
+
+    const input = createUnitSchema.parse({ name: "X", characteristics: DEFAULT_CHARACTERISTICS }) as never;
+
+    await unitsResource.create(actor, input);
+    await unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input);
+    expect(db.unit.create.mock.calls[0][0].data).not.toHaveProperty("characteristics");
+    expect(db.unit.update.mock.calls[0][0].data.characteristics).toBeUndefined();
+
+    db.campaign.findUnique.mockResolvedValue({ rules: WFRP_RULES });
+    await unitsResource.create(actor, input);
+    await unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input);
+    expect(db.unit.create.mock.calls[1][0].data.characteristics).toEqual(DEFAULT_CHARACTERISTICS);
+    expect(db.unit.update.mock.calls[1][0].data.characteristics).toEqual(DEFAULT_CHARACTERISTICS);
+  });
+
+  it("rejects trait effects outside wfrp before writing, accepts them in wfrp", async () => {
+    db.unit.create.mockResolvedValue({ id: "u1" });
+    db.unit.update.mockResolvedValue({ id: "u1" });
+
+    const abilities = [{ id: "a1", name: "Ward", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] }];
+
+    const input = createUnitSchema.parse({ name: "X", abilities }) as never;
+
+    db.campaign.findUnique.mockResolvedValue({ rules: {} });
+    await expect(unitsResource.create(actor, input)).rejects.toMatchObject({ message: API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, status: 400 });
+    await expect(unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input)).rejects.toMatchObject({ message: API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, status: 400 });
+    expect(db.unit.create).not.toHaveBeenCalled();
+    expect(db.unit.update).not.toHaveBeenCalled();
+
+    await unitsResource.create(actor, createUnitSchema.parse({ name: "X" }) as never);
+    expect(db.unit.create).toHaveBeenCalledTimes(1);
+
+    db.campaign.findUnique.mockResolvedValue({ rules: WFRP_RULES });
+    await unitsResource.create(actor, input);
+    expect(db.unit.create).toHaveBeenCalledTimes(2);
   });
 
   it("find scopes to the actor campaign", async () => {

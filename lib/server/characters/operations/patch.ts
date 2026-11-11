@@ -14,6 +14,7 @@ import { type ChoiceFields,resolveCharacterChoices } from "@/lib/server/characte
 import { buildCharacterUpdateData, resolveFinalLevel, tableSlots } from "@/lib/server/characters/core/build-character-update-data";
 import { loadRaceProgression } from "@/lib/server/characters/core/load-race-progression";
 import { resolveCharacterOwner } from "@/lib/server/characters/core/resolve-character-owner";
+import { normalizeCharacterInput } from "@/lib/server/characters/core/system-fields";
 import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { ContentError } from "@/lib/server/content/errors";
@@ -27,6 +28,7 @@ import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import { levelNotificationEvents, spellNotificationEvents } from "@/lib/utils/notifications/events";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -40,8 +42,10 @@ type CharacterRecord = Gate["character"];
 
 type ClassesResult = Awaited<ReturnType<typeof resolveClasses>>;
 
-async function editableData({ access, character }: Gate, parsed: Parsed) {
+async function editableData({ access, character }: Gate, input: Parsed) {
   const { userId, campaign, isDM } = access;
+
+  const parsed = normalizeCharacterInput(ruleSystemOf(campaign.rules), input, campaign.rules, "update");
 
   if (parsed.initiative !== undefined) {
     const { heroMin, heroMax } = campaign.rules.initiative;
@@ -52,6 +56,10 @@ async function editableData({ access, character }: Gate, parsed: Parsed) {
   const data = isDM
     ? parsed
     : ({ ...parsed, level: undefined, classes: undefined, archetype: undefined, avatar: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
+
+  const characteristics = ruleSystemOf(campaign.rules).characteristics;
+
+  if (!isDM && data.characteristics) data.characteristics = (characteristics.reconcile?.(character.characteristics, data.characteristics, { isDM: false }) ?? data.characteristics) as typeof data.characteristics;
 
   if (isDM && data.controlledBy !== undefined) {
     const owner = await resolveCharacterOwner(character.campaignId, userId, {type: character.type as "player" | "npc_hero", controlledBy: data.controlledBy ?? character.controlledBy ?? ""});
@@ -140,11 +148,12 @@ function updateWriter({ character, data, avatar, resolved, computedState }: Upda
     ...(fromClasses.spellcastingAbility && { spellcastingAbility: fromClasses.spellcastingAbility }),
   };
 
-  return (db: Pick<Prisma.TransactionClient, "character">, classes: ClassesResult["classesInput"], choiceFields?: ChoiceFields) =>
+  return (db: Pick<Prisma.TransactionClient, "character">, classes: ClassesResult["classesInput"], choiceFields?: ChoiceFields, characteristics?: unknown) =>
     db.character.update({
       where: { id: character.id },
       data: {
         ...data,
+        characteristics: (characteristics ?? data.characteristics) as Prisma.InputJsonValue | undefined,
         backgroundChoices: undefined,
         backgroundFeatPicks: undefined,
         classes: classes as unknown as Prisma.InputJsonValue | undefined,
@@ -202,7 +211,9 @@ async function patchCore(gate: Gate, parsed: Parsed) {
 
   const writeUpdate = updateWriter({ character, data, avatar: avatar.avatar, resolved, computedState });
 
-  const updatedCharacter = data.classes || changesBackground
+  const guardsLedger = Boolean(data.characteristics && ruleSystemOf(campaign.rules).advancement);
+
+  const updatedCharacter = data.classes || changesBackground || guardsLedger
     ? await prisma.$transaction(async (tx) => {
         await lockCharacters(tx, [characterId]);
 
@@ -218,7 +229,9 @@ async function patchCore(gate: Gate, parsed: Parsed) {
 
         if (choices && !choices.ok) throw choices.error;
 
-        return writeUpdate(tx, classes, choices?.ok ? choices.fields : undefined);
+        const characteristics = guardsLedger && data.characteristics ? ruleSystemOf(campaign.rules).characteristics.reconcile?.(fresh.characteristics, data.characteristics, { isDM, baseline: data.systemBaseline }) : undefined;
+
+        return writeUpdate(tx, classes, choices?.ok ? choices.fields : undefined, characteristics);
       })
     : await writeUpdate(prisma, resolved.classesInput);
 

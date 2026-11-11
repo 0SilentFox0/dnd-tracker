@@ -7,6 +7,9 @@ import { UnitGroupAppearancesSchema } from "@/lib/schemas/unit-groups";
 import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
+import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
+import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
+import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
@@ -15,6 +18,8 @@ const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
 const INITIATIVE_ORDER_MESSAGE = "rules.validation.initiativeOrder";
 
 const CRITICALS_ORDER_MESSAGE = "rules.validation.criticalsOrder";
+
+const UNKNOWN_SYSTEM_MESSAGE = "rules.validation.unknownSystem";
 
 const CustomConditionSchema = z.object({
   key: z.string().regex(CUSTOM_CONDITION_KEY_RE),
@@ -75,6 +80,9 @@ const sectionSchemas = {
   }),
   items: z.strictObject({ enabled: z.boolean(), attunementLimit: z.number().int().min(1).max(10) }),
   spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
+  advancement: AdvancementRulesSchema,
+  tables: TablesRulesSchema,
+  system: z.strictObject({ key: z.enum(RULE_SYSTEM_KEYS as [string, ...string[]], { message: UNKNOWN_SYSTEM_MESSAGE }) }),
 };
 
 // Виводимо тип до застосування defaults: DEFAULT_RULES типізований через Ruleset.
@@ -114,6 +122,9 @@ const sections = {
   encounters: withDefaults(sectionSchemas.encounters, DEFAULT_RULES.encounters),
   items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
   spellIngredients: withDefaults(sectionSchemas.spellIngredients, DEFAULT_RULES.spellIngredients),
+  advancement: withDefaults(sectionSchemas.advancement, DEFAULT_RULES.advancement),
+  tables: withDefaults(sectionSchemas.tables, DEFAULT_RULES.tables),
+  system: withDefaults(sectionSchemas.system, DEFAULT_RULES.system),
 };
 
 type Sections = typeof sections;
@@ -146,6 +157,9 @@ export const RulesetSchema = z
     encounters: sections.encounters.prefault({}),
     items: sections.items.prefault({}),
     spellIngredients: sections.spellIngredients.prefault({}),
+    advancement: sections.advancement.prefault({}),
+    tables: sections.tables.prefault({}),
+    system: sections.system.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
@@ -153,8 +167,8 @@ export const RulesetSchema = z
 export function parseRules(raw: unknown): Ruleset {
   const obj = isRecord(raw) ? raw : {};
 
-  return Object.fromEntries(
-    (Object.keys(sections) as (keyof Sections)[]).map((k) => {
+  const rules = Object.fromEntries(
+    (Object.keys(sections) as (keyof Sections)[]).filter((k): k is Exclude<keyof Sections, "system"> => k !== "system").map((k) => {
       const parsed = sections[k].safeParse(obj[k] ?? {});
 
       const valid =
@@ -164,7 +178,11 @@ export function parseRules(raw: unknown): Ruleset {
 
       return [k, valid ? parsed.data : DEFAULT_RULES[k]];
     }),
-  ) as Ruleset;
+  ) as Omit<Ruleset, "system">;
+
+  const system = sectionSchemas.system.safeParse(obj.system);
+
+  return { ...rules, system: system.success ? system.data : { key: rules.classes.enabled ? "dnd5e" : "homm" } };
 }
 
 const RULES_CACHE_LIMIT = 50;
@@ -210,6 +228,9 @@ export const RulesetPatchSchema = z
     encounters: patchSection("encounters").optional(),
     items: patchSection("items").optional(),
     spellIngredients: patchSection("spellIngredients").optional(),
+    advancement: patchSection("advancement").optional(),
+    tables: patchSection("tables").optional(),
+    system: patchSection("system").optional(),
     removeCustomConditions: z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });
@@ -228,6 +249,8 @@ export function mergeRules(current: Ruleset, patch: MergePatch): MergeRulesResul
   if (conflict) return { ok: false, issues: [{ code: "custom", message: "validation.rulesCustomConflict", path: ["removeCustomConditions"], input: patch.removeCustomConditions }] };
 
   const next = Object.fromEntries((Object.keys(current) as (keyof Ruleset)[]).map((k) => [k, { ...current[k], ...(sections[k] ?? {}) }]));
+
+  if (isRecord(sections.tables)) next.tables = Object.fromEntries(Object.entries(next.tables).filter(([, rows]) => rows !== null));
 
   const groupPatch = sections.encounters?.unitGroups;
 

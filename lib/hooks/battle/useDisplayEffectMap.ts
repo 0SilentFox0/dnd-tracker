@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 
-import { buildDisplayEffects } from "@/lib/utils/battle/view";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import { buildDisplayEffects, type DisplayEffect } from "@/lib/utils/battle/view";
+import type { Ruleset } from "@/lib/utils/rules";
+import type { BattleParticipant } from "@/types/battle";
 
 /** Раз на зміну черги, не на рядок; незмінні списки ефектів лишаються тими самими масивами. */
-export function useDisplayEffectMap(order: BattleParticipant[]): Map<string, ActiveEffect[]> {
-  const [state, setState] = useState(() => ({ order, effects: buildDisplayEffects(order) }));
+export function useDisplayEffectMap(order: BattleParticipant[], rules?: Ruleset): Map<string, DisplayEffect[]> {
+  const [state, setState] = useState(() => ({ order, effects: buildDisplayEffects(order, undefined, rules) }));
 
   if (state.order !== order) {
-    const next = { order, effects: buildDisplayEffects(order, state.effects) };
+    const next = { order, effects: buildDisplayEffects(order, state.effects, rules) };
 
     setState(next);
 

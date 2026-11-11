@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
+
 vi.mock("server-only", () => ({}));
 
 import { createRaceSchema } from "@/lib/schemas";
@@ -20,7 +22,7 @@ const choices = [{ id: "l", label: "L", kind: "option", lineage: true, options: 
 
 describe("nested spell names in race choices", () => {
   it("resolves names (case-insensitive) and ids, errors on unknown like the real import", async () => {
-    const report = await importContent(actor, "races", { rows: [{ name: "Elf", choices: JSON.stringify(choices) }], mode: "create", dryRun: true }, { resource: () => resource, loadNames: async (_c, k) => (k === "spells" ? spells : []) });
+    const report = await importContent(actor, "races", { rows: [{ name: "Elf", choices: JSON.stringify(choices) }], mode: "create", dryRun: true }, stubImportDeps({ resource: () => resource, loadNames: async (_c, k) => (k === "spells" ? spells : []) }));
 
     expect(report.results[0].status).toBe("error");
     expect(report.results[0].issues).toEqual([{ field: "choices", level: "error", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.races.choices", value: "Nope", kind: "contentImport.kinds.spells" } }]);
@@ -50,7 +52,7 @@ it("imports perform names as IDs and exports them for another campaign", async (
 
   const ability = { id: "command", name: "Command", trigger: { event: "action" }, limits: { legendaryCost: 1 }, perform: { kind: "spell", spellId: "Druidcraft" }, effects: [{ kind: "note", text: "Cast" }] };
 
-  const deps = { resource: () => unitResource, loadNames: async (_c: string, k: string) => k === "spells" ? spells : [] };
+  const deps = stubImportDeps({ resource: () => unitResource, loadNames: async (_c, k) => k === "spells" ? spells : [] });
 
   expect((await importContent(actor, "units", { rows: [{ name: "Dragon", abilities: [ability] }], mode: "create", dryRun: false }, deps)).counts.error).toBe(0);
   expect(stored.abilities).toMatchObject([{ perform: { spellId: "sp-druidcraft" } }]);
@@ -60,7 +62,7 @@ it("imports perform names as IDs and exports them for another campaign", async (
   const abilities = cells[IMPORT_SPECS.units.fields.findIndex((f) => f.key === "abilities")];
 
   expect(abilities).toContain('"spellId":"Druidcraft"');
-  await importContent({ ...actor, campaignId: "c2" }, "units", { rows: [{ name: "Dragon", abilities }], mode: "create", dryRun: false }, { ...deps, loadNames: async (_c, k) => k === "spells" ? [{ id: "c2-spell", name: "Druidcraft" }] : [] });
+  await importContent({ ...actor, campaignId: "c2" }, "units", { rows: [{ name: "Dragon", abilities }], mode: "create", dryRun: false }, { ...deps, loadKeys: async (_c, k) => (k === "spells" ? [{ id: "c2-spell", name: "Druidcraft", slug: null }] : []) });
   expect(stored.abilities).toMatchObject([{ perform: { spellId: "c2-spell" } }]);
 });
 
@@ -70,7 +72,7 @@ it("rejects unknown perform names and duplicate grant names in import planning",
   const result = await importContent(actor, "units", { rows: [
     { name: "Broken", abilities: [{ id: "command", name: "Command", trigger: { event: "action" }, limits: { legendaryCost: 1 }, perform: { kind: "spell", spellId: "Missing" }, effects: [{ kind: "note", text: "Cast" }] }] },
     { name: "Duplicate", spellcasting: { spells: [{ spellId: "Druidcraft" }, { spellId: "sp-druidcraft", perBattle: 1 }] } },
-  ], mode: "create", dryRun: true }, { resource: () => unitResource, loadNames: async (_c, k) => k === "spells" ? spells : [] });
+  ], mode: "create", dryRun: true }, stubImportDeps({ resource: () => unitResource, loadNames: async (_c, k) => k === "spells" ? spells : [] }));
 
   expect(result.results.map((r) => r.status)).toEqual(["error", "error"]);
 });
@@ -84,7 +86,7 @@ it("imports item spell names and exports portable names", async () => {
 
  return { id: "wand", ...body }; } } as unknown as AnyContentResource;
 
-  const result = await importContent(actor, "artifacts", { rows: [{ name: "Wand", slot: "item", item: { charges: { max: 7, rest: "long" }, spells: [{ spellId: "Longstrider", cost: 1 }] } }], mode: "create", dryRun: false }, { resource: () => resource, loadNames: async (_c, k) => k === "spells" ? spells : [] });
+  const result = await importContent(actor, "artifacts", { rows: [{ name: "Wand", slot: "item", item: { charges: { max: 7, rest: "long" }, spells: [{ spellId: "Longstrider", cost: 1 }] } }], mode: "create", dryRun: false }, stubImportDeps({ resource: () => resource, loadNames: async (_c, k) => k === "spells" ? spells : [] }));
 
   expect(result.counts.error).toBe(0);
   expect(stored.item).toMatchObject({ spells: [{ spellId: "sp-longstrider" }] });

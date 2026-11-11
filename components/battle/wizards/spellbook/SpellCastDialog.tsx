@@ -10,6 +10,7 @@ import { SpellSummary } from "./SpellSummary";
 
 import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
+import { useSystemBattleUi } from "@/components/battle/use-system-battle-ui";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
@@ -69,15 +70,21 @@ function TargetsStep({ book }: { book: Book }) {
 function RollsStep({ book }: { book: Book }) {
   const tw = useTranslations("battleWizards.spell.cast");
 
+  const CastTest = useSystemBattleUi()?.CastTest;
+
   const { state, view, actions } = book;
 
   const { selected } = view;
 
   return (
     <>
-      <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
-      <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title={tw("attackRoll")} />
-      {view.attackTargets.length > 0 && <p className="mt-1 text-xs italic text-[var(--hud-muted)]">{tw("serverD20")}</p>}
+      {view.cast && CastTest ? <CastTest book={book} /> : (
+        <>
+          <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
+          <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title={tw("attackRoll")} />
+        </>
+      )}
+      {!view.cast && view.attackTargets.length > 0 && <p className="mt-1 text-xs italic text-[var(--hud-muted)]">{tw("serverD20")}</p>}
       {state.pick?.inputDice && (
         <label className="mt-3 flex items-center justify-between gap-3 text-sm">
           <span className="hud-sc font-bold">{state.pick.inputDice.label}</span>
@@ -132,8 +139,8 @@ function SummaryStep({ book }: { book: Book }) {
 
   return (
     <>
-      {selected && <SpellSummary spell={selected} state={state} targets={view.targets} formula={view.formulaOf(selected)} targeting={view.definitionOf(selected).targeting} slotCost={view.slotCostLabel(selected)} />}
-      <IngredientsLine line={view.ingredients} />
+      {selected && <SpellSummary spell={selected} state={state} targets={view.targets} formula={view.formulaOf(selected)} targeting={view.definitionOf(selected).targeting} slotCost={view.magic ? null : view.slotCostLabel(selected)} />}
+      <IngredientsLine line={view.ingredients} onUse={actions.setUseIngredient} />
       <OptionPicker book={book} />
       <button type="button" disabled={submitting || optionMissing(state) || !!view.ingredients?.blocked} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
         {submitting ? <Loader2 className="size-5 animate-spin" /> : <><Sparkles className="size-5" />{tw("apply")}</>}
@@ -154,7 +161,7 @@ export function SpellCastDialog({ book }: { book: Book }) {
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={view.selected?.name ?? tw("fallbackName")} className={cn(HUD_SURFACE, "spellbook-dialog border-white/25")}>
-      {step !== "submitting" && <SlotSelect book={book} />}
+      {step !== "submitting" && !view.cast && <SlotSelect book={book} />}
       {step === "targets" && <TargetsStep book={book} />}
       {step === "rolls" && <RollsStep book={book} />}
       {(step === "summary" || step === "submitting") && <SummaryStep book={book} />}

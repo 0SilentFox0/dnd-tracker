@@ -1,0 +1,83 @@
+[
+  {
+    "slug": "attack",
+    "name": "Attack",
+    "color": "#b3312c",
+    "isEnableInSkillTree": false,
+    "role": "attack"
+  },
+  {
+    "slug": "chaos",
+    "name": "Chaos",
+    "color": "#d4561e",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Chaos",
+    "role": "magic"
+  },
+  {
+    "slug": "dark",
+    "name": "Darkness",
+    "color": "#5b3a7a",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Darkness",
+    "role": "magic"
+  },
+  {
+    "slug": "defense",
+    "name": "Defense",
+    "color": "#4f6d8a",
+    "isEnableInSkillTree": false,
+    "role": "defense"
+  },
+  {
+    "slug": "leadership",
+    "name": "Leadership",
+    "color": "#c9a227",
+    "isEnableInSkillTree": false,
+    "role": "leadership"
+  },
+  {
+    "slug": "light",
+    "name": "Light",
+    "color": "#e8c547",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Light",
+    "role": "magic"
+  },
+  {
+    "slug": "nature",
+    "name": "Nature",
+    "color": "#6b8e23",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Nature",
+    "role": "magic"
+  },
+  {
+    "slug": "personal-skills",
+    "name": "Personal",
+    "color": "#8e6bbf",
+    "isEnableInSkillTree": false,
+    "role": "personal"
+  },
+  {
+    "slug": "race-skills",
+    "name": "Racial",
+    "color": "#c9a227",
+    "isEnableInSkillTree": false,
+    "role": "race"
+  },
+  {
+    "slug": "ranged",
+    "name": "Ranged",
+    "color": "#3d7a3a",
+    "isEnableInSkillTree": false,
+    "role": "ranged"
+  },
+  {
+    "slug": "ultimate-skills",
+    "name": "Ultimate",
+    "color": "#b3261e",
+    "isEnableInSkillTree": false,
+    "role": "ultimate"
+  }
+]

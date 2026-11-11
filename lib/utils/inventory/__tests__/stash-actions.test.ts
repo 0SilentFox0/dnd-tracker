@@ -12,6 +12,20 @@ const base = (): StashState => ({
 
 const ctx = { newItemId: "new-1" };
 
+describe("applyStashAction with a 12/20 table", () => {
+  const coinValue = { gp: 240, sp: 12, cp: 1 };
+
+  it("spend uses the system coin table", () => {
+    const r = applyStashAction({ ...base(), purse: { gp: 1, sp: 0, cp: 0 } }, { action: "spend", amount: 5, coin: "sp", note: "x" }, { ...ctx, coinValue });
+
+    expect(r.ok && r.state.purse).toEqual({ gp: 0, sp: 15, cp: 0 });
+  });
+
+  it("the default table would see 1 gp as 100", () => {
+    expect(applyStashAction({ ...base(), purse: { gp: 1, sp: 0, cp: 0 } }, { action: "spend", amount: 5, coin: "sp", note: "x" }, ctx)).toMatchObject({ ok: true, state: { purse: { gp: 0, sp: 5, cp: 0 } } });
+  });
+});
+
 describe("applyStashAction", () => {
   it("spend deducts and logs negative delta with note", () => {
     const r = applyStashAction(base(), { action: "spend", amount: 3, coin: "gp", note: "човен" }, ctx);

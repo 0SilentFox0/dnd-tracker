@@ -6,7 +6,7 @@ import type { Ruleset } from "@/lib/utils/rules";
 import type { EntityStats, UnitEntityStats } from "@/types/battle-setup";
 
 export async function getBalancePayload(campaignId: string, rules?: Ruleset) {
-  const characters = await loadCharacterBalanceStats(campaignId);
+  const characters = await loadCharacterBalanceStats(campaignId, undefined, rules);
 
   const characterStats: Record<string, EntityStats> = {};
 

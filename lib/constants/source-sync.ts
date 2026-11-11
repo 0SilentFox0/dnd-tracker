@@ -1,4 +1,4 @@
-export const SYNC_TABLE_SCOPES = ["spellGroups", "races", "classes", "feats", "backgrounds", "units", "spells", "mainSkills", "skills", "skillTrees", "artifactSets", "artifacts", "tracks"] as const;
+export const SYNC_TABLE_SCOPES = ["spellGroups", "races", "classes", "feats", "careers", "backgrounds", "units", "spells", "mainSkills", "skills", "skillTrees", "artifactSets", "artifacts", "tracks"] as const;
 
 export const SYNC_SCOPES = [...SYNC_TABLE_SCOPES, "rules", "settings"] as const;
 

@@ -15,3 +15,12 @@ describe("лог: фраза криту", () => {
     expect(getLogEntryDetailLines(entry("Фраза."), makeT())).toEqual(["battleLog.details.effect {\"id\":3}: Ефект — опис"]);
   });
 });
+
+describe("лог: percentile і Wounds", () => {
+  const entry = { actionType: "attack", actorName: "A", targets: [], actionDetails: { attackRoll: 24, attackBonus: 0, totalAttackValue: 24, targetAC: 38, system: { key: "wfrp", data: { attack: { roll: 24 } } } }, hpChanges: [{ participantName: "B", change: 2 }], resultText: "" } as unknown as BattleAction;
+
+  it("d100-запис без d20-рядків, Wounds замість HP", () => {
+    expect(getLogEntryDetailLines(entry, makeT(), true)).toEqual(["B: battleLog.details.woundsChange {\"value\":\"-2\"}"]);
+    expect(getLogEntryDetailLines(entry, makeT())).toEqual(["B: battleLog.details.hpChange {\"value\":\"-2\"}"]);
+  });
+});

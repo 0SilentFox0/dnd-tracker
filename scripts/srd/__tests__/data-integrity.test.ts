@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createBackgroundSchema, updateBackgroundSchema } from "@/lib/schemas/backgrounds";
+import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
@@ -18,6 +19,7 @@ import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { importContent } from "@/lib/server/content/import/import-content";
 import type { Actor } from "@/lib/utils/api/actor";
+import { isSlug } from "@/lib/utils/templates/slug";
 
 const SCHEMAS: Record<SrdKind, { create: ZodType; update: ZodType }> = {
   "spell-groups": { create: createSpellGroupSchema, update: updateSpellGroupSchema },
@@ -44,7 +46,7 @@ describe("SRD 5.2 data files", () => {
 
     expect(manifest.counts).toEqual(EXPECTED);
     expect(Object.fromEntries(SRD_KINDS.map((k) => [k, data[k].length]))).toEqual(EXPECTED);
-    expect(manifest.source.sha).toBe(OPEN5E_SHA);
+    expect(manifest.source?.sha).toBe(OPEN5E_SHA);
     expect(manifest.credits).toContain("System Reference Document 5.2");
   });
 
@@ -52,7 +54,7 @@ describe("SRD 5.2 data files", () => {
     for (const kind of SRD_KINDS) {
       const slugs = rowsOf(kind).map((r) => r.slug);
 
-      expect(slugs.every((s) => s.startsWith("srd-2024_"))).toBe(true);
+      expect(slugs.every((s) => s.startsWith("srd-2024_") && isSlug(s))).toBe(true);
       expect(new Set(slugs).size).toBe(slugs.length);
     }
   });
@@ -60,10 +62,10 @@ describe("SRD 5.2 data files", () => {
   it.each(SRD_KINDS)("%s: every row passes importContent dryRun with no issues and refs resolve", async (kind) => {
     const resource = { schemas: SCHEMAS[kind], invalidates: [] } as unknown as AnyContentResource;
 
-    const report = await importContent(actor, kind, { rows: toImportRows(data[kind]), mode: "create", dryRun: true }, {
+    const report = await importContent(actor, kind, { rows: toImportRows(data[kind]), mode: "create", dryRun: true }, stubImportDeps({
       resource: () => resource,
       loadNames: async (_c, k) => (k !== kind && (SRD_KINDS as readonly string[]).includes(k) ? rowsOf(k as SrdKind).map((r) => ({ id: `id-${r.slug}`, name: r.name })) : []),
-    });
+    }));
 
     expect(report.results.filter((r) => r.status !== "created" || r.issues.length > 0)).toEqual([]);
   });

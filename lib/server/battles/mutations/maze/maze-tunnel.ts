@@ -29,7 +29,7 @@ function turnAfter(ctx: BattleMutationContext, remaining: BattleParticipant[], p
 
   const before = ctx.participants.slice(0, ctx.scene.turnIndex).filter((p) => !leaves(p)).length;
 
-  const advanced = advanceAfterRemoval({ participants: remaining, pending, scene: ctx.scene, map, before });
+  const advanced = advanceAfterRemoval({ participants: remaining, pending, scene: ctx.scene, map, rules: ctx.meta.rules, before });
 
   return { participants: advanced.participants, pending: advanced.pending, scene: advanced.scene, events: advanced.actions.map(battleActionToEvent) };
 }

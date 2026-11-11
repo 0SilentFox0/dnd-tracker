@@ -12,6 +12,7 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
+import type { SystemData, SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
 
@@ -40,6 +41,8 @@ export interface CharacterGoal {
  * Згрупована структура даних персонажа (як використовується в формі)
  */
 export interface CharacterFormData {
+  characteristics?: SystemData;
+  systemBaseline?: unknown;
   basicInfo: {
     name: string;
     type: CharacterTypeValue;
@@ -143,6 +146,8 @@ export interface Character {
   primaryAbility?: AbilityKey | null;
   goals?: CharacterGoal[];
   archetype?: string | null;
+  characteristics?: SystemData;
+  experience?: number;
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<
     string,
@@ -166,7 +171,7 @@ export interface Character {
 /** Рядок списку персонажів кампанії (GET /characters). */
 export type CharacterListItem = Pick<
   Character,
-  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "classes" | "armorClass" | "initiative"
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "classes" | "armorClass" | "initiative" | "characteristics"
 > & { user?: { displayName: string } | null; reviewNote?: string | null; experience?: number; inspiration?: boolean; resources?: CharacterResources };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
@@ -219,6 +224,7 @@ export interface SheetArtifact {
   effects: AbilityFlowSummary[];
   attunement?: "attuned" | "required";
   carried?: true;
+  systemStats?: unknown;
 }
 
 export interface SetProgress {
@@ -231,6 +237,8 @@ export interface SetProgress {
 }
 
 export interface CharacterSheet {
+  system: string;
+  systemSlot?: SystemSlot;
   viewer: { isDM: boolean; isOwner: boolean };
   review: { pending: boolean; note: string | null };
   maxLevel: number;
@@ -313,15 +321,37 @@ export interface CharacterResources {
   charges?: Record<string, { used: number; rest: RestKindValue | null; /** uses restored by a short rest even though `rest` is long */ regain?: number }>;
   exhaustion?: number;
   shortRestOpen?: boolean;
+  fortune?: number;
+  /** Sin 0-10; only the DM changes it, battle never writes it */
+  sin?: number;
 }
 
-export type RestBody = { kind: "short" | "long" | "close"; characterIds: string[] };
+export type RestBody = { kind: "short" | "long" | "close" | "session"; characterIds: string[] };
 
 export type SheetRollSubject = { kind: "check"; skill: DndSkill } | { kind: "check"; ability: AbilityKey } | { kind: "save"; ability: AbilityKey };
 
-export type SheetRollBody = SheetRollSubject & { useInspiration?: boolean };
+export type SheetTestSubject = { kind: "test"; characteristic: string } | { kind: "test"; skill: string; spec?: string };
 
-export interface SheetRollResult {
+export type SheetRollBody = (SheetRollSubject & { useInspiration?: boolean }) | (SheetTestSubject & { difficulty?: string });
+
+export type SheetRollResult = SheetD20RollResult | SheetPercentileRollResult;
+
+export interface SheetPercentileRollResult {
+  kind: "percentile";
+  label: string;
+  rawRoll: number;
+  roll: number;
+  reversed: boolean;
+  target: number;
+  sl: number;
+  outcome: "critical" | "success" | "failure" | "fumble";
+  auto: "success" | "failure" | null;
+  difficulty: string;
+  mode: "normal" | "advantage" | "disadvantage";
+}
+
+export interface SheetD20RollResult {
+  kind: "d20";
   label: string;
   rolls: number[];
   roll: number;
@@ -344,7 +374,7 @@ export interface HitDieResult {
 
 export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
 
-export type ResourcesEditBody = { hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
+export type ResourcesEditBody = { fortune?: number; sin?: number; hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
 
 export interface SheetRest {
   persist: boolean;

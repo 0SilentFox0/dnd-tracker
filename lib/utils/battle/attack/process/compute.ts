@@ -3,11 +3,11 @@ import { applyBalanceDamageMultiplier, scaleAdditionalDamage } from "../../damag
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyObstacle, obstacleStep } from "../../damage/obstacle";
-import { multiplierRow, ruleRow } from "../../damage/rows";
+import { multiplierRow, ruleRow, stepRow, totalRow } from "../../damage/rows";
 import { applyWeaponFlat } from "../../damage/weapon-flat";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
-import { applyCriticalEffect } from "..";
+import { applyCriticalEffect } from "../critical";
 import { applyResistanceForAdditional } from "./damage";
 
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
@@ -20,6 +20,9 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { effectName } from "@/lib/utils/battle/common/terms";
 import { dealsNoDamage, findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
+import { type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { MitigateResult } from "@/lib/utils/rules/systems/types";
 import type { BattleAttack, BattleParticipant, DamageRow, DamageStep } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -29,7 +32,8 @@ export interface ComputeHitDamageParams {
   attack: BattleAttack;
   damageRolls: number[];
   allParticipants: BattleParticipant[];
-  attackRoll: { isCritical: boolean; criticalEffect?: CriticalEffect };
+  attackRoll: { isCritical: boolean; criticalEffect?: CriticalEffect; margin?: number; location?: string; totalAttackValue?: number };
+  rules: Ruleset;
   damageMultiplier?: number;
   currentRound: number;
   actionModifiers?: StaticEffect[];
@@ -53,6 +57,7 @@ export interface ComputeHitDamageResult {
   criticalEffectApplied?: CriticalEffect;
   damageSteps: DamageStep[];
   oldHp: number;
+  afterHit?: MitigateResult["afterHit"];
 }
 
 interface PhysicalState {
@@ -126,7 +131,18 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     attackKindOf(attack.type),
   );
 
-  const unhalvedDamage = resistanceResult.finalDamage + totalAdditionalDamage;
+  const immune = physicalDamageForTarget > 0 && resistanceResult.finalDamage <= 0;
+
+  const mitigated = mitigateHit({ ...params, rules: params.rules }, { attacker: updatedAttacker, target: updatedTarget, weapon: baseDamage, amount: immune ? 0 : Math.max(resistanceResult.finalDamage, 1) });
+
+  if (mitigated) {
+    state.steps = mitigated.steps;
+    damageCalculation.breakdown = mitigated.rows;
+  }
+
+  const targetDamage = mitigated ? Math.floor(mitigated.amount * dmgMult) : resistanceResult.finalDamage;
+
+  const unhalvedDamage = targetDamage + totalAdditionalDamage;
 
   const pacified = dealsNoDamage(attacker);
 
@@ -134,7 +150,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   if (pacified) damageCalculation.breakdown.push({ label: textRef("battleLog.damage.rows.pacified"), tone: "note" });
 
-  if (dmgMult !== 1) state.steps.push({ label: textRef("battleLog.damage.steps.share"), side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
+  if (dmgMult !== 1) state.steps.push({ label: textRef("battleLog.damage.steps.share"), side: "attacker", kind: "multiplier", value: dmgMult, after: mitigated ? targetDamage : physicalDamageForTarget });
 
   state.steps.push(...resistanceResult.steps);
 
@@ -158,6 +174,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     criticalEffectApplied,
     damageSteps: state.steps,
     oldHp: updatedTarget.combatStats.currentHp,
+    ...(mitigated?.afterHit && { afterHit: mitigated.afterHit }),
   };
 }
 
@@ -237,4 +254,43 @@ function applyAttackerMultipliers(
     state.damage = Math.floor(state.damage * factor);
     state.steps.push({ label: ctx.bonusLabel ?? textRef("battleLog.damage.steps.counter"), side: "attacker", kind: "multiplier", value: factor, after: state.damage });
   }
+}
+
+function mitigateHit(
+  params: ComputeHitDamageParams & { rules: Ruleset },
+  input: { attacker: BattleParticipant; target: BattleParticipant; weapon: number; amount: number },
+): { amount: number; steps: DamageStep[]; rows: DamageRow[]; afterHit?: MitigateResult["afterHit"] } | null {
+  const hook = ruleSystemOf(params.rules).combat.mitigateDamage;
+
+  const { margin, location, totalAttackValue } = params.attackRoll;
+
+  if (!hook || margin === undefined) return null;
+
+  const result = hook({
+    ...input,
+    weapon: input.weapon + (params.attack.damageBonus ?? 0),
+    margin,
+    location: location ?? "",
+    crit: params.attackRoll.isCritical,
+    attackRoll: totalAttackValue,
+    attack: params.attack,
+    rng: params.rng ?? Math.random,
+    rules: params.rules,
+  });
+
+  let running = 0;
+
+  const steps = result.steps.map<DamageStep>((s) => {
+    running += s.value;
+
+    return { label: s.label, side: s.side, kind: "flat", value: s.value, after: running };
+  });
+
+  const rows = [
+    ...result.steps.map((s) => stepRow(s.label, s.value > 0 ? `+${s.value}` : s.value)),
+    ruleRow(),
+    totalRow(result.totalLabel, result.amount),
+  ];
+
+  return { amount: result.amount, steps, rows, afterHit: result.afterHit };
 }

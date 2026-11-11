@@ -78,8 +78,8 @@ export function useBattleMapScene(): BattleMapScene | null {
   const { view: modeView } = useModeView();
 
   const scene = useMemo(
-    () => (map ? deriveMapScene({ map, participants: order, selectedId, actor, mode, modeView }) : null),
-    [map, order, selectedId, actor, mode, modeView],
+    () => (map ? deriveMapScene({ map, rules: battle.rules, participants: order, selectedId, actor, mode, modeView }) : null),
+    [map, battle.rules, order, selectedId, actor, mode, modeView],
   );
 
   const { pending: pendingStroke } = terrainTool;
@@ -89,8 +89,8 @@ export function useBattleMapScene(): BattleMapScene | null {
   const { currentRound, currentTurnIndex } = battle;
 
   const hovered = useMemo(
-    () => (scene?.aiming && map && mapAim && hoverCell ? aimView({ map, participants: scene.participants }, mapAim, hoverCell) : null),
-    [scene, map, mapAim, hoverCell],
+    () => (scene?.aiming && map && mapAim && hoverCell ? aimView({ map, participants: scene.participants, rules: battle.rules }, mapAim, hoverCell) : null),
+    [scene, map, mapAim, hoverCell, battle.rules],
   );
 
   const previewCell = hovered ? hoverCell : null;
@@ -112,11 +112,12 @@ export function useBattleMapScene(): BattleMapScene | null {
     return composeMapView({
       scene,
       map,
+      rules: battle.rules,
       current,
       hover: { cell: hoverCell, preview: hovered },
       overlay: { returnId, pendingStroke, impactFor, effects, round: currentRound, mode: modeView },
     });
-  }, [scene, map, hovered, hoverCell, pendingStroke, current, returnId, impactFor, effects, currentRound, modeView]);
+  }, [scene, map, battle.rules, hovered, hoverCell, pendingStroke, current, returnId, impactFor, effects, currentRound, modeView]);
 
   const { mutate: move } = actions.move;
 

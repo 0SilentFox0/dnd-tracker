@@ -46,6 +46,8 @@ export const unitAbilities = (row: OwnerRow) => read(row);
 
 export const featAbilities = (row: OwnerRow) => read(row);
 
+export const abilitySpellIds = (abilities: readonly Pick<Ability, "perform">[] | undefined): string[] => (abilities ?? []).flatMap((a) => (a.perform?.kind === "spell" ? [a.perform.spellId] : []));
+
 export function abilitiesJson(abilities: Ability[]): Prisma.InputJsonValue {
   return abilities as unknown as Prisma.InputJsonValue;
 }

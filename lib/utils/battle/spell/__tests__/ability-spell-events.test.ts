@@ -5,6 +5,7 @@ import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const firebolt: CastableSpell = {
   id: "s1",
@@ -17,7 +18,7 @@ const firebolt: CastableSpell = {
 function cast(caster = makeParticipant({ id: "c" }), others = [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 3 })]) {
   const withSlots = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } } };
 
-  return castSpell({ caster: withSlots, spell: firebolt, targetIds: ["e"], allParticipants: [withSlots, ...others], currentRound: 1, battleId: "b1", diceRolls: [5], rng: seq(0) });
+  return castSpell({ rules: DEFAULT_RULES, caster: withSlots, spell: firebolt, targetIds: ["e"], allParticipants: [withSlots, ...others], currentRound: 1, battleId: "b1", diceRolls: [5], rng: seq(0) });
 }
 
 const hpOf = (r: ReturnType<typeof cast>, id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.currentHp as number;
@@ -53,7 +54,7 @@ describe("spell ability events", () => {
 
     const quake: CastableSpell = { ...firebolt, id: "s2", name: "Землетрус", level: 0, definition: { ...firebolt.definition, targeting: { kind: "self" }, effects: [{ kind: "dealDamage", amount: 5, damageType: "magic", target: "allEnemies" }] } };
 
-    const r = castSpell({ caster: c, spell: quake, targetIds: ["c"], allParticipants: [c, makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 3 })], currentRound: 1, battleId: "b1", diceRolls: [5], rng: seq(0) });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: quake, targetIds: ["c"], allParticipants: [c, makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 3 })], currentRound: 1, battleId: "b1", diceRolls: [5], rng: seq(0) });
 
     expect(hpOf(r, "e")).toBe(0);
     expect(r.casterUpdated.combatStats.morale).toBe(1);

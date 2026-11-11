@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { acceptFullBattle, applyBattleDelta, prependBattleLog } from "@/lib/utils/battle/client/apply-delta";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -169,6 +170,20 @@ describe("applyBattleDelta — відкат завершеного бою", () =
 
     expect(next.status).toBe("active");
     expect(next.completedAt).toBeUndefined();
+  });
+});
+
+describe("applyBattleDelta — system state", () => {
+  const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null };
+
+  it("кладе стан системи у кеш, наступна дельта без нього очищає", () => {
+    const withTokens = applyBattleDelta(cached, delta({ scene: { ...scene, system: sceneOf({ ally: true }) } })) as BattleScene;
+
+    expect(momentumOf(withTokens.system)).toEqual({ ally: true });
+
+    const cleared = applyBattleDelta(withTokens, delta({ version: (withTokens.version ?? 0) + 1, scene })) as BattleScene;
+
+    expect(cleared.system).toBeUndefined();
   });
 });
 

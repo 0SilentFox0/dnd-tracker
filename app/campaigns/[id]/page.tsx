@@ -43,7 +43,9 @@ export default async function CampaignDetailPage({
 
   const hasMembership = !isTemplate && !isDemo;
 
-  const classesEnabled = parseRules(campaign.rules).classes.enabled;
+  const rules = parseRules(campaign.rules);
+
+  const classesEnabled = rules.classes.enabled;
 
   const [dm, player, onboarding] = await Promise.all([
     isDM && !isTemplate ? readDmDashboard(id).catch(() => null) : null,
@@ -90,7 +92,7 @@ export default async function CampaignDetailPage({
         <div className="min-w-0 space-y-4">
           {dm && <DmNextSteps campaignId={id} data={dm} />}
           {player && <PlayerHeroCard campaignId={id} data={player} />}
-          <DashboardGroups campaignId={id} isDM={isDM} isDemo={isDemo} pendingDrafts={dm?.pendingDrafts ?? 0} context={{ isTemplate, classesEnabled }} hiddenKeys={hiddenKeys} />
+          <DashboardGroups campaignId={id} isDM={isDM} isDemo={isDemo} pendingDrafts={dm?.pendingDrafts ?? 0} context={{ isTemplate, classesEnabled, systemKey: rules.system.key }} hiddenKeys={hiddenKeys} />
         </div>
 
         <div className="space-y-4">

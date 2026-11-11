@@ -2,6 +2,7 @@ export * from "./attack-flow";
 export * from "./attack-intent";
 export * from "./die-input";
 export * from "./forced-for";
+export * from "./percentile-input";
 export * from "./roll-outcome";
 export * from "./spell-costs";
 export * from "./spell-flow";

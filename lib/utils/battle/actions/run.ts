@@ -25,6 +25,8 @@ import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -36,12 +38,14 @@ export interface RunCoreActionInput {
   round: number;
   rng: () => number;
   battleId: string;
+  sceneState?: SystemSlot;
 }
 
 export interface RunCoreActionResult {
   participants: BattleParticipant[];
   messages: LogLine[];
   actions?: BattleAction[];
+  sceneState?: SystemSlot;
 }
 
 const TIMED_ACTIONS = {
@@ -70,11 +74,13 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   const cost = coreActionCost(body.action, actor, participants);
 
+  if (cost === "bonusAction" && !ruleSystemOf(rules).combat.actionEconomy.bonusAction) throw ruleErrorOf("action_rejected", actionReason("noBonusAction"));
+
   if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) throw ruleErrorOf("action_used", actionReason("bonusUsed"));
 
   const spent = cost === "action" ? spendAction(actor, participants, body.action) : cost === "bonusAction" ? { ...actor, actionFlags: { ...actor.actionFlags, hasUsedBonusAction: true } } : actor;
 
-  const invalid = validateCoreAction(body.action, actor, participants, map, "targetId" in body ? body.targetId : undefined);
+  const invalid = validateCoreAction(body.action, actor, participants, map, rules, "targetId" in body ? body.targetId : undefined);
 
   if (invalid) return reject(invalid);
 
@@ -88,7 +94,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   switch (body.action) {
     case "dash": {
-      const gained = baseMovement(spent);
+      const gained = baseMovement(spent, rules);
 
       return done("🏃", { ...spent, battleData: { ...spent.battleData, extraMovement: (spent.battleData.extraMovement ?? 0) + gained } }, textRef("battleActions.core.dashTail", { gained }));
     }
@@ -113,7 +119,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
     case "standUp": {
       const { participant } = removeEffects(actor, (e) => e.effects.some((m) => m.type === "prone"));
 
-      return done("🧍", { ...participant, battleData: { ...participant.battleData, movementUsed: (participant.battleData.movementUsed ?? 0) + standUpCost(actor) } });
+      return done("🧍", { ...participant, battleData: { ...participant.battleData, movementUsed: (participant.battleData.movementUsed ?? 0) + standUpCost(actor, rules) } });
     }
 
     case "hide": {
@@ -141,11 +147,11 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 }
 
 function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targetId: string): RunCoreActionResult {
-  const { participants, map, round, rng } = input;
+  const { participants, map, round, rng, rules } = input;
 
   if (!actor.battleData.readied) return reject(actionReason("readiedMissing"));
 
-  const blocker = reactionBlocker(actor);
+  const blocker = reactionBlocker(actor, rules);
 
   if (blocker) return reject(blocker);
 
@@ -161,11 +167,11 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   assertAttackAllowed(actor, attack, [target]);
 
-  const reach = attackReachError(map, participants, actor, attack, [target]);
+  const reach = attackReachError(map, participants, actor, attack, [target], input.rules);
 
   if (reach) return reject(reach);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules }, sceneState: input.sceneState };
 
   const { battleAction } = resolveServerAttack({ flow, attackerId: actor.basicInfo.id, targetId, attack, currentRound: round, battleId: input.battleId, rng, label: "readied" });
 
@@ -173,5 +179,5 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   const spent = { ...fresh, battleData: { ...fresh.battleData, readied: undefined }, actionFlags: { ...fresh.actionFlags, hasUsedReaction: true } };
 
-  return { participants: replaceParticipant(flow.ps, spent), messages: [], actions: [battleAction] };
+  return { participants: replaceParticipant(flow.ps, spent), messages: [], actions: [battleAction], sceneState: flow.sceneState };
 }

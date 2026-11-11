@@ -11,9 +11,10 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { CUSTOM_CONDITION_KEY_RE, type CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isConditionUsed } from "@/lib/utils/rules/condition-usage";
+import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
 import type { Ruleset, RulesetPatch } from "@/lib/utils/rules/schema";
 import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
-import type { ConditionUsage } from "@/types/campaigns";
+import type { CampaignRulesView, ConditionUsage } from "@/types/campaigns";
 
 export async function loadRules(campaignId: string): Promise<Ruleset> {
   const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
@@ -23,13 +24,23 @@ export async function loadRules(campaignId: string): Promise<Ruleset> {
   return parseRules(campaign.rules);
 }
 
-export function readCampaignRules(actor: Actor): Promise<Ruleset> {
-  assertCan(actor, CONTENT_OPERATIONS["rules.get"].need);
+type CountClient = Pick<Prisma.TransactionClient, "character" | "unit">;
 
-  return loadRules(actor.campaignId);
+async function hasSystemBoundContent(db: CountClient, campaignId: string): Promise<boolean> {
+  const [characters, units] = await Promise.all([db.character.count({ where: { campaignId } }), db.unit.count({ where: { campaignId } })]);
+
+  return characters + units > 0;
 }
 
-export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Promise<Ruleset> {
+export async function readCampaignRules(actor: Actor): Promise<CampaignRulesView> {
+  assertCan(actor, CONTENT_OPERATIONS["rules.get"].need);
+
+  const [rules, systemLocked] = await Promise.all([loadRules(actor.campaignId), hasSystemBoundContent(prisma, actor.campaignId)]);
+
+  return { ...(actor.isDM ? rules : stripPlayerHiddenRules(rules)), systemLocked };
+}
+
+export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Promise<CampaignRulesView> {
   assertCan(actor, CONTENT_OPERATIONS["rules.update"].need);
 
   return withCampaignContentWrite(actor.campaignId, async (tx) => {
@@ -41,13 +52,17 @@ export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Pr
       if (condition && isConditionUsed(await findCustomConditionUsage(actor.campaignId, key as CustomConditionKey, tx))) throw new ContentError(API_ERRORS.RULES_CUSTOM_CONDITION_IN_USE, 409, undefined, { name: condition.name });
     }
 
+    const systemLocked = await hasSystemBoundContent(tx, actor.campaignId);
+
+    if (systemLocked && patch.system?.key && patch.system.key !== current.system.key) throw new ContentError(API_ERRORS.SYSTEM_LOCKED, 409);
+
     const merged = mergeRules(current, patch);
 
     if (!merged.ok) throw new ContentError(API_ERRORS.INVALID_RULES, 400, merged.issues);
 
     await prisma.campaign.update({ where: { id: actor.campaignId }, data: { rules: merged.rules as Prisma.InputJsonObject } });
 
-    return merged.rules;
+    return { ...merged.rules, systemLocked };
   });
 }
 

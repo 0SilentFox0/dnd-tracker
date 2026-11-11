@@ -5,6 +5,7 @@ import { CharacterType, HERO_INITIATIVE, HERO_INITIATIVE_BOUNDS } from "@/lib/co
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { BackgroundSelectionFields, CharacterFeatsSchema, PicksSchema } from "@/lib/schemas/choices";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
+import { SystemDataSchema } from "@/lib/schemas/common";
 
 export const createCharacterSchema = z.object({
   name: z.string().min(1).max(100),
@@ -18,7 +19,7 @@ export const createCharacterSchema = z.object({
   raceChoices: PicksSchema.optional(),
   feats: CharacterFeatsSchema.optional(),
   archetype: z.enum(HERO_ARCHETYPE_KEYS).nullable().optional(),
-  race: z.string().min(1),
+  race: z.string().default(""),
   subrace: z.string().optional(),
   alignment: z.string().optional(),
   background: z.string().optional(),
@@ -62,8 +63,7 @@ export const createCharacterSchema = z.object({
   // Уміння (персональний скіл з групи «Персональні»)
   personalSkillId: z.string().optional().nullable(),
   primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
-}).superRefine((value, ctx) => {
-  if (!value.class && !value.classes?.length) ctx.addIssue({ code: "custom", path: ["class"], message: "Required" });
+  characteristics: SystemDataSchema.optional(),
 });
 
 export type CreateCharacterInput = z.infer<typeof createCharacterSchema>;

@@ -2,8 +2,10 @@ import type { ErrorParams } from "@/lib/constants/api-errors";
 import { issueParams } from "@/lib/i18n/translate-issue";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
-import { AbilitiesSchema, type Ability, AbilitySchema, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
+import { SYSTEM_EFFECT_DEFAULTS } from "@/lib/utils/abilities/registry/effects/system-rows";
+import { AbilitiesSchema, type Ability, AbilitySchema, type AnyEffect, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
 import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
+import type { SystemEffect } from "@/lib/utils/abilities/schema/system-effects";
 import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 import type { ClassColumn } from "@/types/classes";
 
@@ -11,7 +13,7 @@ export type AbilityError = string | { message: string; params?: ErrorParams };
 
 const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"];
 
-const ALL_KINDS = Object.keys(EFFECT_REGISTRY) as EffectKind[];
+const ALL_KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter((k) => (EFFECT_REGISTRY[k] as { pickable?: false }).pickable !== false);
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
   if (trigger.event === "passive") return STATIC_KINDS;
@@ -21,7 +23,7 @@ export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
 
 type WithoutKind<T> = T extends unknown ? Omit<T, "kind"> : never;
 
-const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: K }>> } = {
+const BASE_DEFAULTS: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: WithoutKind<Extract<AnyEffect, { kind: K }>> } = {
   modifyStat: { stat: "armor", flat: 1 },
   damageBonus: { filter: { kind: "all" }, percent: 10 },
   flag: { flag: "advantage", attackKind: "all" },
@@ -49,6 +51,8 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   push: { feet: 10, from: "caster", target: "eventTarget" },
   randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] },
 };
+
+const EFFECT_DEFAULTS = { ...BASE_DEFAULTS, ...SYSTEM_EFFECT_DEFAULTS } as { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>> };
 
 const baseEffect = (kind: EffectKind, noteText: string): Effect => ({ kind, ...structuredClone(EFFECT_DEFAULTS[kind]), ...(kind === "note" && { text: noteText }) }) as Effect;
 

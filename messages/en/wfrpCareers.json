@@ -1,0 +1,77 @@
+{
+  "page": {
+    "title": "Careers",
+    "subtitle": "Careers: {count}",
+    "create": "New career",
+    "emptyTitle": "No careers yet",
+    "emptyDescription": "Create a career with four tiers.",
+    "deleteTitle": "Delete \"{name}\"?",
+    "deleteBody": "This cannot be undone.",
+    "deleteFailed": "Could not delete"
+  },
+  "form": {
+    "createTitle": "New career",
+    "editTitle": "Career",
+    "name": "Name",
+    "class": "Class",
+    "tier": "Tier {n}",
+    "tierName": "Tier name",
+    "status": "Status",
+    "characteristics": "Characteristics",
+    "skills": "Skills",
+    "talents": "Talents",
+    "trappings": "Trappings",
+    "skill": "Skill",
+    "spec": "Specialisation",
+    "anySpec": "Any",
+    "talent": "Add talent",
+    "add": "Add",
+    "remove": "Remove: {name}",
+    "nameRequired": "Enter a name",
+    "tierNameRequired": "Enter a name for every tier",
+    "saveFailed": "Could not save"
+  },
+  "rules": {
+    "characteristic": "Characteristics",
+    "skill": "Skills",
+    "max": "Maximum",
+    "upTo": "up to",
+    "cost": "cost",
+    "addBracket": "Add bracket",
+    "removeBracket": "Remove bracket {n}",
+    "talentMultiplier": "Talent price multiplier",
+    "career": "Career",
+    "ticks": "Ticks for tier {n}",
+    "multiplier": "Out-of-career multiplier",
+    "creation": {
+      "title": "Character creation",
+      "careerBonus": {
+        "rolled": "Career XP: rolled",
+        "choice": "Career XP: chosen from roll",
+        "free": "Career XP: free"
+      },
+      "statBonus": {
+        "rolled": "Stats XP: rolled",
+        "rearranged": "Stats XP: rearranged",
+        "free": "Stats XP: free"
+      },
+      "freeBudget": "Free stat points budget"
+    }
+  },
+  "profile": {
+    "career": "Career",
+    "noCareer": "No career",
+    "tier": "Tier",
+    "tierValue": "Tier {n}",
+    "clear": "Clear",
+    "talents": "Talents",
+    "rank": "rank",
+    "remove": "Remove: {name}",
+    "addTalent": "Add talent",
+    "ledgerNote": "Purchase log: {count}. Changed only by buying or undoing."
+  },
+  "panel": {
+    "replaceTitle": "Replace the career?",
+    "replaceBody": "The current career is at tier {tier} with {have} ticks. The new career starts at tier 1 with no ticks."
+  }
+}

@@ -1,3 +1,4 @@
+import type { Coin } from "@/lib/constants/inventory";
 import type { Translator } from "@/lib/i18n/translator";
 import { formatCoins } from "@/lib/utils/inventory/money";
 import type { InventoryLogEntry, Purse } from "@/types/inventory";
@@ -6,11 +7,11 @@ const ITEM_KINDS = new Set(["item_add", "item_use", "item_edit", "item_remove"])
 
 const ARTIFACT_KINDS = new Set(["artifact_stash", "artifact_equip", "artifact_unequip", "artifact_grant", "artifact_revoke", "artifact_transfer", "artifact_attune", "artifact_unattune"]);
 
-export function describeLog({ kind, delta, note }: InventoryLogEntry, t: Translator): string {
+export function describeLog({ kind, delta, note }: InventoryLogEntry, t: Translator, label?: (coin: Coin) => string): string {
   const withNote = (text: string) => (note ? t("log.withNote", { text, note }) : text);
 
   if (kind.startsWith("money_")) {
-    const coins = formatCoins(delta as Partial<Purse>, (c) => t(`coins.${c}`)) || "0";
+    const coins = formatCoins(delta as Partial<Purse>, label ?? ((c) => t(`coins.${c}`))) || "0";
 
     return withNote(t(kind === "money_set" ? "log.moneySet" : "log.money", { coins }));
   }

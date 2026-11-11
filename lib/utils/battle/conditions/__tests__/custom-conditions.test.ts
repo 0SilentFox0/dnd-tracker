@@ -123,7 +123,7 @@ describe("pacified: шкода", () => {
   const hpAfter = (c: BattleParticipant) => {
     const foe = makeParticipant({ id: "f", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50 });
 
-    const r = castSpell({ caster: c, spell: { ...spell, definition: { ...spell.definition, targeting: { kind: "enemy" } } }, targetIds: ["f"], allParticipants: [c, foe], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4 });
+    const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: { ...spell, definition: { ...spell.definition, targeting: { kind: "enemy" } } }, targetIds: ["f"], allParticipants: [c, foe], currentRound: 1, battleId: "b", diceRolls: [], rng: () => 0.4 });
 
     return r.allParticipantsUpdated.find((p) => p.basicInfo.id === "f")!.combatStats.currentHp;
   };
@@ -164,7 +164,7 @@ describe("pacified: шкода", () => {
         scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
         participants: [marked ? { ...hero, battleData: { ...hero.battleData, activeEffects: [{ id: "e", name: "М", type: "condition", duration: 3, effects: [{ type: "no_damage_dealt", value: 1 }] }] } } : hero, gob],
         pending: [],
-        meta: { map: null },
+        meta: { map: null, rules: DEFAULT_RULES },
         userId: "user-1",
         isDM: false,
       } as unknown as BattleMutationContext;

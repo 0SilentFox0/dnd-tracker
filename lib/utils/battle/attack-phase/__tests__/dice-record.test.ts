@@ -4,6 +4,7 @@ import { runAttackPhase } from "../run-attack-phase";
 
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const attackOf = (damageDice: string, type: AttackType = AttackType.MELEE): BattleAttack => ({ id: "w", name: "Зброя", type, attackBonus: 5, damageDice, damageType: "slashing" });
@@ -16,7 +17,7 @@ const attackerWith = (attack: BattleAttack, maxTargets = 1) => {
 
 const foe = (id: string) => makeParticipant({ id, side: ParticipantSide.ENEMY, hp: 80, maxHp: 80 });
 
-const run = (order: BattleParticipant[], data: Record<string, unknown>) => runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", ...data } as never, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
+const run = (order: BattleParticipant[], data: Record<string, unknown>) => runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", ...data } as never, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
 
 const damageGroup = (action: { actionDetails: { diceRolls?: Array<{ kind: string; dice: unknown[] }> } }) => action.actionDetails.diceRolls?.find((g) => g.kind === "damage");
 

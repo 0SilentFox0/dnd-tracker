@@ -12,6 +12,8 @@ import { prisma } from "@/lib/db";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { visibleTemplates } from "@/lib/server/templates/list-templates";
+import { parseRules } from "@/lib/utils/rules/schema";
+import { systemKeyOf } from "@/lib/utils/rules/systems";
 
 export default async function CampaignsPage() {
   const user = await getAuthUser();
@@ -44,7 +46,7 @@ export default async function CampaignsPage() {
   try {
     const templatesQuery = prisma.campaign.findMany({
       where: { kind: CampaignKind.TEMPLATE, members: { some: { userId, role: CampaignRole.DM } } },
-      select: { id: true, name: true, description: true, kind: true, visibility: true, locale: true, templateKey: true },
+      select: { id: true, name: true, description: true, kind: true, visibility: true, locale: true, templateKey: true, rules: true },
       orderBy: { updatedAt: "desc" },
     });
 
@@ -78,7 +80,7 @@ export default async function CampaignsPage() {
 
     const [templateRows, campaignRows, demoRow] = await Promise.all([templatesQuery, campaignsQuery, demoQuery]);
 
-    templates = visibleTemplates(templateRows);
+    templates = visibleTemplates(templateRows).map(({ rules, ...tile }) => ({ ...tile, system: systemKeyOf(parseRules(rules)) }));
     campaigns = campaignRows;
     demoCampaign = demoRow;
   } catch (error: unknown) {

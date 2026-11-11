@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
 import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "@/lib/utils/rules/schema";
 
 describe("parseRules", () => {
@@ -27,6 +28,9 @@ describe("parseRules", () => {
       encounters: { balance: "fair", edition: "2014", autoXp: false },
       items: { enabled: false, attunementLimit: 3 },
       spellIngredients: { enabled: false, autoPay: true },
+      advancement: DEFAULT_ADVANCEMENT_RULES,
+      tables: {},
+      system: { key: "homm" },
     });
   });
 

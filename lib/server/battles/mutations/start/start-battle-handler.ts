@@ -22,8 +22,10 @@ import {
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle/turn/initiative";
+import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export async function buildStartOrder(
   battleId: string,
@@ -131,7 +133,7 @@ export async function buildStartOrder(
     ),
   );
 
-  const built = rules.encounters.balance === "xp" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext);
+  const built = rules.encounters.balance === "xp" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext, rules);
 
   const { field, reserve } = partitionReserve(slots, built);
 
@@ -159,10 +161,9 @@ function applyStartOfBattleAndSort(
 ): { order: BattleParticipant[]; triggerLogEntries: BattleAction[] } {
   const ctx = { round: 1, rng: Math.random, map, rules };
 
-  const battleStart = runAbilities(
+  const battleStart = runJoinTriggers(
     // сплячі вороги лабіринту не спрацьовують на старті
     initiativeOrder.map((p) => modeEnter(map, p)),
-    { type: "battleStart" },
     ctx,
   );
 
@@ -188,23 +189,25 @@ function applyStartOfBattleAndSort(
 
   const triggerLogEntries: BattleAction[] = [];
 
-  if (allTriggerMessages.length > 0) {
-    triggerLogEntries.push({
-      id: `triggers-start-${Date.now()}`,
-      battleId,
-      round: 1,
-      actionIndex: 0,
-      timestamp: new Date(),
-      ...SYSTEM_ACTOR,
-      actionType: "ability",
-      targets: [],
-      actionDetails: { triggeredAbilities: [] },
-      ...logFields([textRef("battleLog.triggers.battleStart"), ...allTriggerMessages]),
-      hpChanges: [],
-      isCancelled: false,
-      stateBefore: undefined,
-    });
-  }
+  const entry = (tag: string, lines: LogLine[], targets: BattleAction["targets"]): BattleAction => ({
+    id: `${tag}-${Date.now()}`,
+    battleId,
+    round: 1,
+    actionIndex: triggerLogEntries.length,
+    timestamp: new Date(),
+    ...SYSTEM_ACTOR,
+    actionType: "ability",
+    targets,
+    actionDetails: { triggeredAbilities: [] },
+    ...logFields(lines),
+    hpChanges: [],
+    isCancelled: false,
+    stateBefore: undefined,
+  });
+
+  if (allTriggerMessages.length > 0) triggerLogEntries.push(entry("triggers-start", [textRef("battleLog.triggers.battleStart"), ...allTriggerMessages], []));
+
+  if (battleStart.psychology.lines.length > 0) triggerLogEntries.push(entry("psychology-start", battleStart.psychology.lines, battleStart.psychology.targets));
 
   return { order, triggerLogEntries };
 }

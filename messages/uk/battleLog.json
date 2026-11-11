@@ -82,7 +82,9 @@
     "spell": "Заклинання",
     "spellLevel": "{name} (рівень {level})",
     "healing": "Лікування",
-    "d10": "Кидок d10"
+    "d10": "Кидок d10",
+    "hpChange": "{value} HP",
+    "woundsChange": "{value} Ран"
   },
   "attack": {
     "critHit": "Критичне влучання — {name}!{flavor}",
@@ -102,6 +104,8 @@
     "obstacle": "🧱 перешкода: шкода ×0.5 → {damage}"
   },
   "offTurn": {
+    "hitPercentile": "{title}: {attacker} → {target}: d100 {roll}, {damage} шкоди{plainCrit}{crit}",
+    "missPercentile": "{title}: {attacker} → {target}: d100 {roll}, промах{crit}",
     "hit": "{title}: {attacker} → {target}: d20 {d20}, {damage} шкоди{plainCrit}{crit}",
     "miss": "{title}: {attacker} → {target}: d20 {d20}, промах{crit}",
     "second": "🎲 {noun}, {mode}: другий d20 = {value}",
@@ -153,6 +157,7 @@
     "turnEnd": "Кінець ходу"
   },
   "turn": {
+    "skipUnconscious": "{name} непритомний — хід пропущено",
     "recharged": "🔄 {pool} перезарядилась ({roll})",
     "notRecharged": "🔄 {pool} не перезарядилась ({roll})",
     "skipLost": "💫 {name} втрачає дію ({source})",
@@ -338,6 +343,7 @@
     "badStrikeRoll": "Некоректний кидок атаки для цілі {target}",
     "rollsRequired": "d20Roll, attackRoll або attackRolls обов'язковий",
     "oneTargetRequired": "Потрібно вказати хоча б одну ціль",
+    "fortuneNotFree": "Удача не діє на вільний каст",
     "barrierDuration": "Барʼєру потрібна тривалість у раундах",
     "mapOccupied": "Клітинка зайнята або поза полем",
     "rollbackLimit": "Цю дію вже не відкотити: після завершення бою зберігаються лише останні {count} станів",
@@ -376,5 +382,17 @@
     "applied": "🐾 {name} перетворюється: {unit} ({hp} HP, КЗ {ac})",
     "reverted": "🐾 {name} повертає звичайну форму",
     "formLost": "🐾 {name}: форма втрачена{hasOverflow, select, true {, {overflow} шкоди переходить на звичайну форму} other {}}"
+  },
+  "percentile": {
+    "test": "🎲 Тест: {roll} проти {target} (РУ {sl})",
+    "opposedHidden": "🎲 Протиборство: {roll} проти {target} (РУ {sl}), різниця {netSl}",
+    "opposed": "🎲 Протиборство: {roll} проти {target} (РУ {sl}) — захист {defense}: {defRoll} проти {defTarget} (РУ {defSl}), різниця {netSl}",
+    "doublesMiss": "🎲 Дублі на промаху — крит не застосовується",
+    "momentum": "⚡ Імпульс переходить до переможця",
+    "defense": {
+      "parry": "парирування",
+      "dodge": "ухилення",
+      "shield": "щит"
+    }
   }
 }

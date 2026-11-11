@@ -53,6 +53,21 @@ describe("applySourceChanges", () => {
     expect(await visible()).toEqual([]);
   });
 
+  it("copies a new row's slug unless a local row already holds it", async () => {
+    const free = id("f"), taken = id("g");
+
+    f.addRow("spell", { id: free, campaignId: SRC, name: "Free", slug: "free" });
+    f.addRow("spell", { id: taken, campaignId: SRC, name: "Taken", slug: "mine" });
+    f.addRow("spell", { id: id("h"), campaignId: TGT, name: "Own", slug: "mine", sourceId: null });
+
+    const items = (await visible()).filter((i) => i.key === free || i.key === taken);
+
+    await applySourceChanges(f.db, TGT, { apply: items.map(ref), ignore: [] });
+
+    expect(rows("spell", TGT).find((r) => r.name === "Free")!.slug).toBe("free");
+    expect(rows("spell", TGT).find((r) => r.name === "Taken")!.slug).toBeNull();
+  });
+
   it("adds a new unit with its new race and remaps knownSpells to local ids", async () => {
     const R2 = id("q"), U2 = id("w");
 
@@ -404,6 +419,23 @@ it("refuses deleting a feat still referenced by a background", async () => {
   f.removeRow("feat", FEAT);
   await expect(applySourceChanges(f.db, TGT, { apply: (await visible()).filter((i) => i.scope === "feats").map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
   expect(rows("feat", TGT)).toHaveLength(1);
+});
+
+it("skips deleting a feat used by a race profile and reports it as a warning", async () => {
+  const FEAT = id("f");
+
+  f.addRow("feat", { id: FEAT, campaignId: SRC, name: "Hardy", type: "general" });
+  await applySourceChanges(f.db, TGT, { apply: (await visible()).map(ref), ignore: [] });
+
+  const localFeat = rows("feat", TGT)[0];
+
+  f.patchRow("race", rows("race", TGT)[0].id as string, { profile: { talents: [localFeat.id], randomTalents: [] } });
+  f.removeRow("feat", FEAT);
+
+  const result = await applySourceChanges(f.db, TGT, { apply: (await visible()).filter((i) => i.scope === "feats").map(ref), ignore: [] });
+
+  expect(rows("feat", TGT)).toHaveLength(1);
+  expect(result.warnings).toEqual([expect.stringContaining("Hardy")]);
 });
 
 it("validates new background origin refs and prevents changing a referenced origin's type", async () => {

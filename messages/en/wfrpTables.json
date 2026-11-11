@@ -1,0 +1,46 @@
+{
+  "slot": "Table",
+  "slots": {
+    "critHead": "Critical: head",
+    "critArm": "Critical: arm",
+    "critBody": "Critical: body",
+    "critLeg": "Critical: leg",
+    "miscastMinor": "Minor miscast",
+    "miscastMajor": "Major miscast",
+    "wrath": "Wrath of the Gods",
+    "downtimeEvent": "Downtime events",
+    "mutationPhysical": "Mutations: physical",
+    "mutationMental": "Mutations: mental"
+  },
+  "from": "From {n} to",
+  "upTo": "Up to, row {n}",
+  "text": "Text, row {n}",
+  "effectType": "Effect type",
+  "effect": {
+    "damage": "Extra damage",
+    "wounds": "Wounds",
+    "condition": "Condition",
+    "marker": "Marker",
+    "characteristic": "Characteristic",
+    "move": "Move",
+    "maxWounds": "Max Wounds"
+  },
+  "amount": "Amount",
+  "condition": "Condition",
+  "levels": "Levels",
+  "marker": "Marker",
+  "markers": {
+    "winded": "Winded",
+    "disarmed": "Disarmed",
+    "crippled": "Crippled"
+  },
+  "addRow": "Add row",
+  "removeRow": "Remove row {n}",
+  "addEffect": "Add effect",
+  "removeEffect": "Remove effect",
+  "customize": "Customize",
+  "reset": "Reset to default",
+  "defaultHint": "This table uses the built-in rows. Customize to edit a copy.",
+  "customHint": "The last row always ends at 100.",
+  "characteristic": "Characteristic"
+}

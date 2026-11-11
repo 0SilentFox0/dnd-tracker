@@ -1,5 +1,8 @@
 import { displayEffects } from "./personal-effects";
+import { collapseSystemConditions, type DisplayEffect } from "./system-conditions";
 
+import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export interface ParticipantFace {
@@ -11,10 +14,22 @@ export interface ParticipantFace {
 export const NO_EFFECTS: readonly ActiveEffect[] = Object.freeze([]);
 
 /** Список ефектів лишається тим самим масивом, поки його вміст не змінився, — memo-рядки не перемальовуються. */
-export function buildDisplayEffects(order: BattleParticipant[], prev?: Map<string, ActiveEffect[]>): Map<string, ActiveEffect[]> {
+export function buildDisplayEffects(order: BattleParticipant[], prev?: Map<string, DisplayEffect[]>, rules?: Ruleset): Map<string, DisplayEffect[]> {
+  const system = rules ? ruleSystemOf(rules) : undefined;
+
+  const conditions = system?.conditions;
+
   return new Map(
     order.map((p) => {
-      const list = displayEffects(p, order);
+      const levels = conditions?.list(p);
+
+      const all = displayEffects(p, order);
+
+      const collapsed = levels?.length ? collapseSystemConditions(all, levels) : all;
+
+      const badge = system?.magic?.badge(p);
+
+      const list = badge ? [...collapsed, badge] : collapsed;
 
       const before = prev?.get(p.basicInfo.id);
 

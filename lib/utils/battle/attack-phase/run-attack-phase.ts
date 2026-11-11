@@ -1,6 +1,6 @@
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
-import { type AttackRequest, validateAttackRequest } from "./request";
-import { damageDiceCursor, damageFractions, strikeD20 } from "./strike-rolls";
+import { type AttackRequest, requestedTargetIds, validateAttackRequest } from "./request";
+import { damageDiceCursor, damageFractions, strikeRoll } from "./strike-rolls";
 import { resolveAttackTargets } from "./targets";
 
 import { AttackType } from "@/lib/constants/battle";
@@ -22,7 +22,9 @@ import type { ProcessAttackResult } from "@/lib/utils/battle/types/attack-proces
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
-import type { Ruleset } from "@/lib/utils/rules";
+import { type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -39,14 +41,16 @@ export type AttackPhaseInput = {
   serverRolls?: boolean;
   crit?: CritPicker;
   map?: BattleMapConfig | null;
-  rules?: Ruleset;
+  rules: Ruleset;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
+  sceneState?: SystemSlot;
 };
 
 export type AttackPhaseResult = {
   finalInitiativeOrder: BattleParticipant[];
   allBattleActions: BattleAction[];
   summons: SummonRequest[];
+  sceneState?: SystemSlot;
 };
 
 interface PhaseCtx {
@@ -64,6 +68,7 @@ interface PhaseState {
   actions: BattleAction[];
   summons: SummonRequest[];
   heldBack: ActiveEffect[];
+  sceneState?: SystemSlot;
 }
 
 interface StrikeOpts {
@@ -74,21 +79,44 @@ interface StrikeOpts {
 
 const liveOf = (st: PhaseState, p: BattleParticipant) => findParticipant(st.order, p.basicInfo.id) ?? p;
 
-// Фаза атаки: валідація, processAttack на ціль, відповідний удар по основній цілі.
+// d100: сервер сам вирішує влучання, а клієнт шле кубики на кожну ціль; пул, як у d20, — лише за влучання.
+// Пробний прогін записує rng, повторний програє запис, тож влучання збігаються.
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
+  const targets = requestedTargetIds(input.data).length;
+
+  const pool = input.data.damageRolls;
+
+  if (ruleSystemOf(input.rules).combat.judge === "client" || targets < 2 || pool.length === 0 || pool.length % targets !== 0) return runPhase(input);
+
+  const source = rngOf(input);
+
+  const tape: number[] = [];
+
+  const dry = runPhase({ ...input, crit: undefined, rng: () => tape[tape.push(source()) - 1] });
+
+  const hits = dry.allBattleActions.filter((a) => a.actionType === "attack" && a.actionDetails.isHit).length;
+
+  let at = 0;
+
+  const replay = () => (at < tape.length ? tape[at++] : source());
+
+  return runPhase({ ...input, rng: replay, data: { ...input.data, damageRolls: pool.slice(0, (hits * pool.length) / targets) } });
+}
+
+function runPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, isDM, userId } = input;
 
   const rng = rngOf(input);
 
   const initiativeOrder = battle.initiativeOrder;
 
-  const request = validateAttackRequest({ participants: initiativeOrder, scene: { turnIndex: battle.currentTurnIndex }, userId, isDM }, data);
+  const request = validateAttackRequest({ participants: initiativeOrder, scene: { turnIndex: battle.currentTurnIndex }, userId, isDM }, data, input.rules);
 
   const { attacker, attack, chosenTargets, targetIds } = request;
 
   const flags = findFlagsMany(withSelf(initiativeOrder, attacker), attacker.basicInfo.id, ["attackHitsAllEnemies", "piercingShot", "multiTargetFalloff", "chainShot"]);
 
-  const { targets, expanded, piercing, volley, falloff, serverRolledFrom, chain } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags });
+  const { targets, expanded, piercing, volley, falloff, serverRolledFrom, chain } = resolveAttackTargets({ order: initiativeOrder, attacker, attack, chosen: chosenTargets, targetIds, map: input.map, flags, rules: input.rules });
 
   const fractions = damageFractions(targets, attack, { volley, falloff });
 
@@ -96,7 +124,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const ctx: PhaseCtx = { input, request, rng, dice: damageDiceCursor(data.damageRolls, damageFormula, rng), expanded, effectsBeforeVolley: activeEffectIds([attacker]) };
 
-  const st: PhaseState = { order: initiativeOrder, attacker: { ...attacker }, actions: [], summons: [], heldBack: [] };
+  const st: PhaseState = { order: initiativeOrder, attacker: { ...attacker }, actions: [], summons: [], heldBack: [], sceneState: input.sceneState };
 
   const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
 
@@ -117,6 +145,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     finalInitiativeOrder: restoreHeldBack(st.order, attacker.basicInfo.id, st.heldBack),
     allBattleActions: st.actions,
     summons: st.summons,
+    sceneState: st.sceneState,
   };
 }
 
@@ -128,7 +157,7 @@ function runChain(ctx: PhaseCtx, st: PhaseState, first: BattleParticipant, chain
   let from = liveOf(st, first);
 
   for (let jump = 1; jump <= chain.jumps && isActive(st.attacker); jump++) {
-    const next = nextChainTarget({ map: ctx.input.map, order: st.order, attacker: st.attacker, attack, from, hit });
+    const next = nextChainTarget({ map: ctx.input.map, order: st.order, attacker: st.attacker, attack, from, hit, rules: ctx.input.rules });
 
     if (!next) break;
 
@@ -152,15 +181,17 @@ function rollStrike(ctx: PhaseCtx, target: BattleParticipant, i: number, opts: S
 
   const chosenAt = ctx.expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-  const serverD20 = input.serverRolls || opts.serverRolled;
+  const sides = ruleSystemOf(input.rules).combat.dice;
 
-  const strike = serverD20 ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng);
+  const serverD20 = input.serverRolls || opts.serverRolled || data.serverRoll;
+
+  const strike = serverD20 ? { value: rollDie(sides, rng), serverRolled: true } : strikeRoll(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng, sides);
 
   const serverDamage = input.serverRolls ? damageDiceSlots(attacker, attack).map(sides => rollDie(sides, rng)) : null;
 
   const strikeDice = serverDamage ? { rolls: serverDamage, serverRolled: serverDamage } : ctx.dice.next();
 
-  const second = serverD20 ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
+  const second = serverD20 || sides !== 20 ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
 
   return { strike, strikeDice, second };
 }
@@ -196,17 +227,20 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
     damageMultiplier: opts.multiplier,
     obstacle,
     cunningStrike: i === 0 ? data.cunningStrike : undefined,
+    fortune: i === 0 && data.fortune ? { kind: data.fortune, ...(data.fortuneRoll !== undefined && !input.serverRolls && !data.serverRoll && { manualReroll: data.fortuneRoll }) } : undefined,
     map: input.map,
     rules: input.rules,
     hitSpells: input.hitSpells,
+    sceneState: st.sceneState,
     rng,
     crit: input.crit,
     recordDice: true,
     serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
   });
 
-  if (attackResult.success) ctx.dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical));
+  if (attackResult.success) ctx.dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical) && !ruleSystemOf(input.rules).combat.mitigateDamage);
 
+  st.sceneState = attackResult.sceneState;
   st.order = mergeParticipants(st.order, attackResult.allParticipantsUpdated ?? []);
   st.attacker = attackResult.attackerUpdated;
   st.summons.push(...attackResult.summons);
@@ -249,10 +283,12 @@ function retaliate(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, att
     crit: input.crit,
     map: input.map,
     rules: input.rules,
+    sceneState: st.sceneState,
   });
 
   if (!retaliation) return;
 
+  st.sceneState = retaliation.sceneState;
   st.order = mergeParticipants(st.order, retaliation.participants);
   st.attacker = findParticipant(retaliation.participants, attacker.basicInfo.id) ?? st.attacker;
   st.actions.push(retaliation.battleAction);

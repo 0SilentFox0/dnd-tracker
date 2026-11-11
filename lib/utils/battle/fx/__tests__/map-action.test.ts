@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { action } from "./action-fixture";
 
+import { SPELL_FX_BY_NAME } from "@/data/library/spell-fx-by-name";
 import { mapAction } from "@/lib/utils/battle/fx";
-import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
 describe("mapAction", () => {
   it("melee hit with slashing → melee/physical", () => {

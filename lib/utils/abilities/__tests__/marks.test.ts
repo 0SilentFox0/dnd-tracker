@@ -7,6 +7,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { countMarks } from "@/lib/utils/abilities/engine/effects/marks";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
 const markOnHit = resolved({
@@ -25,7 +26,7 @@ describe("marks", () => {
   it("stack per source and drive perMark damage bonus", () => {
     let ps = [makeParticipant({ id: "h", abilities: [markOnHit, perMark] }), makeParticipant({ id: "h2", abilities: [markOnHit] }), makeParticipant({ id: "t" })];
 
-    for (const actor of ["h", "h", "h2"]) ps = runAbilities(ps, hit(actor), { round: 1, rng: () => 0 }).participants;
+    for (const actor of ["h", "h", "h2"]) ps = runAbilities(ps, hit(actor), { rules: DEFAULT_RULES, round: 1, rng: () => 0 }).participants;
 
     const t = ps.find((p) => p.basicInfo.id === "t");
 

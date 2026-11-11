@@ -1,4 +1,4 @@
-import { BUNDLED_STATIC_ASSET, ICON_BUCKETS, SHARED_ASSET_PREFIX } from "@/lib/constants/storage";
+import { BUNDLED_STATIC_ASSET, ICON_BUCKETS, SHARED_ASSET_PREFIX, TEMPLATE_ASSET_PREFIX } from "@/lib/constants/storage";
 
 export function normalizeImageUrl(src: string): string {
   try {
@@ -79,7 +79,9 @@ export function sharedAssetPath(setKey: string, fileHash: string, ext: string): 
   return `${SHARED_ASSET_PREFIX}${slug || "set"}/${fileHash}${ext}`;
 }
 
-/** Template icon on our project Storage under `sets/` (immutable, shared between campaigns). */
+export const templateAssetPath = (templateKey: string, kind: string, slug: string, sha8: string): string => `${TEMPLATE_ASSET_PREFIX}${templateKey}/${kind}/${slug}-${sha8}.webp`;
+
+/** Template icon on our project Storage under `sets/` or `templates/` (immutable, shared between campaigns). */
 export function isSharedAssetUrl(url: string): boolean {
   const key = isHostedOnProjectStorage(url) ? parsePublicStorageUrl(url)?.key : undefined;
 
@@ -87,7 +89,7 @@ export function isSharedAssetUrl(url: string): boolean {
 
   const slash = key.indexOf("/");
 
-  return (ICON_BUCKETS as readonly string[]).includes(key.slice(0, slash)) && key.slice(slash + 1).startsWith(SHARED_ASSET_PREFIX);
+  return (ICON_BUCKETS as readonly string[]).includes(key.slice(0, slash)) && [SHARED_ASSET_PREFIX, TEMPLATE_ASSET_PREFIX].some((prefix) => key.slice(slash + 1).startsWith(prefix));
 }
 
 export function isBundledStaticAsset(src: string): boolean {

@@ -117,6 +117,7 @@ async function main() {
         feats: character.feats as Prisma.InputJsonValue,
         raceChoices: character.raceChoices as Prisma.InputJsonValue,
         resources: character.resources as Prisma.InputJsonValue,
+        characteristics: character.characteristics as Prisma.InputJsonValue,
       },
     });
 

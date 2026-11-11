@@ -6,6 +6,7 @@ import { useAbilityValidity } from "@/lib/hooks/abilities";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useRaces } from "@/lib/hooks/races";
 import { useSpells } from "@/lib/hooks/spells";
+import { useRuleSystem } from "@/lib/hooks/systems";
 import { byName } from "@/lib/utils/common/text";
 import type { Unit } from "@/types/units";
 
@@ -15,6 +16,8 @@ export function useUnitFormFields(campaignId: string, initial: () => Partial<Uni
   const { data: spells = [] } = useSpells(campaignId);
 
   const { data: rules } = useCampaignRules(campaignId);
+
+  const { key: system } = useRuleSystem({ campaignId });
 
   const fiveE = !!rules && (rules.classes.enabled || rules.encounters.balance === "xp");
 
@@ -35,7 +38,7 @@ export function useUnitFormFields(campaignId: string, initial: () => Partial<Uni
 
   return {
     form: { data: formData, set: setFormData, change, dirty },
-    options: { races, race, spells, fiveE },
+    options: { races, race, spells, fiveE, system },
     abilities,
   };
 }

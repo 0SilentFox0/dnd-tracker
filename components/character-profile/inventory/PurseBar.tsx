@@ -4,6 +4,7 @@ import type { MoneyMode } from "../stash/MoneyDialog";
 
 import { COINS } from "@/lib/constants/inventory";
 import type { InventoryModel } from "@/lib/hooks/characters";
+import type { CurrencyView } from "@/lib/hooks/systems";
 import type { Purse } from "@/types/inventory";
 
 const BUTTONS: { mode: MoneyMode; sign: string; dmOnly?: boolean }[] = [
@@ -12,7 +13,7 @@ const BUTTONS: { mode: MoneyMode; sign: string; dmOnly?: boolean }[] = [
   { mode: "set", sign: "=", dmOnly: true },
 ];
 
-export function PurseBar({ purse, access, onMode }: { purse: Purse; access: InventoryModel["access"]; onMode: (m: MoneyMode) => void }) {
+export function PurseBar({ purse, access, onMode, currency }: { purse: Purse; access: InventoryModel["access"]; onMode: (m: MoneyMode) => void; currency?: CurrencyView }) {
   const t = useTranslations("inventory");
 
   return (
@@ -20,7 +21,7 @@ export function PurseBar({ purse, access, onMode }: { purse: Purse; access: Inve
       <span className="text-sm text-hud-ink">
         {COINS.map((c) => (
           <span key={c} className="mr-3 whitespace-nowrap last:mr-0">
-            {purse[c]} <span className="text-xs text-hud-muted">{t(`coins.${c}`)}</span>
+            {purse[c]} <span className="text-xs text-hud-muted">{currency ? currency.label(c) : t(`coins.${c}`)}</span>
           </span>
         ))}
       </span>

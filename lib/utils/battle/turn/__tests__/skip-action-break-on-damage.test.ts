@@ -8,6 +8,7 @@ import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { applyDamageToTarget } from "@/lib/utils/battle/attack/process/damage";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 function cast(effect: Effect) {
   const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })];
@@ -20,7 +21,7 @@ function cast(effect: Effect) {
     effect,
     targetIds: ["t"],
     event: { type: "action", actorId: "o", abilityKey: "k" },
-    ctx: { round: 1, rng: seq(0.5) },
+    ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
   }).participants[1];
 }
 
@@ -34,7 +35,7 @@ describe("skip_action", () => {
   it("кидок нижче шансу — дія втрачена", () => {
     const t = confused();
 
-    const out = processStartOfTurn(t, 2, [t], seq(0.49));
+    const out = processStartOfTurn(t, 2, [t], seq(0.49), undefined, DEFAULT_RULES);
 
     expect(out.participant.actionFlags.hasUsedAction).toBe(true);
     expect(out.abilityMessages.some((m) => textOf(m).includes("втрачає дію"))).toBe(true);
@@ -43,7 +44,7 @@ describe("skip_action", () => {
   it("кидок не нижче шансу — дія доступна", () => {
     const t = confused();
 
-    expect(processStartOfTurn(t, 2, [t], seq(0.5)).participant.actionFlags.hasUsedAction).toBe(false);
+    expect(processStartOfTurn(t, 2, [t], seq(0.5), undefined, DEFAULT_RULES).participant.actionFlags.hasUsedAction).toBe(false);
   });
 
   it("без стану rng не витрачається", () => {
@@ -53,7 +54,7 @@ describe("skip_action", () => {
 
     let calls = 0;
 
-    processStartOfTurn(p, 2, [p], () => (calls++, rng()));
+    processStartOfTurn(p, 2, [p], () => (calls++, rng()), undefined, DEFAULT_RULES);
     expect(calls).toBe(0);
   });
 });
@@ -79,7 +80,7 @@ describe("breakOnDamage", () => {
 
     const withDot = { ...poisoned, battleData: { ...poisoned.battleData, activeEffects: [...poisoned.battleData.activeEffects, { id: "poison", name: "Чума", type: "debuff" as const, duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [], dotDamage: { damagePerRound: 3, damageType: "poison" } }] } };
 
-    const out = processStartOfTurn(withDot, 2, [withDot], seq(0.5));
+    const out = processStartOfTurn(withDot, 2, [withDot], seq(0.5), undefined, DEFAULT_RULES);
 
     expect(out.participant.battleData.activeEffects.map((e) => e.name)).toEqual(["Чума"]);
   });

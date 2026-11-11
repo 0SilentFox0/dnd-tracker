@@ -7,9 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { campaignKeys } from "./keys";
 
 import { getTemplates } from "@/lib/api/templates";
-import { EMPTY_5E_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
-import { isCanonicalSrdTemplate } from "@/lib/utils/campaigns/template-locales";
+import { DEFAULT_TEMPLATE_KEY, isCanonicalTemplate, templateKeyOf } from "@/lib/utils/templates/registry";
 import type { TemplateSelection } from "@/types/campaigns";
 
 export function useTemplates() {
@@ -25,7 +24,7 @@ export function useTemplateSelection() {
 
   const all = [...(templates.data?.official ?? []), ...(templates.data?.mine ?? [])];
 
-  const selection = chosen ?? { templateId: templates.data?.official.find((t) => t.name === EMPTY_5E_TEMPLATE_NAME)?.id ?? null };
+  const selection = chosen ?? { templateId: templates.data?.official.find((t) => templateKeyOf(t) === DEFAULT_TEMPLATE_KEY)?.id ?? null };
 
   const name = selection.file?.name.replace(/\.json$/i, "") ?? all.find((t) => t.id === selection.templateId)?.name;
 
@@ -34,7 +33,7 @@ export function useTemplateSelection() {
 
     const source = all.find((t) => t.id === next.templateId);
 
-    setChosen({ templateId: next.templateId, ...(source && isCanonicalSrdTemplate(source) ? { contentLocale: next.contentLocale ?? (uiLocale === "uk" ? "uk" : "en") } : {}) });
+    setChosen({ templateId: next.templateId, ...(source && isCanonicalTemplate(source) ? { contentLocale: next.contentLocale ?? (uiLocale === "uk" ? "uk" : "en") } : {}) });
   };
 
   return { selection, setSelection, name, isLoading: templates.isLoading };

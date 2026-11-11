@@ -16,6 +16,7 @@ import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -75,13 +76,14 @@ export interface AimScene {
   map: BattleMapConfig;
   participants: BattleParticipant[];
   caster: BattleParticipant;
+  rules: Ruleset;
 }
 
 export const SKILL_AREA_TEMPLATE: SpellTemplate = { shape: "circle", size: SKILL_AREA_RADIUS_FEET };
 
 /** Розширене вмінням одиночне заклинання не б'є своїх: лише сторона заклинання, найближчі до точки, до maxTargets. */
-export function skillRadiusArea({ map, participants, caster }: AimScene, radius: SkillRadius, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
-  const { cells, targets } = templateArea(map, participants, caster, SKILL_AREA_TEMPLATE, aim);
+export function skillRadiusArea({ map, participants, caster, rules }: AimScene, radius: SkillRadius, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
+  const { cells, targets } = templateArea(map, participants, caster, SKILL_AREA_TEMPLATE, aim, rules);
 
   const sided = targets.filter((p) => !isHostile(map, caster, p) === (radius.side === "ally"));
 
@@ -94,7 +96,7 @@ export interface SpellChain {
 }
 
 /** Ланцюг на карті: кожна наступна ціль — найближча до попередньої жива на карті зі сторони заклинання; рівні — за ініціативою. */
-export function spellChain({ participants, caster }: Omit<AimScene, "map">, chain: SpellChain, first: BattleParticipant, map?: BattleMapConfig | null): BattleParticipant[] {
+export function spellChain({ participants, caster }: Omit<AimScene, "map" | "rules">, chain: SpellChain, first: BattleParticipant, map?: BattleMapConfig | null): BattleParticipant[] {
   const pool = participants.filter((p) => p !== first && isActive(p) && isOnMap(p) && !isHostile(map, caster, p) === (chain.side === "ally"));
 
   const out = [first];
@@ -119,6 +121,7 @@ export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: str
 
 export interface SpellMapContext {
   map: BattleMapConfig | null;
+  rules: Ruleset;
   targetCell?: GridPoint;
   castLevel?: number;
   upcastTargets?: number;
@@ -135,13 +138,13 @@ interface FilterLevel {
   castLevel?: number;
 }
 
-function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined, level: FilterLevel): SpellTargetResolution {
+function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined, level: FilterLevel, rules: Ruleset): SpellTargetResolution {
   const passing = (targets: BattleParticipant[]) => targets.filter((p) => matchesTargetFilter(p, targeting.filter, level)).map((p) => p.basicInfo.id);
 
   if (targeting.shape === "emanation") {
     const centre = cellsOf(caster)[0];
 
-    const { cells, targets } = templateArea(map, ps, caster, targeting, centre);
+    const { cells, targets } = templateArea(map, ps, caster, targeting, centre, rules);
 
     return { ok: true, targetIds: passing(targets), cells, centre };
   }
@@ -150,13 +153,13 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   if (!inBounds(map, aim)) return fail(textRef("battleActions.spell.target.pointOutOfMap"));
 
-  if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
+  if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range, rules)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
 
   const hidden = modeAimHiddenText(map, caster, aim);
 
   if (hidden) return fail(hidden);
 
-  const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
+  const { cells, targets } = templateArea(map, ps, caster, targeting, aim, rules);
 
   // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
 
@@ -172,7 +175,7 @@ function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: 
 
   if (!inBounds(scene.map, aim.cell)) return fail(textRef("battleActions.spell.target.pointOutOfMap"));
 
-  if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
+  if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range, scene.rules)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
 
   const hidden = modeAimHiddenText(scene.map, scene.caster, aim.cell);
 
@@ -183,10 +186,10 @@ function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: 
   return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: aim.cell };
 }
 
-function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], range: number | undefined): boolean {
+function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], range: number | undefined, rules: Ruleset): boolean {
   if (range === undefined) return false;
 
-  const max = feetToCells(range);
+  const max = feetToCells(range, rules);
 
   return picked.some((p) => p.battleData.position !== undefined && footprintDistance(cellsOf(caster), cellsOf(p)) > max);
 }
@@ -201,9 +204,11 @@ function resolveRaw(
 ): SpellTargetResolution {
   const side = caster.basicInfo.side;
 
-  const map = mapCtx?.map && isOnMap(caster) ? mapCtx.map : null;
+  const live = mapCtx?.map && isOnMap(caster) ? { map: mapCtx.map, rules: mapCtx.rules } : null;
 
-  if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell, { spellLevel: spell.level, castLevel: mapCtx?.castLevel });
+  const map = live?.map ?? null;
+
+  if (live && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, live.map, mapCtx?.targetCell, { spellLevel: spell.level, castLevel: mapCtx?.castLevel }, live.rules);
 
   if (targeting.kind === "ally" || targeting.kind === "enemy") {
     const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
@@ -214,8 +219,8 @@ function resolveRaw(
       return all.length > 0 ? { ok: true, targetIds: all } : fail(textRef("battleActions.spell.target.noTargets"));
     }
 
-    if (map && skill.mode === "area") {
-      return resolveSkillRadius({ map, participants: ps, caster }, { side: targeting.kind, maxTargets: skill.maxTargets }, { cell: mapCtx?.targetCell, range: targeting.range });
+    if (live && skill.mode === "area") {
+      return resolveSkillRadius({ map: live.map, participants: ps, caster, rules: live.rules }, { side: targeting.kind, maxTargets: skill.maxTargets }, { cell: mapCtx?.targetCell, range: targeting.range });
     }
   }
 
@@ -229,7 +234,7 @@ function resolveRaw(
 
   if (picked.some(isAirborne)) return fail(textRef(API_ERRORS.TARGET_AIRBORNE));
 
-  if (map && "range" in targeting && outOfRange(caster, picked, targeting.range)) return fail(textRef("battleActions.spell.target.targetOutOfRange"));
+  if (live && "range" in targeting && outOfRange(caster, picked, targeting.range, live.rules)) return fail(textRef("battleActions.spell.target.targetOutOfRange"));
 
   const targetHidden = map && SIGHTED_KINDS.has(targeting.kind) ? modeTargetHiddenText(map, caster, picked) : null;
 

@@ -1,10 +1,10 @@
 import { Prisma } from "@prisma/client";
 
-import { cascadeRelationsOf, tableKey } from "./content-dependencies";
+import { cascadeRelationsOf } from "./content-dependencies";
 
 import "server-only";
 import { prisma } from "@/lib/db";
-import { BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
+import { BUNDLE_TABLES, delegateOf, tableKey } from "@/lib/server/templates/bundle";
 import { collectKeysAndStrings } from "@/lib/server/templates/remap-ids";
 import type { Actor } from "@/lib/utils/api/actor";
 

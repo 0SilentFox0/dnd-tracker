@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { action } from "./action-fixture";
 
+import { SPELL_FX_BY_NAME } from "@/data/library/spell-fx-by-name";
 import { ARCHETYPE_FX, FX_ARCHETYPES, impactFor as impactForSpec, mapAction } from "@/lib/utils/battle/fx";
-import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 import type { BattleAction } from "@/types/battle";
 
 const impactFor = (action: BattleAction | undefined, id: string) => impactForSpec(action ? mapAction(action)[0] : undefined, id);

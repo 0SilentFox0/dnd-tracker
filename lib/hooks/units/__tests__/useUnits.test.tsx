@@ -40,3 +40,15 @@ describe("мутації юнітів інвалідують баланс бою
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["battle-balance", "c"] }));
   });
 });
+
+describe("створення юніта інвалідує правила кампанії", () => {
+  it("systemLocked оновлюється", async () => {
+    const { invalidate, wrapper } = setup();
+
+    const { result } = renderHook(() => run(useCreateUnit("c")), { wrapper });
+
+    await act(() => result.current({}));
+
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["campaign-rules", "c"] }));
+  });
+});

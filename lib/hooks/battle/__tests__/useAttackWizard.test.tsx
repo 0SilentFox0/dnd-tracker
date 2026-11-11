@@ -6,6 +6,7 @@ import { useAttackWizard } from "../useAttackWizard";
 import { fakeScene } from "./fake-scene";
 
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleAction } from "@/types/battle";
 
 const hitLog = (changes: { participantId: string; change: number }[]) =>
@@ -270,5 +271,28 @@ describe("useAttackWizard — Cunning Strike", () => {
     const { result } = start();
 
     expect(result.current.view.cunning).toBeNull();
+  });
+});
+
+describe("useAttackWizard on a server-judged system", () => {
+  it("exposes the scene state and goes straight to submitting without a damage step", async () => {
+    const scene = fakeScene({ system: "wfrp", momentum: { ally: true } });
+
+    scene.mutateAsync.mockResolvedValue(undefined);
+
+    const { result } = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
+
+    act(() => result.current.actions.open());
+    act(() => result.current.actions.toggleTarget("gob"));
+    act(() => result.current.actions.confirmTargets());
+
+    expect(result.current.view.serverJudged).toBe(true);
+    expect(result.current.view.judged.attackerSide).toBe("ally");
+    expect(result.current.view.judged.sceneState).toEqual(sceneOf({ ally: true }));
+
+    act(() => result.current.actions.roll(37));
+    expect(result.current.state).toMatchObject({ step: "submitting", judge: "server" });
+    expect(result.current.state.strikes[0].damage).toHaveLength(result.current.state.diceSlots.length);
+    await waitFor(() => expect(scene.mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ targetIds: ["gob"], attackRoll: 37 })));
   });
 });

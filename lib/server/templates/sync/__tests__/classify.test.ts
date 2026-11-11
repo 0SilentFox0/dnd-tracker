@@ -6,8 +6,11 @@ import { type Bundle, BUNDLE_TABLES, emptyBundle } from "@/lib/server/templates/
 import { classify } from "@/lib/server/templates/sync/classify";
 import { baselineFromBundle, rowHash } from "@/lib/server/templates/sync/hash";
 import type { LocalRow, SyncContext } from "@/lib/server/templates/sync/types";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 
 const spells = BUNDLE_TABLES.find((t) => t.key === "spells")!;
+
+const units = BUNDLE_TABLES.find((t) => t.key === "units")!;
 
 // джерело: S1 Fireball; клон: L1 (sourceId S1)
 const S1 = id("a"), S2 = id("b"), L1 = id("x"), L2 = id("y"), U1 = id("u"), LU = id("v");
@@ -37,6 +40,29 @@ const local = (lid: string, sid: string | null, name: string, extra: Record<stri
 const visible = (c: SyncContext) => visibleItems(classify(c));
 
 describe("classify", () => {
+  it("unit with a locally stored empty/default characteristics does not conflict with a source that lacks it", () => {
+    const unit = { id: U1, name: "Imp" };
+
+    const localUnit = (extra: Record<string, unknown>): LocalRow => ({ table: "units", row: { id: LU, sourceId: U1, name: "Imp", ...extra } });
+
+    for (const characteristics of [{}, null, DEFAULT_CHARACTERISTICS]) {
+      expect(visible(ctx({ units: [unit] }, [localUnit({ characteristics })], { units: [unit] }))).toEqual([]);
+    }
+
+    expect(rowHash({ ...unit, characteristics: {} }, units)).toBe(rowHash(unit, units));
+    expect(rowHash({ ...unit, characteristics: { ...DEFAULT_CHARACTERISTICS, fate: 2 } }, units)).not.toBe(rowHash(unit, units));
+  });
+
+  it("a clone row without slug against a source row with slug has no visible changes", () => {
+    expect(visible(ctx({ spells: [spell(S1, "Fireball", { slug: "fireball" })] }, [local(L1, S1, "Fireball")], { spells: [spell(S1, "Fireball")] }))).toEqual([]);
+  });
+
+  it("changedFields never lists slug", () => {
+    const items = classify(ctx({ spells: [spell(S1, "Fireball II", { slug: "fireball" })] }, [local(L1, S1, "Fireball", { slug: null })], { spells: [spell(S1, "Fireball")] }));
+
+    expect(items.find((i) => i.scope === "spells")?.changedFields).toEqual(["name"]);
+  });
+
   it("fresh clone has no visible changes", () => {
     expect(visible(ctx({ spells: [spell(S1, "Fireball")] }, [local(L1, S1, "Fireball")], { spells: [spell(S1, "Fireball")] }))).toEqual([]);
   });
@@ -126,6 +152,14 @@ describe("classify", () => {
     const items = visible(c);
 
     expect(items).toEqual([expect.objectContaining({ scope: "rules", key: "morale", status: "updated", name: "morale" })]);
+  });
+
+  it("rules: absent baseline entry is not a conflict", () => {
+    const c = ctx({ rules: { morale: { enabled: false } } }, [], {});
+
+    c.baseline.rules = {};
+
+    expect(visible(c)).toEqual([expect.objectContaining({ scope: "rules", key: "morale", status: "updated" })]);
   });
 
   it("settings: one item with changed field names", () => {

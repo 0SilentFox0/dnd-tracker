@@ -6,6 +6,7 @@ import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { effectName } from "@/lib/utils/battle/common/terms";
 import { critOutcome, effectLines, logEntryView, sanitizeLogEntry } from "@/lib/utils/battle/view";
 import { getLogEntryDetailItems } from "@/lib/utils/battle/view/log-format";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleAction } from "@/types/battle";
 
 const entry = (resultText: string) => ({ resultText, hpChanges: [], actionType: "ability" }) as unknown as BattleAction;
@@ -69,8 +70,8 @@ describe("damageRows і приховані дані", () => {
   it("гравець не бачить damageRows, ДМ — бачить", () => {
     const e = { ...entry(""), actionDetails: { targetAC: 12, damageBreakdown: "x", damageRows: [{ label: "a", tone: "step" }] } } as unknown as BattleAction;
 
-    expect(sanitizeLogEntry(e, { isDM: false } as never).actionDetails).toEqual({});
-    expect(sanitizeLogEntry(e, { isDM: true } as never)).toBe(e);
+    expect(sanitizeLogEntry(e, { isDM: false } as never, { participants: [], rules: DEFAULT_RULES }).actionDetails).toEqual({});
+    expect(sanitizeLogEntry(e, { isDM: true } as never, { participants: [], rules: DEFAULT_RULES })).toBe(e);
   });
 
   it("damageRows іде в деталі таблицею замість розбору рядка", () => {
@@ -95,5 +96,14 @@ describe("ефекти рушія з label", () => {
 
     expect(lines).toHaveLength(1);
     expect(textOf(lines[0], "uk").charAt(0)).toBe(textOf(lines[0], "uk").charAt(0).toUpperCase());
+  });
+});
+
+describe("logEntryView: мітка початку ходу", () => {
+  const withRolls = (types: string[]) => ({ ...entry("x"), actionType: "end_turn", actionDetails: { damageRolls: types.map((damageType) => ({ dice: "", results: [], total: 0, damageType })) } }) as unknown as BattleAction;
+
+  it("лише dot-кидки — turnStart; змішані — end_turn", () => {
+    expect(logEntryView(withRolls(["dot", "dot"])).kindLabel).toEqual(textRef("battleCommon.actionKinds.turnStart"));
+    expect(logEntryView(withRolls(["dot", "fire"])).kindLabel).toEqual(dynamicTextRef("battleCommon.actionKinds.end_turn"));
   });
 });

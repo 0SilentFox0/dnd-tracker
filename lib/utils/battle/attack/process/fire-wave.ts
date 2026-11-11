@@ -2,9 +2,10 @@ import { FIRE_WAVE_NO_MAP_VICTIMS } from "@/lib/constants/battle";
 import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import { apexOf, bothOnMap, cellsOf, closestCell, participantsInCells, templateCells } from "@/lib/utils/battle/grid";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
-export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, victimId: string, sizeFt: number): string[] {
+export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, victimId: string, sizeFt: number, rules: Ruleset): string[] {
   const victim = findParticipant(ps, victimId);
 
   if (!victim) return [];
@@ -21,7 +22,7 @@ export function fireWaveVictims(map: BattleMapConfig | null | undefined, ps: Bat
 
   const aim = { x: vc.x + Math.sign(vc.x - ac.x), y: vc.y + Math.sign(vc.y - ac.y) };
 
-  const cells = templateCells(map, { shape: "cone", size: sizeFt }, cellsOf(victim), aim);
+  const cells = templateCells(map, { shape: "cone", size: sizeFt }, cellsOf(victim), aim, rules);
 
   return participantsInCells(ps, cells, apexOf(cellsOf(victim), aim))
     .filter(isEnemy)

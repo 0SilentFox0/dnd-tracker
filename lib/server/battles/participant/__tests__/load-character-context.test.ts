@@ -11,6 +11,7 @@ import { loadCharacterContext } from "@/lib/server/battles/participant/load-char
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const character = {
   campaignId: "own-campaign", race: "Elf", classes: [{ classId: sorcerer.id, level: 4 }],
@@ -81,5 +82,20 @@ describe("loadCharacterContext choice refs", () => {
     expect(context.backgroundsById).toEqual({});
     expect(mocks.classes).not.toHaveBeenCalled();
     expect(mocks.backgrounds).not.toHaveBeenCalled();
+  });
+});
+
+describe("loadCharacterContext WFRP talents", () => {
+  it("loads the campaign feats when the hero owns talents", async () => {
+    vi.resetAllMocks();
+    mocks.campaign.mockResolvedValue({ races: [], skillTrees: [] });
+    mocks.feats.mockResolvedValue([feat]);
+
+    const hero = { campaignId: "own-campaign", race: "Human", classes: [], feats: [], raceChoices: {}, characteristics: { talents: { f: 1 } } } as unknown as CharacterFromPrisma;
+
+    const { context } = await loadCharacterContext(hero, { maxLevel: 20, rules: WFRP_RULES });
+
+    expect(context.featsById?.f.name).toBe("Own feat");
+    expect(mocks.feats).toHaveBeenCalledExactlyOnceWith("own-campaign");
   });
 });

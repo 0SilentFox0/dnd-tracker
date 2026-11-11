@@ -6,6 +6,7 @@ import { createCharacterSchema } from "@/lib/server/characters/core/create-chara
 import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireAuth: vi.fn(), requireDM: vi.fn() }));
@@ -63,7 +64,7 @@ describe("PATCH archetype", () => {
   const params = { params: Promise.resolve({ id: "camp", characterId: "ch" }) };
 
   const access = (userId: string, isDM: boolean) =>
-    ({ userId, isDM, campaign: { id: "camp", maxLevel: 20, allowPlayerEdit: true } }) as never;
+    ({ userId, isDM, campaign: { id: "camp", rules: DEFAULT_RULES, maxLevel: 20, allowPlayerEdit: true } }) as never;
 
   const patch = async (body: unknown) => {
     const { PATCH } = await import("@/app/api/campaigns/[id]/characters/[characterId]/route");

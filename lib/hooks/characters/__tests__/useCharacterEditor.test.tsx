@@ -83,3 +83,27 @@ describe("useCharacterEditor після збереження", () => {
     expect(result.current.form.formData.abilityScores.strength).toBe(13);
   });
 });
+
+describe("useCharacterEditor 409", () => {
+  it("refetches and reseeds the form when the save hits a stale sheet", async () => {
+    const { getCharacter, updateCharacter } = await import("@/lib/api/characters");
+
+    const { ApiError } = await import("@/lib/api/client");
+
+    vi.mocked(getCharacter).mockResolvedValueOnce({ id: "ch4", name: "Старий", race: "Людина", class: "Воїн", controlledBy: "u1", level: 3, inventory: {} } as never).mockResolvedValue({ id: "ch4", name: "Свіжий", race: "Людина", class: "Воїн", controlledBy: "u1", level: 3, inventory: {} } as never);
+    vi.mocked(updateCharacter).mockRejectedValueOnce(new ApiError("stale", 409, "/x"));
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    const { result } = renderHook(() => useCharacterEditor({ campaignId: "c1", characterId: "ch4", onSaved: vi.fn() }), {
+      wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>,
+    });
+
+    await waitFor(() => expect(result.current.ready).toBe(true));
+
+    await act(() => result.current.form.actions.handleSubmit({ preventDefault: () => {} } as never));
+
+    expect(result.current.form.status.error).toBe("stale");
+    expect(result.current.form.formData.basicInfo.name).toBe("Свіжий");
+  });
+});

@@ -4,7 +4,6 @@ import type { AttackContext } from "./forced-for";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export interface RollInput {
@@ -14,10 +13,10 @@ export interface RollInput {
 }
 
 /** Результат кидка атаки проти поточного КБ цілі. */
-export function rollOutcomeOf(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, ctx: AttackContext & { rules?: Ruleset }, roll: RollInput): RollOutcome {
-  const { totalBonus, targetAC } = predictAttack(attacker, target, attack, ctx.order, ctx.round, ctx.map);
+export function rollOutcomeOf(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack, ctx: AttackContext, roll: RollInput): RollOutcome {
+  const { totalBonus, targetAC } = predictAttack(attacker, target, attack, ctx.order, { round: ctx.round, map: ctx.map, rules: ctx.rules });
 
-  const crit = ctx.rules?.criticals ?? DEFAULT_RULES.criticals;
+  const crit = ctx.rules.criticals;
 
   const { d20, second, mode } = roll;
 

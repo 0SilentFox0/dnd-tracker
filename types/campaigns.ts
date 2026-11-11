@@ -1,6 +1,7 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { SYNC_SCOPES, SYNC_STATUSES } from "@/lib/constants/source-sync";
-import type { SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
+import type { Ruleset } from "@/lib/utils/rules";
+import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 
 export interface Campaign {
   id: string;
@@ -32,6 +33,7 @@ export interface TemplateCard {
   templateKey?: string | null;
   kind?: string;
   availableLocales?: readonly string[];
+  system?: string;
 }
 
 export interface TemplateList {
@@ -45,7 +47,7 @@ export interface BundleFile {
   entities: number;
 }
 
-export type TemplateSelection = { templateId?: string | null; file?: BundleFile; contentLocale?: SrdContentLocale };
+export type TemplateSelection = { templateId?: string | null; file?: BundleFile; contentLocale?: TemplateContentLocale };
 
 /** Рядок campaign_members з user-relation (сторінка кампанії). */
 export interface CampaignMembership {
@@ -168,3 +170,5 @@ export interface ConditionUsage {
   feats: { id: string; name: string }[];
   statusEffects: { id: string; name: string }[];
 }
+
+export type CampaignRulesView = Ruleset & { systemLocked?: boolean };

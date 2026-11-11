@@ -1,20 +1,23 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { hitModelUnitStats } from "@/lib/utils/battle/balance/hit-model";
 import { unitResistances } from "@/lib/utils/battle/balance/resist";
 import type { UnitStats } from "@/lib/utils/battle/balance/stats";
 import { summonedUnitIds, UNIT_SPELL_SELECT, unitRowStats, type UnitSpellRow } from "@/lib/utils/battle/balance/unit-library";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { BattleParticipant } from "@/types/battle";
 import type { RaceRow } from "@/types/races";
 
-/** Resistances from the participant the battle would build (unit and race abilities, immunities). */
-async function unitResistancesById(units: UnitFromPrisma[], races: RaceRow[]): Promise<Map<string, Record<string, number>>> {
+/** The participants the battle would build; resistances (unit and race abilities, immunities) and system hit models read them. */
+async function builtUnitsById(units: UnitFromPrisma[], races: RaceRow[], rules?: Ruleset): Promise<Map<string, BattleParticipant>> {
   const racesById = Object.fromEntries(races.map((r) => [r.id, r]));
 
-  const built = await Promise.all(units.map((u) => createBattleParticipantFromUnit(u, "", ParticipantSide.ENEMY, 1, racesById)));
+  const built = await Promise.all(units.map((u) => createBattleParticipantFromUnit(u, "", ParticipantSide.ENEMY, 1, racesById, rules)));
 
-  return new Map(built.map((p, i) => [units[i].id, unitResistances(p)]));
+  return new Map(built.map((p, i) => [units[i].id, p]));
 }
 
 /** One narrow query for every spell the given units know. */
@@ -39,12 +42,18 @@ async function loadSummonSources(campaignId: string): Promise<unknown[]> {
 export async function loadUnitLibraryStats(campaignId: string, rules: Ruleset = DEFAULT_RULES): Promise<UnitStats[]> {
   const [rows, races, summonSources] = await Promise.all([prisma.unit.findMany({ where: { campaignId } }), prisma.race.findMany({ where: { campaignId } }), loadSummonSources(campaignId)]);
 
-  const [spellsById, resistById] = await Promise.all([loadSpellsForUnits(campaignId, rows), unitResistancesById(rows, races)]);
+  const model = ruleSystemOf(rules).combat.hitModel;
+
+  const [spellsById, builtById] = await Promise.all([loadSpellsForUnits(campaignId, rows), builtUnitsById(rows, races, model ? rules : undefined)]);
 
   const summoned = summonedUnitIds([...summonSources, ...rows.map((u) => u.abilities), ...races.map((r) => r.abilities)]);
 
   return rows.map((u) => {
-    const stats = unitRowStats(u, spellsById, resistById.get(u.id), rules.formulas.saveDcBase);
+    const built = builtById.get(u.id);
+
+    const base = unitRowStats(u, spellsById, built && unitResistances(built), rules.formulas.saveDcBase);
+
+    const stats = model && built ? hitModelUnitStats(base, built, model) : base;
 
     return summoned.has(u.id) ? { ...stats, summon: true } : stats;
   });

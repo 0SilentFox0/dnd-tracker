@@ -1,0 +1,10 @@
+{
+  "key": "fixture-sets",
+  "system": "dnd5e",
+  "names": { "en": "Fixture sets", "uk": "Fixture sets" },
+  "locales": ["en"],
+  "rules": { "file": "rules.json" },
+  "kinds": ["artifact-sets", "artifacts", "tracks"],
+  "icons": {},
+  "counts": { "artifact-sets": 2, "artifacts": 2, "tracks": 1 }
+}

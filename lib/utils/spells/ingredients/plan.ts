@@ -1,6 +1,6 @@
 import { ingredientKey, trackedIngredients } from "./key";
 
-import { COIN_VALUE } from "@/lib/constants/inventory";
+import { type Coin, COIN_VALUE } from "@/lib/constants/inventory";
 import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { IngredientStock } from "@/types/battle";
 
@@ -11,7 +11,7 @@ export interface IngredientPlan {
   missing: Array<{ name: string; qty: number; minGp?: number }>;
 }
 
-export function planIngredients(ingredients: SpellIngredient[], stock: IngredientStock, opts: { autoPay: boolean }): IngredientPlan {
+export function planIngredients(ingredients: SpellIngredient[], stock: IngredientStock, opts: { autoPay: boolean; value?: Record<Coin, number> }): IngredientPlan {
   const taken: Record<string, number> = {};
 
   const held: Record<string, number> = {};
@@ -50,7 +50,7 @@ export function planIngredients(ingredients: SpellIngredient[], stock: Ingredien
       continue;
     }
 
-    const cost = Math.round(minGp * COIN_VALUE.gp) * rest;
+    const cost = Math.round(minGp * (opts.value ?? COIN_VALUE).gp) * rest;
 
     if (opts.autoPay && minGp > 0 && stock.purseCp - stock.usedCp - spendCp >= cost) spendCp += cost;
     else missing.push({ name: ing.name, qty: rest, ...(ing.minGp !== undefined && { minGp: ing.minGp }) });
