@@ -25,7 +25,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { careersResource } from "@/lib/server/content/resources/careers";
 import type { Actor } from "@/lib/utils/api/actor";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 type Chars = typeof DEFAULT_CHARACTERISTICS;

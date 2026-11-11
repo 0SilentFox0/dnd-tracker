@@ -5,7 +5,7 @@ import { trait } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { conditionLevel } from "@/systems/wfrp/rules/conditions/levels";
 import type { BattleParticipant } from "@/types/battle";

@@ -7,8 +7,8 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 

@@ -9,7 +9,8 @@ import type { WfrpDraftFormState } from "./types";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
 import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement";
-import { CHARACTERISTIC_KEYS, STAT_FLOOR } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
+import { STAT_FLOOR } from "@/systems/wfrp/rules/creation";
 
 export function StatsStep({ form }: { form: WfrpDraftFormState }) {
   const t = useTranslations("wfrpCreation.stats");

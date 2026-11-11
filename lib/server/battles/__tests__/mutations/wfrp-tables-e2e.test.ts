@@ -8,8 +8,8 @@ import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mut
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import type { TableRow } from "@/lib/utils/rules/tables-schema";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { conditionLevel } from "@/systems/wfrp/rules/conditions/levels";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";

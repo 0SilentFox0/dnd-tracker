@@ -13,7 +13,8 @@ import { useCareers } from "@/lib/hooks/careers";
 import { useFeats } from "@/lib/hooks/feats";
 import { useRaceProfiles, useSaveRaceProfile } from "@/lib/hooks/races";
 import { errorMessage } from "@/lib/utils/common/error-message";
-import { CHARACTERISTIC_KEYS, type SpeciesProfile } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import { parseProfile, SpeciesProfileSchema } from "@/systems/wfrp/server/schemas";
 
 const TABLE_ERRORS: Record<string, "tableAscending" | "tableEnd"> = { "creation.tableAscending": "tableAscending", "creation.tableEnd": "tableEnd" };

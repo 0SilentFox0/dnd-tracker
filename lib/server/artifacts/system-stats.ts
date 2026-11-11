@@ -1,17 +1,14 @@
 import { API_ERRORS, type ApiErrorKey } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
-import { SYSTEM_STATS_SCHEMAS } from "@/systems/wfrp/server/schemas";
 
 type SystemStatsResult = { ok: true; value: unknown | null } | { ok: false; key: ApiErrorKey; issues?: unknown };
 
 function validateSystemStats(rules: Ruleset, stats: unknown): SystemStatsResult {
   if (stats === null) return { ok: true, value: null };
 
-  const system = ruleSystemOf(rules);
-
-  const schema = system.equipment && SYSTEM_STATS_SCHEMAS[system.key];
+  const schema = systemServerOf(rules).schemas.systemStats;
 
   if (!schema) return { ok: false, key: API_ERRORS.SYSTEM_STATS_UNSUPPORTED };
 

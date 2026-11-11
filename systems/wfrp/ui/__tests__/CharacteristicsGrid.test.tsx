@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CharacteristicsGrid } from "../CharacteristicsGrid";
 
 import { signed } from "@/lib/utils/common/format";
-import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
 import type { SheetWfrpBlock } from "@/systems/wfrp/rules/characteristics/sheet-block";
 
 const block = {

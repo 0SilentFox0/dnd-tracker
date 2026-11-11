@@ -1,9 +1,5 @@
 import { readCharacteristics } from "../characteristics/keys";
-import { planCareerAdvance, planCareerSet } from "./career";
-import { advanceCost } from "./cost";
-import { planPurchase } from "./plan";
-import { availableXp, talentGroups } from "./talent-groups";
-import { planUndo } from "./undo";
+import { talentGroups } from "./talent-groups";
 
 import type { RuleSystemAdvancement } from "@/lib/utils/rules/systems/types";
 
@@ -15,4 +11,4 @@ export type { AdvancementRules, AdvancementTrack } from "./rules";
 export { availableXp, talentGroups } from "./talent-groups";
 export { planUndo, type UndoResult } from "./undo";
 
-export const WFRP_ADVANCEMENT: RuleSystemAdvancement = { talentsOf: (row) => readCharacteristics(row).talents, cost: advanceCost, planPurchase, planUndo, planCareerSet, planCareerAdvance, availableXp, talentGroups };
+export const WFRP_ADVANCEMENT: RuleSystemAdvancement = { talentsOf: (row) => readCharacteristics(row).talents, talentGroups };

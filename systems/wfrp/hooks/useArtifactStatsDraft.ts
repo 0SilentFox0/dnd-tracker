@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import type { WfrpItemStats } from "@/lib/utils/rules/systems";
 import { ARMOUR_SLOTS, parseWfrpStats, WEAPON_SLOTS } from "@/systems/wfrp/rules/equipment";
+import type { WfrpItemStats } from "@/systems/wfrp/rules/equipment/stats";
 
 export type StatsKind = WfrpItemStats["type"];
 

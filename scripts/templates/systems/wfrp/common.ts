@@ -1,7 +1,7 @@
 import type { Pack } from "../../lib/pack";
 
 import type { RulesetPatch } from "@/lib/utils/rules/schema";
-import type { SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 
 export const WFRP_ROW_KINDS = ["feats", "careers", "races", "spells", "units", "artifacts"] as const;
 

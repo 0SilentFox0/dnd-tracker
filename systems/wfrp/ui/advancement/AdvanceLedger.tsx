@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { skillLabel } from "../skill-label";
 
 import { Button } from "@/components/ui/button";
-import type { LedgerEntry } from "@/lib/utils/rules/systems";
+import type { LedgerEntry } from "@/systems/wfrp/rules/characteristics/keys";
 import { parseSkillAdvanceKey } from "@/systems/wfrp/rules/skills/catalog";
 import type { FeatData } from "@/types/choices";
 

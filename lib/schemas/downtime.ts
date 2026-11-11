@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { AILMENTS_MAX } from "@/lib/utils/rules/systems";
+import { AILMENTS_MAX } from "@/systems/wfrp/rules/downtime/types";
 import { AilmentInputSchema, EndeavourSchema } from "@/systems/wfrp/server/schemas";
 
 const characterIds = z.array(z.string().min(1).max(64)).min(1).max(50);

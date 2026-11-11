@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import type { Ailment, AilmentKind } from "@/lib/utils/rules/systems";
-import { AILMENTS_MAX } from "@/lib/utils/rules/systems";
+import type { Ailment, AilmentKind } from "@/systems/wfrp/rules/downtime/types";
+import { AILMENTS_MAX } from "@/systems/wfrp/rules/downtime/types";
 
 export type AilmentDraft = Omit<Ailment, "id"> & { id?: string };
 

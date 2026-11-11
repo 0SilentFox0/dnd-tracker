@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { wfrpHeroView, wfrpParticipantView } from "@/lib/ai/tools/wfrp-view";
-import { readCharacteristics, woundsMax } from "@/lib/utils/rules/systems";
 import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { woundsMax } from "@/systems/wfrp/rules/characteristics/derive";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import type { BattleParticipant } from "@/types/battle";
 
 const careers = [{ id: "c1", name: "Archivist", tiers: [{ name: "Copyist" }, { name: "Archivist" }] }];

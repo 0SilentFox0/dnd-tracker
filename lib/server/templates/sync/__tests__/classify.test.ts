@@ -6,7 +6,7 @@ import { type Bundle, BUNDLE_TABLES, emptyBundle } from "@/lib/server/templates/
 import { classify } from "@/lib/server/templates/sync/classify";
 import { baselineFromBundle, rowHash } from "@/lib/server/templates/sync/hash";
 import type { LocalRow, SyncContext } from "@/lib/server/templates/sync/types";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 
 const spells = BUNDLE_TABLES.find((t) => t.key === "spells")!;
 

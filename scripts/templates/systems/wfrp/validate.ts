@@ -8,8 +8,8 @@ import { unitIssues } from "./units";
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
-import { SPEC_RE } from "@/lib/utils/rules/systems";
 import type { TableRow } from "@/lib/utils/rules/tables-schema";
+import { SPEC_RE } from "@/systems/wfrp/rules/characteristics/keys";
 import { skillDef } from "@/systems/wfrp/rules/skills/catalog";
 import { SpeciesProfileSchema } from "@/systems/wfrp/server/schemas";
 

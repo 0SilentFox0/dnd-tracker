@@ -7,7 +7,8 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";

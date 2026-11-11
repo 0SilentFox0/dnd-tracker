@@ -8,7 +8,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { FeatData } from "@/types/choices";
 

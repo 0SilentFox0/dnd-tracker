@@ -10,7 +10,7 @@ import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { type BattleMutationOutcome, prepareSave } from "@/lib/utils/battle/store";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import { trait } from "@/systems/wfrp/rules/traits/__tests__/fixtures";

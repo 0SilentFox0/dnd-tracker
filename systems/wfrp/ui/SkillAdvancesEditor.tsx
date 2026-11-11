@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import type { SectionBinding } from "@/lib/utils/characters/form/bindings";
-import type { Characteristics } from "@/lib/utils/rules/systems";
-import { SPEC_RE } from "@/lib/utils/rules/systems";
+import type { Characteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { SPEC_RE } from "@/systems/wfrp/rules/characteristics/keys";
 import { parseSkillAdvanceKey, SKILL_CATALOG, skillAdvanceKey, skillDef } from "@/systems/wfrp/rules/skills/catalog";
 
 export function SkillAdvancesEditor({ binding: { data, set } }: { binding: SectionBinding<Characteristics> }) {

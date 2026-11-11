@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import { useCharacterSheet, useStash } from "@/lib/hooks/characters";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { type Encumbrance, encumbrance } from "@/systems/wfrp/rules/equipment";
 import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 import type { SheetArtifact } from "@/types/characters";

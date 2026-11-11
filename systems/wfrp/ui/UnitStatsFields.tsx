@@ -6,7 +6,7 @@ import { CharacteristicsEditor } from "./CharacteristicsEditor";
 
 import { HudSection } from "@/components/hud/form";
 import type { UnitStatsFieldsProps } from "@/components/systems/types";
-import { type Characteristics, readCharacteristics } from "@/lib/utils/rules/systems";
+import { type Characteristics, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 
 export function UnitStatsFields({ formData, onChange }: UnitStatsFieldsProps) {
   const t = useTranslations("characters.wfrp");

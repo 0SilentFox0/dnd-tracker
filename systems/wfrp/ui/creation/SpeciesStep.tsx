@@ -6,7 +6,7 @@ import { OptionCard } from "./OptionCard";
 import type { WfrpDraftFormState } from "./types";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
-import type { CharacteristicKey } from "@/lib/utils/rules/systems";
+import type { CharacteristicKey } from "@/systems/wfrp/rules/characteristics/keys";
 
 export function SpeciesStep({ form }: { form: WfrpDraftFormState }) {
   const t = useTranslations("wfrpCreation.species");

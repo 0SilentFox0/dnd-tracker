@@ -8,7 +8,7 @@ import { skillName, specName } from "../skill-label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { SPEC_RE } from "@/lib/utils/rules/systems";
+import { SPEC_RE } from "@/systems/wfrp/rules/characteristics/keys";
 import { SKILL_CATALOG, skillAdvanceKey, skillDef } from "@/systems/wfrp/rules/skills/catalog";
 
 interface Props {

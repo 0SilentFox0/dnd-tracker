@@ -11,7 +11,10 @@ import { characteristicsJson } from "@/lib/server/characters/core/system-fields"
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
-import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { planGrant } from "@/systems/wfrp/rules/corruption/plan-grant";
+import { planCorruptionUndo } from "@/systems/wfrp/rules/corruption/undo";
 import type { CorruptionGrantResult, CorruptionUndoResult } from "@/types/corruption";
 
 function prepare({ access, character }: CharacterGate) {
@@ -21,7 +24,7 @@ function prepare({ access, character }: CharacterGate) {
 
   if (character.status !== CharacterStatus.ACTIVE) throw new ContentError(API_ERRORS.REST_CHARACTERS_INVALID, 400);
 
-  return corruption;
+  return { planGrant, planUndo: planCorruptionUndo };
 }
 
 export async function grantCorruption(gate: CharacterGate, input: CorruptionGrantInput): Promise<CorruptionGrantResult> {

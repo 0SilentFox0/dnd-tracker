@@ -1,4 +1,4 @@
-import type { CorruptionState, GrantSummary } from "@/lib/utils/rules/systems";
+import type { CorruptionState, GrantSummary } from "@/systems/wfrp/rules/corruption/types";
 
 export type CorruptionGrantBody = { points: number; reason: string };
 

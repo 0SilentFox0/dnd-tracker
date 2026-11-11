@@ -1,5 +1,5 @@
 import { campaignGet, campaignPut, createCampaignCrudApi } from "@/lib/api/client";
-import type { SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import type { Race, RaceFormData, RaceProfileItem } from "@/types/races";
 
 const racesApi = createCampaignCrudApi<Race, RaceFormData, Partial<RaceFormData>, { ok: true }>(

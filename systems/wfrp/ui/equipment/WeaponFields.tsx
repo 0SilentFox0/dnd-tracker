@@ -8,8 +8,8 @@ import { QualityListEditor } from "./QualityListEditor";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
-import type { WfrpWeaponStats } from "@/lib/utils/rules/systems";
 import { WEAPON_GROUPS, WEAPON_REACHES } from "@/systems/wfrp/rules/equipment";
+import type { WfrpWeaponStats } from "@/systems/wfrp/rules/equipment/stats";
 
 interface WeaponFieldsProps {
   value: WfrpWeaponStats;

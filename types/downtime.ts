@@ -1,4 +1,4 @@
-import type { Ailment, DowntimeState, Endeavour } from "@/lib/utils/rules/systems";
+import type { Ailment, DowntimeState, Endeavour } from "@/systems/wfrp/rules/downtime/types";
 import type { CharacterResources } from "@/types/characters";
 import type { Purse } from "@/types/inventory";
 

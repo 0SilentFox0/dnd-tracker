@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { lockCharacters } from "@/lib/server/characters/lock";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 
 describe("lockCharacters", () => {
   it("returns parsed resources and experience per id", async () => {

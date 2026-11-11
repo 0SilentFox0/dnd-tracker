@@ -7,7 +7,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { jsonContentInput } from "@/lib/utils/common/json";
-import type { SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import { parseSpeciesProfile, profileRefIds } from "@/systems/wfrp/server/profile-refs";
 
 export type RaceProfileItem = { raceId: string; profile: SpeciesProfile };

@@ -15,7 +15,7 @@ import { StepIndicator } from "@/components/common/StepIndicator";
 import { HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/lib/utils/common/error-message";
-import type { WfrpDraftIdentityInput } from "@/lib/utils/rules/systems";
+import type { WfrpDraftIdentityInput } from "@/systems/wfrp/api/types";
 import { useWfrpDraftForm,type WfrpDraftStepId } from "@/systems/wfrp/hooks";
 
 const STEP_ORDER: WfrpDraftStepId[] = ["species", "career", "stats", "talents", "identity"];

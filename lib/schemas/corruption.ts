@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CORRUPTION_GRANT_MAX, CORRUPTION_REASON_MAX } from "@/lib/utils/rules/systems";
+import { GRANT_MAX as CORRUPTION_GRANT_MAX, REASON_MAX as CORRUPTION_REASON_MAX } from "@/systems/wfrp/rules/corruption/constants";
 
 export const corruptionGrantSchema = z.object({ points: z.number().int().min(1).max(CORRUPTION_GRANT_MAX), reason: z.string().trim().min(1).max(CORRUPTION_REASON_MAX) });
 

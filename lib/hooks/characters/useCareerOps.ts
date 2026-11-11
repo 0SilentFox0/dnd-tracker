@@ -6,7 +6,7 @@ import { characterKeys } from "./keys";
 
 import { advanceCharacterCareer, setCharacterCareer } from "@/lib/api/characters";
 import { useCrudMutation } from "@/lib/hooks/common";
-import type { CareerResult } from "@/lib/utils/rules/systems";
+import type { CareerResult } from "@/systems/wfrp/api/types";
 import type { Character } from "@/types/characters";
 
 type CareerOp = { kind: "set"; careerId: string } | { kind: "advance"; force?: boolean };

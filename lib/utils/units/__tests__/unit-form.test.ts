@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { buildUnitCreatePayload, buildUnitFormData, buildUnitUpdatePayload, emptyUnitFormDefaults } from "@/lib/utils/units/unit-form";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import type { Unit } from "@/types/units";
 
 const unit = { id: "u1", name: "Гоблін", raceId: "r1", knownSpells: ["s1"], attacks: null, avatar: "https://x/a.png" } as unknown as Unit;

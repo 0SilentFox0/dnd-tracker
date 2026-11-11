@@ -9,7 +9,7 @@ import { againstMod, selfTestMod } from "../test-mod";
 import { AttackType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const src = textRef("battleWfrp.log.removed", { target: "x", condition: "y" });

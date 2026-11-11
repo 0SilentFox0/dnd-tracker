@@ -5,7 +5,7 @@ import { raceProfileKeys } from "./keys";
 import { getRaceProfiles, saveRaceProfile } from "@/lib/api/races";
 import { useCrudMutation } from "@/lib/hooks/common";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
-import type { SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import type { RaceProfileItem } from "@/types/races";
 
 export function useRaceProfiles(campaignId: string, opts?: { enabled?: boolean }) {

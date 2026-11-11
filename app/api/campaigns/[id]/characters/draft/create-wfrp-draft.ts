@@ -14,6 +14,7 @@ import { type CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { isUsableProfile, planDraft } from "@/systems/wfrp/rules/creation";
 import { parseProfile } from "@/systems/wfrp/server/schemas";
 
 type Campaign = CampaignAccessResult["campaign"];
@@ -50,9 +51,9 @@ export async function createWfrpDraft(request: Request, campaign: Campaign, acce
 
   const profile = parseProfile(race.profile);
 
-  if (!creation.isUsableProfile(profile)) return errorResponse(API_ERRORS.SPECIES_PROFILE_NOT_READY, 422);
+  if (!isUsableProfile(profile)) return errorResponse(API_ERRORS.SPECIES_PROFILE_NOT_READY, 422);
 
-  const plan = creation.planDraft(
+  const plan = planDraft(
     { career: data.career, stats: data.stats, talents: data.talents },
     { profile, rules: campaign.rules.advancement, careerIds: new Set(careers.map((c) => c.id)), featIds: new Set(feats.map((f) => f.id)) },
   );

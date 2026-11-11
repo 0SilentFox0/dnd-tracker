@@ -37,7 +37,7 @@ import { advanceUndoOperation } from "../advance-undo";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 type Run = (gate: unknown, input: unknown) => Promise<{ characteristics: typeof DEFAULT_CHARACTERISTICS; experience: number; available: number; entry: { cost: number } }>;

@@ -6,7 +6,8 @@ import { skillLabel } from "../skill-label";
 
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { CHARACTERISTIC_KEYS, type Endeavour, type EndeavourKind, SPEC_RE } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS, SPEC_RE } from "@/systems/wfrp/rules/characteristics/keys";
+import type { Endeavour, EndeavourKind } from "@/systems/wfrp/rules/downtime/types";
 import { skillAdvanceKey } from "@/systems/wfrp/rules/skills/catalog";
 
 const KINDS: EndeavourKind[] = ["earn", "train", "tend", "rest", "custom"];

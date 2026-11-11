@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { MutationEffects } from "./MutationEffects";
 
 import { useText } from "@/lib/i18n/use-text";
-import type { GrantSummary } from "@/lib/utils/rules/systems";
+import type { GrantSummary } from "@/systems/wfrp/rules/corruption/types";
 
 export function GrantSummaryView({ summary }: { summary: GrantSummary }) {
   const t = useTranslations("wfrpCorruption");

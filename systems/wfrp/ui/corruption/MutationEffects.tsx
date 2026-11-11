@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { signed } from "@/lib/utils/common/format";
-import type { MutationEffect } from "@/lib/utils/rules/systems";
+import type { MutationEffect } from "@/systems/wfrp/rules/corruption/types";
 
 export function MutationEffects({ effects }: { effects: MutationEffect[] }) {
   const t = useTranslations("wfrpCorruption.effects");

@@ -6,7 +6,8 @@ import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { ruleSystemOf, type SpeciesProfile } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import { SpeciesProfileSchema } from "@/systems/wfrp/server/schemas";
 
 export async function PUT(req: Request, ctx: { params: Promise<{ id: string; raceId: string }> }) {

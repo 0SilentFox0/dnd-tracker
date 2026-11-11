@@ -10,7 +10,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { extractWfrpAttacks } from "@/systems/wfrp/rules/combat/extract-attacks";
 import { mitigateWfrpDamage } from "@/systems/wfrp/rules/combat/mitigate";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";

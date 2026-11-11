@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { readCorruption } from "../read";
 
-import { readCharacteristics } from "@/lib/utils/rules/systems";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 
 const mutation = { id: "m1", at: "2026-01-01T00:00:00.000Z", kind: "physical", roll: 12, text: "Scales", effects: [{ type: "characteristic", key: "t", amount: 5 }] };
 

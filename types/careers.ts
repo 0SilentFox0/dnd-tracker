@@ -1,4 +1,4 @@
-import type { CareerTierDef } from "@/lib/utils/rules/systems";
+import type { CareerTierDef } from "@/systems/wfrp/rules/advancement/career";
 
 export type { CareerTierDef };
 

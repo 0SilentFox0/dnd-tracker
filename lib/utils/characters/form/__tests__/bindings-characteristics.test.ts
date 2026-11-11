@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { formDataToCharacter } from "@/lib/utils/characters/character-form";
 import { buildCharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import { defaultCharacterFormData } from "@/lib/utils/characters/form/defaults";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import type { CharacterFormData } from "@/types/characters";
 
 describe("characteristics binding", () => {

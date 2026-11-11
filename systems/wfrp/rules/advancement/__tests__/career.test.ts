@@ -6,7 +6,6 @@ import { DEFAULT_ADVANCEMENT_RULES as RULES } from "../defaults";
 import { planPurchase, type PurchaseInput } from "../plan";
 import { planUndo } from "../undo";
 
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
 
 const tier = (over: Partial<CareerTierDef> = {}): CareerTierDef => ({ name: "T", characteristics: ["ws"], skills: ["athletics", "melee"], talents: ["t1"], trappings: [], ...over });
 
@@ -162,13 +161,6 @@ describe("planCareerSet / planCareerAdvance", () => {
   it("tier 4 is MAX_TIER even with force; no career is NO_CAREER", () => {
     expect(planCareerAdvance(withCareer(ctx(ticks(99), 4)), RULES, { force: true })).toEqual({ ok: false, error: "MAX_TIER" });
     expect(planCareerAdvance(DEFAULT_CHARACTERISTICS, RULES, { force: true })).toEqual({ ok: false, error: "NO_CAREER" });
-  });
-
-  it("is exposed through the wfrp system", () => {
-    const adv = ruleSystemOf({ system: { key: "wfrp" } } as never).advancement;
-
-    expect(adv?.planCareerSet).toBe(planCareerSet);
-    expect(adv?.planCareerAdvance).toBe(planCareerAdvance);
   });
 });
 

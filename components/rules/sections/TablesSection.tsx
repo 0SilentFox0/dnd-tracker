@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { DEFAULT_TABLES } from "@/lib/utils/rules/systems";
 import { MARKER_KEYS, MUTATION_SLOTS, SLOT_EFFECTS, TABLE_SLOTS, type TableEffect, type TableRow, type TableSlot } from "@/lib/utils/rules/tables-schema";
 import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/constants/characteristics";
 import { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL } from "@/systems/wfrp/constants/conditions";
 import { MUTATION_EFFECT_LIMITS, MUTATION_EFFECTS_MAX } from "@/systems/wfrp/constants/mutations";
+import { DEFAULT_TABLES } from "@/systems/wfrp/rules/tables/defaults";
 
 const MAX_ROWS = 20;
 

@@ -17,8 +17,8 @@ import { getOperation } from "../get";
 import { listOperation, redactListedLedgers } from "../list";
 import { patchOperation } from "../patch";
 
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { WFRP_SYSTEM } from "@/systems/wfrp";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const entry = { id: "e1", at: "2026-01-01T00:00:00.000Z", kind: "characteristic", key: "ws", from: 0, to: 1, cost: 25 } as const;

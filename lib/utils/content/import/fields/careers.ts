@@ -1,7 +1,7 @@
 import { defineSpec, type FieldDef, nameField, textField } from "./common";
 
 import { CAREER_TIER_COUNT, CAREER_TIER_PARTS, careerTierKey,type CareerTierPart } from "@/lib/constants/import-aliases";
-import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
 import type { ImportRecord } from "@/types/content-import";
 
 const tiers = Array.from({ length: CAREER_TIER_COUNT }, (_, i) => i + 1);

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { RollDialogBodyProps } from "@/components/systems/types";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { DIFFICULTY_KEYS, type DifficultyKey } from "@/lib/utils/rules/systems";
+import { DIFFICULTY_KEYS, type DifficultyKey } from "@/systems/wfrp/rules/percentile/difficulty";
 
 export function RollDialogBody({ result, difficulty, setDifficulty }: RollDialogBodyProps) {
   const t = useTranslations("rest.sheetRoll");

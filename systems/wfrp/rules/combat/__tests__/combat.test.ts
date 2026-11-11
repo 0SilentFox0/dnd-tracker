@@ -18,9 +18,9 @@ import { AttackType, CombatStatus } from "@/lib/constants/battle";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { mulberry32 } from "@/lib/utils/common/rng";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 

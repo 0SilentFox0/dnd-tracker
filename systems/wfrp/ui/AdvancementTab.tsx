@@ -16,9 +16,9 @@ import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useCareers } from "@/lib/hooks/careers";
 import { useAdvance, useCharacter } from "@/lib/hooks/characters";
 import { useFeats } from "@/lib/hooks/feats";
-import { CHARACTERISTIC_KEYS, readCharacteristics } from "@/lib/utils/rules/systems";
 import { advanceCost, availableXp, careerPrice } from "@/systems/wfrp/rules/advancement";
 import { value } from "@/systems/wfrp/rules/characteristics";
+import { CHARACTERISTIC_KEYS, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { skillAdvanceKey } from "@/systems/wfrp/rules/skills/catalog";
 import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 

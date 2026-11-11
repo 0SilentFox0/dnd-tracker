@@ -1,4 +1,6 @@
-import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, characteristicValue, PARTICIPANT_SLOT, readCharacteristics, woundsMax } from "@/lib/utils/rules/systems";
+import { value as characteristicValue, woundsMax } from "@/systems/wfrp/rules/characteristics/derive";
+import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { PARTICIPANT_SLOT } from "@/systems/wfrp/rules/slots";
 import type { BattleParticipant } from "@/types/battle";
 
 export type WfrpCareerRef = { id: string; name: string; tiers: unknown };

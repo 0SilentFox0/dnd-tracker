@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { useText } from "@/lib/i18n/use-text";
-import type { PeriodSummary } from "@/lib/utils/rules/systems";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import type { PeriodSummary } from "@/systems/wfrp/rules/downtime/types";
 
 type Test = NonNullable<PeriodSummary["endeavour"]>["test"];
 

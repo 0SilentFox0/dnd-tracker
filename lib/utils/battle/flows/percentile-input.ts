@@ -1,6 +1,5 @@
 import { parseDieInput } from "./die-input";
 
-import { textRef } from "@/lib/i18n/text-ref";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellMagicKind } from "@/lib/utils/spells/model/schema";
@@ -24,7 +23,7 @@ export const parsePercentileField = (raw: string) => parseDieInput(raw, PERCENTI
 export function percentileTargetOf(attacker: BattleParticipant, attack: BattleAttack, rules: Ruleset): { target: number; label: LogLine } | null {
   const resolved = ruleSystemOf(rules).combat.attackTarget?.(attacker, attack);
 
-  return resolved ? { target: resolved.target, label: textRef(`gameTerms.characteristics.${resolved.characteristic}.label`) } : null;
+  return resolved ? resolved : null;
 }
 
 /** Casting-test numbers shown before the roll; null outside systems with a casting test. */

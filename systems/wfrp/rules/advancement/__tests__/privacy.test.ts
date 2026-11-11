@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { preserveServerOwned, redactLedger } from "../privacy";
 
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 
 const entry = { id: "e1", at: "2026-01-01T00:00:00.000Z", kind: "characteristic", key: "ws", from: 0, to: 1, cost: 25 } as const;
 

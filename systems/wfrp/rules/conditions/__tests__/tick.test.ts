@@ -10,7 +10,7 @@ import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 

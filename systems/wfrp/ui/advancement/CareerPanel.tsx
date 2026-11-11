@@ -13,7 +13,7 @@ import { useCareers } from "@/lib/hooks/careers";
 import { useCareerOps } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
 import { useFeats } from "@/lib/hooks/feats";
-import type { Characteristics } from "@/lib/utils/rules/systems";
+import type { Characteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { parseSkillAdvanceKey } from "@/systems/wfrp/rules/skills/catalog";
 import type { CareerData } from "@/types/careers";
 

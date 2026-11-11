@@ -8,8 +8,8 @@ import { conditionLevel } from "../levels";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import type { Characteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 

@@ -13,9 +13,10 @@ import { useRaceProfiles, useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems/useRuleSystem";
 import { cryptoRandom } from "@/lib/utils/common/dice";
 import type { Rng } from "@/lib/utils/common/rng";
-import { type CreationPicks, type CreationRolls, type PlanDraftResult, RULE_SYSTEM_REGISTRY, type SpeciesProfile } from "@/lib/utils/rules/systems";
+import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import type { WfrpDraftIdentityInput, WfrpDraftInput } from "@/systems/wfrp/api/types";
 import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
+import { type CreationPicks, type CreationRolls, isUsableProfile, planDraft, type PlanDraftResult, rollCreation, type SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import type { Race } from "@/types/races";
 
 export type WfrpDraftStepId = "species" | "career" | "stats" | "talents" | "identity";
@@ -100,7 +101,7 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
     return (races.data ?? []).flatMap((race): { race: Race; profile: SpeciesProfile }[] => {
       const profile = byRace.get(race.id);
 
-      return profile && creation.isUsableProfile(profile) ? [{ race, profile }] : [];
+      return profile && isUsableProfile(profile) ? [{ race, profile }] : [];
     });
   }, [creation, profiles.data, races.data]);
 
@@ -126,7 +127,7 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
   const preview: PlanDraftResult | undefined = useMemo(() => {
     if (identityOnly || !creation || !profile || !rules) return undefined;
 
-    return creation.planDraft(picks, { profile, rules, careerIds: new Set((careers.data ?? []).map((c) => c.id)), featIds: new Set((feats.data ?? []).map((f) => f.id)) });
+    return planDraft(picks, { profile, rules, careerIds: new Set((careers.data ?? []).map((c) => c.id)), featIds: new Set((feats.data ?? []).map((f) => f.id)) });
   }, [identityOnly, creation, profile, rules, picks, careers.data, feats.data]);
 
   const errorsFor = (id: WfrpDraftStepId) => (preview && !preview.ok ? preview.errors.filter(STEP_ERRORS[id]) : []);
@@ -143,7 +144,7 @@ export function useWfrpDraftForm({ campaignId, characterId, initialIdentity, rng
 
   const stepErrors = (id: WfrpDraftStepId) => errorsFor(id).filter((c) => VISIBLE_STEP_ERRORS.has(c) && (c !== "CAREER_UNKNOWN" || !!careerId));
 
-  const rollAll = useCallback(() => (profile && creation ? creation.rollCreation(rng, profile) : undefined), [creation, profile, rng]);
+  const rollAll = useCallback(() => (profile && creation ? rollCreation(rng, profile) : undefined), [creation, profile, rng]);
 
   const selectSpecies = useCallback((raceId: string) => {
     if (raceId === speciesId) return;

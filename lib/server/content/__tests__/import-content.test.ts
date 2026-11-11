@@ -63,11 +63,11 @@ describe("importContent", () => {
 
     expect(report.results.flatMap((r) => r.issues)).toEqual([]);
 
-    const bodies = create.mock.calls.map((c) => c[1] as { characteristics?: { base: Record<string, number>; move: number }; abilities?: unknown[] });
+    const bodies = create.mock.calls.map((c) => c[1] as { characteristics?: Record<string, unknown>; abilities?: unknown[] });
 
     expect(bodies[0].characteristics).toMatchObject({ base: { ws: 45 }, move: 6 });
     expect(bodies[0].abilities).toEqual([ward]);
-    expect(bodies[1].characteristics?.base.ws).toBe(30);
+    expect(bodies[1].characteristics).toEqual({});
   });
 
   beforeEach(() => {

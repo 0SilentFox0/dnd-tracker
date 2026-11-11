@@ -10,31 +10,16 @@ import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import type { ChoiceGroup } from "@/lib/utils/characters/choices/selections";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SpellMagic, SpellMagicKind } from "@/lib/utils/spells/model/schema";
-import type { planCareerAdvance, planCareerSet } from "@/systems/wfrp/rules/advancement/career";
-import type { advanceCost } from "@/systems/wfrp/rules/advancement/cost";
-import type { planPurchase } from "@/systems/wfrp/rules/advancement/plan";
-import type { availableXp, talentGroups } from "@/systems/wfrp/rules/advancement/talent-groups";
-import type { planUndo } from "@/systems/wfrp/rules/advancement/undo";
-import type { CharacteristicKey } from "@/systems/wfrp/rules/characteristics/keys";
-import type { HitLocation } from "@/systems/wfrp/rules/combat/constants";
-import type { planGrant } from "@/systems/wfrp/rules/corruption/plan-grant";
-import type { planCorruptionUndo } from "@/systems/wfrp/rules/corruption/undo";
-import type { planDraft } from "@/systems/wfrp/rules/creation/plan";
-import type { isUsableProfile } from "@/systems/wfrp/rules/creation/profile";
-import type { rollCreation } from "@/systems/wfrp/rules/creation/roll";
-import type { validateEndeavour } from "@/systems/wfrp/rules/downtime/endeavours";
-import type { planPeriod } from "@/systems/wfrp/rules/downtime/plan-period";
-import type { armourAp, parseWfrpStats } from "@/systems/wfrp/rules/equipment/armour";
-import type { encumbrance } from "@/systems/wfrp/rules/equipment/encumbrance";
-import type { QUALITY_REGISTRY } from "@/systems/wfrp/rules/equipment/qualities";
-import type { wfrpUnitBuild } from "@/systems/wfrp/rules/traits/unit-build";
+import type { ResolvedAbility } from "@/types/abilities";
 import type { ActiveEffect, BattleAttack, BattleParticipant, ParticipantSide } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
+import type { FeatData } from "@/types/choices";
 import type { LogLine } from "@/types/text";
 
 export type { RuleSystemKey };
@@ -252,7 +237,7 @@ export interface RuleSystemCombat {
   judge: "client" | "server";
   dice: number;
   attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
-  participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; armourOnly?: Record<HitLocation, number>; flexible?: boolean }): SystemSlot;
+  participantFields?(row: { characteristics?: unknown }, gear?: ArmourGear): SystemSlot;
   /** Ranks participants with equal initiative: higher wins */
   tieBreak?(p: BattleParticipant): number;
   actionEconomy: { bonusAction: boolean; reaction: boolean };
@@ -260,7 +245,7 @@ export interface RuleSystemCombat {
   /** Whether the scene state gives this side a standing advantage (Momentum) */
   sceneHeldBy?(state: SystemSlot | undefined, side: ParticipantSide): boolean;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
-  attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { characteristic: CharacteristicKey; target: number };
+  attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { label: LogLine; target: number };
   mitigateDamage?(ctx: MitigateCtx): MitigateResult;
   onZeroHp?(ctx: ZeroHpCtx): DamageConsequencesResult;
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
@@ -278,18 +263,6 @@ export interface RuleSystemCombat {
     /** Hit chance of an average matchup; party/unit factors are relative to it */
     refHit: number;
   };
-}
-
-export interface RuleSystemCorruption {
-  planGrant: typeof planGrant;
-  planUndo: typeof planCorruptionUndo;
-  grantMax: number;
-}
-
-export interface RuleSystemDowntime {
-  planPeriod: typeof planPeriod;
-  validateEndeavour: typeof validateEndeavour;
-  maxDays: number;
 }
 
 export interface RuleSystemDefinition {
@@ -327,10 +300,11 @@ export interface RuleSystemDefinition {
   equipment?: RuleSystemEquipment;
   traits?: RuleSystemTraits;
   currency?: RuleSystemCurrency;
-  downtime?: RuleSystemDowntime;
-  corruption?: RuleSystemCorruption;
+  /** Presence flags: the UI shows the tab; the handlers live in the system */
+  downtime?: true;
+  corruption?: true;
   identity: { alignments: boolean };
-  creation?: RuleSystemCreation;
+  creation?: true;
   lineage: boolean;
   classes: boolean;
   attacks: boolean;
@@ -341,27 +315,26 @@ export interface RuleSystemDefinition {
   unusedMechanics: readonly MechanicKey[];
 }
 
+export interface ArmourGear {
+  ap: Record<string, number>;
+  armourOnly?: Record<string, number>;
+  flexible?: boolean;
+}
+
+export interface UnitBuild {
+  fields: SystemSlot;
+  attacks: ExtractedAttack[];
+}
+
 export interface RuleSystemTraits {
   recipes: readonly Recipe[];
-  unitBuild: typeof wfrpUnitBuild;
+  unitBuild(row: { id: string; characteristics?: unknown }, abilities: readonly ResolvedAbility[]): UnitBuild;
   psychology?(ps: BattleParticipant[], ctx: { round: number; rng: Rng; newcomerIds?: readonly string[] }): SystemConditionResult & { testerIds: string[] };
 }
 
 export interface RuleSystemAdvancement {
   talentsOf(row: { characteristics?: unknown }): Record<string, number>;
-  cost: typeof advanceCost;
-  planPurchase: typeof planPurchase;
-  planUndo: typeof planUndo;
-  planCareerSet: typeof planCareerSet;
-  planCareerAdvance: typeof planCareerAdvance;
-  availableXp: typeof availableXp;
-  talentGroups: typeof talentGroups;
-}
-
-export interface RuleSystemCreation {
-  rollCreation: typeof rollCreation;
-  planDraft: typeof planDraft;
-  isUsableProfile: typeof isUsableProfile;
+  talentGroups(talents: Record<string, number>, featsById: Record<string, FeatData>): ChoiceGroup[];
 }
 
 export type ApplyDamageConsequences = typeof import("@/lib/utils/battle/damage/consequences").applyDamageConsequences;
@@ -373,8 +346,5 @@ export interface RuleSystemCurrency {
 }
 
 export interface RuleSystemEquipment {
-  armourAp: typeof armourAp;
-  parseStats: typeof parseWfrpStats;
-  qualities: typeof QUALITY_REGISTRY;
-  encumbrance: typeof encumbrance;
+  armourAp(equipped: { slot: string; systemStats: unknown }[]): ArmourGear;
 }

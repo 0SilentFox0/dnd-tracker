@@ -19,8 +19,13 @@ import type { CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { toCareerData } from "@/lib/utils/careers/row";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { applyStashAction, type StashResult } from "@/lib/utils/inventory/stash-actions";
-import type { Ailment, DowntimeState, PeriodHero } from "@/lib/utils/rules/systems";
-import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { MAX_DAYS } from "@/systems/wfrp/rules/downtime/constants";
+import { validateEndeavour } from "@/systems/wfrp/rules/downtime/endeavours";
+import type { PeriodHero } from "@/systems/wfrp/rules/downtime/plan-period";
+import { planPeriod } from "@/systems/wfrp/rules/downtime/plan-period";
+import type { Ailment, DowntimeState } from "@/systems/wfrp/rules/downtime/types";
 import type { CharacterResources } from "@/types/characters";
 import type { DowntimePeriodResult, DowntimeSetResult } from "@/types/downtime";
 import type { Purse, StashState } from "@/types/inventory";
@@ -36,7 +41,7 @@ function downtimeOf(access: CampaignAccessResult) {
 
   if (!downtime) throw new ContentError(API_ERRORS.DOWNTIME_UNSUPPORTED, 409);
 
-  return downtime;
+  return { planPeriod, validateEndeavour, maxDays: MAX_DAYS };
 }
 
 async function loadActiveHeroes(access: CampaignAccessResult, characterIds: string[]) {

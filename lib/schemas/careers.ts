@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CHARACTERISTIC_KEYS, SKILL_ADVANCE_KEY_RE } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS, SKILL_ADVANCE_KEY_RE } from "@/systems/wfrp/rules/characteristics/keys";
 
 const LIST_MAX = 40;
 

@@ -8,9 +8,10 @@ import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { splitParticipant } from "@/lib/utils/battle/store";
 import { redactLogForPlayers, redactParticipantsForPlayers } from "@/lib/utils/battle/view";
-import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import { castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";

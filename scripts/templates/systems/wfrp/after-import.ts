@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 import { saveRaceProfile } from "@/lib/server/races/race-profile";
 import { jsonContent } from "@/lib/utils/common/json";
 import { nameKey } from "@/lib/utils/content/import";
-import type { SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 
 type Ctx = Parameters<NonNullable<PackHooks["afterImport"]>>[0];
 

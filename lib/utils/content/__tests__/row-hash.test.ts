@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { contentRowHash } from "../row-hash";
 
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 
 describe("contentRowHash", () => {
   it("an empty column added after the baseline hashes like a missing one", () => {

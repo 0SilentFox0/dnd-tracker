@@ -8,9 +8,10 @@ import { characteristicsJson } from "@/lib/server/characters/core/system-fields"
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
-import type { Characteristics } from "@/lib/utils/rules/systems";
-import { readCharacteristics } from "@/lib/utils/rules/systems";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
+import { planCareerAdvance, planCareerSet } from "@/systems/wfrp/rules/advancement";
+import type { Characteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 
 export type CareerResult = { characteristics: Characteristics };
 
@@ -27,7 +28,7 @@ function advancementOf({ access, character }: CharacterGate) {
 
   if (character.status !== CharacterStatus.ACTIVE) throw new ContentError(API_ERRORS.XP_CHARACTERS_INVALID, 400);
 
-  return advancement;
+  return { planCareerSet, planCareerAdvance };
 }
 
 export async function setCareer(gate: CharacterGate, input: CareerSetInput): Promise<CareerResult> {

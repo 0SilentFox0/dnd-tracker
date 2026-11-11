@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { rebuildTrait, unitIssues, unitWounds } from "../units";
 
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT } from "@/systems/wfrp/rules/traits/constants";
 
 const all40 = { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, s: 40, t: 40, i: 40, ag: 40, dex: 40, int: 40, wp: 40, fel: 40 };

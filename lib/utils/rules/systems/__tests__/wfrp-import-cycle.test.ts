@@ -44,8 +44,35 @@ function reaches(start: string, target: string): string[] | null {
   return walk(start, [start]);
 }
 
+function reachesPackage(start: string, pkg: string): string | null {
+  const seen = new Set<string>([start]);
+
+  const queue = [start];
+
+  while (queue.length > 0) {
+    const file = queue.shift() as string;
+
+    for (const m of readFileSync(path.join(ROOT, file), "utf8").matchAll(VALUE_IMPORT)) {
+      if (m[1] === pkg) return file;
+
+      const next = resolve(m[1], file);
+
+      if (next && !seen.has(next)) {
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+  }
+
+  return null;
+}
+
 describe("wfrp rule system value-import graph", () => {
   it("never leads back to its own entry (TDZ at load time)", () => {
     expect(reaches(WFRP_ENTRY, WFRP_ENTRY)).toBeNull();
+  });
+
+  it("the logic registry stays zod-free (client graph)", () => {
+    expect(reachesPackage("lib/utils/rules/systems/registry.ts", "zod")).toBeNull();
   });
 });

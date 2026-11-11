@@ -15,8 +15,9 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import { applyScenePatch } from "@/lib/utils/battle/scene-state";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
-import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";

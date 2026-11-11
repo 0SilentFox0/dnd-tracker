@@ -4,7 +4,7 @@ import { channelMutation, channelSchema } from "../channel-mutation";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { context, goblin, participant } from "@/lib/server/battles/__tests__/mutations/fixtures";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";

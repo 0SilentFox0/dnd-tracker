@@ -35,7 +35,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { InventoryLogKind } from "@/lib/constants/inventory";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { type Characteristics,DEFAULT_CHARACTERISTICS, readCharacteristics } from "@/lib/utils/rules/systems";
+import { type Characteristics, DEFAULT_CHARACTERISTICS, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { DowntimePeriodResult } from "@/types/downtime";
 

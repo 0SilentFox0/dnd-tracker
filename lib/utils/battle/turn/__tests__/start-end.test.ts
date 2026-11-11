@@ -11,7 +11,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import { trait } from "@/systems/wfrp/rules/traits/__tests__/fixtures";

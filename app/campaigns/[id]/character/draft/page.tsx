@@ -10,7 +10,7 @@ import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { draftEditInitial } from "@/lib/server/characters/choices/draft-initial";
 import { validateAbilityScores } from "@/lib/utils/characters/generate";
 import { parseRules } from "@/lib/utils/rules/schema";
-import type { WfrpDraftIdentityInput } from "@/lib/utils/rules/systems";
+import type { WfrpDraftIdentityInput } from "@/systems/wfrp/api/types";
 import type { DraftInput } from "@/types/characters";
 
 export default async function PlayerDraftPage({ params }: { params: Promise<{ id: string }> }) {

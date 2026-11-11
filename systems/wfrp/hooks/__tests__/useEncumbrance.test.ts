@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { encumbranceItemsOf } from "../useEncumbrance";
 
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { encumbrance } from "@/systems/wfrp/rules/equipment";
 
 const stats = (weight: number) => ({ type: "gear", weight, price: 1, qualities: [] });

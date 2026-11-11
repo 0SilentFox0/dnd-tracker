@@ -6,7 +6,7 @@ import { GRIM_UNIT_LEVELS, GRIM_UNIT_THEMES, unitTraitKeys, unitTraits } from ".
 import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules } from "@/lib/utils/rules/schema";
-import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
 import { parseStatus } from "@/systems/wfrp/rules/downtime/status";
 import { ARMOUR_KINDS, QUALITY_REGISTRY } from "@/systems/wfrp/rules/equipment";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";

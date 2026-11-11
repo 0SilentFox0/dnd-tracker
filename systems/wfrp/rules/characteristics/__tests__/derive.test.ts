@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { bonus, moveOf, runYards, skillTarget, value, walkYards, woundsBreakdown, woundsMax } from "../derive";
 import { type Characteristics, CharacteristicsSchema } from "../schema";
 
-import type { MutationEffect } from "@/lib/utils/rules/systems";
+import type { MutationEffect } from "@/systems/wfrp/rules/corruption/types";
 
 const make = (patch: Record<string, unknown> = {}): Characteristics => CharacteristicsSchema.parse(patch);
 

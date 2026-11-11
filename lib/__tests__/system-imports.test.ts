@@ -7,7 +7,7 @@ import { importsSystem, isImportAllowed, readImportsExempt, ROOT, scanImporters,
 
 const BARREL = "lib/utils/rules/systems/index.ts";
 
-const BARREL_MAX_SYSTEM_IMPORT_LINES = 26;
+const BARREL_MAX_SYSTEM_IMPORT_LINES = 0;
 
 const REASON = /^(route|content-kind|ruleset-section|e1:\d+\.\d+)$/;
 

@@ -4,8 +4,8 @@ import { applyCharacterResources } from "../battle";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 

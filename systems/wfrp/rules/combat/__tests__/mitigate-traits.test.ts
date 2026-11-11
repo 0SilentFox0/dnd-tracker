@@ -7,9 +7,9 @@ import { resolveWfrpAttack } from "../resolve-attack";
 import { AttackType } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { withStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack } from "@/types/battle";
 

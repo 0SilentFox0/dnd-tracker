@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { corruptionThreshold } from "../threshold";
 
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 
 const withEffect = (key: "t" | "wp", amount: number) => ({ ...DEFAULT_CHARACTERISTICS, corruption: { points: 0, mutations: [{ id: "m", at: "2026-01-01T00:00:00.000Z", kind: "mental" as const, roll: 1, text: "x", effects: [{ type: "characteristic" as const, key, amount }] }] } });
 

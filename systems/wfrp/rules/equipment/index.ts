@@ -1,6 +1,4 @@
-import { armourAp, parseWfrpStats } from "./armour";
-import { encumbrance } from "./encumbrance";
-import { QUALITY_REGISTRY } from "./qualities";
+import { armourAp } from "./armour";
 
 import type { RuleSystemEquipment } from "@/lib/utils/rules/systems/types";
 
@@ -12,4 +10,4 @@ export { type QualityEffect, qualityEffects, qualityFumbleFrom, qualityToHit } f
 export type * from "./stats";
 export { type WeaponProfile, weaponProfile } from "./weapon-profile";
 
-export const WFRP_EQUIPMENT: RuleSystemEquipment = { armourAp, parseStats: parseWfrpStats, qualities: QUALITY_REGISTRY, encumbrance };
+export const WFRP_EQUIPMENT: RuleSystemEquipment = { armourAp };

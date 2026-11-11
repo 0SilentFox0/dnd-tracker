@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/db";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
-import { readCharacteristics } from "@/lib/utils/rules/systems";
 import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 vi.mock("@/lib/db", () => ({

@@ -12,7 +12,8 @@ import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { abilityRegistryOf, flowSegments, linesText } from "@/lib/utils/abilities/segments";
-import { readCharacteristics, systemKeyOf } from "@/lib/utils/rules/systems";
+import { systemKeyOf } from "@/lib/utils/rules/systems";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 
 const kindSchema = z.enum(["unit", "spell", "race", "skill", "artifact"]);
 

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useDowntimePeriod, useDowntimePeriodUndo } from "@/lib/hooks/characters";
 import { useCheckedIds, useConfirm } from "@/lib/hooks/common";
-import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { MAX_DAYS } from "@/systems/wfrp/rules/downtime/constants";
 import type { DowntimePeriodResult } from "@/types/downtime";
 
 const DEFAULT_DAYS = 7;
@@ -38,7 +38,7 @@ export function DowntimePeriodPanel({ campaignId, characters }: DowntimePeriodPa
 
   const checked = useCheckedIds(characters);
 
-  const maxDays = RULE_SYSTEM_REGISTRY.wfrp.downtime?.maxDays ?? DEFAULT_DAYS;
+  const maxDays = MAX_DAYS;
 
   const n = Number(days);
 

@@ -29,7 +29,7 @@ const attackBaseTargetOf = (attacker: BattleParticipant, attack: BattleAttack): 
 
 const attackerTargetOf = (attacker: BattleParticipant, attack: BattleAttack): number => attackBaseTargetOf(attacker, attack) + selfTestMod(attacker, "attack");
 
-export const wfrpAttackTarget = (attacker: BattleParticipant, attack: BattleAttack) => ({ characteristic: attackCharacteristicOf(attack), target: attackerTargetOf(attacker, attack) });
+export const wfrpAttackTarget = (attacker: BattleParticipant, attack: BattleAttack) => ({ label: textRef(`gameTerms.characteristics.${attackCharacteristicOf(attack)}.label`), target: attackerTargetOf(attacker, attack) });
 
 // Positions are required: without a map nobody counts as outnumbering.
 function isOutnumbering(attacker: BattleParticipant, target: BattleParticipant, participants: BattleParticipant[]): boolean {

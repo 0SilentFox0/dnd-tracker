@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useGrantCorruption, useUndoCorruption } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
-import { CORRUPTION_REASON_MAX, RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { GRANT_MAX as CORRUPTION_GRANT_MAX, REASON_MAX as CORRUPTION_REASON_MAX } from "@/systems/wfrp/rules/corruption/constants";
 import type { CorruptionGrantResult } from "@/types/corruption";
 
 export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId: string; characterId: string }) {
@@ -36,7 +36,7 @@ export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId:
 
   const [undone, setUndone] = useState(false);
 
-  const max = RULE_SYSTEM_REGISTRY.wfrp.corruption?.grantMax ?? 1;
+  const max = CORRUPTION_GRANT_MAX;
 
   const n = Number(points);
 

@@ -1,4 +1,4 @@
-import type { SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import { SpeciesProfileSchema } from "@/systems/wfrp/server/schemas";
 
 export type ProfileRefIds = { careers: string[]; feats: string[] };

@@ -1,7 +1,12 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { RULE_SYSTEM_KEYS } from "../meta";
 import { RULE_SYSTEM_REGISTRY, ruleSystemOf, systemKeyOf } from "../registry";
 
+import { SYSTEM_UI } from "@/components/systems/registry";
+import { SYSTEM_SERVER } from "@/lib/server/systems/registry";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 
@@ -10,6 +15,21 @@ const sheetInput = { characteristics: {} as never, resources: {} };
 describe("rule system registry", () => {
   it("has the three systems", () => {
     expect(Object.keys(RULE_SYSTEM_REGISTRY).sort()).toEqual(["dnd5e", "homm", "wfrp"]);
+  });
+
+  it("registries of logic, ui and server schemas cover the same keys", () => {
+    const keys = [...RULE_SYSTEM_KEYS].sort();
+
+    expect(Object.keys(RULE_SYSTEM_REGISTRY).sort()).toEqual(keys);
+    expect(Object.keys(SYSTEM_UI).sort()).toEqual(keys);
+    expect(Object.keys(SYSTEM_SERVER).sort()).toEqual(keys);
+  });
+
+  it("the contract file names no system and no function type of one", () => {
+    const text = readFileSync(path.join(process.cwd(), "lib/utils/rules/systems/types.ts"), "utf8");
+
+    expect(text).not.toContain("@/systems/");
+    expect(text).not.toMatch(/typeof (plan|roll|armour|encumbrance|wfrp|advance|validate|QUALITY)/);
   });
 
   it("only wfrp drops alignments from the identity", () => {
@@ -31,13 +51,13 @@ describe("rule system registry", () => {
   });
 
   it("only wfrp defines downtime", () => {
-    expect(RULE_SYSTEM_REGISTRY.wfrp.downtime?.maxDays).toBe(30);
+    expect(RULE_SYSTEM_REGISTRY.wfrp.downtime).toBe(true);
     expect(RULE_SYSTEM_REGISTRY.homm.downtime).toBeUndefined();
     expect(RULE_SYSTEM_REGISTRY.dnd5e.downtime).toBeUndefined();
   });
 
   it("only wfrp defines corruption", () => {
-    expect(RULE_SYSTEM_REGISTRY.wfrp.corruption?.grantMax).toBe(10);
+    expect(RULE_SYSTEM_REGISTRY.wfrp.corruption).toBe(true);
     expect(RULE_SYSTEM_REGISTRY.homm.corruption).toBeUndefined();
     expect(RULE_SYSTEM_REGISTRY.dnd5e.corruption).toBeUndefined();
   });

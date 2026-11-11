@@ -13,7 +13,8 @@ import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { CharacterType } from "@/lib/constants/characters";
 import { useCharacter, useCharacters, useDowntime } from "@/lib/hooks/characters";
-import { type Endeavour, readCharacteristics } from "@/lib/utils/rules/systems";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import type { Endeavour } from "@/systems/wfrp/rules/downtime/types";
 import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 export function DowntimeTab() {

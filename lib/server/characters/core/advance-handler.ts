@@ -11,9 +11,11 @@ import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
 import { toCareerData } from "@/lib/utils/careers/row";
-import type { Characteristics, LedgerEntry, PurchaseError } from "@/lib/utils/rules/systems";
-import { readCharacteristics } from "@/lib/utils/rules/systems";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
+import { availableXp, planPurchase, planUndo } from "@/systems/wfrp/rules/advancement";
+import type { PurchaseError } from "@/systems/wfrp/rules/advancement/plan";
+import type { Characteristics, LedgerEntry } from "@/systems/wfrp/rules/characteristics/keys";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 
 export type AdvanceResult = { characteristics: Characteristics; experience: number; available: number; entry: LedgerEntry };
 
@@ -35,7 +37,7 @@ function advancementOf({ access, character }: CharacterGate) {
 
   if (character.status !== CharacterStatus.ACTIVE) throw new ContentError(API_ERRORS.XP_CHARACTERS_INVALID, 400);
 
-  return advancement;
+  return { planPurchase, planUndo, availableXp };
 }
 
 export async function advanceCharacter(gate: CharacterGate, input: AdvanceInput): Promise<AdvanceResult> {

@@ -4,32 +4,76 @@
     "reason": "e1:3.3"
   },
   {
+    "file": "app/api/campaigns/[id]/characters/draft/wfrp-draft-schema.ts",
+    "reason": "e1:3.3"
+  },
+  {
     "file": "app/api/campaigns/[id]/races/[raceId]/profile/route.ts",
     "reason": "route"
+  },
+  {
+    "file": "app/campaigns/[id]/character/draft/page.tsx",
+    "reason": "e1:5.1"
   },
   {
     "file": "components/rules/sections/TablesSection.tsx",
     "reason": "e1:4.3"
   },
   {
+    "file": "lib/ai/tools/reference.ts",
+    "reason": "e1:4.1"
+  },
+  {
+    "file": "lib/ai/tools/wfrp-view.ts",
+    "reason": "e1:4.1"
+  },
+  {
+    "file": "lib/api/characters.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/api/races.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/hooks/characters/useAdvance.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/hooks/characters/useCareerOps.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/hooks/races/useRaceProfiles.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/schemas/careers.ts",
+    "reason": "content-kind"
+  },
+  {
+    "file": "lib/schemas/corruption.ts",
+    "reason": "e1:3.3"
+  },
+  {
     "file": "lib/schemas/downtime.ts",
     "reason": "e1:3.3"
   },
   {
-    "file": "lib/schemas/units.ts",
-    "reason": "e1:3.2"
+    "file": "lib/server/characters/core/advance-handler.ts",
+    "reason": "e1:3.3"
   },
   {
-    "file": "lib/server/artifacts/system-stats.ts",
-    "reason": "e1:3.2"
+    "file": "lib/server/characters/core/career-handler.ts",
+    "reason": "e1:3.3"
   },
   {
-    "file": "lib/server/characters/core/create-character-schema.ts",
-    "reason": "e1:3.2"
+    "file": "lib/server/characters/core/corruption-handler.ts",
+    "reason": "e1:3.3"
   },
   {
-    "file": "lib/server/characters/core/update-character-schema.ts",
-    "reason": "e1:3.2"
+    "file": "lib/server/characters/core/downtime-handler.ts",
+    "reason": "e1:3.3"
   },
   {
     "file": "lib/server/races/profile-usage.ts",
@@ -44,15 +88,27 @@
     "reason": "e1:3.3"
   },
   {
-    "file": "lib/utils/rules/systems/index.ts",
-    "reason": "e1:3.2"
-  },
-  {
-    "file": "lib/utils/rules/systems/types.ts",
-    "reason": "e1:3.2"
+    "file": "lib/utils/content/import/fields/careers.ts",
+    "reason": "content-kind"
   },
   {
     "file": "lib/utils/rules/tables-schema.ts",
     "reason": "ruleset-section"
+  },
+  {
+    "file": "types/careers.ts",
+    "reason": "content-kind"
+  },
+  {
+    "file": "types/corruption.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "types/downtime.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "types/races.ts",
+    "reason": "e1:3.3"
   }
 ]

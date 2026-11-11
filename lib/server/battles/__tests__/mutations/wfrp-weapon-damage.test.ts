@@ -6,7 +6,7 @@ import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { extractWfrpAttacks } from "@/systems/wfrp/rules/combat/extract-attacks";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";

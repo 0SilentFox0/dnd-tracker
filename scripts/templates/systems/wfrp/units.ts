@@ -5,7 +5,7 @@ import type { Row } from "./common";
 import { TRAIT_SIZES, type TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import type { RecipeContext, RecipeValues } from "@/lib/utils/abilities/templates/types";
 import { isRecord } from "@/lib/utils/common/is-record";
-import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/systems/wfrp/rules/characteristics/keys";
 import { BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT } from "@/systems/wfrp/rules/traits/constants";
 import { TRAIT_RECIPES } from "@/systems/wfrp/rules/traits/recipes";
 

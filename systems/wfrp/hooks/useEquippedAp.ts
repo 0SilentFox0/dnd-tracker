@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import { useCharacterSheet } from "@/lib/hooks/characters";
-import type { HitLocation } from "@/lib/utils/rules/systems";
+import type { HitLocation } from "@/systems/wfrp/rules/combat/constants";
 import { armourAp } from "@/systems/wfrp/rules/equipment";
 import { ARMOUR_SL_PER_AP } from "@/systems/wfrp/rules/magic/constants";
 import type { SheetArtifact } from "@/types/characters";

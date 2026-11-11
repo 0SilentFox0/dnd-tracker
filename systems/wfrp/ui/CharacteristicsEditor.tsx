@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Label } from "@/components/ui/label";
 import type { SectionBinding } from "@/lib/utils/characters/form/bindings";
-import { CHARACTERISTIC_KEYS, type Characteristics } from "@/lib/utils/rules/systems";
 import { value } from "@/systems/wfrp/rules/characteristics";
+import { CHARACTERISTIC_KEYS, type Characteristics } from "@/systems/wfrp/rules/characteristics/keys";
 
 export function CharacteristicsEditor({ binding: { data, set }, withExtras = true }: { binding: SectionBinding<Characteristics>; withExtras?: boolean }) {
   const t = useTranslations("characters.wfrp");
