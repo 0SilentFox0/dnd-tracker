@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { validatePack } from "../lib/validate";
-import { PACK_ADAPTERS } from "../systems";
-import { fixturePack, FIXTURES_DIR } from "../systems/wfrp/__tests__/pack-helpers";
-import { type WfrpData, wfrpDataOf } from "../systems/wfrp/common";
-import { careerSkillIssue } from "../systems/wfrp/validate";
+import { validatePack } from "@/scripts/templates/lib/validate";
+import { PACK_ADAPTERS } from "@/scripts/templates/systems";
+import { fixturePack, FIXTURES_DIR } from "@/scripts/templates/systems/wfrp/__tests__/pack-helpers";
+import { type WfrpData, wfrpDataOf } from "@/scripts/templates/systems/wfrp/common";
+import { careerSkillIssue } from "@/scripts/templates/systems/wfrp/validate";
 
 const base = fixturePack();
 

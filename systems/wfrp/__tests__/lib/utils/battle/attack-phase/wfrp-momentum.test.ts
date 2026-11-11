@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { runAttackPhase } from "../run-attack-phase";
-
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
+import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { momentumOf, sceneOf, slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";

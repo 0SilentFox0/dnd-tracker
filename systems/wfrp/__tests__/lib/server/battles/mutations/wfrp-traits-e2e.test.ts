@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { context } from "./fixtures";
-
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
+import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";

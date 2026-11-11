@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { context, goblin, hero } from "./fixtures";
-
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { coreActionMutation } from "@/lib/server/battles/mutations/core-action/core-action-mutation";
 import { legendaryMutation } from "@/lib/server/battles/mutations/core-action/legendary-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";

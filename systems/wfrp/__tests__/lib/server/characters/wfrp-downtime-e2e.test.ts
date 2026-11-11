@@ -24,11 +24,10 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) => Promise<unknown>) => fn(h) } }));
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn() }));
 
-import { runCharacterOperation } from "../operation-runner";
-
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { InventoryLogKind } from "@/lib/constants/inventory";
+import { runCharacterOperation } from "@/lib/server/characters/operation-runner";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { type Characteristics, DEFAULT_CHARACTERISTICS, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import type { DowntimePeriodResult } from "@/systems/wfrp/rules/downtime/api-types";

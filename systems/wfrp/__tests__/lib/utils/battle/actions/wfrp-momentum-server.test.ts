@@ -1,12 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { legendaryAttack } from "../legendary";
-import { resolveMovement5e } from "../movement";
-import { resolveOpportunityAttacks } from "../opportunity";
-import { runCoreAction } from "../run";
-
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
+import { legendaryAttack } from "@/lib/utils/battle/actions/legendary";
+import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
+import { resolveOpportunityAttacks } from "@/lib/utils/battle/actions/opportunity";
+import { runCoreAction } from "@/lib/utils/battle/actions/run";
 import { pathTo } from "@/lib/utils/battle/grid/path";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";

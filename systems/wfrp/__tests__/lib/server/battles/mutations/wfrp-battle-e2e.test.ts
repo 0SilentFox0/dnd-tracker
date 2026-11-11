@@ -1,10 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { context, goblin, hero } from "./fixtures";
-
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
+import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { type AttackBody, attackMutation, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { conditionTestMutation } from "@/lib/server/battles/mutations/condition-test/condition-test-mutation";
 import { initiativeRollMutation } from "@/lib/server/battles/mutations/initiative/initiative-roll-mutation";

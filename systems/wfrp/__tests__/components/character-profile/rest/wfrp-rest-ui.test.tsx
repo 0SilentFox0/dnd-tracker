@@ -2,10 +2,9 @@
 import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { sheetFixture } from "../../__tests__/sheet-fixture";
-import { ProfileProvider } from "../../ProfileContext";
-import { RestBadges } from "../RestBadges";
-
+import { sheetFixture } from "@/components/character-profile/__tests__/sheet-fixture";
+import { ProfileProvider } from "@/components/character-profile/ProfileContext";
+import { RestBadges } from "@/components/character-profile/rest/RestBadges";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { CharacterSheet, SheetRest } from "@/types/characters";
 

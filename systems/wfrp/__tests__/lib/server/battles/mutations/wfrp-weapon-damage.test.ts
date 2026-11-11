@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { context } from "./fixtures";
-
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { attackBodySchema } from "@/lib/schemas/battles";
+import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
