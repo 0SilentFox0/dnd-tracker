@@ -21,16 +21,11 @@ import { useClassMode } from "@/lib/hooks/classes";
 import { useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems";
 import { pruneFormChoices } from "@/lib/utils/characters/choices/prune";
+import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 
-type NewCharacterFormProps = { campaignId: string; characterType: CharacterTypeValue };
+type NewCharacterFormProps = { campaignId: string; characterType: CharacterTypeValue; systemKey: RuleSystemKey };
 
-export function NewCharacterForm(props: NewCharacterFormProps) {
-  const { ready } = useRuleSystem({ campaignId: props.campaignId });
-
-  return ready ? <NewCharacterFormBody {...props} /> : null;
-}
-
-function NewCharacterFormBody({ campaignId: id, characterType }: NewCharacterFormProps) {
+export function NewCharacterForm({ campaignId: id, characterType, systemKey }: NewCharacterFormProps) {
   const router = useRouter();
 
   const t = useTranslations("characters");
@@ -45,9 +40,9 @@ function NewCharacterFormBody({ campaignId: id, characterType }: NewCharacterFor
 
   const classMode = useClassMode(id);
 
-  const { key: systemKey, system } = useRuleSystem({ campaignId: id });
+  const { system } = useRuleSystem({ key: systemKey });
 
-  const Ui = systemKey && systemUiOf(systemKey);
+  const Ui = systemUiOf(systemKey);
 
   const refsRef = useRef<ChoiceRefsView | null>(null);
 
@@ -61,9 +56,9 @@ function NewCharacterFormBody({ campaignId: id, characterType }: NewCharacterFor
     ...bindings
   } = useCharacterForm({
     type: characterType,
-    requireRace: system?.lineage,
-    requireClass: system?.classes,
-    seedCharacteristics: system?.characteristics.defaults,
+    requireRace: system.lineage,
+    requireClass: system.classes,
+    seedCharacteristics: system.characteristics.defaults,
     recommendScores: classMode.byId,
     onSubmit: async (data) => {
       await create.mutateAsync(refsRef.current?.ready ? pruneFormChoices(data, refsRef.current) : data);
@@ -85,7 +80,7 @@ function NewCharacterFormBody({ campaignId: id, characterType }: NewCharacterFor
     {
       id: CHARACTER_FORM_TAB.basic,
       label: tc("tabs.basic"),
-      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system?.lineage} hideClass={!system?.classes} hideAlignment={!system?.identity.alignments} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system.lineage} hideClass={!system.classes} hideAlignment={!system.identity.alignments} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,
