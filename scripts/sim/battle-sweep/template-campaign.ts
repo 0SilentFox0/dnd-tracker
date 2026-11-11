@@ -50,11 +50,11 @@ export async function openTemplateRun(profile: SweepProfile, campaignId: string 
 
   const races = await prisma.race.findMany({ where: { campaignId: campaign.id }, orderBy: { name: "asc" } });
 
-  const classes = await prisma.gameClass.findMany({ where: { campaignId: campaign.id }, orderBy: { name: "asc" } });
+  const classes = (await prisma.gameClass.findMany({ where: { campaignId: campaign.id }, orderBy: { name: "asc" } })).sort((x, y) => Number(y.caster !== "none") - Number(x.caster !== "none"));
 
   const spells = await prisma.spell.findMany({ where: { campaignId: campaign.id }, orderBy: [{ level: "asc" }, { name: "asc" }], select: { id: true, level: true, concentration: true } });
 
-  const picked = [...spells.filter((s) => s.concentration).slice(0, 2), ...spells.filter((s) => !s.concentration && s.level <= Math.ceil(profile.heroLevel / 2)).slice(0, 8)];
+  const picked = [...spells.filter((s) => s.concentration && s.level >= 1).slice(0, 8), ...spells.filter((s) => !s.concentration && s.level <= Math.ceil(profile.heroLevel / 2)).slice(0, 8)];
 
   const heroIds: string[] = [];
 

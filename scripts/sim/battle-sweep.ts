@@ -275,7 +275,7 @@ async function call(label: string, options: any, body: any = {}, as?: string): P
 
     const dice = e.actionDetails?.diceRolls as Array<{ dice: Array<{ sides: number; value: number }> }> | undefined;
 
-    if (rolled && !e.isCancelled && !dice?.length) issue("error", `немає diceRolls: ${resultTextOf(e)}`);
+    if (rolled && !e.isCancelled && !dice?.length && !(PROFILE.judge === "server" && e.actionDetails?.system)) issue("error", `немає diceRolls: ${resultTextOf(e)}`);
 
     for (const die of dice?.flatMap((g) => g.dice) ?? []) if (![4, 6, 8, 10, 12, 20, ...(PROFILE.judge === "server" ? [100] : [])].includes(die.sides) || die.value < 1 || die.value > die.sides) issue("error", `кубик поза межами: d${die.sides}=${die.value} у «${resultTextOf(e)}»`);
   }
@@ -554,7 +554,9 @@ function passiveViaModifiers(p: any, a: any): boolean {
     for (const s of subjects) {
       const r = collectModifiers(ps, s.basicInfo.id, q);
 
-      if (r.entries.some((en: any) => en.label === a.name || en.label === a.source.name || en.label?.includes(a.name) || en.label?.includes(a.source.name))) return true;
+      if (r.entries.some((en: any) => { const label = typeof en.label === "string" ? en.label : JSON.stringify(en.label ?? "");
+
+ return label === a.name || label === a.source.name || label.includes(a.name) || label.includes(a.source.name); })) return true;
     }
   }
 
@@ -626,7 +628,7 @@ async function castSpell(actor: any, spell: any) {
     if (targets === "needDead") return null;
   }
 
-  const dice = casterSpellDice(actor, { dice: spell.dice ?? 0, groupId: spell.groupId ?? null });
+  const dice = casterSpellDice(actor, { dice: spell.dice ?? 0, groupId: spell.groupId ?? null, level: spell.level, dieSides: spell.dieSides, upcastDice: spell.upcastDice, fixedDice: spell.fixedDice });
 
   const diceRolls = dice.count > 0 ? rollDiceList(`${dice.count}d${dice.sides}`, rng) : [];
 
@@ -866,13 +868,31 @@ const SYNTHETIC_SPELLS = [
   { name: "SYN Складна зона", level: 1, type: "damage", damageType: "none", dice: 0, targeting: { kind: "template", shape: "circle", size: 20, side: "enemy", maxTargets: 20, range: 60, zone: { rounds: 5, terrain: ["difficult", "obscured"], onExit: { save: { ability: "strength" }, effects: [], pull: "centre" } } }, resolution: { kind: "auto" }, concentration: true, spellEffects: [] },
 ];
 
+const createdSpellIds: string[] = [];
+
+async function removeSyntheticSpells() {
+  if (KEEP_BATTLES || !createdSpellIds.length) return;
+
+  for (const h of heroRows) {
+    const row = await prisma.character.findUnique({ where: { id: h.id } });
+
+    if (row) await prisma.character.update({ where: { id: h.id }, data: { knownSpells: ((row.knownSpells as string[]) ?? []).filter((id) => !createdSpellIds.includes(id)) as any } });
+  }
+
+  await prisma.spell.deleteMany({ where: { id: { in: createdSpellIds } } });
+}
+
 async function ensureSyntheticSpells() {
   const ids: string[] = [];
 
   for (const def of SYNTHETIC_SPELLS) {
     const found = await prisma.spell.findFirst({ where: { campaignId: ctx.campaignId, name: def.name } });
 
-    ids.push((found ?? (await prisma.spell.create({ data: { campaignId: ctx.campaignId, executionMode: "native", ...def } as any }))).id);
+    const row = found ?? (await prisma.spell.create({ data: { campaignId: ctx.campaignId, executionMode: "native", ...def } as any }));
+
+    if (!found) createdSpellIds.push(row.id);
+
+    ids.push(row.id);
   }
 
   for (const h of heroRows) {
@@ -932,6 +952,7 @@ async function main() {
   writeFileSync(join(OUT, "log.txt"), fullLog.join("\n"));
   console.info(targetedResults.join("\n"));
   await removeTestBattles();
+  await removeSyntheticSpells();
   await templateRun?.cleanup();
   console.info(`\n${errors.length ? "❌" : "✅"} помилок: ${errors.length}, попереджень: ${issues.length - errors.length}. Звіт: ${join(OUT, "battle-sweep.md")}`);
   await prisma.$disconnect();
@@ -963,6 +984,8 @@ async function systemChecks(spells: Map<string, any>) {
 
   const foe = await prisma.unit.findFirstOrThrow({ where: { campaignId: ctx.campaignId }, orderBy: { level: "asc" } });
 
+  await prisma.character.updateMany({ where: { id: { in: heroRows.map((h) => h.id) } }, data: { resources: {} } });
+
   const setup = [{ id: heroRows[0].id, type: ParticipantSourceType.CHARACTER, side: "ally" }, { id: foe.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }];
 
   const battle = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ система", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
@@ -974,9 +997,12 @@ async function systemChecks(spells: Map<string, any>) {
 
   if (started.status !== 200) return tcheck("старт бою для перевірок системи", false, JSON.stringify(started.body).slice(0, 200));
 
-  const heroId = heroRows[0].id;
+  const heroName = heroRows[0].name;
 
-  const heroTurn = await untilTurnOf((p) => p?.basicInfo.id === heroId);
+
+  const heroTurn = await untilTurnOf((p) => p?.basicInfo.name === heroName);
+
+  const heroId = current()?.basicInfo.id;
 
   const hero = () => byId(heroId);
 
@@ -988,11 +1014,12 @@ async function systemChecks(spells: Map<string, any>) {
 
   const roll = PROFILE.judge === "server" ? { serverRoll: true } : { d20Roll: 20 };
 
-  const wantSides = PROFILE.judge === "server" ? 100 : 20;
-
   const r = await call("attack", ATTACK, { attackerId: heroId, targetId: target.basicInfo.id, attackId: weapon.id, ...roll, damageRolls: rollDiceList(heroAttackDamageParts(hero(), weapon).formula, rng), endTurn: false });
 
-  tcheck(PROFILE.judge === "server" ? "сервер кидає d100 за атаку" : "d20-атака героя", r.status === 200 && diceSidesOf(r.log).has(wantSides), `${r.status}; кубики d${[...diceSidesOf(r.log)].join(",d")}`);
+  const slotRoll = Number(/"roll":(\d+)/.exec(JSON.stringify(r.log.map((e: any) => e.actionDetails?.system).filter(Boolean)))?.[1]);
+
+  if (PROFILE.judge === "server") tcheck("сервер кидає d100 за атаку", r.status === 200 && slotRoll >= 1 && slotRoll <= 100, `${r.status}; кидок у деталях дії ${slotRoll}`);
+  else tcheck("d20-атака героя", r.status === 200 && diceSidesOf(r.log).has(20), `${r.status}; кубики d${[...diceSidesOf(r.log)].join(",d")}`);
 
   const withAmmo = P().find((p) => p.battleData.ammo && Object.keys(p.battleData.ammo).length);
 
@@ -1002,13 +1029,26 @@ async function systemChecks(spells: Map<string, any>) {
   }
 
   if (PROFILE.judge === "client") {
-    const spell = ((hero().spellcasting?.knownSpells ?? []) as any[]).map((k: any) => spells.get(typeof k === "string" ? k : k.id)).find((sp: any) => sp?.concentration);
+    await nextOnly();
 
-    if (!spell) return tskip("концентрація", "герой не знає жодного заклинання з концентрацією");
+    if (!(await untilTurnOf((p) => p?.basicInfo.id === heroId)) || state.status !== "active") return tskip("концентрація", "хід героя не настав вдруге");
 
-    const cast = await castSpell(hero(), spell);
+    const candidates = ((hero().spellcasting?.knownSpells ?? []) as any[]).map((k: any) => spells.get(typeof k === "string" ? k : k.id)).filter((sp: any) => sp?.concentration);
 
-    tcheck("концентрація ставиться на кастері", cast?.status === 200 && !!byId(heroId)?.battleData.activeEffects.some((e: any) => e.concentration), `${spell.name}: ${cast?.status}`);
+    if (!candidates.length) return tskip("концентрація", "герой не знає жодного заклинання з концентрацією");
+
+    let cast: any = null;
+
+    let used: any = null;
+
+    for (const spell of candidates) {
+      used = spell;
+      cast = await castSpell(hero(), spell);
+
+      if (cast?.status === 200) break;
+    }
+
+    tcheck("концентрація ставиться на кастері", cast?.status === 200 && !!byId(heroId)?.battleData.activeEffects.some((e: any) => e.concentration), `${used.name}: ${cast?.status} (кандидатів ${candidates.length})`);
   }
 }
 
@@ -1698,7 +1738,7 @@ async function orchestrate() {
   process.exit(overallExit(results) || (drift.length && !KEEP_BATTLES ? 1 : 0));
 }
 
-const failWorker = async (e: unknown) => { console.error(e); await removeTestBattles().catch(() => undefined); await templateRun?.cleanup().catch(() => undefined); await prisma.$disconnect(); process.exit(1); };
+const failWorker = async (e: unknown) => { console.error(e); await removeTestBattles().catch(() => undefined); await removeSyntheticSpells().catch(() => undefined); await templateRun?.cleanup().catch(() => undefined); await prisma.$disconnect(); process.exit(1); };
 
 if (WORKER) PROFILE = parseTemplateKeys(argv)[0];
 

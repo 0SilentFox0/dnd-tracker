@@ -1,4 +1,7 @@
+// args is the first sweep module loaded: the next/cache stub must be installed before any lib/ import
 import { profileOf, SWEEP_PROFILES, type SweepProfile } from "./profiles";
+
+import "./stub-next-cache";
 
 export function parseTemplateKeys(argv: readonly string[]): SweepProfile[] {
   const at = argv.indexOf("--template");
