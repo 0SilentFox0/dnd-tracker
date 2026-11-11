@@ -32,7 +32,6 @@
     "import-unit-icons": "tsx scripts/import/import-unit-icon-bundle.ts",
     "assets:grim-icons": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/assets/grim-icons/cli.ts",
     "assets:icon-prompts": "tsx --tsconfig tsconfig.scripts.json scripts/assets/build-icon-prompts.ts",
-    "constructor:official-templates": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/create-official-templates.ts",
     "constructor:copy-heroes": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/copy-test-heroes.ts",
     "constructor:backfill": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/backfill-content-fields.ts",
     "constructor:srd-template": "pnpm template import srd-5.2 --publish --allow-untranslated",
