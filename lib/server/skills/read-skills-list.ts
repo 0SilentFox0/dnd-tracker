@@ -1,7 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
-import { formatSkillsListResponse } from "@/lib/server/skills/format-skills-response";
 import { formatSkillResponse } from "@/lib/server/skills/format-skill-response";
+import { formatSkillsListResponse } from "@/lib/server/skills/format-skills-response";
 
 const ID_NAME = { select: { id: true, name: true } } as const;
 

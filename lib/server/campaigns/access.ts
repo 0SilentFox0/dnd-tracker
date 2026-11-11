@@ -3,8 +3,8 @@
  * DM-only для гравця → /campaigns/[id]. Для API-routes — `requireCampaignAccess` / `requireDM` у `lib/utils/api/api-auth.ts`.
  */
 
-import { redirect } from "next/navigation";
 import { cache } from "react";
+import { redirect } from "next/navigation";
 import type { Campaign, CampaignMember } from "@prisma/client";
 
 import "server-only";

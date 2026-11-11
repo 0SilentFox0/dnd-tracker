@@ -2,11 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => {
   const entries = new Map<string, unknown>();
+
   const cache = (fn: (...args: never[]) => unknown) => (...args: never[]) => {
     const key = JSON.stringify(args);
+
     if (!entries.has(key)) entries.set(key, fn(...args));
+
     return entries.get(key);
   };
+
   return { entries, cache, findUnique: vi.fn(), getAuthUser: vi.fn() };
 });
 
@@ -28,6 +32,7 @@ describe("campaign layout access cache", () => {
 
   it("shares the same campaign lookup between layout gating and route access", async () => {
     await getCampaignForLayout("c1", "u1");
+
     const result = await requireCampaignMember("c1");
 
     expect(result.isDemo).toBe(true);
