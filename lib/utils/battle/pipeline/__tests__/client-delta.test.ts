@@ -45,13 +45,13 @@ describe("buildClientDelta", () => {
     expect(d.scene).toMatchObject({ status: "active", round: 2, turnIndex: 0, startedAt: "2026-01-01T00:00:00.000Z" });
   });
 
-  it("system у scene лише коли є стан сцени", () => {
+  it("system у scene: без змін — відсутнє, змінилось — є, скинуто — null", () => {
     const a = p("a");
 
-    const run = (sceneState: BattleSceneState["sceneState"]) =>
+    const run = (prev: BattleSceneState["sceneState"], next: BattleSceneState["sceneState"]) =>
       buildClientDelta({
-        before: { scene, meta, participants: [a], pending: [] },
-        after: { ...scene, version: 8, sceneState },
+        before: { scene: { ...scene, sceneState: prev }, meta, participants: [a], pending: [] },
+        after: { ...scene, version: 8, sceneState: next },
         participants: [a],
         pending: [],
         stored: [],
@@ -59,8 +59,10 @@ describe("buildClientDelta", () => {
         log: [],
       });
 
-    expect(momentumOf(run(sceneOf({ enemy: true })).scene.system)).toEqual({ enemy: true });
-    expect("system" in run(undefined).scene).toBe(false);
+    expect("system" in run(undefined, undefined).scene).toBe(false);
+    expect("system" in run(sceneOf({ enemy: true }), sceneOf({ enemy: true })).scene).toBe(false);
+    expect(momentumOf(run(undefined, sceneOf({ enemy: true })).scene.system ?? undefined)).toEqual({ enemy: true });
+    expect(run(sceneOf({ enemy: true }), undefined).scene.system).toBeNull();
   });
 
   it("карта чи зміни місцевості в scene лише тоді, коли вона змінилась", () => {

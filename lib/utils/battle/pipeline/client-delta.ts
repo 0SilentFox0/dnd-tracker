@@ -5,6 +5,7 @@ import type { MapModeKey } from "@/lib/utils/battle/modes";
 import { isModeMapKey, modeDeltas } from "@/lib/utils/battle/modes/client";
 import type { BattleMeta, BattleSceneState } from "@/lib/utils/battle/store";
 import { buildParticipantPatch, FULL_PARTICIPANT } from "@/lib/utils/battle/store";
+import { jsonEqual } from "@/lib/utils/battle/store/stable-json";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import type { BattleParticipantPatch, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -94,7 +95,7 @@ export function buildClientDelta(args: {
       pendingMoraleCheck: after.pendingMoraleCheck,
       pendingCritChoice: toPublicPendingCrit(after.pendingCritChoice),
       ...(after.turnStartedAt && after.turnStartedAt.getTime() !== before.scene.turnStartedAt?.getTime() && { turnStartedAt: after.turnStartedAt.toISOString() }),
-      ...(after.sceneState && { system: after.sceneState }),
+      ...(!jsonEqual(before.scene.sceneState ?? null, after.sceneState ?? null) && { system: after.sceneState ?? null }),
       ...(after.startedAt ? { startedAt: after.startedAt.toISOString() } : before.scene.startedAt && { startedAt: null }),
       ...(after.completedAt
         ? { completedAt: after.completedAt.toISOString() }

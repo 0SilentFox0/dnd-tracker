@@ -109,8 +109,8 @@ export interface ClientBattleDelta {
     turnIndex: number;
     pendingMoraleCheck: unknown;
     pendingCritChoice: PendingCritChoice | null;
-    /** відсутнє = без змін станом сцени не керує жодна система */
-    system?: SystemSlot;
+    /** відсутнє = без змін, null = стан скинуто */
+    system?: SystemSlot | null;
     /** null — дату скинуто (reset, відкат завершеного бою) */
     startedAt?: string | null;
     /** коли почався поточний хід (для таймера ходу) */

@@ -176,12 +176,16 @@ describe("applyBattleDelta — відкат завершеного бою", () =
 describe("applyBattleDelta — system state", () => {
   const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null };
 
-  it("кладе стан системи у кеш, наступна дельта без нього очищає", () => {
+  it("кладе стан системи у кеш, відсутнє поле зберігає, null очищає", () => {
     const withTokens = applyBattleDelta(cached, delta({ scene: { ...scene, system: sceneOf({ ally: true }) } })) as BattleScene;
 
     expect(momentumOf(withTokens.system)).toEqual({ ally: true });
 
-    const cleared = applyBattleDelta(withTokens, delta({ version: (withTokens.version ?? 0) + 1, scene })) as BattleScene;
+    const kept = applyBattleDelta(withTokens, delta({ version: (withTokens.version ?? 0) + 1, scene })) as BattleScene;
+
+    expect(kept.system).toBe(withTokens.system);
+
+    const cleared = applyBattleDelta(kept, delta({ version: (kept.version ?? 0) + 1, scene: { ...scene, system: null } })) as BattleScene;
 
     expect(cleared.system).toBeUndefined();
   });
