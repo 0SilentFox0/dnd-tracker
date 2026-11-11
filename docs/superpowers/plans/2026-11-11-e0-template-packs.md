@@ -453,6 +453,14 @@ export function bundleToPack(bundle: Bundle, manifest: TemplateManifest, slugs: 
 
 - [ ] Тести → експорт з prodcopy → slugs → `pnpm template:index` → комміт.
 
+**Notes for 5.1** (за звіркою частини 4):
+- (a) `bundleToPack` пише *назви* шкіл (не id) у `damageBonus`/flags, дзеркально до `resolveSchoolRefs`; id пережили б лише імпорт у ту саму БД, у свіжій вони висіли б.
+- (b) Рядки `skillTrees`/`tracks` у пакеті без `id`/`campaignId`/`createdAt`/`sourceId`/`sourceHash`; посилання всередині JSON дерев — slug або назви, їх резолвить `PACK_HOOKS.homm.afterImport` (там є `idBySlug`). `upsertBySlug` пише колонки як є.
+- (c) Скопіювати `credits` у `manifest.json`: `ensureTemplate` пише `credits: manifest.credits ?? ""`, без поля поточні credits шаблону зітруться.
+- (d) Прибрати виняток «pending» для `heroes-homm` у тесті `all-packs`.
+- (e) `staleSpellColumns` підбиває `updatedAt` заклинань Heroes; не рахувати їх у метриках «unchanged».
+- Після E0: `PackHooks.prepareRows?(kind, rows, ctx)` замість `import-prepare.ts` (d20-частини `resolveSchoolRefs`/`withClassIcons` переїдуть у `PACK_HOOKS.dnd5e`/`homm`); перенести `creature-header`/`spell-header`/`validate` зі `scripts/srd/i18n` у `scripts/templates` і прибрати `srd:i18n`.
+
 ### Задача 5.2: імпорт зі збереженням id (E0.10)
 
 **Files:**
