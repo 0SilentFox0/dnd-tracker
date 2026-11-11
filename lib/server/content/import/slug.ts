@@ -25,7 +25,9 @@ interface Delegate {
   update(args: unknown): Promise<unknown>;
 }
 
-const delegateOf = (kind: ImportKind) => (prisma as unknown as Record<string, Delegate>)[BUNDLE_TABLES.find((t) => t.key === TABLE_OF_KIND[kind])!.delegate];
+export const tableOfKind = (kind: ImportKind) => BUNDLE_TABLES.find((t) => t.key === TABLE_OF_KIND[kind])!;
+
+const delegateOf = (kind: ImportKind) => (prisma as unknown as Record<string, Delegate>)[tableOfKind(kind).delegate];
 
 export const loadKeys = (campaignId: string, kind: ImportKind): Promise<KeyRow[]> =>
   delegateOf(kind).findMany({ where: { campaignId }, select: { id: true, name: true, slug: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });

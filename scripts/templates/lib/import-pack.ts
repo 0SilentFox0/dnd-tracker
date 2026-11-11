@@ -15,9 +15,11 @@ import { getTranslator } from "@/lib/i18n/translator";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
 import { loadKeys } from "@/lib/server/content/import/slug";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { markContentDirty } from "@/lib/server/content/write-context";
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
 import { type PublishResult } from "@/lib/server/templates/publish";
 import { publishTemplate } from "@/lib/server/templates/publish-service";
+import { rowHash } from "@/lib/server/templates/sync/hash";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isImportKind } from "@/lib/utils/content/import";
 import { RulesetSchema } from "@/lib/utils/rules/schema";
@@ -53,20 +55,23 @@ async function upsertBySlug(campaignId: string, kind: PackKind, rows: PackRow[])
   const result = counts();
 
   await withCampaignContentWrite(campaignId, async (tx) => {
-    const delegate = (tx as unknown as Record<string, { findFirst(args: unknown): Promise<{ id: string } | null>; create(args: unknown): Promise<unknown>; update(args: unknown): Promise<unknown> }>)[table.delegate];
+    const delegate = (tx as unknown as Record<string, { findFirst(args: unknown): Promise<Record<string, unknown> & { id: string } | null>; create(args: unknown): Promise<unknown>; update(args: unknown): Promise<unknown> }>)[table.delegate];
 
     for (const { origin: _origin, ...data } of rows) {
-      const existing = await delegate.findFirst({ where: { campaignId, slug: data.slug }, select: { id: true } });
+      const existing = await delegate.findFirst({ where: { campaignId, slug: data.slug } });
 
-      if (existing) {
+      if (existing && rowHash(existing, table) === rowHash({ ...existing, ...data }, table)) result.skipped += 1;
+      else if (existing) {
+        markContentDirty();
         await delegate.update({ where: { id: existing.id }, data });
         result.updated += 1;
       } else {
+        markContentDirty();
         await delegate.create({ data: { ...data, campaignId } });
         result.created += 1;
       }
     }
-  });
+  }, { bump: false });
 
   return result;
 }
@@ -105,8 +110,6 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
   const t = await getTranslator("uk");
 
   const existing = await store.findTemplate();
-
-  const versionBefore = existing ? (await prisma.campaign.findUniqueOrThrow({ where: { id: existing.id }, select: { contentVersion: true } })).contentVersion : null;
 
   if (dryRun && !existing) return { templateId: null, created: true, perKind: Object.fromEntries(manifest.kinds.map((kind) => [kind, counts(pack.rows[kind]?.length ?? 0)])) };
 
@@ -174,8 +177,6 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
   if (gaps.length > 0 && !opts.allowUntranslated) throw new Error(`Refusing to publish "${key}": translations are incomplete (${gaps.join("; ")}); run \`pnpm template i18n status ${key} <locale>\``);
 
   const published = await publishTemplate(actor);
-
-  if (published.added + published.changed + published.removed === 0 && versionBefore !== null) await prisma.campaign.update({ where: { id: template.id }, data: { contentVersion: versionBefore } });
 
   console.info(`Version ${published.version}: +${published.added} ~${published.changed} -${published.removed}`);
 

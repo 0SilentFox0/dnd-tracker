@@ -186,4 +186,16 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
     expect(await unitSpellLinks(templateId)).toEqual(links);
     expect(await versionOf(templateId)).toBe(version);
   });
+
+  it("a rerun without --publish updates nothing and keeps contentVersion", async () => {
+    const version = await versionOf(templateId);
+
+    const result = await importPack("grim-d100", { owner: userId, dir: goodDir() });
+
+    const kinds = Object.values(result.perKind);
+
+    expect(kinds.reduce((sum, c) => sum + c.created + c.updated, 0)).toBe(0);
+    expect(kinds.reduce((sum, c) => sum + c.skipped, 0)).toBeGreaterThan(0);
+    expect(await versionOf(templateId)).toBe(version);
+  });
 });

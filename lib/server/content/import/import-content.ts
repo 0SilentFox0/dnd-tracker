@@ -9,10 +9,11 @@ import { assertCan } from "@/lib/server/content/access";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { loadNames } from "@/lib/server/content/import/names";
-import { type KeyRow, loadKeys, writeSlug } from "@/lib/server/content/import/slug";
+import { type KeyRow, loadKeys, tableOfKind, writeSlug } from "@/lib/server/content/import/slug";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
-import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { withCampaignContentWrite, withCampaignRuntimeWrite } from "@/lib/server/content/write";
 import { afterContentCommit, currentContentWrite, markContentDirty } from "@/lib/server/content/write-context";
+import { rowHash } from "@/lib/server/templates/sync/hash";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -28,11 +29,12 @@ export interface ImportDeps {
   writeSlug(campaignId: string, kind: ImportKind, id: string, slug: string): Promise<void>;
   invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
   transactional?: boolean;
+  skipUnchanged?: boolean;
 }
 
 export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames, loadKeys, writeSlug, transactional: true };
 
-export const OFFLINE_IMPORT_DEPS: ImportDeps = { ...DEFAULT_IMPORT_DEPS, invalidate: () => undefined };
+export const OFFLINE_IMPORT_DEPS: ImportDeps = { ...DEFAULT_IMPORT_DEPS, invalidate: () => undefined, skipUnchanged: true };
 
 type NameIndex = { byName: Map<string, string[]>; ids: Set<string>; bySlug: Map<string, KeyRow>; slugOf: Map<string, string | null> };
 
@@ -214,6 +216,20 @@ async function writePlan(resource: AnyContentResource, actor: Actor, plan: Plan,
   if (plan.slug && plan.slug !== plan.storedSlug) await deps.writeSlug?.(actor.campaignId, kind, id, plan.slug);
 }
 
+async function settleUnchanged(resource: AnyContentResource, actor: Actor, plan: Plan, kind: ImportKind, deps: ImportDeps): Promise<boolean> {
+  const stored = (await resource.find(actor, plan.existingId as string, "write")) as Record<string, unknown> | null;
+
+  if (!stored) return false;
+
+  const table = tableOfKind(kind);
+
+  if (rowHash(stored, table) !== rowHash({ ...stored, ...(plan.body as Record<string, unknown>) }, table)) return false;
+
+  if (plan.slug && plan.slug !== plan.storedSlug) await withCampaignRuntimeWrite(actor.campaignId, () => deps.writeSlug(actor.campaignId, kind, plan.existingId as string, plan.slug as string));
+
+  return true;
+}
+
 async function checkPlan(resource: AnyContentResource, actor: Actor, plan: Plan): Promise<ImportRowResult> {
   if (plan.status !== "pending" || !resource.checkImport) return toResult(plan);
 
@@ -279,6 +295,12 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
         if (!current) throw new ContentError(resource.notFound, 404);
 
         plan.body = await resource.prepareUpdate(actor, current, plan.body);
+      }
+
+      if (plan.op === "update" && deps.skipUnchanged && (await settleUnchanged(resource, actor, plan, kind, deps))) {
+        plan.status = "skipped";
+        results.push(toResult(plan));
+        continue;
       }
 
       if (deps.transactional) {
