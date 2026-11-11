@@ -55,8 +55,15 @@ export const ROOT_SPECS: readonly RootSpec[] = [
   {
     file: "lib/utils/abilities/schema/system-effects.ts",
     blocks: [
-      { layer: (id) => `systems/${id}/rules/ability-effects.ts`, line: imp((id) => `${upper(id)}_EFFECTS`, (id) => `@/systems/${id}/rules/ability-effects`) },
-      { layer: (id) => `systems/${id}/rules/ability-effects.ts`, line: (id) => `${upper(id)}_EFFECTS,` },
+      { layer: (id) => `systems/${id}/rules/ability-effects.ts`, line: imp((id) => `${upper(id)}_EFFECT_SCHEMAS`, (id) => `@/systems/${id}/rules/ability-effects`) },
+      { layer: (id) => `systems/${id}/rules/ability-effects.ts`, line: (id) => `${upper(id)}_EFFECT_SCHEMAS,` },
+    ],
+  },
+  {
+    file: "lib/utils/abilities/registry/effects/system-rows.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`, line: imp((id) => `${upper(id)}_EFFECT_ROWS`, (id) => `@/systems/${id}/rules/ability-effect-rows`) },
+      { layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`, line: (id) => `${upper(id)}_EFFECT_ROWS,` },
     ],
   },
   {

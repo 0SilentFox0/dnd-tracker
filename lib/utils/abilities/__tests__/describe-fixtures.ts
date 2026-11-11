@@ -4,7 +4,8 @@ import { CONDITION_REGISTRY } from "../registry/conditions";
 import { EFFECT_REGISTRY } from "../registry/effects";
 import { FLAG_REGISTRY } from "../registry/effects/flags";
 import { TRIGGER_REGISTRY } from "../registry/triggers";
-import type { Ability, Condition, Effect, EffectKind, FlagKey, Limits, TraitEffect, Trigger } from "../schema";
+import type { Ability, Condition, Effect, EffectKind, FlagKey, Limits, Trigger } from "../schema";
+import type { SystemEffect } from "../schema/system-effects";
 
 import type { Locale } from "@/lib/i18n/config";
 import type { Translator } from "@/lib/i18n/translator";
@@ -12,7 +13,7 @@ import { CONDITION_5E_KEYS, CONDITION_KEYS } from "@/lib/utils/abilities/schema/
 
 const duration = { rounds: 2 };
 
-const BASE_EFFECTS: Record<Exclude<EffectKind, "help" | "push" | TraitEffect["kind"]>, Effect> = {
+const BASE_EFFECTS: Record<Exclude<EffectKind, "help" | "push" | SystemEffect["kind"]>, Effect> = {
   modifyStat: { kind: "modifyStat", stat: "armor", flat: 2 },
   damageBonus: { kind: "damageBonus", filter: { kind: "melee" }, percent: 10 },
   flag: { kind: "flag", flag: "guaranteedHit" },
@@ -105,7 +106,7 @@ const TRAIT_FIXTURES = [
   { kind: "wfrpSize", size: "large" },
   { kind: "wfrpPsychology", psychology: "terror", value: 2 },
   { kind: "wfrpAttack", attack: "breath", damage: 5, rangeFt: 36, magical: true },
-] as const satisfies readonly TraitEffect[];
+] as const satisfies readonly SystemEffect[];
 
 const MERGED_EFFECTS: Effect[] = [
   { kind: "help", target: "eventTarget" },

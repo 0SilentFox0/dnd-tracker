@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { sizeDamageBonus, sizeHitMod, wardRoll } from "../size";
 
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import { withStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import type { TraitSize } from "@/systems/wfrp/rules/trait-kinds";
 
 const sized = (id: string, size?: TraitSize, ward?: number) => {
   const p = makeParticipant({ id });

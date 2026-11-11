@@ -7,13 +7,13 @@ import { PARTICIPANT_SLOT, type WfrpParticipantSlot } from "../slots";
 import { BREATH_BLAST, BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT, TRAIT_MELEE_CELLS } from "./constants";
 import { sizeStep, traitEntries } from "./read";
 
-import type { TraitEffect } from "@/lib/utils/abilities/schema";
-import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { WfrpEffect } from "@/systems/wfrp/rules/ability-effects";
+import type { TraitSize } from "@/systems/wfrp/rules/trait-kinds";
 import type { ResolvedAbility } from "@/types/abilities";
 
-type AttackEffect = Extract<TraitEffect, { kind: "wfrpAttack" }>;
+type AttackEffect = Extract<WfrpEffect, { kind: "wfrpAttack" }>;
 
 function attackProfile(e: AttackEffect): WeaponProfile {
   if (e.attack === "breath") {

@@ -28,13 +28,14 @@ import {
   modifyStatFields,
 } from "./static";
 import { applyPhantom, applyRaiseDead, applySummon, describePhantom, describeRaiseDead, describeSummon } from "./summon";
-import { applyTrait, traitDescribe, traitFields } from "./traits";
+import { SYSTEM_EFFECT_ROWS } from "./system-rows";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Translator } from "@/lib/i18n/translator";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Ability, AnyEffect, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS, MANEUVERS } from "@/lib/utils/abilities/schema/kinds";
+import type { SystemEffect } from "@/lib/utils/abilities/schema/system-effects";
 import { joinSegments, seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
@@ -55,7 +56,7 @@ const AMOUNT: FieldMeta = { name: "amount", input: "amount" };
 
 const REQUIRED_DURATION: FieldMeta = { ...DURATION_FIELD, optional: false };
 
-export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
+const BASE_EFFECT_REGISTRY: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: EffectDefinition<K> } = {
   modifyStat: { kind: "modifyStat", static: true, fields: modifyStatFields, describe: describeModifyStat, apply: (i) => applyStatic(i, describeEffectText) },
   damageBonus: { kind: "damageBonus", static: true, fields: damageBonusFields, describe: describeDamageBonus, apply: (i) => applyStatic(i, describeEffectText) },
   flag: {
@@ -155,11 +156,6 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   },
   help: { kind: "help", static: false, fields: [TARGET_FIELD], describe: () => [seg("summary.effects.help")], apply: applyHelp },
   push: { kind: "push", static: false, fields: [{ name: "feet", input: "number" }, { name: "from", input: "select", options: [{ value: "caster" }] }, TARGET_FIELD], describe: describePush, apply: applyPush },
-  wfrpArmour: { kind: "wfrpArmour", static: true, pickable: false, fields: traitFields.wfrpArmour, describe: traitDescribe.wfrpArmour, apply: applyTrait },
-  wfrpWard: { kind: "wfrpWard", static: true, pickable: false, fields: traitFields.wfrpWard, describe: traitDescribe.wfrpWard, apply: applyTrait },
-  wfrpSize: { kind: "wfrpSize", static: true, pickable: false, fields: traitFields.wfrpSize, describe: traitDescribe.wfrpSize, apply: applyTrait },
-  wfrpPsychology: { kind: "wfrpPsychology", static: true, pickable: false, fields: traitFields.wfrpPsychology, describe: traitDescribe.wfrpPsychology, apply: applyTrait },
-  wfrpAttack: { kind: "wfrpAttack", static: true, pickable: false, fields: traitFields.wfrpAttack, describe: traitDescribe.wfrpAttack, apply: applyTrait },
   randomOf: {
     kind: "randomOf",
     static: false,
@@ -174,6 +170,10 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     },
   },
 };
+
+const SYSTEM_EFFECT_REGISTRY = Object.fromEntries(SYSTEM_EFFECT_ROWS.map((r) => [r.kind, r.row]));
+
+export const EFFECT_REGISTRY = { ...BASE_EFFECT_REGISTRY, ...SYSTEM_EFFECT_REGISTRY } as { [K in EffectKind]: EffectDefinition<K> };
 
 export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   const def = EFFECT_REGISTRY[input.effect.kind] as EffectDefinition<EffectKind>;

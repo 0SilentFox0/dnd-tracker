@@ -1,9 +1,10 @@
 import { BREATH_DEFAULT_RANGE_FT, NIGHT_VISION_FT, RANGED_DEFAULT_RANGE_FT, REGENERATE_DICE } from "./constants";
 
-import type { Effect, TraitEffect } from "@/lib/utils/abilities/schema";
+import type { Effect } from "@/lib/utils/abilities/schema";
 import type { Trigger } from "@/lib/utils/abilities/schema";
-import { PSYCHOLOGY_KINDS, TRAIT_SIZES } from "@/lib/utils/abilities/schema/kinds";
 import type { ParamDef, Recipe, RecipeValues } from "@/lib/utils/abilities/templates/types";
+import type { WfrpEffect } from "@/systems/wfrp/rules/ability-effects";
+import { PSYCHOLOGY_KINDS, TRAIT_SIZES } from "@/systems/wfrp/rules/trait-kinds";
 
 const PASSIVE: Trigger = { event: "passive" };
 
@@ -13,7 +14,7 @@ const select = (key: string, def: string, options: readonly string[]): ParamDef 
 
 const MAGICAL = select("magical", "no", ["no", "yes"]);
 
-const trait = (e: TraitEffect) => e as unknown as Effect;
+const trait = (e: WfrpEffect) => e as unknown as Effect;
 
 const passive = (id: string, params: ParamDef[], effects: (v: RecipeValues) => Effect[]): Recipe => ({
   id,

@@ -9,9 +9,9 @@ import { traitEffects } from "./read";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { inPlay, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
-import type { PsychologyKind } from "@/lib/utils/abilities/schema/kinds";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { SystemConditionResult } from "@/lib/utils/rules/systems/types";
+import type { PsychologyKind } from "@/systems/wfrp/rules/trait-kinds";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 

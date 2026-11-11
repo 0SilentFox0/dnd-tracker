@@ -1,4 +1,4 @@
-import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
+import type { TraitSize } from "@/systems/wfrp/rules/trait-kinds";
 
 // All values: verify against 5e book.
 export const SIZE_HIT_PER_STEP = 10;

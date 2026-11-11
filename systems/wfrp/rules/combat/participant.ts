@@ -5,8 +5,8 @@ import { PARTICIPANT_SLOT } from "../slots";
 import type { HitLocation } from "./constants";
 import { LOCATIONS } from "./constants";
 
-import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { TraitSize } from "@/systems/wfrp/rules/trait-kinds";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface WfrpParticipantStats {

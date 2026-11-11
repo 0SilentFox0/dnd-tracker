@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { allowedEffectKinds } from "../../editor";
 import { describeEffect } from "../../registry/effects";
-import { TRAIT_EFFECT_KINDS } from "../kinds";
 import { AbilitySchema, EffectSchema } from "..";
+
+import { WFRP_EFFECT_KINDS } from "@/systems/wfrp/rules/trait-kinds";
 
 const ability = (effect: unknown, trigger: unknown = { event: "passive" }) => ({ id: "a1", name: "Trait", trigger, effects: [effect] });
 
@@ -63,7 +64,7 @@ describe("wfrp trait effects", () => {
     for (const trigger of [{ event: "passive" }, { event: "action" }, { event: "turnStart" }] as const) {
       const kinds = allowedEffectKinds(trigger);
 
-      for (const k of TRAIT_EFFECT_KINDS) expect(kinds).not.toContain(k);
+      for (const k of WFRP_EFFECT_KINDS) expect(kinds).not.toContain(k);
     }
   });
 
@@ -71,5 +72,18 @@ describe("wfrp trait effects", () => {
     const segments = describeEffect(EffectSchema.parse(effect));
 
     expect(segments[0].key).not.toBe("summary.unknownEffect");
+  });
+});
+
+describe("system effect rows", () => {
+  it("WFRP_EFFECT_KINDS matches the registered rows and the core root", async () => {
+    const { WFRP_EFFECT_ROWS } = await import("@/systems/wfrp/rules/ability-effect-rows");
+
+    const { isSystemEffectKind, SYSTEM_EFFECT_ROWS } = await import("@/lib/utils/abilities/registry/effects/system-rows");
+
+    expect(WFRP_EFFECT_ROWS.map((e) => e.kind)).toEqual([...WFRP_EFFECT_KINDS]);
+    expect(SYSTEM_EFFECT_ROWS.map((r) => r.kind)).toEqual([...WFRP_EFFECT_KINDS]);
+    expect(isSystemEffectKind("wfrpWard")).toBe(true);
+    expect(isSystemEffectKind("heal")).toBe(false);
   });
 });
