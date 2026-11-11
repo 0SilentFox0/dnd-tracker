@@ -74,3 +74,56 @@ describe("wfrp leaks outside the allowed files", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe("d20 / HOMM names and rule-section readers leaving core", () => {
+  // Counts files (not hits) in lib/ app/ components/ types/ scripts/ except registry roots and scripts/templates/systems/**.
+  // A number may only fall: both growth and a stale (too high) maximum fail. Target is 0 once Part 2+ moves the rules out.
+  const roots = new Set(SYSTEM_ROOTS);
+
+  const files = sourceFiles().filter((f) => !roots.has(f) && !f.startsWith("scripts/templates/systems/"));
+
+  const texts = new Map(files.map((f) => [f, fs.readFileSync(path.join(ROOT, f), "utf8")]));
+
+  const filesMatching = (re: RegExp) => files.filter((f) => re.test(texts.get(f) ?? ""));
+
+  const check = (table: Record<string, number>, toRegExp: (key: string) => RegExp) => {
+    const problems = Object.entries(table).flatMap(([key, max]) => {
+      const n = filesMatching(toRegExp(key)).length;
+
+      if (n > max) return [`${key}: ${n} files, max ${max}`];
+
+      return n < max ? [`${key}: lower the maximum to ${n} (was ${max})`] : [];
+    });
+
+    expect(problems).toEqual([]);
+  };
+
+  const LEAK_NAMES: Record<string, number> = {
+    "D20_[A-Z]+": 2,
+    d20System: 1,
+    judgeD20: 1,
+    CONDITION_5E_: 12,
+    applyCondition5e: 6,
+    isHomm: 0,
+    "HOMM_[A-Z]+": 2,
+  };
+
+  const RULES_SECTION_READERS: Record<string, number> = {
+    morale: 6,
+    heroScaling: 6,
+    criticals: 9,
+    deathSaves: 6,
+    concentration: 6,
+    conditions: 8,
+    actions: 11,
+    classes: 20,
+    encounters: 9,
+    formulas: 10,
+    initiative: 8,
+    saves: 3,
+  };
+
+  it("leaked names stay under their maximum", () => check(LEAK_NAMES, (p) => new RegExp(p)));
+
+  it("reads of rules.<section> stay under their maximum", () => check(RULES_SECTION_READERS, (s) => new RegExp(`\\b(?:rules|ruleset|ruleSet|sections)\\??\\.${s}\\b`)));
+});
