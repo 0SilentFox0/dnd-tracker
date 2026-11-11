@@ -104,23 +104,20 @@ describe("importBundle", () => {
     for (const old of idMap.keys()) expect(all.has(old)).toBe(false);
   });
 
-  it("copies a slug, or writes null when another local row already holds it", async () => {
-    const bundle = { ...fullBundle(), spells: [{ id: SP, name: "s", slug: "bolt" }], races: [{ id: R, name: "Human", slug: "human" }] } as unknown as Bundle;
+  it("copies a slug, or writes null for a duplicate slug inside the bundle", async () => {
+    const dup = id("m");
 
-    const free = createFakeDb();
+    const bundle = { ...fullBundle(), spells: [{ id: SP, name: "s", slug: "bolt" }, { id: dup, name: "t", slug: "bolt" }], races: [{ id: R, name: "Human", slug: "human" }] } as unknown as Bundle;
 
-    await importBundle(free.db, bundle, "target");
+    const { db, store } = createFakeDb();
 
-    expect(rowsOf(free.store, "spell")[0].slug).toBe("bolt");
+    await importBundle(db, bundle, "target");
 
-    const taken = createFakeDb();
+    const spells = rowsOf(store, "spell");
 
-    taken.store.get("spell")!.push({ id: "local", campaignId: "target", slug: "bolt" });
-
-    await importBundle(taken.db, bundle, "target");
-
-    expect(rowsOf(taken.store, "spell").find((r) => r.sourceId === SP)!.slug).toBeNull();
-    expect(rowsOf(taken.store, "race")[0].slug).toBe("human");
+    expect(spells.find((r) => r.sourceId === SP)!.slug).toBe("bolt");
+    expect(spells.find((r) => r.sourceId === dup)!.slug).toBeNull();
+    expect(rowsOf(store, "race")[0].slug).toBe("human");
   });
 
   it("sends Prisma.DbNull for null in nullable json columns", async () => {

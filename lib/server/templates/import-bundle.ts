@@ -1,6 +1,6 @@
 import type { TableHashes } from "./sync/types";
 import { assertNoLeak, findForeignContentIds } from "./assert-no-leak";
-import { type Bundle, BUNDLE_TABLES, BundleInvalidError, BundleSchema, type BundleTableDef, delegateOf, pick, type TemplateDb,toPrismaJson } from "./bundle";
+import { type Bundle, BUNDLE_TABLES, BundleInvalidError, BundleSchema, delegateOf, pick, type TemplateDb,toPrismaJson } from "./bundle";
 import { CONTENT_ID_RE, newContentId } from "./ids";
 import { collectKeysAndStrings, remapIds } from "./remap-ids";
 import { dropTakenSlugs } from "./slug-collisions";
@@ -14,14 +14,6 @@ const idCandidates = (bundle: Bundle) => new Set([...collectKeysAndStrings(bundl
 
 /** `overrides` (base id → sourceHash): rows that shadow a base row; any other id missing from the bundle is a base row too. */
 export interface ImportLayer { overrides: Readonly<Record<string, string | null>> }
-
-async function takenSlugs(tx: TemplateDb, t: BundleTableDef, campaignId: string, bundle: Array<Record<string, unknown>>) {
-  if (!bundle.some((r) => r.slug)) return new Map<string, string>();
-
-  const existing = await delegateOf(tx, t).findMany({ where: { campaignId, slug: { not: null } }, select: { id: true, slug: true } });
-
-  return new Map(existing.filter((r) => r.slug).map((r) => [r.slug as string, r.id as string]));
-}
 
 export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId: string, layer?: ImportLayer) {
   const parsed = BundleSchema.safeParse(raw);
@@ -85,8 +77,6 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
   const hashes: TableHashes = {};
 
   const writes = await Promise.all(BUNDLE_TABLES.map(async (t) => {
-    const taken = await takenSlugs(tx, t, targetCampaignId, bundle[t.key]);
-
     const rows = dropTakenSlugs(bundle[t.key].map((row) => {
       const clean = pick(row, t.columns);
 
@@ -110,7 +100,7 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
       const stored = !layer ? { id: idMap.get(row.id)!, sourceId: row.id, sourceHash } : isOverride(row.id) ? { id: newContentId(), sourceId: row.id, sourceHash: layer.overrides[row.id] } : { id: idMap.get(row.id)!, sourceId: null, sourceHash: null };
 
       return { ...remapped, ...stored, campaignId: targetCampaignId } as Record<string, unknown> & { id: string; slug?: string | null };
-    }), taken).map((row) => toPrismaJson(row, t));
+    }), new Map()).map((row) => toPrismaJson(row, t));
 
     return { t, rows };
   }));
