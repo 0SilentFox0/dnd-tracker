@@ -7,15 +7,22 @@
  * (рідкісні тригери), контроль юнітів і закляття 5-го рівня від імені гравця.
  * Змінює героїв і створює бої в БД — лише локальна копія (`scripts/db/prodcopy-db.sh`).
  *
- *   DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep [--mode all|sweep|targeted|control|level5] [--campaign <id>] [--out <dir>] [--consistency] [--keep-battles]
+ *   DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep [--template <ключ шаблону>] [--mode all|sweep|targeted|control|level5|system] [--campaign <id>] [--out <dir>] [--consistency] [--keep-battles]
  *
- * Звіт: <out>/battle-sweep.md (+ data.json, log.txt). Код виходу 1, якщо є помилки.
+ * Без --template проганяє всі шаблони (srd-5.2, heroes-homm, grim-d100) окремими процесами; профіль — scripts/sim/battle-sweep/profiles.
+ * Для шаблонів без героїв герої сидяться з контенту шаблону й видаляються після прогону.
+ * Звіт: <out>/<шаблон>/battle-sweep.md (+ data.json, log.txt). Код виходу 1, якщо є помилки.
  * Створені бої видаляються після прогону; --keep-battles лишає їх для огляду в браузері.
  */
+import { spawnSync } from "node:child_process";
 import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { assertLocalProdcopy, parseTemplateKeys } from "./battle-sweep/args";
+import { modeRuns, type SweepProfile } from "./battle-sweep/profiles";
+import { diffRowCounts, overallExit, type SweepRunResult } from "./battle-sweep/row-counts";
+import { openTemplateRun, snapshotRowCounts, type TemplateRun } from "./battle-sweep/template-campaign";
 import { resultTextOf } from "./log-text";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -60,8 +67,10 @@ import { rollDiceList } from "@/lib/utils/common/dice";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, writeUnlocked } from "@/lib/utils/skills/progression";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 
-if (!/@(localhost|127\.0\.0\.1)[:/]/.test(process.env.DATABASE_URL ?? "")) {
-  console.error("❌ battle-sweep змінює героїв і створює бої — лише локальна БД (DATABASE_URL на localhost).");
+try {
+  assertLocalProdcopy(process.env.DATABASE_URL);
+} catch (e) {
+  console.error(`❌ ${(e as Error).message}`);
   process.exit(1);
 }
 
@@ -80,6 +89,12 @@ const OUT = arg("out") ?? join(tmpdir(), "battle-sweep");
 const CONSISTENCY = argv.includes("--consistency");
 
 const KEEP_BATTLES = argv.includes("--keep-battles");
+
+const WORKER = argv.includes("--worker");
+
+let PROFILE!: SweepProfile;
+
+let templateRun: TemplateRun | null = null;
 
 const ROUNDS = 5;
 
@@ -262,7 +277,7 @@ async function call(label: string, options: any, body: any = {}, as?: string): P
 
     if (rolled && !e.isCancelled && !dice?.length) issue("error", `немає diceRolls: ${resultTextOf(e)}`);
 
-    for (const die of dice?.flatMap((g) => g.dice) ?? []) if (![4, 6, 8, 10, 12, 20].includes(die.sides) || die.value < 1 || die.value > die.sides) issue("error", `кубик поза межами: d${die.sides}=${die.value} у «${resultTextOf(e)}»`);
+    for (const die of dice?.flatMap((g) => g.dice) ?? []) if (![4, 6, 8, 10, 12, 20, ...(PROFILE.judge === "server" ? [100] : [])].includes(die.sides) || die.value < 1 || die.value > die.sides) issue("error", `кубик поза межами: d${die.sides}=${die.value} у «${resultTextOf(e)}»`);
   }
 
   if (res.status === 200) invariants(label);
@@ -367,8 +382,18 @@ function learnLegally(tree: any, order: string[], level: number, who: string) {
   return learned;
 }
 
+async function prepareTemplate() {
+  templateRun = await openTemplateRun(PROFILE, CAMPAIGN);
+  campaign = templateRun.campaign;
+  ctx.campaignId = campaign.id;
+  dmId = campaign.dmUserId;
+  heroRows = await prisma.character.findMany({ where: { id: { in: templateRun.heroIds } } });
+}
+
 async function prepare() {
-  campaign = await prisma.campaign.findFirstOrThrow({ where: CAMPAIGN ? { id: CAMPAIGN } : { name: "HOMM5", kind: "campaign" } });
+  if (PROFILE.source.kind === "template") return prepareTemplate();
+
+  campaign = await prisma.campaign.findFirstOrThrow({ where: CAMPAIGN ? { id: CAMPAIGN } : { name: PROFILE.source.name, kind: "campaign" } });
   ctx.campaignId = campaign.id;
   dmId = campaign.dmUserId;
   for (const row of await prisma.skillTree.findMany({ where: { campaignId: campaign.id } })) trees[row.race] = normalizeTree(row);
@@ -653,7 +678,9 @@ async function attack(actor: any) {
 
   const d20 = rng() < 0.1 ? 20 : 6 + Math.floor(rng() * 15);
 
-  return call("attack", ATTACK, { attackerId: actor.basicInfo.id, targetId: target.basicInfo.id, attackId: weapon.id, d20Roll: Math.min(20, d20), damageRolls: rollDiceList(formula, rng), endTurn: true });
+  const roll = PROFILE.judge === "server" ? { serverRoll: true } : { d20Roll: Math.min(20, d20) };
+
+  return call("attack", ATTACK, { attackerId: actor.basicInfo.id, targetId: target.basicInfo.id, attackId: weapon.id, ...roll, damageRolls: rollDiceList(formula, rng), endTurn: true });
 }
 
 async function takeTurn(spells: Map<string, any>) {
@@ -770,6 +797,20 @@ function interleaveByRace(units: { id: string; raceId: string | null }[]) {
   return out;
 }
 
+async function sweepTemplate(spells: Map<string, any>, report: string[]) {
+  const pool = interleaveByRace(await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, select: { id: true, raceId: true } }));
+
+  const per = PROFILE.unitsPerBattle;
+
+  const chunks = Array.from({ length: Math.min(PROFILE.maxBattles, Math.ceil(pool.length / per)) }, (_, i) => pool.slice(i * per, (i + 1) * per));
+
+  for (const [i, chunk] of chunks.entries()) {
+    const res = await runBattle(`Б${i + 1}`, chunk, spells, i + 1);
+
+    if (res) report.push(`- ${res}`);
+  }
+}
+
 async function sweep(spells: Map<string, any>, report: string[]) {
   const shuffled = interleaveByRace(await prisma.unit.findMany({ where: { campaignId: ctx.campaignId }, select: { id: true, raceId: true } }));
 
@@ -845,7 +886,8 @@ async function ensureSyntheticSpells() {
 
 async function main() {
   await prepare();
-  await ensureSyntheticSpells();
+
+  if (PROFILE.source.kind === "campaign") await ensureSyntheticSpells();
 
   const spellRows = await prisma.spell.findMany({ where: { campaignId: ctx.campaignId }, include: { spellGroup: true } });
 
@@ -853,27 +895,31 @@ async function main() {
 
   for (const s of spellRows as any[]) spellStats.set(s.id, { name: s.name, school: s.spellGroup?.name ?? "-", level: s.level, casts: 0, ok: 0, noEffect: 0, rejected: [], samples: [], kinds: (s.spellEffects ?? []).map((e: any) => e.kind).join("+") } as any);
 
-  const report: string[] = [`# Battle sweep: ${campaign.name}`, "", "## Дерева", ...treeChecks.map((t) => `- ${t}`)];
+  const report: string[] = [`# Battle sweep: ${campaign.name} (${PROFILE.key})`, "", ...(treeChecks.length ? ["## Дерева", ...treeChecks.map((t) => `- ${t}`)] : [])];
 
-  if (MODE === "all" || MODE === "sweep") await sweep(spells, report);
+  const runs = (wanted: Parameters<typeof modeRuns>[2]) => modeRuns(PROFILE, MODE, wanted);
 
-  if (MODE === "all" || MODE === "targeted") await targeted(spells);
+  if (runs("sweep")) await (PROFILE.source.kind === "template" ? sweepTemplate(spells, report) : sweep(spells, report));
 
-  if (MODE === "all" || MODE === "control") await controlCheck(spells);
+  if (runs("targeted")) await targeted(spells);
 
-  if (MODE === "all" || MODE === "level5") await level5Check(spells);
+  if (runs("control")) await controlCheck(spells);
 
-  if (MODE === "all" || MODE === "targeted" || MODE === "aura") await auraZoneCheck();
+  if (runs("level5")) await level5Check(spells);
 
-  if (MODE === "all" || MODE === "targeted" || MODE === "reserve") await reserveCheck();
+  if (runs("aura")) await auraZoneCheck();
 
-  if (MODE === "all" || MODE === "targeted" || MODE === "map") await mapCheck(spells);
+  if (runs("reserve")) await reserveCheck();
 
-  if (MODE === "all" || MODE === "targeted" || MODE === "maze") await mazeCheck();
+  if (runs("map")) await mapCheck(spells);
+
+  if (runs("maze")) await mazeCheck();
+
+  if (runs("system")) await systemChecks(spells);
 
   if (targetedResults.length) report.push("\n## Цільові перевірки", ...targetedResults.map((t) => `- ${t}`));
 
-  if (MODE === "all" || MODE === "sweep") report.push(...coverageReport());
+  if (runs("sweep")) report.push(...coverageReport());
 
   const errors = issues.filter((i) => i.level === "error");
 
@@ -886,6 +932,7 @@ async function main() {
   writeFileSync(join(OUT, "log.txt"), fullLog.join("\n"));
   console.info(targetedResults.join("\n"));
   await removeTestBattles();
+  await templateRun?.cleanup();
   console.info(`\n${errors.length ? "❌" : "✅"} помилок: ${errors.length}, попереджень: ${issues.length - errors.length}. Звіт: ${join(OUT, "battle-sweep.md")}`);
   await prisma.$disconnect();
   process.exit(errors.length ? 1 : 0);
@@ -907,6 +954,63 @@ const tskip = (name: string, detail: string) => { targetedResults.push(`⏭️ $
 const byName = (n: string) => P().find((p) => p.basicInfo.name === n);
 
 const nextOnly = async () => { if (state.status === "active") await call("next-turn", NEXT); };
+
+const diceSidesOf = (log: any[]) => new Set(log.flatMap((e: any) => (e.actionDetails?.diceRolls ?? []).flatMap((g: any) => g.dice.map((d: any) => d.sides))));
+
+/** Template-specific checks on seeded heroes: attack judge dice, ammo and concentration where the content has them. */
+async function systemChecks(spells: Map<string, any>) {
+  battleLabel = "система";
+
+  const foe = await prisma.unit.findFirstOrThrow({ where: { campaignId: ctx.campaignId }, orderBy: { level: "asc" } });
+
+  const setup = [{ id: heroRows[0].id, type: ParticipantSourceType.CHARACTER, side: "ally" }, { id: foe.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }];
+
+  const battle = await createTestBattle({ data: { campaignId: ctx.campaignId, name: "ТЕСТ система", status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+
+  ctx.battleId = battle.id;
+  state = await readState();
+
+  const started = await call("start", START);
+
+  if (started.status !== 200) return tcheck("старт бою для перевірок системи", false, JSON.stringify(started.body).slice(0, 200));
+
+  const heroId = heroRows[0].id;
+
+  const heroTurn = await untilTurnOf((p) => p?.basicInfo.id === heroId);
+
+  const hero = () => byId(heroId);
+
+  const weapon = hero()?.battleData.attacks?.[0];
+
+  if (!heroTurn || !weapon) return tskip("атака героя", heroTurn ? "у героя немає атак" : "хід героя не настав");
+
+  const target = foesOf(hero())[0];
+
+  const roll = PROFILE.judge === "server" ? { serverRoll: true } : { d20Roll: 20 };
+
+  const wantSides = PROFILE.judge === "server" ? 100 : 20;
+
+  const r = await call("attack", ATTACK, { attackerId: heroId, targetId: target.basicInfo.id, attackId: weapon.id, ...roll, damageRolls: rollDiceList(heroAttackDamageParts(hero(), weapon).formula, rng), endTurn: false });
+
+  tcheck(PROFILE.judge === "server" ? "сервер кидає d100 за атаку" : "d20-атака героя", r.status === 200 && diceSidesOf(r.log).has(wantSides), `${r.status}; кубики d${[...diceSidesOf(r.log)].join(",d")}`);
+
+  const withAmmo = P().find((p) => p.battleData.ammo && Object.keys(p.battleData.ammo).length);
+
+  if (PROFILE.judge === "server") {
+    if (withAmmo) tcheck("боєзапас засіяно на старті", Object.values(withAmmo.battleData.ammo as Record<string, number>).every((n) => n > 0), JSON.stringify(withAmmo.battleData.ammo))
+    else tskip("боєзапас", "жоден учасник бою не має зброї з боєзапасом у даних шаблону");
+  }
+
+  if (PROFILE.judge === "client") {
+    const spell = ((hero().spellcasting?.knownSpells ?? []) as any[]).map((k: any) => spells.get(typeof k === "string" ? k : k.id)).find((sp: any) => sp?.concentration);
+
+    if (!spell) return tskip("концентрація", "герой не знає жодного заклинання з концентрацією");
+
+    const cast = await castSpell(hero(), spell);
+
+    tcheck("концентрація ставиться на кастері", cast?.status === 200 && !!byId(heroId)?.battleData.activeEffects.some((e: any) => e.concentration), `${spell.name}: ${cast?.status}`);
+  }
+}
 
 async function untilTurnOf(pred: (p: any) => boolean) {
   for (let i = 0; i < 60 && state.status === "active" && !pred(current()); i++) await nextOnly();
@@ -1552,7 +1656,53 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
   tcheck(emptyName, r.status === 200 && aim?.x === empty.x && aim?.y === empty.y && hitIds.length === 0, `${r.status} точка ${JSON.stringify(empty)}; aimCell=${JSON.stringify(aim)}; цілей ${hitIds.length}${r.status !== 200 ? ` ${JSON.stringify(r.body).slice(0, 200)}` : ""}`);
 }
 
-main().catch(async (e) => { console.error(e); await removeTestBattles().catch(() => undefined); await prisma.$disconnect(); process.exit(1); });
+async function orchestrate() {
+  let profiles: SweepProfile[];
+
+  try {
+    profiles = parseTemplateKeys(argv);
+
+    if (CAMPAIGN && profiles.length !== 1) throw new Error("--campaign needs --template");
+  } catch (e) {
+    console.error(`❌ ${(e as Error).message}`);
+    process.exit(1);
+  }
+
+  const passthrough: string[] = [];
+
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--template" || argv[i] === "--out") i++;
+    else passthrough.push(argv[i]);
+  }
+
+  const before = await snapshotRowCounts();
+
+  const results: SweepRunResult[] = [];
+
+  for (const profile of profiles) {
+    console.info(`\n=== ${profile.key} ===`);
+
+    const run = spawnSync(process.execPath, [...process.execArgv, process.argv[1], ...passthrough, "--template", profile.key, "--worker", "--out", join(OUT, profile.key)], { stdio: "inherit", env: process.env });
+
+    results.push({ key: profile.key, exitCode: run.status ?? 1 });
+  }
+
+  const drift = diffRowCounts(before, await snapshotRowCounts());
+
+  const lines = [...results.map((r) => `${r.exitCode === 0 ? "✅" : "❌"} ${r.key}: exit ${r.exitCode}`), drift.length && !KEEP_BATTLES ? `❌ row counts changed after the run:\n${drift.map((d) => `  ${d}`).join("\n")}` : "✅ row counts unchanged after the run"];
+
+  mkdirSync(OUT, { recursive: true });
+  writeFileSync(join(OUT, "summary.txt"), lines.join("\n"));
+  console.info(`\n${lines.join("\n")}`);
+  await prisma.$disconnect();
+  process.exit(overallExit(results) || (drift.length && !KEEP_BATTLES ? 1 : 0));
+}
+
+const failWorker = async (e: unknown) => { console.error(e); await removeTestBattles().catch(() => undefined); await templateRun?.cleanup().catch(() => undefined); await prisma.$disconnect(); process.exit(1); };
+
+if (WORKER) PROFILE = parseTemplateKeys(argv)[0];
+
+(WORKER ? main() : orchestrate()).catch(failWorker);
 
 
 // ---------- лабіринт ----------
