@@ -263,7 +263,7 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
       perKind.artifacts = { ...perKind.artifacts, errors: perKind.artifacts.errors + second.counts.error };
     }
 
-    const clearable = clearableColumnsOf(kind, hooks?.clearableColumns);
+    const clearable = clearableColumnsOf(kind);
 
     if (!dryRun && clearable.length > 0) await clearStaleColumns(template.id, kind, rows, clearable);
   }

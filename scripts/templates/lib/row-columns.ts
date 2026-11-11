@@ -29,7 +29,7 @@ export function rowSchemaIssues(kind: PackKind, row: Record<string, unknown>): s
 /** Optional core-table columns a pack may drop; a rerun clears them for every system, not only d20. */
 export const CORE_CLEARABLE_COLUMNS: Partial<Record<PackKind, readonly string[]>> = { spells: ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod", "fixedDice", "damageBonus"] };
 
-export const clearableColumnsOf = (kind: PackKind, systemColumns?: Partial<Record<PackKind, readonly string[]>>): string[] => [...(CORE_CLEARABLE_COLUMNS[kind] ?? []), ...(systemColumns?.[kind] ?? [])];
+export const clearableColumnsOf = (kind: PackKind): string[] => [...(CORE_CLEARABLE_COLUMNS[kind] ?? [])];
 
 /** The import treats null as an empty cell and keeps the old value, so a rerun clears dropped optional columns itself. */
 export const staleColumns = (rows: readonly PackRow[], columns: readonly string[]): Array<{ column: string; slugs: string[] }> =>

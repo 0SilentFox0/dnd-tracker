@@ -37,8 +37,6 @@ export interface PackHooks {
   fromPackRow?(kind: PackKind, row: PackRow, refs: PackRefs & { rowId: string | undefined }): PackRow;
   /** Import: system-specific row rewrites after the generic icon fill, before the importer sees the rows. */
   prepareRows?(kind: PackKind, rows: PackRow[], ctx: PrepareCtx): Promise<PackRow[]>;
-  /** Import: optional columns a rerun nulls out when the pack row no longer carries them. */
-  clearableColumns?: Partial<Record<PackKind, readonly string[]>>;
   /** Translation apply: mechanical fix-ups of a translated entry before validation. */
   normalizeTranslation?(entry: KeyedString, text: string, glossary: Glossary): string;
 }

@@ -38,11 +38,10 @@ describe("staleColumns (d20 spell columns)", () => {
 });
 
 describe("clearableColumnsOf", () => {
-  it("core spell columns apply to every pack, including wfrp (no system hook needed)", () => {
+  it("core spell columns apply to every pack, including wfrp", () => {
     const spells = [{ slug: "a", name: "Bolt" }] as PackRow[];
 
-    expect(PACK_HOOKS.wfrp?.clearableColumns?.spells).toBeUndefined();
-    expect(staleColumns(spells, clearableColumnsOf("spells", PACK_HOOKS.wfrp?.clearableColumns)).map((c) => c.column)).toContain("upcastDice");
+    expect(staleColumns(spells, clearableColumnsOf("spells")).map((c) => c.column)).toContain("upcastDice");
     expect(clearableColumnsOf("spells")).toEqual(CORE_CLEARABLE_COLUMNS.spells);
     expect(clearableColumnsOf("units")).toEqual([]);
   });
@@ -125,7 +124,6 @@ describe("pack hooks composition", () => {
     expect(PACK_HOOKS.homm.prepareRows).toBe(D20_HOOKS.prepareRows);
     expect(PACK_HOOKS.homm.validatePack).toBeDefined();
     expect(PACK_HOOKS.wfrp.prepareRows).toBeUndefined();
-    expect(PACK_HOOKS.wfrp.clearableColumns).toBeUndefined();
   });
 
   it("SYSTEM_MODULE follows the system meta", () => {
