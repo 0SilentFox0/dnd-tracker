@@ -1,28 +1,18 @@
 #!/usr/bin/env tsx
 // pnpm template <index|validate|build|import|publish|icons|export|backfill-keys|backfill-slugs|backfill-locale|i18n> ...  (see USAGE)
-import { parseCommandArgs } from "./lib/cli-args";
+import { assertOnlyFlags, COMMAND_USAGE, parseCommandArgs } from "./lib/cli-args";
 import { i18nCommand } from "./lib/i18n-command";
 import { writeIndex } from "./lib/index-gen";
 import { readPack } from "./lib/pack";
 import { validatePack } from "./lib/validate";
 
-const USAGE = [
-  "pnpm template index",
-  "pnpm template validate <key>",
-  "pnpm template build <key> [--source <dir>] [--init-slugs]",
-  "pnpm template import <key> [--owner <userId>] [--dry-run] [--publish] [--prune] [--allow-untranslated] [--allow-remote]",
-  "pnpm template publish <key> [--allow-untranslated] [--allow-remote]",
-  "pnpm template icons <key> --dir <images> [--kinds a,b] [--dry-run] [--allow-remote]",
-  "pnpm template export <key> --from <campaignId> [--system <system>] [--name <name>] [--slugs <file>]",
-  "pnpm template backfill-keys [--apply] [--allow-remote]",
-  "pnpm template backfill-slugs <key> [--apply] [--allow-remote]",
-  "pnpm template backfill-locale <key> [--locale uk] [--apply] [--allow-remote]",
-  "pnpm template i18n <extract|apply|normalize|status|convert> <key> <locale>",
-].join("\n  ");
+const USAGE = Object.values(COMMAND_USAGE).join("\n  ");
 
 type Command = (args: string[]) => Promise<void> | void;
 
 async function backfillKeys(args: string[]) {
+  assertOnlyFlags(args, "backfill-keys");
+
   const [{ assertSeedTarget }, { prisma }, { CampaignKind, CampaignVisibility }, { planKeyBackfill }] = await Promise.all([import("../seed/seed-library-lib"), import("@/lib/db"), import("@/lib/constants/campaigns"), import("./lib/store")]);
 
   try {
@@ -43,7 +33,7 @@ async function backfillKeys(args: string[]) {
 }
 
 function validate(args: string[]) {
-  const { key } = parseCommandArgs(args);
+  const { key } = parseCommandArgs(args, undefined, false, "validate");
 
   const issues = validatePack(readPack(key), {});
 
@@ -57,7 +47,7 @@ function validate(args: string[]) {
 }
 
 async function build(args: string[]) {
-  const { key, flags, options } = parseCommandArgs(args);
+  const { key, flags, options } = parseCommandArgs(args, undefined, false, "build");
 
   const { buildPack } = await import("./lib/build");
 
@@ -65,7 +55,7 @@ async function build(args: string[]) {
 }
 
 async function importCommand(args: string[]) {
-  const { key, flags, options } = parseCommandArgs(args);
+  const { key, flags, options } = parseCommandArgs(args, undefined, false, "import");
 
   const [{ importPack }, { prisma }] = await Promise.all([import("./lib/import-pack"), import("@/lib/db")]);
 
@@ -81,7 +71,7 @@ async function importCommand(args: string[]) {
 }
 
 async function backfillSlugsCommand(args: string[]) {
-  const { key, flags } = parseCommandArgs(args);
+  const { key, flags } = parseCommandArgs(args, undefined, false, "backfill-slugs");
 
   const [{ backfillSlugs }, { prisma }] = await Promise.all([import("./lib/backfill-slugs"), import("@/lib/db")]);
 
@@ -95,7 +85,7 @@ async function backfillSlugsCommand(args: string[]) {
 }
 
 async function backfillLocaleCommand(args: string[]) {
-  const { key, flags, options } = parseCommandArgs(args);
+  const { key, flags, options } = parseCommandArgs(args, undefined, false, "backfill-locale");
 
   const [{ backfillLocale }, { prisma }] = await Promise.all([import("./lib/locale-backfill"), import("@/lib/db")]);
 
@@ -107,7 +97,7 @@ async function backfillLocaleCommand(args: string[]) {
 }
 
 async function publish(args: string[]) {
-  const { key, flags } = parseCommandArgs(args);
+  const { key, flags } = parseCommandArgs(args, undefined, false, "publish");
 
   const [{ publishPack }, { prisma }] = await Promise.all([import("./lib/import-pack"), import("@/lib/db")]);
 
@@ -121,7 +111,7 @@ async function publish(args: string[]) {
 }
 
 async function icons(args: string[]) {
-  const { key, flags, options } = parseCommandArgs(args);
+  const { key, flags, options } = parseCommandArgs(args, undefined, false, "icons");
 
   if (!options["--dir"]) throw new Error("--dir <images> is required");
 
@@ -143,7 +133,8 @@ const COMMANDS: Record<string, Command> = {
   publish,
   icons,
   export: (args) => import("./lib/export-command").then(({ exportCommand }) => exportCommand(args)),
-  index: () => {
+  index: (args) => {
+    assertOnlyFlags(args, "index");
     writeIndex();
     console.info("data/templates/manifests.ts and dictionaries.server.ts are up to date");
   },

@@ -19,7 +19,7 @@ const USAGE = "pnpm template export <key> --from <campaignId> [--system <system>
 const write = (file: string, value: unknown) => fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
 
 export async function exportCommand(args: string[]): Promise<void> {
-  const { key, options } = parseCommandArgs(args, undefined, true);
+  const { key, options } = parseCommandArgs(args, undefined, true, "export");
 
   if (!options["--from"]) throw new Error(USAGE);
 
