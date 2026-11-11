@@ -38,7 +38,7 @@ describe("system ui registry", () => {
   });
 
   it("only wfrp has battle slots and the spell magic editor", () => {
-    expect(Object.keys(systemUiOf("wfrp").battle ?? {}).sort()).toEqual(["CastTest", "ChannelDialog", "ChannelLabel", "ConditionTestPanel", "RollBody"]);
+    expect(Object.keys(systemUiOf("wfrp").battle ?? {}).sort()).toEqual(["CastTest", "ChannelDialog", "ChannelLabel", "ConditionTestPanel", "RollBody", "RollTitle"]);
     expect(systemUiOf("wfrp").SpellMagicFields).toBeDefined();
 
     for (const key of ["homm", "dnd5e"] as const) {
@@ -57,5 +57,11 @@ describe("system ui registry", () => {
     const wfrp = RULE_SYSTEM_REGISTRY.wfrp;
 
     expect([wfrp.spells, wfrp.items, wfrp.d20Stats, wfrp.rest.kinds]).toEqual([true, false, false, false]);
+  });
+});
+
+describe("systemUiOf unknown key", () => {
+  it("throws instead of returning undefined", () => {
+    expect(() => systemUiOf("nope")).toThrow("Unknown rule system: nope");
   });
 });

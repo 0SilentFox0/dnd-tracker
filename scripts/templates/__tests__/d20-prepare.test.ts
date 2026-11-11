@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { iconColumnOf, withIcons } from "../lib/icons-file";
 import type { IconsFile, PackRow } from "../lib/pack";
-import { staleColumns } from "../lib/row-columns";
+import { clearableColumnsOf, CORE_CLEARABLE_COLUMNS, staleColumns } from "../lib/row-columns";
 import { PACK_HOOKS, SYSTEM_MODULE } from "../systems";
 import { D20_HOOKS } from "../systems/d20";
-import { CLEARABLE_SPELL_COLUMNS, resolveSchoolRefs, withClassIcons } from "../systems/d20/prepare";
+import { resolveSchoolRefs, withClassIcons } from "../systems/d20/prepare";
 
 describe("resolveSchoolRefs", () => {
   it("replaces school names with group ids anywhere in a row, leaves unknown names", () => {
@@ -26,7 +26,7 @@ describe("staleColumns (d20 spell columns)", () => {
       { slug: "b", name: "Freedom of Movement" },
     ] as PackRow[];
 
-    expect(staleColumns(spells, CLEARABLE_SPELL_COLUMNS)).toEqual([
+    expect(staleColumns(spells, clearableColumnsOf("spells"))).toEqual([
       { column: "dieSides", slugs: ["b"] },
       { column: "upcastDice", slugs: ["b"] },
       { column: "upcastTargets", slugs: ["a", "b"] },
@@ -34,6 +34,17 @@ describe("staleColumns (d20 spell columns)", () => {
       { column: "fixedDice", slugs: ["a", "b"] },
       { column: "damageBonus", slugs: ["a", "b"] },
     ]);
+  });
+});
+
+describe("clearableColumnsOf", () => {
+  it("core spell columns apply to every pack, including wfrp (no system hook needed)", () => {
+    const spells = [{ slug: "a", name: "Bolt" }] as PackRow[];
+
+    expect(PACK_HOOKS.wfrp?.clearableColumns?.spells).toBeUndefined();
+    expect(staleColumns(spells, clearableColumnsOf("spells", PACK_HOOKS.wfrp?.clearableColumns)).map((c) => c.column)).toContain("upcastDice");
+    expect(clearableColumnsOf("spells")).toEqual(CORE_CLEARABLE_COLUMNS.spells);
+    expect(clearableColumnsOf("units")).toEqual([]);
   });
 });
 

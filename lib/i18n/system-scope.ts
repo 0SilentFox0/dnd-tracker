@@ -15,3 +15,6 @@ export function systemScope(key: string | null, slot: SystemScopeSlot): readonly
 
   return (list ?? []) as readonly Namespace[];
 }
+
+/** Keys of `gameTerms.ruleSystem.*` follow the open set of system keys, so the typed translator cannot check them. */
+export const ruleSystemLabelKey = (key: string): never => `ruleSystem.${key}` as never;

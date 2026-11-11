@@ -135,6 +135,7 @@ export interface SpellMagicFieldsProps extends SpellFormFieldsProps {
 
 export interface SystemBattleUi {
   RollBody?: ComponentType<RollBodyProps>;
+  RollTitle?: ComponentType;
   CastTest?: ComponentType<CastTestProps>;
   ChannelDialog?: ComponentType<ChannelDialogProps>;
   ChannelLabel?: ComponentType;

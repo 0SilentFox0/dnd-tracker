@@ -47,7 +47,6 @@
         "disadvantage": "Disadvantage"
       },
       "d100": {
-        "title": "Attack roll · d100",
         "mode": {
           "server": "Auto",
           "manual": "Manual"

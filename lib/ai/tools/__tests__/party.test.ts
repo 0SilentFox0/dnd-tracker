@@ -52,3 +52,27 @@ describe("partySummary", () => {
     expect(loadRules).not.toHaveBeenCalled();
   });
 });
+
+describe("system tool notes", () => {
+  it("get_party description carries the wfrp note, and the core text stays system-neutral", async () => {
+    const { getPartyTool, readCharacterTool } = await import("@/lib/ai/tools/party");
+
+    const { getBattleStateTool } = await import("@/lib/ai/tools/battle");
+
+    expect(getPartyTool.description).toContain("Wounds and Fate");
+    expect(readCharacterTool.description).toContain("characteristics");
+    expect(getBattleStateTool.description).toContain("Wounds");
+  });
+
+  it("core ai tool sources have no system names", async () => {
+    const fs = await import("node:fs");
+
+    const path = await import("node:path");
+
+    const dir = path.resolve(__dirname, "..");
+
+    const offenders = fs.readdirSync(dir).filter((f) => /\.ts$/.test(f) && /grim|wfrp/i.test(fs.readFileSync(path.join(dir, f), "utf8")));
+
+    expect(offenders).toEqual([]);
+  });
+});

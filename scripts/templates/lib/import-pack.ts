@@ -10,7 +10,7 @@ import { JSON_REFS, mapJsonRefs, slugsToIds } from "./json-refs";
 import { delegateFor } from "./kind-delegate";
 import { type Pack, type PackRow, readPack, TEMPLATES_DIR } from "./pack";
 import { type OutsideRow, pruneRows, rowsOutsidePack } from "./prune";
-import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues, staleColumns } from "./row-columns";
+import { clearableColumnsOf, EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues, staleColumns } from "./row-columns";
 import { assertNoDuplicatesFromUnslugged } from "./slug-guard";
 import { ensureTemplate, makeTemplateStore } from "./store";
 import { validatePack } from "./validate";
@@ -263,9 +263,9 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
       perKind.artifacts = { ...perKind.artifacts, errors: perKind.artifacts.errors + second.counts.error };
     }
 
-    const clearable = hooks?.clearableColumns?.[kind];
+    const clearable = clearableColumnsOf(kind, hooks?.clearableColumns);
 
-    if (!dryRun && clearable) await clearStaleColumns(template.id, kind, rows, clearable);
+    if (!dryRun && clearable.length > 0) await clearStaleColumns(template.id, kind, rows, clearable);
   }
 
   const failed = Object.values(perKind).some((c) => c.errors > 0);

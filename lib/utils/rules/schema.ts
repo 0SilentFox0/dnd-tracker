@@ -8,7 +8,7 @@ import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
-import { isRuleSystemKey } from "@/lib/utils/rules/systems/meta";
+import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
 import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
@@ -82,7 +82,7 @@ const sectionSchemas = {
   spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
   advancement: AdvancementRulesSchema,
   tables: TablesRulesSchema,
-  system: z.strictObject({ key: z.string().refine(isRuleSystemKey, { message: UNKNOWN_SYSTEM_MESSAGE }) }),
+  system: z.strictObject({ key: z.enum(RULE_SYSTEM_KEYS as [string, ...string[]], { message: UNKNOWN_SYSTEM_MESSAGE }) }),
 };
 
 // Виводимо тип до застосування defaults: DEFAULT_RULES типізований через Ruleset.

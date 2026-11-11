@@ -21,7 +21,7 @@ import type { ActionResult } from "@/lib/server/assistant/types";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
-import { SYSTEM_SERVER } from "@/lib/server/systems/registry";
+import { mergeSystemOperations } from "@/lib/server/systems/registry";
 import type { Actor } from "@/lib/utils/api/actor";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
@@ -32,7 +32,7 @@ const stashWithId = z.union(stashActionSchema.options.map(schema => schema.exten
 
 const serverRoll = z.union(sheetRollSchema.options.map(schema => schema.extend({ ...characterIdSchema.shape, mode: z.literal("server") }).strict()));
 
-export const PROGRESSION_INPUTS: Record<string, z.ZodType> = {
+const CORE_INPUTS: Record<string, z.ZodType> = {
   "level-up": withId(LevelUpBodySchema), choices: withId(ChoicesBodySchema), resources: withId(resourcesEditSchema),
   "inventory.patch": withId(updateInventorySchema), "inventory": characterIdSchema,
   "stash": characterIdSchema, "stash.apply": stashWithId, "transfer": withId(transferSchema),
@@ -41,9 +41,10 @@ export const PROGRESSION_INPUTS: Record<string, z.ZodType> = {
   "progression.learn": characterIdSchema.extend({ nodeId: z.string().min(1) }).strict(),
   "progression.unlearn": characterIdSchema.extend({ nodeIds: z.array(z.string().min(1)).min(1).max(100) }).strict(),
   "progression.reset": characterIdSchema, "progression.seen-level": characterIdSchema,
-  log: characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.log": characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.free-artifacts": z.object({}),
-  ...Object.fromEntries(Object.values(SYSTEM_SERVER).flatMap(system => Object.entries(system.operations ?? {}).map(([key, { input }]) => [key, input])))
+  log: characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.log": characterIdSchema.extend({ cursor: z.string().max(100).optional() }), "stash.free-artifacts": z.object({})
 };
+
+export const PROGRESSION_INPUTS = mergeSystemOperations(CORE_INPUTS, ({ input }) => input);
 export const progressionReads = new Set(["inventory", "stash", "sheet", "progression", "log", "stash.log", "stash.free-artifacts"]);
 
 export async function progressionState(actor: Actor, input: Record<string, unknown>, operation?: string) {

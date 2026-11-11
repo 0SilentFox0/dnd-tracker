@@ -8,7 +8,7 @@ import { ACTIVE_CHARACTER, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { readContent } from "@/lib/server/scenario/page-store";
-import { systemServerOf } from "@/lib/server/systems/registry";
+import { systemServerOf, withSystemNotes } from "@/lib/server/systems/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import { docText } from "@/lib/utils/scenario/doc";
 
@@ -32,7 +32,7 @@ export const getPartyTool = defineTool({
   name: "get_party",
   scopes: ["ai"],
   title: "Party",
-  description: "Player heroes of the campaign: id, name, level, class, race, AC, DM notes (Grim d100 campaigns: race, career and tier, characteristics, Wounds and Fate instead of class and AC).",
+  description: withSystemNotes("Player heroes of the campaign: id, name, level, class, race, AC, DM notes.", "get_party"),
   input: z.object({}),
   handler: async (ctx) => partySummary(ctx.campaignId),
 });
@@ -41,7 +41,7 @@ export const readCharacterTool = defineTool({
   name: "read_character",
   scopes: ["ai"],
   title: "Character sheet",
-  description: "Full character sheet (player hero or NPC hero): ability scores, AC, HP-related stats, goals, DM notes and the hero biography from the scenario. Grim d100: characteristics, career, Wounds and Fate instead of ability scores and AC.",
+  description: withSystemNotes("Full character sheet (player hero or NPC hero): ability scores, AC, HP-related stats, goals, DM notes and the hero biography from the scenario.", "read_character"),
   input: z.object({ id: z.string().min(1) }),
   handler: async (ctx, { id }) => {
     const ai = systemServerOf(await loadRules(ctx.campaignId)).ai;

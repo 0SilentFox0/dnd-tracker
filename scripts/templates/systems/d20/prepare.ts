@@ -1,7 +1,5 @@
 import type { IconsFile, PackRow } from "../../lib/pack";
 
-export const CLEARABLE_SPELL_COLUMNS = ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod", "fixedDice", "damageBonus"] as const;
-
 /** The engine compares damageBonus/flag schools with spell group ids; pack files keep portable names. */
 export function resolveSchoolRefs<T>(value: T, idByName: ReadonlyMap<string, string>): T {
   if (Array.isArray(value)) return value.map((v) => resolveSchoolRefs(v, idByName)) as T;

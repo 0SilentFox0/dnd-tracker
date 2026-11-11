@@ -15,7 +15,7 @@ import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SpellMagic, SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { ActiveEffect, BattleAttack, BattleParticipant, ParticipantSide } from "@/types/battle";
+import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { FeatData } from "@/types/choices";
 import type { LogLine } from "@/types/text";
@@ -239,7 +239,6 @@ export interface RuleSystemCombat {
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
   /** Whether the scene state gives this side a standing advantage (Momentum) */
-  sceneHeldBy?(state: SystemSlot | undefined, side: ParticipantSide): boolean;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
   attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { label: LogLine; target: number };
   mitigateDamage?(ctx: MitigateCtx): MitigateResult;

@@ -26,6 +26,11 @@ export function rowSchemaIssues(kind: PackKind, row: Record<string, unknown>): s
   return parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".") || "row"} ${i.message}`);
 }
 
+/** Optional core-table columns a pack may drop; a rerun clears them for every system, not only d20. */
+export const CORE_CLEARABLE_COLUMNS: Partial<Record<PackKind, readonly string[]>> = { spells: ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod", "fixedDice", "damageBonus"] };
+
+export const clearableColumnsOf = (kind: PackKind, systemColumns?: Partial<Record<PackKind, readonly string[]>>): string[] => [...(CORE_CLEARABLE_COLUMNS[kind] ?? []), ...(systemColumns?.[kind] ?? [])];
+
 /** The import treats null as an empty cell and keeps the old value, so a rerun clears dropped optional columns itself. */
 export const staleColumns = (rows: readonly PackRow[], columns: readonly string[]): Array<{ column: string; slugs: string[] }> =>
   columns.map((column) => ({ column, slugs: rows.filter((r) => r[column] === undefined).map((r) => r.slug) })).filter((c) => c.slugs.length > 0);

@@ -14,8 +14,11 @@ export interface SystemOperation {
   input: ZodType;
 }
 
+export type SystemToolNote = "get_party" | "read_character" | "get_battle_state";
+
 export interface SystemAi {
   promptLine?: string;
+  toolNotes?: Partial<Record<SystemToolNote, string>>;
   heroSelect?: Record<string, true>;
   party?(campaignId: string, query: Record<string, unknown>): Promise<Record<string, unknown>[]>;
   hero?(campaignId: string, row: Record<string, unknown>): Promise<Record<string, unknown>>;

@@ -18,13 +18,13 @@ export function RollStep({ wizard, target }: { wizard: AttackWizardModel; target
 
   const { state, view } = wizard;
 
-  const RollBody = useSystemBattleUi()?.RollBody;
+  const { RollBody, RollTitle } = useSystemBattleUi() ?? {};
 
   const serverJudged = view.serverJudged && !!RollBody;
 
   return (
     <>
-      <div className="hud-sc text-xl font-bold">{serverJudged ? t("d100.title") : t("title")}</div>
+      <div className="hud-sc text-xl font-bold">{serverJudged && RollTitle ? <RollTitle /> : t("title")}</div>
       {state.strikes.length > 1 && <div className="mt-1 text-sm text-[var(--hud-muted)]">{t("strike", { n: state.index + 1, total: state.strikes.length, name: target.basicInfo.name })}</div>}
       {view.cover.has(target.basicInfo.id) && <div className="mt-2 text-sm text-[#e0a050]">{t("cover")}</div>}
       {serverJudged ? <RollBody wizard={wizard} /> : <D20RollBody wizard={wizard} />}

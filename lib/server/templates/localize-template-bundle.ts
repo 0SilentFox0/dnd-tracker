@@ -78,7 +78,7 @@ export function localizeTemplateBundle(bundle: Bundle, translations: Translation
 
   const maps = Object.fromEntries(TABLES.map((table) => [table, translatedNames(bundle[table], KIND_OF[table], translations, table, nameNormalizerOf(table))])) as Record<Table, Map<string, string>>;
 
-  // Templates without classes (Grim) list spells under free-form list names.
+  // Templates without classes list spells under free-form list names.
   if (bundle.classes.length === 0) {
     const lists = [...new Set(bundle.spells.flatMap((spell) => (Array.isArray(spell.lists) ? spell.lists : [])))].filter((name): name is string => typeof name === "string").map((name) => ({ name, slug: safeSlug(name) }));
 

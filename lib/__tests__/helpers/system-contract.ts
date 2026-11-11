@@ -59,4 +59,6 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
   if (definition.creation) expect(ui.DraftForm).toBeDefined();
 
   expect(typeof server.schemas).toBe("object");
+
+  if (server.ai?.heroSelect) expect(server.ai.hero).toBeDefined();
 }

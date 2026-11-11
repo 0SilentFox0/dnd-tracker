@@ -8,7 +8,6 @@ import { extractWfrpAttacks } from "./rules/combat/extract-attacks";
 import { wfrpHitModel } from "./rules/combat/hit-model";
 import { wfrpInitiative } from "./rules/combat/initiative";
 import { mitigateWfrpDamage } from "./rules/combat/mitigate";
-import { heldBy } from "./rules/combat/momentum";
 import { wfrpOnZeroHp } from "./rules/combat/on-zero-hp";
 import { participantStats, wfrpBaseStats, wfrpParticipantFields } from "./rules/combat/participant";
 import { resolveWfrpAttack, wfrpAttackTarget } from "./rules/combat/resolve-attack";
@@ -17,7 +16,7 @@ import { WFRP_EQUIPMENT } from "./rules/equipment";
 import { WFRP_MAGIC } from "./rules/magic";
 import { onSession } from "./rules/session";
 import { acceptsWfrpSheetTest, rollWfrpSheetTest } from "./rules/sheet-test";
-import { PARTICIPANT_SLOT, SCENE_SLOT } from "./rules/slots";
+import { PARTICIPANT_SLOT } from "./rules/slots";
 import { WFRP_TRAITS } from "./rules/traits";
 
 import { COINS } from "@/lib/constants/inventory";
@@ -57,7 +56,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },
   identity: { alignments: false },
-  combat: { fortune: true, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, sceneHeldBy: (state, side) => heldBy(SCENE_SLOT.read(state) ?? {}, side), details: wfrpActionDetails, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
+  combat: { fortune: true, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
   classes: false,
   attacks: false,

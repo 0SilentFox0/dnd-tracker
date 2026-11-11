@@ -55,6 +55,11 @@ const heroView = async (campaignId: string, { characteristics, ...rest }: HeroRo
 
 export const WFRP_AI: SystemAi = {
   promptLine: WFRP_SYSTEM_LINE,
+  toolNotes: {
+    get_party: "Grim d100 campaigns: race, career and tier, characteristics, Wounds and Fate instead of class and AC.",
+    read_character: "Grim d100: characteristics, career, Wounds and Fate instead of ability scores and AC.",
+    get_battle_state: "Grim d100 battles show Wounds and characteristics instead of HP/AC.",
+  },
   heroSelect: WFRP_PARTY_SELECT,
   async party(campaignId, query) {
     const [rows, careers] = await Promise.all([prisma.character.findMany({ ...query, select: WFRP_PARTY_SELECT }), loadCareers(campaignId)]);

@@ -80,6 +80,7 @@
     "terror": "Жах"
   },
   "ui": {
+    "rollTitle": "Кидок атаки · d100",
     "dialog": {
       "title": "Стани",
       "level": "Рівні",

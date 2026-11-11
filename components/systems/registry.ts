@@ -13,6 +13,10 @@ export const SYSTEM_UI: Record<string, SystemUi> = {
   // </systems:generated>
 };
 
-export const systemUiOf = (key: string): SystemUi => SYSTEM_UI[key];
+export const systemUiOf = (key: string): SystemUi => {
+  if (!Object.hasOwn(SYSTEM_UI, key)) throw new Error(`Unknown rule system: ${key}`);
+
+  return SYSTEM_UI[key];
+};
 
 export const systemUiByKey = (key: string): SystemUi | undefined => (Object.hasOwn(SYSTEM_UI, key) ? SYSTEM_UI[key] : undefined);

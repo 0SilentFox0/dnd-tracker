@@ -56,6 +56,18 @@ describe("system exhaustiveness", () => {
   });
 });
 
+describe("server operations do not collide", () => {
+  it("a system operation key clashing with a core key throws", async () => {
+    const { mergeSystemOperations } = await import("@/lib/server/systems/registry");
+
+    const key = Object.keys(SYSTEM_SERVER.wfrp.operations ?? {})[0];
+
+    expect(key).toBeDefined();
+    expect(() => mergeSystemOperations({ [key]: 1 }, () => 2)).toThrow(/Duplicate/);
+    expect(mergeSystemOperations({ other: 1 }, () => 2)[key]).toBe(2);
+  });
+});
+
 describe("fixture system d6pool", () => {
   it("passes the same contract as the real systems", () => assertSystemContract(D6POOL_META, D6POOL_SYSTEM, D6POOL_UI, D6POOL_SERVER));
 

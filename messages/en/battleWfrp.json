@@ -80,6 +80,7 @@
     "terror": "Terror"
   },
   "ui": {
+    "rollTitle": "Attack roll · d100",
     "dialog": {
       "title": "Conditions",
       "level": "Levels",

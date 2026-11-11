@@ -194,7 +194,7 @@ async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnT
 
   const resulting = [...effective.values()];
 
-  // Templates without classes (Grim) have no providers for spell-list names.
+  // Templates without classes have no providers for spell-list names.
   if (ctx.templateOverlay && ctx.sourceBundle.classes.length > 0) {
     const selectedLocalIds = new Set([...selected.values()].map((item) => item.localId ?? map.get(item.key)).filter((id): id is string => !!id));
 

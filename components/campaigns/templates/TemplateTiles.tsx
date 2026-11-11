@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { HudCard, HudPill } from "@/components/hud/page";
 import { SelectField } from "@/components/ui/select-field";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
+import { ruleSystemLabelKey } from "@/lib/i18n/system-scope";
 import { groupTemplates, pickVariant, type TemplateGroup } from "@/lib/utils/campaigns/template-variants";
 import { isCanonicalTemplate, isLegacyLocalizedTemplate } from "@/lib/utils/templates/registry";
 
@@ -40,7 +41,7 @@ function TemplateGroupTile({ group }: { group: TemplateGroup<TemplateTile> }) {
     <HudCard className="space-y-2">
       <Link href={`/campaigns/${variant.id}`} className="block space-y-2">
         <h3 className="hud-sc text-lg text-hud-ink">{variant.name}</h3>
-        {variant.system && <HudPill tone="silver">{tg(`ruleSystem.${variant.system}` as never)}</HudPill>}
+        {variant.system && <HudPill tone="silver">{tg(ruleSystemLabelKey(variant.system))}</HudPill>}
         {variant.description && <p className="text-sm text-hud-muted">{variant.description}</p>}
       </Link>
       {options.length > 1 ? (

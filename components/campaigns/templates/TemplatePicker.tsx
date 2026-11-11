@@ -9,6 +9,7 @@ import { HudPill } from "@/components/hud/page";
 import { SelectField, type SelectOptionGroup } from "@/components/ui/select-field";
 import { useBundleFilePicker, useTemplates } from "@/lib/hooks/campaigns";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
+import { ruleSystemLabelKey } from "@/lib/i18n/system-scope";
 import { groupTemplates, pickVariant } from "@/lib/utils/campaigns/template-variants";
 import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 import { isCanonicalTemplate } from "@/lib/utils/templates/registry";
@@ -101,7 +102,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
           </p>
           <SelectField aria-label={t("ariaLabel")} value={current} onValueChange={handleChange} groups={groups} />
           {languageOptions.length > 1 && selected && <SelectField aria-label={t("languageLabel")} value={contentLocales.length > 0 ? contentLocale : selected.id} onValueChange={contentLocales.length > 0 ? (locale) => onChange({ templateId: selected.id, contentLocale: locale as TemplateContentLocale }) : handleChange} groups={[{ label: t("language"), options: languageOptions }]} />}
-          {selected?.system && <HudPill tone="silver">{tg(`ruleSystem.${selected.system}` as never)}</HudPill>}
+          {selected?.system && <HudPill tone="silver">{tg(ruleSystemLabelKey(selected.system))}</HudPill>}
           {selected && <p className="text-xs text-hud-muted">{[selected.description, countsLabel(selected)].filter(Boolean).join(" — ")}</p>}
           {selected?.credits && <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">{selected.credits}</p>}
           {value.file && (

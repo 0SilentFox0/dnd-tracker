@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(__dirname, "../../..");
 
-const BANNED = /battleWfrp|D100|Percentile|dice === 100/;
+const BANNED = /battleWfrp|\bd100\b|Percentile|dice === 100/i;
 
 const sources = (rel: string): string[] =>
   fs.readdirSync(path.join(ROOT, rel), { withFileTypes: true }).flatMap((e) => {
