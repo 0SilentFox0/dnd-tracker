@@ -14,7 +14,7 @@ const USAGE = [
   "pnpm template publish <key> [--allow-untranslated] [--allow-remote]",
   "pnpm template icons <key> --dir <images> [--kinds a,b] [--dry-run] [--allow-remote]",
   "pnpm template export <key> --from <campaignId> [--system <system>] [--name <name>] [--slugs <file>]",
-  "pnpm template backfill-keys [--apply]",
+  "pnpm template backfill-keys [--apply] [--allow-remote]",
   "pnpm template i18n <extract|apply|normalize|status|convert> <key> <locale>",
 ].join("\n  ");
 
@@ -24,7 +24,7 @@ async function backfillKeys(args: string[]) {
   const [{ assertSeedTarget }, { prisma }, { CampaignKind, CampaignVisibility }, { planKeyBackfill }] = await Promise.all([import("../seed/seed-library-lib"), import("@/lib/db"), import("@/lib/constants/campaigns"), import("./lib/store")]);
 
   try {
-    assertSeedTarget(process.env.DATABASE_URL, false);
+    assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
 
     const rows = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL }, select: { id: true, name: true, templateKey: true, locale: true } });
 
@@ -34,7 +34,7 @@ async function backfillKeys(args: string[]) {
 
     console.info(`${plan.length} row(s) to update${args.includes("--apply") ? "" : " (dry run, pass --apply to write)"}`);
 
-    if (args.includes("--apply")) for (const { id, to } of plan) await prisma.campaign.update({ where: { id }, data: { templateKey: to } });
+    if (args.includes("--apply")) await prisma.$transaction(plan.map(({ id, to }) => prisma.campaign.update({ where: { id }, data: { templateKey: to } })));
   } finally {
     await prisma.$disconnect();
   }
