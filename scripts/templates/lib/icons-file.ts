@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import { TEMPLATES_DIR } from "./pack";
+
 export type IconsFile = Record<string, Record<string, string>>;
 
 type Slugged = { slug?: unknown };
-
-export const TEMPLATES_DIR = path.join(process.cwd(), "data/templates");
 
 const fileOf = (key: string, dir: string) => path.join(dir, key, "icons.json");
 
