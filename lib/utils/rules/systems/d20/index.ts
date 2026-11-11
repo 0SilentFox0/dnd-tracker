@@ -15,7 +15,7 @@ export const d20System = (key: Extract<RuleSystemKey, "homm" | "dnd5e">): RuleSy
   },
   rest: { kinds: true },
   battle: { supported: true },
-  combat: { dice: 20, actionEconomy: { bonusAction: true, reaction: true } },
+  combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true } },
   identity: { alignments: true },
   lineage: true,
   classes: true,

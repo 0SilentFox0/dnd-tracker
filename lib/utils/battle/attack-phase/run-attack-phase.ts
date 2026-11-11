@@ -86,7 +86,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const pool = input.data.damageRolls;
 
-  if (ruleSystemOf(input.rules).combat.dice === 20 || targets < 2 || pool.length === 0 || pool.length % targets !== 0) return runPhase(input);
+  if (ruleSystemOf(input.rules).combat.judge === "client" || targets < 2 || pool.length === 0 || pool.length % targets !== 0) return runPhase(input);
 
   const source = rngOf(input);
 

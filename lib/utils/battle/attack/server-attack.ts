@@ -46,7 +46,7 @@ interface ServerJudged {
   isHit: boolean;
 }
 
-function judgeServerWfrp(flow: ActionFlow, input: Pick<ServerAttackInput, "attackerId" | "targetId" | "attack" | "rng">, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): ServerJudged {
+function judgeServerBySystem(flow: ActionFlow, input: Pick<ServerAttackInput, "attackerId" | "targetId" | "attack" | "rng">, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): ServerJudged {
   const { attackerId, targetId } = input;
 
   const attacker = getP(flow, attackerId);
@@ -92,7 +92,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
   const resolveHook = ruleSystemOf(flow.ctx.rules).combat.resolveAttack;
 
-  const { roll, targetAC, isHit } = resolveHook ? judgeServerWfrp(flow, input, resolveHook) : judgeServerD20(flow, input);
+  const { roll, targetAC, isHit } = resolveHook ? judgeServerBySystem(flow, input, resolveHook) : judgeServerD20(flow, input);
 
   let hit: BuildOffTurnParams["hit"] = null;
 

@@ -78,7 +78,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const resolveHook = ruleSystemOf(flow.ctx.rules).combat.resolveAttack;
 
-  const judged = resolveHook ? judgeWfrp(run, resolveHook) : judgeD20(run, actionModifiers);
+  const judged = resolveHook ? judgeBySystem(run, resolveHook) : judgeD20(run, actionModifiers);
 
   const { second, targetAC, isHit, attackRoll } = judged;
 
@@ -198,7 +198,7 @@ function judgeD20(run: AttackRun, actionModifiers: Modifiers): Judged {
   return { second, targetAC, ...judgeHit(run, rolled, targetAC, actionModifiers) };
 }
 
-function judgeWfrp(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): Judged {
+function judgeBySystem(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): Judged {
   const { flow, attackerId, targetId, params } = run;
 
   const attacker = getP(flow, attackerId);

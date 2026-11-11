@@ -19,7 +19,7 @@ const render = (key: RuleSystemKey, momentum?: { ally?: true }) => {
 
 describe("useBattleRules", () => {
   it("homm: d20 flags", () => {
-    expect(render("homm")).toMatchObject({ dice: 20, d20Stats: true, spells: true, woundsLabel: "hp", distance: { unit: "ft", perCell: 5 } });
+    expect(render("homm")).toMatchObject({ dice: 20, serverJudged: false, d20Stats: true, spells: true, woundsLabel: "hp", distance: { unit: "ft", perCell: 5 } });
   });
 
   it("wfrp: d100 flags", () => {
@@ -29,6 +29,7 @@ describe("useBattleRules", () => {
     expect(rules.sceneHeldBy("enemy")).toBe(false);
     expect(rules).toMatchObject({
       dice: 100,
+      serverJudged: true,
       d20Stats: false,
       spells: true,
       magic: true,

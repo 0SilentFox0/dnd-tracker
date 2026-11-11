@@ -53,4 +53,16 @@ describe("battle core knows no rule-system i18n keys", () => {
     expect(log.damage.steps.wfrp).toBeUndefined();
     expect(log.damage.rows.wfrpTotal).toBeUndefined();
   });
+
+  it("lib/utils/battle judges by combat.judge, not by die size or a system name", () => {
+    const hits = walk(join(ROOT, "lib/utils/battle"))
+      .map((file) => relative(ROOT, file))
+      .flatMap((file) =>
+        readFileSync(join(ROOT, file), "utf8")
+          .split("\n")
+          .flatMap((line, i) => (/judgeWfrp|judgeServerWfrp|dice\s*[!=]==\s*(20|100)\b/.test(line) ? [`${file}:${i + 1}: ${line.trim()}`] : [])),
+      );
+
+    expect(hits).toEqual([]);
+  });
 });

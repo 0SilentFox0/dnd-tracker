@@ -18,7 +18,7 @@ export function RollStep({ wizard, target }: { wizard: AttackWizardModel; target
 
   const { state, view } = wizard;
 
-  const d100 = view.dice === 100;
+  const d100 = view.serverJudged;
 
   return (
     <>

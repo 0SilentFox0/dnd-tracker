@@ -61,8 +61,6 @@
   "lib/utils/abilities/registry/effects/traits.ts": 23,
   "lib/utils/abilities/schema/effects.ts": 15,
   "lib/utils/abilities/schema/kinds.ts": 5,
-  "lib/utils/battle/attack/process/run.ts": 2,
-  "lib/utils/battle/attack/server-attack.ts": 2,
   "lib/utils/battle/log/codec.ts": 1,
   "lib/utils/battle/turn/initiative.ts": 1,
   "lib/utils/characters/resources/sheet-roll.ts": 1,

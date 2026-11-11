@@ -248,7 +248,9 @@ export interface RuleSystemActionDetails {
 export interface RuleSystemCombat {
   details?: RuleSystemActionDetails;
   fortune?: true;
-  dice: 20 | 100;
+  /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
+  judge: "client" | "server";
+  dice: number;
   attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
   participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; armourOnly?: Record<HitLocation, number>; flexible?: boolean }): SystemSlot;
   /** Ranks participants with equal initiative: higher wins */

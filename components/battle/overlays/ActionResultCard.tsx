@@ -38,7 +38,7 @@ function AttackBody({ fx }: { fx: AttackFx }) {
 
   const text = useText();
 
-  const { dice } = useBattleRules();
+  const { serverJudged } = useBattleRules();
 
   const critFail = fx.kind === "miss" ? fx.critFail : undefined;
 
@@ -57,7 +57,7 @@ function AttackBody({ fx }: { fx: AttackFx }) {
           ))}
         </ul>
       ) : fx.kind === "miss" ? (
-        dice === 100 ? (
+        serverJudged ? (
           <>
             <div className="mt-1 text-sm">{fx.targetName}</div>
             <SystemLines system={fx.system} hit={false} exact={!!fx.exact} />
