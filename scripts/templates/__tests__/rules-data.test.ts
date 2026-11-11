@@ -1,8 +1,9 @@
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import { describe, expect, it } from "vitest";
 
-import { listPackKeys, readPack } from "../lib/pack";
+import { listPackKeys, readPack, TEMPLATES_DIR } from "../lib/pack";
 import { validatePack } from "../lib/validate";
 
 import { mergeRules, RulesetSchema } from "@/lib/utils/rules/schema";
@@ -50,9 +51,13 @@ describe("rules.json of the packs", () => {
     }
   });
 
-  it("a pack without rules.json is invalid", () => {
-    const pack = readPack("srd-5.2-empty");
+  it("readPack throws without rules.json unless lenient", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "rules-missing-"));
 
-    expect(validatePack({ ...pack, rules: undefined }).map((issue) => issue.message)).toEqual(["rules: rules.json is missing"]);
+    fs.cpSync(path.join(TEMPLATES_DIR, "srd-5.2-empty"), path.join(dir, "srd-5.2-empty"), { recursive: true });
+    fs.rmSync(path.join(dir, "srd-5.2-empty", "rules.json"));
+
+    expect(() => readPack("srd-5.2-empty", dir)).toThrow(/no rules file/);
+    expect(validatePack(readPack("srd-5.2-empty", dir, { lenient: true })).some((issue) => issue.level === "error")).toBe(true);
   });
 });

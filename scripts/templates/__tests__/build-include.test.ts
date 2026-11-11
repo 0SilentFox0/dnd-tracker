@@ -13,6 +13,7 @@ const source = (): Pack => structuredClone(readPack("fixture-pack", fixtures));
 const target = (include: NonNullable<Pack["manifest"]["include"]>, kinds: Pack["manifest"]["kinds"] = ["feats"]): Pack => ({
   manifest: { ...source().manifest, key: "child", kinds, include, counts: {} },
   rows: Object.fromEntries(kinds.map((kind) => [kind, []])),
+  rules: source().rules,
   extras: {},
   icons: {},
 });
@@ -66,6 +67,7 @@ describe("buildPack", () => {
     try {
       fs.cpSync(path.join(fixtures, "fixture-pack"), path.join(dir, "fixture-pack"), { recursive: true });
       fs.mkdirSync(path.join(dir, "child"));
+      fs.copyFileSync(path.join(fixtures, "fixture-pack", "rules.json"), path.join(dir, "child", "rules.json"));
       fs.writeFileSync(path.join(dir, "child", "manifest.json"), JSON.stringify({ ...source().manifest, key: "child", locales: ["en"], kinds: ["feats"], include: [{ from: "fixture-pack", kinds: { feats: ["fix-alert"] } }], counts: {} }));
 
       const built = await buildPack("child", { dir });

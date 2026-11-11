@@ -46,8 +46,6 @@ function manifestIssues(pack: Pack, registry: Readonly<Record<string, TemplateMa
 }
 
 function rulesIssues(pack: Pack): PackIssue[] {
-  if (pack.rules === undefined) return [error(`rules: ${pack.manifest.rules.file} is missing`)];
-
   const parsed = RulesetSchema.safeParse(pack.rules);
 
   if (!parsed.success) return parsed.error.issues.map((i) => error(`rules: ${i.path.join(".") || "rules"} ${i.message}`));

@@ -31,8 +31,7 @@ export type PackRow = { slug: string; name?: string; origin?: { template: string
 
 export interface Pack {
   manifest: TemplateManifest;
-  /** undefined when the file is missing; the validator reports it */
-  rules?: Ruleset;
+  rules: Ruleset;
   rows: Partial<Record<PackKind, PackRow[]>>;
   extras: Record<string, unknown>;
   icons: IconsFile;
@@ -44,7 +43,7 @@ const readJsonIf = <T>(key: string, file: string, dir: string): T | undefined =>
   return fs.existsSync(target) ? (JSON.parse(fs.readFileSync(target, "utf8")) as T) : undefined;
 };
 
-/** `lenient` (build only): a kind file that does not exist yet reads as an empty kind. */
+/** `lenient` (build only): a kind file that does not exist yet reads as an empty kind, a missing rules file as `{}`. */
 export function readPack(key: string, dir = TEMPLATES_DIR, opts: { lenient?: boolean } = {}): Pack {
   const manifest = readManifest(key, dir);
 
@@ -60,5 +59,9 @@ export function readPack(key: string, dir = TEMPLATES_DIR, opts: { lenient?: boo
 
   const extras = Object.fromEntries((manifest.extras ?? []).map((name) => [name, readJsonIf<unknown>(key, `${name}.json`, dir)]));
 
-  return { manifest, rules: readJsonIf<Ruleset>(key, manifest.rules.file, dir), rows, extras, icons: readJsonIf<IconsFile>(key, "icons.json", dir) ?? {} };
+  const rules = readJsonIf<Ruleset>(key, manifest.rules.file, dir);
+
+  if (!rules && !opts.lenient) throw new Error(`Pack "${key}" has no rules file ${manifest.rules.file}`);
+
+  return { manifest, rules: rules ?? ({} as Ruleset), rows, extras, icons: readJsonIf<IconsFile>(key, "icons.json", dir) ?? {} };
 }
