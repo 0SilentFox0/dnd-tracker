@@ -47,6 +47,7 @@ function describeReport(kind: string, report: ImportReport, t: Awaited<ReturnTyp
 
   return [
     `${kind}: created ${c.created}, updated ${c.updated}, skipped ${c.skipped}, error ${c.error}`,
+    ...results.filter((r) => r.status === "updated").slice(0, 10).map((r) => `  updated #${r.row} ${r.name ?? "?"}`),
     ...results.filter((r) => r.status === "error").slice(0, 10).map((r) => `  #${r.row} ${r.name ?? "?"}: ${r.issues.filter((i) => i.level === "error").map((i) => translateIssue(t, i)).join("; ")}`),
   ];
 }
