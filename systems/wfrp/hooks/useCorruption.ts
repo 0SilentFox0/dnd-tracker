@@ -2,11 +2,10 @@
 
 import { useTranslations } from "next-intl";
 
-import { characterKeys, characterWriteKeys } from "./keys";
-
-import { postCorruptionGrant, postCorruptionUndo } from "@/lib/api/corruption";
+import { characterKeys, characterWriteKeys } from "@/lib/hooks/characters/keys";
 import { useCrudMutation, useOptionalNotify } from "@/lib/hooks/common";
-import type { CorruptionGrantBody, CorruptionUndoBody } from "@/types/corruption";
+import { postCorruptionGrant, postCorruptionUndo } from "@/systems/wfrp/api/corruption";
+import type { CorruptionGrantBody, CorruptionUndoBody } from "@/systems/wfrp/rules/corruption/api-types";
 
 const corruptionKeys = (c: string, id: string) => [characterKeys.detail(c, id), characterKeys.sheet(c, id), characterKeys.log(c, id), ...characterWriteKeys(c)];
 

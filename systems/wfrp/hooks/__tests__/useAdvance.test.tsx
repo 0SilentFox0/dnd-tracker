@@ -4,11 +4,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/api/characters", () => ({ advanceCharacter: vi.fn(), undoCharacterAdvance: vi.fn() }));
+vi.mock("@/systems/wfrp/api/characters", () => ({ advanceCharacter: vi.fn(), undoCharacterAdvance: vi.fn() }));
 
-import { advanceCharacter, undoCharacterAdvance } from "@/lib/api/characters";
-import { useAdvance } from "@/lib/hooks/characters";
 import { characterKeys } from "@/lib/hooks/characters/keys";
+import { advanceCharacter, undoCharacterAdvance } from "@/systems/wfrp/api/characters";
+import { useAdvance } from "@/systems/wfrp/hooks";
 import type { Character } from "@/types/characters";
 
 const result = { characteristics: { advances: { ws: 1 } }, experience: 100, available: 75, entry: {} };

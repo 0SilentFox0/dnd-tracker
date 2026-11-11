@@ -10,7 +10,7 @@ import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
-vi.mock("@/lib/api/characters", () => ({ createWfrpDraft: vi.fn(), updateWfrpDraftIdentity: vi.fn() }));
+vi.mock("@/systems/wfrp/api/characters", () => ({ createWfrpDraft: vi.fn(), updateWfrpDraftIdentity: vi.fn() }));
 
 vi.mock("@/components/ui/image-upload", () => ({ ImageUpload: () => null }));
 
@@ -37,6 +37,8 @@ vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => ({ data: [{ id: "f0", name
 
 vi.mock("@/lib/hooks/races", () => ({
   useRaces: () => ({ data: data.races, isPending: false }),
+}));
+vi.mock("@/systems/wfrp/hooks/useRaceProfiles", () => ({
   useRaceProfiles: () => ({ data: data.profiles, isPending: false }),
 }));
 
@@ -117,7 +119,7 @@ describe("WfrpDraftForm", () => {
   });
 
   it("shows translated per-code messages for server issues and falls back to the general text", async () => {
-    const { createWfrpDraft } = await import("@/lib/api/characters");
+    const { createWfrpDraft } = await import("@/systems/wfrp/api/characters");
 
     mount();
 

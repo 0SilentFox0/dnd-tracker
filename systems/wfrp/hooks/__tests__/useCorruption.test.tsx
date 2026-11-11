@@ -6,12 +6,12 @@ import { describe, expect, it, vi } from "vitest";
 
 const notify = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/api/corruption", () => ({ postCorruptionGrant: vi.fn(), postCorruptionUndo: vi.fn() }));
+vi.mock("@/systems/wfrp/api/corruption", () => ({ postCorruptionGrant: vi.fn(), postCorruptionUndo: vi.fn() }));
 vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<object>()), useOptionalNotify: () => notify }));
 
 import { ApiError } from "@/lib/api/client";
-import { postCorruptionGrant, postCorruptionUndo } from "@/lib/api/corruption";
-import { useGrantCorruption, useUndoCorruption } from "@/lib/hooks/characters";
+import { postCorruptionGrant, postCorruptionUndo } from "@/systems/wfrp/api/corruption";
+import { useGrantCorruption, useUndoCorruption } from "@/systems/wfrp/hooks";
 
 const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={new QueryClient({ defaultOptions: { mutations: { retry: false } } })}>{children}</QueryClientProvider>;
 

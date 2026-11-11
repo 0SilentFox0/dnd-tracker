@@ -16,7 +16,7 @@ const tier = (name: string, over = {}) => ({ name, characteristics: [], skills: 
 vi.mock("@/lib/hooks/careers", () => ({ useCareers: () => ({ data: [{ id: "car", name: "Воїн", icon: null, class: null, tiers: [tier("Новобранець"), tier("B"), tier("C"), tier("D")] }] }) }));
 vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: DEFAULT_RULES }) }));
 vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => ({ data: [{ id: "f1", name: "Меткий" }] }) }));
-vi.mock("@/lib/hooks/characters", () => ({ useCareerOps: () => ({ setCareer: mocks.setCareer, advanceCareer: mocks.advanceCareer, isPending: false }) }));
+vi.mock("@/systems/wfrp/hooks", async (orig) => ({ ...(await orig<object>()), useCareerOps: () => ({ setCareer: mocks.setCareer, advanceCareer: mocks.advanceCareer, isPending: false }) }));
 vi.mock("@/lib/hooks/common", () => ({ useConfirm: () => mocks.confirm }));
 vi.mock("@/components/ui/select-field", () => ({
   SelectField: ({ value, options, onValueChange, "aria-label": label }: { value: string; options: { value: string; label: string }[]; onValueChange: (v: string) => void; "aria-label"?: string }) => (

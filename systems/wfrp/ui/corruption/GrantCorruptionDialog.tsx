@@ -8,10 +8,10 @@ import { GrantSummaryView } from "./GrantSummaryView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { useGrantCorruption, useUndoCorruption } from "@/lib/hooks/characters";
 import { useConfirm } from "@/lib/hooks/common";
+import { useGrantCorruption, useUndoCorruption } from "@/systems/wfrp/hooks";
+import type { CorruptionGrantResult } from "@/systems/wfrp/rules/corruption/api-types";
 import { GRANT_MAX as CORRUPTION_GRANT_MAX, REASON_MAX as CORRUPTION_REASON_MAX } from "@/systems/wfrp/rules/corruption/constants";
-import type { CorruptionGrantResult } from "@/types/corruption";
 
 export function GrantCorruptionDialog({ campaignId, characterId }: { campaignId: string; characterId: string }) {
   const t = useTranslations("wfrpCorruption.grant");

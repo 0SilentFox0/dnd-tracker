@@ -30,15 +30,15 @@ import { downtimeSetOperation } from "../operations/downtime";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
-import { corruptionGrantSchema, corruptionUndoSchema } from "@/lib/schemas/corruption";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { preserveServerOwned } from "@/systems/wfrp/rules/advancement/privacy";
 import { type Characteristics, DEFAULT_CHARACTERISTICS, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import type { CorruptionGrantResult, CorruptionUndoResult } from "@/systems/wfrp/rules/corruption/api-types";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import { PARTICIPANT_SLOT } from "@/systems/wfrp/rules/slots";
 import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
-import type { CorruptionGrantResult, CorruptionUndoResult } from "@/types/corruption";
+import { corruptionGrantSchema, corruptionUndoSchema } from "@/systems/wfrp/server/corruption-schemas";
 
 const hero = (id: string, over: Partial<Row> = {}, characteristics: Partial<Characteristics> = {}): Row => ({
   id,

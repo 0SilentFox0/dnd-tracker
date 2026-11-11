@@ -1,11 +1,11 @@
 [
   {
-    "file": "app/api/campaigns/[id]/characters/draft/create-wfrp-draft.ts",
-    "reason": "e1:3.3"
+    "file": "app/api/campaigns/[id]/characters/[characterId]/draft/update-draft.ts",
+    "reason": "route"
   },
   {
-    "file": "app/api/campaigns/[id]/characters/draft/wfrp-draft-schema.ts",
-    "reason": "e1:3.3"
+    "file": "app/api/campaigns/[id]/characters/draft/create-draft.ts",
+    "reason": "route"
   },
   {
     "file": "app/api/campaigns/[id]/races/[raceId]/profile/route.ts",
@@ -28,64 +28,56 @@
     "reason": "e1:4.1"
   },
   {
-    "file": "lib/api/characters.ts",
-    "reason": "e1:3.3"
-  },
-  {
-    "file": "lib/api/races.ts",
-    "reason": "e1:3.3"
-  },
-  {
-    "file": "lib/hooks/characters/useAdvance.ts",
-    "reason": "e1:3.3"
-  },
-  {
-    "file": "lib/hooks/characters/useCareerOps.ts",
-    "reason": "e1:3.3"
-  },
-  {
-    "file": "lib/hooks/races/useRaceProfiles.ts",
-    "reason": "e1:3.3"
-  },
-  {
     "file": "lib/schemas/careers.ts",
     "reason": "content-kind"
   },
   {
-    "file": "lib/schemas/corruption.ts",
-    "reason": "e1:3.3"
+    "file": "lib/server/characters/operations/advance-undo.ts",
+    "reason": "route"
   },
   {
-    "file": "lib/schemas/downtime.ts",
-    "reason": "e1:3.3"
+    "file": "lib/server/characters/operations/advance.ts",
+    "reason": "route"
   },
   {
-    "file": "lib/server/characters/core/advance-handler.ts",
-    "reason": "e1:3.3"
+    "file": "lib/server/characters/operations/career.ts",
+    "reason": "route"
   },
   {
-    "file": "lib/server/characters/core/career-handler.ts",
-    "reason": "e1:3.3"
+    "file": "lib/server/characters/operations/corruption-undo.ts",
+    "reason": "route"
   },
   {
-    "file": "lib/server/characters/core/corruption-handler.ts",
-    "reason": "e1:3.3"
+    "file": "lib/server/characters/operations/corruption.ts",
+    "reason": "route"
   },
   {
-    "file": "lib/server/characters/core/downtime-handler.ts",
-    "reason": "e1:3.3"
+    "file": "lib/server/characters/operations/downtime-period-undo.ts",
+    "reason": "route"
+  },
+  {
+    "file": "lib/server/characters/operations/downtime-period.ts",
+    "reason": "route"
+  },
+  {
+    "file": "lib/server/characters/operations/downtime.ts",
+    "reason": "route"
+  },
+  {
+    "file": "lib/server/characters/progression-service.ts",
+    "reason": "route"
   },
   {
     "file": "lib/server/races/profile-usage.ts",
-    "reason": "e1:3.3"
+    "reason": "content-kind"
   },
   {
     "file": "lib/server/races/race-profile.ts",
-    "reason": "e1:3.3"
+    "reason": "content-kind"
   },
   {
     "file": "lib/server/templates/sync/profile-refs.ts",
-    "reason": "e1:3.3"
+    "reason": "content-kind"
   },
   {
     "file": "lib/utils/content/import/fields/careers.ts",
@@ -98,17 +90,5 @@
   {
     "file": "types/careers.ts",
     "reason": "content-kind"
-  },
-  {
-    "file": "types/corruption.ts",
-    "reason": "e1:3.3"
-  },
-  {
-    "file": "types/downtime.ts",
-    "reason": "e1:3.3"
-  },
-  {
-    "file": "types/races.ts",
-    "reason": "e1:3.3"
   }
 ]

@@ -10,10 +10,10 @@ import type { DowntimePeriodPanelProps } from "@/components/systems/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { useDowntimePeriod, useDowntimePeriodUndo } from "@/lib/hooks/characters";
 import { useCheckedIds, useConfirm } from "@/lib/hooks/common";
+import { useDowntimePeriod, useDowntimePeriodUndo } from "@/systems/wfrp/hooks";
+import type { DowntimePeriodResult } from "@/systems/wfrp/rules/downtime/api-types";
 import { MAX_DAYS } from "@/systems/wfrp/rules/downtime/constants";
-import type { DowntimePeriodResult } from "@/types/downtime";
 
 const DEFAULT_DAYS = 7;
 

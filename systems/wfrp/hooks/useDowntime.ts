@@ -3,12 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { characterKeys } from "./keys";
-
-import { postDowntimePeriod, postDowntimePeriodUndo, putDowntime } from "@/lib/api/downtime";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
+import { postDowntimePeriod, postDowntimePeriodUndo, putDowntime } from "@/systems/wfrp/api/downtime";
+import type { DowntimePeriodBody, DowntimePeriodUndoBody, DowntimeSetBody } from "@/systems/wfrp/rules/downtime/api-types";
 import type { Character } from "@/types/characters";
-import type { DowntimePeriodBody, DowntimePeriodUndoBody, DowntimeSetBody } from "@/types/downtime";
 
 const periodKeys = (c: string) => [characterKeys.details(c), characterKeys.sheet(c), characterKeys.lists(c), characterKeys.logs(c), characterKeys.stashes(c), characterKeys.inventoryLogs(c)];
 

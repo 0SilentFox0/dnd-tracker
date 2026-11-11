@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { mergeDraftGoals } from "../../draft/draft-data";
-import { wfrpDraftIdentitySchema } from "../../draft/wfrp-draft-schema";
+import { wfrpDraftIdentitySchema } from "./wfrp-draft-schema";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { mergeDraftGoals } from "@/lib/server/characters/draft-goals";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import type { CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";

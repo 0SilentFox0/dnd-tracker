@@ -4,7 +4,6 @@ import { draftChoiceFields } from "../../draft/draft-choices";
 import { parseDraftBody } from "../../draft/draft-class";
 import { draftFields } from "../../draft/draft-data";
 import { resolveDraftParts } from "../../draft/draft-resolve";
-import { patchWfrpDraft } from "./patch-wfrp-draft";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
@@ -16,6 +15,7 @@ import { loadOwned } from "@/lib/utils/api/load-owned";
 import { storedDraftChoices } from "@/lib/utils/characters/choices/picks";
 import { validateAbilityScores } from "@/lib/utils/characters/generate";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { patchWfrpDraft } from "@/systems/wfrp/server/draft/patch-wfrp-draft";
 import type { CharacterClassEntry } from "@/types/classes";
 
 export async function updateDraft(request: Request, campaignId: string, characterId: string): Promise<NextResponse> {

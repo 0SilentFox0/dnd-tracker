@@ -13,7 +13,8 @@ const mocks = vi.hoisted(() => ({
   undo: vi.fn(async () => true),
 }));
 
-vi.mock("@/lib/hooks/characters", () => ({
+vi.mock("@/systems/wfrp/hooks", async (orig) => ({
+  ...(await orig<object>()),
   useGrantCorruption: () => mocks.grant,
   useUndoCorruption: () => ({ mutateOk: mocks.undo, isPending: false }),
 }));

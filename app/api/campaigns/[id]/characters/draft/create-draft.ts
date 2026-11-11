@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { createWfrpDraft } from "./create-wfrp-draft";
 import { draftChoiceFields } from "./draft-choices";
 import { parseDraftBody } from "./draft-class";
 import { draftFields } from "./draft-data";
@@ -15,6 +14,7 @@ import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
+import { createWfrpDraft } from "@/systems/wfrp/server/draft/create-wfrp-draft";
 import type { CharacterClassEntry } from "@/types/classes";
 
 export async function createDraft(request: Request, campaignId: string): Promise<NextResponse> {

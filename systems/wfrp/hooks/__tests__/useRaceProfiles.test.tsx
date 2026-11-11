@@ -4,12 +4,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { raceProfileKeys } from "../keys";
 import { useRaceProfiles, useSaveRaceProfile } from "../useRaceProfiles";
 
-import { getRaceProfiles, saveRaceProfile } from "@/lib/api/races";
+import { raceProfileKeys } from "@/lib/hooks/races";
+import { getRaceProfiles, saveRaceProfile } from "@/systems/wfrp/api/races";
 
-vi.mock("@/lib/api/races", () => ({ getRaceProfiles: vi.fn(), saveRaceProfile: vi.fn() }));
+vi.mock("@/systems/wfrp/api/races", () => ({ getRaceProfiles: vi.fn(), saveRaceProfile: vi.fn() }));
 
 const item = { raceId: "r1", profile: { mods: {}, move: 4, fate: 2, extraWounds: 0, talents: [], randomTalentCount: 0, randomTalents: [], careerTable: [] } };
 

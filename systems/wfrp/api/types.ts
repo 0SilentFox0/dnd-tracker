@@ -1,5 +1,6 @@
 import type { PurchaseRequest } from "../rules/advancement/plan";
 import type { Characteristics, LedgerEntry } from "../rules/characteristics/keys";
+import type { SpeciesProfile } from "../rules/creation";
 
 import type { GoalKind } from "@/lib/constants/characters";
 
@@ -23,3 +24,8 @@ export type AdvanceBody = PurchaseRequest;
 export type CareerResult = { characteristics: Characteristics };
 
 export type AdvanceResult = { characteristics: Characteristics; experience: number; available: number; entry: LedgerEntry };
+
+export interface RaceProfileItem {
+  raceId: string;
+  profile: SpeciesProfile;
+}

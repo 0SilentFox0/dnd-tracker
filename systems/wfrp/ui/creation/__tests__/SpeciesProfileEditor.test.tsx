@@ -23,7 +23,8 @@ vi.mock("@/lib/hooks/careers", () => ({ useCareers: () => ({ data: [{ id: "ca", 
 
 vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => ({ data: [{ id: "f0", name: "Hardy" }] }) }));
 
-vi.mock("@/lib/hooks/races", () => ({
+vi.mock("@/systems/wfrp/hooks", async (orig) => ({
+  ...(await orig<object>()),
   useRaceProfiles: () => ({ isPending: false, data: [{ raceId: "r1", profile: { mods: {}, move: 4, fate: 2, extraWounds: 0, talents: [], randomTalentCount: 0, randomTalents: [], careerTable: [{ max: 50, careerId: "ca" }, { max: 100, careerId: "cb" }] } }] }),
   useSaveRaceProfile: () => ({ mutate, isPending: false, error: null }),
 }));

@@ -7,12 +7,12 @@ import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
-vi.mock("../create-wfrp-draft", () => ({ createWfrpDraft: vi.fn(async () => NextResponse.json({ wfrp: true })) }));
+vi.mock("@/systems/wfrp/server/draft/create-wfrp-draft", () => ({ createWfrpDraft: vi.fn(async () => NextResponse.json({ wfrp: true })) }));
 
 import { createDraft } from "../create-draft";
-import { createWfrpDraft } from "../create-wfrp-draft";
 
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { createWfrpDraft } from "@/systems/wfrp/server/draft/create-wfrp-draft";
 
 const as = (rules: object) => vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "u1", campaign: { rules, members: [] } } as never);
 

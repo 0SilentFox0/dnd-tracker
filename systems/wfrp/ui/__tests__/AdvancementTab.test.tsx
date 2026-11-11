@@ -17,6 +17,9 @@ const mocks = vi.hoisted(() => ({ character: { data: undefined as unknown }, fea
 
 vi.mock("@/lib/hooks/characters", () => ({
   useCharacter: () => mocks.character,
+}));
+vi.mock("@/systems/wfrp/hooks", async (orig) => ({
+  ...(await orig<object>()),
   useCareerOps: () => ({ setCareer: vi.fn(), advanceCareer: vi.fn(), isPending: false }),
   useAdvance: () => ({ buy: mocks.buy, undo: mocks.undo, isPending: false, error: null }),
 }));

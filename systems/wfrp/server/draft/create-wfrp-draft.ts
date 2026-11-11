@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { mergeDraftGoals } from "./draft-data";
 import { wfrpDraftSchema } from "./wfrp-draft-schema";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -8,6 +7,7 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 import { CharacterStatus, CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { EMPTY_INVENTORY } from "@/lib/server/characters/core/derive-character-defaults";
+import { mergeDraftGoals } from "@/lib/server/characters/draft-goals";
 import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { type CampaignAccessResult } from "@/lib/utils/api/api-auth";

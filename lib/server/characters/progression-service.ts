@@ -14,8 +14,6 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
-import { corruptionGrantSchema, corruptionUndoSchema } from "@/lib/schemas/corruption";
-import { downtimePeriodSchema, downtimePeriodUndoSchema, downtimeSetSchema } from "@/lib/schemas/downtime";
 import { advanceSchema, arcaneRecoverySchema, careerAdvanceSchema, careerSetSchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
 import { actionResult } from "@/lib/server/assistant/json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
@@ -26,6 +24,8 @@ import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
+import { corruptionGrantSchema, corruptionUndoSchema } from "@/systems/wfrp/server/corruption-schemas";
+import { downtimePeriodSchema, downtimePeriodUndoSchema, downtimeSetSchema } from "@/systems/wfrp/server/downtime-schemas";
 
 const withId = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => schema.extend(characterIdSchema.shape).strict();
 

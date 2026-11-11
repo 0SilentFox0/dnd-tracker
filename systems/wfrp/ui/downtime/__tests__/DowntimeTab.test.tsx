@@ -17,6 +17,9 @@ const mocks = vi.hoisted(() => ({ character: { data: undefined as unknown }, sav
 vi.mock("@/lib/hooks/characters", () => ({
   useCharacter: () => mocks.character,
   useCharacters: () => ({ data: [{ id: "ch", name: "Я" }, { id: "p2", name: "Друг" }] }),
+}));
+vi.mock("@/systems/wfrp/hooks", async (orig) => ({
+  ...(await orig<object>()),
   useDowntime: () => ({ mutateOk: mocks.save, isPending: false }),
 }));
 

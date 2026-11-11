@@ -1,8 +1,8 @@
 import { requireCharacterAccess } from "../access";
 import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
 
-import { corruptionGrantSchema } from "@/lib/schemas/corruption";
-import { grantCorruption } from "@/lib/server/characters/core/corruption-handler";
+import { grantCorruption } from "@/systems/wfrp/server/corruption-handler";
+import { corruptionGrantSchema } from "@/systems/wfrp/server/corruption-schemas";
 
 export const corruptionGrantOperation = defineCharacterOperation({
   name: "corruption.grant",

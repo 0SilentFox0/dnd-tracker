@@ -1,5 +1,5 @@
 import { campaignPost, campaignPut } from "@/lib/api/client";
-import type { DowntimePeriodBody, DowntimePeriodResult, DowntimePeriodUndoBody, DowntimeSetBody, DowntimeSetResult } from "@/types/downtime";
+import type { DowntimePeriodBody, DowntimePeriodResult, DowntimePeriodUndoBody, DowntimeSetBody, DowntimeSetResult } from "@/systems/wfrp/rules/downtime/api-types";
 
 export const putDowntime = (campaignId: string, characterId: string, body: DowntimeSetBody) => campaignPut<DowntimeSetResult>(campaignId, `/characters/${characterId}/downtime`, body);
 

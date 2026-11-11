@@ -1,7 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
-import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
 import type { Choice } from "@/types/choices";
 
 export interface StatModifier {
@@ -56,8 +55,3 @@ export interface RaceFormData {
 }
 
 export type RaceRow = Prisma.RaceGetPayload<object>;
-
-export interface RaceProfileItem {
-  raceId: string;
-  profile: SpeciesProfile;
-}

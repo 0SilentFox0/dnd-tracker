@@ -3,10 +3,9 @@
 import { useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { characterKeys } from "./keys";
-
-import { advanceCharacter, undoCharacterAdvance } from "@/lib/api/characters";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
+import { advanceCharacter, undoCharacterAdvance } from "@/systems/wfrp/api/characters";
 import type { AdvanceBody, AdvanceResult } from "@/systems/wfrp/api/types";
 import type { Character } from "@/types/characters";
 

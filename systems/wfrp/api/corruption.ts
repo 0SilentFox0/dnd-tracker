@@ -1,5 +1,5 @@
 import { campaignPost } from "@/lib/api/client";
-import type { CorruptionGrantBody, CorruptionGrantResult, CorruptionUndoBody, CorruptionUndoResult } from "@/types/corruption";
+import type { CorruptionGrantBody, CorruptionGrantResult, CorruptionUndoBody, CorruptionUndoResult } from "@/systems/wfrp/rules/corruption/api-types";
 
 export const postCorruptionGrant = (campaignId: string, characterId: string, body: CorruptionGrantBody) => campaignPost<CorruptionGrantResult>(campaignId, `/characters/${characterId}/corruption`, body);
 

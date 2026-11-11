@@ -1,8 +1,8 @@
 import { requireCharacterAccess } from "../access";
 import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
 
-import { downtimeSetSchema } from "@/lib/schemas/downtime";
-import { setDowntime } from "@/lib/server/characters/core/downtime-handler";
+import { setDowntime } from "@/systems/wfrp/server/downtime-handler";
+import { downtimeSetSchema } from "@/systems/wfrp/server/downtime-schemas";
 
 export const downtimeSetOperation = defineCharacterOperation({
   name: "downtime.set",

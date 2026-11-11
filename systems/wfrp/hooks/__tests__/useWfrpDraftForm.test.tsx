@@ -6,15 +6,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useWfrpDraftForm } from "../useWfrpDraftForm";
 
-import { createWfrpDraft, updateWfrpDraftIdentity } from "@/lib/api/characters";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
+import { createWfrpDraft, updateWfrpDraftIdentity } from "@/systems/wfrp/api/characters";
 
 const push = vi.hoisted(() => vi.fn());
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
-vi.mock("@/lib/api/characters", () => ({ createWfrpDraft: vi.fn().mockResolvedValue({}), updateWfrpDraftIdentity: vi.fn().mockResolvedValue({}) }));
+vi.mock("@/systems/wfrp/api/characters", () => ({ createWfrpDraft: vi.fn().mockResolvedValue({}), updateWfrpDraftIdentity: vi.fn().mockResolvedValue({}) }));
 
 vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { system: { key: "wfrp" }, advancement: DEFAULT_ADVANCEMENT_RULES } }) }));
 
@@ -38,6 +38,8 @@ const profile = {
 
 vi.mock("@/lib/hooks/races", () => ({
   useRaces: () => ({ data: [{ id: "r1", name: "Human" }, { id: "r2", name: "Elf" }], isPending: false }),
+}));
+vi.mock("@/systems/wfrp/hooks/useRaceProfiles", () => ({
   useRaceProfiles: () => ({ data: [{ raceId: "r1", profile }, { raceId: "r2", profile: { ...profile, careerTable: [] } }], isPending: false }),
 }));
 

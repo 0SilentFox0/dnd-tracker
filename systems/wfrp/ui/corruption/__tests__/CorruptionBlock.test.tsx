@@ -10,7 +10,8 @@ import type { CharacterSheet } from "@/types/characters";
 
 vi.unmock("next-intl");
 vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<object>()), useConfirm: () => vi.fn() }));
-vi.mock("@/lib/hooks/characters", () => ({
+vi.mock("@/systems/wfrp/hooks", async (orig) => ({
+  ...(await orig<object>()),
   useGrantCorruption: () => ({ mutateOk: vi.fn(), isPending: false }),
   useUndoCorruption: () => ({ mutateOk: vi.fn(), isPending: false }),
 }));

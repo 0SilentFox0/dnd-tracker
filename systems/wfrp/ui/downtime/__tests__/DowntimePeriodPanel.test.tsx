@@ -14,7 +14,8 @@ const mocks = vi.hoisted(() => ({
   undo: vi.fn(async () => true),
 }));
 
-vi.mock("@/lib/hooks/characters", () => ({
+vi.mock("@/systems/wfrp/hooks", async (orig) => ({
+  ...(await orig<object>()),
   useDowntimePeriod: () => mocks.period,
   useDowntimePeriodUndo: () => ({ mutateOk: mocks.undo, isPending: false }),
 }));

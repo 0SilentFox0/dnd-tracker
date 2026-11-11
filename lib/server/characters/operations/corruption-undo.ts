@@ -1,8 +1,8 @@
 import { requireCharacterAccess } from "../access";
 import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
 
-import { corruptionUndoSchema } from "@/lib/schemas/corruption";
-import { undoCorruption } from "@/lib/server/characters/core/corruption-handler";
+import { undoCorruption } from "@/systems/wfrp/server/corruption-handler";
+import { corruptionUndoSchema } from "@/systems/wfrp/server/corruption-schemas";
 
 export const corruptionUndoOperation = defineCharacterOperation({
   name: "corruption.undo",

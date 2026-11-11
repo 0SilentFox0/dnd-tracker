@@ -4,7 +4,6 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import type { CorruptionGrantInput, CorruptionUndoInput } from "@/lib/schemas/corruption";
 import type { CharacterGate } from "@/lib/server/characters/access";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { characteristicsJson } from "@/lib/server/characters/core/system-fields";
@@ -13,9 +12,10 @@ import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import type { CorruptionGrantResult, CorruptionUndoResult } from "@/systems/wfrp/rules/corruption/api-types";
 import { planGrant } from "@/systems/wfrp/rules/corruption/plan-grant";
 import { planCorruptionUndo } from "@/systems/wfrp/rules/corruption/undo";
-import type { CorruptionGrantResult, CorruptionUndoResult } from "@/types/corruption";
+import type { CorruptionGrantInput, CorruptionUndoInput } from "@/systems/wfrp/server/corruption-schemas";
 
 function prepare({ access, character }: CharacterGate) {
   const corruption = ruleSystemOf(access.campaign.rules).corruption;

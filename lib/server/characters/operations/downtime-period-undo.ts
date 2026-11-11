@@ -1,7 +1,7 @@
 import { campaignGate, characterRoute, defineCharacterOperation } from "../operation-runner";
 
-import { downtimePeriodUndoSchema } from "@/lib/schemas/downtime";
-import { undoPeriod } from "@/lib/server/characters/core/downtime-handler";
+import { undoPeriod } from "@/systems/wfrp/server/downtime-handler";
+import { downtimePeriodUndoSchema } from "@/systems/wfrp/server/downtime-schemas";
 
 export const downtimePeriodUndoOperation = defineCharacterOperation({
   name: "downtime.period.undo",

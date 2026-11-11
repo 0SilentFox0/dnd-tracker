@@ -1,7 +1,7 @@
 import { campaignGate, characterRoute, defineCharacterOperation } from "../operation-runner";
 
-import { downtimePeriodSchema } from "@/lib/schemas/downtime";
-import { passPeriod } from "@/lib/server/characters/core/downtime-handler";
+import { passPeriod } from "@/systems/wfrp/server/downtime-handler";
+import { downtimePeriodSchema } from "@/systems/wfrp/server/downtime-schemas";
 
 export const downtimePeriodOperation = defineCharacterOperation({
   name: "downtime.period",
