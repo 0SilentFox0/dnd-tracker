@@ -24,9 +24,6 @@ const SOURCE_FILE = /\.tsx?$/;
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-export const systemIds = (): string[] =>
-  fs.readdirSync(path.join(ROOT, "systems"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
-
 export const sourceFiles = (dirs: readonly string[] = SCAN_DIRS): string[] => {
   const walk = (rel: string): string[] =>
     fs.readdirSync(path.join(ROOT, rel), { withFileTypes: true }).flatMap((e) => {
@@ -46,13 +43,13 @@ export interface LiteralTokens {
 }
 
 export const literalTokens = (): LiteralTokens => {
-  const ids = systemIds();
+  const substring = [...new Set(SYSTEM_META.flatMap((m) => m.tokens ?? []))];
 
   const keysAndModules = SYSTEM_META.flatMap((m) => [...m.keys, m.module]);
 
   return {
-    substring: ids,
-    literal: [...new Set([...keysAndModules.filter((t) => !ids.includes(t)), ...Object.keys(TEMPLATE_REGISTRY)])],
+    substring,
+    literal: [...new Set([...keysAndModules.filter((t) => !substring.includes(t)), ...Object.keys(TEMPLATE_REGISTRY)])],
   };
 };
 
