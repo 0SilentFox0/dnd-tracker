@@ -1,5 +1,3 @@
-import { createHash } from "crypto";
-
 export const NAME_KEYS: readonly string[] = ["name", "label", "nameTemplate"];
 
 export const TEXT_KEYS: readonly string[] = ["description", "text", "equipmentText"];
@@ -17,8 +15,6 @@ export const REF_KEYS: Readonly<Record<string, string>> = {
 export type TextClass = "n" | "d";
 
 export type Translations = Record<string, string>;
-
-export const hashText = (cls: TextClass, en: string) => createHash("sha1").update(`${cls}\0${en}`).digest("hex").slice(0, 10);
 
 // Paths omit array indices, so seed rows and DB rows share the same context.
 export const classOf = (key: string, parent = "", path: readonly string[] = []): TextClass | null => {

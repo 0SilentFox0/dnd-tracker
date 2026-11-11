@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { classOf, hashText } from "../catalog";
+import { classOf } from "../catalog";
 import { extractKeyed } from "../keys";
 
 type Rows = Record<string, object[]>;
@@ -23,9 +23,6 @@ describe("extractKeyed classification", () => {
     expect(en({ spells: [{ slug: "s", name: "Fireball", casting: { text: "bonus-action" } }] })).toEqual(["Fireball"]);
   });
 
-  it("distinguishes name and description classes of the same text", () => {
-    expect(hashText("n", "Light")).not.toBe(hashText("d", "Light"));
-  });
 });
 
 describe("contextual prose", () => {

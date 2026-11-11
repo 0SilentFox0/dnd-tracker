@@ -36,6 +36,18 @@ function fixture() {
 }
 
 describe("localizeTemplateBundle", () => {
+  it("localizes mainSkills, skills and artifactSets rows by <kind>/<slug> keys", () => {
+    const bundle = emptyBundle();
+
+    bundle.mainSkills = [{ id: "m", slug: "might", name: "Might" }];
+    bundle.skills = [{ id: "s", slug: "cleave", name: "Cleave" }];
+    bundle.artifactSets = [{ id: "a", slug: "dragon", name: "Dragon" }];
+
+    const out = localizeTemplateBundle(bundle, dict(entry("main-skills/might/name", "Міць", "Might"), entry("skills/cleave/name", "Розруб", "Cleave"), entry("artifact-sets/dragon/name", "Дракон", "Dragon")));
+
+    expect([out.mainSkills[0].name, out.skills[0].name, out.artifactSets[0].name]).toEqual(["Міць", "Розруб", "Дракон"]);
+  });
+
   it("localizes DB prose and name references while retaining all ID references", () => {
     const src = fixture();
 
@@ -84,7 +96,7 @@ describe("localizeTemplateBundle", () => {
     expect(out.artifacts[0].modifiers).toEqual(records);
     expect(out.rules).toBe(src.rules);
     expect(out.settings).toBe(src.settings);
-    expect(out.mainSkills).toBe(src.mainSkills);
+    expect(out.mainSkills).toEqual(src.mainSkills);
     expect(out.credits).toBe("Fireball");
     expect(localizeTemplateBundle(src, {})).toBe(src);
     expect(localizeTemplateBundle(src, dict(entry("spells/missing/name", "Відсутній", "Missing")))).toEqual(src);

@@ -3,10 +3,9 @@ import * as os from "os";
 import * as path from "path";
 import { describe, expect, it } from "vitest";
 
-import { catalogOf, convertV1 } from "../lib/i18n-convert";
+import { catalogOf, convertV1, hashText } from "../lib/i18n-convert";
 import { readTranslations, writeTranslations } from "../lib/i18n-store";
 
-import { hashText } from "@/lib/utils/templates/i18n/catalog";
 import { extractKeyed, statusOf } from "@/lib/utils/templates/i18n/keys";
 
 const catalog = extractKeyed({

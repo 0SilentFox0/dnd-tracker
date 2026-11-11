@@ -1,15 +1,17 @@
-import type { Bundle } from "./bundle";
+import type { Bundle, BundleTable } from "./bundle";
 
+import { CONTENT_KINDS, type ContentKind } from "@/lib/constants/content-kinds";
+import { tableKey } from "@/lib/server/assistant/actions/content-dependencies";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { classOf, isTranslatable } from "@/lib/utils/templates/i18n/catalog";
 import { mapKeyed, safeSlug, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 import { attackNames, translateAt,translatedNames } from "@/lib/utils/templates/i18n/overlay";
 
-const TABLE_KINDS = { spellGroups: "spell-groups", spells: "spells", races: "races", classes: "classes", feats: "feats", backgrounds: "backgrounds", units: "units", artifacts: "artifacts", careers: "careers" } as const;
+const KIND_OF = Object.fromEntries(CONTENT_KINDS.map((kind) => [tableKey(kind), kind])) as Record<string, ContentKind>;
 
-type Table = keyof typeof TABLE_KINDS;
+type Table = BundleTable;
 
-const TABLES = Object.keys(TABLE_KINDS) as Table[];
+const TABLES = Object.keys(KIND_OF) as Table[];
 
 const translatable = (key: string, parent: string, path: readonly string[], text: string) => classOf(key, parent, path) !== null && isTranslatable(text);
 
@@ -58,7 +60,7 @@ const slugOf = (row: Record<string, unknown>): string | null => (typeof row.slug
 export function localizeTemplateBundle(bundle: Bundle, translations: TranslationsV2): Bundle {
   if (!Object.keys(translations).length) return bundle;
 
-  const maps = Object.fromEntries(TABLES.map((table) => [table, translatedNames(bundle[table], TABLE_KINDS[table], translations, table, table === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)])) as Record<Table, Map<string, string>>;
+  const maps = Object.fromEntries(TABLES.map((table) => [table, translatedNames(bundle[table], KIND_OF[table], translations, table, table === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)])) as Record<Table, Map<string, string>>;
 
   // Templates without classes (Grim) list spells under free-form list names.
   if (bundle.classes.length === 0) {
@@ -77,7 +79,7 @@ export function localizeTemplateBundle(bundle: Bundle, translations: Translation
 
       if (!slug) return row;
 
-      const kind = TABLE_KINDS[table];
+      const kind = KIND_OF[table];
 
       // Modifiers are opaque outside the two explicitly recognized record types.
       const { modifiers, ...fields } = row;
