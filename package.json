@@ -43,7 +43,6 @@
     "template:index": "pnpm template index",
     "template:i18n": "pnpm template i18n",
     "template:validate": "pnpm template validate",
-    "srd:i18n": "tsx --tsconfig tsconfig.scripts.json scripts/srd/i18n/cli.ts",
     "srd:build": "pnpm template build srd-5.2",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-library.ts",
     "seed-world-map": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-world-map.ts",

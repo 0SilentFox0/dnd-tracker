@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { withIcons } from "../lib/icons-file";
-import { iconColumnOf, resolveSchoolRefs, staleSpellColumns, withClassIcons } from "../lib/import-prepare";
+import { iconColumnOf, withIcons } from "../lib/icons-file";
 import type { IconsFile, PackRow } from "../lib/pack";
+import { staleColumns } from "../lib/row-columns";
+import { PACK_HOOKS, SYSTEM_MODULE } from "../systems";
+import { D20_HOOKS } from "../systems/d20";
+import { CLEARABLE_SPELL_COLUMNS, resolveSchoolRefs, withClassIcons } from "../systems/d20/prepare";
 
 describe("resolveSchoolRefs", () => {
   it("replaces school names with group ids anywhere in a row, leaves unknown names", () => {
@@ -16,14 +19,14 @@ describe("resolveSchoolRefs", () => {
   });
 });
 
-describe("staleSpellColumns", () => {
+describe("staleColumns (d20 spell columns)", () => {
   it("lists, per optional column, the spells that no longer carry it", () => {
     const spells = [
       { slug: "a", name: "Fireball", dieSides: 6, upcastDice: 1 },
       { slug: "b", name: "Freedom of Movement" },
     ] as PackRow[];
 
-    expect(staleSpellColumns(spells)).toEqual([
+    expect(staleColumns(spells, CLEARABLE_SPELL_COLUMNS)).toEqual([
       { column: "dieSides", slugs: ["b"] },
       { column: "upcastDice", slugs: ["b"] },
       { column: "upcastTargets", slugs: ["a", "b"] },
@@ -74,5 +77,55 @@ describe("withClassIcons", () => {
 
   it("is a no-op without feature or subclass icons", () => {
     expect(withClassIcons([row()], {})).toEqual([{ ...row(), features: [{ level: 1, abilities: [{ id: "rage-1", name: "Rage" }] }] }]);
+  });
+});
+
+const prepareRows = D20_HOOKS.prepareRows as NonNullable<typeof D20_HOOKS.prepareRows>;
+
+const normalize = D20_HOOKS.normalizeTranslation as NonNullable<typeof D20_HOOKS.normalizeTranslation>;
+
+describe("D20_HOOKS.prepareRows", () => {
+  const pack = (kinds: string[]) => ({ manifest: { kinds } }) as never;
+
+  const row = { slug: "x", name: "X", damageBonus: { school: "Evocation" } } as unknown as PackRow;
+
+  it("class icons first, then school names resolve to group ids when the pack has spell-groups", async () => {
+    const idByName = async () => new Map([["Evocation", "g-evo"]]);
+
+    const [out] = await prepareRows("spells", [row], { pack: pack(["spells", "spell-groups"]), icons: {}, idByName });
+
+    expect(JSON.stringify(out)).toContain('"school":"g-evo"');
+
+    const [same] = await prepareRows("spells", [row], { pack: pack(["spells"]), icons: {}, idByName });
+
+    expect(same).toBe(row);
+  });
+
+  it("does not resolve inside spell-groups itself", async () => {
+    const idByName = async () => { throw new Error("must not be called"); };
+
+    await expect(prepareRows("spell-groups", [row], { pack: pack(["spell-groups"]), icons: {}, idByName })).resolves.toEqual([row]);
+  });
+});
+
+describe("pack hooks composition", () => {
+  it("homm = d20 + homm, dnd5e = d20, wfrp stays d20-free", () => {
+    expect(PACK_HOOKS.dnd5e).toBe(D20_HOOKS);
+    expect(PACK_HOOKS.homm.prepareRows).toBe(D20_HOOKS.prepareRows);
+    expect(PACK_HOOKS.homm.validatePack).toBeDefined();
+    expect(PACK_HOOKS.wfrp.prepareRows).toBeUndefined();
+    expect(PACK_HOOKS.wfrp.clearableColumns).toBeUndefined();
+  });
+
+  it("SYSTEM_MODULE follows the system meta", () => {
+    expect(SYSTEM_MODULE).toEqual({ homm: "d20", dnd5e: "d20", wfrp: "wfrp" });
+  });
+
+  it("d20 normalizeTranslation rebuilds a spell header from the glossary", () => {
+    const en = "Level 1 Evocation · Casting Time: 1 action · Range: 30 feet · Components: V, S · Duration: Instantaneous · Classes: Wizard";
+
+    const out = normalize({ key: "k", kind: "spells", slug: "s", fieldPath: "description", cls: "d", en }, "x", { Level: "Рівень" });
+
+    expect(out).toBe("x");
   });
 });

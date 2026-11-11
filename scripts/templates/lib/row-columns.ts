@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { PackRow } from "./pack";
+
 import { saveSkillTreeSchema } from "@/lib/schemas/skills";
 import type { PackKind } from "@/lib/utils/templates/manifest";
 
@@ -23,3 +25,7 @@ export function rowSchemaIssues(kind: PackKind, row: Record<string, unknown>): s
 
   return parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".") || "row"} ${i.message}`);
 }
+
+/** The import treats null as an empty cell and keeps the old value, so a rerun clears dropped optional columns itself. */
+export const staleColumns = (rows: readonly PackRow[], columns: readonly string[]): Array<{ column: string; slugs: string[] }> =>
+  columns.map((column) => ({ column, slugs: rows.filter((r) => r[column] === undefined).map((r) => r.slug) })).filter((c) => c.slugs.length > 0);

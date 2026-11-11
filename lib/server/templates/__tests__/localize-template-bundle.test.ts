@@ -201,7 +201,7 @@ describe("Grim bundle", () => {
   const grimTr = dict(
     entry("careers/archivist/name", "Архіваріус", "Archivist"), entry("careers/archivist/tiers[=copyist].name", "Переписувач", "Copyist"), entry("careers/archivist/class", "Учені", "Academic"),
     entry("careers/archivist/tiers[=copyist].trappings[0]", "Перо й чорнило", "Quill and ink"), entry("rules/_/miscastMinor[0].text", "Запах паленого волосся.", "A smell of scorched hair."),
-    entry("spellLists/school-of-embers/name", "Школа Жару", "School of Embers"), entry("spells/ember-dart/name", "Жарова стріла", "Ember Dart"),
+    entry("lists/school-of-embers/name", "Школа Жару", "School of Embers"), entry("spells/ember-dart/name", "Жарова стріла", "Ember Dart"),
   );
 
   it("localizes career names, class, tier names and trappings only", () => {
@@ -237,6 +237,6 @@ describe("Grim bundle", () => {
     expect(localizeTemplateBundle(src, grimTr).spells[0]).toMatchObject({ name: "Жарова стріла", lists: ["Школа Жару"] });
 
     src.spells = [{ id: "s", slug: "a", name: "A", lists: ["School of Embers"] }, { id: "t", slug: "b", name: "B", lists: ["Ember Dart"] }];
-    expect(() => localizeTemplateBundle(src, { ...grimTr, "spellLists/ember-dart/name": { text: "Школа Жару", en: "Ember Dart" } })).toThrow(/spell lists/);
+    expect(() => localizeTemplateBundle(src, { ...grimTr, "lists/ember-dart/name": { text: "Школа Жару", en: "Ember Dart" } })).toThrow(/spell lists/);
   });
 });

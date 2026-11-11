@@ -3,7 +3,7 @@ import { type Bundle, type BundleTable, tableKey } from "./bundle";
 import { CONTENT_KINDS, type ContentKind } from "@/lib/constants/content-kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { classOf, isTranslatable } from "@/lib/utils/templates/i18n/catalog";
-import { mapKeyed, safeSlug, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
+import { mapKeyed, PACK_LIST_KIND, safeSlug, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 import { attackNames, nameNormalizerOf, translateAt, translatedNames } from "@/lib/utils/templates/i18n/overlay";
 
 const KIND_OF = Object.fromEntries(CONTENT_KINDS.map((kind) => [tableKey(kind), kind])) as Record<string, ContentKind>;
@@ -82,7 +82,7 @@ export function localizeTemplateBundle(bundle: Bundle, translations: Translation
   if (bundle.classes.length === 0) {
     const lists = [...new Set(bundle.spells.flatMap((spell) => (Array.isArray(spell.lists) ? spell.lists : [])))].filter((name): name is string => typeof name === "string").map((name) => ({ name, slug: safeSlug(name) }));
 
-    maps.classes = translatedNames(lists, "spellLists", translations, "spell lists");
+    maps.classes = translatedNames(lists, PACK_LIST_KIND, translations, "spell lists");
   }
 
   const attacks = bundle.units.map((row) => attackNames(row, "units", translations));

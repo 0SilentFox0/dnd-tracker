@@ -1,5 +1,5 @@
 import { PACK_HOOKS, type PackRefs } from "../systems";
-import { iconColumnOf } from "./import-prepare";
+import { iconColumnOf } from "./icons-file";
 import { mapJsonRefs } from "./json-refs";
 import type { IconsFile, Pack, PackRow } from "./pack";
 import { EXTRA_COLUMNS } from "./row-columns";

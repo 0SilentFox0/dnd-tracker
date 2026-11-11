@@ -1,6 +1,5 @@
-import { normalizeCreatureHeader } from "../../srd/i18n/creature-header";
-import { type Glossary, normalizeSpellHeader } from "../../srd/i18n/spell-header";
-import { checkTranslation, type TranslationIssue } from "../../srd/i18n/validate";
+import type { Glossary, PackHooks } from "../systems/types";
+import { checkTranslation, type TranslationIssue } from "./i18n-validate";
 import { buildNameMap, fixItalicNames } from "./names";
 
 import type { KeyedString, TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
@@ -44,7 +43,7 @@ export interface Rejected extends AppliedLine {
   issues: Array<TranslationIssue | "unknown">;
 }
 
-export function mergeApplied(existing: TranslationsV2, lines: AppliedLine[], catalog: KeyedString[], glossary: Glossary = {}): { merged: TranslationsV2; accepted: number; rejected: Rejected[] } {
+export function mergeApplied(existing: TranslationsV2, lines: AppliedLine[], catalog: KeyedString[], glossary: Glossary = {}, normalize?: PackHooks["normalizeTranslation"]): { merged: TranslationsV2; accepted: number; rejected: Rejected[] } {
   const byKey = new Map(catalog.map((e) => [e.key, e]));
 
   const merged = { ...existing };
@@ -58,7 +57,9 @@ export function mergeApplied(existing: TranslationsV2, lines: AppliedLine[], cat
   for (const line of lines) {
     const entry = byKey.get(line.key);
 
-    const text = entry ? normalizeCreatureHeader(entry.en, normalizeSpellHeader(entry.en, fixItalicNames(entry.en, line.text, names), glossary), glossary) : line.text;
+    const fixed = entry ? fixItalicNames(entry.en, line.text, names) : line.text;
+
+    const text = entry && normalize ? normalize(entry, fixed, glossary) : fixed;
 
     const issues = entry ? checkTranslation(entry.en, text) : (["unknown"] as Rejected["issues"]);
 

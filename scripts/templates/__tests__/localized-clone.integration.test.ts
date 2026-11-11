@@ -145,7 +145,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
     expect(minor).toBe(translateAt(tr, "rules/_/miscastMinor[0].text", (data.rules?.tables as unknown as { miscastMinor: { text: string }[] }).miscastMinor[0].text));
 
     if (locale === "uk") {
-      const known = new Set(Object.values(GRIM_SPELL_LISTS).flat().map((list) => translateAt(uk, `spellLists/${slugify(list)}/name`, list)));
+      const known = new Set(Object.values(GRIM_SPELL_LISTS).flat().map((list) => translateAt(uk, `lists/${slugify(list)}/name`, list)));
 
       for (const spell of spells) expect(known.has((spell.lists as string[])[0]), spell.name).toBe(true);
     }

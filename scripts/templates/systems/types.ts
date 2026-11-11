@@ -1,6 +1,6 @@
-import type { Pack, PackRow } from "../lib/pack";
+import type { IconsFile, Pack, PackRow } from "../lib/pack";
 
-import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
+import type { KeyedString, TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 import type { PackKind } from "@/lib/utils/templates/manifest";
 
 export interface PackIssue {
@@ -16,6 +16,15 @@ export interface PackRefs {
   slugOf(kind: PackKind, id: string): string | undefined;
 }
 
+export type Glossary = Record<string, string>;
+
+/** What `prepareRows` may read; `idByName` maps row names of a kind already in the template to ids. */
+export interface PrepareCtx {
+  pack: Pack;
+  icons: IconsFile;
+  idByName(kind: PackKind): Promise<ReadonlyMap<string, string>>;
+}
+
 export interface PackHooks {
   validatePack?(pack: Pack): PackIssue[];
   /** System-specific catalog rows for translation (pseudo-kinds allowed); defaults to the pack rows. */
@@ -26,4 +35,10 @@ export interface PackHooks {
   toPackRow?(kind: PackKind, row: Record<string, unknown>, refs: PackRefs): PackRow;
   /** Import: the inverse of `toPackRow`, applied before the row is written; may set `id` for a fresh row. */
   fromPackRow?(kind: PackKind, row: PackRow, refs: PackRefs & { rowId: string | undefined }): PackRow;
+  /** Import: system-specific row rewrites after the generic icon fill, before the importer sees the rows. */
+  prepareRows?(kind: PackKind, rows: PackRow[], ctx: PrepareCtx): Promise<PackRow[]>;
+  /** Import: optional columns a rerun nulls out when the pack row no longer carries them. */
+  clearableColumns?: Partial<Record<PackKind, readonly string[]>>;
+  /** Translation apply: mechanical fix-ups of a translated entry before validation. */
+  normalizeTranslation?(entry: KeyedString, text: string, glossary: Glossary): string;
 }

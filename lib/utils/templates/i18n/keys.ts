@@ -2,6 +2,9 @@ import { classOf, isTranslatable, type TextClass } from "./catalog";
 
 import { slugify } from "@/lib/utils/templates/slug";
 
+/** Pseudo-kind of free-form spell list names (templates without classes). */
+export const PACK_LIST_KIND = "lists";
+
 export interface TranslationEntry { text: string; en: string }
 
 /** Key: "<kind>/<slug>/<fieldPath>". */

@@ -3,7 +3,11 @@ import * as path from "path";
 
 import { type IconsFile, TEMPLATES_DIR } from "./pack";
 
+import type { PackKind } from "@/lib/utils/templates/manifest";
+
 export type { IconsFile };
+
+export const iconColumnOf = (kind: PackKind): "icon" | "avatar" => (kind === "units" ? "avatar" : "icon");
 
 type Slugged = { slug?: unknown };
 

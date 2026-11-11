@@ -20,7 +20,7 @@ let f: ReturnType<typeof createFakeSyncDb>;
 
 const setFenlore = (text: string) => {
   dictionary.values["spells/fenlore/name"] = { text, en: "Fenlore" };
-  dictionary.values["spellLists/fenlore/name"] = { text, en: "Fenlore" };
+  dictionary.values["lists/fenlore/name"] = { text, en: "Fenlore" };
 };
 
 const source = "source", target = "target", spell = id("s"), klass = id("k"), base = id("b"), property = id("p");

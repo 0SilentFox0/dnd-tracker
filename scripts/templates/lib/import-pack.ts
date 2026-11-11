@@ -1,17 +1,16 @@
 import { isDeepStrictEqual } from "node:util";
 
 import { assertSeedTarget } from "../../seed/seed-library-lib";
-import { PACK_HOOKS, type PackHooks } from "../systems";
+import { PACK_HOOKS, type PackHooks, type PrepareCtx } from "../systems";
 import { catalogOfPack } from "./i18n-convert";
 import { readTranslations } from "./i18n-store";
-import { withIcons } from "./icons-file";
+import { iconColumnOf, withIcons } from "./icons-file";
 import { importOrder } from "./import-order";
-import { iconColumnOf, resolveSchoolRefs, staleSpellColumns, withClassIcons } from "./import-prepare";
 import { JSON_REFS, mapJsonRefs, slugsToIds } from "./json-refs";
 import { delegateFor } from "./kind-delegate";
 import { type Pack, type PackRow, readPack, TEMPLATES_DIR } from "./pack";
 import { type OutsideRow, pruneRows, rowsOutsidePack } from "./prune";
-import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues } from "./row-columns";
+import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues, staleColumns } from "./row-columns";
 import { assertNoDuplicatesFromUnslugged } from "./slug-guard";
 import { ensureTemplate, makeTemplateStore } from "./store";
 import { validatePack } from "./validate";
@@ -139,12 +138,14 @@ async function writeExtras(campaignId: string, kind: PackKind, rows: PackRow[]):
   );
 }
 
-async function clearStaleSpellColumns(campaignId: string, rows: PackRow[]): Promise<void> {
+async function clearStaleColumns(campaignId: string, kind: PackKind, rows: PackRow[], columns: readonly string[]): Promise<void> {
   await withCampaignContentWrite(
     campaignId,
     async (tx) => {
-      for (const { column, slugs } of staleSpellColumns(rows)) {
-        const { count } = await tx.spell.updateMany({ where: { campaignId, slug: { in: slugs }, [column]: { not: null } }, data: { [column]: null } });
+      const { delegate } = delegateFor(tx, kind);
+
+      for (const { column, slugs } of staleColumns(rows, columns)) {
+        const { count } = await delegate.updateMany({ where: { campaignId, slug: { in: slugs }, [column]: { not: null } }, data: { [column]: null } });
 
         if (count > 0) markContentDirty();
       }
@@ -210,7 +211,13 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   const run = (kind: ImportKind, rows: PackRow[]) => importContent(actor, kind, { rows, mode: "update", dryRun }, OFFLINE_IMPORT_DEPS);
 
-  const schoolIds = async () => new Map((await prisma.spellGroup.findMany({ where: { campaignId: template.id }, select: { id: true, name: true } })).map((g) => [g.name, g.id]));
+  const hooks = Object.hasOwn(PACK_HOOKS, manifest.system) ? PACK_HOOKS[manifest.system] : undefined;
+
+  const prepareCtx: PrepareCtx = {
+    pack,
+    icons: pack.icons,
+    idByName: async (kind) => new Map((await delegateFor(prisma, kind).delegate.findMany({ where: { campaignId: template.id }, select: { id: true, name: true } })).map((row) => [String(row.name), row.id] as const)),
+  };
 
   const hasSets = manifest.kinds.includes("artifact-sets") && manifest.kinds.includes("artifacts");
 
@@ -221,14 +228,10 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
     const iconed = withIcons(resolved, pack.icons[kind], iconColumnOf(kind));
 
-    const classed = kind === "classes" ? withClassIcons(iconed, pack.icons) : iconed;
-
-    return kind !== "spell-groups" && manifest.kinds.includes("spell-groups") ? resolveSchoolRefs(classed, await schoolIds()) : classed;
+    return (await hooks?.prepareRows?.(kind, iconed, prepareCtx)) ?? iconed;
   };
 
   const perKind: Record<string, KindCounts> = {};
-
-  const hooks = Object.hasOwn(PACK_HOOKS, manifest.system) ? PACK_HOOKS[manifest.system] : undefined;
 
   for (const kind of importOrder(manifest.kinds)) {
     const rows = pack.rows[kind] ?? [];
@@ -260,7 +263,9 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
       perKind.artifacts = { ...perKind.artifacts, errors: perKind.artifacts.errors + second.counts.error };
     }
 
-    if (!dryRun && kind === "spells") await clearStaleSpellColumns(template.id, rows);
+    const clearable = hooks?.clearableColumns?.[kind];
+
+    if (!dryRun && clearable) await clearStaleColumns(template.id, kind, rows, clearable);
   }
 
   const failed = Object.values(perKind).some((c) => c.errors > 0);

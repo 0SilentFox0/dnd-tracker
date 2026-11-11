@@ -2,8 +2,8 @@ import { expect, it } from "vitest";
 
 import { expectedTargets, IDENTITY_BUCKET } from "../../assets/tokens-5e/identity-catalog";
 import { withIcons } from "../../templates/lib/icons-file";
-import { withClassIcons } from "../../templates/lib/import-prepare";
 import type { IconsFile, PackRow } from "../../templates/lib/pack";
+import { withClassIcons } from "../../templates/systems/d20/prepare";
 import { readSrdData, toImportRows } from "../lib/data-files";
 
 const fakeIcons = (): IconsFile => {

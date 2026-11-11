@@ -1,4 +1,4 @@
-import type { Glossary } from "./spell-header";
+import type { Glossary } from "../../types";
 
 const HEADER = /^(Tiny|Small|Medium|Large|Huge|Gargantuan) (Aberration|Beast|Celestial|Construct|Dragon|Elemental|Fey|Fiend|Giant|Humanoid|Monstrosity|Ooze|Plant|Undead), (Unaligned|(?:Lawful|Chaotic|Neutral)(?: (?:Good|Evil|Neutral))?)$/;
 

@@ -72,7 +72,7 @@ describe("wfrpI18nIssues", () => {
   });
 
   it("flags colliding spell lists and careers", () => {
-    const lists = { "spellLists/school-of-embers/name": { text: "Школа", en: "School of Embers" }, "spellLists/school-of-gloam/name": { text: "Школа", en: "School of Gloam" } };
+    const lists = { "lists/school-of-embers/name": { text: "Школа", en: "School of Embers" }, "lists/school-of-gloam/name": { text: "Школа", en: "School of Gloam" } };
 
     expect(wfrpI18nIssues(pack, lists).join("\n")).toContain("spell lists");
 

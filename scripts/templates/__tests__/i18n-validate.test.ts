@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { checkTranslation } from "../validate";
+import { checkTranslation } from "../lib/i18n-validate";
 
 const TABLE = "Table: Draconic Ancestors\n\n| Dragon | Damage Type |\n| --- | --- |\n| Black | Acid |";
 

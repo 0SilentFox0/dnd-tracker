@@ -5,8 +5,8 @@ import { wfrpI18nIssues } from "../i18n";
 import { grimPack } from "./pack-helpers";
 
 import { statusOf } from "@/lib/utils/templates/i18n/keys";
-import { checkTranslation } from "@/scripts/srd/i18n/validate";
 import { readTranslations } from "@/scripts/templates/lib/i18n-store";
+import { checkTranslation } from "@/scripts/templates/lib/i18n-validate";
 
 const pack = grimPack();
 

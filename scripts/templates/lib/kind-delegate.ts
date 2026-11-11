@@ -10,6 +10,7 @@ export interface Delegate {
   findMany(args: unknown): Promise<Row[]>;
   create(args: unknown): Promise<unknown>;
   update(args: unknown): Promise<unknown>;
+  updateMany(args: unknown): Promise<{ count: number }>;
   deleteMany(args: unknown): Promise<unknown>;
 }
 

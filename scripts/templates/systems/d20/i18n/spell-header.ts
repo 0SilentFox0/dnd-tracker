@@ -1,4 +1,6 @@
-export type Glossary = Record<string, string>;
+import type { Glossary } from "../../types";
+
+export type { Glossary };
 
 const HEADER = /^(?:Level (\d+) (\S+)|(\S+) Cantrip) · Casting Time: (.+) · Range: (.+) · Components: (.+) · Duration: (.+) · Classes: (.+)$/;
 

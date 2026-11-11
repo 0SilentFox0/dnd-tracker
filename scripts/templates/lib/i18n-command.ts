@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import { PACK_HOOKS } from "../systems";
 import { type AppliedLine, inPhase, mergeApplied, missing, type Phase, planBatches } from "./batches";
 import { catalogOf, convertV1, i18nIssuesOf } from "./i18n-convert";
 import { readGlossary, readTranslations, writeTranslations } from "./i18n-store";
@@ -53,6 +54,12 @@ function extract(key: string, locale: string, args: string[], dir: string) {
   console.info(`${key} ${locale} phase ${phase}: ${todo.length} rows, ${todo.reduce((n, e) => n + e.en.length, 0)} chars, ${batches.length} batches -> ${out}`);
 }
 
+const normalizerOf = (key: string, dir: string) => {
+  const { system } = readPack(key, dir).manifest;
+
+  return Object.hasOwn(PACK_HOOKS, system) ? PACK_HOOKS[system].normalizeTranslation : undefined;
+};
+
 function parseLine(file: string, line: number, text: string): AppliedLine {
   try {
     return JSON.parse(text) as AppliedLine;
@@ -64,7 +71,7 @@ function parseLine(file: string, line: number, text: string): AppliedLine {
 function apply(key: string, locale: string, files: string[], dir: string) {
   const lines: AppliedLine[] = files.flatMap((f) => fs.readFileSync(f, "utf8").split("\n").filter(Boolean).map((l, i) => parseLine(f, i + 1, l)));
 
-  const { merged, accepted, rejected } = mergeApplied(readTranslations(key, locale, dir), lines, catalogOf(key, dir), readGlossary(key, locale, dir));
+  const { merged, accepted, rejected } = mergeApplied(readTranslations(key, locale, dir), lines, catalogOf(key, dir), readGlossary(key, locale, dir), normalizerOf(key, dir));
 
   const issues = i18nIssuesOf(readPack(key, dir), merged);
 
@@ -91,7 +98,7 @@ function normalize(key: string, locale: string, dir: string) {
 
   const catalog = catalogOf(key, dir);
 
-  const { merged } = mergeApplied(tr, catalog.filter((e) => Object.hasOwn(tr, e.key)).map((e) => ({ key: e.key, text: tr[e.key].text })), catalog, readGlossary(key, locale, dir));
+  const { merged } = mergeApplied(tr, catalog.filter((e) => Object.hasOwn(tr, e.key)).map((e) => ({ key: e.key, text: tr[e.key].text })), catalog, readGlossary(key, locale, dir), normalizerOf(key, dir));
 
   const changed = Object.keys(merged).filter((k) => merged[k].text !== tr[k].text).length;
 
