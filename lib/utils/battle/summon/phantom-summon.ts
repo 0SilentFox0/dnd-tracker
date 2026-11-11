@@ -1,6 +1,9 @@
-import { CombatStatus,ParticipantSourceType } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { nearestStandable } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 interface PhantomInput {
   source: BattleParticipant;
@@ -28,11 +31,27 @@ export function buildPhantom({ source, owner, order, castId, map }: PhantomInput
     ...copy,
     basicInfo: { ...basic, id, sourceId: `phantom:${castId}`, sourceType: ParticipantSourceType.UNIT, name: `👻 ${source.basicInfo.name}`, side: owner.basicInfo.side, controlledBy: owner.basicInfo.controlledBy },
     combatStats: { ...copy.combatStats, maxHp: 1, currentHp: 1, tempHp: 0, status: CombatStatus.ACTIVE },
-    battleData: { ...data, activeEffects: [], abilityUsage: {}, summonedBy: owner.basicInfo.id, pendingExtraActions: 0 },
+    battleData: { ...data, activeEffects: [], abilityUsage: {}, summonedBy: owner.basicInfo.id, phantomOf: owner.basicInfo.id, pendingExtraActions: 0 },
     actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
   };
 
   const at = map && source.battleData.position ? nearestStandable(map, order, base, source.battleData.position) : null;
 
   return at ? { ...base, battleData: { ...base.battleData, position: at } } : base;
+}
+
+export function dismissPhantoms(order: BattleParticipant[], ownerId: string): { order: BattleParticipant[]; messages: LogLine[] } {
+  const messages: LogLine[] = [];
+
+  const next = order.map((p) => {
+    if (p.battleData.phantomOf !== ownerId || !isActive(p)) return p;
+
+    const { position: _position, ...battleData } = p.battleData;
+
+    messages.push(textRef("battleLog.summon.phantomReplaced", { name: p.basicInfo.name }));
+
+    return { ...p, combatStats: { ...p.combatStats, status: CombatStatus.DEAD }, battleData: { ...battleData, dismissed: true } };
+  });
+
+  return { order: messages.length ? next : order, messages };
 }

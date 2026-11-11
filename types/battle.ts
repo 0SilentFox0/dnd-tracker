@@ -584,6 +584,8 @@ export interface BattleParticipantBattleData {
   attackedWithLight?: boolean;
   /** Хто прикликав або підняв учасника здібністю */
   summonedBy?: string;
+  /** Двійник заклинання Phantom: id кастера; у кастера лише один живий */
+  phantomOf?: string;
   /** Предмет заклинання: не ціль, не ходить, не рахується в перемозі; зникає за expiresRound чи з концентрацією */
   object?: { spellId: string; expiresRound?: number; concentrationOf?: { casterId: string; castId: string } };
   /** Цільова форма заклинання перетворення; немає — своя форма */

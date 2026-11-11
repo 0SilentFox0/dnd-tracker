@@ -5,7 +5,7 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/summon/append-summoned-unit";
 import { buildInlineSummon } from "@/lib/utils/battle/summon/inline-summon";
-import { buildPhantom } from "@/lib/utils/battle/summon/phantom-summon";
+import { buildPhantom, dismissPhantoms } from "@/lib/utils/battle/summon/phantom-summon";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { pickOne } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -70,10 +70,12 @@ export async function applyAbilitySummons(
 
       if (!owner || !source) continue;
 
-      const { finalOrder, added } = appendToInitiativeEnd(next, buildPhantom({ source, owner, order: next, castId: req.castId ?? req.spellId ?? "x", map: opts.map }));
+      const dismissed = dismissPhantoms(next, req.ownerId);
+
+      const { finalOrder, added } = appendToInitiativeEnd(dismissed.order, buildPhantom({ source, owner, order: dismissed.order, castId: req.castId ?? req.spellId ?? "x", map: opts.map }));
 
       next = finalOrder;
-      messages.push(textRef("battleLog.summon.appears", { names: added.basicInfo.name }));
+      messages.push(...dismissed.messages, textRef("battleLog.summon.appears", { names: added.basicInfo.name }));
 
       continue;
     }
