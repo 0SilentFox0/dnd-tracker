@@ -44,6 +44,8 @@ describe("system literals ratchet", () => {
     expect(isLiteralAllowed("scripts/templates/systems/wfrp/units.ts", tokens)).toBe(true);
     expect(isLiteralAllowed("scripts/templates/grim-d100/validate.ts", tokens)).toBe(true);
     expect(isLiteralAllowed("lib/utils/templates/registry.ts", tokens)).toBe(true);
+    expect(isLiteralAllowed("scripts/sim/battle-sweep/profiles/grim-d100.ts", tokens)).toBe(true);
+    expect(isLiteralAllowed("scripts/sim/battle-sweep/run.ts", tokens)).toBe(false);
     expect(isLiteralAllowed("lib/utils/battle/foo.ts", tokens)).toBe(false);
     expect(isLiteralAllowed("scripts/templates/lib/foo.ts", tokens)).toBe(false);
   });

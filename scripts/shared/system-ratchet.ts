@@ -69,6 +69,8 @@ export const isLiteralAllowed = (file: string, tokens: LiteralTokens): boolean =
 
   if (file.startsWith("lib/utils/rules/systems/d20/") || file.startsWith("components/systems/d20/")) return true;
 
+  if (file.startsWith("scripts/sim/battle-sweep/profiles/")) return true;
+
   const owners = new Set([...tokens.substring, ...tokens.literal, ...SYSTEM_META.map((m) => m.module)]);
 
   const [a, b, c] = file.split("/");
