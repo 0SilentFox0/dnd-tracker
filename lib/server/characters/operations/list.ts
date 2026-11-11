@@ -104,5 +104,5 @@ export async function listCharacters(request: Request, campaignId: string, actor
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(compact ? rows : redactListedLedgers(rows as LedgerRow[], { isDM: access.isDM }, ruleSystemOf(access.campaign.rules)));
+  return NextResponse.json(compact ? rows : redactListedLedgers(rows as LedgerRow[], access, ruleSystemOf(access.campaign.rules)));
 }
