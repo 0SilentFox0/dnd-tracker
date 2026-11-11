@@ -6,6 +6,7 @@ import { characterToFormData } from "@/lib/utils/characters/character-form";
 import { buildCharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import { defaultCharacterFormData } from "@/lib/utils/characters/form/defaults";
 import { withRecommendedScores } from "@/lib/utils/characters/form/recommended-scores";
+import type { SystemData } from "@/lib/utils/rules/systems/slot";
 import type { Character } from "@/types/characters";
 import { CharacterFormData } from "@/types/characters";
 import type { GameClassData } from "@/types/classes";
@@ -16,6 +17,7 @@ interface UseCharacterFormOptions {
   recommendScores?: Record<string, GameClassData>;
   requireRace?: boolean;
   requireClass?: boolean;
+  seedCharacteristics?: () => SystemData | undefined;
   onSubmit: (data: CharacterFormData) => Promise<CharacterFormData | void>;
   onCancel?: () => void;
 }
@@ -29,9 +31,13 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
       : characterToFormData(options.initialData as Partial<Character>)
     : defaultCharacterFormData;
 
-  const initialFormData = options.type ? { ...base, basicInfo: { ...base.basicInfo, type: options.type } } : base;
+  const [formData, setFormData] = useState<CharacterFormData>(() => {
+    const typed = options.type ? { ...base, basicInfo: { ...base.basicInfo, type: options.type } } : base;
 
-  const [formData, setFormData] = useState<CharacterFormData>(initialFormData);
+    const seed = typed.characteristics ? undefined : options.seedCharacteristics?.();
+
+    return seed ? { ...typed, characteristics: seed } : typed;
+  });
 
   const [isLoading, setIsLoading] = useState(false);
 

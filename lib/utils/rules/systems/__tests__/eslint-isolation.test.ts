@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { readImportsExempt, SYSTEM_ROOTS } from "@/scripts/shared/system-ratchet";
 
-type RuleEntry = [string, { paths?: ({ name: string } | string)[]; patterns?: { group: string[] }[] }?];
+type RuleEntry = [string, { paths?: ({ name: string } | string)[]; patterns?: { group: string[]; allowTypeImports?: boolean }[] }?];
 
 const configOf = async (filePath: string) => (await new ESLint({ cwd: process.cwd() }).calculateConfigForFile(filePath)) as { rules: Record<string, RuleEntry | undefined> };
 
@@ -49,6 +49,14 @@ describe("system import zones", () => {
 
   it("does not cover tests, system code or the template system scripts", async () => {
     for (const file of ["lib/utils/battle/__tests__/foo.test.ts", "systems/wfrp/rules/x.ts", "scripts/templates/systems/wfrp/x.ts", "scripts/templates/systems/homm/x.ts"]) expect((await restricted(file)).zone).toEqual([]);
+  });
+
+  it("lets ui/** import wire types from systems/*/api but not values", async () => {
+    const config = await configOf("systems/wfrp/ui/x.tsx");
+
+    const pattern = config.rules["no-restricted-imports"]?.[1]?.patterns?.find((p) => p.group.includes("@/systems/*/api"));
+
+    expect(pattern?.allowTypeImports).toBe(true);
   });
 
   it("applies layer rules inside a system", async () => {

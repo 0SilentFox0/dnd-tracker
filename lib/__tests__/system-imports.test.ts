@@ -5,6 +5,10 @@ import { describe, expect, it } from "vitest";
 
 import { importsSystem, isImportAllowed, readImportsExempt, ROOT, scanImporters, SYSTEM_ROOTS } from "@/scripts/shared/system-ratchet";
 
+const BARREL = "lib/utils/rules/systems/index.ts";
+
+const BARREL_MAX_SYSTEM_IMPORT_LINES = 26;
+
 const REASON = /^(route|content-kind|ruleset-section|e1:\d+\.\d+)$/;
 
 describe("system imports ratchet", () => {
@@ -27,7 +31,13 @@ describe("system imports ratchet", () => {
     expect(scanImporters().filter((file) => !listed.has(file))).toEqual([]);
   });
 
-  it("ESLint rejects a new importer and spares roots and exempt files", async () => {
+  it("the rules barrel does not grow its @/systems/ re-exports (D69)", () => {
+    const lines = fs.readFileSync(path.join(ROOT, BARREL), "utf8").split("\n").filter((l) => l.includes('from "@/systems/')).length;
+
+    expect(lines).toBeLessThanOrEqual(BARREL_MAX_SYSTEM_IMPORT_LINES);
+  });
+
+  it("ESLint rejects a new importer and spares roots and exempt files", { timeout: 30_000 }, async () => {
     const eslint = new ESLint({ cwd: ROOT });
 
     const lint = async (filePath: string) => (await eslint.lintText('import x from "@/systems/wfrp/rules";\nexport { x };\n', { filePath })).flatMap((r) => r.messages.filter((m) => m.ruleId === "systems/zone"));

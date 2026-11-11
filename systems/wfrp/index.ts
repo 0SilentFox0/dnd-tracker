@@ -38,7 +38,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
       return { total: woundsMax(c), breakdown: woundsBreakdown(c) };
     },
   },
-  characteristics: { persisted: true, defaults: () => DEFAULT_CHARACTERISTICS as unknown as SystemData, isEmpty: isEmptyCharacteristics, sheetBlock: wfrpSheetBlock, reconcile: reconcileCharacteristics, redact: redactCharacteristics },
+  characteristics: { persisted: true, defaults: () => structuredClone(DEFAULT_CHARACTERISTICS) as unknown as SystemData, isEmpty: isEmptyCharacteristics, sheetBlock: wfrpSheetBlock, reconcile: reconcileCharacteristics, redact: redactCharacteristics },
   resources: {
     limits: (row) => ({ fateMax: readCharacteristics(row).fate }),
     seed: (characteristics) => ({ fortune: readCharacteristics({ characteristics }).fate }),

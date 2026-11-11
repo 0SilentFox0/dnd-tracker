@@ -87,7 +87,7 @@ const SYSTEM_SELF_PATTERNS = (id) => [
 
 const SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*"], message: "rules/** — чиста логіка без сервера." };
 
-const SYSTEM_API_IMPORT_PATTERN = { group: ["@/systems/*/api", "@/systems/*/api/*"], message: "ui/** не ходить в API — використайте хук із systems/<id>/hooks." };
+const SYSTEM_API_IMPORT_PATTERN = { group: ["@/systems/*/api", "@/systems/*/api/*"], allowTypeImports: true, message: "ui/** не ходить в API — використайте хук із systems/<id>/hooks." };
 
 const SYSTEM_LAYERS = (id) => {
   const self = SYSTEM_SELF_PATTERNS(id);

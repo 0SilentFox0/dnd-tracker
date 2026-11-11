@@ -22,7 +22,15 @@ import { useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems";
 import { pruneFormChoices } from "@/lib/utils/characters/choices/prune";
 
-export function NewCharacterForm({ campaignId: id, characterType }: { campaignId: string; characterType: CharacterTypeValue }) {
+type NewCharacterFormProps = { campaignId: string; characterType: CharacterTypeValue };
+
+export function NewCharacterForm(props: NewCharacterFormProps) {
+  const { ready } = useRuleSystem({ campaignId: props.campaignId });
+
+  return ready ? <NewCharacterFormBody {...props} /> : null;
+}
+
+function NewCharacterFormBody({ campaignId: id, characterType }: NewCharacterFormProps) {
   const router = useRouter();
 
   const t = useTranslations("characters");
@@ -55,18 +63,13 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     type: characterType,
     requireRace: system?.lineage,
     requireClass: system?.classes,
+    seedCharacteristics: system?.characteristics.defaults,
     recommendScores: classMode.byId,
     onSubmit: async (data) => {
       await create.mutateAsync(refsRef.current?.ready ? pruneFormChoices(data, refsRef.current) : data);
       router.push(`/campaigns/${id}/dm/characters?type=${data.basicInfo.type}`);
     },
   });
-
-  const defaultCharacteristics = system?.characteristics.defaults();
-
-  useEffect(() => {
-    if (defaultCharacteristics) setFormData((prev) => (prev.characteristics ? prev : { ...prev, characteristics: defaultCharacteristics }));
-  }, [defaultCharacteristics, setFormData]);
 
   const refs = useChoiceRefs(id, basicInfo.data.race);
 
