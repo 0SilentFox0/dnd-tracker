@@ -1,9 +1,8 @@
 import { useTranslations } from "next-intl";
 import { Plus, X } from "lucide-react";
 
-import { NumberField } from "../NumberField";
-import { RulesSection } from "../RulesSection";
-
+import { NumberField } from "@/components/rules/NumberField";
+import { RulesSection } from "@/components/rules/RulesSection";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
 import type { RulesFormState } from "@/lib/hooks/campaigns";

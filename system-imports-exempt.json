@@ -52,10 +52,6 @@
     "reason": "e1:5.1"
   },
   {
-    "file": "components/rules/sections/TablesSection.tsx",
-    "reason": "e1:4.3"
-  },
-  {
     "file": "lib/schemas/careers.ts",
     "reason": "content-kind"
   },

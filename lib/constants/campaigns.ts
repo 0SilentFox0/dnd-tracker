@@ -1,5 +1,7 @@
 import { Award, BookOpen, Bot, Briefcase, Cpu, Gem, GitBranch, GraduationCap, Images, type LucideIcon, Music, Network, Scale, ScrollText, Shield, Skull, Sparkles, Swords, Users, Wand2 } from "lucide-react";
 
+import { metaOf } from "@/lib/utils/rules/systems/meta";
+
 export const CampaignRole = { DM: "dm", PLAYER: "player" } as const;
 
 export type CampaignRoleValue = (typeof CampaignRole)[keyof typeof CampaignRole];
@@ -25,7 +27,8 @@ export interface DmSection {
   icon: LucideIcon;
   templateVisible: boolean;
   requiresClasses?: boolean;
-  requiresSystem?: string;
+  /** shown only when the active system declares the path in meta.dmSections */
+  systemSection?: true;
   /** skill libraries have no use in 5e class campaigns */
   hiddenWithClasses?: boolean;
   /** campaign page tile: in every kind, only on templates, or none (menu only) */
@@ -45,7 +48,7 @@ export const DM_SECTIONS: readonly DmSection[] = [
   { path: "classes", icon: GraduationCap, templateVisible: true, requiresClasses: true, tile: "all" },
   { path: "backgrounds", icon: Award, templateVisible: true, requiresClasses: true, tile: "all" },
   { path: "feats", icon: Award, templateVisible: true, requiresClasses: true, tile: "all" },
-  { path: "careers", icon: Briefcase, templateVisible: false, requiresSystem: "wfrp", tile: "all" },
+  { path: "careers", icon: Briefcase, templateVisible: false, systemSection: true, tile: "all" },
   { path: "battles", icon: Swords, templateVisible: false, tile: "all" },
   { path: "music", icon: Music, templateVisible: true, tile: "all" },
   { path: "show", icon: Images, templateVisible: false, tile: "all" },
@@ -63,7 +66,7 @@ interface DmSectionContext {
 }
 
 export const dmSectionsFor = ({ isTemplate, classesEnabled, systemKey }: DmSectionContext): DmSection[] =>
-  DM_SECTIONS.filter((s) => (!isTemplate || s.templateVisible) && (!s.requiresSystem || s.requiresSystem === systemKey) && (!s.requiresClasses || classesEnabled) && !(s.hiddenWithClasses && classesEnabled));
+  DM_SECTIONS.filter((s) => (!isTemplate || s.templateVisible) && (!s.systemSection || !!(systemKey && metaOf(systemKey)?.dmSections?.includes(s.path))) && (!s.requiresClasses || classesEnabled) && !(s.hiddenWithClasses && classesEnabled));
 
 export const dmTilesFor = (ctx: DmSectionContext): DmSection[] =>
   dmSectionsFor(ctx).filter((s) => s.tile === "all" || (s.tile === "template" && ctx.isTemplate));

@@ -13,7 +13,6 @@ import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ChoiceGroup } from "@/lib/utils/characters/choices/selections";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
-import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SpellMagic, SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
@@ -314,7 +313,6 @@ export interface RuleSystemDefinition {
   items: boolean;
   inventory: boolean;
   d20Stats: boolean;
-  unusedMechanics: readonly MechanicKey[];
 }
 
 export interface ArmourGear {

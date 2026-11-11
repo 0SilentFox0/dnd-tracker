@@ -13,13 +13,14 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useCareers, useDeleteCareer } from "@/lib/hooks/careers";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
+import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 import type { CareerData } from "@/types/careers";
 
 const FORM_ID = "career-form";
 
-const CareerForm = systemUiOf("wfrp").CareerForm;
+export function DMCareersPageClient({ campaignId, systemKey, canEdit = true }: { campaignId: string; systemKey: RuleSystemKey; canEdit?: boolean }) {
+  const CareerForm = systemUiOf(systemKey).CareerForm;
 
-export function DMCareersPageClient({ campaignId, canEdit = true }: { campaignId: string; canEdit?: boolean }) {
   const t = useTranslations("wfrpCareers");
 
   const tc = useTranslations("common.actions");

@@ -26,7 +26,7 @@ afterEach(() => {
 
 describe("DMCareersPageClient", () => {
   it("lists careers with their tiers and offers create/edit/delete to the DM", () => {
-    render(<DMCareersPageClient campaignId="c" />);
+    render(<DMCareersPageClient systemKey="wfrp" campaignId="c" />);
 
     expect(screen.getByText("Воїн")).toBeTruthy();
     expect(screen.getByText("A › B › C › D")).toBeTruthy();
@@ -35,7 +35,7 @@ describe("DMCareersPageClient", () => {
   });
 
   it("hides editing in the demo", () => {
-    render(<DMCareersPageClient campaignId="c" canEdit={false} />);
+    render(<DMCareersPageClient systemKey="wfrp" campaignId="c" canEdit={false} />);
 
     expect(screen.queryByRole("button", { name: "Нова кар'єра" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Видалити" })).toBeNull();
@@ -45,7 +45,7 @@ describe("DMCareersPageClient", () => {
     mocks.confirm.mockResolvedValue(true);
     mocks.remove.mockRejectedValue(new Error("Кар'єру мають герої"));
 
-    render(<DMCareersPageClient campaignId="c" />);
+    render(<DMCareersPageClient systemKey="wfrp" campaignId="c" />);
     fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
 
     await waitFor(() => expect(mocks.notify).toHaveBeenCalledWith("Кар'єру мають герої"));

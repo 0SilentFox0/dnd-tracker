@@ -1,7 +1,9 @@
 import type { ComponentType } from "react";
 
 import type { SystemConditionBody } from "@/lib/hooks/battles";
+import type { RulesFormState } from "@/lib/hooks/campaigns";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
+import type { MechanicKey } from "@/lib/utils/rules/registry";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant } from "@/types/battle";
 import type { CareerData } from "@/types/careers";
@@ -104,6 +106,10 @@ export interface ActionResultProps {
   exact: boolean;
 }
 
+export interface RulesSectionProps {
+  form: RulesFormState;
+}
+
 export interface SystemUi {
   HeroStats: ComponentType;
   StatsTab: ComponentType<StatsTabProps>;
@@ -126,4 +132,5 @@ export interface SystemUi {
   ResourceFields?: ComponentType<ResourceFieldsProps>;
   resourceDefaults?(sheet: CharacterSheet): Record<string, string>;
   ActionResult?: ComponentType<ActionResultProps>;
+  rulesSections?: Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>>;
 }

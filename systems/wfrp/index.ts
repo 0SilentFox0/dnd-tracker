@@ -67,5 +67,4 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   items: false,
   inventory: true,
   d20Stats: false,
-  unusedMechanics: ["morale", "criticals", "formulas", "heroScaling", "initiative", "saves", "deathSaves", "concentration", "conditions", "actions", "classes", "encounters"],
 };

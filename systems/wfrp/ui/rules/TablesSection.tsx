@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 
-import { RulesSection } from "../RulesSection";
-
+import { RulesSection } from "@/components/rules/RulesSection";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

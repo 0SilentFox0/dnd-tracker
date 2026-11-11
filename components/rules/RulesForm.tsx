@@ -1,9 +1,8 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { ComponentType, FormEvent } from "react";
 
 import { ActionsSection } from "./sections/ActionsSection";
-import { AdvancementSection } from "./sections/AdvancementSection";
 import { ClassesSection } from "./sections/ClassesSection";
 import { ConcentrationSection } from "./sections/ConcentrationSection";
 import { ConditionsSection } from "./sections/ConditionsSection";
@@ -20,21 +19,20 @@ import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
 import { SpellIngredientsSection } from "./sections/SpellIngredientsSection";
 import { SystemSection } from "./sections/SystemSection";
-import { TablesSection } from "./sections/TablesSection";
 
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
+import type { RulesSectionProps } from "@/components/systems/types";
 import { Button } from "@/components/ui/button";
 import { useRulesForm } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { MechanicKey } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
-
-const WFRP_ONLY = new Set<MechanicKey>(["advancement", "tables"]);
+import { metaOf } from "@/lib/utils/rules/systems/meta";
 
 const FORM_ID = "campaign-rules-form";
 
-const SECTIONS = {
+const SECTIONS: Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>> = {
   morale: MoraleSection,
   criticals: CriticalsSection,
   formulas: FormulasSection,
@@ -51,9 +49,7 @@ const SECTIONS = {
   encounters: EncountersSection,
   items: ItemsSection,
   spellIngredients: SpellIngredientsSection,
-  advancement: AdvancementSection,
-  tables: TablesSection,
-} satisfies Record<MechanicKey, unknown>;
+} satisfies Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {
   const t = useTranslator("rules");
@@ -66,10 +62,12 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   if (isLoading) return <LoadingState />;
 
-  const unused = ruleSystemOf(form.data).unusedMechanics;
+  const unused: readonly string[] = metaOf(form.data.system.key)?.unusedMechanics ?? [];
 
-  const tabs: HudTab<MechanicKey>[] = (Object.keys(SECTIONS) as MechanicKey[]).filter((key) => !WFRP_ONLY.has(key) || form.data.system.key === "wfrp").map((key) => {
-    const Section = SECTIONS[key];
+  const sections = { ...SECTIONS, ...systemUiOf(form.data.system.key).rulesSections };
+
+  const tabs: HudTab<MechanicKey>[] = (Object.keys(sections) as MechanicKey[]).map((key) => {
+    const Section = sections[key] as ComponentType<RulesSectionProps>;
 
     return {
       id: key,

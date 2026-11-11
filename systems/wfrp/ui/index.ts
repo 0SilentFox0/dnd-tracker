@@ -17,6 +17,8 @@ import { UnitStatsFields } from "./UnitStatsFields";
 
 import { type SystemUi } from "@/components/systems/types";
 import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
+import { AdvancementSection } from "@/systems/wfrp/ui/rules/AdvancementSection";
+import { TablesSection } from "@/systems/wfrp/ui/rules/TablesSection";
 
 const SpeciesProfileEditor = dynamic(() => import("./creation/SpeciesProfileEditor").then((m) => m.SpeciesProfileEditor));
 
@@ -28,4 +30,4 @@ const DowntimeTab = dynamic(() => import("./downtime/DowntimeTab").then((m) => m
 
 const DowntimePeriodPanel = dynamic(() => import("./downtime/DowntimePeriodPanel").then((m) => m.DowntimePeriodPanel));
 
-export const WFRP_UI: SystemUi = { HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, DraftForm: WfrpDraftForm, RaceProfileEditor: SpeciesProfileEditor, battleConditionsDialog: SystemConditionsDialog, ArtifactStatsEditor, EquippedSummary, DowntimeTab, DowntimePeriodPanel, RestBadges, ResourceFields, ActionResult, resourceDefaults: (sheet) => ({ sin: String(SHEET_SLOT.read(sheet.systemSlot)?.sin ?? 0) }) };
+export const WFRP_UI: SystemUi = { rulesSections: { advancement: AdvancementSection, tables: TablesSection }, HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, DraftForm: WfrpDraftForm, RaceProfileEditor: SpeciesProfileEditor, battleConditionsDialog: SystemConditionsDialog, ArtifactStatsEditor, EquippedSummary, DowntimeTab, DowntimePeriodPanel, RestBadges, ResourceFields, ActionResult, resourceDefaults: (sheet) => ({ sin: String(SHEET_SLOT.read(sheet.systemSlot)?.sin ?? 0) }) };
