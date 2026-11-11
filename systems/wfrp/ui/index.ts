@@ -39,7 +39,7 @@ const TablesSection = dynamic(() => import("@/systems/wfrp/ui/rules/TablesSectio
 
 const ConditionTestPanel = dynamic(() => import("./battle/ConditionTestPanel").then((m) => m.ConditionTestPanel));
 
-const ChannelDialog = dynamic(() => import("./battle/ChannelDialog").then((m) => m.ChannelDialog), { ssr: false });
+const ChannelDialog = dynamic(() => import("./battle/ChannelDialog").then((m) => m.ChannelDialog));
 
 const SpellMagicFields = dynamic(() => import("./spells/SpellMagicFields").then((m) => m.SpellMagicFields));
 
