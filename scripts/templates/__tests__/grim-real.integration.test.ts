@@ -13,10 +13,9 @@ const scoped = createScopedDatabase(raw.$extends(contentLayer()));
 vi.mock("@/lib/db", () => ({ get prisma() { return scoped; } }));
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 
-import { readGrimData } from "../data";
-import { loadGrimTemplate } from "../load-template";
+import { importPack } from "../lib/import-pack";
+import { grimData } from "../systems/wfrp/__tests__/pack-helpers";
 
-import { GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { listRaceProfiles } from "@/lib/server/races/race-profile";
 
@@ -39,7 +38,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
   const userId = marker;
 
   beforeAll(async () => {
-    if (await raw.campaign.count({ where: { kind: "template", name: GRIM_TEMPLATE_NAME } })) throw new Error("a Grim d100 template already exists in the test database");
+    if (await raw.campaign.count({ where: { kind: "template", name: "Grim d100" } })) throw new Error("a Grim d100 template already exists in the test database");
 
     guardPassed = true;
 
@@ -65,11 +64,12 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
   });
 
   it("loads the real catalog", async () => {
-    const result = await loadGrimTemplate({ owner: userId, allowRemote: false });
+    const result = await importPack("grim-d100", { owner: userId, publish: true });
 
-    templateId = result.templateId;
+    templateId = result.templateId as string;
     expect(result.created).toBe(true);
-    expect(result.counts).toMatchObject({ feats: 50, careers: 16, races: 4, units: 30, spells: 30, artifacts: 56, raceProfiles: 4 });
+    expect(Object.fromEntries(Object.entries(result.perKind).map(([kind, c]) => [kind, c.created]))).toEqual({ feats: 50, careers: 16, races: 4, units: 30, spells: 30, artifacts: 56 });
+    expect(Object.values(result.perKind).every((c) => c.errors === 0)).toBe(true);
   });
 
   it("a clone sees every species profile with id-based career tables", async () => {
@@ -83,7 +83,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     expect(profiles).toHaveLength(4);
 
-    const data = readGrimData();
+    const data = grimData();
 
     const [careers, feats] = await Promise.all([scoped.career.findMany({ where: { campaignId: created.campaign.id }, select: { id: true, name: true } }), scoped.feat.findMany({ where: { campaignId: created.campaign.id }, select: { id: true, name: true, abilities: true } })]);
 
@@ -126,7 +126,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     invalidateCampaignLayer();
 
-    const data = readGrimData();
+    const data = grimData();
 
     const units = await scoped.unit.findMany({ where: { campaignId: created.campaign.id }, select: { name: true, level: true, maxHp: true, speed: true, initiative: true, gridSize: true, abilities: true, characteristics: true, statblock: true } });
 
@@ -147,7 +147,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     invalidateCampaignLayer();
 
-    const data = readGrimData();
+    const data = grimData();
 
     const campaignId = created.campaign.id;
 
@@ -194,9 +194,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 real data load", () => {
 
     const version = (await raw.campaign.findUniqueOrThrow({ where: { id: templateId }, select: { contentVersion: true } })).contentVersion;
 
-    const result = await loadGrimTemplate({ owner: userId, allowRemote: false });
+    const result = await importPack("grim-d100", { owner: userId, publish: true });
 
     expect(result).toMatchObject({ templateId, created: false, published: { added: 0, changed: 0, removed: 0 } });
+    expect(Object.values(result.perKind).every((c) => c.created === 0 && c.errors === 0)).toBe(true);
     expect(await rowCounts(templateId)).toEqual(before);
     expect((await raw.campaign.findUniqueOrThrow({ where: { id: templateId }, select: { contentVersion: true } })).contentVersion).toBe(version);
   });

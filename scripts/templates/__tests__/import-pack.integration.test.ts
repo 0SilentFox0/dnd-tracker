@@ -16,17 +16,18 @@ const scoped = createScopedDatabase(raw.$extends(contentLayer()));
 vi.mock("@/lib/db", () => ({ get prisma() { return scoped; } }));
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 
-import { loadGrimTemplate } from "../load-template";
+import { importPack } from "../lib/import-pack";
 
-import { GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { listRaceProfiles } from "@/lib/server/races/race-profile";
 
 const marker = `grimload-${randomUUID()}`;
 
-const fixtures = path.join(__dirname, "../../templates/__tests__/fixtures/grim-fixture");
+const fixtures = path.join(__dirname, "fixtures/grim-fixture");
 
-const manifest = { key: "grim-d100", system: "wfrp", names: { en: GRIM_TEMPLATE_NAME, uk: GRIM_TEMPLATE_NAME }, locales: ["en", "uk"], rules: { file: "rules.json" }, kinds: [], icons: {}, credits: "", counts: {} };
+const GRIM_TEMPLATE_NAME = "Grim d100";
+
+const manifest = { key: "grim-d100", system: "wfrp", names: { en: GRIM_TEMPLATE_NAME, uk: GRIM_TEMPLATE_NAME }, locales: ["en"], rules: { file: "rules.json" }, kinds: ["feats", "careers", "races", "spells", "units", "artifacts"], extras: ["race-profiles"], icons: {}, credits: "", counts: { feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2 } };
 
 const tmpDirs: string[] = [];
 
@@ -35,15 +36,17 @@ const mixedDir = (mutate: (name: string, rows: Array<Record<string, unknown>>) =
 
   tmpDirs.push(dir);
 
+  fs.mkdirSync(path.join(dir, "grim-d100"));
+
   for (const file of fs.readdirSync(fixtures).filter((f) => f.endsWith(".json"))) {
     const rows = JSON.parse(fs.readFileSync(path.join(fixtures, file), "utf8"));
 
     if (Array.isArray(rows)) mutate(file.replace(".json", ""), rows);
 
-    fs.writeFileSync(path.join(dir, file), JSON.stringify(rows));
+    fs.writeFileSync(path.join(dir, "grim-d100", file), JSON.stringify(rows));
   }
 
-  fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify(manifest));
+  fs.writeFileSync(path.join(dir, "grim-d100", "manifest.json"), JSON.stringify(manifest));
 
   return dir;
 };
@@ -114,22 +117,22 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
       if (name === "careers") rows[0].tier1_talents = ["Missing Talent"];
     });
 
-    await expect(loadGrimTemplate({ owner: userId, dir: unknownTalent, allowRemote: false })).rejects.toThrow(/Missing Talent/);
+    await expect(importPack("grim-d100", { owner: userId, dir: unknownTalent, publish: true })).rejects.toThrow(/Missing Talent/);
 
     const extraField = mixedDir((name, rows) => {
       if (name === "feats") rows[0].bogus = 1;
     });
 
-    await expect(loadGrimTemplate({ owner: userId, dir: extraField, allowRemote: false })).rejects.toThrow(/bogus/);
+    await expect(importPack("grim-d100", { owner: userId, dir: extraField, publish: true })).rejects.toThrow(/bogus/);
     expect(await rowCounts("none")).toEqual(before);
   });
 
   it("creates, imports and publishes the template", async () => {
-    const result = await loadGrimTemplate({ owner: userId, dir: goodDir(), allowRemote: false });
+    const result = await importPack("grim-d100", { owner: userId, dir: goodDir(), publish: true });
 
-    templateId = result.templateId;
+    templateId = result.templateId as string;
     expect(result.created).toBe(true);
-    expect(result.counts).toMatchObject({ feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2, raceProfiles: 1 });
+    expect(Object.fromEntries(Object.entries(result.perKind).map(([kind, c]) => [kind, c.created]))).toEqual({ feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2 });
 
     const counts = await rowCounts(templateId);
 
@@ -163,7 +166,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
 
     const before = await rowCounts(templateId);
 
-    await loadGrimTemplate({ owner: userId, dir: goodDir(), allowRemote: false });
+    await importPack("grim-d100", { owner: userId, dir: goodDir(), publish: true });
 
     expect(await rowCounts(templateId)).toEqual(before);
     expect((await raw.feat.findFirstOrThrow({ where: { campaignId: templateId, name: "Hardy" } })).slug).toBe("hardy");
@@ -176,7 +179,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
 
     const version = await versionOf(templateId);
 
-    const result = await loadGrimTemplate({ owner: userId, dir: goodDir(), allowRemote: false });
+    const result = await importPack("grim-d100", { owner: userId, dir: goodDir(), publish: true });
 
     expect(result).toMatchObject({ templateId, created: false });
     expect(await rowCounts(templateId)).toEqual(before);

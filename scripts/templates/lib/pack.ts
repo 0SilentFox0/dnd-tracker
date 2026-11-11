@@ -44,16 +44,17 @@ const readJsonIf = <T>(key: string, file: string, dir: string): T | undefined =>
   return fs.existsSync(target) ? (JSON.parse(fs.readFileSync(target, "utf8")) as T) : undefined;
 };
 
-export function readPack(key: string, dir = TEMPLATES_DIR): Pack {
+/** `lenient` (build only): a kind file that does not exist yet reads as an empty kind. */
+export function readPack(key: string, dir = TEMPLATES_DIR, opts: { lenient?: boolean } = {}): Pack {
   const manifest = readManifest(key, dir);
 
   const rows = Object.fromEntries(
     manifest.kinds.map((kind) => {
       const found = readJsonIf<PackRow[]>(key, `${kind}.json`, dir);
 
-      if (!found) throw new Error(`Pack "${key}" lists kind "${kind}" but ${kind}.json is missing`);
+      if (!found && !opts.lenient) throw new Error(`Pack "${key}" lists kind "${kind}" but ${kind}.json is missing`);
 
-      return [kind, found];
+      return [kind, found ?? []];
     }),
   );
 

@@ -13,11 +13,10 @@ const scoped = createScopedDatabase(raw.$extends(contentLayer()));
 vi.mock("@/lib/db", () => ({ get prisma() { return scoped; } }));
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 
-import { GRIM_SPELL_LISTS } from "../../templates/systems/wfrp/spells";
-import { readGrimData } from "../data";
-import { loadGrimTemplate } from "../load-template";
+import { importPack } from "../lib/import-pack";
+import { grimData } from "../systems/wfrp/__tests__/pack-helpers";
+import { GRIM_SPELL_LISTS } from "../systems/wfrp/spells";
 
-import { GRIM_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { listRaceProfiles } from "@/lib/server/races/race-profile";
 import { visible } from "@/lib/server/templates/sync/__tests__/helpers";
@@ -30,7 +29,7 @@ import { readTranslations } from "@/scripts/templates/lib/i18n-store";
 
 const marker = `grimloc-${randomUUID()}`;
 
-const data = readGrimData();
+const data = grimData();
 
 const uk = readTranslations("grim-d100", "uk");
 
@@ -52,7 +51,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
   const clones = {} as Record<"uk" | "en", string>;
 
   beforeAll(async () => {
-    if (await raw.campaign.count({ where: { kind: "template", name: GRIM_TEMPLATE_NAME } })) throw new Error("a Grim d100 template already exists in the test database");
+    if (await raw.campaign.count({ where: { kind: "template", name: "Grim d100" } })) throw new Error("a Grim d100 template already exists in the test database");
 
     guardPassed = true;
 
@@ -78,14 +77,14 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
   });
 
   it("loads the template and a second run is a no-op", async () => {
-    const first = await loadGrimTemplate({ owner: userId, allowRemote: false });
+    const first = await importPack("grim-d100", { owner: userId, publish: true });
 
-    templateId = first.templateId;
+    templateId = first.templateId as string;
     expect(first.created).toBe(true);
 
-    const second = await loadGrimTemplate({ owner: userId, allowRemote: false });
+    const second = await importPack("grim-d100", { owner: userId, publish: true });
 
-    expect(second.published).toEqual({ added: 0, changed: 0, removed: 0 });
+    expect(second.published).toMatchObject({ added: 0, changed: 0, removed: 0 });
   });
 
   it.each([["uk" as const], ["en" as const]])("clones the %s locale with translated rows", async (locale) => {
