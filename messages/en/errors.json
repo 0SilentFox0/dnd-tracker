@@ -133,6 +133,7 @@
   "foreignSkill": "The skill does not belong to this campaign",
   "campaignNotActive": "The campaign is not active",
   "alreadyMember": "You are already a member of this campaign",
+  "cannotDemoteOwner": "The campaign owner cannot be demoted",
   "cannotRemoveDm": "The DM cannot be removed from the campaign",
   "unknownOwnerKind": "Unknown owner type",
   "missingPusherParams": "socket_id and channel_name are required",

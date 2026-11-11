@@ -6,6 +6,7 @@ export {
   useCreateCampaign,
   useDeleteCampaign,
   useJoinCampaign,
+  useSetCampaignMemberRole,
   useRemoveCampaignMember,
   useUpdateCampaign,
 } from "./useCampaignMutations";

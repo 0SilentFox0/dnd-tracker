@@ -105,7 +105,7 @@ export default async function CampaignDetailPage({
                 <p className={`${LABEL} mb-2`}>
                   {t("page.members.count", { count: campaign.members.length })}
                 </p>
-                <CampaignMembersList campaignId={id} members={campaign.members} isDM={isDM} />
+                <CampaignMembersList campaignId={id} members={campaign.members} isDM={isDM} isOwner={campaign.dmUserId === user.id} ownerId={campaign.dmUserId} />
               </HudSection>
             </HudPanel>
           )}

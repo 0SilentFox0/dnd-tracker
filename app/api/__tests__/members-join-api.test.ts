@@ -5,8 +5,8 @@ import { CampaignRole } from "@/lib/constants/campaigns";
 
 const db = vi.hoisted(() => ({
   $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
-  campaign: { findFirst: vi.fn() },
-  campaignMember: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
+  campaign: { findFirst: vi.fn(), findUnique: vi.fn() },
+  campaignMember: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), deleteMany: vi.fn(), updateMany: vi.fn() },
   user: { upsert: vi.fn() },
 }));
 
@@ -69,6 +69,64 @@ describe("DELETE /campaigns/:id/members/:memberId", () => {
     expect((await removeMember()).status).toBe(200);
     expect(db.campaignMember.deleteMany).toHaveBeenCalledWith({ where: { id: "m1" } });
     expect(kvDel.mock.calls.map(([key]) => key).sort()).toEqual(["campaigns:dm", "campaigns:p1", "campaigns:p2"]);
+  });
+});
+
+describe("PATCH /campaigns/:id/members/:memberId", () => {
+  const promote = (body: unknown = { role: "dm" }) => member.PATCH(new Request("http://x", { method: "PATCH", body: JSON.stringify(body) }), ctxMember);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    auth.requireDM.mockResolvedValue({ userId: "dm" });
+    db.campaignMember.findUnique.mockResolvedValue({ id: "m1", campaignId: "c1", userId: "p1" });
+  });
+
+  it("гравцю — 403 без змін", async () => {
+    auth.requireDM.mockResolvedValue(forbidden());
+
+    expect((await promote()).status).toBe(403);
+    expect(db.campaignMember.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("учасник іншої кампанії — 403", async () => {
+    db.campaignMember.findUnique.mockResolvedValue({ id: "m1", campaignId: "c2", userId: "p1" });
+
+    expect((await promote()).status).toBe(403);
+    expect(db.campaignMember.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("невалідна роль — 400", async () => {
+    expect((await promote({ role: "owner" })).status).toBe(400);
+    expect(db.campaignMember.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("власник знімає права DM — роль player", async () => {
+    db.campaign.findUnique.mockResolvedValue({ dmUserId: "dm" });
+    db.campaignMember.findUnique.mockResolvedValue({ id: "m1", campaignId: "c1", userId: "d2" });
+
+    expect((await promote({ role: "player" })).status).toBe(200);
+    expect(db.campaignMember.updateMany).toHaveBeenCalledWith({ where: { id: "m1" }, data: { role: CampaignRole.PLAYER } });
+  });
+
+  it("DM не власник не може знімати права — 403", async () => {
+    db.campaign.findUnique.mockResolvedValue({ dmUserId: "other" });
+
+    expect((await promote({ role: "player" })).status).toBe(403);
+    expect(db.campaignMember.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("власника не можна понизити — 400", async () => {
+    db.campaign.findUnique.mockResolvedValue({ dmUserId: "dm" });
+    db.campaignMember.findUnique.mockResolvedValue({ id: "m1", campaignId: "c1", userId: "dm" });
+
+    expect((await promote({ role: "player" })).status).toBe(400);
+    expect(db.campaignMember.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("DM призначає учасника DM і скидає його кеш списку", async () => {
+    expect((await promote()).status).toBe(200);
+    expect(db.campaignMember.updateMany).toHaveBeenCalledWith({ where: { id: "m1" }, data: { role: CampaignRole.DM } });
+    expect(kvDel.mock.calls.map(([key]) => key)).toEqual(["campaigns:p1"]);
   });
 });
 

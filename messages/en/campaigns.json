@@ -89,6 +89,11 @@
     }
   },
   "members": {
+    "promote": "Make DM",
+    "demote": "Remove DM",
+    "confirmDemote": "Remove DM rights from this member? They will become a player again.",
+    "promoting": "Promoting...",
+    "confirmPromote": "Make this member a DM? They will get full control of the campaign.",
     "remove": "Remove",
     "removing": "Removing...",
     "confirmRemove": "Are you sure you want to remove this member from the campaign?"

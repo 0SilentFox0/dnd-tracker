@@ -7,7 +7,7 @@ import { saveAiSettings } from "@/lib/ai/settings";
 import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { invalidateAllReference } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignRole, type CampaignRoleValue, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
@@ -198,6 +198,30 @@ export async function removeCampaignMember(actor: Actor, memberId: string) {
     const remaining = await prisma.campaignMember.findMany({ where: { campaignId: actor.campaignId }, select: { userId: true } });
 
     afterContentCommit(() => invalidateCampaignLists([member.userId, ...remaining.map(m => m.userId)]));
+
+    return { success: true };
+  });
+}
+export async function setCampaignMemberRole(actor: Actor, memberId: string, role: CampaignRoleValue) {
+  assertCan(actor, need());
+
+  return withCampaignContentWrite(actor.campaignId, async () => {
+    const member = await prisma.campaignMember.findUnique({ where: { id: memberId }, select: { campaignId: true, userId: true } });
+
+    if (!member) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+    if (member.campaignId !== actor.campaignId) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+
+    if (role === CampaignRole.PLAYER) {
+      const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { dmUserId: true } });
+
+      if (campaign?.dmUserId !== actor.userId) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+
+      if (member.userId === campaign.dmUserId) throw new ContentError(API_ERRORS.CANNOT_DEMOTE_OWNER, 400);
+    }
+
+    await prisma.campaignMember.updateMany({ where: { id: memberId }, data: { role } });
+    afterContentCommit(() => invalidateCampaignLists([member.userId]));
 
     return { success: true };
   });

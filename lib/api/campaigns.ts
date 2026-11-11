@@ -4,6 +4,7 @@ import {
   campaignPatch,
   request,
 } from "@/lib/api/client";
+import type { CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 import type { ActiveSessions, Campaign, CampaignMember, CampaignSettings, CampaignWithWarnings } from "@/types/campaigns";
 
@@ -72,6 +73,14 @@ export async function removeCampaignMember(
     campaignId,
     `/members/${memberId}`,
   );
+}
+
+export async function setCampaignMemberRole(
+  campaignId: string,
+  memberId: string,
+  role: CampaignRoleValue,
+): Promise<{ success: boolean }> {
+  return campaignPatch<{ success: boolean }>(campaignId, `/members/${memberId}`, { role });
 }
 
 export async function deleteCampaign(campaignId: string): Promise<{ success: boolean }> {

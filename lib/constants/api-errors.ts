@@ -133,6 +133,7 @@ export const API_ERRORS = {
   CAMPAIGN_NOT_ACTIVE: "errors.campaignNotActive",
   ALREADY_MEMBER: "errors.alreadyMember",
   CANNOT_REMOVE_DM: "errors.cannotRemoveDm",
+  CANNOT_DEMOTE_OWNER: "errors.cannotDemoteOwner",
   UNKNOWN_OWNER_KIND: "errors.unknownOwnerKind",
   MISSING_PUSHER_PARAMS: "errors.missingPusherParams",
   CRON_NOT_CONFIGURED: "errors.cronNotConfigured",

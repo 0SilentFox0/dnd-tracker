@@ -5,7 +5,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { campaignKeys } from "./keys";
 
-import { createCampaign, deleteCampaign, joinCampaign, removeCampaignMember, updateCampaign } from "@/lib/api/campaigns";
+import { createCampaign, deleteCampaign, joinCampaign, setCampaignMemberRole, removeCampaignMember, updateCampaign } from "@/lib/api/campaigns";
+import type { CampaignRoleValue } from "@/lib/constants/campaigns";
 import { useCrudMutation } from "@/lib/hooks/common";
 
 export function useCreateCampaign() {
@@ -30,6 +31,16 @@ export function useRemoveCampaignMember(campaignId: string) {
 
   return useCrudMutation({
     mutationFn: (memberId: string) => removeCampaignMember(campaignId, memberId),
+    invalidateKeys: [campaignKeys.members(campaignId)],
+    onSuccess: () => router.refresh(),
+  });
+}
+
+export function useSetCampaignMemberRole(campaignId: string) {
+  const router = useRouter();
+
+  return useCrudMutation({
+    mutationFn: ({ memberId, role }: { memberId: string; role: CampaignRoleValue }) => setCampaignMemberRole(campaignId, memberId, role),
     invalidateKeys: [campaignKeys.members(campaignId)],
     onSuccess: () => router.refresh(),
   });
