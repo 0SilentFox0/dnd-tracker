@@ -8,7 +8,7 @@ import { withIcons } from "./icons-file";
 import { importOrder } from "./import-order";
 import { iconColumnOf, resolveSchoolRefs, staleSpellColumns, withClassIcons } from "./import-prepare";
 import { type Pack, type PackRow, readPack, TEMPLATES_DIR } from "./pack";
-import { EXTRA_COLUMNS, MATCH_COLUMN } from "./row-columns";
+import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues } from "./row-columns";
 import { ensureTemplate, makeTemplateStore } from "./store";
 import { validatePack } from "./validate";
 
@@ -74,6 +74,10 @@ async function upsertBySlug(campaignId: string, kind: PackKind, rows: PackRow[],
       const existing = (await delegate.findFirst({ where: { campaignId, slug: row.slug } })) ?? (matchColumn ? await delegate.findFirst({ where: { campaignId, slug: null, [matchColumn]: row[matchColumn] } }) : null);
 
       const data = hooks?.fromPackRow ? hooks.fromPackRow(kind, row, { idOf: (k, slug) => idBySlug[k]?.[slug] ?? (dryRun ? slug : undefined), slugOf: () => undefined, rowId: existing?.id }) : row;
+
+      const invalid = rowSchemaIssues(kind, data);
+
+      if (invalid.length > 0) throw new Error(`${kind} "${row.slug}": ${invalid.join("; ")}`);
 
       const unchanged = existing && rowHash(existing, table) === rowHash({ ...existing, ...data }, table);
 

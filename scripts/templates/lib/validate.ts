@@ -4,7 +4,7 @@ import { catalogOfPack, i18nIssuesOf } from "./i18n-convert";
 import { readTranslations } from "./i18n-store";
 import { iconGaps, iconIssues } from "./icons-file";
 import { type Pack, type PackRow, TEMPLATES_DIR } from "./pack";
-import { EXTRA_COLUMNS, MATCH_COLUMN } from "./row-columns";
+import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues } from "./row-columns";
 
 import { TemplateManifestSchema } from "@/lib/schemas/template-manifest";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
@@ -88,7 +88,11 @@ function rowIssues(kind: PackKind, rows: PackRow[]): PackIssue[] {
       else matches.set(value, String(raw.slug));
     }
 
-    if (!isImportKind(kind)) return;
+    if (!isImportKind(kind)) {
+      for (const message of rowSchemaIssues(kind, raw)) add(message);
+
+      return;
+    }
 
     const { slug: _slug, origin: _origin, extra: _extra, ...fields } = raw;
 
