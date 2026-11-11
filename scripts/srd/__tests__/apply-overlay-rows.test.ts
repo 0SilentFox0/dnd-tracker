@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
-
 import { applyOverlay } from "../lib/apply-overlay";
+
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 
 const KINDS = ["spell-groups", "spells", "races", "classes", "feats", "backgrounds", "units", "artifacts"] as const;
 

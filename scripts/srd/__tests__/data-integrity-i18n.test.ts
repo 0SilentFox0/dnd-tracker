@@ -10,6 +10,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
+import { applyOverlay } from "../lib/apply-overlay";
 import { readSrdData, toImportRows } from "../lib/data-files";
 import { SRD_DATA_DIR } from "../lib/source";
 import { SRD_KINDS, type SrdKind } from "../lib/types";
@@ -22,7 +23,6 @@ import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { importContent } from "@/lib/server/content/import/import-content";
 import type { Actor } from "@/lib/utils/api/actor";
 import { extractKeyed, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
-import { applyOverlay } from "../lib/apply-overlay";
 
 const SCHEMAS = {
   "spell-groups": { create: createSpellGroupSchema, update: updateSpellGroupSchema },

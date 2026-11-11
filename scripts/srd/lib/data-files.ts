@@ -2,13 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { readTranslations } from "../../templates/lib/i18n-store";
+import { applyOverlay } from "./apply-overlay";
 import { SRD_CREDITS } from "./credits";
 import { OPEN5E_PATH, OPEN5E_REPO, OPEN5E_SHA, SRD_DATA_DIR } from "./source";
 import { SRD_KINDS, type SrdData } from "./types";
 
 import { DEFAULT_TEMPLATE_LOCALE } from "@/lib/constants/campaigns";
 import { TemplateManifestSchema } from "@/lib/schemas/template-manifest";
-import { applyOverlay } from "./apply-overlay";
 import type { TemplateManifest } from "@/lib/utils/templates/manifest";
 
 const fileOf = (dir: string, name: string) => path.join(dir, `${name}.json`);

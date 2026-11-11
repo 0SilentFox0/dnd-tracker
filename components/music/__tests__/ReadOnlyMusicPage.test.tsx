@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ toggle: vi.fn() }));
+
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("@/lib/hooks/music", () => ({ useTrackPreview: () => ({ playingId: null, failedId: null, progress: null, toggle: mocks.toggle, stop: vi.fn() }) }));
 
@@ -19,6 +20,7 @@ const tracks: CampaignTrack[] = [
 describe("ReadOnlyMusicPage", () => {
   it("uses the shared preview hook instead of mounting an audio or iframe player for every track", () => {
     const { container } = render(<ReadOnlyMusicPage tracks={tracks} />);
+
     const buttons = screen.getAllByRole("button", { name: "music.list.play" });
 
     expect(buttons).toHaveLength(2);

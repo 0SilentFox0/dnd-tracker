@@ -15,7 +15,7 @@ import { errorMessage } from "@/lib/utils/common/error-message";
 import { useRaceProfiles, useSaveRaceProfile } from "@/systems/wfrp/hooks";
 import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
 import type { SpeciesProfile } from "@/systems/wfrp/rules/creation";
-import { parseProfile, SpeciesProfileSchema } from "@/systems/wfrp/server/schemas";
+import { parseProfile, SpeciesProfileSchema } from "@/systems/wfrp/rules/creation/schema";
 
 const TABLE_ERRORS: Record<string, "tableAscending" | "tableEnd"> = { "creation.tableAscending": "tableAscending", "creation.tableEnd": "tableEnd" };
 

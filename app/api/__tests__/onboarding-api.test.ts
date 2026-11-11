@@ -54,6 +54,7 @@ describe("GET /api/onboarding", () => {
 
   it("повертає збережений прапорець демо-туру після повторного запиту", async () => {
     vi.mocked(prisma.userOnboardingFlag.findMany).mockResolvedValue([{ key: "demo-tour:show", value: "complete" }] as never);
+
     const { GET } = await import("@/app/api/onboarding/route");
 
     const body = await (await GET()).json();
