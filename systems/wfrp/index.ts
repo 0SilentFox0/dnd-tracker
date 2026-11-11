@@ -3,6 +3,7 @@ import { woundsBreakdown, woundsMax } from "./rules/characteristics/derive";
 import { DEFAULT_CHARACTERISTICS, readCharacteristics } from "./rules/characteristics/keys";
 import { isEmptyCharacteristics, reconcileCharacteristics, redactCharacteristics } from "./rules/characteristics/reconcile";
 import { wfrpSheetBlock } from "./rules/characteristics/sheet-block";
+import { wfrpActionDetails } from "./rules/combat/details";
 import { extractWfrpAttacks } from "./rules/combat/extract-attacks";
 import { wfrpHitModel } from "./rules/combat/hit-model";
 import { wfrpInitiative } from "./rules/combat/initiative";
@@ -60,7 +61,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
   traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },
   identity: { alignments: false },
-  combat: { fortune: true, dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
+  combat: { fortune: true, dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, mitigateDamage: mitigateWfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
   classes: false,
   attacks: false,

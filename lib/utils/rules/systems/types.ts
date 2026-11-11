@@ -5,6 +5,7 @@ import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
 import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
+import type { DieFx } from "@/lib/utils/battle/fx/dice/types";
 import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
 import type { AttackRollResult, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
@@ -224,7 +225,26 @@ export interface RuleSystemMagic {
   onDamaged(p: BattleParticipant): BattleParticipant;
 }
 
+export interface ActionDetailsView {
+  hideNumbers: boolean;
+  hideActor: boolean;
+}
+
+export interface RuleSystemActionDetails {
+  /** Same reference when nothing is hidden; undefined drops the slot */
+  redact(details: SystemSlot, view: ActionDetailsView): SystemSlot | undefined;
+  /** Details reveal something only the actor's side may see (a miscast) */
+  actorSecret(details: SystemSlot): boolean;
+  /** Applied to every line a player receives; idempotent */
+  redactLine(line: LogLine): LogLine;
+  /** One group of one throw; [] when nothing was thrown */
+  diceFx(details: SystemSlot): DieFx[];
+  /** The cast did not take effect */
+  failed(details: SystemSlot): boolean;
+}
+
 export interface RuleSystemCombat {
+  details?: RuleSystemActionDetails;
   fortune?: true;
   dice: 20 | 100;
   attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];

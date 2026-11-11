@@ -15,3 +15,5 @@ export const SYSTEM_UI: Record<RuleSystemKey, SystemUi> = {
 };
 
 export const systemUiOf = (key: RuleSystemKey): SystemUi => SYSTEM_UI[key];
+
+export const systemUiByKey = (key: string): SystemUi | undefined => (Object.hasOwn(SYSTEM_UI, key) ? SYSTEM_UI[key as RuleSystemKey] : undefined);

@@ -1,10 +1,11 @@
 import { MAX_INITIATIVE_DICE, MAX_SAVES_SHOWN } from "./layout";
+import type { DieFx } from "./types";
 
-import type { BattleAction, DiceRollGroup, DieSides } from "@/types/battle";
+import type { BattleAction, DiceRollGroup } from "@/types/battle";
 
 export interface DiceThrowSpec {
   seed: number;
-  groups: Array<Array<{ sides: DieSides; value: number; chosen?: boolean; dropped?: boolean; tens?: boolean; units?: boolean }>>;
+  groups: DieFx[][];
 }
 
 const toDie = (group: DiceRollGroup) => {

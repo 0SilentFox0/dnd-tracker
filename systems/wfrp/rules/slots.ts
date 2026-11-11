@@ -4,6 +4,7 @@ import type { WfrpParticipantStats } from "./combat/participant";
 import { qualityList } from "./equipment/guard";
 import type { QualityRef } from "./equipment/qualities";
 
+import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import { defineSlot } from "@/lib/utils/rules/systems/slot";
 
 const isRec = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -35,3 +36,18 @@ export interface WfrpParticipantSlot {
 export const PARTICIPANT_SLOT = defineSlot<WfrpParticipantSlot>("wfrp", (raw) => (isRec(raw) && isRec(raw.characteristics) && isRec(raw.stats) ? (raw as unknown as WfrpParticipantSlot) : undefined));
 
 export const SHEET_SLOT = defineSlot<SheetWfrpBlock>("wfrp", (raw) => (isRec(raw) ? (raw as unknown as SheetWfrpBlock) : undefined));
+
+export interface WfrpActionSlot {
+  attack?: PercentileAttackDetails;
+  cast?: PercentileCastDetails;
+}
+
+export const ACTION_SLOT = defineSlot<WfrpActionSlot>("wfrp", (raw) => {
+  if (!isRec(raw)) return undefined;
+
+  const attack = isRec(raw.attack) ? (raw.attack as unknown as PercentileAttackDetails) : undefined;
+
+  const cast = isRec(raw.cast) ? (raw.cast as unknown as PercentileCastDetails) : undefined;
+
+  return attack || cast ? { ...(attack && { attack }), ...(cast && { cast }) } : undefined;
+});

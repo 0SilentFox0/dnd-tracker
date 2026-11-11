@@ -22,3 +22,5 @@ export const ruleSystemOf = (rules: Pick<Ruleset, "system">): RuleSystemDefiniti
 export const systemKeyOf = (rules: Pick<Ruleset, "system">): RuleSystemKey => rules.system.key;
 
 export const currencyValueOf = (rules: Pick<Ruleset, "system">): Record<Coin, number> => ruleSystemOf(rules).currency?.value ?? COIN_VALUE;
+
+export const ruleSystemByKey = (key: string): RuleSystemDefinition | undefined => (Object.hasOwn(RULE_SYSTEM_REGISTRY, key) ? RULE_SYSTEM_REGISTRY[key as RuleSystemKey] : undefined);

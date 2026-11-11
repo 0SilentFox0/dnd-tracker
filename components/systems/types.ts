@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 
 import type { SystemConditionBody } from "@/lib/hooks/battles";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant } from "@/types/battle";
 import type { CareerData } from "@/types/careers";
 import type { CharacterListItem, CharacterSheet, SheetRollBody, SheetRollResult, SheetTotal } from "@/types/characters";
@@ -96,6 +97,13 @@ export interface DowntimePeriodPanelProps {
   characters: CharacterListItem[];
 }
 
+export interface ActionResultProps {
+  details: SystemSlot;
+  hit: boolean;
+  /** The viewer may see the target's exact defense */
+  exact: boolean;
+}
+
 export interface SystemUi {
   HeroStats: ComponentType;
   StatsTab: ComponentType<StatsTabProps>;
@@ -117,4 +125,5 @@ export interface SystemUi {
   RestBadges?: ComponentType<RestBadgesProps>;
   ResourceFields?: ComponentType<ResourceFieldsProps>;
   resourceDefaults?(sheet: CharacterSheet): Record<string, string>;
+  ActionResult?: ComponentType<ActionResultProps>;
 }
