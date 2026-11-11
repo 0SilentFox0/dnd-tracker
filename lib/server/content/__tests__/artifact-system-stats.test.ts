@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
+
 const db = vi.hoisted(() => ({
   artifact: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
   campaign: { findUnique: vi.fn(), update: async () => ({ contentVersion: 1 }) },
@@ -48,7 +50,7 @@ describe("artifact systemStats", () => {
 
     const rows = [{ name: "Plate", slot: "armor", systemStats: armour }];
 
-    const report = await importContent(actor, "artifacts", { rows, mode: "create", dryRun: true }, { resource: () => artifactsResource, loadNames: async () => [] });
+    const report = await importContent(actor, "artifacts", { rows, mode: "create", dryRun: true }, stubImportDeps({ resource: () => artifactsResource, loadNames: async () => [] }));
 
     expect(report.results[0].status).toBe("error");
     expect(JSON.stringify(report.results)).toContain(API_ERRORS.SYSTEM_STATS_UNSUPPORTED);
@@ -56,7 +58,7 @@ describe("artifact systemStats", () => {
 
     setRules(WFRP_RULES);
 
-    const ok = await importContent(actor, "artifacts", { rows, mode: "create", dryRun: true }, { resource: () => artifactsResource, loadNames: async () => [] });
+    const ok = await importContent(actor, "artifacts", { rows, mode: "create", dryRun: true }, stubImportDeps({ resource: () => artifactsResource, loadNames: async () => [] }));
 
     expect(ok.results[0].status).toBe("created");
   });
@@ -107,7 +109,7 @@ describe("artifact systemStats", () => {
 });
 
 describe("artifact import systemStats", () => {
-  const deps = { resource: () => artifactsResource, loadNames: async () => [{ id: "a1", name: "Mail" }] };
+  const deps = stubImportDeps({ resource: () => artifactsResource, loadNames: async () => [{ id: "a1", name: "Mail" }] });
 
   beforeEach(() => {
     vi.clearAllMocks();

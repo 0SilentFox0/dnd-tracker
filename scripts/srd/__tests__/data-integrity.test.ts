@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createBackgroundSchema, updateBackgroundSchema } from "@/lib/schemas/backgrounds";
+import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
@@ -61,10 +62,10 @@ describe("SRD 5.2 data files", () => {
   it.each(SRD_KINDS)("%s: every row passes importContent dryRun with no issues and refs resolve", async (kind) => {
     const resource = { schemas: SCHEMAS[kind], invalidates: [] } as unknown as AnyContentResource;
 
-    const report = await importContent(actor, kind, { rows: toImportRows(data[kind]), mode: "create", dryRun: true }, {
+    const report = await importContent(actor, kind, { rows: toImportRows(data[kind]), mode: "create", dryRun: true }, stubImportDeps({
       resource: () => resource,
       loadNames: async (_c, k) => (k !== kind && (SRD_KINDS as readonly string[]).includes(k) ? rowsOf(k as SrdKind).map((r) => ({ id: `id-${r.slug}`, name: r.name })) : []),
-    });
+    }));
 
     expect(report.results.filter((r) => r.status !== "created" || r.issues.length > 0)).toEqual([]);
   });

@@ -24,8 +24,8 @@ import type { ImportField, ImportIssue, ImportKind, ImportMode, ImportRecord, Im
 export interface ImportDeps {
   resource(kind: ImportKind): AnyContentResource;
   loadNames(campaignId: string, kind: ImportKind): Promise<IdName[]>;
-  loadKeys?(campaignId: string, kind: ImportKind): Promise<KeyRow[]>;
-  writeSlug?(campaignId: string, kind: ImportKind, id: string, slug: string): Promise<void>;
+  loadKeys(campaignId: string, kind: ImportKind): Promise<KeyRow[]>;
+  writeSlug(campaignId: string, kind: ImportKind, id: string, slug: string): Promise<void>;
   invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
   transactional?: boolean;
 }
@@ -252,7 +252,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
 
   const refKinds = refKindsOf(spec);
 
-  const [own, ...refLists] = await Promise.all([(deps.loadKeys ?? deps.loadNames)(actor.campaignId, kind), ...refKinds.map((k) => deps.loadNames(actor.campaignId, k))]);
+  const [own, ...refLists] = await Promise.all([deps.loadKeys(actor.campaignId, kind), ...refKinds.map((k) => deps.loadNames(actor.campaignId, k))]);
 
   const ctx: PlanCtx = { spec, resource, mode: input.mode, existing: indexNames(own), refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])), seen: new Set(), seenSlugs: new Set() };
 

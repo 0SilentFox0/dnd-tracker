@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
+
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
 vi.mock("@/lib/server/content/resources", () => ({ CONTENT_RESOURCES: {} }));
@@ -53,7 +55,7 @@ async function dryRunAll(data: ReturnType<typeof readSrdData>) {
   for (const kind of SRD_KINDS) {
     const resource = { schemas: SCHEMAS[kind], invalidates: [] } as unknown as AnyContentResource;
 
-    const report = await importContent(actor, kind, { rows: toImportRows(data[kind]), mode: "create", dryRun: true }, { resource: () => resource, loadNames: async (_c, k) => (k !== kind && (SRD_KINDS as readonly string[]).includes(k) ? names(k as SrdKind) : []) });
+    const report = await importContent(actor, kind, { rows: toImportRows(data[kind]), mode: "create", dryRun: true }, stubImportDeps({ resource: () => resource, loadNames: async (_c, k) => (k !== kind && (SRD_KINDS as readonly string[]).includes(k) ? names(k as SrdKind) : []) }));
 
     expect(report.results.filter((r) => r.status !== "created" || r.issues.length > 0), kind).toEqual([]);
   }

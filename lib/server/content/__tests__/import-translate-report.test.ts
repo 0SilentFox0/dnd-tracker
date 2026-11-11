@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
+
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/translate-error", () => ({ requestTranslator: vi.fn() }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createClassSchema } from "@/lib/schemas";
-import { importContent,type ImportDeps } from "@/lib/server/content/import/import-content";
+import { importContent } from "@/lib/server/content/import/import-content";
 import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import type { ImportReport } from "@/types/content-import";
 
@@ -44,7 +46,7 @@ describe("translateImportReport", () => {
   it("переносить params з Zod-проблеми імпорту (ключ повтореної колонки)", async () => {
     const resource = { schemas: { create: createClassSchema, update: createClassSchema }, access: { list: "member", item: "member" }, invalidates: [] } as never;
 
-    const deps: ImportDeps = { resource: () => resource, loadNames: async () => [] };
+    const deps = stubImportDeps({ resource: () => resource, loadNames: async () => [] });
 
     const column = { key: "focus", label: "Focus", values: Array(20).fill("") };
 
