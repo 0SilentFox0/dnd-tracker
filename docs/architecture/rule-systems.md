@@ -81,6 +81,14 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 3. `gameTerms.ruleSystem.<key>` і `messages/{uk,en}/<ns>.json` для кожного namespace з meta; пресет правил; запис у `whats-new` і help.
 4. Звірити: `pnpm test:run lib/__tests__/system-contract.test.ts lib/__tests__/systems-index.test.ts lib/utils/rules/systems` — exhaustiveness і `assertSystemContract` скажуть, чого бракує. Новий шаблон додається разом зі своїм профілем `battle-sweep`.
 5. Новий хук: поле в `RuleSystemDefinition` (або `SystemUi`/`SystemServer`/`PackHooks`), реалізація в `d20/` (нейтральна/делегуюча) і в системах, виклик лише через `ruleSystemOf`/`systemUiOf`/`systemServerOf`; рядок у таблицю вище. Нові види контенту (`careers`) поки потребують ~14 точок core (E2).
+6. Адаптер конкретного пакета (напр. заборонені терміни `grim-d100`): `scripts/templates/<key>/index.ts` з `<KEY>_ADAPTER = { validate }`; `pnpm systems:index` додає його в `scripts/templates/systems/adapters.ts`, корінь вручну не правиться.
+7. **Що досі потребує правок core (E2, контракт доведено лише формою — fixture `d6pool`):**
+   - власні маршрути (`channel`, `condition-test`, `corruption`, `downtime`, `career`, `advance`, `draft`, `race-profiles`) — окремі `route.ts` у `app/api/**` (ratchet імпортів), цільово один `/system/[action]`;
+   - вид контенту: запис у `CONTENT_KINDS`, Prisma-таблиця (expand-only міграція з RLS), ресурс у `lib/server/content`, профіль виду;
+   - лічильники бою `battleData.{fortune,channelledSl,sin,conditionTests,psychologyTested}` лежать у core-типах, а не в слоті системи;
+   - нейтральні за змістом, але wfrp-подібні поняття в core: `fortune: "reroll" | "sl"` у `attack-phase/request.ts`, `flows/attack-flow.ts`, `store/types.ts`, `turn/join-triggers.ts` — нова система з іншим ресурсом перекидання мусить мапитись на них або розширювати ці типи; перейменування відкладено (зачіпає схеми запитів і збережені дані);
+   - `rules.tables`/`rules.advancement` і форма `skillTrees` у core-схемі правил;
+   - міграції Prisma для будь-яких нових колонок/таблиць (expand-only).
 
 ## Розбіжності doc ↔ spec розд. 7 (закрито в E1.12)
 
