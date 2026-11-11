@@ -106,6 +106,8 @@ _Оновлено: 2026-11-11._
 
 ### Prod-runbook WFRP / E0 (єдиний порядок)
 
+**Виконано на prod 2026-11-11 (кроки 1–7):** бекап `.migration-backup/backup_20261111_203133.sql`; білд Vercel `ceiqa2jq0` Ready (виправлено `ssr:false` у `systems/wfrp/ui/index.ts`), міграції 74/74; `backfill-keys` (2 рядки); SRD імпорт 0/0 (skipped 1216, версія 2437, slug-и 498/331/333), іконка Captain's Charm виправлена в `icons.json`; Heroes: `backfill-slugs` 484, `backfill-locale` 1 клон → uk, `import --prune` 477 updated / 5 deleted, `publish` v380 (479 рядків); Grim d100 v191 (186 рядків з іконками), `grim-d100-empty` і `srd-5.2-empty` v0; sync-diff: клон SRD порожній, клон Heroes — 5 змінених + 5 видалених Сар-Ісси + `rules.defaultAttacks`, рядків без slug немає. Не перевірено: створення нових клонів uk/en з шаблонів (лише читанням). `backfill-slugs` на prod потребував таймауту транзакції 10 хв (484 віддалені записи > 30 с).
+
 Кожен крок із записом у prod — лише за окремим «так» користувача; перед початком — бекап prod-БД. CLI тепер відхиляє невідомі опції (`Unknown option`), тож помилка в прапорці зупиняє запуск.
 
 1. **Merge → деплой з main.** `migrate deploy` накочує міграції гілки (усі expand-only: `ADD COLUMN` / `CREATE TABLE` / індекси; `UPDATE races … FROM race_profiles` на prod порожній). Ризик: префікси міграцій збігаються з main (M1), тож до деплою перевірити `prisma migrate status` і `migrate deploy` на свіжій prodcopy.
