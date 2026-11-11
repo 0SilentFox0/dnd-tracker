@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { useRecipeText } from "../useRecipeText";
 
 import { RECIPES } from "@/lib/utils/abilities/templates";
-import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
+import { TRAIT_RECIPES } from "@/systems/wfrp/rules/traits/recipes";
 
 describe("useRecipeText", () => {
   it("textKey recipes resolve from their own namespace", () => {

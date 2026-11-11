@@ -20,7 +20,7 @@ import { importContent } from "@/lib/server/content/import/import-content";
 import { artifactsResource } from "@/lib/server/content/resources/artifacts";
 import { createContent, updateContent } from "@/lib/server/content/service";
 import type { Actor } from "@/lib/utils/api/actor";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
 

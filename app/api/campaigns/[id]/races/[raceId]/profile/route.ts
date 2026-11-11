@@ -7,7 +7,7 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { ruleSystemOf, type SpeciesProfile } from "@/lib/utils/rules/systems";
-import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
+import { SpeciesProfileSchema } from "@/systems/wfrp/server/schemas";
 
 export async function PUT(req: Request, ctx: { params: Promise<{ id: string; raceId: string }> }) {
   try {

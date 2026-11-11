@@ -11,12 +11,12 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { coerceRecord, IMPORT_SPECS } from "@/lib/utils/content/import";
 import { mergeRules } from "@/lib/utils/rules/schema";
-import { woundsMax } from "@/lib/utils/rules/systems/wfrp/characteristics/derive";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { planDraft } from "@/lib/utils/rules/systems/wfrp/creation/plan";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 import { unitCreateData } from "@/lib/utils/units/unit-create-data";
+import { woundsMax } from "@/systems/wfrp/rules/characteristics/derive";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { planDraft } from "@/systems/wfrp/rules/creation/plan";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export const data = grimData();

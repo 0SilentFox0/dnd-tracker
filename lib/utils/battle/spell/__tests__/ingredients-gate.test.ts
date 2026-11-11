@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { ingredientsGate } from "@/lib/utils/battle/spell/ingredients";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { currencyValueOf } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant, IngredientStock } from "@/types/battle";
 
 const rules = parseRules({ spellIngredients: { enabled: true } });

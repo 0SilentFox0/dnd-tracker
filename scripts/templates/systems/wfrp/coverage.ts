@@ -7,10 +7,10 @@ import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { mergeRules } from "@/lib/utils/rules/schema";
 import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
-import { parseStatus } from "@/lib/utils/rules/systems/wfrp/downtime/status";
-import { ARMOUR_KINDS, QUALITY_REGISTRY } from "@/lib/utils/rules/systems/wfrp/equipment";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
+import { parseStatus } from "@/systems/wfrp/rules/downtime/status";
+import { ARMOUR_KINDS, QUALITY_REGISTRY } from "@/systems/wfrp/rules/equipment";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { TRAIT_RECIPES } from "@/systems/wfrp/rules/traits/recipes";
 
 type Part = "characteristics" | "skills" | "talents";
 

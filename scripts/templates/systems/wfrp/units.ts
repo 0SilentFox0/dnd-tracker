@@ -6,8 +6,8 @@ import { TRAIT_SIZES, type TraitSize } from "@/lib/utils/abilities/schema/kinds"
 import type { RecipeContext, RecipeValues } from "@/lib/utils/abilities/templates/types";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/utils/rules/systems";
-import { BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT } from "@/lib/utils/rules/systems/wfrp/traits/constants";
-import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
+import { BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT } from "@/systems/wfrp/rules/traits/constants";
+import { TRAIT_RECIPES } from "@/systems/wfrp/rules/traits/recipes";
 
 export const GRIM_UNIT_THEMES = ["Beasts", "Raiders", "Restless Dead", "Cultists", "Constructs", "Horrors"] as const;
 

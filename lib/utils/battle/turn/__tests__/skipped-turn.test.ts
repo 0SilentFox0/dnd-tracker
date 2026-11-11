@@ -8,8 +8,8 @@ import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 
 const downed = (status: BattleParticipant["combatStats"]["status"], bleeding = 0): BattleParticipant => {

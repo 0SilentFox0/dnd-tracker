@@ -9,8 +9,8 @@ import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/
 import { rollInitiative } from "@/lib/utils/battle/turn/roll-initiative";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { type Characteristics,DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf, wfrpBaseStats } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { wfrpAbilitiesOf, wfrpBaseStats } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 
 const rollRules = { ...WFRP_RULES, initiative: { ...WFRP_RULES.initiative, mode: "roll" as const } };

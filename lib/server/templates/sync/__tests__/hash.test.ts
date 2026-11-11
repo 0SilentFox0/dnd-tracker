@@ -7,7 +7,7 @@ import { hashJson } from "@/lib/utils/battle/store/stable-json";
 import { contentRowHash } from "@/lib/utils/content/row-hash";
 import { MECHANIC_REGISTRY } from "@/lib/utils/rules/registry";
 import { parseRules } from "@/lib/utils/rules/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const spells = BUNDLE_TABLES.find((t) => t.key === "spells")!;
 

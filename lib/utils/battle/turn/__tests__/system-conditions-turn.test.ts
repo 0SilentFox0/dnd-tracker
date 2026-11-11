@@ -11,8 +11,8 @@ import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn, enterChangedTurn } from "@/lib/utils/battle/turn";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 
 const scene: BattleSceneState = {

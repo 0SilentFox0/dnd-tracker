@@ -5,7 +5,7 @@ import { CharacterLogKind } from "@/lib/constants/character-log";
 import { ContentError } from "@/lib/server/content/errors";
 import { applyRest } from "@/lib/utils/characters/resources/rest";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 vi.mock("server-only", () => ({}));
 

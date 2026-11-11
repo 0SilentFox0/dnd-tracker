@@ -5,9 +5,9 @@ import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/partici
 import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-source";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { armourSl } from "@/lib/utils/rules/systems/wfrp/magic/armour";
-import { ARMOUR_SL_PER_AP } from "@/lib/utils/rules/systems/wfrp/magic/constants";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { armourSl } from "@/systems/wfrp/rules/magic/armour";
+import { ARMOUR_SL_PER_AP } from "@/systems/wfrp/rules/magic/constants";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const character = {
   id: "ch1", campaignId: "c1", name: "Герой", race: "Людина", class: "Воїн", level: 1,

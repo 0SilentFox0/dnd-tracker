@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildCharacterSheet, type SheetInput } from "@/lib/utils/characters/sheet";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { woundsMax } from "@/lib/utils/rules/systems/wfrp/characteristics/derive";
-import { CharacteristicsSchema } from "@/lib/utils/rules/systems/wfrp/characteristics/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { woundsMax } from "@/systems/wfrp/rules/characteristics/derive";
+import { CharacteristicsSchema } from "@/systems/wfrp/rules/characteristics/schema";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const characteristics = CharacteristicsSchema.parse({ base: { s: 40, t: 35, wp: 30 }, move: 4, fate: 3, skillAdvances: { "melee:flail": 5, lore: 0, "lore:old-world": 2 } });
 

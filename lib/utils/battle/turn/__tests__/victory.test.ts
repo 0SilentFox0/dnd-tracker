@@ -6,7 +6,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAction } from "@/types/battle";
 
 describe("completeBattle", () => {

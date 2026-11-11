@@ -11,7 +11,7 @@ import { loadCharacterContext } from "@/lib/server/battles/participant/load-char
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import { parseRules } from "@/lib/utils/rules/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const character = {
   campaignId: "own-campaign", race: "Elf", classes: [{ classId: sorcerer.id, level: 4 }],

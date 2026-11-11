@@ -18,8 +18,8 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["lib/**/*.ts"],
-      exclude: ["lib/**/*.test.ts", "lib/**/__tests__/**"],
+      include: ["lib/**/*.ts", "systems/**/*.ts"],
+      exclude: ["lib/**/*.test.ts", "lib/**/__tests__/**", "systems/**/__tests__/**"],
     },
   },
   resolve: {

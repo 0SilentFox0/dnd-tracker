@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { readCharacteristics } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 vi.mock("@/lib/db", () => ({
   prisma: {

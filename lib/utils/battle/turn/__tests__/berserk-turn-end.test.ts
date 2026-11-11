@@ -8,8 +8,8 @@ import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilitie
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const lastTurnEffect = makeEffect("adv", { duration: 1, expireAtTurnEnd: true, armed: true });
 

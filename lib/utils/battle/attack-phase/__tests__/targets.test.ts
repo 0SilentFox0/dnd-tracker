@@ -6,7 +6,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { CLAWS, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const none = { attackHitsAllEnemies: [], piercingShot: [], multiTargetFalloff: [], chainShot: [] };
 

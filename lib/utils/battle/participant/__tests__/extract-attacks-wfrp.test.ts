@@ -11,11 +11,11 @@ import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { mitigateWfrpDamage } from "@/lib/utils/rules/systems/wfrp/combat/mitigate";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_EQUIPMENT } from "@/lib/utils/rules/systems/wfrp/equipment";
-import { armourAp } from "@/lib/utils/rules/systems/wfrp/equipment/armour";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { mitigateWfrpDamage } from "@/systems/wfrp/rules/combat/mitigate";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_EQUIPMENT } from "@/systems/wfrp/rules/equipment";
+import { armourAp } from "@/systems/wfrp/rules/equipment/armour";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleMapConfig } from "@/types/battle";
 
 const weaponStats = (over: object) => ({ type: "weapon", group: "basic", reach: "average", damage: { addSb: true, flat: 4 }, qualities: [], flaws: [], twoHanded: false, weight: 1, price: 1, ...over });

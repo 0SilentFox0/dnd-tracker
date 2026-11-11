@@ -26,7 +26,7 @@ import { careersResource } from "@/lib/server/content/resources/careers";
 import type { Actor } from "@/lib/utils/api/actor";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 type Chars = typeof DEFAULT_CHARACTERISTICS;
 

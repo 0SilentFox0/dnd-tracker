@@ -16,7 +16,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const ctxOf = (rules: typeof DEFAULT_RULES) => ({ scene: { id: "s1", campaignId: "c1" }, meta: { setup: [{ id: "p1" }], map: null, rules } }) as unknown as BattleMutationContext;
 

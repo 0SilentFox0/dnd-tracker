@@ -2,7 +2,7 @@ import { describe } from "vitest";
 
 import { expectLabelKeys } from "../test/label-keys";
 
-import { DEFAULT_TABLES } from "@/lib/utils/rules/systems/wfrp/tables/defaults";
+import { DEFAULT_TABLES } from "@/systems/wfrp/rules/tables/defaults";
 
 describe("wfrp magic labels have translations", () => {
   expectLabelKeys("wfrpMagic", "log", ["miscast", "castSuccess", "castFail", "castCritical", "channelSuccess", "channelFail"]);

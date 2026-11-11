@@ -2,7 +2,7 @@ import { describe } from "vitest";
 
 import { expectLabelKeys } from "../test/label-keys";
 
-import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
+import { TRAIT_RECIPES } from "@/systems/wfrp/rules/traits/recipes";
 
 describe("wfrp trait recipes have translations", () => {
   for (const r of TRAIT_RECIPES) {

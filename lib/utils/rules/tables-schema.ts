@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/lib/constants/wfrp-characteristics";
-import { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL, type WfrpConditionKey } from "@/lib/constants/wfrp-conditions";
-import { MUTATION_EFFECT_LIMITS, MUTATION_EFFECTS_MAX } from "@/lib/constants/wfrp-mutations";
+import { CHARACTERISTIC_KEYS, type CharacteristicKey } from "@/systems/wfrp/constants/characteristics";
+import { WFRP_CONDITION_KEYS, WFRP_CONDITION_MAX_LEVEL, type WfrpConditionKey } from "@/systems/wfrp/constants/conditions";
+import { MUTATION_EFFECT_LIMITS, MUTATION_EFFECTS_MAX } from "@/systems/wfrp/constants/mutations";
 
 export const TABLE_SLOTS = ["critHead", "critArm", "critBody", "critLeg", "miscastMinor", "miscastMajor", "wrath", "downtimeEvent", "mutationPhysical", "mutationMental"] as const;
 

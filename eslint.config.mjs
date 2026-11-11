@@ -53,11 +53,11 @@ const MODE_IMPORT_PATTERN = {
 };
 
 const SYSTEM_IMPORT_PATTERN = {
-  group: ["@/lib/utils/rules/systems/wfrp*", "@/lib/utils/rules/systems/d20*", "@/lib/hooks/systems/wfrp*", "@/components/systems/wfrp*"],
+  group: ["@/systems/wfrp/rules*", "@/systems/wfrp/ui*", "@/systems/wfrp/hooks*", "@/systems/wfrp/index*", "@/lib/utils/rules/systems/d20*"],
   message: "Рульова система — лише через реєстр (@/lib/utils/rules/systems, @/components/systems).",
 };
 
-const SYSTEM_OWNED_FILES = ["lib/utils/rules/systems/**", "lib/hooks/systems/**", "components/systems/**"];
+const SYSTEM_OWNED_FILES = ["lib/utils/rules/systems/**", "lib/hooks/systems/**", "components/systems/**", "systems/**"];
 
 const MODE_OWNED_FILES = [
   "lib/utils/battle/modes/**",
@@ -204,7 +204,7 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "systems/**/*.{ts,tsx}"],
     ignores: ["components/ui/**"],
     rules: {
       "no-restricted-imports": [
@@ -323,6 +323,34 @@ const eslintConfig = defineConfig([
           patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
+    },
+  },
+  {
+    files: ["systems/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
+    files: ["systems/*/rules/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH], patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
+    files: ["systems/*/hooks/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
+    files: ["systems/*/ui/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
     },
   },
   {

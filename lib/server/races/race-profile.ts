@@ -8,7 +8,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { jsonContentInput } from "@/lib/utils/common/json";
 import type { SpeciesProfile } from "@/lib/utils/rules/systems";
-import { parseSpeciesProfile, profileRefIds } from "@/lib/utils/rules/systems/profile-refs";
+import { parseSpeciesProfile, profileRefIds } from "@/systems/wfrp/server/profile-refs";
 
 export type RaceProfileItem = { raceId: string; profile: SpeciesProfile };
 

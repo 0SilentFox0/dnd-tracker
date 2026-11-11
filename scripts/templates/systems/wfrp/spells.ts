@@ -1,10 +1,10 @@
 import { descriptionIssues, type Row } from "./common";
 import { unitTraits } from "./units";
 
-import { WFRP_CONDITION_KEYS } from "@/lib/constants/wfrp-conditions";
 import { isRecord } from "@/lib/utils/common/is-record";
-import { NO_OVERCAST_KINDS, PRAYER_KINDS } from "@/lib/utils/rules/systems/wfrp/magic/constants";
 import type { SpellMagicKind } from "@/lib/utils/spells/model/schema";
+import { WFRP_CONDITION_KEYS } from "@/systems/wfrp/constants/conditions";
+import { NO_OVERCAST_KINDS, PRAYER_KINDS } from "@/systems/wfrp/rules/magic/constants";
 
 export const GRIM_SPELL_KINDS = ["petty", "arcane", "hedge", "witchcraft", "blessing", "miracle"] as const satisfies readonly SpellMagicKind[];
 

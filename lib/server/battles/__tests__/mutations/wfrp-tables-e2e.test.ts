@@ -9,11 +9,11 @@ import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { conditionLevel } from "@/lib/utils/rules/systems/wfrp/conditions/levels";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
 import type { TableRow } from "@/lib/utils/rules/tables-schema";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { conditionLevel } from "@/systems/wfrp/rules/conditions/levels";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.mock("@/lib/db", () => ({ prisma: { race: { findFirst: vi.fn() } } }));

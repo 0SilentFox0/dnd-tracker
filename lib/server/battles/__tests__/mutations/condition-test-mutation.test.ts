@@ -6,7 +6,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { conditionTestMutation, conditionTestSchema } from "@/lib/server/battles/mutations/condition-test/condition-test-mutation";
 import { resetTurnState } from "@/lib/utils/battle/turn/turn-state";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 
 const conditions = ruleSystemOf(WFRP_RULES).conditions!;

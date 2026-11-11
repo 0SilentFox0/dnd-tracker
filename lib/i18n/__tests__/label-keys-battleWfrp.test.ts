@@ -2,8 +2,8 @@ import { describe } from "vitest";
 
 import { expectLabelKeys } from "../test/label-keys";
 
-import { WFRP_CONDITION_KEYS } from "@/lib/utils/rules/systems/wfrp/conditions/catalog";
-import { DEFAULT_TABLES } from "@/lib/utils/rules/systems/wfrp/tables/defaults";
+import { WFRP_CONDITION_KEYS } from "@/systems/wfrp/rules/conditions/catalog";
+import { DEFAULT_TABLES } from "@/systems/wfrp/rules/tables/defaults";
 
 describe("wfrp battle labels have translations", () => {
   for (const k of WFRP_CONDITION_KEYS) expectLabelKeys("battleWfrp", `conditions.${k}`, ["label", "description"]);

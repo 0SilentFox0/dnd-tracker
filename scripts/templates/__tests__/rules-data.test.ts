@@ -7,7 +7,7 @@ import { listPackKeys, readPack, TEMPLATES_DIR } from "../lib/pack";
 import { validatePack } from "../lib/validate";
 
 import { mergeRules, RulesetSchema } from "@/lib/utils/rules/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const rulesOf = (key: string) => readPack(key).rules;
 

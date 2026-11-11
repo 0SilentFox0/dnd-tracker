@@ -6,7 +6,7 @@ import { levelUpOperation } from "../level-up";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 describe("level-up system gate", () => {
   it("rejects systems without levels", async () => {

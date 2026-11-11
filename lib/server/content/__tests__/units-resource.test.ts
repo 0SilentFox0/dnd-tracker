@@ -17,7 +17,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { unitsResource } from "@/lib/server/content/resources/units";
 import type { Actor } from "@/lib/utils/api/actor";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
 

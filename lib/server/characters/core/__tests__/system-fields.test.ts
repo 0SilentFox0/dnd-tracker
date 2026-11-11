@@ -8,7 +8,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const wfrp = RULE_SYSTEM_REGISTRY.wfrp;
 

@@ -2,7 +2,7 @@ import { API_ERRORS, type ApiErrorKey } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
-import { SYSTEM_STATS_SCHEMAS } from "@/lib/utils/rules/systems/schemas";
+import { SYSTEM_STATS_SCHEMAS } from "@/systems/wfrp/server/schemas";
 
 type SystemStatsResult = { ok: true; value: unknown | null } | { ok: false; key: ApiErrorKey; issues?: unknown };
 

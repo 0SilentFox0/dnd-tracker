@@ -4,9 +4,9 @@ import { expectLabelKeys } from "../test/label-keys";
 
 import { RULE_SYSTEM_KEYS } from "@/lib/constants/rules";
 import { CHARACTERISTIC_KEYS, DEFAULT_TABLES } from "@/lib/utils/rules/systems";
-import { DIFFICULTY_KEYS } from "@/lib/utils/rules/systems/wfrp/percentile";
-import { SKILL_CATALOG } from "@/lib/utils/rules/systems/wfrp/skills";
 import { TABLE_SLOTS } from "@/lib/utils/rules/tables-schema";
+import { DIFFICULTY_KEYS } from "@/systems/wfrp/rules/percentile";
+import { SKILL_CATALOG } from "@/systems/wfrp/rules/skills";
 
 describe("rule system labels have translations", () => {
   expectLabelKeys("gameTerms", "ruleSystem", [...RULE_SYSTEM_KEYS]);

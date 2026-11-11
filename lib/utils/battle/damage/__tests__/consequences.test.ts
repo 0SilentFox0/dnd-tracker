@@ -5,7 +5,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { dealResistedDamage } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 
 const withRules = (deathSaves: Partial<Ruleset["deathSaves"]>): Ruleset => ({ ...DEFAULT_RULES, deathSaves: { ...DEFAULT_RULES.deathSaves, ...deathSaves } });

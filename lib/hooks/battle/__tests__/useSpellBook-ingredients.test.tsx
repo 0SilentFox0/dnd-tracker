@@ -6,7 +6,7 @@ import { fakeScene } from "./fake-scene";
 
 import { useSpellBook } from "@/lib/hooks/battle/useSpellBook";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BookSpell } from "@/types/spells";
 
 const spell = { id: "bolt", name: "Bolt", level: 1, dice: 0, targeting: { kind: "enemy" }, resolution: { kind: "auto" }, ingredients: [{ name: "Diamond", qty: 1, minGp: 50, consumed: true, focus: false }] } as unknown as BookSpell;

@@ -6,7 +6,7 @@ import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
+import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 
 vi.mock("@/lib/db", () => ({ prisma: { race: { findFirst: vi.fn() } } }));
 

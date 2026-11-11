@@ -13,10 +13,10 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { coerceRecord, IMPORT_SPECS } from "@/lib/utils/content/import";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
-import { readCharacteristics } from "@/lib/utils/rules/systems/wfrp/characteristics/keys";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { armourAp, WFRP_EQUIPMENT } from "@/lib/utils/rules/systems/wfrp/equipment";
-import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
+import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { armourAp, WFRP_EQUIPMENT } from "@/systems/wfrp/rules/equipment";
+import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.mock("@/lib/db", () => ({ prisma: { race: { findFirst: vi.fn() } } }));

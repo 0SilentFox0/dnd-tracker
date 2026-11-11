@@ -8,11 +8,11 @@ import { grimCoverage, grimInfo } from "../../systems/wfrp/coverage";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { nameKey } from "@/lib/utils/content/import";
 import { mergeRules } from "@/lib/utils/rules/schema";
-import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems/wfrp/characteristics/keys";
-import { planDraft } from "@/lib/utils/rules/systems/wfrp/creation/plan";
-import { rollCreation } from "@/lib/utils/rules/systems/wfrp/creation/roll";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { isSlug } from "@/lib/utils/templates/slug";
+import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
+import { planDraft } from "@/systems/wfrp/rules/creation/plan";
+import { rollCreation } from "@/systems/wfrp/rules/creation/roll";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const pack = readPack("grim-d100");
 

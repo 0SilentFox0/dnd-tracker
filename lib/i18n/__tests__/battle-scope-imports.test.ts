@@ -19,7 +19,8 @@ const ALLOWED_BATTLE_CODE = ["components/battle/fx/dice/", "components/battle/fx
 function outsideBattleGraph(): Map<string, string> {
   const roots = walkSources("app").filter((f) => !SERVER_ONLY.test(f) && !BATTLE_SEGMENTS.test(f) && !f.startsWith("app/dev/"));
 
-  return reachableSources(roots, (file, text) => SERVER_ONLY.test(file) || text.includes('"server-only"') || BATTLE_SEGMENTS.test(file));
+  // systems/ was invisible to this walk while it used relative imports inside lib/; keep that boundary
+  return reachableSources(roots, (file, text) => file.startsWith("systems/") || SERVER_ONLY.test(file) || text.includes('"server-only"') || BATTLE_SEGMENTS.test(file));
 }
 
 describe("battle namespaces stay inside the battle segments", () => {

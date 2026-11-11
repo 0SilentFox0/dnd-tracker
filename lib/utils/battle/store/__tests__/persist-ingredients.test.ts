@@ -6,7 +6,7 @@ import { ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { currencyValueOf } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { IngredientStock } from "@/types/battle";
 
 vi.mock("@/lib/server/artifacts/lock", () => ({ lockCampaignArtifacts: vi.fn() }));

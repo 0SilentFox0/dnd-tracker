@@ -10,9 +10,9 @@ import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fi
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { trait } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { trait } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 function deps(over = {}) {

@@ -16,7 +16,7 @@ import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { render } from "@/lib/i18n/test/render-uk";
 import { textRef } from "@/lib/i18n/text-ref";
 import type { RuleSystemKey } from "@/lib/utils/rules/systems";
-import { applyWfrpConditionTo } from "@/lib/utils/rules/systems/wfrp/conditions/apply";
+import { applyWfrpConditionTo } from "@/systems/wfrp/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.unmock("next-intl");

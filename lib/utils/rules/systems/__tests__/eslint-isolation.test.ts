@@ -9,10 +9,10 @@ const patternGroups = async (filePath: string) => {
 
 describe("rule system isolation", () => {
   it.each(["lib/utils/battle/foo.ts", "components/characters/Foo.tsx", "lib/hooks/characters/useX.ts"])("%s cannot import a system directly", async (file) => {
-    expect(await patternGroups(file)).toEqual(expect.arrayContaining(["@/lib/utils/rules/systems/wfrp*", "@/lib/utils/rules/systems/d20*", "@/lib/hooks/systems/wfrp*", "@/components/systems/wfrp*"]));
+    expect(await patternGroups(file)).toEqual(expect.arrayContaining(["@/systems/wfrp/rules*", "@/systems/wfrp/ui*", "@/systems/wfrp/hooks*", "@/systems/wfrp/index*", "@/lib/utils/rules/systems/d20*"]));
   });
 
   it.each(["lib/utils/rules/systems/registry.ts", "components/systems/registry.ts"])("%s may import systems", async (file) => {
-    expect(await patternGroups(file)).not.toContain("@/lib/utils/rules/systems/wfrp*");
+    expect(await patternGroups(file)).not.toContain("@/systems/wfrp/rules*");
   });
 });

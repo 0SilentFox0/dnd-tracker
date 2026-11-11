@@ -7,7 +7,7 @@ import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant, SceneMomentum } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };

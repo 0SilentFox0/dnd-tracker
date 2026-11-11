@@ -7,8 +7,8 @@ import { context, goblin, participant } from "@/lib/server/battles/__tests__/mut
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant } from "@/types/battle";
 
 const magic = { cn: 2, kind: "arcane", overcast: null };

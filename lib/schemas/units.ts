@@ -5,7 +5,7 @@ import { AttackType, RECHARGE_THRESHOLDS } from "@/lib/constants/battle";
 import { isChallengeRating } from "@/lib/constants/challenge";
 import { WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
-import { UnitCharacteristicsSchema } from "@/lib/utils/rules/systems/schemas";
+import { UnitCharacteristicsSchema } from "@/systems/wfrp/server/schemas";
 
 export const unitAttackSchema = z.object({
   name: z.string(),

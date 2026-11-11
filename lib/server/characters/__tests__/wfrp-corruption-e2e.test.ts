@@ -33,7 +33,7 @@ import { CharacterLogKind } from "@/lib/constants/character-log";
 import { corruptionGrantSchema, corruptionUndoSchema } from "@/lib/schemas/corruption";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { type Characteristics, DEFAULT_CHARACTERISTICS, preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { CorruptionGrantResult, CorruptionUndoResult } from "@/types/corruption";
 
 const hero = (id: string, over: Partial<Row> = {}, characteristics: Partial<Characteristics> = {}): Row => ({

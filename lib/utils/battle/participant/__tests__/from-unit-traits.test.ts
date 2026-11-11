@@ -9,7 +9,7 @@ import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const wfrp = parseRules(WFRP_RULES);
 

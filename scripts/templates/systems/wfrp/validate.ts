@@ -9,9 +9,9 @@ import { CAREER_TIER_COUNT, careerTierKey } from "@/lib/constants/import-aliases
 import { isRecord } from "@/lib/utils/common/is-record";
 import { coerceRecord, IMPORT_SPECS, nameKey } from "@/lib/utils/content/import";
 import { SPEC_RE } from "@/lib/utils/rules/systems";
-import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
-import { skillDef } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 import type { TableRow } from "@/lib/utils/rules/tables-schema";
+import { skillDef } from "@/systems/wfrp/rules/skills/catalog";
+import { SpeciesProfileSchema } from "@/systems/wfrp/server/schemas";
 
 const label = (kind: string, index: number, name: unknown) => `${kind} #${index + 1}${typeof name === "string" ? ` "${name}"` : ""}`;
 

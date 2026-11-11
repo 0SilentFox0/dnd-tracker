@@ -36,7 +36,7 @@ import { CharacterLogKind } from "@/lib/constants/character-log";
 import { InventoryLogKind } from "@/lib/constants/inventory";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { type Characteristics,DEFAULT_CHARACTERISTICS, readCharacteristics } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { DowntimePeriodResult } from "@/types/downtime";
 
 const INT4_MAX = 2_147_483_647;

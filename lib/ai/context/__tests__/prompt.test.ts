@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const caller = { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session" as const, scopes: null }, channel: "chat" as const, tokenId: null, threadId: null, locale: "uk" as const };
 

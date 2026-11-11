@@ -7,7 +7,7 @@ import { systemConditionMutation, systemConditionSchema } from "@/lib/server/bat
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const conditions = ruleSystemOf(WFRP_RULES).conditions!;
 

@@ -13,10 +13,10 @@ import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
-import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
+import { TRAIT_RECIPES } from "@/systems/wfrp/rules/traits/recipes";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.mock("@/lib/db", () => ({ prisma: { race: { findFirst: vi.fn() } } }));

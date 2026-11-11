@@ -5,9 +5,9 @@ import { buildDisplayEffects, collapseSystemConditions } from "../index";
 import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { applyWfrpConditionTo } from "@/lib/utils/rules/systems/wfrp/conditions/apply";
-import { wfrpConditions } from "@/lib/utils/rules/systems/wfrp/conditions/levels";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { applyWfrpConditionTo } from "@/systems/wfrp/rules/conditions/apply";
+import { wfrpConditions } from "@/systems/wfrp/rules/conditions/levels";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 const src = textRef("battleWfrp.log.removed", { target: "x", condition: "y" });

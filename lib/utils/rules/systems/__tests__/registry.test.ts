@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { RULE_SYSTEM_REGISTRY, ruleSystemOf, systemKeyOf } from "../registry";
 
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
+import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 
 const sheetInput = { characteristics: {} as never, resources: {} };
 

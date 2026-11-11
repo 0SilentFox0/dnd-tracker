@@ -14,7 +14,7 @@ import { type CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import { parseProfile } from "@/lib/utils/rules/systems/schemas";
+import { parseProfile } from "@/systems/wfrp/server/schemas";
 
 type Campaign = CampaignAccessResult["campaign"];
 

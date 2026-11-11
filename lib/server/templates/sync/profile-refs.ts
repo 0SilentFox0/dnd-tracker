@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { collectKeysAndStrings } from "@/lib/server/templates/remap-ids";
 import type { SyncDb } from "@/lib/server/templates/sync/context";
 import { isRecord } from "@/lib/utils/common/is-record";
-import { parseSpeciesProfile, profileRefIds } from "@/lib/utils/rules/systems/profile-refs";
+import { parseSpeciesProfile, profileRefIds } from "@/systems/wfrp/server/profile-refs";
 
 export type RefScope = "feats" | "careers" | "artifacts";
 

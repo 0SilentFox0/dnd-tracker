@@ -18,7 +18,7 @@ vi.mock("next/cache", () => ({ revalidateTag }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(async () => ({ userId: "dm" })) }));
 
 import { POST } from "@/app/api/campaigns/[id]/units/import/route";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const post = (body: unknown) =>
   POST(new Request("http://x", { method: "POST", body: JSON.stringify(body) }), { params: Promise.resolve({ id: "c1" }) }) as Promise<NextResponse>;

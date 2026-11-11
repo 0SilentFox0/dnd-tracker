@@ -9,7 +9,7 @@ vi.mock("@/lib/server/campaigns/rules", () => ({ loadRules: vi.fn() }));
 import { partySummary } from "@/lib/ai/tools/party";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 describe("partySummary", () => {
   beforeEach(() => {

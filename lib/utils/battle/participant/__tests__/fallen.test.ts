@@ -5,7 +5,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 const charm: ActiveEffect = {

@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { must } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
-import { TRAIT_RECIPES } from "@/lib/utils/rules/systems/wfrp/traits/recipes";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
+import { TRAIT_RECIPES } from "@/systems/wfrp/rules/traits/recipes";
 import type { BattleParticipant } from "@/types/battle";
 
 const recipe = must(TRAIT_RECIPES.find((r) => r.id === "regenerate"));

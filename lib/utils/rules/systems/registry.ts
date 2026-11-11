@@ -1,9 +1,9 @@
 import { d20System } from "./d20";
 import type { RuleSystemDefinition, RuleSystemKey } from "./types";
-import { WFRP_SYSTEM } from "./wfrp";
 
 import { type Coin, COIN_VALUE } from "@/lib/constants/inventory";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import { WFRP_SYSTEM } from "@/systems/wfrp";
 
 export const RULE_SYSTEM_REGISTRY: Record<RuleSystemKey, RuleSystemDefinition> = {
   homm: d20System("homm"),

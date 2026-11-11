@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(__dirname, "../../../../..");
 
-const WFRP_ENTRY = "lib/utils/rules/systems/wfrp/index.ts";
+const WFRP_ENTRY = "systems/wfrp/index.ts";
 
 const VALUE_IMPORT = /^(?:import|export)\s+(?!type\b)[^;]*?from\s+"([^"]+)"/gm;
 

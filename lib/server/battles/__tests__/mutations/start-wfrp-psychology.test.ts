@@ -24,9 +24,9 @@ import { buildStartOrder } from "@/lib/server/battles/mutations/start/start-batt
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
-import { wfrpAbilitiesOf } from "@/lib/utils/rules/systems/wfrp/combat/participant";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
-import { trait } from "@/lib/utils/rules/systems/wfrp/traits/__tests__/fixtures";
+import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { trait } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 
 const setup = [
   { id: "h1", type: "character" as const, side: "ally" },

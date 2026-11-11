@@ -4,7 +4,7 @@ import { DEFAULT_RULES } from "../defaults";
 import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "../schema";
 
 import srdRules from "@/data/templates/srd-5.2/rules.json";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const SRD_RULES = RulesetSchema.parse(srdRules);
 

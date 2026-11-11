@@ -5,7 +5,7 @@ import { applyBattleResult, applyCharacterResources } from "@/lib/utils/characte
 import { editResources } from "@/lib/utils/characters/resources/edit";
 import { applyRest } from "@/lib/utils/characters/resources/rest";
 import { CharacterResourcesSchema } from "@/lib/utils/characters/resources/schema";
-import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 describe("sin resource", () => {
   it("schema accepts 0-10 only", () => {
