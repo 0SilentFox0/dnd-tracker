@@ -109,6 +109,21 @@
 
 **Фікси перед/під час 2.4 (у 2.4a, окремим комітом `refactor(systems): part 2 reconciliation fixes`):** F1 — D69 (ліміт рядків бареля в `system-imports.test.ts`); F2 — таймаут 30 s для ESLint-кейсів `system-imports.test.ts` (флейк 5 s під навантаженням); F3 — `NewCharacterForm`: засів `characteristics.defaults()` перенести з `useEffect` у лінивий ініціалізатор стану форми в хуку (layering: логіка в хуках), wfrp `defaults()` → свіжа копія (D68); F4 — тест D66; F5 — `allowTypeImports` для `@/systems/*/api` у блоці `ui/**` + кейс у матриці (D71).
 
+## Рішення D80+ (проміжне ревʼю частин 1–3, Opus)
+
+Звіт: `.superpowers/sdd/e1-mid-review.md`. Фікси — одна хвиля Sonnet перед частиною 4.
+
+| # | Рішення | Чому |
+|---|---|---|
+| D80 | Ріст ratchet імпортів 14→23 прийнято як облік (D69: барель ховав ~119 споживачів), але `reason: "route"` для `lib/server/characters/operations/{advance,advance-undo,career,corruption,corruption-undo,downtime,downtime-period,downtime-period-undo}.ts` і `progression-service.ts` відхилено: це D41а. Операції → `systems/wfrp/server/operations/`; `SystemServer.operations?: Record<string, { operation; input: ZodType }>` домерджується в `CHARACTER_OPERATIONS` і `PROGRESSION_INPUTS`; route-файли `app/api` реекспортують із системи (`route`). `characteristicsJson` → листовий файл (розриває цикл registry → handlers → `system-fields` → registry); `advance/careerSet/careerAdvance`-схеми з `lib/schemas/out-of-combat.ts` — у систему | D41 допускає лише три причини; core-шар операцій має бути нейтральним |
+| D81 | `lib/server/races/race-profile.ts` (цілком wfrp) → `systems/wfrp/server/`; `profile-usage.ts`, `templates/sync/profile-refs.ts` лишаються `content-kind` до E2 (профіль виду = розширення виду `races` системою, реєструється разом із `careers`) | змішані файли цілісності посилань; хук без реєстру видів контенту — зайвий |
+| D82 | Хук `characteristics.initial?(value): SystemData` замість деструктуризації `downtime`/`corruption` у `normalizeCharacterInput` | wfrp-поля в core, ratchet їх не бачить |
+| D83 | `units.import` звужує `characteristics` через `parseSystemData(rules, …, "unitCharacteristics")` в `operation-service` (регресія 3.2). Дефолти в ресурсі прийнято; compendium-import пише через ресурс, preview (`nativeBody`) не звужує — прийнято | запис без валідації в JSON-колонку |
+| D84 | `NewCharacterForm`: ключ системи приходить зі сторінки (server), `useRuleSystem({ key })`; без порожнього кадру | дані вже є на сервері |
+| D85 | D73 закрито без змін: диспетчер — `system.creation`, `!d20Stats` охороняє d20-шлях. `SystemServer.draft` — 6.3/E2 | проксі «це wfrp» більше немає |
+| D86 | D64 підтверджено. `SYSTEM_LAYERS`: `ui/**`, `hooks/**` забороняють `@/lib/server*`, `@/lib/db`, `@/systems/*/server*`; `rules/**` — `@/lib/utils/api/*` крім `content-error` (D65). Тест графа: `components/systems/registry.ts` без zod/server-only, `meta.ts` не досягає `registry.ts` | Review Focus 4 тримали лише тести |
+| D87 | `scripts/sim/battle-sweep/profiles/**` — дозволене місце літералів (як `scripts/templates/<key>/**`); 3 записи з `system-literals-exempt.json` прибрати | профіль шаблону — частина пакета (D63), не витік |
+
 ## Файлова структура (цільова)
 
 ```
