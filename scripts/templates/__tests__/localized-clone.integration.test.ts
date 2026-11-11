@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { contentLayer, invalidateCampaignLayer } from "@/lib/db/content-layer";
@@ -15,6 +18,7 @@ vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invali
 
 import { catalogOf } from "../lib/i18n-convert";
 import { importPack } from "../lib/import-pack";
+import { readPack } from "../lib/pack";
 import { grimData } from "../systems/wfrp/__tests__/pack-helpers";
 import { GRIM_SPELL_LISTS } from "../systems/wfrp/spells";
 
@@ -184,5 +188,63 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
 
   it("clones are in sync with the template", async () => {
     for (const locale of ["uk", "en"] as const) expect(visible(classify(await loadSyncContext(scoped as unknown as SyncDb, clones[locale]))), locale).toEqual([]);
+  });
+});
+
+describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm localized clone (English base, uk overlay)", () => {
+  const heroesMarker = `heroesloc-${randomUUID()}`;
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "heroes-loc-"));
+
+  const key = `heroes-loc-${heroesMarker.slice(-8)}`;
+
+  const heroesUk = readTranslations("heroes-homm", "uk");
+
+  let templateId = "";
+
+  beforeAll(async () => {
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    await raw.user.create({ data: { id: heroesMarker, email: `${heroesMarker}@example.invalid`, displayName: heroesMarker } });
+
+    const pack = readPack("heroes-homm");
+
+    fs.cpSync(path.join(process.cwd(), "data/templates/heroes-homm"), path.join(tmpDir, key), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, key, "manifest.json"), JSON.stringify({ ...pack.manifest, key, names: { en: key, uk: key } }));
+    templateId = (await importPack(key, { owner: heroesMarker, dir: tmpDir })).templateId as string;
+  });
+
+  afterAll(async () => {
+    const ids = (await raw.campaign.findMany({ where: { dmUserId: heroesMarker }, select: { id: true } })).map((c) => c.id);
+
+    await raw.campaign.updateMany({ where: { id: { in: ids } }, data: { baseSourceId: null } });
+    await raw.campaign.deleteMany({ where: { id: { in: ids } } });
+    await raw.user.deleteMany({ where: { id: heroesMarker } });
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("every catalog key of the English pack is applied on the DB row form", async () => {
+    const catalog = catalogOf("heroes-homm");
+
+    expect(catalog.length).toBeGreaterThan(1000);
+
+    const tr: TranslationsV2 = Object.fromEntries(catalog.map((entry, index) => [entry.key, { text: `${entry.en}\u27e6${index}\u27e7`, en: entry.en }]));
+
+    const applied = new Set([...JSON.stringify(localizeTemplateBundle(await exportCampaign(scoped as never, templateId), tr)).matchAll(/\u27e6(\d+)\u27e7/g)].map((m) => Number(m[1])));
+
+    expect(catalog.filter((_, index) => !applied.has(index)).map((entry) => entry.key)).toEqual([]);
+  });
+
+  it("the uk overlay renames rows, the English template stays Cyrillic-free", async () => {
+    const bundle = await exportCampaign(scoped as never, templateId);
+
+    expect(JSON.stringify(bundle)).not.toMatch(/[\u0400-\u04FF]/);
+
+    const localized = localizeTemplateBundle(bundle, heroesUk);
+
+    const pack = readPack("heroes-homm");
+
+    expect(names(localized.units as unknown as Rows)).toEqual(expectedNames("units", pack.rows.units ?? [], heroesUk));
+    expect(names(localized.races as unknown as Rows)).toEqual(expectedNames("races", pack.rows.races ?? [], heroesUk));
+    expect(names(localized.artifacts as unknown as Rows)).toEqual(expectedNames("artifacts", pack.rows.artifacts ?? [], heroesUk));
   });
 });

@@ -49,9 +49,12 @@ describe("localizationOf", () => {
     expect(localizationOf({ ...official, templateKey: null, name: "5e SRD 5.2" })).toEqual({ templateKey: "srd-5.2", locales: ["en", "uk"] });
   });
 
+  it("localizes heroes-homm (en base, uk overlay)", () => {
+    expect(localizationOf({ ...official, templateKey: "heroes-homm" })).toEqual({ templateKey: "heroes-homm", locales: ["en", "uk"] });
+  });
+
   it("is null for empty shells, private templates and unknown keys", () => {
     expect(localizationOf({ ...official, templateKey: "srd-5.2-empty" })).toBeNull();
-    expect(localizationOf({ ...official, templateKey: "heroes-homm" })).toBeNull();
     expect(localizationOf({ kind: "template", visibility: "private", templateKey: "srd-5.2" })).toBeNull();
     expect(localizationOf({ ...official, templateKey: "nope" })).toBeNull();
   });
