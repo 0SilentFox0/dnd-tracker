@@ -124,25 +124,25 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const system = input.rules ? ruleSystemOf(input.rules) : null;
 
-  const wfrp = system?.characteristics.sheetBlock({ characteristics: c.characteristics, resources: readResources(c.resources) });
+  const systemSlot = system?.characteristics.sheetBlock({ characteristics: c.characteristics, resources: readResources(c.resources) });
 
   const grid = Object.fromEntries(ARTIFACT_GRID_9.map((cell) => [cell.key, input.artifacts.find((a) => a.slot === cell.key) ?? null]));
 
   return {
     system: system?.key ?? "homm",
-    ...(wfrp && { wfrp }),
+    ...(systemSlot && { systemSlot }),
     viewer: input.viewer,
     review: { pending: c.status === CharacterStatus.PENDING, note: c.status === CharacterStatus.PENDING ? (c.reviewNote ?? null) : null },
     maxLevel: input.maxLevel,
     identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).key ?? "universal", subclass: c.subclass, race: c.race, ...(showSubrace && c.subrace && { subrace: c.subrace }), raceIcon: input.raceIcon, alignment: c.alignment },
-    abilities: wfrp ? [] : ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
+    abilities: systemSlot ? [] : ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
     primaryAbility: primary,
-    proficiency: wfrp ? 0 : prof,
+    proficiency: systemSlot ? 0 : prof,
     hp: {
       total: p.combatStats.maxHp,
       lines: [...hp.breakdown.map((b) => ({ ...b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: sheetLineKey("bonuses"), value: signed(hpBonus) }] : [])],
     },
-    armorClass: wfrp ? { total: 0, lines: [] } : armorTotal(p),
+    armorClass: systemSlot ? { total: 0, lines: [] } : armorTotal(p),
     initiative: calculateInitiative(p),
     speed: p.combatStats.speed,
     morale: p.combatStats.morale,
@@ -152,11 +152,11 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     proficiencies: [...new Set([...proficiencyList(c.proficiencies), ...(input.choices?.selections.tools ?? [])])],
     attacks,
     bestToHit: attacks.length ? Math.max(...attacks.map((a) => a.toHit.total)) : null,
-    saves: wfrp ? [] : ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
-    skills: wfrp ? [] : skills,
-    passives: wfrp ? { perception: 0, investigation: 0, insight: 0 } : { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
+    saves: systemSlot ? [] : ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
+    skills: systemSlot ? [] : skills,
+    passives: systemSlot ? { perception: 0, investigation: 0, insight: 0 } : { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: c.spellcastingAbility as AbilityKey, saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
-    hitDice: classEntries && !wfrp ? hitDiceLabel(classEntries) : null,
+    hitDice: classEntries && !systemSlot ? hitDiceLabel(classEntries) : null,
     ...(classEntries && { classTable: classTableLines(classEntries), classProgression: classEntries.flatMap((e) => (e.class ? [buildClassProgression(e.class, e)] : [])) }),
     pact: pactSlot(p),
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),

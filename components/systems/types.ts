@@ -2,10 +2,9 @@ import type { ComponentType } from "react";
 
 import type { SystemConditionBody } from "@/lib/hooks/battles";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
-import type { DifficultyKey } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { CareerData } from "@/types/careers";
-import type { CharacterListItem, SheetRollBody, SheetRollResult, SheetTotal, WfrpDraftIdentityInput } from "@/types/characters";
+import type { CharacterListItem, CharacterSheet, SheetRollBody, SheetRollResult, SheetTotal } from "@/types/characters";
 import type { Unit } from "@/types/units";
 
 export interface SheetRollRequest {
@@ -22,8 +21,8 @@ export interface StatsTabProps {
 export interface RollDialogBodyProps {
   request: SheetRollRequest;
   result: SheetRollResult | null;
-  difficulty: DifficultyKey;
-  setDifficulty: (difficulty: DifficultyKey) => void;
+  difficulty: string;
+  setDifficulty: (difficulty: string) => void;
 }
 
 export interface StatsFieldsProps {
@@ -62,7 +61,17 @@ export interface SystemConditionsDialogProps {
 export interface DraftFormProps {
   campaignId: string;
   characterId?: string;
-  initialIdentity?: WfrpDraftIdentityInput;
+  initialIdentity?: unknown;
+}
+
+export interface RestBadgesProps {
+  sheet: CharacterSheet;
+}
+
+export interface ResourceFieldsProps {
+  sheet: CharacterSheet;
+  values: Record<string, string>;
+  onChange: (key: string, value: string) => void;
 }
 
 export interface RaceProfileEditorProps {
@@ -105,4 +114,7 @@ export interface SystemUi {
   EquippedSummary?: ComponentType<EquippedSummaryProps>;
   DowntimeTab?: ComponentType;
   DowntimePeriodPanel?: ComponentType<DowntimePeriodPanelProps>;
+  RestBadges?: ComponentType<RestBadgesProps>;
+  ResourceFields?: ComponentType<ResourceFieldsProps>;
+  resourceDefaults?(sheet: CharacterSheet): Record<string, string>;
 }

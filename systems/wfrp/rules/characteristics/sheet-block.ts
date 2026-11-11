@@ -1,12 +1,29 @@
 import { modifiersOf } from "../corruption/modifiers";
 import { corruptionThreshold } from "../corruption/threshold";
+import type { Mutation } from "../corruption/types";
 import { parseSkillAdvanceKey, SKILL_CATALOG, skillAdvanceKey, skillDef } from "../skills/catalog";
+import { SHEET_SLOT } from "../slots";
 import { bonus, moveOf, runYards, skillTarget, value, walkYards, woundsBreakdown, woundsMax } from "./derive";
-import { CHARACTERISTIC_KEYS, readCharacteristics } from "./keys";
+import { CHARACTERISTIC_KEYS, type CharacteristicKey, readCharacteristics } from "./keys";
 
-import type { SheetBlockInput, SheetWfrpBlock } from "@/lib/utils/rules/systems/types";
+import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { SheetBlockInput } from "@/lib/utils/rules/systems/types";
 
-export function wfrpSheetBlock({ characteristics, resources }: SheetBlockInput): SheetWfrpBlock {
+export interface SheetWfrpBlock {
+  characteristics: { key: CharacteristicKey; base: number; advances: number; value: number; bonus: number; mod: number }[];
+  wounds: { max: number; breakdown: HpBreakdownLine[] };
+  move: { value: number; walkYd: number; runYd: number };
+  skills: { key: string; spec?: string; characteristic: CharacteristicKey; target: number; advances: number; trained: boolean; kind: "basic" | "advanced" }[];
+  fate: number;
+  fortune: number;
+  sin: number;
+  corruption: { points: number; threshold: number; mutations: Mutation[] };
+}
+
+export const wfrpSheetBlock = (input: SheetBlockInput): SystemSlot => SHEET_SLOT.write(buildBlock(input));
+
+function buildBlock({ characteristics, resources }: SheetBlockInput): SheetWfrpBlock {
   const c = readCharacteristics({ characteristics });
 
   const entries = new Map<string, { key: string; spec?: string }>();

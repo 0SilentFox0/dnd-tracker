@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { GoalKind } from "@/lib/constants/characters";
-import type { WfrpDraftIdentityInput, WfrpDraftInput } from "@/types/characters";
+import type { WfrpDraftIdentityInput, WfrpDraftInput } from "@/lib/utils/rules/systems";
 
 const roll = z.array(z.number().int()).max(12);
 

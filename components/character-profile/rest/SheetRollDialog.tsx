@@ -14,12 +14,11 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SwitchField } from "@/components/ui/switch-field";
 import { useSheetRoll } from "@/lib/hooks/characters";
 import { cryptoRandom } from "@/lib/utils/common/dice";
-import type { DifficultyKey } from "@/lib/utils/rules/systems";
 import type { SheetRollBody, SheetRollResult } from "@/types/characters";
 
 export type { SheetRollRequest };
 
-function rollBody(subject: SheetRollBody, difficulty: DifficultyKey, useInspiration: boolean): SheetRollBody {
+function rollBody(subject: SheetRollBody, difficulty: string, useInspiration: boolean): SheetRollBody {
   if (subject.kind === "test") return { ...subject, difficulty };
 
   return { ...subject, ...(useInspiration && { useInspiration: true }) };
@@ -38,7 +37,7 @@ export function SheetRollDialog({ request, onClose }: { request: SheetRollReques
 
   const [useInspiration, setUseInspiration] = useState(false);
 
-  const [difficulty, setDifficulty] = useState<DifficultyKey>("challenging");
+  const [difficulty, setDifficulty] = useState("challenging");
 
   const [result, setResult] = useState<SheetRollResult | null>(null);
 

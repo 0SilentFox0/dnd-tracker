@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CharacteristicsGrid } from "../CharacteristicsGrid";
 
 import { signed } from "@/lib/utils/common/format";
-import type { SheetWfrpBlock } from "@/lib/utils/rules/systems";
 import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems";
+import type { SheetWfrpBlock } from "@/systems/wfrp/rules/characteristics/sheet-block";
 
 const block = {
   characteristics: CHARACTERISTIC_KEYS.map((key, i) => ({ key, base: 30 + i, advances: 5, value: 35 + i, bonus: Math.floor((35 + i) / 10), mod: i === 0 ? -10 : 0 })),

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { useProfile } from "@/components/character-profile/ProfileContext";
 import { HudStatChip } from "@/components/hud/page";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 export function HeroStats() {
   const { sheet } = useProfile();
@@ -14,7 +15,7 @@ export function HeroStats() {
 
   const tg = useTranslations("gameTerms");
 
-  const block = sheet.wfrp;
+  const block = SHEET_SLOT.read(sheet.systemSlot);
 
   if (!block) return null;
 

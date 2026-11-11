@@ -12,8 +12,8 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
-import type { CharacteristicKey, Characteristics, DifficultyKey, LedgerEntry, PurchaseRequest, RuleSystemKey, SheetWfrpBlock } from "@/lib/utils/rules/systems";
-import type { SystemData } from "@/lib/utils/rules/systems/slot";
+import type { RuleSystemKey } from "@/lib/utils/rules/systems";
+import type { SystemData, SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
 
@@ -239,7 +239,7 @@ export interface SetProgress {
 
 export interface CharacterSheet {
   system: RuleSystemKey;
-  wfrp?: SheetWfrpBlock;
+  systemSlot?: SystemSlot;
   viewer: { isDM: boolean; isOwner: boolean };
   review: { pending: boolean; note: string | null };
   maxLevel: number;
@@ -308,21 +308,6 @@ export interface DraftInput {
   choices?: Partial<BackgroundSelection> & { raceChoices?: Picks; feats?: CharacterFeat[]; classChoices?: Picks };
 }
 
-export interface WfrpDraftIdentityInput {
-  name: string;
-  alignment?: string;
-  background?: string;
-  avatar?: string;
-  goals?: Array<{ text: string; kind: GoalKind }>;
-}
-
-export interface WfrpDraftInput extends WfrpDraftIdentityInput {
-  speciesId: string;
-  career: { mode: "rolled" | "choice" | "free"; careerId: string };
-  stats: { mode: "rolled"; rolls: number[] } | { mode: "rearranged"; rolls: number[]; arranged: number[] } | { mode: "free"; points: number[] };
-  talents: string[];
-}
-
 export type RestKindValue = "short" | "long";
 
 export interface CharacterResources {
@@ -346,9 +331,9 @@ export type RestBody = { kind: "short" | "long" | "close" | "session"; character
 
 export type SheetRollSubject = { kind: "check"; skill: DndSkill } | { kind: "check"; ability: AbilityKey } | { kind: "save"; ability: AbilityKey };
 
-export type SheetTestSubject = { kind: "test"; characteristic: CharacteristicKey } | { kind: "test"; skill: string; spec?: string };
+export type SheetTestSubject = { kind: "test"; characteristic: string } | { kind: "test"; skill: string; spec?: string };
 
-export type SheetRollBody = (SheetRollSubject & { useInspiration?: boolean }) | (SheetTestSubject & { difficulty?: DifficultyKey });
+export type SheetRollBody = (SheetRollSubject & { useInspiration?: boolean }) | (SheetTestSubject & { difficulty?: string });
 
 export type SheetRollResult = SheetD20RollResult | SheetPercentileRollResult;
 
@@ -362,7 +347,7 @@ export interface SheetPercentileRollResult {
   sl: number;
   outcome: "critical" | "success" | "failure" | "fumble";
   auto: "success" | "failure" | null;
-  difficulty: DifficultyKey;
+  difficulty: string;
   mode: "normal" | "advantage" | "disadvantage";
 }
 
@@ -389,12 +374,6 @@ export interface HitDieResult {
 }
 
 export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
-
-export type AdvanceBody = PurchaseRequest;
-
-export type CareerResult = { characteristics: Characteristics };
-
-export type AdvanceResult = { characteristics: Characteristics; experience: number; available: number; entry: LedgerEntry };
 
 export type ResourcesEditBody = { fortune?: number; sin?: number; hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
 

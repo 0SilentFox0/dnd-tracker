@@ -8,6 +8,7 @@ import { MutationEffects } from "./MutationEffects";
 import { useProfile } from "@/components/character-profile/ProfileContext";
 import { HudSection } from "@/components/hud/form";
 import { useText } from "@/lib/i18n/use-text";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 export function CorruptionBlock() {
   const { sheet, campaignId, characterId } = useProfile();
@@ -16,7 +17,7 @@ export function CorruptionBlock() {
 
   const text = useText();
 
-  const c = sheet.wfrp?.corruption;
+  const c = SHEET_SLOT.read(sheet.systemSlot)?.corruption;
 
   if (!c) return null;
 

@@ -14,8 +14,8 @@ import { useRuleSystem } from "@/lib/hooks/systems/useRuleSystem";
 import { cryptoRandom } from "@/lib/utils/common/dice";
 import type { Rng } from "@/lib/utils/common/rng";
 import { type CreationPicks, type CreationRolls, type PlanDraftResult, RULE_SYSTEM_REGISTRY, type SpeciesProfile } from "@/lib/utils/rules/systems";
+import type { WfrpDraftIdentityInput, WfrpDraftInput } from "@/systems/wfrp/api/types";
 import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
-import type { WfrpDraftIdentityInput, WfrpDraftInput } from "@/types/characters";
 import type { Race } from "@/types/races";
 
 export type WfrpDraftStepId = "species" | "career" | "stats" | "talents" | "identity";

@@ -12,7 +12,7 @@ vi.unmock("next-intl");
 
 const mount = (corruption?: { points: number; threshold: number; mutations: [] }) =>
   render(
-    <ProfileProvider campaignId="c" characterId="h" canEdit={false} sheet={{ wfrp: { wounds: { max: 10 }, move: { walkYd: 8, runYd: 16 }, fate: 2, fortune: 2, sin: 0, ...(corruption && { corruption }) } } as unknown as CharacterSheet}>
+    <ProfileProvider campaignId="c" characterId="h" canEdit={false} sheet={{ systemSlot: { key: "wfrp", data: { wounds: { max: 10 }, move: { walkYd: 8, runYd: 16 }, fate: 2, fortune: 2, sin: 0, ...(corruption && { corruption }) } } } as unknown as CharacterSheet}>
       <HeroStats />
     </ProfileProvider>,
   );

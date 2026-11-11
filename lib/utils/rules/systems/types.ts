@@ -22,7 +22,6 @@ import type { planUndo } from "@/systems/wfrp/rules/advancement/undo";
 import type { CharacteristicKey } from "@/systems/wfrp/rules/characteristics/keys";
 import type { HitLocation } from "@/systems/wfrp/rules/combat/constants";
 import type { planGrant } from "@/systems/wfrp/rules/corruption/plan-grant";
-import type { Mutation } from "@/systems/wfrp/rules/corruption/types";
 import type { planCorruptionUndo } from "@/systems/wfrp/rules/corruption/undo";
 import type { planDraft } from "@/systems/wfrp/rules/creation/plan";
 import type { isUsableProfile } from "@/systems/wfrp/rules/creation/profile";
@@ -49,17 +48,6 @@ export interface CharacterHpInput {
 export interface SheetBlockInput {
   characteristics: unknown;
   resources: CharacterResources;
-}
-
-export interface SheetWfrpBlock {
-  characteristics: { key: CharacteristicKey; base: number; advances: number; value: number; bonus: number; mod: number }[];
-  wounds: { max: number; breakdown: HpBreakdownLine[] };
-  move: { value: number; walkYd: number; runYd: number };
-  skills: { key: string; spec?: string; characteristic: CharacteristicKey; target: number; advances: number; trained: boolean; kind: "basic" | "advanced" }[];
-  fate: number;
-  fortune: number;
-  sin: number;
-  corruption: { points: number; threshold: number; mutations: Mutation[] };
 }
 
 export interface SheetTestInput {
@@ -292,7 +280,7 @@ export interface RuleSystemDefinition {
     persisted: boolean;
     defaults(): SystemData | undefined;
     isEmpty(value: unknown): boolean;
-    sheetBlock(input: SheetBlockInput): SheetWfrpBlock | undefined;
+    sheetBlock(input: SheetBlockInput): SystemSlot | undefined;
     /** Merges an incoming edit into the stored value; throws ContentError on a conflict */
     reconcile?(stored: unknown, incoming: unknown, ctx: { isDM: boolean; baseline?: unknown }): unknown;
     redact?(value: unknown, viewer: { isDM: boolean; isOwner: boolean }): unknown;

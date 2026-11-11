@@ -6,6 +6,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { woundsMax } from "@/systems/wfrp/rules/characteristics/derive";
 import { CharacteristicsSchema } from "@/systems/wfrp/rules/characteristics/schema";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 const characteristics = CharacteristicsSchema.parse({ base: { s: 40, t: 35, wp: 30 }, move: 4, fate: 3, skillAdvances: { "melee:flail": 5, lore: 0, "lore:old-world": 2 } });
 
@@ -35,7 +36,7 @@ describe("buildCharacterSheet system", () => {
     const sheet = buildCharacterSheet(input());
 
     expect(sheet.system).toBe("homm");
-    expect(sheet.wfrp).toBeUndefined();
+    expect(sheet.systemSlot).toBeUndefined();
     expect(sheet.abilities).toHaveLength(6);
   });
 
@@ -51,15 +52,17 @@ describe("buildCharacterSheet system", () => {
   it("wfrp builds the characteristics block and empties d20 fields", () => {
     const sheet = buildCharacterSheet(input({ rules: WFRP_RULES }, { fortune: 1 }));
 
+    const block = SHEET_SLOT.read(sheet.systemSlot);
+
     expect(sheet.system).toBe("wfrp");
-    expect(sheet.wfrp?.characteristics).toHaveLength(10);
-    expect(sheet.wfrp?.wounds.max).toBe(woundsMax(characteristics));
-    expect(sheet.wfrp?.move).toEqual({ value: 4, walkYd: 8, runYd: 16 });
-    expect(sheet.wfrp?.fate).toBe(3);
-    expect(sheet.wfrp?.fortune).toBe(1);
-    expect(sheet.wfrp?.skills.find((s) => s.key === "dodge")?.trained).toBe(true);
-    expect(sheet.wfrp?.skills.find((s) => s.key === "channelling")?.trained).toBe(false);
-    expect(sheet.wfrp?.skills.find((s) => s.key === "melee" && s.spec === "flail")?.advances).toBe(5);
+    expect(block?.characteristics).toHaveLength(10);
+    expect(block?.wounds.max).toBe(woundsMax(characteristics));
+    expect(block?.move).toEqual({ value: 4, walkYd: 8, runYd: 16 });
+    expect(block?.fate).toBe(3);
+    expect(block?.fortune).toBe(1);
+    expect(block?.skills.find((s) => s.key === "dodge")?.trained).toBe(true);
+    expect(block?.skills.find((s) => s.key === "channelling")?.trained).toBe(false);
+    expect(block?.skills.find((s) => s.key === "melee" && s.spec === "flail")?.advances).toBe(5);
     expect(sheet.abilities).toEqual([]);
     expect(sheet.saves).toEqual([]);
     expect(sheet.skills).toEqual([]);
@@ -68,9 +71,11 @@ describe("buildCharacterSheet system", () => {
   it("fortune falls back to fate and trained skills come first", () => {
     const sheet = buildCharacterSheet(input({ rules: WFRP_RULES }));
 
-    expect(sheet.wfrp?.fortune).toBe(3);
+    const block = SHEET_SLOT.read(sheet.systemSlot);
 
-    const flags = sheet.wfrp!.skills.map((s) => s.trained);
+    expect(block?.fortune).toBe(3);
+
+    const flags = block!.skills.map((s) => s.trained);
 
     expect(flags).toEqual([...flags].sort((a, b) => Number(b) - Number(a)));
   });

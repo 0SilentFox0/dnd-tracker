@@ -19,7 +19,7 @@ type Corruption = { points: number; threshold: number; mutations: unknown[] };
 
 const mount = (corruption: Corruption | undefined, isDM = false, wfrp = true, pending = false) =>
   render(
-    <ProfileProvider campaignId="c" characterId="h" canEdit={false} sheet={{ viewer: { isDM, isOwner: !isDM }, review: { pending }, ...(wfrp && { wfrp: { corruption } }) } as unknown as CharacterSheet}>
+    <ProfileProvider campaignId="c" characterId="h" canEdit={false} sheet={{ viewer: { isDM, isOwner: !isDM }, review: { pending }, ...(wfrp && { systemSlot: { key: "wfrp", data: { corruption } } }) } as unknown as CharacterSheet}>
       <CorruptionBlock />
     </ProfileProvider>,
   );

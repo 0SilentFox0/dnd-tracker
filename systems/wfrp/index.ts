@@ -17,7 +17,7 @@ import { WFRP_DOWNTIME } from "./rules/downtime";
 import { WFRP_EQUIPMENT } from "./rules/equipment";
 import { WFRP_MAGIC } from "./rules/magic";
 import { onSession } from "./rules/session";
-import { rollWfrpSheetTest } from "./rules/sheet-test";
+import { acceptsWfrpSheetTest, rollWfrpSheetTest } from "./rules/sheet-test";
 import { PARTICIPANT_SLOT } from "./rules/slots";
 import { WFRP_TRAITS } from "./rules/traits";
 
@@ -45,7 +45,7 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
     fortuneOf: (p) => PARTICIPANT_SLOT.read(p.abilities.system)?.characteristics.fate,
   },
   sheetTest: {
-    accepts: (body) => body.kind === "test",
+    accepts: acceptsWfrpSheetTest,
     roll: rollWfrpSheetTest,
   },
   rest: { kinds: false, onSession },

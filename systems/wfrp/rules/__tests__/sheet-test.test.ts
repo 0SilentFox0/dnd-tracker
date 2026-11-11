@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { applyWfrpConditionTo } from "../conditions/apply";
-import { rollWfrpSheetTest } from "../sheet-test";
+import { acceptsWfrpSheetTest, rollWfrpSheetTest } from "../sheet-test";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { makeT } from "@/lib/i18n/test/mock-t";
 import { textRef } from "@/lib/i18n/text-ref";
-import { ContentError } from "@/lib/server/content/errors";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
+import { ContentError } from "@/lib/utils/api/content-error";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SheetTestInput } from "@/lib/utils/rules/systems/types";
@@ -81,5 +81,20 @@ describe("rollWfrpSheetTest", () => {
 
   it("non-test body is 400", () => {
     fails({ kind: "check", ability: "strength" }, 400, API_ERRORS.ROLL_KIND_MISMATCH);
+  });
+});
+
+describe("acceptsWfrpSheetTest", () => {
+  it("accepts known characteristics, skill keys and difficulties", () => {
+    expect(acceptsWfrpSheetTest({ kind: "test", characteristic: "ws" })).toBe(true);
+    expect(acceptsWfrpSheetTest({ kind: "test", skill: "melee", spec: "flail", difficulty: "hard" })).toBe(true);
+  });
+
+  it("rejects unknown characteristic, bad skill/spec, unknown difficulty and non-test bodies", () => {
+    expect(acceptsWfrpSheetTest({ kind: "test", characteristic: "xx" })).toBe(false);
+    expect(acceptsWfrpSheetTest({ kind: "test", skill: "Not A Key" })).toBe(false);
+    expect(acceptsWfrpSheetTest({ kind: "test", skill: "melee", spec: "BAD" })).toBe(false);
+    expect(acceptsWfrpSheetTest({ kind: "test", characteristic: "ws", difficulty: "impossible" })).toBe(false);
+    expect(acceptsWfrpSheetTest({ kind: "check", ability: "strength" })).toBe(false);
   });
 });

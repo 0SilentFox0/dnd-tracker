@@ -1,4 +1,5 @@
 import type { Characteristics } from "./characteristics/keys";
+import type { SheetWfrpBlock } from "./characteristics/sheet-block";
 import type { WfrpParticipantStats } from "./combat/participant";
 import { qualityList } from "./equipment/guard";
 import type { QualityRef } from "./equipment/qualities";
@@ -32,3 +33,5 @@ export interface WfrpParticipantSlot {
 }
 
 export const PARTICIPANT_SLOT = defineSlot<WfrpParticipantSlot>("wfrp", (raw) => (isRec(raw) && isRec(raw.characteristics) && isRec(raw.stats) ? (raw as unknown as WfrpParticipantSlot) : undefined));
+
+export const SHEET_SLOT = defineSlot<SheetWfrpBlock>("wfrp", (raw) => (isRec(raw) ? (raw as unknown as SheetWfrpBlock) : undefined));

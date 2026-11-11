@@ -7,8 +7,9 @@ import { skillLabel } from "./skill-label";
 import { useProfile } from "@/components/character-profile/ProfileContext";
 import { HudSection } from "@/components/hud/form";
 import { EmptySpellBook } from "@/components/spells/book/SpellBookPages";
-import type { SheetWfrpBlock } from "@/lib/utils/rules/systems";
 import { groupSpellsBySchool, NO_SCHOOL } from "@/lib/utils/spells/group-by-school";
+import type { SheetWfrpBlock } from "@/systems/wfrp/rules/characteristics/sheet-block";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 const CHANNELLING = "channelling";
 
@@ -29,9 +30,11 @@ export function MagicTab() {
 
   const groups = groupSpellsBySchool(sheet.spells);
 
-  const casting = targetOf(sheet.wfrp, "language", "magick");
+  const block = SHEET_SLOT.read(sheet.systemSlot);
 
-  const channelling = targetOf(sheet.wfrp, CHANNELLING) ?? sheet.wfrp?.characteristics.find((c) => c.key === "wp")?.value ?? null;
+  const casting = targetOf(block, "language", "magick");
+
+  const channelling = targetOf(block, CHANNELLING) ?? block?.characteristics.find((c) => c.key === "wp")?.value ?? null;
 
   return (
     <>

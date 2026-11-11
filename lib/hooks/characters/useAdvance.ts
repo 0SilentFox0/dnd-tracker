@@ -7,7 +7,8 @@ import { characterKeys } from "./keys";
 
 import { advanceCharacter, undoCharacterAdvance } from "@/lib/api/characters";
 import { useCrudMutation } from "@/lib/hooks/common";
-import type { AdvanceBody, AdvanceResult, Character } from "@/types/characters";
+import type { AdvanceBody, AdvanceResult } from "@/lib/utils/rules/systems";
+import type { Character } from "@/types/characters";
 
 type AdvanceOp = { kind: "buy"; request: AdvanceBody } | { kind: "undo" };
 

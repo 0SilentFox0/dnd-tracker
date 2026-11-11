@@ -89,9 +89,6 @@ const SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*"], messa
 
 const SYSTEM_API_IMPORT_PATTERN = { group: ["@/systems/*/api", "@/systems/*/api/*"], message: "ui/** не ходить в API — використайте хук із systems/<id>/hooks." };
 
-// ContentError lives in lib/server; ratchet, removed when sheetTest moves off it (E1 2.3)
-const RULES_SERVER_IMPORT_EXEMPT = ["systems/wfrp/rules/sheet-test.ts"];
-
 const SYSTEM_LAYERS = (id) => {
   const self = SYSTEM_SELF_PATTERNS(id);
 
@@ -103,7 +100,7 @@ const SYSTEM_LAYERS = (id) => {
 
   return [
     layer("*", RESTRICTED_PATHS, []),
-    layer("rules", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SERVER_IMPORT_PATTERN], RULES_SERVER_IMPORT_EXEMPT.filter((f) => f.startsWith(`systems/${id}/`))),
+    layer("rules", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SERVER_IMPORT_PATTERN]),
     layer("ui", RESTRICTED_PATHS, [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, SYSTEM_API_IMPORT_PATTERN]),
     layer("hooks", RESTRICTED_PATHS, []),
     layer("api", RESTRICTED_PATHS, []),

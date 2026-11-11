@@ -20,6 +20,7 @@ import { CHARACTERISTIC_KEYS, readCharacteristics } from "@/lib/utils/rules/syst
 import { advanceCost, availableXp, careerPrice } from "@/systems/wfrp/rules/advancement";
 import { value } from "@/systems/wfrp/rules/characteristics";
 import { skillAdvanceKey } from "@/systems/wfrp/rules/skills/catalog";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 export function AdvancementTab() {
   const { campaignId, characterId, sheet } = useProfile();
@@ -56,7 +57,7 @@ export function AdvancementTab() {
 
   const price = (kind: "characteristic" | "skill" | "talent", key: string, base: number | null) => (base === null ? { cost: null, outOfCareer: null } : careerPrice(ctx, advancement, kind, key, base));
 
-  const skillRows = sheet.wfrp?.skills ?? [];
+  const skillRows = SHEET_SLOT.read(sheet.systemSlot)?.skills ?? [];
 
   return (
     <div className="space-y-4">

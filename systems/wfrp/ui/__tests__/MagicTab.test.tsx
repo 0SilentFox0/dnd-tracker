@@ -22,9 +22,12 @@ const sheet = (spells: BookSpell[]) =>
     slots: [],
     magic: undefined,
     spells,
-    wfrp: {
-      characteristics: [{ key: "wp", base: 30, advances: 0, value: 41, bonus: 4 }],
-      skills: [{ key: "language", spec: "magick", characteristic: "int", target: 52, advances: 5, trained: true, kind: "advanced" }],
+    systemSlot: {
+      key: "wfrp",
+      data: {
+        characteristics: [{ key: "wp", base: 30, advances: 0, value: 41, bonus: 4 }],
+        skills: [{ key: "language", spec: "magick", characteristic: "int", target: 52, advances: 5, trained: true, kind: "advanced" }],
+      },
     },
   }) as unknown as CharacterSheet;
 

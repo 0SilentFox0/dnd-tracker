@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +36,9 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
 
   const [temp, setTemp] = useState(String(rest.hp?.temp ?? 0));
 
-  const [sin, setSin] = useState(String(sheet.wfrp?.sin ?? 0));
+  const Ui = systemUiOf(sheet.system);
+
+  const [extra, setExtra] = useState(() => Ui.resourceDefaults?.(sheet) ?? {});
 
   const [exhaustion, setExhaustion] = useState(String(rest.exhaustion ?? 0));
 
@@ -47,9 +50,9 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
 
   const send = (body: ResourcesEditBody) => void edit.mutateOk(body).then((ok) => ok && onOpenChange(false));
 
-  const filled = [hp, temp, exhaustion, ...(sheet.wfrp ? [sin] : [])].every((v) => v.trim() !== "");
+  const filled = [hp, temp, exhaustion, ...Object.values(extra)].every((v) => v.trim() !== "");
 
-  const save = () => filled && send({ hp: Number(hp), tempHp: Number(temp), exhaustion: Number(exhaustion), ...(sheet.wfrp && { sin: Number(sin) }), ...(Object.keys(changedCharges).length > 0 && { charges: changedCharges }) });
+  const save = () => filled && send({ hp: Number(hp), tempHp: Number(temp), exhaustion: Number(exhaustion), ...Object.fromEntries(Object.entries(extra).map(([key, value]) => [key, Number(value)])), ...(Object.keys(changedCharges).length > 0 && { charges: changedCharges }) });
 
   const toggleDead = async () => {
     if (rest.dead || (await confirm({ title: t("deadConfirmTitle"), confirmLabel: t("deadConfirm"), destructive: true }))) send({ dead: !rest.dead });
@@ -92,12 +95,7 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
             </div>
           </>
         )}
-        {sheet.wfrp && (
-          <div>
-            <Label htmlFor="res-sin">{t("sin")}</Label>
-            <Input id="res-sin" type="number" min={0} max={10} value={sin} onChange={(e) => setSin(e.target.value)} />
-          </div>
-        )}
+        {Ui.ResourceFields && <Ui.ResourceFields sheet={sheet} values={extra} onChange={(key, value) => setExtra((prev) => ({ ...prev, [key]: value }))} />}
         {itemCharges.map((c) => (
           <div key={c.key} className="col-span-3 grid grid-cols-[1fr_6rem] items-center gap-2">
             <Label htmlFor={`res-charge-${c.key}`}>{t("charge", { name: c.name, uses: c.uses })}</Label>

@@ -3,15 +3,14 @@ import { describe, expect, it } from "vitest";
 import { resourcesEditSchema, restSchema, sheetRollSchema } from "../out-of-combat";
 
 describe("out-of-combat wfrp schemas", () => {
-  it("accepts both test variants and defaults difficulty", () => {
-    expect(sheetRollSchema.parse({ kind: "test", characteristic: "ws" })).toEqual({ kind: "test", characteristic: "ws", difficulty: "challenging" });
+  it("accepts both test variants and leaves the difficulty to the system", () => {
+    expect(sheetRollSchema.parse({ kind: "test", characteristic: "ws" })).toEqual({ kind: "test", characteristic: "ws" });
     expect(sheetRollSchema.parse({ kind: "test", skill: "melee", spec: "flail", difficulty: "hard" })).toEqual({ kind: "test", skill: "melee", spec: "flail", difficulty: "hard" });
   });
 
   it("rejects useInspiration with test and bad keys", () => {
     expect(sheetRollSchema.safeParse({ kind: "test", characteristic: "ws", useInspiration: true }).success).toBe(false);
-    expect(sheetRollSchema.safeParse({ kind: "test", skill: "Melee" }).success).toBe(false);
-    expect(sheetRollSchema.safeParse({ kind: "test", characteristic: "xx" }).success).toBe(false);
+    expect(sheetRollSchema.safeParse({ kind: "test", characteristic: "x".repeat(41) }).success).toBe(false);
   });
 
   it("d20 variants still parse", () => {

@@ -15,15 +15,15 @@ import { StepIndicator } from "@/components/common/StepIndicator";
 import { HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/lib/utils/common/error-message";
+import type { WfrpDraftIdentityInput } from "@/lib/utils/rules/systems";
 import { useWfrpDraftForm,type WfrpDraftStepId } from "@/systems/wfrp/hooks";
-import type { WfrpDraftIdentityInput } from "@/types/characters";
 
 const STEP_ORDER: WfrpDraftStepId[] = ["species", "career", "stats", "talents", "identity"];
 
 interface WfrpDraftFormProps {
   campaignId: string;
   characterId?: string;
-  initialIdentity?: WfrpDraftIdentityInput;
+  initialIdentity?: unknown;
 }
 
 export function WfrpDraftForm({ campaignId, characterId, initialIdentity }: WfrpDraftFormProps) {
@@ -33,7 +33,7 @@ export function WfrpDraftForm({ campaignId, characterId, initialIdentity }: Wfrp
 
   const tc = useTranslations("common");
 
-  const form = useWfrpDraftForm({ campaignId, characterId, initialIdentity });
+  const form = useWfrpDraftForm({ campaignId, characterId, initialIdentity: initialIdentity as WfrpDraftIdentityInput | undefined });
 
   const { step, submit, reveal } = form;
 

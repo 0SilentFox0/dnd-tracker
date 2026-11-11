@@ -35,6 +35,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { type Characteristics, DEFAULT_CHARACTERISTICS, preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import { PARTICIPANT_SLOT } from "@/systems/wfrp/rules/slots";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 import type { CorruptionGrantResult, CorruptionUndoResult } from "@/types/corruption";
 
 const hero = (id: string, over: Partial<Row> = {}, characteristics: Partial<Characteristics> = {}): Row => ({
@@ -119,7 +120,7 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 
-const sheet = (id: string) => sys().characteristics.sheetBlock({ characteristics: chars(id), resources: {} });
+const sheet = (id: string) => SHEET_SLOT.read(sys().characteristics.sheetBlock({ characteristics: chars(id), resources: {} }));
 
 const maxTotal = (id: string) => sys().progression.maxHp({ character: { level: 1, constitution: 10 } as never, characteristics: chars(id), rules: WFRP_RULES })?.total;
 

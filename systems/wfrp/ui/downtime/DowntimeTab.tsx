@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { CharacterType } from "@/lib/constants/characters";
 import { useCharacter, useCharacters, useDowntime } from "@/lib/hooks/characters";
 import { type Endeavour, readCharacteristics } from "@/lib/utils/rules/systems";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 export function DowntimeTab() {
   const { campaignId, characterId, sheet } = useProfile();
@@ -47,7 +48,7 @@ export function DowntimeTab() {
   return (
     <div className="px-3 py-3">
       <HudSection title={t("tab.endeavourTitle")}>
-        <EndeavourPicker value={endeavour} onChange={(e) => setDraft((d) => ({ ...d, endeavour: e }))} patients={patients} skills={sheet.wfrp?.skills ?? []} />
+        <EndeavourPicker value={endeavour} onChange={(e) => setDraft((d) => ({ ...d, endeavour: e }))} patients={patients} skills={SHEET_SLOT.read(sheet.systemSlot)?.skills ?? []} />
         <div className="mt-2 flex gap-2">
           <Button type="button" size="sm" disabled={save.isPending || !isEndeavourValid(endeavour)} onClick={() => send({ endeavour: endeavour ?? null, ...(draft.ailments ? { ailments: draft.ailments } : {}) })}>
             {t("tab.save")}

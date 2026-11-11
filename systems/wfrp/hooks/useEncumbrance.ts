@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useCharacterSheet, useStash } from "@/lib/hooks/characters";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { type Encumbrance, encumbrance } from "@/systems/wfrp/rules/equipment";
+import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 import type { SheetArtifact } from "@/types/characters";
 import type { SpecialItem, StashArtifact } from "@/types/inventory";
 
@@ -28,7 +29,7 @@ export function useEncumbrance(campaignId: string, characterId: string): Encumbr
 
   const { data: stash } = useStash(campaignId, characterId, { enabled: canSeeStash });
 
-  const block = sheet?.wfrp;
+  const block = SHEET_SLOT.read(sheet?.systemSlot);
 
   const grid = sheet?.items.grid;
 

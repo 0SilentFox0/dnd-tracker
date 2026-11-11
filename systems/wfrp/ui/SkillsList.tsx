@@ -6,7 +6,7 @@ import { skillLabel } from "./skill-label";
 
 import type { SheetRollRequest } from "@/components/systems/types";
 import { cn } from "@/lib/utils";
-import type { SheetWfrpBlock } from "@/lib/utils/rules/systems";
+import type { SheetWfrpBlock } from "@/systems/wfrp/rules/characteristics/sheet-block";
 
 interface Props {
   block: SheetWfrpBlock;

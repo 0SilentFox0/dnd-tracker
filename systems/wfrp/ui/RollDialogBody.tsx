@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { RollDialogBodyProps } from "@/components/systems/types";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { DIFFICULTY_KEYS } from "@/lib/utils/rules/systems";
+import { DIFFICULTY_KEYS, type DifficultyKey } from "@/lib/utils/rules/systems";
 
 export function RollDialogBody({ result, difficulty, setDifficulty }: RollDialogBodyProps) {
   const t = useTranslations("rest.sheetRoll");
@@ -16,7 +16,7 @@ export function RollDialogBody({ result, difficulty, setDifficulty }: RollDialog
     <>
       <div className="space-y-1">
         <Label htmlFor="sheet-roll-difficulty">{t("difficulty")}</Label>
-        <SelectField id="sheet-roll-difficulty" value={difficulty} onValueChange={(v) => setDifficulty(v as typeof difficulty)} options={DIFFICULTY_KEYS.map((key) => ({ value: key, label: tg(`difficulty.${key}`) }))} triggerClassName="w-full" />
+        <SelectField id="sheet-roll-difficulty" value={difficulty} onValueChange={(v) => setDifficulty(v)} options={DIFFICULTY_KEYS.map((key) => ({ value: key, label: tg(`difficulty.${key}`) }))} triggerClassName="w-full" />
       </div>
       {result?.kind === "percentile" && (
         <div aria-live="polite" className="text-center">
@@ -29,7 +29,7 @@ export function RollDialogBody({ result, difficulty, setDifficulty }: RollDialog
           <div className="mt-1 text-sm">
             {tg(`testOutcome.${result.outcome}`)} · {t("sl", { sl: result.sl })}
           </div>
-          <div className="text-xs text-hud-muted">{tg(`difficulty.${result.difficulty}`)}</div>
+          <div className="text-xs text-hud-muted">{tg(`difficulty.${result.difficulty as DifficultyKey}`)}</div>
         </div>
       )}
     </>

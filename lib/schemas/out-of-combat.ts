@@ -3,7 +3,6 @@ import { z } from "zod";
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { MAX_EXHAUSTION } from "@/lib/utils/battle/conditions/query";
-import { CHARACTERISTIC_KEYS, DIFFICULTY_KEYS, SKILL_KEY_RE, SPEC_RE } from "@/lib/utils/rules/systems";
 
 const characterIds = z.array(z.string().min(1).max(100)).min(1).max(50);
 
@@ -21,14 +20,14 @@ export type ArcaneRecoveryInput = z.infer<typeof arcaneRecoverySchema>;
 
 export type HitDieInput = z.infer<typeof hitDieSchema>;
 
-const difficulty = z.enum(DIFFICULTY_KEYS).default("challenging");
+const difficulty = z.string().max(40).optional();
 
 export const sheetRollSchema = z.union([
   z.object({ kind: z.literal("check"), skill: z.enum(DND_SKILLS), useInspiration }),
   z.object({ kind: z.literal("check"), ability: z.enum(ABILITY_KEYS), useInspiration }),
   z.object({ kind: z.literal("save"), ability: z.enum(ABILITY_KEYS), useInspiration }),
-  z.object({ kind: z.literal("test"), characteristic: z.enum(CHARACTERISTIC_KEYS), difficulty }).strict(),
-  z.object({ kind: z.literal("test"), skill: z.string().regex(SKILL_KEY_RE), spec: z.string().regex(SPEC_RE).optional(), difficulty }).strict(),
+  z.object({ kind: z.literal("test"), characteristic: z.string().max(40), difficulty }).strict(),
+  z.object({ kind: z.literal("test"), skill: z.string().max(60), spec: z.string().max(60).optional(), difficulty }).strict(),
 ]);
 
 export type SheetRollInput = z.infer<typeof sheetRollSchema>;

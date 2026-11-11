@@ -6,7 +6,7 @@ import { EquippedArmourSummary } from "../EquippedArmourSummary";
 
 const state = vi.hoisted(() => ({ grid: {} as Record<string, unknown>, wfrp: undefined as unknown, stash: undefined as unknown }));
 
-vi.mock("@/lib/hooks/characters", () => ({ useCharacterSheet: () => ({ data: { viewer: { isDM: true, isOwner: false }, wfrp: state.wfrp, items: { grid: state.grid } } }), useStash: () => ({ data: state.stash }) }));
+vi.mock("@/lib/hooks/characters", () => ({ useCharacterSheet: () => ({ data: { viewer: { isDM: true, isOwner: false }, systemSlot: state.wfrp && { key: "wfrp", data: state.wfrp }, items: { grid: state.grid } } }), useStash: () => ({ data: state.stash }) }));
 
 afterEach(() => {
   cleanup();
