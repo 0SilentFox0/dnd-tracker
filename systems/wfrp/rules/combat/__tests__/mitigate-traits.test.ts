@@ -8,15 +8,14 @@ import { AttackType } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { withStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack } from "@/types/battle";
 
 const unit = (id: string, extra: { size?: TraitSize; ward?: number; tb?: number } = {}) => {
   const p = makeParticipant({ id, hp: 10, maxHp: 10 });
 
-  const base = wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS);
-
-  return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp, sb: 0, tb: extra.tb ?? 0, ...(extra.size && { size: extra.size }), ...(extra.ward !== undefined && { ward: extra.ward }) } } };
+  return withStats({ ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS) } }, { sb: 0, tb: extra.tb ?? 0, ...(extra.size && { size: extra.size }), ...(extra.ward !== undefined && { ward: extra.ward }) });
 };
 
 const d10 = (n: number) => () => (n - 1) / 10 + 0.01;
@@ -72,9 +71,7 @@ describe("resolveWfrpAttack size", () => {
 
     const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } };
 
-    const base = wfrpAbilitiesOf(characteristics);
-
-    return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp, ...(size && { size }) } } };
+    return withStats({ ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics) } }, { ...(size && { size }) });
   };
 
   const target = (attack: BattleAttack, a: ReturnType<typeof fighter>, t: ReturnType<typeof fighter>) =>

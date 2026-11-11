@@ -1,5 +1,5 @@
 import { skillTarget, value } from "../characteristics/derive";
-import { readCharacteristics } from "../characteristics/keys";
+import { participantChars } from "../combat/participant";
 import { applyWfrpCondition } from "../conditions/apply";
 import { selfTestMod } from "../conditions/test-mod";
 import { resolvePercentileTest } from "../percentile";
@@ -63,7 +63,7 @@ export function wfrpPsychology(ps: BattleParticipant[], ctx: { round: number; rn
 
     testerIds.push(tester.basicInfo.id);
 
-    const c = readCharacteristics({ characteristics: tester.abilities.characteristics });
+    const c = participantChars(tester);
 
     const base = skillTarget(c, "cool")?.target ?? value(c, "wp");
 

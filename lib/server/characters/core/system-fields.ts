@@ -6,7 +6,7 @@ import type { UpdateCharacterInput } from "./update-character-schema";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { Characteristics, RuleSystemDefinition } from "@/lib/utils/rules/systems";
+import type { RuleSystemDefinition } from "@/lib/utils/rules/systems";
 
 const FOREIGN_FIELDS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma", "armorClass", "archetype", "class", "subclass", "classes", "initiative", "speed", "level"] as const;
 
@@ -19,7 +19,7 @@ export function normalizeCharacterInput<T extends CreateCharacterInput | UpdateC
 
   if (system.classes && classMissing(data, mode)) throw new ContentError(API_ERRORS.HERO_CLASS_REQUIRED, 400);
 
-  if (system.characteristics.kind !== "wfrp") return omit(data, ["characteristics"]);
+  if (!system.characteristics.persisted) return omit(data, ["characteristics"]);
 
   if (mode === "update") return omit(data, FOREIGN_FIELDS);
 
@@ -30,4 +30,4 @@ export function normalizeCharacterInput<T extends CreateCharacterInput | UpdateC
   return { ...data, characteristics, level: 1, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 10, archetype: null, class: "", classes: [], initiative: rules.initiative.heroMin, speed: 30 };
 }
 
-export const characteristicsJson = (c: Characteristics) => c as Prisma.InputJsonObject;
+export const characteristicsJson = (c: object) => c as Prisma.InputJsonObject;

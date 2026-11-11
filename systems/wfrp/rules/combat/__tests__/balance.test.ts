@@ -39,7 +39,7 @@ describe("winChance", () => {
 const wfrpP = (characteristics: unknown, dice = "1d6"): BattleParticipant =>
   ({
     combatStats: { maxHp: 12, currentHp: 12 },
-    abilities: { level: 1, modifiers: {}, characteristics, wfrp: { sb: 3, tb: 3, ap: {} } },
+    abilities: { level: 1, modifiers: {}, system: { key: "wfrp", data: { characteristics: characteristics ?? {}, stats: { sb: 3, tb: 3, ap: {} } } } },
     battleData: { attacks: [{ name: "x", type: "melee", damageDice: dice }] },
   }) as unknown as BattleParticipant;
 
@@ -59,7 +59,9 @@ describe("wfrpHitModel", () => {
 const withWfrp = (wfrp: Record<string, unknown>, attacks?: unknown[]): BattleParticipant => {
   const p = wfrpP(DEFAULT_CHARACTERISTICS);
 
-  return { ...p, abilities: { ...p.abilities, wfrp: { sb: 3, tb: 3, ap: {}, ...wfrp } }, battleData: attacks ? { attacks } : p.battleData } as unknown as BattleParticipant;
+  const data = (p.abilities.system as { data: { characteristics: unknown } }).data;
+
+  return { ...p, abilities: { ...p.abilities, system: { key: "wfrp", data: { ...data, stats: { sb: 3, tb: 3, ap: {}, ...wfrp } } } }, battleData: attacks ? { attacks } : p.battleData } as unknown as BattleParticipant;
 };
 
 const allAp = (n: number) => ({ head: n, arm: n, body: n, leg: n });

@@ -12,6 +12,7 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { coerceRecord, IMPORT_SPECS } from "@/lib/utils/content/import";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { slotChars, slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { extractWfrpAttacks } from "@/systems/wfrp/rules/combat/extract-attacks";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
@@ -49,7 +50,7 @@ function armed(hero: BattleParticipant): BattleParticipant {
 
   const attacks = extractWfrpAttacks({ rows: rows.map((r) => ({ row: r as never, slot: r.slot })) });
 
-  const abilities = { ...hero.abilities, ...wfrpAbilitiesOf(readCharacteristics({ characteristics: hero.abilities.characteristics }), { ap: gear.ap, flexible: gear.flexible, armourOnly: gear.armourOnly }) };
+  const abilities = { ...hero.abilities, ...wfrpAbilitiesOf(readCharacteristics({ characteristics: slotChars(hero.abilities.system) }), { ap: gear.ap, flexible: gear.flexible, armourOnly: gear.armourOnly }) };
 
   return { ...hero, abilities, battleData: { ...hero.battleData, attacks: attacks as never, ammo: initAmmo(attacks as never) } };
 }
@@ -59,7 +60,7 @@ function mage(): BattleParticipant {
 
   const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, int: 40, wp: 40 }, skillAdvances: { "language:magick": 20 } };
 
-  const abilities = { ...hero.abilities, ...wfrpAbilitiesOf(characteristics, { ap: hero.abilities.wfrp?.ap as never, flexible: true, armourOnly: armourAp(Object.entries(GEAR).map(([slot, name]) => ({ ...artifactRow(name), slot }))).armourOnly }) };
+  const abilities = { ...hero.abilities, ...wfrpAbilitiesOf(characteristics, { ap: slotStats(hero.abilities.system)?.ap as never, flexible: true, armourOnly: armourAp(Object.entries(GEAR).map(([slot, name]) => ({ ...artifactRow(name), slot }))).armourOnly }) };
 
   return { ...hero, abilities, spellcasting: { ...hero.spellcasting, spellSlots: {}, knownSpells: ["Ember Dart"] } };
 }
@@ -80,7 +81,7 @@ describe("grim arsenal and magic end to end", () => {
   it("template gear gives the hero AP, a sword and a crossbow", () => {
     const hero = armed(heroes()[0]);
 
-    expect(hero.abilities.wfrp).toMatchObject({ ap: { head: 4, arm: 4, body: 4, leg: 2 }, flexible: true });
+    expect(slotStats(hero.abilities.system)).toMatchObject({ ap: { head: 4, arm: 4, body: 4, leg: 2 }, flexible: true });
 
     const sword = must(hero.battleData.attacks.find((a) => a.name === "Arming Sword"));
 

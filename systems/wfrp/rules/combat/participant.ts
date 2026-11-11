@@ -1,10 +1,13 @@
 import { bonus, value, walkYards } from "../characteristics/derive";
 import { type Characteristics, readCharacteristics } from "../characteristics/keys";
 import { foldCorruption } from "../corruption/fold";
+import { PARTICIPANT_SLOT } from "../slots";
 import type { HitLocation } from "./constants";
 import { LOCATIONS } from "./constants";
 
 import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { BattleParticipant } from "@/types/battle";
 
 export interface WfrpParticipantStats {
   sb: number;
@@ -15,11 +18,6 @@ export interface WfrpParticipantStats {
   castAp?: number;
   size?: TraitSize;
   ward?: number;
-}
-
-export interface WfrpParticipantFields {
-  characteristics: Characteristics;
-  wfrp: WfrpParticipantStats;
 }
 
 const NO_ARMOR = Object.fromEntries(LOCATIONS.map((l) => [l, 0])) as Record<HitLocation, number>;
@@ -39,16 +37,22 @@ function castApOf(gear?: WfrpGear): { castAp?: number } {
 }
 
 // The XP ledger and downtime are private and unused in battle; corruption is folded into base values.
-export function wfrpAbilitiesOf(characteristics: Characteristics, gear?: WfrpGear): WfrpParticipantFields {
+export function wfrpAbilitiesOf(characteristics: Characteristics, gear?: WfrpGear): { system: SystemSlot } {
   const { downtime: _downtime, ...rest } = foldCorruption(characteristics);
 
   return {
-    characteristics: { ...rest, ledger: [] },
-    wfrp: { sb: bonus(rest, "s"), ag: value(rest, "ag"), tb: bonus(rest, "t"), ap: { ...(gear?.ap ?? NO_ARMOR) }, ...(gear?.flexible && { flexible: true as const }), ...castApOf(gear) },
+    system: PARTICIPANT_SLOT.write({
+      characteristics: { ...rest, ledger: [] },
+      stats: { sb: bonus(rest, "s"), ag: value(rest, "ag"), tb: bonus(rest, "t"), ap: { ...(gear?.ap ?? NO_ARMOR) }, ...(gear?.flexible && { flexible: true as const }), ...castApOf(gear) },
+    }),
   };
 }
 
-export const wfrpParticipantFields = (row: { characteristics?: unknown }, gear?: WfrpGear): WfrpParticipantFields => wfrpAbilitiesOf(readCharacteristics(row), gear);
+export const wfrpParticipantFields = (row: { characteristics?: unknown }, gear?: WfrpGear): SystemSlot => wfrpAbilitiesOf(readCharacteristics(row), gear).system;
+
+export const participantStats = (p: BattleParticipant): WfrpParticipantStats | undefined => PARTICIPANT_SLOT.read(p.abilities.system)?.stats;
+
+export const participantChars = (p: BattleParticipant): Characteristics => readCharacteristics({ characteristics: PARTICIPANT_SLOT.read(p.abilities.system)?.characteristics });
 
 export function wfrpBaseStats(row: { characteristics?: unknown }): { initiative: number; speed: number } {
   const c = readCharacteristics(row);

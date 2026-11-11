@@ -26,7 +26,7 @@ export async function createDraft(request: Request, campaignId: string): Promise
 
   if (ruleSystemOf(campaign.rules).creation) return createWfrpDraft(request, campaign, access);
 
-  if (ruleSystemOf(campaign.rules).characteristics.kind !== "d20") return errorResponse(API_ERRORS.SYSTEM_DRAFTS_UNSUPPORTED, 409);
+  if (!ruleSystemOf(campaign.rules).d20Stats) return errorResponse(API_ERRORS.SYSTEM_DRAFTS_UNSUPPORTED, 409);
 
   const parsed = await parseDraftBody(request, campaign);
 

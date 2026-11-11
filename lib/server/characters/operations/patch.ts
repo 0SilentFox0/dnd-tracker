@@ -28,7 +28,7 @@ import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
 import { levelNotificationEvents, spellNotificationEvents } from "@/lib/utils/notifications/events";
-import { type CareerState, type Characteristics, preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -57,7 +57,9 @@ async function editableData({ access, character }: Gate, input: Parsed) {
     ? parsed
     : ({ ...parsed, level: undefined, classes: undefined, archetype: undefined, avatar: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
 
-  if (!isDM && data.characteristics) data.characteristics = preserveServerOwned(readCharacteristics(character), data.characteristics);
+  const characteristics = ruleSystemOf(campaign.rules).characteristics;
+
+  if (!isDM && data.characteristics) data.characteristics = (characteristics.reconcile?.(character.characteristics, data.characteristics, { isDM: false }) ?? data.characteristics) as typeof data.characteristics;
 
   if (isDM && data.controlledBy !== undefined) {
     const owner = await resolveCharacterOwner(character.campaignId, userId, {type: character.type as "player" | "npc_hero", controlledBy: data.controlledBy ?? character.controlledBy ?? ""});
@@ -68,24 +70,6 @@ async function editableData({ access, character }: Gate, input: Parsed) {
   }
 
   return { data };
-}
-
-const sameCareer = (a?: CareerState | null, b?: CareerState | null) => (!a && !b) || Boolean(a && b && a.careerId === b.careerId && a.tier === b.tier && a.ticks.length === b.ticks.length && a.ticks.every((t, i) => t === b.ticks[i]));
-
-export function reconcileCharacteristics(fresh: CharacterRecord, incoming: Characteristics, isDM: boolean, careerBaseline?: CareerState | null): Characteristics {
-  const stored = readCharacteristics(fresh);
-
-  if (!isDM) return preserveServerOwned(stored, incoming);
-
-  const moved = incoming.ledger.length !== stored.ledger.length || incoming.ledger.at(-1)?.id !== stored.ledger.at(-1)?.id || incoming.spentArchived !== stored.spentArchived;
-
-  const careerMoved = careerBaseline !== undefined && !sameCareer(careerBaseline, stored.career);
-
-  if (moved || careerMoved) throw new ContentError(API_ERRORS.CHARACTERISTICS_CHANGED, 409);
-
-  const { downtime: _downtime, corruption: _corruption, ...rest } = incoming;
-
-  return { ...rest, ...(stored.downtime ? { downtime: stored.downtime } : {}), ...(stored.corruption ? { corruption: stored.corruption } : {}) };
 }
 
 async function resolveClasses(campaign: Campaign, character: CharacterRecord, data: Parsed) {
@@ -164,7 +148,7 @@ function updateWriter({ character, data, avatar, resolved, computedState }: Upda
     ...(fromClasses.spellcastingAbility && { spellcastingAbility: fromClasses.spellcastingAbility }),
   };
 
-  return (db: Pick<Prisma.TransactionClient, "character">, classes: ClassesResult["classesInput"], choiceFields?: ChoiceFields, characteristics?: Characteristics) =>
+  return (db: Pick<Prisma.TransactionClient, "character">, classes: ClassesResult["classesInput"], choiceFields?: ChoiceFields, characteristics?: unknown) =>
     db.character.update({
       where: { id: character.id },
       data: {
@@ -245,7 +229,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
 
         if (choices && !choices.ok) throw choices.error;
 
-        const characteristics = guardsLedger && data.characteristics ? reconcileCharacteristics(fresh, data.characteristics, isDM, data.careerBaseline) : undefined;
+        const characteristics = guardsLedger && data.characteristics ? ruleSystemOf(campaign.rules).characteristics.reconcile?.(fresh.characteristics, data.characteristics, { isDM, baseline: data.systemBaseline }) : undefined;
 
         return writeUpdate(tx, classes, choices?.ok ? choices.fields : undefined, characteristics);
       })

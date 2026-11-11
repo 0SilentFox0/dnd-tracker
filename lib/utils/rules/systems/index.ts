@@ -24,4 +24,5 @@ export { AILMENTS_MAX } from "@/systems/wfrp/rules/downtime/types";
 export type { QualityKey, QualityRef } from "@/systems/wfrp/rules/equipment/qualities";
 export type { WfrpArmourStats, WfrpGearStats, WfrpItemStats, WfrpWeaponStats } from "@/systems/wfrp/rules/equipment/stats";
 export { DIFFICULTY_KEYS, type DifficultyKey } from "@/systems/wfrp/rules/percentile/difficulty";
+export { PARTICIPANT_SLOT } from "@/systems/wfrp/rules/slots";
 export { DEFAULT_TABLES, type ResolvedRow } from "@/systems/wfrp/rules/tables/defaults";

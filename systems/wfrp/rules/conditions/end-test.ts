@@ -1,5 +1,5 @@
 import { skillTarget, value } from "../characteristics/derive";
-import { readCharacteristics } from "../characteristics/keys";
+import { participantChars } from "../combat/participant";
 import { resolvePercentileTest } from "../percentile";
 import { reduceWfrpCondition } from "./apply";
 import { isWfrpConditionKey, WFRP_CONDITION_REGISTRY } from "./catalog";
@@ -38,7 +38,7 @@ export function attemptWfrpConditionEnd(
     return { participants: replace(participant), messages: [textRef("battleWfrp.log.stand", { name: p.basicInfo.name })], success: true };
   }
 
-  const c = readCharacteristics({ characteristics: p.abilities.characteristics });
+  const c = participantChars(p);
 
   const base = "skill" in endTest ? (skillTarget(c, endTest.skill)?.target ?? 0) : value(c, endTest.characteristic);
 

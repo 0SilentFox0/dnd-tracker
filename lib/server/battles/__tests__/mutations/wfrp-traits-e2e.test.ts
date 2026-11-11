@@ -170,7 +170,7 @@ describe("wfrp unit traits end to end", () => {
   it("a d20 campaign sees none of the traits", async () => {
     const troll = await buildTroll(DEFAULT_RULES as never);
 
-    expect(troll.abilities.wfrp).toBeUndefined();
+    expect(troll.abilities.system).toBeUndefined();
     expect(troll.battleData.attacks).toHaveLength(0);
 
     const joined = runJoinTriggers([makeParticipant({ id: "h", side: ParticipantSide.ALLY }), troll], { round: 1, rng: () => FAIL, map: null, rules: DEFAULT_RULES });

@@ -26,7 +26,13 @@ const p = (key: string) => `wfrpCareers.profile.${key}`;
 const mount = (data = DEFAULT_CHARACTERISTICS) => {
   const set = vi.fn();
 
-  render(<AdvancementEditor campaignId="c" bindings={{ characteristics: { data, set } } as never} />);
+  const update = (fn: (prev: unknown) => Record<string, unknown>) => {
+    const next = fn(data);
+
+    for (const [key, value] of Object.entries(next)) if (JSON.stringify(value) !== JSON.stringify((data as Record<string, unknown>)[key])) set(key, value);
+  };
+
+  render(<AdvancementEditor campaignId="c" bindings={{ characteristics: { data, update } } as never} />);
 
   return set;
 };

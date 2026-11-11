@@ -7,5 +7,5 @@ export { hitLocation } from "./location";
 export { mitigateWfrpDamage } from "./mitigate";
 export { wfrpOnZeroHp } from "./on-zero-hp";
 export { resolveOpposed } from "./opposed";
-export { wfrpAbilitiesOf, type WfrpGear, type WfrpParticipantFields, wfrpParticipantFields, type WfrpParticipantStats } from "./participant";
+export { wfrpAbilitiesOf, type WfrpGear, wfrpParticipantFields, type WfrpParticipantStats } from "./participant";
 export { resolveWfrpAttack } from "./resolve-attack";

@@ -6,6 +6,7 @@ import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { slotChars, slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { ATTACK_SLOT } from "@/systems/wfrp/rules/slots";
 import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 
@@ -22,7 +23,7 @@ describe("grim bestiary end to end", () => {
 
       expect(p.combatStats, String(row.name)).toMatchObject({ maxHp: row.maxHp, speed: row.speed, gridSize: row.gridSize });
       expect(p.abilities.initiative, String(row.name)).toBe(row.initiative);
-      expect(p.abilities.characteristics?.base, String(row.name)).toEqual(c.base);
+      expect(slotChars(p.abilities.system)?.base, String(row.name)).toEqual(c.base);
       expect(p.battleData.attacks.length, String(row.name)).toBeGreaterThan(0);
       expect(p.battleData.attacks.every((a) => !!a.system), String(row.name)).toBe(true);
     }
@@ -31,12 +32,12 @@ describe("grim bestiary end to end", () => {
   it("armour, ward, size, magical and breath reach the participants", async () => {
     const [revenant, wraith, mouths, drake] = await Promise.all(E2E_UNITS.map((name, i) => buildUnit(name, `u${i}`)));
 
-    expect(revenant.abilities.wfrp?.ap).toEqual({ head: 3, body: 3, arm: 3, leg: 3 });
-    expect(wraith.abilities.wfrp?.ward).toBe(9);
+    expect(slotStats(revenant.abilities.system)?.ap).toEqual({ head: 3, body: 3, arm: 3, leg: 3 });
+    expect(slotStats(wraith.abilities.system)?.ward).toBe(9);
     expect(ATTACK_SLOT.read(must(wraith.battleData.attacks.find((a) => a.name === "Grave Touch +6")).system)?.magical).toBe(true);
-    expect(mouths.abilities.wfrp?.size).toBe("large");
+    expect(slotStats(mouths.abilities.system)?.size).toBe("large");
     expect(mouths.battleData.resolvedAbilities.some((a) => a.trigger.event === "turnStart")).toBe(true);
-    expect(drake.abilities.wfrp).toMatchObject({ size: "enormous", ap: { head: 4, body: 4, arm: 4, leg: 4 } });
+    expect(slotStats(drake.abilities.system)).toMatchObject({ size: "enormous", ap: { head: 4, body: 4, arm: 4, leg: 4 } });
     expect(must(drake.battleData.attacks.find((a) => a.name === "Breath +9"))).toMatchObject({ type: "ranged", range: "36 ft", targetType: "aoe", blastRadius: 2 });
     expect(ATTACK_SLOT.read(must(drake.battleData.attacks.find((a) => a.name === "Breath +9")).system)?.noSb).toBe(true);
   });
@@ -64,7 +65,7 @@ describe("grim bestiary end to end", () => {
 
       expect(part(next, "h0").combatStats.currentHp, foe.basicInfo.name).toBeLessThan(party[0].combatStats.maxHp);
 
-      if (foe.abilities.wfrp?.size === "large" || foe.abilities.wfrp?.size === "enormous") expect(JSON.stringify(out.events)).toContain("steps.size");
+      if (slotStats(foe.abilities.system)?.size === "large" || slotStats(foe.abilities.system)?.size === "enormous") expect(JSON.stringify(out.events)).toContain("steps.size");
 
       ctx = { ...next, participants: next.participants.map((p) => (p.basicInfo.id === "h0" ? party[0] : p)) };
     }

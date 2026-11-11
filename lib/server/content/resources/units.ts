@@ -25,7 +25,7 @@ async function loadCampaignSystem(campaignId: string): Promise<RuleSystemDefinit
   return campaign ? ruleSystemOf(parseRules(campaign.rules)) : null;
 }
 
-const keepsCharacteristics = (system: RuleSystemDefinition | null) => system?.characteristics.kind === "wfrp";
+const keepsCharacteristics = (system: RuleSystemDefinition | null) => !!system?.characteristics.persisted;
 
 export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSchema>, z.infer<typeof updateUnitSchema>>({
   kind: "units",

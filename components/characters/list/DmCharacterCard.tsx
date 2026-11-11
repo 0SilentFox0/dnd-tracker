@@ -42,7 +42,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const hideProgression = !ready || systemUiOf(systemKey).hideProgression;
 
-  const wounds = system?.characteristics.kind === "wfrp";
+  const wounds = system?.progression.hpTerm === "wounds";
 
   const classPick = classMode.enabled && !!character.classes?.length;
 

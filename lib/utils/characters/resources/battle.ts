@@ -7,6 +7,7 @@ import { applyCondition5e, exhaustionLevel, PERMANENT_ROUNDS } from "@/lib/utils
 import { startDying } from "@/lib/utils/battle/death-saves";
 import { isCastPool, isConsumablePool } from "@/lib/utils/items/pools";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterResources } from "@/types/characters";
 
@@ -99,7 +100,7 @@ export function applyCharacterResources(p: BattleParticipant, state: StoredChara
 
   const out = r ? withHpState(withCharges(withSpentSlots(withExhaustion(inspired, r.exhaustion ?? 0, rules), r.slotsSpent), r.charges), r, rules) : inspired;
 
-  const fortune = r?.fortune ?? p.abilities.characteristics?.fate;
+  const fortune = r?.fortune ?? ruleSystemOf(rules).resources?.fortuneOf?.(p);
 
   return fortune === undefined && r?.sin === undefined ? out : { ...out, battleData: { ...out.battleData, ...(fortune !== undefined && { fortune }), ...(r?.sin !== undefined && { sin: r.sin }) } };
 }

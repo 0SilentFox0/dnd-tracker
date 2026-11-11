@@ -9,7 +9,7 @@ describe("lockCharacters", () => {
 
     const map = await lockCharacters(tx as never, ["a"]);
 
-    expect(map.get("a")).toEqual({ id: "a", resources: { hp: 3 }, experience: 40, characteristics: DEFAULT_CHARACTERISTICS });
+    expect(map.get("a")).toEqual({ id: "a", resources: { hp: 3 }, experience: 40, characteristics: null });
   });
 
   it("no ids → no query", async () => {

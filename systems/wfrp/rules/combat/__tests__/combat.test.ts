@@ -19,6 +19,7 @@ import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -109,9 +110,9 @@ describe("wfrpAbilitiesOf gear", () => {
   it("takes AP and the flexible flag from gear", () => {
     const gear = { ap: { head: 1, arm: 2, body: 3, leg: 0 }, flexible: true };
 
-    expect(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, gear).wfrp).toMatchObject({ ap: gear.ap, flexible: true });
-    expect(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: gear.ap, flexible: false }).wfrp).not.toHaveProperty("flexible");
-    expect(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS).wfrp.ap).toEqual({ head: 0, arm: 0, body: 0, leg: 0 });
+    expect(slotStats(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, gear).system)).toMatchObject({ ap: gear.ap, flexible: true });
+    expect(slotStats(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: gear.ap, flexible: false }).system)).not.toHaveProperty("flexible");
+    expect(slotStats(wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS).system)?.ap).toEqual({ head: 0, arm: 0, body: 0, leg: 0 });
   });
 });
 

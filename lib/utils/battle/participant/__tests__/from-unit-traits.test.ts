@@ -9,6 +9,7 @@ import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const wfrp = parseRules(WFRP_RULES);
@@ -41,7 +42,7 @@ describe("participant from unit: WFRP traits", () => {
   it("writes AP, ward and size and appends trait attacks", async () => {
     const p = await build(traitAbilities);
 
-    expect(p.abilities.wfrp).toMatchObject({ ap: { head: 3, body: 3, arm: 3, leg: 3 }, ward: 7, size: "large" });
+    expect(slotStats(p.abilities.system)).toMatchObject({ ap: { head: 3, body: 3, arm: 3, leg: 3 }, ward: 7, size: "large" });
 
     const [claw, bite, breath] = p.battleData.attacks;
 
@@ -58,14 +59,14 @@ describe("participant from unit: WFRP traits", () => {
 
     expect(withNote.abilities).toEqual(plain.abilities);
     expect(withNote.battleData.attacks).toEqual(plain.battleData.attacks);
-    expect(stripId(plain).abilities.wfrp).not.toHaveProperty("ward");
+    expect(slotStats(stripId(plain).abilities.system)).not.toHaveProperty("ward");
     expect(plain.battleData.attacks).toHaveLength(1);
   });
 
   it("a d20 ruleset ignores the traits", async () => {
     const p = await build(traitAbilities, DEFAULT_RULES);
 
-    expect(p.abilities.wfrp).toBeUndefined();
+    expect(slotStats(p.abilities.system)).toBeUndefined();
     expect(p.battleData.attacks).toHaveLength(1);
   });
 });

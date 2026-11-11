@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { readCharacteristics } from "@/lib/utils/rules/systems";
+import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 vi.mock("@/lib/db", () => ({
@@ -98,7 +99,7 @@ describe("context tools", () => {
       isDM: true, isMember: true,
       meta: { name: "Ambush", rules: WFRP_RULES },
       scene: { status: "active", round: 1, turnIndex: 0 },
-      participants: [{ basicInfo: { name: "Hans", side: "ally" }, combatStats: { currentHp: 7, maxHp: 12, armorClass: 0, status: "active" }, abilities: { characteristics: readCharacteristics({ characteristics: { base: { ws: 35 } } }) } }],
+      participants: [{ basicInfo: { name: "Hans", side: "ally" }, combatStats: { currentHp: 7, maxHp: 12, armorClass: 0, status: "active" }, abilities: { system: slotOf(readCharacteristics({ characteristics: { base: { ws: 35 } } })) } }],
     } as never);
     vi.mocked(prisma.battleEvent.findMany).mockResolvedValue([] as never);
 

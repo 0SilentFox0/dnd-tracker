@@ -9,6 +9,7 @@ import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Characteristics } from "@/lib/utils/rules/systems";
+import { readCharacteristics } from "@/lib/utils/rules/systems";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 
 export type CareerResult = { characteristics: Characteristics };
@@ -43,7 +44,7 @@ export async function setCareer(gate: CharacterGate, input: CareerSetInput): Pro
 
     if (!career) throw new ContentError(API_ERRORS.CAREER_NOT_FOUND, 404);
 
-    const next = advancement.planCareerSet(locked.characteristics, career.id);
+    const next = advancement.planCareerSet(readCharacteristics(locked), career.id);
 
     await tx.character.update({ where: { id: character.id }, data: { characteristics: characteristicsJson(next) } });
 
@@ -63,10 +64,10 @@ export async function advanceCareer(gate: CharacterGate, input: CareerAdvanceInp
 
     if (!locked) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
-    const plan = advancement.planCareerAdvance(locked.characteristics, access.campaign.rules.advancement, { force: input.force === true });
+    const plan = advancement.planCareerAdvance(readCharacteristics(locked), access.campaign.rules.advancement, { force: input.force === true });
 
     if (!plan.ok) {
-      const career = locked.characteristics.career;
+      const career = readCharacteristics(locked).career;
 
       const issues = plan.error === "TICKS_MISSING" && career ? { needed: access.campaign.rules.advancement.career.ticksRequired[career.tier - 1], have: career.ticks.length } : undefined;
 

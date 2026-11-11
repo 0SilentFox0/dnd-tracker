@@ -36,7 +36,8 @@ import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calc
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
-import { currencyValueOf, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -162,7 +163,7 @@ async function characterSpellcasting(character: CharacterFromPrisma, refs: Build
 async function characterTalentGroups(character: CharacterFromPrisma, rules: Ruleset, context: CampaignSpellContext | undefined) {
   const advancement = ruleSystemOf(rules).advancement;
 
-  const talents = advancement ? readCharacteristics(character).talents : {};
+  const talents = advancement?.talentsOf(character) ?? {};
 
   if (!advancement || Object.keys(talents).length === 0) return [];
 
@@ -288,7 +289,7 @@ export async function createBattleParticipantFromCharacter(
       raceId: (race as { id?: string } | null)?.id,
       moraleCap: moraleCapFromRules(rules),
       ...(resolvedClasses && { damageModel: "5e" as const }),
-      ...ruleSystemOf(rules).combat.participantFields?.(character, equipmentGear),
+      ...systemSlotOf(ruleSystemOf(rules).combat.participantFields?.(character, equipmentGear)),
       heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,

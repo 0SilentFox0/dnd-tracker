@@ -1,5 +1,5 @@
 import { skillTarget, value } from "../characteristics/derive";
-import { readCharacteristics } from "../characteristics/keys";
+import { participantChars } from "../combat/participant";
 import { selfTestMod } from "../conditions/test-mod";
 import { resolvePercentileTest } from "../percentile";
 import { CHANNEL_MAX_SL, WORST_ROLL } from "./constants";
@@ -11,7 +11,7 @@ import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export function channelTargetOf(p: BattleParticipant): number {
-  const chars = readCharacteristics({ characteristics: p.abilities.characteristics });
+  const chars = participantChars(p);
 
   return (skillTarget(chars, "channelling")?.target ?? value(chars, "wp")) + selfTestMod(p, "test");
 }

@@ -1,5 +1,4 @@
 import { skillTarget, value } from "../characteristics/derive";
-import { readCharacteristics } from "../characteristics/keys";
 import { againstMod, selfTestMod } from "../conditions/test-mod";
 import { qualityFumbleFrom, qualityToHit } from "../equipment/quality-effects";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
@@ -10,6 +9,7 @@ import { sizeHitMod } from "../traits/size";
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from "./constants";
 import { hitLocation } from "./location";
 import { resolveOpposed } from "./opposed";
+import { participantChars } from "./participant";
 
 import { AttackType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
@@ -21,11 +21,9 @@ import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
 import type { ResolveAttackCtx,ResolvedAttack } from "@/lib/utils/rules/systems/types";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
-const charsOf = (p: BattleParticipant) => readCharacteristics({ characteristics: p.abilities.characteristics });
-
 const attackCharacteristicOf = (attack: BattleAttack) => (attackKindOf(attack.type) === AttackType.RANGED ? "bs" : "ws") as "bs" | "ws";
 
-const attackBaseTargetOf = (attacker: BattleParticipant, attack: BattleAttack): number => value(charsOf(attacker), attackCharacteristicOf(attack));
+const attackBaseTargetOf = (attacker: BattleParticipant, attack: BattleAttack): number => value(participantChars(attacker), attackCharacteristicOf(attack));
 
 const attackerTargetOf = (attacker: BattleParticipant, attack: BattleAttack): number => attackBaseTargetOf(attacker, attack) + selfTestMod(attacker, "attack");
 
@@ -111,7 +109,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
     return marked(result.result, fortune);
   }
 
-  const d = charsOf(target);
+  const d = participantChars(target);
 
   const dodge = skillTarget(d, "dodge")?.target ?? value(d, "ag");
 

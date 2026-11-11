@@ -12,7 +12,6 @@ import type { PsychologyKind } from "@/lib/utils/abilities/schema/kinds";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
-import type { Characteristics, WfrpParticipantStats } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
@@ -193,8 +192,8 @@ export interface BattleParticipantBasicInfo {
  * Характеристики учасника бою
  */
 export interface BattleParticipantAbilities {
-  characteristics?: Characteristics;
-  wfrp?: WfrpParticipantStats;
+  /** Opaque rule-system data (the system's codec narrows it) */
+  system?: SystemSlot;
   creatureType?: string;
   cr?: number;
   damageModel?: "5e";

@@ -14,7 +14,7 @@ import { loadClassesById } from "@/lib/utils/battle/participant/load-classes";
 import { hitDicePoolFor } from "@/lib/utils/characters/resources/hit-dice";
 import { applyRest, type RestAction } from "@/lib/utils/characters/resources/rest";
 import { readResources } from "@/lib/utils/characters/resources/schema";
-import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 
 const LOG_KIND = { short: CharacterLogKind.SHORT_REST, long: CharacterLogKind.LONG_REST, close: CharacterLogKind.REST_CLOSED, session: CharacterLogKind.SESSION } as const;
 
@@ -47,7 +47,7 @@ export async function restParty(access: CampaignAccessResult, body: RestInput) {
 
       const pool = hitDicePoolFor(c.classes, classesById);
 
-      if (onSession) return { id: c.id, resources: onSession(current, readCharacteristics(c)), dead: !!current.dead };
+      if (onSession) return { id: c.id, resources: onSession(current, c.characteristics), dead: !!current.dead };
 
       return { id: c.id, resources: applyRest(body.kind as RestAction, current, { pool, longRestHitDice: outOfCombat.longRestHitDice }), dead: !!current.dead };
     });

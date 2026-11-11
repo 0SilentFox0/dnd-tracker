@@ -12,6 +12,7 @@ import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
 import { toCareerData } from "@/lib/utils/careers/row";
 import type { Characteristics, LedgerEntry, PurchaseError } from "@/lib/utils/rules/systems";
+import { readCharacteristics } from "@/lib/utils/rules/systems";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
 
 export type AdvanceResult = { characteristics: Characteristics; experience: number; available: number; entry: LedgerEntry };
@@ -49,13 +50,13 @@ export async function advanceCharacter(gate: CharacterGate, input: AdvanceInput)
 
     const feat = input.kind === "talent" ? await tx.feat.findFirst({ where: { id: input.key, campaignId: character.campaignId }, select: { id: true, xpCost: true, maxRank: true } }) : null;
 
-    const state = locked.characteristics.career;
+    const state = readCharacteristics(locked).career;
 
     const row = state ? await tx.career.findFirst({ where: { id: state.careerId, campaignId: character.campaignId } }) : null;
 
     const plan = advancement.planPurchase({
-      characteristics: locked.characteristics,
-      available: advancement.availableXp(locked.experience, locked.characteristics),
+      characteristics: readCharacteristics(locked),
+      available: advancement.availableXp(locked.experience, readCharacteristics(locked)),
       request: input,
       rules: access.campaign.rules.advancement,
       talent: feat ?? undefined,
@@ -88,7 +89,7 @@ export async function undoAdvance(gate: CharacterGate): Promise<AdvanceResult> {
 
     if (!locked) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
-    const plan = advancement.planUndo(locked.characteristics);
+    const plan = advancement.planUndo(readCharacteristics(locked));
 
     if (!plan.ok) throw new ContentError(UNDO_ERRORS[plan.error], 409);
 

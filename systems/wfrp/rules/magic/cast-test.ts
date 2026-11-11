@@ -1,5 +1,5 @@
 import { skillTarget, value } from "../characteristics/derive";
-import { readCharacteristics } from "../characteristics/keys";
+import { participantChars } from "../combat/participant";
 import { selfTestMod } from "../conditions/test-mod";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import { applyFortune } from "../percentile/fortune";
@@ -12,13 +12,13 @@ import type { SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 export function castTargetOf(caster: BattleParticipant): number {
-  const chars = readCharacteristics({ characteristics: caster.abilities.characteristics });
+  const chars = participantChars(caster);
 
   return (skillTarget(chars, CAST_SKILL.key, CAST_SKILL.spec)?.target ?? value(chars, "int")) + selfTestMod(caster, "test");
 }
 
 export function prayTargetOf(caster: BattleParticipant): number {
-  const chars = readCharacteristics({ characteristics: caster.abilities.characteristics });
+  const chars = participantChars(caster);
 
   return (skillTarget(chars, PRAY_SKILL.key)?.target ?? value(chars, "fel")) + selfTestMod(caster, "test");
 }

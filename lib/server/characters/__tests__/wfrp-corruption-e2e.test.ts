@@ -34,6 +34,7 @@ import { corruptionGrantSchema, corruptionUndoSchema } from "@/lib/schemas/corru
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { type Characteristics, DEFAULT_CHARACTERISTICS, preserveServerOwned, readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { PARTICIPANT_SLOT } from "@/systems/wfrp/rules/slots";
 import type { CorruptionGrantResult, CorruptionUndoResult } from "@/types/corruption";
 
 const hero = (id: string, over: Partial<Row> = {}, characteristics: Partial<Characteristics> = {}): Row => ({
@@ -154,7 +155,7 @@ describe("corruption.grant and corruption.undo", () => {
 
     await grant({ points: 1, reason: "Rift" });
 
-    expect(stats("h1").fields?.characteristics.corruption).toBeUndefined();
+    expect(PARTICIPANT_SLOT.read(stats("h1").fields)?.characteristics.corruption).toBeUndefined();
     expect(sheet("h1")?.characteristics.find((c) => c.key === "ag")?.value).toBe(agBefore - 5);
 
     rolls(96, 20, 71);

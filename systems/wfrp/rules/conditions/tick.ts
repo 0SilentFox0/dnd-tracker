@@ -1,4 +1,5 @@
 import { MIN_DAMAGE } from "../combat/constants";
+import { participantStats } from "../combat/participant";
 import { applyWfrpConditionTo } from "./apply";
 import { BLEEDING_UNCONSCIOUS_CHANCE_PER_LEVEL } from "./catalog";
 import { conditionLevel } from "./levels";
@@ -56,7 +57,7 @@ export function wfrpConditionsTurnStart(ps: BattleParticipant[], id: string, ctx
   const ablaze = conditionLevel(findParticipant(participants, id)!, "ablaze");
 
   if (ablaze > 0) {
-    const wfrp = findParticipant(participants, id)!.abilities.wfrp;
+    const wfrp = participantStats(findParticipant(participants, id)!);
 
     hurt(Math.max(MIN_DAMAGE, rollDie(10, ctx.rng) + ablaze - 1 - (wfrp?.tb ?? 0) - (wfrp?.ap.body ?? 0)), "ablaze");
   }

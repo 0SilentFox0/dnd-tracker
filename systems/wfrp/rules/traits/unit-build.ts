@@ -1,14 +1,16 @@
 import { LOCATIONS } from "../combat/constants";
 import { wfrpAttackFromProfile } from "../combat/extract-attacks";
-import { type WfrpParticipantFields,wfrpParticipantFields } from "../combat/participant";
+import { wfrpParticipantFields } from "../combat/participant";
 import { AP_CAP } from "../equipment/constants";
 import type { WeaponProfile } from "../equipment/weapon-profile";
+import { PARTICIPANT_SLOT, type WfrpParticipantSlot } from "../slots";
 import { BREATH_BLAST, BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT, TRAIT_MELEE_CELLS } from "./constants";
 import { sizeStep, traitEntries } from "./read";
 
 import type { TraitEffect } from "@/lib/utils/abilities/schema";
 import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { ResolvedAbility } from "@/types/abilities";
 
 type AttackEffect = Extract<TraitEffect, { kind: "wfrpAttack" }>;
@@ -23,14 +25,16 @@ function attackProfile(e: AttackEffect): WeaponProfile {
   return { range: "melee", cells: TRAIT_MELEE_CELLS, damageFlat: e.damage, addSb: true, qualities: [], flaws: [], twoHanded: false };
 }
 
-export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, abilities: readonly ResolvedAbility[]): { fields: WfrpParticipantFields; attacks: ExtractedAttack[] } {
-  const base = wfrpParticipantFields(row);
+export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, abilities: readonly ResolvedAbility[]): { fields: SystemSlot; attacks: ExtractedAttack[] } {
+  const baseSlot = wfrpParticipantFields(row);
 
   const entries = traitEntries(abilities);
 
-  if (entries.length === 0) return { fields: base, attacks: [] };
+  if (entries.length === 0) return { fields: baseSlot, attacks: [] };
 
-  const ap = { ...base.wfrp.ap };
+  const base = PARTICIPANT_SLOT.read(baseSlot) as WfrpParticipantSlot;
+
+  const ap = { ...base.stats.ap };
 
   let armoured = false;
 
@@ -59,5 +63,5 @@ export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, ab
     }
   }
 
-  return { fields: { ...base, wfrp: { ...base.wfrp, ...(armoured && { ap }), ...(ward !== undefined && { ward }), ...(size !== undefined && { size }) } }, attacks };
+  return { fields: PARTICIPANT_SLOT.write({ ...base, stats: { ...base.stats, ...(armoured && { ap }), ...(ward !== undefined && { ward }), ...(size !== undefined && { size }) } }), attacks };
 }

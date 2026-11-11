@@ -2,11 +2,13 @@ import { modifiersOf } from "../corruption/modifiers";
 import { corruptionThreshold } from "../corruption/threshold";
 import { parseSkillAdvanceKey, SKILL_CATALOG, skillAdvanceKey, skillDef } from "../skills/catalog";
 import { bonus, moveOf, runYards, skillTarget, value, walkYards, woundsBreakdown, woundsMax } from "./derive";
-import { CHARACTERISTIC_KEYS } from "./keys";
+import { CHARACTERISTIC_KEYS, readCharacteristics } from "./keys";
 
 import type { SheetBlockInput, SheetWfrpBlock } from "@/lib/utils/rules/systems/types";
 
-export function wfrpSheetBlock({ characteristics: c, resources }: SheetBlockInput): SheetWfrpBlock {
+export function wfrpSheetBlock({ characteristics, resources }: SheetBlockInput): SheetWfrpBlock {
+  const c = readCharacteristics({ characteristics });
+
   const entries = new Map<string, { key: string; spec?: string }>();
 
   const add = (key: string, spec?: string) => entries.set(skillAdvanceKey(key, spec), { key, ...(spec && { spec }) });

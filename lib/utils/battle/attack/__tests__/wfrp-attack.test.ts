@@ -7,6 +7,7 @@ import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant, SceneMomentum } from "@/types/battle";
 
@@ -21,7 +22,7 @@ const fighter = (id: string, side: ParticipantSide, over: { characteristics?: bo
 
   return {
     ...p,
-    abilities: { ...p.abilities, ...(characteristics && { characteristics: { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } } }) },
+    abilities: { ...p.abilities, ...(characteristics && { system: slotOf({ ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } }) }) },
     battleData: { ...p.battleData, attacks: [sword, bow], ...(position && { position }) },
   };
 };
@@ -67,7 +68,7 @@ describe("WFRP percentile attack", () => {
   it("natural 96+ fails even with a huge target", () => {
     const attacker = fighter("a", ParticipantSide.ALLY);
 
-    const strong = { ...attacker, abilities: { ...attacker.abilities, characteristics: { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 100 } } } };
+    const strong = { ...attacker, abilities: { ...attacker.abilities, system: slotOf({ ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 100 } }) } };
 
     expect(strike(97, 99, { attacker: strong }).success).toBe(false);
   });

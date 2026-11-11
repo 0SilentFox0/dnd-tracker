@@ -12,7 +12,8 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
-import type { CareerState, CharacteristicKey, Characteristics, DifficultyKey, LedgerEntry, PurchaseRequest, RuleSystemKey, SheetWfrpBlock } from "@/lib/utils/rules/systems";
+import type { CharacteristicKey, Characteristics, DifficultyKey, LedgerEntry, PurchaseRequest, RuleSystemKey, SheetWfrpBlock } from "@/lib/utils/rules/systems";
+import type { SystemData } from "@/lib/utils/rules/systems/slot";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
 
@@ -41,8 +42,8 @@ export interface CharacterGoal {
  * Згрупована структура даних персонажа (як використовується в формі)
  */
 export interface CharacterFormData {
-  characteristics?: Characteristics;
-  careerBaseline?: CareerState | null;
+  characteristics?: SystemData;
+  systemBaseline?: unknown;
   basicInfo: {
     name: string;
     type: CharacterTypeValue;
@@ -146,7 +147,7 @@ export interface Character {
   primaryAbility?: AbilityKey | null;
   goals?: CharacterGoal[];
   archetype?: string | null;
-  characteristics?: Characteristics;
+  characteristics?: SystemData;
   experience?: number;
   /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
   skillTreeProgress?: Record<

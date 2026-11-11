@@ -18,6 +18,7 @@ import { listOperation, redactListedLedgers } from "../list";
 import { patchOperation } from "../patch";
 
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { WFRP_SYSTEM } from "@/systems/wfrp";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const entry = { id: "e1", at: "2026-01-01T00:00:00.000Z", kind: "characteristic", key: "ws", from: 0, to: 1, cost: 25 } as const;
@@ -68,6 +69,7 @@ describe("redaction leaves rows without wfrp keys alone", () => {
         { controlledBy: "p2", characteristics: { ...stored, downtime: { ailments: [] } } },
       ],
       { userId: "p1", isDM: false },
+      WFRP_SYSTEM,
     );
 
     expect(d20.characteristics).toEqual({});
@@ -80,7 +82,7 @@ describe("downtime redaction on list", () => {
   const withDowntime = { ...stored, downtime: { ailments: [] } };
 
   it("redactListedLedgers strips downtime even without a ledger in the row", () => {
-    const [row] = redactListedLedgers([{ controlledBy: "p2", characteristics: { downtime: { ailments: [] } } }], { userId: "p1", isDM: false });
+    const [row] = redactListedLedgers([{ controlledBy: "p2", characteristics: { downtime: { ailments: [] } } }], { userId: "p1", isDM: false }, WFRP_SYSTEM);
 
     expect("downtime" in (row.characteristics as object)).toBe(false);
   });
@@ -121,7 +123,7 @@ describe("PATCH cannot bypass the ledger", () => {
 
     expect(gate).not.toBeInstanceOf(NextResponse);
 
-    await patchOperation.run(gate as never, patchOperation.schema.parse({ characteristics, careerBaseline }));
+    await patchOperation.run(gate as never, patchOperation.schema.parse({ characteristics, ...(careerBaseline && { systemBaseline: { ...stored, career: careerBaseline } }) }));
 
     return h.character.update.mock.calls[0][0].data.characteristics as typeof stored;
   };

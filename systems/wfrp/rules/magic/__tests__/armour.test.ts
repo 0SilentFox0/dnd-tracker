@@ -7,6 +7,7 @@ import { caster } from "./fixtures";
 
 import { mulberry32 } from "@/lib/utils/common/rng";
 import type { CastTestCtx } from "@/lib/utils/rules/systems/types";
+import { withStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 describe("armourSl", () => {
@@ -21,7 +22,7 @@ describe("armourSl", () => {
   it("is 0 for flexible armour", () => {
     const p = caster({ ap: { head: 3, arm: 0, body: 3, leg: 0 } });
 
-    expect(armourSl({ ...p, abilities: { ...p.abilities, wfrp: { ...p.abilities.wfrp!, flexible: true } } })).toBe(0);
+    expect(armourSl({ ...p, abilities: { ...withStats(p, { flexible: true }).abilities } })).toBe(0);
   });
 
   it("makes a cast with SL 4 fail against CN 2 at AP 3", () => {

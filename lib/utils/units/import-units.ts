@@ -83,7 +83,7 @@ export async function importUnitsIntoCampaign(db: ImportDb, campaignId: string, 
 
   const taken = new Set(existing.map((u) => u.name));
 
-  const data = rows.filter((r) => !taken.has(r.name)).map((r) => toUnitCreateData(campaignId, r, raceIdOf(r.raceName), !!rules && ruleSystemOf(rules).characteristics.kind === "wfrp"));
+  const data = rows.filter((r) => !taken.has(r.name)).map((r) => toUnitCreateData(campaignId, r, raceIdOf(r.raceName), !!rules && ruleSystemOf(rules).characteristics.persisted));
 
   const { count } = data.length > 0 ? await db.unit.createMany({ data }) : { count: 0 };
 

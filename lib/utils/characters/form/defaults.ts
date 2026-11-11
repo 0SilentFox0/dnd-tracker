@@ -1,9 +1,7 @@
 import { CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
-import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import type { CharacterFormData } from "@/types/characters";
 
 export const defaultCharacterFormData: CharacterFormData = {
-  characteristics: DEFAULT_CHARACTERISTICS,
   basicInfo: {
     name: "",
     type: CharacterType.PLAYER,

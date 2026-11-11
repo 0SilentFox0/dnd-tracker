@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { wfrpHeroView, wfrpParticipantView } from "@/lib/ai/tools/wfrp-view";
 import { readCharacteristics, woundsMax } from "@/lib/utils/rules/systems";
+import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 const careers = [{ id: "c1", name: "Archivist", tiers: [{ name: "Copyist" }, { name: "Archivist" }] }];
@@ -25,7 +26,7 @@ describe("wfrpHeroView", () => {
 
 describe("wfrpParticipantView", () => {
   it("wounds without ac", () => {
-    const p = { basicInfo: { name: "Hans", side: "ally" }, combatStats: { currentHp: 7, maxHp: 12, status: "active", armorClass: 9 }, abilities: { characteristics: readCharacteristics(row) } } as unknown as BattleParticipant;
+    const p = { basicInfo: { name: "Hans", side: "ally" }, combatStats: { currentHp: 7, maxHp: 12, status: "active", armorClass: 9 }, abilities: { system: slotOf(readCharacteristics(row)) } } as unknown as BattleParticipant;
 
     const view = wfrpParticipantView(p);
 

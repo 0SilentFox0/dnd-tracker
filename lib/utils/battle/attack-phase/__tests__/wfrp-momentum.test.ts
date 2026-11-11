@@ -5,6 +5,7 @@ import { runAttackPhase } from "../run-attack-phase";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleParticipant, SceneMomentum } from "@/types/battle";
 
@@ -16,7 +17,7 @@ const fighter = (id: string, side: ParticipantSide): BattleParticipant => {
   return {
     ...p,
     combatStats: { ...p.combatStats, maxTargets: 2 },
-    abilities: { ...p.abilities, characteristics: { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } } },
+    abilities: { ...p.abilities, system: slotOf({ ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } }) },
     battleData: { ...p.battleData, attacks: [sword] },
   };
 };

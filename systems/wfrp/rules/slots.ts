@@ -1,3 +1,5 @@
+import type { Characteristics } from "./characteristics/keys";
+import type { WfrpParticipantStats } from "./combat/participant";
 import { qualityList } from "./equipment/guard";
 import type { QualityRef } from "./equipment/qualities";
 
@@ -23,3 +25,10 @@ export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>("wfrp", (raw) => {
 
   return { qualities, flaws, ...(raw.noSb === true && { noSb: true }), ...(raw.magical === true && { magical: true as const }) };
 });
+
+export interface WfrpParticipantSlot {
+  characteristics: Characteristics;
+  stats: WfrpParticipantStats;
+}
+
+export const PARTICIPANT_SLOT = defineSlot<WfrpParticipantSlot>("wfrp", (raw) => (isRec(raw) && isRec(raw.characteristics) && isRec(raw.stats) ? (raw as unknown as WfrpParticipantSlot) : undefined));

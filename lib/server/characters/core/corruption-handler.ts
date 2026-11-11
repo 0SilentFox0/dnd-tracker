@@ -11,7 +11,7 @@ import { characteristicsJson } from "@/lib/server/characters/core/system-fields"
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { CorruptionGrantResult, CorruptionUndoResult } from "@/types/corruption";
 
 function prepare({ access, character }: CharacterGate) {
@@ -40,9 +40,9 @@ export async function grantCorruption(gate: CharacterGate, input: CorruptionGran
 
     const grantId = randomUUID();
 
-    const { state, summary } = corruption.planGrant({ characteristics: locked.characteristics, rules: access.campaign.rules, points: input.points, reason: input.reason, rng: Math.random, id: grantId, at: new Date().toISOString() });
+    const { state, summary } = corruption.planGrant({ characteristics: readCharacteristics(locked), rules: access.campaign.rules, points: input.points, reason: input.reason, rng: Math.random, id: grantId, at: new Date().toISOString() });
 
-    await tx.character.update({ where: { id: character.id }, data: { characteristics: characteristicsJson({ ...locked.characteristics, corruption: state }) } });
+    await tx.character.update({ where: { id: character.id }, data: { characteristics: characteristicsJson({ ...readCharacteristics(locked), corruption: state }) } });
 
     await writeCharacterLog(tx, [{ campaignId, characterId: character.id, actorUserId: access.userId, kind: CharacterLogKind.CORRUPTION, data: { grantId, reason: input.reason, points: input.points, total: summary.total, threshold: summary.threshold, mutation: !!summary.mutation, summary } }]);
 
@@ -64,11 +64,11 @@ export async function undoCorruption(gate: CharacterGate, input: CorruptionUndoI
 
     await assertNotInActiveBattle(campaignId, [character.id], API_ERRORS.CORRUPTION_IN_BATTLE);
 
-    const result = corruption.planUndo(locked.characteristics.corruption, input.grantId);
+    const result = corruption.planUndo(readCharacteristics(locked).corruption, input.grantId);
 
     if (!result.ok) throw new ContentError(API_ERRORS.CORRUPTION_STALE, 409);
 
-    await tx.character.update({ where: { id: character.id }, data: { characteristics: characteristicsJson({ ...locked.characteristics, corruption: result.state }) } });
+    await tx.character.update({ where: { id: character.id }, data: { characteristics: characteristicsJson({ ...readCharacteristics(locked), corruption: result.state }) } });
 
     await writeCharacterLog(tx, [{ campaignId, characterId: character.id, actorUserId: access.userId, kind: CharacterLogKind.CORRUPTION, data: { grantId: input.grantId, undo: true } }]);
 

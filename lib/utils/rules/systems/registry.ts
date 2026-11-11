@@ -15,6 +15,8 @@ export const RULE_SYSTEM_REGISTRY: Record<RuleSystemKey, RuleSystemDefinition> =
   // </systems:generated>
 };
 
+export const isEmptySystemData = (value: unknown): boolean => Object.values(RULE_SYSTEM_REGISTRY).some((system) => system.characteristics.isEmpty(value));
+
 export const ruleSystemOf = (rules: Pick<Ruleset, "system">): RuleSystemDefinition => RULE_SYSTEM_REGISTRY[rules.system.key];
 
 export const systemKeyOf = (rules: Pick<Ruleset, "system">): RuleSystemKey => rules.system.key;

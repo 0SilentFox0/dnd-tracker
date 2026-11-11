@@ -9,7 +9,7 @@ import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { type Characteristics, redactLedger } from "@/lib/utils/rules/systems";
+import { type RuleSystemDefinition, ruleSystemOf } from "@/lib/utils/rules/systems";
 
 const COMPACT_SELECT = {
   id: true,
@@ -38,12 +38,15 @@ const LIST_SELECT = {
   user: { select: { displayName: true } },
 } as const;
 
-const isCharacteristicsObject = (value: unknown): value is Characteristics => typeof value === "object" && value !== null && !Array.isArray(value);
-
 type LedgerRow = { characteristics?: unknown; controlledBy?: string | null };
 
-export const redactListedLedgers = <T extends LedgerRow>(rows: T[], viewer: { userId?: string; isDM: boolean }): T[] =>
-  rows.map((row) => isCharacteristicsObject(row.characteristics) ? { ...row, characteristics: redactLedger(row.characteristics, { isDM: viewer.isDM, isOwner: !!viewer.userId && row.controlledBy === viewer.userId }) } : row);
+export const redactListedLedgers = <T extends LedgerRow>(rows: T[], viewer: { userId?: string; isDM: boolean }, system: RuleSystemDefinition): T[] => {
+  const { redact } = system.characteristics;
+
+  if (!redact) return rows;
+
+  return rows.map((row) => (row.characteristics ? { ...row, characteristics: redact(row.characteristics, { isDM: viewer.isDM, isOwner: !!viewer.userId && row.controlledBy === viewer.userId }) } : row));
+};
 
 const listSchema = z.object({ type: z.string().nullish(), compact: z.boolean().optional(), status: z.string().nullish() });
 
@@ -70,7 +73,7 @@ export const listOperation = defineCharacterOperation({
 
     if (compact) return prisma.character.findMany({ where, select: COMPACT_SELECT, orderBy });
 
-    return redactListedLedgers(await prisma.character.findMany({ where, select: pending ? { ...LIST_SELECT, reviewNote: true } : LIST_SELECT, orderBy }), access);
+    return redactListedLedgers(await prisma.character.findMany({ where, select: pending ? { ...LIST_SELECT, reviewNote: true } : LIST_SELECT, orderBy }), access, ruleSystemOf(access.campaign.rules));
   },
 });
 
@@ -101,5 +104,5 @@ export async function listCharacters(request: Request, campaignId: string, actor
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(compact ? rows : redactListedLedgers(rows as LedgerRow[], { isDM: access.isDM }));
+  return NextResponse.json(compact ? rows : redactListedLedgers(rows as LedgerRow[], { isDM: access.isDM }, ruleSystemOf(access.campaign.rules)));
 }

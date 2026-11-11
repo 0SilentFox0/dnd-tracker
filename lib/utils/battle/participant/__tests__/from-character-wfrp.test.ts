@@ -5,6 +5,7 @@ import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/partici
 import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-source";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { slotChars, slotStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { armourSl } from "@/systems/wfrp/rules/magic/armour";
 import { ARMOUR_SL_PER_AP } from "@/systems/wfrp/rules/magic/constants";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
@@ -42,15 +43,15 @@ describe("participant: WFRP equipment", () => {
   it("equipped mail and shield give AP per location", async () => {
     const p = await withGear([row("m", "armor", mail), row("s", "shield", buckler)]);
 
-    expect(p.abilities.wfrp?.ap).toEqual({ head: 1, arm: 2, body: 4, leg: 1 });
-    expect(p.abilities.wfrp).not.toHaveProperty("flexible");
+    expect(slotStats(p.abilities.system)?.ap).toEqual({ head: 1, arm: 2, body: 4, leg: 1 });
+    expect(slotStats(p.abilities.system)).not.toHaveProperty("flexible");
     expect(armourSl(p)).toBe(ARMOUR_SL_PER_AP * 3);
   });
 
   it("all-flexible armour sets the flag and cancels the armour penalty", async () => {
     const p = await withGear([row("f", "armor", flexLeather)]);
 
-    expect(p.abilities.wfrp).toMatchObject({ flexible: true, ap: { body: 1 } });
+    expect(slotStats(p.abilities.system)).toMatchObject({ flexible: true, ap: { body: 1 } });
     expect(armourSl(p)).toBe(0);
   });
 
@@ -58,7 +59,7 @@ describe("participant: WFRP equipment", () => {
     for (const rows of [[], [row("g", "armor", { type: "armour" })], [row("n", "armor", null)]]) {
       const p = await withGear(rows);
 
-      expect(p.abilities.wfrp?.ap).toEqual({ head: 0, arm: 0, body: 0, leg: 0 });
+      expect(slotStats(p.abilities.system)?.ap).toEqual({ head: 0, arm: 0, body: 0, leg: 0 });
     }
   });
 
@@ -83,8 +84,8 @@ describe("participant: WFRP characteristics", () => {
   it("SB/TB/move from characteristics; AP zero for every location", async () => {
     const p = await build({ characteristics: { base: { s: 45, t: 38 }, advances: { s: 5 }, move: 5 } });
 
-    expect(p.abilities.wfrp).toEqual({ sb: 5, ag: 30, tb: 3, ap: { head: 0, arm: 0, body: 0, leg: 0 } });
-    expect(p.abilities.characteristics?.move).toBe(5);
+    expect(slotStats(p.abilities.system)).toEqual({ sb: 5, ag: 30, tb: 3, ap: { head: 0, arm: 0, body: 0, leg: 0 } });
+    expect(slotChars(p.abilities.system)?.move).toBe(5);
   });
 
   it("initiative is the I characteristic and speed is walk yards * 3 ft", async () => {
@@ -98,8 +99,8 @@ describe("participant: WFRP characteristics", () => {
   it("empty characteristics fall back to defaults", async () => {
     const p = await build({ characteristics: {} });
 
-    expect(p.abilities.characteristics).toEqual(DEFAULT_CHARACTERISTICS);
-    expect(p.abilities.wfrp).toMatchObject({ sb: 3, tb: 3 });
+    expect(slotChars(p.abilities.system)).toEqual(DEFAULT_CHARACTERISTICS);
+    expect(slotStats(p.abilities.system)).toMatchObject({ sb: 3, tb: 3 });
   });
 
   it("d20 system: fields absent, JSON identical to the shape without them (snapshotHash unchanged)", async () => {
@@ -117,7 +118,7 @@ describe("participant: WFRP characteristics", () => {
 
     const out = refreshFromSource(live, fresh);
 
-    expect(out.abilities.wfrp?.sb).toBe(6);
+    expect(slotStats(out.abilities.system)?.sb).toBe(6);
 
     const d20 = await build({}, parseRules({}));
 

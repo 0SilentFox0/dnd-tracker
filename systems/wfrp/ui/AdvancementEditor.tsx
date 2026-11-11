@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
+import { wfrpBinding } from "./characteristics-binding";
+
 import { HudSection } from "@/components/hud/form";
 import type { AdvancementEditorProps } from "@/components/systems/types";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
@@ -13,7 +15,9 @@ import { useFeats } from "@/lib/hooks/feats";
 
 const TIERS = ["1", "2", "3", "4"];
 
-export function AdvancementEditor({ bindings: { characteristics: { data, set } }, campaignId }: AdvancementEditorProps) {
+export function AdvancementEditor({ bindings, campaignId }: AdvancementEditorProps) {
+  const { data, set } = wfrpBinding(bindings.characteristics);
+
   const t = useTranslations("wfrpCareers.profile");
 
   const careers = useCareers(campaignId);

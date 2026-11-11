@@ -11,6 +11,8 @@ export interface SlotCodec<T> {
   write(data: T): SystemSlot;
 }
 
+export const systemSlotOf = (slot: SystemSlot | undefined): { system?: SystemSlot } => (slot ? { system: slot } : {});
+
 export const defineSlot = <T>(key: string, parse: (raw: unknown) => T | undefined): SlotCodec<T> => ({
   key,
   read: (slot) => (slot?.key === key ? parse(slot.data) : undefined),

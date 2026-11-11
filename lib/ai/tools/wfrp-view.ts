@@ -1,4 +1,4 @@
-import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, characteristicValue, readCharacteristics, woundsMax } from "@/lib/utils/rules/systems";
+import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, characteristicValue, PARTICIPANT_SLOT, readCharacteristics, woundsMax } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 
 export type WfrpCareerRef = { id: string; name: string; tiers: unknown };
@@ -29,7 +29,7 @@ export function wfrpHeroView(row: { characteristics?: unknown }, careers: readon
 }
 
 export function wfrpParticipantView(p: BattleParticipant) {
-  const { characteristics } = p.abilities;
+  const characteristics = PARTICIPANT_SLOT.read(p.abilities.system)?.characteristics;
 
   return {
     name: p.basicInfo.name,

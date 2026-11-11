@@ -92,7 +92,7 @@ export async function setDowntime(gate: CharacterGate, input: DowntimeSetInput):
 
     if (!locked) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
-    const { characteristics } = locked;
+    const characteristics = readCharacteristics(locked);
 
     if (endeavour && downtime.validateEndeavour(endeavour, characteristics)) throw new ContentError(API_ERRORS.SKILL_UNTRAINED, 409);
 
@@ -143,7 +143,7 @@ export async function passPeriod(access: CampaignAccessResult, input: DowntimePe
     const heroes: PeriodHero[] = rows.map((row) => {
       const fresh = locked.get(row.id);
 
-      const hero: Hero = { id: row.id, resources: fresh?.resources ?? {}, characteristics: fresh?.characteristics ?? readCharacteristics(row) };
+      const hero: Hero = { id: row.id, resources: fresh?.resources ?? {}, characteristics: readCharacteristics(fresh ?? row) };
 
       return { ...hero, maxHp: characterBaseHp(row, { rules: campaign.rules, characteristics: hero.characteristics }).total, status: statusOf(hero) };
     });
@@ -195,7 +195,7 @@ export async function undoPeriod(access: CampaignAccessResult, input: DowntimePe
     const checked = ids.map((id) => {
       const hero = locked.get(id);
 
-      const d = hero?.characteristics.downtime;
+      const d = hero && readCharacteristics(hero).downtime;
 
       const snapshot = d?.lastPeriod;
 
@@ -233,7 +233,7 @@ export async function undoPeriod(access: CampaignAccessResult, input: DowntimePe
 
       const downtime: DowntimeState = { ...(d.endeavour ? { endeavour: d.endeavour } : {}), ailments: before.ailments, ...(before.training ? { training: before.training } : {}) };
 
-      return { id, resources, downtime, characteristics: { ...hero.characteristics, downtime } };
+      return { id, resources, downtime, characteristics: { ...readCharacteristics(hero), downtime } };
     });
 
     for (const r of restored) await tx.character.update({ where: { id: r.id }, data: { resources: r.resources as Prisma.InputJsonValue, characteristics: characteristicsJson(r.characteristics) } });

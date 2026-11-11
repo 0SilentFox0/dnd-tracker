@@ -2,7 +2,7 @@ import { getHeroMaxHpBreakdown, type HeroHpFormula } from "@/lib/constants/hero-
 import { classHp, hitDiceLabel } from "@/lib/utils/characters/classes";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { TextRef } from "@/types/choices";
 import type { ResolvedClassEntry } from "@/types/classes";
 
@@ -21,7 +21,7 @@ export function characterBaseHp(
   opts: { entries?: ResolvedClassEntry[] | null; formula?: HeroHpFormula; rules?: Ruleset; characteristics?: unknown },
 ): { total: number; breakdown: HpBreakdownLine[] } {
   if (opts.rules) {
-    const hp = ruleSystemOf(opts.rules).progression.maxHp({ character: c, characteristics: readCharacteristics({ characteristics: opts.characteristics }), rules: opts.rules });
+    const hp = ruleSystemOf(opts.rules).progression.maxHp({ character: c, characteristics: opts.characteristics, rules: opts.rules });
 
     if (hp) return hp;
   }

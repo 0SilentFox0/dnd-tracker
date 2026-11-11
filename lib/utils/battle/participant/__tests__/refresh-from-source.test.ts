@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeEffect, makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-source";
+import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 const oldAb = resolved({ trigger: { event: "passive" }, effects: [] }, { id: "old" });
@@ -128,16 +129,16 @@ describe("refreshFromSource pools", () => {
 
 describe("refreshFromSource WFRP traits", () => {
   it("takes size, ward, AP and trait attacks from the fresh build, keeps live HP", () => {
-    const live = { ...makeParticipant({ id: "p", hp: 3 }), abilities: { ...makeParticipant({ id: "p" }).abilities, wfrp: { sb: 3, tb: 3, ag: 3, ap: { head: 0, arm: 0, body: 0, leg: 0 } } } } as BattleParticipant;
+    const live = { ...makeParticipant({ id: "p", hp: 3 }), abilities: { ...makeParticipant({ id: "p" }).abilities, system: slotOf(undefined, { sb: 3, tb: 3, ag: 3 }) } } as BattleParticipant;
 
     const fresh = makeParticipant({ id: "p", hp: 99 });
 
-    fresh.abilities = { ...fresh.abilities, wfrp: { sb: 3, tb: 3, ag: 3, ap: { head: 2, arm: 2, body: 2, leg: 2 }, size: "large", ward: 7 } };
+    fresh.abilities = { ...fresh.abilities, system: slotOf(undefined, { sb: 3, tb: 3, ag: 3, ap: { head: 2, arm: 2, body: 2, leg: 2 }, size: "large", ward: 7 }) };
     fresh.battleData = { ...fresh.battleData, attacks: [{ id: "u-trait-bite-0", name: "Bite" } as never] };
 
     const out = refreshFromSource(live, fresh);
 
-    expect(out.abilities.wfrp).toEqual(fresh.abilities.wfrp);
+    expect(out.abilities.system).toEqual(fresh.abilities.system);
     expect(out.battleData.attacks).toEqual(fresh.battleData.attacks);
     expect(out.combatStats.currentHp).toBe(3);
   });

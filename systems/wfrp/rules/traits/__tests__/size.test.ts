@@ -5,14 +5,13 @@ import { sizeDamageBonus, sizeHitMod, wardRoll } from "../size";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { withStats } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 
 const sized = (id: string, size?: TraitSize, ward?: number) => {
   const p = makeParticipant({ id });
 
-  const base = wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS);
-
-  return { ...p, abilities: { ...p.abilities, ...base, wfrp: { ...base.wfrp, ...(size && { size }), ...(ward !== undefined && { ward }) } } };
+  return withStats({ ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS) } }, { ...(size && { size }), ...(ward !== undefined && { ward }) });
 };
 
 describe("size", () => {

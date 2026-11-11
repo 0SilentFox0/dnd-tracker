@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { wfrpAttackFromProfile } from "../../combat/extract-attacks";
 import { wfrpParticipantFields } from "../../combat/participant";
-import { ATTACK_SLOT } from "../../slots";
+import { ATTACK_SLOT, PARTICIPANT_SLOT } from "../../slots";
 import { wfrpUnitBuild } from "../unit-build";
 import { trait } from "./fixtures";
 
@@ -12,31 +12,32 @@ const armour = (n: number | Partial<Record<"head" | "body" | "arm" | "leg", numb
 
 describe("wfrpUnitBuild", () => {
   it("returns exactly the base fields when there are no traits", () => {
-    const { fields, attacks } = wfrpUnitBuild(row, [trait([{ kind: "note", text: "x" }])]);
+    const { fields: slot, attacks } = wfrpUnitBuild(row, [trait([{ kind: "note", text: "x" }])]);
 
-    expect(fields).toEqual(wfrpParticipantFields(row));
-    expect(fields.wfrp).not.toHaveProperty("size");
-    expect(fields.wfrp).not.toHaveProperty("ward");
+    const fields = PARTICIPANT_SLOT.read(slot)!;
+
+    expect(slot).toEqual(wfrpParticipantFields(row));
+    expect(fields.stats).not.toHaveProperty("size");
+    expect(fields.stats).not.toHaveProperty("ward");
     expect(attacks).toEqual([]);
   });
 
   it("takes the best AP per location, capped", () => {
-    const { fields } = wfrpUnitBuild(row, [trait([armour(2)], { key: "a" }), trait([armour({ head: 4 })], { key: "b" })]);
+    const { fields: slot } = wfrpUnitBuild(row, [trait([armour(2)], { key: "a" }), trait([armour({ head: 4 })], { key: "b" })]);
 
-    expect(fields.wfrp.ap).toEqual({ head: 4, body: 2, arm: 2, leg: 2 });
-    expect(wfrpUnitBuild(row, [trait([armour(12)]), trait([armour(12)])]).fields.wfrp.ap.body).toBe(12);
+    expect(PARTICIPANT_SLOT.read(slot)?.stats.ap).toEqual({ head: 4, body: 2, arm: 2, leg: 2 });
+    expect(PARTICIPANT_SLOT.read(wfrpUnitBuild(row, [trait([armour(12)]), trait([armour(12)])]).fields)?.stats.ap.body).toBe(12);
   });
 
   it("takes the lowest Ward and the largest Size", () => {
-    const { fields } = wfrpUnitBuild(row, [
+    const { fields: slot } = wfrpUnitBuild(row, [
       trait([{ kind: "wfrpWard", value: 8 }]),
       trait([{ kind: "wfrpWard", value: 6 }]),
       trait([{ kind: "wfrpSize", size: "large" }]),
       trait([{ kind: "wfrpSize", size: "small" }]),
     ]);
 
-    expect(fields.wfrp.ward).toBe(6);
-    expect(fields.wfrp.size).toBe("large");
+    expect(PARTICIPANT_SLOT.read(slot)?.stats).toMatchObject({ ward: 6, size: "large" });
   });
 
   it("builds melee attacks from Bite", () => {

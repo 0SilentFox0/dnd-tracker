@@ -9,6 +9,7 @@ import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleParticipant, SceneMomentum } from "@/types/battle";
 
@@ -20,7 +21,7 @@ const fighter = (id: string, side: ParticipantSide, extra: Partial<BattlePartici
   return {
     ...p,
     basicInfo: { ...p.basicInfo, battleId: "b1", controlledBy: "dm" },
-    abilities: { ...p.abilities, characteristics: { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } } },
+    abilities: { ...p.abilities, system: slotOf({ ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } }) },
     battleData: { ...p.battleData, attacks: [sword], ...extra },
   };
 };

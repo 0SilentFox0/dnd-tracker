@@ -12,7 +12,7 @@ import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
 import { inventoryArtifactIds } from "@/lib/utils/items/resolve";
 import type { Ruleset } from "@/lib/utils/rules";
-import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { ResolvedClassEntry } from "@/types/classes";
@@ -109,7 +109,7 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
 
   const needsSelections = classMode || (race ? readChoiceList(race.choices).length > 0 : false);
 
-  const hasTalents = Boolean(ruleSystemOf(rules).advancement) && Object.keys(readCharacteristics(character).talents).length > 0;
+  const hasTalents = Object.keys(ruleSystemOf(rules).advancement?.talentsOf(character) ?? {}).length > 0;
 
   const featsById = await loadFeatsById(campaignId, (needsSelections && selectionNeedsFeats(state, classMode)) || hasTalents);
 

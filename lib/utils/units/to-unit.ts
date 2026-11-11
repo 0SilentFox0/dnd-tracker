@@ -1,7 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
 import { abilitySummary } from "@/lib/utils/abilities/summary";
-import { readCharacteristics } from "@/lib/utils/rules/systems";
 import { readSaveProficiencies } from "@/lib/utils/units/monster";
 import type { Unit, UnitAttack } from "@/types/units";
 
@@ -41,6 +40,6 @@ export function toUnit(row: Prisma.UnitGetPayload<object>): Unit {
     saveProficiencies: readSaveProficiencies(row.saveProficiencies),
     statblock: (row.statblock ?? {}) as Unit["statblock"],
     spellcasting: (row.spellcasting ?? {}) as unknown as Unit["spellcasting"],
-    characteristics: readCharacteristics(row),
+    characteristics: (row.characteristics ?? undefined) as Unit["characteristics"],
   };
 }

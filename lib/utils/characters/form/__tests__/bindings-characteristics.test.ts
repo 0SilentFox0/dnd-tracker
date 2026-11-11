@@ -7,7 +7,7 @@ import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import type { CharacterFormData } from "@/types/characters";
 
 describe("characteristics binding", () => {
-  it("set updates only the given characteristics field", () => {
+  it("update receives the previous value and replaces the stored characteristics", () => {
     let state: CharacterFormData = defaultCharacterFormData;
 
     const setFormData = (update: React.SetStateAction<CharacterFormData>) => {
@@ -16,9 +16,10 @@ describe("characteristics binding", () => {
 
     const { characteristics } = buildCharacterFormBindings(state, setFormData as never, { toggleSavingThrow: () => {}, toggleSkill: () => {} });
 
-    characteristics.set("fate", 3);
+    characteristics.update((prev) => ({ ...prev, fate: 3 }));
+    characteristics.update((prev) => ({ ...prev, move: 5 }));
 
-    expect(state.characteristics).toEqual({ ...defaultCharacterFormData.characteristics, fate: 3 });
+    expect(state.characteristics).toEqual({ fate: 3, move: 5 });
     expect(state.basicInfo).toBe(defaultCharacterFormData.basicInfo);
   });
 

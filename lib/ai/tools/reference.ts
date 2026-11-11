@@ -12,7 +12,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { abilityRegistryOf, flowSegments, linesText } from "@/lib/utils/abilities/segments";
-import { systemKeyOf } from "@/lib/utils/rules/systems";
+import { readCharacteristics, systemKeyOf } from "@/lib/utils/rules/systems";
 
 const kindSchema = z.enum(["unit", "spell", "race", "skill", "artifact"]);
 
@@ -29,7 +29,7 @@ async function listOf(campaignId: string, kind: Kind, locale: Locale): Promise<E
 
     const wfrp = systemKeyOf(await loadRules(campaignId)) === "wfrp";
 
-    return units.map((u) => ({ ...u, abilitySummary: linesText(registry, (u.abilitySummary ?? []).map(flowSegments)), ...(wfrp && u.characteristics && { characteristics: characteristicValues(u.characteristics) }) })) as unknown as Entry[];
+    return units.map((u) => ({ ...u, abilitySummary: linesText(registry, (u.abilitySummary ?? []).map(flowSegments)), ...(wfrp && u.characteristics && { characteristics: characteristicValues(readCharacteristics(u)) }) })) as unknown as Entry[];
   }
 
   if (kind === "spell") return (await getCachedSpells(campaignId)) as unknown as Entry[];

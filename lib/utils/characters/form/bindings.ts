@@ -1,4 +1,4 @@
-import { type Characteristics, DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import type { SystemData } from "@/lib/utils/rules/systems/slot";
 import type { CharacterFormData } from "@/types/characters";
 
 export interface SectionBinding<S> {
@@ -22,10 +22,15 @@ function sectionBinding<T extends FieldSection>(formData: CharacterFormData, set
   };
 }
 
-function characteristicsBinding(formData: CharacterFormData, setFormData: SetFormData): SectionBinding<Characteristics> {
+export interface SystemBinding {
+  data: SystemData | undefined;
+  update: (fn: (prev: SystemData | undefined) => SystemData) => void;
+}
+
+function characteristicsBinding(formData: CharacterFormData, setFormData: SetFormData): SystemBinding {
   return {
-    data: formData.characteristics ?? DEFAULT_CHARACTERISTICS,
-    set: (key, value) => setFormData((prev) => ({ ...prev, characteristics: { ...(prev.characteristics ?? DEFAULT_CHARACTERISTICS), [key]: value } })),
+    data: formData.characteristics,
+    update: (fn) => setFormData((prev) => ({ ...prev, characteristics: fn(prev.characteristics) })),
   };
 }
 

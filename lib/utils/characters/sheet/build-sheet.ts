@@ -19,7 +19,7 @@ import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import { heroHpFormula, type Ruleset } from "@/lib/utils/rules";
-import { readCharacteristics, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
 import type { ResolvedClassEntry } from "@/types/classes";
@@ -124,7 +124,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const system = input.rules ? ruleSystemOf(input.rules) : null;
 
-  const wfrp = system?.characteristics.kind === "wfrp" ? system.characteristics.sheetBlock({ characteristics: readCharacteristics(c), resources: readResources(c.resources) }) : undefined;
+  const wfrp = system?.characteristics.sheetBlock({ characteristics: c.characteristics, resources: readResources(c.resources) });
 
   const grid = Object.fromEntries(ARTIFACT_GRID_9.map((cell) => [cell.key, input.artifacts.find((a) => a.slot === cell.key) ?? null]));
 

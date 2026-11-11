@@ -1,3 +1,5 @@
+import type { SystemData, SystemSlot } from "./slot";
+
 import type { Coin } from "@/lib/constants/inventory";
 import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
@@ -17,9 +19,8 @@ import type { advanceCost } from "@/systems/wfrp/rules/advancement/cost";
 import type { planPurchase } from "@/systems/wfrp/rules/advancement/plan";
 import type { availableXp, talentGroups } from "@/systems/wfrp/rules/advancement/talent-groups";
 import type { planUndo } from "@/systems/wfrp/rules/advancement/undo";
-import type { CharacteristicKey, Characteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import type { CharacteristicKey } from "@/systems/wfrp/rules/characteristics/keys";
 import type { HitLocation } from "@/systems/wfrp/rules/combat/constants";
-import type { WfrpParticipantStats } from "@/systems/wfrp/rules/combat/participant";
 import type { planGrant } from "@/systems/wfrp/rules/corruption/plan-grant";
 import type { Mutation } from "@/systems/wfrp/rules/corruption/types";
 import type { planCorruptionUndo } from "@/systems/wfrp/rules/corruption/undo";
@@ -46,7 +47,7 @@ export interface CharacterHpInput {
 }
 
 export interface SheetBlockInput {
-  characteristics: Characteristics;
+  characteristics: unknown;
   resources: CharacterResources;
 }
 
@@ -239,7 +240,9 @@ export interface RuleSystemCombat {
   fortune?: true;
   dice: 20 | 100;
   attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
-  participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; armourOnly?: Record<HitLocation, number>; flexible?: boolean }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
+  participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; armourOnly?: Record<HitLocation, number>; flexible?: boolean }): SystemSlot;
+  /** Ranks participants with equal initiative: higher wins */
+  tieBreak?(p: BattleParticipant): number;
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
@@ -281,11 +284,27 @@ export interface RuleSystemDefinition {
   balance: { kind: "fair" } | { kind: "none" };
   progression: {
     levels: boolean;
-    maxHp(input: { character: CharacterHpInput; characteristics: Characteristics; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;
+    maxHp(input: { character: CharacterHpInput; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;
+    hpTerm: "hp" | "wounds";
   };
-  characteristics: { kind: "d20" | "wfrp"; sheetBlock(input: SheetBlockInput): SheetWfrpBlock | undefined };
+  characteristics: {
+    /** The `characteristics` column carries system data (otherwise it is dropped on write) */
+    persisted: boolean;
+    defaults(): SystemData | undefined;
+    isEmpty(value: unknown): boolean;
+    sheetBlock(input: SheetBlockInput): SheetWfrpBlock | undefined;
+    /** Merges an incoming edit into the stored value; throws ContentError on a conflict */
+    reconcile?(stored: unknown, incoming: unknown, ctx: { isDM: boolean; baseline?: unknown }): unknown;
+    redact?(value: unknown, viewer: { isDM: boolean; isOwner: boolean }): unknown;
+  };
+  resources?: {
+    limits?(row: { characteristics?: unknown }): { fateMax?: number };
+    seed?(characteristics: unknown): Partial<CharacterResources>;
+    /** Starting Fortune of a participant without stored resources */
+    fortuneOf?(p: BattleParticipant): number | undefined;
+  };
   sheetTest: { accepts(body: { kind: string }): boolean; roll(input: SheetTestInput): SheetTestResult };
-  rest: { kinds: boolean; onSession?(resources: CharacterResources, characteristics: Characteristics): CharacterResources };
+  rest: { kinds: boolean; onSession?(resources: CharacterResources, characteristics: unknown): CharacterResources };
   battle: { supported: boolean };
   combat: RuleSystemCombat;
   conditions?: RuleSystemConditions;
@@ -315,6 +334,7 @@ export interface RuleSystemTraits {
 }
 
 export interface RuleSystemAdvancement {
+  talentsOf(row: { characteristics?: unknown }): Record<string, number>;
   cost: typeof advanceCost;
   planPurchase: typeof planPurchase;
   planUndo: typeof planUndo;

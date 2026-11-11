@@ -62,6 +62,12 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     },
   });
 
+  const defaultCharacteristics = system?.characteristics.defaults();
+
+  useEffect(() => {
+    if (defaultCharacteristics) setFormData((prev) => (prev.characteristics ? prev : { ...prev, characteristics: defaultCharacteristics }));
+  }, [defaultCharacteristics, setFormData]);
+
   const refs = useChoiceRefs(id, basicInfo.data.race);
 
   useEffect(() => {
