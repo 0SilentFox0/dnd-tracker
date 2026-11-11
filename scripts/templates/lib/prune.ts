@@ -1,11 +1,10 @@
 import { importOrder } from "./import-order";
-import { delegateFor } from "./kind-delegate";
+import { delegateFor, rowLabel } from "./kind-delegate";
 import type { PackRow } from "./pack";
 
 import { prisma } from "@/lib/db";
 import { DETACH_KIND_BY_TABLE, detachRefs } from "@/lib/server/content/detach-refs";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
-import { markContentDirty } from "@/lib/server/content/write-context";
 import type { PackKind } from "@/lib/utils/templates/manifest";
 
 export interface OutsideRow { kind: PackKind; id: string; slug: string; label: string }
@@ -29,7 +28,7 @@ export async function rowsOutsidePack(campaignId: string, kinds: readonly PackKi
     for (const row of existing) {
       const slug = String(row.slug);
 
-      if (!inPack.has(slug)) found.push({ kind, id: row.id, slug, label: String(row.name ?? row.title ?? row.race ?? slug) });
+      if (!inPack.has(slug)) found.push({ kind, id: row.id, slug, label: rowLabel(row, slug) });
     }
   }
 
@@ -53,9 +52,7 @@ export async function pruneRows(campaignId: string, outside: readonly OutsideRow
         if (detach) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], campaignId, detach, ids);
 
         await delegate.deleteMany({ where: { id: { in: ids }, campaignId } });
-        markContentDirty();
       }
     },
-    { bump: false },
   );
 }

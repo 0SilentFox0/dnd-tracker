@@ -190,6 +190,8 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   if (dryRun && !existing) return { templateId: null, created: true, perKind: Object.fromEntries(manifest.kinds.map((kind) => [kind, counts(pack.rows[kind]?.length ?? 0)])) };
 
+  if (existing) for (const kind of importOrder(manifest.kinds)) await assertSlugged(existing.id, kind, pack.rows[kind] ?? []);
+
   const template = dryRun && existing ? { id: existing.id, dmUserId: existing.dmUserId, created: false } : await ensureTemplate(store, { owner: opts.owner, rules: RulesetSchema.parse(pack.rules), credits: manifest.credits ?? "" });
 
   console.info(`${manifest.names.en}: ${template.id}${template.created ? " (created)" : ""}${dryRun ? " (dry run)" : ""}`);
@@ -220,8 +222,6 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   for (const kind of importOrder(manifest.kinds)) {
     const rows = pack.rows[kind] ?? [];
-
-    await assertSlugged(template.id, kind, rows);
 
     if (!isImportKind(kind)) {
       perKind[kind] = await upsertBySlug(template.id, kind, rows, { hooks, idBySlug: await idsBySlug(template.id, manifest.kinds), dryRun });

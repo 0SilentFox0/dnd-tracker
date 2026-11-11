@@ -11,7 +11,6 @@ export interface Delegate {
   deleteMany(args: unknown): Promise<unknown>;
 }
 
-/** The Prisma delegate of a pack kind; `db` is the client or a transaction. */
 export const delegateFor = (db: unknown, kind: PackKind): { table: BundleTableDef; delegate: Delegate } => {
   const table = tableOfKind(kind);
 
@@ -19,3 +18,5 @@ export const delegateFor = (db: unknown, kind: PackKind): { table: BundleTableDe
 
   return { table, delegate: (db as Record<string, Delegate>)[table.delegate] };
 };
+
+export const rowLabel = (row: Record<string, unknown>, fallback: unknown): string => String(row.name ?? row.title ?? row.race ?? fallback);

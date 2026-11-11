@@ -247,4 +247,42 @@ describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm localized clone (English 
     expect(names(localized.races as unknown as Rows)).toEqual(expectedNames("races", pack.rows.races ?? [], heroesUk));
     expect(names(localized.artifacts as unknown as Rows)).toEqual(expectedNames("artifacts", pack.rows.artifacts ?? [], heroesUk));
   });
+
+  it("string references the engine matches by name resolve to localized rows (D30)", async () => {
+    const localized = localizeTemplateBundle(await exportCampaign(scoped as never, templateId), heroesUk) as unknown as Record<string, Array<Record<string, any>>>;
+
+    const raceNames = new Set(localized.races.map((row) => row.name));
+
+    const mainSkillNames = new Set(localized.mainSkills.map((row) => row.name));
+
+    expect(localized.skillTrees.length).toBeGreaterThan(0);
+
+    const missing: string[] = [];
+
+    const need = (set: Set<unknown>, value: unknown, where: string) => void (set.has(value) || missing.push(`${where}: ${String(value)}`));
+
+    for (const tree of localized.skillTrees) {
+      need(raceNames, tree.race, `skillTrees ${tree.slug}`);
+
+      for (const main of tree.skills?.mainSkills ?? []) need(mainSkillNames, main.name, `skillTrees ${tree.slug} mainSkills`);
+    }
+
+    const walk = (value: unknown, where: string): void => {
+      if (Array.isArray(value)) return value.forEach((item) => walk(item, where));
+
+      if (!value || typeof value !== "object") return;
+
+      const node = value as Record<string, unknown>;
+
+      if (node.type === "targetRace" && Array.isArray(node.races)) for (const race of node.races) need(raceNames, race, `${where} targetRace`);
+
+      if (node.kind === "summon" && typeof node.group === "string") need(raceNames, node.group, `${where} summon`);
+
+      for (const child of Object.values(node)) walk(child, where);
+    };
+
+    for (const table of ["units", "skills", "spells", "artifacts"]) for (const row of localized[table] ?? []) walk(row, `${table} ${row.slug}`);
+
+    expect(missing).toEqual([]);
+  });
 });

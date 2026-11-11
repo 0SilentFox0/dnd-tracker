@@ -253,6 +253,36 @@ describe.skipIf(!isLocalDevDatabaseEnv())("sync over layers", () => {
     }
   });
 
+  it("keeps a template-only artifact held in a character inventory when deleted upstream", async () => {
+    const campaignId = await fresh();
+
+    const artifactId = `${marker}-artifact-a`;
+
+    await raw.artifactBase.create({ data: { id: artifactId, name: "Crown", slot: "head", sourceCampaignId: tpl, validFrom: 1 } });
+    invalidateCampaignLayer();
+
+    try {
+      const character = await raw.character.create({ data: { campaignId, type: "pc", controlledBy: marker, name: "Hero", class: "Fighter", race: "Human", updatedAt: new Date() } });
+
+      await raw.characterInventory.create({ data: { characterId: character.id, backpack: [{ artifactId }] } });
+      await raw.artifactBase.updateMany({ where: { id: artifactId }, data: { validTo: 2 } });
+      await raw.campaign.update({ where: { id: tpl }, data: { contentVersion: 2 } });
+
+      const gone = (await diffOf(campaignId)).find((i) => i.key === artifactId)!;
+
+      expect(gone.status).toBe("deletedInSource");
+
+      const result = await apply(campaignId, { apply: [ref(gone)], ignore: [] });
+
+      expect(result.warnings).toEqual([expect.stringContaining("Crown")]);
+      expect(result.warnings).toEqual([expect.stringContaining("not deleted")]);
+    } finally {
+      await raw.character.deleteMany({ where: { campaignId } });
+      await raw.artifactBase.deleteMany({ where: { sourceCampaignId: tpl } });
+      invalidateCampaignLayer();
+    }
+  });
+
   it("an unselected updated row stays at the old version", async () => {
     const campaignId = await fresh();
 

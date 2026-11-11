@@ -10,7 +10,7 @@ import type { SyncRef } from "@/types/campaigns";
 
 const SRC = "src", TGT = "tgt";
 
-const RACE = id("r"), CAREER = id("c"), FEAT = id("f");
+const RACE = id("r"), CAREER = id("c"), FEAT = id("f"), ARTIFACT = id("a");
 
 let f: ReturnType<typeof createFakeSyncDb>;
 
@@ -30,6 +30,7 @@ beforeEach(async () => {
   f.addRow("race", { id: RACE, campaignId: SRC, name: "Human" });
   f.addRow("career", { id: CAREER, campaignId: SRC, name: "Scribe", tiers: [] });
   f.addRow("feat", { id: FEAT, campaignId: SRC, name: "Hardy", type: "general" });
+  f.addRow("artifact", { id: ARTIFACT, campaignId: SRC, name: "Crown", modifiers: [] });
   await clone(f, SRC, TGT);
 });
 
@@ -68,6 +69,29 @@ describe("career/feat ref-integrity in sync", () => {
 
     expect(rows("feat")).toHaveLength(1);
     expect(result.warnings).toEqual([expect.stringContaining("Hardy")]);
+  });
+
+  it.each(["equipped", "backpack", "stash"] as const)("keeps an artifact held in a character %s and warns", async (slot) => {
+    const local = rows("artifact")[0].id as string;
+
+    const held = { equipped: {}, backpack: [], stash: [], [slot]: slot === "equipped" ? { head: { artifactId: local } } : [{ artifactId: local }] };
+
+    f.addRow("characterInventory", { id: id("i"), campaignId: TGT, characterId: id("h"), ...held });
+    f.removeRow("artifact", ARTIFACT);
+
+    const result = await syncScope("artifacts");
+
+    expect(rows("artifact")).toHaveLength(1);
+    expect(result.warnings).toEqual([expect.stringContaining("Crown")]);
+  });
+
+  it("deletes an artifact no inventory holds", async () => {
+    f.addRow("characterInventory", { id: id("i"), campaignId: TGT, characterId: id("h"), equipped: {}, backpack: [], stash: [] });
+    f.removeRow("artifact", ARTIFACT);
+
+    await syncScope("artifacts");
+
+    expect(rows("artifact")).toEqual([]);
   });
 
   it("deletes an unreferenced career and feat", async () => {

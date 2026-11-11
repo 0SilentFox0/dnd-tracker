@@ -13,7 +13,7 @@ import { canReadSource } from "@/lib/utils/api/is-dm";
 import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 import { isCanonicalTemplate, localizationOf } from "@/lib/utils/templates/registry";
 
-export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character">;
+export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character" | "characterInventory">;
 
 const asState = (v: unknown): SyncState => {
   const o = (v ?? {}) as Partial<SyncState>;

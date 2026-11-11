@@ -2,12 +2,10 @@ import { assertSeedTarget } from "../../seed/seed-library-lib";
 import { readManifest, TEMPLATES_DIR } from "./pack";
 import { makeTemplateStore } from "./store";
 
-import { CampaignKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 export interface LocaleRow { id: string; name: string; locale: string | null }
 
-/** Pure: ids of clones that still have no content locale. */
 export const planLocaleBackfill = (clones: readonly LocaleRow[]): string[] => clones.filter((row) => row.locale === null).map((row) => row.id);
 
 /** D34: clones of a template that predates its English base read Ukrainian rows; mark them `locale` before the first sync against the localized source. */
@@ -24,7 +22,7 @@ export async function backfillLocale(key: string, opts: { locale?: string; apply
 
   if (!template) throw new Error(`No official template for "${key}" in the database`);
 
-  const clones = await prisma.campaign.findMany({ where: { createdFromId: template.id, kind: { not: CampaignKind.TEMPLATE } }, select: { id: true, name: true, locale: true }, orderBy: { createdAt: "asc" } });
+  const clones = await prisma.campaign.findMany({ where: { createdFromId: template.id }, select: { id: true, name: true, locale: true }, orderBy: { createdAt: "asc" } });
 
   const ids = planLocaleBackfill(clones);
 
@@ -32,7 +30,7 @@ export async function backfillLocale(key: string, opts: { locale?: string; apply
 
   console.info(`${ids.length} of ${clones.length} clone(s) to update${opts.apply ? "" : " (dry run, pass --apply to write)"}`);
 
-  if (opts.apply && ids.length > 0) await prisma.$transaction([prisma.campaign.updateMany({ where: { id: { in: ids }, locale: null }, data: { locale } })]);
+  if (opts.apply && ids.length > 0) await prisma.campaign.updateMany({ where: { id: { in: ids }, locale: null }, data: { locale } });
 
   return { ids, applied: !!opts.apply };
 }

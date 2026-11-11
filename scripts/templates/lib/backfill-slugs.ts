@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { assertSeedTarget } from "../../seed/seed-library-lib";
-import { delegateFor } from "./kind-delegate";
+import { delegateFor, rowLabel } from "./kind-delegate";
 import { readManifest, TEMPLATES_DIR } from "./pack";
 import { makeTemplateStore } from "./store";
 
@@ -18,7 +18,7 @@ export interface SlugPlan { kind: PackKind; id: string; slug: string }
 
 export interface BackfillResult { plan: SlugPlan[]; unmapped: { kind: string; id: string; label: string }[]; written: number }
 
-/** Pure: which unslugged rows get which slug; rows without a map entry and slug collisions are reported, not guessed. */
+/** Which unslugged rows get which slug; rows without a map entry and slug collisions are reported, not guessed. */
 export function planSlugBackfill(rowsByKind: Record<string, { id: string; slug: string | null; label: string }[]>, map: SlugsFile): { plan: SlugPlan[]; unmapped: BackfillResult["unmapped"]; collisions: string[] } {
   const plan: SlugPlan[] = [];
 
@@ -68,7 +68,7 @@ export async function backfillSlugs(key: string, opts: { apply?: boolean; allowR
   for (const kind of manifest.kinds) {
     const rows = await delegateFor(prisma, kind).delegate.findMany({ where: { campaignId: template.id }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
 
-    rowsByKind[kind] = rows.map((row) => ({ id: row.id, slug: typeof row.slug === "string" ? row.slug : null, label: String(row.name ?? row.title ?? row.race ?? row.id) }));
+    rowsByKind[kind] = rows.map((row) => ({ id: row.id, slug: typeof row.slug === "string" ? row.slug : null, label: rowLabel(row, row.id) }));
   }
 
   const { plan, unmapped, collisions } = planSlugBackfill(rowsByKind, map);

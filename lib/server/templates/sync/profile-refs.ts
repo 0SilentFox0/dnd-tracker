@@ -5,9 +5,9 @@ import type { SyncDb } from "@/lib/server/templates/sync/context";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { parseSpeciesProfile, profileRefIds } from "@/lib/utils/rules/systems/profile-refs";
 
-export type RefScope = "feats" | "careers";
+export type RefScope = "feats" | "careers" | "artifacts";
 
-export const isRefScope = (scope: string): scope is RefScope => scope === "feats" || scope === "careers";
+export const isRefScope = (scope: string): scope is RefScope => scope === "feats" || scope === "careers" || scope === "artifacts";
 
 const speciesProfiles = async (db: SyncDb, campaignId: string) =>
   (await db.race.findMany({ where: { campaignId }, select: { profile: true } })).flatMap((r) => (r.profile == null ? [] : [r.profile]));
@@ -35,15 +35,29 @@ async function careerRefs(db: SyncDb, campaignId: string): Promise<Set<string>> 
   return used;
 }
 
-const blockedText = (scope: RefScope, name: string) =>
-  scope === "feats" ? `feats ${name}: not deleted, used by a species profile or career` : `careers ${name}: not deleted, used by a species profile or character`;
+/** Inventories hold artifact ids in JSON (equipped, backpack, stash), so no FK stops a sync delete. */
+async function artifactRefs(db: SyncDb, campaignId: string): Promise<Set<string>> {
+  const inventories = await db.characterInventory.findMany({ where: { character: { campaignId } }, select: { equipped: true, backpack: true, stash: true } });
+
+  return collectKeysAndStrings(inventories.flatMap((i) => [i.equipped, i.backpack, i.stash]));
+}
+
+const REFS = { feats: featRefs, careers: careerRefs, artifacts: artifactRefs } as const;
+
+const BLOCKED_TEXT: Record<RefScope, string> = {
+  feats: "used by a species profile or career",
+  careers: "used by a species profile or character",
+  artifacts: "in a character inventory",
+};
+
+const blockedText = (scope: RefScope, name: string) => `${scope} ${name}: not deleted, ${BLOCKED_TEXT[scope]}`;
 
 /** Lazy per-sync memo of reference sets, so N deleted rows cost one read per scope. */
 export function createRefChecker(db: SyncDb, campaignId: string) {
   const memo = new Map<RefScope, Promise<Set<string>>>();
 
   const refs = (scope: RefScope) => {
-    if (!memo.has(scope)) memo.set(scope, (scope === "feats" ? featRefs : careerRefs)(db, campaignId));
+    if (!memo.has(scope)) memo.set(scope, REFS[scope](db, campaignId));
 
     return memo.get(scope)!;
   };

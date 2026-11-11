@@ -135,19 +135,59 @@ describe.skipIf(!isLocalDevDatabaseEnv())("template prune, slug backfill and loc
     expect(await slugs()).toEqual(["fix-alert", "fix-archery", "fix-brand-new"]);
   });
 
+  it("the slug guard refuses before anything is written, even when an earlier kind has changes", async () => {
+    const legacy = await raw.feat.create({ data: { campaignId: templateId, name: "Legacy two" } });
+
+    const spellsFile = path.join(dir, "fixture-pack", "spells.json");
+
+    const featsFile = path.join(dir, "fixture-pack", "feats.json");
+
+    const [spellsOriginal, featsOriginal] = [fs.readFileSync(spellsFile, "utf8"), fs.readFileSync(featsFile, "utf8")];
+
+    const spells = JSON.parse(spellsOriginal) as { description: string }[];
+
+    const description = async () => (await raw.spell.findFirstOrThrow({ where: { campaignId: templateId, slug: "fix-fire-bolt" } })).description;
+
+    const stored = await description();
+
+    spells[0].description += " Changed.";
+    fs.writeFileSync(spellsFile, JSON.stringify(spells));
+    fs.writeFileSync(featsFile, JSON.stringify([...(JSON.parse(featsOriginal) as object[]), { slug: "fix-another", name: "Another" }]));
+    fs.writeFileSync(path.join(dir, "fixture-pack", "manifest.json"), fs.readFileSync(path.join(dir, "fixture-pack", "manifest.json"), "utf8").replace(/"feats": 3/, '"feats": 4'));
+
+    await expect(importPack("fixture-pack", { dir })).rejects.toThrow(/Refusing to create/);
+    expect(await description()).toBe(stored);
+
+    fs.writeFileSync(spellsFile, spellsOriginal);
+    fs.writeFileSync(featsFile, featsOriginal);
+    fs.writeFileSync(path.join(dir, "fixture-pack", "manifest.json"), fs.readFileSync(path.join(dir, "fixture-pack", "manifest.json"), "utf8").replace(/"feats": 4/, '"feats": 3'));
+    await raw.feat.delete({ where: { id: legacy.id } });
+  });
+
+  it("--prune leaves a row without a slug alone", async () => {
+    const legacy = await raw.feat.create({ data: { campaignId: templateId, name: "Legacy three" } });
+
+    const pruned = await importPack("fixture-pack", { dir, prune: true });
+
+    expect(pruned.outside).toEqual([]);
+    expect(await raw.feat.count({ where: { id: legacy.id } })).toBe(1);
+    await raw.feat.delete({ where: { id: legacy.id } });
+  });
+
   it("backfill-locale marks only clones without a locale, and only with --apply", async () => {
     const clone = (name: string, locale: string | null) => raw.campaign.create({ data: { name, dmUserId: marker, createdFromId: templateId, locale, inviteCode: `${marker}-${name}` } });
 
-    const [bare, uk] = [await clone("bare", null), await clone("has-locale", "uk")];
+    const [bare, uk, privateTemplate] = [await clone("bare", null), await clone("has-locale", "uk"), await raw.campaign.create({ data: { name: "private-template", kind: "template", dmUserId: marker, createdFromId: templateId, inviteCode: `${marker}-private` } })];
 
     const dry = await backfillLocale("fixture-pack", { dir });
 
-    expect(dry.ids).toEqual([bare.id]);
+    expect([...dry.ids].sort()).toEqual([bare.id, privateTemplate.id].sort());
     expect((await raw.campaign.findUniqueOrThrow({ where: { id: bare.id } })).locale).toBeNull();
 
     await backfillLocale("fixture-pack", { dir, apply: true });
     expect((await raw.campaign.findUniqueOrThrow({ where: { id: bare.id } })).locale).toBe("uk");
     expect((await raw.campaign.findUniqueOrThrow({ where: { id: uk.id } })).locale).toBe("uk");
+    expect((await raw.campaign.findUniqueOrThrow({ where: { id: privateTemplate.id } })).locale).toBe("uk");
     expect((await backfillLocale("fixture-pack", { dir })).ids).toEqual([]);
   });
 });
