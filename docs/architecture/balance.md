@@ -26,4 +26,4 @@ Summon targets (units a spell or ability summons by `unitId`, `summonedUnitIds` 
 
 ## WFRP hit model
 
-The wfrp `hitModel` (`lib/utils/rules/systems/wfrp/combat/hit-model.ts`): `durability` also scales by the defender's TB (on top of AP and Ward), so wfrp fair scaling changes even for units without Traits. The `damage` formula no longer adds SB to `noSb` weapons or to participants with no attacks.
+The wfrp `hitModel` (`systems/wfrp/rules/combat/hit-model.ts`): `durability` also scales by the defender's TB (on top of AP and Ward), so wfrp fair scaling changes even for units without Traits. The `damage` formula no longer adds SB to `noSb` weapons or to participants with no attacks.

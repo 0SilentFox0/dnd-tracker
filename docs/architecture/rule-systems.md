@@ -1,71 +1,102 @@
 # Рульові системи (homm / dnd5e / wfrp)
 
-Кампанія грає за однією рульовою системою: `rules.system.key` ∈ `homm | dnd5e | wfrp`. Дві реалізації: `d20/` (homm і dnd5e, делегує в наявний код) і `wfrp/` (d100, характеристики). Spec: [2026-11-03-wfrp-5a-design.md](../superpowers/specs/2026-11-03-wfrp-5a-design.md), дослідження: [2026-11-03-wfrp-rule-system.md](../superpowers/research/2026-11-03-wfrp-rule-system.md).
+Кампанія грає за однією рульовою системою: `rules.system.key` — рядок, відомий реєстру (`homm | dnd5e | wfrp` на сьогодні). Три шари: **core** (бій, лист, шаблони — не знає систем), **система** (тека `systems/<id>/` з логікою, UI, сервером, мета-описом) і **пакет шаблону** (`data/templates/<key>/` + хуки `scripts/templates/systems/<id>/`). d20-система (homm і dnd5e) до E2 лишається в core (`lib/utils/rules/systems/d20`, `components/systems/d20`). Spec: [2026-11-10-architecture-modularity-design.md](../superpowers/specs/2026-11-10-architecture-modularity-design.md), план E1: [2026-11-11-e1-neutral-rule-system.md](../superpowers/plans/2026-11-11-e1-neutral-rule-system.md); історія wfrp: [2026-11-03-wfrp-5a-design.md](../superpowers/specs/2026-11-03-wfrp-5a-design.md).
 
-## Реєстр і хуки
+## Корені і реєстри
 
-`lib/utils/rules/systems/`: `types.ts` (`RuleSystemDefinition`), `registry.ts` (`RULE_SYSTEM_REGISTRY`, `ruleSystemOf(rules)`, `systemKeyOf`), `d20/`, `wfrp/`. UI-двійник — `components/systems/` (`SYSTEM_UI`, `systemUiOf(key)`); хук `useRuleSystem` — `lib/hooks/systems/`.
+Core бачить систему лише через **корені** (`SYSTEM_ROOTS`, `scripts/shared/system-ratchet.ts`); кожен має блоки `// <systems:generated>` ... `// </systems:generated>`, які пише генератор `pnpm systems:index` (`scripts/shared/systems-index.ts`, `--check` у тесті `lib/__tests__/systems-index.test.ts`; рядки в алфавітному порядку id, лише для наявних шарів теки):
 
-| Хук | Що робить | Де викликається |
+| Корінь | Що збирає | Шар системи |
 |---|---|---|
-| `distance { unit, perCell }` | одиниця й масштаб клітинки (ft/5, yd/2); у 5a лише декларація | UI одиниць, `gameTerms.distanceUnit`; шов у grid-хелперах — 5b |
-| `balance { kind }` | `fair` / `none`; wfrp = `fair` (via `combat.hitModel`: offense/defense/winChance/damage/refHit; `loadUnitLibraryStats`/`heroPower` swap d20 to-hit/AC for it, `buildPartyPower(members, model)` carries `hit`/`refHit`) | `useBattleSetup` (ховає перемикач), `balance-post`, `start-battle-handler` |
-| `progression.levels` / `maxHp` | level-up/XP-пороги (`levels: false` → rest-блок без `xp.next`/`levelUp`, `level-up` → 409 `SYSTEM_LEVELS_UNSUPPORTED`); формула максимуму HP (wfrp = Wounds); `null` → d20-розрахунок | `characterBaseHp` (`hero-hp.ts`: лист і бій — одне число), `HeroStats`, rest-блок |
-| `characteristics { kind, sheetBlock }` | `d20` або `wfrp`; блок листа (характеристики, Wounds, Move, навички, Fate/Fortune) | `build-sheet.ts`, `resources-handler`, `system-fields.ts` (чужі поля відкидаються), `create`/`patch` |
-| `sheetTest { accepts, roll }` | тест з листа: d20 `check/save` або d100 `test` | `roll-handler`, `SheetRollDialog` (тіло діалогу — `SystemUi.RollDialogBody`) |
-| `rest.kinds` / `rest.onSession` | `kinds: false` ховає UI короткого/довгого відпочинку (кнопки партії, пілюля вікна відпочинку, панелі хіт-кісток і відновлення), сервер і далі приймає kinds; `onSession` — дія ДМ «Нова сесія»: `Fortune = Fate`, відсутній → 409 `REST_KIND_UNSUPPORTED` | `rest-handler`, `PartyRestActions`, `RestBadges`, `ProfileHero` |
-| `spells` / `items` | вкладки «Магія» і «Інвентар» у перегляді листа та редакторі ДМ (`?tab=magic` для wfrp → бойова) | `CharacterProfile`, `ProfileEditor` |
-| `d20Stats` | d20-рядки: AC/ініціатива/швидкість і мораль у «Бою», бейджі виснаження/натхнення, поля тимчасових HP та виснаження в діалозі ресурсів, перемикач натхнення | `CombatTab`, `RestBadges`, `DmRestActions`, `ResourcesDialog` |
-| `combat.dice` / `actionEconomy` | розмір основного кубика (d20 / d100) і прапорці дій (`bonusAction`/`reaction`); d20 = {20, true/true}, wfrp = {100, false/false}; шов для `rollInitiative`, `reactionBlocker`/`canReact`, off-hand (wfrp → основна дія) | `turn/initiative.ts`, `turn/reaction`, `strikeRoll(max)` |
-| `combat.resolveAttack` | відкрита перевірка d100 (WS/BS проти захисту, SL, Momentum, дублети, локація за відвернутим кидком); `undefined` у d20 → старий `judgeD20` | `attack/run.ts` (`judgeWfrp`), `server-attack.ts` |
-| `combat.mitigateDamage` | зброя + SB + чистий SL − TB − AP (мін. 1), крит від дублетів (`rollCrit`) з `afterHit()`; викликається в `compute.ts` між опором і `totalFinalDamage` | `attack/process/compute.ts` |
-| `combat.onZeroHp` | 0 Wounds → непритомність + один крит; після `revertOnZero` у `applyDamageConsequences` і в `settleStatusChange` (ручна зміна ДМ — без крита) | `damage/consequences.ts` |
-| `combat.initiative` / `baseStats` | `I` (+d10) замість d20 + Dex (`InitiativeScore {total, roll, die}`), тай-брейк за `abilities.wfrp.ag`; початкові `initiative`/`speed` (Move × 3 ft) | `scoreInitiative`, `from-character`/`from-unit` |
-| `combat.hitModel` | `offense/defense/winChance/damage/refHit` для чесного балансу (замість d20 to-hit/AC) | `balance/hit-model.ts`, `heroPower`, `loadUnitLibraryStats` |
-| `combat.hitModel.durability?(p)` | множник ефективних HP за AP (зважено за локаціями), TB і Ward; `builtUnitsById` бере `rules` лише для систем із `hitModel` (d20 без змін) | `hitModelHeroStats/UnitStats` |
-| `combat.participantFields` | додаткові поля учасника при створенні з персонажа/юніта (`abilities.characteristics`, `abilities.wfrp`: стати, AP = 0); d20 не додає ключів; `refreshFromSource` копіює | `from-character`, `from-unit`, `refresh-from-source` |
-| `conditions` | 12 станів wfrp: `catalog`, `apply`/`remove`/`level` (рівень = сума маркерів, обрізання 10), `tick` на початку ходу активного носія, `endTest` (тест зняття), `selfTestMod`/`againstMod` для d100-тестів; `undefined` у d20 → `CONDITION_5E_REGISTRY` без змін | `turn/start` (`applyStartOfTurnDamage`), `resolve-attack`, `crit-effect`, `system-condition`/`condition-test` мутації, `sheet-test` |
-| `magic` | `RuleSystemMagic`: `castTest` (d100 проти Int + Language (Magick), SL + канальований SL ≥ CN, броня, Fortune, дублі → miscast), `channel` (банк SL, `battleData.channelledSl`), `miscast` (таблиці minor/major з `rules.tables`), `attribute` (lore → стан), `onDamaged` (втрата канальованого SL); `slots: false`; `undefined` у d20 | `castSpell` (`spell/cast/cast-test.ts`, `finish.ts`), `spell-mutation`, `channel-mutation` (`POST …/channel`), `damage/consequences.ts` |
-| `combat.fortune` | Fortune: перекинути d100 (лише атакувальник; захисник — ні) або +1 SL; `percentile.fortune` у деталях дії; `undefined` у d20 | `attack/run.ts`, схема атаки, `useAttackWizard` |
-| `cellFeetOf(rules)` | розмір клітинки в футах (`grid/cell-feet.ts`): homm/dnd5e 5, wfrp 6 (2 yd); `CELL_FEET` видалено, `rules` — обов'язковий параметр grid-хелперів (рух, шаблони, досяжність, цілі) | `lib/utils/battle/grid/*` |
-| `traits` | `RuleSystemTraits`: `recipes` (рецепти Traits у галереї вмінь), `unitBuild(row, abilities)` (поля учасника й атаки-Traits юніта), `psychology` (Fear/Terror при приєднанні); d20 не має. Прапорець = наявність `traits` | `RecipeGallery`, `create-participant-from-unit`, `runJoinTriggers` |
-| `downtime` | `RuleSystemDowntime`: `planPeriod`, `validateEndeavour`, `maxDays`; `undefined` у d20 | `downtime-handler.ts`, операції `downtime.*` (`set`, `period`, `period.undo`) |
-| `corruption` | `RuleSystemCorruption`: `planGrant`, `planUndo`, `grantMax`; `undefined` у d20 | `corruption-handler.ts`, операції `corruption.grant`/`corruption.undo` |
-| `battle.supported` | wfrp = `true` (5b-1); `false` → старт бою 409 `SYSTEM_BATTLE_UNSUPPORTED` | `start-mutation`, setup UI |
-| `unusedMechanics` | механіки, що ховаються на сторінці правил | `RulesForm` |
+| `lib/utils/rules/systems/meta.ts` | `SYSTEM_META`, `RULE_SYSTEM_KEYS`, `isRuleSystemKey`, `metaOf`, `systemNamespaces()` | `systems/<id>/meta.ts` (лише дані, `import type`) |
+| `lib/utils/rules/systems/registry.ts` | `RULE_SYSTEM_REGISTRY`, `ruleSystemOf(rules)` (невідомий ключ → помилка `Unknown rule system`), `ruleSystemByKey(key)`, `systemKeyOf` | `systems/<id>/index.ts` (`<ID>_SYSTEM`) |
+| `components/systems/registry.ts` | `SYSTEM_UI`, `systemUiOf`, `systemUiByKey` | `systems/<id>/ui/index.ts` |
+| `lib/server/systems/registry.ts` | `SYSTEM_SERVER`, `systemServerOf` | `systems/<id>/server/index.ts` |
+| `lib/utils/abilities/schema/system-effects.ts`, `lib/utils/abilities/registry/effects/system-rows.ts` | схеми й рядки ability-ефектів системи (два корені: реєстр клієнтського графа без zod) | `systems/<id>/rules/ability-effects.ts`, `ability-effect-rows.ts` |
+| `scripts/templates/systems/index.ts` | `PACK_HOOKS`; `SYSTEM_MODULE` береться з meta (`modules.ts`) | `scripts/templates/systems/<id>/index.ts` (`<ID>_HOOKS`) |
+
+Ключ `RuleSystemKey` не існує: `string`, валідація в `RulesetSchema` (`isRuleSystemKey`; невідомий ключ → `rules.validation.unknownSystem`). `gameTerms.ruleSystem.<key>` потрібен для кожного ключа (тест `system-contract`).
+
+`SystemMeta` (`systems/<id>/meta.ts`, легкий опис без логіки): `module`, `keys`, `i18n` (`battle | campaign | member | dm | pages{character, dmCharacters, dmCharacter, dmRules, draft}` + `budgetKb`), `unusedMechanics` (механіки, що ховаються на сторінці правил), `dmSections`. Із нього виводяться `Namespace` (`systemNamespaces()`), `systemScope(key, slot)` (`lib/i18n/system-scope.ts`) і бюджети `scope-size`.
+
+**Слот** (`lib/utils/rules/systems/slot.ts`): `SystemSlot = { key, data }`, `defineSlot(key, parse)` → `{ read, write }`; чужий ключ → `read()` повертає `undefined`. Слоти в core-типах: `abilities.system` (характеристики й стати учасника), `attack.system`, `sheet.systemSlot`, `actionDetails.system` / `AttackRollResult.system`, `scene.system` (стан сцени, колонка `battle_scenes.system_state`; core лише передає непрозорий `sceneState` у `combat.resolveAttack` і порівнює `sceneStatePatch` через `hashJson`). Колонка `characteristics` у рядках — непрозорий `SystemData`; дефолт і «порожність» дає система. Нейтральні поля атаки, які читає сітка: `ammo`, `reachCells`, `blastRadius`, `noLevelDice`, `ignoresEngagement`.
+
+## Хуки
+
+`RuleSystemDefinition` (`lib/utils/rules/systems/types.ts`, без zod і без імпортів `@/systems/*`):
+
+| Поле | Що робить | Хто читає |
+|---|---|---|
+| `key`, `distance { unit, perCell }` | ключ; одиниця й масштаб клітинки (`ft/5`, `yd/2`) | `cellFeetOf(rules)` (`grid/cell-feet.ts`), `gameTerms.distanceUnit` |
+| `progression { levels, hpTerm, maxHp }` | рівні/XP (`levels: false` → `level-up` 409 `SYSTEM_LEVELS_UNSUPPORTED`); підпис HP/Wounds; формула максимуму (`null` → d20) | `characterBaseHp`, `HeroStats`, rest-блок |
+| `characteristics { persisted, defaults, isEmpty, sheetBlock, reconcile?, initial?, redact? }` | чи колонка несе дані системи; дефолт; «порожність»; блок листа; злиття правки (409 при конфлікті); відкидання серверних полів нового персонажа; редакція для глядача | `build-sheet`, `system-fields`, `normalizeCharacterInput`, `units`, `import-units` |
+| `resources? { limits, seed, fortuneOf }` | стеля Fate, початковий Fortune, Fortune учасника | `resources-handler`, `from-character` |
+| `sheetTest { accepts, roll }` | тест з листа: d20 `check/save` або `test` системи | `roll-handler`, `SheetRollDialog` |
+| `rest { kinds, onSession? }` | `kinds: false` ховає UI короткого/довгого відпочинку; дія ДМ «Нова сесія» | `rest-handler`, `PartyRestActions` |
+| `combat { judge, dice, actionEconomy, … }` | `judge: "client" \| "server"` (хто вирішує атаку), розмір кубика, `bonusAction`/`reaction`; `resolveAttack`, `details` (`redact`, `actorSecret`, `redactLine`, `diceFx`, `failed`), `mitigateDamage`, `onZeroHp`, `initiative`, `tieBreak`, `baseStats`, `participantFields`, `attacksOf`, `attackTarget`, `sceneHeldBy`, `fortune`, `hitModel` | `attack/run.ts`, `compute.ts`, `damage/consequences.ts`, `scoreInitiative`, `balance/hit-model.ts`; клієнтський flow дивиться на `combat.judge === "server"` (`mode: "client" \| "serverJudged"`) |
+| `conditions?` | каталог станів, `apply`, `reduce`, `turnStart`, `skippedTurn`, `attemptEnd`, приховування рядків (`concealLine`, `isMiscastLine`); `undefined` → `CONDITION_5E_REGISTRY` | `turn/start`, `system-condition`/`condition-test` мутації |
+| `magic?` | `castTest`, `castPreview`, `channel`, `miscast`, `attribute`, `badge`, `onDamaged`, `avertMiscast`; `slots: false` | `castSpell`, `spell-mutation`, `channel-mutation` |
+| `advancement?`, `equipment?`, `traits?`, `currency?` | таланти/кар'єри; броня й спорядження; рецепти Traits і психологія; монети | `RecipeGallery`, `create-participant-from-unit`, інвентар |
+| `downtime?`, `corruption?`, `creation?` | прапорці наявності (UI показує вкладку; обробники — у `systems/<id>/server`) | `CharacterProfile`, `create-draft` |
+| `identity { alignments }`, `lineage`, `classes`, `attacks`, `spells`, `items`, `inventory`, `d20Stats` | що показують форма, лист і бій (`d20Stats`: AC/ініціатива/мораль/натхнення) | `CharacterProfile`, `CombatTab`, `RestBadges` |
+
+`SystemUi` (`components/systems/types.ts`): обов'язкові `HeroStats`, `StatsTab`, `RollDialogBody`, `StatsFields`, `UnitStatsFields`, `hideProgression`; необов'язкові слоти — `battle { RollBody, CastTest, ChannelDialog, ChannelLabel, ConditionTestPanel }`, `ActionResult`, `MagicTab`, `AdvancementTab/Editor`, `CareerForm`, `DraftForm`, `DowntimeTab/PeriodPanel`, `RaceProfileEditor`, `battleConditionsDialog`, `ArtifactStatsEditor`, `EquippedSummary`, `RestBadges`, `ResourceFields`, `SpellMagicFields`, `rulesSections` (редактори секцій правил). `SystemServer` (`lib/server/systems/types.ts`): `schemas { characteristics, unitCharacteristics, systemStats }`, `operations` (домерджуються в `CHARACTER_OPERATIONS` і `PROGRESSION_INPUTS`), `ai { promptLine, heroSelect, party, hero, participantView, unitView }`. `PackHooks` (`scripts/templates/systems/types.ts`): `validatePack`, `i18nRows`/`i18nIssues`, `afterImport`, `toPackRow`/`fromPackRow`, `prepareRows(kind, rows, ctx)`, `clearableColumns`, `normalizeTranslation`; d20-частини (`D20_HOOKS`: школи заклинань, іконки класів, заголовки статблоків) спільні для `homm` і `dnd5e`, `PACK_HOOKS.homm = { ...D20_HOOKS, ...HOMM_HOOKS }`.
 
 ## Правила
 
-- Ядро не імпортує систему: `lib/utils/rules/systems/wfrp*`, `d20*`, `lib/hooks/systems/wfrp*`, `components/systems/wfrp*` заборонені ESLint поза `lib/utils/rules/systems/**`, `lib/hooks/systems/**`, `components/systems/**`. Решта коду бере систему через `ruleSystemOf`/`systemUiOf`.
-- `system` не механіка: `MechanicKey` без неї, sync шаблон→кампанія й вкладки правил її не бачать.
+- **Зона.** Поза коренями й списком `system-imports-exempt.json` нічого не імпортує `@/systems/*` (ESLint `systems/zone`, патерн `SYSTEM_ZONE_PATTERN`); d20-реалізація недоступна поза реєстром (`@/lib/utils/rules/systems/d20*`, `@/components/systems/d20*`). Барель `lib/utils/rules/systems/index.ts` не реекспортує систему (тест `system-imports`, максимум 0 рядків `@/systems/`).
+- **Шари всередині системи** наслідують правила core: `rules/**` = `lib/utils` (без `@/lib/db`, `@/lib/server`; з `lib/utils/api` лише `content-error`), `ui/**` = `components` (без `@/lib/api`, `@/systems/*/api` крім типів, без сервера), `hooks/**` = `lib/hooks`, `api/**` = `lib/api`, `server/**` — без обмежень шару. Система не імпортує іншу систему, `@/app/*`, `@/scripts/*`; `meta.ts` — лише `import type`.
+- **Ratchet** (корінь репозиторію): `system-imports-exempt.json` (`[{file, reason}]`, причини лише `route` | `content-kind` | `ruleset-section`, ціль ≤ 30 файлів; ESLint читає його як `ignores`) і `system-literals-exempt.json` (`{файл: max}`, літерали ключів і модулів систем та ключів `TEMPLATE_REGISTRY` поза теками систем; лічильник може лише падати). Перегенерація: `pnpm exec tsx scripts/shared/system-ratchet.ts --write`. Тест `system-literals` додатково забороняє `=== "wfrp"`, `isWfrpCampaign`, `WFRP_*`, `.wfrp` у нетестовому core і wfrp-літерали поза route/content-kind/ruleset-section, `whats-new`, `api-errors`, `character-coverage` і сторінкою кар'єр.
+- **Контракт систем** (`lib/__tests__/system-contract.test.ts`): ключі meta = логіка = UI = сервер = `PACK_HOOKS`; теки `systems/*` = модулі meta без `d20`, кожна з `meta.ts` і `index.ts`; кожен namespace meta має файл у `messages/{uk,en}`; `assertSystemContract` проходять і реальні системи, і фікстурна `d6pool` (`lib/__tests__/fixtures/d6pool`), яка живе лише в тестах і не імпортує нічого з `@/systems`.
+- `system` не механіка: `MechanicKey` без неї, sync шаблон→кампанія й вкладки правил її не бачать; `unusedMechanics` з meta ховає механіки на сторінці правил.
 - Блокування: `updateCampaignRules` рахує `characters` + `units`; якщо >0 і патч змінює `system.key` → 409 `SYSTEM_LOCKED`. `rules.get` повертає `systemLocked`.
 - Відсутня секція `system` у збережених правилах: `parseRules` виводить `dnd5e` (якщо `classes.enabled`) або `homm`; бекфіла БД нема.
-- Прапорець `classes` реєстру (d20 `true`, wfrp `false`): форма/редагування ховають клас і підклас (`CharacterBasicInfo.hideClass`, `useCharacterForm.requireClass`), лист/ДМ-картка/дашборд гравця не друкують клас; сервер (`normalizeCharacterInput`) вимагає клас лише в системах з `classes` (`HERO_CLASS_REQUIRED`), у wfrp пише `class: ""` і відкидає надісланий клас/підклас. Зведена перевірка «клас або `classes`» перенесена зі Zod-схем у `normalizeCharacterInput`.
-- Пресети: `SRD_RULES` = `dnd5e`; `WFRP_RULES` (`wfrp/rules-preset.ts`) вимикає класи, рятунки від смерті, концентрацію, мораль, стани й дії; шаблон «Grim d100 (empty)» (`templateKey: grim-d100-empty`).
+- Прапорець `classes` (d20 `true`, wfrp `false`): форма/редагування ховають клас і підклас; сервер (`normalizeCharacterInput`) вимагає клас лише в системах з `classes`.
+- Пресети: `SRD_RULES` = `dnd5e`; `WFRP_RULES` (`systems/wfrp/rules/rules-preset.ts`) вимикає класи, рятунки від смерті, концентрацію, мораль, стани й дії.
+- Невикористані в E1 хуки-заглушки прибрано: `balance { kind }`, `battle { supported }`, `characteristics.kind`, `dice: 20 | 100` як дискримінатор.
 
 ## Що де лежить (wfrp)
 
 | Шлях | Зміст |
 |---|---|
-| `wfrp/percentile/` | `roll` (d100, інверсія, дублети), `difficulty` (`DIFFICULTY_KEYS`, модифікатори), `resolve` (SL, критичний успіх/невдача) |
-| `wfrp/characteristics/` | `schema` (`CharacteristicsSchema`, 10 характеристик, `fate`, `advances`, навички), `derive` (Wounds, Move), `sheet-block` |
-| `wfrp/skills/` | каталог навичок і спеціалізацій (`catalog.ts`) |
-| `wfrp/conditions/` | `catalog.ts` (числа станів), `apply.ts`, `levels.ts`, `tick.ts`, `end-test.ts`, `test-mod.ts`, `index.ts` (`WFRP_CONDITIONS`) |
-| `wfrp/magic/` | `cast-test.ts`, `channel.ts`, `miscast.ts`, `attribute.ts` (lore attribute), `armour.ts` (штраф броні), `constants.ts` (`CAST_SKILL`, `OVERCAST_SL_STEP`, `CHANNEL_MAX_SL`), `index.ts` (`WFRP_MAGIC`) |
-| `wfrp/tables/` | `roll-table.ts` — спільний `rollTable`; `defaults.ts` (`DEFAULT_TABLES`), `resolve.ts` (`resolveTable`, `rollSlot`) — таблиці критів/miscast/wrath з `rules.tables` ([«Межі 5h-2»](#межі-5h-2)) |
-| `wfrp/traits/` | `constants.ts` (числа-заглушки Traits), `read.ts` (`traitEntries`/`traitEffects`/`sizeStep`), `recipes.ts` (14 рецептів), `unit-build.ts` (`wfrpUnitBuild`), `size.ts` (`sizeHitMod`, `sizeDamageBonus`, `wardRoll`), `psychology.ts` (`wfrpPsychology`), `index.ts` (`WFRP_TRAITS`) |
-| `wfrp/downtime/` | `constants.ts` (числа), `status.ts` (дохід за статусом), `heal.ts`, `ailments.ts` (festering/disease/injury), `endeavours.ts` (earn/train/tend/rest/custom), `event.ts` (`downtimeEvent`), `plan-period.ts`, `read.ts`, `index.ts` — [«Межі 5h-4»](#межі-5h-4) |
-| `wfrp/corruption/` | `constants.ts` (числа), `plan-grant.ts`, `undo.ts`, `modifiers.ts`/`fold.ts` (ефекти мутацій), `threshold.ts`, `read.ts`, `types.ts` — [«Межі 5h-3»](#межі-5h-3) |
-| `wfrp/sheet-test.ts`, `session.ts` | `sheetTest.roll` і `rest.onSession` |
-| `components/systems/wfrp/` | `HeroStats`, `StatsTab`, `StatsFields`, `UnitStatsFields`, `RollDialogBody`, редактори характеристик і навичок |
+| `systems/wfrp/meta.ts`, `index.ts` | `WFRP_META`; `WFRP_SYSTEM` (`RuleSystemDefinition`, без zod) |
+| `systems/wfrp/rules/` | `percentile/` (d100, SL, дублети, `details`), `characteristics/`, `skills/`, `conditions/`, `magic/`, `tables/`, `traits/`, `downtime/`, `corruption/`, `advancement/`, `creation/`, `equipment/`, `combat/` (`momentum`, атака), `slots.ts` (`PARTICIPANT_SLOT`, `ATTACK_SLOT`, …), `ability-effects.ts` / `ability-effect-rows.ts` / `trait-kinds.ts`, `rules-preset.ts`, `sheet-test.ts`, `session.ts` |
+| `systems/wfrp/constants/` | `characteristics`, `conditions`, `mutations` |
+| `systems/wfrp/server/` | `index.ts` (`WFRP_SERVER`), `schemas.ts`, `ai.ts`, `operations/`, `*-handler.ts` (advance, career, downtime, corruption), `draft/`, `race-profile.ts` |
+| `systems/wfrp/api/`, `hooks/` | клієнтські обгортки й хуки (аналог `lib/api`, `lib/hooks`) |
+| `systems/wfrp/ui/` | `index.ts` (`WFRP_UI`), лист і редактори, `battle/` (RollBody, CastTest, Channel, ConditionTest, ActionResult), `rules/` (Tables, Advancement), `careers/`, `creation/`, `downtime/`, `corruption/` |
+| `systems/wfrp/__tests__/` | `wfrp-*` тести з core-тек (дзеркальний підшлях: `lib/...`, `components/...`, `scripts/...`) |
+| `scripts/templates/systems/wfrp/` | `PackHooks` пакета Grim d100 |
 
-Тексти: `gameTerms.ruleSystem|characteristics|wfrpSkills|wfrpSpecs|difficulty|testOutcome|distanceUnit`, `rules.system.*`, `rest.log.test|session`, `rest.party.session`; динамічні ключі покриває `lib/i18n/__tests__/label-keys-rule-systems.test.ts`. Дані: JSON `characteristics` у `characters` і `units` (6 колонок d20 лишаються; для d20 сервер не пише `characteristics` ні персонажів, ні юнітів, а `rowHash` синку шаблонів трактує порожнє/дефолтне `units.characteristics` як відсутнє), Wounds = `resources.hp`, `resources.fortune`.
+Тексти: `gameTerms.ruleSystem|characteristics|wfrpSkills|wfrpSpecs|difficulty|testOutcome|distanceUnit`, namespace-и з meta (`battleWfrp`, `wfrpMagic`, …), `rules.system.*`; динамічні ключі покриває `lib/i18n/__tests__/label-keys-rule-systems.test.ts`. Дані: JSON `characteristics` у `characters` і `units` (для d20 сервер не пише `characteristics`, а `rowHash` синку трактує порожнє/дефолтне `units.characteristics` як відсутнє), Wounds = `resources.hp`, `resources.fortune`.
 
-## Як додати систему або хук
+Старі шляхи з розділів «Межі …» нижче (історія): `lib/utils/rules/systems/wfrp/**` → `systems/wfrp/rules/**`, `components/systems/wfrp/**` → `systems/wfrp/ui/**`, `lib/hooks/systems/wfrp/**` → `systems/wfrp/hooks/**`, `lib/constants/wfrp-*.ts` → `systems/wfrp/constants/*`, `lib/utils/battle/momentum.ts` → `systems/wfrp/rules/combat/momentum.ts`, `lib/ai/tools/wfrp-view.ts` → `systems/wfrp/server/ai.ts`, `abilities.wfrp` / `attack.wfrp` / `percentile` у деталях дії → слоти `system`.
 
-- Нова система: ключ у `RULE_SYSTEM_KEYS` (`lib/constants/rules.ts`), тека `lib/utils/rules/systems/<key>/` з `RuleSystemDefinition`, рядок у `RULE_SYSTEM_REGISTRY`, UI у `components/systems/<key>/` + рядок у `SYSTEM_UI`, пресет правил, терміни в `gameTerms`, запис у `whats-new` і help.
-- Новий хук: поле в `RuleSystemDefinition`, реалізація в обох `d20/` і `wfrp/` (d20 — нейтральна/делегуюча), виклик лише через `ruleSystemOf`; додати рядок у таблицю вище.
-- Нові ключі з динамічною назвою — у `label-keys-rule-systems.test.ts`.
+## Як додати систему
+
+1. `systems/<id>/meta.ts` (`<ID>_META as const satisfies SystemMeta`: `module`, `keys`, `i18n`, `unusedMechanics`, `dmSections`), `index.ts` (`<ID>_SYSTEM`), за потреби `rules/`, `ui/index.ts` (`<ID>_UI`), `server/index.ts` (`<ID>_SERVER`), `rules/ability-effects.ts` + `ability-effect-rows.ts`; для пакета — `scripts/templates/systems/<id>/index.ts` (`<ID>_HOOKS`).
+2. `pnpm systems:index` дописує рядки в усі корені; ESLint-зони й ratchet підхоплюють теку автоматично (`fs.readdirSync("systems")`).
+3. `gameTerms.ruleSystem.<key>` і `messages/{uk,en}/<ns>.json` для кожного namespace з meta; пресет правил; запис у `whats-new` і help.
+4. Звірити: `pnpm test:run lib/__tests__/system-contract.test.ts lib/__tests__/systems-index.test.ts lib/utils/rules/systems` — exhaustiveness і `assertSystemContract` скажуть, чого бракує. Новий шаблон додається разом зі своїм профілем `battle-sweep`.
+5. Новий хук: поле в `RuleSystemDefinition` (або `SystemUi`/`SystemServer`/`PackHooks`), реалізація в `d20/` (нейтральна/делегуюча) і в системах, виклик лише через `ruleSystemOf`/`systemUiOf`/`systemServerOf`; рядок у таблицю вище. Нові види контенту (`careers`) поки потребують ~14 точок core (E2).
+
+## Розбіжності doc ↔ spec розд. 7 (закрито в E1.12)
+
+1. `templateKey: grim-d100-empty` — у коді ключ шаблону = його назва (`grim-d100`); застарілий опис прибрано.
+2. «Без шарів, `*Base`, sync» (5e-2) суперечило розділу 5g-0 — чинне 5g-0 (шари контенту).
+3. ESLint: `SYSTEM_IMPORT_PATTERN` забороняє лише d20-теки; зона `@/systems/*` + `types/` під межею описано в «Правилах».
+4. Таблиця хуків тепер повна: `identity`, `lineage`, `attacks`, `inventory`, `currency`, `equipment`, `advancement`, `creation`, `attackTarget`, `conditions.*`.
+5. `distance` не «лише декларація»: його читає `cellFeetOf`.
+6. «Як додати систему» враховує корені, генератор, meta, ESLint-зони, `system-contract`, ratchet і `systemScope` (раніше пропускало ESLint-патерн, `NAMESPACES`/`scopes.ts`, `isWfrpCampaign`, перевірки `kind`, AI-проєкції); `map-modes.md` посилається сюди.
+7. Приховані вкладки правил — `unusedMechanics` з meta (хардкод `WFRP_ONLY` видалено).
+8. `battle.supported` видалено (усі системи `true`, гілка була недосяжна).
+9. `balance.kind: "none"` видалено (жодна система не використовувала).
+10. `SYSTEM_STATS` (`schemas.systemStats`): d20 відхиляє не-null, реєстр `Record<string, …>` з exhaustiveness-тестом.
+11. `SYSTEM_UI`/`useRuleSystem` збігається з кодом; рядок чекліста «лишився 5g» у STATUS оновлено.
+
+## Ratchet наприкінці E1
+
+Імпорти (`system-imports-exempt.json`): 18 файлів — 12 `route` (`app/api/**`), 5 `content-kind` (`careers`, профіль виду), 1 `ruleset-section` (`tables-schema.ts`); початок E1 — 14 (облік бареля D69 підняв до 23). Літерали (`system-literals-exempt.json`): 35 файлів / 73 влучання (початок E1: 81 / 379; решта — літерали `homm`/`dnd5e`/ключів шаблонів у d20-core, до E2). Борги E2: маршрути `/system/[action]` замість route-файлів, реєстрація виду `careers`, `rules.tables`/`rules.advancement` у слот правил, лічильники `battleData.{fortune,channelledSl,sin,conditionTests,psychologyTested}`, форма `skillTrees`, `systems/d20` і `systems/homm`, Minor 13.
 
 ## Межі 5b-2
 
