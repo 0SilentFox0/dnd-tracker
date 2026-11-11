@@ -73,6 +73,7 @@
 | U5 | Дизайн за розділами схвалено |
 | U6 | Ключі шаблонів: `srd-5.2` (з версією), `grim-d100`, `heroes-homm`; порожні оболонки — `srd-5.2-empty`, `grim-d100-empty` (ruling архітектора) |
 | U7 | Heroes стає повноцінним перекладеним шаблоном: EN-база + uk-overlay робляться зараз, у E0, разом із переведенням у пакет |
+| U9 | E2: механіки, властиві лише HOMM (мораль, відсіч, лідерство тощо), живуть в окремому модулі `systems/homm`, що розширює базу `systems/d20`, а не в підпапці d20-варіанта; `dnd5e` лишається d20-базою без HOMM-механік. Межу «що база, що HOMM» вирішує Opus на початку E2 | чистіша межа й ESLint-зона; 5e не знає про HOMM-механіки (користувач 2026-11-11) |
 
 Рішення архітектора:
 
@@ -305,7 +306,7 @@ export interface RuleSystemDefinition {
 
 ### Після merge
 
-**E2 (L, по підсистемах):** `systems/d20/` стає повним модулем з варіантами `homm`/`dnd5e` (`d20System(key)`): спершу `lib/constants` (~25 файлів: `abilities.ts` 107 імпортерів, `classes`, `skills`, `spells`, `damage`, `weapon-traits`, hero-файли), далі персонажі (`lib/utils/characters`, `lib/server/characters`), далі бій (`lib/utils/battle` d20-частини, `d20Roll`). Кожен під-крок зменшує ratchet-список; ціль нуль. Паралельно борги БД: DROP `race_profiles`, `status_effects`, мертвих колонок — після деплою й перевірки prod-рядків; нові міграції лише expand-only. Узагальнення клієнтських flow (`flow.mode`) і маршрутів системних дій (`/system/[action]` замість `channel`, `condition-test`, `corruption`, `downtime`) — теж тут: у E1 системні route-файли в `app/api` лишаються у ratchet-списку винятків (вибір spec).
+**E2 (L, по підсистемах):** `systems/d20/` стає повним модулем (база d20, `dnd5e` без HOMM-механік); HOMM-специфіка (мораль, відсіч, лідерство) — окремий модуль `systems/homm` поверх бази (U9): спершу `lib/constants` (~25 файлів: `abilities.ts` 107 імпортерів, `classes`, `skills`, `spells`, `damage`, `weapon-traits`, hero-файли), далі персонажі (`lib/utils/characters`, `lib/server/characters`), далі бій (`lib/utils/battle` d20-частини, `d20Roll`). Кожен під-крок зменшує ratchet-список; ціль нуль. Паралельно борги БД: DROP `race_profiles`, `status_effects`, мертвих колонок — після деплою й перевірки prod-рядків; нові міграції лише expand-only. Узагальнення клієнтських flow (`flow.mode`) і маршрутів системних дій (`/system/[action]` замість `channel`, `condition-test`, `corruption`, `downtime`) — теж тут: у E1 системні route-файли в `app/api` лишаються у ratchet-списку винятків (вибір spec).
 **E3 (доменні модулі епіку «Модулі»):** `modules/<domain>/…`, ESLint boundaries, Vitest projects; потребує переписування layering в `CLAUDE.md`. Окремий spec після merge і E2.
 E2 після merge, бо масове перенесення на гілці з ~1420 змінених файлів дає найважчі конфлікти.
 
