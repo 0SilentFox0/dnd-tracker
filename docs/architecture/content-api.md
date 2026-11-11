@@ -159,7 +159,7 @@
 
 ### Мова контенту офіційних шаблонів
 
-Реєстр `TEMPLATE_LOCALIZATIONS` (`lib/utils/campaigns/template-locales.ts`) перелічує локалізовані офіційні шаблони: SRD 5.2 і Grim d100 (обидва `en/uk`). Для кожного `templateKey` канонічний — один офіційний англійський шаблон; словники лежать у `data/templates/<template>/i18n/uk.json`, CLI — `pnpm template i18n <cmd> <key> <locale>` (`srd-5.2` / `grim-d100`; скрипт `srd:i18n` видалено в E1); `apply` відмовляє при колізіях імен і нерезолвлених списках заклинань. Нижче описано SRD; Grim працює так само, додатково локалізуючи кар'єри, `rules.tables[*].text` і списки заклинань (псевдовид `lists`, `PACK_LIST_KIND`; ключі словника `lists/<slug>/name`; межі — «Межі 5g-4» у [rule-systems.md](rule-systems.md)).
+Локалізовані офіційні шаблони визначає `localizationOf` над `TEMPLATE_REGISTRY` (`lib/utils/templates/registry.ts`; манифест із двома й більше `locales`): SRD 5.2, Grim d100 і Heroes (усі `en/uk`). Для кожного `templateKey` канонічний — один офіційний англійський шаблон; словники лежать у `data/templates/<template>/i18n/uk.json`, CLI — `pnpm template i18n <cmd> <key> <locale>` (`srd-5.2` / `grim-d100`; скрипт `srd:i18n` видалено в E1); `apply` відмовляє при колізіях імен і нерезолвлених списках заклинань. Нижче описано SRD; Grim працює так само, додатково локалізуючи кар'єри, `rules.tables[*].text` і списки заклинань (псевдовид `lists`, `PACK_LIST_KIND`; ключі словника `lists/<slug>/name`; межі — «Межі 5g-4» у [rule-systems.md](rule-systems.md)).
 
 Англійський офіційний `5e SRD 5.2` — єдине джерело; `uk` накладається під час створення клону та source-sync. Спек: `docs/superpowers/specs/2026-10-31-srd-template-overlay-design.md`.
 

@@ -72,6 +72,8 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 Старі шляхи з розділів «Межі …» нижче (історія): `lib/utils/rules/systems/wfrp/**` → `systems/wfrp/rules/**`, `components/systems/wfrp/**` → `systems/wfrp/ui/**`, `lib/hooks/systems/wfrp/**` → `systems/wfrp/hooks/**`, `lib/constants/wfrp-*.ts` → `systems/wfrp/constants/*`, `lib/utils/battle/momentum.ts` → `systems/wfrp/rules/combat/momentum.ts`, `lib/ai/tools/wfrp-view.ts` → `systems/wfrp/server/ai.ts`, `abilities.wfrp` / `attack.wfrp` / `percentile` у деталях дії → слоти `system`.
 
+Що ще потребує правок core (межі контракту; M6 з ревʼю E0+E1): власні HTTP-маршрути (`/system/[action]`), новий вид контенту (`CONTENT_KINDS` + Prisma), власні лічильники `battleData.*`, міграції. Нейтральні в core, але wfrp-подібні поняття: `fortune: "reroll" | "sl"` (`attack-phase/request.ts`, `flows/attack-flow.ts`), `channelledSl`, `psychologyTested` (`store/types.ts`, `turn/join-triggers.ts`). Fixture `d6pool` перевіряє лише форму контракту.
+
 ## Як додати систему
 
 1. `systems/<id>/meta.ts` (`<ID>_META as const satisfies SystemMeta`: `module`, `keys`, `i18n`, `unusedMechanics`, `dmSections`), `index.ts` (`<ID>_SYSTEM`), за потреби `rules/`, `ui/index.ts` (`<ID>_UI`), `server/index.ts` (`<ID>_SERVER`), `rules/ability-effects.ts` + `ability-effect-rows.ts`; для пакета — `scripts/templates/systems/<id>/index.ts` (`<ID>_HOOKS`).
@@ -87,7 +89,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 3. ESLint: `SYSTEM_IMPORT_PATTERN` забороняє лише d20-теки; зона `@/systems/*` + `types/` під межею описано в «Правилах».
 4. Таблиця хуків тепер повна: `identity`, `lineage`, `attacks`, `inventory`, `currency`, `equipment`, `advancement`, `creation`, `attackTarget`, `conditions.*`.
 5. `distance` не «лише декларація»: його читає `cellFeetOf`.
-6. «Як додати систему» враховує корені, генератор, meta, ESLint-зони, `system-contract`, ratchet і `systemScope` (раніше пропускало ESLint-патерн, `NAMESPACES`/`scopes.ts`, `isWfrpCampaign`, перевірки `kind`, AI-проєкції); `map-modes.md` посилається сюди.
+6. «Як додати систему» враховує корені, генератор, meta, ESLint-зони, `system-contract`, ratchet і `systemScope` (раніше пропускало ESLint-патерн, `NAMESPACES`/`scopes.ts`, перевірки `kind`, AI-проєкції); `map-modes.md` посилається сюди.
 7. Приховані вкладки правил — `unusedMechanics` з meta (хардкод `WFRP_ONLY` видалено).
 8. `battle.supported` видалено (усі системи `true`, гілка була недосяжна).
 9. `balance.kind: "none"` видалено (жодна система не використовувала).
@@ -105,7 +107,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 - Momentum — жетон сцени `{ ally?, enemy? }`, який ядро бачить лише як непрозорий слот `sceneState` (`battle_scenes.system_state`, у знімку, дельті як `scene.system` і rollback; `lib/utils/battle/scene-state.ts`: `sceneStatePatch`, `applyScenePatch`; кодек `SCENE_SLOT` і `settle`/`heldBy` — `systems/wfrp/rules/combat/momentum.ts`): `resolveAttack` отримує `sceneState`, повертає `scene` і рядок здобутого Momentum у `lines`; клієнт (`D100RollBody`) читає `heldBy(SCENE_SLOT.read(view.judged.sceneState))`. Спільний для гравецьких і серверних атак (фаза атаки, помста, нагода, рух, легендарні дії, підготовлена атака); `spell/cast` і `berserk` його не чіпають (стан сцени лишається `undefined`). У d20 `scene.system` ніколи не з'являється в дельті; порожній стан wfrp зберігається як слот `{}`, а не як відсутній. У wfrp немає реакцій, тож нагода/підготовлена атака за реальних правил недосяжні; крит-вибір ДМ (`pendingCritChoice`) атаками wfrp не запускається. Дальній бій Momentum не використовує.
 - Броня й щит: див. «Межі 5f» (AP із екіпірування).
 - Крит-маркери (bleeding, stunned, …) були інертними мітками: закрито в 5c-1 для bleeding/stunned/unconscious/prone (див. «Межі 5c-1»); head.5 «unconscious» тепер дає стан.
-- d100 не пишеться в `diceRolls` (`DieSides` не має 100); значення лежить в `actionDetails.percentile`. Схема атаки приймає `d20Roll`/`attackRoll`/`attackRolls` до 100, а верхню межу задає `combat.dice` (закрито в 5b-3).
+- d100 не пишеться в `diceRolls` (`DieSides` не має 100); значення лежить у слоті `actionDetails.system` (ключ `percentile`). Схема атаки приймає `d20Roll`/`attackRoll`/`attackRolls` до 100, а верхню межу задає `combat.dice` (закрито в 5b-3).
 - Дальня атака без смуг дальності (складність challenging, ціль захисту 0).
 - Еталони балансу (`refHit`) припущені, не звірені з книгою.
 - `berserk` (turn/berserk.ts) кидає основний кубик системи (`combat.dice`, серверний кидок); у wfrp немає вмінь, тож недосяжний.
@@ -123,7 +125,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 - Overcast (кроки `OVERCAST_SL_STEP` за перевищення CN, див. «Межі 5d-3»): `diceRolls` клієнта не розширюються, додаткові кубики кидає сервер. Каст без `castRoll`/`serverRoll` сервер кидає сам (не відхиляє).
 - `channel`: основна дія; не свій хід, використана дія або d20-кампанія (`BATTLE_CHANNEL_UNSUPPORTED`, 422) відхиляються; кидок 100 дає minor miscast; будь-яка шкода кастеру скидає channelled SL (`onDamaged`).
 - Числа (`MISCAST_TABLE`, CN, кроки SL: `OVERCAST_SL_STEP`, `ARMOUR_SL_PER_AP`, `CHANNEL_MAX_SL`, правила miscast на дублях) не звірені з книгою (немає джерела).
-- Штраф броні касту береться з AP броні екіпірування без щита (5f: `armourAp().armourOnly`, у учасника `abilities.wfrp.castAp`, лише коли відрізняється від `max(head, body)` загального AP).
+- Штраф броні касту береться з AP броні екіпірування без щита (5f: `armourAp().armourOnly`, у слоті `abilities.system` учасника — `castAp`, лише коли відрізняється від `max(head, body)` загального AP).
 - Long cast заборонений; overcast лише апкаст (дальність, площа, тривалість — ні).
 - Шкода заклинань іде наявним ефект-рушієм без SL касту, TB й AP.
 - Таланти, редагований контент `tables`, Sin/молитви (5d-3) — поза межами.
@@ -133,7 +135,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, вкладка «Магія» на аркуші, каст-діалог і плитка «Скерування» у бою, поля магії в редакторі заклинань). Свідомі межі:
 
-- `wfrpMagic` підвантажується лише для wfrp-кампаній: `app/campaigns/[id]/layout.tsx` обгортає дерево в `ExtendLocaleScope` з `WFRP_CAMPAIGN_EXTRA` (`lib/i18n/scopes.ts`), для d20-кампаній scope не змінюється.
+- `wfrpMagic` підвантажується лише для wfrp-кампаній: `app/campaigns/[id]/layout.tsx` обгортає дерево в `ExtendLocaleScope` з namespace-ами `systemScope(key, "campaign")` (`lib/i18n/system-scope.ts`, з `SystemMeta.i18n`), для d20-кампаній scope не змінюється.
 - Розмір `scope-size` (gzip, ліміт 105 KB): campaign + battle + battleWfrp до 5d-2 — uk 102.8 / en 82.8 KB; після (+ `wfrpMagic`) — uk 103.8 / en 83.6 KB (+1.0 / +0.8 KB). Ліміт не перевищено, відповідь П5 (окремий ліміт) не знадобилась; запас uk ≈ 1.2 KB, тож наступний wfrp-namespace потребує винесення або окремого ліміту.
 - Онбординг: запис `2026-11-05-wfrp-magic` у what's new і розділ «Магія» в `dm-rule-systems`.
 - Live-run 5d-2 (Task 10.3) виконано; хвости виправлено в 5d-3 (мітки умов у редакторі, слоти в книзі заклинань, підписи Fortune-перекиду).
@@ -165,7 +167,7 @@ UI магії на `feat/wfrp` (без міграції; namespace `wfrpMagic`, 
 
 ## Межі 5f
 
-- Екіпірування: колонка `artifacts.system_stats` (+ `artifacts_base`), валідація лише через `SYSTEM_STATS_SCHEMAS` (d20/homm відхиляють не-null), `null` очищає, пропуск зберігає. Два валідатори (`equipment/guard.ts` для клієнта без zod і zod-схема) звіряє `guard.test`.
+- Екіпірування: колонка `artifacts.system_stats` (+ `artifacts_base`), валідація лише через `SystemServer.schemas.systemStats` (`lib/server/systems/types.ts`; d20/homm відхиляють не-null), `null` очищає, пропуск зберігає. Два валідатори (`equipment/guard.ts` для клієнта без zod і zod-схема) звіряє `guard.test`.
 - Шкода зброї: плоский бонус `damage.flat` іде в `attack.damageBonus` (кубиків зброї немає, `damageDice: ""`, героїчні кубики рівня для атак із `attack.wfrp` не додаються); крок `weapon` = `damageBonus`, SB додається, якщо `addSb`. Нуль і від'ємне значення допустимі; нульовий `amount` d20-конвеєра більше не обриває `mitigate` (імунітет = `amount 0` лише коли d20-шкоду зменшили до нуля).
 - Броня: AP = сума шарів по локаціях (кап 12); щит дає X на голову/руки/тулуб і пропадає лише при дворучній зброї в слоті `weapon` (лук у `range_weapon` щит не знімає). `armourAp` повертає застосований `shield`, лист і бій беруть звідти.
 - Боєзапас і перезарядка: `battleData.ammo/reload` — у `ParticipantState` (дельти без перезапису знімка). Перезарядка X зберігається як X+1: кінець ходу, на якому закінчились набої, не рахується. Той самий артефакт у двох слотах дає окремі атаки (другий id = `<artifactId>:<slot>`) з незалежними лічильниками; зброя в слоті `shield` (запасна рука) теж дає атаку, а щит (`gear`) — ні, AP щита не змінюється. Лічильники живуть до кінця бою і не пересіваються й не поповнюються після зміни екіпірування посеред бою (свідоме рішення, окремої мутації немає).
@@ -316,7 +318,7 @@ Traits юнітів (Armour, Ward, Size, Fear/Terror, атаки Bite/Claw/Breat
 - Панель «Спробувати зняти» для ДМ, що керує поточним учасником, не перевірена вручну: перевіряється в live-run (Task 12).
 - Fortune: `percentile.fortune` замість окремого `actionDetails.fortune`; перекидання при влучанні з першого кидка не списується; серверні атаки й ініціатива без Fortune; Fate без механіки.
 - Мітки disarmed/winded/crippled — інертні (5c-2); Besmirched, Corruption, психологія, травми — поза межами.
-- `battleWfrp` вантажиться лише в бойових лейаутах wfrp-кампаній (`isWfrpCampaign`); `scope-size` (кампанія + бій): uk 102.0 → 102.7 KB gzip, en 82.1 → 82.7 KB, ліміт 105.
+- `battleWfrp` вантажиться лише в бойових лейаутах wfrp-кампаній (`systemScope(key, "battle")`); `scope-size` (кампанія + бій): uk 102.0 → 102.7 KB gzip, en 82.1 → 82.7 KB, ліміт 105.
 
 ## Межі 5c-2
 
@@ -461,7 +463,7 @@ UI бою wfrp без d20-артефактів. Свідомі межі:
 
 Завершення шаблону Grim d100 (на `feat/wfrp`, не змерджено; без міграцій). Spec/план — `docs/superpowers/{specs,plans}/2026-11-10-wfrp-5g4*`.
 
-- Реєстр локалізацій: `TEMPLATE_LOCALIZATIONS` (`lib/utils/campaigns/template-locales.ts`) — SRD і Grim, обидва `en/uk`; канонічний — офіційний `en` на кожен `templateKey` (два `en` Grim → 409 при клонуванні Grim і в списку, SRD клонується як раніше). Код помилки `SRD_CANONICAL_UNAVAILABLE` лишився спільним, змінено лише текст.
+- Реєстр локалізацій: `localizationOf` над `TEMPLATE_REGISTRY` (`lib/utils/templates/registry.ts`; манifest шаблону з `locales.length >= 2`) — SRD, Grim і Heroes; канонічний — офіційний `en` на кожен `templateKey` (два `en` Grim → 409 при клонуванні Grim і в списку, SRD клонується як раніше). Код помилки `SRD_CANONICAL_UNAVAILABLE` лишився спільним, змінено лише текст.
 - Що локалізується: назви й описи всіх видів, кар'єри з рівнями й спорядженням (`trappings`), `rules.tables[slot][i].text`, списки заклинань однією мапою імен для всіх місць (колізія двох списків — помилка до запису й при локалізації). Не локалізуються: `status` рівнів («Brass 3» парсить простій), ключі навичок, `profile` виду (текстових полів немає), `creatureType` юнітів.
 - Sync uk-клону Grim одразу після створення порожній, включно з правилами (`rulesHashes` рахує `tables` локалізованими з обох боків).
 - uk-словник Grim: `data/templates/grim-d100/i18n/uk.json` (покриття 100 %, `status`), глосарій `i18n/glossary/uk.json`; пайплайн — `pnpm srd:i18n <cmd> <locale> --template grim`, валідатор `grimI18nIssues`. Словник серверний, у клієнтські scope не потрапляє.
