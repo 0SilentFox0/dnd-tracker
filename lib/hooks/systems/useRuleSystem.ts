@@ -7,6 +7,8 @@ type Source = { key: RuleSystemKey } | { campaignId: string };
 
 type RuleSystemState = { key: RuleSystemKey; system: RuleSystemDefinition; ready: true } | { key: undefined; system: undefined; ready: false };
 
+export function useRuleSystem(source: { key: RuleSystemKey }): Extract<RuleSystemState, { ready: true }>;
+export function useRuleSystem(source: Source): RuleSystemState;
 export function useRuleSystem(source: Source): RuleSystemState {
   const rules = useCampaignRules("campaignId" in source ? source.campaignId : "");
 
