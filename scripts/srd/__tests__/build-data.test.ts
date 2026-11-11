@@ -15,7 +15,7 @@ describe("build helpers", () => {
   });
 
   it("toImportRows keeps the slug for the import layer", () => {
-    expect(toImportRows([{ slug: "s", name: "N", level: 1 }])).toEqual([{ slug: "s", name: "N", level: 1 }]);
+    expect(toImportRows([{ slug: "s", name: "N", level: 1 } as { slug: string }])).toEqual([{ slug: "s", name: "N", level: 1 }]);
   });
 
   it("writes files and a manifest, reads them back", () => {

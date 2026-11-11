@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { isBundledStaticAsset, isHttpUrl, isSharedAssetUrl, isSupabaseStorageUrl, normalizeImageUrl, sharedAssetPath } from "../image-url";
+import { isBundledStaticAsset, isHttpUrl, isSharedAssetUrl, isSupabaseStorageUrl, normalizeImageUrl, sharedAssetPath, templateAssetPath } from "../image-url";
 
 describe("normalizeImageUrl", () => {
   it("повертає той самий URL для не-wikia", () => {
@@ -100,6 +100,12 @@ describe("sharedAssetPath", () => {
   });
 });
 
+describe("templateAssetPath", () => {
+  it("builds templates/<key>/<kind>/<slug>-<sha8>.webp", () => {
+    expect(templateAssetPath("grim-d100", "careers", "rat-catcher", "ab12cd34")).toBe("templates/grim-d100/careers/rat-catcher-ab12cd34.webp");
+  });
+});
+
 describe("isSharedAssetUrl", () => {
   afterEach(() => vi.unstubAllEnvs());
 
@@ -108,6 +114,12 @@ describe("isSharedAssetUrl", () => {
   it("true для public URL нашого проєкту під sets/", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proj.supabase.co");
     expect(isSharedAssetUrl(`${base}/unit-icons/sets/5e-srd-5-2/abc.webp`)).toBe(true);
+  });
+
+  it("true для templates/ у бакеті іконок, зокрема career-icons", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proj.supabase.co");
+    expect(isSharedAssetUrl(`${base}/career-icons/templates/grim-d100/careers/rat-catcher-ab12cd34.webp`)).toBe(true);
+    expect(isSharedAssetUrl(`${base}/spell-icons/templates/srd-5.2/spells/fireball-ab12cd34.webp`)).toBe(true);
   });
 
   it("false для {campaignId}/… та чужого хоста", () => {

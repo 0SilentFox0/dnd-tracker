@@ -6,40 +6,48 @@ import { describe, expect, it } from "vitest";
 import { GRIM_ROW_KINDS, type GrimData } from "../data";
 import { grimIconGaps, grimIconIssues, type GrimIcons, mergeGrimIcons, readGrimIcons, withGrimIcons, writeGrimIcons } from "../icons";
 
-const data: GrimData = { feats: [{ name: "Steady Aim" }], careers: [{ name: "Archivist" }], races: [{ name: "Lowlander" }], spells: [{ name: "Dazzle" }], units: [{ name: "Ash Hound" }, { name: "Clay Drudge" }], artifacts: [{ name: "Spear" }], raceProfiles: [] };
+const data: GrimData = {
+  feats: [{ slug: "steady-aim", name: "Steady Aim" }],
+  careers: [{ slug: "archivist", name: "Archivist" }],
+  races: [{ slug: "lowlander", name: "Lowlander" }],
+  spells: [{ slug: "dazzle", name: "Dazzle" }],
+  units: [{ slug: "ash-hound", name: "Ash Hound" }, { slug: "clay-drudge", name: "Clay Drudge" }],
+  artifacts: [{ slug: "spear", name: "Spear" }],
+  raceProfiles: [],
+};
 
 const empty = (): GrimIcons => ({ feats: {}, careers: {}, races: {}, spells: {}, units: {}, artifacts: {} });
 
 describe("grim icons", () => {
   it("sets avatar on units and icon elsewhere only where a URL exists, without mutating the input", () => {
-    const icons = { ...empty(), units: { "Ash Hound": "https://x.test/a.webp" }, careers: { Archivist: "https://x.test/b.webp" } };
+    const icons = { ...empty(), units: { "ash-hound": "https://x.test/a.webp" }, careers: { archivist: "https://x.test/b.webp" } };
 
     const out = withGrimIcons(data, icons);
 
-    expect(out.units).toEqual([{ name: "Ash Hound", avatar: "https://x.test/a.webp" }, { name: "Clay Drudge" }]);
-    expect(out.careers).toEqual([{ name: "Archivist", icon: "https://x.test/b.webp" }]);
-    expect(out.spells).toEqual([{ name: "Dazzle" }]);
-    expect(data.units[0]).toEqual({ name: "Ash Hound" });
+    expect(out.units).toEqual([{ slug: "ash-hound", name: "Ash Hound", avatar: "https://x.test/a.webp" }, { slug: "clay-drudge", name: "Clay Drudge" }]);
+    expect(out.careers).toEqual([{ slug: "archivist", name: "Archivist", icon: "https://x.test/b.webp" }]);
+    expect(out.spells).toEqual([{ slug: "dazzle", name: "Dazzle" }]);
+    expect(data.units[0]).toEqual({ slug: "ash-hound", name: "Ash Hound" });
   });
 
-  it("flags names outside the catalog and non-https urls", () => {
-    const icons = { ...empty(), careers: { Nobody: "https://x.test/a.webp" }, units: { "Ash Hound": "http://x.test/a.webp" } };
+  it("flags slugs outside the catalog and non-https urls", () => {
+    const icons = { ...empty(), careers: { nobody: "https://x.test/a.webp" }, units: { "ash-hound": "http://x.test/a.webp" } };
 
-    expect(grimIconIssues(data, icons)).toEqual(['icons: careers "Nobody" is not in the catalog', 'icons: units "Ash Hound" url must be https']);
+    expect(grimIconIssues(data, icons)).toEqual(['icons: careers "nobody" is not in the catalog', 'icons: units "ash-hound" url must be https']);
   });
 
   it("reports a gap per catalog entry when icons are empty", () => {
     expect(grimIconGaps(data, empty())).toHaveLength(GRIM_ROW_KINDS.reduce((n, k) => n + data[k].length, 0));
-    expect(grimIconGaps(data, empty())).toContain('icons: spells "Dazzle" has no icon');
+    expect(grimIconGaps(data, empty())).toContain('icons: spells "dazzle" has no icon');
   });
 
-  it("merges uploads over old icons and prunes names outside the catalog", () => {
-    const old = { ...empty(), units: { "Ash Hound": "https://x.test/old.webp", Gone: "https://x.test/gone.webp" } };
+  it("merges uploads over old icons and prunes slugs outside the catalog", () => {
+    const old = { ...empty(), units: { "ash-hound": "https://x.test/old.webp", gone: "https://x.test/gone.webp" } };
 
-    const merged = mergeGrimIcons(old, { ...empty(), units: { "Ash Hound": "https://x.test/new.webp" }, careers: { Archivist: "https://x.test/c.webp" } }, data);
+    const merged = mergeGrimIcons(old, { ...empty(), units: { "ash-hound": "https://x.test/new.webp" }, careers: { archivist: "https://x.test/c.webp" } }, data);
 
-    expect(merged.units).toEqual({ "Ash Hound": "https://x.test/new.webp" });
-    expect(merged.careers).toEqual({ Archivist: "https://x.test/c.webp" });
+    expect(merged.units).toEqual({ "ash-hound": "https://x.test/new.webp" });
+    expect(merged.careers).toEqual({ archivist: "https://x.test/c.webp" });
   });
 
   it("reads a missing file as empty kinds and round-trips sorted", () => {
@@ -47,9 +55,9 @@ describe("grim icons", () => {
 
     expect(readGrimIcons(dir)).toEqual(empty());
 
-    writeGrimIcons({ ...empty(), units: { B: "https://x.test/b", A: "https://x.test/a" } }, dir);
+    writeGrimIcons({ ...empty(), units: { b: "https://x.test/b", a: "https://x.test/a" } }, dir);
 
-    expect(Object.keys(readGrimIcons(dir).units)).toEqual(["A", "B"]);
+    expect(Object.keys(readGrimIcons(dir).units)).toEqual(["a", "b"]);
     expect(Object.keys(JSON.parse(fs.readFileSync(path.join(dir, "icons.json"), "utf8")))).toEqual([...GRIM_ROW_KINDS]);
   });
 });

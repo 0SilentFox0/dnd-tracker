@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-import { GRIM_ROW_KINDS, readGrimData } from "../../grim/data";
+import { GRIM_ROW_KINDS, type GrimRowKind, readGrimData } from "../../grim/data";
 import { emptyGrimIcons, grimIconGaps, type GrimIcons, mergeGrimIcons, readGrimIcons, writeGrimIcons } from "../../grim/icons";
 import { assertSeedTarget, assertStorageTarget } from "../../seed/seed-library-lib";
 import { assertCleanPrompt, assertUniqueFiles, type PromptRow, toMarkdown } from "../icon-prompts/compose";
@@ -100,6 +100,10 @@ async function uploadIcons(args: string[]) {
 
   const uploaded: GrimIcons = emptyGrimIcons();
 
+  const data = readGrimData();
+
+  const slugOf = (kind: GrimRowKind, name: string) => String(data[kind].find((r) => r.name === name)?.slug ?? "");
+
   const errors: string[] = [];
 
   let missing = 0;
@@ -141,14 +145,12 @@ async function uploadIcons(args: string[]) {
       continue;
     }
 
-    uploaded[row.kind][row.name] = admin.storage.from(bucket).getPublicUrl(objectName).data.publicUrl;
+    uploaded[row.kind][slugOf(row.kind, row.name)] = admin.storage.from(bucket).getPublicUrl(objectName).data.publicUrl;
   }
 
   console.info(`${dryRun ? "конвертовано (dry-run)" : "завантажено"}: ${dryRun ? count : Object.values(uploaded).reduce((n, m) => n + Object.keys(m).length, 0)}, сумарно ${(total / KB).toFixed(0)} КБ; без файлу: ${missing}`);
 
   for (const e of errors) console.warn(`  не завантажено: ${e}`);
-
-  const data = readGrimData();
 
   if (!dryRun) {
     const next = mergeGrimIcons(readGrimIcons(), uploaded, data);
