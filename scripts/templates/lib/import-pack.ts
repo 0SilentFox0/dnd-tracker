@@ -129,6 +129,20 @@ async function writeExtras(campaignId: string, kind: PackKind, rows: PackRow[]):
   );
 }
 
+async function clearStaleSpellColumns(campaignId: string, rows: PackRow[]): Promise<void> {
+  await withCampaignContentWrite(
+    campaignId,
+    async (tx) => {
+      for (const { column, slugs } of staleSpellColumns(rows)) {
+        const { count } = await tx.spell.updateMany({ where: { campaignId, slug: { in: slugs }, [column]: { not: null } }, data: { [column]: null } });
+
+        if (count > 0) markContentDirty();
+      }
+    },
+    { bump: false },
+  );
+}
+
 const translationGaps = (pack: Pack, dir: string): string[] => {
   const catalog = catalogOfPack(pack);
 
@@ -220,7 +234,7 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
       perKind.artifacts = { ...perKind.artifacts, errors: perKind.artifacts.errors + second.counts.error };
     }
 
-    if (!dryRun && kind === "spells") for (const { column, names } of staleSpellColumns(rows)) await prisma.spell.updateMany({ where: { campaignId: template.id, name: { in: names } }, data: { [column]: null } });
+    if (!dryRun && kind === "spells") await clearStaleSpellColumns(template.id, rows);
   }
 
   const failed = Object.values(perKind).some((c) => c.errors > 0);

@@ -7,8 +7,8 @@ export const iconColumnOf = (kind: PackKind): "icon" | "avatar" => (kind === "un
 export const CLEARABLE_SPELL_COLUMNS = ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod", "fixedDice", "damageBonus"] as const;
 
 /** The import treats null as an empty cell and keeps the old value, so a rerun clears dropped optional columns itself. */
-export const staleSpellColumns = (spells: readonly PackRow[]): Array<{ column: (typeof CLEARABLE_SPELL_COLUMNS)[number]; names: string[] }> =>
-  CLEARABLE_SPELL_COLUMNS.map((column) => ({ column, names: spells.filter((s) => s[column] === undefined).map((s) => String(s.name)) })).filter((c) => c.names.length > 0);
+export const staleSpellColumns = (spells: readonly PackRow[]): Array<{ column: (typeof CLEARABLE_SPELL_COLUMNS)[number]; slugs: string[] }> =>
+  CLEARABLE_SPELL_COLUMNS.map((column) => ({ column, slugs: spells.filter((s) => s[column] === undefined).map((s) => s.slug) })).filter((c) => c.slugs.length > 0);
 
 /** The engine compares damageBonus/flag schools with spell group ids; pack files keep portable names. */
 export function resolveSchoolRefs<T>(value: T, idByName: ReadonlyMap<string, string>): T {

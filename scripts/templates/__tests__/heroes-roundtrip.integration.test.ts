@@ -7,6 +7,9 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { contentLayer } from "@/lib/db/content-layer";
 import { createScopedDatabase } from "@/lib/server/content/write-context";
+import { tableKey } from "@/lib/server/templates/bundle";
+import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
 const raw = new PrismaClient({ datasources: { db: { url: singleConnectionDatabaseUrl("DATABASE_URL") } } });
@@ -16,6 +19,7 @@ const scoped = createScopedDatabase(raw.$extends(contentLayer()));
 vi.mock("@/lib/db", () => ({ get prisma() { return scoped; } }));
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 
+import { bundleToPack, type SlugMap } from "../lib/export";
 import { importPack } from "../lib/import-pack";
 import { readPack } from "../lib/pack";
 import { diffSnapshots, snapshotCampaign } from "../lib/snapshot";
@@ -26,12 +30,16 @@ const tmpDirs: string[] = [];
 
 const pack = readPack("heroes-homm");
 
+const liveTemplate = isLocalDevDatabaseEnv() ? await raw.campaign.findFirst({ where: { kind: "template", templateKey: "heroes-homm" }, select: { id: true } }) : null;
+
 const unchanged = (result: Awaited<ReturnType<typeof importPack>>) => Object.values(result.perKind).every((c) => c.created === 0 && c.updated === 0 && c.errors === 0);
 
 describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm pack", () => {
   let freshId = "";
 
   let freshDir = "";
+
+  let key = "";
 
   beforeAll(() => {
     vi.spyOn(console, "info").mockImplementation(() => undefined);
@@ -53,7 +61,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm pack", () => {
     freshDir = fs.mkdtempSync(path.join(os.tmpdir(), "heroes-pack-"));
     tmpDirs.push(freshDir);
 
-    const key = `heroes-rt-${marker.slice(-8)}`;
+    key = `heroes-rt-${marker.slice(-8)}`;
 
     fs.cpSync(path.join(process.cwd(), "data/templates/heroes-homm"), path.join(freshDir, key), { recursive: true });
     fs.writeFileSync(path.join(freshDir, key, "manifest.json"), JSON.stringify({ ...pack.manifest, key, names: { en: key, uk: key } }));
@@ -101,26 +109,81 @@ describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm pack", () => {
     expect(unchanged(again)).toBe(true);
   });
 
-  it("re-imports into the live Heroes template without touching content, slugs are all set", async () => {
-    const template = await raw.campaign.findFirst({ where: { kind: "template", templateKey: "heroes-homm" }, select: { id: true } });
+  it("fixpoint: a fresh import exported back equals the pack", async () => {
+    const bundle = await exportCampaign(scoped as never, freshId);
 
-    if (!template) return;
+    const slugs: SlugMap = Object.fromEntries(pack.manifest.kinds.map((kind) => [kind, Object.fromEntries(((bundle as unknown as Record<string, Array<{ id: string; slug: string }>>)[tableKey(kind)] ?? []).map((row) => [row.id, row.slug]))]));
 
-    const clones = (await raw.campaign.findMany({ where: { createdFromId: template.id }, select: { id: true } })).map((c) => c.id);
+    const exported = bundleToPack(bundle, pack.manifest, slugs);
 
-    const clonesBefore = await Promise.all(clones.map(snapshotCampaign));
+    const normal = (rows: Array<Record<string, unknown>> = []) => rows.map(({ origin: _origin, ...row }) => (Array.isArray(row.artifactIds) ? { ...row, artifactIds: [...row.artifactIds].sort() } : row));
+
+    for (const kind of pack.manifest.kinds) expect(normal(exported.rows[kind] as never), kind).toEqual(normal(pack.rows[kind] as never));
+  });
+
+  it("a changed skill name and weapon stat are reported by a dry run, written by an import and bump the version", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "heroes-pack-edit-"));
+
+    tmpDirs.push(dir);
+    fs.cpSync(path.join(freshDir, key), path.join(dir, key), { recursive: true });
+
+    const edit = (file: string, change: (rows: Array<Record<string, any>>) => void) => {
+      const target = path.join(dir, key, file);
+
+      const rows = JSON.parse(fs.readFileSync(target, "utf8")) as Array<Record<string, any>>;
+
+      change(rows);
+      fs.writeFileSync(target, JSON.stringify(rows));
+    };
+
+    let skillSlug = "";
+
+    let weaponSlug = "";
+
+    edit("skills.json", (rows) => {
+      rows[0].name = `${rows[0].name} (renamed)`;
+      skillSlug = rows[0].slug;
+    });
+    edit("artifacts.json", (rows) => {
+      const row = rows.find((r) => r.weapon)!;
+
+      row.weapon = { ...row.weapon, damageDice: "1d12" };
+      weaponSlug = row.slug;
+    });
+
+    const version = (await raw.campaign.findUniqueOrThrow({ where: { id: freshId } })).contentVersion;
+
+    const dry = await importPack(key, { dir, dryRun: true });
+
+    expect(dry.perKind.skills).toMatchObject({ updated: 1, created: 0 });
+    expect(dry.perKind.artifacts).toMatchObject({ updated: 1, created: 0 });
+    expect((await raw.campaign.findUniqueOrThrow({ where: { id: freshId } })).contentVersion).toBe(version);
+    expect((await raw.skill.findFirstOrThrow({ where: { campaignId: freshId, slug: skillSlug } })).name).not.toContain("(renamed)");
+
+    const result = await importPack(key, { dir });
+
+    expect(result.perKind.skills).toMatchObject({ updated: 1, created: 0, errors: 0 });
+    expect(result.perKind.artifacts).toMatchObject({ updated: 1, created: 0, errors: 0 });
+    expect((await raw.skill.findFirstOrThrow({ where: { campaignId: freshId, slug: skillSlug } })).name).toContain("(renamed)");
+    expect(weaponStatsFromRow(await raw.artifact.findFirstOrThrow({ where: { campaignId: freshId, slug: weaponSlug } }) as never)?.damageDice).toBe("1d12");
+    expect((await raw.campaign.findUniqueOrThrow({ where: { id: freshId } })).contentVersion).toBeGreaterThan(version);
+
+    const again = await importPack(key, { dir });
+
+    expect(unchanged(again)).toBe(true);
+  });
+
+  it.skipIf(!liveTemplate)("a dry run against the live Heroes template reports no changes and writes nothing", async () => {
+    const template = liveTemplate!;
 
     const before = await snapshotCampaign(template.id);
 
-    const result = await importPack("heroes-homm");
+    const result = await importPack("heroes-homm", { dryRun: true });
 
     expect(unchanged(result)).toBe(true);
 
     const after = await snapshotCampaign(template.id);
 
-    expect(after.contentVersion).toBe(before.contentVersion);
-    expect(await Promise.all(clones.map(snapshotCampaign))).toEqual(clonesBefore);
-
-    for (const [table, diff] of Object.entries(diffSnapshots(before, after))) expect(diff, table).toEqual({ created: 0, deleted: 0, changed: 0, slugsMissing: 0 });
+    expect(after).toEqual(before);
   });
 });

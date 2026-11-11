@@ -24,12 +24,12 @@ describe("staleSpellColumns", () => {
     ] as PackRow[];
 
     expect(staleSpellColumns(spells)).toEqual([
-      { column: "dieSides", names: ["Freedom of Movement"] },
-      { column: "upcastDice", names: ["Freedom of Movement"] },
-      { column: "upcastTargets", names: ["Fireball", "Freedom of Movement"] },
-      { column: "addAbilityMod", names: ["Fireball", "Freedom of Movement"] },
-      { column: "fixedDice", names: ["Fireball", "Freedom of Movement"] },
-      { column: "damageBonus", names: ["Fireball", "Freedom of Movement"] },
+      { column: "dieSides", slugs: ["b"] },
+      { column: "upcastDice", slugs: ["b"] },
+      { column: "upcastTargets", slugs: ["a", "b"] },
+      { column: "addAbilityMod", slugs: ["a", "b"] },
+      { column: "fixedDice", slugs: ["a", "b"] },
+      { column: "damageBonus", slugs: ["a", "b"] },
     ]);
   });
 });
