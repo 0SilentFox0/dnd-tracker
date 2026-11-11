@@ -2,16 +2,12 @@ import { buildStartOrder } from "./start-battle-handler";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { ContentError } from "@/lib/server/content/errors";
 import { modeStart } from "@/lib/utils/battle/modes/server";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
 
 export function createStartMutation(build = buildStartOrder) {
   return async (ctx: BattleMutationContext): Promise<MutationResult> => {
-    if (!ruleSystemOf(ctx.meta.rules).battle.supported) throw new ContentError(API_ERRORS.SYSTEM_BATTLE_UNSUPPORTED, 409);
-
     if (ctx.meta.setup.length === 0) {
       throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_NO_PARTICIPANTS);
     }

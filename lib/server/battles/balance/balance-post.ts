@@ -61,8 +61,6 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
 
   const response: { allyStats: AllyStats; suggestedEnemies?: SuggestedEnemy[] } = { allyStats };
 
-  if (rules && ruleSystemOf(rules).balance.kind === "none") return response;
-
   if (suggest && rules?.encounters.balance === "xp") {
     response.suggestedEnemies = xpSuggestion(heroes.map((h) => h.character.level), library, byId, data, rules.encounters.edition);
   } else if (suggest) {

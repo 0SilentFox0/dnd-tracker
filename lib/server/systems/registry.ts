@@ -1,8 +1,6 @@
-import "server-only";
-
 import type { SystemServer } from "./types";
 
-import type { RuleSystemKey } from "@/lib/utils/rules/systems";
+import "server-only";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 // <systems:generated>
 import { WFRP_SERVER } from "@/systems/wfrp/server";
@@ -12,7 +10,7 @@ export type { SystemSchemas, SystemServer } from "./types";
 
 const D20_SERVER: SystemServer = { schemas: {} };
 
-export const SYSTEM_SERVER: Readonly<Record<RuleSystemKey, SystemServer>> = {
+export const SYSTEM_SERVER: Readonly<Record<string, SystemServer>> = {
   homm: D20_SERVER,
   dnd5e: D20_SERVER,
   // <systems:generated>

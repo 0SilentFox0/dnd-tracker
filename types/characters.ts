@@ -12,7 +12,6 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
-import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 import type { SystemData, SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
@@ -238,7 +237,7 @@ export interface SetProgress {
 }
 
 export interface CharacterSheet {
-  system: RuleSystemKey;
+  system: string;
   systemSlot?: SystemSlot;
   viewer: { isDM: boolean; isOwner: boolean };
   review: { pending: boolean; note: string | null };

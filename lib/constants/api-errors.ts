@@ -79,7 +79,6 @@ export const API_ERRORS = {
   INITIATIVE_OUT_OF_RANGE: "errors.initiativeOutOfRange",
   INVALID_RULES: "errors.invalidRules",
   SYSTEM_LOCKED: "errors.systemLocked",
-  SYSTEM_BATTLE_UNSUPPORTED: "errors.systemBattleUnsupported",
   SYSTEM_LEVELS_UNSUPPORTED: "errors.systemLevelsUnsupported",
   SYSTEM_TRAITS_UNSUPPORTED: "errors.systemTraitsUnsupported",
   SYSTEM_DRAFTS_UNSUPPORTED: "errors.systemDraftsUnsupported",

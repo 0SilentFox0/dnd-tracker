@@ -27,7 +27,6 @@ import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
 export const WFRP_SYSTEM: RuleSystemDefinition = {
   key: "wfrp",
   distance: { unit: "yd", perCell: 2 },
-  balance: { kind: "fair" },
   progression: {
     levels: false,
     hpTerm: "wounds",
@@ -48,7 +47,6 @@ export const WFRP_SYSTEM: RuleSystemDefinition = {
     roll: rollWfrpSheetTest,
   },
   rest: { kinds: false, onSession },
-  battle: { supported: true },
   conditions: WFRP_CONDITIONS,
   magic: WFRP_MAGIC,
   advancement: WFRP_ADVANCEMENT,

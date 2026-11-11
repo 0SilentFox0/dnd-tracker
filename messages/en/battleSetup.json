@@ -182,8 +182,7 @@
     "weak": "Too weak",
     "excess": "Too strong",
     "hintWeak": "Too weak: add {list}",
-    "hintExcess": "Too strong: remove {list}",
-    "none": "This rule system does not scale enemies; the DM picks the encounter roster."
+    "hintExcess": "Too strong: remove {list}"
   },
   "xp": {
     "title": "Battle balance (5e XP)",
@@ -199,8 +198,5 @@
     "barrierNeedsDuration": "A barrier needs a duration",
     "tooManyTerrainCells": "Too many terrain cells",
     "playableAreaTooSmall": "The playable area is too small: at least a free 2×2 area is required"
-  },
-  "system": {
-    "unsupported": "Battles in this rule system are not supported yet; starting will be rejected."
   }
 }

@@ -36,7 +36,7 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
 
   const ruleSystem = ruleSystemOf({ system: rules?.system ?? DEFAULT_RULES.system });
 
-  const balanceKind: "fair" | "none" | "xp" = ruleSystem.balance.kind === "none" ? "none" : encounters.balance === "xp" ? "xp" : "fair";
+  const balanceKind: "fair" | "xp" = encounters.balance === "xp" ? "xp" : "fair";
 
   const participants = useBattleParticipants(initial?.participants);
 
@@ -69,7 +69,6 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
     fair,
     encounters,
     balanceKind,
-    battleSupported: ruleSystem.battle.supported,
     xp,
   };
 }

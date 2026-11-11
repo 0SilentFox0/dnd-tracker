@@ -17,7 +17,6 @@
   "components/character-profile/ProfileHero.tsx": 5,
   "components/character-profile/rest/SheetRollDialog.tsx": 1,
   "lib/constants/api-errors.ts": 4,
-  "lib/constants/rules.ts": 3,
   "lib/constants/site.ts": 1,
   "lib/onboarding/whats-new.ts": 6,
   "lib/schemas/careers.ts": 1,

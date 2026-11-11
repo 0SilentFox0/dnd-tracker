@@ -2,12 +2,13 @@ import { z } from "zod";
 
 import { DEFAULT_RULES } from "./defaults";
 
-import { RULE_SYSTEM_KEYS, RULES_EDITIONS } from "@/lib/constants/rules";
+import { RULES_EDITIONS } from "@/lib/constants/rules";
 import { UnitGroupAppearancesSchema } from "@/lib/schemas/unit-groups";
 import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
+import { isRuleSystemKey } from "@/lib/utils/rules/systems/meta";
 import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
@@ -17,6 +18,8 @@ const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
 const INITIATIVE_ORDER_MESSAGE = "rules.validation.initiativeOrder";
 
 const CRITICALS_ORDER_MESSAGE = "rules.validation.criticalsOrder";
+
+const UNKNOWN_SYSTEM_MESSAGE = "rules.validation.unknownSystem";
 
 const CustomConditionSchema = z.object({
   key: z.string().regex(CUSTOM_CONDITION_KEY_RE),
@@ -79,7 +82,7 @@ const sectionSchemas = {
   spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
   advancement: AdvancementRulesSchema,
   tables: TablesRulesSchema,
-  system: z.strictObject({ key: z.enum(RULE_SYSTEM_KEYS) }),
+  system: z.strictObject({ key: z.string().refine(isRuleSystemKey, { message: UNKNOWN_SYSTEM_MESSAGE }) }),
 };
 
 // Виводимо тип до застосування defaults: DEFAULT_RULES типізований через Ruleset.

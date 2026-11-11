@@ -101,7 +101,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
           </p>
           <SelectField aria-label={t("ariaLabel")} value={current} onValueChange={handleChange} groups={groups} />
           {languageOptions.length > 1 && selected && <SelectField aria-label={t("languageLabel")} value={contentLocales.length > 0 ? contentLocale : selected.id} onValueChange={contentLocales.length > 0 ? (locale) => onChange({ templateId: selected.id, contentLocale: locale as TemplateContentLocale }) : handleChange} groups={[{ label: t("language"), options: languageOptions }]} />}
-          {selected?.system && <HudPill tone="silver">{tg(`ruleSystem.${selected.system}`)}</HudPill>}
+          {selected?.system && <HudPill tone="silver">{tg(`ruleSystem.${selected.system}` as never)}</HudPill>}
           {selected && <p className="text-xs text-hud-muted">{[selected.description, countsLabel(selected)].filter(Boolean).join(" — ")}</p>}
           {selected?.credits && <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">{selected.credits}</p>}
           {value.file && (

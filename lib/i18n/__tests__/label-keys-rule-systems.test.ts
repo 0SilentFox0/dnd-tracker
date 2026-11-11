@@ -2,7 +2,7 @@ import { describe } from "vitest";
 
 import { expectLabelKeys } from "../test/label-keys";
 
-import { RULE_SYSTEM_KEYS } from "@/lib/constants/rules";
+import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
 import { TABLE_SLOTS } from "@/lib/utils/rules/tables-schema";
 import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
 import { DIFFICULTY_KEYS } from "@/systems/wfrp/rules/percentile";

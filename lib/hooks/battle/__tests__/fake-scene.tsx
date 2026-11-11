@@ -13,7 +13,6 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { buildDisplayEffects, deriveScene, turnQueue } from "@/lib/utils/battle/view";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 import { sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import type { SceneMomentum } from "@/systems/wfrp/rules/slots";
 import type { ResolvedAbility } from "@/types/abilities";
@@ -42,7 +41,7 @@ export interface FakeSceneOptions {
   playerView?: boolean;
   critPending?: boolean;
   resultOpen?: boolean;
-  system?: RuleSystemKey;
+  system?: string;
   momentum?: SceneMomentum;
 }
 

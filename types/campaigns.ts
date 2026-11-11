@@ -1,7 +1,6 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { SYNC_SCOPES, SYNC_STATUSES } from "@/lib/constants/source-sync";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
 
 export interface Campaign {
@@ -34,7 +33,7 @@ export interface TemplateCard {
   templateKey?: string | null;
   kind?: string;
   availableLocales?: readonly string[];
-  system?: RuleSystemKey;
+  system?: string;
 }
 
 export interface TemplateList {

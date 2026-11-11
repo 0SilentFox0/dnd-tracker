@@ -1,12 +1,11 @@
-import type { RuleSystemDefinition, RuleSystemKey } from "../types";
+import type { RuleSystemDefinition } from "../types";
 
 import { rollFromSheet } from "@/lib/utils/characters/resources/sheet-roll";
 import type { SheetRollSubject } from "@/types/characters";
 
-export const d20System = (key: Extract<RuleSystemKey, "homm" | "dnd5e">): RuleSystemDefinition => ({
+export const d20System = (key: string): RuleSystemDefinition => ({
   key,
   distance: { unit: "ft", perCell: 5 },
-  balance: { kind: "fair" },
   progression: { levels: true, hpTerm: "hp", maxHp: () => null },
   characteristics: { persisted: false, defaults: () => undefined, isEmpty: (v) => v == null || (typeof v === "object" && Object.keys(v).length === 0), sheetBlock: () => undefined },
   sheetTest: {
@@ -14,7 +13,6 @@ export const d20System = (key: Extract<RuleSystemKey, "homm" | "dnd5e">): RuleSy
     roll: (i) => rollFromSheet(i.participant, i.body as SheetRollSubject, i),
   },
   rest: { kinds: true },
-  battle: { supported: true },
   combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true } },
   identity: { alignments: true },
   lineage: true,

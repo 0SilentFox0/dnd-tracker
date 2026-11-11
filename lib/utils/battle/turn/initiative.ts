@@ -5,7 +5,7 @@ import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import { RULE_SYSTEM_REGISTRY, type RuleSystemKey, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { ruleSystemByKey, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { BattleParticipant } from "@/types/battle";
 
 export interface InitiativeRoll {
@@ -49,7 +49,7 @@ export const calculateInitiative = (participant: BattleParticipant, participants
 const tieBreakStat = (p: BattleParticipant) => {
   const key = p.abilities.system?.key;
 
-  return (key && Object.hasOwn(RULE_SYSTEM_REGISTRY, key) ? RULE_SYSTEM_REGISTRY[key as RuleSystemKey].combat.tieBreak?.(p) : undefined) ?? p.abilities.dexterity;
+  return (key ? ruleSystemByKey(key)?.combat.tieBreak?.(p) : undefined) ?? p.abilities.dexterity;
 };
 
 export function compareInitiative(a: BattleParticipant, b: BattleParticipant): number {

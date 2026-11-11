@@ -21,9 +21,8 @@ import { useClassMode } from "@/lib/hooks/classes";
 import { useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems";
 import { pruneFormChoices } from "@/lib/utils/characters/choices/prune";
-import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 
-type NewCharacterFormProps = { campaignId: string; characterType: CharacterTypeValue; systemKey: RuleSystemKey };
+type NewCharacterFormProps = { campaignId: string; characterType: CharacterTypeValue; systemKey: string };
 
 export function NewCharacterForm({ campaignId: id, characterType, systemKey }: NewCharacterFormProps) {
   const router = useRouter();

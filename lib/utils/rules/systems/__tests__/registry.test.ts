@@ -13,6 +13,10 @@ import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 const sheetInput = { characteristics: {} as never, resources: {} };
 
 describe("rule system registry", () => {
+  it("ruleSystemOf throws a readable error for an unknown key", () => {
+    expect(() => ruleSystemOf({ system: { key: "d6pool" } })).toThrow("Unknown rule system: d6pool");
+  });
+
   it("has the three systems", () => {
     expect(Object.keys(RULE_SYSTEM_REGISTRY).sort()).toEqual(["dnd5e", "homm", "wfrp"]);
   });
@@ -75,8 +79,6 @@ describe("rule system registry", () => {
       expect(s.characteristics.sheetBlock(sheetInput)).toBeUndefined();
       expect(s.sheetTest.accepts({ kind: "check" })).toBe(true);
       expect(s.sheetTest.accepts({ kind: "test" })).toBe(false);
-      expect(s.battle.supported).toBe(true);
-      expect(s.balance.kind).toBe("fair");
       expect(s.distance).toEqual({ unit: "ft", perCell: 5 });
       expect(s.progression.levels).toBe(true);
       expect(s).toMatchObject({ lineage: true, attacks: true });
@@ -88,8 +90,6 @@ describe("rule system registry", () => {
 
     expect(s.sheetTest.accepts({ kind: "test" })).toBe(true);
     expect(s.sheetTest.accepts({ kind: "check" })).toBe(false);
-    expect(s.battle.supported).toBe(true);
-    expect(s.balance.kind).toBe("fair");
     expect(s.combat.hitModel).toBeDefined();
     expect(s.distance).toEqual({ unit: "yd", perCell: 2 });
     expect(s.progression.levels).toBe(false);

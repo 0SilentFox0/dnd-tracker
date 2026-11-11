@@ -1,7 +1,6 @@
 import type { SystemData, SystemSlot } from "./slot";
 
 import type { Coin } from "@/lib/constants/inventory";
-import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
 import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
@@ -20,8 +19,6 @@ import type { ActiveEffect, BattleAttack, BattleParticipant, ParticipantSide } f
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { FeatData } from "@/types/choices";
 import type { LogLine } from "@/types/text";
-
-export type { RuleSystemKey };
 
 export interface CharacterHpInput {
   level: number;
@@ -265,9 +262,8 @@ export interface RuleSystemCombat {
 }
 
 export interface RuleSystemDefinition {
-  key: RuleSystemKey;
+  key: string;
   distance: { unit: "ft" | "yd"; perCell: number };
-  balance: { kind: "fair" } | { kind: "none" };
   progression: {
     levels: boolean;
     maxHp(input: { character: CharacterHpInput; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;
@@ -293,7 +289,6 @@ export interface RuleSystemDefinition {
   };
   sheetTest: { accepts(body: { kind: string }): boolean; roll(input: SheetTestInput): SheetTestResult };
   rest: { kinds: boolean; onSession?(resources: CharacterResources, characteristics: unknown): CharacterResources };
-  battle: { supported: boolean };
   combat: RuleSystemCombat;
   conditions?: RuleSystemConditions;
   magic?: RuleSystemMagic;

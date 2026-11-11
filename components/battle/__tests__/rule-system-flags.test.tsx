@@ -15,15 +15,14 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { render } from "@/lib/i18n/test/render-uk";
 import { textRef } from "@/lib/i18n/text-ref";
-import type { RuleSystemKey } from "@/lib/utils/rules/systems";
 import { applyWfrpConditionTo } from "@/systems/wfrp/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.unmock("next-intl");
 
-const scene = (system?: RuleSystemKey) => fakeScene({ system, knownSpells: ["shield"] });
+const scene = (system?: string) => fakeScene({ system, knownSpells: ["shield"] });
 
-const list = (system?: RuleSystemKey) => {
+const list = (system?: string) => {
   const { wrapper } = scene(system);
 
   render(<TooltipProvider><ParticipantList side={ParticipantSide.ALLY} /></TooltipProvider>, { wrapper });

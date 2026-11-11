@@ -24,7 +24,6 @@ import {
 } from "@/lib/utils/battle/turn/initiative";
 import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAction, BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -134,7 +133,7 @@ export async function buildStartOrder(
     ),
   );
 
-  const built = rules.encounters.balance === "xp" || ruleSystemOf(rules).balance.kind === "none" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext, rules);
+  const built = rules.encounters.balance === "xp" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext, rules);
 
   const { field, reserve } = partitionReserve(slots, built);
 

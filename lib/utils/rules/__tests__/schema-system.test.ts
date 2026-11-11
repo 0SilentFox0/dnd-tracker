@@ -34,6 +34,12 @@ describe("rules.system", () => {
     expect(WFRP_RULES.morale.enabled).toBe(false);
   });
 
+  it("unknown key fails with a translatable message key", () => {
+    const r = RulesetPatchSchema.safeParse({ system: { key: "d6pool" } });
+
+    expect(r.success ? [] : r.error.issues.map((i) => i.message)).toEqual(["rules.validation.unknownSystem"]);
+  });
+
   it("patch schema accepts valid keys only", () => {
     expect(RulesetPatchSchema.safeParse({ system: { key: "wfrp" } }).success).toBe(true);
     expect(RulesetPatchSchema.safeParse({ system: { key: "x" } }).success).toBe(false);
