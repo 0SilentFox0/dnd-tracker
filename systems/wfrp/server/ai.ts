@@ -1,3 +1,6 @@
+import "server-only";
+import { prisma } from "@/lib/db";
+import type { SystemAi } from "@/lib/server/systems/types";
 import { value as characteristicValue, woundsMax } from "@/systems/wfrp/rules/characteristics/derive";
 import { CHARACTERISTIC_KEYS, type CharacteristicKey, type Characteristics, readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 import { PARTICIPANT_SLOT } from "@/systems/wfrp/rules/slots";
@@ -41,3 +44,24 @@ export function wfrpParticipantView(p: BattleParticipant) {
     ...(characteristics && { characteristics: characteristicValues(characteristics) }),
   };
 }
+
+const WFRP_PARTY_SELECT = { id: true, name: true, level: true, race: true, notes: true, characteristics: true } as const;
+
+const loadCareers = (campaignId: string): Promise<WfrpCareerRef[]> => prisma.career.findMany({ where: { campaignId }, select: { id: true, name: true, tiers: true } });
+
+type HeroRow = { characteristics?: unknown } & Record<string, unknown>;
+
+const heroView = async (campaignId: string, { characteristics, ...rest }: HeroRow) => ({ ...rest, ...wfrpHeroView({ characteristics }, await loadCareers(campaignId)) });
+
+export const WFRP_AI: SystemAi = {
+  promptLine: WFRP_SYSTEM_LINE,
+  heroSelect: WFRP_PARTY_SELECT,
+  async party(campaignId, query) {
+    const [rows, careers] = await Promise.all([prisma.character.findMany({ ...query, select: WFRP_PARTY_SELECT }), loadCareers(campaignId)]);
+
+    return rows.map(({ characteristics, ...c }) => ({ ...c, ...wfrpHeroView({ characteristics }, careers) }));
+  },
+  hero: heroView,
+  participantView: wfrpParticipantView,
+  unitView: (u) => ({ characteristics: characteristicValues(readCharacteristics(u)) }),
+};

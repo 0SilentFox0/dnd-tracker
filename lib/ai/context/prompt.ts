@@ -5,7 +5,6 @@ import "server-only";
 import { type PartyMember, partySummary } from "@/lib/ai/tools/party";
 import { contentToMarkdown, sectionToMarkdown } from "@/lib/ai/tools/scenario-read";
 import { showSummary } from "@/lib/ai/tools/show";
-import { WFRP_SYSTEM_LINE } from "@/lib/ai/tools/wfrp-view";
 import { AI_LIMITS, type AiThreadMode } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
@@ -17,8 +16,8 @@ import { assistantCatalog } from "@/lib/server/assistant/catalog";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { loadDigestItems } from "@/lib/server/scenario/summary-store";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { parseRules } from "@/lib/utils/rules/schema";
-import { systemKeyOf } from "@/lib/utils/rules/systems";
 import { scenarioDigest } from "@/lib/utils/scenario/digest/scenario-digest";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
 import type { AiFocus, AssistantContextDisclosure, ContextBlockId } from "@/types/ai";
@@ -82,7 +81,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
     "Always do a fresh read before writing: history, compaction and this summary do not replace current rules, versions and server checks.",
     "Read full records with tools when needed; source notes only via an explicit session UI selection. Do not ask for secrets, credentials, invite tokens, signed URLs or raw compendium JSON.",
     "Scenario markup: **bold**, _italic_, ||DM secret||, :::read … :::, :::say … :::, :::callout … :::, [@Name](character:id).",
-    ...(systemKeyOf(rules) === "wfrp" ? [WFRP_SYSTEM_LINE] : []),
+    ...[systemServerOf(rules).ai?.promptLine ?? []].flat(),
   ].join("\n");
 
   const standing = campaign.aiInstructions?.trim();

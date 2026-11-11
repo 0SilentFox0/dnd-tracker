@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { AiToolError, defineTool } from "./define";
-import { characteristicValues } from "./wfrp-view";
 
 import "server-only";
 import { getCachedRaces, getCachedSpells, getCachedUnits } from "@/lib/cache/reference-data";
@@ -11,9 +10,8 @@ import { prisma } from "@/lib/db";
 import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { loadRules } from "@/lib/server/campaigns/rules";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { abilityRegistryOf, flowSegments, linesText } from "@/lib/utils/abilities/segments";
-import { systemKeyOf } from "@/lib/utils/rules/systems";
-import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
 
 const kindSchema = z.enum(["unit", "spell", "race", "skill", "artifact"]);
 
@@ -28,9 +26,9 @@ async function listOf(campaignId: string, kind: Kind, locale: Locale): Promise<E
 
     const registry = abilityRegistryOf(await getTranslator(locale));
 
-    const wfrp = systemKeyOf(await loadRules(campaignId)) === "wfrp";
+    const unitView = systemServerOf(await loadRules(campaignId)).ai?.unitView;
 
-    return units.map((u) => ({ ...u, abilitySummary: linesText(registry, (u.abilitySummary ?? []).map(flowSegments)), ...(wfrp && u.characteristics && { characteristics: characteristicValues(readCharacteristics(u)) }) })) as unknown as Entry[];
+    return units.map((u) => ({ ...u, abilitySummary: linesText(registry, (u.abilitySummary ?? []).map(flowSegments)), ...(unitView && u.characteristics && unitView(u)) })) as unknown as Entry[];
   }
 
   if (kind === "spell") return (await getCachedSpells(campaignId)) as unknown as Entry[];

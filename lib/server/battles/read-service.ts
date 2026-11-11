@@ -1,11 +1,11 @@
 import "server-only";
-import { wfrpParticipantView } from "@/lib/ai/tools/wfrp-view";
 import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { decodeStoredLog } from "@/lib/utils/battle/log/codec";
 import { formatBattleLog } from "@/lib/utils/battle/log/lines";
 import { loadBattle } from "@/lib/utils/battle/store";
@@ -33,7 +33,7 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
 
     const t = await getTranslator("en");
 
-    const wfrp = battle.meta.rules?.system?.key === "wfrp";
+    const participantView = battle.meta.rules?.system ? systemServerOf(battle.meta.rules).ai?.participantView : undefined;
 
     return {
       name: battle.meta.name,
@@ -41,8 +41,8 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
       round: battle.scene.round,
       currentTurnIndex: battle.scene.turnIndex,
       participants: battle.participants.map((p) =>
-        wfrp
-          ? wfrpParticipantView(p)
+        participantView
+          ? participantView(p)
           : {
               name: p.basicInfo.name,
               side: p.basicInfo.side,
