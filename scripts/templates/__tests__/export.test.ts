@@ -90,7 +90,8 @@ describe("bundleToPack", () => {
     const pack = bundleToPack(bundle(), manifest, slugs);
 
     expect(pack.rows.units?.[0].extra).toEqual({ levelScaling: { perLevel: 1 } });
-    expect(pack.rows.skills?.[0].extra).toEqual({ appearanceDescription: "looks" });
+    expect(pack.rows.skills?.[0]).toMatchObject({ appearanceDescription: "looks" });
+    expect(pack.rows.skills?.[0].extra).toBeUndefined();
   });
 
   it("counts rows and forces the system key into the rules", () => {

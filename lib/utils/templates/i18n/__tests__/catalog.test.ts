@@ -49,3 +49,11 @@ describe("classOf for Grim fields", () => {
     expect(classOf("status", "tiers")).toBeNull();
   });
 });
+
+describe("classOf for HOMM fields", () => {
+  it("translates appearanceDescription and the top-level track title only", () => {
+    expect(classOf("appearanceDescription", "")).toBe("d");
+    expect(classOf("title", "", ["title"])).toBe("n");
+    expect(classOf("title", "x", ["x", "title"])).toBeNull();
+  });
+});

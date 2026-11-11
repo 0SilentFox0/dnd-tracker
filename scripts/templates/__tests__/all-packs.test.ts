@@ -49,6 +49,18 @@ describe("every pack of data/templates", () => {
     expect(files.sort()).toEqual([...locales].sort());
   });
 
+  it("heroes-homm keeps Cyrillic out of its data files once it has a uk overlay (D28: the English text is the base)", () => {
+    const withOverlay = keys.filter((key) => key === "heroes-homm" && TEMPLATE_REGISTRY[key].locales.includes("uk"));
+
+    for (const key of withOverlay) {
+      const dir = packPath(key, "", TEMPLATES_DIR);
+
+      const files = fs.readdirSync(dir).filter((file) => file.endsWith(".json"));
+
+      for (const file of files) expect(fs.readFileSync(path.join(dir, file), "utf8"), `${key}/${file}`).not.toMatch(/[\u0400-\u04FF]/);
+    }
+  });
+
   it("legacy names map to registered packs", () => {
     for (const key of Object.values(LEGACY_KEY_BY_NAME)) expect(keys, key).toContain(key);
   });

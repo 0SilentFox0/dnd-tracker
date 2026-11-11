@@ -77,7 +77,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("template pack import (fixture pack)",
     templateId = result.templateId as string;
 
     expect(result.created).toBe(true);
-    expect(result.perKind).toEqual({ "spell-groups": { created: 2, updated: 0, skipped: 0, errors: 0 }, spells: { created: 2, updated: 0, skipped: 0, errors: 0 }, feats: { created: 2, updated: 0, skipped: 0, errors: 0 } });
+    expect(result.perKind).toEqual({ "spell-groups": { created: 2, updated: 0, skipped: 0, errors: 0, deleted: 0 }, spells: { created: 2, updated: 0, skipped: 0, errors: 0, deleted: 0 }, feats: { created: 2, updated: 0, skipped: 0, errors: 0, deleted: 0 } });
     expect((await raw.campaign.findUniqueOrThrow({ where: { id: templateId } })).templateKey).toBe("fixture-pack");
     expect((await raw.feat.findMany({ where: { campaignId: templateId }, select: { icon: true, slug: true }, orderBy: { slug: "asc" } }))).toEqual([{ slug: "fix-alert", icon: "https://example.test/icons/alert.webp" }, { slug: "fix-archery", icon: null }]);
   });

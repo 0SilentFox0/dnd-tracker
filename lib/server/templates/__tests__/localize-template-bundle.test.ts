@@ -36,6 +36,20 @@ function fixture() {
 }
 
 describe("localizeTemplateBundle", () => {
+  it("maps race and main-skill names kept as strings in ability JSON and skill trees (D30)", () => {
+    const bundle = emptyBundle();
+
+    bundle.races = [{ id: "r", slug: "demons", name: "Demons" }];
+    bundle.mainSkills = [{ id: "m", slug: "attack", name: "Attack" }];
+    bundle.units = [{ id: "u", slug: "imp", name: "Imp", abilities: [{ id: "a", condition: { type: "targetRace", races: ["Demons", "Elves"] }, effects: [{ kind: "summon", group: "Demons", tier: 1 }] }] }];
+    bundle.skillTrees = [{ id: "t", slug: "demons", race: "Demons", skills: { id: "t", race: "Demons", mainSkills: [{ id: "attack", name: "Attack" }, { id: "racial", name: "Missing" }] } }];
+
+    const out = localizeTemplateBundle(bundle, dict(entry("races/demons/name", "Демони", "Demons"), entry("main-skills/attack/name", "Напад", "Attack")));
+
+    expect(out.units[0].abilities).toEqual([{ id: "a", condition: { type: "targetRace", races: ["Демони", "Elves"] }, effects: [{ kind: "summon", group: "Демони", tier: 1 }] }]);
+    expect(out.skillTrees[0]).toMatchObject({ race: "Демони", skills: { id: "t", race: "Демони", mainSkills: [{ id: "attack", name: "Напад" }, { id: "racial", name: "Missing" }] } });
+  });
+
   it("localizes mainSkills, skills and artifactSets rows by <kind>/<slug> keys", () => {
     const bundle = emptyBundle();
 
