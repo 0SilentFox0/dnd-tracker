@@ -7,16 +7,17 @@ import * as path from "path";
 
 import { assertSeedTarget, assertStorageTarget } from "../../seed/seed-library-lib";
 import { readSrdData } from "../../srd/lib/data-files";
+import { readIcons, writeIcons } from "../../templates/lib/icons-file";
 import { ASSET_BUCKET } from "../attach-lib";
 import { mapToTemplate, parseCatalog, TOKEN_SIZE, type TokenKind } from "./catalog";
 import { toWebp } from "./convert";
-import { readIcons, writeIcons } from "./icons-file";
 
 import { CampaignKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
+import { templateAssetPath } from "@/lib/utils/common/image-url";
 import { templateKeyOf } from "@/lib/utils/templates/registry";
 
 const USAGE = "Використання: pnpm assets:tokens-5e <templateId> [--dir <v2>] [--dry-run] [--allow-remote]";
@@ -101,7 +102,7 @@ async function main() {
       ensured.add(kind);
     }
 
-    const objectName = `${templateId}/${kind}/${slug}-${createHash("sha1").update(webp).digest("hex").slice(0, 8)}.webp`;
+    const objectName = templateAssetPath("srd-5.2", kind, slug, createHash("sha1").update(webp).digest("hex").slice(0, 8));
 
     const { error } = await admin.storage.from(bucket).upload(objectName, webp, staticAssetUploadOptions("image/webp"));
 
@@ -121,11 +122,11 @@ async function main() {
   for (const e of errors) console.warn(`  не завантажено: ${e}`);
 
   if (!dryRun) {
-    const old = readIcons();
+    const old = readIcons("srd-5.2");
 
-    const kept = (kind: TokenKind) => Object.fromEntries(Object.entries(old[kind]).filter(([slug]) => picked.some((p) => p.kind === kind && p.slug === slug)));
+    const kept = (kind: TokenKind) => Object.fromEntries(Object.entries(old[kind] ?? {}).filter(([slug]) => picked.some((p) => p.kind === kind && p.slug === slug)));
 
-    writeIcons({ ...old, spells: { ...kept("spells"), ...uploaded.spells }, units: { ...kept("units"), ...uploaded.units }, artifacts: { ...kept("artifacts"), ...uploaded.artifacts } });
+    writeIcons("srd-5.2", { ...old, spells: { ...kept("spells"), ...uploaded.spells }, units: { ...kept("units"), ...uploaded.units }, artifacts: { ...kept("artifacts"), ...uploaded.artifacts } });
   }
 
   if (errors.length > 0) process.exitCode = 1;

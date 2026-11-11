@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { BUNDLE_TABLES, emptyBundle } from "@/lib/server/templates/bundle";
@@ -26,7 +25,7 @@ vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor:
 
 const actor = { campaignId: "home", userId: "dm", isDM: true, via: "session" as const, scopes: null };
 
-const official = { kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME, members: [] };
+const official = { kind: "template", visibility: "official", templateKey: "srd-5.2", members: [] };
 
 let f: ReturnType<typeof createFakeSyncDb>;
 

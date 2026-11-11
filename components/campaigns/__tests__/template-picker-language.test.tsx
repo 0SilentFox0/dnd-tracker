@@ -3,7 +3,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TemplatePicker } from "@/components/campaigns/templates/TemplatePicker";
-import { GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import type { TemplateCard } from "@/types/campaigns";
 
 const card = (id: string, locale: string | null): TemplateCard => ({ id, name: "SRD", description: null, visibility: "official", counts: {}, locale, templateKey: "srd" });
@@ -36,7 +35,7 @@ vi.mock("@/lib/hooks/campaigns", () => ({
 describe("TemplatePicker: мова шаблону", () => {
   afterEach(() => { cleanup(); uiLocale = "uk"; });
 
-  const canonical = () => ({ ...card("canonical", "en"), kind: "template", templateKey: SRD_TEMPLATE_NAME, availableLocales: ["en", "uk"] });
+  const canonical = () => ({ ...card("canonical", "en"), kind: "template", templateKey: "srd-5.2", availableLocales: ["en", "uk"] });
 
   it("uses one SRD id and emits the displayed default language, then preserves explicit selection across UI changes", () => {
     official = [canonical()];
@@ -100,7 +99,7 @@ describe("TemplatePicker: мова шаблону", () => {
   });
 
   it("offers the content language for the canonical Grim", () => {
-    official = [{ ...card("grim", "en"), kind: "template", templateKey: GRIM_TEMPLATE_NAME, availableLocales: ["en", "uk"] }];
+    official = [{ ...card("grim", "en"), kind: "template", templateKey: "grim-d100", availableLocales: ["en", "uk"] }];
 
     const onChange = vi.fn();
 

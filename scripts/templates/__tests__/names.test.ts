@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildNameMap, fixItalicNames, namesIn } from "../names";
+import { buildNameMap, fixItalicNames, namesIn } from "../lib/names";
 
 import type { KeyedString } from "@/lib/utils/templates/i18n/keys";
 

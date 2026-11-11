@@ -18,15 +18,7 @@ export const CampaignVisibility = { PRIVATE: "private", OFFICIAL: "official" } a
 
 export type CampaignVisibility = (typeof CampaignVisibility)[keyof typeof CampaignVisibility];
 
-export const SRD_TEMPLATE_NAME = "5e SRD 5.2";
-
 export const DEFAULT_TEMPLATE_LOCALE = "en";
-
-export const EMPTY_5E_TEMPLATE_NAME = "5e (empty)";
-
-export const EMPTY_GRIM_TEMPLATE_NAME = "Grim d100 (empty)";
-
-export const GRIM_TEMPLATE_NAME = "Grim d100";
 
 export interface DmSection {
   path: string;

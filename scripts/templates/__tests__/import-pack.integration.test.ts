@@ -25,9 +25,9 @@ const marker = `grimload-${randomUUID()}`;
 
 const fixtures = path.join(__dirname, "fixtures/grim-fixture");
 
-const GRIM_TEMPLATE_NAME = "Grim d100";
+const GRIM_NAME = "Grim d100";
 
-const manifest = { key: "grim-d100", system: "wfrp", names: { en: GRIM_TEMPLATE_NAME, uk: GRIM_TEMPLATE_NAME }, locales: ["en"], rules: { file: "rules.json" }, kinds: ["feats", "careers", "races", "spells", "units", "artifacts"], extras: ["race-profiles"], icons: {}, credits: "", counts: { feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2 } };
+const manifest = { key: "grim-d100", system: "wfrp", names: { en: GRIM_NAME, uk: GRIM_NAME }, locales: ["en"], rules: { file: "rules.json" }, kinds: ["feats", "careers", "races", "spells", "units", "artifacts"], extras: ["race-profiles"], icons: {}, credits: "", counts: { feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2 } };
 
 const tmpDirs: string[] = [];
 
@@ -54,7 +54,7 @@ const mixedDir = (mutate: (name: string, rows: Array<Record<string, unknown>>) =
 const goodDir = () => mixedDir(() => undefined);
 
 const rowCounts = async (templateId: string) => ({
-  campaigns: await raw.campaign.count({ where: { kind: "template", name: GRIM_TEMPLATE_NAME } }),
+  campaigns: await raw.campaign.count({ where: { kind: "template", name: GRIM_NAME } }),
   feats: await raw.feat.count({ where: { campaignId: templateId } }),
   careers: await raw.career.count({ where: { campaignId: templateId } }),
   races: await raw.race.count({ where: { campaignId: templateId } }),
@@ -84,7 +84,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
   const userId = marker;
 
   beforeAll(async () => {
-    if (await raw.campaign.count({ where: { kind: "template", name: GRIM_TEMPLATE_NAME } })) throw new Error("a Grim d100 template already exists in the test database");
+    if (await raw.campaign.count({ where: { kind: "template", name: GRIM_NAME } })) throw new Error("a Grim d100 template already exists in the test database");
 
     guardPassed = true;
 

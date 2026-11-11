@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { inPhase, mergeApplied, missing, planBatches } from "../batches";
+import { inPhase, mergeApplied, missing, planBatches } from "../lib/batches";
 
 import type { KeyedString } from "@/lib/utils/templates/i18n/keys";
 

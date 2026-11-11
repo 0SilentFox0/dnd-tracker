@@ -7,8 +7,8 @@ import * as path from "path";
 
 import { assertSeedTarget, assertStorageTarget } from "../../seed/seed-library-lib";
 import { readSrdData } from "../../srd/lib/data-files";
+import { readIcons, writeIcons } from "../../templates/lib/icons-file";
 import { toWebp } from "./convert";
-import { readIcons, writeIcons } from "./icons-file";
 import { expectedTargets, IDENTITY_BUCKET, IDENTITY_SIZE, type IdentityKind, parseIdentityCsv } from "./identity-catalog";
 import { planUploads } from "./identity-plan";
 
@@ -16,6 +16,7 @@ import { CampaignKind } from "@/lib/constants/campaigns";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
+import { templateAssetPath } from "@/lib/utils/common/image-url";
 import { templateKeyOf } from "@/lib/utils/templates/registry";
 
 const USAGE = "Використання: pnpm assets:identity-icons <templateId> [--dir <fantasy-tokens>] [--dry-run] [--allow-remote]";
@@ -104,7 +105,7 @@ async function main() {
       ensured.add(bucket);
     }
 
-    const objectName = `${templateId}/${target.kind}/${target.key.replaceAll("/", "_")}-${createHash("sha1").update(webp).digest("hex").slice(0, 8)}.webp`;
+    const objectName = templateAssetPath("srd-5.2", target.kind, target.key.replaceAll("/", "_"), createHash("sha1").update(webp).digest("hex").slice(0, 8));
 
     const { error } = await admin.storage.from(bucket).upload(objectName, webp, staticAssetUploadOptions("image/webp"));
 
@@ -122,7 +123,7 @@ async function main() {
   for (const e of errors) console.warn(`  не завантажено: ${e}`);
 
   if (!dryRun) {
-    const old = readIcons();
+    const old = readIcons("srd-5.2");
 
     const next = { ...old };
 
@@ -132,7 +133,7 @@ async function main() {
       next[kind] = Object.fromEntries(Object.entries({ ...old[kind], ...uploaded[kind] }).filter(([key]) => valid.has(key)));
     }
 
-    writeIcons(next);
+    writeIcons("srd-5.2", next);
   }
 
   if (errors.length > 0 || missing.length > 0) process.exitCode = 1;

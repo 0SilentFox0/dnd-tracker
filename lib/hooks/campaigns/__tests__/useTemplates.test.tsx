@@ -5,7 +5,6 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { getTemplates } from "@/lib/api/templates";
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { useTemplates, useTemplateSelection } from "@/lib/hooks/campaigns";
 import { campaignKeys } from "@/lib/hooks/campaigns/keys";
 
@@ -56,7 +55,7 @@ describe("useTemplates", () => {
   });
 
   it("resolves SRD content language once and discards stale locale for private, empty and file sources", async () => {
-    const canonical = { ...list.official[0], id: "srd", kind: "template", templateKey: SRD_TEMPLATE_NAME, availableLocales: ["en", "uk"], locale: "en" };
+    const canonical = { ...list.official[0], id: "srd", kind: "template", templateKey: "srd-5.2", availableLocales: ["en", "uk"], locale: "en" };
 
     vi.mocked(getTemplates).mockResolvedValue({ official: [canonical], mine: [{ ...canonical, id: "private", visibility: "private" }] });
 

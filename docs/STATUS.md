@@ -79,7 +79,8 @@ _Оновлено: 2026-11-10._
 3. Гейт: `battle-sweep` homm/dnd5e на prodcopy після останніх змін епіку (останній прогін 2026-11-05 — до 5e/5f, тож повторити перед merge).
 4. Повний `pnpm test:run` і repo-wide lint один раз перед merge.
 5. Після деплою: існуючі wfrp-кампанії вмикають правило `spellIngredients` вручну.
-6. Іконки Grim: згенерувати 186 PNG, QA вшитого тексту (список сюди), завантажити (runbook — content-api.md, «Grim d100»).
+6. Іконки Grim: згенерувати 186 PNG, QA вшитого тексту (список сюди), завантажити (runbook — content-api.md, «Grim d100»; завантаження — `pnpm template icons grim-d100 --dir <images>`).
+7. E0 (пакети шаблонів, `feat/wfrp`, частини 1–4 готові; опис — content-api.md, «Пакети шаблонів»): міграція `20261130000000_content_slug` їде з main; на prod після деплою v2-словників одразу `pnpm template import srd-5.2 --publish --allow-remote` (slug backfill без підняття `contentVersion`, `--allow-untranslated` потрібен, поки в SRD uk лишається 676 missing) і `pnpm template backfill-keys --apply`; `template publish` відмовляє за stale/missing у перекладі. Лишилося: Heroes як пакет (частина 5).
 
 Хвости 5h-1 (фінальне review), що лишилися:
 

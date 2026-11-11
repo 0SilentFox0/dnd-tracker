@@ -1,7 +1,7 @@
-import { normalizeCreatureHeader } from "./creature-header";
+import { normalizeCreatureHeader } from "../../srd/i18n/creature-header";
+import { type Glossary, normalizeSpellHeader } from "../../srd/i18n/spell-header";
+import { checkTranslation, type TranslationIssue } from "../../srd/i18n/validate";
 import { buildNameMap, fixItalicNames } from "./names";
-import { type Glossary, normalizeSpellHeader } from "./spell-header";
-import { checkTranslation, type TranslationIssue } from "./validate";
 
 import type { KeyedString, TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 

@@ -28,6 +28,21 @@ describe("icon upload planning", () => {
     expect([ICON_SIZE_BY_KIND("units"), ICON_SIZE_BY_KIND("feats")]).toEqual([384, 256]);
   });
 
+  it("grim-d100: the planned files are the ones the prompt generator names, with the career and feat buckets", async () => {
+    const grim = readPack("grim-d100");
+
+    const { grimPromptRows } = await import("../../assets/grim-icons/prompts");
+
+    const { WFRP_ROW_KINDS, wfrpDataOf } = await import("../systems/wfrp/common");
+
+    const readSubject = (name: string) => JSON.parse(fs.readFileSync(path.join(__dirname, "../../assets/icon-subjects", `grim-${name}.json`), "utf8"));
+
+    const prompts = grimPromptRows(wfrpDataOf(grim), { units: readSubject("units"), spells: readSubject("spells"), artifacts: readSubject("artifacts"), identity: readSubject("identity") });
+
+    expect(planIconUploads(grim, "/i").map((p) => path.relative("/i", p.file)).sort()).toEqual(prompts.map((p) => p.file).sort());
+    expect(WFRP_ROW_KINDS.map((kind) => bucketOf(grim, kind))).toEqual(["feat-icons", "career-icons", "race-icons", "spell-icons", "unit-icons", "artifact-icons"]);
+  });
+
   it("--dry-run converts the present files, counts the missing ones and writes nothing", async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "icons-dry-"));
 

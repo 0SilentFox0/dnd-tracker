@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { readPack } from "../../templates/lib/pack";
-import { validatePack } from "../../templates/lib/validate";
-import { grimCoverage, grimInfo } from "../../templates/systems/wfrp/coverage";
-import { GRIM_ROW_KINDS, readGrimData, readGrimManifest } from "../data";
-import { grimIconIssues, readGrimIcons } from "../icons";
+import { readPack } from "../../lib/pack";
+import { validatePack } from "../../lib/validate";
+import { WFRP_ROW_KINDS, wfrpDataOf } from "../../systems/wfrp/common";
+import { grimCoverage, grimInfo } from "../../systems/wfrp/coverage";
 
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { nameKey } from "@/lib/utils/content/import";
@@ -15,7 +14,9 @@ import { rollCreation } from "@/lib/utils/rules/systems/wfrp/creation/roll";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { isSlug } from "@/lib/utils/templates/slug";
 
-const data = readGrimData();
+const pack = readPack("grim-d100");
+
+const data = wfrpDataOf(pack);
 
 const MECHANICAL_STATS = ["attackBonus", "maxHp", "initiative"];
 
@@ -31,11 +32,11 @@ const ROSTER = [["Bog Leech Swarm", "Beasts", 1], ["Ash Hound", "Beasts", 2], ["
 
 describe("grim-d100 catalog", () => {
   it("icons.json has no stale or invalid entries", () => {
-    expect(grimIconIssues(data, readGrimIcons())).toEqual([]);
+    expect(validatePack(pack).filter((issue) => issue.message.startsWith("icons:") && issue.level === "error")).toEqual([]);
   });
 
   it("passes the validator", () => {
-    expect(validatePack(readPack("grim-d100")).filter((issue) => issue.level === "error")).toEqual([]);
+    expect(validatePack(pack).filter((issue) => issue.level === "error")).toEqual([]);
   });
 
   it("has no coverage warnings", () => {
@@ -66,7 +67,7 @@ describe("grim-d100 catalog", () => {
   });
 
   it("every row has a unique valid slug and profiles point at race slugs", () => {
-    for (const kind of GRIM_ROW_KINDS) {
+    for (const kind of WFRP_ROW_KINDS) {
       const slugs = data[kind].map((r) => String(r.slug));
 
       expect(slugs.every(isSlug), kind).toBe(true);
@@ -77,7 +78,7 @@ describe("grim-d100 catalog", () => {
   });
 
   it("manifest counts match the data", () => {
-    const { counts } = readGrimManifest();
+    const { counts } = pack.manifest;
 
     expect(counts).toEqual({ races: 4, careers: 16, feats: 50, units: 30, spells: 30, artifacts: 56 });
     expect(counts).toEqual({ races: data.races.length, careers: data.careers.length, feats: data.feats.length, units: data.units.length, spells: data.spells.length, artifacts: data.artifacts.length });

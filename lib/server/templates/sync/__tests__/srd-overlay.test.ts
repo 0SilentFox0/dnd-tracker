@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeSyncDb } from "./fake-sync-db";
 import { id, visible } from "./helpers";
 
-import { GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { importBundle } from "@/lib/server/templates/import-bundle";
 import { prepareCampaignSource } from "@/lib/server/templates/prepare-source";
 import { applySourceChanges } from "@/lib/server/templates/sync/apply";
@@ -44,7 +43,7 @@ async function makeClone(locale: "en" | "uk" = "uk") {
 
 beforeEach(() => {
   f = createFakeSyncDb();
-  f.addCampaign({ id: source, kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME, locale: "en" });
+  f.addCampaign({ id: source, kind: "template", visibility: "official", templateKey: "srd-5.2", locale: "en" });
   f.addRow("spell", { id: spell, campaignId: source, slug: "bless", name: "Bless", description: "Untranslated prose" });
   dictionary.values = { "spells/bless/name": { text: "Благословення", en: "Bless" } };
 });
@@ -215,7 +214,7 @@ describe("localized Grim synchronization", () => {
   const table = (text: string) => ({ tables: { miscastMinor: [{ max: 100, text, effects: [] }] } });
 
   beforeEach(() => {
-    f.patchCampaign(source, { templateKey: GRIM_TEMPLATE_NAME, rules: table("A smell of scorched hair.") });
+    f.patchCampaign(source, { templateKey: "grim-d100", rules: table("A smell of scorched hair.") });
     f.addRow("career", { id: id("c"), campaignId: source, slug: "archivist", name: "Archivist", class: "Academic", tiers: [] });
     dictionary.values = { "rules/_/miscastMinor[0].text": { text: "Запах паленого волосся.", en: "A smell of scorched hair." }, "careers/archivist/name": { text: "Архіваріус", en: "Archivist" } };
   });

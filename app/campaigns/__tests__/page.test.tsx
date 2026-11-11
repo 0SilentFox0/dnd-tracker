@@ -5,7 +5,6 @@ import { describe, expect, it, vi } from "vitest";
 import CampaignsPage from "../page";
 
 import { TemplateTiles } from "@/components/campaigns/templates/TemplateTiles";
-import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 
 const findMany = vi.fn();
 
@@ -32,7 +31,7 @@ function tileProps(node: ReactNode): Record<string, unknown> | null {
 
 describe("campaign owner template tiles", () => {
   it("omits legacy official uk even for its owner while preserving private same-name templates", async () => {
-    const srd = { kind: "template", visibility: "official", name: SRD_TEMPLATE_NAME, templateKey: SRD_TEMPLATE_NAME, description: null };
+    const srd = { kind: "template", visibility: "official", name: "5e SRD 5.2", templateKey: "srd-5.2", description: null };
 
     findMany.mockResolvedValueOnce([{ ...srd, id: "canonical", locale: null }, { ...srd, id: "legacy", locale: "uk" }, { ...srd, id: "private", visibility: "private", locale: "uk" }]).mockResolvedValueOnce([]);
     findFirst.mockResolvedValue(null);

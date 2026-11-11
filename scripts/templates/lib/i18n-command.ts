@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { type AppliedLine, inPhase, mergeApplied, missing, type Phase, planBatches } from "../../srd/i18n/batches";
-import { buildNameMap, namesIn } from "../../srd/i18n/names";
+import { type AppliedLine, inPhase, mergeApplied, missing, type Phase, planBatches } from "./batches";
 import { catalogOf, convertV1, i18nIssuesOf } from "./i18n-convert";
 import { readGlossary, readTranslations, writeTranslations } from "./i18n-store";
+import { buildNameMap, namesIn } from "./names";
 import { packPath, readPack, TEMPLATES_DIR } from "./pack";
 
 import { type KeyedString, statusOf } from "@/lib/utils/templates/i18n/keys";

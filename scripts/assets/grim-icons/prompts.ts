@@ -1,4 +1,4 @@
-import { GRIM_ROW_KINDS, type GrimData, type GrimRowKind } from "../../grim/data";
+import { WFRP_ROW_KINDS, type WfrpData, type WfrpRowKind } from "../../templates/systems/wfrp/common";
 import { composeCreature, composeItem, composeSkill, composeSpell, rarityFlair } from "../icon-prompts/compose";
 
 export type GrimSubjects = {
@@ -8,7 +8,7 @@ export type GrimSubjects = {
   identity: Record<string, string>;
 };
 
-export type GrimPromptRow = { recordId: string; kind: GrimRowKind; name: string; file: string; prompt: string };
+export type GrimPromptRow = { recordId: string; kind: WfrpRowKind; name: string; file: string; prompt: string };
 
 export const grimSlug = (name: string) =>
   name
@@ -20,7 +20,7 @@ const IDENTITY_COLOURS = "neutral gold";
 
 export const GRIM_NO_TEXT = "Image only: absolutely no text, letters, words, numbers, runes, captions, signs, signatures or watermarks anywhere in the picture.";
 
-function basePrompt(kind: GrimRowKind, name: string, rarity: unknown, subjects: GrimSubjects): string {
+function basePrompt(kind: WfrpRowKind, name: string, rarity: unknown, subjects: GrimSubjects): string {
   const missing = (): never => {
     throw new Error(`Немає субʼєкта іконки: ${kind} "${name}"`);
   };
@@ -38,10 +38,10 @@ function basePrompt(kind: GrimRowKind, name: string, rarity: unknown, subjects: 
   return composeSkill(subjects.identity[`${kind}:${name}`] ?? missing(), IDENTITY_COLOURS, null);
 }
 
-const promptFor = (kind: GrimRowKind, name: string, rarity: unknown, subjects: GrimSubjects) => `${basePrompt(kind, name, rarity, subjects)} ${GRIM_NO_TEXT}`;
+const promptFor = (kind: WfrpRowKind, name: string, rarity: unknown, subjects: GrimSubjects) => `${basePrompt(kind, name, rarity, subjects)} ${GRIM_NO_TEXT}`;
 
-export function grimPromptRows(data: GrimData, subjects: GrimSubjects): GrimPromptRow[] {
-  return GRIM_ROW_KINDS.flatMap((kind) =>
+export function grimPromptRows(data: WfrpData, subjects: GrimSubjects): GrimPromptRow[] {
+  return WFRP_ROW_KINDS.flatMap((kind) =>
     data[kind].map((row) => {
       const name = String(row.name);
 
