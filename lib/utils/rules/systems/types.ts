@@ -238,7 +238,6 @@ export interface RuleSystemCombat {
   tieBreak?(p: BattleParticipant): number;
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
-  /** Whether the scene state gives this side a standing advantage (Momentum) */
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
   attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { label: LogLine; target: number };
   mitigateDamage?(ctx: MitigateCtx): MitigateResult;

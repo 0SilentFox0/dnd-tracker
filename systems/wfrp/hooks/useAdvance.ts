@@ -25,6 +25,8 @@ export function useAdvance(campaignId: string, characterId: string) {
     onError: () => void queryClient.invalidateQueries({ queryKey: characterKeys.detail(campaignId, characterId) }),
   });
 
+  const { mutateOk } = mutation;
+
   const inFlight = useRef(false);
 
   // synchronous: isPending only flips after a render, a fast second click would slip through
@@ -39,8 +41,6 @@ export function useAdvance(campaignId: string, characterId: string) {
       inFlight.current = false;
     }
   };
-
-  const { mutateOk } = mutation;
 
   return {
     buy: (request: AdvanceBody) => guarded({ kind: "buy", request }),
