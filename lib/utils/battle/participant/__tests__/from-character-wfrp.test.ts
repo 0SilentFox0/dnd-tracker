@@ -67,8 +67,8 @@ describe("participant: WFRP equipment", () => {
 
     const p = await withGear([row("sw", "weapon", weapon({ reach: "average" })), row("bw", "range_weapon", weapon({ group: "bow", range: 60, ammoCapacity: 20, flaws: [{ key: "reload", value: 1 }] }))]);
 
-    expect(p.battleData.attacks.find((a) => a.id === "sw")).toMatchObject({ damageDice: "", damageBonus: 4, wfrp: { qualities: [] } });
-    expect(p.battleData.attacks.find((a) => a.id === "bw")).toMatchObject({ wfrp: { ammoCapacity: 20, reload: 1 } });
+    expect(p.battleData.attacks.find((a) => a.id === "sw")).toMatchObject({ damageDice: "", damageBonus: 4, system: { key: "wfrp", data: { qualities: [] } } });
+    expect(p.battleData.attacks.find((a) => a.id === "bw")).toMatchObject({ ammo: { capacity: 20, reload: 1 } });
     expect(p.battleData.ammo).toEqual({ bw: 20 });
   });
 

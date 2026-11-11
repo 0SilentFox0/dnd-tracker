@@ -95,7 +95,7 @@ describe("wfrpHitModel traits", () => {
   });
 
   it("breath without SB ignores SB, size scales damage", () => {
-    const breath = [{ name: "b", type: "ranged", damageDice: "", damageBonus: 6, wfrp: { noSb: true } }];
+    const breath = [{ name: "b", type: "ranged", damageDice: "", damageBonus: 6, system: { key: "wfrp", data: { qualities: [], flaws: [], noSb: true } } }];
 
     expect(wfrpHitModel.damage(withWfrp({ sb: 5 }, breath))).toBeCloseTo(6 - 3);
     expect(wfrpHitModel.damage(withWfrp({ sb: 5, size: "large" }, breath))).toBeCloseTo(12 - 3);

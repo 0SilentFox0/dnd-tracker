@@ -13,7 +13,7 @@ export function tickReload(p: BattleParticipant): BattleParticipant {
     const left = Math.max(0, turns - 1);
 
     if (left > 0) nextReload[id] = left;
-    else nextAmmo[id] = attacks.find((a) => a.id === id)?.wfrp?.ammoCapacity ?? nextAmmo[id] ?? 0;
+    else nextAmmo[id] = attacks.find((a) => a.id === id)?.ammo?.capacity ?? nextAmmo[id] ?? 0;
   }
 
   return { ...p, battleData: { ...p.battleData, ammo: nextAmmo, reload: nextReload } };

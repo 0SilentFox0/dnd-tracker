@@ -5,7 +5,7 @@ export type AmmoStatus = "ok" | "empty" | "reloading";
 export function ammoStatus(p: BattleParticipant, attack: BattleAttack): AmmoStatus {
   const { ammo, reload } = p.battleData;
 
-  if (!attack.id || !attack.wfrp?.ammoCapacity) return "ok";
+  if (!attack.id || !attack.ammo?.capacity) return "ok";
 
   if ((reload?.[attack.id] ?? 0) > 0) return "reloading";
 
@@ -16,11 +16,11 @@ export function ammoStatus(p: BattleParticipant, attack: BattleAttack): AmmoStat
 export function spendAmmo(p: BattleParticipant, attack: BattleAttack): BattleParticipant {
   const { ammo } = p.battleData;
 
-  if (!attack.id || !attack.wfrp?.ammoCapacity || !ammo || ammo[attack.id] === undefined) return p;
+  if (!attack.id || !attack.ammo?.capacity || !ammo || ammo[attack.id] === undefined) return p;
 
   const left = Math.max(0, ammo[attack.id] - 1);
 
-  const reload = attack.wfrp.reload ?? 0;
+  const reload = attack.ammo.reload ?? 0;
 
   return {
     ...p,

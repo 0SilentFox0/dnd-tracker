@@ -1,20 +1,15 @@
 import { LOCATIONS } from "../combat/constants";
+import { wfrpAttackFromProfile } from "../combat/extract-attacks";
 import { type WfrpParticipantFields,wfrpParticipantFields } from "../combat/participant";
 import { AP_CAP } from "../equipment/constants";
+import type { WeaponProfile } from "../equipment/weapon-profile";
 import { BREATH_BLAST, BREATH_DEFAULT_RANGE_FT, RANGED_DEFAULT_RANGE_FT, TRAIT_MELEE_CELLS } from "./constants";
 import { sizeStep, traitEntries } from "./read";
 
 import type { TraitEffect } from "@/lib/utils/abilities/schema";
 import type { TraitSize } from "@/lib/utils/abilities/schema/kinds";
-import type { WeaponProfile } from "@/lib/utils/rules/systems/types";
+import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 import type { ResolvedAbility } from "@/types/abilities";
-
-export interface UnitTraitAttack {
-  id: string;
-  name: string;
-  profile: WeaponProfile;
-  magical?: true;
-}
 
 type AttackEffect = Extract<TraitEffect, { kind: "wfrpAttack" }>;
 
@@ -28,7 +23,7 @@ function attackProfile(e: AttackEffect): WeaponProfile {
   return { range: "melee", cells: TRAIT_MELEE_CELLS, damageFlat: e.damage, addSb: true, qualities: [], flaws: [], twoHanded: false };
 }
 
-export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, abilities: readonly ResolvedAbility[]): { fields: WfrpParticipantFields; attacks: UnitTraitAttack[] } {
+export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, abilities: readonly ResolvedAbility[]): { fields: WfrpParticipantFields; attacks: ExtractedAttack[] } {
   const base = wfrpParticipantFields(row);
 
   const entries = traitEntries(abilities);
@@ -43,7 +38,7 @@ export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, ab
 
   let size: TraitSize | undefined;
 
-  const attacks: UnitTraitAttack[] = [];
+  const attacks: ExtractedAttack[] = [];
 
   for (const { ability, effect, index } of entries) {
     switch (effect.kind) {
@@ -59,7 +54,7 @@ export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, ab
 
         break;
       case "wfrpAttack":
-        attacks.push({ id: `${row.id}-trait-${ability.key}-${index}`, name: ability.name, profile: attackProfile(effect), ...(effect.magical && { magical: true as const }) });
+        attacks.push(wfrpAttackFromProfile(`${row.id}-trait-${ability.key}-${index}`, ability.name, attackProfile(effect), effect.magical ? { magical: true } : undefined));
         break;
     }
   }

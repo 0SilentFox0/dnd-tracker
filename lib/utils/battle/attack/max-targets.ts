@@ -8,7 +8,7 @@ export function isCleave(attack: BattleAttack): boolean {
 
 /** Скільки цілей обирає гравець; автоцілі (ланцюг, розщеплення, пробивний, «бʼє всіх») — поза лімітом. */
 export function attackMaxTargets(attacker: BattleParticipant, attack: BattleAttack, ctx: { chain: boolean; onMap: boolean }): number {
-  if (attack.targetType === "aoe" && attack.wfrp?.blastRadius && ctx.onMap) return 1;
+  if (attack.targetType === "aoe" && attack.blastRadius && ctx.onMap) return 1;
 
   if (attack.targetType === "aoe") return attack.maxTargets || attacker.combatStats.maxTargets || 1;
 

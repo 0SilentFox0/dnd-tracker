@@ -11,9 +11,9 @@ import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
+import { extractWfrpAttacks } from "@/systems/wfrp/rules/combat/extract-attacks";
 import { mitigateWfrpDamage } from "@/systems/wfrp/rules/combat/mitigate";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
-import { WFRP_EQUIPMENT } from "@/systems/wfrp/rules/equipment";
 import { armourAp } from "@/systems/wfrp/rules/equipment/armour";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleAttack, BattleMapConfig } from "@/types/battle";
@@ -24,7 +24,7 @@ const row = (id: string, slot: string, systemStats: unknown, carried?: true) => 
 
 const hero = { campaignId: "c", inventory: null } as unknown as CharacterFromPrisma;
 
-const extract = (rows: ReturnType<typeof row>[]) => extractAttacksFromCharacter(hero, {}, undefined, { equipment: { hooks: WFRP_EQUIPMENT, rows } });
+const extract = (rows: ReturnType<typeof row>[]) => extractAttacksFromCharacter(hero, {}, undefined, { attacksOf: () => extractWfrpAttacks({ rows }) });
 
 const sword = row("sword", "weapon", weaponStats({}));
 
@@ -34,7 +34,7 @@ describe("extractWfrpAttacks", () => {
   it("sword becomes a melee attack with flat damage and reach", () => {
     const [a, d] = extract([sword]);
 
-    expect(a).toMatchObject({ id: "sword", type: AttackType.MELEE, damageDice: "", damageBonus: 4, attackBonus: 0, wfrp: { reachCells: 1, qualities: [], flaws: [] } });
+    expect(a).toMatchObject({ id: "sword", type: AttackType.MELEE, damageDice: "", damageBonus: 4, attackBonus: 0, reachCells: 1, system: { key: "wfrp", data: { qualities: [], flaws: [] } } });
     expect(a.range).toBeUndefined();
     expect(d.id).toBe("default-ranged");
   });
@@ -42,7 +42,7 @@ describe("extractWfrpAttacks", () => {
   it("bow becomes a ranged attack with range, ammo and reload", () => {
     const [a] = extract([bow]);
 
-    expect(a).toMatchObject({ id: "bow", type: AttackType.RANGED, range: "60 ft", damageDice: "", damageBonus: 3, wfrp: { ammoCapacity: 20, reload: 1, noSb: true } });
+    expect(a).toMatchObject({ id: "bow", type: AttackType.RANGED, range: "60 ft", damageDice: "", damageBonus: 3, ammo: { capacity: 20, reload: 1 }, system: { key: "wfrp", data: { noSb: true } } });
   });
 
   it("the same artifact in two slots gets independent attack ids", () => {
@@ -70,7 +70,7 @@ describe("extractWfrpAttacks", () => {
 
     expect(attacks.map((a) => a.id).slice(0, 2)).toEqual(["sword", "dagger"]);
     expect(attacks.some((a) => a.id === "buckler")).toBe(false);
-    expect(attacks[1]).toMatchObject({ damageBonus: 2, wfrp: { ammoCapacity: 3 } });
+    expect(attacks[1]).toMatchObject({ damageBonus: 2, ammo: { capacity: 3 } });
   });
 
   it("the same weapon in main hand and shield slot gets independent ids", () => {
@@ -80,7 +80,7 @@ describe("extractWfrpAttacks", () => {
   it("Blast X becomes an aoe attack", () => {
     const [a] = extract([row("bomb", "range_weapon", weaponStats({ reach: undefined, range: 30, qualities: [{ key: "blast", value: 2 }] }))]);
 
-    expect(a).toMatchObject({ targetType: "aoe", wfrp: { blastRadius: 2 } });
+    expect(a).toMatchObject({ targetType: "aoe", blastRadius: 2 });
   });
 
   it("without equipment opts the d20 path is used", () => {
@@ -103,11 +103,11 @@ describe("wfrp weapon attacks in play", () => {
 
   const target = at("e2", 12, ParticipantSide.ENEMY);
 
-  const attack = (qualities: object[]) => ({ id: "g", name: "Gun", type: AttackType.RANGED, range: "60 ft", wfrp: { qualities, flaws: [] } }) as unknown as BattleAttack;
+  const attack = (ignoresEngagement: boolean) => ({ id: "g", name: "Gun", type: AttackType.RANGED, range: "60 ft", ...(ignoresEngagement && { ignoresEngagement: true }) }) as unknown as BattleAttack;
 
   it("Pistol shoots an engaged enemy, a plain bow is refused", () => {
-    expect(attackReachError(map, [shooter, adjacent, target], shooter, attack([{ key: "pistol" }]), [target], DEFAULT_RULES)).toBeNull();
-    expect(attackReachError(map, [shooter, adjacent, target], shooter, attack([]), [target], DEFAULT_RULES)).not.toBeNull();
+    expect(attackReachError(map, [shooter, adjacent, target], shooter, attack(true), [target], DEFAULT_RULES)).toBeNull();
+    expect(attackReachError(map, [shooter, adjacent, target], shooter, attack(false), [target], DEFAULT_RULES)).not.toBeNull();
   });
 
   it("addSb:false weapon has no sb step", () => {
@@ -117,14 +117,14 @@ describe("wfrp weapon attacks in play", () => {
 
     attacker.abilities = { ...attacker.abilities, ...wfrpAbilitiesOf(strong) };
 
-    const ctx = { attacker, target: makeParticipant({ id: "t", hp: 10, maxHp: 10 }), weapon: 3, amount: 5, netSl: 1, location: "body" as const, crit: false, rng: () => 0.5, rules: WFRP_RULES };
+    const ctx = { attacker, target: makeParticipant({ id: "t", hp: 10, maxHp: 10 }), weapon: 3, amount: 5, netSl: 1, location: "body" as const, crit: false, rng: () => 0.5, rules: WFRP_RULES, attack: { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack };
 
     const sbLabel = dynamicTextRef("battleWfrp.damage.steps.sb");
 
     const has = (r: ReturnType<typeof mitigateWfrpDamage>) => r.steps.some((s) => JSON.stringify(s.label) === JSON.stringify(sbLabel));
 
     expect(has(mitigateWfrpDamage(ctx))).toBe(true);
-    expect(has(mitigateWfrpDamage({ ...ctx, noSb: true }))).toBe(false);
+    expect(has(mitigateWfrpDamage({ ...ctx, attack: { ...ctx.attack, system: { key: "wfrp", data: { qualities: [], flaws: [], noSb: true } } } }))).toBe(false);
   });
 });
 

@@ -146,7 +146,7 @@ describe("AttackWizard", () => {
   it("WFRP: лічильник набоїв на зброї, кнопка вимкнена коли порожньо або перезарядка", async () => {
     const { wrapper, me } = fakeScene();
 
-    const bow = { id: "bow", name: "Лук", type: AttackType.RANGED, range: "60 ft", attackBonus: 4, damageDice: "1d6", damageType: "piercing", wfrp: { qualities: [], flaws: [], ammoCapacity: 3, reload: 1 } } as BattleAttack;
+    const bow = { id: "bow", name: "Лук", type: AttackType.RANGED, range: "60 ft", attackBonus: 4, damageDice: "1d6", damageType: "piercing", ammo: { capacity: 3, reload: 1 } } as BattleAttack;
 
     const withAmmo = (battleData: Partial<typeof me.battleData>) => ({ ...me, battleData: { ...me.battleData, attacks: [...me.battleData.attacks, bow], ...battleData } });
 

@@ -3,7 +3,9 @@ import type { RuleSystemKey } from "@/lib/constants/rules";
 import type { Translator } from "@/lib/i18n/translator";
 import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
+import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
 import type { AttackRollResult, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
+import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
 import type { Rng } from "@/lib/utils/common/rng";
@@ -28,7 +30,7 @@ import type { validateEndeavour } from "@/systems/wfrp/rules/downtime/endeavours
 import type { planPeriod } from "@/systems/wfrp/rules/downtime/plan-period";
 import type { armourAp, parseWfrpStats } from "@/systems/wfrp/rules/equipment/armour";
 import type { encumbrance } from "@/systems/wfrp/rules/equipment/encumbrance";
-import type { QUALITY_REGISTRY, QualityRef } from "@/systems/wfrp/rules/equipment/qualities";
+import type { QUALITY_REGISTRY } from "@/systems/wfrp/rules/equipment/qualities";
 import type { PercentileOutcome } from "@/systems/wfrp/rules/percentile";
 import type { wfrpUnitBuild } from "@/systems/wfrp/rules/traits/unit-build";
 import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
@@ -116,10 +118,7 @@ export interface MitigateCtx {
   /** The attack roll was a critical (WFRP: doubles on a hit) */
   crit: boolean;
   attackRoll?: number;
-  qualities?: QualityRef[];
-  flaws?: QualityRef[];
-  /** WFRP weapon without the Strength bonus */
-  noSb?: boolean;
+  attack: BattleAttack;
   rng: Rng;
   rules: Ruleset;
 }
@@ -239,6 +238,7 @@ export interface RuleSystemMagic {
 export interface RuleSystemCombat {
   fortune?: true;
   dice: 20 | 100;
+  attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
   participantFields?(row: { characteristics?: unknown }, gear?: { ap: Record<HitLocation, number>; armourOnly?: Record<HitLocation, number>; flexible?: boolean }): { characteristics: Characteristics; wfrp: WfrpParticipantStats };
   actionEconomy: { bonusAction: boolean; reaction: boolean };
   resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
@@ -332,19 +332,6 @@ export interface RuleSystemCreation {
 
 export type ApplyDamageConsequences = typeof import("@/lib/utils/battle/damage/consequences").applyDamageConsequences;
 
-export type WeaponProfile = {
-  range: "melee" | "ranged";
-  /** Melee reach in cells */
-  cells?: number;
-  rangeFt?: number;
-  damageFlat: number;
-  addSb: boolean;
-  qualities: QualityRef[];
-  flaws: QualityRef[];
-  ammoCapacity?: number;
-  twoHanded: boolean;
-};
-
 export interface RuleSystemCurrency {
   coins: readonly Coin[];
   value: Record<Coin, number>;
@@ -354,7 +341,6 @@ export interface RuleSystemCurrency {
 export interface RuleSystemEquipment {
   armourAp: typeof armourAp;
   parseStats: typeof parseWfrpStats;
-  weaponProfile(stats: unknown): WeaponProfile | null;
   qualities: typeof QUALITY_REGISTRY;
   encumbrance: typeof encumbrance;
 }

@@ -79,10 +79,12 @@ async function loadCharacterBuildRefs(character: CharacterFromPrisma, rules: Rul
 
   const resolvedClasses = resolvedEntries.some((e) => e.class) ? resolvedEntries : null;
 
+  const { attacksOf } = ruleSystemOf(rules).combat;
+
   const attacks = extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, {
     fiveE: !!resolvedClasses,
     items: { enabled: rules.items.enabled, attuned: attunedRefs(character.inventory) },
-    ...(ruleSystemOf(rules).equipment && { equipment: { hooks: ruleSystemOf(rules).equipment!, rows: artifactRows } }),
+    ...(attacksOf && { attacksOf: () => attacksOf({ rows: artifactRows }) }),
   });
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);

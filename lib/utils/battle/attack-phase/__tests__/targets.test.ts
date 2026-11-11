@@ -93,7 +93,7 @@ describe("resolveAttackTargets: Blast", () => {
 
   const friend = placed("fr", { side: ParticipantSide.ALLY, at: { x: 5, y: 6 } });
 
-  const bomb = { ...CLAWS, type: AttackType.RANGED, targetType: "aoe" as const, maxTargets: 8, wfrp: { qualities: [], flaws: [], blastRadius: 2 } };
+  const bomb = { ...CLAWS, type: AttackType.RANGED, targetType: "aoe" as const, maxTargets: 8, blastRadius: 2 };
 
   const input = { rules: WFRP_RULES, order: [a, centre, near, far, friend], attacker: a, attack: bomb, chosen: [centre], targetIds: ["c"], map: testMap(), flags: none };
 
@@ -105,7 +105,7 @@ describe("resolveAttackTargets: Blast", () => {
   });
 
   it("a larger radius reaches farther enemies", () => {
-    const r = resolveAttackTargets({ ...input, attack: { ...bomb, wfrp: { ...bomb.wfrp, blastRadius: 4 } } });
+    const r = resolveAttackTargets({ ...input, attack: { ...bomb, blastRadius: 4 } });
 
     expect(r.targets.map((t) => t.basicInfo.id)).toEqual(["c", "n", "fr", "f"]);
   });

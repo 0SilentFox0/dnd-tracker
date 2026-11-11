@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { wfrpAttackFromProfile } from "../../combat/extract-attacks";
 import { wfrpParticipantFields } from "../../combat/participant";
+import { ATTACK_SLOT } from "../../slots";
 import { wfrpUnitBuild } from "../unit-build";
 import { trait } from "./fixtures";
 
@@ -40,21 +42,23 @@ describe("wfrpUnitBuild", () => {
   it("builds melee attacks from Bite", () => {
     const { attacks } = wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "bite", damage: 3 }], { name: "Bite +3", key: "k1" })]);
 
-    expect(attacks).toEqual([{ id: "u1-trait-k1-0", name: "Bite +3", profile: { range: "melee", cells: 1, damageFlat: 3, addSb: true, qualities: [], flaws: [], twoHanded: false } }]);
+    expect(attacks).toEqual([wfrpAttackFromProfile("u1-trait-k1-0", "Bite +3", { range: "melee", cells: 1, damageFlat: 3, addSb: true, qualities: [], flaws: [], twoHanded: false })]);
+    expect(attacks[0]).toMatchObject({ reachCells: 1, damageBonus: 3 });
   });
 
   it("builds a ranged Blast profile from Breath", () => {
     const { attacks } = wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "breath", damage: 5 }])]);
 
-    expect(attacks[0].profile).toEqual({ range: "ranged", rangeFt: 36, damageFlat: 5, addSb: false, qualities: [{ key: "blast", value: 2 }], flaws: [], twoHanded: false });
-    expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "breath", damage: 5, rangeFt: 60 }])]).attacks[0].profile.rangeFt).toBe(60);
+    expect(attacks[0]).toEqual(wfrpAttackFromProfile(attacks[0].id, attacks[0].name, { range: "ranged", rangeFt: 36, damageFlat: 5, addSb: false, qualities: [{ key: "blast", value: 2 }], flaws: [], twoHanded: false }));
+    expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "breath", damage: 5, rangeFt: 60 }])]).attacks[0].range).toBe("60 ft");
   });
 
   it("builds a ranged profile that adds SB, defaulting the range", () => {
-    const profile = { range: "ranged", rangeFt: 150, damageFlat: 4, addSb: true, qualities: [], flaws: [], twoHanded: false };
+    const [a] = wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "ranged", damage: 4, rangeFt: 150 }])]).attacks;
 
-    expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "ranged", damage: 4, rangeFt: 150 }])]).attacks[0].profile).toEqual(profile);
-    expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "ranged", damage: 4 }])]).attacks[0].profile.rangeFt).toBe(72);
+    expect(a).toMatchObject({ range: "150 ft", damageBonus: 4 });
+    expect(ATTACK_SLOT.read(a.system)?.noSb).toBeUndefined();
+    expect(wfrpUnitBuild(row, [trait([{ kind: "wfrpAttack", attack: "ranged", damage: 4 }])]).attacks[0].range).toBe("72 ft");
   });
 
   it("flags magical attacks and gives duplicate Bites distinct ids", () => {
@@ -62,7 +66,7 @@ describe("wfrpUnitBuild", () => {
 
     const { attacks } = wfrpUnitBuild(row, [trait([bite, bite])]);
 
-    expect(attacks.map((a) => a.magical)).toEqual([true, true]);
+    expect(attacks.map((a) => ATTACK_SLOT.read(a.system)?.magical)).toEqual([true, true]);
     expect(new Set(attacks.map((a) => a.id)).size).toBe(2);
   });
 });

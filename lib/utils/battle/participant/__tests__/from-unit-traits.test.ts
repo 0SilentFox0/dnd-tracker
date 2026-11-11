@@ -47,8 +47,8 @@ describe("participant from unit: WFRP traits", () => {
 
     expect(claw.name).toBe("Кіготь");
     expect(p.battleData.attacks).toHaveLength(3);
-    expect(bite).toMatchObject({ type: AttackType.MELEE, damageBonus: 2, damageDice: "", wfrp: { reachCells: 1 } });
-    expect(breath).toMatchObject({ type: AttackType.RANGED, range: "36 ft", targetType: "aoe", wfrp: { blastRadius: 2, noSb: true } });
+    expect(bite).toMatchObject({ type: AttackType.MELEE, damageBonus: 2, damageDice: "", reachCells: 1 });
+    expect(breath).toMatchObject({ type: AttackType.RANGED, range: "36 ft", targetType: "aoe", blastRadius: 2, system: { key: "wfrp", data: { noSb: true } } });
   });
 
   it("without traits the participant equals the plain wfrp build", async () => {

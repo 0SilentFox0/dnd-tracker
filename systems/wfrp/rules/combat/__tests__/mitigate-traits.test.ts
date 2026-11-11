@@ -21,7 +21,7 @@ const unit = (id: string, extra: { size?: TraitSize; ward?: number; tb?: number 
 
 const d10 = (n: number) => () => (n - 1) / 10 + 0.01;
 
-const ctx = (target: ReturnType<typeof unit>, over: object = {}, attacker = unit("a")) => ({ attacker, target, weapon: 4, amount: 5, netSl: 1, location: "body" as const, crit: false, rng: () => 0.5, rules: WFRP_RULES, ...over });
+const ctx = (target: ReturnType<typeof unit>, over: object = {}, attacker = unit("a")) => ({ attacker, target, weapon: 4, amount: 5, netSl: 1, location: "body" as const, crit: false, rng: () => 0.5, rules: WFRP_RULES, attack: { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack, ...over });
 
 describe("mitigateWfrpDamage traits", () => {
   it("ward 7 negates the hit on d10 7, with one ward step and no crit", () => {

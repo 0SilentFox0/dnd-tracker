@@ -73,7 +73,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const isChain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
 
-  const blast = isAoe && onMap && !expanded ? (attack.wfrp?.blastRadius ?? 0) : 0;
+  const blast = isAoe && onMap && !expanded ? (attack.blastRadius ?? 0) : 0;
 
   const limit = attackMaxTargets(attacker, attack, { chain: isChain, onMap });
 

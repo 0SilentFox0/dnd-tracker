@@ -1,7 +1,18 @@
 import { readStats } from "./guard";
+import type { QualityRef } from "./qualities";
 import type { WfrpWeaponStats } from "./stats";
 
-import type { WeaponProfile } from "@/lib/utils/rules/systems/types";
+export type WeaponProfile = {
+  range: "melee" | "ranged";
+  cells?: number;
+  rangeFt?: number;
+  damageFlat: number;
+  addSb: boolean;
+  qualities: QualityRef[];
+  flaws: QualityRef[];
+  ammoCapacity?: number;
+  twoHanded: boolean;
+};
 
 // Matches wfrp `distance` (2 yd per cell); the registry cannot be imported from here without a cycle
 export const WFRP_CELL_FEET = 6;

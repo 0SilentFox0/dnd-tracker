@@ -121,7 +121,7 @@ describe("mitigateWfrpDamage", () => {
 
     const target = makeParticipant({ id: "t", hp: 10, maxHp: 10 });
 
-    return { attacker, target, weapon: 4, amount, netSl: 2, location: "body" as const, crit: false, rng, rules: WFRP_RULES };
+    return { attacker, target, weapon: 4, amount, netSl: 2, location: "body" as const, crit: false, rng, rules: WFRP_RULES, attack: { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" } as BattleAttack };
   };
 
   it("every step carries a label and side, plus totalLabel", () => {

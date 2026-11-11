@@ -274,7 +274,7 @@ function mitigateHit(
     location: details.location,
     crit: params.attackRoll.isCritical,
     attackRoll: details.roll,
-    ...(params.attack.wfrp && { qualities: params.attack.wfrp.qualities, flaws: params.attack.wfrp.flaws, noSb: params.attack.wfrp.noSb }),
+    attack: params.attack,
     rng: params.rng ?? Math.random,
     rules: params.rules,
   });

@@ -1,5 +1,6 @@
 import { skillTarget, value } from "../characteristics/derive";
 import { readCharacteristics } from "../characteristics/keys";
+import { ATTACK_SLOT } from "../slots";
 import { AVERAGE_SIZE, SIZE_DAMAGE_PER_STEP, SIZE_HIT_PER_STEP } from "../traits/constants";
 import { sizeStep } from "../traits/read";
 import { BALANCE_REF_AP, BALANCE_REF_INCOMING, BALANCE_REF_TARGET, BALANCE_REF_TB, LOCATIONS, MIN_DAMAGE } from "./constants";
@@ -23,7 +24,7 @@ const sizeSteps = (p: BattleParticipant) => sizeStep(p.abilities.wfrp?.size) - s
 function bestHitAverage(p: BattleParticipant): number {
   const sb = p.abilities.wfrp?.sb ?? 0;
 
-  return (p.battleData.attacks ?? []).reduce((best, a) => Math.max(best, diceAverage(a.damageDice || "0") + (a.damageBonus ?? 0) + (a.wfrp?.noSb ? 0 : sb)), 0);
+  return (p.battleData.attacks ?? []).reduce((best, a) => Math.max(best, diceAverage(a.damageDice || "0") + (a.damageBonus ?? 0) + (ATTACK_SLOT.read(a.system)?.noSb ? 0 : sb)), 0);
 }
 
 export const wfrpHitModel: NonNullable<RuleSystemCombat["hitModel"]> = {

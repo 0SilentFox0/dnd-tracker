@@ -144,7 +144,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       sneakDice: cunningOffer.sneakDice,
     },
     fortune: { available: dice === 100 && fortune && (attacker?.battleData.fortune ?? 0) >= 1 && state.targetIds.length === 1, left: attacker?.battleData.fortune ?? 0 },
-    ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.wfrp?.ammoCapacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.wfrp.ammoCapacity, capacity: a.wfrp.ammoCapacity }] as const] : []))) : {},
+    ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.ammo?.capacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.ammo.capacity, capacity: a.ammo.capacity }] as const] : []))) : {},
     attack, attacks, targets, steps, estimate, cover, unreachable, unknownDefense, previews, dice, percentile,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */

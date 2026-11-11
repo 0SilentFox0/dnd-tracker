@@ -14,7 +14,7 @@ const num = (v: unknown, min: number, max: number, int = false): v is number => 
 
 const oneOf = <T extends string>(v: unknown, list: readonly T[]): v is T => typeof v === "string" && (list as readonly string[]).includes(v);
 
-function qualityList(v: unknown): QualityRef[] | null {
+export function qualityList(v: unknown): QualityRef[] | null {
   if (!Array.isArray(v) || v.length > 20) return null;
 
   const out: QualityRef[] = [];

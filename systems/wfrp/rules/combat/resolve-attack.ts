@@ -5,6 +5,7 @@ import { qualityFumbleFrom, qualityToHit } from "../equipment/quality-effects";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import { DIFFICULTY_SL } from "../percentile/difficulty";
 import { applyFortune } from "../percentile/fortune";
+import { ATTACK_SLOT } from "../slots";
 import { sizeHitMod } from "../traits/size";
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from "./constants";
 import { hitLocation } from "./location";
@@ -69,7 +70,11 @@ const detailsOf = (t: PercentileTestResult, netSl: number, extra: Partial<Percen
   ...extra,
 });
 
-const refsOf = (attack: BattleAttack) => ({ qualities: attack.wfrp?.qualities ?? [], flaws: attack.wfrp?.flaws ?? [] });
+const refsOf = (attack: BattleAttack) => {
+  const slot = ATTACK_SLOT.read(attack.system);
+
+  return { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] };
+};
 
 export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
   const { attacker, target, attack, participants, rng, manualRoll } = ctx;

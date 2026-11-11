@@ -1,23 +1,24 @@
-import type { ExtractedAttack } from "../types/participant";
-import type { EquippedArtifactRow } from "./extract-artifacts";
+import { type WeaponProfile, weaponProfile } from "../equipment/weapon-profile";
+import { ATTACK_SLOT } from "../slots";
 
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
-import type { RuleSystemEquipment, WeaponProfile } from "@/lib/utils/rules/systems/types";
+import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
+import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 
 const valueOf = (list: { key: string; value?: number }[], key: string) => list.find((q) => q.key === key)?.value;
 
 // verify against 5e book: targets hit per cell of blast radius
 const BLAST_TARGETS_PER_RADIUS_CELL = 4;
 
-export function extractWfrpAttacks(rows: EquippedArtifactRow[], equipment: RuleSystemEquipment): ExtractedAttack[] {
+export function extractWfrpAttacks({ rows }: { rows: EquippedArtifactRow[] }): ExtractedAttack[] {
   const seen = new Set<string>();
 
   return rows.flatMap(({ row, slot, carried }) => {
     if (carried || !(isWeaponSlot(slot) || slot === ArtifactSlot.SHIELD)) return [];
 
-    const profile = equipment.weaponProfile(row.systemStats);
+    const profile = weaponProfile(row.systemStats);
 
     if (!profile) return [];
 
@@ -45,16 +46,16 @@ export function wfrpAttackFromProfile(id: string, name: string, profile: WeaponP
     damageBonus: profile.damageFlat,
     damageType: "physical",
     ...(ranged && { range: `${profile.rangeFt} ft` }),
-    ...(blast && { targetType: "aoe" as const, maxTargets: blast * BLAST_TARGETS_PER_RADIUS_CELL }),
-    wfrp: {
+    ...(blast && { targetType: "aoe" as const, maxTargets: blast * BLAST_TARGETS_PER_RADIUS_CELL, blastRadius: blast }),
+    system: ATTACK_SLOT.write({
       qualities: profile.qualities,
       flaws: profile.flaws,
-      ...(profile.ammoCapacity !== undefined && { ammoCapacity: profile.ammoCapacity }),
-      ...(reload && { reload }),
       ...(!profile.addSb && { noSb: true }),
-      ...(!ranged && profile.cells && { reachCells: profile.cells }),
-      ...(blast && { blastRadius: blast }),
       ...(extra?.magical && { magical: true as const }),
-    },
+    }),
+    noLevelDice: true,
+    ...(profile.ammoCapacity !== undefined && { ammo: { capacity: profile.ammoCapacity, ...(reload && { reload }) } }),
+    ...(!ranged && profile.cells && { reachCells: profile.cells }),
+    ...(profile.qualities.some((q) => q.key === "pistol") && { ignoresEngagement: true as const }),
   };
 }

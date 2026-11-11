@@ -1,6 +1,6 @@
 export * from "./registry";
 export type { RuleSystemKey } from "./types";
-export type { CharacterHpInput, RuleSystemAdvancement, RuleSystemCorruption, RuleSystemCreation, RuleSystemCurrency, RuleSystemDefinition, RuleSystemDowntime, RuleSystemEquipment, SheetBlockInput, SheetTestInput, SheetTestResult, SheetWfrpBlock, SystemConditionInfo, WeaponProfile } from "./types";
+export type { CharacterHpInput, RuleSystemAdvancement, RuleSystemCorruption, RuleSystemCreation, RuleSystemCurrency, RuleSystemDefinition, RuleSystemDowntime, RuleSystemEquipment, SheetBlockInput, SheetTestInput, SheetTestResult, SheetWfrpBlock, SystemConditionInfo } from "./types";
 export type { CareerTierDef } from "@/systems/wfrp/rules/advancement/career";
 export type { PurchaseError, PurchaseRequest } from "@/systems/wfrp/rules/advancement/plan";
 export { type LedgerViewer, preserveServerOwned, redactLedger } from "@/systems/wfrp/rules/advancement/privacy";

@@ -8,14 +8,15 @@ import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createSpellSchema } from "@/lib/schemas/spells";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { initAmmo } from "@/lib/utils/battle/ammo";
-import { extractWfrpAttacks } from "@/lib/utils/battle/participant/extract-wfrp-attacks";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { coerceRecord, IMPORT_SPECS } from "@/lib/utils/content/import";
 import { DEFAULT_CHARACTERISTICS, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { readCharacteristics } from "@/systems/wfrp/rules/characteristics/keys";
+import { extractWfrpAttacks } from "@/systems/wfrp/rules/combat/extract-attacks";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
-import { armourAp, WFRP_EQUIPMENT } from "@/systems/wfrp/rules/equipment";
+import { armourAp } from "@/systems/wfrp/rules/equipment";
+import { ATTACK_SLOT } from "@/systems/wfrp/rules/slots";
 import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -46,7 +47,7 @@ function armed(hero: BattleParticipant): BattleParticipant {
 
   const gear = armourAp(rows);
 
-  const attacks = extractWfrpAttacks(rows.map((r) => ({ row: r as never, slot: r.slot })), WFRP_EQUIPMENT);
+  const attacks = extractWfrpAttacks({ rows: rows.map((r) => ({ row: r as never, slot: r.slot })) });
 
   const abilities = { ...hero.abilities, ...wfrpAbilitiesOf(readCharacteristics({ characteristics: hero.abilities.characteristics }), { ap: gear.ap, flexible: gear.flexible, armourOnly: gear.armourOnly }) };
 
@@ -86,7 +87,8 @@ describe("grim arsenal and magic end to end", () => {
     const bow = must(hero.battleData.attacks.find((a) => a.name === "Light Crossbow"));
 
     expect(sword).toMatchObject({ type: "melee", damageBonus: 4 });
-    expect(bow).toMatchObject({ type: "ranged", range: "180 ft", wfrp: { ammoCapacity: 1, reload: 1, noSb: true } });
+    expect(bow).toMatchObject({ type: "ranged", range: "180 ft", ammo: { capacity: 1, reload: 1 } });
+    expect(ATTACK_SLOT.read(bow.system)?.noSb).toBe(true);
   });
 
   it("the crossbow spends its bolt, arms reload and refuses a second shot", async () => {
@@ -107,7 +109,7 @@ describe("grim arsenal and magic end to end", () => {
     const bow = must(captain.battleData.attacks.find((a) => a.name === "Crossbow +7"));
 
     expect(bow).toMatchObject({ type: "ranged", range: "180 ft" });
-    expect(bow.wfrp?.noSb).toBeUndefined();
+    expect(ATTACK_SLOT.read(bow.system)?.noSb).toBeUndefined();
 
     const hero = armed(heroes()[0]);
 

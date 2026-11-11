@@ -14,7 +14,7 @@ export interface HeroAttackDamageParts {
 export function heroAttackDamageParts(p: BattleParticipant, attack: BattleAttack): HeroAttackDamageParts {
   const weaponDice = attack.damageDice ?? "";
 
-  if (attack.wfrp) return { weaponDice, heroDice: "", formula: weaponDice };
+  if (attack.noLevelDice) return { weaponDice, heroDice: "", formula: weaponDice };
 
   if (p.basicInfo.sourceType !== ParticipantSourceType.CHARACTER || isFiveE(p)) return { weaponDice, heroDice: "", formula: weaponDice };
 
@@ -31,7 +31,7 @@ export function damageDiceSlots(p: BattleParticipant, attack: BattleAttack): num
 
   const strict = diceSlots(formula);
 
-  if (strict.length || attack.wfrp) return strict;
+  if (strict.length || attack.noLevelDice) return strict;
 
   return parseDiceLenient(formula).groups.flatMap((g) => Array.from({ length: g.count }, () => g.size));
 }

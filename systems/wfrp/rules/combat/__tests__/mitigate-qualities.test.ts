@@ -10,11 +10,14 @@ import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/lib/utils/rules/systems";
 import { QUALITY_REGISTRY, type QualityRef } from "@/systems/wfrp/rules/equipment/qualities";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { ATTACK_SLOT } from "@/systems/wfrp/rules/slots";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const withAp = (p: BattleParticipant, body: number): BattleParticipant => ({ ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, { ap: { head: 0, arm: 0, body, leg: 0 } }) } });
 
-const ctx = (extra: { qualities?: QualityRef[]; flaws?: QualityRef[]; crit?: boolean; attackRoll?: number; body?: number; netSl?: number } = {}) => ({
+const baseAttack: BattleAttack = { id: "w", name: "w", type: AttackType.MELEE, attackBonus: 0, damageDice: "", damageType: "physical" };
+
+const ctx = ({ qualities, flaws, noSb, ...extra }: { qualities?: QualityRef[]; flaws?: QualityRef[]; noSb?: boolean; crit?: boolean; attackRoll?: number; body?: number; netSl?: number } = {}) => ({
   attacker: withAp(makeParticipant({ id: "a", hp: 10, maxHp: 10 }), 0),
   target: withAp(makeParticipant({ id: "t", hp: 10, maxHp: 10 }), extra.body ?? 4),
   weapon: 4,
@@ -24,6 +27,7 @@ const ctx = (extra: { qualities?: QualityRef[]; flaws?: QualityRef[]; crit?: boo
   crit: false,
   rng: () => 0.5,
   rules: WFRP_RULES,
+  attack: qualities || flaws || noSb ? { ...baseAttack, system: ATTACK_SLOT.write({ qualities: qualities ?? [], flaws: flaws ?? [], ...(noSb && { noSb }) }) } : baseAttack,
   ...extra,
 });
 
@@ -85,7 +89,7 @@ describe("resolveWfrpAttack qualities", () => {
   const run = (attack: BattleAttack, manualRoll = 30) =>
     resolveWfrpAttack({ attacker: fighter("a"), target: fighter("t"), attack, participants: [], rules: WFRP_RULES, rng: () => 0.5, manualRoll, momentum: { attacker: false, defender: false } });
 
-  const q = (qualities: QualityRef[], flaws: QualityRef[] = [], type: BattleAttack["type"] = AttackType.MELEE): BattleAttack => ({ ...sword, type, wfrp: { qualities, flaws } });
+  const q = (qualities: QualityRef[], flaws: QualityRef[] = [], type: BattleAttack["type"] = AttackType.MELEE): BattleAttack => ({ ...sword, type, system: ATTACK_SLOT.write({ qualities, flaws }) });
 
   it("Accurate +10 and Imprecise -10 shift the target", () => {
     expect(run(q([{ key: "accurate" }])).attackRoll.percentile?.target).toBe(50);
@@ -94,7 +98,7 @@ describe("resolveWfrpAttack qualities", () => {
   });
 
   it("Dangerous fumbles on a roll of 91+ even when it would hit", () => {
-    const hit = { ...q([]), wfrp: { qualities: [{ key: "accurate" as const }], flaws: [{ key: "dangerous" as const }] } };
+    const hit = { ...q([]), system: ATTACK_SLOT.write({ qualities: [{ key: "accurate" as const }], flaws: [{ key: "dangerous" as const }] }) };
 
     expect(run(hit, 44).isHit).toBe(true);
     expect(run(hit, 91).isHit).toBe(false);

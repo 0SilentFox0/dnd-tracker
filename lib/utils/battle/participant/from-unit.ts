@@ -1,7 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
 import type { UnitFromPrisma } from "../types/participant";
-import { wfrpAttackFromProfile } from "./extract-wfrp-attacks";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -201,7 +200,7 @@ function unitBattleData(unit: UnitFromPrisma, monster: boolean, statblock: UnitS
   const legendary = unitLegendary(unit, monster, statblock);
 
   return {
-    attacks: [...unitBattleAttacks(unit), ...(traits?.attacks ?? []).map((a) => wfrpAttackFromProfile(a.id, a.name, a.profile, a.magical && { magical: true }))],
+    attacks: [...unitBattleAttacks(unit), ...(traits?.attacks ?? [])],
     activeEffects: [],
     equippedArtifacts: [],
     resolvedAbilities,

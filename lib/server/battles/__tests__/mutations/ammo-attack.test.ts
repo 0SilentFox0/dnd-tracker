@@ -11,7 +11,7 @@ import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
-const bow: BattleAttack = { id: "bow", name: "Bow", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d6", damageType: "piercing", wfrp: { qualities: [], flaws: [], ammoCapacity: 2, reload: 1 } };
+const bow: BattleAttack = { id: "bow", name: "Bow", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d6", damageType: "piercing", ammo: { capacity: 2, reload: 1 } };
 
 const knife: BattleAttack = { id: "kn", name: "Knife", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d4", damageType: "slashing" };
 

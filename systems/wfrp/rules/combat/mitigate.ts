@@ -1,5 +1,6 @@
 import { QUALITY_REGISTRY } from "../equipment/qualities";
 import { qualityEffects } from "../equipment/quality-effects";
+import { ATTACK_SLOT } from "../slots";
 import { sizeDamageBonus, wardRoll } from "../traits/size";
 import { applyWfrpCrit } from "./crit-effect";
 import { rollCrit } from "./crit-table";
@@ -32,12 +33,14 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
   const ap = target.abilities.wfrp?.ap[location] ?? 0;
 
+  const slot = ATTACK_SLOT.read(ctx.attack.system);
+
   const { effect, steps: qualitySteps } = qualityEffects(
-    { qualities: ctx.qualities ?? [], flaws: ctx.flaws ?? [] },
+    { qualities: slot?.qualities ?? [], flaws: slot?.flaws ?? [] },
     { attackRoll: ctx.attackRoll ?? 0, netSl: ctx.netSl, crit: ctx.crit, sb, ap },
   );
 
-  const appliedSb = ctx.noSb ? 0 : sb;
+  const appliedSb = slot?.noSb ? 0 : sb;
 
   const size = sizeDamageBonus(attacker, target, ctx.weapon + appliedSb + ctx.netSl);
 

@@ -13,9 +13,9 @@ import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import type { Characteristics, WfrpParticipantStats } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
-import type { QualityRef } from "@/systems/wfrp/rules/equipment/qualities";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 import type { LogLine } from "@/types/text";
@@ -155,8 +155,15 @@ export interface BattleAttack {
   damageBonus?: number;
   /** Категорія зброї 5e (з опису предмета); відсутня — вважається володінням */
   weaponCategory?: "simple" | "martial";
-  /** WFRP: weapon qualities from the equipped item's system stats */
-  wfrp?: { qualities: QualityRef[]; flaws: QualityRef[]; ammoCapacity?: number; reload?: number; noSb?: boolean; reachCells?: number; blastRadius?: number; magical?: true };
+  /** Opaque rule-system data (the system's codec narrows it) */
+  system?: SystemSlot;
+  ammo?: { capacity: number; reload?: number };
+  reachCells?: number;
+  blastRadius?: number;
+  /** Shootable while enemies are adjacent */
+  ignoresEngagement?: true;
+  /** Damage comes from `damageDice`/`damageBonus` only, without hero level dice */
+  noLevelDice?: true;
 }
 
 /**

@@ -31,7 +31,12 @@ export type ExtractedAttack = {
   damageBonus?: number;
   weaponCategory?: "simple" | "martial";
   targetType?: "target" | "aoe";
-  wfrp?: BattleAttack["wfrp"];
+  system?: BattleAttack["system"];
+  ammo?: BattleAttack["ammo"];
+  reachCells?: number;
+  blastRadius?: number;
+  ignoresEngagement?: true;
+  noLevelDice?: true;
 };
 
 export type CharacterFromPrisma = Prisma.CharacterGetPayload<{

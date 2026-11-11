@@ -54,9 +54,5 @@
   {
     "file": "lib/utils/rules/tables-schema.ts",
     "reason": "ruleset-section"
-  },
-  {
-    "file": "types/battle.ts",
-    "reason": "e1:2.1"
   }
 ]
