@@ -70,7 +70,6 @@ export const ROOT_SPECS: readonly RootSpec[] = [
     file: "scripts/templates/systems/index.ts",
     blocks: [
       { layer: scriptsLayer, line: imp((id) => `${upper(id)}_HOOKS`, (id) => `./${id}`) },
-      { layer: scriptsLayer, line: (id) => `${id}: "${id}",` },
       { layer: scriptsLayer, line: (id) => `${id}: ${upper(id)}_HOOKS,` },
     ],
   },
