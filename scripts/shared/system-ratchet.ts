@@ -43,7 +43,7 @@ export interface LiteralTokens {
 }
 
 export const literalTokens = (): LiteralTokens => {
-  const substring = [...new Set(SYSTEM_META.flatMap((m) => m.tokens ?? []))];
+  const substring: string[] = [...new Set<string>(SYSTEM_META.flatMap((m) => m.tokens ?? []))];
 
   const keysAndModules = SYSTEM_META.flatMap((m) => [...m.keys, m.module]);
 
