@@ -1,6 +1,8 @@
 import { D20_META } from "./d20/meta";
 
+// <systems:generated>
 import { WFRP_META } from "@/systems/wfrp/meta";
+// </systems:generated>
 
 export type SystemPageScope = "character" | "dmCharacters" | "dmCharacter" | "dmRules";
 
@@ -21,7 +23,12 @@ export interface SystemMeta {
   dmSections?: readonly string[];
 }
 
-export const SYSTEM_META: readonly SystemMeta[] = [D20_META, WFRP_META];
+export const SYSTEM_META: readonly SystemMeta[] = [
+  D20_META,
+  // <systems:generated>
+  WFRP_META,
+  // </systems:generated>
+];
 
 export const RULE_SYSTEM_KEYS: readonly string[] = SYSTEM_META.flatMap((m) => m.keys);
 

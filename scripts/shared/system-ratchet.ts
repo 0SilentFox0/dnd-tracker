@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { ROOT_SPECS } from "./systems-index";
+
 import { SYSTEM_META } from "@/lib/utils/rules/systems/meta";
 import { TEMPLATE_REGISTRY } from "@/lib/utils/templates/registry";
 
@@ -12,14 +14,7 @@ export const LITERALS_FILE = "system-literals-exempt.json";
 
 export const SCAN_DIRS = ["lib", "app", "components", "types", "scripts"] as const;
 
-export const SYSTEM_ROOTS = [
-  "lib/utils/rules/systems/meta.ts",
-  "lib/utils/rules/systems/registry.ts",
-  "components/systems/registry.ts",
-  "lib/server/systems/registry.ts",
-  "lib/utils/abilities/schema/system-effects.ts",
-  "scripts/templates/systems/index.ts",
-];
+export const SYSTEM_ROOTS = ROOT_SPECS.map((spec) => spec.file);
 
 const SKIP_DIRS = new Set(["node_modules", ".next", "__tests__", "grim-icons"]);
 
@@ -102,12 +97,14 @@ export interface ImportEntry {
   reason: string;
 }
 
-const SYSTEM_IMPORT = /["'`]@\/systems\//;
+const SYSTEM_IMPORT = /(?:from|import)\s*\(?\s*["']@\/systems\//;
+
+export const importsSystem = (text: string): boolean => SYSTEM_IMPORT.test(text);
 
 export const isImportAllowed = (file: string): boolean => SYSTEM_ROOTS.includes(file) || file.startsWith("scripts/templates/systems/");
 
 export const scanImporters = (): string[] =>
-  sourceFiles().filter((file) => !isImportAllowed(file) && SYSTEM_IMPORT.test(fs.readFileSync(path.join(ROOT, file), "utf8")));
+  sourceFiles().filter((file) => !isImportAllowed(file) && importsSystem(fs.readFileSync(path.join(ROOT, file), "utf8")));
 
 export const readImportsExempt = (): ImportEntry[] => JSON.parse(fs.readFileSync(path.join(ROOT, IMPORTS_FILE), "utf8"));
 

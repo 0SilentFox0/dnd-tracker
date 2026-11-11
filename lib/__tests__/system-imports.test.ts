@@ -3,11 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { isImportAllowed, readImportsExempt, ROOT, scanImporters, SYSTEM_ROOTS } from "@/scripts/shared/system-ratchet";
+import { importsSystem, isImportAllowed, readImportsExempt, ROOT, scanImporters, SYSTEM_ROOTS } from "@/scripts/shared/system-ratchet";
 
 const REASON = /^(route|content-kind|ruleset-section|e1:\d+\.\d+)$/;
-
-const SYSTEM_IMPORT = /["'`]@\/systems\//;
 
 describe("system imports ratchet", () => {
   const exempt = readImportsExempt();
@@ -18,7 +16,7 @@ describe("system imports ratchet", () => {
   });
 
   it("every entry exists and still imports @/systems/ (lower the list)", () => {
-    const stale = exempt.filter((e) => !fs.existsSync(path.join(ROOT, e.file)) || !SYSTEM_IMPORT.test(fs.readFileSync(path.join(ROOT, e.file), "utf8")) || isImportAllowed(e.file));
+    const stale = exempt.filter((e) => !fs.existsSync(path.join(ROOT, e.file)) || !importsSystem(fs.readFileSync(path.join(ROOT, e.file), "utf8")) || isImportAllowed(e.file));
 
     expect(stale.map((e) => e.file)).toEqual([]);
   });
