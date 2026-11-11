@@ -13,12 +13,15 @@ const scoped = createScopedDatabase(raw.$extends(contentLayer()));
 vi.mock("@/lib/db", () => ({ get prisma() { return scoped; } }));
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 
+import { catalogOf } from "../lib/i18n-convert";
 import { importPack } from "../lib/import-pack";
 import { grimData } from "../systems/wfrp/__tests__/pack-helpers";
 import { GRIM_SPELL_LISTS } from "../systems/wfrp/spells";
 
 import { createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { listRaceProfiles } from "@/lib/server/races/race-profile";
+import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
 import { visible } from "@/lib/server/templates/sync/__tests__/helpers";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
@@ -85,6 +88,20 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
     const second = await importPack("grim-d100", { owner: userId, publish: true });
 
     expect(second.published).toMatchObject({ added: 0, changed: 0, removed: 0 });
+  });
+
+  it("every catalog key is applied on the DB row form", async () => {
+    const catalog = catalogOf("grim-d100");
+
+    expect(catalog.length).toBeGreaterThan(100);
+
+    const tr: TranslationsV2 = Object.fromEntries(catalog.map((entry, index) => [entry.key, { text: `${entry.en}\u27e6${index}\u27e7`, en: entry.en }]));
+
+    const localized = localizeTemplateBundle(await exportCampaign(scoped as never, templateId), tr);
+
+    const applied = new Set([...JSON.stringify(localized).matchAll(/\u27e6(\d+)\u27e7/g)].map((m) => Number(m[1])));
+
+    expect(catalog.filter((_, index) => !applied.has(index)).map((entry) => entry.key)).toEqual([]);
   });
 
   it.each([["uk" as const], ["en" as const]])("clones the %s locale with translated rows", async (locale) => {
