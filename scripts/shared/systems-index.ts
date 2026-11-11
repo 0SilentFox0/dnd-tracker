@@ -8,6 +8,7 @@ const CLOSE = "// </systems:generated>";
 const upper = (id: string) => id.toUpperCase().replace(/[^A-Z0-9]/g, "_");
 
 interface BlockSpec {
+  packs?: boolean;
   layer: (id: string) => string;
   line: (id: string) => string;
 }
@@ -22,6 +23,8 @@ const metaLayer = (id: string) => `systems/${id}/meta.ts`;
 const imp = (name: (id: string) => string, from: (id: string) => string) => (id: string) => `import { ${name(id)} } from "${from(id)}";`;
 
 const scriptsLayer = (id: string) => `scripts/templates/systems/${id}/index.ts`;
+
+const packLayer = (id: string) => `scripts/templates/${id}/index.ts`;
 
 export const ROOT_SPECS: readonly RootSpec[] = [
   {
@@ -73,6 +76,13 @@ export const ROOT_SPECS: readonly RootSpec[] = [
       { layer: scriptsLayer, line: (id) => `${id}: ${upper(id)}_HOOKS,` },
     ],
   },
+  {
+    file: "scripts/templates/systems/adapters.ts",
+    blocks: [
+      { layer: packLayer, packs: true, line: imp((id) => `${upper(id)}_ADAPTER`, (id) => `@/scripts/templates/${id}`) },
+      { layer: packLayer, packs: true, line: (id) => `"${id}": ${upper(id)}_ADAPTER,` },
+    ],
+  },
 ];
 
 export const systemIdsIn = (root: string): string[] => {
@@ -89,7 +99,15 @@ export const systemIdsIn = (root: string): string[] => {
 
 const BLOCK_RE = new RegExp(`^([ \\t]*)${OPEN}\\n[\\s\\S]*?^[ \\t]*${CLOSE}`, "gm");
 
-const render = (spec: RootSpec, text: string, ids: string[], root: string): string => {
+export const packKeysIn = (root: string): string[] => {
+  const dir = path.join(root, "scripts/templates");
+
+  if (!fs.existsSync(dir)) return [];
+
+  return fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "systems" && fs.existsSync(path.join(dir, d.name, "index.ts"))).map((d) => d.name).sort();
+};
+
+const render = (spec: RootSpec, text: string, ids: string[], packs: string[], root: string): string => {
   const found = [...text.matchAll(BLOCK_RE)].length;
 
   if (found !== spec.blocks.length) throw new Error(`${spec.file}: expected ${spec.blocks.length} generated blocks, found ${found}`);
@@ -99,7 +117,7 @@ const render = (spec: RootSpec, text: string, ids: string[], root: string): stri
   return text.replace(BLOCK_RE, (_all, indent: string) => {
     const block = spec.blocks[i++];
 
-    const lines = ids.filter((id) => fs.existsSync(path.join(root, block.layer(id)))).map((id) => `${indent}${block.line(id)}\n`);
+    const lines = (block.packs ? packs : ids).filter((id) => fs.existsSync(path.join(root, block.layer(id)))).map((id) => `${indent}${block.line(id)}\n`);
 
     return `${indent}${OPEN}\n${lines.join("")}${indent}${CLOSE}`;
   });
@@ -113,6 +131,8 @@ export interface IndexResult {
 export const syncSystemsIndex = (root: string, mode: "check" | "write" = "write"): IndexResult => {
   const ids = systemIdsIn(root);
 
+  const packs = packKeysIn(root);
+
   const result: IndexResult = { stale: [], written: [] };
 
   for (const spec of ROOT_SPECS) {
@@ -122,7 +142,7 @@ export const syncSystemsIndex = (root: string, mode: "check" | "write" = "write"
 
     const before = fs.readFileSync(file, "utf8");
 
-    const after = render(spec, before, ids, root);
+    const after = render(spec, before, ids, packs, root);
 
     if (before === after) continue;
 

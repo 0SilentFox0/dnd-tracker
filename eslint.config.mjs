@@ -70,6 +70,7 @@ const SYSTEM_ROOTS = [
   "lib/utils/abilities/schema/system-effects.ts",
   "lib/utils/abilities/registry/effects/system-rows.ts",
   "scripts/templates/systems/index.ts",
+  "scripts/templates/systems/adapters.ts",
 ];
 
 const SYSTEM_IMPORT_EXEMPT = JSON.parse(readFileSync(new URL("./system-imports-exempt.json", import.meta.url), "utf8")).map((e) => e.file.replace(/[[\]]/g, "\\$&"));
