@@ -26,7 +26,7 @@ import { openTemplateRun, snapshotRowCounts, type TemplateRun } from "./battle-s
 import { resultTextOf } from "./log-text";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
+import { AttackType, BATTLE_LOG_RECENT_EVENTS, EffectMarker, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
@@ -35,6 +35,7 @@ import { createAbilityActionMutation } from "@/lib/server/battles/mutations/abil
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { auraZoneMutation } from "@/lib/server/battles/mutations/aura-zone/aura-zone-mutation";
 import { createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
+import { battleConditionsMutation, battleConditionsSchema } from "@/lib/server/battles/mutations/conditions/conditions-mutation";
 import { mapTerrainMutation } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
 import { mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
 import { mazeMarkMutation } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
@@ -49,9 +50,11 @@ import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mut
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { abilityLabel } from "@/lib/utils/abilities/build/resolve";
-import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { auraKey, collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
+import { isAreaTarget } from "@/lib/utils/abilities/schema/kinds";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { cellDistance, cellKey, inBounds, mapCentre, neighbors, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
@@ -145,6 +148,9 @@ let state: any;
 
 let battleLabel = "";
 
+/** Тільки в цільових пробах: кожен шансовий тригер проходить (rng()·100 < chance завжди) */
+let forceChance = false;
+
 const deps: any = {
   getUserId: async () => actingUser,
   rateLimit: async () => ({ allowed: true, count: 0, limit: 1e6, resetInSeconds: 0 }),
@@ -152,7 +158,7 @@ const deps: any = {
   saveBattle: (b: any, o: any, w?: any) => saveBattle(prisma, b, o, w),
   loadRecentEvents: (id: string, l: number) => loadRecentEvents(prisma, id, l),
   publish: () => {},
-  rng: () => rng(),
+  rng: () => (forceChance ? 0 : rng()),
   logLocale: async () => "uk",
 };
 
@@ -165,7 +171,7 @@ const fullLog: string[] = [];
 
 const rejections = new Map<string, number>();
 
-type Cov = { source: string; owner: string; name: string; event: string; effects: string; battles: number; fired: number; passiveOk: number; passiveMiss: number; owners: Set<string>; note: boolean; conditional: boolean };
+type Cov = { source: string; owner: string; name: string; event: string; effects: string; battles: number; fired: number; passiveOk: number; passiveMiss: number; owners: Set<string>; note: boolean; conditional: boolean; baked: number; missDetail: string; probed: number; unmet: number; area: boolean };
 
 const coverage = new Map<string, Cov>();
 
@@ -309,6 +315,8 @@ const ABILITY = { access: "member", requireStatus: "active", blockedByMode: true
 const SPELL = { access: "member", requireStatus: "active", blockedByMode: true, schema: castSpellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
 
 const UNIT_CONTROL = { access: "dm", requireStatus: "active", schema: unitControlSchema, mutate: unitControlMutation };
+
+const COND = { access: "dm", requireStatus: "active", schema: battleConditionsSchema, mutate: battleConditionsMutation };
 
 const AURA_ZONE = { access: "member", requireStatus: "active", blockedByMode: true, schema: auraZoneSchema, mutate: auraZoneMutation };
 
@@ -475,44 +483,141 @@ async function applyRotation(r: number) {
 }
 
 // ---------- покриття ----------
-function recordCoverage() {
+function recordCoverage(probe = false) {
   for (const p of P()) {
     for (const a of p.battleData.resolvedAbilities ?? []) {
-      const owner = p.basicInfo.sourceType === ParticipantSourceType.UNIT ? p.basicInfo.name.replace(/ #\d+$/, "") : p.basicInfo.name;
+      const c = covEntry(p, a);
 
-      const key = `${a.source.type}|${a.source.name}|${a.name}|${a.trigger.event}`;
-
-      const c = coverage.get(key) ?? { source: a.source.type, owner: a.source.name, name: a.name, event: a.trigger.event, effects: a.effects.map((e: any) => e.kind).join("+"), battles: 0, fired: 0, passiveOk: 0, passiveMiss: 0, owners: new Set(), note: a.effects.every((e: any) => e.kind === "note"), conditional: !!a.condition };
+      const used = p.battleData.abilityUsage?.[a.key]?.battle ?? 0;
 
       c.battles++;
-      c.owners.add(owner);
-      c.fired += p.battleData.abilityUsage?.[a.key]?.battle ?? 0;
-      coverage.set(key, c);
+      c.fired += used;
+
+      if (probe) c.probed += used;
     }
   }
 }
+
+/** Запис покриття для вміння учасника; спільний для recordCoverage / recordPassives / доказів аур. */
+function covEntry(p: any, a: any): any {
+  const owner = p.basicInfo.sourceType === ParticipantSourceType.UNIT ? p.basicInfo.name.replace(/ #\d+$/, "") : p.basicInfo.name;
+
+  const key = `${a.source.type}|${a.source.name}|${a.name}|${a.trigger.event}`;
+
+  const c = coverage.get(key) ?? { source: a.source.type, owner: a.source.name, name: a.name, event: a.trigger.event, effects: a.effects.map((e: any) => e.kind).join("+"), battles: 0, fired: 0, passiveOk: 0, passiveMiss: 0, owners: new Set(), note: a.effects.every((e: any) => e.kind === "note"), conditional: !!a.condition, baked: 0, missDetail: "", probed: 0, unmet: 0, area: a.effects.some(isAreaEffect) };
+
+  c.owners.add(owner);
+  coverage.set(key, c);
+
+  return c;
+}
+
+const isAreaEffect = (e: any) => isAreaTarget(e.target);
 
 function recordPassives() {
   for (const p of P()) {
     for (const a of p.battleData.resolvedAbilities ?? []) {
       if (a.trigger.event !== "passive" || a.effects.every((e: any) => e.kind === "note")) continue;
 
-      const key = `${a.source.type}|${a.source.name}|${a.name}|${a.trigger.event}`;
+      const c = covEntry(p, a);
 
-      const c: any = coverage.get(key) ?? { source: a.source.type, owner: a.source.name, name: a.name, event: a.trigger.event, effects: a.effects.map((e: any) => e.kind).join("+"), battles: 0, fired: 0, passiveOk: 0, passiveMiss: 0, owners: new Set(), note: false, conditional: !!a.condition, baked: 0, missDetail: "" };
+      if (c.area) continue;
 
       const r = passiveApplies(p, a);
 
-      if (r === true) c.passiveOk++; else if (r === "baked") c.baked = (c.baked ?? 0) + 1; else { c.passiveMiss++; c.missDetail = r; }
-
-      coverage.set(key, c);
+      if (r === true) c.passiveOk++;
+      else if (r === "baked") c.baked++;
+      else if (a.condition) c.unmet++;
+      else { c.passiveMiss++; c.missDetail = r; }
     }
   }
 }
 
+/** Аура «поруч» діє не через passive-запис, а зоною: після aura-zone ціль має отримати запис у collectModifiers від ефекту зони (однакові аури з одним id діляться ключем — підпис може бути іншого власника). */
+function proveAreaAura(owner: any, aura: any, targetIds: string[]) {
+  const c = covEntry(owner, aura.ability);
+
+  const key = auraKey(aura.ability);
+
+  const names = new Set<string>(P().flatMap((p) => (p.battleData.resolvedAbilities ?? []).filter((a: any) => auraKey(a) === key).map((a: any) => a.name as string)));
+
+  const fromAura = (en: any) => [...names].some((n) => (typeof en.label === "string" ? en.label : JSON.stringify(en.label ?? "")).includes(n));
+
+  // perMark-ефект діє лише по відміченій цілі, тож collectModifiers без позначки його не дає: доказ — сам ефект зони на цілі
+  const inZone = (id: string) => (byId(id)?.battleData.activeEffects ?? []).some((x: any) => x.zone?.ownerId === owner.basicInfo.id && names.has(x.name));
+
+  const proven = aura.effects.every((e: any) => targetIds.some((id) => (e.perMark ? inZone(id) : collectModifiers(P(), id, queryOf(e) as any).entries.some(fromAura))));
+
+  if (proven) c.passiveOk++; else { c.passiveMiss++; c.missDetail = `зона задана (${targetIds.length} цілей), запису в collectModifiers немає`; }
+}
+
+function queryOf(e: any) {
+  if (e.kind === "modifyStat") return { stat: e.stat };
+
+  if (e.kind === "damageBonus") return { damage: { kind: e.filter?.kind === "all" || e.filter?.kind === "physical" ? "melee" : (e.filter?.kind ?? "melee"), school: e.filter?.school ?? null } };
+
+  if (e.kind === "flag") return { flag: e.flag };
+
+  return null;
+}
+
 const BAKED = new Set(["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma", "maxHp", "initiative", "spellSlots", "speed"]);
 
+const TARGET_STATS = new Set(["morale", "minTargets", "maxTargets"]);
+
+/** Сума запечених плоских бонусів стату для учасника: власні + аури allAllies/allEnemies (однакова аура — раз, найсильніша), як у bakePassives/applyBakedAuras. */
+function expectedBakedFlat(x: any, stat: string): number {
+  let sum = 0;
+
+  const auras = new Map<string, number>();
+
+  for (const src of P()) {
+    for (const ab of src.battleData.resolvedAbilities ?? []) {
+      if (ab.trigger.event !== "passive" || ab.condition) continue;
+
+      for (const e of ab.effects) {
+        if (e.kind !== "modifyStat" || e.stat !== stat || typeof e.flat !== "number") continue;
+
+        const t = e.target ?? "self";
+
+        if (t === "self" && src === x) sum += e.flat;
+        else if ((t === "allAllies" && src.basicInfo.side === x.basicInfo.side) || (t === "allEnemies" && src.basicInfo.side !== x.basicInfo.side)) {
+          const k = auraKey(ab);
+
+          const prev = auras.get(k);
+
+          if (prev === undefined || Math.abs(e.flat) > Math.abs(prev)) auras.set(k, e.flat);
+        }
+      }
+    }
+  }
+
+  return sum + [...auras.values()].reduce((n, v) => n + v, 0);
+}
+
 function passiveApplies(p: any, a: any): true | "baked" | string {
+  if (a.effects.every((e: any) => e.kind === "modifyStat" && TARGET_STATS.has(e.stat) && ["self", "allAllies", "allEnemies", undefined].includes(e.target))) {
+    for (const e of a.effects) {
+      const t = e.target ?? "self";
+
+      const subject = t === "self" ? p : P().find((x) => alive(x) && heroRows.some((h) => h.id === x.basicInfo.sourceId) && (t === "allAllies") === (x.basicInfo.side === p.basicInfo.side));
+
+      const hero = subject && heroRows.find((h) => h.id === subject.basicInfo.sourceId);
+
+      if (!subject || !hero) return "baked";
+
+      const cap = subject.abilities.moraleCap ?? 3;
+
+      const raw = (hero[e.stat] ?? (e.stat === "morale" ? 0 : 1)) + expectedBakedFlat(subject, e.stat);
+
+      const expected = e.stat === "morale" ? Math.max(-cap, Math.min(cap, raw)) : raw;
+
+      if (subject.combatStats[e.stat] !== expected) return `${e.stat}: ${subject.combatStats[e.stat]} ≠ очікувано ${expected} (${subject.basicInfo.name}, база ${hero[e.stat] ?? "?"})`;
+    }
+
+    return true;
+  }
+
   if (a.effects.every((e: any) => e.kind === "modifyStat" && BAKED.has(e.stat) && (!e.target || e.target === "self"))) {
     const ab = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
 
@@ -526,7 +631,7 @@ function passiveApplies(p: any, a: any): true | "baked" | string {
 
         if (p.abilities[e.stat] !== expected) return `${e.stat}: ${p.abilities[e.stat]} ≠ очікувано ${expected} (база ${hero[e.stat]})`;
       } else if (e.stat === "initiative" && e.flat >= 100) {
-        if ((p.combatStats.initiative ?? 0) < e.flat) return `initiative ${p.combatStats.initiative} < ${e.flat}`;
+        if ((p.abilities.initiative ?? 0) < e.flat) return `initiative ${p.abilities.initiative} < ${e.flat}`;
       } else if (e.stat === "spellSlots") {
         for (const lvl of e.spellLevels ?? []) if (((p.spellcasting.spellSlots?.[String(lvl)]?.max ?? 0) - (hero.slots?.[String(lvl)]?.max ?? 0)) < e.flat) return `слоти ${lvl}-го: ${p.spellcasting.spellSlots?.[String(lvl)]?.max ?? 0} (база ${hero.slots?.[String(lvl)]?.max ?? 0})`;
       } else return "baked";
@@ -544,11 +649,7 @@ function passiveViaModifiers(p: any, a: any): boolean {
   const ps = P();
 
   for (const e of a.effects) {
-    let q: any = null;
-
-    if (e.kind === "modifyStat") q = { stat: e.stat };
-    else if (e.kind === "damageBonus") q = { damage: { kind: e.filter?.kind === "all" || e.filter?.kind === "physical" ? "melee" : (e.filter?.kind ?? "melee"), school: e.filter?.school ?? null } };
-    else if (e.kind === "flag") q = { flag: e.flag };
+    const q: any = queryOf(e);
 
     if (!q) return true;
 
@@ -732,7 +833,9 @@ async function takeTurn(spells: Map<string, any>) {
     for (const aura of pendingAreaAuras(P(), id, state.currentRound)) {
       const pool = zoneCandidates(P(), me(), aura.target).filter(() => rng() < 0.6);
 
-      await call("aura-zone", AURA_ZONE, { participantId: id, auraId: aura.id, targetIds: pool.map((x: any) => x.basicInfo.id) }, me().basicInfo.controlledBy === CONTROLLED_BY_DM ? undefined : me().basicInfo.controlledBy);
+      const zr = await call("aura-zone", AURA_ZONE, { participantId: id, auraId: aura.id, targetIds: pool.map((x: any) => x.basicInfo.id) }, me().basicInfo.controlledBy === CONTROLLED_BY_DM ? undefined : me().basicInfo.controlledBy);
+
+      if (zr.status === 200 && pool.length) proveAreaAura(me(), aura, pool.map((x: any) => x.basicInfo.id));
     }
   }
 
@@ -870,7 +973,7 @@ async function sweep(spells: Map<string, any>, report: string[]) {
 }
 
 function coverageReport(): string[] {
-  const status = (c: any) => (c.note ? "note" : c.event === "passive" ? (c.passiveMiss > 0 ? "MISS" : c.passiveOk > 0 ? "ok" : "baked") : c.fired > 0 ? "fired" : "NOT-FIRED");
+  const status = (c: any) => (c.note ? "note" : c.event === "passive" ? (c.passiveMiss > 0 ? "MISS" : c.passiveOk > 0 ? "ok" : c.area || (c.conditional && c.unmet > 0) ? "MISS" : "baked") : c.fired > 0 ? "fired" : "NOT-FIRED");
 
   const out = ["\n## Покриття вмінь", "Не спрацювали тригерні вміння (часто шанс або умова) та пасивки без запису в модифікаторах:"];
 
@@ -880,8 +983,12 @@ function coverageReport(): string[] {
     const counts = list.reduce((m: Record<string, number>, c) => ({ ...m, [status(c)]: (m[status(c)] ?? 0) + 1 }), {});
 
     out.push(`\n### ${src}: ${Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(", ")}`);
-    for (const c of list) if (["NOT-FIRED", "MISS"].includes(status(c))) out.push(`- ${status(c)} ${c.event} · ${c.owner} · ${c.name} (${c.effects}${c.conditional ? ", з умовою" : ""}) ${(c as any).missDetail ?? ""}`);
+    for (const c of list) if (["NOT-FIRED", "MISS"].includes(status(c))) out.push(`- ${status(c)} ${c.event} · ${c.owner} · ${c.name} (${c.effects}${c.conditional ? ", з умовою" : ""}) ${(c as any).missDetail || (c.area ? "зону аури жодного разу не задано" : "умову пасивки жодного разу не створено")}`);
   }
+
+  const probed = [...coverage.values()].filter((c) => c.event !== "passive" && c.probed > 0 && c.probed === c.fired);
+
+  out.push("\n### Спрацювали лише в цільових пробах (примусовий шанс / сценарій умови)", ...(probed.length ? probed.map((c) => `- ${c.source} · ${c.owner} · ${c.name} (${c.event}${(c as any).conditional ? ", з умовою" : ""}) ×${c.probed}`) : ["- немає"]));
   out.push("\n## Заклинання");
   for (const [, s] of [...spellStats.entries()].sort((a, b) => a[1].school.localeCompare(b[1].school) || a[1].level - b[1].level)) {
     const name = (s as any).name;
@@ -963,6 +1070,12 @@ async function main() {
   if (runs("sweep")) await (PROFILE.source.kind === "template" ? sweepTemplate(spells, report) : sweep(spells, report));
 
   if (runs("targeted")) await targeted(spells);
+
+  if (runs("targeted") && runs("sweep")) {
+    await unitTriggerProbes(spells);
+    await areaAuraProbes();
+    await copyBuffsProbe(spells);
+  }
 
   if (runs("control")) await controlCheck(spells);
 
@@ -1120,6 +1233,270 @@ async function hitBy(target: any, logs: string[], hpBeforeHit?: number, d20 = 20
   return r;
 }
 
+
+// ---------- проби рідкісних тригерів ----------
+const usageOf = (p: any, name: string) => (p?.battleData.resolvedAbilities ?? []).filter((a: any) => a.name === name).reduce((n: number, a: any) => n + (p.battleData.abilityUsage?.[a.key]?.battle ?? 0), 0);
+
+const attackWith = (att: any, target: any, w: any) => call("attack", ATTACK, { attackerId: att.basicInfo.id, targetId: target.basicInfo.id, attackId: w.id, d20Roll: 20, disadvantageRoll: 20, advantageRoll: 20, damageRolls: rollDiceList(heroAttackDamageParts(att, w).formula, rng), endTurn: false });
+
+const turnOf = (id: string) => untilTurnOf((p) => p.basicInfo.id === id && alive(p) && !p.actionFlags.hasUsedAction);
+
+const heal = (p: any) => call("participants", PATCH(p.basicInfo.id), { currentHp: p.combatStats.maxHp });
+
+/** Здобич лучника: другий дальній постріл по відміченій цілі додає шкоду (мітка від першого влучання). */
+async function preyProbe() {
+  const ivan = byName("Айвен");
+
+  const w = ivan?.battleData.attacks?.find((x: any) => attackKindOf(x.type) === AttackType.RANGED);
+
+  if (!ivan || !w) return tskip("Здобич: мітка → +15 % шкоди", "немає дальньої зброї в Айвена");
+
+  const foe = foesOf(ivan).sort((a, b) => b.combatStats.maxHp - a.combatStats.maxHp)[0];
+
+  const logs: string[] = [];
+
+  for (let i = 0; i < 6 && foe && usageOf(byName("Айвен"), "Здобич: шкода") === 0; i++) {
+    await nextOnly();
+
+    if (!(await turnOf(ivan.basicInfo.id))) break;
+
+    await heal(byId(foe.basicInfo.id));
+    logs.push(...(await attackWith(byName("Айвен"), byId(foe.basicInfo.id), w)).log.map((e: any) => resultTextOf(e)));
+    logs.push(`[після ${i + 1}: Здобич ${usageOf(byName("Айвен"), "Здобич")}; ефекти цілі: ${JSON.stringify(byId(foe.basicInfo.id)?.battleData.activeEffects.map((e: any) => [e.name, e.abilityKey, e.source?.participantId, e.duration]))}; зброя ${w.name} ${w.type}; вміння: ${(byName("Айвен").battleData.resolvedAbilities ?? []).map((a: any) => a.name).filter((n: string) => /Здобич/.test(n)).join(",")}]`);
+  }
+
+  const used = usageOf(byName("Айвен"), "Здобич: шкода");
+
+  tcheck("Здобич: друге влучання по відміченій цілі дає +15 % шкоди", used > 0, `спрацювань ${used}; ${logs.filter((l) => l.startsWith("[після")).join(" ")}`);
+}
+
+/** Пасивки з умовою «союзник має < N % HP»: без умови запису немає, з умовою — є (collectModifiers, канал, яким читає атака). */
+async function lowAllyPassiveProbe() {
+  for (const p of P().filter(alive)) await heal(p);
+
+  for (const owner of P().filter(alive)) {
+    for (const a of owner.battleData.resolvedAbilities ?? []) {
+      const cond = a.condition;
+
+      if (a.trigger.event !== "passive" || cond?.type !== "hpBelow" || cond.who !== "anyAlly") continue;
+
+      const label = JSON.stringify(abilityLabel(a));
+
+      const present = () => a.effects.every((e: any) => collectModifiers(P(), owner.basicInfo.id, queryOf(e) as any).entries.some((en: any) => JSON.stringify(en.label) === label));
+
+      const victim = friendsOf(owner).find((x) => x !== owner);
+
+      if (!victim) continue;
+
+      const before = present();
+
+      await call("participants", PATCH(victim.basicInfo.id), { currentHp: Math.max(1, Math.floor((victim.combatStats.maxHp * (cond.percent - 5)) / 100)) });
+
+      const during = present();
+
+      await heal(byId(victim.basicInfo.id));
+
+      const c = covEntry(owner, a);
+
+      if (!before && during) c.passiveOk++; else { c.passiveMiss++; c.missDetail = `без умови запис ${before}, з умовою ${during}`; }
+
+      tcheck(`${a.name}: бонус лише коли союзник < ${cond.percent} % HP`, !before && during, `${owner.basicInfo.name}: без умови ${before}, з умовою (${victim.basicInfo.name} < ${cond.percent} %) ${during}`);
+    }
+  }
+}
+
+/** Некромант (Експерт): підняття мертвих — ціль-мертвий союзник, дія героя. */
+async function raiseDeadProbe() {
+  const nec = byName("Маркел");
+
+  const raise = (nec?.battleData.resolvedAbilities ?? []).find((a: any) => a.effects.some((e: any) => e.kind === "raiseDead") && a.trigger.event === "action");
+
+  if (!nec || !raise) return tskip("Підняття мертвих: воскрешає полеглого", "у Маркела немає raiseDead-вміння в цій ротації");
+
+  const victim = P().find((x) => x.basicInfo.sourceType === ParticipantSourceType.UNIT && x.basicInfo.side !== nec.basicInfo.side && alive(x));
+
+  if (!victim) return tskip("Підняття мертвих: воскрешає полеглого", "немає ворожого юніта");
+
+  await call("participants", PATCH(victim.basicInfo.id), { kill: true });
+  await nextOnly();
+
+  const ok = await turnOf(nec.basicInfo.id);
+
+  const r = ok ? await call("ability-action", ABILITY, { participantId: nec.basicInfo.id, abilityKey: raise.key, targetParticipantIds: [victim.basicInfo.id] }) : null;
+
+  tcheck(`${raise.name}: воскрешає полеглого юніта (raiseDead діє лише на юнітів)`, !!r && r.status === 200 && alive(byId(victim.basicInfo.id)), `${r?.status} HP ${byId(victim.basicInfo.id)?.combatStats.currentHp}; ${r?.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 200)} ${r && r.status !== 200 ? JSON.stringify(r.body).slice(0, 200) : ""}`);
+}
+
+/** Тригерні вміння юнітів, що не спрацювали у випадкових боях: окремий міні-бій із примусовим шансом і сценарієм під подію. */
+async function unitTriggerProbes(spells: Map<string, any>) {
+  const todo = [...coverage.values()].filter((c) => c.source === "unit" && c.event !== "passive" && c.event !== "spellCast" && !c.note && c.fired === 0);
+
+  const units = await prisma.unit.findMany({ where: { campaignId: ctx.campaignId } });
+
+  const byHp = [...units].sort((a, b) => b.maxHp - a.maxHp);
+
+  for (const owner of [...new Set(todo.map((c) => c.owner))]) {
+    const ou = units.find((u) => u.name === owner);
+
+    if (!ou) continue;
+
+    const mine = todo.filter((c) => c.owner === owner);
+
+    const foe = byHp.find((u) => u.id !== ou.id);
+
+    const weak = [...byHp].reverse().find((u) => u.id !== ou.id && u.id !== foe?.id && !(u.immunities as any[]).length && !/resistance|immun/i.test(JSON.stringify(u.abilities)));
+
+    const stunCond = mine.map((c) => (c.name && (ou.abilities as any[]).find((a: any) => a.name === c.name)?.condition?.condition) as string | undefined).find(Boolean);
+
+    if (!foe || !weak) continue;
+
+    const setup = [
+      { id: ou.id, type: ParticipantSourceType.UNIT, side: "ally", quantity: 1 },
+      { id: weak.id, type: ParticipantSourceType.UNIT, side: "ally", quantity: 1 },
+      { id: foe.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 },
+    ];
+
+    battleLabel = `ПРОБА ${owner}`;
+
+    const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${battleLabel}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+
+    ctx.battleId = b.id; state = await readState();
+
+    if ((await call("start", START)).status !== 200) continue;
+
+    forceChance = true;
+
+    const nameIs = (u: any) => (p: any) => p.basicInfo.name.replace(/ #\d+$/, "") === u.name;
+
+    const o = () => P().find(nameIs(ou));
+
+    const foeP = () => P().find(nameIs(foe));
+
+    const weakP = () => P().find(nameIs(weak));
+
+    const logFrom = fullLog.length;
+
+    for (const c of mine) {
+      const a = (o().battleData.resolvedAbilities ?? []).find((x: any) => x.name === c.name && x.trigger.event === c.event);
+
+      if (!a || usageOf(o(), c.name) > 0 || state.status !== "active") continue;
+
+      const role = a.trigger.role;
+
+      if (c.event === "kill" && role === "victimSide") {
+        await heal(foeP());
+        await call("participants", PATCH(weakP().basicInfo.id), { currentHp: 1 });
+
+        for (let i = 0; i < 6 && alive(weakP()) && state.status === "active"; i++) {
+          await nextOnly();
+
+          if (await turnOf(foeP().basicInfo.id)) await attackWith(foeP(), weakP(), foeP().battleData.attacks[0]);
+        }
+      } else if (c.event === "action") {
+        if (a.condition?.type === "targetDead") await call("participants", PATCH(weakP().basicInfo.id), { kill: true });
+
+        for (let i = 0; i < 6 && usageOf(o(), c.name) === 0 && state.status === "active"; i++) {
+          if (await turnOf(o().basicInfo.id)) await adaptiveAbility("ability-action", o(), a);
+
+          await nextOnly();
+        }
+      } else if (c.event === "hit" || c.event === "attack") {
+        for (let cycle = 0; cycle < 5 && usageOf(o(), c.name) === 0 && state.status === "active"; cycle++) {
+          await nextOnly();
+          await heal(foeP());
+
+          if (stunCond === EffectMarker.SKIP_ACTION) await call("conditions", COND, { action: "apply", participantId: foeP().basicInfo.id, condition: "incapacitated", rounds: 3 });
+
+          if (await turnOf(o().basicInfo.id)) for (const w of o().battleData.attacks ?? []) if (usageOf(o(), c.name) === 0 && !o().actionFlags.hasUsedAction) { await heal(foeP()); await attackWith(o(), foeP(), w); }
+        }
+      }
+    }
+
+    forceChance = false;
+    recordCoverage(true);
+
+    for (const c of mine) if (usageOf(o(), c.name) === 0) targetedResults.push(`⚠️ проба ${owner} / ${c.name}: не спрацювало; журнал: ${fullLog.slice(logFrom).join(" | ").slice(-500)}`);
+  }
+
+  battleLabel = "";
+  void spells;
+}
+
+
+/** Аури «поруч», яких випадкові бої жодного разу не задали: власник задає зону на всіх можливих цілях, перевіряємо запис у collectModifiers. */
+async function areaAuraProbes() {
+  const todo = [...coverage.values()].filter((c) => c.area && c.passiveOk === 0 && c.passiveMiss === 0);
+
+  const units = await prisma.unit.findMany({ where: { campaignId: ctx.campaignId } });
+
+  const foe = [...units].sort((a, b) => b.maxHp - a.maxHp)[0];
+
+  for (const c of todo) {
+    const ou = units.find((u) => u.name === c.owner);
+
+    if (!ou || !foe || ou.id === foe.id) continue;
+
+    battleLabel = `ПРОБА аура ${c.owner}`;
+
+    const setup = [{ id: ou.id, type: ParticipantSourceType.UNIT, side: "ally", quantity: 1 }, { id: foe.id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }];
+
+    const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${battleLabel}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+
+    ctx.battleId = b.id; state = await readState();
+    await call("start", START);
+
+    const o = P().find((p) => p.basicInfo.name.replace(/ #\d+$/, "") === ou.name);
+
+    if (!o || !(await untilTurnOf((p) => p.basicInfo.id === o.basicInfo.id && alive(p)))) continue;
+
+    for (const aura of pendingAreaAuras(P(), o.basicInfo.id, state.currentRound)) {
+      const ids = zoneCandidates(P(), byId(o.basicInfo.id), aura.target).map((x: any) => x.basicInfo.id);
+
+      if ((await call("aura-zone", AURA_ZONE, { participantId: o.basicInfo.id, auraId: aura.id, targetIds: ids })).status === 200 && ids.length) proveAreaAura(byId(o.basicInfo.id), aura, ids);
+    }
+  }
+
+  battleLabel = "";
+}
+
+/** «Світле відлуння» єдинорога: союзний герой кастує баф заклинанням школи тригера — єдиноріг отримує копію. */
+async function copyBuffsProbe(spells: Map<string, any>) {
+  const todo = [...coverage.values()].filter((c) => c.source === "unit" && c.event === "spellCast" && c.fired === 0);
+
+  for (const c of todo) {
+    const ou = await prisma.unit.findFirst({ where: { campaignId: ctx.campaignId, name: c.owner } });
+
+    const trig = (ou?.abilities as any[] | undefined)?.find((a: any) => a.name === c.name)?.trigger;
+
+    const caster = heroRows.find((h) => h.name === "Зехір");
+
+    const spell = [...spells.values()].find((sp: any) => sp.groupId === trig?.school && ["ally", "self"].includes(sp.targeting?.kind) && spellEffects(sp).some((e: any) => e.kind === "modifyStat"));
+
+    if (!ou || !caster || !spell) { tskip(`${c.name}: союзний баф школи`, "немає героя-кастера або заклинання бафу цієї школи"); continue; }
+
+    battleLabel = `ПРОБА ${c.owner}`;
+    await applyRotation(0);
+
+    const setup = [{ id: caster.id, type: ParticipantSourceType.CHARACTER, side: "ally" }, { id: ou.id, type: ParticipantSourceType.UNIT, side: "ally", quantity: 1 }, { id: (await prisma.unit.findFirstOrThrow({ where: { campaignId: ctx.campaignId, id: { not: ou.id } }, orderBy: { maxHp: "desc" } })).id, type: ParticipantSourceType.UNIT, side: "enemy", quantity: 1 }];
+
+    const b = await createTestBattle({ data: { campaignId: ctx.campaignId, name: `ТЕСТ ${battleLabel}`, status: "prepared", participants: setup as any, currentRound: 1, currentTurnIndex: 0 } });
+
+    ctx.battleId = b.id; state = await readState();
+    await call("start", START);
+
+    const zeh = () => byName(caster.name);
+
+    const uni = () => P().find((p) => p.basicInfo.name.replace(/ #\d+$/, "") === ou.name);
+
+    const r = (await turnOf(zeh().basicInfo.id)) ? await call("spell", SPELL, { casterId: zeh().basicInfo.id, spellId: spell.id, targetIds: [zeh().basicInfo.id], diceRolls: [], free: true }) : null;
+
+    tcheck(`${c.name}: баф союзника школи «${spell.name}» копіюється єдинорогу`, !!r && r.status === 200 && usageOf(uni(), c.name) > 0, `${r?.status} ефекти єдинорога: ${uni()?.battleData.activeEffects.map((e: any) => e.name).join(", ")}`);
+    recordCoverage(true);
+  }
+
+  battleLabel = "";
+}
+
 async function targeted(spells: Map<string, any>) {
   const easy = (await prisma.unit.findMany({ where: { campaignId: ctx.campaignId } })).filter((u: any) => !/дракон|титан|архангел|ліч/i.test(u.name)).slice(0, 3).map((u: any) => u.id);
 
@@ -1222,6 +1599,10 @@ async function targeted(spells: Map<string, any>) {
   }
   tcheck("Вибух мани: ворожий каст у Зехіра відповідає шкодою (шанс 50 %)", burst, burst ? "спрацював" : "не спрацював за 6 кастів");
 
+  await preyProbe();
+  await lowAllyPassiveProbe();
+  recordCoverage(true);
+
   // Ангел Хранитель (ультимат Людей) — ротація 3
   await applyRotation(2);
   await mkBattle("ЦІЛЬ-2");
@@ -1241,6 +1622,9 @@ async function targeted(spells: Map<string, any>) {
   const v2 = byName("Айвен");
 
   tcheck("Ангел Хранитель: воскрешає полеглого союзника з 50 % HP", !!ar && ar.status === 200 && alive(v2), `${ar?.status} HP ${v2.combatStats.currentHp}/${v2.combatStats.maxHp}; ${ar?.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 250)} ${ar && ar.status !== 200 ? JSON.stringify(ar.body).slice(0, 200) : ""}`);
+
+  await raiseDeadProbe();
+  recordCoverage(true);
 }
 
 async function controlCheck(spells: Map<string, any>) {
