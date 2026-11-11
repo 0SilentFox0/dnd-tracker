@@ -21,7 +21,7 @@ export const MODULE_SERVER: Record<string, ModuleEntry<SystemServer>> = {
 
 const serverCache = new Map<string, SystemServer>();
 
-const resolve = (system: Pick<Ruleset, "system">["system"]): SystemServer => resolveSystem(system, serverCache, { entries: MODULE_SERVER, fallbackBase: () => D20_SERVER, compose: composeServer });
+const resolve = (system: Pick<Ruleset, "system">["system"]): SystemServer => resolveSystem(system, serverCache, { entries: MODULE_SERVER, optional: true, fallbackBase: () => D20_SERVER, compose: composeServer });
 
 export const SYSTEM_SERVER: Readonly<Record<string, SystemServer>> = Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve({ key })]));
 

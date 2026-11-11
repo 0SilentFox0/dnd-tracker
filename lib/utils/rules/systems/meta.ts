@@ -1,6 +1,13 @@
 import { D20_META } from "./d20/meta";
 
 // <systems:generated>
+import { ARTIFACTSETS_META } from "@/systems/artifactsets/meta";
+import { HEROSCALING_META } from "@/systems/heroscaling/meta";
+import { HOMM_META } from "@/systems/homm/meta";
+import { MORALE_META } from "@/systems/morale/meta";
+import { RETALIATION_META } from "@/systems/retaliation/meta";
+import { SKILLTREES_META } from "@/systems/skilltrees/meta";
+import { UNITSTACKS_META } from "@/systems/unitstacks/meta";
 import { WFRP_META } from "@/systems/wfrp/meta";
 // </systems:generated>
 
@@ -37,6 +44,13 @@ export interface SystemMeta {
 export const SYSTEM_META = [
   D20_META,
   // <systems:generated>
+  ARTIFACTSETS_META,
+  HEROSCALING_META,
+  HOMM_META,
+  MORALE_META,
+  RETALIATION_META,
+  SKILLTREES_META,
+  UNITSTACKS_META,
   WFRP_META,
   // </systems:generated>
 ] as const satisfies readonly SystemMeta[];

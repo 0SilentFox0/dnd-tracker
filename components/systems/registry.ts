@@ -16,7 +16,7 @@ export const MODULE_UI: Record<string, ModuleEntry<SystemUi>> = {
 
 const uiCache = new Map<string, SystemUi>();
 
-const resolve = (key: string, modules?: readonly string[]): SystemUi => resolveSystem({ key, modules }, uiCache, { entries: MODULE_UI, fallbackBase: () => D20_UI, compose: composeUi });
+const resolve = (key: string, modules?: readonly string[]): SystemUi => resolveSystem({ key, modules }, uiCache, { entries: MODULE_UI, optional: true, fallbackBase: () => D20_UI, compose: composeUi });
 
 export const SYSTEM_UI: Record<string, SystemUi> = Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve(key)]));
 

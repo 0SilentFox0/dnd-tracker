@@ -45,6 +45,15 @@ describe("system exhaustiveness", () => {
     expect(keysOf(terms.ruleSystem)).toEqual(keys);
   });
 
+  it.each(["uk", "en"])("every addon has gameTerms.module name and summary in %s", (locale) => {
+    const terms = JSON.parse(fs.readFileSync(path.join(ROOT, `messages/${locale}/gameTerms.json`), "utf8")) as { module: Record<string, { name?: string; summary?: string }> };
+
+    for (const meta of (SYSTEM_META as readonly SystemMeta[]).filter((m) => m.kind === "addon")) {
+      expect(terms.module[meta.module]?.name, `${locale}/${meta.module}.name`).toBeTruthy();
+      expect(terms.module[meta.module]?.summary, `${locale}/${meta.module}.summary`).toBeTruthy();
+    }
+  });
+
   it.each(["uk", "en"])("every namespace of a meta has a message file in %s", (locale) => {
     for (const ns of systemNamespaces()) expect(fs.existsSync(path.join(ROOT, `messages/${locale}/${ns}.json`)), `${locale}/${ns}`).toBe(true);
   });

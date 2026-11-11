@@ -1,5 +1,5 @@
 import { moduleMetaOf, type SystemSelection } from "./catalog";
-import { type Addon, type AddonBuilder, composeCached, compositionOrder } from "./compose";
+import { type Addon, type AddonBuilder, composeCached, compositionOrder, type DeepPartial } from "./compose";
 
 export type ModuleEntry<T> = T | AddonBuilder<T>;
 
@@ -7,6 +7,8 @@ export interface ModuleSource<T extends object> {
   entries: Readonly<Record<string, ModuleEntry<T>>>;
   /** Temporary bases that are not folders yet, keyed by system key */
   fallbackBase?: (key: string) => T | undefined;
+  /** A module without an entry in this layer contributes nothing */
+  optional?: boolean;
   compose: (base: T, addons: readonly Addon<T>[]) => T;
 }
 
@@ -22,6 +24,8 @@ export function resolveSystem<T extends object>(system: SystemSelection, cache: 
 
     const addons = compositionOrder(base, modules).map((id): Addon<T> => {
       const built = Object.hasOwn(source.entries, id) ? source.entries[id] : undefined;
+
+      if (!built && source.optional) return { id, claims: moduleMetaOf(id)?.claims, build: () => ({}) as DeepPartial<T> };
 
       if (!built || !isBuilder(built)) throw new Error(`No definition for module: ${id}`);
 

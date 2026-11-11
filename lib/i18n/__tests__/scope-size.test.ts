@@ -15,8 +15,8 @@ const ROOT_LIMIT_KB = 20;
 
 const BASE = [...CAMPAIGN_NAMESPACES, ...BATTLE_NAMESPACES];
 
-const systemScopes = SYSTEM_META.flatMap((meta) => {
-  const [key] = meta.keys;
+const systemScopes = SYSTEM_META.filter((meta) => (meta.kind ?? "base") === "base").flatMap((meta) => {
+  const key = meta.keys[0] as string;
 
   const { budgetKb } = meta.i18n as { budgetKb?: { battle?: number; member?: number; dm?: number; pages?: Record<string, number> } };
 

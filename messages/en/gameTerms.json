@@ -296,5 +296,31 @@
   "distanceUnit": {
     "ft": "ft",
     "yd": "yd"
+  },
+  "module": {
+    "morale": {
+      "name": "Morale",
+      "summary": "A morale check at the start of a turn: units may lose their turn or fight better depending on spirit."
+    },
+    "retaliation": {
+      "name": "Retaliation",
+      "summary": "A melee target strikes back after being attacked; per-round retaliation counters."
+    },
+    "heroscaling": {
+      "name": "Hero scaling",
+      "summary": "Hero HP formula, level-based dice, archetypes and multipliers from Heroes."
+    },
+    "skilltrees": {
+      "name": "Skill trees",
+      "summary": "Main skills, trees with progression and learning spells from magic schools."
+    },
+    "artifactsets": {
+      "name": "Artifact sets",
+      "summary": "Artifact collections that grant bonuses for the number of equipped pieces."
+    },
+    "unitstacks": {
+      "name": "Unit stacks",
+      "summary": "Creature count in a stack, target range, level scaling and stack damage in balance."
+    }
   }
 }

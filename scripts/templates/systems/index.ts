@@ -5,6 +5,7 @@ import { HOMM_HOOKS } from "./homm";
 import { SYSTEM_MODULE, systemBases } from "./modules";
 import type { PackHooks, PackIssue } from "./types";
 // <systems:generated>
+import { HOMM_MODULE_HOOKS } from "./homm";
 import { WFRP_MODULE_HOOKS } from "./wfrp";
 // </systems:generated>
 
@@ -14,14 +15,15 @@ export type { Glossary, PackHooks, PackIssue, PackRefs, PrepareCtx } from "./typ
 
 export const MODULE_HOOKS: Readonly<Record<string, PackHooks>> = {
   // <systems:generated>
+  homm: HOMM_MODULE_HOOKS,
   wfrp: WFRP_MODULE_HOOKS,
   // </systems:generated>
 };
 
 export const PACK_HOOKS: Readonly<Record<string, PackHooks>> = {
+  ...MODULE_HOOKS,
   homm: { ...D20_HOOKS, ...HOMM_HOOKS },
   dnd5e: D20_HOOKS,
-  ...MODULE_HOOKS,
 };
 
 export const PACK_ADAPTERS: Readonly<Record<string, { validate?(pack: Pack): PackIssue[] }>> = ADAPTERS;

@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { ROOT_SPECS } from "./systems-index";
 
-import { SYSTEM_META } from "@/lib/utils/rules/systems/meta";
+import { SYSTEM_META, type SystemMeta } from "@/lib/utils/rules/systems/meta";
 import { TEMPLATE_REGISTRY } from "@/lib/utils/templates/registry";
 
 export const ROOT = path.resolve(__dirname, "../..");
@@ -43,9 +43,9 @@ export interface LiteralTokens {
 }
 
 export const literalTokens = (): LiteralTokens => {
-  const substring: string[] = [...new Set<string>(SYSTEM_META.flatMap((m) => m.tokens ?? []))];
+  const substring: string[] = [...new Set<string>((SYSTEM_META as readonly SystemMeta[]).flatMap((m) => m.tokens ?? []))];
 
-  const keysAndModules = SYSTEM_META.flatMap((m) => [...m.keys, m.module]);
+  const keysAndModules = (SYSTEM_META as readonly SystemMeta[]).flatMap((m) => (m.kind === "addon" ? [...m.keys] : [...m.keys, m.module]));
 
   return {
     substring,
