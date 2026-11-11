@@ -2,26 +2,20 @@
 
 import { useEffect } from "react";
 
-import type { SpellFormFieldsProps } from "./SpellFormBasicFields";
-
 import { HudSection } from "@/components/hud/form";
+import type { SpellMagicFieldsProps } from "@/components/systems/types";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import type { SystemConditionInfo } from "@/lib/utils/rules/systems";
 import { asMagicSpell, DEFAULT_SPELL_MAGIC, withSpellMagic } from "@/lib/utils/spells/model/form";
 import { SPELL_MAGIC_KINDS } from "@/lib/utils/spells/model/schema";
-
-export interface SpellMagicFieldsSystem {
-  conditions: readonly SystemConditionInfo[];
-}
 
 const OVERCAST_KEYS = ["none", "dice", "targets"] as const;
 
 const MAX_ATTRIBUTE_LEVELS = 3;
 
-export function SpellMagicFields({ formData, setFormData, conditions }: SpellFormFieldsProps & SpellMagicFieldsSystem) {
+export function SpellMagicFields({ formData, setFormData, conditions }: SpellMagicFieldsProps) {
   const t = useTranslator();
 
   const magic = formData.casting?.magic ?? DEFAULT_SPELL_MAGIC;

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { D100Input } from "@/components/battle/hud/D100Input";
+import { D100Input } from "./D100Input";
+
 import { AiRollButton } from "@/components/battle/hud/DiceInput";
 import { cn } from "@/lib/utils";
 

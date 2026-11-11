@@ -50,8 +50,8 @@ export interface AttackFlowState {
   picked?: boolean;
   offHand?: boolean;
   inspiration?: boolean;
-  /** d100: the server decides hit/miss, so there is no damage step */
-  percentile?: boolean;
+  /** server-judged systems decide hit/miss on the server, so there is no damage step */
+  judge?: "server";
   cunningStrike?: CunningStrikeEffect[];
   fortune?: "reroll" | "sl";
 }
@@ -67,7 +67,7 @@ export type AttackFlowAction =
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
   | { type: "SET_FORTUNE"; value: "reroll" | "sl" | null }
   | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
-  | { type: "ROLL"; d20?: number; second?: number; outcome: RollOutcome; percentile?: boolean; damage?: number[] }
+  | { type: "ROLL"; d20?: number; second?: number; outcome: RollOutcome; judge?: "server"; damage?: number[] }
   | { type: "DAMAGE"; values: number[] }
   | { type: "BACK" }
   | { type: "SUBMIT" }
@@ -144,9 +144,9 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "ROLL": {
       const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: a.damage ?? [] } : st));
 
-      if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1, ...(a.percentile && { percentile: true }) };
+      if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1, ...(a.judge && { judge: a.judge }) };
 
-      if (a.percentile) return { ...s, strikes, step: "submitting", percentile: true, error: undefined };
+      if (a.judge) return { ...s, strikes, step: "submitting", judge: a.judge, error: undefined };
 
       const first = nextHit(strikes, 0);
 
@@ -181,7 +181,7 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "SUCCESS":
       return { ...s, step: "result", results: a.results, error: undefined, waitingCrit: false };
     case "FAIL": {
-      const toSummary = s.strikes.some(isHit) && !s.percentile;
+      const toSummary = s.strikes.some(isHit) && s.judge !== "server";
 
       return { ...s, waitingCrit: false, step: toSummary ? "summary" : "roll", index: toSummary ? s.index : s.strikes.length - 1, error: a.error };
     }
@@ -202,7 +202,7 @@ export function forcedModeOf(p: Pick<PredictedAttack, "mode" | "forced" | "reaso
   return { mode: "normal", reason: textRef("battleWizards.flow.forced.cancelled", { advantage: joinLines(advantage, ", "), disadvantage: joinLines(disadvantage, ", ") }) };
 }
 
-/** d100: the roll source is fixed by the first strike; undefined while it is still free to choose */
+/** server-judged: the roll source is fixed by the first strike; undefined while it is still free to choose */
 export function lockedRollSource(s: Pick<AttackFlowState, "strikes" | "index">): "server" | "manual" | undefined {
   if (s.index === 0 || s.strikes.length === 0) return undefined;
 
@@ -237,10 +237,10 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
       ...base,
       targetIds: [st.targetId],
       ...(serverRoll ? { serverRoll } : { attackRoll: st.d20 }),
-      ...(st.second !== undefined && !s.percentile && mode === "advantage" && { advantageRoll: st.second }),
-      ...(st.second !== undefined && !s.percentile && mode === "disadvantage" && { disadvantageRoll: st.second }),
+      ...(st.second !== undefined && s.judge !== "server" && mode === "advantage" && { advantageRoll: st.second }),
+      ...(st.second !== undefined && s.judge !== "server" && mode === "disadvantage" && { disadvantageRoll: st.second }),
       ...(s.fortune && { fortune: s.fortune }),
-      ...(s.fortune === "reroll" && s.percentile && st.second !== undefined && !serverRoll && { fortuneRoll: st.second }),
+      ...(s.fortune === "reroll" && s.judge === "server" && st.second !== undefined && !serverRoll && { fortuneRoll: st.second }),
       damageRolls: isHit(st) ? st.damage : [],
     } as AttackData & { endTurn: boolean };
   }
@@ -252,7 +252,7 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
     ...base,
     targetIds: s.strikes.map((st) => st.targetId),
     ...(serverRoll ? { serverRoll } : { attackRolls: s.strikes.map((st) => st.d20 ?? 0) }),
-    ...(!s.percentile && s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
+    ...(s.judge !== "server" && s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
     damageRolls: hits.flatMap((st) => st.damage),
   } as AttackData & { endTurn: boolean };
 }

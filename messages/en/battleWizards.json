@@ -22,7 +22,12 @@
       "melee": "melee",
       "ranged": "ranged",
       "toHit": "{kind} · {bonus} to hit",
-      "toHitPercent": "{kind} · {target}% to hit"
+      "toHitPercent": "{kind} · {target}% to hit",
+      "ammo": {
+        "badge": "Ammo {left}/{capacity}",
+        "empty": "Out of ammo",
+        "reloading": "Reloading"
+      }
     },
     "target": {
       "cover": "There is an obstacle between the attacker and the target",

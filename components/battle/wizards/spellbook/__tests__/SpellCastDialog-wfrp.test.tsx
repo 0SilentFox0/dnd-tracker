@@ -3,6 +3,11 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/battle/use-system-battle-ui", async () => {
+  const { CastTestBody } = await import("@/systems/wfrp/ui/battle/CastTestBody");
+
+  return { useSystemBattleUi: () => ({ CastTest: CastTestBody }) };
+});
 
 import { SpellCastDialog } from "../SpellCastDialog";
 

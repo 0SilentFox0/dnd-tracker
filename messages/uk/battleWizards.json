@@ -22,7 +22,12 @@
       "melee": "ближній",
       "ranged": "дальній",
       "toHit": "{kind} · {bonus} до влучання",
-      "toHitPercent": "{kind} · {target}% до влучання"
+      "toHitPercent": "{kind} · {target}% до влучання",
+      "ammo": {
+        "badge": "Набої {left}/{capacity}",
+        "empty": "Немає набоїв",
+        "reloading": "Перезарядка"
+      }
     },
     "target": {
       "cover": "Між стрільцем і ціллю є перешкода",

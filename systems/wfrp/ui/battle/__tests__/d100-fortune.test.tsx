@@ -4,8 +4,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
-import { D100RollBody } from "@/components/battle/wizards/attack/D100RollBody";
-import type { AttackWizardModel } from "@/components/battle/wizards/attack/shared";
+import { D100RollBody } from "../D100RollBody";
+
+import type { RollBodyProps } from "@/components/systems/types";
 import { render } from "@/lib/i18n/test/render-uk";
 
 vi.unmock("next-intl");
@@ -15,9 +16,9 @@ const model = (available: boolean, fortune?: "reroll" | "sl") => {
 
   const wizard = {
     state: { index: 0, diceSlots: [], strikes: [{ targetId: "t", damage: [] }], ...(fortune && { fortune }) },
-    view: { percentile: { target: null, momentum: false }, fortune: { available, left: 2 } },
+    view: { judged: { target: null, attackerSide: undefined }, fortune: { available, left: 2 } },
     actions,
-  } as unknown as AttackWizardModel;
+  } as unknown as RollBodyProps["wizard"];
 
   return { wizard, actions };
 };

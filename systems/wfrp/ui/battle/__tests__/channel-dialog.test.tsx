@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
-import { ChannelDialog } from "@/components/battle/wizards/ChannelDialog";
+import { ChannelDialog } from "../ChannelDialog";
+
 import { render } from "@/lib/i18n/test/render-uk";
 
 vi.unmock("next-intl");

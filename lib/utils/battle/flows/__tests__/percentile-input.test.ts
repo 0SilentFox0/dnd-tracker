@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { composePercentile, parsePercentileField, percentileTargetOf } from "../percentile-input";
+import { composePercentile, parsePercentileField } from "../percentile-input";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
@@ -48,13 +49,13 @@ describe("composePercentile", () => {
   });
 });
 
-describe("percentileTargetOf", () => {
+describe("combat.attackTarget", () => {
   it("uses WS for melee and BS for ranged", () => {
-    expect(percentileTargetOf(archer(), attack(AttackType.MELEE), WFRP_RULES)?.target).toBe(41);
-    expect(percentileTargetOf(archer(), attack(AttackType.RANGED), WFRP_RULES)?.target).toBe(52);
+    expect(ruleSystemOf(WFRP_RULES).combat.attackTarget?.(archer(), attack(AttackType.MELEE))?.target).toBe(41);
+    expect(ruleSystemOf(WFRP_RULES).combat.attackTarget?.(archer(), attack(AttackType.RANGED))?.target).toBe(52);
   });
 
   it("is null in d20 systems", () => {
-    expect(percentileTargetOf(archer(), attack(AttackType.MELEE), DEFAULT_RULES)).toBeNull();
+    expect(ruleSystemOf(DEFAULT_RULES).combat.attackTarget).toBeUndefined();
   });
 });

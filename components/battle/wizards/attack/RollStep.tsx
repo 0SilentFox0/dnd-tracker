@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { D100RollBody } from "./D100RollBody";
 import { type AttackWizardModel,btn } from "./shared";
 
 import { AiRollButton, DiceGrid } from "@/components/battle/hud/DiceInput";
+import { useSystemBattleUi } from "@/components/battle/use-system-battle-ui";
 import { Switch } from "@/components/ui/switch";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
@@ -18,14 +18,16 @@ export function RollStep({ wizard, target }: { wizard: AttackWizardModel; target
 
   const { state, view } = wizard;
 
-  const d100 = view.serverJudged;
+  const RollBody = useSystemBattleUi()?.RollBody;
+
+  const serverJudged = view.serverJudged && !!RollBody;
 
   return (
     <>
-      <div className="hud-sc text-xl font-bold">{d100 ? t("d100.title") : t("title")}</div>
+      <div className="hud-sc text-xl font-bold">{serverJudged ? t("d100.title") : t("title")}</div>
       {state.strikes.length > 1 && <div className="mt-1 text-sm text-[var(--hud-muted)]">{t("strike", { n: state.index + 1, total: state.strikes.length, name: target.basicInfo.name })}</div>}
       {view.cover.has(target.basicInfo.id) && <div className="mt-2 text-sm text-[#e0a050]">{t("cover")}</div>}
-      {d100 ? <D100RollBody wizard={wizard} /> : <D20RollBody wizard={wizard} />}
+      {serverJudged ? <RollBody wizard={wizard} /> : <D20RollBody wizard={wizard} />}
     </>
   );
 }

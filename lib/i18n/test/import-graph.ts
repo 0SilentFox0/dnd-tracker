@@ -5,6 +5,9 @@ const ROOT = process.cwd();
 
 const IMPORT_RE = /(?:from|import)\s*\(?\s*["']@\/([^"']+)["']/g;
 
+// type-only imports are erased and never reach a bundle
+const TYPE_IMPORT_RE = /(?:import|export)\s+type\s[^;"']*?from\s*["'][^"']+["'];?/g;
+
 const EXTS = [".ts", ".tsx", "/index.ts", "/index.tsx"];
 
 export function walkSources(dir: string, out: string[] = []): string[] {
@@ -44,7 +47,7 @@ export function reachableSources(roots: readonly string[], skip: (file: string, 
 
     seen.set(file, text);
 
-    for (const [, spec] of text.matchAll(IMPORT_RE)) {
+    for (const [, spec] of text.replace(TYPE_IMPORT_RE, "").matchAll(IMPORT_RE)) {
       const next = resolveImport(spec);
 
       if (next) queue.push(next);

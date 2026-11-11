@@ -248,7 +248,7 @@ describe("attackFlow", () => {
   });
 
   it("d100: ROLL одразу відправляє без кроку шкоди; помилка повертає на кидок", () => {
-    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", percentile: true });
+    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", judge: "server" });
 
     expect(s.step).toBe("submitting");
     expect(attackPayload(s, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 73, damageRolls: [], endTurn: false });
@@ -260,17 +260,17 @@ describe("attackFlow", () => {
   });
 
   it("d100: кубики шкоди з кидка потрапляють у payload", () => {
-    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", percentile: true, damage: [4] });
+    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", judge: "server", damage: [4] });
 
     expect(attackPayload(s, "me")).toMatchObject({ attackRoll: 73, damageRolls: [4] });
   });
 
   it("d100: авто-кидок не має d20 і йде прапорцем serverRoll без attackRoll", () => {
-    const one = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", percentile: true, damage: [4] });
+    const one = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", judge: "server", damage: [4] });
 
     expect(attackPayload(one, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a"], serverRoll: true, damageRolls: [4], endTurn: false });
 
-    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", percentile: true }, { type: "ROLL", outcome: "hit", percentile: true });
+    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", judge: "server" }, { type: "ROLL", outcome: "hit", judge: "server" });
 
     const payload = attackPayload(s, "me");
 
@@ -279,11 +279,11 @@ describe("attackFlow", () => {
   });
 
   it("d100: кілька цілей — кидок на кожну, потім відправка", () => {
-    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 55, outcome: "hit", percentile: true });
+    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 55, outcome: "hit", judge: "server" });
 
     expect(s).toMatchObject({ step: "roll", index: 1 });
 
-    const done = attackFlow(s, { type: "ROLL", d20: 100, outcome: "hit", percentile: true });
+    const done = attackFlow(s, { type: "ROLL", d20: 100, outcome: "hit", judge: "server" });
 
     expect(done.step).toBe("submitting");
     expect(attackPayload(done, "me")).toMatchObject({ attackRolls: [55, 100], damageRolls: [] });
@@ -294,15 +294,15 @@ describe("attackFlow", () => {
 
     expect(lockedRollSource(start)).toBeUndefined();
 
-    const manual = attackFlow(start, { type: "ROLL", d20: 40, outcome: "hit", percentile: true });
+    const manual = attackFlow(start, { type: "ROLL", d20: 40, outcome: "hit", judge: "server" });
 
     expect(lockedRollSource(manual)).toBe("manual");
 
-    const server = attackFlow(start, { type: "ROLL", outcome: "hit", percentile: true });
+    const server = attackFlow(start, { type: "ROLL", outcome: "hit", judge: "server" });
 
     expect(lockedRollSource(server)).toBe("server");
 
-    const done = attackFlow(manual, { type: "ROLL", d20: 12, outcome: "hit", percentile: true });
+    const done = attackFlow(manual, { type: "ROLL", d20: 12, outcome: "hit", judge: "server" });
 
     expect(attackPayload(done, "me")).toMatchObject({ attackRolls: [40, 12] });
     expect(attackPayload(done, "me")).not.toHaveProperty("serverRoll");
@@ -313,19 +313,19 @@ describe("Fortune in attack flow", () => {
   const pct = (...extra: AttackFlowAction[]) => run(open(1, 2), { type: "TOGGLE_TARGET", id: "e1" }, { type: "CONFIRM_TARGETS" }, ...extra);
 
   it("SET_FORTUNE sets state; payload carries fortune and fortuneRoll", () => {
-    const s = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", percentile: true });
+    const s = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
 
     expect(s.fortune).toBe("reroll");
     expect(attackPayload(s, "a1")).toMatchObject({ fortune: "reroll", fortuneRoll: 20, attackRoll: 90 });
   });
 
   it("server roll: no fortuneRoll; sl: no fortuneRoll", () => {
-    const server = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", outcome: "hit", percentile: true });
+    const server = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", outcome: "hit", judge: "server" });
 
     expect(attackPayload(server, "a1")).toMatchObject({ fortune: "reroll" });
     expect(attackPayload(server, "a1")).not.toHaveProperty("fortuneRoll");
 
-    const sl = pct({ type: "SET_FORTUNE", value: "sl" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", percentile: true });
+    const sl = pct({ type: "SET_FORTUNE", value: "sl" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
 
     expect(attackPayload(sl, "a1")).toMatchObject({ fortune: "sl" });
     expect(attackPayload(sl, "a1")).not.toHaveProperty("fortuneRoll");
@@ -338,7 +338,7 @@ describe("Fortune in attack flow", () => {
     expect(run(open(1, 3), { type: "SET_FORTUNE", value: "sl" }, { type: "SET_TARGETS", ids: ["a", "b"] }).fortune).toBeUndefined();
     expect(attackFlow({ ...base, targetIds: ["a"] }, { type: "TOGGLE_TARGET", id: "b" }).fortune).toBeUndefined();
 
-    const two = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 10, outcome: "miss", percentile: true }, { type: "ROLL", d20: 10, outcome: "miss", percentile: true });
+    const two = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 10, outcome: "miss", judge: "server" }, { type: "ROLL", d20: 10, outcome: "miss", judge: "server" });
 
     expect(attackPayload({ ...two, fortune: "sl" }, "a1")).not.toHaveProperty("fortune");
   });

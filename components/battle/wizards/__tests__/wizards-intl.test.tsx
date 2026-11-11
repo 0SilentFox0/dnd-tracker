@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.unmock("next-intl");
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock("@/components/battle/use-system-battle-ui", () => ({ useSystemBattleUi: () => undefined }));
 
 import { RollStep } from "@/components/battle/wizards/attack/RollStep";
 import type { AttackWizardModel } from "@/components/battle/wizards/attack/shared";

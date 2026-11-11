@@ -18,7 +18,9 @@ vi.mock("next/dynamic", () => ({
 }));
 
 vi.mock("@/components/battle/wizards/AttackWizard", () => ({ AttackWizard: () => null }));
-vi.mock("@/components/battle/wizards/ChannelDialog", () => ({ ChannelDialog: () => <div data-testid="channel-dialog" /> }));
+vi.mock("@/components/battle/use-system-battle-ui", () => ({
+  useSystemBattleUi: () => (rules.current.magic ? { ChannelDialog: () => <div data-testid="channel-dialog" />, ChannelLabel: () => <>Скерування</> } : undefined),
+}));
 vi.mock("@/components/battle/wizards/SpellBook", () => ({ SpellBook: () => null }));
 vi.mock("@/components/battle/turn/CoreActionsDialog", () => ({ CoreActionsDialog: () => null }));
 vi.mock("@/components/battle/wizards/BonusActionPicker", () => ({ BonusActionPicker: ({ trigger }: { trigger?: string }) => <div data-testid={`picker-${trigger ?? "bonus"}`} /> }));

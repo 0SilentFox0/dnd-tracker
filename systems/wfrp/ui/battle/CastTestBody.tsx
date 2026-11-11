@@ -1,12 +1,10 @@
 import { useTranslations } from "next-intl";
 
-import { D100RollPicker } from "../attack/D100RollPicker";
+import { D100RollPicker } from "./D100RollPicker";
 
-import type { useSpellBook } from "@/lib/hooks/battle";
+import type { CastTestProps } from "@/components/systems/types";
 
-type Book = ReturnType<typeof useSpellBook>;
-
-export function CastTestBody({ book: { state, view, actions } }: { book: Book }) {
+export function CastTestBody({ book: { state, view, actions } }: CastTestProps) {
   const t = useTranslations("wfrpMagic.ui.cast");
 
   const { cast } = view;

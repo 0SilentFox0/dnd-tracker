@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
-import { D100Input } from "@/components/battle/hud";
+import { D100Input } from "../D100Input";
+
 import { render } from "@/lib/i18n/test/render-uk";
 
 vi.unmock("next-intl");

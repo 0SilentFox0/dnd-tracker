@@ -3,8 +3,7 @@ import { parseDieInput } from "./die-input";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellMagicKind } from "@/lib/utils/spells/model/schema";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import type { BattleParticipant } from "@/types/battle";
 
 export const PERCENTILE_SIDES = 100;
 
@@ -18,13 +17,6 @@ export function composePercentile(tens: number | undefined, units: number | unde
 }
 
 export const parsePercentileField = (raw: string) => parseDieInput(raw, PERCENTILE_SIDES);
-
-/** Base target the roll is compared with (before outnumbering and Momentum); null outside percentile systems. */
-export function percentileTargetOf(attacker: BattleParticipant, attack: BattleAttack, rules: Ruleset): { target: number; label: LogLine } | null {
-  const resolved = ruleSystemOf(rules).combat.attackTarget?.(attacker, attack);
-
-  return resolved ? resolved : null;
-}
 
 /** Casting-test numbers shown before the roll; null outside systems with a casting test. */
 export function castPreviewOf(caster: BattleParticipant, rules: Ruleset, kind?: SpellMagicKind): { target: number; channelTarget: number; channelled: number; armourSl: number } | null {

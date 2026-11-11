@@ -6,9 +6,9 @@ import { Heart, Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, HpFigure, SlotGrid, ZoomablePortrait } from "@/components/battle/hud";
-import { ConditionTestPanel } from "@/components/battle/participants/ConditionTestPanel";
 import { ReactionSpellButton } from "@/components/battle/turn/ReactionSpellButton";
 import { ReadiedAttackButton } from "@/components/battle/turn/ReadiedAttackButton";
+import { useSystemBattleUi } from "@/components/battle/use-system-battle-ui";
 import { BattleStatus } from "@/lib/constants/battle";
 import { useBattleRules, useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,8 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
   const { battle, turn: { queue, isMyTurn }, effects } = useBattleSceneData();
 
   const { d20Stats, woundsLabel, spells } = useBattleRules();
+
+  const ConditionTestPanel = useSystemBattleUi()?.ConditionTestPanel;
 
   const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
@@ -72,7 +74,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = fal
         </div>
       )}
       {!compact && <EffectLine effects={heroEffects} />}
-      {!compact && <ConditionTestPanel hero={hero} />}
+      {!compact && ConditionTestPanel && <ConditionTestPanel hero={hero} />}
       {hero.battleData.pendingCast && <p className="mt-2 text-sm">{t("pendingCast", { spell: hero.battleData.pendingCast.spellName, rounds: hero.battleData.pendingCast.remainingRounds })}</p>}
       <ReadiedAttackButton participant={hero} />
       {battle.status === BattleStatus.ACTIVE && <ReactionSpellButton participant={hero} />}

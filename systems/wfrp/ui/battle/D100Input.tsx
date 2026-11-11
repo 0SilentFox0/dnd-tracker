@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { DieInput } from "./DiceInput";
-
+import { DieInput } from "@/components/battle/hud/DiceInput";
 import { cn } from "@/lib/utils";
 import { composePercentile, PERCENTILE_SIDES, TENS_OPTIONS } from "@/lib/utils/battle/flows";
 

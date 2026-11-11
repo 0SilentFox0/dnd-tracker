@@ -3,10 +3,11 @@ import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { SpellMagicFields } from "../SpellMagicFields";
+
 import { getDefaultSpellFormData, resolutionKeysOf, spellCostKeysOf,type SpellFormData } from "@/components/spells/form/spell-form-defaults";
 import { SpellFormBasicFields } from "@/components/spells/form/SpellFormBasicFields";
 import { SpellFormPowerFields } from "@/components/spells/form/SpellFormPowerFields";
-import { SpellMagicFields } from "@/components/spells/form/SpellMagicFields";
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, scrollIntoView: () => {} });
 
@@ -52,7 +53,7 @@ describe("SpellMagicFields", () => {
   });
 
   it("magic power tab offers only auto resolution", () => {
-    render(<Harness initial={getDefaultSpellFormData()}>{(p) => <SpellFormPowerFields {...p} magic={{ conditions }} />}</Harness>);
+    render(<Harness initial={getDefaultSpellFormData()}>{(p) => <SpellFormPowerFields {...p} magic={{ conditions, Fields: SpellMagicFields }} />}</Harness>);
 
     expect(screen.getByLabelText("wfrpMagic.ui.editor.cn")).toBeTruthy();
     expect(screen.getByRole("combobox", { name: "spellEditor.power.check" })).toHaveTextContent("spellEditor.power.resolution.auto");

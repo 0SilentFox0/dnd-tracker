@@ -13,7 +13,7 @@ export function WeaponStep({ wizard: { state, view, actions } }: { wizard: Attac
 
   const text = useText();
 
-  const ta = useTranslations("battleWfrp.ammo");
+  const ta = useTranslations("battleWizards.attack.weapon.ammo");
 
   return (
     <div className="space-y-2">
@@ -31,7 +31,7 @@ export function WeaponStep({ wizard: { state, view, actions } }: { wizard: Attac
             {a.type === AttackType.RANGED ? <Crosshair className="size-7 shrink-0 text-[var(--gold)]" /> : <Swords className="size-7 shrink-0 text-[var(--gold)]" />}
             <span className="min-w-0 flex-1">
               <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
-              <span className="block text-[13px] text-hud-soft">{t(view.serverJudged ? "toHitPercent" : "toHit", { kind: t(a.type === AttackType.MELEE ? "melee" : "ranged"), bonus: signed(preview?.toHit ?? a.attackBonus), target: view.percentile.weaponTargets[id] ?? 0 })}</span>
+              <span className="block text-[13px] text-hud-soft">{t(view.serverJudged ? "toHitPercent" : "toHit", { kind: t(a.type === AttackType.MELEE ? "melee" : "ranged"), bonus: signed(preview?.toHit ?? a.attackBonus), target: view.judged.weaponTargets[id] ?? 0 })}</span>
               <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-hud-gold">
                 {ammo && <span>{locked ? ta(ammo.status) : ta("badge", { left: ammo.left, capacity: ammo.capacity })}</span>}
                 {preview?.bonuses.map((b) => {

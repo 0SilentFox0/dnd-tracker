@@ -152,10 +152,5 @@
       "crit": "Critical wound"
     },
     "total": "Total damage"
-  },
-  "ammo": {
-    "badge": "Ammo {left}/{capacity}",
-    "empty": "Out of ammo",
-    "reloading": "Reloading"
   }
 }

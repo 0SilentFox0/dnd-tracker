@@ -1,9 +1,12 @@
 import type { ComponentType } from "react";
 
+import type { SpellFormFieldsProps } from "@/components/spells/form/SpellFormBasicFields";
+import type { useAttackWizard, useChannelAction, useSpellBook } from "@/lib/hooks/battle";
 import type { SystemConditionBody } from "@/lib/hooks/battles";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
+import type { SystemConditionInfo } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant } from "@/types/battle";
 import type { CareerData } from "@/types/careers";
@@ -110,7 +113,37 @@ export interface RulesSectionProps {
   form: RulesFormState;
 }
 
+export interface RollBodyProps {
+  wizard: ReturnType<typeof useAttackWizard>;
+}
+
+export interface CastTestProps {
+  book: ReturnType<typeof useSpellBook>;
+}
+
+export interface ChannelDialogProps {
+  channel: ReturnType<typeof useChannelAction>;
+}
+
+export interface ConditionTestPanelProps {
+  hero: BattleParticipant;
+}
+
+export interface SpellMagicFieldsProps extends SpellFormFieldsProps {
+  conditions: readonly SystemConditionInfo[];
+}
+
+export interface SystemBattleUi {
+  RollBody?: ComponentType<RollBodyProps>;
+  CastTest?: ComponentType<CastTestProps>;
+  ChannelDialog?: ComponentType<ChannelDialogProps>;
+  ChannelLabel?: ComponentType;
+  ConditionTestPanel?: ComponentType<ConditionTestPanelProps>;
+}
+
 export interface SystemUi {
+  battle?: SystemBattleUi;
+  SpellMagicFields?: ComponentType<SpellMagicFieldsProps>;
   HeroStats: ComponentType;
   StatsTab: ComponentType<StatsTabProps>;
   RollDialogBody: ComponentType<RollDialogBodyProps>;

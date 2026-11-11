@@ -19,16 +19,17 @@ import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
-import { attackFlow, type AttackFlowAction, type AttackMode, forcedFor, initialAttackFlow, percentileTargetOf, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
+import { attackFlow, type AttackFlowAction, type AttackMode, forcedFor, initialAttackFlow, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { canSeeExactStats, strikeDamageSteps, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();
 
-  const { dice, serverJudged, sceneHeldBy, fortune } = useBattleRules();
+  const { dice, serverJudged, sceneState, fortune } = useBattleRules();
 
   const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
 
@@ -84,10 +85,13 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     [attacker, attacks, order, isOpen],
   );
 
-  const percentile = {
-    target: serverJudged && attacker && attack ? percentileTargetOf(attacker, attack, scene.battle.rules) : null,
-    momentum: !!attacker && sceneHeldBy(attacker.basicInfo.side),
-    weaponTargets: serverJudged && attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, percentileTargetOf(attacker, a, scene.battle.rules)?.target])) : {},
+  const attackTarget = ruleSystemOf(scene.battle.rules).combat.attackTarget;
+
+  const judged = {
+    target: serverJudged && attacker && attack ? (attackTarget?.(attacker, attack) ?? null) : null,
+    sceneState,
+    attackerSide: attacker?.basicInfo.side,
+    weaponTargets: serverJudged && attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, attackTarget?.(attacker, a)?.target])) : {},
   };
 
   const unknownDefense = state.strikes.some((s) => {
@@ -131,7 +135,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   };
 
   const rollAction = (d20?: number, second?: number): AttackFlowAction =>
-    serverJudged ? { type: "ROLL", d20, outcome: "hit", percentile: true, damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)), ...(second !== undefined && { second }) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20 ?? 0, second) };
+    serverJudged ? { type: "ROLL", d20, outcome: "hit", judge: "server", damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)), ...(second !== undefined && { second }) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20 ?? 0, second) };
 
   useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
@@ -145,7 +149,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     fortune: { available: serverJudged && fortune && (attacker?.battleData.fortune ?? 0) >= 1 && state.targetIds.length === 1, left: attacker?.battleData.fortune ?? 0 },
     ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.ammo?.capacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.ammo.capacity, capacity: a.ammo.capacity }] as const] : []))) : {},
-    attack, attacks, targets, steps, estimate, cover, unreachable, unknownDefense, previews, dice, serverJudged, percentile,
+    attack, attacks, targets, steps, estimate, cover, unreachable, unknownDefense, previews, dice, serverJudged, judged,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
     reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),

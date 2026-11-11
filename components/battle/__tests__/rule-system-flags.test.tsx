@@ -94,7 +94,7 @@ describe("прапорці системи правил у HUD бою", () => {
     expect(screen.queryByText("×3")).toBeNull();
   });
 
-  it("MyHeroPanel: «Спробувати зняти» у свій хід, лише для wfrp і без спроби цього ходу", () => {
+  it("MyHeroPanel: «Спробувати зняти» у свій хід, лише для wfrp і без спроби цього ходу", async () => {
     const withBleeding = (hero: BattleParticipant, tests?: string[]): BattleParticipant => {
       const bled = applyWfrpConditionTo(hero, { key: "bleeding", levels: 1, round: 1, sourceName: textRef("battleWfrp.log.removed", { target: "x", condition: "y" }) }).participant;
 
@@ -104,7 +104,7 @@ describe("прапорці системи правил у HUD бою", () => {
     const wfrp = scene("wfrp");
 
     render(<TooltipProvider><MyHeroPanel hero={withBleeding(wfrp.me)} /></TooltipProvider>, { wrapper: wfrp.wrapper });
-    fireEvent.click(screen.getByRole("button", { name: /Спробувати зняти/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /Спробувати зняти/ }));
     fireEvent.click(screen.getByRole("button", { name: /Авто-кидок/ }));
     expect(wfrp.value.actions.conditionTest.mutate).toHaveBeenCalledWith({ participantId: "me", condition: "bleeding", serverRoll: true });
     cleanup();

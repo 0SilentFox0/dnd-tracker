@@ -1,6 +1,9 @@
 import dynamic from "next/dynamic";
 
 import { ActionResult } from "./battle/ActionResult";
+import { CastTestBody } from "./battle/CastTestBody";
+import { ChannelLabel } from "./battle/ChannelLabel";
+import { D100RollBody } from "./battle/D100RollBody";
 import { CareerForm } from "./careers/CareerForm";
 import { WfrpDraftForm } from "./creation/WfrpDraftForm";
 import { AdvancementEditor } from "./AdvancementEditor";
@@ -15,7 +18,7 @@ import { StatsTab } from "./StatsTab";
 import { SystemConditionsDialog } from "./SystemConditionsDialog";
 import { UnitStatsFields } from "./UnitStatsFields";
 
-import { type SystemUi } from "@/components/systems/types";
+import { type SystemBattleUi, type SystemUi } from "@/components/systems/types";
 import { SHEET_SLOT } from "@/systems/wfrp/rules/slots";
 
 const SpeciesProfileEditor = dynamic(() => import("./creation/SpeciesProfileEditor").then((m) => m.SpeciesProfileEditor));
@@ -33,4 +36,12 @@ const AdvancementSection = dynamic(() => import("@/systems/wfrp/ui/rules/Advance
 
 const TablesSection = dynamic(() => import("@/systems/wfrp/ui/rules/TablesSection").then((m) => m.TablesSection));
 
-export const WFRP_UI: SystemUi = { rulesSections: { advancement: AdvancementSection, tables: TablesSection }, HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, DraftForm: WfrpDraftForm, RaceProfileEditor: SpeciesProfileEditor, battleConditionsDialog: SystemConditionsDialog, ArtifactStatsEditor, EquippedSummary, DowntimeTab, DowntimePeriodPanel, RestBadges, ResourceFields, ActionResult, resourceDefaults: (sheet) => ({ sin: String(SHEET_SLOT.read(sheet.systemSlot)?.sin ?? 0) }) };
+const ConditionTestPanel = dynamic(() => import("./battle/ConditionTestPanel").then((m) => m.ConditionTestPanel));
+
+const ChannelDialog = dynamic(() => import("./battle/ChannelDialog").then((m) => m.ChannelDialog), { ssr: false });
+
+const SpellMagicFields = dynamic(() => import("./spells/SpellMagicFields").then((m) => m.SpellMagicFields));
+
+const battle: SystemBattleUi = { RollBody: D100RollBody, CastTest: CastTestBody, ChannelDialog, ChannelLabel, ConditionTestPanel };
+
+export const WFRP_UI: SystemUi = { battle, SpellMagicFields, rulesSections: { advancement: AdvancementSection, tables: TablesSection }, HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields, hideProgression: true, MagicTab, AdvancementTab, AdvancementEditor, CareerForm, DraftForm: WfrpDraftForm, RaceProfileEditor: SpeciesProfileEditor, battleConditionsDialog: SystemConditionsDialog, ArtifactStatsEditor, EquippedSummary, DowntimeTab, DowntimePeriodPanel, RestBadges, ResourceFields, ActionResult, resourceDefaults: (sheet) => ({ sin: String(SHEET_SLOT.read(sheet.systemSlot)?.sin ?? 0) }) };

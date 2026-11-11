@@ -11,6 +11,7 @@ import { SpellFormEffects } from "./SpellFormEffects";
 import { SpellFormPowerFields } from "./SpellFormPowerFields";
 
 import { HudForm, type HudTab } from "@/components/hud/form";
+import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useRuleSystem } from "@/lib/hooks/systems";
@@ -42,9 +43,11 @@ export function SpellFormBody({
 
   const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
-  const { system } = useRuleSystem({ campaignId });
+  const { key, system } = useRuleSystem({ campaignId });
 
-  const magic = system?.magic ? { conditions: system.conditions?.catalog ?? [] } : undefined;
+  const Fields = key && systemUiOf(key).SpellMagicFields;
+
+  const magic = system?.magic && Fields ? { conditions: system.conditions?.catalog ?? [], Fields } : undefined;
 
   const tabs: HudTab<SpellFormTabId>[] = [
     {

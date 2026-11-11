@@ -1,26 +1,31 @@
 import { useTranslations } from "next-intl";
 
+import { heldBy } from "../../rules/combat/momentum";
+import { SCENE_SLOT } from "../../rules/slots";
 import { D100RollPicker } from "./D100RollPicker";
-import { type AttackWizardModel, btn } from "./shared";
 
+import { btn } from "@/components/battle/wizards/attack/shared";
+import type { RollBodyProps } from "@/components/systems/types";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { lockedRollSource } from "@/lib/utils/battle/flows/attack-flow";
 
-export function D100RollBody({ wizard: { state, view, actions } }: { wizard: AttackWizardModel }) {
+export function D100RollBody({ wizard: { state, view, actions } }: RollBodyProps) {
   const t = useTranslations("battleWizards.attack.roll.d100");
 
   const tc = useTranslations("common.actions");
 
   const text = useText();
 
-  const { percentile, fortune } = view;
+  const { judged, fortune } = view;
+
+  const momentum = judged.attackerSide !== undefined && heldBy(SCENE_SLOT.read(judged.sceneState) ?? {}, judged.attackerSide);
 
   return (
     <>
-      {percentile.target && <div className="mt-2 text-sm text-hud-gold">{t("target", { target: percentile.target.target, label: text(percentile.target.label) })}</div>}
+      {judged.target && <div className="mt-2 text-sm text-hud-gold">{t("target", { target: judged.target.target, label: text(judged.target.label) })}</div>}
       {state.diceSlots.length > 0 && <div className="mt-1 text-sm text-[var(--hud-muted)]">{t("damageDice", { dice: state.diceSlots.map((sides) => `d${sides}`).join(" + ") })}</div>}
-      <div className="mt-1 text-sm text-[var(--hud-muted)]">{percentile.momentum ? t("momentum.held", { side: t("momentum.side") }) : t("momentum.none")}</div>
+      <div className="mt-1 text-sm text-[var(--hud-muted)]">{momentum ? t("momentum.held", { side: t("momentum.side") }) : t("momentum.none")}</div>
       <D100RollPicker
         locked={lockedRollSource(state)}
         fortune={{ available: fortune.available && state.index === 0, left: fortune.left, value: state.fortune ?? null, onChange: actions.setFortune }}

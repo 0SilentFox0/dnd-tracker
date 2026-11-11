@@ -25,8 +25,8 @@ describe("useBattleRules", () => {
   it("wfrp: d100 flags", () => {
     const rules = render("wfrp", { ally: true });
 
-    expect(rules.sceneHeldBy("ally")).toBe(true);
-    expect(rules.sceneHeldBy("enemy")).toBe(false);
+    expect(rules.sceneState).toEqual(sceneOf({ ally: true }));
+    expect(rules.systemKey).toBe("wfrp");
     expect(rules).toMatchObject({
       dice: 100,
       serverJudged: true,

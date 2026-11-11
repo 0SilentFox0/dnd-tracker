@@ -3,7 +3,6 @@ import { Loader2, Sparkles } from "lucide-react";
 
 import { btn, primaryBtn } from "../attack/shared";
 import { TargetButton } from "../TargetButton";
-import { CastTestBody } from "./CastTestBody";
 import { IngredientsLine } from "./IngredientsLine";
 import { SaveRolls } from "./SaveRolls";
 import { SlotSelect } from "./SlotSelect";
@@ -11,6 +10,7 @@ import { SpellSummary } from "./SpellSummary";
 
 import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
+import { useSystemBattleUi } from "@/components/battle/use-system-battle-ui";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
@@ -70,13 +70,15 @@ function TargetsStep({ book }: { book: Book }) {
 function RollsStep({ book }: { book: Book }) {
   const tw = useTranslations("battleWizards.spell.cast");
 
+  const CastTest = useSystemBattleUi()?.CastTest;
+
   const { state, view, actions } = book;
 
   const { selected } = view;
 
   return (
     <>
-      {view.cast ? <CastTestBody book={book} /> : (
+      {view.cast && CastTest ? <CastTest book={book} /> : (
         <>
           <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
           <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title={tw("attackRoll")} />

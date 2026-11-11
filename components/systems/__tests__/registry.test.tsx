@@ -37,6 +37,16 @@ describe("system ui registry", () => {
     }
   });
 
+  it("only wfrp has battle slots and the spell magic editor", () => {
+    expect(Object.keys(systemUiOf("wfrp").battle ?? {}).sort()).toEqual(["CastTest", "ChannelDialog", "ChannelLabel", "ConditionTestPanel", "RollBody"]);
+    expect(systemUiOf("wfrp").SpellMagicFields).toBeDefined();
+
+    for (const key of ["homm", "dnd5e"] as const) {
+      expect(systemUiOf(key).battle).toBeUndefined();
+      expect(systemUiOf(key).SpellMagicFields).toBeUndefined();
+    }
+  });
+
   it("sheet flags: d20 keeps spells/items/rest kinds/d20 stats, wfrp keeps only spells", () => {
     for (const key of ["homm", "dnd5e"] as const) {
       const sys = RULE_SYSTEM_REGISTRY[key];

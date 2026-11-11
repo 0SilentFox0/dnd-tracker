@@ -2,15 +2,15 @@
 
 import { useTranslations } from "next-intl";
 
-import { D100RollPicker } from "./attack/D100RollPicker";
-import { btn } from "./attack/shared";
+import { D100RollPicker } from "./D100RollPicker";
 
+import { btn } from "@/components/battle/wizards/attack/shared";
 import { HUD_SURFACE } from "@/components/hud";
+import type { ChannelDialogProps } from "@/components/systems/types";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import type { useChannelAction } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-export function ChannelDialog({ channel: { view, actions } }: { channel: ReturnType<typeof useChannelAction> }) {
+export function ChannelDialog({ channel: { view, actions } }: ChannelDialogProps) {
   const t = useTranslations("wfrpMagic.ui.channel");
 
   const tc = useTranslations("common.actions");
