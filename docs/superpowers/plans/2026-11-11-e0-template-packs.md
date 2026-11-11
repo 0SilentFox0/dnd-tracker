@@ -43,6 +43,10 @@
 | D15 | `localizationOf().templateKey` — завжди ключ пакета з реєстру, не значення колонки. Запити до БД за ключем пакета йдуть лише через `templateKeyWhere(keys)` (`registry.ts`), яка до backfill покриває `templateKey = null` і ключ-назву; джерела compendium-import = `compendiumTemplateKeys()`. Обидві знімаються/спрощуються разом із `LEGACY_KEY_BY_NAME` у 4.4 | Review Focus 3: prod до backfill; словники ключовано ключем пакета |
 | D16 | `groupTemplates` ключує `templateKeyOf(card) ?? card.templateKey ?? card.name`: сирий `templateKey` лишається для ключів поза реєстром (приватні шаблони, `heroes-homm` до 5.1) | без нього такі картки групувалися б за назвою |
 | D17 | `manifest.names` містить усі `TEMPLATE_CONTENT_LOCALES` незалежно від `manifest.locales` (в оболонках `names.uk = names.en`); `spell-fx-by-name` живе в `data/library/` (кириличні ключі, `data/**` поза i18n-лінтом). У частині 3 `SRD_KINDS` у `lib/utils/templates/i18n/{catalog,overlay}.ts` замінюється видами з `manifest.kinds` | тип spec 4.2; `lib/` під забороною кирилиці |
+| D18 | Імпорт-шар НЕ піднімає `contentVersion`, якщо рядок відрізняється лише slug: у `template:import` (частина 4) такі рядки пишуться лише через `writeSlug` без `markContentDirty()` (або лоадер відновлює версію, як Grim). До цього `constructor:srd-template` не запускати на prod для backfill | prodcopy: версія SRD 2437→3656 від backfill; план 2.3/spec розд. 9 вимагають незмінної версії; причина: `writePlan` (import-content.ts ~:202-215) викликає update для кожного знайденого рядка і `markContentDirty` (~:293) |
+| D19 | `loadKeys`/`writeSlug` обовʼязкові в `ImportDeps`; одна мапа kind→table | мовчки пропущений slug ламає перейменування рядка (Review Focus 1) |
+| D20 | `TEMPLATES_DIR` визначено лише в `scripts/templates/lib/pack.ts` | env-перевизначення потрібне тестам fixture-pack (частина 4) |
+| D21 | import-bundle не читає `takenSlugs` з БД: ціль завжди нова/очищена кампанія; колізії slug перевіряються лише всередині bundle (D5 для sync/apply без змін) | дельти замість читань |
 
 ## Файлова структура
 
@@ -370,6 +374,8 @@ export function validatePack(pack: Pack, opts?: { registry?: Record<string, Temp
 - [ ] Тести → реалізація → `pnpm test:run scripts/templates` → комміт.
 
 ### Задача 4.2: команди `build`, `validate`, `import`, `publish`, `icons`
+
+Враховує D18.
 
 **Files:**
 - Create: `scripts/templates/lib/{import-pack,build,icons-upload}.ts`, `scripts/templates/srd-5.2/build.ts` (обгортка чинного `scripts/srd/build.ts` + `lib/build-data`), команди в `cli.ts`
