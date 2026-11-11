@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -18,9 +18,13 @@ export function ClassSection({ progression, defaultOpen, children }: ClassSectio
 
   const [open, setOpen] = useState(defaultOpen);
 
-  useEffect(() => {
+  const [seenDefault, setSeenDefault] = useState(defaultOpen);
+
+  if (seenDefault !== defaultOpen) {
+    setSeenDefault(defaultOpen);
+
     if (defaultOpen) setOpen(true);
-  }, [defaultOpen]);
+  }
 
   const { level } = pathSummary(progression);
 

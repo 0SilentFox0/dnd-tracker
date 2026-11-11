@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useGroupLabel } from "./useGroupLabel";
 import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnit } from "./useUnits";
@@ -48,9 +48,12 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const groups = activeRaceFilter.length > 0 ? found.filter((g) => activeRaceFilter.includes(g.key)) : found;
 
-  useEffect(() => {
+  const [openInputs, setOpenInputs] = useState({ debouncedQuery, units, races });
+
+  if (openInputs.debouncedQuery !== debouncedQuery || openInputs.units !== units || openInputs.races !== races) {
+    setOpenInputs({ debouncedQuery, units, races });
     setOpen(debouncedQuery.trim() ? groupUnitsByRace(units, races, debouncedQuery).map((g) => g.key) : []);
-  }, [debouncedQuery, units, races]);
+  }
 
   const toggleRace = (key: string) =>
     setRaceFilter((current) => (current.includes(key) ? current.filter((k) => k !== key) : [...current, key]));

@@ -80,3 +80,21 @@ describe("ClassSection", () => {
     expect(details.open).toBe(false);
   });
 });
+
+describe("ClassSection", () => {
+  afterEach(cleanup);
+
+  const details = (c: HTMLElement) => c.querySelector("details") as HTMLDetailsElement;
+
+  it("opens when defaultOpen flips to true, and otherwise keeps the user's toggle", () => {
+    const { container, rerender } = render(<ClassSection progression={two[0]} defaultOpen={false}>x</ClassSection>);
+
+    expect(details(container).open).toBe(false);
+    rerender(<ClassSection progression={two[0]} defaultOpen>x</ClassSection>);
+
+    expect(details(container).open).toBe(true);
+    rerender(<ClassSection progression={two[0]} defaultOpen={false}>x</ClassSection>);
+
+    expect(details(container).open).toBe(true);
+  });
+});
