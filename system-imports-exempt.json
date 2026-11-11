@@ -1,0 +1,62 @@
+[
+  {
+    "file": "app/api/campaigns/[id]/characters/draft/create-wfrp-draft.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "app/api/campaigns/[id]/races/[raceId]/profile/route.ts",
+    "reason": "route"
+  },
+  {
+    "file": "components/rules/sections/TablesSection.tsx",
+    "reason": "e1:4.3"
+  },
+  {
+    "file": "lib/schemas/downtime.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/schemas/units.ts",
+    "reason": "e1:3.2"
+  },
+  {
+    "file": "lib/server/artifacts/system-stats.ts",
+    "reason": "e1:3.2"
+  },
+  {
+    "file": "lib/server/characters/core/create-character-schema.ts",
+    "reason": "e1:3.2"
+  },
+  {
+    "file": "lib/server/characters/core/update-character-schema.ts",
+    "reason": "e1:3.2"
+  },
+  {
+    "file": "lib/server/races/profile-usage.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/server/races/race-profile.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/server/templates/sync/profile-refs.ts",
+    "reason": "e1:3.3"
+  },
+  {
+    "file": "lib/utils/rules/systems/index.ts",
+    "reason": "e1:3.2"
+  },
+  {
+    "file": "lib/utils/rules/systems/types.ts",
+    "reason": "e1:3.2"
+  },
+  {
+    "file": "lib/utils/rules/tables-schema.ts",
+    "reason": "ruleset-section"
+  },
+  {
+    "file": "types/battle.ts",
+    "reason": "e1:2.1"
+  }
+]

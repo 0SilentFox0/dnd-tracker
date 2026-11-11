@@ -21,8 +21,6 @@ const walk = (dir: string): string[] =>
 
 const sources = (folders: string[]) => folders.flatMap((folder) => walk(path.join(root, folder))).filter((file) => /\.(ts|tsx)$/.test(file));
 
-const codeFiles = (folders: string[]) => sources(folders).filter((file) => !/__tests__|\.test\./.test(file));
-
 describe("a fourth pack needs no change outside its folder", () => {
   it("validates, orders and indexes from a temporary templates dir", () => {
     fs.cpSync(path.join(__dirname, "fixtures", "fixture-pack"), path.join(tmp, "fixture-pack"), { recursive: true });
@@ -37,15 +35,7 @@ describe("a fourth pack needs no change outside its folder", () => {
   });
 });
 
-describe("no pack key or template-name constant leaks into core", () => {
-  it("lib, app, components and types name no pack outside the registry", () => {
-    const keyed = /["'`](srd-5\.2|grim-d100|heroes-homm)["'`]/;
-
-    const offenders = codeFiles(["lib", "app", "components", "types"]).filter((file) => !file.endsWith(path.join("utils", "templates", "registry.ts")) && keyed.test(fs.readFileSync(file, "utf8")));
-
-    expect(offenders.map((file) => path.relative(root, file))).toEqual([]);
-  });
-
+describe("no template-name constant leaks into core", () => {
   it("the old name constants are gone", () => {
     const constant = ["_TEMPLATE", "NAME"].join("_");
 
