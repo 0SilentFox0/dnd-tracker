@@ -73,7 +73,7 @@ function rowIssues(kind: PackKind, rows: PackRow[]): PackIssue[] {
 
     if (!isImportKind(kind)) return;
 
-    const { slug: _slug, origin: _origin, ...fields } = raw;
+    const { slug: _slug, origin: _origin, extra: _extra, ...fields } = raw;
 
     const spec = IMPORT_SPECS[kind];
 
@@ -117,7 +117,7 @@ function linkIssues(pack: Pack): PackIssue[] {
 
   return kinds.flatMap((kind) =>
     (pack.rows[kind] ?? []).flatMap((row, index) => {
-      const { slug: _slug, origin: _origin, ...fields } = row;
+      const { slug: _slug, origin: _origin, extra: _extra, ...fields } = row;
 
       const { value } = coerceRecord(fields, IMPORT_SPECS[kind].fields);
 
@@ -141,10 +141,14 @@ function countIssues(pack: Pack): PackIssue[] {
   ];
 }
 
+const NO_ICON_KINDS = new Set(["skillTrees", "tracks"]);
+
 function iconPackIssues(pack: Pack): PackIssue[] {
   const rows = pack.rows as Record<string, { slug?: unknown }[]>;
 
-  return [...iconIssues(rows, pack.icons).map((message) => error(message)), ...iconGaps(rows, pack.icons).map((message): PackIssue => ({ level: "warning", message }))];
+  const iconed = Object.fromEntries(Object.entries(rows).filter(([kind]) => !NO_ICON_KINDS.has(kind)));
+
+  return [...iconIssues(rows, pack.icons).map((message) => error(message)), ...iconGaps(iconed, pack.icons).map((message): PackIssue => ({ level: "warning", message }))];
 }
 
 function translationIssues(pack: Pack, dir: string): PackIssue[] {

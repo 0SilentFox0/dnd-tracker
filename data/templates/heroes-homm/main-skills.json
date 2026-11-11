@@ -1,0 +1,83 @@
+[
+  {
+    "slug": "attack",
+    "name": "Напад",
+    "color": "#b3312c",
+    "isEnableInSkillTree": false,
+    "role": "attack"
+  },
+  {
+    "slug": "chaos",
+    "name": "Хаос",
+    "color": "#d4561e",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Хаос",
+    "role": "magic"
+  },
+  {
+    "slug": "dark",
+    "name": "Темрява",
+    "color": "#5b3a7a",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Темрява",
+    "role": "magic"
+  },
+  {
+    "slug": "defense",
+    "name": "Захист",
+    "color": "#4f6d8a",
+    "isEnableInSkillTree": false,
+    "role": "defense"
+  },
+  {
+    "slug": "leadership",
+    "name": "Лідерство",
+    "color": "#c9a227",
+    "isEnableInSkillTree": false,
+    "role": "leadership"
+  },
+  {
+    "slug": "light",
+    "name": "Світло",
+    "color": "#e8c547",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Світло",
+    "role": "magic"
+  },
+  {
+    "slug": "nature",
+    "name": "Природа",
+    "color": "#6b8e23",
+    "isEnableInSkillTree": false,
+    "spellGroupId": "Природа",
+    "role": "magic"
+  },
+  {
+    "slug": "personal-skills",
+    "name": "Персональні",
+    "color": "#8e6bbf",
+    "isEnableInSkillTree": false,
+    "role": "personal"
+  },
+  {
+    "slug": "race-skills",
+    "name": "Раса",
+    "color": "#c9a227",
+    "isEnableInSkillTree": false,
+    "role": "race"
+  },
+  {
+    "slug": "ranged",
+    "name": "Стрільба",
+    "color": "#3d7a3a",
+    "isEnableInSkillTree": false,
+    "role": "ranged"
+  },
+  {
+    "slug": "ultimate-skills",
+    "name": "Ультимат",
+    "color": "#b3261e",
+    "isEnableInSkillTree": false,
+    "role": "ultimate"
+  }
+]

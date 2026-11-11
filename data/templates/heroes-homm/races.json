@@ -1,0 +1,761 @@
+[
+  {
+    "slug": "dark-elves",
+    "name": "Темні ельфи",
+    "color": "#6b2d5c",
+    "availableSkills": [
+      "Напад",
+      "Захист",
+      "Стрільба",
+      "Темрява",
+      "Хаос"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-dark-elves.webp",
+      "name": "Підземний зір",
+      "description": "+2 до Спритності, +1 до Харизми. Перша атака героя в бою — з перевагою.",
+      "statModifiers": {
+        "charisma": {
+          "bonus": true
+        },
+        "dexterity": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Очі темного ельфа бачать там, де інші впираються в суцільну пітьму: кожен рух ворога світиться для нього тьмяним фіалковим вогнем. Він завмирає в тіні, чекаючи першого удару, і б'є так, що жертва ще довго не розуміє, звідки прийшла смерть."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "dark-elves-stats",
+        "name": "Темні ельфи: характеристики",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "dexterity",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "charisma",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "dark-elves-darkvision",
+        "name": "Підземний зір",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "advantage",
+            "attackKind": "all"
+          }
+        ]
+      },
+      {
+        "id": "dark-elves-fighting-style",
+        "name": "Стиль бою",
+        "description": "Ближня шкода +15 %, шкода заклинань −10 %.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 15
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "demons",
+    "name": "Демони",
+    "color": "#b3261e",
+    "availableSkills": [
+      "Напад",
+      "Захист",
+      "Стрільба",
+      "Темрява",
+      "Лідерство",
+      "Хаос"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-demons.webp",
+      "name": "Пекельна кров",
+      "description": "+2 до Сили, +1 до Харизми. Опір вогню 50 %.",
+      "statModifiers": {
+        "charisma": {
+          "bonus": true
+        },
+        "strength": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "По венах демона тече не кров, а розжарена лава, і шкіра вкривається багряними тріщинами, коли поруч спалахує полум'я. Вогонь лиже його плечі, наче давній знайомий, і гасне, не залишивши опіків. Лише дим здіймається від обгорілого плаща."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "demons-stats",
+        "name": "Демони: характеристики",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "strength",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "charisma",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "demons-hellblood",
+        "name": "Пекельна кров",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "fire",
+            "percent": 50
+          }
+        ]
+      },
+      {
+        "id": "demons-fighting-style",
+        "name": "Стиль бою",
+        "description": "Ближня шкода +15 %, дальня −10 %.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 15
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "dwarves",
+    "name": "Гноми",
+    "color": "#8a6a3b",
+    "availableSkills": [
+      "Лідерство",
+      "Стрільба",
+      "Напад",
+      "Захист",
+      "Світло"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-dwarves.webp",
+      "name": "Кам'яна шкіра роду",
+      "description": "+2 до Статури, +1 до Сили. +1 до класу броні.",
+      "statModifiers": {
+        "strength": {
+          "bonus": true
+        },
+        "constitution": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Гном стоїть, ніби виріс із самої скелі: широкі плечі, борода, заплетена в залізні кільця, і шкіра, що темніє й твердне, наче граніт. Клинки скрегочуть по ній і відскакують, залишаючи лише іскри. Предки гір немов вклали в нього частку своєї міцності."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "dwarves-stats",
+        "name": "Гноми: характеристики",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "constitution",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "strength",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "dwarves-stoneskin",
+        "name": "Кам'яна шкіра роду",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "armor",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "dwarves-fighting-style",
+        "name": "Стиль бою",
+        "description": "Ближня шкода +10 %, дальня −10 %.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 10
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "elves",
+    "name": "Ельфи",
+    "color": "#3f8f3a",
+    "availableSkills": [
+      "Лідерство",
+      "Стрільба",
+      "Напад",
+      "Захист",
+      "Природа"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-elves.webp",
+      "name": "Око лісу",
+      "description": "+2 до Спритності, +1 до Мудрості. Усі атаки героя отримують +1 до кидка влучання.",
+      "statModifiers": {
+        "wisdom": {
+          "bonus": true
+        },
+        "dexterity": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Ельф примружується, і ліс ніби підказує йому, де гойднеться гілка, а де промайне тінь. Його погляд ловить найменшу прогалину в обороні ворога, чи то між пластинами лат, чи між ударами мечів. Птахи не змовкають поруч із ним — вони знають, що він свій."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "elves-stats",
+        "name": "Ельфи: характеристики",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "dexterity",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "wisdom",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "elves-forest-eye",
+        "name": "Око лісу",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "attackBonus",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "elves-fighting-style",
+        "name": "Стиль бою",
+        "description": "Дальня шкода +20 %, ближня −15 %.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": 20
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": -15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "humans",
+    "name": "Люди",
+    "color": "#c9a227",
+    "availableSkills": [
+      "Лідерство",
+      "Стрільба",
+      "Напад",
+      "Захист",
+      "Світло"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-humans.webp",
+      "name": "Вишкіл війська",
+      "description": "+2 до Сили, +1 до Харизми. На початку бою герой і всі союзники отримують +1 до моралі на 2 раунди.",
+      "statModifiers": {
+        "charisma": {
+          "bonus": true
+        },
+        "strength": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Перед першою сутичкою лунає короткий сигнал сурми, і ряди імперських воїнів вирівнюються, наче по шнурку. Командир кидає один погляд на стрій, і навіть новобранці відчувають, що за плечима в них стоїть уся армія. Шоломи піднімаються, щити змикаються, і страх відступає перед спільним ритмом кроків."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "humans-stats",
+        "name": "Люди: характеристики",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "strength",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "charisma",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "humans-army-drill",
+        "name": "Вишкіл війська",
+        "trigger": {
+          "event": "battleStart"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1,
+            "target": "allAllies",
+            "duration": {
+              "rounds": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "humans-fighting-style",
+        "name": "Стиль бою",
+        "description": "Ближня шкода +10 %.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "mages",
+    "name": "Маги",
+    "color": "#2f6fb3",
+    "availableSkills": [
+      "Світло",
+      "Темрява",
+      "Хаос",
+      "Природа",
+      "Захист",
+      "Лідерство"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-mages.webp",
+      "name": "Магічний захист",
+      "description": "+2 до Інтелекту, +1 до Мудрості. Опір шкоді від заклинань 15 %.",
+      "statModifiers": {
+        "wisdom": {
+          "bonus": true
+        },
+        "intelligence": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Роки в бібліотеках Академії залишили на пальцях чорнильні плями, а на плечах — невидиму оболонку з вивірених формул. Ворожі чари ковзають по ній, як дощ по склу, і втрачають частину сили ще до удару. Маг навіть не здригається: він знає цю магію краще за тих, хто її кличе."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "mages-stats",
+        "name": "Маги: характеристики",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "intelligence",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "wisdom",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "mages-ward",
+        "name": "Магічний захист",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "spell",
+            "percent": 15
+          }
+        ]
+      },
+      {
+        "id": "mages-fighting-style",
+        "name": "Стиль бою",
+        "description": "Шкода заклинань +15 %, ближня −20 %.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 15
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": -20
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necromancers",
+    "name": "Некроманти",
+    "color": "#5b3f8c",
+    "availableSkills": [
+      "Стрільба",
+      "Напад",
+      "Захист",
+      "Темрява"
+    ],
+    "passiveAbility": {
+      "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/race-flag-necromancers.webp",
+      "name": "Неживе тіло",
+      "description": "+2 до Інтелекту, +1 до Статури. Мораль героя завжди 0. Імунітет до шкоди отрутою.",
+      "statModifiers": {
+        "constitution": {
+          "bonus": true
+        },
+        "intelligence": {
+          "bonus": true
+        }
+      },
+      "appearanceDescription": "Шкіра некроманта холодна, як могильна плита, а в грудях давно не б'ється серце. Отрута стікає по ньому, не знаходячи живої плоті, а ні відвага, ні жах не торкаються його порожнього погляду. Він давно переступив межу, за якою щось відчувають."
+    },
+    "spellSlotProgression": [
+      {
+        "level": 1,
+        "slots": 4
+      },
+      {
+        "level": 2,
+        "slots": 3
+      },
+      {
+        "level": 3,
+        "slots": 3
+      },
+      {
+        "level": 4,
+        "slots": 2
+      },
+      {
+        "level": 5,
+        "slots": 1
+      }
+    ],
+    "abilities": [
+      {
+        "id": "necromancers-stats",
+        "name": "Некроманти: характеристики",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "intelligence",
+            "flat": 2
+          },
+          {
+            "kind": "modifyStat",
+            "stat": "constitution",
+            "flat": 1
+          }
+        ]
+      },
+      {
+        "id": "necromancers-undead-body",
+        "name": "Неживе тіло",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "ignoreMorale"
+          },
+          {
+            "kind": "flag",
+            "flag": "resistance",
+            "damageType": "poison",
+            "percent": 100
+          }
+        ]
+      },
+      {
+        "id": "necromancers-fighting-style",
+        "name": "Стиль бою",
+        "description": "Шкода заклинань +10 %, ближня −10 %.",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "magic"
+            },
+            "percent": 10
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "melee"
+            },
+            "percent": -10
+          }
+        ]
+      }
+    ]
+  }
+]

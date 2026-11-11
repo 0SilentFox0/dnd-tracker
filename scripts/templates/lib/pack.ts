@@ -27,7 +27,8 @@ export function readManifest(key: string, dir = TEMPLATES_DIR): TemplateManifest
 
 export type IconsFile = Record<string, Record<string, string>>;
 
-export type PackRow = { slug: string; name?: string; origin?: { template: string; slug: string } } & Record<string, unknown>;
+/** `extra`: columns outside the import specs (units.levelScaling, skills.appearanceDescription), written by slug after the import. */
+export type PackRow = { slug: string; name?: string; origin?: { template: string; slug: string }; extra?: Record<string, unknown> } & Record<string, unknown>;
 
 export interface Pack {
   manifest: TemplateManifest;

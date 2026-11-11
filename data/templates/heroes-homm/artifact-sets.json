@@ -1,0 +1,313 @@
+[
+  {
+    "slug": "set-archers-dream",
+    "name": "Мрія лучника",
+    "description": "Повний комплект: дальнє влучання позначає ціль «Здобиччю» на 2 раунди; дальні атаки власника по «Здобичі» завдають +15 % шкоди.\n\nСильванські лучники кажуть, що єдиноріг сам обирає, чий лук носитиме його ріг, а Деревородні — чий сагайдак ніколи не спорожніє. Коли обидва дари зустрічаються в одних руках, ліс замовкає: кожна стріла вже знає свою жертву.",
+    "abilities": [
+      {
+        "id": "archers-dream-prey",
+        "name": "Здобич",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "effects": [
+          {
+            "kind": "mark",
+            "markId": "ivan-prey",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "eventTarget"
+          }
+        ]
+      },
+      {
+        "id": "archers-dream-prey-bonus",
+        "name": "Здобич: шкода",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker",
+          "attackKind": "ranged"
+        },
+        "condition": {
+          "type": "hasMark",
+          "who": "eventTarget",
+          "markId": "ivan-prey",
+          "bySelf": true
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "ranged"
+            },
+            "percent": 15
+          }
+        ]
+      }
+    ],
+    "artifactIds": [
+      "Перстень стрімкості",
+      "Сагайдак Деревородних",
+      "Лук з рогу єдинорога"
+    ]
+  },
+  {
+    "slug": "set-dawn-regalia",
+    "name": "Регалії світанку",
+    "description": "Повний комплект: коли будь-який союзник падає нижче 50 % HP, «Сурми світанку» звучать удруге — усі союзники +2 ініціативи і +10 % шкоди на 2 раунди та +1 моралі (1 раз за бій).\n\nКорона, намисто й обладунок належали полководцям Грифонової імперії, що вели війська на світанку. Зібрані разом, вони пам'ятають той ранковий клич — і повторюють його саме тоді, коли стрій починає хитатися.",
+    "abilities": [
+      {
+        "id": "dawn-regalia-second-call",
+        "name": "Другий поклик сурм",
+        "trigger": {
+          "event": "roundStart"
+        },
+        "condition": {
+          "type": "any",
+          "conditions": [
+            {
+              "type": "hpBelow",
+              "who": "self",
+              "percent": 50
+            },
+            {
+              "type": "hpBelow",
+              "who": "anyAlly",
+              "percent": 50
+            }
+          ]
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "initiative",
+            "flat": 2,
+            "target": "allAllies",
+            "duration": {
+              "rounds": 2
+            }
+          },
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 10,
+            "target": "allAllies",
+            "duration": {
+              "rounds": 2
+            }
+          },
+          {
+            "kind": "changeMorale",
+            "delta": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ],
+    "artifactIds": [
+      "Намисто перемоги",
+      "Корона лідерства",
+      "Обладунок звитяги"
+    ]
+  },
+  {
+    "slug": "set-dwarven-kings",
+    "name": "Обладунки гномських королів",
+    "description": "Повний комплект: коли по власнику влучають, з шансом 30 % (не частіше 1 разу за раунд) союзникам на 1 раунд дістається випадкова руна: +10 % шкоди, +1 AC, +2 ініціативи або лікування 5 % max HP.\n\nЧотири частини обладунку куті в горнилах Гробниць гномських королів, і на кожній вибита руна предка, що загинув, тримаючи стрій. Поки хоч один лицар у цій броні стоїть на ногах, руни шепочуть його побратимам: «Ми з вами».",
+    "abilities": [
+      {
+        "id": "dwarven-kings-runes",
+        "name": "Руни королів",
+        "trigger": {
+          "event": "hit",
+          "role": "target"
+        },
+        "limits": {
+          "perRound": 1,
+          "chance": 30
+        },
+        "effects": [
+          {
+            "kind": "randomOf",
+            "options": [
+              {
+                "kind": "damageBonus",
+                "filter": {
+                  "kind": "all"
+                },
+                "percent": 10,
+                "target": "allAllies",
+                "duration": {
+                  "rounds": 1
+                }
+              },
+              {
+                "kind": "modifyStat",
+                "stat": "armor",
+                "flat": 1,
+                "target": "allAllies",
+                "duration": {
+                  "rounds": 1
+                }
+              },
+              {
+                "kind": "modifyStat",
+                "stat": "initiative",
+                "flat": 2,
+                "target": "allAllies",
+                "duration": {
+                  "rounds": 1
+                }
+              },
+              {
+                "kind": "heal",
+                "amount": {
+                  "percentOf": "maxHp",
+                  "value": 5
+                },
+                "target": "allAllies"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "artifactIds": [
+      "Шолом гномських королів",
+      "Щит гномських королів",
+      "Кіраса гномських королів",
+      "Поножі гномських королів"
+    ]
+  },
+  {
+    "slug": "set-lions-spirit",
+    "name": "Дух лева",
+    "description": "Повний комплект: влучання знижує мораль цілі на 1 (1 раз за раунд).\n\nРегалії Ордену Лева носили лише ті лицарі Грифонової імперії, що жодного разу не показали ворогові спину. Коли такий лицар б'є, ворог чує не дзвін сталі, а лев'ячий рик — і відчуває, як слабнуть його коліна.",
+    "abilities": [
+      {
+        "id": "lions-spirit-roar",
+        "name": "Лев'ячий рик",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": -1,
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ],
+    "artifactIds": [
+      "Плащ левової гриви",
+      "Намисто лева",
+      "Левова корона"
+    ]
+  },
+  {
+    "slug": "set-sar-issa",
+    "name": "Регалії Сар-Ісси",
+    "description": "Повний комплект: закляття 1–2 рівня б'ють до 2 цілей.\n\nАрхімаг Сар-Ісса залишив Срібній лізі не книги, а речі: корону, мантію, посох і перстень, кожен напоєний однією з шкіл. Хто збере всі чотири, почує, як вони гудуть в унісон, і найпростіше закляття розщепиться надвоє.",
+    "setBonus": {},
+    "abilities": [
+      {
+        "id": "sar-issus-split",
+        "name": "Розщеплення чар",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "maxTargets": 2,
+            "maxLevel": 2
+          }
+        ]
+      }
+    ],
+    "artifactIds": [
+      "Посох Сар-Ісси",
+      "Перстень Сар-Ісси",
+      "Мантія Сар-Ісси",
+      "Корона Сар-Ісси"
+    ]
+  },
+  {
+    "slug": "set-sar-issus",
+    "name": "Регалії Сар-Іссуса",
+    "description": "Повний комплект: закляття 1–2 рівня б'ють до 2 цілей.\n\nАрхімаг Сар-Іссус залишив Срібній лізі не книги, а речі: корону, мантію, посох і перстень, кожен напоєний однією з шкіл. Хто збере всі чотири, почує, як вони гудуть в унісон, і найпростіше закляття розщепиться надвоє.",
+    "abilities": [
+      {
+        "id": "sar-issus-split",
+        "name": "Розщеплення чар",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "flag": "spellTargeting",
+            "mode": "area",
+            "maxTargets": 2,
+            "maxLevel": 2
+          }
+        ]
+      }
+    ],
+    "artifactIds": [
+      "Корона Сар-Іссуса",
+      "Мантія Сар-Іссуса",
+      "Посох Сар-Іссуса",
+      "Перстень Сар-Іссуса"
+    ]
+  },
+  {
+    "slug": "set-yggshail-claws",
+    "name": "Кігті Ігг-Шайла",
+    "description": "Повний комплект: влучання з шансом 25 % забирає в цілі реакцію на 1 раунд — вона не може відповісти відсіччю.\n\nЖерці Маласси кажуть, що Ігг-Шайл, отруйна прадраконеса глибин, лишила по собі три кігті. З них викували клинок, намисто й перстень — і кожна рана від їхнього власника ще довго пам'ятає дотик отрути.",
+    "abilities": [
+      {
+        "id": "yggshail-claws-paralysis",
+        "name": "Паралізуюча отрута",
+        "trigger": {
+          "event": "hit",
+          "role": "attacker"
+        },
+        "limits": {
+          "chance": 25
+        },
+        "effects": [
+          {
+            "kind": "applyCondition",
+            "condition": "no_reaction",
+            "duration": {
+              "rounds": 1
+            },
+            "target": "eventTarget"
+          }
+        ]
+      }
+    ],
+    "artifactIds": [
+      "Намисто кривавого кігтя",
+      "Проклятий перстень",
+      "Місячний клинок"
+    ]
+  }
+]

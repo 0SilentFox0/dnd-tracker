@@ -1,0 +1,775 @@
+[
+  {
+    "slug": "track-01",
+    "title": "Маги - Тема Зехіра (Племена Сходу)",
+    "kind": "youtube",
+    "youtubeId": "YvN8dwhZ3eg",
+    "durationSec": 126,
+    "sortOrder": 9
+  },
+  {
+    "slug": "track-02",
+    "title": "Люди - Битва",
+    "kind": "youtube",
+    "youtubeId": "bMn4pFBiqbk",
+    "durationSec": 149,
+    "sortOrder": 3
+  },
+  {
+    "slug": "track-03",
+    "title": "Некроманти - Битва 1",
+    "kind": "youtube",
+    "youtubeId": "LU5sqFDBSoI",
+    "durationSec": 170,
+    "sortOrder": 34
+  },
+  {
+    "slug": "track-04",
+    "title": "Демони - Битва 2",
+    "kind": "youtube",
+    "youtubeId": "ddO9v9LjgSA",
+    "durationSec": 128,
+    "sortOrder": 22
+  },
+  {
+    "slug": "track-05",
+    "title": "Люди - Тема Фрейди",
+    "kind": "youtube",
+    "youtubeId": "yIlyXVl3Yfs",
+    "durationSec": 142,
+    "sortOrder": 0
+  },
+  {
+    "slug": "track-06",
+    "title": "Демони - Місто (бета-версія)",
+    "kind": "youtube",
+    "youtubeId": "Vr2DS_Ej6Io",
+    "durationSec": 139,
+    "sortOrder": 25
+  },
+  {
+    "slug": "track-07",
+    "title": "Нейтральні - Битва (альфа-версія)",
+    "kind": "youtube",
+    "youtubeId": "yNXwiZKeyJw",
+    "durationSec": 163,
+    "sortOrder": 65
+  },
+  {
+    "slug": "track-08",
+    "title": "Нейтральні - Місцевість: вода (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "H1FpX1jOfxo",
+    "durationSec": 115,
+    "sortOrder": 92
+  },
+  {
+    "slug": "track-09",
+    "title": "Нейтральні - Перемога в сценарії (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "VhcqKchilEE",
+    "durationSec": 74,
+    "sortOrder": 82
+  },
+  {
+    "slug": "track-10",
+    "title": "Гноми - Облога",
+    "kind": "youtube",
+    "youtubeId": "QMQTWJ7Fhk8",
+    "durationSec": 188,
+    "sortOrder": 18
+  },
+  {
+    "slug": "track-11",
+    "title": "Некроманти - Битва 2",
+    "kind": "youtube",
+    "youtubeId": "mJkS39zyJlM",
+    "durationSec": 126,
+    "sortOrder": 35
+  },
+  {
+    "slug": "track-12",
+    "title": "Ельфи - Битва",
+    "kind": "youtube",
+    "youtubeId": "P9SnICiBORE",
+    "durationSec": 189,
+    "sortOrder": 7
+  },
+  {
+    "slug": "track-13",
+    "title": "Нейтральні - Місцевість: земля",
+    "kind": "youtube",
+    "youtubeId": "9ZZyJyTTjkc",
+    "durationSec": 197,
+    "sortOrder": 56
+  },
+  {
+    "slug": "track-14",
+    "title": "Нейтральні - Місцевість: болото",
+    "kind": "youtube",
+    "youtubeId": "MvZXDLvThMU",
+    "durationSec": 140,
+    "sortOrder": 60
+  },
+  {
+    "slug": "track-15",
+    "title": "Epic Evil",
+    "kind": "youtube",
+    "youtubeId": "tAMhUyLwD4k",
+    "sortOrder": 96
+  },
+  {
+    "slug": "track-16",
+    "title": "Нейтральні - Тема добрих фракцій (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "xkt7e9rsk9w",
+    "durationSec": 78,
+    "sortOrder": 83
+  },
+  {
+    "slug": "track-17",
+    "title": "Болотяни - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "qxIdh2kCWAI",
+    "durationSec": 148,
+    "sortOrder": 73
+  },
+  {
+    "slug": "track-18",
+    "title": "Орки - Кампанія",
+    "kind": "youtube",
+    "youtubeId": "FzPQwrnGrDM",
+    "durationSec": 141,
+    "sortOrder": 42
+  },
+  {
+    "slug": "track-19",
+    "title": "Ельфи - Місто",
+    "kind": "youtube",
+    "youtubeId": "SXQ0ew4h0Eo",
+    "durationSec": 142,
+    "sortOrder": 8
+  },
+  {
+    "slug": "track-20",
+    "title": "Нейтральні - Хід суперника 2 (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "_qsk3Z7a6Ng",
+    "durationSec": 53,
+    "sortOrder": 76
+  },
+  {
+    "slug": "track-21",
+    "title": "Нейтральні - Місцевість: сніг (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "gvGDOUG0pVc",
+    "durationSec": 123,
+    "sortOrder": 90
+  },
+  {
+    "slug": "track-22",
+    "title": "Ельфи - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "WdB3jIEyWQc",
+    "durationSec": 167,
+    "sortOrder": 67
+  },
+  {
+    "slug": "track-23",
+    "title": "Нейтральні - Битва 1 (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "LDsHw4AjuYw",
+    "durationSec": 170,
+    "sortOrder": 78
+  },
+  {
+    "slug": "track-24",
+    "title": "Некроманти - Облога 2",
+    "kind": "youtube",
+    "youtubeId": "rThB1SpeXww",
+    "durationSec": 185,
+    "sortOrder": 36
+  },
+  {
+    "slug": "track-25",
+    "title": "Нейтральні - Місцевість: пісок",
+    "kind": "youtube",
+    "youtubeId": "v-eZSvn4l7g",
+    "durationSec": 135,
+    "sortOrder": 55
+  },
+  {
+    "slug": "track-26",
+    "title": "Нейтральні - Місцевість: підземелля (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "Ku6f3l4XR8E",
+    "durationSec": 116,
+    "sortOrder": 94
+  },
+  {
+    "slug": "track-27",
+    "title": "Орки - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "n7PddNlM8kY",
+    "durationSec": 141,
+    "sortOrder": 72
+  },
+  {
+    "slug": "track-28",
+    "title": "Темні ельфи - Тема Шадвін та Ілайї",
+    "kind": "youtube",
+    "youtubeId": "h9-egbO4skE",
+    "durationSec": 130,
+    "sortOrder": 26
+  },
+  {
+    "slug": "track-29",
+    "title": "Некроманти - Місто (бета-версія)",
+    "kind": "youtube",
+    "youtubeId": "fB4dfD8Zfkw",
+    "durationSec": 146,
+    "sortOrder": 38
+  },
+  {
+    "slug": "track-30",
+    "title": "Гноми - Тема Рольфа",
+    "kind": "youtube",
+    "youtubeId": "xIcimZwwixw",
+    "durationSec": 133,
+    "sortOrder": 15
+  },
+  {
+    "slug": "track-31",
+    "title": "Нейтральні - Місцевість: пустирі",
+    "kind": "youtube",
+    "youtubeId": "J_3X7oTIBdA",
+    "durationSec": 135,
+    "sortOrder": 59
+  },
+  {
+    "slug": "track-32",
+    "title": "Люди - Місто",
+    "kind": "youtube",
+    "youtubeId": "Uqc-HNyMkkI",
+    "durationSec": 195,
+    "sortOrder": 4
+  },
+  {
+    "slug": "track-33",
+    "title": "Темні ельфи - Кампанія (Молоти долі)",
+    "kind": "youtube",
+    "youtubeId": "pVSF34ud2aY",
+    "durationSec": 131,
+    "sortOrder": 27
+  },
+  {
+    "slug": "track-34",
+    "title": "Нейтральні - Головне меню (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "kKg-dlrVH9k",
+    "durationSec": 75,
+    "sortOrder": 74
+  },
+  {
+    "slug": "track-35",
+    "title": "Некроманти - Облога (розширена)",
+    "kind": "youtube",
+    "youtubeId": "wS-eVohTTjo",
+    "durationSec": 1225,
+    "sortOrder": 39
+  },
+  {
+    "slug": "track-36",
+    "title": "Темні ельфи - Битва",
+    "kind": "youtube",
+    "youtubeId": "CiQrHcgTb-A",
+    "durationSec": 180,
+    "sortOrder": 28
+  },
+  {
+    "slug": "track-37",
+    "title": "Люди - Тема Дункана",
+    "kind": "youtube",
+    "youtubeId": "FjzxPMwSwYQ",
+    "durationSec": 135,
+    "sortOrder": 1
+  },
+  {
+    "slug": "track-38",
+    "title": "Нейтральні - Тема нейтральних фракцій (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "QMzzOSwNBxg",
+    "durationSec": 101,
+    "sortOrder": 84
+  },
+  {
+    "slug": "track-39",
+    "title": "Темні ельфи - Місто",
+    "kind": "youtube",
+    "youtubeId": "avNas1GZ-N4",
+    "durationSec": 130,
+    "sortOrder": 29
+  },
+  {
+    "slug": "track-40",
+    "title": "Нейтральні - Меню мультиплеєра",
+    "kind": "youtube",
+    "youtubeId": "V9jFtiybBaE",
+    "durationSec": 186,
+    "sortOrder": 52
+  },
+  {
+    "slug": "track-41",
+    "title": "Маги - Битва 1",
+    "kind": "youtube",
+    "youtubeId": "iwE6xtzzQZw",
+    "durationSec": 197,
+    "sortOrder": 11
+  },
+  {
+    "slug": "track-42",
+    "title": "Марширують",
+    "kind": "youtube",
+    "youtubeId": "GZw6x-k94qA",
+    "sortOrder": 98
+  },
+  {
+    "slug": "track-43",
+    "title": "Нейтральні - Місцевість: пісок (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "JUmFOsNdu_k",
+    "durationSec": 122,
+    "sortOrder": 89
+  },
+  {
+    "slug": "track-44",
+    "title": "Нейтральні - Головне меню",
+    "kind": "youtube",
+    "youtubeId": "RfMCmE96a4w",
+    "durationSec": 195,
+    "sortOrder": 49
+  },
+  {
+    "slug": "track-45",
+    "title": "Нейтральні - Головне меню (Молоти долі)",
+    "kind": "youtube",
+    "youtubeId": "BqWWzmgEvK4",
+    "durationSec": 178,
+    "sortOrder": 50
+  },
+  {
+    "slug": "track-46",
+    "title": "Нейтральні - Битва 3 (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "-_Mt7Pys0FI",
+    "durationSec": 144,
+    "sortOrder": 80
+  },
+  {
+    "slug": "track-47",
+    "title": "Темні ельфи - Місто (бета-версія)",
+    "kind": "youtube",
+    "youtubeId": "ZQoWwxaje9w",
+    "durationSec": 130,
+    "sortOrder": 30
+  },
+  {
+    "slug": "track-48",
+    "title": "Нейтральні - Тема Сарета-людини 2",
+    "kind": "youtube",
+    "youtubeId": "2bbCbgZI4QM",
+    "durationSec": 143,
+    "sortOrder": 62
+  },
+  {
+    "slug": "track-49",
+    "title": "Гноми - Місто",
+    "kind": "youtube",
+    "youtubeId": "7T82ZC2UD8I",
+    "durationSec": 130,
+    "sortOrder": 19
+  },
+  {
+    "slug": "track-50",
+    "title": "Маги - Кампанія (Племена Сходу)",
+    "kind": "youtube",
+    "youtubeId": "WtkTwIfHOIM",
+    "durationSec": 124,
+    "sortOrder": 10
+  },
+  {
+    "slug": "track-51",
+    "title": "Нейтральні - Тема злих фракцій (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "7ZEiwzPFPAw",
+    "durationSec": 95,
+    "sortOrder": 85
+  },
+  {
+    "slug": "track-52",
+    "title": "Маги - Місто",
+    "kind": "youtube",
+    "youtubeId": "lvdmC8yTCX0",
+    "durationSec": 249,
+    "sortOrder": 13
+  },
+  {
+    "slug": "track-53",
+    "title": "Люди - Облога (розширена)",
+    "kind": "youtube",
+    "youtubeId": "W5tKS3ARzpE",
+    "durationSec": 1237,
+    "sortOrder": 6
+  },
+  {
+    "slug": "track-54",
+    "title": "Нейтральні - Місцевість: лава (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "7eCLKsI6kKw",
+    "durationSec": 113,
+    "sortOrder": 87
+  },
+  {
+    "slug": "track-55",
+    "title": "Нейтральні - Битва 2 (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "gLVTyp27mGo",
+    "durationSec": 161,
+    "sortOrder": 79
+  },
+  {
+    "slug": "track-56",
+    "title": "Нейтральні - Місцевість: трава (альфа-версія)",
+    "kind": "youtube",
+    "youtubeId": "BDrFIJnlq2c",
+    "durationSec": 267,
+    "sortOrder": 64
+  },
+  {
+    "slug": "track-57",
+    "title": "Нейтральні - Місцевість: болото (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "fDRfwnhnnSI",
+    "durationSec": 148,
+    "sortOrder": 93
+  },
+  {
+    "slug": "track-58",
+    "title": "Орки - Тема Готая",
+    "kind": "youtube",
+    "youtubeId": "SgWVHlMGDqE",
+    "durationSec": 128,
+    "sortOrder": 40
+  },
+  {
+    "slug": "track-59",
+    "title": "Демони - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "BBFFteor_oQ",
+    "durationSec": 138,
+    "sortOrder": 69
+  },
+  {
+    "slug": "track-60",
+    "title": "Орки - Битва",
+    "kind": "youtube",
+    "youtubeId": "PfNaQKbGZmI",
+    "durationSec": 127,
+    "sortOrder": 43
+  },
+  {
+    "slug": "track-61",
+    "title": "Гноми - Битва",
+    "kind": "youtube",
+    "youtubeId": "5tHwDqc3hSI",
+    "durationSec": 166,
+    "sortOrder": 17
+  },
+  {
+    "slug": "track-62",
+    "title": "Нейтральні - Місцевість: підземелля",
+    "kind": "youtube",
+    "youtubeId": "-8Lde2xum10",
+    "durationSec": 124,
+    "sortOrder": 58
+  },
+  {
+    "slug": "track-63",
+    "title": "Маги - Битва 2",
+    "kind": "youtube",
+    "youtubeId": "R9IbAtVRN0I",
+    "durationSec": 125,
+    "sortOrder": 12
+  },
+  {
+    "slug": "track-64",
+    "title": "Люди - Місто (бета-версія)",
+    "kind": "youtube",
+    "youtubeId": "MyLOX7KCM2c",
+    "durationSec": 197,
+    "sortOrder": 5
+  },
+  {
+    "slug": "track-65",
+    "title": "Темні ельфи - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "wHExqEjNFj8",
+    "durationSec": 137,
+    "sortOrder": 70
+  },
+  {
+    "slug": "track-66",
+    "title": "Люди - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "DVeH-WSIOa4",
+    "durationSec": 156,
+    "sortOrder": 66
+  },
+  {
+    "slug": "track-67",
+    "title": "Нейтральні - Місцевість: лава",
+    "kind": "youtube",
+    "youtubeId": "MdijLAKDMeM",
+    "durationSec": 190,
+    "sortOrder": 54
+  },
+  {
+    "slug": "track-68",
+    "title": "Маги - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "m3WYrXxCXZU",
+    "durationSec": 227,
+    "sortOrder": 68
+  },
+  {
+    "slug": "track-69",
+    "title": "Epic Evil 2",
+    "kind": "youtube",
+    "youtubeId": "4NDfNmfdhTM",
+    "sortOrder": 97
+  },
+  {
+    "slug": "track-70",
+    "title": "Некроманти - Тема Орнелли",
+    "kind": "youtube",
+    "youtubeId": "xzFjuujZ7gc",
+    "durationSec": 130,
+    "sortOrder": 31
+  },
+  {
+    "slug": "track-71",
+    "title": "Демони - Місто",
+    "kind": "youtube",
+    "youtubeId": "yTj5m9V3EMg",
+    "durationSec": 134,
+    "sortOrder": 24
+  },
+  {
+    "slug": "track-72",
+    "title": "Нейтральні - Місцевість: трава",
+    "kind": "youtube",
+    "youtubeId": "hBO434Gj0wQ",
+    "durationSec": 196,
+    "sortOrder": 53
+  },
+  {
+    "slug": "track-73",
+    "title": "Нейтральні - Місцевість: трава (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "f4VjMquy8Lc",
+    "durationSec": 122,
+    "sortOrder": 86
+  },
+  {
+    "slug": "track-74",
+    "title": "Нейтральні - Таємна тема (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "PLbLklSaM90",
+    "durationSec": 71,
+    "sortOrder": 95
+  },
+  {
+    "slug": "track-75",
+    "title": "Нейтральні - Хід суперника 3 (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "0vkI3BpRcxk",
+    "durationSec": 117,
+    "sortOrder": 77
+  },
+  {
+    "slug": "track-76",
+    "title": "Некроманти - Місто (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "Aoc471zt-co",
+    "durationSec": 154,
+    "sortOrder": 71
+  },
+  {
+    "slug": "track-77",
+    "title": "Гноми - Тема Вульфстана",
+    "kind": "youtube",
+    "youtubeId": "x3VfFFphbC4",
+    "durationSec": 129,
+    "sortOrder": 14
+  },
+  {
+    "slug": "track-78",
+    "title": "Орки - Облога",
+    "kind": "youtube",
+    "youtubeId": "IkjBZazO-Ko",
+    "durationSec": 191,
+    "sortOrder": 44
+  },
+  {
+    "slug": "track-79",
+    "title": "Нейтральні - Головне меню (Племена Сходу)",
+    "kind": "youtube",
+    "youtubeId": "7hSYOXqwQvA",
+    "durationSec": 172,
+    "sortOrder": 51
+  },
+  {
+    "slug": "track-80",
+    "title": "Демони - Битва 1",
+    "kind": "youtube",
+    "youtubeId": "-UwkKxXRBm8",
+    "durationSec": 176,
+    "sortOrder": 21
+  },
+  {
+    "slug": "track-81",
+    "title": "Некроманти - Місто",
+    "kind": "youtube",
+    "youtubeId": "K9DnuTBc_HE",
+    "durationSec": 150,
+    "sortOrder": 37
+  },
+  {
+    "slug": "track-82",
+    "title": "Ренегати - Битва",
+    "kind": "youtube",
+    "youtubeId": "fdeJtGhJBP8",
+    "durationSec": 130,
+    "sortOrder": 46
+  },
+  {
+    "slug": "track-83",
+    "title": "Люди - Кампанія (Молоти долі)",
+    "kind": "youtube",
+    "youtubeId": "eA2GckMC8qQ",
+    "durationSec": 126,
+    "sortOrder": 2
+  },
+  {
+    "slug": "track-84",
+    "title": "Нейтральні - Хід суперника 1 (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "PHqDH2Aewwc",
+    "durationSec": 47,
+    "sortOrder": 75
+  },
+  {
+    "slug": "track-85",
+    "title": "Нейтральні - Місцевість: вода",
+    "kind": "youtube",
+    "youtubeId": "Tvtw43OlA1s",
+    "durationSec": 128,
+    "sortOrder": 57
+  },
+  {
+    "slug": "track-86",
+    "title": "Нейтральні - Битва 4 (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "49S9m5TGsUM",
+    "durationSec": 195,
+    "sortOrder": 81
+  },
+  {
+    "slug": "track-87",
+    "title": "Нейтральні - Місцевість: земля (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "cobNe-NQWIU",
+    "durationSec": 128,
+    "sortOrder": 91
+  },
+  {
+    "slug": "track-88",
+    "title": "Демони - Битва (альтернативна)",
+    "kind": "youtube",
+    "youtubeId": "mSNJiCfB7CQ",
+    "durationSec": 121,
+    "sortOrder": 23
+  },
+  {
+    "slug": "track-89",
+    "title": "Некроманти - Кампанія (Племена Сходу)",
+    "kind": "youtube",
+    "youtubeId": "k4dWUL7_1Rc",
+    "durationSec": 129,
+    "sortOrder": 33
+  },
+  {
+    "slug": "track-90",
+    "title": "Нейтральні - Битва",
+    "kind": "youtube",
+    "youtubeId": "3RG3ovj6GT8",
+    "durationSec": 183,
+    "sortOrder": 61
+  },
+  {
+    "slug": "track-91",
+    "title": "Гноми - Кампанія",
+    "kind": "youtube",
+    "youtubeId": "qkqFL5eUXgQ",
+    "durationSec": 134,
+    "sortOrder": 16
+  },
+  {
+    "slug": "track-92",
+    "title": "Демони - Тема Біари (Молоти долі)",
+    "kind": "youtube",
+    "youtubeId": "aUG-6N1qFio",
+    "durationSec": 123,
+    "sortOrder": 20
+  },
+  {
+    "slug": "track-93",
+    "title": "Некроманти - Тема Арантіра",
+    "kind": "youtube",
+    "youtubeId": "6aky42rnzMk",
+    "durationSec": 137,
+    "sortOrder": 32
+  },
+  {
+    "slug": "track-94",
+    "title": "Нейтральні - Місцевість: пустирі (HoMM III)",
+    "kind": "youtube",
+    "youtubeId": "o5hLwQavqeg",
+    "durationSec": 136,
+    "sortOrder": 88
+  },
+  {
+    "slug": "track-95",
+    "title": "Орки - Тема Куджін",
+    "kind": "youtube",
+    "youtubeId": "ByjeKM6p1N0",
+    "durationSec": 125,
+    "sortOrder": 41
+  },
+  {
+    "slug": "track-96",
+    "title": "Нейтральні - Фінальні титри",
+    "kind": "youtube",
+    "youtubeId": "jZ1lDUcwEJ8",
+    "durationSec": 168,
+    "sortOrder": 63
+  },
+  {
+    "slug": "track-97",
+    "title": "Орки - Місто",
+    "kind": "youtube",
+    "youtubeId": "LOrFMy-jp2E",
+    "durationSec": 135,
+    "sortOrder": 45
+  }
+]

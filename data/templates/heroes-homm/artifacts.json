@@ -1,0 +1,790 @@
+[
+  {
+    "slug": "armor-of-valor",
+    "name": "Обладунок звитяги",
+    "description": "Коли союзник падає нижче 30 % HP, усі союзники лікуються на 5 % max HP щораунду 2 раунди (1 раз за бій).\n\nОбладунок освячений у соборі Ельрата, і на нагруднику викарбувано грифона, що закриває крилами пташенят. Коли хтось із побратимів стікає кров'ю, крила наче розгортаються над усім загоном.",
+    "rarity": "epic",
+    "slot": "armor",
+    "setId": "Регалії світанку",
+    "abilities": [
+      {
+        "id": "armor-of-valor-wings",
+        "name": "Крила грифона",
+        "trigger": {
+          "event": "roundStart"
+        },
+        "condition": {
+          "type": "any",
+          "conditions": [
+            {
+              "type": "hpBelow",
+              "who": "self",
+              "percent": 30
+            },
+            {
+              "type": "hpBelow",
+              "who": "anyAlly",
+              "percent": 30
+            }
+          ]
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "hot",
+            "healPerRound": {
+              "percentOf": "maxHp",
+              "value": 5
+            },
+            "duration": {
+              "rounds": 2
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cape-of-the-lions-mane",
+    "name": "Плащ левової гриви",
+    "description": "Хто влучив союзника, стає «Кривдником» на 2 раунди; атаки власника по «Кривднику» завдають +10 % шкоди.\n\nПлащ пошитий з гриви лева, що загинув, захищаючи свій прайд. Кожного разу, коли когось із побратимів поранено, грива на плечах власника настовбурчується — і він уже знає, кого карати.",
+    "rarity": "epic",
+    "slot": "cloak",
+    "setId": "Дух лева",
+    "abilities": [
+      {
+        "id": "cape-of-the-lions-mane-mark",
+        "name": "Кривдник",
+        "trigger": {
+          "event": "hit",
+          "role": "target",
+          "whose": "ally"
+        },
+        "effects": [
+          {
+            "kind": "mark",
+            "markId": "godric-offender",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "eventActor"
+          }
+        ]
+      },
+      {
+        "id": "cape-of-the-lions-mane-bonus",
+        "name": "Кривдник: шкода",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "hasMark",
+          "who": "eventTarget",
+          "markId": "godric-offender",
+          "bySelf": true
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "crown-of-leadership",
+    "name": "Корона лідерства",
+    "description": "Мораль +1 власнику й усім союзникам.\n\nСкромний золотий обруч без жодного каменя — справжній полководець не потребує прикрас. Досить того, що його бачать над строєм: воїни поруч стають сміливішими й частіше кидаються вперед, не чекаючи наказу.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Регалії світанку",
+    "abilities": [
+      {
+        "id": "crown-of-leadership-spark",
+        "name": "Іскра відваги",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "crown-of-sar-issa",
+    "name": "Корона Сар-Ісси",
+    "description": "Закляття Світла лікують усіх союзників на 5 % max HP (2 рази за бій).\n\nТонкий срібний обруч світиться м'яким ранковим світлом, коли власник торкається магії Світла. Це світло не сліпить — воно лягає на плечі союзників, як тепла долоня.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Регалії Сар-Ісси",
+    "abilities": [
+      {
+        "id": "crown-of-sar-issus-light",
+        "name": "Світло корони",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Світло"
+        },
+        "limits": {
+          "perBattle": 2
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 5
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "crown-of-sar-issus",
+    "name": "Корона Сар-Іссуса",
+    "description": "Закляття Світла лікують усіх союзників на 5 % max HP (2 рази за бій).\n\nТонкий срібний обруч світиться м'яким ранковим світлом, коли власник торкається магії Світла. Це світло не сліпить — воно лягає на плечі союзників, як тепла долоня.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Регалії Сар-Іссуса",
+    "abilities": [
+      {
+        "id": "crown-of-sar-issus-light",
+        "name": "Світло корони",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Світло"
+        },
+        "limits": {
+          "perBattle": 2
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 5
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cuirass-of-the-dwarven-kings",
+    "name": "Кіраса гномських королів",
+    "description": "Коли по власнику влучають, усі атакують кривдника з перевагою 1 раунд.\n\nВід удару по цій кірасі лунає гул, як від вечірнього дзвону в Грімгейті. Почувши його, побратими розвертаються до того, хто посмів ударити, — і стають безжальними.",
+    "rarity": "epic",
+    "slot": "armor",
+    "setId": "Обладунки гномських королів",
+    "abilities": [
+      {
+        "id": "cuirass-of-the-dwarven-kings-toll",
+        "name": "Дзвін кіраси",
+        "trigger": {
+          "event": "hit",
+          "role": "target"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "eventActor",
+            "duration": {
+              "rounds": 1
+            },
+            "flag": "advantageForAttackers"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "cursed-ring",
+    "name": "Проклятий перстень",
+    "description": "Вбивство вивільняє отруйну хмару: усі вороги отруєні на 15 % шкоди атаки власника щораунду, 2 раунди (1 раз за раунд).\n\nЗлодії виколупали діамант з персня вбитого некроманта Фанка — і прокляття все одно їх знайшло. Тепер перстень видихає отруйний туман щоразу, коли поруч обривається чиєсь життя.",
+    "rarity": "epic",
+    "slot": "ring",
+    "setId": "Кігті Ігг-Шайла",
+    "abilities": [
+      {
+        "id": "cursed-ring-cloud",
+        "name": "Отруйна хмара",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": {
+              "percentOf": "ownerAttack",
+              "value": 15
+            },
+            "damageType": "poison",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "greaves-of-the-dwarven-kings",
+    "name": "Поножі гномських королів",
+    "description": "Смертельний удар (1 раз за бій): Семгрун лишається з 30 % HP, мораль союзників +1.\n\nКажуть, гномські королі ніколи не падали — їх виносили з поля, ще живих і лайливих. Ці поножі вросли в камінь під ногами, і жоден удар не може збити їхнього власника з ніг з першого разу.",
+    "rarity": "epic",
+    "slot": "boots",
+    "setId": "Обладунки гномських королів",
+    "abilities": [
+      {
+        "id": "greaves-of-the-dwarven-kings-stand",
+        "name": "Королі не падають",
+        "trigger": {
+          "event": "lethalDamage"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 30
+            },
+            "revive": true,
+            "target": "self"
+          },
+          {
+            "kind": "changeMorale",
+            "delta": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "helm-of-the-dwarven-kings",
+    "name": "Шолом гномських королів",
+    "description": "Союзники імунні до Сліпоти й Сповільнення.\n\nШолом королів пам'ятає кожен погляд, що намагався його засліпити, і кожне закляття, що прагнуло скувати ноги його носія. Тепер ця пам'ять береже всіх, хто стоїть з ним в одному строю.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Обладунки гномських королів",
+    "abilities": [
+      {
+        "id": "helm-of-the-dwarven-kings-ward",
+        "name": "Пильність королів",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "flag",
+            "target": "allAllies",
+            "flag": "spellImmunity",
+            "spellIds": [
+              "c1ej0e9kg2zdarcisqpqd9ale",
+              "c388yedrw59tp30hd6jxbww70"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "lion-crown",
+    "name": "Левова корона",
+    "description": "Мораль +1.\n\nЗолота корона з левовою пащею на чолі не прикрашає — вона надихає. Лицар у ній відчуває, як у грудях прокидається лев, і кидається в бій раніше, ніж ворог устигає підняти щит.",
+    "rarity": "epic",
+    "slot": "helmet",
+    "setId": "Дух лева",
+    "abilities": [
+      {
+        "id": "lion-crown-courage",
+        "name": "Відвага лева",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "morale",
+            "flat": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "moonblade",
+    "name": "Місячний клинок",
+    "description": "+15 % шкоди по цілі, у якої менше 50 % HP.\n\nТонке, як серп молодого місяця, лезо для другої руки. Воно майже не блищить у темряві Підземелля, зате безпомильно знаходить уже поранену плоть — так хижак добиває ослаблу здобич.",
+    "rarity": "legendary",
+    "slot": "shield",
+    "setId": "Кігті Ігг-Шайла",
+    "abilities": [
+      {
+        "id": "moonblade-finisher",
+        "name": "Добивання",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "hpBelow",
+          "who": "eventTarget",
+          "percent": 50
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necklace-of-the-bloody-claw",
+    "name": "Намисто кривавого кігтя",
+    "description": "Вбивство лікує власника на 15 % max HP.\n\nІкла перевертня Кривавого Кігтя, що спустошував села біля Талонгарда, доки його не зарубав Лицар Дракона. Звірина спрага досі живе в них і віддає власнику силу кожного поваленого ворога.",
+    "rarity": "epic",
+    "slot": "amulet",
+    "setId": "Кігті Ігг-Шайла",
+    "abilities": [
+      {
+        "id": "necklace-of-the-bloody-claw-feast",
+        "name": "Кривава спрага",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 15
+            },
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necklace-of-the-lion",
+    "name": "Намисто лева",
+    "description": "Смертельний удар (1 раз за бій): Годрик встає з 25 % HP, мораль союзників +1.\n\nІкло лева на важкому ланцюзі гріє груди, як друге серце. Коли перше серце вже готове зупинитися, друге б'є за нього — і лицар підводиться, на подив і жах ворогів.",
+    "rarity": "epic",
+    "slot": "amulet",
+    "setId": "Дух лева",
+    "abilities": [
+      {
+        "id": "necklace-of-the-lion-rise",
+        "name": "Друге серце",
+        "trigger": {
+          "event": "lethalDamage"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "heal",
+            "amount": {
+              "percentOf": "maxHp",
+              "value": 25
+            },
+            "revive": true,
+            "target": "self"
+          },
+          {
+            "kind": "changeMorale",
+            "delta": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "necklace-of-victory",
+    "name": "Намисто перемоги",
+    "description": "Вбивство ворога будь-ким із партії дає союзникам +1 моралі (1 раз за раунд).\n\nОрден Маршалів Перемоги, заснований у війні Четвертого затемнення (засновник — Айвен Грифон). Кожна здобута перемога відбивається в золоті ордена, і військо поруч з носієм стає трохи сміливішим.",
+    "rarity": "epic",
+    "slot": "amulet",
+    "setId": "Регалії світанку",
+    "abilities": [
+      {
+        "id": "necklace-of-victory-glory",
+        "name": "Слава",
+        "trigger": {
+          "event": "kill",
+          "role": "killerSide"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": 1,
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ring-of-celerity",
+    "name": "Перстень стрімкості",
+    "description": "+15 % шкоди по цілі з повним HP.\n\nПлатинові крила Їлата, освячені ще в Соколиній імперії, обіймають камінь цього персня. Кажуть, вітри вічності дмуть у спину тому, хто його носить, — і перший удар по необережному ворогу завжди найглибший.",
+    "rarity": "epic",
+    "slot": "ring",
+    "setId": "Мрія лучника",
+    "abilities": [
+      {
+        "id": "ring-of-celerity-fresh",
+        "name": "Перший удар",
+        "trigger": {
+          "event": "attack",
+          "phase": "before",
+          "role": "attacker"
+        },
+        "condition": {
+          "type": "hpAbove",
+          "who": "eventTarget",
+          "percent": 99
+        },
+        "effects": [
+          {
+            "kind": "damageBonus",
+            "filter": {
+              "kind": "all"
+            },
+            "percent": 15
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ring-of-sar-issa",
+    "name": "Перстень Сар-Ісси",
+    "description": "Закляття Природи повертає 1 слот закляття (1 раз за бій).\n\nПерстень обвитий живим пагоном, що не в'яне вже кілька століть. Магія Природи не витрачається з ним — вона повертається, як вода в річку після дощу.",
+    "rarity": "epic",
+    "slot": "ring",
+    "setId": "Регалії Сар-Ісси",
+    "abilities": [
+      {
+        "id": "ring-of-sar-issus-nature",
+        "name": "Кругообіг",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Природа"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "restoreSpellSlot",
+            "count": 1,
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "ring-of-sar-issus",
+    "name": "Перстень Сар-Іссуса",
+    "description": "Закляття Природи повертає 1 слот закляття (1 раз за бій).\n\nПерстень обвитий живим пагоном, що не в'яне вже кілька століть. Магія Природи не витрачається з ним — вона повертається, як вода в річку після дощу.",
+    "rarity": "epic",
+    "slot": "ring",
+    "setId": "Регалії Сар-Іссуса",
+    "abilities": [
+      {
+        "id": "ring-of-sar-issus-nature",
+        "name": "Кругообіг",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Природа"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "restoreSpellSlot",
+            "count": 1,
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "robe-of-sar-issa",
+    "name": "Мантія Сар-Ісси",
+    "description": "Закляття Темряви знижують мораль усіх ворогів на 1 (1 раз за бій).\n\nСиньо-золотий шовк мантії архімага ховає в собі частку його сили. Коли з вуст власника злітає темне слово, тінь мантії розповзається полем, і вороги раптом відчувають себе дуже малими.",
+    "rarity": "epic",
+    "slot": "armor",
+    "setId": "Регалії Сар-Ісси",
+    "abilities": [
+      {
+        "id": "robe-of-sar-issus-dark",
+        "name": "Тінь мантії",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Темрява"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": -1,
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "robe-of-sar-issus",
+    "name": "Мантія Сар-Іссуса",
+    "description": "Закляття Темряви знижують мораль усіх ворогів на 1 (1 раз за бій).\n\nСиньо-золотий шовк мантії архімага ховає в собі частку його сили. Коли з вуст власника злітає темне слово, тінь мантії розповзається полем, і вороги раптом відчувають себе дуже малими.",
+    "rarity": "epic",
+    "slot": "armor",
+    "setId": "Регалії Сар-Іссуса",
+    "abilities": [
+      {
+        "id": "robe-of-sar-issus-dark",
+        "name": "Тінь мантії",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Темрява"
+        },
+        "limits": {
+          "perBattle": 1
+        },
+        "effects": [
+          {
+            "kind": "changeMorale",
+            "delta": -1,
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "shield-of-the-dwarven-kings",
+    "name": "Щит гномських королів",
+    "description": "На початку бою Семгрун бере союзників під варту: 20 % їхньої шкоди переходить на носія.\n\nКороль, що носив цей щит, ні разу не відступив і ні разу не дозволив упасти побратиму поруч. Щит досі пам'ятає ту клятву й тягне на себе удари, призначені іншим.",
+    "rarity": "legendary",
+    "slot": "shield",
+    "setId": "Обладунки гномських королів",
+    "abilities": [
+      {
+        "id": "shield-of-the-dwarven-kings-guard",
+        "name": "Клятва щита",
+        "trigger": {
+          "event": "battleStart"
+        },
+        "effects": [
+          {
+            "kind": "guard",
+            "percent": 20,
+            "duration": {
+              "rounds": 99
+            },
+            "target": "allAllies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "staff-of-sar-issa",
+    "name": "Посох Сар-Ісси",
+    "description": "Закляття Хаосу підпалюють усіх ворогів: 1d6 вогнем щораунду, 2 раунди (1 раз за раунд).\n\nНавершя посоху — кристал, у якому застигла іскра первісного вогню. Кожне закляття Хаосу розбурхує її, і тоді полум'я зісковзує з кристала й шукає ворогів саме.",
+    "rarity": "legendary",
+    "slot": "weapon",
+    "setId": "Регалії Сар-Ісси",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "bludgeoning",
+      "attackType": "melee"
+    },
+    "abilities": [
+      {
+        "id": "staff-of-sar-issus-chaos",
+        "name": "Іскра Хаосу",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Хаос"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": "1d6",
+            "damageType": "fire",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "staff-of-sar-issus",
+    "name": "Посох Сар-Іссуса",
+    "description": "Закляття Хаосу підпалюють усіх ворогів: 1d6 вогнем щораунду, 2 раунди (1 раз за раунд).\n\nНавершя посоху — кристал, у якому застигла іскра первісного вогню. Кожне закляття Хаосу розбурхує її, і тоді полум'я зісковзує з кристала й шукає ворогів саме.",
+    "rarity": "legendary",
+    "slot": "weapon",
+    "setId": "Регалії Сар-Іссуса",
+    "weapon": {
+      "damageDice": "1d6",
+      "damageType": "bludgeoning",
+      "attackType": "melee"
+    },
+    "abilities": [
+      {
+        "id": "staff-of-sar-issus-chaos",
+        "name": "Іскра Хаосу",
+        "trigger": {
+          "event": "spellCast",
+          "phase": "after",
+          "role": "caster",
+          "school": "Хаос"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "dot",
+            "damagePerRound": "1d6",
+            "damageType": "fire",
+            "duration": {
+              "rounds": 2
+            },
+            "target": "allEnemies"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "treeborn-quiver",
+    "name": "Сагайдак Деревородних",
+    "description": "Вбивство повертає бонусну дію (1 раз за раунд).\n\nСагайдак виріс, а не був зшитий: Деревородні виплекали його з кори старого дуба, і в ньому завжди пахне живицею. Щойно ворог падає, сагайдак тихо шелестить — і рука лучника вже тягнеться по наступну стрілу.",
+    "rarity": "epic",
+    "slot": "cloak",
+    "setId": "Мрія лучника",
+    "abilities": [
+      {
+        "id": "treeborn-quiver-refresh",
+        "name": "Шелест сагайдака",
+        "trigger": {
+          "event": "kill",
+          "role": "killer"
+        },
+        "limits": {
+          "perRound": 1
+        },
+        "effects": [
+          {
+            "kind": "grantAction",
+            "refreshBonusAction": true,
+            "target": "self"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "unicorn-horn-bow",
+    "name": "Лук з рогу єдинорога",
+    "description": "Дальня атака може вразити ще 1 ціль; основна ціль отримує повну шкоду, кожна додаткова — 50 %; для кожної — окремий кидок влучання.\n\nТятива сплетена з гриви єдинорога, а плечі лука вирізані з його рогу, що сам віддав його лісу. Стріла з нього не летить — вона ковзає між краплинами дощу і знаходить дві цілі там, де інший лучник бачить одну.",
+    "rarity": "legendary",
+    "slot": "range_weapon",
+    "setId": "Мрія лучника",
+    "weapon": {
+      "damageDice": "1d8",
+      "damageType": "piercing",
+      "attackType": "ranged"
+    },
+    "abilities": [
+      {
+        "id": "unicorn-horn-bow-two-targets",
+        "name": "Подвійний постріл",
+        "trigger": {
+          "event": "passive"
+        },
+        "effects": [
+          {
+            "kind": "modifyStat",
+            "stat": "maxTargets",
+            "flat": 1
+          },
+          {
+            "kind": "flag",
+            "flag": "multiTargetFalloff",
+            "percent": 50
+          }
+        ]
+      }
+    ]
+  }
+]

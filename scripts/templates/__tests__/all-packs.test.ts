@@ -11,9 +11,6 @@ import { LEGACY_KEY_BY_NAME, TEMPLATE_REGISTRY } from "@/lib/utils/templates/reg
 
 const keys = Object.keys(TEMPLATE_REGISTRY);
 
-// Heroes becomes a pack in E0.10; its legacy name is already mapped
-const PENDING_PACKS = ["heroes-homm"];
-
 describe("every pack of data/templates", () => {
   it.each(keys)("%s: validates without errors", (key) => {
     expect(validatePack(readPack(key)).filter((issue) => issue.level === "error").map((issue) => issue.message)).toEqual([]);
@@ -48,6 +45,6 @@ describe("every pack of data/templates", () => {
   });
 
   it("legacy names map to registered packs", () => {
-    for (const key of Object.values(LEGACY_KEY_BY_NAME)) if (!PENDING_PACKS.includes(key)) expect(keys, key).toContain(key);
+    for (const key of Object.values(LEGACY_KEY_BY_NAME)) expect(keys, key).toContain(key);
   });
 });

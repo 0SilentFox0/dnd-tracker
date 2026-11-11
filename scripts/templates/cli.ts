@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// pnpm template <index|validate|build|import|publish|icons|backfill-keys|i18n> ...  (see USAGE)
+// pnpm template <index|validate|build|import|publish|icons|export|backfill-keys|i18n> ...  (see USAGE)
 import { parseCommandArgs } from "./lib/cli-args";
 import { i18nCommand } from "./lib/i18n-command";
 import { writeIndex } from "./lib/index-gen";
@@ -13,6 +13,7 @@ const USAGE = [
   "pnpm template import <key> [--owner <userId>] [--dry-run] [--publish] [--allow-untranslated] [--allow-remote]",
   "pnpm template publish <key> [--allow-untranslated] [--allow-remote]",
   "pnpm template icons <key> --dir <images> [--kinds a,b] [--dry-run] [--allow-remote]",
+  "pnpm template export <key> --from <campaignId> [--system <system>] [--name <name>] [--slugs <file>]",
   "pnpm template backfill-keys [--apply]",
   "pnpm template i18n <extract|apply|normalize|status|convert> <key> <locale>",
 ].join("\n  ");
@@ -113,6 +114,7 @@ const COMMANDS: Record<string, Command> = {
   import: importCommand,
   publish,
   icons,
+  export: (args) => import("./lib/export-command").then(({ exportCommand }) => exportCommand(args)),
   index: () => {
     writeIndex();
     console.info("data/templates/manifests.ts and dictionaries.server.ts are up to date");

@@ -1,0 +1,2003 @@
+[
+  {
+    "slug": "armageddon",
+    "name": "Армагеддон",
+    "level": 5,
+    "groupId": "Хаос",
+    "description": "Кожен учасник бою — вороги, союзники і сам заклинатель — отримує 4 кубики шкоди вогнем (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя).",
+    "appearanceDescription": "Небо стає багряним, і з нього ллється вогняний дощ, що не розбирає ні своїх, ні чужих. Земля плавиться, повітря реве, а заклинатель стоїть посеред пекла, сміючись крізь опіки.",
+    "cost": "action",
+    "dice": 4,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "everyone"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "fire"
+      }
+    ]
+  },
+  {
+    "slug": "avatar",
+    "name": "Аватар",
+    "level": 4,
+    "groupId": "Природа",
+    "description": "Особисте закляття: Маркел прикликає Аватара Смерті (DM може замінити юніта в редакторі заклинання). Аватаром керує той, хто прикликав.",
+    "appearanceDescription": "Повітря перед заклинателем густішає й мерехтить, ніби над розпеченим каменем. З тіні та світла складається велична постать без обличчя, що мовчки стає поруч, готова до бою.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "summon",
+        "unitId": "ckmb1m02naky9pslcxnbgd0q6"
+      }
+    ],
+    "fx": {
+      "element": "necrotic",
+      "archetype": "avatar"
+    }
+  },
+  {
+    "slug": "berserk",
+    "name": "Шал",
+    "level": 4,
+    "groupId": "Темрява",
+    "description": "Ворог робить рятівний кидок Мудрості; при провалі на 1 раунд впадає в шал: на свій хід автоматично атакує випадкову іншу істоту (зокрема своїх) з +50 % шкоди. Не діє на героїв.",
+    "appearanceDescription": "Очі ворога наливаються кров'ю, а з горла виривається звіриний рев. Він більше не бачить облич — лише цілі, і кидається на першого, хто трапиться, хай то навіть його брат по зброї.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "kind": "berserk",
+        "duration": {
+          "rounds": 1
+        },
+        "damageBonusPercent": 50
+      }
+    ]
+  },
+  {
+    "slug": "blindness",
+    "name": "Сліпота",
+    "level": 4,
+    "groupId": "Темрява",
+    "description": "Ворог робить рятівний кидок Статури; при провалі 2 раунди не може атакувати (ні в ближньому бою, ні здалеку) і чаклувати. Ефект спадає, щойно ворог отримує шкоду. Успіх — без ефекту.",
+    "appearanceDescription": "Чорна пелена затягує ворогові очі, наче хтось накинув на них оксамитову хустку. Він махає руками в порожнечі, а довкола лунає лише тихий сміх темряви.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "constitution",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 2
+        },
+        "condition": "disable_melee_attacks",
+        "breakOnDamage": true
+      },
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 2
+        },
+        "condition": "disable_ranged_attacks",
+        "breakOnDamage": true
+      },
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 2
+        },
+        "condition": "disable_spell_casting",
+        "breakOnDamage": true
+      }
+    ],
+    "fx": {
+      "aura": "blind",
+      "element": "necrotic",
+      "archetype": "blindfold"
+    }
+  },
+  {
+    "slug": "call-of-the-beast",
+    "name": "Призив Фенікса",
+    "level": 5,
+    "groupId": "Природа",
+    "description": "Прикликає Фенікса, яким керує гравець: літає, б'є вогняними кігтями двох ворогів, має імунітет до вогню й раз за бій відроджується з полум'я. Здоров'я, шкода та атака Фенікса зростають з рівнем заклинателя.",
+    "appearanceDescription": "Друїд кидає в землю жменю жару, і над полем бою здіймається стовп полум'я. З вогню, розправляючи палаючі крила, з криком злітає Фенікс, і навіть смерть лише ненадовго повертає його в попіл.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "summon",
+        "unitId": "ccgz0l928zkvfrm6dnrfko7ib"
+      }
+    ],
+    "fx": {
+      "element": "fire",
+      "archetype": "phoenix"
+    }
+  },
+  {
+    "slug": "chain-lightning",
+    "name": "Ланцюгова блискавка",
+    "level": 4,
+    "groupId": "Хаос",
+    "description": "Блискавка стрибає між ворогами (до 4): перша ціль отримує 2 кубики шкоди блискавкою (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя), кожна наступна — половину від попередньої (100 % → 50 % → 25 % → 13 %). На карті заклинатель обирає першу ціль у межах 60 фт, а блискавка сама перескакує на найближчого до попередньої цілі ворога; без карти — до 4 ворогів на вибір у порядку стрибків.",
+    "appearanceDescription": "Сліпучий розряд вистрибує з пальців заклинателя і, вдаривши першого ворога, перескакує на наступного, і далі, і далі. Повітря тріщить і пахне грозою, а кожен стрибок трохи тьмяніший за попередній.",
+    "cost": "action",
+    "dice": 2,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "chain": true,
+      "range": 60,
+      "maxTargets": 4
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "falloff": [
+          100,
+          50,
+          25,
+          13
+        ],
+        "damageType": "lightning"
+      }
+    ]
+  },
+  {
+    "slug": "circle-of-winter",
+    "name": "Коло зими",
+    "level": 3,
+    "groupId": "Хаос",
+    "description": "Кільце радіусом 10 фт (3×3 навколо точки) у межах 60 фт, центральна клітинка не вражається: кожна істота в кільці, включно із союзниками й самим заклинателем, робить рятівний кидок Статури; кожен отримує 3 кубики шкоди холодом (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) і −2 до ініціативи на 1 раунд. При успіху — половина шкоди без штрафу ініціативи. Без карти — до 3 ворогів на вибір.",
+    "appearanceDescription": "Від заклинателя розходиться крижане кільце, і трава на його шляху вкривається памороззю. Вороги застигають у хрусткому інеї, видихаючи хмарки білої пари.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 10,
+      "range": 60,
+      "shape": "circle",
+      "hollow": true,
+      "maxTargets": 3
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "constitution",
+      "onSuccess": "half"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "cold"
+      },
+      {
+        "flat": -2,
+        "kind": "modifyStat",
+        "stat": "initiative",
+        "duration": {
+          "rounds": 1
+        }
+      }
+    ]
+  },
+  {
+    "slug": "cleansing",
+    "name": "Очищення",
+    "level": 2,
+    "groupId": "Світло",
+    "description": "Знімає із союзника всі негативні ефекти й стани (дебафи, отрути, контроль).",
+    "appearanceDescription": "Чиста біла вода стікає з небес на союзника, хоча над полем бою немає хмар. Темні плями прокльонів шиплять, як вугілля в джерелі, і розчиняються безслідно.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "cleanse",
+        "includeConditions": true
+      }
+    ],
+    "fx": {
+      "element": "radiant",
+      "archetype": "cleanse"
+    }
+  },
+  {
+    "slug": "confusion",
+    "name": "Розсіяність",
+    "level": 3,
+    "groupId": "Темрява",
+    "description": "Ворог робить рятівний кидок Мудрості; при провалі 2 раунди на початку кожного свого ходу з шансом 50 % втрачає дію. Успіх — без ефекту.",
+    "appearanceDescription": "У голові ворога зринають сотні шепотів, і кожен кличе в інший бік. Він застигає з піднятою зброєю, озирається, не впізнаючи ні друзів, ні ворогів.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "percent": 50,
+        "duration": {
+          "rounds": 2
+        },
+        "condition": "skip_action"
+      }
+    ],
+    "fx": {
+      "aura": "dizzy",
+      "element": "arcane",
+      "archetype": "whispers"
+    }
+  },
+  {
+    "slug": "curse-of-the-netherworld",
+    "name": "Прокляття Потойбіччя",
+    "level": 5,
+    "groupId": "Темрява",
+    "description": "Усі вороги отримують 4 кубики некротичної шкоди (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) і втрачають 1 мораль.",
+    "appearanceDescription": "Земля під ворогами розступається, і з тріщин здіймаються примарні руки, холодні, як могильна плита. Вони хапають живих за щиколотки, висмоктуючи тепло й надію.",
+    "cost": "action",
+    "dice": 4,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "allEnemies"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "necrotic"
+      },
+      {
+        "kind": "changeMorale",
+        "delta": -1
+      }
+    ],
+    "fx": {
+      "element": "necrotic",
+      "archetype": "netherhands"
+    }
+  },
+  {
+    "slug": "deep-freeze",
+    "name": "Глибока заморозка",
+    "level": 5,
+    "groupId": "Хаос",
+    "description": "Ворог робить рятівний кидок Статури; отримує 6 кубиків шкоди холодом (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) і 1 раунд не може діяти. При успіху — половина шкоди без заморозки.",
+    "appearanceDescription": "Ворога за мить охоплює товща блакитного льоду, і він застигає, мов статуя в зимовому саду. Крізь кригу видно його розширені очі, а тиша навколо стає дзвінкою, як у морозну ніч.",
+    "cost": "action",
+    "dice": 6,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "constitution",
+      "onSuccess": "half"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "cold"
+      },
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 1
+        },
+        "condition": "skip_action"
+      }
+    ]
+  },
+  {
+    "slug": "divine-retribution",
+    "name": "Божественна відплата",
+    "level": 5,
+    "groupId": "Світло",
+    "description": "Завдає ворогу 6 кубиків шкоди світлом (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя). Що більше поранений заклинатель, то сильніша відплата: шкода зростає на 1 % за кожен 1 % втраченого HP заклинателя (на половині HP — ×1,5).",
+    "appearanceDescription": "Кров заклинателя, що стікає на землю, спалахує білим полум'ям. Із неба б'є стовп сліпучого світла, і що глибші рани праведника, то нещадніше палає кара, що падає на кривдника.",
+    "cost": "action",
+    "dice": 6,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": {
+            "formula": "100 + lost_hp_percent"
+          }
+        },
+        "damageType": "radiant"
+      }
+    ],
+    "fx": {
+      "element": "radiant",
+      "archetype": "retribution"
+    }
+  },
+  {
+    "slug": "divine-strength",
+    "name": "Божественна сила",
+    "level": 1,
+    "groupId": "Світло",
+    "description": "Союзник завдає на 25 % більше шкоди всіма атаками й заклинаннями протягом 3 раундів.",
+    "appearanceDescription": "Над головою союзника спалахує тонкий золотий німб, і зброя в його руках починає дзвеніти, наче дзвін собору. Кожен удар лишає у повітрі світлий слід, що пахне ладаном.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "damageBonus",
+        "filter": {
+          "kind": "all"
+        },
+        "percent": 25,
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "holyweapon",
+      "element": "radiant",
+      "archetype": "empower"
+    }
+  },
+  {
+    "slug": "earthquake",
+    "name": "Землетрус",
+    "level": 4,
+    "groupId": "Природа",
+    "description": "Коло радіусом 20 фт у межах 60 фт: кожна істота в ньому, включно із союзниками й самим заклинателем, робить рятівний кидок Спритності; кожен отримує 2 кубики дробильної шкоди (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) і 1 раунд атакує з невигідністю. При успіху — половина шкоди без невигідності. Без карти — до 6 ворогів на вибір.",
+    "appearanceDescription": "Друїд б'є посохом об землю, і поле бою здригається від глибокого гулу. Ґрунт тріскається, вороги падають навколішки, а з розломів здіймається пил і запах сирої глини.",
+    "cost": "action",
+    "dice": 2,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 20,
+      "range": 60,
+      "shape": "circle",
+      "maxTargets": 6
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "half"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "bludgeoning"
+      },
+      {
+        "flag": "disadvantage",
+        "kind": "flag",
+        "duration": {
+          "rounds": 1
+        }
+      }
+    ],
+    "fx": {
+      "aura": "dust",
+      "element": "earth",
+      "archetype": "quake"
+    }
+  },
+  {
+    "slug": "eldritch-arrow",
+    "name": "Потойбічна стріла",
+    "level": 1,
+    "groupId": "Хаос",
+    "description": "Завдає ворогу 3 кубики шкоди вогнем (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя).",
+    "appearanceDescription": "З долоні заклинателя зривається стріла фіолетового полум'я, що лишає по собі запах сірки. Вона ніколи не промахується — лише впивається в ціль і вибухає снопом іскор.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "fire"
+      }
+    ],
+    "fx": {
+      "element": "fire",
+      "archetype": "eldritch"
+    }
+  },
+  {
+    "slug": "entangle",
+    "name": "Сплутування",
+    "level": 3,
+    "groupId": "Природа",
+    "description": "Квадрат 15 фт у межах 60 фт: кожна істота в ньому, включно із союзниками й самим заклинателем, робить рятівний кидок Сили; хто провалить — 1 раунд не може атакувати в ближньому бою. Успіх — без ефекту. Без карти — до 3 ворогів на вибір.",
+    "appearanceDescription": "Трава довкола ворогів раптом оживає і стає жорсткою, як дріт. Стебла сплітаються в густу сітку, і кожен крок вперед обертається падінням.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 15,
+      "range": 60,
+      "shape": "cube",
+      "maxTargets": 3
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "strength",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 1
+        },
+        "condition": "disable_melee_attacks"
+      }
+    ],
+    "fx": {
+      "aura": "roots",
+      "element": "nature",
+      "archetype": "entangle"
+    }
+  },
+  {
+    "slug": "eternal-light",
+    "name": "Вічне світло",
+    "level": 4,
+    "groupId": "Світло",
+    "description": "Союзник відновлює 4 кубики лікування (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) HP, а потім ще 2 раунди лікується на 10 % максимального HP на початку кожного свого ходу. Дає скіл гілки Світла.",
+    "appearanceDescription": "Над союзником розквітає маленьке сонце, і його промені проникають крізь обладунки просто до серця. Рани світяться зсередини і зникають, а сяйво ще довго не згасає, тихо зігріваючи плоть.",
+    "cost": "action",
+    "dice": 4,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      },
+      {
+        "kind": "hot",
+        "duration": {
+          "rounds": 2
+        },
+        "healPerRound": {
+          "value": 10,
+          "percentOf": "maxHp"
+        }
+      }
+    ],
+    "fx": {
+      "aura": "sunglow",
+      "element": "radiant",
+      "archetype": "sunbeam"
+    }
+  },
+  {
+    "slug": "evasion",
+    "name": "Ухилення",
+    "level": 3,
+    "groupId": "Світло",
+    "description": "Союзник отримує на 50 % менше шкоди від дальніх атак протягом 3 раундів.",
+    "appearanceDescription": "Довкола союзника мерехтить ледь помітна завіса світла, і стріли, влітаючи в неї, ухиляються вбік, наче їх штовхнула невидима долоня. Арбалетні болти з глухим стуком падають у траву.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flag": "resistance",
+        "kind": "flag",
+        "percent": 50,
+        "duration": {
+          "rounds": 3
+        },
+        "attackKind": "ranged",
+        "damageType": "all"
+      }
+    ],
+    "fx": {
+      "aura": "deflect",
+      "element": "radiant",
+      "archetype": "deflect"
+    }
+  },
+  {
+    "slug": "fire-wall",
+    "name": "Вогняна стіна",
+    "level": 3,
+    "groupId": "Хаос",
+    "description": "Лінія вогню завдовжки 30 фт від заклинателя: усі в ній, включно із союзниками, отримують 1 кубик шкоди вогнем (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя). Вогонь горить 3 раунди — той, хто входить у лінію або починає в ній свій хід, знову отримує шкоду цього кидка. Без карти — до 6 ворогів на вибір, і вогонь на полі не лишається.",
+    "appearanceDescription": "Перед ворожим строєм із землі здіймається ревуча стіна вогню, вища за людський зріст. Жар обпікає обличчя, дим виїдає очі, а смуга полум'я ще кілька раундів лишається на землі й пече всіх, хто в неї ступить.",
+    "cost": "action",
+    "dice": 1,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 30,
+      "zone": {
+        "rounds": 3
+      },
+      "shape": "line",
+      "maxTargets": 6
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "fire"
+      }
+    ]
+  },
+  {
+    "slug": "fireball",
+    "name": "Вогняна куля",
+    "level": 3,
+    "groupId": "Хаос",
+    "description": "Коло радіусом 10 фт у межах 120 фт: кожна істота в ньому, включно із союзниками й самим заклинателем, робить рятівний кидок Спритності й отримує 3 кубики шкоди вогнем (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя), при успіху — половину. Без карти — до 3 ворогів на вибір.",
+    "appearanceDescription": "Між долонями заклинателя набухає гаряча помаранчева куля, що гуде, мов розпечена кузня. Вона вибухає посеред ворогів, і полум'я розкочується колом, пожираючи траву й плащі.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 10,
+      "range": 120,
+      "shape": "circle",
+      "maxTargets": 3
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "half"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "fire"
+      }
+    ]
+  },
+  {
+    "slug": "forest-rebirth",
+    "name": "Відродження лісу",
+    "level": 5,
+    "groupId": "Природа",
+    "description": "Повертає до бою полеглих союзників з 30 % максимального HP.",
+    "appearanceDescription": "Над полеглими проростають молоді паростки, що за мить стають квітучими кущами. Коли пелюстки опадають, на їхньому місці підводяться воїни, з волоссям, у якому заплуталося листя.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "allAlliesDead"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "value": 30,
+          "percentOf": "maxHp"
+        },
+        "revive": true
+      }
+    ],
+    "fx": {
+      "element": "nature",
+      "archetype": "rebirth"
+    }
+  },
+  {
+    "slug": "forest-spirit",
+    "name": "Дух лісу",
+    "level": 3,
+    "groupId": "Природа",
+    "description": "Протягом 3 раундів союзник на початку кожного свого ходу відновлює 10 % максимального HP і має опір 50 % до отрути.",
+    "appearanceDescription": "За спиною союзника з'являється напівпрозорий олень з гіллястими рогами, у яких сплять світлячки. Його подих пахне живицею і повертає силу кожній зраненій жилі.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "hot",
+        "duration": {
+          "rounds": 3
+        },
+        "healPerRound": {
+          "value": 10,
+          "percentOf": "maxHp"
+        }
+      },
+      {
+        "flag": "resistance",
+        "kind": "flag",
+        "percent": 50,
+        "duration": {
+          "rounds": 3
+        },
+        "damageType": "poison"
+      }
+    ],
+    "fx": {
+      "aura": "stag",
+      "element": "nature",
+      "archetype": "forestspirit"
+    }
+  },
+  {
+    "slug": "frailty",
+    "name": "Немічність",
+    "level": 2,
+    "groupId": "Темрява",
+    "description": "Ворог отримує −2 до AC на 3 раунди. Повторні накладання складаються, до трьох разів (−6 AC); кожне накладання триває 3 раунди окремо, а четверте оновлює тривалість найстарішого.",
+    "appearanceDescription": "По обладунках ворога розповзається чорна іржа, а шкіра під ними сіріє й тріскається, мов старий пергамент. Сталь, що вчора тримала удар сокири, тепер м'якне під пальцями.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": true,
+    "maxStacks": 3,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flat": -2,
+        "kind": "modifyStat",
+        "stat": "armor",
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "rust",
+      "element": "necrotic",
+      "archetype": "rust"
+    }
+  },
+  {
+    "slug": "haste",
+    "name": "Поспіх",
+    "level": 1,
+    "groupId": "Світло",
+    "description": "Союзник отримує +3 до ініціативи та +10 фт (2 клітинки) до швидкості на 3 раунди.",
+    "appearanceDescription": "Довкола ніг союзника закручується вихор білого пір'я, і світ навколо ніби сповільнюється. Його кроки стають легкими, а плащ тріпоче, хоча вітру немає.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flat": 3,
+        "kind": "modifyStat",
+        "stat": "initiative",
+        "duration": {
+          "rounds": 3
+        }
+      },
+      {
+        "flat": 10,
+        "kind": "modifyStat",
+        "stat": "speed",
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "haste",
+      "element": "wind",
+      "archetype": "haste"
+    }
+  },
+  {
+    "slug": "healing-wave",
+    "name": "Хвиля зцілення",
+    "level": 4,
+    "groupId": "Природа",
+    "description": "Кожен союзник відновлює 3 кубики лікування (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) HP.",
+    "appearanceDescription": "Від друїда котиться зелена хвиля, і там, де вона проходить, розквітають польові квіти. Союзники вдихають запах весняного лісу, і втома та рани відступають.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "allAllies"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ],
+    "fx": {
+      "element": "nature",
+      "archetype": "healwave"
+    }
+  },
+  {
+    "slug": "healing-word",
+    "name": "Слово лікування",
+    "level": 1,
+    "groupId": "Природа",
+    "description": "Бонусною дією союзник відновлює 3 кубики лікування (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) HP.",
+    "appearanceDescription": "Заклинатель шепоче коротке слово, і союзника огортає запах свіжої трави після дощу. Рани затягуються зеленкуватим світлом, мов молодою корою.",
+    "cost": "bonusAction",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ],
+    "fx": {
+      "element": "nature",
+      "archetype": "healword"
+    }
+  },
+  {
+    "slug": "ice-bolt",
+    "name": "Крижаний болт",
+    "level": 2,
+    "groupId": "Хаос",
+    "description": "Завдає ворогу 3 кубики шкоди холодом (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя); ворог 1 раунд атакує з невигідністю.",
+    "appearanceDescription": "Повітря тріщить від морозу, і в руці заклинателя виростає синій крижаний спис. Він летить зі свистом і розбивається об ціль, вкриваючи її інеєм і скуваючи суглоби.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "cold"
+      },
+      {
+        "flag": "disadvantage",
+        "kind": "flag",
+        "duration": {
+          "rounds": 1
+        }
+      }
+    ],
+    "fx": {
+      "element": "cold",
+      "archetype": "icefall"
+    }
+  },
+  {
+    "slug": "implosion",
+    "name": "Імплозія",
+    "level": 5,
+    "groupId": "Хаос",
+    "description": "Завдає ворогу 8 кубиків силової шкоди (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя).",
+    "appearanceDescription": "Простір довкола ворога стискається в точку, і світло гне свої промені, падаючи всередину. Обладунки зминаються, мов пергамент, а потім усе розривається глухим, нищівним вибухом.",
+    "cost": "action",
+    "dice": 8,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "force"
+      }
+    ]
+  },
+  {
+    "slug": "lightning-bolt",
+    "name": "Блискавка",
+    "level": 2,
+    "groupId": "Хаос",
+    "description": "Завдає ворогу 3 кубики шкоди блискавкою (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя); ворог отримує −2 до ініціативи на 2 раунди.",
+    "appearanceDescription": "Небо розколюється сліпучою гілкою, і грім б'є просто у ворога. Від нього валить дим, волосся стоїть дибки, а м'язи ще довго сіпаються в судомах.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "lightning"
+      },
+      {
+        "flat": -2,
+        "kind": "modifyStat",
+        "stat": "initiative",
+        "duration": {
+          "rounds": 2
+        }
+      }
+    ],
+    "fx": {
+      "element": "lightning",
+      "archetype": "skystrike"
+    }
+  },
+  {
+    "slug": "magic-immunity",
+    "name": "Магічний імунітет",
+    "level": 4,
+    "groupId": "Світло",
+    "description": "Протягом 2 раундів союзник не отримує шкоди від заклинань і має імунітет до всіх станів контролю.",
+    "appearanceDescription": "Союзника огортає кришталева сфера, по якій пробігають веселкові хвилі. Ворожі закляття розбиваються об неї, мов морська піна об скелю, і осипаються іскристим пилом.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flag": "resistance",
+        "kind": "flag",
+        "percent": 100,
+        "duration": {
+          "rounds": 2
+        },
+        "damageType": "spell"
+      },
+      {
+        "flag": "conditionImmunity",
+        "kind": "flag",
+        "duration": {
+          "rounds": 2
+        },
+        "conditions": "all"
+      }
+    ],
+    "fx": {
+      "aura": "spellward",
+      "element": "arcane",
+      "archetype": "spellward"
+    }
+  },
+  {
+    "slug": "meteor-shower",
+    "name": "Метеоритний дощ",
+    "level": 4,
+    "groupId": "Хаос",
+    "description": "Коло радіусом 20 фт у межах 120 фт: кожна істота в ньому, включно із союзниками й самим заклинателем, робить рятівний кидок Спритності; кожен отримує 2 кубики дробильної шкоди (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя), при успіху — половину. Без карти — до 6 ворогів на вибір.",
+    "appearanceDescription": "Небо темніє, і з нього падають розпечені брили, лишаючи по собі вогняні хвости. Земля здригається від ударів, вирви димлять, а уламки каміння свистять над головами.",
+    "cost": "action",
+    "dice": 2,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 20,
+      "range": 120,
+      "shape": "circle",
+      "maxTargets": 6
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "half"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "bludgeoning"
+      }
+    ],
+    "fx": {
+      "element": "fire",
+      "archetype": "meteor"
+    }
+  },
+  {
+    "slug": "moonbeam",
+    "name": "Місячний промінь",
+    "level": 2,
+    "groupId": "Природа",
+    "description": "Завдає ворогу 3 кубики променевої шкоди (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя), а місячне світло підсвічує його: наступні 2 його ходи всі атаки по ньому мають перевагу.",
+    "appearanceDescription": "Навіть серед білого дня з неба падає срібний місячний стовп і пришпилює ворога до землі. Холодне сяйво не гасне й після удару: ворог світиться, мов мішень, і жодна тінь не може його сховати.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "radiant"
+      },
+      {
+        "flag": "advantageForAttackers",
+        "kind": "flag",
+        "duration": {
+          "rounds": 2
+        }
+      }
+    ],
+    "fx": {
+      "element": "radiant",
+      "archetype": "moonbeam"
+    }
+  },
+  {
+    "slug": "nature-storm",
+    "name": "Шторм природи",
+    "level": 5,
+    "groupId": "Природа",
+    "description": "Усі вороги отримують 3 кубики шкоди блискавкою (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) і 1 раунд не можуть чаклувати.",
+    "appearanceDescription": "Небо над полем бою чорніє, вітер виє, ламаючи дерева, і блискавки б'ють у ворожі лави одна за одною. Шум зливи заглушає слова закляття, а маги ворога лише безпорадно ковтають воду.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "allEnemies"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "lightning"
+      },
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 1
+        },
+        "condition": "disable_spell_casting"
+      }
+    ]
+  },
+  {
+    "slug": "plague",
+    "name": "Чума",
+    "level": 2,
+    "groupId": "Темрява",
+    "description": "Отруює ворога: кидок — 1 кубик отрутою (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) — визначає шкоду, яку ворог отримує на початку кожного свого ходу протягом 2 раундів.",
+    "appearanceDescription": "З долоні заклинателя зривається хмарка зеленкуватих мух і впивається ворогові в обличчя. Шкіра вкривається чорними пухирями, а від подиху тхне гниллю склепу.",
+    "cost": "action",
+    "dice": 1,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dot",
+        "duration": {
+          "rounds": 2
+        },
+        "damageType": "poison",
+        "damagePerRound": {
+          "spellRoll": 100
+        }
+      }
+    ],
+    "fx": {
+      "element": "poison",
+      "archetype": "pestilence"
+    }
+  },
+  {
+    "slug": "puppet-master",
+    "name": "Ляльковод",
+    "level": 5,
+    "groupId": "Темрява",
+    "description": "Ворог робить рятівний кидок Мудрості; при провалі на 1 раунд переходить на бік заклинателя і діє під контролем його гравця, потім повертається. Не діє на героїв.",
+    "appearanceDescription": "З пальців заклинателя тягнуться тонкі срібні нитки й чіпляються за зап'ястя та шию ворога. Той смикається, як лялька на ярмарку, і слухняно розвертає зброю проти своїх.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "kind": "charm",
+        "duration": {
+          "rounds": 1
+        }
+      }
+    ],
+    "fx": {
+      "aura": "strings",
+      "element": "arcane",
+      "archetype": "puppet"
+    }
+  },
+  {
+    "slug": "regeneration",
+    "name": "Регенерація",
+    "level": 2,
+    "groupId": "Світло",
+    "description": "На початку кожного свого ходу союзник відновлює 10 % максимального HP. Триває 3 раунди.",
+    "appearanceDescription": "Під шкірою союзника розливається тепле бурштинове сяйво, і рани затягуються тонкими золотими нитками. З кожним подихом світло пульсує, мов друге серце.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "hot",
+        "duration": {
+          "rounds": 3
+        },
+        "healPerRound": {
+          "value": 10,
+          "percentOf": "maxHp"
+        }
+      }
+    ],
+    "fx": {
+      "aura": "lifedome",
+      "element": "nature",
+      "archetype": "regenerate"
+    }
+  },
+  {
+    "slug": "resurrection",
+    "name": "Воскресіння",
+    "level": 5,
+    "groupId": "Світло",
+    "description": "Повертає до бою полеглого союзника з 50 % максимального HP.",
+    "appearanceDescription": "Над тілом полеглого опускається колона м'якого світла, і в ній кружляють пелюстки білих лілій. Груди здіймаються в першому подиху, а очі відкриваються, сповнені тихого подиву.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "allyDead",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "value": 50,
+          "percentOf": "maxHp"
+        },
+        "revive": true
+      }
+    ],
+    "fx": {
+      "element": "radiant",
+      "archetype": "resurrect"
+    }
+  },
+  {
+    "slug": "righteous-might",
+    "name": "Праведна міць",
+    "level": 3,
+    "groupId": "Світло",
+    "description": "Союзник отримує +3 до кидків атаки і +15 % до шкоди на 3 раунди.",
+    "appearanceDescription": "Постать союзника росте в сяйві, ніби за його спиною розправляє крила невидимий янгол. М'язи наливаються силою, а погляд стає твердим і ясним, як сталь на світанку.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flat": 3,
+        "kind": "modifyStat",
+        "stat": "attackBonus",
+        "duration": {
+          "rounds": 3
+        }
+      },
+      {
+        "kind": "damageBonus",
+        "filter": {
+          "kind": "all"
+        },
+        "percent": 15,
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "might",
+      "element": "radiant",
+      "archetype": "might"
+    }
+  },
+  {
+    "slug": "roots",
+    "name": "Корені",
+    "level": 1,
+    "groupId": "Природа",
+    "description": "Ворог робить рятівний кидок Сили; при провалі 1 раунд не може рухатися й атакувати (ні в ближньому, ні в дальньому бою) і отримує −2 до ініціативи. Успіх — без ефекту.",
+    "appearanceDescription": "Земля під ногами ворога розверзається, і з неї вириваються вузлуваті корені, обплітаючи щиколотки й коліна. Від них пахне вологою глиною і старим лісом.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "strength",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 1
+        },
+        "condition": "disable_melee_attacks"
+      },
+      {
+        "kind": "applyCondition",
+        "duration": {
+          "rounds": 1
+        },
+        "condition": "disable_ranged_attacks"
+      },
+      {
+        "flat": -2,
+        "kind": "modifyStat",
+        "stat": "initiative",
+        "duration": {
+          "rounds": 1
+        }
+      }
+    ],
+    "fx": {
+      "aura": "roots",
+      "element": "nature",
+      "archetype": "entangle"
+    }
+  },
+  {
+    "slug": "slow",
+    "name": "Сповільнення",
+    "level": 1,
+    "groupId": "Темрява",
+    "description": "Ворог робить рятівний кидок Мудрості; при провалі отримує −3 до ініціативи та −10 фт (2 клітинки) до швидкості на 3 раунди. Успіх — без ефекту.",
+    "appearanceDescription": "Довкола ворога густішає повітря, наче він опинився під водою. Кожен рух розтягується, звуки глухнуть, а кліпання очей триває ціле століття.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "flat": -3,
+        "kind": "modifyStat",
+        "stat": "initiative",
+        "duration": {
+          "rounds": 3
+        }
+      },
+      {
+        "flat": -10,
+        "kind": "modifyStat",
+        "stat": "speed",
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "shackles",
+      "element": "necrotic",
+      "archetype": "slow"
+    }
+  },
+  {
+    "slug": "sorrow",
+    "name": "Смуток",
+    "level": 3,
+    "groupId": "Темрява",
+    "description": "Мораль ворога знижується на 2 на 3 раунди.",
+    "appearanceDescription": "Над ворогом збирається крихітна дощова хмара, і з неї сіється холодна мряка. В очах гасне вогонь, а в серці оселяється туга за домом, якого він, можливо, вже ніколи не побачить.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flat": -2,
+        "kind": "modifyStat",
+        "stat": "morale",
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "raincloud",
+      "element": "necrotic",
+      "archetype": "raincloud"
+    }
+  },
+  {
+    "slug": "stone-spikes",
+    "name": "Кам'яні шипи",
+    "level": 1,
+    "groupId": "Хаос",
+    "description": "Хрест із променями по 5 фт (центр і чотири сусідні клітинки) у межах 60 фт: кожна істота в ньому, включно із союзниками, отримує 2 кубики дробильної шкоди (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя). Без карти — до 3 ворогів на вибір.",
+    "appearanceDescription": "Земля під ворогами здригається, і з неї вистрибують гострі кам'яні шпилі, мов зуби величезного звіра. Уламки скель розлітаються, лишаючи по собі хмари пилу.",
+    "cost": "action",
+    "dice": 2,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 5,
+      "range": 60,
+      "shape": "cross",
+      "maxTargets": 3
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "bludgeoning"
+      }
+    ],
+    "fx": {
+      "element": "earth"
+    }
+  },
+  {
+    "slug": "stoneskin",
+    "name": "Кам'яна шкіра",
+    "level": 3,
+    "groupId": "Світло",
+    "description": "Союзник отримує +3 до AC на 3 раунди.",
+    "appearanceDescription": "Шкіра союзника вкривається сірим гранітним візерунком, що відблискує, як мармур храмових колон. Клинки ворогів дзенькають об неї, висікаючи іскри.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flat": 3,
+        "kind": "modifyStat",
+        "stat": "armor",
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "stoneskin",
+      "element": "earth",
+      "archetype": "stoneskin"
+    }
+  },
+  {
+    "slug": "suffering",
+    "name": "Страждання",
+    "level": 3,
+    "groupId": "Темрява",
+    "description": "Ворог отримує −3 до кидків атаки на 3 раунди.",
+    "appearanceDescription": "Невидимі гаки впиваються ворогові в жили, і кожен замах відгукується пекучим болем. Він кривиться, руки тремтять, а клинок раз у раз проходить повз ціль.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flat": -3,
+        "kind": "modifyStat",
+        "stat": "attackBonus",
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "thorncrown",
+      "element": "necrotic",
+      "archetype": "thorns"
+    }
+  },
+  {
+    "slug": "summon-air-elemental",
+    "name": "Прикликання елементаля: Повітря",
+    "level": 3,
+    "groupId": "Природа",
+    "description": "Прикликає елементаля повітря (зазвичай одного за бій — комірок 3 рівня небагато): його здоров'я, шкода та атака зростають з рівнем заклинателя. Елементалем керує гравець.",
+    "appearanceDescription": "Вихор злітає з-під ніг заклинателя, і серед пилу й блискавок проступає прозора постать, що ніколи не промахується. Заклинатель простягає руку, і елементаль стає на його бік.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "summon",
+        "unitId": "ci2wpsty09lumf6fcbm5lqol0"
+      }
+    ],
+    "fx": {
+      "element": "lightning",
+      "archetype": "airsummon"
+    }
+  },
+  {
+    "slug": "summon-earth-elemental",
+    "name": "Прикликання елементаля: Земля",
+    "level": 3,
+    "groupId": "Природа",
+    "description": "Прикликає елементаля землі (зазвичай одного за бій — комірок 3 рівня небагато): його здоров'я, шкода та атака зростають з рівнем заклинателя. Елементалем керує гравець.",
+    "appearanceDescription": "Земля розкривається, і з неї піднімається брила, що складається в масивного велета з очима з розжареного каменю. Заклинатель простягає руку, і елементаль стає на його бік.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "summon",
+        "unitId": "cmopwirqwm18u88edx3r9vg2j"
+      }
+    ],
+    "fx": {
+      "element": "earth",
+      "archetype": "earthsummon"
+    }
+  },
+  {
+    "slug": "summon-fire-elemental",
+    "name": "Прикликання елементаля: Вогонь",
+    "level": 3,
+    "groupId": "Природа",
+    "description": "Прикликає елементаля вогню (зазвичай одного за бій — комірок 3 рівня небагато): його здоров'я, шкода та атака зростають з рівнем заклинателя. Елементалем керує гравець.",
+    "appearanceDescription": "Полум'я стискається в людиноподібну постать, що тріщить жаром і залишає на землі випалені сліди. Заклинатель простягає руку, і елементаль стає на його бік.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "summon",
+        "unitId": "cnq8x7zjt06bbazs241qx23ip"
+      }
+    ],
+    "fx": {
+      "element": "fire",
+      "archetype": "firesummon"
+    }
+  },
+  {
+    "slug": "summon-water-elemental",
+    "name": "Прикликання елементаля: Вода",
+    "level": 3,
+    "groupId": "Природа",
+    "description": "Прикликає елементаля води (зазвичай одного за бій — комірок 3 рівня небагато): його здоров'я, шкода та атака зростають з рівнем заклинателя. Елементалем керує гравець.",
+    "appearanceDescription": "З повітря зривається водяний стовп і застигає постаттю з хвиль та льоду, холодною на дотик навіть здалеку. Заклинатель простягає руку, і елементаль стає на його бік.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "summon",
+        "unitId": "cgr6jgssxqfv8o70zvrpa05lb"
+      }
+    ],
+    "fx": {
+      "element": "cold",
+      "archetype": "watersummon"
+    }
+  },
+  {
+    "slug": "teleportation",
+    "name": "Телепортація",
+    "level": 4,
+    "groupId": "Світло",
+    "description": "Переносить союзника в будь-яку вільну точку поля бою. Механіки в трекері немає: витрачає слот і дію, переміщення відіграє DM на мапі.",
+    "appearanceDescription": "Союзник розсипається стовпом золотих іскор, що на мить зависають у повітрі. Деінде на полі бою іскри збираються знову — і він уже стоїть там, ледь похитуючись від запаморочення.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "note",
+        "text": "Телепортація: DM переносить ціль у будь-яку вільну точку поля бою."
+      }
+    ],
+    "fx": {
+      "element": "arcane",
+      "archetype": "teleport"
+    }
+  },
+  {
+    "slug": "thorny-vines",
+    "name": "Колючі лози",
+    "level": 2,
+    "groupId": "Природа",
+    "description": "Отруйні лози обвивають ворога: кидок — 1 кубик отрутою (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) — визначає шкоду, яку ворог отримує на початку кожного свого ходу протягом 3 раундів.",
+    "appearanceDescription": "Із землі здіймаються темно-зелені пагони, вкриті шипами, з яких сочиться жовтий сік. Вони обплітають ворога і щільнішають з кожним його рухом.",
+    "cost": "action",
+    "dice": 1,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dot",
+        "duration": {
+          "rounds": 3
+        },
+        "damageType": "poison",
+        "damagePerRound": {
+          "spellRoll": 100
+        }
+      }
+    ],
+    "fx": {
+      "aura": "vines",
+      "element": "poison",
+      "archetype": "thornvines"
+    }
+  },
+  {
+    "slug": "vampirism",
+    "name": "Вампіризм",
+    "level": 5,
+    "groupId": "Темрява",
+    "description": "Протягом 3 раундів атаки союзника лікують його на 50 % завданої шкоди.",
+    "appearanceDescription": "Зуби союзника видовжуються, а шкіра набуває мертвотної блідості. Кожна рана, яку він завдає, сочиться червоним туманом, що тягнеться до його вуст і повертає йому сили.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "ally",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "flag": "lifesteal",
+        "kind": "flag",
+        "percent": 50,
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "bloodlust",
+      "element": "fury",
+      "archetype": "vampire"
+    }
+  },
+  {
+    "slug": "wasp-swarm",
+    "name": "Рій ос",
+    "level": 3,
+    "groupId": "Природа",
+    "description": "Коло радіусом 5 фт у межах 60 фт: кожна істота в ньому, включно із союзниками й самим заклинателем, отримує 2 кубики колючої шкоди (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя) і −2 до ініціативи на 2 раунди. Без карти — до 3 ворогів на вибір.",
+    "appearanceDescription": "З рукава друїда вилітає гудуча хмара ос завбільшки з палець. Вони облітають ворогів, жалять в обличчя й шию, і ті відмахуються, забувши про бій.",
+    "cost": "action",
+    "dice": 2,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "template",
+      "side": "enemy",
+      "size": 5,
+      "range": 60,
+      "shape": "circle",
+      "maxTargets": 3
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "piercing"
+      },
+      {
+        "flat": -2,
+        "kind": "modifyStat",
+        "stat": "initiative",
+        "duration": {
+          "rounds": 2
+        }
+      }
+    ],
+    "fx": {
+      "aura": "stings",
+      "element": "nature",
+      "archetype": "swarm"
+    }
+  },
+  {
+    "slug": "weakness",
+    "name": "Ослаблення",
+    "level": 1,
+    "groupId": "Темрява",
+    "description": "Ворог робить рятівний кидок Мудрості; при провалі завдає на 25 % менше шкоди протягом 3 раундів. Успіх — без ефекту.",
+    "appearanceDescription": "Сірий туман заповзає ворогові в рукави, і зброя раптом важчає в його руках. Пальці слабнуть, плечі опускаються, а удари стають кволими, як у хворого.",
+    "cost": "action",
+    "dice": 0,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
+    },
+    "spellEffects": [
+      {
+        "kind": "damageBonus",
+        "filter": {
+          "kind": "all"
+        },
+        "percent": -25,
+        "duration": {
+          "rounds": 3
+        }
+      }
+    ],
+    "fx": {
+      "aura": "sapped",
+      "element": "necrotic",
+      "archetype": "siphon"
+    }
+  },
+  {
+    "slug": "word-of-light",
+    "name": "Слово світла",
+    "level": 5,
+    "groupId": "Світло",
+    "description": "Усі вороги отримують 3 кубики шкоди світлом (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя). Люди, Ельфи, Гноми й Маги мають до нього імунітет — світло не карає добрих.",
+    "appearanceDescription": "Заклинатель вимовляє одне-єдине слово, і воно гримить, як тисяча дзвонів. Поле бою заливає біле сяйво: темні створіння горять і корчаться, а добрі серця лише відчувають теплий подих світанку.",
+    "cost": "action",
+    "dice": 3,
+    "concentration": false,
+    "ritual": false,
+    "stackable": false,
+    "targeting": {
+      "kind": "allEnemies"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "radiant"
+      }
+    ],
+    "raceModifiers": [
+      {
+        "raceId": "ctaasr7czc063fgbfbkm0glnz",
+        "percent": -100
+      },
+      {
+        "raceId": "clfir88nvuln9ptdl4u9zhejj",
+        "percent": -100
+      },
+      {
+        "raceId": "cx41wbvesryrzrqf04gjbbs3r",
+        "percent": -100
+      },
+      {
+        "raceId": "ca2jiwxnj0cuom31h12bjy1a4",
+        "percent": -100
+      }
+    ],
+    "fx": {
+      "element": "radiant",
+      "archetype": "holyword"
+    }
+  }
+]
