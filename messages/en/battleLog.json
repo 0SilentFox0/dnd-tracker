@@ -242,7 +242,7 @@
     "summoned": "🌀 summoned: {names}",
     "appears": "🌿 appears: {names}",
     "vanishes": "🌿 {name} vanishes",
-    "phantomReplaced": "🌀 the previous phantom of {name} dissolves"
+    "phantomReplaced": "🌀 the previous phantom «{name}» dissolves"
   },
   "maneuver": {
     "damage": "💥 {ability}: {target} −{dealt} HP{note}",

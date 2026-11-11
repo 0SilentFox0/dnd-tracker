@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeEffect, makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyAbilitySummons } from "@/lib/utils/battle/summon/ability-summons";
+import { dismissPhantoms } from "@/lib/utils/battle/summon/phantom-summon";
 
 const run = (order: ReturnType<typeof makeParticipant>[], cloneOf = "knight", castId = "c1") =>
   applyAbilitySummons([{ ownerId: "mage", cloneOf, count: 1, spellId: "sp", castId }], order, { campaignId: "c1", battleId: "b1", rng: () => 0, deps: { loadPool: async () => ({ units: [], races: [] }) } });
@@ -74,5 +75,60 @@ describe("phantom clone", () => {
 
     expect(live(second.order)).toHaveLength(1);
     expect(second.messages).toHaveLength(1);
+  });
+
+  it("a multi-target cast keeps all its phantoms; a recast dismisses all old ones", async () => {
+    const mage = makeParticipant({ id: "mage", side: ParticipantSide.ALLY });
+
+    const a = makeParticipant({ id: "a", side: ParticipantSide.ENEMY });
+
+    const b = makeParticipant({ id: "b", side: ParticipantSide.ENEMY });
+
+    const opts = { campaignId: "c1", battleId: "b1", rng: () => 0, deps: { loadPool: async () => ({ units: [], races: [] }) } };
+
+    const first = await applyAbilitySummons(
+      [
+        { ownerId: "mage", cloneOf: "a", count: 1, spellId: "sp", castId: "c1" },
+        { ownerId: "mage", cloneOf: "b", count: 1, spellId: "sp", castId: "c1" },
+      ],
+      [mage, a, b],
+      opts,
+    );
+
+    expect(live(first.order)).toHaveLength(2);
+
+    const second = await run(first.order, "a", "c2");
+
+    expect(live(second.order).map((p) => p.basicInfo.id)).toEqual(["phantom:c2:1"]);
+  });
+
+  it("dismissed phantom drops its concentration effects", () => {
+    const mage = makeParticipant({ id: "mage", side: ParticipantSide.ALLY });
+
+    const ally = makeParticipant({ id: "ally", side: ParticipantSide.ALLY });
+
+    const ph = makeParticipant({ id: "phantom:c1:1", side: ParticipantSide.ALLY });
+
+    const phantom = { ...ph, battleData: { ...ph.battleData, phantomOf: "mage", activeEffects: [makeEffect("conc", { concentration: { castId: "k", spellName: "Bless" } })] } };
+
+    const buffed = { ...ally, battleData: { ...ally.battleData, activeEffects: [makeEffect("buff", { concentrationOf: { casterId: "phantom:c1:1", castId: "k" } })] } };
+
+    const { order } = dismissPhantoms([mage, buffed, phantom], "mage");
+
+    expect(order.find((p) => p.basicInfo.id === "ally")?.battleData.activeEffects).toHaveLength(0);
+    expect(order.find((p) => p.basicInfo.id === "phantom:c1:1")?.battleData.activeEffects).toHaveLength(0);
+  });
+
+  it("pre-deploy phantoms without phantomOf are matched by id + summonedBy", () => {
+    const mage = makeParticipant({ id: "mage", side: ParticipantSide.ALLY });
+
+    const ph = makeParticipant({ id: "phantom:old:1", side: ParticipantSide.ALLY });
+
+    const legacy = { ...ph, battleData: { ...ph.battleData, summonedBy: "mage" } };
+
+    const { order, messages } = dismissPhantoms([mage, legacy], "mage");
+
+    expect(order[1].combatStats.status).toBe(CombatStatus.DEAD);
+    expect(messages).toHaveLength(1);
   });
 });

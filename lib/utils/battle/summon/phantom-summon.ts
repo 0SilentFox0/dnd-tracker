@@ -1,6 +1,7 @@
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { nearestStandable } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -40,18 +41,34 @@ export function buildPhantom({ source, owner, order, castId, map }: PhantomInput
   return at ? { ...base, battleData: { ...base.battleData, position: at } } : base;
 }
 
-export function dismissPhantoms(order: BattleParticipant[], ownerId: string): { order: BattleParticipant[]; messages: LogLine[] } {
+const isPhantomOf = (p: BattleParticipant, ownerId: string) =>
+  p.battleData.phantomOf === ownerId || (p.basicInfo.id.startsWith("phantom:") && p.battleData.summonedBy === ownerId);
+
+/** `keepCastId`: фантоми цього касту лишаються (мультицільовий каст = кілька запитів одного власника). */
+export function dismissPhantoms(order: BattleParticipant[], ownerId: string, keepCastId?: string): { order: BattleParticipant[]; messages: LogLine[] } {
   const messages: LogLine[] = [];
 
-  const next = order.map((p) => {
-    if (p.battleData.phantomOf !== ownerId || !isActive(p)) return p;
+  const dismissedIds: string[] = [];
+
+  let next = order.map((p) => {
+    if (!isPhantomOf(p, ownerId) || !isActive(p) || (keepCastId && p.basicInfo.sourceId === `phantom:${keepCastId}`)) return p;
 
     const { position: _position, ...battleData } = p.battleData;
 
     messages.push(textRef("battleLog.summon.phantomReplaced", { name: p.basicInfo.name }));
+    dismissedIds.push(p.basicInfo.id);
 
     return { ...p, combatStats: { ...p.combatStats, status: CombatStatus.DEAD }, battleData: { ...battleData, dismissed: true } };
   });
 
-  return { order: messages.length ? next : order, messages };
+  if (!messages.length) return { order, messages };
+
+  for (const id of dismissedIds) {
+    const dropped = dropConcentration(next, id, "");
+
+    next = dropped.participants;
+    messages.push(...dropped.messages);
+  }
+
+  return { order: next, messages };
 }
