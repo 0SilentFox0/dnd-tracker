@@ -652,7 +652,11 @@ async function castSpell(actor: any, spell: any) {
     }
   }
 
-  const nothingToCleanse = effectKinds.length > 0 && effectKinds.every((k) => k === "cleanse") && (targets as string[]).every((id) => !byId(id)?.battleData.activeEffects.length);
+  const cleansable = (e: any, withConditions: boolean) => e.type === "debuff" || (withConditions && e.type === "condition");
+
+  const withConditions = (spell.spellEffects ?? []).some((e: any) => e.kind === "cleanse" && e.includeConditions);
+
+  const nothingToCleanse = effectKinds.length > 0 && effectKinds.every((k) => k === "cleanse") && (targets as string[]).every((id) => !byId(id)?.battleData.activeEffects.some((e: any) => cleansable(e, withConditions)));
 
   const watched = [...new Set([...(targets as string[]), ...P().map((p: any) => p.basicInfo.id)])];
 
@@ -1910,15 +1914,28 @@ async function mazeCheck() {
 
   await untilTurnOf(isMazeAlly);
 
-  const hero = current();
+  const wallCellOf = (h: any) => {
+    const g = mazeGrid();
+
+    const w = wallSet(g.maze);
+
+    const from = mazeDistances(g, [posOf(h) as any]);
+
+    return neighbors(posOf(h) as any).find((n) => inBounds(state.map, n) && !canStep(g, w, posOf(h) as any, n) && (from.get(cellKey(n)) ?? Infinity) > MAZE_STEPS_PER_TURN && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === cellKey(n)));
+  };
+
+  let hero = current();
+
+  let blockedCell = wallCellOf(hero);
+
+  for (let attempt = 0; attempt < 6 && !blockedCell && state.status === "active"; attempt++) {
+    await nextOnly();
+    await untilTurnOf(isMazeAlly);
+    hero = current();
+    blockedCell = wallCellOf(hero);
+  }
 
   const grid = mazeGrid();
-
-  const walls = wallSet(grid.maze);
-
-  const fromHero = mazeDistances(grid, [posOf(hero) as any]);
-
-  const blockedCell = neighbors(posOf(hero) as any).find((n) => inBounds(state.map, n) && !canStep(grid, walls, posOf(hero) as any, n) && (fromHero.get(cellKey(n)) ?? Infinity) > MAZE_STEPS_PER_TURN && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === cellKey(n)));
 
   const wallMove = blockedCell ? await call("move", MOVE, { participantId: hero.basicInfo.id, to: blockedCell }) : null;
 
