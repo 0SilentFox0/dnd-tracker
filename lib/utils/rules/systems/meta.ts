@@ -15,9 +15,20 @@ export interface SystemI18n {
   budgetKb?: { battle?: number; member?: number; dm?: number; pages?: Partial<Record<SystemPageScope, number>> };
 }
 
+export type SystemKind = "base" | "addon" | "preset";
+
 export interface SystemMeta {
   module: string;
+  /** Absent means "base" until every folder declares it */
+  kind?: SystemKind;
   keys: readonly string[];
+  preset?: { base: string; modules: readonly string[] };
+  requires?: readonly string[];
+  conflicts?: readonly string[];
+  claims?: readonly string[];
+  after?: readonly string[];
+  toggle?: "free" | "setup";
+  tokens?: readonly string[];
   i18n: SystemI18n;
   unusedMechanics: readonly string[];
   dmSections?: readonly string[];

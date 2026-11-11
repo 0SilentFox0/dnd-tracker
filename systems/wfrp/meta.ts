@@ -2,6 +2,7 @@ import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 
 export const WFRP_META = {
   module: "wfrp",
+  kind: "base",
   keys: ["wfrp"],
   i18n: {
     battle: ["battleWfrp"],
