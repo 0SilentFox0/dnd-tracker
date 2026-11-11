@@ -6,8 +6,8 @@ export {
   useCreateCampaign,
   useDeleteCampaign,
   useJoinCampaign,
-  useSetCampaignMemberRole,
   useRemoveCampaignMember,
+  useSetCampaignMemberRole,
   useUpdateCampaign,
 } from "./useCampaignMutations";
 export { useCampaignRules, useUpdateCampaignRules } from "./useCampaignRules";
