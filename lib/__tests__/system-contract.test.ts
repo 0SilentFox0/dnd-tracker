@@ -12,7 +12,7 @@ import { assertSystemContract } from "./helpers/system-contract";
 import { SYSTEM_UI } from "@/components/systems/registry";
 import { SYSTEM_SERVER } from "@/lib/server/systems/registry";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
-import { metaOf, RULE_SYSTEM_KEYS, SYSTEM_META, systemNamespaces } from "@/lib/utils/rules/systems/meta";
+import { metaOf, RULE_SYSTEM_KEYS, SYSTEM_META, type SystemMeta, systemNamespaces } from "@/lib/utils/rules/systems/meta";
 import { readRequires } from "@/scripts/shared/system-requires.mjs";
 import { PACK_HOOKS, SYSTEM_MODULE } from "@/scripts/templates/systems";
 
@@ -99,7 +99,7 @@ describe("fixture system d6pool", () => {
 describe("eslint isolation requires", () => {
   const systemsDir = pathToFileURL(`${path.join(ROOT, "systems")}/`);
 
-  it.each(SYSTEM_META.filter((m) => m.module !== "d20").map((m) => [m.module, m.requires ?? []] as const))("%s: eslint parse of meta.ts equals META.requires", (id, requires) => {
+  it.each((SYSTEM_META as readonly SystemMeta[]).filter((m) => m.module !== "d20").map((m) => [m.module, m.requires ?? []] as const))("%s: eslint parse of meta.ts equals META.requires", (id, requires) => {
     expect(readRequires(systemsDir, id)).toEqual([...requires]);
   });
 });
