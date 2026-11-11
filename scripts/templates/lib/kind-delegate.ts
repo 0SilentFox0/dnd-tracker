@@ -1,3 +1,5 @@
+import { MATCH_COLUMN } from "./row-columns";
+
 import { type BundleTableDef, tableOfKind } from "@/lib/server/templates/bundle";
 import type { PackKind } from "@/lib/utils/templates/manifest";
 
@@ -18,5 +20,8 @@ export const delegateFor = (db: unknown, kind: PackKind): { table: BundleTableDe
 
   return { table, delegate: (db as Record<string, Delegate>)[table.delegate] };
 };
+
+/** Select for id, slug and the column rowLabel reads. */
+export const labelSelect = (kind: PackKind): Record<string, true> => ({ id: true, slug: true, [MATCH_COLUMN[kind] ?? "name"]: true });
 
 export const rowLabel = (row: Record<string, unknown>, fallback: unknown): string => String(row.name ?? row.title ?? row.race ?? fallback);

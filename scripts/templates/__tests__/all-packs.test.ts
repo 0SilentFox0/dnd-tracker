@@ -50,15 +50,13 @@ describe("every pack of data/templates", () => {
   });
 
   it("heroes-homm keeps Cyrillic out of its data files once it has a uk overlay (D28: the English text is the base)", () => {
-    const withOverlay = keys.filter((key) => key === "heroes-homm" && TEMPLATE_REGISTRY[key].locales.includes("uk"));
+    expect(TEMPLATE_REGISTRY["heroes-homm"].locales).toContain("uk");
 
-    for (const key of withOverlay) {
-      const dir = packPath(key, "", TEMPLATES_DIR);
+    const dir = packPath("heroes-homm", "", TEMPLATES_DIR);
 
-      const files = fs.readdirSync(dir).filter((file) => file.endsWith(".json"));
+    const files = fs.readdirSync(dir).filter((file) => file.endsWith(".json"));
 
-      for (const file of files) expect(fs.readFileSync(path.join(dir, file), "utf8"), `${key}/${file}`).not.toMatch(/[\u0400-\u04FF]/);
-    }
+    for (const file of files) expect(fs.readFileSync(path.join(dir, file), "utf8"), `heroes-homm/${file}`).not.toMatch(/[\u0400-\u04FF]/);
   });
 
   it("legacy names map to registered packs", () => {

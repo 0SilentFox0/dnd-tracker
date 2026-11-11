@@ -4,7 +4,7 @@ import { CONTENT_KINDS, type ContentKind } from "@/lib/constants/content-kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { classOf, isTranslatable } from "@/lib/utils/templates/i18n/catalog";
 import { mapKeyed, safeSlug, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
-import { attackNames, translateAt,translatedNames } from "@/lib/utils/templates/i18n/overlay";
+import { attackNames, nameNormalizerOf, translateAt, translatedNames } from "@/lib/utils/templates/i18n/overlay";
 
 const KIND_OF = Object.fromEntries(CONTENT_KINDS.map((kind) => [tableKey(kind), kind])) as Record<string, ContentKind>;
 
@@ -53,8 +53,12 @@ export function localizeRules(rules: unknown, tr: TranslationsV2): unknown {
   return JSON.stringify(tables) === JSON.stringify(rules.tables) ? rules : { ...rules, tables };
 }
 
-/** Skill trees are not content kinds: their race and branch names follow the race and main-skill names (D30). */
+const slugOf = (row: Record<string, unknown>): string | null => (typeof row.slug === "string" && row.slug ? row.slug : null);
+
+/** Skill trees are not content kinds: their race and branch names follow the race and main-skill names (D30). A tree without a slug stays English. */
 function localizeTree(row: Record<string, unknown>, maps: Record<Table, Map<string, string>>): Record<string, unknown> {
+  if (!slugOf(row)) return row;
+
   const race = (value: unknown) => (typeof value === "string" ? (maps.races.get(value) ?? value) : value);
 
   const { skills } = row;
@@ -68,13 +72,11 @@ function localizeTree(row: Record<string, unknown>, maps: Record<Table, Map<stri
   return { ...row, race: race(row.race), skills: mapped };
 }
 
-const slugOf = (row: Record<string, unknown>): string | null => (typeof row.slug === "string" && row.slug ? row.slug : null);
-
-/** Localize canonical template DB rows (SRD, Grim); source/language policy belongs to the caller. A row without a slug stays English. */
+/** Localize canonical template DB rows (SRD, Grim, Heroes); source/language policy belongs to the caller. A row without a slug stays English. */
 export function localizeTemplateBundle(bundle: Bundle, translations: TranslationsV2): Bundle {
   if (!Object.keys(translations).length) return bundle;
 
-  const maps = Object.fromEntries(TABLES.map((table) => [table, translatedNames(bundle[table], KIND_OF[table], translations, table, table === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)])) as Record<Table, Map<string, string>>;
+  const maps = Object.fromEntries(TABLES.map((table) => [table, translatedNames(bundle[table], KIND_OF[table], translations, table, nameNormalizerOf(table))])) as Record<Table, Map<string, string>>;
 
   // Templates without classes (Grim) list spells under free-form list names.
   if (bundle.classes.length === 0) {

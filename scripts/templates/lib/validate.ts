@@ -13,7 +13,7 @@ import { coerceRecord, IMPORT_SPECS, isImportKind, nameKey } from "@/lib/utils/c
 import { RulesetSchema } from "@/lib/utils/rules/schema";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems/registry";
 import { statusOf, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
-import { attackNames, placeholders, translatedNames } from "@/lib/utils/templates/i18n/overlay";
+import { attackNames, nameNormalizerOf, placeholders, translatedNames } from "@/lib/utils/templates/i18n/overlay";
 import type { PackKind, TemplateManifest } from "@/lib/utils/templates/manifest";
 import { TEMPLATE_REGISTRY } from "@/lib/utils/templates/registry";
 import { isSlug } from "@/lib/utils/templates/slug";
@@ -230,7 +230,7 @@ function collisionIssues(pack: Pack, tr: TranslationsV2, locale: string): PackIs
   for (const [kind, rows] of Object.entries(pack.rows) as [PackKind, PackRow[]][]) {
     if (new Set(rows.map((row) => row.slug)).size !== rows.length) continue;
 
-    guard(() => translatedNames(rows, kind, tr, kind, kind === "artifacts" ? (name) => name.trim().toLowerCase() : undefined));
+    guard(() => translatedNames(rows, kind, tr, kind, nameNormalizerOf(kind)));
 
     if (kind === "units") for (const row of rows) guard(() => attackNames(row, kind, tr));
   }

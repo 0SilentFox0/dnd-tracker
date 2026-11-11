@@ -66,8 +66,8 @@ async function fresh() {
 }
 
 describe("layered sync parity", () => {
-  it("hashes the same columns as the template bundle for all tables", () => {
-    for (const t of BUNDLE_TABLES) expect([...layeredModels()[t.model].hashColumns].sort(), t.key).toEqual([...t.columns].sort());
+  it("hashes the same columns as the template bundle for all tables (slug is a key, never hashed)", () => {
+    for (const t of BUNDLE_TABLES) expect([...layeredModels()[t.model].hashColumns].sort(), t.key).toEqual(t.columns.filter((column) => column !== "slug").sort());
   });
 });
 

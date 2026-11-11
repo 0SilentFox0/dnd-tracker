@@ -9,6 +9,9 @@ export function translateAt(tr: TranslationsV2, key: string, en: string): string
   return translated !== undefined && placeholders(translated) === placeholders(en) ? translated : en;
 }
 
+/** Artifact names match case-insensitively; every other kind matches exactly. */
+export const nameNormalizerOf = (kind: string): ((name: string) => string) | undefined => (kind === "artifacts" ? (name) => name.trim().toLowerCase() : undefined);
+
 interface NameRow { slug?: unknown; name?: unknown }
 
 /** Validate before overlaying any rows, including a collision with an untranslated name. */

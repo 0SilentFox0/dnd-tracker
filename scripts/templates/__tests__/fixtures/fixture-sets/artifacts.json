@@ -1,0 +1,4 @@
+[
+  { "slug": "art-a", "name": "Ring A", "description": "Ring of the set.", "rarity": "rare", "slot": "ring", "setId": "Drop Set", "abilities": [] },
+  { "slug": "art-b", "name": "Ring B", "description": "Ring of the kept set.", "rarity": "rare", "slot": "ring", "setId": "Keep Set", "abilities": [] }
+]

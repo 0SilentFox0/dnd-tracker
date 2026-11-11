@@ -16,7 +16,7 @@ describe("parseCommandArgs", () => {
   });
 
   it("lists the known keys for an unknown pack", () => {
-    expect(() => parseCommandArgs(["nope"], dir)).toThrow(/Unknown pack "nope"; known packs: fixture-pack, grim-fixture/);
+    expect(() => parseCommandArgs(["nope"], dir)).toThrow(/Unknown pack "nope"; known packs: fixture-pack, fixture-sets, grim-fixture/);
   });
 
   it("rejects a missing key, a flag in the key position and an option without a value", () => {

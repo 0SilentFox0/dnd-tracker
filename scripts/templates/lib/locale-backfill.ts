@@ -28,6 +28,10 @@ export async function backfillLocale(key: string, opts: { locale?: string; apply
 
   for (const clone of clones.filter((row) => ids.includes(row.id))) console.info(`${clone.id}  ${clone.name}: null -> ${locale}`);
 
+  const histogram = clones.reduce<Record<string, number>>((acc, row) => ({ ...acc, [row.locale ?? "null"]: (acc[row.locale ?? "null"] ?? 0) + 1 }), {});
+
+  console.info(`clone locales: ${Object.entries(histogram).map(([locale, count]) => `${locale}=${count}`).join(", ") || "none"}`);
+
   console.info(`${ids.length} of ${clones.length} clone(s) to update${opts.apply ? "" : " (dry run, pass --apply to write)"}`);
 
   if (opts.apply && ids.length > 0) await prisma.campaign.updateMany({ where: { id: { in: ids }, locale: null }, data: { locale } });

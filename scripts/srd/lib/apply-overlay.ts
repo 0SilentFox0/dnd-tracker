@@ -1,6 +1,6 @@
 import { classOf, isTranslatable } from "@/lib/utils/templates/i18n/catalog";
 import { mapKeyed, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
-import { attackNames, translatedNames, translateAt } from "@/lib/utils/templates/i18n/overlay";
+import { attackNames, nameNormalizerOf, translateAt,translatedNames } from "@/lib/utils/templates/i18n/overlay";
 
 const REF_KEYS: Readonly<Record<string, string>> = {
   spellId: "spells",
@@ -19,7 +19,7 @@ export function applyOverlay<T extends object>(source: T, tr: TranslationsV2, ki
 
   const rows = (kind: string): readonly unknown[] => data[kind] ?? [];
 
-  const maps: Record<string, Map<string, string>> = Object.fromEntries(kinds.map((kind) => [kind, translatedNames(rows(kind), kind, tr, kind, kind === "artifacts" ? (name) => name.trim().toLowerCase() : undefined)]));
+  const maps: Record<string, Map<string, string>> = Object.fromEntries(kinds.map((kind) => [kind, translatedNames(rows(kind), kind, tr, kind, nameNormalizerOf(kind))]));
 
   const attacks = rows("units").map((row) => attackNames(row, "units", tr));
 

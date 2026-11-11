@@ -1,5 +1,5 @@
 import { importOrder } from "./import-order";
-import { delegateFor, rowLabel } from "./kind-delegate";
+import { delegateFor, labelSelect, rowLabel } from "./kind-delegate";
 import type { PackRow } from "./pack";
 
 import { prisma } from "@/lib/db";
@@ -23,7 +23,7 @@ export async function rowsOutsidePack(campaignId: string, kinds: readonly PackKi
   for (const kind of pruneOrder(kinds)) {
     const inPack = new Set((rows[kind] ?? []).map((row) => row.slug));
 
-    const existing = await delegateFor(prisma, kind).delegate.findMany({ where: { campaignId, slug: { not: null } }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
+    const existing = await delegateFor(prisma, kind).delegate.findMany({ where: { campaignId, slug: { not: null } }, select: labelSelect(kind), orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
 
     for (const row of existing) {
       const slug = String(row.slug);

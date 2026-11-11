@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { assertSeedTarget } from "../../seed/seed-library-lib";
-import { delegateFor, rowLabel } from "./kind-delegate";
+import { delegateFor, labelSelect, rowLabel } from "./kind-delegate";
 import { readManifest, TEMPLATES_DIR } from "./pack";
 import { makeTemplateStore } from "./store";
 
@@ -66,7 +66,7 @@ export async function backfillSlugs(key: string, opts: { apply?: boolean; allowR
   const rowsByKind: Record<string, { id: string; slug: string | null; label: string }[]> = {};
 
   for (const kind of manifest.kinds) {
-    const rows = await delegateFor(prisma, kind).delegate.findMany({ where: { campaignId: template.id }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
+    const rows = await delegateFor(prisma, kind).delegate.findMany({ where: { campaignId: template.id }, select: labelSelect(kind), orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
 
     rowsByKind[kind] = rows.map((row) => ({ id: row.id, slug: typeof row.slug === "string" ? row.slug : null, label: rowLabel(row, row.id) }));
   }

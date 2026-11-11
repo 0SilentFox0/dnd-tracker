@@ -48,7 +48,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         groupId: data.groupId || null,
         icon: data.icon || null,
         description: data.description ?? null,
-        appearanceDescription: data.appearanceDescription ?? null,
+        appearanceDescription: data.appearanceDescription || null,
         fx: data.fx ?? undefined,
         ...(data.lists && { lists: data.lists }),
         ingredients: toJsonInput(data.ingredients),

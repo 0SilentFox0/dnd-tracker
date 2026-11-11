@@ -71,6 +71,12 @@ describe("nameRefIssues (HOMM D30)", () => {
     expect(nameRefIssues(pack(rows))).toEqual([]);
   });
 
+  it("checks condition.races of any condition type and effects[].group of any effect kind, as the overlay maps them", () => {
+    const rows = { ...base, units: [{ slug: "imp", name: "Imp", abilities: [{ condition: { type: "any", races: ["Ghosts"] }, effects: [{ kind: "damage", group: "Elves" }] }] }] } as unknown as Pack["rows"];
+
+    expect(nameRefIssues(pack(rows)).map((i) => i.message)).toEqual(['units "imp": race name "Ghosts" is not a race of the pack', 'units "imp": race name "Elves" is not a race of the pack']);
+  });
+
   it("flags unknown race names in conditions, summon groups and trees, and unknown branch names", () => {
     const rows = { ...base, units: [{ slug: "imp", name: "Imp", abilities: [{ condition: { type: "targetRace", races: ["Демони"] }, effects: [{ kind: "summon", group: "Elves" }] }] }], skillTrees: [{ slug: "x", race: "Ghosts", skills: { mainSkills: [{ id: "attack", name: "Напад" }] } }] } as unknown as Pack["rows"];
 

@@ -194,15 +194,17 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
 describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm localized clone (English base, uk overlay)", () => {
   const heroesMarker = `heroesloc-${randomUUID()}`;
 
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "heroes-loc-"));
+  let tmpDir = "";
 
   const key = `heroes-loc-${heroesMarker.slice(-8)}`;
 
-  const heroesUk = readTranslations("heroes-homm", "uk");
+  let heroesUk: TranslationsV2 = {};
 
   let templateId = "";
 
   beforeAll(async () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "heroes-loc-"));
+    heroesUk = readTranslations("heroes-homm", "uk");
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     await raw.user.create({ data: { id: heroesMarker, email: `${heroesMarker}@example.invalid`, displayName: heroesMarker } });
 
@@ -219,7 +221,8 @@ describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm localized clone (English 
     await raw.campaign.updateMany({ where: { id: { in: ids } }, data: { baseSourceId: null } });
     await raw.campaign.deleteMany({ where: { id: { in: ids } } });
     await raw.user.deleteMany({ where: { id: heroesMarker } });
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+
+    if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("every catalog key of the English pack is applied on the DB row form", async () => {

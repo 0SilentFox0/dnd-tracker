@@ -5,18 +5,18 @@ type Json = Record<string, unknown>;
 
 const isRecord = (v: unknown): v is Json => !!v && typeof v === "object" && !Array.isArray(v);
 
-/** Race names the engine matches as strings: `targetRace` conditions and `summon` effect groups. */
-function raceNameRefs(value: unknown): string[] {
-  if (Array.isArray(value)) return value.flatMap(raceNameRefs);
+/** Race names the engine matches as strings: `condition.races` and `effects[].group`, the two places the overlay maps (D30). */
+function raceNameRefs(value: unknown, parentKey = ""): string[] {
+  if (Array.isArray(value)) return value.flatMap((item) => raceNameRefs(item, parentKey));
 
   if (!isRecord(value)) return [];
 
   const own = [
-    ...(value.type === "targetRace" && Array.isArray(value.races) ? value.races.filter((r): r is string => typeof r === "string") : []),
-    ...(value.kind === "summon" && typeof value.group === "string" ? [value.group] : []),
+    ...(parentKey === "condition" && Array.isArray(value.races) ? value.races.filter((r): r is string => typeof r === "string") : []),
+    ...(parentKey === "effects" && typeof value.group === "string" ? [value.group] : []),
   ];
 
-  return [...own, ...Object.values(value).flatMap(raceNameRefs)];
+  return [...own, ...Object.entries(value).flatMap(([key, child]) => raceNameRefs(child, key))];
 }
 
 const namesOf = (rows: PackRow[] | undefined) => new Set((rows ?? []).map((row) => (typeof row.name === "string" ? row.name : "")));
