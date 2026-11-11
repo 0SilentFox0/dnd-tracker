@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { describe, expect, it } from "vitest";
 
+import { leakedIds } from "../lib/export";
 import { listPackKeys, packPath, readManifest, readPack, TEMPLATES_DIR } from "../lib/pack";
 import { validatePack } from "../lib/validate";
 
@@ -14,6 +15,12 @@ const keys = Object.keys(TEMPLATE_REGISTRY);
 describe("every pack of data/templates", () => {
   it.each(keys)("%s: validates without errors", (key) => {
     expect(validatePack(readPack(key)).filter((issue) => issue.level === "error").map((issue) => issue.message)).toEqual([]);
+  });
+
+  it("ratchet: ids left inside pack rows (D25b) never grow past 60", () => {
+    const total = keys.reduce((sum, key) => sum + Object.values(leakedIds(readPack(key))).reduce((a, n) => a + n, 0), 0);
+
+    expect(total).toBeLessThanOrEqual(60);
   });
 
   it("registry, folders and generated manifests list the same packs", () => {

@@ -4,9 +4,13 @@ import type { PackRefs } from "../types";
 import { newContentId } from "@/lib/server/templates/ids";
 import { isPlaceholderSkillId } from "@/lib/utils/skills/progression/ids";
 
+const RACIAL_BRANCH = "racial";
+
 type Json = Record<string, unknown>;
 
 type Swap = (kind: "main-skills" | "skills" | "spell-groups", value: string) => string;
+
+const isLiteral = (kind: string, value: string) => kind === "main-skills" && value === RACIAL_BRANCH;
 
 const isRecord = (v: unknown): v is Json => !!v && typeof v === "object" && !Array.isArray(v);
 
@@ -53,9 +57,28 @@ export function treeToPack(row: Json, refs: PackRefs): PackRow {
 export function treeFromPack(row: PackRow, refs: PackRefs & { rowId: string | undefined }): PackRow {
   const id = refs.rowId ?? newContentId();
 
-  const swap: Swap = (kind, value) => refs.idOf(kind, value) ?? value;
+  const swap: Swap = (kind, value) => {
+    const id = refs.idOf(kind, value);
+
+    if (id === undefined && !isLiteral(kind, value)) throw new Error(`skillTrees "${String(row.race)}": no ${kind} row with slug "${value}"`);
+
+    return id ?? value;
+  };
 
   const skills = mapTree(row.skills, swap) as Json;
 
   return { ...row, ...(refs.rowId === undefined && { id }), skills: { id, race: row.race, ...skills } };
+}
+
+/** Slugs a tree refers to that no row of the pack carries. */
+export function unresolvedTreeSlugs(row: PackRow, known: Readonly<Record<string, ReadonlySet<string>>>): string[] {
+  const missing: string[] = [];
+
+  mapTree(row.skills, (kind, value) => {
+    if (!isLiteral(kind, value) && !known[kind]?.has(value)) missing.push(`${kind} "${value}"`);
+
+    return value;
+  });
+
+  return [...new Set(missing)];
 }

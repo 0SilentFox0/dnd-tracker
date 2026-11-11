@@ -6,6 +6,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { type Pack, type PackRow, readPack } from "../lib/pack";
 import { validatePack } from "../lib/validate";
 import type { PackIssue } from "../systems";
+import { treeFromPack } from "../systems/homm/skill-trees";
 
 import type { TemplateManifest } from "@/lib/utils/templates/manifest";
 
@@ -113,5 +114,58 @@ describe("readPack", () => {
     fs.rmSync(path.join(dir, "fixture-pack", "spells.json"));
 
     expect(() => readPack("fixture-pack", dir)).toThrow(/spells\.json is missing/);
+  });
+});
+
+describe("validatePack on heroes-homm guards (D25, D25b, D25c)", () => {
+  const heroes = (): Pack => structuredClone(readPack("heroes-homm"));
+
+  const heroesErrors = (pack: Pack) => validatePack(pack).filter((issue) => issue.level === "error").map((issue) => issue.message);
+
+  it("is valid as it is and warns about ids left inside rows", () => {
+    const issues = validatePack(heroes());
+
+    expect(issues.filter((issue) => issue.level === "error")).toEqual([]);
+    expect(issues.some((issue) => issue.level === "warning" && issue.message.includes("left inside rows"))).toBe(true);
+  });
+
+  it("rejects an extra column outside the whitelist and extra on a kind without any", () => {
+    const pack = heroes();
+
+    (pack.rows.units as PackRow[])[0].extra = { hp: 1 };
+    (pack.rows.skillTrees as PackRow[])[0].extra = { race: "x" };
+
+    const errors = heroesErrors(pack);
+
+    expect(errors.filter((m) => m.includes("extra column(s) hp are not allowed"))).toHaveLength(1);
+    expect(errors.filter((m) => m.includes("extra column(s) race are not allowed (allowed: none)"))).toHaveLength(1);
+  });
+
+  it("rejects two skill trees of one race", () => {
+    const pack = heroes();
+
+    const trees = pack.rows.skillTrees as PackRow[];
+
+    trees[1] = { ...trees[1], race: trees[0].race };
+
+    expect(heroesErrors(pack).some((m) => m.includes("duplicate race"))).toBe(true);
+  });
+
+  it("rejects a tree that names a slug no row of the pack has", () => {
+    const pack = heroes();
+
+    const tree = (pack.rows.skillTrees as PackRow[])[0];
+
+    const branch = (tree.skills as { mainSkills: Array<Record<string, unknown>> }).mainSkills.find((b) => b.id !== "racial") as Record<string, unknown>;
+
+    branch.id = "no-such-branch";
+
+    expect(heroesErrors(pack).some((m) => m.includes('unknown main-skills "no-such-branch"'))).toBe(true);
+  });
+
+  it("treeFromPack throws on an unresolved slug instead of keeping it", () => {
+    const row = { slug: "t", race: "Human", skills: { mainSkills: [{ id: "racial" }, { id: "missing" }] } } as unknown as PackRow;
+
+    expect(() => treeFromPack(row, { idOf: () => undefined, slugOf: () => undefined, rowId: undefined })).toThrow(/no main-skills row with slug "missing"/);
   });
 });

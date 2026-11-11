@@ -43,7 +43,9 @@ export async function publishTemplateVersion(db: Prisma.TransactionClient, templ
 
     const current = new Map(rows.map((row) => [row.id, row]));
 
-    const slugFixes = rows.filter((row) => openHashes.get(row.id) === rowHash(row, t) && (open.find((o) => o.id === row.id)?.slug ?? null) !== ((row.slug as string | null | undefined) ?? null));
+    const openSlug = new Map(open.map((row) => [row.id, row.slug ?? null]));
+
+    const slugFixes = rows.filter((row) => openHashes.get(row.id) === rowHash(row, t) && openSlug.get(row.id) !== ((row.slug as string | null | undefined) ?? null));
 
     return {
       t,

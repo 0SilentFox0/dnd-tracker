@@ -1,6 +1,7 @@
 import { PACK_HOOKS, type PackRefs } from "../systems";
 import { iconColumnOf } from "./import-prepare";
 import type { IconsFile, Pack, PackRow } from "./pack";
+import { EXTRA_COLUMNS } from "./row-columns";
 
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { type Bundle, tableOfKind } from "@/lib/server/templates/bundle";
@@ -18,9 +19,6 @@ import type { ImportKind } from "@/types/content-import";
 type Row = Record<string, unknown> & { id: string };
 
 export type SlugMap = Partial<Record<PackKind, Record<string, string>>>;
-
-/** Columns the import specs do not carry; the importer writes them from `extra` by slug. */
-export const EXTRA_COLUMNS: Partial<Record<PackKind, readonly string[]>> = { units: ["levelScaling"], skills: ["appearanceDescription"] };
 
 const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (!!v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
 

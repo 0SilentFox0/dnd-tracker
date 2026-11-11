@@ -1,8 +1,10 @@
 import { PACK_ADAPTERS, PACK_HOOKS, type PackIssue, SYSTEM_MODULE } from "../systems";
+import { leakedIds } from "./export";
 import { catalogOfPack, i18nIssuesOf } from "./i18n-convert";
 import { readTranslations } from "./i18n-store";
 import { iconGaps, iconIssues } from "./icons-file";
 import { type Pack, type PackRow, TEMPLATES_DIR } from "./pack";
+import { EXTRA_COLUMNS, MATCH_COLUMN } from "./row-columns";
 
 import { TemplateManifestSchema } from "@/lib/schemas/template-manifest";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
@@ -60,6 +62,8 @@ function rowIssues(kind: PackKind, rows: PackRow[]): PackIssue[] {
 
   const slugs = new Map<string, string>();
 
+  const matches = new Map<string, string>();
+
   rows.forEach((raw, index) => {
     const where = label(kind, index, raw.name);
 
@@ -70,6 +74,19 @@ function rowIssues(kind: PackKind, rows: PackRow[]): PackIssue[] {
     if (typeof raw.slug !== "string" || !isSlug(raw.slug)) add("invalid slug");
     else if (slugs.has(raw.slug)) add(`duplicate slug "${raw.slug}" (also ${slugs.get(raw.slug)})`);
     else slugs.set(raw.slug, String(raw.name ?? raw.slug));
+
+    const unknownExtra = Object.keys(raw.extra ?? {}).filter((column) => !EXTRA_COLUMNS[kind]?.includes(column));
+
+    if (unknownExtra.length > 0) add(`extra column(s) ${unknownExtra.join(", ")} are not allowed (allowed: ${EXTRA_COLUMNS[kind]?.join(", ") || "none"})`);
+
+    const matchColumn = MATCH_COLUMN[kind];
+
+    if (matchColumn) {
+      const value = JSON.stringify(raw[matchColumn]);
+
+      if (matches.has(value)) add(`duplicate ${matchColumn} ${value} (also ${matches.get(value)})`);
+      else matches.set(value, String(raw.slug));
+    }
 
     if (!isImportKind(kind)) return;
 
@@ -141,6 +158,14 @@ function countIssues(pack: Pack): PackIssue[] {
   ];
 }
 
+function leakIssues(pack: Pack): PackIssue[] {
+  const leaks = leakedIds(pack);
+
+  const total = Object.values(leaks).reduce((sum, n) => sum + n, 0);
+
+  return total > 0 ? [{ level: "warning", message: `${total} row id(s) left inside rows, not portable (${Object.entries(leaks).map(([path, n]) => `${path}: ${n}`).join(", ")})` }] : [];
+}
+
 const NO_ICON_KINDS = new Set(["skillTrees", "tracks"]);
 
 function iconPackIssues(pack: Pack): PackIssue[] {
@@ -184,6 +209,7 @@ export function validatePack(pack: Pack, opts: ValidateOptions = {}): PackIssue[
     ...(Object.entries(pack.rows) as [PackKind, PackRow[]][]).flatMap(([kind, rows]) => rowIssues(kind, rows)),
     ...linkIssues(pack),
     ...countIssues(pack),
+    ...leakIssues(pack),
     ...iconPackIssues(pack),
     ...translationIssues(pack, dir),
     ...(hooks?.validatePack?.(pack) ?? []),

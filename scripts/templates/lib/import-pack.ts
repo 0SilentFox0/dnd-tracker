@@ -8,6 +8,7 @@ import { withIcons } from "./icons-file";
 import { importOrder } from "./import-order";
 import { iconColumnOf, resolveSchoolRefs, staleSpellColumns, withClassIcons } from "./import-prepare";
 import { type Pack, type PackRow, readPack, TEMPLATES_DIR } from "./pack";
+import { EXTRA_COLUMNS, MATCH_COLUMN } from "./row-columns";
 import { ensureTemplate, makeTemplateStore } from "./store";
 import { validatePack } from "./validate";
 
@@ -58,9 +59,6 @@ const delegateFor = (db: unknown, kind: PackKind): { table: BundleTableDef; dele
   return { table, delegate: (db as Record<string, Delegate>)[table.delegate] };
 };
 
-/** Kinds without a name column: an unslugged row of the template is matched by this column. */
-const MATCH_COLUMN: Partial<Record<PackKind, string>> = { skillTrees: "race", tracks: "title" };
-
 interface UpsertContext { hooks: PackHooks | undefined; idBySlug: Record<string, Record<string, string>>; dryRun: boolean }
 
 /** Rows of a kind the importer does not know (skillTrees, tracks): match by slug (else by the match column), keep the id, write the columns as they are. */
@@ -75,7 +73,7 @@ async function upsertBySlug(campaignId: string, kind: PackKind, rows: PackRow[],
     for (const { origin: _origin, extra: _extra, ...row } of rows) {
       const existing = (await delegate.findFirst({ where: { campaignId, slug: row.slug } })) ?? (matchColumn ? await delegate.findFirst({ where: { campaignId, slug: null, [matchColumn]: row[matchColumn] } }) : null);
 
-      const data = hooks?.fromPackRow ? hooks.fromPackRow(kind, row, { idOf: (k, slug) => idBySlug[k]?.[slug], slugOf: () => undefined, rowId: existing?.id }) : row;
+      const data = hooks?.fromPackRow ? hooks.fromPackRow(kind, row, { idOf: (k, slug) => idBySlug[k]?.[slug] ?? (dryRun ? slug : undefined), slugOf: () => undefined, rowId: existing?.id }) : row;
 
       const unchanged = existing && rowHash(existing, table) === rowHash({ ...existing, ...data }, table);
 
@@ -117,6 +115,10 @@ async function writeExtras(campaignId: string, kind: PackKind, rows: PackRow[]):
       const { delegate } = delegateFor(db, kind);
 
       for (const { slug, extra = {} } of withExtra) {
+        const unknown = Object.keys(extra).filter((column) => !EXTRA_COLUMNS[kind]?.includes(column));
+
+        if (unknown.length > 0) throw new Error(`${kind} "${slug}": extra column(s) ${unknown.join(", ")} are not allowed`);
+
         const existing = await delegate.findFirst({ where: { campaignId, slug } });
 
         if (existing && Object.entries(extra).some(([column, value]) => !isDeepStrictEqual(existing[column], value))) {

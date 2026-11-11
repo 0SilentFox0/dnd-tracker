@@ -9,8 +9,8 @@ import { contentLayer } from "@/lib/db/content-layer";
 import { createScopedDatabase } from "@/lib/server/content/write-context";
 import { tableKey } from "@/lib/server/templates/bundle";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
-import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
+import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 
 const raw = new PrismaClient({ datasources: { db: { url: singleConnectionDatabaseUrl("DATABASE_URL") } } });
 
@@ -22,7 +22,7 @@ vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invali
 import { bundleToPack, type SlugMap } from "../lib/export";
 import { importPack } from "../lib/import-pack";
 import { readPack } from "../lib/pack";
-import { diffSnapshots, snapshotCampaign } from "../lib/snapshot";
+import { snapshotCampaign } from "../lib/snapshot";
 
 const marker = `heroesrt-${randomUUID()}`;
 
@@ -127,10 +127,10 @@ describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm pack", () => {
     tmpDirs.push(dir);
     fs.cpSync(path.join(freshDir, key), path.join(dir, key), { recursive: true });
 
-    const edit = (file: string, change: (rows: Array<Record<string, any>>) => void) => {
+    const edit = (file: string, change: (rows: Array<Record<string, unknown> & { slug: string; name: string; weapon?: Record<string, unknown> }>) => void) => {
       const target = path.join(dir, key, file);
 
-      const rows = JSON.parse(fs.readFileSync(target, "utf8")) as Array<Record<string, any>>;
+      const rows = JSON.parse(fs.readFileSync(target, "utf8")) as Array<Record<string, unknown> & { slug: string; name: string; weapon?: Record<string, unknown> }>;
 
       change(rows);
       fs.writeFileSync(target, JSON.stringify(rows));
