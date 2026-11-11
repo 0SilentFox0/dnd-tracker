@@ -87,6 +87,10 @@ const SYSTEM_SELF_PATTERNS = (id) => [
 
 const SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*"], message: "rules/** — чиста логіка без сервера." };
 
+const SYSTEM_SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*", "@/systems/*/server", "@/systems/*/server/*"], message: "ui/** і hooks/** не імпортують сервер." };
+
+const API_UTILS_IMPORT_PATTERN = { group: ["@/lib/utils/api/*", "!@/lib/utils/api/content-error"], message: "rules/** — лише @/lib/utils/api/content-error з утиліт API." };
+
 const SYSTEM_API_IMPORT_PATTERN = { group: ["@/systems/*/api", "@/systems/*/api/*"], allowTypeImports: true, message: "ui/** не ходить в API — використайте хук із systems/<id>/hooks." };
 
 const SYSTEM_LAYERS = (id) => {
@@ -100,9 +104,9 @@ const SYSTEM_LAYERS = (id) => {
 
   return [
     layer("*", RESTRICTED_PATHS, []),
-    layer("rules", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SERVER_IMPORT_PATTERN]),
-    layer("ui", RESTRICTED_PATHS, [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, SYSTEM_API_IMPORT_PATTERN]),
-    layer("hooks", RESTRICTED_PATHS, []),
+    layer("rules", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SERVER_IMPORT_PATTERN, API_UTILS_IMPORT_PATTERN]),
+    layer("ui", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, SYSTEM_API_IMPORT_PATTERN, SYSTEM_SERVER_IMPORT_PATTERN]),
+    layer("hooks", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SYSTEM_SERVER_IMPORT_PATTERN]),
     layer("api", RESTRICTED_PATHS, []),
     layer("server", RESTRICTED_PATHS, []),
   ].map((block, i) => (i === 0 ? { ...block, files: [`systems/${id}/**/*.{ts,tsx}`] } : block));

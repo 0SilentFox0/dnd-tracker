@@ -69,6 +69,16 @@ describe("system import zones", () => {
 
     expect(ui.groups).toEqual(expect.arrayContaining(["@/lib/api", "@/systems/*/api", "@/app", D20]));
 
+    expect(rules.groups).toEqual(expect.arrayContaining(["@/lib/utils/api/*", "!@/lib/utils/api/content-error"]));
+
+    expect(ui.names).toContain("@/lib/db");
+    expect(ui.groups).toEqual(expect.arrayContaining(["@/lib/server", "@/systems/*/server"]));
+
+    const hooks = await restricted("systems/wfrp/hooks/x.ts");
+
+    expect(hooks.names).toContain("@/lib/db");
+    expect(hooks.groups).toEqual(expect.arrayContaining(["@/lib/server", "@/lib/server/*", "@/systems/*/server", "@/systems/*/server/*"]));
+
     for (const file of ["systems/wfrp/hooks/x.ts", "systems/wfrp/api/x.ts", "systems/wfrp/server/x.ts"]) expect((await restricted(file)).groups).toEqual(expect.arrayContaining(["@/app", "@/scripts", D20]));
   });
 });
