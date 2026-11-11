@@ -102,6 +102,18 @@ describe("importContent slug matching", () => {
     expect(writeSlug).not.toHaveBeenCalled();
   });
 
+  it("a new row does not steal a renamed row that another incoming slug claims", async () => {
+    keys = [{ id: "r1", name: "Foo", slug: "b" }];
+
+    const report = await run([{ name: "Foo", slug: "a" }, { name: "Bar", slug: "b" }]);
+
+    expect(report.counts).toMatchObject({ created: 1, updated: 1 });
+    expect(create.mock.calls[0][1]).toMatchObject({ name: "Foo" });
+    expect(update.mock.calls[0][1]).toMatchObject({ id: "r1" });
+    expect(update.mock.calls[0][2]).toMatchObject({ name: "Bar" });
+    expect(writeSlug).toHaveBeenCalledTimes(1);
+  });
+
   it("dry run writes nothing", async () => {
     await run([{ name: "Archer", slug: "archer" }], "update", true);
 

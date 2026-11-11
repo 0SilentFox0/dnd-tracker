@@ -3,7 +3,7 @@ import { iconColumnOf } from "./import-prepare";
 import type { IconsFile, Pack, PackRow } from "./pack";
 
 import { ArtifactSlot } from "@/lib/constants/artifacts";
-import type { Bundle, BundleTable } from "@/lib/server/templates/bundle";
+import { type Bundle, tableOfKind } from "@/lib/server/templates/bundle";
 import { CONTENT_ID_RE } from "@/lib/server/templates/ids";
 import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
@@ -18,23 +18,6 @@ import type { ImportKind } from "@/types/content-import";
 type Row = Record<string, unknown> & { id: string };
 
 export type SlugMap = Partial<Record<PackKind, Record<string, string>>>;
-
-const TABLE_OF: Record<PackKind, BundleTable | undefined> = {
-  units: "units",
-  races: "races",
-  classes: "classes",
-  feats: "feats",
-  backgrounds: "backgrounds",
-  careers: "careers",
-  spells: "spells",
-  "spell-groups": "spellGroups",
-  "main-skills": "mainSkills",
-  skills: "skills",
-  artifacts: "artifacts",
-  "artifact-sets": "artifactSets",
-  tracks: "tracks",
-  skillTrees: "skillTrees",
-};
 
 /** Columns the import specs do not carry; the importer writes them from `extra` by slug. */
 export const EXTRA_COLUMNS: Partial<Record<PackKind, readonly string[]>> = { units: ["levelScaling"], skills: ["appearanceDescription"] };
@@ -78,9 +61,9 @@ const isUrl = (v: unknown): v is string => typeof v === "string" && /^https?:\/\
 /** Pack rows keep references by name (importer contract); row ids, icon urls and the legacy-only columns leave the row. */
 export function bundleToPack(bundle: Bundle, manifest: TemplateManifest, slugs: SlugMap): Pack {
   const rowsOf = (kind: PackKind): Row[] => {
-    const table = TABLE_OF[kind];
+    const table = tableOfKind(kind);
 
-    return table ? (bundle[table] as Row[]) : [];
+    return table ? (bundle[table.key] as Row[]) : [];
   };
 
   const slugOf = (kind: PackKind, id: string) => slugs[kind]?.[id];

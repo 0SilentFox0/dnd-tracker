@@ -95,6 +95,13 @@ export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
   table("tracks", "CampaignTrack", "campaignTrack"),
 ];
 
+const TABLE_KEY_OF_KIND: Readonly<Record<string, BundleTable>> = { "spell-groups": "spellGroups", "main-skills": "mainSkills", "artifact-sets": "artifactSets" };
+
+/** The one map from a content/pack kind to its bundle table key; kinds named like their table pass through. */
+export const tableKey = (kind: string): string => TABLE_KEY_OF_KIND[kind] ?? kind;
+
+export const tableOfKind = (kind: string): BundleTableDef | undefined => BUNDLE_TABLES.find((t) => t.key === tableKey(kind));
+
 const perTable = <T>(make: () => T) => Object.fromEntries(BUNDLE_TABLES.map((t) => [t.key, make()])) as Record<BundleTable, T>;
 
 const rowSchema = z.array(z.looseObject({ id: z.string().regex(CONTENT_ID_RE) })).max(5000);

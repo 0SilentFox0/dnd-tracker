@@ -135,7 +135,7 @@ function zodIssues(error: { issues: ZodLikeIssue[] }): ImportIssue[] {
   });
 }
 
-type PlanCtx = { spec: ImportSpec; resource: AnyContentResource; mode: ImportMode; existing: NameIndex; refs: Map<ImportKind, NameIndex>; seen: Set<string>; seenSlugs: Set<string> };
+type PlanCtx = { spec: ImportSpec; resource: AnyContentResource; mode: ImportMode; existing: NameIndex; refs: Map<ImportKind, NameIndex>; seen: Set<string>; seenSlugs: Set<string>; incomingSlugs: Set<string>; claimed: Set<string> };
 
 function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan {
   const { slug: rawSlug, ...fields } = raw;
@@ -166,7 +166,15 @@ function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan 
 
   const bySlug = slug ? ctx.existing.bySlug.get(slug) : undefined;
 
-  const matches = bySlug ? [bySlug.id] : (ctx.existing.byName.get(key) ?? []);
+  const byName = (ctx.existing.byName.get(key) ?? []).filter((id) => {
+    const stored = ctx.existing.slugOf.get(id);
+
+    return !ctx.claimed.has(id) && (!stored || stored === slug || !ctx.incomingSlugs.has(stored));
+  });
+
+  const matches = bySlug ? [bySlug.id] : byName;
+
+  for (const id of matches) ctx.claimed.add(id);
 
   if (matches.length > 0 && ctx.mode === "create") return { row, name, status: "error", issues: [...issues, err("contentImport.issues.alreadyExists", "name", { params: { name } })] };
 
@@ -213,21 +221,60 @@ async function writePlan(resource: AnyContentResource, actor: Actor, plan: Plan,
     await resource.update(actor, existing, plan.body);
   }
 
-  if (plan.slug && plan.slug !== plan.storedSlug) await deps.writeSlug?.(actor.campaignId, kind, id, plan.slug);
+  if (plan.slug && plan.slug !== plan.storedSlug) await deps.writeSlug(actor.campaignId, kind, id, plan.slug);
 }
 
-async function settleUnchanged(resource: AnyContentResource, actor: Actor, plan: Plan, kind: ImportKind, deps: ImportDeps): Promise<boolean> {
-  const stored = (await resource.find(actor, plan.existingId as string, "write")) as Record<string, unknown> | null;
+class Rollback extends Error {
+  constructor(readonly unchanged: boolean) {
+    super("rollback");
+  }
+}
 
-  if (!stored) return false;
-
+/** Applies the update inside a transaction and compares the stored row before and after; an unchanged row is rolled back. */
+async function applyIfChanged(resource: AnyContentResource, actor: Actor, plan: Plan, kind: ImportKind, deps: ImportDeps, commit: boolean): Promise<boolean> {
   const table = tableOfKind(kind);
 
-  if (rowHash(stored, table) !== rowHash({ ...stored, ...(plan.body as Record<string, unknown>) }, table)) return false;
+  try {
+    await withCampaignContentWrite(actor.campaignId, async () => {
+      const before = (await resource.find(actor, plan.existingId as string, "write")) as Record<string, unknown> | null;
 
-  if (plan.slug && plan.slug !== plan.storedSlug) await withCampaignRuntimeWrite(actor.campaignId, () => deps.writeSlug(actor.campaignId, kind, plan.existingId as string, plan.slug as string));
+      if (!before) throw new ContentError(resource.notFound, 404);
 
-  return true;
+      await resource.update(actor, before, plan.body);
+
+      const after = (await resource.find(actor, plan.existingId as string, "write")) as Record<string, unknown>;
+
+      if (rowHash(before, table) === rowHash(after, table)) throw new Rollback(true);
+
+      if (!commit) throw new Rollback(false);
+
+      if (plan.slug && plan.slug !== plan.storedSlug) await deps.writeSlug(actor.campaignId, kind, plan.existingId as string, plan.slug);
+    });
+
+    return true;
+  } catch (error) {
+    if (!(error instanceof Rollback)) throw error;
+
+    if (error.unchanged && commit && plan.slug && plan.slug !== plan.storedSlug) await withCampaignRuntimeWrite(actor.campaignId, () => deps.writeSlug(actor.campaignId, kind, plan.existingId as string, plan.slug as string));
+
+    return !error.unchanged;
+  }
+}
+
+async function prepareBody(resource: AnyContentResource, actor: Actor, plan: Plan, create: boolean) {
+  if (create) {
+    if (resource.prepareCreate) plan.body = await resource.prepareCreate(actor, plan.body);
+
+    return;
+  }
+
+  if (!resource.prepareUpdate) return;
+
+  const current = await resource.find(actor, plan.existingId as string, "write");
+
+  if (!current) throw new ContentError(resource.notFound, 404);
+
+  plan.body = await resource.prepareUpdate(actor, current, plan.body);
 }
 
 async function checkPlan(resource: AnyContentResource, actor: Actor, plan: Plan): Promise<ImportRowResult> {
@@ -270,11 +317,25 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
 
   const [own, ...refLists] = await Promise.all([deps.loadKeys(actor.campaignId, kind), ...refKinds.map((k) => deps.loadNames(actor.campaignId, k))]);
 
-  const ctx: PlanCtx = { spec, resource, mode: input.mode, existing: indexNames(own), refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])), seen: new Set(), seenSlugs: new Set() };
+  const ctx: PlanCtx = { spec, resource, mode: input.mode, existing: indexNames(own), refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])), seen: new Set(), seenSlugs: new Set(), incomingSlugs: new Set(input.rows.flatMap((r) => (typeof r.slug === "string" && r.slug ? [r.slug] : []))), claimed: new Set() };
 
   const plans = input.rows.map((raw, i) => planRow(raw, i + 1, ctx));
 
-  if (input.dryRun) return report(true, await Promise.all(plans.map((plan) => checkPlan(resource, actor, plan))));
+  if (input.dryRun) {
+    const checked = await Promise.all(plans.map((plan) => checkPlan(resource, actor, plan)));
+
+    if (!deps.skipUnchanged) return report(true, checked);
+
+    for (const [i, plan] of plans.entries()) {
+      if (plan.status !== "pending" || plan.op !== "update" || checked[i].status !== "updated") continue;
+
+      await prepareBody(resource, actor, plan, false);
+
+      if (!(await applyIfChanged(resource, actor, plan, kind, deps, false))) checked[i] = { ...checked[i], status: "skipped" };
+    }
+
+    return report(true, checked);
+  }
 
   const results: ImportRowResult[] = [];
 
@@ -287,19 +348,17 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
     }
 
     try {
-      if (plan.op === "create" && resource.prepareCreate) plan.body = await resource.prepareCreate(actor, plan.body);
+      await prepareBody(resource, actor, plan, plan.op === "create");
 
-      if (plan.op === "update" && resource.prepareUpdate) {
-        const current = await resource.find(actor, plan.existingId as string, "write");
+      if (plan.op === "update" && deps.skipUnchanged) {
+        if (await applyIfChanged(resource, actor, plan, kind, deps, true)) {
+          wrote = true;
+          results.push(toResult(plan));
+        } else {
+          plan.status = "skipped";
+          results.push(toResult(plan));
+        }
 
-        if (!current) throw new ContentError(resource.notFound, 404);
-
-        plan.body = await resource.prepareUpdate(actor, current, plan.body);
-      }
-
-      if (plan.op === "update" && deps.skipUnchanged && (await settleUnchanged(resource, actor, plan, kind, deps))) {
-        plan.status = "skipped";
-        results.push(toResult(plan));
         continue;
       }
 

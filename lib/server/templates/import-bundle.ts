@@ -76,7 +76,7 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
 
   const hashes: TableHashes = {};
 
-  const writes = await Promise.all(BUNDLE_TABLES.map(async (t) => {
+  const writes = BUNDLE_TABLES.map((t) => {
     const rows = dropTakenSlugs(bundle[t.key].map((row) => {
       const clean = pick(row, t.columns);
 
@@ -103,7 +103,7 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
     }), new Map()).map((row) => toPrismaJson(row, t));
 
     return { t, rows };
-  }));
+  });
 
   assertNoLeak(remappedRows, new Set([...idMap].filter(([from, to]) => from !== to).map(([from]) => from)));
 

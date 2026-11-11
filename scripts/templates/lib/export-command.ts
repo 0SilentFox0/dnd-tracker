@@ -7,12 +7,11 @@ import { writeIcons } from "./icons-file";
 import { listPackKeys, packPath, readManifest, TEMPLATES_DIR } from "./pack";
 
 import { prisma } from "@/lib/db";
+import { tableKey } from "@/lib/server/templates/bundle";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import type { PackKind, TemplateManifest } from "@/lib/utils/templates/manifest";
 
 const KIND_ORDER: readonly PackKind[] = ["spell-groups", "spells", "races", "classes", "feats", "backgrounds", "careers", "units", "main-skills", "skills", "artifact-sets", "artifacts", "skillTrees", "tracks"];
-
-const TABLE_OF: Partial<Record<PackKind, string>> = { "spell-groups": "spellGroups", "main-skills": "mainSkills", "artifact-sets": "artifactSets" };
 
 const OPTIONS = new Set(["--from", "--system", "--name", "--slugs"]);
 
@@ -54,7 +53,7 @@ export async function exportCommand(args: string[]): Promise<void> {
 
     if (!base.system) throw new Error("--system is required for a new pack");
 
-    const kinds = base.kinds.length > 0 ? base.kinds : KIND_ORDER.filter((kind) => ((bundle as unknown as Record<string, unknown[]>)[TABLE_OF[kind] ?? kind]?.length ?? 0) > 0);
+    const kinds = base.kinds.length > 0 ? base.kinds : KIND_ORDER.filter((kind) => ((bundle as unknown as Record<string, unknown[]>)[tableKey(kind)]?.length ?? 0) > 0);
 
     const pack = bundleToPack(bundle, { ...base, kinds }, slugs);
 

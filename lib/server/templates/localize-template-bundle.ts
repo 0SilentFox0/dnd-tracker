@@ -1,7 +1,6 @@
-import type { Bundle, BundleTable } from "./bundle";
+import { type Bundle, type BundleTable, tableKey } from "./bundle";
 
 import { CONTENT_KINDS, type ContentKind } from "@/lib/constants/content-kinds";
-import { tableKey } from "@/lib/server/assistant/actions/content-dependencies";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { classOf, isTranslatable } from "@/lib/utils/templates/i18n/catalog";
 import { mapKeyed, safeSlug, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";

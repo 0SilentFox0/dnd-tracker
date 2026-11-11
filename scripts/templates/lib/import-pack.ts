@@ -18,7 +18,7 @@ import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/
 import { loadKeys } from "@/lib/server/content/import/slug";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { markContentDirty } from "@/lib/server/content/write-context";
-import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
+import { type BundleTableDef, tableOfKind } from "@/lib/server/templates/bundle";
 import { type PublishResult } from "@/lib/server/templates/publish";
 import { publishTemplate } from "@/lib/server/templates/publish-service";
 import { rowHash } from "@/lib/server/templates/sync/hash";
@@ -50,8 +50,8 @@ function describeReport(kind: string, report: ImportReport, t: Awaited<ReturnTyp
 
 type Delegate = { findFirst(args: unknown): Promise<(Record<string, unknown> & { id: string }) | null>; create(args: unknown): Promise<unknown>; update(args: unknown): Promise<unknown> };
 
-const delegateFor = (db: unknown, kind: PackKind): { table: (typeof BUNDLE_TABLES)[number]; delegate: Delegate } => {
-  const table = BUNDLE_TABLES.find((t) => t.key === kind || (kind === "spell-groups" && t.key === "spellGroups") || (kind === "main-skills" && t.key === "mainSkills") || (kind === "artifact-sets" && t.key === "artifactSets"));
+const delegateFor = (db: unknown, kind: PackKind): { table: BundleTableDef; delegate: Delegate } => {
+  const table = tableOfKind(kind);
 
   if (!table) throw new Error(`No table is registered for kind "${kind}"`);
 

@@ -3,11 +3,9 @@ import { Prisma } from "@prisma/client";
 import type { FieldChange, TargetRef } from "../types";
 import { jsonContent } from "./content-snapshot";
 
-import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
+import { BUNDLE_TABLES, tableKey } from "@/lib/server/templates/bundle";
 import { collectKeysAndStrings } from "@/lib/server/templates/remap-ids";
 import { asRecord } from "@/lib/utils/common/json";
-
-export const tableKey = (kind: string) => ({ "spell-groups": "spellGroups", "main-skills": "mainSkills", "artifact-sets": "artifactSets" }[kind] ?? kind);
 
 type Row = Record<string, unknown>;
 
