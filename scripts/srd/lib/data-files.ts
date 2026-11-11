@@ -49,8 +49,4 @@ export const readSrdData = (dir = SRD_DATA_DIR, locale?: string): SrdData => {
 
 export const readSrdManifest = (dir = SRD_DATA_DIR): TemplateManifest => TemplateManifestSchema.parse(JSON.parse(fs.readFileSync(fileOf(dir, "manifest"), "utf8")));
 
-export function toImportRows<T extends { slug: string }>(rows: T[]): Record<string, unknown>[];
-export function toImportRows(rows: ReadonlyArray<{ slug: string }>): Record<string, unknown>[];
-export function toImportRows(rows: ReadonlyArray<{ slug: string }>): Record<string, unknown>[] {
-  return rows.map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => key !== "slug")));
-}
+export const toImportRows = <T extends { slug: string }>(rows: readonly T[]): Record<string, unknown>[] => rows.map((row) => ({ ...row }));

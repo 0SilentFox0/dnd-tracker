@@ -1,4 +1,4 @@
 [
-  {"name":"Arming Sword","description":"A plain, well-balanced sword for one hand.","rarity":"common","slot":"weapon","systemStats":{"type":"weapon","group":"basic","reach":"average","damage":{"addSb":true,"flat":4},"qualities":[],"flaws":[],"twoHanded":false,"weight":1,"price":240}},
-  {"name":"Padded Jack","description":"A quilted linen jacket stuffed with tow.","rarity":"common","slot":"armor","systemStats":{"type":"armour","locations":{"head":0,"arm":1,"body":1,"leg":0},"kind":"soft","qualities":[{"key":"flexible"}],"weight":1,"price":120}}
+  {"slug":"arming-sword","name":"Arming Sword","description":"A plain, well-balanced sword for one hand.","rarity":"common","slot":"weapon","systemStats":{"type":"weapon","group":"basic","reach":"average","damage":{"addSb":true,"flat":4},"qualities":[],"flaws":[],"twoHanded":false,"weight":1,"price":240}},
+  {"slug":"padded-jack","name":"Padded Jack","description":"A quilted linen jacket stuffed with tow.","rarity":"common","slot":"armor","systemStats":{"type":"armour","locations":{"head":0,"arm":1,"body":1,"leg":0},"kind":"soft","qualities":[{"key":"flexible"}],"weight":1,"price":120}}
 ]

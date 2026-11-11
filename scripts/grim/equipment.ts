@@ -52,7 +52,7 @@ export const SHIELD_BAND = { x: [1, 3], weight: [0, 3], price: [12, 480] } as co
 
 export const GEAR_BAND = { weight: [0, 2], price: [1, 480] } as const satisfies Record<string, Range>;
 
-export const ARTIFACT_KEYS: readonly string[] = ["name", "description", "rarity", "slot", "systemStats"];
+export const ARTIFACT_KEYS: readonly string[] = ["slug", "name", "description", "rarity", "slot", "systemStats"];
 
 export const GRIM_ITEM_SLOTS = ["weapon", "range_weapon", "armor", "helmet", "boots", "shield", "item"] as const;
 

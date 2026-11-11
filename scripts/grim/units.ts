@@ -43,7 +43,7 @@ export const UNIT_LEVEL_BANDS: Record<GrimUnitLevel, UnitLevelBand> = {
   4: { charMax: 80, combat: [50, 80], wounds: [24, 120], ap: [1, 6], ward: [7, 9], psychologyMax: 4, attack: [6, 12], breath: [7, 12], ranged: [5, 10], regenerate: true, magical: true },
 };
 
-export const UNIT_KEYS: readonly string[] = ["name", "level", "maxHp", "speed", "initiative", "gridSize", "statblock", "characteristics", "abilities", "knownSpells", "raceId"];
+export const UNIT_KEYS: readonly string[] = ["slug", "name", "level", "maxHp", "speed", "initiative", "gridSize", "statblock", "characteristics", "abilities", "knownSpells", "raceId"];
 
 export const GRID_BY_SIZE: Record<TraitSize, number> = { tiny: 1, little: 1, small: 1, average: 1, large: 2, enormous: 3, monstrous: 3 };
 

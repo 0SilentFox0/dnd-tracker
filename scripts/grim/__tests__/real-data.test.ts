@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { grimCoverage, grimInfo } from "../coverage";
-import { readGrimData, readGrimManifest } from "../data";
+import { GRIM_ROW_KINDS, readGrimData, readGrimManifest } from "../data";
 import { grimIconIssues, readGrimIcons } from "../icons";
 import { validateGrimData } from "../validate-data";
 
@@ -12,6 +12,7 @@ import { CHARACTERISTIC_KEYS } from "@/lib/utils/rules/systems/wfrp/characterist
 import { planDraft } from "@/lib/utils/rules/systems/wfrp/creation/plan";
 import { rollCreation } from "@/lib/utils/rules/systems/wfrp/creation/roll";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
+import { isSlug } from "@/lib/utils/templates/slug";
 
 const data = readGrimData();
 
@@ -63,6 +64,17 @@ describe("grim-d100 catalog", () => {
     expect(grimInfo(data).join("\n")).not.toMatch(new RegExp(`"(${[...known].join("|")})"`));
   });
 
+  it("every row has a unique valid slug and profiles point at race slugs", () => {
+    for (const kind of GRIM_ROW_KINDS) {
+      const slugs = data[kind].map((r) => String(r.slug));
+
+      expect(slugs.every(isSlug), kind).toBe(true);
+      expect(new Set(slugs).size, kind).toBe(slugs.length);
+    }
+
+    expect(new Set(data.raceProfiles.map((p) => p.race))).toEqual(new Set(data.races.map((r) => r.slug)));
+  });
+
   it("manifest counts match the data", () => {
     const { counts } = readGrimManifest();
 
@@ -99,7 +111,7 @@ describe("grim-d100 catalog", () => {
 
     expect(new Set(tables.flatMap((t) => [...t]))).toEqual(all);
 
-    const lowlander = data.raceProfiles.find((p) => p.race === "Lowlander");
+    const lowlander = data.raceProfiles.find((p) => p.race === "lowlander");
 
     expect(new Set((lowlander?.profile.careerTable ?? []).map((r) => nameKey(r.careerId)))).toEqual(all);
   });

@@ -29,7 +29,7 @@ describe("resolveSchoolRefs", () => {
       async (kind, rows) => (kind === "classes" ? rows.map((r) => ({ ...r, prepared: true })) : rows),
     );
 
-    expect(seen.find((s) => s.startsWith("classes"))).toBe('classes:[{"name":"C","prepared":true}]');
-    expect(seen.find((s) => s.startsWith("spell-groups"))).toBe('spell-groups:[{"name":"G"}]');
+    expect(seen.find((s) => s.startsWith("classes"))).toBe('classes:[{"slug":"c","name":"C","prepared":true}]');
+    expect(seen.find((s) => s.startsWith("spell-groups"))).toBe('spell-groups:[{"slug":"g","name":"G"}]');
   });
 });

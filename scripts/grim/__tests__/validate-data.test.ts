@@ -92,6 +92,19 @@ describe("validateGrimData", () => {
     expect(issues.some((i) => i.includes('unknown career "Ghost"'))).toBe(true);
   });
 
+  it("rejects an invalid or duplicate row slug", () => {
+    const data = load();
+
+    data.careers[0].slug = "Bad Slug";
+    data.careers[1].slug = "bad";
+
+    expect(issuesOf(data).some((i) => i.startsWith("careers #1") && i.includes("invalid slug"))).toBe(true);
+
+    data.careers[0].slug = "bad";
+
+    expect(issuesOf(data).some((i) => i.startsWith("careers #2") && i.includes('duplicate slug "bad"'))).toBe(true);
+  });
+
   it("rejects a profile that breaks its own schema", () => {
     const data = load();
 

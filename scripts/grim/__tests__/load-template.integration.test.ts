@@ -137,6 +137,9 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
 
     expect(links).toEqual([spellId]);
     expect(counts).toMatchObject({ campaigns: 1, feats: 2, careers: 2, races: 1, spells: 1, units: 1, artifacts: 2, featBase: 2, careerBase: 2, raceBase: 1 });
+    expect((await raw.feat.findMany({ where: { campaignId: templateId }, select: { slug: true }, orderBy: { slug: "asc" } })).map((r) => r.slug)).toEqual(["hardy", "sharp-eyed"]);
+    expect((await raw.careerBase.findMany({ where: { sourceCampaignId: templateId, validTo: null }, select: { slug: true } })).every((r) => r.slug)).toBe(true);
+    expect((await raw.race.findFirstOrThrow({ where: { campaignId: templateId } })).slug).toBe("hollander");
   });
 
   it("a clone sees the species with its profile", async () => {
@@ -153,6 +156,17 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim template loader", () => {
     expect(profiles[0].profile.talents).toHaveLength(1);
     expect(profiles[0].profile.careerTable).toHaveLength(2);
     expect(profiles[0].profile.careerTable.every((r) => (r.careerId as string).length > 10)).toBe(true);
+  });
+
+  it("a rerun backfills the slug of a row that predates slugs, without creating a duplicate", async () => {
+    await raw.feat.updateMany({ where: { campaignId: templateId, name: "Hardy" }, data: { slug: null } });
+
+    const before = await rowCounts(templateId);
+
+    await loadGrimTemplate({ owner: userId, dir: goodDir(), allowRemote: false });
+
+    expect(await rowCounts(templateId)).toEqual(before);
+    expect((await raw.feat.findFirstOrThrow({ where: { campaignId: templateId, name: "Hardy" } })).slug).toBe("hardy");
   });
 
   it("a second run keeps the row counts, unit spell links, the template and its contentVersion", async () => {

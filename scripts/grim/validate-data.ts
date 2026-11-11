@@ -14,6 +14,7 @@ import { SpeciesProfileSchema } from "@/lib/utils/rules/systems/schemas";
 import { WFRP_RULES } from "@/lib/utils/rules/systems/wfrp/rules-preset";
 import { skillDef } from "@/lib/utils/rules/systems/wfrp/skills/catalog";
 import type { TableRow } from "@/lib/utils/rules/tables-schema";
+import { isSlug } from "@/lib/utils/templates/slug";
 
 export type GrimValidation = { ok: true } | { ok: false; issues: string[] };
 
@@ -36,10 +37,21 @@ function validateRows(kind: GrimRowKind, rows: Row[], issues: string[]) {
 
   const seen = new Set<string>();
 
+  const slugs = new Set<string>();
+
   rows.forEach((raw, index) => {
     const where = label(kind, index, raw.name);
 
-    const { value: record, issues: coerced } = coerceRecord(raw, spec.fields);
+    const { slug, ...fields } = raw;
+
+    const { value: record, issues: coerced } = coerceRecord(fields, spec.fields);
+
+    if (slug !== undefined) {
+      if (typeof slug !== "string" || !isSlug(slug)) issues.push(`${where}: invalid slug`);
+      else if (slugs.has(slug)) issues.push(`${where}: duplicate slug "${slug}"`);
+
+      slugs.add(String(slug));
+    }
 
     for (const i of coerced) issues.push(`${where}: ${i.field ?? ""} ${i.message}`.replace(/\s+/g, " "));
 
@@ -69,6 +81,8 @@ function nestedNames(value: unknown, key: string): string[] {
   return Object.entries(value).flatMap(([k, v]) => (k === key && typeof v === "string" ? [v] : nestedNames(v, key)));
 }
 
+const withoutSlug = ({ slug: _slug, ...rest }: Row): Row => rest;
+
 const exactName = (row: Row) => (typeof row.name === "string" ? row.name : "");
 
 /** Links between row kinds are by name; a name missing from its kind is dropped (or errors) at import, so every one must resolve, matching the catalog name exactly. */
@@ -77,7 +91,7 @@ function validateLinks(data: GrimData, issues: string[]) {
 
   for (const kind of GRIM_ROW_KINDS)
     data[kind].forEach((row, index) => {
-      const { value } = coerceRecord(row, IMPORT_SPECS[kind].fields);
+      const { value } = coerceRecord(withoutSlug(row), IMPORT_SPECS[kind].fields);
 
       for (const field of IMPORT_SPECS[kind].fields) {
         const raw = value[field.key];
@@ -293,7 +307,7 @@ export function validateGrimData(data: GrimData): GrimValidation {
 
   for (const kind of GRIM_ROW_KINDS) validateRows(kind, data[kind], issues);
 
-  const names = { races: new Set(data.races.map(exactName)), careers: new Set(data.careers.map(exactName)), feats: new Set(data.feats.map(exactName)) };
+  const names = { races: new Set(data.races.flatMap((r) => (typeof r.slug === "string" ? [r.slug] : []))), careers: new Set(data.careers.map(exactName)), feats: new Set(data.feats.map(exactName)) };
 
   validateLinks(data, issues);
   validateProfiles(data, names, issues);

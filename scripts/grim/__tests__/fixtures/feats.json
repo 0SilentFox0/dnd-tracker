@@ -1,4 +1,4 @@
 [
-  { "name": "Hardy", "type": "general", "description": "Tough as boots.", "xpCost": 100, "maxRank": 3 },
-  { "name": "Sharp Eyed", "type": "general", "description": "Spots what others miss.", "xpCost": 100, "maxRank": 1 }
+  { "slug": "hardy", "name": "Hardy", "type": "general", "description": "Tough as boots.", "xpCost": 100, "maxRank": 3 },
+  { "slug": "sharp-eyed", "name": "Sharp Eyed", "type": "general", "description": "Spots what others miss.", "xpCost": 100, "maxRank": 1 }
 ]

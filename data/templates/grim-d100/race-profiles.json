@@ -1,6 +1,6 @@
 [
   {
-    "race": "Lowlander",
+    "race": "lowlander",
     "profile": {
       "mods": {},
       "move": 4,
@@ -121,7 +121,7 @@
     }
   },
   {
-    "race": "Delver",
+    "race": "delver",
     "profile": {
       "mods": {
         "ws": 10,
@@ -206,7 +206,7 @@
     }
   },
   {
-    "race": "Hearthkin",
+    "race": "hearthkin",
     "profile": {
       "mods": {
         "ws": -10,
@@ -300,7 +300,7 @@
     }
   },
   {
-    "race": "Veyl",
+    "race": "veyl",
     "profile": {
       "mods": {
         "i": 20,

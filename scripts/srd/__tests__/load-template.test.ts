@@ -22,7 +22,7 @@ describe("canonical SRD seed arguments", () => {
 });
 
 describe("importSrdData", () => {
-  it("imports kinds in order with slugs stripped; errors are detected and listed", async () => {
+  it("imports kinds in order with slugs passed on; errors are detected and listed", async () => {
     const data = Object.fromEntries(SRD_KINDS.map((k) => [k, [{ slug: `srd-2024_${k}`, name: k }]])) as unknown as SrdData;
 
     const run = vi.fn<RunImport>(async (kind) => report(kind === "spells" ? 1 : 0));
@@ -30,7 +30,7 @@ describe("importSrdData", () => {
     const results = await importSrdData(data, run);
 
     expect(run.mock.calls.map((c) => c[0])).toEqual([...SRD_KINDS]);
-    expect(run.mock.calls[0][1]).toEqual([{ name: "spell-groups" }]);
+    expect(run.mock.calls[0][1]).toEqual([{ slug: "srd-2024_spell-groups", name: "spell-groups" }]);
     expect(hasRowErrors(results)).toBe(true);
     expect(formatImportSummary(results)).toContain("spells: created 0, updated 3, skipped 0, error 1");
     expect(formatImportSummary(results)).toContain("  #2 Fireball: bad");

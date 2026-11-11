@@ -18,6 +18,7 @@ import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { importContent } from "@/lib/server/content/import/import-content";
 import type { Actor } from "@/lib/utils/api/actor";
+import { isSlug } from "@/lib/utils/templates/slug";
 
 const SCHEMAS: Record<SrdKind, { create: ZodType; update: ZodType }> = {
   "spell-groups": { create: createSpellGroupSchema, update: updateSpellGroupSchema },
@@ -52,7 +53,7 @@ describe("SRD 5.2 data files", () => {
     for (const kind of SRD_KINDS) {
       const slugs = rowsOf(kind).map((r) => r.slug);
 
-      expect(slugs.every((s) => s.startsWith("srd-2024_"))).toBe(true);
+      expect(slugs.every((s) => s.startsWith("srd-2024_") && isSlug(s))).toBe(true);
       expect(new Set(slugs).size).toBe(slugs.length);
     }
   });

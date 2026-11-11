@@ -21,7 +21,7 @@ export const GRIM_SPELL_LISTS: Record<GrimSpellKind, readonly string[]> = {
 
 export const SPELL_CN_BANDS: Record<GrimSpellKind, readonly [number, number]> = { petty: [0, 2], arcane: [3, 12], hedge: [3, 12], witchcraft: [3, 12], blessing: [0, 0], miracle: [6, 14] };
 
-export const SPELL_KEYS: readonly string[] = ["name", "level", "cost", "description", "casting", "targeting", "dice", "upcastDice", "spellEffects", "ingredients", "componentFlags", "lists"];
+export const SPELL_KEYS: readonly string[] = ["slug", "name", "level", "cost", "description", "casting", "targeting", "dice", "upcastDice", "spellEffects", "ingredients", "componentFlags", "lists"];
 
 export const INGREDIENT_PENCE = [6, 240] as const;
 

@@ -1,5 +1,6 @@
 [
   {
+    "slug": "archivist",
     "name": "Archivist",
     "class": "Academic",
     "tier1_name": "Copyist",
@@ -87,6 +88,7 @@
     ]
   },
   {
+    "slug": "bonesetter",
     "name": "Bonesetter",
     "class": "Academic",
     "tier1_name": "Orderly",
@@ -174,6 +176,7 @@
     ]
   },
   {
+    "slug": "chandler",
     "name": "Chandler",
     "class": "Burgher",
     "tier1_name": "Shop Hand",
@@ -260,6 +263,7 @@
     ]
   },
   {
+    "slug": "lamplighter",
     "name": "Lamplighter",
     "class": "Burgher",
     "tier1_name": "Wick Hand",
@@ -345,6 +349,7 @@
     ]
   },
   {
+    "slug": "crier",
     "name": "Crier",
     "class": "Courtier",
     "tier1_name": "Page",
@@ -430,6 +435,7 @@
     ]
   },
   {
+    "slug": "masquer",
     "name": "Masquer",
     "class": "Courtier",
     "tier1_name": "Mummer",
@@ -515,6 +521,7 @@
     ]
   },
   {
+    "slug": "shepherd",
     "name": "Shepherd",
     "class": "Peasant",
     "tier1_name": "Herd Hand",
@@ -601,6 +608,7 @@
     ]
   },
   {
+    "slug": "ashburner",
     "name": "Ashburner",
     "class": "Peasant",
     "tier1_name": "Kiln Hand",
@@ -687,6 +695,7 @@
     ]
   },
   {
+    "slug": "pathfinder",
     "name": "Pathfinder",
     "class": "Ranger",
     "tier1_name": "Guide",
@@ -773,6 +782,7 @@
     ]
   },
   {
+    "slug": "falconer",
     "name": "Falconer",
     "class": "Ranger",
     "tier1_name": "Mews Hand",
@@ -859,6 +869,7 @@
     ]
   },
   {
+    "slug": "ferry-keeper",
     "name": "Ferry Keeper",
     "class": "Riverfolk",
     "tier1_name": "Rope Hand",
@@ -945,6 +956,7 @@
     ]
   },
   {
+    "slug": "eel-fisher",
     "name": "Eel Fisher",
     "class": "Riverfolk",
     "tier1_name": "Net Mender",
@@ -1031,6 +1043,7 @@
     ]
   },
   {
+    "slug": "dicer",
     "name": "Dicer",
     "class": "Rogue",
     "tier1_name": "Dice Runner",
@@ -1117,6 +1130,7 @@
     ]
   },
   {
+    "slug": "lockbreaker",
     "name": "Lockbreaker",
     "class": "Rogue",
     "tier1_name": "Latch Lifter",
@@ -1203,6 +1217,7 @@
     ]
   },
   {
+    "slug": "shieldbearer",
     "name": "Shieldbearer",
     "class": "Warrior",
     "tier1_name": "Shield Hand",
@@ -1289,6 +1304,7 @@
     ]
   },
   {
+    "slug": "sellsword",
     "name": "Sellsword",
     "class": "Warrior",
     "tier1_name": "Hireling",

@@ -1,5 +1,6 @@
 [
   {
+    "slug": "lowlander",
     "name": "Lowlander",
     "passiveAbility": {
       "name": "Many Roads",
@@ -7,6 +8,7 @@
     }
   },
   {
+    "slug": "delver",
     "name": "Delver",
     "passiveAbility": {
       "name": "Stoneborn",
@@ -14,6 +16,7 @@
     }
   },
   {
+    "slug": "hearthkin",
     "name": "Hearthkin",
     "passiveAbility": {
       "name": "Hearth and Home",
@@ -21,6 +24,7 @@
     }
   },
   {
+    "slug": "veyl",
     "name": "Veyl",
     "passiveAbility": {
       "name": "Old Blood",

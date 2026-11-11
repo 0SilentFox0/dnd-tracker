@@ -58,16 +58,18 @@ async function writeRaceProfiles(campaignId: string, data: GrimData): Promise<nu
 
   const select = { id: true, name: true };
 
-  const [feats, careers, raceRows] = await Promise.all([prisma.feat.findMany({ where, select }), prisma.career.findMany({ where, select }), prisma.race.findMany({ where, select: { ...select, profile: true } })]);
+  const [feats, careers, raceRows] = await Promise.all([prisma.feat.findMany({ where, select }), prisma.career.findMany({ where, select }), prisma.race.findMany({ where, select: { ...select, slug: true, profile: true } })]);
 
-  const [featIds, careerIds, races] = [feats, careers, raceRows].map(idMap);
+  const [featIds, careerIds] = [feats, careers].map(idMap);
+
+  const races = new Map(raceRows.flatMap((r) => (r.slug ? [[r.slug, r.id] as const] : [])));
 
   const stored = new Map(raceRows.map((r) => [r.id, r.profile]));
 
   for (const { race, profile } of data.raceProfiles) {
-    const raceId = races.get(nameKey(race));
+    const raceId = races.get(race);
 
-    if (!raceId) throw new Error(`Вид "${race}" не знайдено в шаблоні після імпорту`);
+    if (!raceId) throw new Error(`Вид зі slug "${race}" не знайдено в шаблоні після імпорту`);
 
     const resolved = resolveProfile(profile, { feats: featIds, careers: careerIds });
 
