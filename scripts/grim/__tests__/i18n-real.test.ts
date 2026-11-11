@@ -1,20 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import { readGrimData } from "../data";
-import { GRIM_I18N_DIR, grimCatalog, grimI18nIssues } from "../i18n";
+import { grimCatalog, grimI18nIssues } from "../i18n";
 
-import { readTranslations } from "@/scripts/srd/i18n/store";
+import { statusOf } from "@/lib/utils/templates/i18n/keys";
 import { checkTranslation } from "@/scripts/srd/i18n/validate";
+import { readTranslations } from "@/scripts/templates/lib/i18n-store";
 
 const data = readGrimData();
 
 const catalog = grimCatalog(data);
 
-const uk = readTranslations("uk", GRIM_I18N_DIR);
+const uk = readTranslations("grim-d100", "uk");
 
 describe("grim uk dictionary", () => {
-  it("translates every catalog entry", () => {
-    expect(catalog.filter((entry) => uk[entry.hash] === undefined).map((entry) => entry.en)).toEqual([]);
+  it("translates every catalog entry and has no stale or orphan entries", () => {
+    const status = statusOf(catalog, uk);
+
+    expect({ missing: status.missing, stale: status.stale, orphan: status.orphan }).toEqual({ missing: [], stale: [], orphan: [] });
   });
 
   it("has no cross-entry issues", () => {
@@ -22,7 +25,7 @@ describe("grim uk dictionary", () => {
   });
 
   it("keeps numbers, dice and placeholders", () => {
-    const bad = catalog.flatMap((entry) => checkTranslation(entry.en, uk[entry.hash]).map((issue) => `${entry.en}: ${JSON.stringify(issue)}`));
+    const bad = catalog.flatMap((entry) => checkTranslation(entry.en, uk[entry.key].text).map((issue) => `${entry.en}: ${JSON.stringify(issue)}`));
 
     expect(bad).toEqual([]);
   });
@@ -32,16 +35,14 @@ describe("grim uk dictionary", () => {
 
     const clashes: string[] = [];
 
-    for (const entry of catalog.filter((e) => e.cls === "n")) {
-      for (const kind of entry.kinds) {
-        const key = `${kind}\0${uk[entry.hash]}`;
+    for (const entry of catalog.filter((e) => e.cls === "n" && e.fieldPath === "name")) {
+      const key = `${entry.kind}\0${uk[entry.key].text}`;
 
-        const other = seen.get(key);
+      const other = seen.get(key);
 
-        if (other !== undefined && other !== entry.en) clashes.push(`${kind}: "${other}" / "${entry.en}" -> ${uk[entry.hash]}`);
+      if (other !== undefined && other !== entry.en) clashes.push(`${entry.kind}: "${other}" / "${entry.en}" -> ${uk[entry.key].text}`);
 
-        seen.set(key, entry.en);
-      }
+      seen.set(key, entry.en);
     }
 
     expect(clashes).toEqual([]);

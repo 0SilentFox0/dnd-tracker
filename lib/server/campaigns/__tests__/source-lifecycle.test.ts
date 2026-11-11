@@ -10,9 +10,9 @@ import { id } from "@/lib/server/templates/sync/__tests__/helpers";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
-import { hashText } from "@/lib/utils/templates/i18n/catalog";
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 
-const h = vi.hoisted(() => ({ base: {} as Record<string, unknown>, dictionary: {} as Record<string, string> }));
+const h = vi.hoisted(() => ({ base: {} as Record<string, unknown>, dictionary: {} as TranslationsV2 }));
 
 vi.mock("@/lib/db", async () => {
   const { createScopedDatabase } = await import("@/lib/server/content/write-context");
@@ -35,11 +35,11 @@ let createdCount: number;
 beforeEach(() => {
   f = createFakeSyncDb();
   createdCount = 0;
-  h.dictionary = { [hashText("n", "Bless")]: "Благословення" };
+  h.dictionary = { "spells/bless/name": { text: "Благословення", en: "Bless" } };
   f.addCampaign({ id: "home", name: "Home", kind: "campaign", members: [{ role: "dm" }], locale: "uk" });
   f.addCampaign({ id: "canonical", ...official, locale: "en" });
   f.addCampaign({ id: "legacy", ...official, locale: "uk" });
-  f.addRow("spell", { id: id("s"), campaignId: "canonical", name: "Bless" });
+  f.addRow("spell", { id: id("s"), campaignId: "canonical", slug: "bless", name: "Bless" });
 
   const tx = f.db as unknown as Record<string, unknown>;
 

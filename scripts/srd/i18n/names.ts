@@ -1,4 +1,4 @@
-import type { CatalogEntry, Translations } from "./catalog";
+import type { KeyedString, TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 
 export type NameMap = Map<string, string>;
 
@@ -6,10 +6,10 @@ const ITALIC = /(?<![*\p{L}\p{N}_])\*([^*\n]+)\*(?![*\p{L}\p{N}_])|(?<![\p{L}\p{
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-export function buildNameMap(catalog: CatalogEntry[], tr: Translations): NameMap {
+export function buildNameMap(catalog: KeyedString[], tr: TranslationsV2): NameMap {
   const map: NameMap = new Map();
 
-  for (const e of catalog) if (e.cls === "n" && tr[e.hash] !== undefined) map.set(e.en, tr[e.hash]);
+  for (const e of catalog) if (e.cls === "n" && Object.hasOwn(tr, e.key)) map.set(e.en, tr[e.key].text);
 
   return map;
 }

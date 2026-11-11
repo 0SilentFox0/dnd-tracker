@@ -7,15 +7,13 @@ import { GRIM_SPELL_LISTS } from "../spells";
 
 import { emptyBundle } from "@/lib/server/templates/bundle";
 import { localizeTemplateBundle } from "@/lib/server/templates/localize-template-bundle";
-import { extractCatalog, hashText } from "@/lib/utils/templates/i18n/catalog";
-import { templateOf } from "@/scripts/srd/i18n/templates";
-import { readSrdData } from "@/scripts/srd/lib/data-files";
+import { catalogOf } from "@/scripts/templates/lib/i18n-convert";
 
 const data = readGrimData();
 
 const fixtures = readGrimData(path.join(__dirname, "fixtures"));
 
-const SRD_CATALOG_SIZE = 4658;
+const SRD_CATALOG_SIZE = 8137;
 
 describe("grimCatalog", () => {
   const catalog = grimCatalog(data);
@@ -45,18 +43,20 @@ describe("grimCatalog", () => {
     expect(catalog.some((e) => e.en === "Brass 3" || e.en === "lore:herbs")).toBe(false);
   });
 
-  it("hashes match localizeTemplateBundle on DB-shaped careers", () => {
+  it("keys match localizeTemplateBundle on DB-shaped careers", () => {
     const career = data.careers.find((c) => c.name === "Archivist");
 
     if (!career) throw new Error("Archivist missing");
 
     const trapping = (career.tier1_trappings as string[])[0];
 
+    expect(catalog.some((e) => e.key === "careers/archivist/tiers[=copyist].trappings[0]" && e.en === trapping)).toBe(true);
+
     const bundle = emptyBundle();
 
-    bundle.careers = [{ id: "c1", name: "Archivist", class: "Academic", tiers: [{ name: "Copyist", trappings: [trapping] }] }];
+    bundle.careers = [{ id: "c1", slug: "archivist", name: "Archivist", class: "Academic", tiers: [{ name: "Copyist", trappings: [trapping] }] }];
 
-    const out = localizeTemplateBundle(bundle, { [hashText("d", trapping)]: "X" });
+    const out = localizeTemplateBundle(bundle, { "careers/archivist/tiers[=copyist].trappings[0]": { text: "X", en: trapping } });
 
     expect((out.careers[0].tiers as Array<{ trappings: string[] }>)[0].trappings).toEqual(["X"]);
   });
@@ -72,13 +72,13 @@ describe("grimI18nIssues", () => {
   });
 
   it("flags colliding spell lists and careers", () => {
-    const lists = { [hashText("n", "School of Embers")]: "Школа", [hashText("n", "School of Gloam")]: "Школа" };
+    const lists = { "spellLists/school-of-embers/name": { text: "Школа", en: "School of Embers" }, "spellLists/school-of-gloam/name": { text: "Школа", en: "School of Gloam" } };
 
     expect(grimI18nIssues(data, lists).join("\n")).toContain("spell lists");
 
-    const [a, b] = data.careers.map((c) => String(c.name));
+    const [a, b] = data.careers.map((c) => ({ slug: String(c.slug), name: String(c.name) }));
 
-    expect(grimI18nIssues(data, { [hashText("n", a)]: "Одна", [hashText("n", b)]: "Одна" }).join("\n")).toContain("careers");
+    expect(grimI18nIssues(data, { [`careers/${a.slug}/name`]: { text: "Одна", en: a.name }, [`careers/${b.slug}/name`]: { text: "Одна", en: b.name } }).join("\n")).toContain("careers");
   });
 
   it("checks every list of a spell, not only the first", () => {
@@ -88,18 +88,8 @@ describe("grimI18nIssues", () => {
   });
 });
 
-describe("templateOf", () => {
-  it("strips the option", () => {
-    expect(templateOf(["apply", "--template", "grim", "a.jsonl"]).rest).toEqual(["apply", "a.jsonl"]);
-  });
-
-  it("rejects unknown templates", () => {
-    expect(() => templateOf(["--template", "xyz"])).toThrow();
-  });
-});
-
 describe("SRD catalog", () => {
   it("keeps its size", () => {
-    expect(extractCatalog(readSrdData()).length).toBe(SRD_CATALOG_SIZE);
+    expect(catalogOf("srd-5.2").length).toBe(SRD_CATALOG_SIZE);
   });
 });

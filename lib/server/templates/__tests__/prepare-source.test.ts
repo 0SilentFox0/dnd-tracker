@@ -5,10 +5,10 @@ import { id } from "../sync/__tests__/helpers";
 
 import { EMPTY_GRIM_TEMPLATE_NAME, GRIM_TEMPLATE_NAME, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prepareCampaignSource } from "@/lib/server/templates/prepare-source";
-import { hashText } from "@/lib/utils/templates/i18n/catalog";
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 import { isCanonicalTemplate, isLegacyLocalizedTemplate, isLocalizableTemplate, localizationOf } from "@/lib/utils/templates/registry";
 
-const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
+const dictionary = vi.hoisted(() => ({ values: {} as TranslationsV2 }));
 
 vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
 
@@ -24,9 +24,9 @@ beforeEach(() => {
   f = createFakeSyncDb();
   f.addCampaign({ id: "en", ...official, locale: "en" });
   f.addCampaign({ id: "uk", ...official, locale: "uk" });
-  f.addRow("spell", { id: id("s"), campaignId: "en", name: "Bless", description: "Missing prose" });
+  f.addRow("spell", { id: id("s"), campaignId: "en", slug: "bless", name: "Bless", description: "Missing prose" });
   f.addRow("spell", { id: id("l"), campaignId: "uk", name: "Legacy stored" });
-  dictionary.values = { [hashText("n", "Bless")]: "Благословення" };
+  dictionary.values = { "spells/bless/name": { text: "Благословення", en: "Bless" } };
 });
 
 describe("SRD source preparation", () => {
@@ -101,8 +101,8 @@ describe("Grim source preparation", () => {
 
   beforeEach(() => {
     f.addCampaign({ id: "grim", ...grim, locale: "en" });
-    f.addRow("career", { id: id("c"), campaignId: "grim", name: "Archivist", class: "Academic", tiers: [] });
-    dictionary.values = { ...dictionary.values, [hashText("n", "Archivist")]: "Архіваріус" };
+    f.addRow("career", { id: id("c"), campaignId: "grim", slug: "archivist", name: "Archivist", class: "Academic", tiers: [] });
+    dictionary.values = { ...dictionary.values, "careers/archivist/name": { text: "Архіваріус", en: "Archivist" } };
   });
 
   it("localizes careers into uk and accepts en for Grim", async () => {

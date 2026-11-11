@@ -10,14 +10,19 @@ import { applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
-import { hashText } from "@/lib/utils/templates/i18n/catalog";
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
 import type { SyncRef } from "@/types/campaigns";
 
-const dictionary = vi.hoisted(() => ({ values: {} as Record<string, string> }));
+const dictionary = vi.hoisted(() => ({ values: {} as TranslationsV2 }));
 
 vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? dictionary.values : {} }));
 
 let f: ReturnType<typeof createFakeSyncDb>;
+
+const setFenlore = (text: string) => {
+  dictionary.values["spells/fenlore/name"] = { text, en: "Fenlore" };
+  dictionary.values["spellLists/fenlore/name"] = { text, en: "Fenlore" };
+};
 
 const source = "source", target = "target", spell = id("s"), klass = id("k"), base = id("b"), property = id("p");
 
@@ -40,8 +45,8 @@ async function makeClone(locale: "en" | "uk" = "uk") {
 beforeEach(() => {
   f = createFakeSyncDb();
   f.addCampaign({ id: source, kind: "template", visibility: "official", templateKey: SRD_TEMPLATE_NAME, locale: "en" });
-  f.addRow("spell", { id: spell, campaignId: source, name: "Bless", description: "Untranslated prose" });
-  dictionary.values = { [hashText("n", "Bless")]: "Благословення" };
+  f.addRow("spell", { id: spell, campaignId: source, slug: "bless", name: "Bless", description: "Untranslated prose" });
+  dictionary.values = { "spells/bless/name": { text: "Благословення", en: "Bless" } };
 });
 
 describe("localized SRD synchronization", () => {
@@ -57,19 +62,19 @@ describe("localized SRD synchronization", () => {
     await applySourceChanges(f.db, target, { apply: (await diff()).map(ref), ignore: [] });
     expect(local("spell")[0].description).toBe("Changed English");
     expect(await diff()).toEqual([]);
-    dictionary.values[hashText("d", "Changed English")] = "Новий переклад";
+    dictionary.values["spells/bless/description"] = { text: "Новий переклад", en: "Changed English" };
     await applySourceChanges(f.db, target, { apply: (await diff()).map(ref), ignore: [] });
     expect(local("spell")[0].description).toBe("Новий переклад");
     expect(await diff()).toEqual([]);
-    dictionary.values[hashText("d", "Changed English")] = "Редакція";
+    dictionary.values["spells/bless/description"] = { text: "Редакція", en: "Changed English" };
     expect(await diff()).toEqual([expect.objectContaining({ key: spell, status: "updated" })]);
   });
   it("retains ignored and conflicting local content across translation changes", async () => {
     await makeClone();
-    dictionary.values[hashText("n", "Bless")] = "Версія 2";
+    dictionary.values["spells/bless/name"] = { text: "Версія 2", en: "Bless" };
     await applySourceChanges(f.db, target, { apply: [], ignore: (await diff()).map(ref) });
     expect(await diff()).toEqual([]);
-    dictionary.values[hashText("n", "Bless")] = "Версія 3";
+    dictionary.values["spells/bless/name"] = { text: "Версія 3", en: "Bless" };
     f.patchRow("spell", local("spell")[0].id as string, { name: "Mine" });
     expect(await diff()).toEqual([expect.objectContaining({ status: "conflict" })]);
     await applySourceChanges(f.db, target, { apply: [], ignore: [] });
@@ -77,11 +82,11 @@ describe("localized SRD synchronization", () => {
   });
   it("rejects stale translation hashes before writes", async () => {
     await makeClone();
-    dictionary.values[hashText("n", "Bless")] = "Версія 2";
+    dictionary.values["spells/bless/name"] = { text: "Версія 2", en: "Bless" };
 
     const selection = (await diff()).map(ref);
 
-    dictionary.values[hashText("n", "Bless")] = "Версія 3";
+    dictionary.values["spells/bless/name"] = { text: "Версія 3", en: "Bless" };
     await expect(applySourceChanges(f.db, target, { apply: selection, ignore: [] })).rejects.toMatchObject({ status: 409 });
     expect(f.updates).toEqual([]);
   });
@@ -100,15 +105,15 @@ describe("localized SRD synchronization", () => {
 
 describe("SRD effective name reference graph", () => {
   beforeEach(() => {
-    f.addRow("gameClass", { id: klass, campaignId: source, name: "Wizard", spellList: "Wizard" });
+    f.addRow("gameClass", { id: klass, campaignId: source, slug: "wizard", name: "Wizard", spellList: "Wizard" });
     f.patchRow("spell", spell, { lists: ["Wizard"] });
-    f.addRow("background", { id: id("g"), campaignId: source, name: "Sage", choices: [{ spells: { lists: ["Wizard"] } }] });
-    f.addRow("artifact", { id: base, campaignId: source, name: "Sword", modifiers: [] });
-    f.addRow("artifact", { id: property, campaignId: source, name: "Flaming", modifiers: [{ type: "itemStats", value: JSON.stringify({ property: { appliesTo: { bases: ["Sword"] } }, extra: true }) }] });
+    f.addRow("background", { id: id("g"), campaignId: source, slug: "sage", name: "Sage", choices: [{ spells: { lists: ["Wizard"] } }] });
+    f.addRow("artifact", { id: base, campaignId: source, slug: "sword", name: "Sword", modifiers: [] });
+    f.addRow("artifact", { id: property, campaignId: source, slug: "flaming", name: "Flaming", modifiers: [{ type: "itemStats", value: JSON.stringify({ property: { appliesTo: { bases: ["Sword"] } }, extra: true }) }] });
   });
   it.each(["classes", "spells"])("rejects selecting only %s during linked class rename, before writes", async (scope) => {
     await makeClone();
-    dictionary.values[hashText("n", "Wizard")] = "Чарівник";
+    dictionary.values["classes/wizard/name"] = { text: "Чарівник", en: "Wizard" };
 
     const selection = (await diff()).filter((i) => i.scope === scope).map(ref);
 
@@ -117,7 +122,7 @@ describe("SRD effective name reference graph", () => {
   });
   it.each([base, property])("rejects partial base-name rename for %s including serialized itemStats", async (key) => {
     await makeClone();
-    dictionary.values[hashText("n", "Sword")] = "Меч";
+    dictionary.values["artifacts/sword/name"] = { text: "Меч", en: "Sword" };
     await expect(applySourceChanges(f.db, target, { apply: (await diff()).filter((i) => i.key === key).map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
     expect(f.updates).toEqual([]);
   });
@@ -127,7 +132,7 @@ describe("SRD effective name reference graph", () => {
     const wizardId = local("gameClass")[0].id;
 
     f.addRow("gameClass", { id: id("m"), campaignId: target, name: "Mage", sourceId: null });
-    dictionary.values[hashText("n", "Wizard")] = "Mage";
+    dictionary.values["classes/wizard/name"] = { text: "Mage", en: "Wizard" };
 
     const before = structuredClone([...f.store.entries()]);
 
@@ -141,7 +146,7 @@ describe("SRD effective name reference graph", () => {
   it("rejects a serialized base reference rename that would bind to an unrelated local artifact", async () => {
     await makeClone();
     f.addRow("artifact", { id: id("m"), campaignId: target, name: "Blade", sourceId: null, modifiers: [] });
-    dictionary.values[hashText("n", "Sword")] = "Blade";
+    dictionary.values["artifacts/sword/name"] = { text: "Blade", en: "Sword" };
 
     const before = structuredClone([...f.store.entries()]);
 
@@ -154,7 +159,7 @@ describe("SRD effective name reference graph", () => {
   it("allows a deliberate source reference retarget to another existing class provider", async () => {
     const cleric = id("c");
 
-    f.addRow("gameClass", { id: cleric, campaignId: source, name: "Cleric", spellList: "Cleric" });
+    f.addRow("gameClass", { id: cleric, campaignId: source, slug: "cleric", name: "Cleric", spellList: "Cleric" });
     await makeClone();
     f.patchRow("spell", spell, { lists: ["Cleric"] });
     await applySourceChanges(f.db, target, { apply: (await diff()).filter((i) => i.key === spell).map(ref), ignore: [] });
@@ -164,7 +169,7 @@ describe("SRD effective name reference graph", () => {
   it("allows a deliberate serialized source reference retarget to another existing base provider", async () => {
     const axe = id("a");
 
-    f.addRow("artifact", { id: axe, campaignId: source, name: "Axe", modifiers: [] });
+    f.addRow("artifact", { id: axe, campaignId: source, slug: "axe", name: "Axe", modifiers: [] });
     await makeClone();
     f.patchRow("artifact", property, { modifiers: [{ type: "itemStats", value: JSON.stringify({ property: { appliesTo: { bases: ["Axe"] } }, extra: true }) }] });
     await applySourceChanges(f.db, target, { apply: (await diff()).filter((i) => i.key === property).map(ref), ignore: [] });
@@ -175,10 +180,10 @@ describe("SRD effective name reference graph", () => {
     expect(await diff()).toEqual([]);
   });
   it("accepts complete linked updates and tolerates unchanged unrelated unmatched references", async () => {
-    f.addRow("spell", { id: id("u"), campaignId: source, name: "Unrelated", lists: ["Custom unmatched"] });
+    f.addRow("spell", { id: id("u"), campaignId: source, slug: "unrelated", name: "Unrelated", lists: ["Custom unmatched"] });
     await makeClone();
-    dictionary.values[hashText("n", "Wizard")] = "Чарівник";
-    dictionary.values[hashText("n", "Sword")] = "Меч";
+    dictionary.values["classes/wizard/name"] = { text: "Чарівник", en: "Wizard" };
+    dictionary.values["artifacts/sword/name"] = { text: "Меч", en: "Sword" };
     await applySourceChanges(f.db, target, { apply: (await diff()).map(ref), ignore: [] });
     expect(local("gameClass")[0].name).toBe("Чарівник");
     expect(local("spell").find((r) => r.sourceId === spell)?.lists).toEqual(["Чарівник"]);
@@ -186,7 +191,7 @@ describe("SRD effective name reference graph", () => {
   });
   it("does not automatically overwrite ignored or conflicting linked references", async () => {
     await makeClone();
-    dictionary.values[hashText("n", "Wizard")] = "Чарівник";
+    dictionary.values["classes/wizard/name"] = { text: "Чарівник", en: "Wizard" };
     f.patchRow("spell", local("spell")[0].id as string, { description: "My description" });
 
     const items = await diff();
@@ -211,8 +216,8 @@ describe("localized Grim synchronization", () => {
 
   beforeEach(() => {
     f.patchCampaign(source, { templateKey: GRIM_TEMPLATE_NAME, rules: table("A smell of scorched hair.") });
-    f.addRow("career", { id: id("c"), campaignId: source, name: "Archivist", class: "Academic", tiers: [] });
-    dictionary.values = { [hashText("d", "A smell of scorched hair.")]: "Запах паленого волосся.", [hashText("n", "Archivist")]: "Архіваріус" };
+    f.addRow("career", { id: id("c"), campaignId: source, slug: "archivist", name: "Archivist", class: "Academic", tiers: [] });
+    dictionary.values = { "rules/_/miscastMinor[0].text": { text: "Запах паленого волосся.", en: "A smell of scorched hair." }, "careers/archivist/name": { text: "Архіваріус", en: "Archivist" } };
   });
   it("has no immediate diff and stores localized rules and careers", async () => {
     await makeClone();
@@ -222,12 +227,12 @@ describe("localized Grim synchronization", () => {
     expect(local("career")[0].name).toBe("Архіваріус");
   });
   it("applies a new spell and a renamed spell-list translation without name-reference errors", async () => {
-    f.addRow("spell", { id: id("1"), campaignId: source, name: "Fenlore", lists: ["Fenlore"] });
-    dictionary.values[hashText("n", "Fenlore")] = "Болотна мудрість";
+    f.addRow("spell", { id: id("1"), campaignId: source, slug: "fenlore", name: "Fenlore", lists: ["Fenlore"] });
+    setFenlore("Болотна мудрість");
     await makeClone();
     expect(await diff()).toEqual([]);
-    f.addRow("spell", { id: id("2"), campaignId: source, name: "Mire Step", lists: ["Fenlore"] });
-    dictionary.values[hashText("n", "Fenlore")] = "Болотне знання";
+    f.addRow("spell", { id: id("2"), campaignId: source, slug: "mire-step", name: "Mire Step", lists: ["Fenlore"] });
+    setFenlore("Болотне знання");
 
     const items = await diff();
 
@@ -235,11 +240,11 @@ describe("localized Grim synchronization", () => {
     await applySourceChanges(f.db, target, { apply: items.map(ref), ignore: [] });
   });
   it("keeps the name-reference exemption when the clone has a local class", async () => {
-    f.addRow("spell", { id: id("1"), campaignId: source, name: "Fenlore", lists: ["Fenlore"] });
-    dictionary.values[hashText("n", "Fenlore")] = "Болотна мудрість";
+    f.addRow("spell", { id: id("1"), campaignId: source, slug: "fenlore", name: "Fenlore", lists: ["Fenlore"] });
+    setFenlore("Болотна мудрість");
     await makeClone();
     f.addRow("gameClass", { id: id("9"), campaignId: target, name: "Local" });
-    f.addRow("spell", { id: id("2"), campaignId: source, name: "Mire Step", lists: ["Fenlore"] });
+    f.addRow("spell", { id: id("2"), campaignId: source, slug: "mire-step", name: "Mire Step", lists: ["Fenlore"] });
 
     const items = await diff();
 
@@ -248,7 +253,7 @@ describe("localized Grim synchronization", () => {
   });
   it("reports a changed rule-table translation", async () => {
     await makeClone();
-    dictionary.values[hashText("d", "A smell of scorched hair.")] = "Інший запах.";
+    dictionary.values["rules/_/miscastMinor[0].text"] = { text: "Інший запах.", en: "A smell of scorched hair." };
     expect(await diff()).toEqual([expect.objectContaining({ scope: "rules", key: "tables" })]);
   });
 });

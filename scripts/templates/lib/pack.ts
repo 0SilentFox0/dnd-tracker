@@ -23,3 +23,23 @@ export function readManifest(key: string, dir = TEMPLATES_DIR): TemplateManifest
 
   return manifest;
 }
+
+export interface PackData {
+  rows: Record<string, { slug: string }[]>;
+  rules?: unknown;
+}
+
+const readJsonIf = <T>(key: string, file: string, dir: string): T | undefined => {
+  const target = packPath(key, file, dir);
+
+  return fs.existsSync(target) ? (JSON.parse(fs.readFileSync(target, "utf8")) as T) : undefined;
+};
+
+/** Rows of every kind the manifest lists (a missing file is an empty kind) plus the rules file. */
+export function readPack(key: string, dir = TEMPLATES_DIR): PackData {
+  const manifest = readManifest(key, dir);
+
+  const rows = Object.fromEntries(manifest.kinds.map((kind) => [kind, readJsonIf<{ slug: string }[]>(key, `${kind}.json`, dir) ?? []]));
+
+  return { rows, rules: readJsonIf(key, manifest.rules.file, dir) };
+}

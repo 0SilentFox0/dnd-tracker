@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
-// pnpm template <index|backfill-keys [--apply]> [...args]
+// pnpm template <index|backfill-keys [--apply]|i18n <extract|apply|normalize|status|convert> <key> <locale>> [...args]
+import { i18nCommand } from "./lib/i18n-command";
 import { writeIndex } from "./lib/index-gen";
 
 type Command = (args: string[]) => Promise<void> | void;
@@ -30,6 +31,7 @@ const COMMANDS: Record<string, Command> = {
     console.info("data/templates/manifests.ts and dictionaries.server.ts are up to date");
   },
   "backfill-keys": backfillKeys,
+  i18n: (args) => i18nCommand(args),
 };
 
 async function main() {

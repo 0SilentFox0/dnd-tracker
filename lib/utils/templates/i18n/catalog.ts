@@ -1,7 +1,5 @@
 import { createHash } from "crypto";
 
-export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "feats", "backgrounds", "units", "artifacts"] as const;
-
 export const NAME_KEYS: readonly string[] = ["name", "label", "nameTemplate"];
 
 export const TEXT_KEYS: readonly string[] = ["description", "text", "equipmentText"];
@@ -17,13 +15,6 @@ export const REF_KEYS: Readonly<Record<string, string>> = {
 };
 
 export type TextClass = "n" | "d";
-
-export interface CatalogEntry {
-  hash: string;
-  cls: TextClass;
-  en: string;
-  kinds: string[];
-}
 
 export type Translations = Record<string, string>;
 
@@ -65,30 +56,4 @@ export function mapStrings(value: unknown, visit: (key: string, text: string, pa
   if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, mapStrings(v, visit, k, key, [...path, k])]));
 
   return value;
-}
-
-export type TemplateData = Readonly<Record<string, unknown>>;
-
-export function extractCatalog(data: object, kinds: readonly string[] = SRD_KINDS): CatalogEntry[] {
-  const found = new Map<string, CatalogEntry>();
-
-  for (const kind of kinds) {
-    mapStrings((data as TemplateData)[kind], (key, text, parent, path) => {
-      const cls = classOf(key, parent, path);
-
-      if (cls && isTranslatable(text)) {
-        const hash = hashText(cls, text);
-
-        const entry = found.get(hash) ?? { hash, cls, en: text, kinds: [] };
-
-        if (!entry.kinds.includes(kind)) entry.kinds.push(kind);
-
-        found.set(hash, entry);
-      }
-
-      return text;
-    });
-  }
-
-  return [...found.values()];
 }

@@ -1,23 +1,24 @@
-import { type CatalogEntry, type Translations } from "./catalog";
 import { normalizeCreatureHeader } from "./creature-header";
 import { buildNameMap, fixItalicNames } from "./names";
 import { type Glossary, normalizeSpellHeader } from "./spell-header";
 import { checkTranslation, type TranslationIssue } from "./validate";
 
+import type { KeyedString, TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
+
 export type Phase = "A" | "B";
 
 const PHASE_A_KINDS: readonly string[] = ["races", "feats", "backgrounds", "classes", "careers"];
 
-export const inPhase = (entry: CatalogEntry, phase: Phase) => {
-  const a = entry.cls === "n" || entry.kinds.some((k) => PHASE_A_KINDS.includes(k));
+export const inPhase = (entry: KeyedString, phase: Phase) => {
+  const a = entry.cls === "n" || PHASE_A_KINDS.includes(entry.kind);
 
   return phase === "A" ? a : !a;
 };
 
-export const missing = (entries: CatalogEntry[], tr: Translations) => entries.filter((e) => tr[e.hash] === undefined);
+export const missing = (entries: KeyedString[], tr: TranslationsV2) => entries.filter((e) => !Object.hasOwn(tr, e.key));
 
-export function planBatches(entries: CatalogEntry[], maxChars: number): CatalogEntry[][] {
-  const batches: CatalogEntry[][] = [];
+export function planBatches(entries: KeyedString[], maxChars: number): KeyedString[][] {
+  const batches: KeyedString[][] = [];
 
   let size = 0;
 
@@ -35,16 +36,16 @@ export function planBatches(entries: CatalogEntry[], maxChars: number): CatalogE
 }
 
 export interface AppliedLine {
-  h: string;
-  t: string;
+  key: string;
+  text: string;
 }
 
 export interface Rejected extends AppliedLine {
   issues: Array<TranslationIssue | "unknown">;
 }
 
-export function mergeApplied(existing: Translations, lines: AppliedLine[], catalog: CatalogEntry[], glossary: Glossary = {}): { merged: Translations; accepted: number; rejected: Rejected[] } {
-  const byHash = new Map(catalog.map((e) => [e.hash, e]));
+export function mergeApplied(existing: TranslationsV2, lines: AppliedLine[], catalog: KeyedString[], glossary: Glossary = {}): { merged: TranslationsV2; accepted: number; rejected: Rejected[] } {
+  const byKey = new Map(catalog.map((e) => [e.key, e]));
 
   const merged = { ...existing };
 
@@ -55,15 +56,15 @@ export function mergeApplied(existing: Translations, lines: AppliedLine[], catal
   let accepted = 0;
 
   for (const line of lines) {
-    const entry = byHash.get(line.h);
+    const entry = byKey.get(line.key);
 
-    const t = entry ? normalizeCreatureHeader(entry.en, normalizeSpellHeader(entry.en, fixItalicNames(entry.en, line.t, names), glossary), glossary) : line.t;
+    const text = entry ? normalizeCreatureHeader(entry.en, normalizeSpellHeader(entry.en, fixItalicNames(entry.en, line.text, names), glossary), glossary) : line.text;
 
-    const issues = entry ? checkTranslation(entry.en, t) : (["unknown"] as Rejected["issues"]);
+    const issues = entry ? checkTranslation(entry.en, text) : (["unknown"] as Rejected["issues"]);
 
     if (issues.length > 0) rejected.push({ ...line, issues });
-    else {
-      merged[line.h] = t;
+    else if (entry) {
+      merged[line.key] = { text, en: entry.en };
       accepted += 1;
     }
   }

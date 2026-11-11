@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { hashText } from "@/lib/utils/templates/i18n/catalog";
 
-vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? { [hashText("n", "Bless")]: "Благословення" } : {} }));
+vi.mock("@/lib/server/templates/dictionaries", () => ({ templateTranslationsFor: (_key: string, locale: string) => locale === "uk" ? { "spells/bless/name": { text: "Благословення", en: "Bless" } } : {} }));
 
 const m = vi.hoisted(() => ({
   db: {
@@ -116,7 +115,7 @@ describe("campaign templates API", () => {
 
       m.db.campaign.findUnique.mockImplementation(async ({ where }) => ({ ...identity, id: where.id, locale: where.id === "legacy" ? "uk" : "en" }));
       m.db.campaign.findMany.mockResolvedValue([{ id: "canonical" }]);
-      m.exportCampaign.mockResolvedValue({ ...bundle, spells: [{ id: "c" + "s".repeat(24), name: "Bless", description: "Fallback text" }] });
+      m.exportCampaign.mockResolvedValue({ ...bundle, spells: [{ id: "c" + "s".repeat(24), slug: "bless", name: "Bless", description: "Fallback text" }] });
 
       const res = await createPost(json({ name: "N", templateId: "legacy", contentLocale }));
 

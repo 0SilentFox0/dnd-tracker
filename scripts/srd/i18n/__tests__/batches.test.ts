@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { inPhase, mergeApplied, missing, planBatches } from "../batches";
-import type { CatalogEntry } from "../catalog";
 
-const e = (hash: string, en: string, kinds: CatalogEntry["kinds"] = ["spells"], cls: CatalogEntry["cls"] = "d"): CatalogEntry => ({ hash, cls, en, kinds });
+import type { KeyedString } from "@/lib/utils/templates/i18n/keys";
+
+const e = (key: string, en: string, kind = "spells", cls: KeyedString["cls"] = "d"): KeyedString => ({ key, kind, slug: "x", fieldPath: key, cls, en });
 
 describe("planBatches", () => {
   it("не перевищує ліміт, але не залишає порожніх порцій і не губить записи", () => {
@@ -11,38 +12,38 @@ describe("planBatches", () => {
 
     const batches = planBatches(entries, 20);
 
-    expect(batches.map((b) => b.map((x) => x.hash))).toEqual([["a", "b"], ["c"]]);
+    expect(batches.map((b) => b.map((x) => x.key))).toEqual([["a", "b"], ["c"]]);
     expect(planBatches([], 20)).toEqual([]);
   });
 });
 
 describe("inPhase / missing", () => {
   it("A: назви всіх видів і описи races/classes; B: решта описів", () => {
-    expect(inPhase(e("1", "Fireball", ["spells"], "n"), "A")).toBe(true);
-    expect(inPhase(e("2", "desc", ["classes"]), "A")).toBe(true);
-    expect(inPhase(e("3", "desc", ["spells"]), "A")).toBe(false);
-    expect(inPhase(e("3", "desc", ["spells"]), "B")).toBe(true);
+    expect(inPhase(e("1", "Fireball", "spells", "n"), "A")).toBe(true);
+    expect(inPhase(e("2", "desc", "classes"), "A")).toBe(true);
+    expect(inPhase(e("3", "desc", "spells"), "A")).toBe(false);
+    expect(inPhase(e("3", "desc", "spells"), "B")).toBe(true);
   });
 
   it("missing повертає лише без перекладу", () => {
-    expect(missing([e("a", "x"), e("b", "y")], { a: "ікс" }).map((x) => x.hash)).toEqual(["b"]);
+    expect(missing([e("a", "x"), e("b", "y")], { a: { text: "ікс", en: "x" } }).map((x) => x.key)).toEqual(["b"]);
   });
 });
 
 describe("mergeApplied", () => {
-  const catalog = [e("a", "Range 30 feet"), e("b", "Alert", ["feats"], "n")];
+  const catalog = [e("a", "Range 30 feet"), e("b", "Alert", "feats", "n")];
 
   it("вливає валідні, невалідні й невідомі хеші відхиляє з кодами, повтор ідемпотентний", () => {
-    const first = mergeApplied({}, [{ h: "a", t: "Дальність футів" }, { h: "b", t: "Пильність" }, { h: "zz", t: "?" }], catalog);
+    const first = mergeApplied({}, [{ key: "a", text: "Дальність футів" }, { key: "b", text: "Пильність" }, { key: "zz", text: "?" }], catalog);
 
-    expect(first.merged).toEqual({ b: "Пильність" });
-    expect(first.rejected.map((r) => [r.h, r.issues])).toEqual([["a", ["numbers"]], ["zz", ["unknown"]]]);
-    expect(mergeApplied(first.merged, [{ h: "b", t: "Пильність" }], catalog).merged).toEqual(first.merged);
+    expect(first.merged).toEqual({ b: { text: "Пильність", en: "Alert" } });
+    expect(first.rejected.map((r) => [r.key, r.issues])).toEqual([["a", ["numbers"]], ["zz", ["unknown"]]]);
+    expect(mergeApplied(first.merged, [{ key: "b", text: "Пильність" }], catalog).merged).toEqual(first.merged);
   });
 
   it("автовиправляє курсивні назви за каталогом перед валідацією", () => {
-    const cat = [e("n1", "Fireball", ["spells"], "n"), e("d1", "Cast *Fireball* now")];
+    const cat = [e("n1", "Fireball", "spells", "n"), e("d1", "Cast *Fireball* now")];
 
-    expect(mergeApplied({ n1: "Вогняна куля" }, [{ h: "d1", t: "Накладіть *Вогняну кулю* зараз" }], cat).merged.d1).toBe("Накладіть *Вогняна куля* зараз");
+    expect(mergeApplied({ n1: { text: "Вогняна куля", en: "Fireball" } }, [{ key: "d1", text: "Накладіть *Вогняну кулю* зараз" }], cat).merged.d1.text).toBe("Накладіть *Вогняна куля* зараз");
   });
 });

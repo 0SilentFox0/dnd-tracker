@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import type { CatalogEntry } from "../catalog";
 import { buildNameMap, fixItalicNames, namesIn } from "../names";
 
-const n = (hash: string, en: string): CatalogEntry => ({ hash, cls: "n", en, kinds: ["spells"] });
+import type { KeyedString } from "@/lib/utils/templates/i18n/keys";
 
-const names = buildNameMap([n("e", "force"), n("a", "Fireball"), n("b", "Cure Wounds"), n("c", "Light"), n("d", "Kobold")], { e: "силова", a: "Вогняна куля", b: "Зцілення ран", c: "Світло", d: "Кобольд" });
+const n = (key: string, en: string): KeyedString => ({ key, kind: "spells", slug: key, fieldPath: "name", cls: "n", en });
+
+const tr = (entries: Record<string, [string, string]>) => Object.fromEntries(Object.entries(entries).map(([key, [text, en]]) => [key, { text, en }]));
+
+const names = buildNameMap([n("e", "force"), n("a", "Fireball"), n("b", "Cure Wounds"), n("c", "Light"), n("d", "Kobold")], tr({ e: ["силова", "force"], a: ["Вогняна куля", "Fireball"], b: ["Зцілення ран", "Cure Wounds"], c: ["Світло", "Light"], d: ["Кобольд", "Kobold"] }));
 
 describe("buildNameMap", () => {
   it("бере лише перекладені назви", () => {
-    expect(buildNameMap([n("a", "Fireball"), n("z", "Missing")], { a: "Вогняна куля" })).toEqual(new Map([["Fireball", "Вогняна куля"]]));
+    expect(buildNameMap([n("a", "Fireball"), n("z", "Missing")], tr({ a: ["Вогняна куля", "Fireball"] }))).toEqual(new Map([["Fireball", "Вогняна куля"]]));
   });
 });
 

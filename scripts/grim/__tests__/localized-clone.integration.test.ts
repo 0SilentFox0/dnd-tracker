@@ -14,7 +14,6 @@ vi.mock("@/lib/db", () => ({ get prisma() { return scoped; } }));
 vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 
 import { readGrimData } from "../data";
-import { GRIM_I18N_DIR } from "../i18n";
 import { loadGrimTemplate } from "../load-template";
 import { GRIM_SPELL_LISTS } from "../spells";
 
@@ -24,20 +23,24 @@ import { listRaceProfiles } from "@/lib/server/races/race-profile";
 import { visible } from "@/lib/server/templates/sync/__tests__/helpers";
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
-import { translateText } from "@/lib/utils/templates/i18n/overlay";
-import { readTranslations } from "@/scripts/srd/i18n/store";
+import type { TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
+import { translateAt } from "@/lib/utils/templates/i18n/overlay";
+import { slugify } from "@/lib/utils/templates/slug";
+import { readTranslations } from "@/scripts/templates/lib/i18n-store";
 
 const marker = `grimloc-${randomUUID()}`;
 
 const data = readGrimData();
 
-const uk = readTranslations("uk", GRIM_I18N_DIR);
+const uk = readTranslations("grim-d100", "uk");
 
 type Rows = { name: string }[];
 
 const names = (rows: Rows) => rows.map((row) => row.name).sort();
 
-const expectedNames = (rows: { name?: unknown }[], tr: Record<string, string>) => rows.map((row) => translateText(tr, "name", String(row.name))).sort();
+const nameOf = (tr: TranslationsV2, kind: string, row: { slug?: unknown; name?: unknown }) => translateAt(tr, `${kind}/${String(row.slug)}/name`, String(row.name));
+
+const expectedNames = (kind: string, rows: { slug?: unknown; name?: unknown }[], tr: TranslationsV2) => rows.map((row) => nameOf(tr, kind, row)).sort();
 
 describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
   let templateId = "";
@@ -96,7 +99,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
 
     clones[locale] = campaignId;
 
-    const tr = locale === "uk" ? uk : {};
+    const tr: TranslationsV2 = locale === "uk" ? uk : {};
 
     const where = { campaignId };
 
@@ -112,17 +115,17 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
 
     expect(campaign.locale).toBe(locale);
 
-    for (const [rows, source] of [[careers, data.careers], [spells, data.spells], [units, data.units], [artifacts, data.artifacts], [feats, data.feats], [races, data.races]] as const) {
+    for (const [kind, rows, source] of [["careers", careers, data.careers], ["spells", spells, data.spells], ["units", units, data.units], ["artifacts", artifacts, data.artifacts], ["feats", feats, data.feats], ["races", races, data.races]] as const) {
       expect(rows).toHaveLength(source.length);
-      expect(names(rows)).toEqual(expectedNames(source, tr));
+      expect(names(rows)).toEqual(expectedNames(kind, source, tr));
     }
 
     const minor = (campaign.rules as { tables: { miscastMinor: { text: string }[] } }).tables.miscastMinor[0].text;
 
-    expect(minor).toBe(translateText(tr, "text", (data.rules?.tables as { miscastMinor: { text: string }[] }).miscastMinor[0].text));
+    expect(minor).toBe(translateAt(tr, "rules/_/miscastMinor[0].text", (data.rules?.tables as { miscastMinor: { text: string }[] }).miscastMinor[0].text));
 
     if (locale === "uk") {
-      const known = new Set(Object.values(GRIM_SPELL_LISTS).flat().map((list) => translateText(uk, "name", list)));
+      const known = new Set(Object.values(GRIM_SPELL_LISTS).flat().map((list) => translateAt(uk, `spellLists/${slugify(list)}/name`, list)));
 
       for (const spell of spells) expect(known.has((spell.lists as string[])[0]), spell.name).toBe(true);
     }
@@ -136,17 +139,17 @@ describe.skipIf(!isLocalDevDatabaseEnv())("grim-d100 localized clones", () => {
         scoped.race.findMany({ where: { campaignId }, select: { id: true, name: true } }),
       ]);
 
-      const pos = (rows: { id: string; name: string }[], source: { name?: unknown }[]) => {
-        const order = new Map(source.flatMap((row, index) => [[String(row.name), index], [translateText(uk, "name", String(row.name)), index]] as const));
+      const pos = (kind: string, rows: { id: string; name: string }[], source: { slug?: unknown; name?: unknown }[]) => {
+        const order = new Map(source.flatMap((row, index) => [[String(row.name), index], [nameOf(uk, kind, row), index]] as const));
 
         return new Map(rows.map((row) => [row.id, order.get(row.name)]));
       };
 
-      const careerPos = pos(careers, data.careers);
+      const careerPos = pos("careers", careers, data.careers);
 
-      const featPos = pos(feats, data.feats);
+      const featPos = pos("feats", feats, data.feats);
 
-      const racePos = pos(races, data.races);
+      const racePos = pos("races", races, data.races);
 
       const profiles = await listRaceProfiles(campaignId);
 
