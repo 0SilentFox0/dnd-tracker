@@ -81,7 +81,7 @@ export async function backfillSlugs(key: string, opts: { apply?: boolean; allowR
 
   for (const row of plan) console.info(`${opts.apply ? "" : "would write "}${row.kind} ${row.id} -> ${row.slug}`);
 
-  if (opts.apply) await withCampaignRuntimeWrite(template.id, async () => { for (const row of plan) await writeSlug(template.id, row.kind as ImportKind, row.id, row.slug); });
+  if (opts.apply) await withCampaignRuntimeWrite(template.id, async () => { for (const row of plan) await writeSlug(template.id, row.kind as ImportKind, row.id, row.slug); }, { timeout: 600_000 });
 
   return { plan, unmapped, written: opts.apply ? plan.length : 0 };
 }
