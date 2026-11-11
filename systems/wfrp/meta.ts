@@ -1,6 +1,6 @@
 import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 
-export const WFRP_META: SystemMeta = {
+export const WFRP_META = {
   module: "wfrp",
   keys: ["wfrp"],
   i18n: {
@@ -18,4 +18,4 @@ export const WFRP_META: SystemMeta = {
   },
   unusedMechanics: ["morale", "criticals", "formulas", "heroScaling", "initiative", "saves", "deathSaves", "concentration", "conditions", "actions", "classes", "encounters"],
   dmSections: ["careers"],
-};
+} as const satisfies SystemMeta;

@@ -8,7 +8,7 @@ vi.mock("@/lib/server/campaigns/access", () => ({ getCampaignForLayout: () => Pr
 vi.mock("@/components/onboarding/DemoTourCoordinator", () => ({
   DemoTourCoordinator: ({ children }: { children: React.ReactNode }) => <div data-testid="tour-coordinator">{children}</div>,
 }));
-vi.mock("@/lib/server/campaigns/system-key", () => ({ isWfrpCampaign: () => Promise.resolve(mocks.wfrp) }));
+vi.mock("@/lib/server/campaigns/system-key", () => ({ systemKeyOfCampaign: () => Promise.resolve(mocks.wfrp ? "wfrp" : "homm") }));
 vi.mock("@/lib/i18n/extend-locale-scope", () => ({
   ExtendLocaleScope: ({ children, namespaces }: { children: React.ReactNode; namespaces: string[] }) => <div data-scope={namespaces.join(",")}>{children}</div>,
 }));

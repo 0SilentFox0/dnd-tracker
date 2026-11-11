@@ -7,19 +7,19 @@ const queryRaw = vi.fn();
 
 vi.mock("@/lib/db", () => ({ prisma: { $queryRaw: (...args: unknown[]) => queryRaw(...args) } }));
 
-import { isWfrpCampaign } from "../system-key";
+import { systemKeyOfCampaign } from "../system-key";
 
-describe("isWfrpCampaign", () => {
+describe("systemKeyOfCampaign", () => {
   beforeEach(() => queryRaw.mockReset());
 
   it.each([
-    [[{ wfrp: true }], true],
-    [[], false],
-    [[{ wfrp: null }], false],
-    [[{ wfrp: false }], false],
+    [[{ key: "wfrp" }], "wfrp"],
+    [[{ key: "homm" }], "homm"],
+    [[], null],
+    [[{ key: null }], null],
   ])("%j -> %s", async (rows, expected) => {
     queryRaw.mockResolvedValue(rows);
 
-    expect(await isWfrpCampaign("c1")).toBe(expected);
+    expect(await systemKeyOfCampaign("c1")).toBe(expected);
   });
 });

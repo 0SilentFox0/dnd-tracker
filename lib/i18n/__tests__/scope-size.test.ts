@@ -1,44 +1,48 @@
 import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
-import { LOCALES } from "../config";
+import { LOCALES, type Namespace } from "../config";
 import { loadMessages, loadStaticMessages } from "../messages";
-import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES, ROOT_NAMESPACES, WFRP_BATTLE_NAMESPACES, WFRP_CAMPAIGN_EXTRA, WFRP_DM_EXTRA, WFRP_MEMBER_EXTRA } from "../scopes";
+import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES, ROOT_NAMESPACES } from "../scopes";
+import { systemScope } from "../system-scope";
+
+import { SYSTEM_META } from "@/lib/utils/rules/systems/meta";
 
 const LIMIT_KB = 105;
 
-// every wfrp member / the DM load more wfrp namespaces on top of the 105 KB base; measured uk gzip 106.2 / 110.1 KB (incl. 5h-1 trait and psychology texts, 5h-2 tables editor), limits keep ~0.5 KB headroom
-const WFRP_MEMBER_LIMIT_KB = 107;
-
-const WFRP_DM_LIMIT_KB = 111;
-
-// loaded per page via ExtendLocaleScope (character pages, DM characters, DM rules), not in the layout scope; measured uk gzip 1.7 KB
-const WFRP_DOWNTIME_PAGE_LIMIT_KB = 2;
-
-// loaded per page via ExtendLocaleScope (character pages, DM character, DM rules); measured uk gzip 1.2 KB
-const WFRP_CORRUPTION_PAGE_LIMIT_KB = 2;
-
+// per-system budgets live in the system meta (i18n.budgetKb); limits keep ~0.5 KB headroom over the measured uk gzip
 const ROOT_LIMIT_KB = 20;
 
-const SCOPES = [
-  { name: "campaign", namespaces: CAMPAIGN_NAMESPACES },
-  { name: "campaign + battle", namespaces: [...CAMPAIGN_NAMESPACES, ...BATTLE_NAMESPACES] },
-  { name: "campaign + battle + battleWfrp", namespaces: [...CAMPAIGN_NAMESPACES, ...WFRP_BATTLE_NAMESPACES] },
-  { name: "wfrp member (campaign + battle + every member extra)", namespaces: [...CAMPAIGN_NAMESPACES, ...WFRP_BATTLE_NAMESPACES, ...WFRP_CAMPAIGN_EXTRA, ...WFRP_MEMBER_EXTRA], limit: WFRP_MEMBER_LIMIT_KB },
-  { name: "wfrp DM (member + DM extra)", namespaces: [...CAMPAIGN_NAMESPACES, ...WFRP_BATTLE_NAMESPACES, ...WFRP_CAMPAIGN_EXTRA, ...WFRP_MEMBER_EXTRA, ...WFRP_DM_EXTRA], limit: WFRP_DM_LIMIT_KB },
-  { name: "wfrpDowntime page extra", namespaces: ["wfrpDowntime"], limit: WFRP_DOWNTIME_PAGE_LIMIT_KB },
-  { name: "wfrpCorruption page extra", namespaces: ["wfrpCorruption"], limit: WFRP_CORRUPTION_PAGE_LIMIT_KB },
-] as const;
+const BASE = [...CAMPAIGN_NAMESPACES, ...BATTLE_NAMESPACES];
+
+const systemScopes = SYSTEM_META.flatMap((meta) => {
+  const [key] = meta.keys;
+
+  const { budgetKb } = meta.i18n as { budgetKb?: { member?: number; dm?: number; pages?: Record<string, number> } };
+
+  const battle = systemScope(key, "battle");
+
+  const member = [...BASE, ...battle, ...systemScope(key, "campaign"), ...systemScope(key, "member")];
+
+  return [
+    { name: `${key} battle`, namespaces: [...CAMPAIGN_NAMESPACES, ...BATTLE_NAMESPACES, ...battle] },
+    ...(budgetKb?.member ? [{ name: `${key} member`, namespaces: member, limit: budgetKb.member }] : []),
+    ...(budgetKb?.dm ? [{ name: `${key} DM`, namespaces: [...member, ...systemScope(key, "dm")], limit: budgetKb.dm }] : []),
+    ...Object.entries(budgetKb?.pages ?? {}).map(([page, limit]) => ({ name: `${key} ${page} page extra`, namespaces: systemScope(key, page as Parameters<typeof systemScope>[1]), limit })),
+  ];
+});
+
+const SCOPES = [{ name: "campaign", namespaces: CAMPAIGN_NAMESPACES }, { name: "campaign + battle", namespaces: BASE }, ...systemScopes] as readonly { name: string; namespaces: readonly Namespace[]; limit?: number }[];
 
 describe("message scope size", () => {
-  it.each(SCOPES.flatMap((scope) => LOCALES.map((locale) => ({ ...scope, locale }))))("$name $locale stays under the split threshold", async ({ name, namespaces, locale, ...scope }) => {
+  it.each(SCOPES.flatMap((scope) => LOCALES.map((locale) => ({ ...scope, locale }))))("$name $locale stays under the split threshold", async ({ name, namespaces, locale, limit }) => {
     const json = JSON.stringify(await loadMessages(locale, namespaces));
 
     const gzipKb = gzipSync(json, { level: 9 }).length / 1024;
 
     console.info(`${name} scope ${locale}: ${(json.length / 1024).toFixed(1)} KB raw, ${gzipKb.toFixed(1)} KB gzip`);
 
-    expect(gzipKb).toBeLessThan("limit" in scope ? scope.limit : LIMIT_KB);
+    expect(gzipKb).toBeLessThan(limit ?? LIMIT_KB);
   });
 
   it("root chunk (root namespaces, both locales) stays under the budget", async () => {
@@ -49,5 +53,13 @@ describe("message scope size", () => {
     console.info(`root scope: ${(json.length / 1024).toFixed(1)} KB raw, ${gzipKb.toFixed(1)} KB gzip`);
 
     expect(gzipKb).toBeLessThan(ROOT_LIMIT_KB);
+  });
+
+  it("a d20 campaign gets no system namespace", () => {
+    for (const slot of ["battle", "campaign", "member", "dm", "character", "dmCharacters", "dmCharacter", "dmRules"] as const) {
+      expect(systemScope("homm", slot)).toEqual([]);
+      expect(systemScope("dnd5e", slot)).toEqual([]);
+      expect(systemScope(null, slot)).toEqual([]);
+    }
   });
 });

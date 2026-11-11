@@ -13,7 +13,7 @@ const wfrp = vi.hoisted(() => ({ is: false }));
 vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignDMOrDemo: vi.fn(async () => ({ campaign: { maxLevel: 20 }, userId: "u1", isDemo: false })) }));
 vi.mock("@/lib/server/characters/core/read-sheet", () => ({ readCharacterSheet }));
 vi.mock("@/lib/server/campaigns/rules", () => ({ loadRules: vi.fn(async () => ({ morale: { enabled: false } })) }));
-vi.mock("@/lib/server/campaigns/system-key", () => ({ isWfrpCampaign: () => Promise.resolve(wfrp.is) }));
+vi.mock("@/lib/server/campaigns/system-key", () => ({ systemKeyOfCampaign: () => Promise.resolve(wfrp.is ? "wfrp" : "homm") }));
 vi.mock("@/lib/i18n/extend-locale-scope", () => ({ ExtendLocaleScope: ({ children, namespaces }: { children: React.ReactNode; namespaces: string[] }) => <div data-scope={namespaces.join(",")}>{children}</div> }));
 vi.mock("@/components/character-profile", () => ({ CharacterProfile: () => null }));
 
