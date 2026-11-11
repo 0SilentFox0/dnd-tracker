@@ -7,7 +7,7 @@ import { limitsSegments } from "@/lib/utils/abilities/registry/labels";
 import { describeTrigger } from "@/lib/utils/abilities/registry/triggers";
 import { renderSegments } from "@/lib/utils/abilities/segments";
 
-const CONVERTED_KINDS = new Set(["dealDamage", "heal", "dot", "hot", "berserk", "charm", "maneuver", "summon", "raiseDead", "modifyStat", "damageBonus", "grantAction", "flag", "applyCondition", "restoreSpellSlotLevels", "restoreSpellSlot", "drainSpellSlot", "changeMorale", "mark", "copySpellBuffs", "guard", "cleanse", "randomOf", "help", "push"]);
+const CONVERTED_KINDS = new Set(["dealDamage", "heal", "dot", "hot", "berserk", "charm", "maneuver", "summon", "raiseDead", "phantom", "modifyStat", "damageBonus", "grantAction", "flag", "applyCondition", "restoreSpellSlotLevels", "restoreSpellSlot", "drainSpellSlot", "changeMorale", "mark", "copySpellBuffs", "guard", "cleanse", "randomOf", "help", "push"]);
 
 describe("describe golden (uk)", () => {
   it("describeAbility", async () => {

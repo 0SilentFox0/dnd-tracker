@@ -72,6 +72,9 @@
     "raiseDead": {
       "label": "Підняти мертвих"
     },
+    "phantom": {
+      "label": "Фантом (копія цілі)"
+    },
     "cleanse": {
       "label": "Зняти дебафи"
     },
@@ -1039,6 +1042,7 @@
       "maneuver": "{name}: {percent} % шкоди атаки",
       "summonUnit": "прикликати {count}× обраного юніта",
       "summonGroup": "прикликати {count}× юніта «{group}», Tier {tier}",
+      "phantom": "створити фантома: повну копію цілі з 1 HP під керуванням заклинателя",
       "raiseDead": "підняти мертвих юнітів на {percent}% HP",
       "statAtLeast": "{stat} не менше {n}",
       "stat": "{stat}{hasLevels, select, yes { (рівні {levels})} other {}} {value}",

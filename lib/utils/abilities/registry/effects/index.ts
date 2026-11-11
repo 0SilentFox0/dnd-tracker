@@ -27,7 +27,7 @@ import {
   describeModifyStat,
   modifyStatFields,
 } from "./static";
-import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
+import { applyPhantom, applyRaiseDead, applySummon, describePhantom, describeRaiseDead, describeSummon } from "./summon";
 import { applyTrait, traitDescribe, traitFields } from "./traits";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
@@ -141,6 +141,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     apply: applySummon,
   },
   raiseDead: { kind: "raiseDead", static: false, fields: [{ name: "hpPercent", input: "number" }, TARGET_FIELD], describe: describeRaiseDead, apply: applyRaiseDead },
+  phantom: { kind: "phantom", static: false, fields: [TARGET_FIELD], describe: describePhantom, apply: applyPhantom },
   cleanse: { kind: "cleanse", static: false, fields: [{ name: "includeConditions", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => [seg("summary.effects.cleanse", { includeConditions: e.includeConditions ? "yes" : "no" })], apply: applyCleanse },
   maneuver: {
     kind: "maneuver",

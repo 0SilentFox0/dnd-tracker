@@ -37,6 +37,8 @@ export interface SummonRequest {
   /** закляття, яким прикликано (для extraSummons) */
   spellId?: string;
   inline?: InlineSummon;
+  /** повна копія цього учасника з 1 HP (ефект phantom) */
+  cloneOf?: string;
   atCell?: GridPoint;
   expiresRound?: number;
   concentrationOf?: { casterId: string; castId: string };

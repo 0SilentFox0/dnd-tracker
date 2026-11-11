@@ -64,4 +64,14 @@ export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): Effect
   return { participants: ps, messages };
 }
 
+export function applyPhantom(input: EffectApplyInput<Of<"phantom">>): EffectApplyResult {
+  const [cloneOf] = input.targetIds;
+
+  const spellId = input.event.type === "spellCast" ? input.event.spellId : undefined;
+
+  return { participants: input.participants, messages: [], summons: cloneOf ? [{ ownerId: input.ownerId, count: 1, cloneOf, spellId }] : [] };
+}
+
+export const describePhantom = (): Segment[] => [seg("summary.effects.phantom")];
+
 export const describeRaiseDead = (e: Of<"raiseDead">): Segment[] => [seg("summary.effects.raiseDead", { percent: e.hpPercent })];

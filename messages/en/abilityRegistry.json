@@ -72,6 +72,9 @@
     "raiseDead": {
       "label": "Raise the dead"
     },
+    "phantom": {
+      "label": "Phantom (copy of an ally)"
+    },
     "cleanse": {
       "label": "Remove debuffs"
     },
@@ -1039,6 +1042,7 @@
       "maneuver": "{name}: {percent}% of attack damage",
       "summonUnit": "summon {count}× of the chosen unit",
       "summonGroup": "summon {count}× unit of «{group}», Tier {tier}",
+      "phantom": "create a phantom: a full copy of the target with 1 HP under the caster's control",
       "raiseDead": "raise dead units at {percent}% HP",
       "statAtLeast": "{stat} at least {n}",
       "stat": "{stat}{hasLevels, select, yes { (levels {levels})} other {}} {value}",

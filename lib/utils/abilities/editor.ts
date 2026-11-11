@@ -42,6 +42,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kin
   copySpellBuffs: {},
   summon: { tier: 1 },
   raiseDead: { hpPercent: 50, target: "eventTarget" },
+  phantom: { target: "eventTarget" },
   guard: { percent: 50, duration: { rounds: 2 }, target: "eventTarget" },
   mark: { markId: "mark", duration: { rounds: 2 }, target: "eventTarget" },
   maneuver: { maneuver: "fireBurst", percentOfAttack: 50 },

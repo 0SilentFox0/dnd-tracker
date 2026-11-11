@@ -565,6 +565,8 @@ export interface BattleParticipantBattleData {
   object?: { spellId: string; expiresRound?: number; concentrationOf?: { casterId: string; castId: string } };
   /** Цільова форма заклинання перетворення; немає — своя форма */
   transform?: TransformState;
+  /** Двійник заклинання Phantom: id кастера, який його створив; у кастера лише один живий */
+  phantomOf?: string;
   /** Предмет зник (а не загинув) */
   dismissed?: boolean;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */

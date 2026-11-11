@@ -257,6 +257,8 @@ const SummonSchema = z
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 
+const PhantomSchema = z.object({ kind: z.literal("phantom"), ...target });
+
 const HelpSchema = z.object({ kind: z.literal("help"), ...target });
 
 const PushSchema = z.object({ kind: z.literal("push"), feet: z.number().int().min(5).max(30).multipleOf(5), from: z.literal("caster"), ...target });
@@ -292,6 +294,7 @@ export const BASE_EFFECTS = [
   GuardSchema,
   SummonSchema,
   RaiseDeadSchema,
+  PhantomSchema,
   ManeuverSchema,
   HelpSchema,
   PushSchema,

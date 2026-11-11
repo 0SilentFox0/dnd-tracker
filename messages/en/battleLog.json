@@ -241,6 +241,8 @@
     "noGroup": "no unit in group {group} Tier {tier}",
     "summoned": "🌀 summoned: {names}",
     "appears": "🌿 appears: {names}",
+    "phantom": "🌀 phantom of {name} appears",
+    "phantomReplaced": "🌀 the previous phantom of {name} dissolves",
     "vanishes": "🌿 {name} vanishes"
   },
   "maneuver": {

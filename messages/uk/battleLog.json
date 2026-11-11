@@ -241,6 +241,8 @@
     "noGroup": "немає юніта групи {group} Tier {tier}",
     "summoned": "🌀 прикликано: {names}",
     "appears": "🌿 з'являється: {names}",
+    "phantom": "🌀 з'являється фантом «{name}»",
+    "phantomReplaced": "🌀 попередній фантом «{name}» розвіюється",
     "vanishes": "🌿 {name} зникає"
   },
   "maneuver": {

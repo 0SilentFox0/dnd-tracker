@@ -34,6 +34,7 @@ const BASE_EFFECTS: Record<Exclude<EffectKind, "help" | "push" | TraitEffect["ki
   guard: { kind: "guard", percent: 50, duration },
   summon: { kind: "summon", group: "Haven", tier: 2, count: 2 },
   raiseDead: { kind: "raiseDead", hpPercent: 30 },
+  phantom: { kind: "phantom" },
   cleanse: { kind: "cleanse" },
   maneuver: { kind: "maneuver", maneuver: "dive", percentOfAttack: 150 },
   randomOf: { kind: "randomOf", options: [{ kind: "heal", amount: 3 }, { kind: "dealDamage", amount: 4 }] },
