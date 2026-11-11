@@ -116,7 +116,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm pack", () => {
 
     const exported = bundleToPack(bundle, pack.manifest, slugs);
 
-    const normal = (rows: Array<Record<string, unknown>> = []) => rows.map(({ origin: _origin, ...row }) => (Array.isArray(row.artifactIds) ? { ...row, artifactIds: [...row.artifactIds].sort() } : row));
+    const normal = (rows: Array<Record<string, unknown>> = []) => rows.map(({ origin: _origin, ...row }) => row);
 
     for (const kind of pack.manifest.kinds) expect(normal(exported.rows[kind] as never), kind).toEqual(normal(pack.rows[kind] as never));
   });

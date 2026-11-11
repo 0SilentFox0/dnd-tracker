@@ -22,6 +22,8 @@ export type SlugMap = Partial<Record<PackKind, Record<string, string>>>;
 
 const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (!!v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
 
+const compareText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
 const isRecord = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 
 function mapKey(value: unknown, key: string, swap: (id: string) => string): unknown {
@@ -82,7 +84,9 @@ export function bundleToPack(bundle: Bundle, manifest: TemplateManifest, slugs: 
 
   const setArtifacts = new Map<string, string[]>();
 
-  for (const artifact of rowsOf("artifacts")) if (typeof artifact.setId === "string") setArtifacts.set(artifact.setId, [...(setArtifacts.get(artifact.setId) ?? []), artifact.id]);
+  const bySlug = [...rowsOf("artifacts")].sort((a, b) => compareText(slugOf("artifacts", a.id) ?? "", slugOf("artifacts", b.id) ?? ""));
+
+  for (const artifact of bySlug) if (typeof artifact.setId === "string") setArtifacts.set(artifact.setId, [...(setArtifacts.get(artifact.setId) ?? []), artifact.id]);
 
   const icons: IconsFile = {};
 
@@ -132,7 +136,7 @@ export function bundleToPack(bundle: Bundle, manifest: TemplateManifest, slugs: 
 
         return { slug, ...(mapKey(record, "school", (id) => schoolIds.get(id) ?? id) as Record<string, unknown>), ...(Object.keys(extra).length > 0 && { extra }) } as PackRow;
       })
-      .sort((a, b) => a.slug.localeCompare(b.slug));
+      .sort((a, b) => compareText(a.slug, b.slug));
   }
 
   const counts = Object.fromEntries(manifest.kinds.map((kind) => [kind, rows[kind]?.length ?? 0]));
