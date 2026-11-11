@@ -16,8 +16,6 @@
   "app/campaigns/[id]/dm/characters/page.tsx": 3,
   "app/campaigns/[id]/dm/rules/page.tsx": 5,
   "app/campaigns/[id]/layout.tsx": 14,
-  "components/battle/overlays/CastResultLines.tsx": 2,
-  "components/battle/overlays/PercentileResultLines.tsx": 1,
   "components/battle/participants/ConditionTestPanel.tsx": 1,
   "components/battle/turn/ActionGrid.tsx": 1,
   "components/battle/wizards/attack/D100RollPicker.tsx": 1,

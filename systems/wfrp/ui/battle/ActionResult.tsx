@@ -1,7 +1,7 @@
 import { ACTION_SLOT } from "../../rules/slots";
+import { CastResultLines } from "./CastResultLines";
+import { PercentileResultLines } from "./PercentileResultLines";
 
-import { CastResultLines } from "@/components/battle/overlays/CastResultLines";
-import { PercentileResultLines } from "@/components/battle/overlays/PercentileResultLines";
 import type { ActionResultProps } from "@/components/systems/types";
 
 export function ActionResult({ details, hit, exact }: ActionResultProps) {

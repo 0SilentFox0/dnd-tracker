@@ -1,36 +1,7 @@
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { DefenseKind, HitLocation } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { DamageRow } from "@/types/battle";
 import type { LogLine } from "@/types/text";
-
-export interface PercentileAttackDetails {
-  roll: number;
-  target: number;
-  sl: number;
-  netSl: number;
-  location: HitLocation;
-  doubles: boolean;
-  defender?: { kind: DefenseKind; roll: number; sl: number; target: number };
-  momentumUsed?: boolean;
-  /** Opposed melee test; survives the privacy strip of `defender`. */
-  opposed?: boolean;
-  fortune?: { kind: "reroll" | "sl"; firstRoll?: number };
-}
-
-export interface PercentileCastDetails {
-  roll: number;
-  target: number;
-  sl: number;
-  cn: number;
-  channelled: number;
-  armourSl: number;
-  doubles: boolean;
-  outcome: "critical" | "success" | "failure" | "fumble";
-  overcastSteps: number;
-  miscast: "minor" | "major" | "wrath" | null;
-  fortune?: { kind: "reroll" | "sl"; firstRoll?: number };
-}
 
 export interface AttackRollResult {
   isHit: boolean;

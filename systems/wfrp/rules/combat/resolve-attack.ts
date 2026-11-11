@@ -2,12 +2,14 @@ import { skillTarget, value } from "../characteristics/derive";
 import { againstMod, selfTestMod } from "../conditions/test-mod";
 import { qualityFumbleFrom, qualityToHit } from "../equipment/quality-effects";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
+import type { PercentileAttackDetails } from "../percentile/details";
 import { DIFFICULTY_SL } from "../percentile/difficulty";
 import { applyFortune } from "../percentile/fortune";
 import { ACTION_SLOT, ATTACK_SLOT } from "../slots";
 import { sizeHitMod } from "../traits/size";
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from "./constants";
 import { hitLocation } from "./location";
+import { percentileLines } from "./log";
 import { resolveOpposed } from "./opposed";
 import { participantChars } from "./participant";
 
@@ -15,10 +17,8 @@ import { AttackType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { percentileLines } from "@/lib/utils/battle/attack/process/percentile-log";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
 import type { ResolveAttackCtx,ResolvedAttack } from "@/lib/utils/rules/systems/types";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 

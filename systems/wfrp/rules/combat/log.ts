@@ -1,5 +1,6 @@
+import type { PercentileAttackDetails } from "../percentile/details";
+
 import { textRef } from "@/lib/i18n/text-ref";
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
 import type { LogLine } from "@/types/text";
 
 export function percentileLines(p: PercentileAttackDetails | undefined, isHit: boolean): LogLine[] {

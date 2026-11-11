@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
+import type { PercentileAttackDetails } from "@/systems/wfrp/rules/percentile/details";
 
 /** `defender` is absent when the viewer may not see the target's defense, so only the net result shows. */
 export function PercentileResultLines({ p, hit }: { p: PercentileAttackDetails; hit: boolean }) {

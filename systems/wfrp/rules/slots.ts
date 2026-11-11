@@ -3,8 +3,8 @@ import type { SheetWfrpBlock } from "./characteristics/sheet-block";
 import type { WfrpParticipantStats } from "./combat/participant";
 import { qualityList } from "./equipment/guard";
 import type { QualityRef } from "./equipment/qualities";
+import type { PercentileAttackDetails, PercentileCastDetails } from "./percentile/details";
 
-import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import { defineSlot } from "@/lib/utils/rules/systems/slot";
 
 const isRec = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);

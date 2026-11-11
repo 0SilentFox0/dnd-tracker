@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import type { PercentileCastDetails } from "@/lib/utils/battle/types/attack";
+import type { PercentileCastDetails } from "@/systems/wfrp/rules/percentile/details";
 
 const TONE = { critical: "text-[#ffd36a]", success: "text-[#8fd18f]", failure: "text-[#8f8f96]", fumble: "text-[#c0564a]" } as const;
 

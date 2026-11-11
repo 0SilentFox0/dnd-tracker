@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { attackResultsOf, buildAttackResultFx } from "../attack-result-fx";
 
-import type { PercentileAttackDetails } from "@/lib/utils/battle/types/attack";
+import type { PercentileAttackDetails } from "@/systems/wfrp/rules/percentile/details";
 import type { BattleAction } from "@/types/battle";
 
 const nameOf = (id: string) => ({ a: "Гоблін", b: "Орк" })[id as "a" | "b"] ?? "";

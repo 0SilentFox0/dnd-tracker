@@ -5,8 +5,8 @@ import { wfrpActionDetails as hook } from "../details";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { percentileDice } from "@/lib/utils/battle/fx/dice";
-import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
 import { ruleSystemByKey } from "@/lib/utils/rules/systems";
+import type { PercentileAttackDetails, PercentileCastDetails } from "@/systems/wfrp/rules/percentile/details";
 
 const attack: PercentileAttackDetails = { roll: 34, target: 45, sl: 1, netSl: 3, location: "body", doubles: false, defender: { kind: "parry", roll: 70, sl: -2, target: 40 }, opposed: true };
 

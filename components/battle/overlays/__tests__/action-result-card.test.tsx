@@ -9,7 +9,7 @@ import { CornerStack } from "@/components/battle/scene/CornerStack";
 import { MapStripSlotContext, NoticeStackContext } from "@/components/battle/scene/MapStrip";
 import { ACTION_RESULT_MS } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
-import type { PercentileAttackDetails, PercentileCastDetails } from "@/lib/utils/battle/types/attack";
+import type { PercentileAttackDetails, PercentileCastDetails } from "@/systems/wfrp/rules/percentile/details";
 import { ACTION_SLOT } from "@/systems/wfrp/rules/slots";
 import type { ActionResultFx } from "@/types/battle-scene";
 
