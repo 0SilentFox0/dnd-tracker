@@ -10,6 +10,7 @@ const RAW_OK: Record<string, string> = {
   "lib/utils/inventory/stash-actions.ts": "moves refs between equipped/stash as opaque strings",
   "lib/hooks/characters/useStash.ts": "characterKeys.stash query key",
   "lib/hooks/characters/useCharacterEditor.ts": "seeds the DM editor state with raw refs",
+  "lib/server/templates/sync/profile-refs.ts": "collects raw ids and refs of inventories for the sync-delete integrity check",
   "components/character-profile/ProfileEditor.tsx": "roster equipped is already resolved by read-roster",
 };
 
