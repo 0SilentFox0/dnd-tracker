@@ -1,3 +1,4 @@
+import { settleJsonRefs } from "../../lib/json-refs-db";
 import type { Pack } from "../../lib/pack";
 import type { PackHooks, PackIssue } from "../types";
 import { treeFromPack, treeToPack, unresolvedTreeSlugs } from "./skill-trees";
@@ -14,6 +15,7 @@ function treeIssues(pack: Pack): PackIssue[] {
 
 export const HOMM_HOOKS: PackHooks = {
   validatePack: treeIssues,
+  afterImport: async ({ templateId, idBySlug }) => void (await settleJsonRefs(templateId, idBySlug)),
   toPackRow: (kind, row, refs) => (kind === "skillTrees" ? treeToPack(row, refs) : (row as never)),
   fromPackRow: (kind, row, refs) => (kind === "skillTrees" ? treeFromPack(row, refs) : row),
 };

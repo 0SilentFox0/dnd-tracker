@@ -21,6 +21,7 @@ vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<object>()), invali
 
 import { bundleToPack, type SlugMap } from "../lib/export";
 import { importPack } from "../lib/import-pack";
+import { JSON_REF_COLUMNS, mapJsonRefs } from "../lib/json-refs";
 import { readPack } from "../lib/pack";
 import { snapshotCampaign } from "../lib/snapshot";
 
@@ -107,6 +108,33 @@ describe.skipIf(!isLocalDevDatabaseEnv())("heroes-homm pack", () => {
     const again = await importPack(key, { owner: marker, dir: freshDir });
 
     expect(unchanged(again)).toBe(true);
+  });
+
+  it("JSON references in a fresh import are ids of rows of the template, never slugs", async () => {
+    const delegates = { spells: raw.spell, units: raw.unit, races: raw.race, skills: raw.skill, artifacts: raw.artifact, "artifact-sets": raw.artifactSet } as unknown as Record<string, { findMany(args: unknown): Promise<Array<Record<string, unknown>>> }>;
+
+    const ids = Object.fromEntries(await Promise.all(["spells", "units", "races"].map(async (kind) => [kind, new Set((await delegates[kind].findMany({ where: { campaignId: freshId }, select: { id: true } })).map((r) => r.id as string))] as const)));
+
+    const dangling: string[] = [];
+
+    let seen = 0;
+
+    for (const [kind, columns] of Object.entries(JSON_REF_COLUMNS)) {
+      for (const row of await delegates[kind].findMany({ where: { campaignId: freshId } })) {
+        for (const column of columns) {
+          mapJsonRefs(row[column], (refKind, value) => {
+            seen += 1;
+
+            if (!ids[refKind]?.has(value)) dangling.push(`${kind}.${String(row.slug)}.${column} ${refKind} ${value}`);
+
+            return value;
+          });
+        }
+      }
+    }
+
+    expect(seen).toBeGreaterThanOrEqual(60);
+    expect(dangling).toEqual([]);
   });
 
   it("fixpoint: a fresh import exported back equals the pack", async () => {

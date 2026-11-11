@@ -1224,13 +1224,13 @@
             "kind": "flag",
             "flag": "castSpellOnHit",
             "spellIds": [
-              "czrwlgkumke4xcrwif1qaryzy",
-              "c388yedrw59tp30hd6jxbww70",
-              "c38tpee2qdy2s6ethz3lzqo0k",
-              "cgammxe1bq3spqtq49psi50re",
-              "cztxvfayh4mnbmx0cdvhey5ta",
-              "cjl75d88n3oc5fadntunktha4",
-              "cd6fm0wtg5a7l4wdc42xg8or3"
+              "weakness",
+              "slow",
+              "frailty",
+              "plague",
+              "confusion",
+              "suffering",
+              "sorrow"
             ]
           }
         ]
@@ -9280,7 +9280,7 @@
         "effects": [
           {
             "kind": "summon",
-            "unitId": "c5qpbap7b9ccmm12cl95hsema",
+            "unitId": "necromancers-skeleton",
             "count": 1
           }
         ]

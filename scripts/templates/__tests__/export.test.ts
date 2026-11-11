@@ -145,3 +145,16 @@ describe("skill tree rows", () => {
     expect((row.skills as { id: string }).id).toBe(row.id);
   });
 });
+
+describe("JSON row references", () => {
+  it("exports slugs inside JSON columns and flags unknown slugs in the validator input", async () => {
+    const { mapJsonRefs, slugsToIds } = await import("../lib/json-refs");
+
+    const value = { effects: [{ kind: "summon", unitId: "u1", spellIds: ["s1", "s2"] }] };
+
+    const slugged = mapJsonRefs(value, (kind, id) => ({ u1: "imp", s1: "bolt" })[id] ?? id);
+
+    expect(slugged).toEqual({ effects: [{ kind: "summon", unitId: "imp", spellIds: ["bolt", "s2"] }] });
+    expect(mapJsonRefs(slugged, slugsToIds({ units: { imp: "u1" }, spells: { bolt: "s1" } }))).toEqual({ effects: [{ kind: "summon", unitId: "u1", spellIds: ["s1", "s2"] }] });
+  });
+});

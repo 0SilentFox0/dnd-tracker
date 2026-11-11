@@ -3,6 +3,7 @@ import { leakedIds } from "./export";
 import { catalogOfPack, i18nIssuesOf } from "./i18n-convert";
 import { readTranslations } from "./i18n-store";
 import { iconGaps, iconIssues } from "./icons-file";
+import { JSON_REF_COLUMNS, mapJsonRefs } from "./json-refs";
 import { type Pack, type PackRow, TEMPLATES_DIR } from "./pack";
 import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues } from "./row-columns";
 
@@ -167,7 +168,33 @@ function leakIssues(pack: Pack): PackIssue[] {
 
   const total = Object.values(leaks).reduce((sum, n) => sum + n, 0);
 
-  return total > 0 ? [{ level: "warning", message: `${total} row id(s) left inside rows, not portable (${Object.entries(leaks).map(([path, n]) => `${path}: ${n}`).join(", ")})` }] : [];
+  return total > 0 ? [{ level: "error", message: `${total} row id(s) left inside rows, not portable (${Object.entries(leaks).map(([path, n]) => `${path}: ${n}`).join(", ")})` }] : [];
+}
+
+function jsonRefIssues(pack: Pack): PackIssue[] {
+  if (pack.manifest.include?.length) return [];
+
+  const issues: PackIssue[] = [];
+
+  const known = (kind: PackKind) => new Set((pack.rows[kind] ?? []).map((row) => row.slug));
+
+  const cache = new Map<PackKind, Set<string>>();
+
+  for (const [kind, rows] of Object.entries(pack.rows) as [PackKind, PackRow[]][]) {
+    for (const row of rows) {
+      for (const column of JSON_REF_COLUMNS[kind] ?? []) {
+        mapJsonRefs(row[column], (refKind, value) => {
+          if (!cache.has(refKind)) cache.set(refKind, known(refKind));
+
+          if (!cache.get(refKind)?.has(value)) issues.push(error(`${kind} "${row.slug}": ${column} references unknown ${refKind} slug "${value}"`, { kind, slug: row.slug }));
+
+          return value;
+        });
+      }
+    }
+  }
+
+  return issues;
 }
 
 const NO_ICON_KINDS = new Set(["skillTrees", "tracks"]);
@@ -214,6 +241,7 @@ export function validatePack(pack: Pack, opts: ValidateOptions = {}): PackIssue[
     ...linkIssues(pack),
     ...countIssues(pack),
     ...leakIssues(pack),
+    ...jsonRefIssues(pack),
     ...iconPackIssues(pack),
     ...translationIssues(pack, dir),
     ...(hooks?.validatePack?.(pack) ?? []),

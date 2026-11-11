@@ -122,11 +122,22 @@ describe("validatePack on heroes-homm guards (D25, D25b, D25c)", () => {
 
   const heroesErrors = (pack: Pack) => validatePack(pack).filter((issue) => issue.level === "error").map((issue) => issue.message);
 
-  it("is valid as it is and warns about ids left inside rows", () => {
-    const issues = validatePack(heroes());
+  it("is valid as it is", () => {
+    expect(heroesErrors(heroes())).toEqual([]);
+  });
 
-    expect(issues.filter((issue) => issue.level === "error")).toEqual([]);
-    expect(issues.some((issue) => issue.level === "warning" && issue.message.includes("left inside rows"))).toBe(true);
+  it("errors on a raw id and on an unknown slug inside JSON columns", () => {
+    const pack = heroes();
+
+    const spell = (pack.rows.spells as PackRow[]).find((row) => Array.isArray(row.spellEffects) && row.spellEffects.length > 0) as PackRow;
+
+    spell.raceModifiers = [{ raceId: "cmuylhk0c0001ia06lg5eommv" }];
+    spell.spellEffects = [{ unitId: "no-such-unit" }];
+
+    const errors = heroesErrors(pack);
+
+    expect(errors.some((m) => m.includes("left inside rows"))).toBe(true);
+    expect(errors.some((m) => m.includes('unknown units slug "no-such-unit"'))).toBe(true);
   });
 
   it("rejects an extra column outside the whitelist and extra on a kind without any", () => {

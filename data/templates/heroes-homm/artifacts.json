@@ -310,8 +310,8 @@
             "target": "allAllies",
             "flag": "spellImmunity",
             "spellIds": [
-              "c1ej0e9kg2zdarcisqpqd9ale",
-              "c388yedrw59tp30hd6jxbww70"
+              "blindness",
+              "slow"
             ]
           }
         ]

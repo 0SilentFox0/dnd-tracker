@@ -1,5 +1,6 @@
 import { PACK_HOOKS, type PackRefs } from "../systems";
 import { iconColumnOf } from "./import-prepare";
+import { mapJsonRefs } from "./json-refs";
 import type { IconsFile, Pack, PackRow } from "./pack";
 import { EXTRA_COLUMNS } from "./row-columns";
 
@@ -121,6 +122,8 @@ export function bundleToPack(bundle: Bundle, manifest: TemplateManifest, slugs: 
           if (field.type === "ref" && ref) value = nameOf(ref, String(value));
           else if (field.type === "refList" && ref && Array.isArray(value)) value = value.map((id) => nameOf(ref, String(id)));
           else if (nestedRef) value = mapKey(value, nestedRef.key, (id) => nameOf(nestedRef.kind, id));
+
+          if (value && typeof value === "object") value = mapJsonRefs(value, (refKind, id) => slugOf(refKind, id) ?? id);
 
           record[field.key] = value;
         }

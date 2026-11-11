@@ -17,10 +17,8 @@ describe("every pack of data/templates", () => {
     expect(validatePack(readPack(key)).filter((issue) => issue.level === "error").map((issue) => issue.message)).toEqual([]);
   });
 
-  it("ratchet: ids left inside pack rows (D25b) never grow past 60", () => {
-    const total = keys.reduce((sum, key) => sum + Object.values(leakedIds(readPack(key))).reduce((a, n) => a + n, 0), 0);
-
-    expect(total).toBeLessThanOrEqual(60);
+  it("no pack holds a raw row id inside its rows (D25b)", () => {
+    expect(keys.map((key) => [key, leakedIds(readPack(key))]).filter(([, leaks]) => Object.keys(leaks as object).length > 0)).toEqual([]);
   });
 
   it("registry, folders and generated manifests list the same packs", () => {

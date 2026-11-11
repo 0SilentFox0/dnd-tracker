@@ -929,10 +929,10 @@
             "flag": "extraSummons",
             "count": 1,
             "spellIds": [
-              "c402tb5tbg42qed5o1mpalg47",
-              "cdroda8sk4e5on19o3pzmhj9x",
-              "c5rkftmozseoqzg4xvc9eipjx",
-              "caevgu0pitzftmrqdyla8b78b"
+              "summon-fire-elemental",
+              "summon-water-elemental",
+              "summon-air-elemental",
+              "summon-earth-elemental"
             ]
           }
         ]
@@ -1031,8 +1031,8 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "citwcic7uwf9ued88cej3xk0r",
-              "cqvr45mrej2n5m32hnt7k14vq"
+              "roots",
+              "entangle"
             ],
             "maxTargets": 3
           }
@@ -1088,8 +1088,8 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "cdbsbhy1ksgo2qxc2iin9pze2",
-              "c1msqaok6hqn7825ru6nmb5wd"
+              "divine-strength",
+              "cleansing"
             ],
             "maxTargets": 3
           }
@@ -1119,8 +1119,8 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "cvk0bao1ck6qlnl2z27p2q96b",
-              "cewhyo5jki57lws72tfiljuwu"
+              "evasion",
+              "stoneskin"
             ],
             "maxTargets": 3
           }
@@ -1547,8 +1547,8 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "czrwlgkumke4xcrwif1qaryzy",
-              "c38tpee2qdy2s6ethz3lzqo0k"
+              "weakness",
+              "frailty"
             ],
             "maxTargets": 3
           }
@@ -1574,9 +1574,9 @@
           "phase": "after",
           "role": "caster",
           "spellIds": [
-            "c4oehnn1t3a9tc7niee01fhh2",
-            "cx9a9vpu3x6drqxxdhz8xnc84",
-            "cyuw9pys2mmjrnepnbv8q6npk"
+            "fireball",
+            "fire-wall",
+            "armageddon"
           ]
         },
         "effects": [
@@ -1611,9 +1611,9 @@
           "phase": "after",
           "role": "caster",
           "spellIds": [
-            "csjwzu5edqvo5iv8oph2luobi",
-            "c0i09798iu05rb583ozunf3qx",
-            "c4fr8l6fzalxcljswpdcfjb3w"
+            "ice-bolt",
+            "circle-of-winter",
+            "deep-freeze"
           ]
         },
         "effects": [
@@ -1651,8 +1651,8 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "c388yedrw59tp30hd6jxbww70",
-              "cztxvfayh4mnbmx0cdvhey5ta"
+              "slow",
+              "confusion"
             ],
             "maxTargets": 3
           }
@@ -1682,8 +1682,8 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "cgammxe1bq3spqtq49psi50re",
-              "cjl75d88n3oc5fadntunktha4"
+              "plague",
+              "suffering"
             ],
             "maxTargets": 3
           }
@@ -1709,8 +1709,8 @@
           "phase": "after",
           "role": "caster",
           "spellIds": [
-            "c2311umzxa1bfq0yryso5wq2e",
-            "c2svztclqqyrvv5167ibub1he"
+            "lightning-bolt",
+            "chain-lightning"
           ]
         },
         "effects": [
@@ -1820,13 +1820,13 @@
           "phase": "after",
           "role": "caster",
           "spellIds": [
-            "citwcic7uwf9ued88cej3xk0r",
-            "cy4pb74icg6h39w00k9nqicqo",
-            "cxu321kzkc8wby1x62u8fwtsq",
-            "c1x0eh1q2g3foui1qb37xdlii",
-            "cqvr45mrej2n5m32hnt7k14vq",
-            "cide1grvqadznqo90y8p0yh51",
-            "cqd3m13hcfjt3osgx8f7bvm4v"
+            "roots",
+            "thorny-vines",
+            "moonbeam",
+            "wasp-swarm",
+            "entangle",
+            "earthquake",
+            "nature-storm"
           ]
         },
         "effects": [
@@ -1923,13 +1923,13 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "citwcic7uwf9ued88cej3xk0r",
-              "cqvr45mrej2n5m32hnt7k14vq",
-              "c388yedrw59tp30hd6jxbww70",
-              "c1ej0e9kg2zdarcisqpqd9ale",
-              "cztxvfayh4mnbmx0cdvhey5ta",
-              "cto1ql0j2aukn26zjnixzwjzy",
-              "cznpa28lu82en6egyl234rgtt"
+              "roots",
+              "entangle",
+              "slow",
+              "blindness",
+              "confusion",
+              "berserk",
+              "puppet-master"
             ],
             "maxTargets": 2
           }
@@ -3583,8 +3583,8 @@
             "flag": "spellTargeting",
             "mode": "area",
             "spellIds": [
-              "cbhpiildzgkw6numcn6hyy2xn",
-              "c9nlfksf3ey3l1hcvvublxcbd"
+              "righteous-might",
+              "haste"
             ],
             "maxTargets": 3
           }

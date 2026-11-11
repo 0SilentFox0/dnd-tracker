@@ -7,6 +7,7 @@ import { readTranslations } from "./i18n-store";
 import { withIcons } from "./icons-file";
 import { importOrder } from "./import-order";
 import { iconColumnOf, resolveSchoolRefs, staleSpellColumns, withClassIcons } from "./import-prepare";
+import { JSON_REFS, mapJsonRefs, slugsToIds } from "./json-refs";
 import { type Pack, type PackRow, readPack, TEMPLATES_DIR } from "./pack";
 import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues } from "./row-columns";
 import { ensureTemplate, makeTemplateStore } from "./store";
@@ -199,7 +200,11 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
   const hasSets = manifest.kinds.includes("artifact-sets") && manifest.kinds.includes("artifacts");
 
   const prepare = async (kind: PackKind, rows: PackRow[]): Promise<PackRow[]> => {
-    const iconed = withIcons(rows.map(({ extra: _extra, ...row }) => row), pack.icons[kind], iconColumnOf(kind));
+    const swap = slugsToIds(await idsBySlug(template.id, manifest.kinds.filter((k) => Object.values(JSON_REFS).includes(k))));
+
+    const resolved = rows.map(({ extra: _extra, ...row }) => Object.fromEntries(Object.entries(row).map(([column, value]) => [column, value && typeof value === "object" ? mapJsonRefs(value, swap) : value])) as PackRow);
+
+    const iconed = withIcons(resolved, pack.icons[kind], iconColumnOf(kind));
 
     const classed = kind === "classes" ? withClassIcons(iconed, pack.icons) : iconed;
 

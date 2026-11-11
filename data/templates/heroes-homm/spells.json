@@ -48,7 +48,7 @@
     "spellEffects": [
       {
         "kind": "summon",
-        "unitId": "ckmb1m02naky9pslcxnbgd0q6"
+        "unitId": "neutral-death-avatar"
       }
     ],
     "fx": {
@@ -161,7 +161,7 @@
     "spellEffects": [
       {
         "kind": "summon",
-        "unitId": "ccgz0l928zkvfrm6dnrfko7ib"
+        "unitId": "neutral-phoenix"
       }
     ],
     "fx": {
@@ -1668,7 +1668,7 @@
     "spellEffects": [
       {
         "kind": "summon",
-        "unitId": "ci2wpsty09lumf6fcbm5lqol0"
+        "unitId": "neutral-air-elemental"
       }
     ],
     "fx": {
@@ -1697,7 +1697,7 @@
     "spellEffects": [
       {
         "kind": "summon",
-        "unitId": "cmopwirqwm18u88edx3r9vg2j"
+        "unitId": "neutral-earth-elemental"
       }
     ],
     "fx": {
@@ -1726,7 +1726,7 @@
     "spellEffects": [
       {
         "kind": "summon",
-        "unitId": "cnq8x7zjt06bbazs241qx23ip"
+        "unitId": "neutral-fire-elemental"
       }
     ],
     "fx": {
@@ -1755,7 +1755,7 @@
     "spellEffects": [
       {
         "kind": "summon",
-        "unitId": "cgr6jgssxqfv8o70zvrpa05lb"
+        "unitId": "neutral-water-elemental"
       }
     ],
     "fx": {
@@ -1979,19 +1979,19 @@
     ],
     "raceModifiers": [
       {
-        "raceId": "ctaasr7czc063fgbfbkm0glnz",
+        "raceId": "humans",
         "percent": -100
       },
       {
-        "raceId": "clfir88nvuln9ptdl4u9zhejj",
+        "raceId": "elves",
         "percent": -100
       },
       {
-        "raceId": "cx41wbvesryrzrqf04gjbbs3r",
+        "raceId": "dwarves",
         "percent": -100
       },
       {
-        "raceId": "ca2jiwxnj0cuom31h12bjy1a4",
+        "raceId": "mages",
         "percent": -100
       }
     ],
