@@ -360,7 +360,7 @@
   },
   {
     "slug": "dark-elves-dark-rider",
-    "name": "Dark Rider",
+    "name": "Dark Raider",
     "level": 4,
     "raceId": "Dark Elves",
     "initiative": 11,
@@ -500,7 +500,7 @@
   },
   {
     "slug": "dark-elves-gloom-rider",
-    "name": "Gloom Rider",
+    "name": "Grim Raider",
     "level": 4,
     "raceId": "Dark Elves",
     "initiative": 11,
@@ -777,7 +777,7 @@
   },
   {
     "slug": "dark-elves-minotaur-overseer",
-    "name": "Minotaur Overseer",
+    "name": "Minotaur Taskmaster",
     "level": 3,
     "raceId": "Dark Elves",
     "initiative": 9,
@@ -1366,7 +1366,7 @@
   },
   {
     "slug": "dark-elves-swift-rider",
-    "name": "Swift Rider",
+    "name": "Brisk Raider",
     "level": 4,
     "raceId": "Dark Elves",
     "initiative": 12,
@@ -7331,7 +7331,7 @@
   },
   {
     "slug": "mages-genie",
-    "name": "Genie",
+    "name": "Djinn",
     "level": 5,
     "raceId": "Mages",
     "initiative": 12,
@@ -7403,7 +7403,7 @@
   },
   {
     "slug": "mages-genie-sultan",
-    "name": "Genie Sultan",
+    "name": "Djinn Sultan",
     "level": 5,
     "raceId": "Mages",
     "initiative": 12,
@@ -7494,7 +7494,7 @@
   },
   {
     "slug": "mages-genie-vizier",
-    "name": "Genie Vizier",
+    "name": "Djinn Vizier",
     "level": 5,
     "raceId": "Mages",
     "initiative": 12,

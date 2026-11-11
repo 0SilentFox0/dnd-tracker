@@ -1957,9 +1957,9 @@
   },
   {
     "slug": "personal-markel",
-    "name": "Markel: Call of the Avatar",
-    "description": "Markel knows an additional spell, \"Avatar\", which summons an Avatar of Death (the DM may replace the unit in the spell).",
-    "appearanceDescription": "Markel speaks a name that must not be written, and the air around him thickens, taking shape. From shadow and shimmer rises the Avatar, a silent, majestic figure that bows its head only to the one who called it.",
+    "name": "Markal: Call of the Avatar",
+    "description": "Markal knows an additional spell, \"Avatar\", which summons an Avatar of Death (the DM may replace the unit in the spell).",
+    "appearanceDescription": "Markal speaks a name that must not be written, and the air around him thickens, taking shape. From shadow and shimmer rises the Avatar, a silent, majestic figure that bows its head only to the one who called it.",
     "mainSkillId": "Personal",
     "grantedSpellId": "Avatar",
     "abilities": [

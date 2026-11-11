@@ -32,7 +32,7 @@
     "name": "Avatar",
     "level": 4,
     "groupId": "Nature",
-    "description": "Personal spell: Markel summons an Avatar of Death (the DM can swap the unit in the spell editor). The summoner controls the Avatar.",
+    "description": "Personal spell: Markal summons an Avatar of Death (the DM can swap the unit in the spell editor). The summoner controls the Avatar.",
     "appearanceDescription": "The air before the caster thickens and shimmers, as if over hot stone. A majestic faceless figure forms out of shadow and light and silently takes its place beside the caster, ready for battle.",
     "cost": "action",
     "dice": 0,
