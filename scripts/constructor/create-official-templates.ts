@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
 // pnpm constructor:official-templates <homm5CampaignId> [--owner <userId>] [--allow-remote]
+// Застаріло: шаблон Heroes створює і оновлює `pnpm template import heroes-homm` (пакет data/templates/heroes-homm).
 import { assertSeedTarget } from "../seed/seed-library-lib";
 
 import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";

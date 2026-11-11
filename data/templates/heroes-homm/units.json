@@ -45,9 +45,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -127,9 +124,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -209,9 +203,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -275,9 +266,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -361,9 +349,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -421,9 +406,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -507,9 +489,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -587,9 +566,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -655,9 +631,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -715,9 +688,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -796,9 +766,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -884,9 +851,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -988,9 +952,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -1077,9 +1038,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -1113,9 +1071,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -1181,9 +1136,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -1226,9 +1178,6 @@
       "Страждання",
       "Смуток"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -1290,9 +1239,6 @@
     "knownSpells": [
       "Страждання"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -1332,9 +1278,6 @@
       "Немічність",
       "Чума"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -1412,9 +1355,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -1486,9 +1426,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -1558,9 +1495,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -1644,9 +1578,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -1697,9 +1628,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -1737,9 +1665,6 @@
       "Вогняна куля",
       "Немічність"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -1796,9 +1721,6 @@
       "Немічність",
       "Метеоритний дощ"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -1864,9 +1786,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -1919,9 +1838,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -1991,9 +1907,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -2059,9 +1972,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -2113,9 +2023,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -2190,9 +2097,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -2244,9 +2148,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -2334,9 +2235,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -2424,9 +2322,6 @@
         "maxTargets": 3
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -2517,9 +2412,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -2593,9 +2485,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -2653,9 +2542,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -2689,9 +2575,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -2743,9 +2626,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -2799,9 +2679,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -2876,9 +2753,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -2966,9 +2840,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -3048,9 +2919,6 @@
       "Блискавка",
       "Ухилення"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -3108,9 +2976,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -3166,9 +3031,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -3226,9 +3088,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -3306,9 +3165,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -3367,9 +3223,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -3483,9 +3336,6 @@
         "maxTargets": 3
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -3558,9 +3408,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -3623,9 +3470,6 @@
       "Вогняна куля",
       "Вогняна стіна"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -3681,9 +3525,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -3768,9 +3609,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -3859,9 +3697,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -3914,9 +3749,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -3991,9 +3823,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -4031,9 +3860,6 @@
       "Крижаний болт",
       "Блискавка"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -4104,9 +3930,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -4165,9 +3988,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -4201,9 +4021,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -4294,9 +4111,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -4374,9 +4188,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -4471,9 +4282,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -4507,9 +4315,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -4543,9 +4348,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -4602,9 +4404,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -4686,9 +4485,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -4740,9 +4536,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -4780,9 +4573,6 @@
       "Блискавка",
       "Кам'яні шипи"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -4870,9 +4660,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -4929,9 +4716,6 @@
       "Кам'яні шипи",
       "Кам'яна шкіра"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -5013,9 +4797,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -5091,9 +4872,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -5159,9 +4937,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -5219,9 +4994,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -5287,9 +5059,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -5347,9 +5116,6 @@
       "Слово лікування",
       "Місячний промінь"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -5420,9 +5186,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -5503,9 +5266,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -5558,9 +5318,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -5635,9 +5392,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -5724,9 +5478,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -5781,9 +5532,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -5855,9 +5603,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -5950,9 +5695,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -5986,9 +5728,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -6075,9 +5814,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -6133,9 +5869,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -6209,9 +5942,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -6269,9 +5999,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -6322,9 +6049,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -6388,9 +6112,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -6471,9 +6192,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -6531,9 +6249,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -6585,9 +6300,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -6645,9 +6357,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -6709,9 +6418,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -6795,9 +6501,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -6831,9 +6534,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -6919,9 +6619,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 2,
     "morale": 1,
@@ -7019,9 +6716,6 @@
       "Регенерація",
       "Праведна міць"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -7092,9 +6786,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -7147,9 +6838,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -7228,9 +6916,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -7292,9 +6977,6 @@
       "Метеоритний дощ",
       "Очищення"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -7365,9 +7047,6 @@
       "Крижаний болт",
       "Блискавка"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -7455,9 +7134,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -7546,9 +7222,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -7647,9 +7320,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -7722,9 +7392,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -7816,9 +7483,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -7923,9 +7587,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -7998,9 +7659,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -8034,9 +7692,6 @@
         "attackBonus": 0
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -8094,9 +7749,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -8137,9 +7789,6 @@
       "Блискавка",
       "Прикликання елементаля: Повітря"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -8228,9 +7877,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -8329,9 +7975,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -8414,9 +8057,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -8484,9 +8124,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -8568,9 +8205,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -8621,9 +8255,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -8710,9 +8341,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -8780,9 +8408,6 @@
         "maxTargets": 3
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -8840,9 +8465,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -8941,9 +8563,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -9020,9 +8639,6 @@
       "Немічність",
       "Страждання"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -9124,9 +8740,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -9213,9 +8826,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -9316,9 +8926,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -9404,9 +9011,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -9491,9 +9095,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -9594,9 +9195,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -9688,9 +9286,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -9763,9 +9358,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 2,
     "morale": 1,
@@ -9864,9 +9456,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -9958,9 +9547,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -10017,9 +9603,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -10076,9 +9659,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -10152,9 +9732,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -10264,9 +9841,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -10371,9 +9945,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -10444,9 +10015,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -10539,9 +10107,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -10620,9 +10185,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 4,
     "gridSize": 1,
     "morale": 1,
@@ -10698,9 +10260,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 2,
     "gridSize": 1,
     "morale": 1,
@@ -10790,9 +10349,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -10930,9 +10486,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -11032,9 +10585,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -11130,9 +10680,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,
@@ -11259,9 +10806,6 @@
         ]
       }
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 5,
     "gridSize": 2,
     "morale": 1,
@@ -11339,9 +10883,6 @@
     "knownSpells": [
       "Крижаний болт"
     ],
-    "statblock": {},
-    "characteristics": {},
-    "spellcasting": {},
     "proficiencyBonus": 3,
     "gridSize": 1,
     "morale": 1,

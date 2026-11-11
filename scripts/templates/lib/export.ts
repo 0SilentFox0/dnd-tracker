@@ -39,7 +39,7 @@ const TABLE_OF: Record<PackKind, BundleTable | undefined> = {
 /** Columns the import specs do not carry; the importer writes them from `extra` by slug. */
 export const EXTRA_COLUMNS: Partial<Record<PackKind, readonly string[]>> = { units: ["levelScaling"], skills: ["appearanceDescription"] };
 
-const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0);
+const isEmpty = (v: unknown) => v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (!!v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
 
 const isRecord = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 

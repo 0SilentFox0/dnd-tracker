@@ -1,5 +1,7 @@
+import { isDeepStrictEqual } from "node:util";
+
 import { assertSeedTarget } from "../../seed/seed-library-lib";
-import { PACK_HOOKS } from "../systems";
+import { PACK_HOOKS, type PackHooks } from "../systems";
 import { catalogOfPack } from "./i18n-convert";
 import { readTranslations } from "./i18n-store";
 import { withIcons } from "./icons-file";
@@ -46,34 +48,85 @@ function describeReport(kind: string, report: ImportReport, t: Awaited<ReturnTyp
   ];
 }
 
-/** Rows of a kind the importer does not know (skillTrees, tracks): match by slug, keep the id, write the columns as they are. */
-async function upsertBySlug(campaignId: string, kind: PackKind, rows: PackRow[]): Promise<KindCounts> {
-  const table = BUNDLE_TABLES.find((t) => t.key === kind);
+type Delegate = { findFirst(args: unknown): Promise<(Record<string, unknown> & { id: string }) | null>; create(args: unknown): Promise<unknown>; update(args: unknown): Promise<unknown> };
+
+const delegateFor = (db: unknown, kind: PackKind): { table: (typeof BUNDLE_TABLES)[number]; delegate: Delegate } => {
+  const table = BUNDLE_TABLES.find((t) => t.key === kind || (kind === "spell-groups" && t.key === "spellGroups") || (kind === "main-skills" && t.key === "mainSkills") || (kind === "artifact-sets" && t.key === "artifactSets"));
 
   if (!table) throw new Error(`No table is registered for kind "${kind}"`);
 
+  return { table, delegate: (db as Record<string, Delegate>)[table.delegate] };
+};
+
+/** Kinds without a name column: an unslugged row of the template is matched by this column. */
+const MATCH_COLUMN: Partial<Record<PackKind, string>> = { skillTrees: "race", tracks: "title" };
+
+interface UpsertContext { hooks: PackHooks | undefined; idBySlug: Record<string, Record<string, string>>; dryRun: boolean }
+
+/** Rows of a kind the importer does not know (skillTrees, tracks): match by slug (else by the match column), keep the id, write the columns as they are. */
+async function upsertBySlug(campaignId: string, kind: PackKind, rows: PackRow[], { hooks, idBySlug, dryRun }: UpsertContext): Promise<KindCounts> {
   const result = counts();
 
-  await withCampaignContentWrite(campaignId, async (tx) => {
-    const delegate = (tx as unknown as Record<string, { findFirst(args: unknown): Promise<Record<string, unknown> & { id: string } | null>; create(args: unknown): Promise<unknown>; update(args: unknown): Promise<unknown> }>)[table.delegate];
+  const matchColumn = MATCH_COLUMN[kind];
 
-    for (const { origin: _origin, ...data } of rows) {
-      const existing = await delegate.findFirst({ where: { campaignId, slug: data.slug } });
+  const run = async (db: unknown) => {
+    const { table, delegate } = delegateFor(db, kind);
 
-      if (existing && rowHash(existing, table) === rowHash({ ...existing, ...data }, table)) result.skipped += 1;
-      else if (existing) {
-        markContentDirty();
-        await delegate.update({ where: { id: existing.id }, data });
-        result.updated += 1;
-      } else {
-        markContentDirty();
-        await delegate.create({ data: { ...data, campaignId } });
-        result.created += 1;
+    for (const { origin: _origin, extra: _extra, ...row } of rows) {
+      const existing = (await delegate.findFirst({ where: { campaignId, slug: row.slug } })) ?? (matchColumn ? await delegate.findFirst({ where: { campaignId, slug: null, [matchColumn]: row[matchColumn] } }) : null);
+
+      const data = hooks?.fromPackRow ? hooks.fromPackRow(kind, row, { idOf: (k, slug) => idBySlug[k]?.[slug], slugOf: () => undefined, rowId: existing?.id }) : row;
+
+      const unchanged = existing && rowHash(existing, table) === rowHash({ ...existing, ...data }, table);
+
+      if (unchanged) {
+        result.skipped += 1;
+
+        if (existing.slug !== data.slug && !dryRun) await delegate.update({ where: { id: existing.id }, data: { slug: data.slug } });
+
+        continue;
       }
+
+      if (existing) result.updated += 1;
+      else result.created += 1;
+
+      if (dryRun) continue;
+
+      markContentDirty();
+
+      if (existing) await delegate.update({ where: { id: existing.id }, data });
+      else await delegate.create({ data: { ...data, campaignId } });
     }
-  }, { bump: false });
+  };
+
+  if (dryRun) await run(prisma);
+  else await withCampaignContentWrite(campaignId, run, { bump: false });
 
   return result;
+}
+
+/** Columns outside the import specs travel in `extra`; written by slug after the importer, a changed value counts as a content change. */
+async function writeExtras(campaignId: string, kind: PackKind, rows: PackRow[]): Promise<void> {
+  const withExtra = rows.filter((row) => row.extra && Object.keys(row.extra).length > 0);
+
+  if (withExtra.length === 0) return;
+
+  await withCampaignContentWrite(
+    campaignId,
+    async (db) => {
+      const { delegate } = delegateFor(db, kind);
+
+      for (const { slug, extra = {} } of withExtra) {
+        const existing = await delegate.findFirst({ where: { campaignId, slug } });
+
+        if (existing && Object.entries(extra).some(([column, value]) => !isDeepStrictEqual(existing[column], value))) {
+          markContentDirty();
+          await delegate.update({ where: { id: existing.id }, data: extra });
+        }
+      }
+    },
+    { bump: false },
+  );
 }
 
 const translationGaps = (pack: Pack, dir: string): string[] => {
@@ -126,7 +179,7 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
   const hasSets = manifest.kinds.includes("artifact-sets") && manifest.kinds.includes("artifacts");
 
   const prepare = async (kind: PackKind, rows: PackRow[]): Promise<PackRow[]> => {
-    const iconed = withIcons(rows, pack.icons[kind], iconColumnOf(kind));
+    const iconed = withIcons(rows.map(({ extra: _extra, ...row }) => row), pack.icons[kind], iconColumnOf(kind));
 
     const classed = kind === "classes" ? withClassIcons(iconed, pack.icons) : iconed;
 
@@ -135,11 +188,13 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   const perKind: Record<string, KindCounts> = {};
 
+  const hooks = Object.hasOwn(PACK_HOOKS, manifest.system) ? PACK_HOOKS[manifest.system] : undefined;
+
   for (const kind of importOrder(manifest.kinds)) {
     const rows = pack.rows[kind] ?? [];
 
     if (!isImportKind(kind)) {
-      perKind[kind] = dryRun ? counts(0, 0, rows.length) : await upsertBySlug(template.id, kind, rows);
+      perKind[kind] = await upsertBySlug(template.id, kind, rows, { hooks, idBySlug: await idsBySlug(template.id, manifest.kinds), dryRun });
       continue;
     }
 
@@ -152,6 +207,8 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
     for (const line of describeReport(kind, report, t)) console.info(line);
 
     perKind[kind] = fromReport(report);
+
+    if (!dryRun && report.counts.error === 0) await writeExtras(template.id, kind, rows);
 
     if (hasSets && kind === "artifact-sets") {
       const linked = (await prepare("artifacts", pack.rows.artifacts ?? [])).filter((row) => row.setId);
@@ -168,7 +225,7 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   const failed = Object.values(perKind).some((c) => c.errors > 0);
 
-  if (!dryRun && !failed) await PACK_HOOKS[manifest.system]?.afterImport?.({ pack, templateId: template.id, idBySlug: await idsBySlug(template.id, manifest.kinds) });
+  if (!dryRun && !failed) await hooks?.afterImport?.({ pack, templateId: template.id, idBySlug: await idsBySlug(template.id, manifest.kinds) });
 
   if (dryRun || failed || !opts.publish) return { templateId: template.id, created: template.created, perKind };
 
