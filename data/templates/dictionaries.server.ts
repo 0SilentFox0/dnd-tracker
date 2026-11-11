@@ -5,6 +5,9 @@ export const DICTIONARY_LOADERS: Record<string, Partial<Record<string, () => Pro
   "grim-d100": {
     uk: () => import("./grim-d100/i18n/uk.json"),
   },
+  "heroes-homm": {
+    uk: () => import("./heroes-homm/i18n/uk.json"),
+  },
   "srd-5.2": {
     uk: () => import("./srd-5.2/i18n/uk.json"),
   },

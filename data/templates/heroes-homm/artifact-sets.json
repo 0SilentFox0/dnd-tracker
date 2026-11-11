@@ -1,12 +1,12 @@
 [
   {
     "slug": "set-archers-dream",
-    "name": "Мрія лучника",
-    "description": "Повний комплект: дальнє влучання позначає ціль «Здобиччю» на 2 раунди; дальні атаки власника по «Здобичі» завдають +15 % шкоди.\n\nСильванські лучники кажуть, що єдиноріг сам обирає, чий лук носитиме його ріг, а Деревородні — чий сагайдак ніколи не спорожніє. Коли обидва дари зустрічаються в одних руках, ліс замовкає: кожна стріла вже знає свою жертву.",
+    "name": "Archer's Dream",
+    "description": "Full set: a ranged hit marks the target as \"Prey\" for 2 rounds; the wearer's ranged attacks against \"Prey\" deal +15% damage.\n\nSylvan archers say the unicorn itself chooses whose bow will carry its horn, and the Treeborn choose whose quiver will never run empty. When both gifts meet in the same hands, the forest falls silent: every arrow already knows its victim.",
     "abilities": [
       {
         "id": "archers-dream-prey",
-        "name": "Здобич",
+        "name": "Prey",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -25,7 +25,7 @@
       },
       {
         "id": "archers-dream-prey-bonus",
-        "name": "Здобич: шкода",
+        "name": "Prey: Damage",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -50,19 +50,19 @@
       }
     ],
     "artifactIds": [
-      "Перстень стрімкості",
-      "Сагайдак Деревородних",
-      "Лук з рогу єдинорога"
+      "Ring of Celerity",
+      "Treeborn Quiver",
+      "Unicorn Horn Bow"
     ]
   },
   {
     "slug": "set-dawn-regalia",
-    "name": "Регалії світанку",
-    "description": "Повний комплект: коли будь-який союзник падає нижче 50 % HP, «Сурми світанку» звучать удруге — усі союзники +2 ініціативи і +10 % шкоди на 2 раунди та +1 моралі (1 раз за бій).\n\nКорона, намисто й обладунок належали полководцям Грифонової імперії, що вели війська на світанку. Зібрані разом, вони пам'ятають той ранковий клич — і повторюють його саме тоді, коли стрій починає хитатися.",
+    "name": "Regalia of Dawn",
+    "description": "Full set: when any ally drops below 50% HP, the \"Horns of Dawn\" sound a second time: all allies get +2 initiative and +10% damage for 2 rounds and +1 morale (1 use per battle).\n\nThe crown, necklace and armor belonged to the commanders of the Griffin Empire who led armies at dawn. Gathered together, they remember that morning call and repeat it exactly when the line begins to waver.",
     "abilities": [
       {
         "id": "dawn-regalia-second-call",
-        "name": "Другий поклик сурм",
+        "name": "Second Call of the Horns",
         "trigger": {
           "event": "roundStart"
         },
@@ -114,19 +114,19 @@
       }
     ],
     "artifactIds": [
-      "Обладунок звитяги",
-      "Корона лідерства",
-      "Намисто перемоги"
+      "Armor of Valor",
+      "Crown of Leadership",
+      "Necklace of Victory"
     ]
   },
   {
     "slug": "set-dwarven-kings",
-    "name": "Обладунки гномських королів",
-    "description": "Повний комплект: коли по власнику влучають, з шансом 30 % (не частіше 1 разу за раунд) союзникам на 1 раунд дістається випадкова руна: +10 % шкоди, +1 AC, +2 ініціативи або лікування 5 % max HP.\n\nЧотири частини обладунку куті в горнилах Гробниць гномських королів, і на кожній вибита руна предка, що загинув, тримаючи стрій. Поки хоч один лицар у цій броні стоїть на ногах, руни шепочуть його побратимам: «Ми з вами».",
+    "name": "Armor of the Dwarven Kings",
+    "description": "Full set: when the wearer is hit, with a 30% chance (no more than 1 use per round) allies receive a random rune for 1 round: +10% damage, +1 AC, +2 initiative, or healing for 5% max HP.\n\nThe four pieces of armor were forged in the forges of the Tombs of the Dwarven Kings, and each is stamped with the rune of an ancestor who died holding the line. As long as even one knight in this armor stands on his feet, the runes whisper to his comrades: \"We are with you.\"",
     "abilities": [
       {
         "id": "dwarven-kings-runes",
-        "name": "Руни королів",
+        "name": "Runes of Kings",
         "trigger": {
           "event": "hit",
           "role": "target"
@@ -182,20 +182,20 @@
       }
     ],
     "artifactIds": [
-      "Кіраса гномських королів",
-      "Поножі гномських королів",
-      "Шолом гномських королів",
-      "Щит гномських королів"
+      "Cuirass of the Dwarven Kings",
+      "Greaves of the Dwarven Kings",
+      "Helm of the Dwarven Kings",
+      "Shield of the Dwarven Kings"
     ]
   },
   {
     "slug": "set-lions-spirit",
-    "name": "Дух лева",
-    "description": "Повний комплект: влучання знижує мораль цілі на 1 (1 раз за раунд).\n\nРегалії Ордену Лева носили лише ті лицарі Грифонової імперії, що жодного разу не показали ворогові спину. Коли такий лицар б'є, ворог чує не дзвін сталі, а лев'ячий рик — і відчуває, як слабнуть його коліна.",
+    "name": "Spirit of the Lion",
+    "description": "Full set: a hit lowers the target's morale by 1 (1 use per round).\n\nThe regalia of the Order of the Lion were worn only by those knights of the Griffin Empire who never once showed the enemy their back. When such a knight strikes, the enemy hears not the ring of steel but a lion's roar, and feels his knees weaken.",
     "abilities": [
       {
         "id": "lions-spirit-roar",
-        "name": "Лев'ячий рик",
+        "name": "Lion's Roar",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -213,48 +213,19 @@
       }
     ],
     "artifactIds": [
-      "Плащ левової гриви",
-      "Левова корона",
-      "Намисто лева"
-    ]
-  },
-  {
-    "slug": "set-sar-issa",
-    "name": "Регалії Сар-Ісси",
-    "description": "Повний комплект: закляття 1–2 рівня б'ють до 2 цілей.\n\nАрхімаг Сар-Ісса залишив Срібній лізі не книги, а речі: корону, мантію, посох і перстень, кожен напоєний однією з шкіл. Хто збере всі чотири, почує, як вони гудуть в унісон, і найпростіше закляття розщепиться надвоє.",
-    "abilities": [
-      {
-        "id": "sar-issus-split",
-        "name": "Розщеплення чар",
-        "trigger": {
-          "event": "passive"
-        },
-        "effects": [
-          {
-            "kind": "flag",
-            "flag": "spellTargeting",
-            "mode": "area",
-            "maxTargets": 2,
-            "maxLevel": 2
-          }
-        ]
-      }
-    ],
-    "artifactIds": [
-      "Корона Сар-Ісси",
-      "Перстень Сар-Ісси",
-      "Мантія Сар-Ісси",
-      "Посох Сар-Ісси"
+      "Cape of the Lion's Mane",
+      "Lion Crown",
+      "Necklace of the Lion"
     ]
   },
   {
     "slug": "set-sar-issus",
-    "name": "Регалії Сар-Іссуса",
-    "description": "Повний комплект: закляття 1–2 рівня б'ють до 2 цілей.\n\nАрхімаг Сар-Іссус залишив Срібній лізі не книги, а речі: корону, мантію, посох і перстень, кожен напоєний однією з шкіл. Хто збере всі чотири, почує, як вони гудуть в унісон, і найпростіше закляття розщепиться надвоє.",
+    "name": "Regalia of Sar-Issa",
+    "description": "Full set: level 1-2 spells hit up to 2 targets.\n\nThe archmage Sar-Issa left the Silver League not books but objects: a crown, a robe, a staff and a ring, each infused with one of the schools. Whoever gathers all four will hear them hum in unison, and the simplest spell will split in two.",
     "abilities": [
       {
         "id": "sar-issus-split",
-        "name": "Розщеплення чар",
+        "name": "Spell Splitting",
         "trigger": {
           "event": "passive"
         },
@@ -270,20 +241,20 @@
       }
     ],
     "artifactIds": [
-      "Корона Сар-Іссуса",
-      "Перстень Сар-Іссуса",
-      "Мантія Сар-Іссуса",
-      "Посох Сар-Іссуса"
+      "Crown of Sar-Issa",
+      "Ring of Sar-Issa",
+      "Robe of Sar-Issa",
+      "Staff of Sar-Issa"
     ]
   },
   {
     "slug": "set-yggshail-claws",
-    "name": "Кігті Ігг-Шайла",
-    "description": "Повний комплект: влучання з шансом 25 % забирає в цілі реакцію на 1 раунд — вона не може відповісти відсіччю.\n\nЖерці Маласси кажуть, що Ігг-Шайл, отруйна прадраконеса глибин, лишила по собі три кігті. З них викували клинок, намисто й перстень — і кожна рана від їхнього власника ще довго пам'ятає дотик отрути.",
+    "name": "Claws of Yggshail",
+    "description": "Full set: a hit has a 25% chance to take the target's reaction for 1 round, so it cannot respond with a riposte.\n\nThe priests of Malassa say that Yggshail, the venomous primordial dragoness of the depths, left behind three claws. A blade, a necklace and a ring were forged from them, and every wound dealt by their wearer long remembers the touch of venom.",
     "abilities": [
       {
         "id": "yggshail-claws-paralysis",
-        "name": "Паралізуюча отрута",
+        "name": "Paralyzing Poison",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -304,9 +275,9 @@
       }
     ],
     "artifactIds": [
-      "Проклятий перстень",
-      "Місячний клинок",
-      "Намисто кривавого кігтя"
+      "Cursed Ring",
+      "Moonblade",
+      "Necklace of the Bloody Claw"
     ]
   }
 ]

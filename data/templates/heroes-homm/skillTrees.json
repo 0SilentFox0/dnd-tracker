@@ -1,13 +1,13 @@
 [
   {
     "slug": "dark-elves",
-    "race": "Темні ельфи",
+    "race": "Dark Elves",
     "skills": {
       "mainSkills": [
         {
           "id": "attack",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
-          "name": "Напад",
+          "name": "Attack",
           "color": "#b3312c",
           "levels": {
             "basic": {
@@ -56,7 +56,7 @@
         {
           "id": "defense",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
-          "name": "Захист",
+          "name": "Defense",
           "color": "#4f6d8a",
           "levels": {
             "basic": {
@@ -105,7 +105,7 @@
         {
           "id": "ranged",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
-          "name": "Стрільба",
+          "name": "Ranged",
           "color": "#3d7a3a",
           "levels": {
             "basic": {
@@ -154,7 +154,7 @@
         {
           "id": "dark",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
-          "name": "Темрява",
+          "name": "Darkness",
           "color": "#5b3a7a",
           "levels": {
             "basic": {
@@ -204,7 +204,7 @@
         {
           "id": "chaos",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos.webp",
-          "name": "Хаос",
+          "name": "Chaos",
           "color": "#d4561e",
           "levels": {
             "basic": {
@@ -253,7 +253,7 @@
         },
         {
           "id": "racial",
-          "name": "Раса",
+          "name": "Racial",
           "color": "gainsboro",
           "levels": {},
           "levelSkillIds": {
@@ -270,13 +270,13 @@
   },
   {
     "slug": "demons",
-    "race": "Демони",
+    "race": "Demons",
     "skills": {
       "mainSkills": [
         {
           "id": "attack",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
-          "name": "Напад",
+          "name": "Attack",
           "color": "#b3312c",
           "levels": {
             "basic": {
@@ -325,7 +325,7 @@
         {
           "id": "defense",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
-          "name": "Захист",
+          "name": "Defense",
           "color": "#4f6d8a",
           "levels": {
             "basic": {
@@ -374,7 +374,7 @@
         {
           "id": "ranged",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
-          "name": "Стрільба",
+          "name": "Ranged",
           "color": "#3d7a3a",
           "levels": {
             "basic": {
@@ -423,7 +423,7 @@
         {
           "id": "dark",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
-          "name": "Темрява",
+          "name": "Darkness",
           "color": "#5b3a7a",
           "levels": {
             "basic": {
@@ -473,7 +473,7 @@
         {
           "id": "leadership",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
-          "name": "Лідерство",
+          "name": "Leadership",
           "color": "#c9a227",
           "levels": {
             "basic": {
@@ -522,7 +522,7 @@
         {
           "id": "chaos",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos.webp",
-          "name": "Хаос",
+          "name": "Chaos",
           "color": "#d4561e",
           "levels": {
             "basic": {
@@ -571,7 +571,7 @@
         },
         {
           "id": "racial",
-          "name": "Раса",
+          "name": "Racial",
           "color": "gainsboro",
           "levels": {},
           "levelSkillIds": {
@@ -588,13 +588,13 @@
   },
   {
     "slug": "dwarves",
-    "race": "Гноми",
+    "race": "Dwarves",
     "skills": {
       "mainSkills": [
         {
           "id": "leadership",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
-          "name": "Лідерство",
+          "name": "Leadership",
           "color": "#c9a227",
           "levels": {
             "basic": {
@@ -643,7 +643,7 @@
         {
           "id": "ranged",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
-          "name": "Стрільба",
+          "name": "Ranged",
           "color": "#3d7a3a",
           "levels": {
             "basic": {
@@ -692,7 +692,7 @@
         {
           "id": "attack",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
-          "name": "Напад",
+          "name": "Attack",
           "color": "#b3312c",
           "levels": {
             "basic": {
@@ -741,7 +741,7 @@
         {
           "id": "defense",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
-          "name": "Захист",
+          "name": "Defense",
           "color": "#4f6d8a",
           "levels": {
             "basic": {
@@ -790,7 +790,7 @@
         {
           "id": "light",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light.webp",
-          "name": "Світло",
+          "name": "Light",
           "color": "#e8c547",
           "levels": {
             "basic": {
@@ -839,7 +839,7 @@
         },
         {
           "id": "racial",
-          "name": "Раса",
+          "name": "Racial",
           "color": "gainsboro",
           "levels": {},
           "levelSkillIds": {
@@ -856,13 +856,13 @@
   },
   {
     "slug": "elves",
-    "race": "Ельфи",
+    "race": "Elves",
     "skills": {
       "mainSkills": [
         {
           "id": "leadership",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
-          "name": "Лідерство",
+          "name": "Leadership",
           "color": "#c9a227",
           "levels": {
             "basic": {
@@ -911,7 +911,7 @@
         {
           "id": "ranged",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
-          "name": "Стрільба",
+          "name": "Ranged",
           "color": "#3d7a3a",
           "levels": {
             "basic": {
@@ -960,7 +960,7 @@
         {
           "id": "attack",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
-          "name": "Напад",
+          "name": "Attack",
           "color": "#b3312c",
           "levels": {
             "basic": {
@@ -1009,7 +1009,7 @@
         {
           "id": "defense",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
-          "name": "Захист",
+          "name": "Defense",
           "color": "#4f6d8a",
           "levels": {
             "basic": {
@@ -1058,7 +1058,7 @@
         {
           "id": "nature",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature.webp",
-          "name": "Природа",
+          "name": "Nature",
           "color": "#6b8e23",
           "levels": {
             "basic": {
@@ -1107,7 +1107,7 @@
         },
         {
           "id": "racial",
-          "name": "Раса",
+          "name": "Racial",
           "color": "gainsboro",
           "levels": {},
           "levelSkillIds": {
@@ -1124,13 +1124,13 @@
   },
   {
     "slug": "humans",
-    "race": "Люди",
+    "race": "Humans",
     "skills": {
       "mainSkills": [
         {
           "id": "leadership",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
-          "name": "Лідерство",
+          "name": "Leadership",
           "color": "#c9a227",
           "levels": {
             "basic": {
@@ -1179,7 +1179,7 @@
         {
           "id": "ranged",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
-          "name": "Стрільба",
+          "name": "Ranged",
           "color": "#3d7a3a",
           "levels": {
             "basic": {
@@ -1228,7 +1228,7 @@
         {
           "id": "attack",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
-          "name": "Напад",
+          "name": "Attack",
           "color": "#b3312c",
           "levels": {
             "basic": {
@@ -1277,7 +1277,7 @@
         {
           "id": "defense",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
-          "name": "Захист",
+          "name": "Defense",
           "color": "#4f6d8a",
           "levels": {
             "basic": {
@@ -1326,7 +1326,7 @@
         {
           "id": "light",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light.webp",
-          "name": "Світло",
+          "name": "Light",
           "color": "#e8c547",
           "levels": {
             "basic": {
@@ -1375,7 +1375,7 @@
         },
         {
           "id": "racial",
-          "name": "Раса",
+          "name": "Racial",
           "color": "gainsboro",
           "levels": {},
           "levelSkillIds": {
@@ -1392,13 +1392,13 @@
   },
   {
     "slug": "mages",
-    "race": "Маги",
+    "race": "Mages",
     "skills": {
       "mainSkills": [
         {
           "id": "light",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light.webp",
-          "name": "Світло",
+          "name": "Light",
           "color": "#e8c547",
           "levels": {
             "basic": {
@@ -1448,7 +1448,7 @@
         {
           "id": "dark",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
-          "name": "Темрява",
+          "name": "Darkness",
           "color": "#5b3a7a",
           "levels": {
             "basic": {
@@ -1498,7 +1498,7 @@
         {
           "id": "chaos",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos.webp",
-          "name": "Хаос",
+          "name": "Chaos",
           "color": "#d4561e",
           "levels": {
             "basic": {
@@ -1548,7 +1548,7 @@
         {
           "id": "nature",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature.webp",
-          "name": "Природа",
+          "name": "Nature",
           "color": "#6b8e23",
           "levels": {
             "basic": {
@@ -1598,7 +1598,7 @@
         {
           "id": "defense",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
-          "name": "Захист",
+          "name": "Defense",
           "color": "#4f6d8a",
           "levels": {
             "basic": {
@@ -1647,7 +1647,7 @@
         {
           "id": "leadership",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership.webp",
-          "name": "Лідерство",
+          "name": "Leadership",
           "color": "#c9a227",
           "levels": {
             "basic": {
@@ -1695,7 +1695,7 @@
         },
         {
           "id": "racial",
-          "name": "Раса",
+          "name": "Racial",
           "color": "gainsboro",
           "levels": {},
           "levelSkillIds": {
@@ -1712,13 +1712,13 @@
   },
   {
     "slug": "necromancers",
-    "race": "Некроманти",
+    "race": "Necromancers",
     "skills": {
       "mainSkills": [
         {
           "id": "ranged",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged.webp",
-          "name": "Стрільба",
+          "name": "Ranged",
           "color": "#3d7a3a",
           "levels": {
             "basic": {
@@ -1767,7 +1767,7 @@
         {
           "id": "attack",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack.webp",
-          "name": "Напад",
+          "name": "Attack",
           "color": "#b3312c",
           "levels": {
             "basic": {
@@ -1816,7 +1816,7 @@
         {
           "id": "defense",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense.webp",
-          "name": "Захист",
+          "name": "Defense",
           "color": "#4f6d8a",
           "levels": {
             "basic": {
@@ -1865,7 +1865,7 @@
         {
           "id": "dark",
           "icon": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark.webp",
-          "name": "Темрява",
+          "name": "Darkness",
           "color": "#5b3a7a",
           "levels": {
             "basic": {
@@ -1914,7 +1914,7 @@
         },
         {
           "id": "racial",
-          "name": "Раса",
+          "name": "Racial",
           "color": "gainsboro",
           "levels": {},
           "levelSkillIds": {

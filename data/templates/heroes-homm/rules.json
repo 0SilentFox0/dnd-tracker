@@ -28,9 +28,9 @@
     "mode": "static"
   },
   "defaultAttacks": {
-    "meleeName": "Звичайний удар",
-    "rangedName": "Звичайний постріл",
-    "weaponName": "Зброя"
+    "meleeName": "Unarmed Strike",
+    "rangedName": "Ranged Attack",
+    "weaponName": "Weapon"
   },
   "saves": {
     "proficiency": false

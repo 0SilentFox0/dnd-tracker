@@ -1,7 +1,7 @@
 [
   {
     "slug": "track-01",
-    "title": "Маги - Тема Зехіра (Племена Сходу)",
+    "title": "Mages - Zehir's Theme (Tribes of the East)",
     "kind": "youtube",
     "youtubeId": "YvN8dwhZ3eg",
     "durationSec": 126,
@@ -9,7 +9,7 @@
   },
   {
     "slug": "track-02",
-    "title": "Люди - Битва",
+    "title": "Humans - Battle",
     "kind": "youtube",
     "youtubeId": "bMn4pFBiqbk",
     "durationSec": 149,
@@ -17,7 +17,7 @@
   },
   {
     "slug": "track-03",
-    "title": "Некроманти - Битва 1",
+    "title": "Necromancers - Battle 1",
     "kind": "youtube",
     "youtubeId": "LU5sqFDBSoI",
     "durationSec": 170,
@@ -25,7 +25,7 @@
   },
   {
     "slug": "track-04",
-    "title": "Демони - Битва 2",
+    "title": "Demons - Battle 2",
     "kind": "youtube",
     "youtubeId": "ddO9v9LjgSA",
     "durationSec": 128,
@@ -33,7 +33,7 @@
   },
   {
     "slug": "track-05",
-    "title": "Люди - Тема Фрейди",
+    "title": "Humans - Freyda's Theme",
     "kind": "youtube",
     "youtubeId": "yIlyXVl3Yfs",
     "durationSec": 142,
@@ -41,7 +41,7 @@
   },
   {
     "slug": "track-06",
-    "title": "Демони - Місто (бета-версія)",
+    "title": "Demons - Town (Beta)",
     "kind": "youtube",
     "youtubeId": "Vr2DS_Ej6Io",
     "durationSec": 139,
@@ -49,7 +49,7 @@
   },
   {
     "slug": "track-07",
-    "title": "Нейтральні - Битва (альфа-версія)",
+    "title": "Neutral - Battle (Alpha)",
     "kind": "youtube",
     "youtubeId": "yNXwiZKeyJw",
     "durationSec": 163,
@@ -57,7 +57,7 @@
   },
   {
     "slug": "track-08",
-    "title": "Нейтральні - Місцевість: вода (HoMM III)",
+    "title": "Neutral - Terrain: Water (HoMM III)",
     "kind": "youtube",
     "youtubeId": "H1FpX1jOfxo",
     "durationSec": 115,
@@ -65,7 +65,7 @@
   },
   {
     "slug": "track-09",
-    "title": "Нейтральні - Перемога в сценарії (HoMM III)",
+    "title": "Neutral - Scenario Victory (HoMM III)",
     "kind": "youtube",
     "youtubeId": "VhcqKchilEE",
     "durationSec": 74,
@@ -73,7 +73,7 @@
   },
   {
     "slug": "track-10",
-    "title": "Гноми - Облога",
+    "title": "Dwarves - Siege",
     "kind": "youtube",
     "youtubeId": "QMQTWJ7Fhk8",
     "durationSec": 188,
@@ -81,7 +81,7 @@
   },
   {
     "slug": "track-11",
-    "title": "Некроманти - Битва 2",
+    "title": "Necromancers - Battle 2",
     "kind": "youtube",
     "youtubeId": "mJkS39zyJlM",
     "durationSec": 126,
@@ -89,7 +89,7 @@
   },
   {
     "slug": "track-12",
-    "title": "Ельфи - Битва",
+    "title": "Elves - Battle",
     "kind": "youtube",
     "youtubeId": "P9SnICiBORE",
     "durationSec": 189,
@@ -97,7 +97,7 @@
   },
   {
     "slug": "track-13",
-    "title": "Нейтральні - Місцевість: земля",
+    "title": "Neutral - Terrain: Dirt",
     "kind": "youtube",
     "youtubeId": "9ZZyJyTTjkc",
     "durationSec": 197,
@@ -105,7 +105,7 @@
   },
   {
     "slug": "track-14",
-    "title": "Нейтральні - Місцевість: болото",
+    "title": "Neutral - Terrain: Swamp",
     "kind": "youtube",
     "youtubeId": "MvZXDLvThMU",
     "durationSec": 140,
@@ -120,7 +120,7 @@
   },
   {
     "slug": "track-16",
-    "title": "Нейтральні - Тема добрих фракцій (HoMM III)",
+    "title": "Neutral - Good Factions Theme (HoMM III)",
     "kind": "youtube",
     "youtubeId": "xkt7e9rsk9w",
     "durationSec": 78,
@@ -128,7 +128,7 @@
   },
   {
     "slug": "track-17",
-    "title": "Болотяни - Місто (HoMM III)",
+    "title": "Swampfolk - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "qxIdh2kCWAI",
     "durationSec": 148,
@@ -136,7 +136,7 @@
   },
   {
     "slug": "track-18",
-    "title": "Орки - Кампанія",
+    "title": "Orcs - Campaign",
     "kind": "youtube",
     "youtubeId": "FzPQwrnGrDM",
     "durationSec": 141,
@@ -144,7 +144,7 @@
   },
   {
     "slug": "track-19",
-    "title": "Ельфи - Місто",
+    "title": "Elves - Town",
     "kind": "youtube",
     "youtubeId": "SXQ0ew4h0Eo",
     "durationSec": 142,
@@ -152,7 +152,7 @@
   },
   {
     "slug": "track-20",
-    "title": "Нейтральні - Хід суперника 2 (HoMM III)",
+    "title": "Neutral - Enemy Turn 2 (HoMM III)",
     "kind": "youtube",
     "youtubeId": "_qsk3Z7a6Ng",
     "durationSec": 53,
@@ -160,7 +160,7 @@
   },
   {
     "slug": "track-21",
-    "title": "Нейтральні - Місцевість: сніг (HoMM III)",
+    "title": "Neutral - Terrain: Snow (HoMM III)",
     "kind": "youtube",
     "youtubeId": "gvGDOUG0pVc",
     "durationSec": 123,
@@ -168,7 +168,7 @@
   },
   {
     "slug": "track-22",
-    "title": "Ельфи - Місто (HoMM III)",
+    "title": "Elves - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "WdB3jIEyWQc",
     "durationSec": 167,
@@ -176,7 +176,7 @@
   },
   {
     "slug": "track-23",
-    "title": "Нейтральні - Битва 1 (HoMM III)",
+    "title": "Neutral - Battle 1 (HoMM III)",
     "kind": "youtube",
     "youtubeId": "LDsHw4AjuYw",
     "durationSec": 170,
@@ -184,7 +184,7 @@
   },
   {
     "slug": "track-24",
-    "title": "Некроманти - Облога 2",
+    "title": "Necromancers - Siege 2",
     "kind": "youtube",
     "youtubeId": "rThB1SpeXww",
     "durationSec": 185,
@@ -192,7 +192,7 @@
   },
   {
     "slug": "track-25",
-    "title": "Нейтральні - Місцевість: пісок",
+    "title": "Neutral - Terrain: Sand",
     "kind": "youtube",
     "youtubeId": "v-eZSvn4l7g",
     "durationSec": 135,
@@ -200,7 +200,7 @@
   },
   {
     "slug": "track-26",
-    "title": "Нейтральні - Місцевість: підземелля (HoMM III)",
+    "title": "Neutral - Terrain: Underground (HoMM III)",
     "kind": "youtube",
     "youtubeId": "Ku6f3l4XR8E",
     "durationSec": 116,
@@ -208,7 +208,7 @@
   },
   {
     "slug": "track-27",
-    "title": "Орки - Місто (HoMM III)",
+    "title": "Orcs - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "n7PddNlM8kY",
     "durationSec": 141,
@@ -216,7 +216,7 @@
   },
   {
     "slug": "track-28",
-    "title": "Темні ельфи - Тема Шадвін та Ілайї",
+    "title": "Dark Elves - Theme of Shadwyn and Ylaya",
     "kind": "youtube",
     "youtubeId": "h9-egbO4skE",
     "durationSec": 130,
@@ -224,7 +224,7 @@
   },
   {
     "slug": "track-29",
-    "title": "Некроманти - Місто (бета-версія)",
+    "title": "Necromancers - Town (Beta)",
     "kind": "youtube",
     "youtubeId": "fB4dfD8Zfkw",
     "durationSec": 146,
@@ -232,7 +232,7 @@
   },
   {
     "slug": "track-30",
-    "title": "Гноми - Тема Рольфа",
+    "title": "Dwarves - Rolf's Theme",
     "kind": "youtube",
     "youtubeId": "xIcimZwwixw",
     "durationSec": 133,
@@ -240,7 +240,7 @@
   },
   {
     "slug": "track-31",
-    "title": "Нейтральні - Місцевість: пустирі",
+    "title": "Neutral - Terrain: Wasteland",
     "kind": "youtube",
     "youtubeId": "J_3X7oTIBdA",
     "durationSec": 135,
@@ -248,7 +248,7 @@
   },
   {
     "slug": "track-32",
-    "title": "Люди - Місто",
+    "title": "Humans - Town",
     "kind": "youtube",
     "youtubeId": "Uqc-HNyMkkI",
     "durationSec": 195,
@@ -256,7 +256,7 @@
   },
   {
     "slug": "track-33",
-    "title": "Темні ельфи - Кампанія (Молоти долі)",
+    "title": "Dark Elves - Campaign (Hammers of Fate)",
     "kind": "youtube",
     "youtubeId": "pVSF34ud2aY",
     "durationSec": 131,
@@ -264,7 +264,7 @@
   },
   {
     "slug": "track-34",
-    "title": "Нейтральні - Головне меню (HoMM III)",
+    "title": "Neutral - Main Menu (HoMM III)",
     "kind": "youtube",
     "youtubeId": "kKg-dlrVH9k",
     "durationSec": 75,
@@ -272,7 +272,7 @@
   },
   {
     "slug": "track-35",
-    "title": "Некроманти - Облога (розширена)",
+    "title": "Necromancers - Siege (Extended)",
     "kind": "youtube",
     "youtubeId": "wS-eVohTTjo",
     "durationSec": 1225,
@@ -280,7 +280,7 @@
   },
   {
     "slug": "track-36",
-    "title": "Темні ельфи - Битва",
+    "title": "Dark Elves - Battle",
     "kind": "youtube",
     "youtubeId": "CiQrHcgTb-A",
     "durationSec": 180,
@@ -288,7 +288,7 @@
   },
   {
     "slug": "track-37",
-    "title": "Люди - Тема Дункана",
+    "title": "Humans - Duncan's Theme",
     "kind": "youtube",
     "youtubeId": "FjzxPMwSwYQ",
     "durationSec": 135,
@@ -296,7 +296,7 @@
   },
   {
     "slug": "track-38",
-    "title": "Нейтральні - Тема нейтральних фракцій (HoMM III)",
+    "title": "Neutral - Neutral Factions Theme (HoMM III)",
     "kind": "youtube",
     "youtubeId": "QMzzOSwNBxg",
     "durationSec": 101,
@@ -304,7 +304,7 @@
   },
   {
     "slug": "track-39",
-    "title": "Темні ельфи - Місто",
+    "title": "Dark Elves - Town",
     "kind": "youtube",
     "youtubeId": "avNas1GZ-N4",
     "durationSec": 130,
@@ -312,7 +312,7 @@
   },
   {
     "slug": "track-40",
-    "title": "Нейтральні - Меню мультиплеєра",
+    "title": "Neutral - Multiplayer Menu",
     "kind": "youtube",
     "youtubeId": "V9jFtiybBaE",
     "durationSec": 186,
@@ -320,7 +320,7 @@
   },
   {
     "slug": "track-41",
-    "title": "Маги - Битва 1",
+    "title": "Mages - Battle 1",
     "kind": "youtube",
     "youtubeId": "iwE6xtzzQZw",
     "durationSec": 197,
@@ -328,14 +328,14 @@
   },
   {
     "slug": "track-42",
-    "title": "Марширують",
+    "title": "Marching",
     "kind": "youtube",
     "youtubeId": "GZw6x-k94qA",
     "sortOrder": 98
   },
   {
     "slug": "track-43",
-    "title": "Нейтральні - Місцевість: пісок (HoMM III)",
+    "title": "Neutral - Terrain: Sand (HoMM III)",
     "kind": "youtube",
     "youtubeId": "JUmFOsNdu_k",
     "durationSec": 122,
@@ -343,7 +343,7 @@
   },
   {
     "slug": "track-44",
-    "title": "Нейтральні - Головне меню",
+    "title": "Neutral - Main Menu",
     "kind": "youtube",
     "youtubeId": "RfMCmE96a4w",
     "durationSec": 195,
@@ -351,7 +351,7 @@
   },
   {
     "slug": "track-45",
-    "title": "Нейтральні - Головне меню (Молоти долі)",
+    "title": "Neutral - Main Menu (Hammers of Fate)",
     "kind": "youtube",
     "youtubeId": "BqWWzmgEvK4",
     "durationSec": 178,
@@ -359,7 +359,7 @@
   },
   {
     "slug": "track-46",
-    "title": "Нейтральні - Битва 3 (HoMM III)",
+    "title": "Neutral - Battle 3 (HoMM III)",
     "kind": "youtube",
     "youtubeId": "-_Mt7Pys0FI",
     "durationSec": 144,
@@ -367,7 +367,7 @@
   },
   {
     "slug": "track-47",
-    "title": "Темні ельфи - Місто (бета-версія)",
+    "title": "Dark Elves - Town (Beta)",
     "kind": "youtube",
     "youtubeId": "ZQoWwxaje9w",
     "durationSec": 130,
@@ -375,7 +375,7 @@
   },
   {
     "slug": "track-48",
-    "title": "Нейтральні - Тема Сарета-людини 2",
+    "title": "Neutral - Theme of Sareth the Human 2",
     "kind": "youtube",
     "youtubeId": "2bbCbgZI4QM",
     "durationSec": 143,
@@ -383,7 +383,7 @@
   },
   {
     "slug": "track-49",
-    "title": "Гноми - Місто",
+    "title": "Dwarves - Town",
     "kind": "youtube",
     "youtubeId": "7T82ZC2UD8I",
     "durationSec": 130,
@@ -391,7 +391,7 @@
   },
   {
     "slug": "track-50",
-    "title": "Маги - Кампанія (Племена Сходу)",
+    "title": "Mages - Campaign (Tribes of the East)",
     "kind": "youtube",
     "youtubeId": "WtkTwIfHOIM",
     "durationSec": 124,
@@ -399,7 +399,7 @@
   },
   {
     "slug": "track-51",
-    "title": "Нейтральні - Тема злих фракцій (HoMM III)",
+    "title": "Neutral - Evil Factions Theme (HoMM III)",
     "kind": "youtube",
     "youtubeId": "7ZEiwzPFPAw",
     "durationSec": 95,
@@ -407,7 +407,7 @@
   },
   {
     "slug": "track-52",
-    "title": "Маги - Місто",
+    "title": "Mages - Town",
     "kind": "youtube",
     "youtubeId": "lvdmC8yTCX0",
     "durationSec": 249,
@@ -415,7 +415,7 @@
   },
   {
     "slug": "track-53",
-    "title": "Люди - Облога (розширена)",
+    "title": "Humans - Siege (Extended)",
     "kind": "youtube",
     "youtubeId": "W5tKS3ARzpE",
     "durationSec": 1237,
@@ -423,7 +423,7 @@
   },
   {
     "slug": "track-54",
-    "title": "Нейтральні - Місцевість: лава (HoMM III)",
+    "title": "Neutral - Terrain: Lava (HoMM III)",
     "kind": "youtube",
     "youtubeId": "7eCLKsI6kKw",
     "durationSec": 113,
@@ -431,7 +431,7 @@
   },
   {
     "slug": "track-55",
-    "title": "Нейтральні - Битва 2 (HoMM III)",
+    "title": "Neutral - Battle 2 (HoMM III)",
     "kind": "youtube",
     "youtubeId": "gLVTyp27mGo",
     "durationSec": 161,
@@ -439,7 +439,7 @@
   },
   {
     "slug": "track-56",
-    "title": "Нейтральні - Місцевість: трава (альфа-версія)",
+    "title": "Neutral - Terrain: Grass (Alpha)",
     "kind": "youtube",
     "youtubeId": "BDrFIJnlq2c",
     "durationSec": 267,
@@ -447,7 +447,7 @@
   },
   {
     "slug": "track-57",
-    "title": "Нейтральні - Місцевість: болото (HoMM III)",
+    "title": "Neutral - Terrain: Swamp (HoMM III)",
     "kind": "youtube",
     "youtubeId": "fDRfwnhnnSI",
     "durationSec": 148,
@@ -455,7 +455,7 @@
   },
   {
     "slug": "track-58",
-    "title": "Орки - Тема Готая",
+    "title": "Orcs - Gotai's Theme",
     "kind": "youtube",
     "youtubeId": "SgWVHlMGDqE",
     "durationSec": 128,
@@ -463,7 +463,7 @@
   },
   {
     "slug": "track-59",
-    "title": "Демони - Місто (HoMM III)",
+    "title": "Demons - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "BBFFteor_oQ",
     "durationSec": 138,
@@ -471,7 +471,7 @@
   },
   {
     "slug": "track-60",
-    "title": "Орки - Битва",
+    "title": "Orcs - Battle",
     "kind": "youtube",
     "youtubeId": "PfNaQKbGZmI",
     "durationSec": 127,
@@ -479,7 +479,7 @@
   },
   {
     "slug": "track-61",
-    "title": "Гноми - Битва",
+    "title": "Dwarves - Battle",
     "kind": "youtube",
     "youtubeId": "5tHwDqc3hSI",
     "durationSec": 166,
@@ -487,7 +487,7 @@
   },
   {
     "slug": "track-62",
-    "title": "Нейтральні - Місцевість: підземелля",
+    "title": "Neutral - Terrain: Underground",
     "kind": "youtube",
     "youtubeId": "-8Lde2xum10",
     "durationSec": 124,
@@ -495,7 +495,7 @@
   },
   {
     "slug": "track-63",
-    "title": "Маги - Битва 2",
+    "title": "Mages - Battle 2",
     "kind": "youtube",
     "youtubeId": "R9IbAtVRN0I",
     "durationSec": 125,
@@ -503,7 +503,7 @@
   },
   {
     "slug": "track-64",
-    "title": "Люди - Місто (бета-версія)",
+    "title": "Humans - Town (Beta)",
     "kind": "youtube",
     "youtubeId": "MyLOX7KCM2c",
     "durationSec": 197,
@@ -511,7 +511,7 @@
   },
   {
     "slug": "track-65",
-    "title": "Темні ельфи - Місто (HoMM III)",
+    "title": "Dark Elves - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "wHExqEjNFj8",
     "durationSec": 137,
@@ -519,7 +519,7 @@
   },
   {
     "slug": "track-66",
-    "title": "Люди - Місто (HoMM III)",
+    "title": "Humans - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "DVeH-WSIOa4",
     "durationSec": 156,
@@ -527,7 +527,7 @@
   },
   {
     "slug": "track-67",
-    "title": "Нейтральні - Місцевість: лава",
+    "title": "Neutral - Terrain: Lava",
     "kind": "youtube",
     "youtubeId": "MdijLAKDMeM",
     "durationSec": 190,
@@ -535,7 +535,7 @@
   },
   {
     "slug": "track-68",
-    "title": "Маги - Місто (HoMM III)",
+    "title": "Mages - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "m3WYrXxCXZU",
     "durationSec": 227,
@@ -550,7 +550,7 @@
   },
   {
     "slug": "track-70",
-    "title": "Некроманти - Тема Орнелли",
+    "title": "Necromancers - Ornella's Theme",
     "kind": "youtube",
     "youtubeId": "xzFjuujZ7gc",
     "durationSec": 130,
@@ -558,7 +558,7 @@
   },
   {
     "slug": "track-71",
-    "title": "Демони - Місто",
+    "title": "Demons - Town",
     "kind": "youtube",
     "youtubeId": "yTj5m9V3EMg",
     "durationSec": 134,
@@ -566,7 +566,7 @@
   },
   {
     "slug": "track-72",
-    "title": "Нейтральні - Місцевість: трава",
+    "title": "Neutral - Terrain: Grass",
     "kind": "youtube",
     "youtubeId": "hBO434Gj0wQ",
     "durationSec": 196,
@@ -574,7 +574,7 @@
   },
   {
     "slug": "track-73",
-    "title": "Нейтральні - Місцевість: трава (HoMM III)",
+    "title": "Neutral - Terrain: Grass (HoMM III)",
     "kind": "youtube",
     "youtubeId": "f4VjMquy8Lc",
     "durationSec": 122,
@@ -582,7 +582,7 @@
   },
   {
     "slug": "track-74",
-    "title": "Нейтральні - Таємна тема (HoMM III)",
+    "title": "Neutral - Secret Theme (HoMM III)",
     "kind": "youtube",
     "youtubeId": "PLbLklSaM90",
     "durationSec": 71,
@@ -590,7 +590,7 @@
   },
   {
     "slug": "track-75",
-    "title": "Нейтральні - Хід суперника 3 (HoMM III)",
+    "title": "Neutral - Enemy Turn 3 (HoMM III)",
     "kind": "youtube",
     "youtubeId": "0vkI3BpRcxk",
     "durationSec": 117,
@@ -598,7 +598,7 @@
   },
   {
     "slug": "track-76",
-    "title": "Некроманти - Місто (HoMM III)",
+    "title": "Necromancers - Town (HoMM III)",
     "kind": "youtube",
     "youtubeId": "Aoc471zt-co",
     "durationSec": 154,
@@ -606,7 +606,7 @@
   },
   {
     "slug": "track-77",
-    "title": "Гноми - Тема Вульфстана",
+    "title": "Dwarves - Wulfstan's Theme",
     "kind": "youtube",
     "youtubeId": "x3VfFFphbC4",
     "durationSec": 129,
@@ -614,7 +614,7 @@
   },
   {
     "slug": "track-78",
-    "title": "Орки - Облога",
+    "title": "Orcs - Siege",
     "kind": "youtube",
     "youtubeId": "IkjBZazO-Ko",
     "durationSec": 191,
@@ -622,7 +622,7 @@
   },
   {
     "slug": "track-79",
-    "title": "Нейтральні - Головне меню (Племена Сходу)",
+    "title": "Neutral - Main Menu (Tribes of the East)",
     "kind": "youtube",
     "youtubeId": "7hSYOXqwQvA",
     "durationSec": 172,
@@ -630,7 +630,7 @@
   },
   {
     "slug": "track-80",
-    "title": "Демони - Битва 1",
+    "title": "Demons - Battle 1",
     "kind": "youtube",
     "youtubeId": "-UwkKxXRBm8",
     "durationSec": 176,
@@ -638,7 +638,7 @@
   },
   {
     "slug": "track-81",
-    "title": "Некроманти - Місто",
+    "title": "Necromancers - Town",
     "kind": "youtube",
     "youtubeId": "K9DnuTBc_HE",
     "durationSec": 150,
@@ -646,7 +646,7 @@
   },
   {
     "slug": "track-82",
-    "title": "Ренегати - Битва",
+    "title": "Renegades - Battle",
     "kind": "youtube",
     "youtubeId": "fdeJtGhJBP8",
     "durationSec": 130,
@@ -654,7 +654,7 @@
   },
   {
     "slug": "track-83",
-    "title": "Люди - Кампанія (Молоти долі)",
+    "title": "Humans - Campaign (Hammers of Fate)",
     "kind": "youtube",
     "youtubeId": "eA2GckMC8qQ",
     "durationSec": 126,
@@ -662,7 +662,7 @@
   },
   {
     "slug": "track-84",
-    "title": "Нейтральні - Хід суперника 1 (HoMM III)",
+    "title": "Neutral - Enemy Turn 1 (HoMM III)",
     "kind": "youtube",
     "youtubeId": "PHqDH2Aewwc",
     "durationSec": 47,
@@ -670,7 +670,7 @@
   },
   {
     "slug": "track-85",
-    "title": "Нейтральні - Місцевість: вода",
+    "title": "Neutral - Terrain: Water",
     "kind": "youtube",
     "youtubeId": "Tvtw43OlA1s",
     "durationSec": 128,
@@ -678,7 +678,7 @@
   },
   {
     "slug": "track-86",
-    "title": "Нейтральні - Битва 4 (HoMM III)",
+    "title": "Neutral - Battle 4 (HoMM III)",
     "kind": "youtube",
     "youtubeId": "49S9m5TGsUM",
     "durationSec": 195,
@@ -686,7 +686,7 @@
   },
   {
     "slug": "track-87",
-    "title": "Нейтральні - Місцевість: земля (HoMM III)",
+    "title": "Neutral - Terrain: Dirt (HoMM III)",
     "kind": "youtube",
     "youtubeId": "cobNe-NQWIU",
     "durationSec": 128,
@@ -694,7 +694,7 @@
   },
   {
     "slug": "track-88",
-    "title": "Демони - Битва (альтернативна)",
+    "title": "Demons - Battle (Alternate)",
     "kind": "youtube",
     "youtubeId": "mSNJiCfB7CQ",
     "durationSec": 121,
@@ -702,7 +702,7 @@
   },
   {
     "slug": "track-89",
-    "title": "Некроманти - Кампанія (Племена Сходу)",
+    "title": "Necromancers - Campaign (Tribes of the East)",
     "kind": "youtube",
     "youtubeId": "k4dWUL7_1Rc",
     "durationSec": 129,
@@ -710,7 +710,7 @@
   },
   {
     "slug": "track-90",
-    "title": "Нейтральні - Битва",
+    "title": "Neutral - Battle",
     "kind": "youtube",
     "youtubeId": "3RG3ovj6GT8",
     "durationSec": 183,
@@ -718,7 +718,7 @@
   },
   {
     "slug": "track-91",
-    "title": "Гноми - Кампанія",
+    "title": "Dwarves - Campaign",
     "kind": "youtube",
     "youtubeId": "qkqFL5eUXgQ",
     "durationSec": 134,
@@ -726,7 +726,7 @@
   },
   {
     "slug": "track-92",
-    "title": "Демони - Тема Біари (Молоти долі)",
+    "title": "Demons - Biara's Theme (Hammers of Fate)",
     "kind": "youtube",
     "youtubeId": "aUG-6N1qFio",
     "durationSec": 123,
@@ -734,7 +734,7 @@
   },
   {
     "slug": "track-93",
-    "title": "Некроманти - Тема Арантіра",
+    "title": "Necromancers - Aranthir's Theme",
     "kind": "youtube",
     "youtubeId": "6aky42rnzMk",
     "durationSec": 137,
@@ -742,7 +742,7 @@
   },
   {
     "slug": "track-94",
-    "title": "Нейтральні - Місцевість: пустирі (HoMM III)",
+    "title": "Neutral - Terrain: Wasteland (HoMM III)",
     "kind": "youtube",
     "youtubeId": "o5hLwQavqeg",
     "durationSec": 136,
@@ -750,7 +750,7 @@
   },
   {
     "slug": "track-95",
-    "title": "Орки - Тема Куджін",
+    "title": "Orcs - Kujin's Theme",
     "kind": "youtube",
     "youtubeId": "ByjeKM6p1N0",
     "durationSec": 125,
@@ -758,7 +758,7 @@
   },
   {
     "slug": "track-96",
-    "title": "Нейтральні - Фінальні титри",
+    "title": "Neutral - Final Credits",
     "kind": "youtube",
     "youtubeId": "jZ1lDUcwEJ8",
     "durationSec": 168,
@@ -766,7 +766,7 @@
   },
   {
     "slug": "track-97",
-    "title": "Орки - Місто",
+    "title": "Orcs - Town",
     "kind": "youtube",
     "youtubeId": "LOrFMy-jp2E",
     "durationSec": 135,

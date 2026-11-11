@@ -1,81 +1,81 @@
 [
   {
     "slug": "attack",
-    "name": "Напад",
+    "name": "Attack",
     "color": "#b3312c",
     "isEnableInSkillTree": false,
     "role": "attack"
   },
   {
     "slug": "chaos",
-    "name": "Хаос",
+    "name": "Chaos",
     "color": "#d4561e",
     "isEnableInSkillTree": false,
-    "spellGroupId": "Хаос",
+    "spellGroupId": "Chaos",
     "role": "magic"
   },
   {
     "slug": "dark",
-    "name": "Темрява",
+    "name": "Darkness",
     "color": "#5b3a7a",
     "isEnableInSkillTree": false,
-    "spellGroupId": "Темрява",
+    "spellGroupId": "Darkness",
     "role": "magic"
   },
   {
     "slug": "defense",
-    "name": "Захист",
+    "name": "Defense",
     "color": "#4f6d8a",
     "isEnableInSkillTree": false,
     "role": "defense"
   },
   {
     "slug": "leadership",
-    "name": "Лідерство",
+    "name": "Leadership",
     "color": "#c9a227",
     "isEnableInSkillTree": false,
     "role": "leadership"
   },
   {
     "slug": "light",
-    "name": "Світло",
+    "name": "Light",
     "color": "#e8c547",
     "isEnableInSkillTree": false,
-    "spellGroupId": "Світло",
+    "spellGroupId": "Light",
     "role": "magic"
   },
   {
     "slug": "nature",
-    "name": "Природа",
+    "name": "Nature",
     "color": "#6b8e23",
     "isEnableInSkillTree": false,
-    "spellGroupId": "Природа",
+    "spellGroupId": "Nature",
     "role": "magic"
   },
   {
     "slug": "personal-skills",
-    "name": "Персональні",
+    "name": "Personal",
     "color": "#8e6bbf",
     "isEnableInSkillTree": false,
     "role": "personal"
   },
   {
     "slug": "race-skills",
-    "name": "Раса",
+    "name": "Racial",
     "color": "#c9a227",
     "isEnableInSkillTree": false,
     "role": "race"
   },
   {
     "slug": "ranged",
-    "name": "Стрільба",
+    "name": "Ranged",
     "color": "#3d7a3a",
     "isEnableInSkillTree": false,
     "role": "ranged"
   },
   {
     "slug": "ultimate-skills",
-    "name": "Ультимат",
+    "name": "Ultimate",
     "color": "#b3261e",
     "isEnableInSkillTree": false,
     "role": "ultimate"

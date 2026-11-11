@@ -1,9 +1,9 @@
 [
   {
     "slug": "dark-elves-assassin",
-    "name": "Асасин",
+    "name": "Assassin",
     "level": 1,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 12,
     "armorClass": 13,
     "maxHp": 31,
@@ -16,7 +16,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Отруйний дротик",
+        "name": "Poison Dart",
         "type": "ranged",
         "damageDice": "1d6+1",
         "damageType": "piercing",
@@ -26,8 +26,8 @@
     "abilities": [
       {
         "id": "unit-dot-poison",
-        "name": "Отрута",
-        "description": "Влучання завдає 1d4 шкоди (отрута) щораунду протягом 2 раунди.",
+        "name": "Poison",
+        "description": "A hit deals 1d4 poison damage each round for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -56,9 +56,9 @@
   },
   {
     "slug": "dark-elves-black-dragon",
-    "name": "Чорний дракон",
+    "name": "Black Dragon",
     "level": 7,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 10,
     "armorClass": 17,
     "maxHp": 230,
@@ -71,7 +71,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Подих",
+        "name": "Breath",
         "type": "melee",
         "damageDice": "4d10+20",
         "damageType": "necrotic",
@@ -82,8 +82,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -97,8 +97,8 @@
       },
       {
         "id": "unit-magic-immunity",
-        "name": "Повний імунітет до магії",
-        "description": "Закляття не діють на цей юніт.",
+        "name": "Full Magic Immunity",
+        "description": "Spells do not affect this unit.",
         "trigger": {
           "event": "passive"
         },
@@ -111,15 +111,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -135,9 +135,9 @@
   },
   {
     "slug": "dark-elves-blood-fury",
-    "name": "Фурія крові",
+    "name": "Blood Fury",
     "level": 2,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 16,
     "armorClass": 14,
     "maxHp": 41,
@@ -150,7 +150,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Клинки",
+        "name": "Blades",
         "type": "melee",
         "damageDice": "1d8+3",
         "damageType": "slashing",
@@ -161,8 +161,8 @@
     "abilities": [
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -175,8 +175,8 @@
       },
       {
         "id": "unit-strike-and-return",
-        "name": "Удар і повернення",
-        "description": "Після атаки може безкоштовно повернутися на клітинку, з якої почав хід.",
+        "name": "Strike and Return",
+        "description": "After attacking, can return to the cell where it started its turn for free.",
         "trigger": {
           "event": "passive"
         },
@@ -189,8 +189,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Клинки",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Blades",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -214,9 +214,9 @@
   },
   {
     "slug": "dark-elves-blood-maiden",
-    "name": "Діва крові",
+    "name": "Blood Maiden",
     "level": 2,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 14,
     "armorClass": 13,
     "maxHp": 37,
@@ -229,7 +229,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Клинки",
+        "name": "Blades",
         "type": "melee",
         "damageDice": "1d8+2",
         "damageType": "slashing",
@@ -239,8 +239,8 @@
     "abilities": [
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -253,8 +253,8 @@
       },
       {
         "id": "unit-strike-and-return",
-        "name": "Удар і повернення",
-        "description": "Після атаки може безкоштовно повернутися на клітинку, з якої почав хід.",
+        "name": "Strike and Return",
+        "description": "After attacking, can return to the cell where it started its turn for free.",
         "trigger": {
           "event": "passive"
         },
@@ -277,9 +277,9 @@
   },
   {
     "slug": "dark-elves-blood-sister",
-    "name": "Сестра крові",
+    "name": "Blood Sister",
     "level": 2,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 14,
     "armorClass": 14,
     "maxHp": 41,
@@ -292,7 +292,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Клинки",
+        "name": "Blades",
         "type": "melee",
         "damageDice": "1d8+3",
         "damageType": "slashing",
@@ -302,8 +302,8 @@
     "abilities": [
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -316,8 +316,8 @@
       },
       {
         "id": "unit-strike-and-return",
-        "name": "Удар і повернення",
-        "description": "Після атаки може безкоштовно повернутися на клітинку, з якої почав хід.",
+        "name": "Strike and Return",
+        "description": "After attacking, can return to the cell where it started its turn for free.",
         "trigger": {
           "event": "passive"
         },
@@ -330,8 +330,8 @@
       },
       {
         "id": "unit-dot-bleed",
-        "name": "Кровотеча",
-        "description": "Влучання завдає 1d4 шкоди (кровотеча) щораунду протягом 2 раунди.",
+        "name": "Bleeding",
+        "description": "A hit deals 1d4 bleeding damage each round for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -360,9 +360,9 @@
   },
   {
     "slug": "dark-elves-dark-rider",
-    "name": "Темний вершник",
+    "name": "Dark Rider",
     "level": 4,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 11,
     "armorClass": 14,
     "maxHp": 77,
@@ -375,7 +375,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис",
+        "name": "Spear",
         "type": "melee",
         "damageDice": "2d6+6",
         "damageType": "piercing",
@@ -385,8 +385,8 @@
     "abilities": [
       {
         "id": "unit-first-strike",
-        "name": "Таран",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ram",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -417,9 +417,9 @@
   },
   {
     "slug": "dark-elves-deep-hydra",
-    "name": "Глибинна гідра",
+    "name": "Deep Hydra",
     "level": 5,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 7,
     "armorClass": 15,
     "maxHp": 125,
@@ -432,7 +432,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Укуси",
+        "name": "Bites",
         "type": "melee",
         "damageDice": "3d6+9",
         "damageType": "piercing",
@@ -443,8 +443,8 @@
     "abilities": [
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -457,8 +457,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Укуси",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Bites",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -472,8 +472,8 @@
       },
       {
         "id": "unit-regeneration",
-        "name": "Регенерація 10 %",
-        "description": "На початку ходу відновлює 10 % максимального HP.",
+        "name": "Regeneration 10%",
+        "description": "At the start of its turn, restores 10% of its maximum HP.",
         "trigger": {
           "event": "turnStart"
         },
@@ -500,9 +500,9 @@
   },
   {
     "slug": "dark-elves-gloom-rider",
-    "name": "Похмурий вершник",
+    "name": "Gloom Rider",
     "level": 4,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 11,
     "armorClass": 15,
     "maxHp": 85,
@@ -515,7 +515,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис",
+        "name": "Spear",
         "type": "melee",
         "damageDice": "2d6+7",
         "damageType": "piercing",
@@ -525,8 +525,8 @@
     "abilities": [
       {
         "id": "unit-first-strike",
-        "name": "Таран",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ram",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -547,8 +547,8 @@
       },
       {
         "id": "unit-debuff-initiative",
-        "name": "Каліцтво",
-        "description": "Влучання знижує ініціативу цілі на 2 на 2 раунди.",
+        "name": "Maiming",
+        "description": "A hit lowers the target's initiative by 2 for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -577,9 +577,9 @@
   },
   {
     "slug": "dark-elves-hydra",
-    "name": "Гідра",
+    "name": "Hydra",
     "level": 5,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 7,
     "armorClass": 14,
     "maxHp": 112,
@@ -592,7 +592,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Укуси",
+        "name": "Bites",
         "type": "melee",
         "damageDice": "3d6+7",
         "damageType": "piercing",
@@ -603,8 +603,8 @@
     "abilities": [
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -617,8 +617,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Укуси",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Bites",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -642,9 +642,9 @@
   },
   {
     "slug": "dark-elves-minotaur",
-    "name": "Мінотавр",
+    "name": "Minotaur",
     "level": 3,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 8,
     "armorClass": 14,
     "maxHp": 59,
@@ -657,7 +657,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Бойова сокира",
+        "name": "Battle Axe",
         "type": "melee",
         "damageDice": "1d10+4",
         "damageType": "slashing",
@@ -667,8 +667,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -699,9 +699,9 @@
   },
   {
     "slug": "dark-elves-minotaur-guard",
-    "name": "Мінотавр-охоронець",
+    "name": "Minotaur Guard",
     "level": 3,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 8,
     "armorClass": 15,
     "maxHp": 64,
@@ -714,7 +714,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Бойова сокира",
+        "name": "Battle Axe",
         "type": "melee",
         "damageDice": "1d10+4",
         "damageType": "slashing",
@@ -724,8 +724,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -746,8 +746,8 @@
       },
       {
         "id": "unit-double-strike",
-        "name": "Подвійний удар",
-        "description": "Після атаки з шансом 30 % — ще одна атака, раз за хід.",
+        "name": "Double Strike",
+        "description": "After attacking, has a 30% chance of making another attack, once per turn.",
         "trigger": {
           "event": "attack",
           "phase": "after",
@@ -777,9 +777,9 @@
   },
   {
     "slug": "dark-elves-minotaur-overseer",
-    "name": "Мінотавр-наглядач",
+    "name": "Minotaur Overseer",
     "level": 3,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 9,
     "armorClass": 15,
     "maxHp": 64,
@@ -792,7 +792,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Бойова сокира",
+        "name": "Battle Axe",
         "type": "melee",
         "damageDice": "1d10+4",
         "damageType": "slashing",
@@ -802,8 +802,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -824,8 +824,8 @@
       },
       {
         "id": "unit-buff-morale-initiative",
-        "name": "Батіг",
-        "description": "Дія: +1 на мораль, +2 на ініціативу союзнику на 2 раунди.",
+        "name": "Whip",
+        "description": "Action: an ally gains +1 to morale and +2 to initiative for 2 rounds.",
         "trigger": {
           "event": "action"
         },
@@ -862,9 +862,9 @@
   },
   {
     "slug": "dark-elves-red-dragon",
-    "name": "Червоний дракон",
+    "name": "Red Dragon",
     "level": 7,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 235,
@@ -877,7 +877,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Подих",
+        "name": "Breath",
         "type": "melee",
         "damageDice": "4d10+18",
         "damageType": "fire",
@@ -888,8 +888,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -903,8 +903,8 @@
       },
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -919,8 +919,8 @@
       },
       {
         "id": "unit-dot-fire",
-        "name": "Опік",
-        "description": "Влучання завдає 2d6 шкоди (вогонь) щораунду протягом 2 раунди.",
+        "name": "Burn",
+        "description": "A hit deals 2d6 fire damage each round for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -939,15 +939,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -963,9 +963,9 @@
   },
   {
     "slug": "dark-elves-rotting-hydra",
-    "name": "Гнила гідра",
+    "name": "Rotting Hydra",
     "level": 5,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 8,
     "armorClass": 15,
     "maxHp": 119,
@@ -978,7 +978,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Укуси",
+        "name": "Bites",
         "type": "melee",
         "damageDice": "3d6+9",
         "damageType": "piercing",
@@ -989,8 +989,8 @@
     "abilities": [
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -1003,8 +1003,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Укуси",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Bites",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -1018,8 +1018,8 @@
       },
       {
         "id": "unit-retaliate-acid",
-        "name": "Кислотна кров",
-        "description": "Атакувальник у ближньому бою отримує 25 % завданої шкоди (кислота).",
+        "name": "Acid Blood",
+        "description": "A melee attacker takes 25% of the damage it deals as acid damage.",
         "trigger": {
           "event": "hit",
           "role": "target",
@@ -1049,9 +1049,9 @@
   },
   {
     "slug": "dark-elves-scout",
-    "name": "Розвідник",
+    "name": "Scout",
     "level": 1,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 10,
     "armorClass": 11,
     "maxHp": 25,
@@ -1064,7 +1064,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Короткий лук",
+        "name": "Short Bow",
         "type": "ranged",
         "damageDice": "1d6",
         "damageType": "piercing",
@@ -1082,9 +1082,9 @@
   },
   {
     "slug": "dark-elves-shadow-dragon",
-    "name": "Тіньовий дракон",
+    "name": "Shadow Dragon",
     "level": 7,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 10,
     "armorClass": 16,
     "maxHp": 215,
@@ -1097,7 +1097,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Подих",
+        "name": "Breath",
         "type": "melee",
         "damageDice": "4d10+16",
         "damageType": "necrotic",
@@ -1108,8 +1108,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -1123,15 +1123,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -1147,9 +1147,9 @@
   },
   {
     "slug": "dark-elves-shadow-matriarch",
-    "name": "Матріарх тіней",
+    "name": "Shadow Matriarch",
     "level": 6,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 10,
     "armorClass": 16,
     "maxHp": 141,
@@ -1162,7 +1162,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Тіньовий промінь",
+        "name": "Shadow Ray",
         "type": "ranged",
         "damageDice": "3d8+11",
         "damageType": "necrotic",
@@ -1170,13 +1170,13 @@
       }
     ],
     "knownSpells": [
-      "Ослаблення",
-      "Сповільнення",
-      "Немічність",
-      "Чума",
-      "Розсіяність",
-      "Страждання",
-      "Смуток"
+      "Weakness",
+      "Slow",
+      "Frailty",
+      "Plague",
+      "Confusion",
+      "Suffering",
+      "Sorrow"
     ],
     "proficiencyBonus": 4,
     "gridSize": 1,
@@ -1189,9 +1189,9 @@
   },
   {
     "slug": "dark-elves-shadow-mistress",
-    "name": "Володарка тіней",
+    "name": "Shadow Mistress",
     "level": 6,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 139,
@@ -1204,7 +1204,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Тіньовий промінь",
+        "name": "Shadow Ray",
         "type": "ranged",
         "damageDice": "3d8+11",
         "damageType": "necrotic",
@@ -1214,8 +1214,8 @@
     "abilities": [
       {
         "id": "unit-hit-spell",
-        "name": "Тіньове прокляття",
-        "description": "Влучання накладає на ціль випадкове закляття Темряви 1–3 рівня (рятівні кидки — як у закляття).",
+        "name": "Shadow Curse",
+        "description": "A hit casts a random Darkness spell of level 1–3 on the target (saving throws as for the spell).",
         "trigger": {
           "event": "passive"
         },
@@ -1237,7 +1237,7 @@
       }
     ],
     "knownSpells": [
-      "Страждання"
+      "Suffering"
     ],
     "proficiencyBonus": 4,
     "gridSize": 1,
@@ -1250,9 +1250,9 @@
   },
   {
     "slug": "dark-elves-shadow-witch",
-    "name": "Відьма тіней",
+    "name": "Shadow Witch",
     "level": 6,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 127,
@@ -1265,7 +1265,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Тіньовий промінь",
+        "name": "Shadow Ray",
         "type": "ranged",
         "damageDice": "3d8+9",
         "damageType": "necrotic",
@@ -1273,10 +1273,10 @@
       }
     ],
     "knownSpells": [
-      "Ослаблення",
-      "Сповільнення",
-      "Немічність",
-      "Чума"
+      "Weakness",
+      "Slow",
+      "Frailty",
+      "Plague"
     ],
     "proficiencyBonus": 4,
     "gridSize": 1,
@@ -1289,9 +1289,9 @@
   },
   {
     "slug": "dark-elves-stalker",
-    "name": "Переслідувач",
+    "name": "Stalker",
     "level": 1,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 12,
     "armorClass": 13,
     "maxHp": 34,
@@ -1304,7 +1304,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кинджал",
+        "name": "Dagger",
         "type": "melee",
         "damageDice": "1d8+1",
         "damageType": "piercing",
@@ -1314,8 +1314,8 @@
     "abilities": [
       {
         "id": "unit-dot-poison",
-        "name": "Отрута",
-        "description": "Влучання завдає 1d4 шкоди (отрута) щораунду протягом 2 раунди.",
+        "name": "Poison",
+        "description": "A hit deals 1d4 poison damage each round for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -1334,8 +1334,8 @@
       },
       {
         "id": "unit-first-strike",
-        "name": "Засідка",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ambush",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -1366,9 +1366,9 @@
   },
   {
     "slug": "dark-elves-swift-rider",
-    "name": "Стрімкий вершник",
+    "name": "Swift Rider",
     "level": 4,
-    "raceId": "Темні ельфи",
+    "raceId": "Dark Elves",
     "initiative": 12,
     "armorClass": 14,
     "maxHp": 81,
@@ -1381,7 +1381,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис",
+        "name": "Spear",
         "type": "melee",
         "damageDice": "2d6+6",
         "damageType": "piercing",
@@ -1391,8 +1391,8 @@
     "abilities": [
       {
         "id": "unit-first-strike",
-        "name": "Таран",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ram",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -1413,8 +1413,8 @@
       },
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -1437,9 +1437,9 @@
   },
   {
     "slug": "demons-archdemon",
-    "name": "Архидемон",
+    "name": "Archdemon",
     "level": 7,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 10,
     "armorClass": 16,
     "maxHp": 240,
@@ -1452,7 +1452,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пекельна сокира",
+        "name": "Hellish Axe",
         "type": "melee",
         "damageDice": "4d10+18",
         "damageType": "slashing",
@@ -1462,8 +1462,8 @@
     "abilities": [
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 25 %",
-        "description": "Шкода від заклять зменшена на 25 %.",
+        "name": "Magic Resistance 25%",
+        "description": "Spell damage is reduced by 25%.",
         "trigger": {
           "event": "passive"
         },
@@ -1478,8 +1478,8 @@
       },
       {
         "id": "unit-allies-aura-damageBonus",
-        "name": "Полководець",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Warlord",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -1506,9 +1506,9 @@
   },
   {
     "slug": "demons-archdevil",
-    "name": "Архидиявол",
+    "name": "Archdevil",
     "level": 7,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 11,
     "armorClass": 17,
     "maxHp": 245,
@@ -1521,7 +1521,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пекельний спис",
+        "name": "Hellish Spear",
         "type": "melee",
         "damageDice": "4d10+20",
         "damageType": "piercing",
@@ -1531,8 +1531,8 @@
     "abilities": [
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 25 %",
-        "description": "Шкода від заклять зменшена на 25 %.",
+        "name": "Magic Resistance 25%",
+        "description": "Spell damage is reduced by 25%.",
         "trigger": {
           "event": "passive"
         },
@@ -1547,8 +1547,8 @@
       },
       {
         "id": "unit-summon-group",
-        "name": "Виклик пекла",
-        "description": "Раз за бій прикликає юніта «Демони», Tier 6.",
+        "name": "Call of Hell",
+        "description": "Once per battle, summons a \"Demons\" unit, Tier 6.",
         "trigger": {
           "event": "action"
         },
@@ -1558,22 +1558,22 @@
         "effects": [
           {
             "kind": "summon",
-            "group": "Демони",
+            "group": "Demons",
             "tier": 6
           }
         ]
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -1589,9 +1589,9 @@
   },
   {
     "slug": "demons-cave-abomination",
-    "name": "Печерний виродок",
+    "name": "Cave Abomination",
     "level": 6,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 9,
     "armorClass": 17,
     "maxHp": 165,
@@ -1604,7 +1604,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кам'яна лапа",
+        "name": "Stone Paw",
         "type": "melee",
         "damageDice": "3d10+14",
         "damageType": "bludgeoning",
@@ -1614,8 +1614,8 @@
     "abilities": [
       {
         "id": "unit-crit-range",
-        "name": "Влучний удар",
-        "description": "Критичне влучання з 18 на кубику.",
+        "name": "Precise Strike",
+        "description": "Critical hit on a die roll of 18 or higher.",
         "trigger": {
           "event": "passive"
         },
@@ -1639,9 +1639,9 @@
   },
   {
     "slug": "demons-cave-demon",
-    "name": "Печерний демон",
+    "name": "Cave Demon",
     "level": 6,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 8,
     "armorClass": 16,
     "maxHp": 132,
@@ -1654,7 +1654,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кам'яна лапа",
+        "name": "Stone Paw",
         "type": "melee",
         "damageDice": "3d8+9",
         "damageType": "bludgeoning",
@@ -1662,8 +1662,8 @@
       }
     ],
     "knownSpells": [
-      "Вогняна куля",
-      "Немічність"
+      "Fireball",
+      "Frailty"
     ],
     "proficiencyBonus": 4,
     "gridSize": 2,
@@ -1676,9 +1676,9 @@
   },
   {
     "slug": "demons-cave-lord",
-    "name": "Печерний владика",
+    "name": "Cave Lord",
     "level": 6,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 8,
     "armorClass": 17,
     "maxHp": 148,
@@ -1691,7 +1691,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кам'яна лапа",
+        "name": "Stone Paw",
         "type": "melee",
         "damageDice": "3d8+11",
         "damageType": "bludgeoning",
@@ -1701,8 +1701,8 @@
     "abilities": [
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 25 %",
-        "description": "Шкода від заклять зменшена на 25 %.",
+        "name": "Magic Resistance 25%",
+        "description": "Spell damage is reduced by 25%.",
         "trigger": {
           "event": "passive"
         },
@@ -1717,9 +1717,9 @@
       }
     ],
     "knownSpells": [
-      "Вогняна куля",
-      "Немічність",
-      "Метеоритний дощ"
+      "Fireball",
+      "Frailty",
+      "Meteor Shower"
     ],
     "proficiencyBonus": 4,
     "gridSize": 2,
@@ -1732,9 +1732,9 @@
   },
   {
     "slug": "demons-cerberus",
-    "name": "Цербер",
+    "name": "Cerberus",
     "level": 3,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 13,
     "armorClass": 14,
     "maxHp": 62,
@@ -1747,7 +1747,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Три голови",
+        "name": "Three Heads",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "piercing",
@@ -1758,8 +1758,8 @@
     "abilities": [
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -1772,8 +1772,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Триголова",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Three-Headed",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -1797,9 +1797,9 @@
   },
   {
     "slug": "demons-demon",
-    "name": "Демон",
+    "name": "Demon",
     "level": 2,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 7,
     "armorClass": 13,
     "maxHp": 41,
@@ -1812,7 +1812,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пекельний клинок",
+        "name": "Hellish Blade",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "slashing",
@@ -1822,8 +1822,8 @@
     "abilities": [
       {
         "id": "unit-extra-damage-fire",
-        "name": "Пекельне полум'я",
-        "description": "Влучання завдає додатково 1d4 шкоди (вогонь).",
+        "name": "Hellfire",
+        "description": "A hit deals an additional 1d4 fire damage.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -1849,9 +1849,9 @@
   },
   {
     "slug": "demons-demoness",
-    "name": "Демониця",
+    "name": "Demoness",
     "level": 4,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 74,
@@ -1864,7 +1864,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Ланцюговий постріл",
+        "name": "Chain Shot",
         "type": "ranged",
         "damageDice": "2d6+5",
         "damageType": "necrotic",
@@ -1874,8 +1874,8 @@
     "abilities": [
       {
         "id": "unit-chain-shot",
-        "name": "Ланцюговий постріл",
-        "description": "Після влучання постріл перескакує на найближчого ворога до 2 разів; кожен стрибок — 50 % шкоди попереднього, промах обриває ланцюг.",
+        "name": "Chain Shot",
+        "description": "After a hit, the shot jumps to the nearest enemy up to 2 times; each jump deals 50% of the previous damage, and a miss ends the chain.",
         "trigger": {
           "event": "passive"
         },
@@ -1890,8 +1890,8 @@
       },
       {
         "id": "unit-ranged-retaliation",
-        "name": "Відповідний постріл",
-        "description": "Відповідає пострілом на дальні атаки (раз за раунд, як звичайна відсіч).",
+        "name": "Return Shot",
+        "description": "Retaliates with a shot against ranged attacks (once per round, like a normal retaliation).",
         "trigger": {
           "event": "passive"
         },
@@ -1918,9 +1918,9 @@
   },
   {
     "slug": "demons-devil",
-    "name": "Диявол",
+    "name": "Devil",
     "level": 7,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 220,
@@ -1933,7 +1933,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пекельний спис",
+        "name": "Hellish Spear",
         "type": "melee",
         "damageDice": "4d10+16",
         "damageType": "piercing",
@@ -1943,8 +1943,8 @@
     "abilities": [
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 25 %",
-        "description": "Шкода від заклять зменшена на 25 %.",
+        "name": "Magic Resistance 25%",
+        "description": "Spell damage is reduced by 25%.",
         "trigger": {
           "event": "passive"
         },
@@ -1959,15 +1959,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -1983,9 +1983,9 @@
   },
   {
     "slug": "demons-devilkin",
-    "name": "Дияволя",
+    "name": "Devilkin",
     "level": 1,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 13,
     "armorClass": 13,
     "maxHp": 32,
@@ -1998,7 +1998,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кігті",
+        "name": "Claws",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "slashing",
@@ -2008,8 +2008,8 @@
     "abilities": [
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 25 %",
-        "description": "Шкода від заклять зменшена на 25 %.",
+        "name": "Magic Resistance 25%",
+        "description": "Spell damage is reduced by 25%.",
         "trigger": {
           "event": "passive"
         },
@@ -2034,9 +2034,9 @@
   },
   {
     "slug": "demons-elder-demon",
-    "name": "Старший демон",
+    "name": "Elder Demon",
     "level": 2,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 9,
     "armorClass": 14,
     "maxHp": 44,
@@ -2049,7 +2049,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пекельний клинок",
+        "name": "Hellish Blade",
         "type": "melee",
         "damageDice": "1d8+2",
         "damageType": "slashing",
@@ -2059,8 +2059,8 @@
     "abilities": [
       {
         "id": "unit-extra-damage-fire",
-        "name": "Пекельне полум'я",
-        "description": "Влучання завдає додатково 1d4 шкоди (вогонь).",
+        "name": "Hellfire",
+        "description": "A hit deals an additional 1d4 fire damage.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2076,8 +2076,8 @@
       },
       {
         "id": "unit-rage",
-        "name": "Лють",
-        "description": "Коли гине союзник, шкода юніта зростає на 25 % на 2 раунди.",
+        "name": "Fury",
+        "description": "When an ally dies, the unit's damage increases by 25% for 2 rounds.",
         "trigger": {
           "event": "kill",
           "role": "victimSide"
@@ -2108,9 +2108,9 @@
   },
   {
     "slug": "demons-familiar",
-    "name": "Чортеня",
+    "name": "Familiar",
     "level": 1,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 13,
     "armorClass": 13,
     "maxHp": 32,
@@ -2123,7 +2123,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кігті",
+        "name": "Claws",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "slashing",
@@ -2133,8 +2133,8 @@
     "abilities": [
       {
         "id": "unit-drain-mana",
-        "name": "Крадіжка мани",
-        "description": "Влучання: ціль втрачає 1 слот закляття.",
+        "name": "Mana Theft",
+        "description": "On a hit: the target loses 1 spell slot.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2159,9 +2159,9 @@
   },
   {
     "slug": "demons-fire-cerberus",
-    "name": "Вогняний цербер",
+    "name": "Fire Cerberus",
     "level": 3,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 13,
     "armorClass": 14,
     "maxHp": 60,
@@ -2174,7 +2174,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Три голови",
+        "name": "Three Heads",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "fire",
@@ -2185,8 +2185,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Триголова",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Three-Headed",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -2200,8 +2200,8 @@
       },
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -2216,8 +2216,8 @@
       },
       {
         "id": "unit-dot-fire",
-        "name": "Опік",
-        "description": "Влучання завдає 1d6 шкоди (вогонь) щораунду протягом 2 раунди.",
+        "name": "Burn",
+        "description": "A hit deals 1d6 fire damage each round for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2246,9 +2246,9 @@
   },
   {
     "slug": "demons-fire-demon",
-    "name": "Вогняний демон",
+    "name": "Fire Demon",
     "level": 2,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 8,
     "armorClass": 14,
     "maxHp": 47,
@@ -2261,7 +2261,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пекельний клинок",
+        "name": "Hellish Blade",
         "type": "melee",
         "damageDice": "1d6+2",
         "damageType": "slashing",
@@ -2271,8 +2271,8 @@
     "abilities": [
       {
         "id": "unit-extra-damage-fire",
-        "name": "Пекельне полум'я",
-        "description": "Влучання завдає додатково 1d6 шкоди (вогонь).",
+        "name": "Hellfire",
+        "description": "A hit deals an additional 1d6 fire damage.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2288,8 +2288,8 @@
       },
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -2304,8 +2304,8 @@
       },
       {
         "id": "unit-fire-burst",
-        "name": "Вогняний вибух",
-        "description": "Дія, перезарядка 2 раунди: вороги на сусідніх клітинках отримують 50 % шкоди атаки вогнем (рятівний кидок Спритності — половина).",
+        "name": "Fire Blast",
+        "description": "Action, recharge 2 rounds: enemies in adjacent cells take 50% of the attack's damage as fire (Dexterity saving throw for half).",
         "trigger": {
           "event": "action"
         },
@@ -2333,9 +2333,9 @@
   },
   {
     "slug": "demons-gloom",
-    "name": "Морок",
+    "name": "Gloom",
     "level": 5,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 15,
     "armorClass": 16,
     "maxHp": 117,
@@ -2348,7 +2348,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Копита",
+        "name": "Hooves",
         "type": "melee",
         "damageDice": "3d8+7",
         "damageType": "bludgeoning",
@@ -2358,8 +2358,8 @@
     "abilities": [
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -2374,8 +2374,8 @@
       },
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -2390,8 +2390,8 @@
       },
       {
         "id": "unit-finisher",
-        "name": "Добивання",
-        "description": "За умови: +50 % шкоди.",
+        "name": "Finishing Blow",
+        "description": "Conditional: +50% damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -2423,9 +2423,9 @@
   },
   {
     "slug": "demons-hell-nightmare",
-    "name": "Пекельний кошмар",
+    "name": "Hell Nightmare",
     "level": 5,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 16,
     "armorClass": 16,
     "maxHp": 119,
@@ -2438,7 +2438,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Копита",
+        "name": "Hooves",
         "type": "melee",
         "damageDice": "3d8+7",
         "damageType": "bludgeoning",
@@ -2448,8 +2448,8 @@
     "abilities": [
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -2464,8 +2464,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Жахливий удар",
-        "description": "Влучання з шансом 25 % змушує ціль пропустити хід.",
+        "name": "Dreadful Strike",
+        "description": "A hit has a 25% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2496,9 +2496,9 @@
   },
   {
     "slug": "demons-hound",
-    "name": "Гонча",
+    "name": "Hound",
     "level": 3,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 13,
     "armorClass": 13,
     "maxHp": 56,
@@ -2511,7 +2511,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Укус",
+        "name": "Bite",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "piercing",
@@ -2521,8 +2521,8 @@
     "abilities": [
       {
         "id": "unit-first-strike",
-        "name": "Таран",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ram",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -2553,9 +2553,9 @@
   },
   {
     "slug": "demons-imp",
-    "name": "Біс",
+    "name": "Imp",
     "level": 1,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 13,
     "armorClass": 12,
     "maxHp": 28,
@@ -2568,7 +2568,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кігті",
+        "name": "Claws",
         "type": "melee",
         "damageDice": "1d6",
         "damageType": "slashing",
@@ -2586,9 +2586,9 @@
   },
   {
     "slug": "demons-nightmare",
-    "name": "Кошмар",
+    "name": "Nightmare",
     "level": 5,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 16,
     "armorClass": 15,
     "maxHp": 107,
@@ -2601,7 +2601,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Копита",
+        "name": "Hooves",
         "type": "melee",
         "damageDice": "3d8+6",
         "damageType": "bludgeoning",
@@ -2611,8 +2611,8 @@
     "abilities": [
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -2637,9 +2637,9 @@
   },
   {
     "slug": "demons-succubus",
-    "name": "Суккуб",
+    "name": "Succubus",
     "level": 4,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 10,
     "armorClass": 13,
     "maxHp": 66,
@@ -2652,7 +2652,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Темний постріл",
+        "name": "Dark Shot",
         "type": "ranged",
         "damageDice": "2d6+4",
         "damageType": "necrotic",
@@ -2662,8 +2662,8 @@
     "abilities": [
       {
         "id": "unit-ranged-retaliation",
-        "name": "Відповідний постріл",
-        "description": "Відповідає пострілом на дальні атаки (раз за раунд, як звичайна відсіч).",
+        "name": "Return Shot",
+        "description": "Retaliates with a shot against ranged attacks (once per round, like a normal retaliation).",
         "trigger": {
           "event": "passive"
         },
@@ -2690,9 +2690,9 @@
   },
   {
     "slug": "demons-temptress",
-    "name": "Спокусниця",
+    "name": "Temptress",
     "level": 4,
-    "raceId": "Демони",
+    "raceId": "Demons",
     "initiative": 9,
     "armorClass": 14,
     "maxHp": 73,
@@ -2705,7 +2705,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Темний постріл",
+        "name": "Dark Shot",
         "type": "ranged",
         "damageDice": "2d6+5",
         "damageType": "necrotic",
@@ -2715,8 +2715,8 @@
     "abilities": [
       {
         "id": "unit-charm",
-        "name": "Спокуса",
-        "description": "Влучання з шансом 30 % підкоряє ціль на 2 раунди.",
+        "name": "Temptation",
+        "description": "A hit has a 30% chance to subjugate the target for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2736,8 +2736,8 @@
       },
       {
         "id": "unit-ranged-retaliation",
-        "name": "Відповідний постріл",
-        "description": "Відповідає пострілом на дальні атаки (раз за раунд, як звичайна відсіч).",
+        "name": "Return Shot",
+        "description": "Retaliates with a shot against ranged attacks (once per round, like a normal retaliation).",
         "trigger": {
           "event": "passive"
         },
@@ -2764,9 +2764,9 @@
   },
   {
     "slug": "dwarves-arkat-dragon",
-    "name": "Дракон Аркату",
+    "name": "Arkat Dragon",
     "level": 7,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 16,
     "maxHp": 240,
@@ -2779,7 +2779,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Подих Аркату",
+        "name": "Arkat's Breath",
         "type": "melee",
         "damageDice": "4d10+20",
         "damageType": "fire",
@@ -2790,8 +2790,8 @@
     "abilities": [
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -2806,8 +2806,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -2821,8 +2821,8 @@
       },
       {
         "id": "unit-dot-fire",
-        "name": "Опік",
-        "description": "Влучання завдає 2d6 шкоди (вогонь) щораунду протягом 2 раунди.",
+        "name": "Burn",
+        "description": "A hit deals 2d6 fire damage each round for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2851,9 +2851,9 @@
   },
   {
     "slug": "dwarves-arkat-priest",
-    "name": "Жрець Аркату",
+    "name": "Arkat Priest",
     "level": 5,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 15,
     "maxHp": 98,
@@ -2866,7 +2866,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Рунний жезл",
+        "name": "Rune Rod",
         "type": "ranged",
         "damageDice": "3d6+7",
         "damageType": "fire",
@@ -2876,8 +2876,8 @@
     "abilities": [
       {
         "id": "unit-flame-mark",
-        "name": "Вогняна мітка",
-        "description": "Влучання позначає ціль на 2 раунди.",
+        "name": "Fire Mark",
+        "description": "A hit marks the target for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2895,8 +2895,8 @@
       },
       {
         "id": "unit-allies-aura-damageBonus",
-        "name": "Вогняна мітка: бонус союзників",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Fire Mark: Ally Bonus",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -2914,10 +2914,10 @@
       }
     ],
     "knownSpells": [
-      "Крижаний болт",
-      "Вогняна куля",
-      "Блискавка",
-      "Ухилення"
+      "Ice Bolt",
+      "Fireball",
+      "Lightning Bolt",
+      "Evasion"
     ],
     "proficiencyBonus": 4,
     "gridSize": 1,
@@ -2930,9 +2930,9 @@
   },
   {
     "slug": "dwarves-arkat-warrior",
-    "name": "Воїн Аркату",
+    "name": "Arkat Warrior",
     "level": 4,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 11,
     "armorClass": 15,
     "maxHp": 85,
@@ -2945,7 +2945,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Сокира Аркату",
+        "name": "Arkat Axe",
         "type": "melee",
         "damageDice": "2d6+6",
         "damageType": "slashing",
@@ -2955,8 +2955,8 @@
     "abilities": [
       {
         "id": "unit-finisher",
-        "name": "Добивання",
-        "description": "За умови: атака з перевагою.",
+        "name": "Finishing Blow",
+        "description": "Conditional: the attack has advantage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -2987,9 +2987,9 @@
   },
   {
     "slug": "dwarves-bear-rider",
-    "name": "Вершник на ведмеді",
+    "name": "Bear Rider",
     "level": 3,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 56,
@@ -3002,7 +3002,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис вершника",
+        "name": "Rider's Spear",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "piercing",
@@ -3012,8 +3012,8 @@
     "abilities": [
       {
         "id": "unit-debuff-initiative",
-        "name": "Удар лапою",
-        "description": "Влучання знижує ініціативу цілі на 3 на 1 раунд.",
+        "name": "Paw Strike",
+        "description": "A hit lowers the target's initiative by 3 for 1 round.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3042,9 +3042,9 @@
   },
   {
     "slug": "dwarves-berserker",
-    "name": "Берсерк",
+    "name": "Berserker",
     "level": 4,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 12,
     "armorClass": 11,
     "maxHp": 81,
@@ -3057,7 +3057,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Дві сокири",
+        "name": "Two Axes",
         "type": "melee",
         "damageDice": "2d8+6",
         "damageType": "slashing",
@@ -3067,8 +3067,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -3099,9 +3099,9 @@
   },
   {
     "slug": "dwarves-black-bear-rider",
-    "name": "Вершник на чорному ведмеді",
+    "name": "Black Bear Rider",
     "level": 3,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 11,
     "armorClass": 15,
     "maxHp": 62,
@@ -3114,7 +3114,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис вершника",
+        "name": "Rider's Spear",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "piercing",
@@ -3124,8 +3124,8 @@
     "abilities": [
       {
         "id": "unit-debuff-initiative",
-        "name": "Удар лапою",
-        "description": "Влучання знижує ініціативу цілі на 3 на 1 раунд.",
+        "name": "Paw Strike",
+        "description": "A hit lowers the target's initiative by 3 for 1 round.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3144,8 +3144,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Збивання",
-        "description": "Влучання з шансом 25 % змушує ціль пропустити хід.",
+        "name": "Knockdown",
+        "description": "A hit has a 25% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3176,9 +3176,9 @@
   },
   {
     "slug": "dwarves-bonecrusher",
-    "name": "Костолом",
+    "name": "Bonecrusher",
     "level": 4,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 12,
     "armorClass": 14,
     "maxHp": 77,
@@ -3191,7 +3191,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Дворучний молот",
+        "name": "Two-Handed Hammer",
         "type": "melee",
         "damageDice": "2d6+6",
         "damageType": "bludgeoning",
@@ -3201,8 +3201,8 @@
     "abilities": [
       {
         "id": "unit-debuff-attackBonus",
-        "name": "Каліцтво",
-        "description": "Влучання з шансом 25 % знижує атаку цілі на 2 на 2 раунди.",
+        "name": "Maiming",
+        "description": "A hit has a 25% chance to lower the target's attack by 2 for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3234,9 +3234,9 @@
   },
   {
     "slug": "dwarves-earl",
-    "name": "Ерл",
+    "name": "Earl",
     "level": 6,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 11,
     "armorClass": 17,
     "maxHp": 171,
@@ -3249,7 +3249,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Громовий молот",
+        "name": "Thunder Hammer",
         "type": "melee",
         "damageDice": "3d8+11",
         "damageType": "bludgeoning",
@@ -3259,8 +3259,8 @@
     "abilities": [
       {
         "id": "unit-extra-damage-lightning",
-        "name": "Блискавка",
-        "description": "Влучання завдає додатково 1d10 шкоди (блискавка).",
+        "name": "Lightning Bolt",
+        "description": "A hit deals an additional 1d10 lightning damage.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3276,8 +3276,8 @@
       },
       {
         "id": "unit-resist-lightning",
-        "name": "Імунітет до блискавки",
-        "description": "Опір шкоді (блискавка) 100 %.",
+        "name": "Lightning Immunity",
+        "description": "Resistance to lightning damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -3292,8 +3292,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Громовий удар",
-        "description": "Влучання з шансом 20 % змушує ціль пропустити хід.",
+        "name": "Thunder Strike",
+        "description": "A hit has a 20% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3314,8 +3314,8 @@
       },
       {
         "id": "unit-aoe-once",
-        "name": "Буря",
-        "description": "Раз за бій: до 3 цілей отримують 100 % шкоди від атаки юніта.",
+        "name": "Storm",
+        "description": "Once per battle: up to 3 targets take 100% of the damage from the unit's attack.",
         "trigger": {
           "event": "action"
         },
@@ -3347,9 +3347,9 @@
   },
   {
     "slug": "dwarves-fire-dragon",
-    "name": "Вогняний дракон",
+    "name": "Fire Dragon",
     "level": 7,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 16,
     "maxHp": 220,
@@ -3362,7 +3362,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вогняні пазурі",
+        "name": "Fire Claws",
         "type": "melee",
         "damageDice": "4d10+16",
         "damageType": "fire",
@@ -3372,8 +3372,8 @@
     "abilities": [
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -3388,8 +3388,8 @@
       },
       {
         "id": "unit-retaliate-fire",
-        "name": "Вогняна аура",
-        "description": "Атакувальник у ближньому бою отримує 25 % завданої шкоди (вогонь).",
+        "name": "Fire Aura",
+        "description": "A melee attacker takes 25% of the damage it deals as fire damage.",
         "trigger": {
           "event": "hit",
           "role": "target",
@@ -3419,9 +3419,9 @@
   },
   {
     "slug": "dwarves-flame-priest",
-    "name": "Жрець полум'я",
+    "name": "Flame Priest",
     "level": 5,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 100,
@@ -3434,7 +3434,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Рунний жезл",
+        "name": "Rune Rod",
         "type": "ranged",
         "damageDice": "3d6+7",
         "damageType": "fire",
@@ -3444,8 +3444,8 @@
     "abilities": [
       {
         "id": "unit-retaliate-fire",
-        "name": "Вогонь помсти",
-        "description": "Атакувальник у ближньому бою отримує 25 % завданої шкоди (вогонь).",
+        "name": "Fire of Vengeance",
+        "description": "A melee attacker takes 25% of the damage it deals as fire damage.",
         "trigger": {
           "event": "hit",
           "role": "target",
@@ -3465,10 +3465,10 @@
       }
     ],
     "knownSpells": [
-      "Крижаний болт",
-      "Блискавка",
-      "Вогняна куля",
-      "Вогняна стіна"
+      "Ice Bolt",
+      "Lightning Bolt",
+      "Fireball",
+      "Fire Wall"
     ],
     "proficiencyBonus": 4,
     "gridSize": 1,
@@ -3481,9 +3481,9 @@
   },
   {
     "slug": "dwarves-harpooner",
-    "name": "Гарпунник",
+    "name": "Harpooner",
     "level": 2,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 14,
     "maxHp": 39,
@@ -3496,7 +3496,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Гарпун",
+        "name": "Harpoon",
         "type": "ranged",
         "damageDice": "1d8+2",
         "damageType": "piercing",
@@ -3506,8 +3506,8 @@
     "abilities": [
       {
         "id": "unit-debuff-armor",
-        "name": "Гарпун",
-        "description": "Влучання знижує КД цілі на 2 на 1 раунд.",
+        "name": "Harpoon",
+        "description": "A hit lowers the target's AC by 2 for 1 round.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3536,9 +3536,9 @@
   },
   {
     "slug": "dwarves-jarl",
-    "name": "Ярл",
+    "name": "Jarl",
     "level": 6,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 10,
     "armorClass": 17,
     "maxHp": 165,
@@ -3551,7 +3551,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вогняний молот",
+        "name": "Fire Hammer",
         "type": "melee",
         "damageDice": "3d8+11",
         "damageType": "bludgeoning",
@@ -3561,8 +3561,8 @@
     "abilities": [
       {
         "id": "unit-extra-damage-fire",
-        "name": "Вогонь",
-        "description": "Влучання завдає додатково 1d10 шкоди (вогонь).",
+        "name": "Fire",
+        "description": "A hit deals an additional 1d10 fire damage.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3578,8 +3578,8 @@
       },
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -3594,8 +3594,8 @@
       },
       {
         "id": "unit-fire-wave",
-        "name": "Вогняна хвиля",
-        "description": "Влучання обпікає ворогів позаду цілі (конус 15 фт): 50 % шкоди удару вогнем.",
+        "name": "Fire Wave",
+        "description": "A hit scorches enemies behind the target (15 ft cone): 50% of the hit's damage as fire.",
         "trigger": {
           "event": "passive"
         },
@@ -3620,9 +3620,9 @@
   },
   {
     "slug": "dwarves-lava-dragon",
-    "name": "Лавовий дракон",
+    "name": "Lava Dragon",
     "level": 7,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 18,
     "maxHp": 245,
@@ -3635,7 +3635,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Лавовий подих",
+        "name": "Lava Breath",
         "type": "melee",
         "damageDice": "4d10+18",
         "damageType": "fire",
@@ -3646,8 +3646,8 @@
     "abilities": [
       {
         "id": "unit-resist-fire",
-        "name": "Імунітет до вогню",
-        "description": "Опір шкоді (вогонь) 100 %.",
+        "name": "Fire Immunity",
+        "description": "Resistance to fire damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -3662,8 +3662,8 @@
       },
       {
         "id": "unit-retaliate-fire",
-        "name": "Вогняна аура",
-        "description": "Атакувальник у ближньому бою отримує 25 % завданої шкоди (вогонь).",
+        "name": "Fire Aura",
+        "description": "A melee attacker takes 25% of the damage it deals as fire damage.",
         "trigger": {
           "event": "hit",
           "role": "target",
@@ -3683,8 +3683,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -3708,9 +3708,9 @@
   },
   {
     "slug": "dwarves-mountain-defender",
-    "name": "Захисник гір",
+    "name": "Mountain Defender",
     "level": 1,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 14,
     "maxHp": 31,
@@ -3723,7 +3723,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Молот",
+        "name": "Hammer",
         "type": "melee",
         "damageDice": "1d6",
         "damageType": "bludgeoning",
@@ -3733,8 +3733,8 @@
     "abilities": [
       {
         "id": "unit-big-shield",
-        "name": "Великий щит",
-        "description": "Дальня шкода зменшена на 30 %.",
+        "name": "Great Shield",
+        "description": "Ranged damage is reduced by 30%.",
         "trigger": {
           "event": "passive"
         },
@@ -3760,9 +3760,9 @@
   },
   {
     "slug": "dwarves-mountain-guard",
-    "name": "Гірський вартовий",
+    "name": "Mountain Guard",
     "level": 1,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 8,
     "armorClass": 15,
     "maxHp": 36,
@@ -3775,7 +3775,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Молот",
+        "name": "Hammer",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "bludgeoning",
@@ -3785,8 +3785,8 @@
     "abilities": [
       {
         "id": "unit-big-shield",
-        "name": "Великий щит",
-        "description": "Дальня шкода зменшена на 30 %.",
+        "name": "Great Shield",
+        "description": "Ranged damage is reduced by 30%.",
         "trigger": {
           "event": "passive"
         },
@@ -3802,8 +3802,8 @@
       },
       {
         "id": "unit-rage",
-        "name": "Лють",
-        "description": "Коли гине союзник, шкода юніта зростає на 25 % на 2 раунди.",
+        "name": "Fury",
+        "description": "When an ally dies, the unit's damage increases by 25% for 2 rounds.",
         "trigger": {
           "event": "kill",
           "role": "victimSide"
@@ -3834,9 +3834,9 @@
   },
   {
     "slug": "dwarves-rune-priest",
-    "name": "Рунний жрець",
+    "name": "Rune Priest",
     "level": 5,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 8,
     "armorClass": 14,
     "maxHp": 91,
@@ -3849,7 +3849,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Рунний жезл",
+        "name": "Rune Rod",
         "type": "ranged",
         "damageDice": "3d6+5",
         "damageType": "fire",
@@ -3857,8 +3857,8 @@
       }
     ],
     "knownSpells": [
-      "Крижаний болт",
-      "Блискавка"
+      "Ice Bolt",
+      "Lightning Bolt"
     ],
     "proficiencyBonus": 4,
     "gridSize": 1,
@@ -3871,9 +3871,9 @@
   },
   {
     "slug": "dwarves-shield-bearer",
-    "name": "Щитоносець",
+    "name": "Shield Bearer",
     "level": 1,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 15,
     "maxHp": 36,
@@ -3886,7 +3886,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Молот",
+        "name": "Hammer",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "bludgeoning",
@@ -3896,8 +3896,8 @@
     "abilities": [
       {
         "id": "unit-big-shield",
-        "name": "Великий щит",
-        "description": "Дальня шкода зменшена на 30 %.",
+        "name": "Great Shield",
+        "description": "Ranged damage is reduced by 30%.",
         "trigger": {
           "event": "passive"
         },
@@ -3913,8 +3913,8 @@
       },
       {
         "id": "unit-guardian",
-        "name": "Захисник",
-        "description": "Бере на себе 30 % шкоди союзників.",
+        "name": "Defender",
+        "description": "Takes 30% of allies' damage.",
         "trigger": {
           "event": "battleStart"
         },
@@ -3941,9 +3941,9 @@
   },
   {
     "slug": "dwarves-spear-master",
-    "name": "Майстер списа",
+    "name": "Spear Master",
     "level": 2,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 14,
     "maxHp": 39,
@@ -3956,7 +3956,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Метальний спис",
+        "name": "Throwing Spear",
         "type": "ranged",
         "damageDice": "1d8+2",
         "damageType": "piercing",
@@ -3966,8 +3966,8 @@
     "abilities": [
       {
         "id": "unit-debuff-initiative",
-        "name": "Підрізання",
-        "description": "Влучання з шансом 25 % знижує ініціативу цілі на 2 на 2 раунди.",
+        "name": "Hamstring",
+        "description": "A hit has a 25% chance to lower the target's initiative by 2 for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3999,9 +3999,9 @@
   },
   {
     "slug": "dwarves-spear-thrower",
-    "name": "Списометальник",
+    "name": "Spear Thrower",
     "level": 2,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 9,
     "armorClass": 13,
     "maxHp": 36,
@@ -4014,7 +4014,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Метальний спис",
+        "name": "Throwing Spear",
         "type": "ranged",
         "damageDice": "1d8+1",
         "damageType": "piercing",
@@ -4032,9 +4032,9 @@
   },
   {
     "slug": "dwarves-thane",
-    "name": "Тан",
+    "name": "Thane",
     "level": 6,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 154,
@@ -4047,7 +4047,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Громовий молот",
+        "name": "Thunder Hammer",
         "type": "melee",
         "damageDice": "3d8+9",
         "damageType": "bludgeoning",
@@ -4057,8 +4057,8 @@
     "abilities": [
       {
         "id": "unit-extra-damage-lightning",
-        "name": "Блискавка",
-        "description": "Влучання завдає додатково 1d10 шкоди (блискавка).",
+        "name": "Lightning Bolt",
+        "description": "A hit deals an additional 1d10 lightning damage.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -4074,8 +4074,8 @@
       },
       {
         "id": "unit-resist-lightning",
-        "name": "Імунітет до блискавки",
-        "description": "Опір шкоді (блискавка) 100 %.",
+        "name": "Lightning Immunity",
+        "description": "Resistance to lightning damage 100%.",
         "trigger": {
           "event": "passive"
         },
@@ -4090,8 +4090,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Громовий удар",
-        "description": "Влучання з шансом 20 % змушує ціль пропустити хід.",
+        "name": "Thunder Strike",
+        "description": "A hit has a 20% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -4122,9 +4122,9 @@
   },
   {
     "slug": "dwarves-white-bear-rider",
-    "name": "Вершник на білому ведмеді",
+    "name": "White Bear Rider",
     "level": 3,
-    "raceId": "Гноми",
+    "raceId": "Dwarves",
     "initiative": 11,
     "armorClass": 15,
     "maxHp": 62,
@@ -4137,7 +4137,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис вершника",
+        "name": "Rider's Spear",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "piercing",
@@ -4147,8 +4147,8 @@
     "abilities": [
       {
         "id": "unit-debuff-initiative",
-        "name": "Удар лапою",
-        "description": "Влучання знижує ініціативу цілі на 3 на 1 раунд.",
+        "name": "Paw Strike",
+        "description": "A hit lowers the target's initiative by 3 for 1 round.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -4167,8 +4167,8 @@
       },
       {
         "id": "unit-roar",
-        "name": "Рик",
-        "description": "Бонусна дія, раз за бій: вороги отримують −1 до моралі на 2 раунди.",
+        "name": "Roar",
+        "description": "Bonus action, once per battle: enemies get −1 to morale for 2 rounds.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -4199,9 +4199,9 @@
   },
   {
     "slug": "elves-ancient-ent",
-    "name": "Древній ент",
+    "name": "Ancient Ent",
     "level": 6,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 7,
     "armorClass": 18,
     "maxHp": 176,
@@ -4214,7 +4214,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кулак",
+        "name": "Fist",
         "type": "melee",
         "damageDice": "3d8+13",
         "damageType": "bludgeoning",
@@ -4224,8 +4224,8 @@
     "abilities": [
       {
         "id": "unit-regeneration",
-        "name": "Регенерація 10 %",
-        "description": "На початку ходу відновлює 10 % максимального HP.",
+        "name": "Regeneration 10%",
+        "description": "At the start of its turn, restores 10% of its maximum HP.",
         "trigger": {
           "event": "turnStart"
         },
@@ -4242,8 +4242,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Сплутування",
-        "description": "Влучання з шансом 25 % змушує ціль пропустити хід.",
+        "name": "Entangle",
+        "description": "A hit has a 25% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -4264,8 +4264,8 @@
       },
       {
         "id": "unit-buff-armor-self",
-        "name": "Вкорінення",
-        "description": "Бонусна дія: +3 на КД собі на 1 раунд.",
+        "name": "Rooting",
+        "description": "Bonus action: +3 AC to itself for 1 round.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -4293,9 +4293,9 @@
   },
   {
     "slug": "elves-archer",
-    "name": "Ельф-лучник",
+    "name": "Elf Archer",
     "level": 3,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 10,
     "armorClass": 13,
     "maxHp": 47,
@@ -4308,7 +4308,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Довгий лук",
+        "name": "Longbow",
         "type": "ranged",
         "damageDice": "1d10+2",
         "damageType": "piercing",
@@ -4326,9 +4326,9 @@
   },
   {
     "slug": "elves-blade-dancer",
-    "name": "Танцюючий з клинками",
+    "name": "Blade Dancer",
     "level": 2,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 11,
     "armorClass": 14,
     "maxHp": 41,
@@ -4341,7 +4341,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Клинки",
+        "name": "Blades",
         "type": "melee",
         "damageDice": "1d8+2",
         "damageType": "slashing",
@@ -4359,9 +4359,9 @@
   },
   {
     "slug": "elves-bow-master",
-    "name": "Майстер лука",
+    "name": "Bow Master",
     "level": 3,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 52,
@@ -4374,7 +4374,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Довгий лук",
+        "name": "Longbow",
         "type": "ranged",
         "damageDice": "1d10+3",
         "damageType": "piercing",
@@ -4384,8 +4384,8 @@
     "abilities": [
       {
         "id": "unit-double-strike",
-        "name": "Подвійний постріл",
-        "description": "Після атаки з шансом 30 % — ще одна атака, раз за хід.",
+        "name": "Twin Shot",
+        "description": "After attacking, has a 30% chance of making another attack, once per turn.",
         "trigger": {
           "event": "attack",
           "phase": "after",
@@ -4415,9 +4415,9 @@
   },
   {
     "slug": "elves-crystal-dragon",
-    "name": "Кристалічний дракон",
+    "name": "Crystal Dragon",
     "level": 7,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 14,
     "armorClass": 16,
     "maxHp": 240,
@@ -4430,7 +4430,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кристалічний подих",
+        "name": "Crystal Breath",
         "type": "melee",
         "damageDice": "4d10+18",
         "damageType": "force",
@@ -4441,8 +4441,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Кристалічний подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Crystal Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -4456,8 +4456,8 @@
       },
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 50 %",
-        "description": "Шкода від заклять зменшена на 50 %.",
+        "name": "Magic Resistance 50%",
+        "description": "Spell damage is reduced by 50%.",
         "trigger": {
           "event": "passive"
         },
@@ -4472,15 +4472,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -4496,9 +4496,9 @@
   },
   {
     "slug": "elves-death-dancer",
-    "name": "Танцюючий зі смертю",
+    "name": "Death Dancer",
     "level": 2,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 15,
     "armorClass": 14,
     "maxHp": 44,
@@ -4511,7 +4511,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Клинки",
+        "name": "Blades",
         "type": "melee",
         "damageDice": "1d8+3",
         "damageType": "slashing",
@@ -4522,8 +4522,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Танок смерті",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Dance of Death",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -4547,9 +4547,9 @@
   },
   {
     "slug": "elves-druid",
-    "name": "Друїд",
+    "name": "Druid",
     "level": 4,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 10,
     "armorClass": 13,
     "maxHp": 66,
@@ -4562,7 +4562,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Терновий постріл",
+        "name": "Thorn Shot",
         "type": "ranged",
         "damageDice": "2d6+4",
         "damageType": "piercing",
@@ -4570,8 +4570,8 @@
       }
     ],
     "knownSpells": [
-      "Блискавка",
-      "Кам'яні шипи"
+      "Lightning Bolt",
+      "Stone Spikes"
     ],
     "proficiencyBonus": 3,
     "gridSize": 1,
@@ -4584,9 +4584,9 @@
   },
   {
     "slug": "elves-dryad",
-    "name": "Дріада",
+    "name": "Dryad",
     "level": 1,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 15,
     "armorClass": 13,
     "maxHp": 31,
@@ -4599,7 +4599,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Колючки",
+        "name": "Spikes",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "piercing",
@@ -4610,8 +4610,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Колючки",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Spikes",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -4625,8 +4625,8 @@
       },
       {
         "id": "unit-wasp-swarm",
-        "name": "Рій ос",
-        "description": "Бонусна дія, раз за бій: ціль отримує 1d6 шкоди (отрута) щораунду протягом 3 раундів.",
+        "name": "Wasp Swarm",
+        "description": "Bonus action, once per battle: the target takes 1d6 poison damage each round for 3 rounds.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -4647,15 +4647,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -4671,9 +4671,9 @@
   },
   {
     "slug": "elves-elder-druid",
-    "name": "Старший друїд",
+    "name": "Elder Druid",
     "level": 4,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 74,
@@ -4686,7 +4686,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Терновий постріл",
+        "name": "Thorn Shot",
         "type": "ranged",
         "damageDice": "2d6+5",
         "damageType": "piercing",
@@ -4696,8 +4696,8 @@
     "abilities": [
       {
         "id": "unit-allies-aura-attackBonus",
-        "name": "Аура тайної сили",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Aura of Arcane Power",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -4712,9 +4712,9 @@
       }
     ],
     "knownSpells": [
-      "Блискавка",
-      "Кам'яні шипи",
-      "Кам'яна шкіра"
+      "Lightning Bolt",
+      "Stone Spikes",
+      "Stoneskin"
     ],
     "proficiencyBonus": 3,
     "gridSize": 1,
@@ -4727,9 +4727,9 @@
   },
   {
     "slug": "elves-emerald-dragon",
-    "name": "Смарагдовий дракон",
+    "name": "Emerald Dragon",
     "level": 7,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 14,
     "armorClass": 17,
     "maxHp": 245,
@@ -4742,7 +4742,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кислотний подих",
+        "name": "Acid Breath",
         "type": "melee",
         "damageDice": "4d10+20",
         "damageType": "acid",
@@ -4753,8 +4753,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Кислотний подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Acid Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -4768,8 +4768,8 @@
       },
       {
         "id": "unit-fear-aura",
-        "name": "Аура величі",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Majesty",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -4784,15 +4784,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -4808,9 +4808,9 @@
   },
   {
     "slug": "elves-ent",
-    "name": "Ент",
+    "name": "Ent",
     "level": 6,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 7,
     "armorClass": 17,
     "maxHp": 160,
@@ -4823,7 +4823,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кулак",
+        "name": "Fist",
         "type": "melee",
         "damageDice": "3d8+11",
         "damageType": "bludgeoning",
@@ -4833,8 +4833,8 @@
     "abilities": [
       {
         "id": "unit-regeneration",
-        "name": "Регенерація 10 %",
-        "description": "На початку ходу відновлює 10 % максимального HP.",
+        "name": "Regeneration 10%",
+        "description": "At the start of its turn, restores 10% of its maximum HP.",
         "trigger": {
           "event": "turnStart"
         },
@@ -4851,8 +4851,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Сплутування",
-        "description": "Влучання з шансом 25 % змушує ціль пропустити хід.",
+        "name": "Entangle",
+        "description": "A hit has a 25% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -4883,9 +4883,9 @@
   },
   {
     "slug": "elves-fairy",
-    "name": "Фея",
+    "name": "Fairy",
     "level": 1,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 12,
     "armorClass": 12,
     "maxHp": 28,
@@ -4898,7 +4898,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Колючки",
+        "name": "Spikes",
         "type": "melee",
         "damageDice": "1d6",
         "damageType": "piercing",
@@ -4909,8 +4909,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Колючки",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Spikes",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -4924,15 +4924,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -4948,9 +4948,9 @@
   },
   {
     "slug": "elves-forest-ranger",
-    "name": "Лісовий стрілок",
+    "name": "Forest Ranger",
     "level": 3,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 11,
     "armorClass": 14,
     "maxHp": 50,
@@ -4963,7 +4963,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Довгий лук",
+        "name": "Longbow",
         "type": "ranged",
         "damageDice": "1d10+3",
         "damageType": "piercing",
@@ -4973,8 +4973,8 @@
     "abilities": [
       {
         "id": "unit-stun",
-        "name": "Приголомшливий постріл",
-        "description": "Влучання з шансом 40 % змушує ціль пропустити хід.",
+        "name": "Stunning Shot",
+        "description": "A hit has a 40% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -5005,9 +5005,9 @@
   },
   {
     "slug": "elves-green-dragon",
-    "name": "Зелений дракон",
+    "name": "Green Dragon",
     "level": 7,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 12,
     "armorClass": 16,
     "maxHp": 220,
@@ -5020,7 +5020,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кислотний подих",
+        "name": "Acid Breath",
         "type": "melee",
         "damageDice": "4d10+16",
         "damageType": "acid",
@@ -5031,8 +5031,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Кислотний подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Acid Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -5046,15 +5046,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -5070,9 +5070,9 @@
   },
   {
     "slug": "elves-high-druid",
-    "name": "Верховний друїд",
+    "name": "High Druid",
     "level": 4,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 73,
@@ -5085,7 +5085,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Терновий постріл",
+        "name": "Thorn Shot",
         "type": "ranged",
         "damageDice": "2d6+5",
         "damageType": "piercing",
@@ -5095,8 +5095,8 @@
     "abilities": [
       {
         "id": "unit-restore-slot",
-        "name": "Передача мани",
-        "description": "Раз за бій: союзник відновлює слот закляття.",
+        "name": "Mana Transfer",
+        "description": "Once per battle: an ally regains a spell slot.",
         "trigger": {
           "event": "action"
         },
@@ -5113,8 +5113,8 @@
       }
     ],
     "knownSpells": [
-      "Слово лікування",
-      "Місячний промінь"
+      "Healing Word",
+      "Moonbeam"
     ],
     "proficiencyBonus": 3,
     "gridSize": 1,
@@ -5127,9 +5127,9 @@
   },
   {
     "slug": "elves-light-unicorn",
-    "name": "Світлий єдиноріг",
+    "name": "Light Unicorn",
     "level": 5,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 12,
     "armorClass": 16,
     "maxHp": 117,
@@ -5142,7 +5142,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Ріг",
+        "name": "Horn",
         "type": "melee",
         "damageDice": "3d8+7",
         "damageType": "radiant",
@@ -5152,8 +5152,8 @@
     "abilities": [
       {
         "id": "unit-allies-aura-resistance-spell",
-        "name": "Аура опору магії",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Aura of Magic Resistance",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -5169,14 +5169,14 @@
       },
       {
         "id": "unit-light-echo",
-        "name": "Світле відлуння",
-        "description": "Коли союзник отримує баф від закляття Світла, єдиноріг теж його отримує.",
+        "name": "Light Echo",
+        "description": "When an ally gains a buff from a Light spell, the unicorn gains it too.",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
           "role": "target",
           "whose": "ally",
-          "school": "Світло"
+          "school": "Light"
         },
         "effects": [
           {
@@ -5197,9 +5197,9 @@
   },
   {
     "slug": "elves-nymph",
-    "name": "Німфа",
+    "name": "Nymph",
     "level": 1,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 14,
     "armorClass": 13,
     "maxHp": 31,
@@ -5212,7 +5212,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Колючки",
+        "name": "Spikes",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "piercing",
@@ -5223,8 +5223,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Колючки",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Spikes",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -5238,8 +5238,8 @@
       },
       {
         "id": "unit-heal-ally",
-        "name": "Симбіоз",
-        "description": "Бонусна дія: лікує союзника.",
+        "name": "Symbiosis",
+        "description": "Bonus action: heals an ally.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -5253,15 +5253,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -5277,9 +5277,9 @@
   },
   {
     "slug": "elves-unicorn",
-    "name": "Єдиноріг",
+    "name": "Unicorn",
     "level": 5,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 12,
     "armorClass": 15,
     "maxHp": 107,
@@ -5292,7 +5292,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Ріг",
+        "name": "Horn",
         "type": "melee",
         "damageDice": "3d8+6",
         "damageType": "piercing",
@@ -5302,8 +5302,8 @@
     "abilities": [
       {
         "id": "unit-allies-aura-resistance-spell",
-        "name": "Аура опору магії",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Aura of Magic Resistance",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -5329,9 +5329,9 @@
   },
   {
     "slug": "elves-war-unicorn",
-    "name": "Бойовий єдиноріг",
+    "name": "War Unicorn",
     "level": 5,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 12,
     "armorClass": 16,
     "maxHp": 119,
@@ -5344,7 +5344,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Ріг",
+        "name": "Horn",
         "type": "melee",
         "damageDice": "3d8+7",
         "damageType": "piercing",
@@ -5354,8 +5354,8 @@
     "abilities": [
       {
         "id": "unit-allies-aura-resistance-spell",
-        "name": "Аура опору магії",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Aura of Magic Resistance",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -5371,8 +5371,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Осліплюючий ріг",
-        "description": "Влучання з шансом 20 % змушує ціль пропустити хід.",
+        "name": "Blinding Horn",
+        "description": "A hit has a 20% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -5403,9 +5403,9 @@
   },
   {
     "slug": "elves-wild-ent",
-    "name": "Дикий ент",
+    "name": "Wild Ent",
     "level": 6,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 7,
     "armorClass": 17,
     "maxHp": 171,
@@ -5418,14 +5418,14 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кулак",
+        "name": "Fist",
         "type": "melee",
         "damageDice": "3d10+13",
         "damageType": "bludgeoning",
         "attackBonus": 0
       },
       {
-        "name": "Кидок каменя",
+        "name": "Rock Throw",
         "type": "ranged",
         "damageDice": "3d8+9",
         "damageType": "bludgeoning",
@@ -5435,8 +5435,8 @@
     "abilities": [
       {
         "id": "unit-rage",
-        "name": "Лють",
-        "description": "Коли гине союзник, шкода юніта зростає на 25 % на 2 раунди.",
+        "name": "Fury",
+        "description": "When an ally dies, the unit's damage increases by 25% for 2 rounds.",
         "trigger": {
           "event": "kill",
           "role": "victimSide"
@@ -5457,8 +5457,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Сплутування",
-        "description": "Влучання з шансом 25 % змушує ціль пропустити хід.",
+        "name": "Entangle",
+        "description": "A hit has a 25% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -5489,9 +5489,9 @@
   },
   {
     "slug": "elves-wind-dancer",
-    "name": "Танцюючий із вітром",
+    "name": "Wind Dancer",
     "level": 2,
-    "raceId": "Ельфи",
+    "raceId": "Elves",
     "initiative": 15,
     "armorClass": 16,
     "maxHp": 44,
@@ -5504,7 +5504,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Клинки",
+        "name": "Blades",
         "type": "melee",
         "damageDice": "1d8+3",
         "damageType": "slashing",
@@ -5514,8 +5514,8 @@
     "abilities": [
       {
         "id": "unit-wind-step",
-        "name": "Танець вітру",
-        "description": "+2 до шкоди за кожну клітинку, пройдену цього ходу до удару.",
+        "name": "Wind Dance",
+        "description": "+2 damage for each cell moved this turn before the strike.",
         "trigger": {
           "event": "passive"
         },
@@ -5543,9 +5543,9 @@
   },
   {
     "slug": "humans-angel",
-    "name": "Ангел",
+    "name": "Angel",
     "level": 7,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 210,
@@ -5558,7 +5558,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Священний меч",
+        "name": "Holy Sword",
         "type": "melee",
         "damageDice": "4d10+16",
         "damageType": "radiant",
@@ -5568,8 +5568,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -5590,15 +5590,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -5614,9 +5614,9 @@
   },
   {
     "slug": "humans-archangel",
-    "name": "Архангел",
+    "name": "Archangel",
     "level": 7,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 11,
     "armorClass": 17,
     "maxHp": 240,
@@ -5629,7 +5629,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Священний меч",
+        "name": "Holy Sword",
         "type": "melee",
         "damageDice": "4d10+20",
         "damageType": "radiant",
@@ -5639,8 +5639,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -5661,8 +5661,8 @@
       },
       {
         "id": "unit-resurrect",
-        "name": "Воскресіння",
-        "description": "Раз за бій повертає загиблого союзника в бій з 50 % HP.",
+        "name": "Resurrection",
+        "description": "Once per battle, returns a fallen ally to the fight with 50% HP.",
         "trigger": {
           "event": "action"
         },
@@ -5682,15 +5682,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -5706,9 +5706,9 @@
   },
   {
     "slug": "humans-archer",
-    "name": "Лучник",
+    "name": "Archer",
     "level": 2,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 9,
     "armorClass": 13,
     "maxHp": 33,
@@ -5721,7 +5721,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Лук",
+        "name": "Bow",
         "type": "ranged",
         "damageDice": "1d8",
         "damageType": "piercing",
@@ -5739,9 +5739,9 @@
   },
   {
     "slug": "humans-battle-griffin",
-    "name": "Бойовий грифон",
+    "name": "Battle Griffin",
     "level": 4,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 81,
@@ -5754,7 +5754,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пазурі",
+        "name": "Talons",
         "type": "melee",
         "damageDice": "2d8+4",
         "damageType": "slashing",
@@ -5764,8 +5764,8 @@
     "abilities": [
       {
         "id": "unit-unlimited-retaliation",
-        "name": "Безмежна відсіч",
-        "description": "Відповідає на кожну атаку, а не раз за раунд.",
+        "name": "Unlimited Retaliation",
+        "description": "Retaliates against every attack, not just once per round.",
         "trigger": {
           "event": "passive"
         },
@@ -5778,8 +5778,8 @@
       },
       {
         "id": "unit-squall",
-        "name": "Шквал",
-        "description": "Дія, перезарядка 2 раунди: пролітає по прямій і завдає звичайної шкоди кожному ворогу на шляху.",
+        "name": "Barrage",
+        "description": "Action, recharge 2 rounds: flies in a straight line and deals normal damage to every enemy along the path.",
         "trigger": {
           "event": "action"
         },
@@ -5801,15 +5801,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -5825,9 +5825,9 @@
   },
   {
     "slug": "humans-brute",
-    "name": "Громила",
+    "name": "Brute",
     "level": 1,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 12,
     "maxHp": 32,
@@ -5840,7 +5840,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Булава",
+        "name": "Mace",
         "type": "melee",
         "damageDice": "1d8+1",
         "damageType": "bludgeoning",
@@ -5850,8 +5850,8 @@
     "abilities": [
       {
         "id": "unit-armor-break",
-        "name": "Броньобійність",
-        "description": "Влучання знижує КД цілі на 2 на 1 раунд.",
+        "name": "Armor Piercing",
+        "description": "A hit lowers the target's AC by 2 for 1 round.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -5880,9 +5880,9 @@
   },
   {
     "slug": "humans-champion",
-    "name": "Чемпіон",
+    "name": "Champion",
     "level": 6,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 12,
     "armorClass": 17,
     "maxHp": 165,
@@ -5895,7 +5895,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Натиск",
+        "name": "Onslaught",
         "type": "melee",
         "damageDice": "3d10+14",
         "damageType": "piercing",
@@ -5906,8 +5906,8 @@
     "abilities": [
       {
         "id": "unit-first-strike",
-        "name": "Таран",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ram",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -5928,8 +5928,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Натиск",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Onslaught",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -5953,9 +5953,9 @@
   },
   {
     "slug": "humans-crossbowman",
-    "name": "Арбалетник",
+    "name": "Crossbowman",
     "level": 2,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 14,
     "maxHp": 37,
@@ -5968,7 +5968,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Арбалет",
+        "name": "Crossbow",
         "type": "ranged",
         "damageDice": "1d10+1",
         "damageType": "piercing",
@@ -5978,8 +5978,8 @@
     "abilities": [
       {
         "id": "unit-death-blow",
-        "name": "Точний постріл",
-        "description": "Атака з шансом 25 % завдає подвійної шкоди.",
+        "name": "Accurate Shot",
+        "description": "An attack has a 25% chance to deal double damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -6010,9 +6010,9 @@
   },
   {
     "slug": "humans-defender-of-faith",
-    "name": "Захисник віри",
+    "name": "Defender of Faith",
     "level": 3,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 14,
     "maxHp": 62,
@@ -6025,7 +6025,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Бойова сокира",
+        "name": "Battle Axe",
         "type": "melee",
         "damageDice": "1d10+4",
         "damageType": "slashing",
@@ -6035,8 +6035,8 @@
     "abilities": [
       {
         "id": "unit-extra-retaliations",
-        "name": "Подвійна відсіч",
-        "description": "Відповідає на атаки двічі за раунд.",
+        "name": "Double Retaliation",
+        "description": "Retaliates against attacks twice per round.",
         "trigger": {
           "event": "passive"
         },
@@ -6060,9 +6060,9 @@
   },
   {
     "slug": "humans-griffin",
-    "name": "Грифон",
+    "name": "Griffin",
     "level": 4,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 15,
     "armorClass": 14,
     "maxHp": 74,
@@ -6075,7 +6075,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пазурі",
+        "name": "Talons",
         "type": "melee",
         "damageDice": "2d6+5",
         "damageType": "slashing",
@@ -6085,8 +6085,8 @@
     "abilities": [
       {
         "id": "unit-unlimited-retaliation",
-        "name": "Безмежна відсіч",
-        "description": "Відповідає на кожну атаку, а не раз за раунд.",
+        "name": "Unlimited Retaliation",
+        "description": "Retaliates against every attack, not just once per round.",
         "trigger": {
           "event": "passive"
         },
@@ -6099,15 +6099,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -6123,9 +6123,9 @@
   },
   {
     "slug": "humans-inquisitor",
-    "name": "Інквізитор",
+    "name": "Inquisitor",
     "level": 5,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 100,
@@ -6138,7 +6138,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Священний промінь",
+        "name": "Holy Ray",
         "type": "ranged",
         "damageDice": "3d6+7",
         "damageType": "radiant",
@@ -6148,8 +6148,8 @@
     "abilities": [
       {
         "id": "unit-hatred",
-        "name": "Свята кара",
-        "description": "+25 % шкоди проти рас: Некроманти, Демони.",
+        "name": "Holy Retribution",
+        "description": "+25% damage against races: Necromancers, Demons.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -6158,8 +6158,8 @@
         "condition": {
           "type": "targetRace",
           "races": [
-            "Некроманти",
-            "Демони"
+            "Necromancers",
+            "Demons"
           ]
         },
         "effects": [
@@ -6174,8 +6174,8 @@
       },
       {
         "id": "unit-buff-attackBonus",
-        "name": "Божественна сила",
-        "description": "Дія: +2 на атаку союзнику на 2 раунди.",
+        "name": "Divine Strength",
+        "description": "Action: an ally gains +2 to attack for 2 rounds.",
         "trigger": {
           "event": "action"
         },
@@ -6203,9 +6203,9 @@
   },
   {
     "slug": "humans-knight",
-    "name": "Лицар",
+    "name": "Knight",
     "level": 6,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 11,
     "armorClass": 17,
     "maxHp": 148,
@@ -6218,7 +6218,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис",
+        "name": "Spear",
         "type": "melee",
         "damageDice": "3d8+13",
         "damageType": "piercing",
@@ -6228,8 +6228,8 @@
     "abilities": [
       {
         "id": "unit-first-strike",
-        "name": "Таран",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ram",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -6260,9 +6260,9 @@
   },
   {
     "slug": "humans-marksman",
-    "name": "Стрілець",
+    "name": "Marksman",
     "level": 2,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 13,
     "maxHp": 37,
@@ -6275,7 +6275,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Залп",
+        "name": "Volley",
         "type": "ranged",
         "damageDice": "1d8+1",
         "damageType": "piercing",
@@ -6286,8 +6286,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Залп",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Volley",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -6311,9 +6311,9 @@
   },
   {
     "slug": "humans-militia",
-    "name": "Ополченець",
+    "name": "Militia",
     "level": 1,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 13,
     "maxHp": 32,
@@ -6326,7 +6326,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кистень",
+        "name": "Flail",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "bludgeoning",
@@ -6336,8 +6336,8 @@
     "abilities": [
       {
         "id": "unit-stun",
-        "name": "Оглушення",
-        "description": "Влучання з шансом 20 % змушує ціль пропустити хід.",
+        "name": "Stun",
+        "description": "A hit has a 20% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -6368,9 +6368,9 @@
   },
   {
     "slug": "humans-monk",
-    "name": "Монах",
+    "name": "Monk",
     "level": 5,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 90,
@@ -6383,7 +6383,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Священний промінь",
+        "name": "Holy Ray",
         "type": "ranged",
         "damageDice": "3d6+5",
         "damageType": "radiant",
@@ -6393,8 +6393,8 @@
     "abilities": [
       {
         "id": "unit-hatred",
-        "name": "Свята кара",
-        "description": "+25 % шкоди проти рас: Некроманти, Демони.",
+        "name": "Holy Retribution",
+        "description": "+25% damage against races: Necromancers, Demons.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -6403,8 +6403,8 @@
         "condition": {
           "type": "targetRace",
           "races": [
-            "Некроманти",
-            "Демони"
+            "Necromancers",
+            "Demons"
           ]
         },
         "effects": [
@@ -6429,9 +6429,9 @@
   },
   {
     "slug": "humans-paladin",
-    "name": "Паладин",
+    "name": "Paladin",
     "level": 6,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 12,
     "armorClass": 18,
     "maxHp": 165,
@@ -6444,7 +6444,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Спис",
+        "name": "Spear",
         "type": "melee",
         "damageDice": "3d8+15",
         "damageType": "piercing",
@@ -6454,8 +6454,8 @@
     "abilities": [
       {
         "id": "unit-first-strike",
-        "name": "Таран",
-        "description": "Перша атака в бою завдає на 50 % більше шкоди.",
+        "name": "Ram",
+        "description": "The first attack in a battle deals 50% more damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -6476,8 +6476,8 @@
       },
       {
         "id": "unit-heal-ally",
-        "name": "Покладання рук",
-        "description": "Дія (1 раз за бій): лікує союзника і знімає негативні ефекти.",
+        "name": "Lay on Hands",
+        "description": "Action, once per battle: heals an ally and removes negative effects.",
         "trigger": {
           "event": "action"
         },
@@ -6512,9 +6512,9 @@
   },
   {
     "slug": "humans-peasant",
-    "name": "Селянин",
+    "name": "Peasant",
     "level": 1,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 11,
     "maxHp": 28,
@@ -6527,7 +6527,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вила",
+        "name": "Pitchfork",
         "type": "melee",
         "damageDice": "1d6",
         "damageType": "piercing",
@@ -6545,9 +6545,9 @@
   },
   {
     "slug": "humans-royal-griffin",
-    "name": "Королівський грифон",
+    "name": "Royal Griffin",
     "level": 4,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 15,
     "armorClass": 15,
     "maxHp": 85,
@@ -6560,7 +6560,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пазурі",
+        "name": "Talons",
         "type": "melee",
         "damageDice": "2d6+6",
         "damageType": "slashing",
@@ -6570,8 +6570,8 @@
     "abilities": [
       {
         "id": "unit-unlimited-retaliation",
-        "name": "Безмежна відсіч",
-        "description": "Відповідає на кожну атаку, а не раз за раунд.",
+        "name": "Unlimited Retaliation",
+        "description": "Retaliates against every attack, not just once per round.",
         "trigger": {
           "event": "passive"
         },
@@ -6584,8 +6584,8 @@
       },
       {
         "id": "unit-dive",
-        "name": "Пікірування",
-        "description": "Дія, перезарядка 2 раунди: злітає з поля на раунд (його не можна атакувати) і на початку свого наступного ходу падає на обрану клітинку — ×2 шкоди тому, хто там стоїть.",
+        "name": "Dive",
+        "description": "Action, recharge 2 rounds: leaves the field for a round (it cannot be attacked) and at the start of its next turn drops onto a chosen cell — ×2 damage to whoever stands there.",
         "trigger": {
           "event": "action"
         },
@@ -6606,15 +6606,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -6630,9 +6630,9 @@
   },
   {
     "slug": "humans-seraph",
-    "name": "Серафим",
+    "name": "Seraph",
     "level": 7,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 230,
@@ -6645,7 +6645,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Священний меч",
+        "name": "Holy Sword",
         "type": "melee",
         "damageDice": "4d10+18",
         "damageType": "radiant",
@@ -6655,8 +6655,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -6677,8 +6677,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Оглушення",
-        "description": "Влучання з шансом 25 % змушує ціль пропустити хід.",
+        "name": "Stun",
+        "description": "A hit has a 25% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -6699,22 +6699,22 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
     ],
     "knownSpells": [
-      "Регенерація",
-      "Праведна міць"
+      "Regeneration",
+      "Righteous Might"
     ],
     "proficiencyBonus": 5,
     "gridSize": 2,
@@ -6727,9 +6727,9 @@
   },
   {
     "slug": "humans-squire",
-    "name": "Зброєносець",
+    "name": "Squire",
     "level": 3,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 16,
     "maxHp": 64,
@@ -6742,7 +6742,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Меч",
+        "name": "Sword",
         "type": "melee",
         "damageDice": "1d8+4",
         "damageType": "slashing",
@@ -6752,8 +6752,8 @@
     "abilities": [
       {
         "id": "unit-big-shield",
-        "name": "Великий щит",
-        "description": "Дальня шкода зменшена на 30 %.",
+        "name": "Great Shield",
+        "description": "Ranged damage is reduced by 30%.",
         "trigger": {
           "event": "passive"
         },
@@ -6769,8 +6769,8 @@
       },
       {
         "id": "unit-guardian",
-        "name": "Захисник",
-        "description": "Бере на себе 30 % шкоди союзників.",
+        "name": "Defender",
+        "description": "Takes 30% of allies' damage.",
         "trigger": {
           "event": "battleStart"
         },
@@ -6797,9 +6797,9 @@
   },
   {
     "slug": "humans-swordsman",
-    "name": "Мечник",
+    "name": "Swordsman",
     "level": 3,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 8,
     "armorClass": 15,
     "maxHp": 59,
@@ -6812,7 +6812,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Меч",
+        "name": "Sword",
         "type": "melee",
         "damageDice": "1d8+3",
         "damageType": "slashing",
@@ -6822,8 +6822,8 @@
     "abilities": [
       {
         "id": "unit-big-shield",
-        "name": "Великий щит",
-        "description": "Дальня шкода зменшена на 30 %.",
+        "name": "Great Shield",
+        "description": "Ranged damage is reduced by 30%.",
         "trigger": {
           "event": "passive"
         },
@@ -6849,9 +6849,9 @@
   },
   {
     "slug": "humans-zealot",
-    "name": "Фанатик",
+    "name": "Zealot",
     "level": 5,
-    "raceId": "Люди",
+    "raceId": "Humans",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 98,
@@ -6864,7 +6864,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Священний промінь",
+        "name": "Holy Ray",
         "type": "ranged",
         "damageDice": "3d6+7",
         "damageType": "radiant",
@@ -6874,8 +6874,8 @@
     "abilities": [
       {
         "id": "unit-hatred",
-        "name": "Свята кара",
-        "description": "+25 % шкоди проти рас: Некроманти, Демони.",
+        "name": "Holy Retribution",
+        "description": "+25% damage against races: Necromancers, Demons.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -6884,8 +6884,8 @@
         "condition": {
           "type": "targetRace",
           "races": [
-            "Некроманти",
-            "Демони"
+            "Necromancers",
+            "Demons"
           ]
         },
         "effects": [
@@ -6900,8 +6900,8 @@
       },
       {
         "id": "unit-allies-aura-resistance-spell",
-        "name": "Аура опору магії",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Aura of Magic Resistance",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -6927,9 +6927,9 @@
   },
   {
     "slug": "mages-archmage",
-    "name": "Архімаг",
+    "name": "Archmage",
     "level": 4,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 10,
     "armorClass": 13,
     "maxHp": 74,
@@ -6942,7 +6942,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Посох",
+        "name": "Staff",
         "type": "ranged",
         "damageDice": "2d6+5",
         "damageType": "lightning",
@@ -6952,8 +6952,8 @@
     "abilities": [
       {
         "id": "unit-restore-slot",
-        "name": "Енергетичний канал",
-        "description": "Раз за бій: союзник відновлює слот закляття.",
+        "name": "Energy Channel",
+        "description": "Once per battle: an ally regains a spell slot.",
         "trigger": {
           "event": "action"
         },
@@ -6970,12 +6970,12 @@
       }
     ],
     "knownSpells": [
-      "Вогняна куля",
-      "Вогняна стіна",
-      "Коло зими",
-      "Ланцюгова блискавка",
-      "Метеоритний дощ",
-      "Очищення"
+      "Fireball",
+      "Fire Wall",
+      "Circle of Winter",
+      "Chain Lightning",
+      "Meteor Shower",
+      "Cleansing"
     ],
     "proficiencyBonus": 3,
     "gridSize": 1,
@@ -6988,9 +6988,9 @@
   },
   {
     "slug": "mages-battle-mage",
-    "name": "Бойовий маг",
+    "name": "Battle Mage",
     "level": 4,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 10,
     "armorClass": 13,
     "maxHp": 73,
@@ -7003,7 +7003,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Посох",
+        "name": "Staff",
         "type": "ranged",
         "damageDice": "2d6+6",
         "damageType": "lightning",
@@ -7013,8 +7013,8 @@
     "abilities": [
       {
         "id": "unit-allies-aura-resistance-spell",
-        "name": "Аура пригнічення магії",
-        "description": "Аура: діє на союзників поруч (зону обирають на початку ходу).",
+        "name": "Aura of Magic Suppression",
+        "description": "Aura: affects nearby allies (the area is chosen at the start of the turn).",
         "trigger": {
           "event": "passive"
         },
@@ -7030,8 +7030,8 @@
       },
       {
         "id": "unit-piercing-shot",
-        "name": "Наскрізний постріл",
-        "description": "Дальня атака влучає в усіх ворогів на одній лінії за ціллю.",
+        "name": "Piercing Shot",
+        "description": "The ranged attack hits all enemies in a line behind the target.",
         "trigger": {
           "event": "passive"
         },
@@ -7044,8 +7044,8 @@
       }
     ],
     "knownSpells": [
-      "Крижаний болт",
-      "Блискавка"
+      "Ice Bolt",
+      "Lightning Bolt"
     ],
     "proficiencyBonus": 3,
     "gridSize": 1,
@@ -7058,9 +7058,9 @@
   },
   {
     "slug": "mages-colossus",
-    "name": "Колос",
+    "name": "Colossus",
     "level": 7,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 10,
     "armorClass": 16,
     "maxHp": 220,
@@ -7073,7 +7073,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кулак",
+        "name": "Fist",
         "type": "melee",
         "damageDice": "4d10+16",
         "damageType": "bludgeoning",
@@ -7083,8 +7083,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -7105,8 +7105,8 @@
       },
       {
         "id": "unit-aoe-once",
-        "name": "Землетрус",
-        "description": "Раз за бій: усі вороги отримують 50 % шкоди від атаки юніта, 25 % шанс оглушення.",
+        "name": "Earthquake",
+        "description": "Once per battle: all enemies take 50% of the unit's attack damage, with a 25% chance to be stunned.",
         "trigger": {
           "event": "action"
         },
@@ -7145,9 +7145,9 @@
   },
   {
     "slug": "mages-elemental-gargoyle",
-    "name": "Гаргуля стихій",
+    "name": "Elemental Gargoyle",
     "level": 2,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 11,
     "armorClass": 14,
     "maxHp": 44,
@@ -7160,7 +7160,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кам'яні пазурі",
+        "name": "Stone Claws",
         "type": "melee",
         "damageDice": "1d8+3",
         "damageType": "slashing",
@@ -7170,8 +7170,8 @@
     "abilities": [
       {
         "id": "unit-construct",
-        "name": "Механізм",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Construct",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -7191,8 +7191,8 @@
       },
       {
         "id": "unit-chaos-vulnerability-aura",
-        "name": "Аура стихій",
-        "description": "Аура: вороги поруч отримують на 25 % більше шкоди від заклинань Хаосу.",
+        "name": "Aura of Elements",
+        "description": "Aura: nearby enemies take 25% more damage from Chaos spells.",
         "trigger": {
           "event": "passive"
         },
@@ -7203,21 +7203,21 @@
             "flag": "resistance",
             "damageType": "spell",
             "percent": -25,
-            "school": "Хаос"
+            "school": "Chaos"
           }
         ]
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -7233,9 +7233,9 @@
   },
   {
     "slug": "mages-gargoyle",
-    "name": "Гаргуля",
+    "name": "Gargoyle",
     "level": 2,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 9,
     "armorClass": 14,
     "maxHp": 41,
@@ -7248,7 +7248,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кам'яні пазурі",
+        "name": "Stone Claws",
         "type": "melee",
         "damageDice": "1d8+2",
         "damageType": "slashing",
@@ -7258,8 +7258,8 @@
     "abilities": [
       {
         "id": "unit-construct",
-        "name": "Механізм",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Construct",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -7279,8 +7279,8 @@
       },
       {
         "id": "unit-resist-fire-cold-lightning",
-        "name": "Опір стихіям",
-        "description": "Опір шкоді (вогонь, лід, блискавка) 25 %.",
+        "name": "Elemental Resistance",
+        "description": "Resistance to fire, cold and lightning damage 25%.",
         "trigger": {
           "event": "passive"
         },
@@ -7307,15 +7307,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -7331,9 +7331,9 @@
   },
   {
     "slug": "mages-genie",
-    "name": "Джин",
+    "name": "Genie",
     "level": 5,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 12,
     "armorClass": 15,
     "maxHp": 107,
@@ -7346,7 +7346,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Магічний удар",
+        "name": "Magic Strike",
         "type": "melee",
         "damageDice": "2d10+8",
         "damageType": "force",
@@ -7356,8 +7356,8 @@
     "abilities": [
       {
         "id": "unit-debuff-attackBonus",
-        "name": "Прокляття",
-        "description": "Влучання з шансом 25 % знижує атаку цілі на 2 на 2 раунди.",
+        "name": "Curse",
+        "description": "A hit has a 25% chance to lower the target's attack by 2 for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -7379,15 +7379,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -7403,9 +7403,9 @@
   },
   {
     "slug": "mages-genie-sultan",
-    "name": "Джин-султан",
+    "name": "Genie Sultan",
     "level": 5,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 12,
     "armorClass": 16,
     "maxHp": 119,
@@ -7418,7 +7418,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Магічний удар",
+        "name": "Magic Strike",
         "type": "melee",
         "damageDice": "2d10+9",
         "damageType": "force",
@@ -7428,8 +7428,8 @@
     "abilities": [
       {
         "id": "unit-debuff-attackBonus",
-        "name": "Прокляття",
-        "description": "Влучання з шансом 25 % знижує атаку цілі на 2 на 2 раунди.",
+        "name": "Curse",
+        "description": "A hit has a 25% chance to lower the target's attack by 2 for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -7451,8 +7451,8 @@
       },
       {
         "id": "unit-buff-attackBonus",
-        "name": "Благословення",
-        "description": "Дія: +2 на атаку союзнику на 2 раунди.",
+        "name": "Benediction",
+        "description": "Action: an ally gains +2 to attack for 2 rounds.",
         "trigger": {
           "event": "action"
         },
@@ -7470,15 +7470,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -7494,9 +7494,9 @@
   },
   {
     "slug": "mages-genie-vizier",
-    "name": "Джин-візир",
+    "name": "Genie Vizier",
     "level": 5,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 12,
     "armorClass": 16,
     "maxHp": 117,
@@ -7509,7 +7509,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Магічний удар",
+        "name": "Magic Strike",
         "type": "melee",
         "damageDice": "2d10+9",
         "damageType": "force",
@@ -7519,8 +7519,8 @@
     "abilities": [
       {
         "id": "unit-wheel-of-fortune",
-        "name": "Колесо фортуни",
-        "description": "Влучання, раз за раунд: випадково або баф собі, або дебаф цілі на 1 раунд.",
+        "name": "Wheel of Fortune",
+        "description": "On a hit, once per round: randomly either a buff to itself or a debuff to the target for 1 round.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -7574,15 +7574,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -7598,9 +7598,9 @@
   },
   {
     "slug": "mages-golem",
-    "name": "Голем",
+    "name": "Golem",
     "level": 3,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 7,
     "armorClass": 14,
     "maxHp": 62,
@@ -7613,7 +7613,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кулак",
+        "name": "Fist",
         "type": "melee",
         "damageDice": "1d10+3",
         "damageType": "bludgeoning",
@@ -7623,8 +7623,8 @@
     "abilities": [
       {
         "id": "unit-construct",
-        "name": "Механізм",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Construct",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -7644,8 +7644,8 @@
       },
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 50 %",
-        "description": "Шкода від заклять зменшена на 50 %.",
+        "name": "Magic Resistance 50%",
+        "description": "Spell damage is reduced by 50%.",
         "trigger": {
           "event": "passive"
         },
@@ -7670,9 +7670,9 @@
   },
   {
     "slug": "mages-gremlin",
-    "name": "Гремлін",
+    "name": "Gremlin",
     "level": 1,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 7,
     "armorClass": 12,
     "maxHp": 25,
@@ -7685,7 +7685,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Гайковий пістолет",
+        "name": "Wrench Gun",
         "type": "ranged",
         "damageDice": "1d6",
         "damageType": "piercing",
@@ -7703,9 +7703,9 @@
   },
   {
     "slug": "mages-gremlin-saboteur",
-    "name": "Гремлін-саботажник",
+    "name": "Gremlin Saboteur",
     "level": 1,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 12,
     "armorClass": 13,
     "maxHp": 31,
@@ -7718,7 +7718,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Гайковий пістолет",
+        "name": "Wrench Gun",
         "type": "ranged",
         "damageDice": "1d6+1",
         "damageType": "piercing",
@@ -7728,8 +7728,8 @@
     "abilities": [
       {
         "id": "unit-disable-disable_ranged_attacks",
-        "name": "Саботаж",
-        "description": "Влучання з шансом 20 % забороняє цілі дальні атаки на 1 раунд.",
+        "name": "Sabotage",
+        "description": "A hit has a 20% chance to forbid the target from making ranged attacks for 1 round.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -7760,9 +7760,9 @@
   },
   {
     "slug": "mages-mage",
-    "name": "Маг",
+    "name": "Mage",
     "level": 4,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 10,
     "armorClass": 12,
     "maxHp": 66,
@@ -7775,7 +7775,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Посох",
+        "name": "Staff",
         "type": "ranged",
         "damageDice": "2d6+4",
         "damageType": "lightning",
@@ -7783,11 +7783,11 @@
       }
     ],
     "knownSpells": [
-      "Потойбічна стріла",
-      "Кам'яні шипи",
-      "Крижаний болт",
-      "Блискавка",
-      "Прикликання елементаля: Повітря"
+      "Eldritch Arrow",
+      "Stone Spikes",
+      "Ice Bolt",
+      "Lightning Bolt",
+      "Summon Air Elemental"
     ],
     "proficiencyBonus": 3,
     "gridSize": 1,
@@ -7800,9 +7800,9 @@
   },
   {
     "slug": "mages-magnetic-golem",
-    "name": "Магнетичний голем",
+    "name": "Magnetic Golem",
     "level": 3,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 9,
     "armorClass": 15,
     "maxHp": 64,
@@ -7815,7 +7815,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кулак",
+        "name": "Fist",
         "type": "melee",
         "damageDice": "1d10+4",
         "damageType": "bludgeoning",
@@ -7825,8 +7825,8 @@
     "abilities": [
       {
         "id": "unit-construct",
-        "name": "Механізм",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Construct",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -7846,8 +7846,8 @@
       },
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 50 %",
-        "description": "Шкода від заклять зменшена на 50 %.",
+        "name": "Magic Resistance 50%",
+        "description": "Spell damage is reduced by 50%.",
         "trigger": {
           "event": "passive"
         },
@@ -7862,8 +7862,8 @@
       },
       {
         "id": "unit-chaos-absorb",
-        "name": "Магнітне поле",
-        "description": "Лікується на 50 % шкоди, яку по ньому завдають заклинання Хаосу.",
+        "name": "Magnetic Field",
+        "description": "Is healed for 50% of the damage Chaos spells deal to it.",
         "trigger": {
           "event": "passive"
         },
@@ -7871,7 +7871,7 @@
           {
             "kind": "flag",
             "flag": "spellAbsorb",
-            "school": "Хаос",
+            "school": "Chaos",
             "percent": 50
           }
         ]
@@ -7888,9 +7888,9 @@
   },
   {
     "slug": "mages-obsidian-gargoyle",
-    "name": "Обсидіанова гаргуля",
+    "name": "Obsidian Gargoyle",
     "level": 2,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 47,
@@ -7903,7 +7903,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кам'яні пазурі",
+        "name": "Stone Claws",
         "type": "melee",
         "damageDice": "1d8+3",
         "damageType": "slashing",
@@ -7913,8 +7913,8 @@
     "abilities": [
       {
         "id": "unit-construct",
-        "name": "Механізм",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Construct",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -7934,8 +7934,8 @@
       },
       {
         "id": "unit-resist-fire-cold-lightning",
-        "name": "Опір стихіям",
-        "description": "Опір шкоді (вогонь, лід, блискавка) 50 %.",
+        "name": "Elemental Resistance",
+        "description": "Resistance to fire, cold and lightning damage 50%.",
         "trigger": {
           "event": "passive"
         },
@@ -7962,15 +7962,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -7986,9 +7986,9 @@
   },
   {
     "slug": "mages-rakshasa-kshatriya",
-    "name": "Ракшас-кшатрій",
+    "name": "Rakshasa Kshatriya",
     "level": 6,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 8,
     "armorClass": 17,
     "maxHp": 165,
@@ -8001,7 +8001,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вихор клинків",
+        "name": "Whirl of Blades",
         "type": "melee",
         "damageDice": "3d8+15",
         "damageType": "slashing",
@@ -8012,8 +8012,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Вихор клинків",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Whirl of Blades",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -8027,8 +8027,8 @@
       },
       {
         "id": "unit-onslaught",
-        "name": "Натиск",
-        "description": "Бонусна дія: +3 до ініціативи і +2 до атаки на 2 раунди. Перезарядка 3 раунди.",
+        "name": "Onslaught",
+        "description": "Bonus action: +3 to initiative and +2 to attack for 2 rounds. Recharge 3 rounds.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -8068,9 +8068,9 @@
   },
   {
     "slug": "mages-rakshasa-princess",
-    "name": "Принцеса ракшасів",
+    "name": "Rakshasa Princess",
     "level": 6,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 9,
     "armorClass": 16,
     "maxHp": 148,
@@ -8083,7 +8083,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Закривлені клинки",
+        "name": "Curved Blades",
         "type": "melee",
         "damageDice": "3d8+13",
         "damageType": "slashing",
@@ -8094,8 +8094,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Закривлені клинки",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Curved Blades",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -8109,8 +8109,8 @@
       },
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -8135,9 +8135,9 @@
   },
   {
     "slug": "mages-rakshasa-raja",
-    "name": "Раджа ракшасів",
+    "name": "Rakshasa Raja",
     "level": 6,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 8,
     "armorClass": 17,
     "maxHp": 165,
@@ -8150,7 +8150,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Закривлені клинки",
+        "name": "Curved Blades",
         "type": "melee",
         "damageDice": "3d8+15",
         "damageType": "slashing",
@@ -8161,8 +8161,8 @@
     "abilities": [
       {
         "id": "unit-falloff",
-        "name": "Закривлені клинки",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Curved Blades",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -8176,8 +8176,8 @@
       },
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -8192,8 +8192,8 @@
       },
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -8216,9 +8216,9 @@
   },
   {
     "slug": "mages-senior-gremlin",
-    "name": "Старший гремлін",
+    "name": "Senior Gremlin",
     "level": 1,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 11,
     "armorClass": 13,
     "maxHp": 31,
@@ -8231,7 +8231,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Гайковий пістолет",
+        "name": "Wrench Gun",
         "type": "ranged",
         "damageDice": "1d6+1",
         "damageType": "piercing",
@@ -8241,8 +8241,8 @@
     "abilities": [
       {
         "id": "unit-heal-ally",
-        "name": "Ремонт",
-        "description": "Бонусна дія: лікує союзника (Механізм).",
+        "name": "Repair",
+        "description": "Bonus action: heals an ally (Construct).",
         "trigger": {
           "event": "bonusAction"
         },
@@ -8266,9 +8266,9 @@
   },
   {
     "slug": "mages-steel-golem",
-    "name": "Сталевий голем",
+    "name": "Steel Golem",
     "level": 3,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 7,
     "armorClass": 15,
     "maxHp": 68,
@@ -8281,7 +8281,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кулак",
+        "name": "Fist",
         "type": "melee",
         "damageDice": "1d10+4",
         "damageType": "bludgeoning",
@@ -8291,8 +8291,8 @@
     "abilities": [
       {
         "id": "unit-construct",
-        "name": "Механізм",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Construct",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -8312,8 +8312,8 @@
       },
       {
         "id": "unit-magic-resist",
-        "name": "Опір магії 75 %",
-        "description": "Шкода від заклять зменшена на 75 %.",
+        "name": "Magic Resistance 75%",
+        "description": "Spell damage is reduced by 75%.",
         "trigger": {
           "event": "passive"
         },
@@ -8328,8 +8328,8 @@
       },
       {
         "id": "unit-unlimited-retaliation",
-        "name": "Безмежна відсіч",
-        "description": "Відповідає на кожну атаку, а не раз за раунд.",
+        "name": "Unlimited Retaliation",
+        "description": "Retaliates against every attack, not just once per round.",
         "trigger": {
           "event": "passive"
         },
@@ -8352,9 +8352,9 @@
   },
   {
     "slug": "mages-storm-lord",
-    "name": "Повелитель бурі",
+    "name": "Storm Lord",
     "level": 7,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 10,
     "armorClass": 16,
     "maxHp": 240,
@@ -8367,7 +8367,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Блискавка",
+        "name": "Lightning Bolt",
         "type": "ranged",
         "damageDice": "4d10+18",
         "damageType": "lightning",
@@ -8377,8 +8377,8 @@
     "abilities": [
       {
         "id": "unit-aoe-once",
-        "name": "Виклик блискавки",
-        "description": "Раз за бій: до 3 цілей отримують 50 % шкоди від атаки юніта, 25 % шанс оглушення.",
+        "name": "Call Lightning",
+        "description": "Once per battle: up to 3 targets take 50% of the unit's attack damage, with a 25% chance to be stunned.",
         "trigger": {
           "event": "action"
         },
@@ -8419,9 +8419,9 @@
   },
   {
     "slug": "mages-titan",
-    "name": "Титан",
+    "name": "Titan",
     "level": 7,
-    "raceId": "Маги",
+    "raceId": "Mages",
     "initiative": 10,
     "armorClass": 17,
     "maxHp": 250,
@@ -8434,7 +8434,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Блискавка",
+        "name": "Lightning Bolt",
         "type": "ranged",
         "damageDice": "4d10+20",
         "damageType": "lightning",
@@ -8444,8 +8444,8 @@
     "abilities": [
       {
         "id": "unit-bravery",
-        "name": "Сміливість",
-        "description": "Імунітет до страху, мораль не нижча за 0.",
+        "name": "Courage",
+        "description": "Immune to fear; morale never drops below 0.",
         "trigger": {
           "event": "passive"
         },
@@ -8476,9 +8476,9 @@
   },
   {
     "slug": "necromancers-arcane-ghost",
-    "name": "Магічний привид",
+    "name": "Arcane Ghost",
     "level": 3,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 9,
     "armorClass": 13,
     "maxHp": 52,
@@ -8491,7 +8491,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Примарний промінь",
+        "name": "Ghostly Ray",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "necrotic",
@@ -8501,8 +8501,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -8522,8 +8522,8 @@
       },
       {
         "id": "unit-incorporeal",
-        "name": "Безтілесний",
-        "description": "Атакувальники б'ють з недоліком.",
+        "name": "Incorporeal",
+        "description": "Attackers strike with disadvantage.",
         "trigger": {
           "event": "passive"
         },
@@ -8536,8 +8536,8 @@
       },
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -8550,15 +8550,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -8574,9 +8574,9 @@
   },
   {
     "slug": "necromancers-archlich",
-    "name": "Архіліч",
+    "name": "Archlich",
     "level": 5,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 100,
@@ -8589,7 +8589,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Хмара смерті",
+        "name": "Cloud of Death",
         "type": "ranged",
         "damageDice": "3d6+7",
         "damageType": "necrotic",
@@ -8600,8 +8600,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -8621,8 +8621,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Хмара смерті",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Cloud of Death",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -8636,8 +8636,8 @@
       }
     ],
     "knownSpells": [
-      "Немічність",
-      "Страждання"
+      "Frailty",
+      "Suffering"
     ],
     "proficiencyBonus": 4,
     "gridSize": 2,
@@ -8650,9 +8650,9 @@
   },
   {
     "slug": "necromancers-banshee",
-    "name": "Баньші",
+    "name": "Banshee",
     "level": 6,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 165,
@@ -8665,7 +8665,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Крижані кігті",
+        "name": "Frost Claws",
         "type": "melee",
         "damageDice": "3d8+11",
         "damageType": "necrotic",
@@ -8675,8 +8675,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -8696,8 +8696,8 @@
       },
       {
         "id": "unit-wail",
-        "name": "Виття",
-        "description": "Бонусна дія, раз за бій: вороги −2 до моралі на 2 раунди, кожен з шансом 25 % пропускає хід.",
+        "name": "Howl",
+        "description": "Bonus action, once per battle: enemies get −2 to morale for 2 rounds, and each has a 25% chance to skip its turn.",
         "trigger": {
           "event": "bonusAction"
         },
@@ -8727,15 +8727,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -8751,9 +8751,9 @@
   },
   {
     "slug": "necromancers-bone-dragon",
-    "name": "Костяний дракон",
+    "name": "Bone Dragon",
     "level": 7,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 15,
     "maxHp": 220,
@@ -8766,7 +8766,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кістяні пазурі",
+        "name": "Bone Claws",
         "type": "melee",
         "damageDice": "4d10+16",
         "damageType": "slashing",
@@ -8776,8 +8776,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -8797,8 +8797,8 @@
       },
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -8813,15 +8813,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -8837,9 +8837,9 @@
   },
   {
     "slug": "necromancers-death-herald",
-    "name": "Вісник смерті",
+    "name": "Death Herald",
     "level": 6,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 17,
     "maxHp": 171,
@@ -8852,7 +8852,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Коса смерті",
+        "name": "Scythe of Death",
         "type": "melee",
         "damageDice": "3d8+11",
         "damageType": "necrotic",
@@ -8862,8 +8862,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -8883,8 +8883,8 @@
       },
       {
         "id": "unit-death-blow",
-        "name": "Смертельний дотик",
-        "description": "Атака з шансом 20 % завдає подвійної шкоди.",
+        "name": "Deadly Touch",
+        "description": "An attack has a 20% chance to deal double damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -8905,8 +8905,8 @@
       },
       {
         "id": "unit-finger-of-death",
-        "name": "Палець смерті",
-        "description": "Дія, раз за бій: 150 % атаки без кидка по одному ворогу.",
+        "name": "Finger of Death",
+        "description": "Action, once per battle: 150% of the attack against one enemy, with no roll.",
         "trigger": {
           "event": "action"
         },
@@ -8937,9 +8937,9 @@
   },
   {
     "slug": "necromancers-elder-vampire",
-    "name": "Вищий вампір",
+    "name": "Elder Vampire",
     "level": 4,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 85,
@@ -8952,7 +8952,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вампірячі кігті",
+        "name": "Vampire Claws",
         "type": "melee",
         "damageDice": "2d6+6",
         "damageType": "slashing",
@@ -8962,8 +8962,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -8983,8 +8983,8 @@
       },
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -8997,8 +8997,8 @@
       },
       {
         "id": "unit-life-drain",
-        "name": "Висмоктування життя",
-        "description": "Лікується на 50 % завданої шкоди.",
+        "name": "Life Drain",
+        "description": "Heals for 50% of the damage dealt.",
         "trigger": {
           "event": "passive"
         },
@@ -9022,9 +9022,9 @@
   },
   {
     "slug": "necromancers-ghost",
-    "name": "Привид",
+    "name": "Ghost",
     "level": 3,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 12,
     "maxHp": 49,
@@ -9037,7 +9037,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Крижаний дотик",
+        "name": "Icy Touch",
         "type": "melee",
         "damageDice": "2d6+1",
         "damageType": "necrotic",
@@ -9047,8 +9047,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9068,8 +9068,8 @@
       },
       {
         "id": "unit-incorporeal",
-        "name": "Безтілесний",
-        "description": "Атакувальники б'ють з недоліком.",
+        "name": "Incorporeal",
+        "description": "Attackers strike with disadvantage.",
         "trigger": {
           "event": "passive"
         },
@@ -9082,15 +9082,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -9106,9 +9106,9 @@
   },
   {
     "slug": "necromancers-ghost-warrior",
-    "name": "Привид-воїн",
+    "name": "Ghost Warrior",
     "level": 3,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 13,
     "maxHp": 54,
@@ -9121,7 +9121,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Примарний клинок",
+        "name": "Ghostly Blade",
         "type": "melee",
         "damageDice": "2d6+2",
         "damageType": "necrotic",
@@ -9131,8 +9131,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9152,8 +9152,8 @@
       },
       {
         "id": "unit-incorporeal",
-        "name": "Безтілесний",
-        "description": "Атакувальники б'ють з недоліком.",
+        "name": "Incorporeal",
+        "description": "Attackers strike with disadvantage.",
         "trigger": {
           "event": "passive"
         },
@@ -9166,8 +9166,8 @@
       },
       {
         "id": "unit-drain-mana",
-        "name": "Крадіжка мани",
-        "description": "Влучання: ціль втрачає 1 слот закляття.",
+        "name": "Mana Theft",
+        "description": "On a hit: the target loses 1 spell slot.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -9182,15 +9182,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -9206,9 +9206,9 @@
   },
   {
     "slug": "necromancers-high-lich",
-    "name": "Верховний ліч",
+    "name": "High Lich",
     "level": 5,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 15,
     "maxHp": 98,
@@ -9221,7 +9221,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Хмара смерті",
+        "name": "Cloud of Death",
         "type": "ranged",
         "damageDice": "3d6+7",
         "damageType": "necrotic",
@@ -9232,8 +9232,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9253,8 +9253,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Хмара смерті",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Cloud of Death",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -9268,8 +9268,8 @@
       },
       {
         "id": "unit-raise-on-kill",
-        "name": "Підняття мертвих",
-        "description": "Вбивство прикликає союзного юніта, раз за раунд.",
+        "name": "Raise Dead",
+        "description": "A kill summons an allied unit, once per round.",
         "trigger": {
           "event": "kill",
           "role": "killer"
@@ -9297,9 +9297,9 @@
   },
   {
     "slug": "necromancers-lich",
-    "name": "Ліч",
+    "name": "Lich",
     "level": 5,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 90,
@@ -9312,7 +9312,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Хмара смерті",
+        "name": "Cloud of Death",
         "type": "ranged",
         "damageDice": "3d6+5",
         "damageType": "necrotic",
@@ -9323,8 +9323,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9344,8 +9344,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Хмара смерті",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Cloud of Death",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -9369,9 +9369,9 @@
   },
   {
     "slug": "necromancers-plague-zombie",
-    "name": "Чумний зомбі",
+    "name": "Plague Zombie",
     "level": 2,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 7,
     "armorClass": 10,
     "maxHp": 55,
@@ -9384,7 +9384,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Заразні кігті",
+        "name": "Infectious Claws",
         "type": "melee",
         "damageDice": "1d6+2",
         "damageType": "slashing",
@@ -9394,8 +9394,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9415,8 +9415,8 @@
       },
       {
         "id": "unit-undying",
-        "name": "Нежива стійкість",
-        "description": "Раз за бій смертельний удар лишає юніта з 1 HP.",
+        "name": "Undead Fortitude",
+        "description": "Once per battle, a lethal blow leaves the unit with 1 HP.",
         "trigger": {
           "event": "lethalDamage"
         },
@@ -9434,8 +9434,8 @@
       },
       {
         "id": "unit-debuff-attackBonus",
-        "name": "Чума",
-        "description": "Влучання з шансом 25 % знижує атаку цілі на 2 на 2 раунди.",
+        "name": "Plague",
+        "description": "A hit has a 25% chance to lower the target's attack by 2 for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -9467,9 +9467,9 @@
   },
   {
     "slug": "necromancers-rotting-zombie",
-    "name": "Гниючий зомбі",
+    "name": "Rotting Zombie",
     "level": 2,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 7,
     "armorClass": 10,
     "maxHp": 55,
@@ -9482,7 +9482,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Гнилі кулаки",
+        "name": "Rotten Fists",
         "type": "melee",
         "damageDice": "1d8+1",
         "damageType": "bludgeoning",
@@ -9492,8 +9492,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9513,8 +9513,8 @@
       },
       {
         "id": "unit-undying",
-        "name": "Нежива стійкість",
-        "description": "Раз за бій смертельний удар лишає юніта з 1 HP.",
+        "name": "Undead Fortitude",
+        "description": "Once per battle, a lethal blow leaves the unit with 1 HP.",
         "trigger": {
           "event": "lethalDamage"
         },
@@ -9532,8 +9532,8 @@
       },
       {
         "id": "unit-rot-aura",
-        "name": "Аура гнилі",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до атаки.",
+        "name": "Aura of Rot",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to attack.",
         "trigger": {
           "event": "passive"
         },
@@ -9558,9 +9558,9 @@
   },
   {
     "slug": "necromancers-skeleton",
-    "name": "Скелет",
+    "name": "Skeleton",
     "level": 1,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 14,
     "maxHp": 28,
@@ -9573,7 +9573,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Іржавий меч",
+        "name": "Rusty Sword",
         "type": "melee",
         "damageDice": "1d6",
         "damageType": "slashing",
@@ -9583,8 +9583,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9614,9 +9614,9 @@
   },
   {
     "slug": "necromancers-skeleton-archer",
-    "name": "Скелет-лучник",
+    "name": "Skeleton Archer",
     "level": 1,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 13,
     "maxHp": 28,
@@ -9629,7 +9629,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кістяний лук",
+        "name": "Bone Bow",
         "type": "ranged",
         "damageDice": "1d6+1",
         "damageType": "piercing",
@@ -9639,8 +9639,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9670,9 +9670,9 @@
   },
   {
     "slug": "necromancers-skeleton-warrior",
-    "name": "Скелет-воїн",
+    "name": "Skeleton Warrior",
     "level": 1,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 10,
     "armorClass": 16,
     "maxHp": 36,
@@ -9685,7 +9685,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Старий меч",
+        "name": "Old Sword",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "slashing",
@@ -9695,8 +9695,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9716,8 +9716,8 @@
       },
       {
         "id": "unit-big-shield",
-        "name": "Великий щит",
-        "description": "Дальня шкода зменшена на 30 %.",
+        "name": "Great Shield",
+        "description": "Ranged damage is reduced by 30%.",
         "trigger": {
           "event": "passive"
         },
@@ -9743,9 +9743,9 @@
   },
   {
     "slug": "necromancers-sorrow-dragon",
-    "name": "Дракон скорботи",
+    "name": "Sorrow Dragon",
     "level": 7,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 245,
@@ -9758,7 +9758,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Пазурі скорботи",
+        "name": "Claws of Sorrow",
         "type": "melee",
         "damageDice": "4d10+20",
         "damageType": "necrotic",
@@ -9768,8 +9768,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9789,8 +9789,8 @@
       },
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -9805,8 +9805,8 @@
       },
       {
         "id": "unit-death-gaze",
-        "name": "Смертельний погляд",
-        "description": "Влучання з шансом 15 %: ціль втрачає 20 % максимального HP.",
+        "name": "Deadly Gaze",
+        "description": "A hit has a 15% chance to make the target lose 20% of its maximum HP.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -9828,15 +9828,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -9852,9 +9852,9 @@
   },
   {
     "slug": "necromancers-spectral-dragon",
-    "name": "Драко-привид",
+    "name": "Spectral Dragon",
     "level": 7,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 15,
     "maxHp": 240,
@@ -9867,7 +9867,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Примарні пазурі",
+        "name": "Spectral Claws",
         "type": "melee",
         "damageDice": "4d10+18",
         "damageType": "necrotic",
@@ -9877,8 +9877,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -9898,8 +9898,8 @@
       },
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -9914,8 +9914,8 @@
       },
       {
         "id": "unit-enemies-round-damage",
-        "name": "Отруйна аура",
-        "description": "На початку раунду кожен ворог отримує шкоду 10 % від атаки юніта.",
+        "name": "Poison Aura",
+        "description": "At the start of each round, every enemy takes damage equal to 10% of the unit's attack.",
         "trigger": {
           "event": "roundStart"
         },
@@ -9932,15 +9932,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -9956,9 +9956,9 @@
   },
   {
     "slug": "necromancers-vampire",
-    "name": "Вампір",
+    "name": "Vampire",
     "level": 4,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 15,
     "maxHp": 77,
@@ -9971,7 +9971,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вампірячі кігті",
+        "name": "Vampire Claws",
         "type": "melee",
         "damageDice": "2d6+5",
         "damageType": "slashing",
@@ -9981,8 +9981,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -10002,8 +10002,8 @@
       },
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -10026,9 +10026,9 @@
   },
   {
     "slug": "necromancers-vampire-prince",
-    "name": "Принц-вампір",
+    "name": "Vampire Prince",
     "level": 4,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 81,
@@ -10041,7 +10041,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вампірячі кігті",
+        "name": "Vampire Claws",
         "type": "melee",
         "damageDice": "2d6+6",
         "damageType": "slashing",
@@ -10051,8 +10051,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -10072,8 +10072,8 @@
       },
       {
         "id": "unit-no-retaliation",
-        "name": "Без відповіді",
-        "description": "Ціль не відповідає на атаку цього юніта.",
+        "name": "No Retaliation",
+        "description": "The target does not retaliate against this unit's attack.",
         "trigger": {
           "event": "passive"
         },
@@ -10086,8 +10086,8 @@
       },
       {
         "id": "unit-stun",
-        "name": "Паралізація",
-        "description": "Влучання з шансом 20 % змушує ціль пропустити хід.",
+        "name": "Paralysis",
+        "description": "A hit has a 20% chance to make the target skip its turn.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -10118,9 +10118,9 @@
   },
   {
     "slug": "necromancers-wraith",
-    "name": "Умертвія",
+    "name": "Wraith",
     "level": 6,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 11,
     "armorClass": 16,
     "maxHp": 154,
@@ -10133,7 +10133,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Дотик смерті",
+        "name": "Touch of Death",
         "type": "melee",
         "damageDice": "3d8+9",
         "damageType": "necrotic",
@@ -10143,8 +10143,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -10164,8 +10164,8 @@
       },
       {
         "id": "unit-death-blow",
-        "name": "Смертельний дотик",
-        "description": "Атака з шансом 20 % завдає подвійної шкоди.",
+        "name": "Deadly Touch",
+        "description": "An attack has a 20% chance to deal double damage.",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -10196,9 +10196,9 @@
   },
   {
     "slug": "necromancers-zombie",
-    "name": "Зомбі",
+    "name": "Zombie",
     "level": 2,
-    "raceId": "Некроманти",
+    "raceId": "Necromancers",
     "initiative": 6,
     "armorClass": 10,
     "maxHp": 48,
@@ -10211,7 +10211,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Удар кулаками",
+        "name": "Fist Strike",
         "type": "melee",
         "damageDice": "1d6+1",
         "damageType": "bludgeoning",
@@ -10221,8 +10221,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -10242,8 +10242,8 @@
       },
       {
         "id": "unit-undying",
-        "name": "Нежива стійкість",
-        "description": "Раз за бій смертельний удар лишає юніта з 1 HP.",
+        "name": "Undead Fortitude",
+        "description": "Once per battle, a lethal blow leaves the unit with 1 HP.",
         "trigger": {
           "event": "lethalDamage"
         },
@@ -10271,7 +10271,7 @@
   },
   {
     "slug": "neutral-air-elemental",
-    "name": "Елементаль повітря",
+    "name": "Air Elemental",
     "level": 4,
     "initiative": 19,
     "armorClass": 18,
@@ -10285,7 +10285,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Удар блискавки",
+        "name": "Lightning Strike",
         "type": "melee",
         "damageDice": "2d6",
         "damageType": "lightning",
@@ -10295,8 +10295,8 @@
     "abilities": [
       {
         "id": "unit-elemental",
-        "name": "Елементаль",
-        "description": "Ігнорує мораль, імунітет до страху, імунітет до блискавки.",
+        "name": "Elemental",
+        "description": "Ignores morale; immune to fear; immune to lightning.",
         "trigger": {
           "event": "passive"
         },
@@ -10322,8 +10322,8 @@
       },
       {
         "id": "unit-guaranteed-hit",
-        "name": "Гарантоване влучання",
-        "description": "Атаки цього юніта завжди влучають.",
+        "name": "Guaranteed Hit",
+        "description": "This unit's attacks always hit.",
         "trigger": {
           "event": "passive"
         },
@@ -10336,15 +10336,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -10367,7 +10367,7 @@
   },
   {
     "slug": "neutral-death-avatar",
-    "name": "Аватар Смерті",
+    "name": "Avatar of Death",
     "level": 7,
     "initiative": 16,
     "armorClass": 15,
@@ -10381,7 +10381,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Дотик смерті",
+        "name": "Touch of Death",
         "type": "melee",
         "damageDice": "4d10+18",
         "damageType": "necrotic",
@@ -10391,8 +10391,8 @@
     "abilities": [
       {
         "id": "unit-undead",
-        "name": "Нежить",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Undead",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -10412,8 +10412,8 @@
       },
       {
         "id": "unit-fear-aura",
-        "name": "Аура страху",
-        "description": "Аура: вороги поруч (зону обирають на початку ходу) отримують −1 до моралі.",
+        "name": "Aura of Fear",
+        "description": "Aura: nearby enemies (the area is chosen at the start of the turn) get −1 to morale.",
         "trigger": {
           "event": "passive"
         },
@@ -10428,8 +10428,8 @@
       },
       {
         "id": "unit-reaper",
-        "name": "Жнець",
-        "description": "Влучання з шансом 10 %: ціль втрачає 25 % максимального HP.",
+        "name": "Reaper",
+        "description": "A hit has a 10% chance to make the target lose 25% of its maximum HP.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -10451,8 +10451,8 @@
       },
       {
         "id": "unit-exhaustion",
-        "name": "Виснаження",
-        "description": "Влучання: шкода цілі знижена на 15 % на 2 раунди.",
+        "name": "Exhaustion",
+        "description": "On a hit: the target's damage is reduced by 15% for 2 rounds.",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -10473,15 +10473,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -10497,7 +10497,7 @@
   },
   {
     "slug": "neutral-earth-elemental",
-    "name": "Елементаль землі",
+    "name": "Earth Elemental",
     "level": 4,
     "initiative": 9,
     "armorClass": 16,
@@ -10511,7 +10511,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Кам'яний кулак",
+        "name": "Stone Fist",
         "type": "melee",
         "damageDice": "2d8",
         "damageType": "bludgeoning",
@@ -10521,8 +10521,8 @@
     "abilities": [
       {
         "id": "unit-elemental",
-        "name": "Елементаль",
-        "description": "Ігнорує мораль, імунітет до страху.",
+        "name": "Elemental",
+        "description": "Ignores morale; immune to fear.",
         "trigger": {
           "event": "passive"
         },
@@ -10542,8 +10542,8 @@
       },
       {
         "id": "unit-magic-immunity",
-        "name": "Повний імунітет до магії",
-        "description": "Закляття не діють на цей юніт.",
+        "name": "Full Magic Immunity",
+        "description": "Spells do not affect this unit.",
         "trigger": {
           "event": "passive"
         },
@@ -10556,8 +10556,8 @@
       },
       {
         "id": "unit-unlimited-retaliation",
-        "name": "Безмежна відсіч",
-        "description": "Відповідає на кожну атаку, а не раз за раунд.",
+        "name": "Unlimited Retaliation",
+        "description": "Retaliates against every attack, not just once per round.",
         "trigger": {
           "event": "passive"
         },
@@ -10570,8 +10570,8 @@
       },
       {
         "id": "unit-physical-resist-physical",
-        "name": "Опір фізичній шкоді",
-        "description": "Фізична шкода зменшена на 25 %.",
+        "name": "Physical Resistance",
+        "description": "Physical damage is reduced by 25%.",
         "trigger": {
           "event": "passive"
         },
@@ -10603,7 +10603,7 @@
   },
   {
     "slug": "neutral-fire-elemental",
-    "name": "Елементаль вогню",
+    "name": "Fire Elemental",
     "level": 4,
     "initiative": 13,
     "armorClass": 14,
@@ -10617,7 +10617,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Полум'яний удар",
+        "name": "Flame Strike",
         "type": "melee",
         "damageDice": "2d6",
         "damageType": "fire",
@@ -10627,8 +10627,8 @@
     "abilities": [
       {
         "id": "unit-elemental",
-        "name": "Елементаль",
-        "description": "Ігнорує мораль, імунітет до страху, імунітет до вогню, вразливість до холоду (×2).",
+        "name": "Elemental",
+        "description": "Ignores morale; immune to fear; immune to fire; vulnerable to cold (×2).",
         "trigger": {
           "event": "passive"
         },
@@ -10660,8 +10660,8 @@
       },
       {
         "id": "unit-retaliate-fire",
-        "name": "Вогняний щит",
-        "description": "Атакувальник у ближньому бою отримує 25 % завданої шкоди (вогонь).",
+        "name": "Fire Shield",
+        "description": "A melee attacker takes 25% of the damage it deals as fire damage.",
         "trigger": {
           "event": "hit",
           "role": "target",
@@ -10698,7 +10698,7 @@
   },
   {
     "slug": "neutral-phoenix",
-    "name": "Фенікс",
+    "name": "Phoenix",
     "level": 7,
     "initiative": 19,
     "armorClass": 16,
@@ -10712,7 +10712,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Вогняні кігті",
+        "name": "Flaming Claws",
         "type": "melee",
         "damageDice": "2d10",
         "damageType": "fire",
@@ -10723,8 +10723,8 @@
     "abilities": [
       {
         "id": "unit-elemental",
-        "name": "Елементаль",
-        "description": "Ігнорує мораль, імунітет до страху, імунітет до вогню, вразливість до холоду (×2).",
+        "name": "Elemental",
+        "description": "Ignores morale; immune to fear; immune to fire; vulnerable to cold (×2).",
         "trigger": {
           "event": "passive"
         },
@@ -10756,8 +10756,8 @@
       },
       {
         "id": "unit-falloff",
-        "name": "Вогняний подих",
-        "description": "Атакує кілька цілей; кожна наступна отримує 50 % шкоди.",
+        "name": "Fire Breath",
+        "description": "Attacks multiple targets; each subsequent target takes 50% damage.",
         "trigger": {
           "event": "passive"
         },
@@ -10771,8 +10771,8 @@
       },
       {
         "id": "unit-rebirth",
-        "name": "Відродження",
-        "description": "Раз за бій замість загибелі спалахує полум'ям і відроджується з 50 % максимального HP.",
+        "name": "Rebirth",
+        "description": "Once per battle, instead of dying, bursts into flame and is reborn with 50% of its maximum HP.",
         "trigger": {
           "event": "lethalDamage"
         },
@@ -10793,15 +10793,15 @@
       },
       {
         "id": "unit-flavor-gm7pt7",
-        "name": "Літає",
-        "description": "Особливість для антуражу, без ігрового ефекту.",
+        "name": "Flying",
+        "description": "Flavor feature, no gameplay effect.",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Літає"
+            "text": "Flies"
           }
         ]
       }
@@ -10824,7 +10824,7 @@
   },
   {
     "slug": "neutral-water-elemental",
-    "name": "Елементаль води",
+    "name": "Water Elemental",
     "level": 4,
     "initiative": 13,
     "armorClass": 12,
@@ -10838,7 +10838,7 @@
     "charisma": 10,
     "attacks": [
       {
-        "name": "Крижана хвиля",
+        "name": "Ice Wave",
         "type": "ranged",
         "damageDice": "2d6",
         "damageType": "cold",
@@ -10848,8 +10848,8 @@
     "abilities": [
       {
         "id": "unit-elemental",
-        "name": "Елементаль",
-        "description": "Ігнорує мораль, імунітет до страху, імунітет до холоду, вразливість до вогню (×2).",
+        "name": "Elemental",
+        "description": "Ignores morale; immune to fear; immune to cold; vulnerable to fire (×2).",
         "trigger": {
           "event": "passive"
         },
@@ -10881,7 +10881,7 @@
       }
     ],
     "knownSpells": [
-      "Крижаний болт"
+      "Ice Bolt"
     ],
     "proficiencyBonus": 3,
     "gridSize": 1,

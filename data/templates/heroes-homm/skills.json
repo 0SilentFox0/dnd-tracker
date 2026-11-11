@@ -1,15 +1,15 @@
 [
   {
     "slug": "armor-break",
-    "name": "Пошкодження броні",
-    "description": "Влучання в ближньому бою з шансом 40 % знижує AC цілі на 1 на 2 раунди.",
-    "appearanceDescription": "Удар припадає точно на заклепки, і наплічник повисає на одному ремені. Крізь розсічену кольчугу видно сорочку — і наступний удар уже знає, куди цілити.",
+    "name": "Armor Break",
+    "description": "A melee hit has a 40% chance to reduce the target's AC by 1 for 2 rounds.",
+    "appearanceDescription": "The blow lands squarely on the rivets, and the pauldron dangles from a single strap. Through the split mail the shirt beneath shows, and the next strike already knows where to aim.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/armor-break.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "armor-break",
-        "name": "Пошкодження броні",
+        "name": "Armor Break",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -34,15 +34,15 @@
   },
   {
     "slug": "arrow-cloud",
-    "name": "Хмара стріл",
-    "description": "Бонусна дія, раз за бій: кожен ворог отримує 50 % середньої шкоди вашої атаки (колюча).",
-    "appearanceDescription": "Небо над ворожим строєм на мить темніє, ніби набігла зграя шпаків. Потім зграя падає — і не лишає жодного місця, де можна було б сховатися.",
+    "name": "Cloud of Arrows",
+    "description": "Bonus action, once per battle: every enemy takes 50% of your attack's average damage (piercing).",
+    "appearanceDescription": "For a moment the sky above the enemy line darkens, as if a flock of starlings had swept in. Then the flock falls, and leaves no place to hide.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/arrow-cloud.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "arrow-cloud",
-        "name": "Хмара стріл",
+        "name": "Cloud of Arrows",
         "trigger": {
           "event": "bonusAction"
         },
@@ -65,15 +65,15 @@
   },
   {
     "slug": "attack-advanced",
-    "name": "Просунутий напад",
-    "description": "Шкода ближніх атак +20 % (замінює Базовий напад).",
-    "appearanceDescription": "Удари лягають один за одним, як цвяхи під молотом теслі. Воїн уже не думає про стійку — тіло саме знаходить щілину в обороні.",
+    "name": "Advanced Attack",
+    "description": "Melee attack damage +20% (replaces Basic Attack).",
+    "appearanceDescription": "Blows land one after another, like nails under a carpenter's hammer. The warrior no longer thinks about his stance; his body finds the gap in the defense on its own.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack-advanced.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "attack-advanced",
-        "name": "Просунутий напад",
+        "name": "Advanced Attack",
         "trigger": {
           "event": "passive"
         },
@@ -91,15 +91,15 @@
   },
   {
     "slug": "attack-basic",
-    "name": "Базовий напад",
-    "description": "Шкода ближніх атак +10 %.",
-    "appearanceDescription": "Перші уроки фехтувального двору: тримати лікоть, бити з плеча, не відводити очей. Клинок ще важкуватий, але вже знає, куди йти.",
+    "name": "Basic Attack",
+    "description": "Melee attack damage +10%.",
+    "appearanceDescription": "The first lessons of the fencing yard: keep the elbow in, strike from the shoulder, never look away. The blade is still a little heavy, but it already knows where to go.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack-basic.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "attack-basic",
-        "name": "Базовий напад",
+        "name": "Basic Attack",
         "trigger": {
           "event": "passive"
         },
@@ -117,15 +117,15 @@
   },
   {
     "slug": "attack-expert",
-    "name": "Експертний напад",
-    "description": "Шкода ближніх атак +30 % (замінює Просунутий напад).",
-    "appearanceDescription": "Сталь співає коротко й глухо, і кожна нота — чиясь розколота кіраса. Ветерани кажуть, що такий воїн б'є раніше, ніж противник встигає вирішити, як захищатися.",
+    "name": "Expert Attack",
+    "description": "Melee attack damage +30% (replaces Advanced Attack).",
+    "appearanceDescription": "The steel sings short and dull, and every note is somebody's split cuirass. Veterans say such a warrior strikes before the opponent can decide how to defend.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/attack-expert.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "attack-expert",
-        "name": "Експертний напад",
+        "name": "Expert Attack",
         "trigger": {
           "event": "passive"
         },
@@ -143,15 +143,15 @@
   },
   {
     "slug": "banish",
-    "name": "Вигнання",
-    "description": "Істоти, яких прикликав ворог, з'являються ослабленими — втрачають 50 % HP.",
-    "appearanceDescription": "Друїд промовляє старе слово, і чужі, прикликані з інших світів істоти починають мерехтіти й блякнути. Їхні обриси пливуть, як дим над вогнищем.",
+    "name": "Banish",
+    "description": "Creatures summoned by an enemy appear weakened, losing 50% of their HP.",
+    "appearanceDescription": "The druid speaks an old word, and the alien creatures summoned from other worlds begin to flicker and fade. Their outlines drift like smoke above a campfire.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/banish.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "banish",
-        "name": "Вигнання",
+        "name": "Banish",
         "trigger": {
           "event": "passive"
         },
@@ -167,15 +167,15 @@
   },
   {
     "slug": "benediction",
-    "name": "Благословення",
-    "description": "Закляття Світла до 4 рівня включно діють на всіх союзників.",
-    "appearanceDescription": "Над полем бою розкриваються незримі крила, і їхня тінь падає на кожного союзника одночасно. Одне слово мага — і весь загін сяє, як вітраж на сонці.",
+    "name": "Benediction",
+    "description": "Light spells up to level 4 affect all allies.",
+    "appearanceDescription": "Unseen wings unfold over the battlefield, and their shadow falls on every ally at once. One word from the mage, and the whole company shines like stained glass in the sun.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/benediction.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "benediction",
-        "name": "Благословення",
+        "name": "Benediction",
         "trigger": {
           "event": "passive"
         },
@@ -184,7 +184,7 @@
             "kind": "flag",
             "flag": "spellTargeting",
             "mode": "all",
-            "school": "Світло",
+            "school": "Light",
             "maxLevel": 4
           }
         ]
@@ -193,15 +193,15 @@
   },
   {
     "slug": "brutality",
-    "name": "Жорстокість",
-    "description": "Атаки ближнього бою стають критичними на 19–20 на кидку d20.",
-    "appearanceDescription": "В очах воїна спалахує холодний азарт різника. Він не шукає красивого удару — він шукає той, після якого противник більше не підводиться.",
+    "name": "Brutality",
+    "description": "Melee attacks become critical hits on a 19–20 on the d20 roll.",
+    "appearanceDescription": "A cold butcher's zeal flares in the warrior's eyes. He does not look for a beautiful blow; he looks for the one after which the opponent does not get up again.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/brutality.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "brutality",
-        "name": "Жорстокість",
+        "name": "Brutality",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -220,15 +220,15 @@
   },
   {
     "slug": "bullseye",
-    "name": "В яблучко",
-    "description": "Раз за бій ваша дальня атака гарантовано влучає.",
-    "appearanceDescription": "Стрілець затримує подих, і світ навколо стихає: ні криків, ні брязкоту — лише ціль і тонка лінія до неї. Стріла йде так, ніби її тягне нитка.",
+    "name": "Bullseye",
+    "description": "Once per battle, your ranged attack is guaranteed to hit.",
+    "appearanceDescription": "The archer holds his breath and the world around falls silent: no shouts, no clatter, only the target and a thin line to it. The arrow flies as if drawn by a thread.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/bullseye.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "bullseye",
-        "name": "В яблучко",
+        "name": "Bullseye",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -249,23 +249,23 @@
   },
   {
     "slug": "call-of-the-beast",
-    "name": "Призив Фенікса",
-    "description": "Відкриває нове закляття «Призив Фенікса» — призив Фенікса, що зростає з рівнем заклинателя й раз за бій відроджується.",
-    "appearanceDescription": "Друїд сурмить у ріг, вирізаний з оленячого рогу, і ліс відповідає не ревом, а тріском полум'я. Над деревами здіймається вогняний птах, що пам'ятає ще стародавні присяги.",
+    "name": "Call of the Phoenix",
+    "description": "Unlocks a new spell, \"Call of the Phoenix\": summons a Phoenix that grows with the caster's level and is reborn once per battle.",
+    "appearanceDescription": "The druid sounds a horn carved from a stag's antler, and the forest answers not with a roar but with the crackle of flames. A fiery bird rises above the trees, remembering ancient oaths.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/call-of-the-beast.webp",
-    "mainSkillId": "Природа",
-    "grantedSpellId": "Призив Фенікса",
+    "mainSkillId": "Nature",
+    "grantedSpellId": "Call of the Phoenix",
     "abilities": [
       {
         "id": "call-of-the-beast",
-        "name": "Призив Фенікса",
+        "name": "Call of the Phoenix",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Дає закляття «Призив Фенікса»."
+            "text": "Grants the spell \"Call of the Phoenix\"."
           }
         ]
       }
@@ -273,22 +273,22 @@
   },
   {
     "slug": "chaos-advanced",
-    "name": "Просунута магія Хаосу",
-    "description": "Відкриває доступ до заклять школи «Хаос» 1–4 рівня; кубики заклять цієї школи — к8.",
-    "appearanceDescription": "Полум'я і грім тепер слухаються мага, як дресировані звірі. Він кидає закляття недбало, майже ліниво — і земля під ворогами починає диміти.",
+    "name": "Advanced Chaos Magic",
+    "description": "Unlocks access to \"Chaos\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "Flame and thunder now obey the mage like trained beasts. He casts spells carelessly, almost lazily, and the ground beneath his enemies begins to smoke.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos-advanced.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "chaos-advanced",
-        "name": "Просунута магія Хаосу",
+        "name": "Advanced Chaos Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Хаос» 1–4 рівня; кубики заклять цієї школи — к8."
+            "text": "Unlocks access to \"Chaos\" school spells of levels 1–4; spell dice of this school are d8."
           }
         ]
       }
@@ -296,22 +296,22 @@
   },
   {
     "slug": "chaos-basic",
-    "name": "Базова магія Хаосу",
-    "description": "Відкриває доступ до заклять школи «Хаос» 1–2 рівня; кубики заклять цієї школи — к6.",
-    "appearanceDescription": "Між пальцями учня проскакують іскри, і він ще не завжди знає, куди вони полетять. Та навіть ці перші спалахи лишають на щитах ворога чорні плями.",
+    "name": "Basic Chaos Magic",
+    "description": "Unlocks access to \"Chaos\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "Sparks leap between the apprentice's fingers, and he does not always know where they will fly. Yet even these first flashes leave black scorch marks on the enemy's shields.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos-basic.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "chaos-basic",
-        "name": "Базова магія Хаосу",
+        "name": "Basic Chaos Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Хаос» 1–2 рівня; кубики заклять цієї школи — к6."
+            "text": "Unlocks access to \"Chaos\" school spells of levels 1–2; spell dice of this school are d6."
           }
         ]
       }
@@ -319,22 +319,22 @@
   },
   {
     "slug": "chaos-expert",
-    "name": "Експертна магія Хаосу",
-    "description": "Відкриває доступ до заклять школи «Хаос» 1–5 рівня; кубики заклять цієї школи — к10.",
-    "appearanceDescription": "Небо над цим магом темніє від хмар, що з'являються нізвідки. Коли він підносить посох, навіть союзники мимоволі відступають на крок.",
+    "name": "Expert Chaos Magic",
+    "description": "Unlocks access to \"Chaos\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "The sky above this mage darkens with clouds that appear from nowhere. When he raises his staff, even his allies involuntarily step back.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/chaos-expert.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "chaos-expert",
-        "name": "Експертна магія Хаосу",
+        "name": "Expert Chaos Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Хаос» 1–5 рівня; кубики заклять цієї школи — к10."
+            "text": "Unlocks access to \"Chaos\" school spells of levels 1–5; spell dice of this school are d10."
           }
         ]
       }
@@ -342,22 +342,22 @@
   },
   {
     "slug": "chosen-elemental",
-    "name": "Обраний елементаль",
-    "description": "Дає закляття призиву обраного елементаля (у бібліотеці його немає — DM додає закляття вручну).",
-    "appearanceDescription": "Друїд укладає договір з однією зі стихій, і вона відтепер приходить на його поклик у звичній подобі. Хтось чує в ній тріск полум'я, хтось — шум прибою.",
+    "name": "Chosen Elemental",
+    "description": "Grants the spell to summon the chosen elemental (it is not in the library; the DM adds the spell manually).",
+    "appearanceDescription": "The druid makes a pact with one of the elements, and from then on it answers his call in its familiar form. Some hear in it the crackle of flames, others the rush of the surf.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/chosen-elemental.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "chosen-elemental",
-        "name": "Обраний елементаль",
+        "name": "Chosen Elemental",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Закляття призиву обраного елементаля додає DM."
+            "text": "The DM adds the spell to summon the chosen elemental."
           }
         ]
       }
@@ -365,15 +365,15 @@
   },
   {
     "slug": "cleaving-strike",
-    "name": "Рублячий удар",
-    "description": "Влучання в ближньому бою з шансом 40 % викликає кровотечу: ціль щораунду отримує 20 % середньої шкоди вашої атаки (рубляча), 2 раунди.",
-    "appearanceDescription": "Лезо входить навскіс і виходить із хрипким шелестом, лишаючи рану, що не хоче закриватися. Ворог ще тримається на ногах, але під ним уже темніє трава.",
+    "name": "Cleaving Strike",
+    "description": "A melee hit has a 40% chance to cause bleeding: the target takes 20% of your attack's average damage (slashing) each round for 2 rounds.",
+    "appearanceDescription": "The blade enters at a slant and leaves with a hoarse rustle, leaving a wound that refuses to close. The enemy still stands, but the grass beneath him is already darkening.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/cleaving-strike.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "cleaving-strike",
-        "name": "Рублячий удар",
+        "name": "Cleaving Strike",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -401,22 +401,22 @@
   },
   {
     "slug": "compensation",
-    "name": "Компенсація",
-    "description": "Під час атаки іноді спрацьовує випадкове закляття 1–3 рівня. Рушій не кастує випадкових заклять — ефект відіграє DM.",
-    "appearanceDescription": "Мана в жилах мага неспокійна й час від часу виривається сама, без дозволу. Ніхто — навіть він — не знає, яким закляттям вона спалахне цього разу.",
+    "name": "Compensation",
+    "description": "During an attack, a random level 1–3 spell sometimes triggers. The engine does not cast random spells; the DM plays out the effect.",
+    "appearanceDescription": "The mana in the mage's veins is restless and now and then bursts out on its own, without permission. No one, not even he, knows which spell it will flare into this time.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/compensation.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "compensation",
-        "name": "Компенсація",
+        "name": "Compensation",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Атака може викликати випадкове закляття 1–3 рівня — відіграє DM."
+            "text": "An attack may trigger a random level 1–3 spell; the DM plays it out."
           }
         ]
       }
@@ -424,15 +424,15 @@
   },
   {
     "slug": "crippling-shot",
-    "name": "Травмуючий постріл",
-    "description": "Влучання дальньою атакою з шансом 40 %: ціль атакує з невигідністю 1 раунд.",
-    "appearanceDescription": "Стріла впивається в зап'ясток, і меч у руці ворога раптом стає важким і чужим. Він ще б'є, але кожен замах дається через біль.",
+    "name": "Crippling Shot",
+    "description": "A ranged hit has a 40% chance: the target attacks with disadvantage for 1 round.",
+    "appearanceDescription": "The arrow sinks into the wrist, and the sword in the enemy's hand suddenly feels heavy and foreign. He still strikes, but every swing comes through pain.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/crippling-shot.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "crippling-shot",
-        "name": "Травмуючий постріл",
+        "name": "Crippling Shot",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -456,22 +456,22 @@
   },
   {
     "slug": "dark-advanced",
-    "name": "Просунута магія Темряви",
-    "description": "Відкриває доступ до заклять школи «Темрява» 1–4 рівня; кубики заклять цієї школи — к8.",
-    "appearanceDescription": "Тіні слухаються мага, як зграя гончаків, і самі знаходять жертву. Прокляття лягають густо й надовго, мов сажа на стіни.",
+    "name": "Advanced Dark Magic",
+    "description": "Unlocks access to \"Darkness\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "Shadows obey the mage like a pack of hounds and find their prey on their own. Curses settle thick and long, like soot on walls.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark-advanced.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "dark-advanced",
-        "name": "Просунута магія Темряви",
+        "name": "Advanced Dark Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Темрява» 1–4 рівня; кубики заклять цієї школи — к8."
+            "text": "Unlocks access to \"Darkness\" school spells of levels 1–4; spell dice of this school are d8."
           }
         ]
       }
@@ -479,22 +479,22 @@
   },
   {
     "slug": "dark-basic",
-    "name": "Базова магія Темряви",
-    "description": "Відкриває доступ до заклять школи «Темрява» 1–2 рівня; кубики заклять цієї школи — к6.",
-    "appearanceDescription": "Перші прокльони виходять кволими, як подих у морозну ніч. Та ворог уже відчуває незрозумілу важкість у руках і не знає, звідки вона.",
+    "name": "Basic Dark Magic",
+    "description": "Unlocks access to \"Darkness\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "The first curses come out feeble, like breath on a frosty night. Yet the enemy already feels a strange heaviness in his arms and does not know where it comes from.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark-basic.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "dark-basic",
-        "name": "Базова магія Темряви",
+        "name": "Basic Dark Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Темрява» 1–2 рівня; кубики заклять цієї школи — к6."
+            "text": "Unlocks access to \"Darkness\" school spells of levels 1–2; spell dice of this school are d6."
           }
         ]
       }
@@ -502,22 +502,22 @@
   },
   {
     "slug": "dark-expert",
-    "name": "Експертна магія Темряви",
-    "description": "Відкриває доступ до заклять школи «Темрява» 1–5 рівня; кубики заклять цієї школи — к10.",
-    "appearanceDescription": "Коли цей маг промовляє закляття, свічки в таборі ворога гаснуть самі собою. Навіть хоробрі ветерани відчувають, як щось чуже ворушиться в їхніх думках.",
+    "name": "Expert Dark Magic",
+    "description": "Unlocks access to \"Darkness\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "When this mage speaks a spell, the candles in the enemy camp go out on their own. Even brave veterans feel something alien stirring in their thoughts.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/dark-expert.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "dark-expert",
-        "name": "Експертна магія Темряви",
+        "name": "Expert Dark Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Темрява» 1–5 рівня; кубики заклять цієї школи — к10."
+            "text": "Unlocks access to \"Darkness\" school spells of levels 1–5; spell dice of this school are d10."
           }
         ]
       }
@@ -525,15 +525,15 @@
   },
   {
     "slug": "dark-master",
-    "name": "Майстер темряви",
-    "description": "Закляття Темряви до 4 рівня включно діють на всіх ворогів.",
-    "appearanceDescription": "Тінь мага витягується через усе поле бою й торкається кожного ворога водночас. Одне прокляття — і цілий загін схиляє голови під невидимим тягарем.",
+    "name": "Master of Darkness",
+    "description": "Darkness spells up to level 4 affect all enemies.",
+    "appearanceDescription": "The mage's shadow stretches across the whole battlefield and touches every enemy at once. A single curse, and the entire company bows its head under an invisible burden.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-master.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "dark-master",
-        "name": "Майстер темряви",
+        "name": "Master of Darkness",
         "trigger": {
           "event": "passive"
         },
@@ -542,7 +542,7 @@
             "kind": "flag",
             "flag": "spellTargeting",
             "mode": "all",
-            "school": "Темрява",
+            "school": "Darkness",
             "maxLevel": 4
           }
         ]
@@ -551,15 +551,15 @@
   },
   {
     "slug": "deaths-march",
-    "name": "Поступ смерті",
-    "description": "Шкода заклять школи Темряви +25 %.",
-    "appearanceDescription": "На пальцях мага проступають чорні печатки, що пульсують у такт серцю. Його прокляття тепер мають присмак могильної землі й тримаються міцніше.",
+    "name": "Death's March",
+    "description": "Darkness school spell damage +25%.",
+    "appearanceDescription": "Black seals appear on the mage's fingers, pulsing in time with his heart. His curses now taste of grave earth and hold more firmly.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/deaths-march.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "deaths-march",
-        "name": "Поступ смерті",
+        "name": "Death's March",
         "trigger": {
           "event": "passive"
         },
@@ -568,7 +568,7 @@
             "kind": "damageBonus",
             "filter": {
               "kind": "magic",
-              "school": "Темрява"
+              "school": "Darkness"
             },
             "percent": 25
           }
@@ -578,15 +578,15 @@
   },
   {
     "slug": "defense-advanced",
-    "name": "Просунутий захист",
-    "description": "Опір фізичній шкоді 20 % (замінює Базовий захист).",
-    "appearanceDescription": "Воїн ловить удари так спокійно, наче відмахується від мух. Важкі сокири гаснуть на окуті щита, лишаючи тільки глухий гул.",
+    "name": "Advanced Defense",
+    "description": "Physical damage resistance 20% (replaces Basic Defense).",
+    "appearanceDescription": "The warrior catches blows as calmly as if brushing away flies. Heavy axes die against the shield's metal rim, leaving only a dull hum.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense-advanced.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "defense-advanced",
-        "name": "Просунутий захист",
+        "name": "Advanced Defense",
         "trigger": {
           "event": "passive"
         },
@@ -603,15 +603,15 @@
   },
   {
     "slug": "defense-basic",
-    "name": "Базовий захист",
-    "description": "Опір фізичній шкоді 10 %.",
-    "appearanceDescription": "Новобранець учиться приймати удар на щит під кутом, щоб сталь ковзала, а не била. Синці ще болять, але руки вже не опускаються.",
+    "name": "Basic Defense",
+    "description": "Physical damage resistance 10%.",
+    "appearanceDescription": "The recruit learns to take a blow on the shield at an angle so that steel glances off rather than lands. The bruises still ache, but his arms no longer sag.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense-basic.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "defense-basic",
-        "name": "Базовий захист",
+        "name": "Basic Defense",
         "trigger": {
           "event": "passive"
         },
@@ -628,15 +628,15 @@
   },
   {
     "slug": "defense-expert",
-    "name": "Експертний захист",
-    "description": "Опір фізичній шкоді 30 % (замінює Просунутий захист).",
-    "appearanceDescription": "Він стоїть посеред сутички, мов скеля серед прибою: хвилі б'ють, розбиваються й відкочуються. Ворогам починає здаватися, що їхня зброя затупилася.",
+    "name": "Expert Defense",
+    "description": "Physical damage resistance 30% (replaces Advanced Defense).",
+    "appearanceDescription": "He stands in the middle of the clash like a rock in the surf: the waves strike, break and roll back. The enemies begin to think their weapons have gone dull.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/defense-expert.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "defense-expert",
-        "name": "Експертний захист",
+        "name": "Expert Defense",
         "trigger": {
           "event": "passive"
         },
@@ -653,15 +653,15 @@
   },
   {
     "slug": "deflecting-arrow",
-    "name": "Відбиваюча стріла",
-    "description": "Влучання дальньою атакою з шансом 40 % знижує ініціативу цілі на 2 на 2 раунди.",
-    "appearanceDescription": "Стріла б'є в край щита з такою силою, що ворога розвертає на півкроку. Поки він ловить рівновагу, бій уже пішов далі без нього.",
+    "name": "Deflecting Arrow",
+    "description": "A ranged hit has a 40% chance to reduce the target's initiative by 2 for 2 rounds.",
+    "appearanceDescription": "The arrow strikes the edge of the shield with such force that the enemy is turned half a step. While he catches his balance, the battle has already moved on without him.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/deflecting-arrow.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "deflecting-arrow",
-        "name": "Відбиваюча стріла",
+        "name": "Deflecting Arrow",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -686,15 +686,15 @@
   },
   {
     "slug": "devourer",
-    "name": "Пожирач",
-    "description": "Бонусна дія по мертвому юніту, 2 рази за бій: відновлює 1 слот заклять.",
-    "appearanceDescription": "Маг схиляється над полеглим, і з тіла здіймається блідий дим, що втягується в його ніздрі. Мертвому ця сила вже ні до чого — а живому знадобиться.",
+    "name": "Devourer",
+    "description": "Bonus action on a dead unit, 2 times per battle: restores 1 spell slot.",
+    "appearanceDescription": "The mage bends over the fallen, and a pale smoke rises from the body and is drawn into his nostrils. The dead have no use for this power anymore, but the living will.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/devourer.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "devourer",
-        "name": "Пожирач",
+        "name": "Devourer",
         "trigger": {
           "event": "bonusAction"
         },
@@ -715,15 +715,15 @@
   },
   {
     "slug": "divine-power",
-    "name": "Божа сила",
-    "description": "Шкода заклять школи Світла +25 %.",
-    "appearanceDescription": "Мана стає чистою, як гірське джерело, без жодної каламуті сумніву. Кожне закляття Світла звучить гучніше й сяє яскравіше, ніж раніше.",
+    "name": "Divine Power",
+    "description": "Light school spell damage +25%.",
+    "appearanceDescription": "Mana becomes pure as a mountain spring, without a trace of the murk of doubt. Every Light spell sounds louder and shines brighter than before.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/divine-power.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "divine-power",
-        "name": "Божа сила",
+        "name": "Divine Power",
         "trigger": {
           "event": "passive"
         },
@@ -732,7 +732,7 @@
             "kind": "damageBonus",
             "filter": {
               "kind": "magic",
-              "school": "Світло"
+              "school": "Light"
             },
             "percent": 25
           }
@@ -742,15 +742,15 @@
   },
   {
     "slug": "double-shot",
-    "name": "Постріл по 2 цілям",
-    "description": "Дальня атака може вражати на 1 ціль більше (+1 до максимуму цілей).",
-    "appearanceDescription": "Дві стріли лягають на тятиву разом, розведені на ширину пальця. Вони розходяться в польоті, як ластівки, і кожна знаходить свого ворога.",
+    "name": "Double Shot",
+    "description": "A ranged attack can hit 1 more target (+1 to the maximum number of targets).",
+    "appearanceDescription": "Two arrows lie on the bowstring together, a finger's width apart. They part in flight like swallows, and each finds its own enemy.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/double-shot.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "double-shot",
-        "name": "Постріл по 2 цілям",
+        "name": "Double Shot",
         "trigger": {
           "event": "passive"
         },
@@ -767,15 +767,15 @@
   },
   {
     "slug": "empathy",
-    "name": "Співпереживання",
-    "description": "Коли союзник проходить перевірку моралі, він отримує +1 ініціативи на 2 раунди (ефект стакається).",
-    "appearanceDescription": "Чужа відвага передається, як іскра по сухій траві. Один солдат кидається вперед — і ті, хто поруч, уже не можуть стояти на місці.",
+    "name": "Empathy",
+    "description": "When an ally passes a morale check, they gain +1 initiative for 2 rounds (the effect stacks).",
+    "appearanceDescription": "Another's courage spreads like a spark through dry grass. One soldier charges forward, and those beside him can no longer stand still.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/empathy.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "empathy",
-        "name": "Співпереживання",
+        "name": "Empathy",
         "trigger": {
           "event": "moraleCheck",
           "result": "success",
@@ -798,15 +798,15 @@
   },
   {
     "slug": "endurance",
-    "name": "Стійкість",
-    "description": "Максимальне HP + 2 × рівень героя.",
-    "appearanceDescription": "Роки в сідлі й на марші зробили тіло жорстким, як сиром'ятний ремінь. Там, де інший уже впав би, цей лише сплюне кров і підніме меч.",
+    "name": "Endurance",
+    "description": "Maximum HP + 2 × hero level.",
+    "appearanceDescription": "Years in the saddle and on the march have made the body hard as a rawhide strap. Where another would have fallen, this one merely spits blood and lifts his sword.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/endurance.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "endurance",
-        "name": "Стійкість",
+        "name": "Endurance",
         "trigger": {
           "event": "passive"
         },
@@ -824,23 +824,23 @@
   },
   {
     "slug": "eternal-light",
-    "name": "Вічне світло",
-    "description": "Відкриває нове закляття «Вічне світло» — сильне лікування союзника з подальшою регенерацією.",
-    "appearanceDescription": "Маг пізнає світло, що горить не в небі, а глибоко в кожній живій істоті. Тепер він уміє роздмухати цей вогник навіть у тому, хто вже ледь дихає.",
+    "name": "Eternal Light",
+    "description": "Unlocks a new spell, \"Eternal Light\": a powerful heal on an ally followed by ongoing regeneration.",
+    "appearanceDescription": "The mage comes to know a light that burns not in the sky but deep within every living creature. Now he can fan that small flame even in one who is barely breathing.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/eternal-light.webp",
-    "mainSkillId": "Світло",
-    "grantedSpellId": "Вічне світло",
+    "mainSkillId": "Light",
+    "grantedSpellId": "Eternal Light",
     "abilities": [
       {
         "id": "eternal-light",
-        "name": "Вічне світло",
+        "name": "Eternal Light",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Дає закляття «Вічне світло»."
+            "text": "Grants the spell \"Eternal Light\"."
           }
         ]
       }
@@ -848,15 +848,15 @@
   },
   {
     "slug": "eternal-warriors",
-    "name": "Вічні воїни",
-    "description": "Закляття призиву елементалів прикликають по 2 істоти.",
-    "appearanceDescription": "Замість одного вартового з полум'я чи каменю з'являються двоє — близнюки, що рухаються в одному ритмі. Вони не знають утоми й не знають страху.",
+    "name": "Eternal Warriors",
+    "description": "Elemental summoning spells summon 2 creatures each.",
+    "appearanceDescription": "Instead of one sentinel of flame or stone, two appear, twins moving in the same rhythm. They know no weariness and no fear.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/eternal-warriors.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "eternal-warriors",
-        "name": "Вічні воїни",
+        "name": "Eternal Warriors",
         "trigger": {
           "event": "passive"
         },
@@ -878,15 +878,15 @@
   },
   {
     "slug": "fire-attack",
-    "name": "Вогняна атака",
-    "description": "Кожне ваше влучання атакою додатково завдає 15 % середньої шкоди вашої атаки вогнем.",
-    "appearanceDescription": "Клинок героя жевріє, як щойно вийнятий із горна, і кожен удар лишає на ворогові обпечений слід. Повітря навколо леза дрижить від жару.",
+    "name": "Fire Attack",
+    "description": "Each of your attack hits additionally deals fire damage equal to 15% of your attack's average damage.",
+    "appearanceDescription": "The hero's blade glows like one just drawn from the forge, and every blow leaves a scorched mark on the enemy. The air around the blade shimmers with heat.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/fire-attack.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "fire-attack",
-        "name": "Вогняна атака",
+        "name": "Fire Attack",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -914,15 +914,15 @@
   },
   {
     "slug": "force-arrow",
-    "name": "Стріла сили",
-    "description": "Стріла прошиває ціль наскрізь і зачіпає ще одного ворога — 50 % завданої шкоди.",
-    "appearanceDescription": "Стріла, пущена з такою силою, що тятива гуде ще кілька секунд, проходить крізь першого ворога, не сповільнюючись. Другий навіть не встигає зрозуміти, звідки вона взялася.",
+    "name": "Force Arrow",
+    "description": "The arrow pierces the target and strikes another enemy for 50% of the damage dealt.",
+    "appearanceDescription": "An arrow loosed with such force that the bowstring hums for several seconds passes through the first enemy without slowing. The second does not even have time to understand where it came from.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/force-arrow.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "force-arrow",
-        "name": "Стріла сили",
+        "name": "Force Arrow",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -944,15 +944,15 @@
   },
   {
     "slug": "forest-lord",
-    "name": "Повелитель лісу",
-    "description": "Закляття контролю Природи «Корені» і «Сплутування» діють по області — до 3 цілей.",
-    "appearanceDescription": "Друїд тупає ногою, і земля під ворожим строєм тріскається, випускаючи вузлувате коріння. Воно хапає за щиколотки одразу кількох, тягне вниз і не відпускає.",
+    "name": "Lord of the Forest",
+    "description": "The Nature control spells \"Roots\" and \"Entangle\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The druid stamps his foot, and the ground beneath the enemy line cracks, releasing gnarled roots. They seize several ankles at once, pull them down and do not let go.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/forest-lord.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "forest-lord",
-        "name": "Повелитель лісу",
+        "name": "Lord of the Forest",
         "trigger": {
           "event": "passive"
         },
@@ -973,23 +973,23 @@
   },
   {
     "slug": "forest-roots",
-    "name": "Корені лісу",
-    "description": "Дає закляття «Корені».",
-    "appearanceDescription": "Друїд вивчає мову коріння, що тисячоліттями тримає ліс на місці. Тепер він може попросити його втримати й ворога.",
+    "name": "Forest Roots",
+    "description": "Grants the spell \"Roots\".",
+    "appearanceDescription": "The druid learns the language of the roots that have held the forest in place for millennia. Now he can ask them to hold an enemy too.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/forest-roots.webp",
-    "mainSkillId": "Природа",
-    "grantedSpellId": "Корені",
+    "mainSkillId": "Nature",
+    "grantedSpellId": "Roots",
     "abilities": [
       {
         "id": "forest-roots",
-        "name": "Корені лісу",
+        "name": "Forest Roots",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Дає закляття «Корені»."
+            "text": "Grants the spell \"Roots\"."
           }
         ]
       }
@@ -997,15 +997,15 @@
   },
   {
     "slug": "granting-blessing",
-    "name": "Даруючий благословення",
-    "description": "Закляття «Божественна сила» і «Очищення» діють по області — до 3 цілей.",
-    "appearanceDescription": "Благословення падає на загін, як теплий літній дощ, змиваючи прокляття й наливаючи зброю світлом. Воїни переглядаються, не розуміючи, звідки взялася ця легкість.",
+    "name": "Granting Blessing",
+    "description": "The spells \"Divine Strength\" and \"Cleansing\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The blessing falls on the company like warm summer rain, washing away curses and filling weapons with light. The warriors glance at one another, not understanding where this lightness came from.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/granting-blessing.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "granting-blessing",
-        "name": "Даруючий благословення",
+        "name": "Granting Blessing",
         "trigger": {
           "event": "passive"
         },
@@ -1026,15 +1026,15 @@
   },
   {
     "slug": "granting-protection",
-    "name": "Даруючий захист",
-    "description": "Закляття «Ухилення» і «Кам'яна шкіра» діють по області — до 3 цілей.",
-    "appearanceDescription": "Маг розкидає руки, і над загоном розгортаються прозорі щити, схожі на крила бабки. Стріли й клинки ковзають по них, викрешуючи бліді іскри.",
+    "name": "Granting Protection",
+    "description": "The spells \"Evasion\" and \"Stoneskin\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The mage spreads his arms, and transparent shields like dragonfly wings unfold over the company. Arrows and blades glance off them, striking pale sparks.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/granting-protection.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "granting-protection",
-        "name": "Даруючий захист",
+        "name": "Granting Protection",
         "trigger": {
           "event": "passive"
         },
@@ -1055,15 +1055,15 @@
   },
   {
     "slug": "guardian",
-    "name": "Перенаправлення",
-    "description": "Бонусна дія на союзника: 1 раунд ви берете на себе 50 % шкоди від атак по ньому.",
-    "appearanceDescription": "Герой стає поруч із пораненим товаришем і підставляє щит під удари, призначені не йому. Сталь б'є по сталі, і половина болю дістається тому, хто сам її обрав.",
+    "name": "Guardian",
+    "description": "Bonus action on an ally: for 1 round you take 50% of the damage from attacks against them.",
+    "appearanceDescription": "The hero steps beside a wounded comrade and sets his shield under blows meant for someone else. Steel strikes steel, and half the pain goes to the one who chose it.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/guardian.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "guardian",
-        "name": "Перенаправлення",
+        "name": "Guardian",
         "trigger": {
           "event": "bonusAction"
         },
@@ -1082,15 +1082,15 @@
   },
   {
     "slug": "infernal-power",
-    "name": "Пекельна сила",
-    "description": "Шкода заклять школи Хаосу +25 %.",
-    "appearanceDescription": "Маг осягає таємниці руйнування, записані попелом на сторінках, що не горять. Його вогонь стає білим, а грім — оглушливим.",
+    "name": "Infernal Power",
+    "description": "Chaos school spell damage +25%.",
+    "appearanceDescription": "The mage grasps the secrets of destruction, written in ash on pages that do not burn. His fire turns white and his thunder deafening.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/infernal-power.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "infernal-power",
-        "name": "Пекельна сила",
+        "name": "Infernal Power",
         "trigger": {
           "event": "passive"
         },
@@ -1099,7 +1099,7 @@
             "kind": "damageBonus",
             "filter": {
               "kind": "magic",
-              "school": "Хаос"
+              "school": "Chaos"
             },
             "percent": 25
           }
@@ -1109,15 +1109,15 @@
   },
   {
     "slug": "inspiration",
-    "name": "Натхнення",
-    "description": "Бонусна дія, 2 рази за бій: союзник отримує +1 моралі на 2 раунди.",
-    "appearanceDescription": "Командир кладе руку на плече бійцеві й каже кілька слів, яких ніхто більше не чує. Боєць розправляє плечі, і в його погляді знову горить вогонь.",
+    "name": "Inspiration",
+    "description": "Bonus action, 2 times per battle: an ally gains +1 morale for 2 rounds.",
+    "appearanceDescription": "The commander puts a hand on a fighter's shoulder and says a few words no one else hears. The fighter squares his shoulders, and fire burns in his gaze again.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/inspiration.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "inspiration",
-        "name": "Натхнення",
+        "name": "Inspiration",
         "trigger": {
           "event": "bonusAction"
         },
@@ -1140,15 +1140,15 @@
   },
   {
     "slug": "last-stand",
-    "name": "Битва до останнього",
-    "description": "Раз за бій смертельна шкода не вбиває вас — ви лишаєтеся з 1 HP.",
-    "appearanceDescription": "Удар, що мав стати останнім, кидає героя на коліна — але не на землю. Він підводиться, тримаючись за древко прапора, і вороги на мить відступають.",
+    "name": "Last Stand",
+    "description": "Once per battle, lethal damage does not kill you; you are left with 1 HP.",
+    "appearanceDescription": "The blow that was meant to be the last drives the hero to his knees, but not to the ground. He rises, holding on to the banner pole, and for a moment the enemies fall back.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/last-stand.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "last-stand",
-        "name": "Битва до останнього",
+        "name": "Last Stand",
         "trigger": {
           "event": "lethalDamage"
         },
@@ -1167,15 +1167,15 @@
   },
   {
     "slug": "leadership-advanced",
-    "name": "Просунуте лідерство",
-    "description": "Мораль +2 (лише власнику навички; замінює Базове лідерство).",
-    "appearanceDescription": "Солдати шукають командира очима посеред сутички й заспокоюються, побачивши його прапор. Стрій тримається там, де інший давно розсипався б.",
+    "name": "Advanced Leadership",
+    "description": "Morale +2 (skill owner only; replaces Basic Leadership).",
+    "appearanceDescription": "Soldiers search for their commander with their eyes in the middle of the clash and calm down when they see his banner. The formation holds where another would long since have scattered.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership-advanced.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "leadership-advanced",
-        "name": "Просунуте лідерство",
+        "name": "Advanced Leadership",
         "trigger": {
           "event": "passive"
         },
@@ -1191,15 +1191,15 @@
   },
   {
     "slug": "leadership-basic",
-    "name": "Базове лідерство",
-    "description": "Мораль +1 (лише власнику навички).",
-    "appearanceDescription": "Кілька влучних слів біля вогнища — і загін сміється вперше за тиждень. Наступного ранку вони марширують бадьоріше, ніж учора.",
+    "name": "Basic Leadership",
+    "description": "Morale +1 (skill owner only).",
+    "appearanceDescription": "A few well-chosen words by the campfire, and the company laughs for the first time in a week. The next morning they march more briskly than the day before.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership-basic.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "leadership-basic",
-        "name": "Базове лідерство",
+        "name": "Basic Leadership",
         "trigger": {
           "event": "passive"
         },
@@ -1215,15 +1215,15 @@
   },
   {
     "slug": "leadership-expert",
-    "name": "Експертне лідерство",
-    "description": "Мораль +3 (лише власнику навички; замінює Просунуте лідерство).",
-    "appearanceDescription": "Його ім'я вигукують, ідучи в атаку, і шепочуть, перев'язуючи рани. За таким полководцем ідуть навіть у безнадійний бій — і часом його виграють.",
+    "name": "Expert Leadership",
+    "description": "Morale +3 (skill owner only; replaces Advanced Leadership).",
+    "appearanceDescription": "His name is shouted when charging and whispered when binding wounds. Men follow such a commander even into a hopeless battle, and sometimes win it.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/leadership-expert.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "leadership-expert",
-        "name": "Експертне лідерство",
+        "name": "Expert Leadership",
         "trigger": {
           "event": "passive"
         },
@@ -1239,15 +1239,15 @@
   },
   {
     "slug": "life-force",
-    "name": "Сила життя",
-    "description": "На початку кожного раунду кожен ваш союзник відновлює 3 % свого максимального HP.",
-    "appearanceDescription": "Від друїда розходиться ледь помітне зелене світло, як від світляків у літню ніч. Подряпини затягуються, а втома тане, наче роса на сонці.",
+    "name": "Life Force",
+    "description": "At the start of each round, each of your allies restores 3% of their maximum HP.",
+    "appearanceDescription": "A barely perceptible green light radiates from the druid, like fireflies on a summer night. Scratches close and weariness melts away like dew in the sun.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/life-force.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "life-force",
-        "name": "Сила життя",
+        "name": "Life Force",
         "trigger": {
           "event": "roundStart"
         },
@@ -1266,15 +1266,15 @@
   },
   {
     "slug": "life-lord",
-    "name": "Повелитель життя",
-    "description": "Шкода заклять школи Природи +15 %.",
-    "appearanceDescription": "Друїд чує, як б'ються серця всіх живих істот навколо, і може вплести їхній ритм у свої закляття. Його магія пульсує, як жива плоть.",
+    "name": "Lord of Life",
+    "description": "Nature school spell damage +15%.",
+    "appearanceDescription": "The druid hears the heartbeats of all living creatures around him and can weave their rhythm into his spells. His magic pulses like living flesh.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/life-lord.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "life-lord",
-        "name": "Повелитель життя",
+        "name": "Lord of Life",
         "trigger": {
           "event": "passive"
         },
@@ -1283,7 +1283,7 @@
             "kind": "damageBonus",
             "filter": {
               "kind": "magic",
-              "school": "Природа"
+              "school": "Nature"
             },
             "percent": 15
           }
@@ -1293,22 +1293,22 @@
   },
   {
     "slug": "light-advanced",
-    "name": "Просунута магія Світла",
-    "description": "Відкриває доступ до заклять школи «Світло» 1–4 рівня; кубики заклять цієї школи — к8.",
-    "appearanceDescription": "Світло вже не тремтить, а ллється рівно, як мед із глечика. Союзники відчувають його спиною ще до того, як закляття завершене.",
+    "name": "Advanced Light Magic",
+    "description": "Unlocks access to \"Light\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "The light no longer trembles but pours evenly, like honey from a jug. Allies feel it on their backs before the spell is even finished.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light-advanced.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "light-advanced",
-        "name": "Просунута магія Світла",
+        "name": "Advanced Light Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Світло» 1–4 рівня; кубики заклять цієї школи — к8."
+            "text": "Unlocks access to \"Light\" school spells of levels 1–4; spell dice of this school are d8."
           }
         ]
       }
@@ -1316,22 +1316,22 @@
   },
   {
     "slug": "light-basic",
-    "name": "Базова магія Світла",
-    "description": "Відкриває доступ до заклять школи «Світло» 1–2 рівня; кубики заклять цієї школи — к6.",
-    "appearanceDescription": "Перші молитви звучать невпевнено, але над долонями вже тремтить ледь помітне сяйво. Рани від нього не гояться — та біль стихає.",
+    "name": "Basic Light Magic",
+    "description": "Unlocks access to \"Light\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "The first prayers sound uncertain, but a faint glow already trembles above the palms. It does not heal wounds, but the pain subsides.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light-basic.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "light-basic",
-        "name": "Базова магія Світла",
+        "name": "Basic Light Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Світло» 1–2 рівня; кубики заклять цієї школи — к6."
+            "text": "Unlocks access to \"Light\" school spells of levels 1–2; spell dice of this school are d6."
           }
         ]
       }
@@ -1339,22 +1339,22 @@
   },
   {
     "slug": "light-expert",
-    "name": "Експертна магія Світла",
-    "description": "Відкриває доступ до заклять школи «Світло» 1–5 рівня; кубики заклять цієї школи — к10.",
-    "appearanceDescription": "Коли маг підносить руки, тіні на полі бою коротшають, а в очах поранених запалюються іскри. Його світло видно з-за пагорбів, як світанок.",
+    "name": "Expert Light Magic",
+    "description": "Unlocks access to \"Light\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "When the mage raises his hands, shadows on the battlefield shorten and sparks kindle in the eyes of the wounded. His light can be seen from beyond the hills, like dawn.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/light-expert.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "light-expert",
-        "name": "Експертна магія Світла",
+        "name": "Expert Light Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Світло» 1–5 рівня; кубики заклять цієї школи — к10."
+            "text": "Unlocks access to \"Light\" school spells of levels 1–5; spell dice of this school are d10."
           }
         ]
       }
@@ -1362,15 +1362,15 @@
   },
   {
     "slug": "magic-ward",
-    "name": "Магічний захист",
-    "description": "Опір шкоді заклять +15 %.",
-    "appearanceDescription": "Обереги, вшиті під підкладку плаща, тихо теплішають, коли поруч твориться ворожа волшба. Полум'я заклять обтікає героя, мов вода камінь.",
+    "name": "Magic Ward",
+    "description": "Spell damage resistance +15%.",
+    "appearanceDescription": "The wards sewn under the cloak's lining warm quietly when hostile sorcery is worked nearby. The flames of spells flow around the hero like water around a stone.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/magic-ward.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "magic-ward",
-        "name": "Магічний захист",
+        "name": "Magic Ward",
         "trigger": {
           "event": "passive"
         },
@@ -1387,15 +1387,15 @@
   },
   {
     "slug": "mana-burst",
-    "name": "Вибух мани",
-    "description": "Коли ворог чаклує закляття, ціллю якого є ви, з шансом 50 % (до 2 разів за бій) заклинатель отримує 50 % середньої шкоди вашої атаки (силова).",
-    "appearanceDescription": "Чуже закляття врізається в героя й розколюється, як скло, — а уламки летять назад у того, хто його кинув. Ворожий маг відсахується, витираючи кров із носа.",
+    "name": "Mana Burst",
+    "description": "When an enemy casts a spell targeting you, there is a 50% chance (up to 2 times per battle) that the caster takes 50% of your attack's average damage (force).",
+    "appearanceDescription": "The enemy spell strikes the hero and shatters like glass, and the shards fly back at the one who cast it. The enemy mage recoils, wiping blood from his nose.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/mana-burst.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "mana-burst",
-        "name": "Вибух мани",
+        "name": "Mana Burst",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
@@ -1424,15 +1424,15 @@
   },
   {
     "slug": "master-of-curses",
-    "name": "Повелитель проклять",
-    "description": "Закляття «Ослаблення» і «Немічність» діють по області — до 3 цілей.",
-    "appearanceDescription": "Маг вимовляє одне слово, а прокляття чіпляється одразу до кількох ворогів, як реп'яхи до плаща. Їхні обладунки тьмяніють, а мечі важчають.",
+    "name": "Master of Curses",
+    "description": "The spells \"Weakness\" and \"Frailty\" work over an area, up to 3 targets.",
+    "appearanceDescription": "The mage speaks a single word, and the curse clings to several enemies at once, like burrs to a cloak. Their armor dulls and their swords grow heavier.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-curses.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "master-of-curses",
-        "name": "Повелитель проклять",
+        "name": "Master of Curses",
         "trigger": {
           "event": "passive"
         },
@@ -1453,15 +1453,15 @@
   },
   {
     "slug": "master-of-fire",
-    "name": "Повелитель вогню",
-    "description": "Ціль ваших заклять «Вогняна куля», «Вогняна стіна» і «Армагеддон» отримує −30 % AC на 1 раунд.",
-    "appearanceDescription": "Полум'я мага не просто палить — воно розм'якшує метал. Обладунки ворогів червоніють і обвисають, а ремені на них тліють і рвуться.",
+    "name": "Master of Fire",
+    "description": "The target of your spells \"Fireball\", \"Fire Wall\" and \"Armageddon\" takes −30% AC for 1 round.",
+    "appearanceDescription": "The mage's flame does not merely burn; it softens metal. The enemies' armor turns red and sags, and the straps on it smolder and snap.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-fire.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "master-of-fire",
-        "name": "Повелитель вогню",
+        "name": "Master of Fire",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
@@ -1488,15 +1488,15 @@
   },
   {
     "slug": "master-of-ice",
-    "name": "Повелитель холоду",
-    "description": "Ціль ваших заклять «Крижаний болт», «Коло зими» і «Глибока заморозка» атакує з невигідністю 1 раунд.",
-    "appearanceDescription": "Іній укриває пальці ворога, і руків'я меча примерзає до рукавиці. Кожен його замах тепер скутий і запізнілий, як рух уві сні.",
+    "name": "Master of Ice",
+    "description": "The target of your spells \"Ice Bolt\", \"Circle of Winter\" and \"Deep Freeze\" attacks with disadvantage for 1 round.",
+    "appearanceDescription": "Frost covers the enemy's fingers, and the sword hilt freezes to the gauntlet. Every swing is now stiff and late, like a movement in a dream.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-ice.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "master-of-ice",
-        "name": "Повелитель холоду",
+        "name": "Master of Ice",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
@@ -1522,15 +1522,15 @@
   },
   {
     "slug": "master-of-mind",
-    "name": "Повелитель розуму",
-    "description": "Закляття «Сповільнення» і «Розсіяність» діють по області — до 3 цілей.",
-    "appearanceDescription": "Над ворожим строєм пливе сірий туман, і думки солдатів стають в'язкими, мов болото. Наказ командира доходить до них, наче крізь товщу води.",
+    "name": "Master of Mind",
+    "description": "The spells \"Slow\" and \"Confusion\" work over an area, up to 3 targets.",
+    "appearanceDescription": "A gray fog drifts over the enemy line, and the soldiers' thoughts grow viscous as a swamp. The commander's order reaches them as if through a thick layer of water.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-mind.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "master-of-mind",
-        "name": "Повелитель розуму",
+        "name": "Master of Mind",
         "trigger": {
           "event": "passive"
         },
@@ -1551,15 +1551,15 @@
   },
   {
     "slug": "master-of-pain",
-    "name": "Повелитель болі",
-    "description": "Закляття «Чума» і «Страждання» діють по області — до 3 цілей.",
-    "appearanceDescription": "Біль розповзається від однієї жертви до іншої, як тріщина по кризі. Ворожі воїни корчаться один за одним, не розуміючи, хто їх уразив.",
+    "name": "Master of Pain",
+    "description": "The spells \"Plague\" and \"Suffering\" work over an area, up to 3 targets.",
+    "appearanceDescription": "Pain creeps from one victim to the next, like a crack across ice. The enemy warriors writhe one after another, not understanding who struck them.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-pain.webp",
-    "mainSkillId": "Темрява",
+    "mainSkillId": "Darkness",
     "abilities": [
       {
         "id": "master-of-pain",
-        "name": "Повелитель болі",
+        "name": "Master of Pain",
         "trigger": {
           "event": "passive"
         },
@@ -1580,15 +1580,15 @@
   },
   {
     "slug": "master-of-storms",
-    "name": "Повелитель бурі",
-    "description": "Ціль ваших заклять «Блискавка» і «Ланцюгова блискавка» отримує −5 ініціативи на 2 раунди.",
-    "appearanceDescription": "Блискавка лишає в тілі ворога тремтливий гул, від якого сіпаються м'язи й тремтять коліна. Він ще довго рухається уривками, як маріонетка з переплутаними нитками.",
+    "name": "Master of Storms",
+    "description": "The target of your spells \"Lightning Bolt\" and \"Chain Lightning\" takes −5 initiative for 2 rounds.",
+    "appearanceDescription": "Lightning leaves a trembling hum in the enemy's body that makes the muscles twitch and the knees shake. For a long time he moves in jerks, like a marionette with tangled strings.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/master-of-storms.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "master-of-storms",
-        "name": "Повелитель бурі",
+        "name": "Master of Storms",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
@@ -1614,22 +1614,22 @@
   },
   {
     "slug": "nature-advanced",
-    "name": "Просунута магія Природи",
-    "description": "Відкриває доступ до заклять школи «Природа» 1–4 рівня; кубики заклять цієї школи — к8.",
-    "appearanceDescription": "Лози тягнуться до друїда, як пси до господаря, а птахи замовкають, коли він говорить. Його закляття пахнуть живицею й грозою.",
+    "name": "Advanced Nature Magic",
+    "description": "Unlocks access to \"Nature\" school spells of levels 1–4; spell dice of this school are d8.",
+    "appearanceDescription": "Vines reach for the druid like hounds for their master, and the birds fall silent when he speaks. His spells smell of resin and thunderstorms.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature-advanced.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "nature-advanced",
-        "name": "Просунута магія Природи",
+        "name": "Advanced Nature Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Природа» 1–4 рівня; кубики заклять цієї школи — к8."
+            "text": "Unlocks access to \"Nature\" school spells of levels 1–4; spell dice of this school are d8."
           }
         ]
       }
@@ -1637,22 +1637,22 @@
   },
   {
     "slug": "nature-basic",
-    "name": "Базова магія Природи",
-    "description": "Відкриває доступ до заклять школи «Природа» 1–2 рівня; кубики заклять цієї школи — к6.",
-    "appearanceDescription": "Друїд прикладає долоню до землі, і трава під нею відгукується легким тремтінням. Ліс поки лише прислухається до нього — але вже не відвертається.",
+    "name": "Basic Nature Magic",
+    "description": "Unlocks \"Nature\" school spells of levels 1–2; spell dice of this school are d6.",
+    "appearanceDescription": "The druid presses a palm to the ground, and the grass beneath answers with a faint tremor. The forest is only listening to him for now, but it no longer turns away.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature-basic.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "nature-basic",
-        "name": "Базова магія Природи",
+        "name": "Basic Nature Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Природа» 1–2 рівня; кубики заклять цієї школи — к6."
+            "text": "Unlocks \"Nature\" school spells of levels 1–2; spell dice of this school are d6."
           }
         ]
       }
@@ -1660,22 +1660,22 @@
   },
   {
     "slug": "nature-expert",
-    "name": "Експертна магія Природи",
-    "description": "Відкриває доступ до заклять школи «Природа» 1–5 рівня; кубики заклять цієї школи — к10.",
-    "appearanceDescription": "Там, де ступає цей друїд, крізь каміння пробиваються паростки. Ліс говорить його голосом, і горе тому, хто прийшов у нього з сокирою.",
+    "name": "Expert Nature Magic",
+    "description": "Unlocks \"Nature\" school spells of levels 1–5; spell dice of this school are d10.",
+    "appearanceDescription": "Wherever this druid treads, sprouts break through the stones. The forest speaks with his voice, and woe to anyone who enters it with an axe.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/nature-expert.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "nature-expert",
-        "name": "Експертна магія Природи",
+        "name": "Expert Nature Magic",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Відкриває доступ до заклять школи «Природа» 1–5 рівня; кубики заклять цієї школи — к10."
+            "text": "Unlocks \"Nature\" school spells of levels 1–5; spell dice of this school are d10."
           }
         ]
       }
@@ -1683,15 +1683,15 @@
   },
   {
     "slug": "natures-poison",
-    "name": "Отрута природи",
-    "description": "Ціль кожного вашого ворожого закляття Природи отруюється: щораунду 15 % середньої шкоди вашої атаки отрутою, 2 раунди.",
-    "appearanceDescription": "Кожне закляття друїда несе в собі пилок, сік і жало. Рани ворогів набрякають і синіють, а дихання стає хрипким і важким.",
+    "name": "Nature's Poison",
+    "description": "The target of each of your hostile Nature spells is poisoned: each round, 15% of your attack's average damage as poison, for 2 rounds.",
+    "appearanceDescription": "Every spell the druid casts carries pollen, sap and a sting. Enemy wounds swell and turn blue, and their breathing grows rasping and heavy.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/natures-poison.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "natures-poison",
-        "name": "Отрута природи",
+        "name": "Nature's Poison",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
@@ -1725,15 +1725,15 @@
   },
   {
     "slug": "natures-wrath",
-    "name": "Гнів природи",
-    "description": "Закляття Природи до 4 рівня включно діють на всіх: зцілення — на всіх союзників, шкода й контроль — на всіх ворогів.",
-    "appearanceDescription": "Друїд розкидає руки, і весь ліс довкола вдихає разом із ним. Одне закляття котиться полем, як вітер по траві, і не оминає жодної стеблини.",
+    "name": "Nature's Wrath",
+    "description": "Nature spells up to level 4 affect everyone: healing affects all allies, damage and control affect all enemies.",
+    "appearanceDescription": "The druid flings his arms wide, and the whole forest around him draws breath along with him. A single spell rolls across the field like wind over grass and spares not a single blade.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/natures-wrath.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "natures-wrath",
-        "name": "Гнів природи",
+        "name": "Nature's Wrath",
         "trigger": {
           "event": "passive"
         },
@@ -1742,7 +1742,7 @@
             "kind": "flag",
             "flag": "spellTargeting",
             "mode": "all",
-            "school": "Природа",
+            "school": "Nature",
             "maxLevel": 4
           }
         ]
@@ -1751,14 +1751,14 @@
   },
   {
     "slug": "personal-agrael",
-    "name": "Аграїл: Полум'яна аура",
-    "description": "Усі союзники (зокрема сам Аграїл) завдають +10 % шкоди. Тип шкоди не змінюється.",
-    "appearanceDescription": "Аграїл стоїть у мареві жару, і в ньому танцюють тонкі язики багряного полум'я. Кожен, хто поруч, відчуває, як вогонь проникає в кров, роблячи удари гарячішими й злішими.",
-    "mainSkillId": "Персональні",
+    "name": "Agrael: Flame Aura",
+    "description": "All allies (including Agrael himself) deal +10% damage. The damage type does not change.",
+    "appearanceDescription": "Agrael stands in a heat haze, and thin tongues of crimson flame dance within it. Everyone nearby feels fire seep into their blood, making their blows hotter and fiercer.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "agrael-fire-aura",
-        "name": "Полум'яна аура",
+        "name": "Flame Aura",
         "trigger": {
           "event": "passive"
         },
@@ -1777,14 +1777,14 @@
   },
   {
     "slug": "personal-beatrice",
-    "name": "Беатріс: Подвійні пута",
-    "description": "Закляття контролю (Корені, Сплутування, Сповільнення, Сліпота, Розсіяність, Шал, Ляльковод) діють по області — до 2 цілей.",
-    "appearanceDescription": "Беатріс плете чари, як павук павутину: з пальців тягнуться дві мерехтливі нитки, і кожна знаходить свою жертву. Двоє ворогів одночасно завмирають, мов маріонетки, чиї мотузки смикнула одна рука.",
-    "mainSkillId": "Персональні",
+    "name": "Beatrice: Double Shackles",
+    "description": "Control spells (Roots, Entangle, Slow, Blindness, Confusion, Berserk, Puppet Master) affect an area: up to 2 targets.",
+    "appearanceDescription": "Beatrice weaves magic like a spider spins a web: two shimmering threads stretch from her fingers, and each finds its victim. Two enemies freeze at once, like marionettes whose strings were tugged by a single hand.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "beatrice-double-bind",
-        "name": "Подвійні пута",
+        "name": "Double Shackles",
         "trigger": {
           "event": "passive"
         },
@@ -1810,14 +1810,14 @@
   },
   {
     "slug": "personal-godric",
-    "name": "Годрик: Непохитний",
-    "description": "Годрик: мораль ніколи не опускається нижче +1. Поки будь-який союзник має ≤ 15 % HP, завдає +20 % шкоди.",
-    "appearanceDescription": "Лицар стоїть, мов скеля посеред бурі, і жоден жах не стирає спокою з обличчя. Та коли поруч падає побратим, в очах спалахує холодний гнів, а булава опускається з силою гірського обвалу.",
-    "mainSkillId": "Персональні",
+    "name": "Godric: Unyielding",
+    "description": "Godric: morale never drops below +1. While any ally has ≤ 15% HP, he deals +20% damage.",
+    "appearanceDescription": "The knight stands like a rock in the midst of a storm, and no horror wipes the calm from his face. But when a comrade falls beside him, cold anger flares in his eyes, and the mace comes down with the force of a mountain landslide.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "godric-steadfast",
-        "name": "Непохитний",
+        "name": "Unyielding",
         "trigger": {
           "event": "passive"
         },
@@ -1831,7 +1831,7 @@
       },
       {
         "id": "godric-wrath",
-        "name": "Непохитний: гнів за своїх",
+        "name": "Unyielding: Wrath for Allies",
         "trigger": {
           "event": "passive"
         },
@@ -1854,14 +1854,14 @@
   },
   {
     "slug": "personal-isabel",
-    "name": "Ізабель: Сурми світанку",
-    "description": "На початку бою всі союзники отримують +2 ініціативи і +10 % шкоди на 2 раунди.",
-    "appearanceDescription": "Ізабель підносить до вуст срібний ріг, і його чистий поклик котиться полем, як перший промінь сонця над туманом. Воїни розправляють плечі, стискають руків'я мечів і рушають уперед раніше, ніж ворог устигає вишикуватися.",
-    "mainSkillId": "Персональні",
+    "name": "Isabel: Horns of Dawn",
+    "description": "At the start of battle, all allies gain +2 initiative and +10% damage for 2 rounds.",
+    "appearanceDescription": "Isabel raises a silver horn to her lips, and its clear call rolls across the field like the first ray of sun over the mist. Warriors square their shoulders, grip their sword hilts and surge forward before the enemy can form ranks.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "isabel-dawn-horns",
-        "name": "Сурми світанку",
+        "name": "Horns of Dawn",
         "trigger": {
           "event": "battleStart"
         },
@@ -1892,14 +1892,14 @@
   },
   {
     "slug": "personal-ivan",
-    "name": "Айвен: Перший постріл",
-    "description": "Ініціатива 999 — Айвен завжди ходить першим. Перша дальня атака бою — з перевагою.",
-    "appearanceDescription": "Айвен рухається ще до того, як сурми встигають прозвучати: тятива вже натягнута, погляд уже знайшов ціль. Перша стріла летить у тиші, поки вороги тільки тягнуться до зброї.",
-    "mainSkillId": "Персональні",
+    "name": "Ivan: First Shot",
+    "description": "Initiative 999: Ivan always goes first. The first ranged attack of the battle has advantage.",
+    "appearanceDescription": "Ivan moves before the horns can sound: the bowstring is already drawn, his gaze has already found the target. The first arrow flies in silence while the enemies are only reaching for their weapons.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "ivan-swift",
-        "name": "Перший постріл: швидкість",
+        "name": "First Shot: Speed",
         "trigger": {
           "event": "passive"
         },
@@ -1913,7 +1913,7 @@
       },
       {
         "id": "ivan-first-shot",
-        "name": "Перший постріл",
+        "name": "First Shot",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -1935,14 +1935,14 @@
   },
   {
     "slug": "personal-kha-beleth",
-    "name": "Кха-Белех: Кара Безодні",
-    "description": "Кха-Белех: кожна атака б'є всіх ворогів з повною шкодою.",
-    "appearanceDescription": "Кха-Белех замахується, і за клинком тягнеться хвіст чорного полум'я, що розтікається полем, як прилив. Удар призначався одному, але вогонь Безодні знаходить кожного ворога, хоч би де той стояв.",
-    "mainSkillId": "Персональні",
+    "name": "Kha-Beleth: Wrath of the Abyss",
+    "description": "Kha-Beleth: every attack hits all enemies for full damage.",
+    "appearanceDescription": "Kha-Beleth swings, and a trail of black flame follows the blade, spreading across the field like a tide. The blow was meant for one, but the fire of the Abyss finds every enemy, wherever they stand.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "kha-beleth-abyss-wrath",
-        "name": "Кара Безодні",
+        "name": "Wrath of the Abyss",
         "trigger": {
           "event": "passive"
         },
@@ -1957,22 +1957,22 @@
   },
   {
     "slug": "personal-markel",
-    "name": "Маркел: Поклик Аватара",
-    "description": "Маркел знає додаткове закляття «Аватар» — прикликає Аватара Смерті (DM може замінити юніта в заклятті).",
-    "appearanceDescription": "Маркел вимовляє ім'я, яке не можна писати, і повітря довкола густішає, набуваючи форми. З тіні й мерехтіння постає Аватар — тиха, велична постать, що схиляє голову лише перед тим, хто її покликав.",
-    "mainSkillId": "Персональні",
-    "grantedSpellId": "Аватар",
+    "name": "Markel: Call of the Avatar",
+    "description": "Markel knows an additional spell, \"Avatar\", which summons an Avatar of Death (the DM may replace the unit in the spell).",
+    "appearanceDescription": "Markel speaks a name that must not be written, and the air around him thickens, taking shape. From shadow and shimmer rises the Avatar, a silent, majestic figure that bows its head only to the one who called it.",
+    "mainSkillId": "Personal",
+    "grantedSpellId": "Avatar",
     "abilities": [
       {
         "id": "markel-avatar",
-        "name": "Поклик Аватара",
+        "name": "Call of the Avatar",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Дає закляття «Аватар»."
+            "text": "Grants the \"Avatar\" spell."
           }
         ]
       }
@@ -1980,14 +1980,14 @@
   },
   {
     "slug": "personal-raelag",
-    "name": "Раїлаг: Отрута Ігг-Шайла",
-    "description": "Раїлаг: після влучання ціль отруєна — щораунду 10 % середньої шкоди атаки, 3 раунди. Не стакається — повторне влучання оновлює тривалість.",
-    "appearanceDescription": "Раїлаг тримає клинки, вкриті тьмяною зеленою плівкою, що ледь димить на повітрі. Подряпина від них здається дрібницею, доки рана не починає пекти й чорніти, а по жилах не розповзається крижаний вогонь.",
-    "mainSkillId": "Персональні",
+    "name": "Raelag: Yggshail's Venom",
+    "description": "Raelag: after a hit, the target is poisoned: each round, 10% of the attack's average damage, for 3 rounds. Does not stack; a repeated hit refreshes the duration.",
+    "appearanceDescription": "Raelag holds blades coated in a dull green film that faintly smokes in the air. A scratch from them seems trivial until the wound begins to burn and blacken, and icy fire creeps through the veins.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "raelag-venom",
-        "name": "Отрута Ігг-Шайла",
+        "name": "Yggshail's Venom",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2011,14 +2011,14 @@
   },
   {
     "slug": "personal-semgrun",
-    "name": "Семгрун: Невловима",
-    "description": "Семгрун: перша атака кожного ворога по власнику за раунд — з невигідністю (ворог отримує мітку на 1 раунд).",
-    "appearanceDescription": "Семгрун ніби розчиняється в повітрі саме тоді, коли опускається клинок: лишається тільки тінь і легкий подих вітру. Ворог б'є в порожнечу, а Семгрун уже стоїть на крок лівіше й усміхається.",
-    "mainSkillId": "Персональні",
+    "name": "Semgrun: Elusive",
+    "description": "Semgrun: the first attack of each enemy against the owner each round has disadvantage (the enemy receives a mark for 1 round).",
+    "appearanceDescription": "Semgrun seems to dissolve into the air just as a blade descends: only a shadow and a faint breath of wind remain. The enemy strikes at emptiness, while Semgrun already stands a step to the left, smiling.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "semgrun-elusive",
-        "name": "Невловима",
+        "name": "Elusive",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -2052,19 +2052,19 @@
   },
   {
     "slug": "personal-zehir",
-    "name": "Зехір: Учень усіх шкіл",
-    "description": "Перше закляття кожної школи (Світло, Темрява, Хаос, Природа) за бій дає +15 % до шкоди заклять до кінця бою; бонуси шкіл складаються (до +60 %). З 4 рівня — +2 слоти 3 кола і +1 слот 4 кола. Може вивчати закляття всіх шкіл (DM відкриває їх у дереві).",
-    "appearanceDescription": "Чотири сфери кружляють навколо — золота, чорна, вогняна й зелена, — і кожна спалахує, коли Зехір уперше черпає з неї силу. Що більше сфер прокинулося, то яскравіше палає погляд і то важче гудуть закляття.",
-    "mainSkillId": "Персональні",
+    "name": "Zehir: Student of All Schools",
+    "description": "The first spell of each school (Light, Darkness, Chaos, Nature) in a battle grants +15% spell damage until the end of the battle; school bonuses stack (up to +60%). From level 4: +2 3rd-level slots and +1 4th-level slot. Can learn spells of all schools (the DM unlocks them in the tree).",
+    "appearanceDescription": "Four spheres circle around him: gold, black, fiery and green. Each flares when Zehir first draws power from it. The more spheres awaken, the brighter his gaze burns and the heavier his spells hum.",
+    "mainSkillId": "Personal",
     "abilities": [
       {
         "id": "zehir-school-light",
-        "name": "Учень усіх шкіл: Світло",
+        "name": "Student of All Schools: Light",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
           "role": "caster",
-          "school": "Світло"
+          "school": "Light"
         },
         "limits": {
           "perBattle": 1
@@ -2085,12 +2085,12 @@
       },
       {
         "id": "zehir-school-dark",
-        "name": "Учень усіх шкіл: Темрява",
+        "name": "Student of All Schools: Darkness",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
           "role": "caster",
-          "school": "Темрява"
+          "school": "Darkness"
         },
         "limits": {
           "perBattle": 1
@@ -2111,12 +2111,12 @@
       },
       {
         "id": "zehir-school-chaos",
-        "name": "Учень усіх шкіл: Хаос",
+        "name": "Student of All Schools: Chaos",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
           "role": "caster",
-          "school": "Хаос"
+          "school": "Chaos"
         },
         "limits": {
           "perBattle": 1
@@ -2137,12 +2137,12 @@
       },
       {
         "id": "zehir-school-nature",
-        "name": "Учень усіх шкіл: Природа",
+        "name": "Student of All Schools: Nature",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
           "role": "caster",
-          "school": "Природа"
+          "school": "Nature"
         },
         "limits": {
           "perBattle": 1
@@ -2163,7 +2163,7 @@
       },
       {
         "id": "zehir-arcane-reserve",
-        "name": "Учень усіх шкіл: магічний запас",
+        "name": "Student of All Schools: Mana Reserve",
         "trigger": {
           "event": "passive"
         },
@@ -2192,14 +2192,14 @@
       },
       {
         "id": "zehir-all-schools",
-        "name": "Учень усіх шкіл",
+        "name": "Student of All Schools",
         "trigger": {
           "event": "passive"
         },
         "effects": [
           {
             "kind": "note",
-            "text": "Може вивчати закляття всіх шкіл — DM відкриває їх у дереві навичок."
+            "text": "Can learn spells of all schools; the DM unlocks them in the skill tree."
           }
         ]
       }
@@ -2207,15 +2207,15 @@
   },
   {
     "slug": "piercing-bolt",
-    "name": "Бронебійний снаряд",
-    "description": "Влучання дальньою атакою з шансом 40 % знижує AC цілі на 1 на 2 раунди.",
-    "appearanceDescription": "Гранений наконечник, загартований у маслі й попелі, прошиває пластину, як вощений папір. Крізь пробоїну вже видно, де броня тримає слабше.",
+    "name": "Armor-Piercing Bolt",
+    "description": "A ranged hit has a 40% chance to reduce the target's AC by 1 for 2 rounds.",
+    "appearanceDescription": "A faceted arrowhead, tempered in oil and ash, pierces plate like waxed paper. Through the hole you can already see where the armor holds weakest.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/piercing-bolt.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "piercing-bolt",
-        "name": "Бронебійний снаряд",
+        "name": "Armor-Piercing Bolt",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -2240,20 +2240,20 @@
   },
   {
     "slug": "pyrokinesis",
-    "name": "Пірокінез",
-    "description": "Ціль кожного вашого закляття Хаосу загоряється: щораунду 20 % середньої шкоди вашої атаки вогнем, 3 раунди.",
-    "appearanceDescription": "Після кожного закляття на ворогах лишаються вогники, що не гаснуть ні від води, ні від піску. Вони повзуть по одягу й волоссю, доки не доїдять своє.",
+    "name": "Pyrokinesis",
+    "description": "The target of each of your Chaos spells catches fire: each round, 20% of your attack's average damage as fire, for 3 rounds.",
+    "appearanceDescription": "After each spell, flames remain on the enemies that neither water nor sand can quench. They crawl over clothing and hair until they have eaten their fill.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/pyrokinesis.webp",
-    "mainSkillId": "Хаос",
+    "mainSkillId": "Chaos",
     "abilities": [
       {
         "id": "pyrokinesis",
-        "name": "Пірокінез",
+        "name": "Pyrokinesis",
         "trigger": {
           "event": "spellCast",
           "phase": "after",
           "role": "caster",
-          "school": "Хаос"
+          "school": "Chaos"
         },
         "effects": [
           {
@@ -2274,15 +2274,15 @@
   },
   {
     "slug": "racial-dark-elves-advanced",
-    "name": "Жага крові (Просунутий)",
-    "description": "Кожне вбивство, зроблене самим героєм, дає +1 дію на хід до кінця бою; максимум +2.",
-    "appearanceDescription": "З кожною смертю довкола темного ельфа густішає багряна імла. Він сміється тихо й радісно, і клинки в його руках мелькають уже вдвічі частіше.",
+    "name": "Bloodlust (Advanced)",
+    "description": "Each kill made by the hero personally grants +1 action per turn until the end of the battle; maximum +2.",
+    "appearanceDescription": "With each death, a crimson haze thickens around the dark elf. He laughs softly and gladly, and the blades in his hands flicker twice as often.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-elemental-vision.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "dark-elves-bloodlust-advanced",
-        "name": "Жага крові (Просунутий)",
+        "name": "Bloodlust (Advanced)",
         "trigger": {
           "event": "kill",
           "role": "killer"
@@ -2305,15 +2305,15 @@
   },
   {
     "slug": "racial-dark-elves-basic",
-    "name": "Жага крові (Базовий)",
-    "description": "Кожне вбивство, зроблене самим героєм, дає +1 дію на хід до кінця бою; максимум +1.",
-    "appearanceDescription": "Ворог падає, і темний ельф глибоко вдихає запах крові. Його зіниці розширюються, а рухи стають різкішими й швидшими, ніби хтось підкрутив тятиву в його тілі.",
+    "name": "Bloodlust (Basic)",
+    "description": "Each kill made by the hero personally grants +1 action per turn until the end of the battle; maximum +1.",
+    "appearanceDescription": "An enemy falls, and the dark elf draws a deep breath of the scent of blood. His pupils widen, and his movements grow sharper and faster, as if someone had tightened a bowstring inside his body.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-dark-ritual.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "dark-elves-bloodlust-basic",
-        "name": "Жага крові (Базовий)",
+        "name": "Bloodlust (Basic)",
         "trigger": {
           "event": "kill",
           "role": "killer"
@@ -2336,15 +2336,15 @@
   },
   {
     "slug": "racial-dark-elves-expert",
-    "name": "Жага крові (Експерт)",
-    "description": "Кожне вбивство, зроблене самим героєм, дає +1 дію на хід до кінця бою; максимум +3.",
-    "appearanceDescription": "Після третьої жертви темний ельф стає майже розмитою тінню з фіалковими очима. Кров на його обладунку парує, а вороги не встигають навіть підняти щити.",
+    "name": "Bloodlust (Expert)",
+    "description": "Each kill made by the hero personally grants +1 action per turn until the end of the battle; maximum +3.",
+    "appearanceDescription": "After the third victim, the dark elf becomes an almost blurred shadow with violet eyes. Blood steams on his armor, and enemies cannot even raise their shields in time.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-rage-of-the-elements.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "dark-elves-bloodlust-expert",
-        "name": "Жага крові (Експерт)",
+        "name": "Bloodlust (Expert)",
         "trigger": {
           "event": "kill",
           "role": "killer"
@@ -2367,15 +2367,15 @@
   },
   {
     "slug": "racial-dark-elves-ultimate",
-    "name": "Кривавий ритуал",
-    "description": "Герой бачить HP ворогів. Атаки по цілях із HP ≤ 50 % — з перевагою і +20 % шкоди.",
-    "appearanceDescription": "Темний ельф проводить лезом по долоні, і його кров спалахує фіалковим сяйвом. Тепер він бачить, як б'ються серця ворогів, і чує, які з них уже слабшають. На поранених він кидається, як вовк на пораненого оленя.",
+    "name": "Blood Ritual",
+    "description": "The hero sees enemies' HP. Attacks against targets with HP ≤ 50% have advantage and +20% damage.",
+    "appearanceDescription": "The dark elf draws a blade across his palm, and his blood flares with a violet glow. Now he sees how the enemies' hearts beat and hears which of them are already weakening. He pounces on the wounded like a wolf on a stricken deer.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/dark-elves-empowered-spells.webp",
-    "mainSkillId": "Ультимат",
+    "mainSkillId": "Ultimate",
     "abilities": [
       {
         "id": "dark-elves-blood-ritual-sight",
-        "name": "Кривавий ритуал",
+        "name": "Blood Ritual",
         "trigger": {
           "event": "passive"
         },
@@ -2388,7 +2388,7 @@
       },
       {
         "id": "dark-elves-blood-ritual-strike",
-        "name": "Кривавий ритуал: добивання",
+        "name": "Blood Ritual: Finishing Blow",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -2418,15 +2418,15 @@
   },
   {
     "slug": "racial-demons-advanced",
-    "name": "Відкриття воріт (Просунутий)",
-    "description": "Бонусна дія, 1 раз за бій: прикликає випадкового юніта групи «Демони» Tier 5 з бестіарію кампанії. Заряд не залежить від слотів заклинань.",
-    "appearanceDescription": "Демон креслить у повітрі вогняне коло, і воно провалюється у вируючу безодню. З вихору виступає рогата постать, охоплена язиками полум'я, й одразу шукає здобич.",
+    "name": "Opening the Gates (Advanced)",
+    "description": "Bonus action, 1 use per battle: summons a random Tier 5 unit of the \"Demons\" group from the campaign bestiary. The charge does not depend on spell slots.",
+    "appearanceDescription": "The demon draws a fiery circle in the air, and it collapses into a roiling abyss. From the whirl steps a horned figure wreathed in tongues of flame, at once seeking prey.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-advanced.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "demons-gating-advanced",
-        "name": "Відкриття воріт (Просунутий)",
+        "name": "Opening the Gates (Advanced)",
         "trigger": {
           "event": "bonusAction"
         },
@@ -2436,7 +2436,7 @@
         "effects": [
           {
             "kind": "summon",
-            "group": "Демони",
+            "group": "Demons",
             "tier": 5
           }
         ]
@@ -2445,15 +2445,15 @@
   },
   {
     "slug": "racial-demons-basic",
-    "name": "Відкриття воріт (Базовий)",
-    "description": "Бонусна дія, 1 раз за бій: прикликає випадкового юніта групи «Демони» Tier 3 з бестіарію кампанії. Заряд не залежить від слотів заклинань.",
-    "appearanceDescription": "Повітря поруч із героєм розривається багряною щілиною, з якої б'є жар і чути далеке виття. Крізь неї, обтрушуючи попіл, вилазить невеликий біс і шкірить ікла.",
+    "name": "Opening the Gates (Basic)",
+    "description": "Bonus action, 1 use per battle: summons a random Tier 3 unit of the \"Demons\" group from the campaign bestiary. The charge does not depend on spell slots.",
+    "appearanceDescription": "The air beside the hero tears open in a crimson rift, from which heat blasts and a distant howl is heard. Through it, shaking off ash, a small imp climbs out and bares its fangs.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-basic.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "demons-gating-basic",
-        "name": "Відкриття воріт (Базовий)",
+        "name": "Opening the Gates (Basic)",
         "trigger": {
           "event": "bonusAction"
         },
@@ -2463,7 +2463,7 @@
         "effects": [
           {
             "kind": "summon",
-            "group": "Демони",
+            "group": "Demons",
             "tier": 3
           }
         ]
@@ -2472,15 +2472,15 @@
   },
   {
     "slug": "racial-demons-expert",
-    "name": "Відкриття воріт (Експерт)",
-    "description": "Бонусна дія, 1 раз за бій: прикликає випадкового юніта групи «Демони» Tier 7 з бестіарію кампанії. Заряд не залежить від слотів заклинань.",
-    "appearanceDescription": "Земля здіймається кам'яною аркою, всередині якої палає саме Інферно. Крізь браму, пригинаючи роги, проходить велетенський володар пекла, і від його кроків тріскається каміння.",
+    "name": "Opening the Gates (Expert)",
+    "description": "Bonus action, 1 use per battle: summons a random Tier 7 unit of the \"Demons\" group from the campaign bestiary. The charge does not depend on spell slots.",
+    "appearanceDescription": "The ground rises into a stone arch, within which the Inferno itself blazes. Through the gate, lowering its horns, steps a gigantic lord of hell, and the stones crack beneath his steps.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-expert.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "demons-gating-expert",
-        "name": "Відкриття воріт (Експерт)",
+        "name": "Opening the Gates (Expert)",
         "trigger": {
           "event": "bonusAction"
         },
@@ -2490,7 +2490,7 @@
         "effects": [
           {
             "kind": "summon",
-            "group": "Демони",
+            "group": "Demons",
             "tier": 7
           }
         ]
@@ -2499,15 +2499,15 @@
   },
   {
     "slug": "racial-demons-ultimate",
-    "name": "Пекельна Земля",
-    "description": "Дія, 1 раз за бій: до кінця бою всі вороги щораунду отримують 10 шкоди вогнем.",
-    "appearanceDescription": "Демон б'є долонею об землю, і по ній розбігаються жилки розпеченої лави. Трава спалахує, каміння червоніє, і кожен ворог відчуває, як підошви чобіт починають диміти. Вогонь не гасне, поки триває битва.",
+    "name": "Hellish Land",
+    "description": "Action, 1 use per battle: until the end of the battle, all enemies take 10 fire damage each round.",
+    "appearanceDescription": "The demon slams his palm against the ground, and veins of molten lava race across it. The grass ignites, the stones glow red, and every enemy feels the soles of their boots begin to smoke. The fire does not die while the battle lasts.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-demons-ultimate.webp",
-    "mainSkillId": "Ультимат",
+    "mainSkillId": "Ultimate",
     "abilities": [
       {
         "id": "demons-hellfire-land",
-        "name": "Пекельна Земля",
+        "name": "Hellish Land",
         "trigger": {
           "event": "action"
         },
@@ -2530,15 +2530,15 @@
   },
   {
     "slug": "racial-dwarves-advanced",
-    "name": "Рунна броня (Просунутий)",
-    "description": "Опір усій шкоді 15 %.",
-    "appearanceDescription": "Руни на обладунку гнома спалахують ланцюжком, з'єднуючись у мережу світних ліній. Полум'я, сталь і чари однаково розбиваються об неї, мов хвилі об берег.",
+    "name": "Runic Armor (Advanced)",
+    "description": "Resistance to all damage 15%.",
+    "appearanceDescription": "The runes on the dwarf's armor flare in a chain, joining into a network of glowing lines. Flame, steel and magic alike break against it like waves against a shore.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-advanced.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "dwarves-rune-armor-advanced",
-        "name": "Рунна броня (Просунутий)",
+        "name": "Runic Armor (Advanced)",
         "trigger": {
           "event": "passive"
         },
@@ -2555,15 +2555,15 @@
   },
   {
     "slug": "racial-dwarves-basic",
-    "name": "Рунна броня (Базовий)",
-    "description": "Опір усій шкоді 10 %.",
-    "appearanceDescription": "На нагруднику гнома прокидається одна руна, і по металу пробігає тепле бурштинове світло. Удари, що влучають у нього, звучать глухо, ніби б'ють у скелю.",
+    "name": "Runic Armor (Basic)",
+    "description": "Resistance to all damage 10%.",
+    "appearanceDescription": "A single rune awakens on the dwarf's breastplate, and a warm amber light runs along the metal. Blows that strike him sound dull, as if hitting a cliff.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-basic.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "dwarves-rune-armor-basic",
-        "name": "Рунна броня (Базовий)",
+        "name": "Runic Armor (Basic)",
         "trigger": {
           "event": "passive"
         },
@@ -2580,15 +2580,15 @@
   },
   {
     "slug": "racial-dwarves-expert",
-    "name": "Рунна броня (Експерт)",
-    "description": "Опір усій шкоді 20 %.",
-    "appearanceDescription": "Уся броня гнома палає рунами, як ковальська заготовка, щойно витягнута з горна. Від нього пашить жаром, а ворожі клинки відскакують, лишаючи лише подряпини.",
+    "name": "Runic Armor (Expert)",
+    "description": "Resistance to all damage 20%.",
+    "appearanceDescription": "The dwarf's whole armor blazes with runes, like a smith's workpiece just pulled from the forge. Heat radiates from him, and enemy blades glance off, leaving only scratches.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-expert.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "dwarves-rune-armor-expert",
-        "name": "Рунна броня (Експерт)",
+        "name": "Runic Armor (Expert)",
         "trigger": {
           "event": "passive"
         },
@@ -2605,15 +2605,15 @@
   },
   {
     "slug": "racial-dwarves-ultimate",
-    "name": "Рунічна атака",
-    "description": "Після кожного влучання герой отримує одну випадкову з 4 рун на 1 раунд: лють (+20 % шкоди), броня (+2 AC), швидкість (+3 ініціативи) або життя (лікування 10 % max HP).",
-    "appearanceDescription": "Коли молот гнома влучає, з металу вилітає іскра, що на льоту складається в руну. Вона спалахує червоним, синім, золотим або зеленим — і гном одразу відчуває її дар: лють у м'язах, камінь у шкірі, вітер у ногах чи тепло живого джерела.",
+    "name": "Runic Attack",
+    "description": "After each hit, the hero gains one of 4 random runes for 1 round: fury (+20% damage), armor (+2 AC), speed (+3 initiative) or life (heals 10% max HP).",
+    "appearanceDescription": "When the dwarf's hammer lands, a spark flies from the metal and forms a rune in midair. It flares red, blue, gold or green, and the dwarf at once feels its gift: fury in the muscles, stone in the skin, wind in the legs or the warmth of a living spring.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-dwarves-ultimate.webp",
-    "mainSkillId": "Ультимат",
+    "mainSkillId": "Ultimate",
     "abilities": [
       {
         "id": "dwarves-rune-strike",
-        "name": "Рунічна атака",
+        "name": "Runic Attack",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -2667,15 +2667,15 @@
   },
   {
     "slug": "racial-elves-advanced",
-    "name": "Мисливець (Просунутий)",
-    "description": "Бонусна дія: позначає до 2 ворогів; на 1 раунд усі атаки по позначених цілях — з перевагою.",
-    "appearanceDescription": "Мисливець свистить, як лісовий птах, і два вороги раптом помічають на своїй броні світні відбитки листя. Від цих знаків не сховатися ні в диму, ні в натовпі.",
+    "name": "Hunter (Advanced)",
+    "description": "Bonus action: marks up to 2 enemies; for 1 round all attacks against marked targets have advantage.",
+    "appearanceDescription": "The hunter whistles like a forest bird, and two enemies suddenly notice glowing leaf prints on their armor. There is no hiding from these marks, in smoke or in a crowd.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-advanced.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "elves-avenger-advanced",
-        "name": "Мисливець (Просунутий)",
+        "name": "Hunter (Advanced)",
         "trigger": {
           "event": "bonusAction"
         },
@@ -2695,15 +2695,15 @@
   },
   {
     "slug": "racial-elves-basic",
-    "name": "Мисливець (Базовий)",
-    "description": "Бонусна дія: позначає 1 ворога; на 1 раунд усі атаки по позначених цілях — з перевагою.",
-    "appearanceDescription": "Ельф прищурюється, і над головою обраного ворога спалахує ледь помітний зелений знак, схожий на лист. Тепер кожен лучник загону бачить, куди цілити.",
+    "name": "Hunter (Basic)",
+    "description": "Bonus action: marks 1 enemy; for 1 round all attacks against marked targets have advantage.",
+    "appearanceDescription": "The elf narrows his eyes, and a barely visible green mark like a leaf flares above the chosen enemy's head. Now every archer of the company can see where to aim.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-basic.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "elves-avenger-basic",
-        "name": "Мисливець (Базовий)",
+        "name": "Hunter (Basic)",
         "trigger": {
           "event": "bonusAction"
         },
@@ -2723,15 +2723,15 @@
   },
   {
     "slug": "racial-elves-expert",
-    "name": "Мисливець (Експерт)",
-    "description": "Бонусна дія: позначає до 3 ворогів; на 1 раунд усі атаки по позначених цілях — з перевагою.",
-    "appearanceDescription": "Погляд мисливця пробігає полем бою, і троє ворогів одразу відчувають холодок між лопатками. Над кожним тремтить смарагдова мітка, а стріли самі тягнуться до неї.",
+    "name": "Hunter (Expert)",
+    "description": "Bonus action: marks up to 3 enemies; for 1 round all attacks against marked targets have advantage.",
+    "appearanceDescription": "The hunter's gaze sweeps the battlefield, and three enemies at once feel a chill between their shoulder blades. An emerald mark trembles above each of them, and arrows seem to reach for it on their own.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-expert.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "elves-avenger-expert",
-        "name": "Мисливець (Експерт)",
+        "name": "Hunter (Expert)",
         "trigger": {
           "event": "bonusAction"
         },
@@ -2751,15 +2751,15 @@
   },
   {
     "slug": "racial-elves-ultimate",
-    "name": "Неймовірна удача",
-    "description": "Атаки героя критичні на 18–20 на кубику (поріг криту −2).",
-    "appearanceDescription": "Здається, сам ліс веде руку цього ельфа: вітер стихає саме тоді, коли тятива дзвенить, а сонячний промінь падає на щілину в обладунку ворога. Стріла входить туди, куди не влучив би жоден смертний.",
+    "name": "Incredible Luck",
+    "description": "The hero's attacks are critical on a roll of 18–20 (critical threshold −2).",
+    "appearanceDescription": "It seems the forest itself guides this elf's hand: the wind falls still just as the bowstring sings, and a sunbeam falls on a gap in the enemy's armor. The arrow goes in where no mortal's shot would land.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-elves-ultimate.webp",
-    "mainSkillId": "Ультимат",
+    "mainSkillId": "Ultimate",
     "abilities": [
       {
         "id": "elves-incredible-luck",
-        "name": "Неймовірна удача",
+        "name": "Incredible Luck",
         "trigger": {
           "event": "passive"
         },
@@ -2775,15 +2775,15 @@
   },
   {
     "slug": "racial-humans-advanced",
-    "name": "Контр-атака (Просунутий)",
-    "description": "Першому, хто атакує героя в ближньому бою за раунд, герой відповідає відсіччю (реакція) з бонусом +25 % шкоди.",
-    "appearanceDescription": "Лицар приймає удар на наплічник, розвертається на п'яті й б'є у відкритий бік нападника. Рух відточений тисячами тренувань на плацу під наглядом сивих ветеранів.",
+    "name": "Counterstrike (Advanced)",
+    "description": "The first creature to attack the hero in melee each round is answered with a riposte (reaction) that deals +25% bonus damage.",
+    "appearanceDescription": "The knight takes the blow on his pauldron, spins on his heel and strikes the attacker's exposed flank. The motion is honed by thousands of drills on the parade ground under the watch of grizzled veterans.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-advanced.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "humans-counter-advanced",
-        "name": "Контр-атака (Просунутий)",
+        "name": "Counterstrike (Advanced)",
         "trigger": {
           "event": "passive"
         },
@@ -2802,15 +2802,15 @@
   },
   {
     "slug": "racial-humans-basic",
-    "name": "Контр-атака (Базовий)",
-    "description": "Першому, хто атакує героя в ближньому бою за раунд, герой відповідає відсіччю (реакція) з бонусом +15 % шкоди.",
-    "appearanceDescription": "Щит здригається від удару, і в ту ж мить меч вислизає з-під його краю у коротку, злу відповідь. Ворог ще не встиг відступити, а вже відчуває сталь.",
+    "name": "Counterstrike (Basic)",
+    "description": "The first creature to attack the hero in melee each round is answered with a riposte (reaction) that deals +15% bonus damage.",
+    "appearanceDescription": "The shield shudders from the blow, and at that very instant a sword slips out from under its edge in a short, vicious reply. The enemy has not yet had time to step back, but already feels the steel.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-basic.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "humans-counter-basic",
-        "name": "Контр-атака (Базовий)",
+        "name": "Counterstrike (Basic)",
         "trigger": {
           "event": "passive"
         },
@@ -2829,15 +2829,15 @@
   },
   {
     "slug": "racial-humans-expert",
-    "name": "Контр-атака (Експерт)",
-    "description": "Першому, хто атакує героя в ближньому бою за раунд, герой відповідає відсіччю (реакція) з бонусом +40 % шкоди.",
-    "appearanceDescription": "Кожна атака на воїна Імперії — це запрошення. Він ловить чужий клинок гардою, відводить його вбік і повертає удар з такою силою, що лунає гул, ніби вдарили в храмовий дзвін.",
+    "name": "Counterstrike (Expert)",
+    "description": "The first creature to attack the hero in melee each round is answered with a riposte (reaction) that deals +40% bonus damage.",
+    "appearanceDescription": "Every attack on a warrior of the Empire is an invitation. He catches the foe's blade with his crossguard, turns it aside and returns the strike with such force that it rings like a temple bell.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-expert.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "humans-counter-expert",
-        "name": "Контр-атака (Експерт)",
+        "name": "Counterstrike (Expert)",
         "trigger": {
           "event": "passive"
         },
@@ -2856,15 +2856,15 @@
   },
   {
     "slug": "racial-humans-ultimate",
-    "name": "Ангел Хранитель",
-    "description": "Дія, 1 раз за бій: воскрешає мертвого союзника з 50 % його максимального HP.",
-    "appearanceDescription": "Небо над полем бою розколюється сліпучою смугою, і з неї спускається крилатий вартовий у срібних латах. Він схиляється над полеглим, торкається його чола — і той вдихає знову, ніби прокинувшись від важкого сну.",
+    "name": "Guardian Angel",
+    "description": "Action, 1 use per battle: resurrects a dead ally with 50% of their maximum HP.",
+    "appearanceDescription": "The sky above the battlefield splits in a blinding streak, and a winged guardian in silver plate descends from it. He bends over the fallen, touches their brow, and they draw breath again, as if waking from a heavy sleep.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-humans-ultimate.webp",
-    "mainSkillId": "Ультимат",
+    "mainSkillId": "Ultimate",
     "abilities": [
       {
         "id": "humans-guardian-angel",
-        "name": "Ангел Хранитель",
+        "name": "Guardian Angel",
         "trigger": {
           "event": "action"
         },
@@ -2890,15 +2890,15 @@
   },
   {
     "slug": "racial-mages-advanced",
-    "name": "Всезнання (Просунутий)",
-    "description": "+2 слоти заклинань 4-го рівня і +2 слоти 5-го рівня.",
-    "appearanceDescription": "Довкола мага мерехтять два додаткові кільця рун, повільно обертаючись у протилежні боки. Він черпає з них силу, як воду з глибокої криниці.",
+    "name": "Omniscience (Advanced)",
+    "description": "+2 4th-level spell slots and +2 5th-level slots.",
+    "appearanceDescription": "Two additional rings of runes shimmer around the mage, slowly turning in opposite directions. He draws power from them like water from a deep well.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-advanced.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "mages-omniscience-advanced",
-        "name": "Всезнання (Просунутий)",
+        "name": "Omniscience (Advanced)",
         "trigger": {
           "event": "passive"
         },
@@ -2918,15 +2918,15 @@
   },
   {
     "slug": "racial-mages-basic",
-    "name": "Всезнання (Базовий)",
-    "description": "+1 слот заклинань 4-го рівня і +1 слот 5-го рівня.",
-    "appearanceDescription": "У пам'яті мага розгортається ще один сувій, списаний дрібними рунами. Те, що вчора здавалося недосяжним, тепер чекає на кінчиках його пальців.",
+    "name": "Omniscience (Basic)",
+    "description": "+1 4th-level spell slot and +1 5th-level slot.",
+    "appearanceDescription": "Another scroll, written in tiny runes, unrolls in the mage's memory. What seemed unreachable yesterday now waits at his fingertips.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-basic.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "mages-omniscience-basic",
-        "name": "Всезнання (Базовий)",
+        "name": "Omniscience (Basic)",
         "trigger": {
           "event": "passive"
         },
@@ -2946,15 +2946,15 @@
   },
   {
     "slug": "racial-mages-expert",
-    "name": "Всезнання (Експерт)",
-    "description": "+3 слоти заклинань 4-го рівня і +3 слоти 5-го рівня.",
-    "appearanceDescription": "Сфера знань довкола мага розростається в ціле сузір'я рун, і кожна з них співає своєю нотою. Він тримає в голові закляття, на вивчення яких інші витрачають життя.",
+    "name": "Omniscience (Expert)",
+    "description": "+3 4th-level spell slots and +3 5th-level slots.",
+    "appearanceDescription": "The sphere of knowledge around the mage grows into a whole constellation of runes, each singing its own note. He holds in his head spells that others spend their lives learning.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-expert.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "mages-omniscience-expert",
-        "name": "Всезнання (Експерт)",
+        "name": "Omniscience (Expert)",
         "trigger": {
           "event": "passive"
         },
@@ -2974,15 +2974,15 @@
   },
   {
     "slug": "racial-mages-ultimate",
-    "name": "Знак мага",
-    "description": "Бонусна дія, 2 рази за бій: оновлює основну дію цього ходу (можна сотворити друге закляття).",
-    "appearanceDescription": "Маг креслить у повітрі сяючий знак, і час навколо нього на мить застигає: краплі дощу зависають, полум'я завмирає. У цій тиші він встигає вимовити ще одне закляття, перш ніж світ знову рушить.",
+    "name": "Mark of the Mage",
+    "description": "Bonus action, 2 times per battle: refreshes this turn's main action (allowing a second spell to be cast).",
+    "appearanceDescription": "The mage traces a shining sign in the air, and time around him freezes for a moment: raindrops hang suspended, flames stand still. In that silence he has time to speak one more spell before the world moves again.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-mages-ultimate.webp",
-    "mainSkillId": "Ультимат",
+    "mainSkillId": "Ultimate",
     "abilities": [
       {
         "id": "mages-mage-sign",
-        "name": "Знак мага",
+        "name": "Mark of the Mage",
         "trigger": {
           "event": "bonusAction"
         },
@@ -3001,15 +3001,15 @@
   },
   {
     "slug": "racial-necromancers-advanced",
-    "name": "Підняття мертвих (Просунутий)",
-    "description": "Дія, 1 раз за бій: до 2 повалених юнітів бою (не героїв, будь-якої сторони) оживають з 90 % max HP і переходять на бік некроманта.",
-    "appearanceDescription": "Шепіт некроманта розходиться полем, як холодний вітер. Двоє полеглих одночасно розплющують очі, підводяться, хитаючись, і повертаються обличчям до своїх колишніх товаришів.",
+    "name": "Raise Dead (Advanced)",
+    "description": "Action, 1 use per battle: up to 2 downed units in the battle (not heroes, from either side) revive with 90% max HP and switch to the necromancer's side.",
+    "appearanceDescription": "The necromancer's whisper spreads across the field like a cold wind. Two of the fallen open their eyes at once, rise swaying, and turn to face their former comrades.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-advanced.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "necromancers-raise-advanced",
-        "name": "Підняття мертвих (Просунутий)",
+        "name": "Raise Dead (Advanced)",
         "trigger": {
           "event": "action"
         },
@@ -3032,15 +3032,15 @@
   },
   {
     "slug": "racial-necromancers-basic",
-    "name": "Підняття мертвих (Базовий)",
-    "description": "Дія, 1 раз за бій: до 1 повалених юнітів бою (не героїв, будь-якої сторони) оживають з 90 % max HP і переходять на бік некроманта.",
-    "appearanceDescription": "Некромант простягає кістляву руку, і з-під землі над тілом полеглого здіймаються бліді нитки світла. Мрець смикається, спирається на зброю і встає — тепер із порожнім зеленим вогнем в очницях.",
+    "name": "Raise Dead (Basic)",
+    "description": "Action, 1 use per battle: up to 1 downed unit in the battle (not heroes, from either side) revives with 90% max HP and switches to the necromancer's side.",
+    "appearanceDescription": "The necromancer stretches out a bony hand, and pale threads of light rise from the ground over the body of the fallen. The corpse twitches, leans on its weapon and stands, now with an empty green fire in its eye sockets.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-basic.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "necromancers-raise-basic",
-        "name": "Підняття мертвих (Базовий)",
+        "name": "Raise Dead (Basic)",
         "trigger": {
           "event": "action"
         },
@@ -3063,15 +3063,15 @@
   },
   {
     "slug": "racial-necromancers-expert",
-    "name": "Підняття мертвих (Експерт)",
-    "description": "Дія, 1 раз за бій: до 3 повалених юнітів бою (не героїв, будь-якої сторони) оживають з 90 % max HP і переходять на бік некроманта.",
-    "appearanceDescription": "Над полем бою зависає важкий дзвін, і земля здригається, ніби під нею дихає щось величезне. Троє мерців підіймаються, обтрушуючи кров і пил, і мовчки стають у стрій позаду некроманта.",
+    "name": "Raise Dead (Expert)",
+    "description": "Action, 1 use per battle: up to 3 downed units in the battle (not heroes, from either side) revive with 90% max HP and switch to the necromancer's side.",
+    "appearanceDescription": "A heavy bell tolls above the battlefield, and the ground trembles as if something vast breathes beneath it. Three dead rise, shaking off blood and dust, and silently fall into formation behind the necromancer.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-expert.webp",
-    "mainSkillId": "Раса",
+    "mainSkillId": "Racial",
     "abilities": [
       {
         "id": "necromancers-raise-expert",
-        "name": "Підняття мертвих (Експерт)",
+        "name": "Raise Dead (Expert)",
         "trigger": {
           "event": "action"
         },
@@ -3094,15 +3094,15 @@
   },
   {
     "slug": "racial-necromancers-ultimate",
-    "name": "Крик Банші",
-    "description": "Дія, 1 раз за бій: мораль усіх ворогів −3.",
-    "appearanceDescription": "Некромант розтуляє вуста, і з них виривається пронизливий вереск примари, від якого лопаються шибки й тремтять щити. Ворогам здається, що крижані пальці стискають їм серце, а зброя раптом стає неймовірно важкою.",
+    "name": "Banshee Wail",
+    "description": "Action, 1 use per battle: the morale of all enemies −3.",
+    "appearanceDescription": "The necromancer opens his mouth, and the piercing shriek of a specter bursts out, shattering windowpanes and rattling shields. Enemies feel icy fingers clutch their hearts, and their weapons suddenly grow impossibly heavy.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/racial-necromancers-ultimate.webp",
-    "mainSkillId": "Ультимат",
+    "mainSkillId": "Ultimate",
     "abilities": [
       {
         "id": "necromancers-banshee-howl",
-        "name": "Крик Банші",
+        "name": "Banshee Wail",
         "trigger": {
           "event": "action"
         },
@@ -3121,15 +3121,15 @@
   },
   {
     "slug": "ranged-advanced",
-    "name": "Просунута стрільба",
-    "description": "Шкода дальніх атак +20 % (замінює Базову стрільбу).",
-    "appearanceDescription": "Стрілець бере поправку на вітер, не дивлячись на прапорці, — він відчуває його шкірою. Друга стріла вже на тятиві, поки перша ще летить.",
+    "name": "Advanced Ranged",
+    "description": "Ranged attack damage +20% (replaces Basic Ranged).",
+    "appearanceDescription": "The archer accounts for the wind without glancing at the pennants; he feels it on his skin. A second arrow is already on the string while the first is still in flight.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged-advanced.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "ranged-advanced",
-        "name": "Просунута стрільба",
+        "name": "Advanced Ranged",
         "trigger": {
           "event": "passive"
         },
@@ -3147,15 +3147,15 @@
   },
   {
     "slug": "ranged-basic",
-    "name": "Базова стрільба",
-    "description": "Шкода дальніх атак +10 %.",
-    "appearanceDescription": "Солом'яні опудала на краю табору поступово обростають стрілами саме там, де в людини серце. Рука ще тремтить на довгому натягу, але око вже не помиляється.",
+    "name": "Basic Ranged",
+    "description": "Ranged attack damage +10%.",
+    "appearanceDescription": "Straw dummies at the edge of camp gradually sprout arrows exactly where a person's heart would be. The hand still trembles at full draw, but the eye no longer errs.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged-basic.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "ranged-basic",
-        "name": "Базова стрільба",
+        "name": "Basic Ranged",
         "trigger": {
           "event": "passive"
         },
@@ -3173,15 +3173,15 @@
   },
   {
     "slug": "ranged-expert",
-    "name": "Експертна стрільба",
-    "description": "Шкода дальніх атак +30 % (замінює Просунуту стрільбу).",
-    "appearanceDescription": "Кажуть, такі лучники влучають у щілину забрала з двохсот кроків. Ворог чує лише свист — а потім уже нічого.",
+    "name": "Expert Ranged",
+    "description": "Ranged attack damage +30% (replaces Advanced Ranged).",
+    "appearanceDescription": "They say such archers can hit the gap in a visor from two hundred paces. The enemy hears only a whistle, and then nothing at all.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/main-skill-icons/ranged-expert.webp",
-    "mainSkillId": "Стрільба",
+    "mainSkillId": "Ranged",
     "abilities": [
       {
         "id": "ranged-expert",
-        "name": "Експертна стрільба",
+        "name": "Expert Ranged",
         "trigger": {
           "event": "passive"
         },
@@ -3199,15 +3199,15 @@
   },
   {
     "slug": "readiness",
-    "name": "Готовність",
-    "description": "Раз за раунд, перед атакою ближнього бою по вас, атакуючий отримує 50 % середньої шкоди вашої атаки. Якщо він від цього гине, його атака скасовується.",
-    "appearanceDescription": "Герой не чекає удару — він зустрічає його. Ворог робить крок для замаху й наштовхується на вістря, що вже чекало саме там.",
+    "name": "Readiness",
+    "description": "Once per round, before a melee attack against you, the attacker takes 50% of your attack's average damage. If this kills them, their attack is canceled.",
+    "appearanceDescription": "The hero does not wait for the blow; he meets it. The enemy steps in to swing and runs onto a point that was already waiting right there.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/readiness.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "readiness",
-        "name": "Готовність",
+        "name": "Readiness",
         "trigger": {
           "event": "attack",
           "phase": "before",
@@ -3232,15 +3232,15 @@
   },
   {
     "slug": "resilience",
-    "name": "Супротив",
-    "description": "Раз за бій, коли вас вражають при HP ≤ 15 %, з вас знімаються всі негативні ефекти та стани.",
-    "appearanceDescription": "На краю загибелі в грудях спалахує щось уперте й первісне. Отрута випаровується з крові, чари обсипаються з плечей, мов іній, — і герой знову бачить ясно.",
+    "name": "Resilience",
+    "description": "Once per battle, when you are hit at HP ≤ 15%, all negative effects and conditions are removed from you.",
+    "appearanceDescription": "At the brink of death, something stubborn and primal flares in the chest. Poison evaporates from the blood, spells shed from the shoulders like frost, and the hero sees clearly again.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/resilience.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "resilience",
-        "name": "Супротив",
+        "name": "Resilience",
         "trigger": {
           "event": "hit",
           "role": "target"
@@ -3264,15 +3264,15 @@
   },
   {
     "slug": "restoration",
-    "name": "Відновлення",
-    "description": "Ваша від'ємна мораль вважається рівною 0.",
-    "appearanceDescription": "Навіть після найгіршої поразки герой першим підводиться з багна й обтрушує плащ. Відчай стікає з нього, як дощова вода з обладунку.",
+    "name": "Restoration",
+    "description": "Your negative morale is treated as 0.",
+    "appearanceDescription": "Even after the worst defeat, the hero is the first to rise from the mud and shake out his cloak. Despair runs off him like rainwater off armor.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/restoration.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "restoration",
-        "name": "Відновлення",
+        "name": "Restoration",
         "trigger": {
           "event": "passive"
         },
@@ -3287,15 +3287,15 @@
   },
   {
     "slug": "retribution",
-    "name": "Відплата",
-    "description": "Фізична шкода +5 % за кожне очко вашої моралі.",
-    "appearanceDescription": "Що вище дух загону, то важче падає його меч. Бойовий клич перетворюється на силу в руках, і кожен удар несе в собі гнів усіх, хто стоїть поруч.",
+    "name": "Retribution",
+    "description": "Physical damage +5% for each point of your morale.",
+    "appearanceDescription": "The higher the company's spirit, the heavier its sword falls. The battle cry turns into strength in the hands, and every blow carries the wrath of all who stand beside him.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/retribution.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "retribution",
-        "name": "Відплата",
+        "name": "Retribution",
         "trigger": {
           "event": "passive"
         },
@@ -3315,15 +3315,15 @@
   },
   {
     "slug": "reward",
-    "name": "Нагорода",
-    "description": "Коли ви вбиваєте ворога, ви одразу відновлюєте основну дію (не частіше 1 разу за хід).",
-    "appearanceDescription": "Тіло ворога ще падає, а воїн уже розвертається до наступного. Кров на клинку не встигає захолонути — бій для нього лише розігрівся.",
+    "name": "Reward",
+    "description": "When you kill an enemy, you immediately regain your main action (at most 1 time per turn).",
+    "appearanceDescription": "The enemy's body is still falling, and the warrior is already turning to the next. The blood on his blade has no time to cool; for him the battle has only just warmed up.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/reward.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "reward",
-        "name": "Нагорода",
+        "name": "Reward",
         "trigger": {
           "event": "kill",
           "role": "killer"
@@ -3342,15 +3342,15 @@
   },
   {
     "slug": "righteous-wrath",
-    "name": "Гнів праведний",
-    "description": "Закляття «Праведна міць» і «Поспіх» діють по області — до 3 цілей.",
-    "appearanceDescription": "Священний гнів розливається від мага хвилею, і кілька воїнів одночасно відчувають, як їхні руки наливаються силою. Над їхніми головами на мить спалахують золоті німби.",
+    "name": "Righteous Wrath",
+    "description": "The \"Righteous Might\" and \"Haste\" spells affect an area: up to 3 targets.",
+    "appearanceDescription": "Sacred wrath spreads from the mage in a wave, and several warriors at once feel their arms fill with strength. Golden halos flare briefly above their heads.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/righteous-wrath.webp",
-    "mainSkillId": "Світло",
+    "mainSkillId": "Light",
     "abilities": [
       {
         "id": "righteous-wrath",
-        "name": "Гнів праведний",
+        "name": "Righteous Wrath",
         "trigger": {
           "event": "passive"
         },
@@ -3371,15 +3371,15 @@
   },
   {
     "slug": "sequence",
-    "name": "Послідовність",
-    "description": "Кожне ваше влучання ставить на ціль мітку «Послідовність» на 2 раунди (мітки стакаються). Фізична шкода по цілі +2 % за кожну вашу мітку на ній.",
-    "appearanceDescription": "Перший удар — розвідка, другий — обіцянка, третій — вирок. Воїн б'є в те саме місце знову і знову, і щит противника тріщить усе голосніше.",
+    "name": "Sequence",
+    "description": "Each of your hits places a \"Sequence\" mark on the target for 2 rounds (marks stack). Physical damage to the target +2% for each of your marks on it.",
+    "appearanceDescription": "The first blow is reconnaissance, the second a promise, the third a verdict. The warrior strikes the same spot again and again, and the enemy's shield cracks ever louder.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/sequence.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "sequence-mark",
-        "name": "Послідовність",
+        "name": "Sequence",
         "trigger": {
           "event": "hit",
           "role": "attacker"
@@ -3397,7 +3397,7 @@
       },
       {
         "id": "sequence-bonus",
-        "name": "Послідовність",
+        "name": "Sequence",
         "trigger": {
           "event": "passive"
         },
@@ -3416,15 +3416,15 @@
   },
   {
     "slug": "stunning-strike",
-    "name": "Оглушаючий удар",
-    "description": "Влучання в ближньому бою з шансом 40 % знижує ініціативу цілі на 2 на 2 раунди.",
-    "appearanceDescription": "Руків'я б'є в шолом із дзвоном, від якого в противника пливе світ. Він ще замахується, але рухи стали повільними, наче крізь густий мед.",
+    "name": "Stunning Strike",
+    "description": "A melee hit has a 40% chance to reduce the target's initiative by 2 for 2 rounds.",
+    "appearanceDescription": "The hilt strikes the helmet with a ring that sets the opponent's world swimming. He still swings, but his movements have turned slow, as if through thick honey.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/stunning-strike.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "stunning-strike",
-        "name": "Оглушаючий удар",
+        "name": "Stunning Strike",
         "trigger": {
           "event": "hit",
           "role": "attacker",
@@ -3449,15 +3449,15 @@
   },
   {
     "slug": "success",
-    "name": "Успіх",
-    "description": "Кожна ваша успішна перевірка моралі дає +8 % до всієї шкоди на 3 раунди (ефект стакається).",
-    "appearanceDescription": "Удача любить сміливих, і герой відчуває її подих на потилиці. Кожен вдалий порив додає йому сили, і він мчить уперед на хвилі власного запалу.",
+    "name": "Success",
+    "description": "Each of your successful morale checks grants +8% to all damage for 3 rounds (the effect stacks).",
+    "appearanceDescription": "Fortune favors the bold, and the hero feels her breath on the back of his neck. Every successful surge adds to his strength, and he races forward on the wave of his own ardor.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/success.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "success",
-        "name": "Успіх",
+        "name": "Success",
         "trigger": {
           "event": "moraleCheck",
           "result": "success",
@@ -3481,15 +3481,15 @@
   },
   {
     "slug": "thorn-armor",
-    "name": "Колюча броня",
-    "description": "Раз за бій, коли вас вражає фізична атака, атакуючий отримує 100 % завданої вам шкоди.",
-    "appearanceDescription": "Обладунок укритий дрібними шипами, як шкура їжака, і кожен, хто вдарить надто сильно, залишає на них власну плоть. Брязкіт удару й крик нападника звучать одночасно.",
+    "name": "Thorn Armor",
+    "description": "Once per battle, when you are hit by a physical attack, the attacker takes 100% of the damage dealt to you.",
+    "appearanceDescription": "The armor is covered in tiny spikes like a hedgehog's hide, and anyone who strikes too hard leaves their own flesh upon them. The clang of the blow and the attacker's cry sound at once.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/thorn-armor.webp",
-    "mainSkillId": "Захист",
+    "mainSkillId": "Defense",
     "abilities": [
       {
         "id": "thorn-armor",
-        "name": "Колюча броня",
+        "name": "Thorn Armor",
         "trigger": {
           "event": "hit",
           "role": "target"
@@ -3519,15 +3519,15 @@
   },
   {
     "slug": "thorns",
-    "name": "Шипи",
-    "description": "Коли вас або будь-якого вашого союзника вражає атака ближнього бою, нападник отримує 15 % завданої цілі шкоди (колюча).",
-    "appearanceDescription": "Шкіра друїда і його побратимів вкривається тонкою корою з гострими, як терен, колючками. Кожен, хто б'є впритул, відсмикує руку, закривавлену до ліктя.",
+    "name": "Thorns",
+    "description": "When you or any of your allies is hit by a melee attack, the attacker takes 15% of the damage dealt to the target (piercing).",
+    "appearanceDescription": "The skin of the druid and his companions is covered with thin bark with thorns as sharp as blackthorn. Anyone who strikes at close range pulls back a hand bloodied to the elbow.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/thorns.webp",
-    "mainSkillId": "Природа",
+    "mainSkillId": "Nature",
     "abilities": [
       {
         "id": "thorns",
-        "name": "Шипи",
+        "name": "Thorns",
         "trigger": {
           "event": "hit",
           "role": "target",
@@ -3547,7 +3547,7 @@
       },
       {
         "id": "thorns-allies",
-        "name": "Шипи",
+        "name": "Thorns",
         "trigger": {
           "event": "hit",
           "role": "target",
@@ -3570,15 +3570,15 @@
   },
   {
     "slug": "vengeance",
-    "name": "Помста",
-    "description": "Кожне вбивство ворога вашою стороною дає вам +1 моралі; кожна загибель союзника — −2 моралі (мораль у межах ±3).",
-    "appearanceDescription": "Кожен повалений ворог розпалює в серці героя холодну радість, кожен загиблий товариш — чорну тугу. Він рахує їх усіх, і рахунок цей видно в його очах.",
+    "name": "Vengeance",
+    "description": "Each enemy killed by your side grants you +1 morale; each ally's death gives −2 morale (morale is capped at ±3).",
+    "appearanceDescription": "Every felled enemy kindles cold joy in the hero's heart, every fallen comrade black sorrow. He counts them all, and the tally can be seen in his eyes.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/vengeance.webp",
-    "mainSkillId": "Лідерство",
+    "mainSkillId": "Leadership",
     "abilities": [
       {
         "id": "vengeance-kill",
-        "name": "Помста",
+        "name": "Vengeance",
         "trigger": {
           "event": "kill",
           "role": "killerSide"
@@ -3592,7 +3592,7 @@
       },
       {
         "id": "vengeance-loss",
-        "name": "Помста",
+        "name": "Vengeance",
         "trigger": {
           "event": "kill",
           "role": "victimSide"
@@ -3608,15 +3608,15 @@
   },
   {
     "slug": "zeal",
-    "name": "Завзятість",
-    "description": "Бонусна дія: на 1 раунд фізична шкода +15 %, але AC −1.",
-    "appearanceDescription": "Воїн відкидає обережність разом зі щитом і йде вперед із бойовим ревом. Він відкритий — але кожен його удар тепер важчий за два.",
+    "name": "Zeal",
+    "description": "Bonus action: for 1 round, physical damage +15%, but AC −1.",
+    "appearanceDescription": "The warrior casts caution aside along with his shield and charges forward with a battle roar. He is exposed, but each of his blows now weighs more than two.",
     "image": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/skill-icons/zeal.webp",
-    "mainSkillId": "Напад",
+    "mainSkillId": "Attack",
     "abilities": [
       {
         "id": "zeal",
-        "name": "Завзятість",
+        "name": "Zeal",
         "trigger": {
           "event": "bonusAction"
         },

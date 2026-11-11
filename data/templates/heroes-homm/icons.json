@@ -346,7 +346,6 @@
     "set-dawn-regalia": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/dawn-regalia.webp",
     "set-dwarven-kings": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/dwarven-kings.webp",
     "set-lions-spirit": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/lions-spirit.webp",
-    "set-sar-issa": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/sar-issus.webp",
     "set-sar-issus": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/sar-issus.webp",
     "set-yggshail-claws": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/yggshail-claws.webp"
   },
@@ -354,7 +353,6 @@
     "armor-of-valor": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/armor-of-valor.webp",
     "cape-of-the-lions-mane": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/cape-of-the-lions-mane.webp",
     "crown-of-leadership": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/crown-of-leadership.webp",
-    "crown-of-sar-issa": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/crown-of-sar-issus.webp",
     "crown-of-sar-issus": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/crown-of-sar-issus.webp",
     "cuirass-of-the-dwarven-kings": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/cuirass-of-the-dwarven-kings.webp",
     "cursed-ring": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/cursed-ring.webp",
@@ -366,12 +364,9 @@
     "necklace-of-the-lion": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/necklace-of-the-lion.webp",
     "necklace-of-victory": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/necklace-of-victory.webp",
     "ring-of-celerity": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/ring-of-celerity.webp",
-    "ring-of-sar-issa": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/ring-of-sar-issus.webp",
     "ring-of-sar-issus": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/ring-of-sar-issus.webp",
-    "robe-of-sar-issa": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/robe-of-sar-issus.webp",
     "robe-of-sar-issus": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/robe-of-sar-issus.webp",
     "shield-of-the-dwarven-kings": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/shield-of-the-dwarven-kings.webp",
-    "staff-of-sar-issa": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/staff-of-sar-issus.webp",
     "staff-of-sar-issus": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/staff-of-sar-issus.webp",
     "treeborn-quiver": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/treeborn-quiver.webp",
     "unicorn-horn-bow": "https://mpvcaxsukbwzgrbvzmjj.supabase.co/storage/v1/object/public/artifact-icons/unicorn-horn-bow.webp"

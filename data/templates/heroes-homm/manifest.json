@@ -6,7 +6,8 @@
     "uk": "Heroes"
   },
   "locales": [
-    "en"
+    "en",
+    "uk"
   ],
   "rules": {
     "file": "rules.json"
@@ -31,8 +32,8 @@
     "units": 153,
     "main-skills": 11,
     "skills": 120,
-    "artifact-sets": 7,
-    "artifacts": 24,
+    "artifact-sets": 6,
+    "artifacts": 20,
     "skillTrees": 7,
     "tracks": 97
   }

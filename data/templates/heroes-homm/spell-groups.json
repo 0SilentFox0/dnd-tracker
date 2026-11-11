@@ -1,25 +1,25 @@
 [
   {
     "slug": "chaos",
-    "name": "Хаос",
+    "name": "Chaos",
     "color": "#ec1c0c",
     "icon": "flame"
   },
   {
     "slug": "darkness",
-    "name": "Темрява",
+    "name": "Darkness",
     "color": "#7a1fe6",
     "icon": "moon"
   },
   {
     "slug": "light",
-    "name": "Світло",
+    "name": "Light",
     "color": "#f2b300",
     "icon": "sun"
   },
   {
     "slug": "nature",
-    "name": "Природа",
+    "name": "Nature",
     "color": "#12a52b"
   }
 ]
