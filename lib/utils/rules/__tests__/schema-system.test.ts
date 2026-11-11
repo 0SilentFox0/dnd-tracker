@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { DEFAULT_RULES } from "../defaults";
 import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "../schema";
 
 import srdRules from "@/data/templates/srd-5.2/rules.json";
+import { SYSTEM_META, type SystemMeta } from "@/lib/utils/rules/systems/meta";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const SRD_RULES = RulesetSchema.parse(srdRules);
@@ -49,5 +50,46 @@ describe("rules.system", () => {
     const merged = mergeRules(DEFAULT_RULES, { system: { key: "wfrp" } });
 
     expect(merged).toEqual({ ok: true, rules: { ...DEFAULT_RULES, system: { key: "wfrp" } } });
+  });
+});
+
+describe("rules.system.modules", () => {
+  const addon: SystemMeta = { module: "t-addon", kind: "addon", requires: ["d20"], keys: [], i18n: {}, unusedMechanics: [] };
+
+  beforeAll(() => (SYSTEM_META as unknown as SystemMeta[]).push(addon));
+
+  afterAll(() => {
+    (SYSTEM_META as unknown as SystemMeta[]).splice((SYSTEM_META as unknown as SystemMeta[]).indexOf(addon), 1);
+  });
+
+  const withModules = { ...DEFAULT_RULES, system: { key: "dnd5e", modules: ["t-addon"] } };
+
+  it("parses a row with modules and keeps them sorted", () => {
+    expect(parseRules({ system: { key: "dnd5e", modules: ["t-addon", "t-addon"] } }).system).toEqual({ key: "dnd5e", modules: ["t-addon"] });
+  });
+
+  it("modules survive mergeRules of another section", () => {
+    const merged = mergeRules(withModules, { morale: { enabled: true } });
+
+    expect(merged.ok && merged.rules.system).toEqual({ key: "dnd5e", modules: ["t-addon"] });
+  });
+
+  it("an unknown module id fails with a translatable key", () => {
+    const r = RulesetSchema.safeParse({ ...DEFAULT_RULES, system: { key: "dnd5e", modules: ["nope"] } });
+
+    expect(r.success ? [] : r.error.issues.map((i) => i.message)).toEqual(["rules.validation.unknownModule"]);
+  });
+
+  it("a module of another base fails composition", () => {
+    expect(RulesetSchema.safeParse({ ...DEFAULT_RULES, system: { key: "wfrp", modules: ["t-addon"] } }).success).toBe(false);
+  });
+
+  it("an invalid stored composition falls back to the bare key", () => {
+    expect(parseRules({ system: { key: "dnd5e", modules: ["nope"] } }).system).toEqual({ key: "dnd5e" });
+  });
+
+  it("a patch with modules is rejected until the setup UI exists", () => {
+    expect(RulesetPatchSchema.safeParse({ system: { modules: ["t-addon"] } }).success).toBe(false);
+    expect(RulesetPatchSchema.safeParse({ system: { key: "dnd5e" } }).success).toBe(true);
   });
 });
