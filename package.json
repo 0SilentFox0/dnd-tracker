@@ -35,7 +35,7 @@
     "constructor:official-templates": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/create-official-templates.ts",
     "constructor:copy-heroes": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/copy-test-heroes.ts",
     "constructor:backfill": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/backfill-content-fields.ts",
-    "constructor:srd-template": "pnpm template import srd-5.2 --publish",
+    "constructor:srd-template": "pnpm template import srd-5.2 --publish --allow-untranslated",
     "constructor:empty-5e-template": "pnpm template import srd-5.2-empty --publish",
     "constructor:grim-template": "pnpm template import grim-d100 --publish",
     "constructor:empty-grim-template": "pnpm template import grim-d100-empty --publish",
