@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// pnpm template <index|validate|build|import|publish|icons|export|backfill-keys|i18n> ...  (see USAGE)
+// pnpm template <index|validate|build|import|publish|icons|export|backfill-keys|backfill-slugs|backfill-locale|i18n> ...  (see USAGE)
 import { parseCommandArgs } from "./lib/cli-args";
 import { i18nCommand } from "./lib/i18n-command";
 import { writeIndex } from "./lib/index-gen";
@@ -10,11 +10,13 @@ const USAGE = [
   "pnpm template index",
   "pnpm template validate <key>",
   "pnpm template build <key> [--source <dir>] [--init-slugs]",
-  "pnpm template import <key> [--owner <userId>] [--dry-run] [--publish] [--allow-untranslated] [--allow-remote]",
+  "pnpm template import <key> [--owner <userId>] [--dry-run] [--publish] [--prune] [--allow-untranslated] [--allow-remote]",
   "pnpm template publish <key> [--allow-untranslated] [--allow-remote]",
   "pnpm template icons <key> --dir <images> [--kinds a,b] [--dry-run] [--allow-remote]",
   "pnpm template export <key> --from <campaignId> [--system <system>] [--name <name>] [--slugs <file>]",
   "pnpm template backfill-keys [--apply] [--allow-remote]",
+  "pnpm template backfill-slugs <key> [--apply] [--allow-remote]",
+  "pnpm template backfill-locale <key> [--locale uk] [--apply] [--allow-remote]",
   "pnpm template i18n <extract|apply|normalize|status|convert> <key> <locale>",
 ].join("\n  ");
 
@@ -68,11 +70,37 @@ async function importCommand(args: string[]) {
   const [{ importPack }, { prisma }] = await Promise.all([import("./lib/import-pack"), import("@/lib/db")]);
 
   try {
-    const result = await importPack(key, { owner: options["--owner"], dryRun: flags.has("--dry-run"), publish: flags.has("--publish"), allowUntranslated: flags.has("--allow-untranslated"), allowRemote: flags.has("--allow-remote") });
+    const result = await importPack(key, { owner: options["--owner"], dryRun: flags.has("--dry-run"), publish: flags.has("--publish"), prune: flags.has("--prune"), allowUntranslated: flags.has("--allow-untranslated"), allowRemote: flags.has("--allow-remote") });
 
     console.info(JSON.stringify(result.perKind));
 
     if (Object.values(result.perKind).some((c) => c.errors > 0)) process.exitCode = 1;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+async function backfillSlugsCommand(args: string[]) {
+  const { key, flags } = parseCommandArgs(args);
+
+  const [{ backfillSlugs }, { prisma }] = await Promise.all([import("./lib/backfill-slugs"), import("@/lib/db")]);
+
+  try {
+    const result = await backfillSlugs(key, { apply: flags.has("--apply"), allowRemote: flags.has("--allow-remote") });
+
+    console.info(`${result.plan.length} row(s) to slug${flags.has("--apply") ? `, ${result.written} written` : " (dry run, pass --apply to write)"}`);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+async function backfillLocaleCommand(args: string[]) {
+  const { key, flags, options } = parseCommandArgs(args);
+
+  const [{ backfillLocale }, { prisma }] = await Promise.all([import("./lib/locale-backfill"), import("@/lib/db")]);
+
+  try {
+    await backfillLocale(key, { locale: options["--locale"], apply: flags.has("--apply"), allowRemote: flags.has("--allow-remote") });
   } finally {
     await prisma.$disconnect();
   }
@@ -120,6 +148,8 @@ const COMMANDS: Record<string, Command> = {
     console.info("data/templates/manifests.ts and dictionaries.server.ts are up to date");
   },
   "backfill-keys": backfillKeys,
+  "backfill-slugs": backfillSlugsCommand,
+  "backfill-locale": backfillLocaleCommand,
   i18n: (args) => i18nCommand(args),
 };
 

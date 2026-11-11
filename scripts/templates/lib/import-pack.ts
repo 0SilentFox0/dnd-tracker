@@ -8,8 +8,11 @@ import { withIcons } from "./icons-file";
 import { importOrder } from "./import-order";
 import { iconColumnOf, resolveSchoolRefs, staleSpellColumns, withClassIcons } from "./import-prepare";
 import { JSON_REFS, mapJsonRefs, slugsToIds } from "./json-refs";
+import { delegateFor } from "./kind-delegate";
 import { type Pack, type PackRow, readPack, TEMPLATES_DIR } from "./pack";
+import { type OutsideRow, pruneRows, rowsOutsidePack } from "./prune";
 import { EXTRA_COLUMNS, MATCH_COLUMN, rowSchemaIssues } from "./row-columns";
+import { assertNoDuplicatesFromUnslugged } from "./slug-guard";
 import { ensureTemplate, makeTemplateStore } from "./store";
 import { validatePack } from "./validate";
 
@@ -20,24 +23,23 @@ import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/
 import { loadKeys } from "@/lib/server/content/import/slug";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { markContentDirty } from "@/lib/server/content/write-context";
-import { type BundleTableDef, tableOfKind } from "@/lib/server/templates/bundle";
 import { type PublishResult } from "@/lib/server/templates/publish";
 import { publishTemplate } from "@/lib/server/templates/publish-service";
 import { rowHash } from "@/lib/server/templates/sync/hash";
 import type { Actor } from "@/lib/utils/api/actor";
-import { isImportKind } from "@/lib/utils/content/import";
+import { isImportKind, nameKey } from "@/lib/utils/content/import";
 import { RulesetSchema } from "@/lib/utils/rules/schema";
 import { statusOf } from "@/lib/utils/templates/i18n/keys";
 import type { PackKind } from "@/lib/utils/templates/manifest";
 import type { ImportKind, ImportReport } from "@/types/content-import";
 
-export interface KindCounts { created: number; updated: number; skipped: number; errors: number }
+export interface KindCounts { created: number; updated: number; skipped: number; errors: number; deleted: number }
 
-export interface ImportPackResult { templateId: string | null; created: boolean; perKind: Record<string, KindCounts>; published?: PublishResult }
+export interface ImportPackResult { templateId: string | null; created: boolean; perKind: Record<string, KindCounts>; outside?: OutsideRow[]; published?: PublishResult }
 
-export interface ImportPackOptions { owner?: string; dryRun?: boolean; allowRemote?: boolean; dir?: string; publish?: boolean; allowUntranslated?: boolean }
+export interface ImportPackOptions { owner?: string; dryRun?: boolean; allowRemote?: boolean; dir?: string; publish?: boolean; allowUntranslated?: boolean; prune?: boolean }
 
-const counts = (created = 0, updated = 0, skipped = 0, errors = 0): KindCounts => ({ created, updated, skipped, errors });
+const counts = (created = 0, updated = 0, skipped = 0, errors = 0): KindCounts => ({ created, updated, skipped, errors, deleted: 0 });
 
 const fromReport = ({ counts: c }: ImportReport): KindCounts => counts(c.created, c.updated, c.skipped, c.error);
 
@@ -50,15 +52,16 @@ function describeReport(kind: string, report: ImportReport, t: Awaited<ReturnTyp
   ];
 }
 
-type Delegate = { findFirst(args: unknown): Promise<(Record<string, unknown> & { id: string }) | null>; create(args: unknown): Promise<unknown>; update(args: unknown): Promise<unknown> };
+/** Refuses to create rows in a kind where the template still has unslugged rows (D33). */
+async function assertSlugged(campaignId: string, kind: PackKind, rows: PackRow[]): Promise<void> {
+  const column = isImportKind(kind) ? "name" : MATCH_COLUMN[kind];
 
-const delegateFor = (db: unknown, kind: PackKind): { table: BundleTableDef; delegate: Delegate } => {
-  const table = tableOfKind(kind);
+  const existing = await delegateFor(prisma, kind).delegate.findMany({ where: { campaignId }, select: { slug: true, ...(column && { [column]: true }) } });
 
-  if (!table) throw new Error(`No table is registered for kind "${kind}"`);
+  const keyOf = (row: Record<string, unknown>) => (column ? (column === "name" ? nameKey(String(row.name ?? "")) : String(row[column] ?? "")) : String(row.slug));
 
-  return { table, delegate: (db as Record<string, Delegate>)[table.delegate] };
-};
+  assertNoDuplicatesFromUnslugged(kind, rows, keyOf, existing.map((row) => ({ slug: typeof row.slug === "string" ? row.slug : null, key: keyOf(row) })));
+}
 
 interface UpsertContext { hooks: PackHooks | undefined; idBySlug: Record<string, Record<string, string>>; dryRun: boolean }
 
@@ -218,6 +221,8 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
   for (const kind of importOrder(manifest.kinds)) {
     const rows = pack.rows[kind] ?? [];
 
+    await assertSlugged(template.id, kind, rows);
+
     if (!isImportKind(kind)) {
       perKind[kind] = await upsertBySlug(template.id, kind, rows, { hooks, idBySlug: await idsBySlug(template.id, manifest.kinds), dryRun });
       continue;
@@ -250,9 +255,19 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   const failed = Object.values(perKind).some((c) => c.errors > 0);
 
+  const outside = failed ? [] : await rowsOutsidePack(template.id, manifest.kinds, pack.rows);
+
+  for (const kind of new Set(outside.map((row) => row.kind))) perKind[kind] = { ...perKind[kind], deleted: opts.prune ? outside.filter((row) => row.kind === kind).length : 0 };
+
+  if (outside.length > 0 && opts.prune) {
+    for (const row of outside) console.info(`${dryRun ? "would delete" : "delete"} ${row.kind} ${row.slug} "${row.label}"`);
+
+    if (!dryRun) await pruneRows(template.id, outside);
+  } else if (outside.length > 0) console.warn(`${outside.length} row(s) outside the pack (pass --prune to delete): ${outside.map((row) => `${row.kind}/${row.slug}`).join(", ")}`);
+
   if (!dryRun && !failed) await hooks?.afterImport?.({ pack, templateId: template.id, idBySlug: await idsBySlug(template.id, manifest.kinds) });
 
-  if (dryRun || failed || !opts.publish) return { templateId: template.id, created: template.created, perKind };
+  if (dryRun || failed || !opts.publish) return { templateId: template.id, created: template.created, perKind, outside };
 
   const gaps = translationGaps(pack, dir);
 
@@ -262,7 +277,7 @@ export async function importPack(key: string, opts: ImportPackOptions = {}): Pro
 
   console.info(`Version ${published.version}: +${published.added} ~${published.changed} -${published.removed}`);
 
-  return { templateId: template.id, created: template.created, perKind, published };
+  return { templateId: template.id, created: template.created, perKind, outside, published };
 }
 
 export async function publishPack(key: string, opts: { allowRemote?: boolean; dir?: string; allowUntranslated?: boolean } = {}): Promise<{ contentVersion: number; changedRows: number }> {

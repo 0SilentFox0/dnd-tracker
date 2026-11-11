@@ -1,6 +1,6 @@
 import { arraySegments, hasEntry, type TranslationsV2 } from "./keys";
 
-const placeholders = (text: string) => (text.match(/\{[^{}]+\}/g) ?? []).sort().join("\0");
+export const placeholders = (text: string) => (text.match(/\{[^{}]+\}/g) ?? []).sort().join("\0");
 
 /** A stale entry (the English text changed since) is still applied; a placeholder mismatch falls back to English. */
 export function translateAt(tr: TranslationsV2, key: string, en: string): string {

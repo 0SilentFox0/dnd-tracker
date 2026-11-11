@@ -1,7 +1,7 @@
 import { PACK_ADAPTERS, PACK_HOOKS, type PackIssue, SYSTEM_MODULE } from "../systems";
 import { leakedIds } from "./export";
 import { catalogOfPack, i18nIssuesOf } from "./i18n-convert";
-import { readTranslations } from "./i18n-store";
+import { hasTranslations, readTranslations } from "./i18n-store";
 import { iconGaps, iconIssues } from "./icons-file";
 import { JSON_REF_COLUMNS, mapJsonRefs } from "./json-refs";
 import { type Pack, type PackRow, TEMPLATES_DIR } from "./pack";
@@ -12,7 +12,8 @@ import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { coerceRecord, IMPORT_SPECS, isImportKind, nameKey } from "@/lib/utils/content/import";
 import { RulesetSchema } from "@/lib/utils/rules/schema";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems/registry";
-import { statusOf } from "@/lib/utils/templates/i18n/keys";
+import { statusOf, type TranslationsV2 } from "@/lib/utils/templates/i18n/keys";
+import { attackNames, placeholders, translatedNames } from "@/lib/utils/templates/i18n/overlay";
 import type { PackKind, TemplateManifest } from "@/lib/utils/templates/manifest";
 import { TEMPLATE_REGISTRY } from "@/lib/utils/templates/registry";
 import { isSlug } from "@/lib/utils/templates/slug";
@@ -207,10 +208,48 @@ function iconPackIssues(pack: Pack): PackIssue[] {
   return [...iconIssues(rows, pack.icons).map((message) => error(message)), ...iconGaps(iconed, pack.icons).map((message): PackIssue => ({ level: "warning", message }))];
 }
 
+/** `school` values inside JSON columns are spell group names and must match one exactly (the importer swaps unknown names through unchanged). */
+function schoolIssues(pack: Pack): PackIssue[] {
+  if (pack.manifest.include?.length || !pack.manifest.kinds.includes("spell-groups")) return [];
+
+  const groups = new Set((pack.rows["spell-groups"] ?? []).map(exactName));
+
+  return (Object.entries(pack.rows) as [PackKind, PackRow[]][]).flatMap(([kind, rows]) =>
+    rows.flatMap((row) => [...new Set(nestedNames(row, "school"))].filter((name) => !groups.has(name)).map((name) => error(`${kind} "${row.slug}": school "${name}" is not a spell group name`, { kind, slug: row.slug }))),
+  );
+}
+
+/** Two English names of one kind must not end up with the same translated name. */
+function collisionIssues(pack: Pack, tr: TranslationsV2, locale: string): PackIssue[] {
+  const issues: PackIssue[] = [];
+
+  const guard = (run: () => unknown) => {
+    try { run(); } catch (e) { issues.push(error(`i18n ${locale}: ${(e as Error).message}`)); }
+  };
+
+  for (const [kind, rows] of Object.entries(pack.rows) as [PackKind, PackRow[]][]) {
+    if (new Set(rows.map((row) => row.slug)).size !== rows.length) continue;
+
+    guard(() => translatedNames(rows, kind, tr, kind, kind === "artifacts" ? (name) => name.trim().toLowerCase() : undefined));
+
+    if (kind === "units") for (const row of rows) guard(() => attackNames(row, kind, tr));
+  }
+
+  return issues;
+}
+
+function dictionaryIssues(pack: Pack, tr: TranslationsV2, locale: string): PackIssue[] {
+  const mismatched = Object.entries(tr).filter(([, { text, en }]) => placeholders(text) !== placeholders(en)).map(([key]) => error(`i18n ${locale}: placeholders of "${key}" differ between text and en`));
+
+  return [...mismatched, ...collisionIssues(pack, tr, locale)];
+}
+
 function translationIssues(pack: Pack, dir: string): PackIssue[] {
   const catalog = catalogOfPack(pack);
 
   return pack.manifest.locales.filter((locale) => locale !== "en").flatMap((locale) => {
+    if (!hasTranslations(pack.manifest.key, locale, dir)) return [error(`i18n ${locale}: i18n/${locale}.json is missing`)];
+
     const tr = readTranslations(pack.manifest.key, locale, dir);
 
     const status = statusOf(catalog, tr);
@@ -219,6 +258,7 @@ function translationIssues(pack: Pack, dir: string): PackIssue[] {
 
     return [
       ...status.orphan.map((key) => error(`i18n ${locale}: orphan key "${key}"`)),
+      ...dictionaryIssues(pack, tr, locale),
       ...i18nIssuesOf(pack, tr).map((message) => error(`i18n ${locale}: ${message}`)),
       ...(gaps > 0 ? [{ level: "warning" as const, message: `i18n ${locale}: stale ${status.stale.length}, missing ${status.missing.length}` }] : []),
     ];
@@ -242,6 +282,7 @@ export function validatePack(pack: Pack, opts: ValidateOptions = {}): PackIssue[
     ...countIssues(pack),
     ...leakIssues(pack),
     ...jsonRefIssues(pack),
+    ...schoolIssues(pack),
     ...iconPackIssues(pack),
     ...translationIssues(pack, dir),
     ...(hooks?.validatePack?.(pack) ?? []),

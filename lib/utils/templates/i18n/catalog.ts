@@ -1,6 +1,6 @@
 export const NAME_KEYS: readonly string[] = ["name", "label", "nameTemplate"];
 
-export const TEXT_KEYS: readonly string[] = ["description", "text", "equipmentText"];
+export const TEXT_KEYS: readonly string[] = ["description", "text", "equipmentText", "appearanceDescription"];
 
 export type TextClass = "n" | "d";
 
@@ -25,7 +25,7 @@ export const classOf = (key: string, parent = "", path: readonly string[] = []):
 
   if (key === "trappings" && parent === "tiers") return "d";
 
-  if (key === "class" && path.length === 1) return "n";
+  if ((key === "class" || key === "title") && path.length === 1) return "n";
 
   return null;
 };

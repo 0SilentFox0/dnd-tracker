@@ -86,6 +86,7 @@
     "skills": {
       "name": "Назва",
       "description": "Опис",
+      "appearanceDescription": "Опис вигляду",
       "icon": "Іконка",
       "image": "Зображення",
       "mainSkillId": "Основний скіл",

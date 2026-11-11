@@ -53,6 +53,21 @@ export function localizeRules(rules: unknown, tr: TranslationsV2): unknown {
   return JSON.stringify(tables) === JSON.stringify(rules.tables) ? rules : { ...rules, tables };
 }
 
+/** Skill trees are not content kinds: their race and branch names follow the race and main-skill names (D30). */
+function localizeTree(row: Record<string, unknown>, maps: Record<Table, Map<string, string>>): Record<string, unknown> {
+  const race = (value: unknown) => (typeof value === "string" ? (maps.races.get(value) ?? value) : value);
+
+  const { skills } = row;
+
+  const branches = isRecord(skills) && Array.isArray(skills.mainSkills) ? skills.mainSkills : null;
+
+  const mapped = isRecord(skills)
+    ? { ...skills, ...("race" in skills && { race: race(skills.race) }), ...(branches && { mainSkills: branches.map((b) => (isRecord(b) && typeof b.name === "string" ? { ...b, name: maps.mainSkills.get(b.name) ?? b.name } : b)) }) }
+    : skills;
+
+  return { ...row, race: race(row.race), skills: mapped };
+}
+
 const slugOf = (row: Record<string, unknown>): string | null => (typeof row.slug === "string" && row.slug ? row.slug : null);
 
 /** Localize canonical template DB rows (SRD, Grim); source/language policy belongs to the caller. A row without a slug stays English. */
@@ -91,6 +106,10 @@ export function localizeTemplateBundle(bundle: Bundle, translations: Translation
         if ((table === "classes" && path.join(".") === "spellList") ||
           (key === "lists" && ((table === "spells" && path.length === 1) || (parent === "spells" && path.includes("choices"))))) return maps.classes.get(text) ?? text;
 
+        if (key === "races" && parent === "condition") return maps.races.get(text) ?? text;
+
+        if (key === "group" && parent === "effects") return maps.races.get(text) ?? text;
+
         // DB spellId/groupId/originFeatId/school are identifiers, never seed names.
         return translatable(key, parent, path, text) ? translateAt(translations, `${kind}/${slug}/${fieldPath}`, text) : text;
       }) as typeof row;
@@ -100,6 +119,8 @@ export function localizeTemplateBundle(bundle: Bundle, translations: Translation
       return localized;
     });
   }
+
+  if (Array.isArray(bundle.skillTrees)) out.skillTrees = bundle.skillTrees.map((row) => localizeTree(row, maps) as typeof row);
 
   return { ...out, rules: localizeRules(bundle.rules, translations) };
 }

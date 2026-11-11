@@ -98,6 +98,7 @@ export const FIELD_ALIASES: Record<ImportKind, PerField<readonly string[]>> = {
   skills: {
     name: NAME,
     description: DESCRIPTION,
+    appearanceDescription: ["опис вигляду", "appearance", "appearance description"],
     icon: ICON,
     image: ["зображення", "image"],
     mainSkillId: ["основний скіл", "гілка", "main skill"],

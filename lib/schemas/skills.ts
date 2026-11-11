@@ -23,6 +23,7 @@ export const createSkillSchema = z.object({
     mainSkillId: z.string().nullable().optional(),
   }),
   image: z.string().nullable().optional(),
+  appearanceDescription: z.string().nullable().optional(),
 });
 
 export const updateSkillSchema = z.object({

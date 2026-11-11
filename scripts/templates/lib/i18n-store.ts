@@ -9,6 +9,8 @@ const i18nDir = (key: string, dir: string) => packPath(key, "i18n", dir);
 
 const translationsFile = (key: string, locale: string, dir: string) => path.join(i18nDir(key, dir), `${locale}.json`);
 
+export const hasTranslations = (key: string, locale: string, dir = TEMPLATES_DIR): boolean => fs.existsSync(translationsFile(key, locale, dir));
+
 export function readTranslations(key: string, locale: string, dir = TEMPLATES_DIR): TranslationsV2 {
   const file = translationsFile(key, locale, dir);
 

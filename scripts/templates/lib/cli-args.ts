@@ -7,7 +7,7 @@ export interface CommandArgs {
   rest: string[];
 }
 
-const VALUE_FLAGS = new Set(["--owner", "--dir", "--kinds", "--source", "--from", "--system", "--name", "--slugs"]);
+const VALUE_FLAGS = new Set(["--owner", "--dir", "--kinds", "--source", "--from", "--system", "--name", "--slugs", "--locale"]);
 
 /** `<key> [--flag] [--option value] ...rest`; the key must be a pack folder unless `allowNewKey`. */
 export function parseCommandArgs(args: string[], dir = TEMPLATES_DIR, allowNewKey = false): CommandArgs {

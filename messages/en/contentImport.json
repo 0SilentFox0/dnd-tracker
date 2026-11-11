@@ -86,6 +86,7 @@
     "skills": {
       "name": "Name",
       "description": "Description",
+      "appearanceDescription": "Appearance description",
       "icon": "Icon",
       "image": "Image",
       "mainSkillId": "Main skill",
