@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { WFRP_SYSTEM } from "../../../index";
+import { WFRP_MODULE } from "../../../index";
 import { DEFAULT_CHARACTERISTICS } from "../keys";
 import { reconcileCharacteristics } from "../reconcile";
 
@@ -28,11 +28,11 @@ describe("reconcileCharacteristics systemBaseline (D66)", () => {
 
 describe("wfrp characteristics.defaults (D68)", () => {
   it("returns a fresh copy each call", () => {
-    const a = WFRP_SYSTEM.characteristics.defaults() as typeof DEFAULT_CHARACTERISTICS;
+    const a = WFRP_MODULE.characteristics.defaults() as typeof DEFAULT_CHARACTERISTICS;
 
     a.base.ws = 99;
 
     expect(DEFAULT_CHARACTERISTICS.base.ws).toBe(30);
-    expect(WFRP_SYSTEM.characteristics.defaults()).toEqual(DEFAULT_CHARACTERISTICS);
+    expect(WFRP_MODULE.characteristics.defaults()).toEqual(DEFAULT_CHARACTERISTICS);
   });
 });

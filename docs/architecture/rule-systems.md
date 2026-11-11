@@ -59,12 +59,12 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 | Шлях | Зміст |
 |---|---|
-| `systems/wfrp/meta.ts`, `index.ts` | `WFRP_META`; `WFRP_SYSTEM` (`RuleSystemDefinition`, без zod) |
+| `systems/wfrp/meta.ts`, `index.ts` | `WFRP_META`; `WFRP_MODULE` (`RuleSystemDefinition`, без zod) |
 | `systems/wfrp/rules/` | `percentile/` (d100, SL, дублети, `details`), `characteristics/`, `skills/`, `conditions/`, `magic/`, `tables/`, `traits/`, `downtime/`, `corruption/`, `advancement/`, `creation/`, `equipment/`, `combat/` (`momentum`, атака), `slots.ts` (`PARTICIPANT_SLOT`, `ATTACK_SLOT`, …), `ability-effects.ts` / `ability-effect-rows.ts` / `trait-kinds.ts`, `rules-preset.ts`, `sheet-test.ts`, `session.ts` |
 | `systems/wfrp/constants/` | `characteristics`, `conditions`, `mutations` |
-| `systems/wfrp/server/` | `index.ts` (`WFRP_SERVER`), `schemas.ts`, `ai.ts`, `operations/`, `*-handler.ts` (advance, career, downtime, corruption), `draft/`, `race-profile.ts` |
+| `systems/wfrp/server/` | `index.ts` (`WFRP_MODULE_SERVER`), `schemas.ts`, `ai.ts`, `operations/`, `*-handler.ts` (advance, career, downtime, corruption), `draft/`, `race-profile.ts` |
 | `systems/wfrp/api/`, `hooks/` | клієнтські обгортки й хуки (аналог `lib/api`, `lib/hooks`) |
-| `systems/wfrp/ui/` | `index.ts` (`WFRP_UI`), лист і редактори, `battle/` (RollBody, CastTest, Channel, ConditionTest, ActionResult), `rules/` (Tables, Advancement), `careers/`, `creation/`, `downtime/`, `corruption/` |
+| `systems/wfrp/ui/` | `index.ts` (`WFRP_MODULE_UI`), лист і редактори, `battle/` (RollBody, CastTest, Channel, ConditionTest, ActionResult), `rules/` (Tables, Advancement), `careers/`, `creation/`, `downtime/`, `corruption/` |
 | `systems/wfrp/__tests__/` | `wfrp-*` тести з core-тек (дзеркальний підшлях: `lib/...`, `components/...`, `scripts/...`) |
 | `scripts/templates/systems/wfrp/` | `PackHooks` пакета Grim d100 |
 
