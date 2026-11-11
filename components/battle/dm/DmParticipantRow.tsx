@@ -42,9 +42,9 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
 
   const close = () => onDone?.();
 
-  const { woundsLabel } = useBattleRules();
+  const { hpTerm } = useBattleRules();
 
-  const label = scaleLabel(participant, t, woundsLabel === "wounds");
+  const label = scaleLabel(participant, t, hpTerm === "wounds");
 
   const canKill = onKill && participant.basicInfo.sourceType === ParticipantSourceType.UNIT && participant.combatStats.status !== CombatStatus.DEAD;
 

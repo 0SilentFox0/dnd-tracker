@@ -14,7 +14,7 @@ import { canSeeExactStats, formatKnownArmorClass, NO_EFFECTS, resolveKnownArmorC
 export const ParticipantList = memo(function ParticipantList({ side, className }: { side: ParticipantSide; className?: string }) {
   const { roster: { allies, enemies, reserve }, battle, viewer, turn: { current }, clickParticipant, effects } = useBattleSceneData();
 
-  const { d20Stats, woundsLabel } = useBattleRules();
+  const { d20Stats, hpTerm } = useBattleRules();
 
   const impactFor = useFxImpacts();
 
@@ -39,7 +39,7 @@ export const ParticipantList = memo(function ParticipantList({ side, className }
   return (
     <div className={cn("px-4", className)}>
       {rows.map(({ participant, exact, acText }) => (
-        <ParticipantRow key={participant.basicInfo.id} participant={participant} effects={effects.get(participant.basicInfo.id) ?? NO_EFFECTS} view={{ exact, acText, wounds: woundsLabel === "wounds", current: current?.basicInfo.id === participant.basicInfo.id }} impact={impactFor(participant.basicInfo.id)} onSelect={clickParticipant} />
+        <ParticipantRow key={participant.basicInfo.id} participant={participant} effects={effects.get(participant.basicInfo.id) ?? NO_EFFECTS} view={{ exact, acText, wounds: hpTerm === "wounds", current: current?.basicInfo.id === participant.basicInfo.id }} impact={impactFor(participant.basicInfo.id)} onSelect={clickParticipant} />
       ))}
       {reserved.map((p) => (
         <ReserveParticipantRow key={p.basicInfo.id} participant={p} />

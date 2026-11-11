@@ -33,7 +33,7 @@ export interface SpellPick {
   inline?: { spellId: string; grantKey: string };
   needsSaves: boolean;
   needsAttackRolls?: boolean;
-  /** the system rolls a casting test (percentile magic): the rolls step needs a test roll */
+  /** the system rolls a casting test: the rolls step needs a test roll */
   castTest?: boolean;
   diceSlots: number[];
 }
@@ -61,7 +61,7 @@ export interface SpellFlowState {
   optionIndex?: number;
   inputCount?: number;
   damage: (number | undefined)[];
-  /** casting test: manual d100 (and the second one for a Fortune reroll) or the server roll */
+  /** casting test: manual roll (and the second one for a Fortune reroll) or the server roll */
   castRoll?: number;
   castSecond?: number;
   castServer?: boolean;

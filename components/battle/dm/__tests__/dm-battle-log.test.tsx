@@ -15,7 +15,7 @@ const scene = vi.hoisted(() => ({ battle: null as unknown }));
 vi.mock("@/components/battle/log/BattleLogLoadEarlier", () => ({ BattleLogLoadEarlier: () => null }));
 
 vi.mock("@/lib/hooks/battle", () => ({
-  useBattleRules: () => ({ woundsLabel: "hp" }),
+  useBattleRules: () => ({ hpTerm: "hp" }),
   useBattleScene: () => ({ battle: scene.battle, viewer: { isDM: true }, actions: { rollback: { mutate: vi.fn() } } }),
 }));
 

@@ -11,7 +11,7 @@ import { sanitizeLogEntry } from "@/lib/utils/battle/view";
 export function BattleLog() {
   const { battle, viewer, log } = useBattleScene();
 
-  const { woundsLabel } = useBattleRules();
+  const { hpTerm } = useBattleRules();
 
   const { battleLog, initiativeOrder, rules } = battle;
 
@@ -19,7 +19,7 @@ export function BattleLog() {
 
   return (
     <>
-      <LogTimeline entries={entries} participants={initiativeOrder} focus={log.focus} wounds={woundsLabel === "wounds"} />
+      <LogTimeline entries={entries} participants={initiativeOrder} focus={log.focus} wounds={hpTerm === "wounds"} />
       <BattleLogLoadEarlier />
     </>
   );

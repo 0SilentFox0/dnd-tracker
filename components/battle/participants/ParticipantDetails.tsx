@@ -62,7 +62,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
 
   const { battle, viewer, effects: allEffects } = useBattleSceneData();
 
-  const { d20Stats, woundsLabel } = useBattleRules();
+  const { d20Stats, hpTerm } = useBattleRules();
 
   const impactFor = useFxImpacts();
 
@@ -88,7 +88,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
         <ZoomablePortrait flashKey={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(!change?.impact && hitFlashClass(change))} />
         <div>
           <div className="hud-sc text-[22px] font-bold leading-7">{participant.basicInfo.name}</div>
-          {exact ? <div className="text-sm text-hud-text"><HpFigure participant={participant} wounds={woundsLabel === "wounds"} /></div> : <HealthLabel participant={participant} />}
+          {exact ? <div className="text-sm text-hud-text"><HpFigure participant={participant} wounds={hpTerm === "wounds"} /></div> : <HealthLabel participant={participant} />}
         </div>
       </div>
       <HealthBar participant={participant} exact={exact} className="mt-3" />

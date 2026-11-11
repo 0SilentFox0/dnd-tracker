@@ -22,7 +22,7 @@ export function useBattleRules() {
       spells,
       magic: !!magic,
       distance,
-      woundsLabel: progression.hpTerm === "wounds" ? ("wounds" as const) : ("hp" as const),
+      hpTerm: progression.hpTerm,
       systemKey: rules.system.key,
       sceneState: system,
     };

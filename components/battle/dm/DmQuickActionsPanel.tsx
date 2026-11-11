@@ -69,7 +69,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const { battle, viewer, dmControl, actions } = useBattleScene();
 
-  const { woundsLabel } = useBattleRules();
+  const { hpTerm } = useBattleRules();
 
   const [ownOpen, setOwnOpen] = useState(false);
 
@@ -167,8 +167,8 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
             {canScale && (
               <PanelSection title={t("panel.enemyUnits")} className="grid grid-cols-2 gap-2 pt-2">
-                <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t(woundsLabel === "wounds" ? "panel.buffHintWounds" : "panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
-                <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t(woundsLabel === "wounds" ? "panel.debuffHintWounds" : "panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
+                <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t(hpTerm === "wounds" ? "panel.buffHintWounds" : "panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
+                <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t(hpTerm === "wounds" ? "panel.debuffHintWounds" : "panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
               </PanelSection>
             )}
           </div>

@@ -16,7 +16,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
 
   const { battle, viewer, actions } = useBattleScene();
 
-  const { woundsLabel } = useBattleRules();
+  const { hpTerm } = useBattleRules();
 
   const confirm = useConfirm();
 
@@ -54,7 +54,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
         {entries.length === 0 ? (
           <p className="py-2 text-sm italic text-[var(--hud-muted)]">{t("empty")}</p>
         ) : (
-          <LogTimeline entries={entries} participants={battle.initiativeOrder ?? []} renderActions={renderActions} wounds={woundsLabel === "wounds"} />
+          <LogTimeline entries={entries} participants={battle.initiativeOrder ?? []} renderActions={renderActions} wounds={hpTerm === "wounds"} />
         )}
         <BattleLogLoadEarlier />
       </div>
