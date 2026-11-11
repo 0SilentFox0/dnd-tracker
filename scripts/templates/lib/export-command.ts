@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { assertSeedTarget } from "../../seed/seed-library-lib";
+import { parseCommandArgs } from "./cli-args";
 import { bundleToPack, leakedIds, type SlugMap } from "./export";
 import { writeIcons } from "./icons-file";
 import { listPackKeys, packPath, readManifest, TEMPLATES_DIR } from "./pack";
@@ -13,22 +14,14 @@ import type { PackKind, TemplateManifest } from "@/lib/utils/templates/manifest"
 
 const KIND_ORDER: readonly PackKind[] = ["spell-groups", "spells", "races", "classes", "feats", "backgrounds", "careers", "units", "main-skills", "skills", "artifact-sets", "artifacts", "skillTrees", "tracks"];
 
-const OPTIONS = new Set(["--from", "--system", "--name", "--slugs"]);
+const USAGE = "pnpm template export <key> --from <campaignId> [--system <system>] [--name <name>] [--slugs <file>]";
 
 const write = (file: string, value: unknown) => fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
 
 export async function exportCommand(args: string[]): Promise<void> {
-  const [key, ...tail] = args;
+  const { key, options } = parseCommandArgs(args, undefined, true);
 
-  const options: Record<string, string> = {};
-
-  for (let i = 0; i < tail.length; i += 2) {
-    if (!OPTIONS.has(tail[i]) || !tail[i + 1]) throw new Error(`Bad option ${tail[i]}; pnpm template export <key> --from <campaignId> [--system <system>] [--name <name>] [--slugs <file>]`);
-
-    options[tail[i]] = tail[i + 1];
-  }
-
-  if (!key || !options["--from"]) throw new Error("pnpm template export <key> --from <campaignId> [--system <system>] [--name <name>] [--slugs <file>]");
+  if (!options["--from"]) throw new Error(USAGE);
 
   assertSeedTarget(process.env.DATABASE_URL, false);
 

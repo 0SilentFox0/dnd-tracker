@@ -7,15 +7,15 @@ export interface CommandArgs {
   rest: string[];
 }
 
-const VALUE_FLAGS = new Set(["--owner", "--dir", "--kinds", "--source"]);
+const VALUE_FLAGS = new Set(["--owner", "--dir", "--kinds", "--source", "--from", "--system", "--name", "--slugs"]);
 
-/** `<key> [--flag] [--option value] ...rest`; the key must be a pack folder. */
-export function parseCommandArgs(args: string[], dir = TEMPLATES_DIR): CommandArgs {
+/** `<key> [--flag] [--option value] ...rest`; the key must be a pack folder unless `allowNewKey`. */
+export function parseCommandArgs(args: string[], dir = TEMPLATES_DIR, allowNewKey = false): CommandArgs {
   const [key, ...tail] = args;
 
   const known = listPackKeys(dir);
 
-  if (!key || key.startsWith("--") || !known.includes(key)) throw new Error(`Unknown pack ${key ? `"${key}"` : "(missing)"}; known packs: ${known.join(", ")}`);
+  if (!key || key.startsWith("--") || (!allowNewKey && !known.includes(key))) throw new Error(`Unknown pack ${key ? `"${key}"` : "(missing)"}; known packs: ${known.join(", ")}`);
 
   const flags = new Set<string>();
 

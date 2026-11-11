@@ -24,4 +24,12 @@ describe("parseCommandArgs", () => {
     expect(() => parseCommandArgs(["--dry-run"], dir)).toThrow(/Unknown pack/);
     expect(() => parseCommandArgs(["fixture-pack", "--owner"], dir)).toThrow(/needs a value/);
   });
+
+  it("accepts a new key with export options when allowed", () => {
+    const parsed = parseCommandArgs(["brand-new", "--from", "c1", "--system", "dnd5e"], dir, true);
+
+    expect(parsed.key).toBe("brand-new");
+    expect(parsed.options).toEqual({ "--from": "c1", "--system": "dnd5e" });
+    expect(() => parseCommandArgs(["--from", "c1"], dir, true)).toThrow(/missing|Unknown pack/);
+  });
 });
