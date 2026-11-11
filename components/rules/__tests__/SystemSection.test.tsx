@@ -27,7 +27,7 @@ describe("SystemSection", () => {
 
     fireEvent.click(trigger);
 
-    expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual(["gameTerms.ruleSystem.homm", "gameTerms.ruleSystem.dnd5e", "gameTerms.ruleSystem.wfrp"]);
+    expect(screen.getAllByRole("option").map((o) => o.textContent)).toEqual(["gameTerms.ruleSystem.dnd5e", "gameTerms.ruleSystem.homm", "gameTerms.ruleSystem.wfrp"]);
 
     fireEvent.click(screen.getByRole("option", { name: "gameTerms.ruleSystem.wfrp" }));
 

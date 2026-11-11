@@ -2,10 +2,9 @@
 
 import { useTranslations } from "next-intl";
 
-import type { UnitStatsFieldsProps } from "../types";
-
 import { AbilityScoresGrid } from "@/components/common/AbilityScoresGrid";
 import { HudSection } from "@/components/hud/form";
+import type { UnitStatsFieldsProps } from "@/components/systems/types";
 import { UnitFiveEFields } from "@/components/units/form/UnitFiveEFields";
 
 export function UnitStatsFields({ formData, onChange, fiveE }: UnitStatsFieldsProps) {

@@ -7,15 +7,16 @@ import { isRuleSystemKey, metaOf, RULE_SYSTEM_KEYS, SYSTEM_META, systemNamespace
 
 const ROOT = path.resolve(__dirname, "../../../../..");
 
-const META_FILES = ["lib/utils/rules/systems/d20/meta.ts", "systems/wfrp/meta.ts"];
+const META_FILES = ["systems/d20/meta.ts", "systems/wfrp/meta.ts"];
 
 describe("system meta", () => {
-  it("lists d20 keys first, then systems/* alphabetically", () => expect(RULE_SYSTEM_KEYS).toEqual(["homm", "dnd5e", "wfrp"]));
+  it("lists keys by systems/* folder alphabetically", () => expect(RULE_SYSTEM_KEYS).toEqual(["dnd5e", "homm", "wfrp"]));
 
   it("resolves keys", () => {
     expect(isRuleSystemKey("wfrp")).toBe(true);
     expect(isRuleSystemKey("nope")).toBe(false);
-    expect(metaOf("homm")?.module).toBe("d20");
+    expect(metaOf("dnd5e")?.module).toBe("d20");
+    expect(metaOf("homm")?.module).toBe("homm");
     expect(metaOf("wfrp")?.module).toBe("wfrp");
     expect(metaOf("nope")).toBeUndefined();
   });

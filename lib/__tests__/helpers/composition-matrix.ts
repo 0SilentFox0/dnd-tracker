@@ -159,7 +159,7 @@ export function matrixCases(metas: Metas): MatrixCase[] {
 export function assertMatrixCase(metas: Metas, c: MatrixCase, compose: ComposeFn): void {
   expect(validateComposition({ key: c.key, modules: c.modules }, metas), c.label).toEqual([]);
 
-  const baseMeta = moduleMetaOf(c.base, metas) as SystemMeta;
+  const baseMeta = (metas.find((m) => m.keys.includes(c.key)) ?? moduleMetaOf(c.base, metas)) as SystemMeta;
 
   const { definition, ui, server } = compose(c.key, c.modules);
 

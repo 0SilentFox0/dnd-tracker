@@ -2,8 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import type { RollDialogBodyProps } from "../types";
-
+import type { RollDialogBodyProps } from "@/components/systems/types";
 import { signed } from "@/lib/utils/common/format";
 
 export function RollDialogBody({ result }: RollDialogBodyProps) {

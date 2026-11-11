@@ -7,7 +7,7 @@ import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 describe("system ui registry", () => {
   it("has the three systems, homm and dnd5e share the d20 ui", () => {
     expect(Object.keys(SYSTEM_UI).sort()).toEqual(["dnd5e", "homm", "wfrp"]);
-    expect(systemUiOf("homm")).toBe(systemUiOf("dnd5e"));
+    expect(systemUiOf("homm")).toEqual(systemUiOf("dnd5e"));
     expect(systemUiOf("wfrp")).not.toBe(systemUiOf("homm"));
   });
 

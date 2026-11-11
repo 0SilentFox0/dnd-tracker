@@ -5,8 +5,6 @@ export type ModuleEntry<T> = T | AddonBuilder<T>;
 
 export interface ModuleSource<T extends object> {
   entries: Readonly<Record<string, ModuleEntry<T>>>;
-  /** Temporary bases that are not folders yet, keyed by system key */
-  fallbackBase?: (key: string) => T | undefined;
   /** A module without an entry in this layer contributes nothing */
   optional?: boolean;
   compose: (base: T, addons: readonly Addon<T>[]) => T;
@@ -18,7 +16,7 @@ export function resolveSystem<T extends object>(system: SystemSelection, cache: 
   return composeCached(cache, system, ({ base, modules }) => {
     const entry = Object.hasOwn(source.entries, base) ? source.entries[base] : undefined;
 
-    const baseDef = entry && !isBuilder(entry) ? entry : source.fallbackBase?.(system.key);
+    const baseDef = entry && !isBuilder(entry) ? entry : undefined;
 
     if (!baseDef) throw new Error(`No definition for base module: ${base}`);
 

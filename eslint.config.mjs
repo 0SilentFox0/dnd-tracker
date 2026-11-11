@@ -54,11 +54,6 @@ const MODE_IMPORT_PATTERN = {
   message: "Режим карти — лише через реєстр (@/lib/utils/battle/modes, @/components/battle/modes).",
 };
 
-const SYSTEM_IMPORT_PATTERN = {
-  group: ["@/lib/utils/rules/systems/d20*", "@/components/systems/d20*"],
-  message: "Рульова система — лише через реєстр (@/lib/utils/rules/systems, @/components/systems).",
-};
-
 const SYSTEM_IDS = readdirSync(new URL("./systems", import.meta.url), { withFileTypes: true })
   .filter((d) => d.isDirectory())
   .map((d) => d.name);
@@ -87,7 +82,6 @@ const requiresOf = (id) => readRequires(SYSTEMS_DIR, id);
 const SYSTEM_SELF_PATTERNS = (id) => [
   ...(foreignSystemGroup(id, SYSTEM_IDS, requiresOf).length > 0 ? [{ group: foreignSystemGroup(id, SYSTEM_IDS, requiresOf), message: "Система не імпортує іншу систему (крім модулів зі своїх requires)." }] : []),
   { group: ["@/app", "@/app/*", "@/scripts", "@/scripts/*"], message: "Система не залежить від app і scripts." },
-  SYSTEM_IMPORT_PATTERN,
   MODE_IMPORT_PATTERN,
   THREE_IMPORT_PATTERN,
 ];
@@ -271,7 +265,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
       "no-restricted-globals": [
@@ -294,7 +288,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -306,7 +300,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -319,7 +313,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },
@@ -332,7 +326,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN, THREE_IMPORT_PATTERN, AI_IN_ASSISTANT_PATTERN],
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN, AI_IN_ASSISTANT_PATTERN],
         },
       ],
     },
@@ -412,7 +406,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: DIALOG_RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, SYSTEM_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
         },
       ],
     },

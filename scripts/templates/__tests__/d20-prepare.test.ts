@@ -4,7 +4,7 @@ import { iconColumnOf, withIcons } from "../lib/icons-file";
 import type { IconsFile, PackRow } from "../lib/pack";
 import { clearableColumnsOf, CORE_CLEARABLE_COLUMNS, staleColumns } from "../lib/row-columns";
 import { PACK_HOOKS, SYSTEM_MODULE } from "../systems";
-import { D20_HOOKS } from "../systems/d20";
+import { D20_MODULE_HOOKS } from "../systems/d20";
 import { resolveSchoolRefs, withClassIcons } from "../systems/d20/prepare";
 
 describe("resolveSchoolRefs", () => {
@@ -90,11 +90,11 @@ describe("withClassIcons", () => {
   });
 });
 
-const prepareRows = D20_HOOKS.prepareRows as NonNullable<typeof D20_HOOKS.prepareRows>;
+const prepareRows = D20_MODULE_HOOKS.prepareRows as NonNullable<typeof D20_MODULE_HOOKS.prepareRows>;
 
-const normalize = D20_HOOKS.normalizeTranslation as NonNullable<typeof D20_HOOKS.normalizeTranslation>;
+const normalize = D20_MODULE_HOOKS.normalizeTranslation as NonNullable<typeof D20_MODULE_HOOKS.normalizeTranslation>;
 
-describe("D20_HOOKS.prepareRows", () => {
+describe("D20_MODULE_HOOKS.prepareRows", () => {
   const pack = (kinds: string[]) => ({ manifest: { kinds } }) as never;
 
   const row = { slug: "x", name: "X", damageBonus: { school: "Evocation" } } as unknown as PackRow;
@@ -120,8 +120,8 @@ describe("D20_HOOKS.prepareRows", () => {
 
 describe("pack hooks composition", () => {
   it("homm = d20 + homm, dnd5e = d20, wfrp stays d20-free", () => {
-    expect(PACK_HOOKS.dnd5e).toBe(D20_HOOKS);
-    expect(PACK_HOOKS.homm.prepareRows).toBe(D20_HOOKS.prepareRows);
+    expect(PACK_HOOKS.dnd5e).toBe(D20_MODULE_HOOKS);
+    expect(PACK_HOOKS.homm.prepareRows).toBe(D20_MODULE_HOOKS.prepareRows);
     expect(PACK_HOOKS.homm.validatePack).toBeDefined();
     expect(PACK_HOOKS.wfrp.prepareRows).toBeUndefined();
   });

@@ -1,7 +1,6 @@
-import { D20_META } from "./d20/meta";
-
 // <systems:generated>
 import { ARTIFACTSETS_META } from "@/systems/artifactsets/meta";
+import { D20_META } from "@/systems/d20/meta";
 import { HEROSCALING_META } from "@/systems/heroscaling/meta";
 import { HOMM_META } from "@/systems/homm/meta";
 import { MORALE_META } from "@/systems/morale/meta";
@@ -42,9 +41,9 @@ export interface SystemMeta {
 }
 
 export const SYSTEM_META = [
-  D20_META,
   // <systems:generated>
   ARTIFACTSETS_META,
+  D20_META,
   HEROSCALING_META,
   HOMM_META,
   MORALE_META,

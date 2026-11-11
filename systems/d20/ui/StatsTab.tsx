@@ -3,10 +3,9 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 
-import type { SheetRollRequest, StatsTabProps } from "../types";
-
 import { useProfile } from "@/components/character-profile/ProfileContext";
 import { HudSection } from "@/components/hud/form";
+import type { SheetRollRequest, StatsTabProps } from "@/components/systems/types";
 import type { DndSkill } from "@/lib/constants/skills";
 import { cn } from "@/lib/utils";
 import { signed } from "@/lib/utils/common/format";

@@ -40,7 +40,7 @@ describe("systems index", () => {
   it("emits entries in alphabetical id order, only for existing layers", () => {
     const root = fixture(["zeta", "alpha"]);
 
-    write(root, "systems/alpha/index.ts", "export {};\n");
+    write(root, "systems/alpha/index.ts", "export const ALPHA_MODULE = 1;\n");
 
     syncSystemsIndex(root);
 
@@ -58,7 +58,7 @@ describe("systems index", () => {
   it("two full systems (wfrp + d6pool) keep the same order in every block of every root", () => {
     const root = fixture(["wfrp", "d6pool"]);
 
-    for (const id of ["wfrp", "d6pool"]) for (const layer of new Set(ROOT_SPECS.flatMap((spec) => spec.blocks.map((b) => b.layer(id))))) write(root, layer, "export {};\n");
+    for (const id of ["wfrp", "d6pool"]) for (const layer of new Set(ROOT_SPECS.flatMap((spec) => spec.blocks.map((b) => b.layer(id))))) write(root, layer, `export const ${id.toUpperCase()}_MODULE = 1;\n`);
 
     syncSystemsIndex(root);
 

@@ -1,13 +1,14 @@
-/* eslint-disable simple-import-sort/imports -- the generated block must stay contiguous */
-import { SYSTEM_MODULE, systemBases } from "@/scripts/templates/systems/modules";
-import type { PackHooks, PackIssue } from "@/scripts/templates/systems/types";
-
 import type { Pack } from "../lib/pack";
 import { ADAPTERS } from "./adapters";
-import { D20_HOOKS } from "./d20";
+import { SYSTEM_MODULE, systemBases } from "./modules";
+import type { PackHooks, PackIssue } from "./types";
+
+import { PRESETS } from "@/lib/utils/rules/systems/catalog";
+import { metaOf } from "@/lib/utils/rules/systems/meta";
 // <systems:generated>
-import { HOMM_MODULE_HOOKS } from "./homm";
-import { WFRP_MODULE_HOOKS } from "./wfrp";
+import { D20_MODULE_HOOKS } from "@/scripts/templates/systems/d20";
+import { HOMM_MODULE_HOOKS } from "@/scripts/templates/systems/homm";
+import { WFRP_MODULE_HOOKS } from "@/scripts/templates/systems/wfrp";
 // </systems:generated>
 
 export { SYSTEM_MODULE, systemBases };
@@ -16,15 +17,22 @@ export type { Glossary, PackHooks, PackIssue, PackRefs, PrepareCtx } from "./typ
 
 export const MODULE_HOOKS: Readonly<Record<string, PackHooks>> = {
   // <systems:generated>
+  d20: D20_MODULE_HOOKS,
   homm: HOMM_MODULE_HOOKS,
   wfrp: WFRP_MODULE_HOOKS,
   // </systems:generated>
 };
 
-export const PACK_HOOKS: Readonly<Record<string, PackHooks>> = {
-  ...MODULE_HOOKS,
-  homm: { ...D20_HOOKS, ...HOMM_MODULE_HOOKS },
-  dnd5e: D20_HOOKS,
+const hooksOf = (key: string): PackHooks => {
+  const { base, modules } = PRESETS[key];
+
+  const own = metaOf(key)?.module;
+
+  const sources = [...new Set([base, ...modules, ...(own ? [own] : [])])].flatMap((id) => (Object.hasOwn(MODULE_HOOKS, id) ? [MODULE_HOOKS[id]] : []));
+
+  return sources.length === 1 ? sources[0] : Object.assign({}, ...sources);
 };
+
+export const PACK_HOOKS: Readonly<Record<string, PackHooks>> = Object.fromEntries(Object.keys(PRESETS).map((key) => [key, hooksOf(key)]));
 
 export const PACK_ADAPTERS: Readonly<Record<string, { validate?(pack: Pack): PackIssue[] }>> = ADAPTERS;

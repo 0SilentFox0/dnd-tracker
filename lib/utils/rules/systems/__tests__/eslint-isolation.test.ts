@@ -20,16 +20,13 @@ const restricted = async (filePath: string) => {
   };
 };
 
-const D20 = "@/lib/utils/rules/systems/d20*";
-
 const ZONE = "@/systems/*";
 
 describe("system import zones", () => {
-  it.each(["lib/utils/battle/foo.ts", "components/characters/Foo.tsx", "lib/hooks/characters/useX.ts", "app/api/campaigns/foo/route.ts"])("%s may reach systems only through the roots and not reach d20", async (file) => {
+  it.each(["lib/utils/battle/foo.ts", "components/characters/Foo.tsx", "lib/hooks/characters/useX.ts", "app/api/campaigns/foo/route.ts"])("%s may reach systems only through the roots", async (file) => {
     const r = await restricted(file);
 
     expect(r.zone).toContain(ZONE);
-    expect(r.groups).toContain(D20);
   });
 
   it.each(["types/foo.ts", "scripts/foo.ts"])("%s may reach systems only through the roots", async (file) => expect((await restricted(file)).zone).toContain(ZONE));
@@ -64,11 +61,11 @@ describe("system import zones", () => {
     const rules = await restricted("systems/wfrp/rules/x.ts");
 
     expect(rules.names).toContain("@/lib/db");
-    expect(rules.groups).toEqual(expect.arrayContaining(["@/app", "@/scripts", "@/lib/server", D20]));
+    expect(rules.groups).toEqual(expect.arrayContaining(["@/app", "@/scripts", "@/lib/server"]));
 
     const ui = await restricted("systems/wfrp/ui/x.tsx");
 
-    expect(ui.groups).toEqual(expect.arrayContaining(["@/lib/api", "@/systems/*/api", "@/app", D20]));
+    expect(ui.groups).toEqual(expect.arrayContaining(["@/lib/api", "@/systems/*/api", "@/app"]));
 
     expect(rules.groups).toEqual(expect.arrayContaining(["@/lib/utils/api/*", "!@/lib/utils/api/content-error"]));
 
@@ -80,7 +77,7 @@ describe("system import zones", () => {
     expect(hooks.names).toContain("@/lib/db");
     expect(hooks.groups).toEqual(expect.arrayContaining(["@/lib/server", "@/lib/server/*", "@/systems/*/server", "@/systems/*/server/*"]));
 
-    for (const file of ["systems/wfrp/hooks/x.ts", "systems/wfrp/api/x.ts", "systems/wfrp/server/x.ts"]) expect((await restricted(file)).groups).toEqual(expect.arrayContaining(["@/app", "@/scripts", D20]));
+    for (const file of ["systems/wfrp/hooks/x.ts", "systems/wfrp/api/x.ts", "systems/wfrp/server/x.ts"]) expect((await restricted(file)).groups).toEqual(expect.arrayContaining(["@/app", "@/scripts"]));
   });
 });
 

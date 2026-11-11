@@ -31,10 +31,10 @@ describe("system exhaustiveness", () => {
     expect(keysOf(SYSTEM_MODULE)).toEqual(keys);
   });
 
-  it("systems/* folders are the meta modules without d20, each with meta.ts and index.ts", () => {
+  it("systems/* folders are the meta modules, each with meta.ts and index.ts", () => {
     const folders = fs.readdirSync(path.join(ROOT, "systems"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
 
-    expect(folders).toEqual(SYSTEM_META.map((m) => m.module).filter((m) => m !== "d20").sort());
+    expect(folders).toEqual(SYSTEM_META.map((m) => m.module).sort());
 
     for (const id of folders) for (const file of ["meta.ts", "index.ts"]) expect(fs.existsSync(path.join(ROOT, "systems", id, file)), `systems/${id}/${file}`).toBe(true);
   });
@@ -108,7 +108,7 @@ describe("fixture system d6pool", () => {
 describe("eslint isolation requires", () => {
   const systemsDir = pathToFileURL(`${path.join(ROOT, "systems")}/`);
 
-  it.each((SYSTEM_META as readonly SystemMeta[]).filter((m) => m.module !== "d20").map((m) => [m.module, m.requires ?? []] as const))("%s: eslint parse of meta.ts equals META.requires", (id, requires) => {
+  it.each((SYSTEM_META as readonly SystemMeta[]).map((m) => [m.module, m.requires ?? []] as const))("%s: eslint parse of meta.ts equals META.requires", (id, requires) => {
     expect(readRequires(systemsDir, id)).toEqual([...requires]);
   });
 });

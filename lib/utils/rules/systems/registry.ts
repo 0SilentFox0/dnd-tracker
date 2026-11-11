@@ -1,5 +1,4 @@
 import { composeSystem } from "./compose";
-import { d20System } from "./d20";
 import { RULE_SYSTEM_KEYS } from "./meta";
 import { type ModuleEntry, resolveSystem } from "./resolve";
 import type { RuleSystemDefinition } from "./types";
@@ -8,8 +7,8 @@ import { type Coin, COIN_VALUE } from "@/lib/constants/inventory";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 // <systems:generated>
 import { ARTIFACTSETS_MODULE } from "@/systems/artifactsets";
+import { D20_MODULE } from "@/systems/d20";
 import { HEROSCALING_MODULE } from "@/systems/heroscaling";
-import { HOMM_MODULE } from "@/systems/homm";
 import { MORALE_MODULE } from "@/systems/morale";
 import { RETALIATION_MODULE } from "@/systems/retaliation";
 import { SKILLTREES_MODULE } from "@/systems/skilltrees";
@@ -20,8 +19,8 @@ import { WFRP_MODULE } from "@/systems/wfrp";
 export const MODULES: Record<string, ModuleEntry<RuleSystemDefinition>> = {
   // <systems:generated>
   artifactsets: ARTIFACTSETS_MODULE,
+  d20: D20_MODULE,
   heroscaling: HEROSCALING_MODULE,
-  homm: HOMM_MODULE,
   morale: MORALE_MODULE,
   retaliation: RETALIATION_MODULE,
   skilltrees: SKILLTREES_MODULE,
@@ -30,12 +29,12 @@ export const MODULES: Record<string, ModuleEntry<RuleSystemDefinition>> = {
   // </systems:generated>
 };
 
-const D20_BASES: Record<string, RuleSystemDefinition> = { homm: d20System("homm"), dnd5e: d20System("dnd5e") };
+const withKey = (definition: RuleSystemDefinition, key: string): RuleSystemDefinition => (definition.key === key ? definition : { ...definition, key });
 
 const systemCache = new Map<string, RuleSystemDefinition>();
 
 const resolve = (system: Pick<Ruleset, "system">["system"]): RuleSystemDefinition =>
-  resolveSystem(system, systemCache, { entries: MODULES, fallbackBase: (key) => D20_BASES[key], compose: composeSystem });
+  resolveSystem(system, systemCache, { entries: MODULES, compose: (base, addons) => withKey(composeSystem(base, addons), system.key) });
 
 export const RULE_SYSTEM_REGISTRY: Record<string, RuleSystemDefinition> = Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve({ key })]));
 

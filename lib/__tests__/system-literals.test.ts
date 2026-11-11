@@ -42,7 +42,7 @@ describe("system literals ratchet", () => {
   it("allows system folders and the template registry", () => {
     const tokens = literalTokens();
 
-    expect(isLiteralAllowed("lib/utils/rules/systems/d20/index.ts", tokens)).toBe(true);
+    expect(isLiteralAllowed("systems/d20/index.ts", tokens)).toBe(false);
     expect(isLiteralAllowed("scripts/templates/systems/wfrp/units.ts", tokens)).toBe(true);
     expect(isLiteralAllowed("scripts/templates/grim-d100/validate.ts", tokens)).toBe(true);
     expect(isLiteralAllowed("lib/utils/templates/registry.ts", tokens)).toBe(true);
@@ -99,8 +99,7 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
   };
 
   const LEAK_NAMES: Record<string, number> = {
-    "D20_[A-Z]+": 2,
-    d20System: 1,
+    "D20_[A-Z]+": 0,
     judgeD20: 1,
     CONDITION_5E_: 12,
     applyCondition5e: 6,

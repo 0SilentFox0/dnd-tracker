@@ -1,22 +1,23 @@
 import { composeUi } from "./compose";
-import { D20_UI } from "./d20";
 import type { SystemUi } from "./types";
 
 import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
 import { type ModuleEntry, resolveSystem } from "@/lib/utils/rules/systems/resolve";
 // <systems:generated>
+import { D20_MODULE_UI } from "@/systems/d20/ui";
 import { WFRP_MODULE_UI } from "@/systems/wfrp/ui";
 // </systems:generated>
 
 export const MODULE_UI: Record<string, ModuleEntry<SystemUi>> = {
   // <systems:generated>
+  d20: D20_MODULE_UI,
   wfrp: WFRP_MODULE_UI,
   // </systems:generated>
 };
 
 const uiCache = new Map<string, SystemUi>();
 
-const resolve = (key: string, modules?: readonly string[]): SystemUi => resolveSystem({ key, modules }, uiCache, { entries: MODULE_UI, optional: true, fallbackBase: () => D20_UI, compose: composeUi });
+const resolve = (key: string, modules?: readonly string[]): SystemUi => resolveSystem({ key, modules }, uiCache, { entries: MODULE_UI, optional: true, compose: composeUi });
 
 export const SYSTEM_UI: Record<string, SystemUi> = Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve(key)]));
 

@@ -2,11 +2,10 @@
 
 import { useTranslations } from "next-intl";
 
-import type { StatsFieldsProps } from "../types";
-
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
 import { HudSection } from "@/components/hud/form";
+import type { StatsFieldsProps } from "@/components/systems/types";
 
 export function StatsFields({ bindings: { abilityScores, combatStats }, campaignId, mode, classArmor }: StatsFieldsProps) {
   const t = useTranslations("characters");

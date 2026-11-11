@@ -9,6 +9,8 @@ const upper = (id: string) => id.toUpperCase().replace(/[^A-Z0-9]/g, "_");
 
 interface BlockSpec {
   packs?: boolean;
+  /** The layer file must export this name for the id to get a line */
+  name?: (id: string) => string;
   layer: (id: string) => string;
   line: (id: string) => string;
 }
@@ -21,6 +23,8 @@ export interface RootSpec {
 const metaLayer = (id: string) => `systems/${id}/meta.ts`;
 
 const imp = (name: (id: string) => string, from: (id: string) => string) => (id: string) => `import { ${name(id)} } from "${from(id)}";`;
+
+const exportsName = (root: string, file: string, name: string): boolean => new RegExp(`export (?:const|function) ${name}\\b`).test(fs.readFileSync(path.join(root, file), "utf8"));
 
 const scriptsLayer = (id: string) => `scripts/templates/systems/${id}/index.ts`;
 
@@ -37,8 +41,8 @@ export const ROOT_SPECS: readonly RootSpec[] = [
   {
     file: "lib/utils/rules/systems/registry.ts",
     blocks: [
-      { layer: (id) => `systems/${id}/index.ts`, line: imp((id) => `${upper(id)}_MODULE`, (id) => `@/systems/${id}`) },
-      { layer: (id) => `systems/${id}/index.ts`, line: (id) => `${id}: ${upper(id)}_MODULE,` },
+      { layer: (id) => `systems/${id}/index.ts`, name: (id) => `${upper(id)}_MODULE`, line: imp((id) => `${upper(id)}_MODULE`, (id) => `@/systems/${id}`) },
+      { layer: (id) => `systems/${id}/index.ts`, name: (id) => `${upper(id)}_MODULE`, line: (id) => `${id}: ${upper(id)}_MODULE,` },
     ],
   },
   {
@@ -72,7 +76,7 @@ export const ROOT_SPECS: readonly RootSpec[] = [
   {
     file: "scripts/templates/systems/index.ts",
     blocks: [
-      { layer: scriptsLayer, line: imp((id) => `${upper(id)}_MODULE_HOOKS`, (id) => `./${id}`) },
+      { layer: scriptsLayer, line: imp((id) => `${upper(id)}_MODULE_HOOKS`, (id) => `@/scripts/templates/systems/${id}`) },
       { layer: scriptsLayer, line: (id) => `${id}: ${upper(id)}_MODULE_HOOKS,` },
     ],
   },
@@ -117,7 +121,7 @@ const render = (spec: RootSpec, text: string, ids: string[], packs: string[], ro
   return text.replace(BLOCK_RE, (_all, indent: string) => {
     const block = spec.blocks[i++];
 
-    const lines = (block.packs ? packs : ids).filter((id) => fs.existsSync(path.join(root, block.layer(id)))).map((id) => `${indent}${block.line(id)}\n`);
+    const lines = (block.packs ? packs : ids).filter((id) => fs.existsSync(path.join(root, block.layer(id))) && (!block.name || exportsName(root, block.layer(id), block.name(id)))).map((id) => `${indent}${block.line(id)}\n`);
 
     return `${indent}${OPEN}\n${lines.join("")}${indent}${CLOSE}`;
   });
