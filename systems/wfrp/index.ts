@@ -23,7 +23,7 @@ import { COINS } from "@/lib/constants/inventory";
 import type { SystemData } from "@/lib/utils/rules/systems/slot";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
 
-export const WFRP_SYSTEM: RuleSystemDefinition = {
+export const WFRP_MODULE: RuleSystemDefinition = {
   key: "wfrp",
   distance: { unit: "yd", perCell: 2 },
   progression: {

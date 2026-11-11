@@ -1,29 +1,36 @@
+import { composeServer } from "./compose";
 import type { SystemOperation, SystemServer, SystemToolNote } from "./types";
 
 import "server-only";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
+import { type ModuleEntry, resolveSystem } from "@/lib/utils/rules/systems/resolve";
 // <systems:generated>
-import { WFRP_SERVER } from "@/systems/wfrp/server";
+import { WFRP_MODULE_SERVER } from "@/systems/wfrp/server";
 // </systems:generated>
 
 export type { SystemSchemas, SystemServer } from "./types";
 
 const D20_SERVER: SystemServer = { schemas: {} };
 
-export const SYSTEM_SERVER: Readonly<Record<string, SystemServer>> = {
-  homm: D20_SERVER,
-  dnd5e: D20_SERVER,
+export const MODULE_SERVER: Record<string, ModuleEntry<SystemServer>> = {
   // <systems:generated>
-  wfrp: WFRP_SERVER,
+  wfrp: WFRP_MODULE_SERVER,
   // </systems:generated>
 };
 
+const serverCache = new Map<string, SystemServer>();
+
+const resolve = (system: Pick<Ruleset, "system">["system"]): SystemServer => resolveSystem(system, serverCache, { entries: MODULE_SERVER, fallbackBase: () => D20_SERVER, compose: composeServer });
+
+export const SYSTEM_SERVER: Readonly<Record<string, SystemServer>> = Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve({ key })]));
+
 export const systemServerOf = (rules: Pick<Ruleset, "system">): SystemServer => {
-  const { key } = rules.system;
+  const { key, modules } = rules.system;
 
-  if (!Object.hasOwn(SYSTEM_SERVER, key)) throw new Error(`Unknown rule system: ${key}`);
+  if (!modules && Object.hasOwn(SYSTEM_SERVER, key)) return SYSTEM_SERVER[key];
 
-  return SYSTEM_SERVER[key];
+  return resolve(rules.system);
 };
 
 export const withSystemNotes = (base: string, tool: SystemToolNote): string => {

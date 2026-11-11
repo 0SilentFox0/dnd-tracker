@@ -5,9 +5,10 @@ import { afterAll, describe, expect, it } from "vitest";
 
 import { type Pack, type PackRow, readPack } from "../lib/pack";
 import { validatePack } from "../lib/validate";
-import type { PackIssue } from "../systems";
+import { type PackIssue, systemBases } from "../systems";
 import { treeFromPack } from "../systems/homm/skill-trees";
 
+import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 import type { TemplateManifest } from "@/lib/utils/templates/manifest";
 
 const fixtures = path.join(__dirname, "fixtures");
@@ -98,7 +99,7 @@ describe("validatePack on the fixture pack", () => {
 
     pack.manifest = { ...pack.manifest, include: [{ from: "sibling", kinds: { feats: "all" } }] };
 
-    expect(errorsOf(pack, { registry: { sibling } })).toEqual(['manifest: include.from "sibling" belongs to system "wfrp", a different module than "dnd5e"']);
+    expect(errorsOf(pack, { registry: { sibling } })).toEqual(['manifest: include.from "sibling" belongs to system "wfrp", a different base than "dnd5e"']);
     expect(errorsOf(pack, { registry: { sibling: { ...sibling, system: "homm" } } })).toEqual([]);
     expect(errorsOf(pack, { registry: {} })).toEqual(['manifest: include.from "sibling" is not a known pack']);
   });
@@ -178,5 +179,15 @@ describe("validatePack on heroes-homm guards (D25, D25b, D25c)", () => {
     const row = { slug: "t", race: "Human", skills: { mainSkills: [{ id: "racial" }, { id: "missing" }] } } as unknown as PackRow;
 
     expect(() => treeFromPack(row, { idOf: () => undefined, slugOf: () => undefined, rowId: undefined })).toThrow(/no main-skills row with slug "missing"/);
+  });
+});
+
+describe("systemBases", () => {
+  const meta = (module: string, keys: string[], extra: Partial<SystemMeta> = {}): SystemMeta => ({ module, keys, i18n: {}, unusedMechanics: [], ...extra });
+
+  it("maps every key, presets included, to its base module", () => {
+    const metas = [meta("d20", ["dnd5e"], { kind: "base" }), meta("homm", ["homm"], { kind: "preset", preset: { base: "d20", modules: ["homm-units"] } }), meta("wfrp", ["wfrp"])];
+
+    expect(systemBases(metas)).toEqual({ dnd5e: "d20", homm: "d20", wfrp: "wfrp" });
   });
 });

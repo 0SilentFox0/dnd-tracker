@@ -37,22 +37,22 @@ export const ROOT_SPECS: readonly RootSpec[] = [
   {
     file: "lib/utils/rules/systems/registry.ts",
     blocks: [
-      { layer: (id) => `systems/${id}/index.ts`, line: imp((id) => `${upper(id)}_SYSTEM`, (id) => `@/systems/${id}`) },
-      { layer: (id) => `systems/${id}/index.ts`, line: (id) => `${id}: ${upper(id)}_SYSTEM,` },
+      { layer: (id) => `systems/${id}/index.ts`, line: imp((id) => `${upper(id)}_MODULE`, (id) => `@/systems/${id}`) },
+      { layer: (id) => `systems/${id}/index.ts`, line: (id) => `${id}: ${upper(id)}_MODULE,` },
     ],
   },
   {
     file: "components/systems/registry.ts",
     blocks: [
-      { layer: (id) => `systems/${id}/ui/index.ts`, line: imp((id) => `${upper(id)}_UI`, (id) => `@/systems/${id}/ui`) },
-      { layer: (id) => `systems/${id}/ui/index.ts`, line: (id) => `${id}: ${upper(id)}_UI,` },
+      { layer: (id) => `systems/${id}/ui/index.ts`, line: imp((id) => `${upper(id)}_MODULE_UI`, (id) => `@/systems/${id}/ui`) },
+      { layer: (id) => `systems/${id}/ui/index.ts`, line: (id) => `${id}: ${upper(id)}_MODULE_UI,` },
     ],
   },
   {
     file: "lib/server/systems/registry.ts",
     blocks: [
-      { layer: (id) => `systems/${id}/server/index.ts`, line: imp((id) => `${upper(id)}_SERVER`, (id) => `@/systems/${id}/server`) },
-      { layer: (id) => `systems/${id}/server/index.ts`, line: (id) => `${id}: ${upper(id)}_SERVER,` },
+      { layer: (id) => `systems/${id}/server/index.ts`, line: imp((id) => `${upper(id)}_MODULE_SERVER`, (id) => `@/systems/${id}/server`) },
+      { layer: (id) => `systems/${id}/server/index.ts`, line: (id) => `${id}: ${upper(id)}_MODULE_SERVER,` },
     ],
   },
   {
@@ -72,8 +72,8 @@ export const ROOT_SPECS: readonly RootSpec[] = [
   {
     file: "scripts/templates/systems/index.ts",
     blocks: [
-      { layer: scriptsLayer, line: imp((id) => `${upper(id)}_HOOKS`, (id) => `./${id}`) },
-      { layer: scriptsLayer, line: (id) => `${id}: ${upper(id)}_HOOKS,` },
+      { layer: scriptsLayer, line: imp((id) => `${upper(id)}_MODULE_HOOKS`, (id) => `./${id}`) },
+      { layer: scriptsLayer, line: (id) => `${id}: ${upper(id)}_MODULE_HOOKS,` },
     ],
   },
   {

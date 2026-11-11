@@ -10,6 +10,7 @@ import reactRefreshPlugin from "eslint-plugin-react-refresh";
 import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
 import prettierConfig from "eslint-config-prettier";
 import reactHooks from "eslint-plugin-react-hooks";
+import { foreignSystemGroup, readRequires } from "./scripts/shared/system-requires.mjs";
 
 const DIALOG_RESTRICTED_PATHS = [
   { name: "@/components/ui/dialog", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
@@ -79,8 +80,12 @@ const SYSTEM_ZONE_PATTERN = { group: ["@/systems/*", "@/systems/**"], message: "
 
 const SYSTEM_OWNED_FILES = ["lib/utils/rules/systems/**", "lib/hooks/systems/**", "components/systems/**", "systems/**"];
 
+const SYSTEMS_DIR = new URL("./systems/", import.meta.url);
+
+const requiresOf = (id) => readRequires(SYSTEMS_DIR, id);
+
 const SYSTEM_SELF_PATTERNS = (id) => [
-  ...(SYSTEM_IDS.length > 1 ? [{ group: SYSTEM_IDS.filter((o) => o !== id).map((o) => `@/systems/${o}/**`), message: "Система не імпортує іншу систему." }] : []),
+  ...(foreignSystemGroup(id, SYSTEM_IDS, requiresOf).length > 0 ? [{ group: foreignSystemGroup(id, SYSTEM_IDS, requiresOf), message: "Система не імпортує іншу систему (крім модулів зі своїх requires)." }] : []),
   { group: ["@/app", "@/app/*", "@/scripts", "@/scripts/*"], message: "Система не залежить від app і scripts." },
   SYSTEM_IMPORT_PATTERN,
   MODE_IMPORT_PATTERN,

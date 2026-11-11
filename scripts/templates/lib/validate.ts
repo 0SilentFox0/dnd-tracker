@@ -43,7 +43,7 @@ function manifestIssues(pack: Pack, registry: Readonly<Record<string, TemplateMa
     const source = Object.hasOwn(registry, from) ? registry[from] : undefined;
 
     if (!source) issues.push(error(`manifest: include.from "${from}" is not a known pack`));
-    else if (SYSTEM_MODULE[source.system] !== SYSTEM_MODULE[manifest.system]) issues.push(error(`manifest: include.from "${from}" belongs to system "${source.system}", a different module than "${manifest.system}"`));
+    else if (SYSTEM_MODULE[source.system] !== SYSTEM_MODULE[manifest.system]) issues.push(error(`manifest: include.from "${from}" belongs to system "${source.system}", a different base than "${manifest.system}"`));
   }
 
   return issues;

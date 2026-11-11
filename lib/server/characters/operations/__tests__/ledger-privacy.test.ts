@@ -17,7 +17,7 @@ import { getOperation } from "../get";
 import { listOperation, redactListedLedgers } from "../list";
 import { patchOperation } from "../patch";
 
-import { WFRP_SYSTEM } from "@/systems/wfrp";
+import { WFRP_MODULE } from "@/systems/wfrp";
 import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
@@ -69,7 +69,7 @@ describe("redaction leaves rows without wfrp keys alone", () => {
         { controlledBy: "p2", characteristics: { ...stored, downtime: { ailments: [] } } },
       ],
       { userId: "p1", isDM: false },
-      WFRP_SYSTEM,
+      WFRP_MODULE,
     );
 
     expect(d20.characteristics).toEqual({});
@@ -82,7 +82,7 @@ describe("downtime redaction on list", () => {
   const withDowntime = { ...stored, downtime: { ailments: [] } };
 
   it("redactListedLedgers strips downtime even without a ledger in the row", () => {
-    const [row] = redactListedLedgers([{ controlledBy: "p2", characteristics: { downtime: { ailments: [] } } }], { userId: "p1", isDM: false }, WFRP_SYSTEM);
+    const [row] = redactListedLedgers([{ controlledBy: "p2", characteristics: { downtime: { ailments: [] } } }], { userId: "p1", isDM: false }, WFRP_MODULE);
 
     expect("downtime" in (row.characteristics as object)).toBe(false);
   });

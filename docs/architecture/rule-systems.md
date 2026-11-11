@@ -21,6 +21,20 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 **Слот** (`lib/utils/rules/systems/slot.ts`): `SystemSlot = { key, data }`, `defineSlot(key, parse)` → `{ read, write }`; чужий ключ → `read()` повертає `undefined`. Слоти в core-типах: `abilities.system` (характеристики й стати учасника), `attack.system`, `sheet.systemSlot`, `actionDetails.system` / `AttackRollResult.system`, `scene.system` (стан сцени, колонка `battle_scenes.system_state`; core лише передає непрозорий `sceneState` у `combat.resolveAttack` і порівнює `sceneStatePatch` через `hashJson`). Колонка `characteristics` у рядках — непрозорий `SystemData`; дефолт і «порожність» дає система. Нейтральні поля атаки, які читає сітка: `ammo`, `reachCells`, `blastRadius`, `noLevelDice`, `ignoresEngagement`.
 
+## Композиція «база + модулі» (E2 Ч1, каркас)
+
+Правила кампанії = база (`d20`, `wfrp`) + необов'язкові модулі; `homm` і `dnd5e` — пресети (база + набір модулів). Спека: [2026-11-11-e2-d20-homm-modules-design.md](../superpowers/specs/2026-11-11-e2-d20-homm-modules-design.md). У Ч1 є лише механізм: модулів-доповнень у `systems/` ще немає, поведінка продукту не змінилась.
+
+- **Маніфест** (`SystemMeta`): `kind` (`base | addon | preset`, за замовчуванням `base`), `preset`, `requires`, `conflicts`, `claims`, `after`, `toggle`, `tokens` (підрядки для ratchet; id модулів-доповнень у літерали не входять).
+- **`catalog.ts`:** `composition({key, modules?})` → `{ base, modules }` (явний `modules` заміщує набір пресета), `PRESETS`, `moduleCatalog()`.
+- **`compose.ts`:** `validateComposition` (`requires`, `conflicts`, подвійний `claims`, невідомий id, модуль не тієї бази, цикл), `compositionOrder` (топологічно за `requires` + `after`, рівні за id; не залежить від порядку входу), `composeParts`/`composeSystem`/`composeUi`/`composeServer`, `defineAddon`, `composeCached` (ключ `key:base+modules`), `extendSystem`. Згортка: масиви конкатенуються (база, далі модулі), прості об'єкти зливаються вглиб, словники й групи задані явно (`FieldKinds`), скаляри й функції замінюються лише через `claims` (будівник отримує `prev`; значення, ідентичне `prev`, пропускається). Вид поля визначається за структурою значення, не за типом контракту: у Ч3 словники з нових секцій доведеться додавати в `FieldKinds`.
+- **`resolve.ts`:** спільне розгортання для rules/UI/server; реєстри `MODULES`, `MODULE_UI`, `MODULE_SERVER`, `MODULE_HOOKS` (по рядку на теку, експорти `<ID>_MODULE[_UI|_SERVER|_HOOKS]`); `ruleSystemOf`/`systemUiOf`/`systemServerOf` без `modules` повертають ту саму зібрану систему, що й раніше. Ручні рядки d20 лишаються до Ч2.
+- **`SlotCodec.extend(module, parse)`:** дані модуля в `data.ext[module]`; `write(data, prev?)` переносить `prev.ext`. Увага: наявні виклики `write` у `systems/wfrp` не передають `prev` (див. Ч3).
+- **Секція `system`:** `{ key, modules? }` (відсортовані, без дублів), валідація через `validateComposition` у `superRefine` (`rules.validation.unknownModule` / `invalidComposition`). Невалідна збережена композиція розбирається як `{ key }`. Патч із `modules` відхиляється до Ч16. **Поріг відкату:** після першого запису `system.modules` у prod старіший код (`strictObject({ key })`) такий рядок відкине.
+- **ESLint:** `SYSTEM_SELF_PATTERNS(id)` дозволяє `@/systems/<other>/**` лише для тек із `requires` (розбір першого `requires: [...]` у `meta.ts`, `scripts/shared/system-requires.mjs`; тест контракту звіряє з `META.requires`).
+- **Контракт:** матриця композицій (`lib/__tests__/helpers/composition-matrix.ts`, `system-composition-matrix.test.ts`) на реальних мета й фікстурах `d6pool`, `d6pool-plus` (модуль), `d6pool-alt` (той самий `claims`); `system-literals.test` має таблиці «імена-протікання» і `rules-section-readers` (максимуми лише падають).
+- **`include` між пакетами:** `SYSTEM_MODULE` береться через `presetsOf`; пакет може включати рядки пакета з тією самою базою.
+
 ## Хуки
 
 `RuleSystemDefinition` (`lib/utils/rules/systems/types.ts`, без zod і без імпортів `@/systems/*`):
@@ -59,12 +73,12 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 | Шлях | Зміст |
 |---|---|
-| `systems/wfrp/meta.ts`, `index.ts` | `WFRP_META`; `WFRP_SYSTEM` (`RuleSystemDefinition`, без zod) |
+| `systems/wfrp/meta.ts`, `index.ts` | `WFRP_META`; `WFRP_MODULE` (`RuleSystemDefinition`, без zod) |
 | `systems/wfrp/rules/` | `percentile/` (d100, SL, дублети, `details`), `characteristics/`, `skills/`, `conditions/`, `magic/`, `tables/`, `traits/`, `downtime/`, `corruption/`, `advancement/`, `creation/`, `equipment/`, `combat/` (`momentum`, атака), `slots.ts` (`PARTICIPANT_SLOT`, `ATTACK_SLOT`, …), `ability-effects.ts` / `ability-effect-rows.ts` / `trait-kinds.ts`, `rules-preset.ts`, `sheet-test.ts`, `session.ts` |
 | `systems/wfrp/constants/` | `characteristics`, `conditions`, `mutations` |
-| `systems/wfrp/server/` | `index.ts` (`WFRP_SERVER`), `schemas.ts`, `ai.ts`, `operations/`, `*-handler.ts` (advance, career, downtime, corruption), `draft/`, `race-profile.ts` |
+| `systems/wfrp/server/` | `index.ts` (`WFRP_MODULE_SERVER`), `schemas.ts`, `ai.ts`, `operations/`, `*-handler.ts` (advance, career, downtime, corruption), `draft/`, `race-profile.ts` |
 | `systems/wfrp/api/`, `hooks/` | клієнтські обгортки й хуки (аналог `lib/api`, `lib/hooks`) |
-| `systems/wfrp/ui/` | `index.ts` (`WFRP_UI`), лист і редактори, `battle/` (RollBody, CastTest, Channel, ConditionTest, ActionResult), `rules/` (Tables, Advancement), `careers/`, `creation/`, `downtime/`, `corruption/` |
+| `systems/wfrp/ui/` | `index.ts` (`WFRP_MODULE_UI`), лист і редактори, `battle/` (RollBody, CastTest, Channel, ConditionTest, ActionResult), `rules/` (Tables, Advancement), `careers/`, `creation/`, `downtime/`, `corruption/` |
 | `systems/wfrp/__tests__/` | `wfrp-*` тести з core-тек (дзеркальний підшлях: `lib/...`, `components/...`, `scripts/...`) |
 | `scripts/templates/systems/wfrp/` | `PackHooks` пакета Grim d100 |
 

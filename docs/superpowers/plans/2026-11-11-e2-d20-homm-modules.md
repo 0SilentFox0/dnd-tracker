@@ -130,6 +130,7 @@
 6. `RulesForm`: вкладки = секції композиції; редактор секції рендерить пункти за шляхами (вкладений пункт = вкладений блок); редактори `Morale` → `systems/morale/ui`, `HeroScaling` → `systems/heroscaling/ui`, перемикач відсічі → `systems/retaliation/ui` (пункт у секції `actions`), решта → `systems/d20/ui/rules`. `unusedMechanics` видалити всюди.
 7. Sync: `classifyRules` і `rulesHashes` ігнорують ключі без секції в композиції (D6).
 8. Скрипт `scripts/db/rules-parse-report.ts` (read-only): усі правила БД — «розбір до = після» (старий розбір вшито як еталон), розбіжності по шляхах (D5).
+9. З огляду Ч1 (обов'язково): `mergeRules` при зміні `system.key` скидає `modules`; `parseRules` не стирає мовчки невалідні `modules` (зберігає сирими або логує); усі `slot.write` у `systems/wfrp/rules/**` передають `prev`; `duplicateClaim` ловить префікси (`magic` vs `magic.slots`); `FieldKinds` отримує словники нових секцій; перевірка в `system-contract`, що база має `tokens`.
 
 **Тест-кейси (обов'язкові).** 5 × `data/templates/*/rules.json`: розбір до = після; кампанія `dnd5e` + `modules: ["morale"]` бачить секцію `morale`, без модуля — ні, а JSON після збереження містить її в обох випадках; `ruleset-section` зникає з `system-imports-exempt.json`.
 

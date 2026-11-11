@@ -8,6 +8,7 @@ import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
+import { validateComposition } from "@/lib/utils/rules/systems/compose";
 import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
 import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
 
@@ -20,6 +21,10 @@ const INITIATIVE_ORDER_MESSAGE = "rules.validation.initiativeOrder";
 const CRITICALS_ORDER_MESSAGE = "rules.validation.criticalsOrder";
 
 const UNKNOWN_SYSTEM_MESSAGE = "rules.validation.unknownSystem";
+
+const UNKNOWN_MODULE_MESSAGE = "rules.validation.unknownModule";
+
+const INVALID_COMPOSITION_MESSAGE = "rules.validation.invalidComposition";
 
 const CustomConditionSchema = z.object({
   key: z.string().regex(CUSTOM_CONDITION_KEY_RE),
@@ -82,7 +87,10 @@ const sectionSchemas = {
   spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
   advancement: AdvancementRulesSchema,
   tables: TablesRulesSchema,
-  system: z.strictObject({ key: z.enum(RULE_SYSTEM_KEYS as [string, ...string[]], { message: UNKNOWN_SYSTEM_MESSAGE }) }),
+  system: z.strictObject({
+    key: z.enum(RULE_SYSTEM_KEYS as [string, ...string[]], { message: UNKNOWN_SYSTEM_MESSAGE }),
+    modules: z.array(z.string()).transform((ids) => [...new Set(ids)].sort()).optional(),
+  }),
 };
 
 // Виводимо тип до застосування defaults: DEFAULT_RULES типізований через Ruleset.
@@ -162,7 +170,12 @@ export const RulesetSchema = z
     system: sections.system.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
-  .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
+  .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] })
+  .superRefine((r, ctx) => {
+    for (const issue of validateComposition(r.system)) {
+      if (issue.code !== "unknownKey") ctx.addIssue({ code: "custom", message: issue.code === "unknownModule" ? UNKNOWN_MODULE_MESSAGE : INVALID_COMPOSITION_MESSAGE, path: ["system", "modules"] });
+    }
+  });
 
 export function parseRules(raw: unknown): Ruleset {
   const obj = isRecord(raw) ? raw : {};
@@ -182,7 +195,9 @@ export function parseRules(raw: unknown): Ruleset {
 
   const system = sectionSchemas.system.safeParse(obj.system);
 
-  return { ...rules, system: system.success ? system.data : { key: rules.classes.enabled ? "dnd5e" : "homm" } };
+  if (!system.success) return { ...rules, system: { key: rules.classes.enabled ? "dnd5e" : "homm" } };
+
+  return { ...rules, system: validateComposition(system.data).length > 0 ? { key: system.data.key } : system.data };
 }
 
 const RULES_CACHE_LIMIT = 50;
@@ -230,7 +245,7 @@ export const RulesetPatchSchema = z
     spellIngredients: patchSection("spellIngredients").optional(),
     advancement: patchSection("advancement").optional(),
     tables: patchSection("tables").optional(),
-    system: patchSection("system").optional(),
+    system: patchSection("system").omit({ modules: true }).optional(),
     removeCustomConditions: z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });

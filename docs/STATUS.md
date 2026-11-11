@@ -127,6 +127,10 @@ _Оновлено: 2026-11-11._
 - Ward 11: помилка поля в uk показала сирий англійський текст Zod у dev live-run. Код однаковий для `legendaryCost` = 4 і Ward (`validateAbilities`), юніт-тести з `@/lib/zod/locale` дають ключ `validation.max` для обох; отже, у тому браузері клієнтський `z.config` не був застосований (імовірно dev/HMR, `instrumentation-client`). Перевірити в чистому dev або prod-збірці; глобального пробілу в коді не знайдено.
 - Психологія не тестується, коли прокидаються вороги лабіринту (пробудження — чиста `withMazeAwareness` без rng/правил, їх можна присипляти й будити знову).
 
+### E2 Ч1: каркас композиції (2026-11-12)
+
+Гілка `feat/e2-part1-composition` (worktree `../dnd-tracker-e2-part1`), 11 комітів, **не змерджена й не запушена**; prod-кроків немає. Гейти: `tsc` чистий, повний `test:run` 15340 зелених, ESLint 0 помилок, `pnpm systems:index` ідемпотентний, ratchet-файли не зросли. Opus-огляд: blockers немає. Відкладено: baseline sweep і golden-журнали (Ч1 задача 0) — перед Ч5. Лишилось у Ч3: (1) `mergeRules` при зміні `key` має скидати `modules`, а невалідні `modules` не стирати мовчки при збереженні правил (`schema.ts` parseRules/mergeRules); (2) прокинути `prev` у всі `slot.write(...)` у `systems/wfrp/rules/**` до першого запису в `ext`; (3) `duplicateClaim` вважати префікс (`magic` і `magic.slots`) конфліктом; (4) `FieldKinds` розширити словниками нових секцій; (5) нова база без `tokens` мовчки випадає з substring-ratchet: додати перевірку в `system-contract`. Тимчасове: `fallbackBase` UI/server повертає d20 для будь-якого ключа (зникне в Ч2).
+
 ### Борги E2 (з Fable-ревʼю E0+E1, 2026-11-11)
 
 - **M2.** `scripts/templates/systems/index.ts` вручну імпортує `../grim-d100/validate` і тримає `PACK_ADAPTERS["grim-d100"]`: новий пакет з адаптером = правка кореня. Фікс: адаптер у `scripts/templates/<key>/index.ts` + генерований рядок або `forbiddenTermIssues` у `WFRP_HOOKS.validatePack`.

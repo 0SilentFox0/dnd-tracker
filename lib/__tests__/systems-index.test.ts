@@ -50,9 +50,9 @@ describe("systems index", () => {
 
     const registry = fs.readFileSync(path.join(root, "lib/utils/rules/systems/registry.ts"), "utf8");
 
-    expect(registry).toContain('import { ALPHA_SYSTEM } from "@/systems/alpha";');
-    expect(registry).toContain("alpha: ALPHA_SYSTEM,");
-    expect(registry).not.toContain("ZETA_SYSTEM");
+    expect(registry).toContain('import { ALPHA_MODULE } from "@/systems/alpha";');
+    expect(registry).toContain("alpha: ALPHA_MODULE,");
+    expect(registry).not.toContain("ZETA_MODULE");
   });
 
   it("two full systems (wfrp + d6pool) keep the same order in every block of every root", () => {

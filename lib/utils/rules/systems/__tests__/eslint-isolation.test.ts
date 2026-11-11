@@ -2,6 +2,7 @@ import { ESLint } from "eslint";
 import { describe, expect, it } from "vitest";
 
 import { readImportsExempt, SYSTEM_ROOTS } from "@/scripts/shared/system-ratchet";
+import { foreignSystemGroup, parseRequires } from "@/scripts/shared/system-requires.mjs";
 
 type RuleEntry = [string, { paths?: ({ name: string } | string)[]; patterns?: { group: string[]; allowTypeImports?: boolean }[] }?];
 
@@ -80,5 +81,25 @@ describe("system import zones", () => {
     expect(hooks.groups).toEqual(expect.arrayContaining(["@/lib/server", "@/lib/server/*", "@/systems/*/server", "@/systems/*/server/*"]));
 
     for (const file of ["systems/wfrp/hooks/x.ts", "systems/wfrp/api/x.ts", "systems/wfrp/server/x.ts"]) expect((await restricted(file)).groups).toEqual(expect.arrayContaining(["@/app", "@/scripts", D20]));
+  });
+});
+
+describe("system requires isolation", () => {
+  const ids = ["alpha", "beta", "gamma"];
+
+  it("forbids every other system when nothing is required", () => {
+    expect(foreignSystemGroup("alpha", ids, () => [])).toEqual(["@/systems/beta/**", "@/systems/gamma/**"]);
+  });
+
+  it("allows the required module folders and forbids the rest", () => {
+    const requires = (id: string) => (id === "beta" ? parseRequires('requires: ["alpha", "d20"],') : []);
+
+    expect(foreignSystemGroup("beta", ids, requires)).toEqual(["@/systems/gamma/**"]);
+    expect(foreignSystemGroup("gamma", ids, requires)).toEqual(["@/systems/alpha/**", "@/systems/beta/**"]);
+  });
+
+  it("parses requires from meta source and ignores other arrays", () => {
+    expect(parseRequires('keys: ["x"],\n requires: [\n"a", \'b\',\n],\n conflicts: ["c"]')).toEqual(["a", "b"]);
+    expect(parseRequires('keys: ["x"]')).toEqual([]);
   });
 });
