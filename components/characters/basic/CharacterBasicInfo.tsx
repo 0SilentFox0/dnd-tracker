@@ -30,6 +30,7 @@ interface CharacterBasicInfoProps {
     hideLineage?: boolean;
     hideClass?: boolean;
     hideAlignment?: boolean;
+    hideArchetype?: boolean;
     classMode?: {
         classes: GameClassData[];
         byId: Record<string, GameClassData>;
@@ -45,6 +46,7 @@ export function CharacterBasicInfo({
     hideLineage = false,
     hideClass = false,
     hideAlignment = false,
+    hideArchetype = false,
     classMode,
 }: CharacterBasicInfoProps) {
     const t = useTranslations('characters.form.basic');
@@ -186,20 +188,23 @@ export function CharacterBasicInfo({
                     />
                 </>
             )}
-            {!isPlayerView && !classMode && !hideProgression && (
-                <div className="w-full min-w-0">
-                    <Label htmlFor="archetype">{t('archetype')}</Label>
-                    <SelectField
-                        id="archetype"
-                        value={archetype || ''}
-                        onValueChange={(value) => set('archetype', value)}
-                        options={archetypeOptions}
-                        allowNone
-                        noneLabel={universalLabel}
-                        triggerClassName="w-full"
-                    />
-                </div>
-            )}
+            {!isPlayerView &&
+                !classMode &&
+                !hideProgression &&
+                !hideArchetype && (
+                    <div className="w-full min-w-0">
+                        <Label htmlFor="archetype">{t('archetype')}</Label>
+                        <SelectField
+                            id="archetype"
+                            value={archetype || ''}
+                            onValueChange={(value) => set('archetype', value)}
+                            options={archetypeOptions}
+                            allowNone
+                            noneLabel={universalLabel}
+                            triggerClassName="w-full"
+                        />
+                    </div>
+                )}
 
             {!hideLineage && !hideAlignment && (
                 <div className="w-full min-w-0">

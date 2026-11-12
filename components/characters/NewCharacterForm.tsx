@@ -122,6 +122,7 @@ export function NewCharacterForm({
                     hideLineage={!system.lineage}
                     hideClass={!hasClasses}
                     hideAlignment={!system.identity.alignments}
+                    hideArchetype={!statColumnsOf(system).has('archetype')}
                     classMode={
                         classMode.enabled && Ui && !Ui.hideProgression
                             ? classMode

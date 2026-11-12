@@ -82,6 +82,7 @@ export function BasicEditTab({
                 hideLineage={!def.lineage}
                 hideClass={!statColumnsOf(def).has('classes')}
                 hideAlignment={!def.identity.alignments}
+                hideArchetype={!statColumnsOf(def).has('archetype')}
                 classMode={classUi ? classMode : undefined}
             />
             {classMode.enabled && !classUi && !ui.hideProgression && (
