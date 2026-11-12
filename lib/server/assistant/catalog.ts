@@ -8,6 +8,7 @@ import { operationInComposition } from '@/lib/server/systems/registry';
 import type { Actor } from '@/lib/utils/api/actor';
 import { needFailure } from '@/lib/utils/api/need';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import { contentKindsOf } from '@/lib/utils/rules/systems/catalog';
 
 export function createActionCatalog(
     definitions: readonly AssistantActionDef[]
@@ -51,8 +52,15 @@ export function createActionCatalog(
                         sessionOnly: undefined,
                     }) &&
                     (!rules ||
-                        !def.systemOperation ||
-                        operationInComposition(rules, def.systemOperation))
+                        ((!def.systemOperation ||
+                            operationInComposition(
+                                rules,
+                                def.systemOperation
+                            )) &&
+                            (!def.contentKind ||
+                                contentKindsOf(rules.system).has(
+                                    def.contentKind
+                                ))))
             );
         },
     };

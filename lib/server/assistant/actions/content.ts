@@ -130,6 +130,7 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
         const base = {
             title: resource.label,
             description: resource.description,
+            contentKind: kind,
         };
 
         const target = (
