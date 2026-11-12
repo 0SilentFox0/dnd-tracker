@@ -32,14 +32,14 @@ describe("RulesForm advancement tab", () => {
     expect(screen.queryByRole("tab", { name: "rules.mechanics.advancement.label" })).toBeNull();
   });
 
-  it("system sections come from the system ui; d20 gets neither tab", () => {
+  it("system sections come from the system ui; homm gets neither tab", () => {
     mocks.system = "wfrp";
     renderWithConfirm(<RulesForm campaignId="c1" />);
 
     expect(screen.getByRole("tab", { name: "rules.mechanics.tables.label" })).toBeTruthy();
 
     cleanup();
-    mocks.system = "dnd5e";
+    mocks.system = "homm";
     renderWithConfirm(<RulesForm campaignId="c1" />);
 
     expect(screen.queryByRole("tab", { name: "rules.mechanics.tables.label" })).toBeNull();

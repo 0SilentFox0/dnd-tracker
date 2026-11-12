@@ -21,8 +21,8 @@ afterEach(cleanup);
 const tab = (key: string) => screen.queryByRole("tab", { name: `rules.mechanics.${key}.label` });
 
 describe("RulesForm tabs follow the composition sections", () => {
-  it("dnd5e preset: module sections are tabs, retaliation item sits in the actions section", () => {
-    mocks.system = { key: "dnd5e" };
+  it("homm preset: module sections are tabs", () => {
+    mocks.system = { key: "homm" };
     renderWithConfirm(<RulesForm campaignId="c1" />);
 
     expect(tab("morale")).toBeTruthy();

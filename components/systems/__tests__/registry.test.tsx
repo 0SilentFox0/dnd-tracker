@@ -7,7 +7,16 @@ import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 describe("system ui registry", () => {
   it("has the three systems, homm and dnd5e share the d20 ui", () => {
     expect(Object.keys(SYSTEM_UI).sort()).toEqual(["dnd5e", "homm", "wfrp"]);
-    expect(systemUiOf("homm")).toEqual(systemUiOf("dnd5e"));
+
+    const { rulesSections: hommSections, rulesItems: hommItems, ...hommRest } = systemUiOf("homm");
+
+    const { rulesSections: dndSections, rulesItems: dndItems, ...dndRest } = systemUiOf("dnd5e");
+
+    expect(hommRest).toEqual(dndRest);
+    expect(hommSections).toMatchObject(dndSections ?? {});
+    expect(Object.keys(hommSections ?? {})).toEqual(expect.arrayContaining(["morale", "heroScaling"]));
+    expect(dndItems ?? {}).toEqual({});
+    expect(Object.keys(hommItems ?? {})).toEqual(["actions.retaliation"]);
     expect(systemUiOf("wfrp")).not.toBe(systemUiOf("homm"));
   });
 
