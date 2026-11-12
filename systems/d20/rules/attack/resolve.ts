@@ -1,7 +1,8 @@
+import { calculateAttackRoll } from "./roll";
+
 import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { cancelCritIfImmune } from "@/lib/utils/battle/attack/crit-immunity";
-import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { isAdjacentAttack } from "@/lib/utils/battle/grid/adjacent-attack";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";

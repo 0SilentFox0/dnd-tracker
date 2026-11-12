@@ -10,7 +10,7 @@ import { spendAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { critDamageRolls, critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { type CritFlavor, critFlavorOf } from "@/lib/utils/battle/attack/critical";
-import { eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { eventRollMode } from "@/lib/utils/battle/attack/event-roll-mode";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";

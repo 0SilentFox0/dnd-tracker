@@ -4,4 +4,3 @@ export { calculateAttackBonus, forcedRollMode, hasAdvantage, hasDisadvantage, pr
 export { applyCriticalEffect } from "./critical";
 export type { ProcessAttackParams, ProcessAttackResult } from "./process";
 export { processAttack } from "./process";
-export { calculateAttackRoll } from "./roll";
