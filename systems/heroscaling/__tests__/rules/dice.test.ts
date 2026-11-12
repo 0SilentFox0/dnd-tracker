@@ -2,21 +2,19 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { runParticipantParts } from "@/lib/utils/battle/participant/parts";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { heroDicePart, heroDiceTable } from "@/systems/heroscaling/rules/dice";
+import type { BattleParticipant } from "@/types/battle";
 
 const tables = { meleeDiceByLevel: { "1": "1d6" }, rangedDiceByLevel: null };
 
 const withTables = (system: Ruleset["system"]): Ruleset => ({ ...DEFAULT_RULES, system, heroScaling: { ...DEFAULT_RULES.heroScaling, ...tables } });
 
-const hero = { abilities: {} } as never;
+const hero = { abilities: {} } as unknown as BattleParticipant;
 
-const run = (rules: Ruleset) => {
-  const parts = ruleSystemOf(rules).participant?.fromCharacter ?? [];
-
-  return parts.reduce((p, part) => part(p, { row: { level: 1 }, rules, refs: {} }), hero) as { abilities: { heroDice?: unknown } };
-};
+const run = (rules: Ruleset) => runParticipantParts(ruleSystemOf(rules).participant?.fromCharacter, hero, { row: { level: 1 }, rules, refs: {} });
 
 describe("heroDiceTable", () => {
   it("undefined when not overridden; numeric keys when overridden", () => {
