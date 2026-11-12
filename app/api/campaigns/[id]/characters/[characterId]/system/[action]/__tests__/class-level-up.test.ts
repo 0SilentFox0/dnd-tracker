@@ -10,7 +10,14 @@ vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),
 }));
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireCampaignAccess: vi.fn(async () => ({
+        userId: 'dm',
+        isDM: true,
+        campaign: { id: 'camp', rules: { system: { key: 'homm' } } },
+    })),
+    requireDM: vi.fn(),
+}));
 vi.mock('@/lib/cache/reference-data', () => ({
     getCachedClasses: vi.fn(async () => [
         {
@@ -109,7 +116,11 @@ const post = async (body?: object) => {
             body: body ? JSON.stringify(body) : undefined,
         }),
         {
-            params: Promise.resolve({ id: 'camp', characterId: 'ch' }),
+            params: Promise.resolve({
+                id: 'camp',
+                characterId: 'ch',
+                action: 'level-up',
+            }),
         }
     ) as Promise<NextResponse>;
 };
@@ -132,6 +143,7 @@ const base = {
 
 describe('POST level-up (classes)', () => {
     beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
         await import('../route');
     }, 30_000);
 

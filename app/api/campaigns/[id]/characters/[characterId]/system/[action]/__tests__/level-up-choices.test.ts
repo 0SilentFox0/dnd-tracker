@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { prisma } from '@/lib/db';
 import { loadChoiceRefs } from '@/lib/server/characters/choices/load-refs';
@@ -16,6 +16,11 @@ vi.mock('@/lib/server/notifications/notify', () => ({
 }));
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireCampaignAccess: vi.fn(async () => ({
+        userId: 'dm',
+        isDM: true,
+        campaign: { id: 'camp', rules: { system: { key: 'homm' } } },
+    })),
     requireDM: vi.fn(async () => ({
         userId: 'dm',
         isDM: true,
@@ -86,11 +91,22 @@ const post = async (body: object) => {
 
     return POST(
         new Request('http://x', { method: 'POST', body: JSON.stringify(body) }),
-        { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) }
+        {
+            params: Promise.resolve({
+                id: 'camp',
+                characterId: 'ch',
+                action: 'level-up',
+            }),
+        }
     ) as Promise<NextResponse>;
 };
 
 describe('level-up with choices', () => {
+    beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
+        await import('../route');
+    }, 30_000);
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(prisma.character.findUnique).mockResolvedValue(

@@ -9,6 +9,13 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireCampaignAccess: vi.fn(async () => ({
+        userId: 'owner',
+        isDM: false,
+        campaign: { id: 'camp', rules: { system: { key: 'homm' } } },
+    })),
+}));
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,
@@ -104,7 +111,13 @@ const post = async (body: object) => {
 
     return POST(
         new Request('http://x', { method: 'POST', body: JSON.stringify(body) }),
-        { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) }
+        {
+            params: Promise.resolve({
+                id: 'camp',
+                characterId: 'ch',
+                action: 'arcane-recovery',
+            }),
+        }
     ) as Promise<NextResponse>;
 };
 
@@ -112,6 +125,7 @@ const open = { shortRestOpen: true, slotsSpent: { '1': 2, '2': 1, '6': 1 } };
 
 describe('POST arcane-recovery', () => {
     beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
         await import('../route');
     }, 30_000);
 

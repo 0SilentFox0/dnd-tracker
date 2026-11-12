@@ -21,12 +21,6 @@ export const CHARACTER_ACTION_COVERAGE = [
         'tokens.delete',
         'character-tokens-api',
     ],
-    [
-        'POST',
-        `${hero}/level-up`,
-        'level-up',
-        'character-progression-storage.integration',
-    ],
     ['PUT', `${hero}/choices`, 'choices', 'character-progression-actions'],
     [
         'PATCH',
@@ -56,8 +50,6 @@ export const CHARACTER_ACTION_COVERAGE = [
         'stash.free-artifacts',
         'stash-api',
     ],
-    ['POST', `${hero}/hit-dice`, 'hit-dice', 'hit-dice'],
-    ['POST', `${hero}/arcane-recovery`, 'arcane-recovery', 'arcane-recovery'],
     ['POST', `${hero}/inspiration`, 'inspiration', 'inspiration'],
     [
         'POST',
@@ -67,25 +59,6 @@ export const CHARACTER_ACTION_COVERAGE = [
     ],
     ['GET', `${hero}/sheet`, 'sheet', 'character-sheet-api'],
     ['GET', `${hero}/log`, 'log', 'log'],
-    ['GET', `${hero}/progression`, 'progression', 'progression-api'],
-    [
-        'POST',
-        `${hero}/progression/learn`,
-        'progression.learn',
-        'progression-actions-api',
-    ],
-    [
-        'POST',
-        `${hero}/progression/unlearn`,
-        'progression.unlearn',
-        'progression-actions-api',
-    ],
-    [
-        'POST',
-        `${hero}/progression/reset`,
-        'progression.reset',
-        'character-progression-actions',
-    ],
     [
         'POST',
         `${hero}/progression/seen-level`,

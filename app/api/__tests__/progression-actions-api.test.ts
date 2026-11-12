@@ -71,26 +71,46 @@ const TREE_ROW = {
     }),
 };
 
-const params = { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) };
+const characterParams = {
+    params: Promise.resolve({ id: 'camp', characterId: 'ch' }),
+};
+
+const params = (action: string) => ({
+    params: Promise.resolve({
+        id: 'camp',
+        characterId: 'ch',
+        action: `progression.${action}`,
+    }),
+});
 
 const post = async (action: string, body?: unknown) => {
+    const request = new Request('http://x', {
+        method: 'POST',
+        body: JSON.stringify(body ?? {}),
+    });
+
+    if (action === 'seen-level') {
+        const seen = await import(
+            '@/app/api/campaigns/[id]/characters/[characterId]/progression/seen-level/route'
+        );
+
+        return seen.POST(request, characterParams) as Promise<NextResponse>;
+    }
+
     const mod = await import(
-        `@/app/api/campaigns/[id]/characters/[characterId]/progression/${action}/route`
+        '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
     );
 
-    return mod.POST(
-        new Request('http://x', {
-            method: 'POST',
-            body: JSON.stringify(body ?? {}),
-        }),
-        params
-    ) as Promise<NextResponse>;
+    return mod.POST(request, params(action)) as Promise<NextResponse>;
 };
 
 describe('progression actions', () => {
     beforeAll(async () => {
         await import('@/lib/server/systems/registry');
         await import('@/app/api/campaigns/[id]/characters/[characterId]/route');
+        await import(
+            '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
+        );
     }, 30_000);
 
     beforeEach(() => {
@@ -332,7 +352,7 @@ describe('progression actions', () => {
                     method: 'PATCH',
                     body: JSON.stringify(body),
                 }),
-                params
+                characterParams
             );
         };
 

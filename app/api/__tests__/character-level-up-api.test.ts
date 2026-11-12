@@ -19,7 +19,14 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),
 }));
-vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireCampaignAccess: vi.fn(async () => ({
+        userId: 'dm',
+        isDM: true,
+        campaign: { id: 'camp', rules: { system: { key: 'homm' } } },
+    })),
+    requireDM: vi.fn(),
+}));
 vi.mock('@/lib/db', () => ({
     prisma: {
         character: { findUnique: vi.fn(), update: vi.fn() },
@@ -56,11 +63,15 @@ const CHARACTER = {
 
 const post = async () => {
     const mod = await import(
-        '@/app/api/campaigns/[id]/characters/[characterId]/level-up/route'
+        '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
     );
 
     return mod.POST(new Request('http://x', { method: 'POST' }), {
-        params: Promise.resolve({ id: 'camp', characterId: 'ch' }),
+        params: Promise.resolve({
+            id: 'camp',
+            characterId: 'ch',
+            action: 'level-up',
+        }),
     }) as Promise<NextResponse>;
 };
 
@@ -68,8 +79,9 @@ const random = vi.spyOn(Math, 'random');
 
 describe('POST level-up', () => {
     beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
         await import(
-            '@/app/api/campaigns/[id]/characters/[characterId]/level-up/route'
+            '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
         );
     }, 30_000);
 

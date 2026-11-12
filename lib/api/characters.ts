@@ -5,6 +5,7 @@ import {
     campaignPost,
     campaignPut,
 } from '@/lib/api/client';
+import { systemPath } from '@/lib/api/system';
 import {
     type CharacterTypeValue,
     type GoalKind,
@@ -139,7 +140,7 @@ export async function levelUpCharacter(
 ): Promise<Character & { levelUpDetails?: unknown }> {
     return campaignPost<Character & { levelUpDetails?: unknown }>(
         campaignId,
-        `/characters/${characterId}/level-up`,
+        systemPath.character(characterId, 'level-up'),
         pick
     );
 }
@@ -237,7 +238,7 @@ export const postArcaneRecovery = (
 ) =>
     campaignPost<{ resources: CharacterResources }>(
         campaignId,
-        `/characters/${characterId}/arcane-recovery`,
+        systemPath.character(characterId, 'arcane-recovery'),
         { picks }
     );
 
@@ -248,7 +249,7 @@ export const postHitDie = (
 ) =>
     campaignPost<HitDieResult>(
         campaignId,
-        `/characters/${characterId}/hit-dice`,
+        systemPath.character(characterId, 'hit-dice'),
         { classId }
     );
 

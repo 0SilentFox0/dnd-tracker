@@ -709,13 +709,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
-        route: 'campaigns/[id]/characters/[characterId]/hit-dice',
-        methods: ['POST'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
         route: 'campaigns/[id]/characters/[characterId]/system/[action]',
         methods: ['DELETE', 'GET', 'POST', 'PUT'],
         task: 9,
@@ -737,13 +730,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'handoff',
     },
     {
-        route: 'campaigns/[id]/characters/[characterId]/arcane-recovery',
-        methods: ['POST'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
         route: 'campaigns/[id]/characters/[characterId]/inspiration',
         methods: ['POST'],
         task: 9,
@@ -753,13 +739,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
     {
         route: 'campaigns/[id]/characters/[characterId]/inventory',
         methods: ['GET', 'PATCH'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
-        route: 'campaigns/[id]/characters/[characterId]/level-up',
-        methods: ['POST'],
         task: 9,
         adapter: 'characters',
         state: 'active',
@@ -779,35 +758,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
-        route: 'campaigns/[id]/characters/[characterId]/progression/learn',
-        methods: ['POST'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
-        route: 'campaigns/[id]/characters/[characterId]/progression/reset',
-        methods: ['POST'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
-        route: 'campaigns/[id]/characters/[characterId]/progression',
-        methods: ['GET'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
         route: 'campaigns/[id]/characters/[characterId]/progression/seen-level',
-        methods: ['POST'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
-        route: 'campaigns/[id]/characters/[characterId]/progression/unlearn',
         methods: ['POST'],
         task: 9,
         adapter: 'characters',

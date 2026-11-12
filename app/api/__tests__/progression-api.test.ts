@@ -57,13 +57,19 @@ const TREE_ROW = {
     }),
 };
 
-const params = { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) };
+const params = {
+    params: Promise.resolve({
+        id: 'camp',
+        characterId: 'ch',
+        action: 'progression',
+    }),
+};
 
 describe('GET progression', () => {
     beforeAll(async () => {
         await import('@/lib/server/systems/registry');
         await import(
-            '@/app/api/campaigns/[id]/characters/[characterId]/progression/route'
+            '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
         );
     }, 30_000);
 
@@ -105,7 +111,7 @@ describe('GET progression', () => {
         );
 
         const { GET } = await import(
-            '@/app/api/campaigns/[id]/characters/[characterId]/progression/route'
+            '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
         );
 
         const body = await getResponseJson<Record<string, unknown>>(
@@ -136,7 +142,7 @@ describe('GET progression', () => {
         );
 
         const { GET } = await import(
-            '@/app/api/campaigns/[id]/characters/[characterId]/progression/route'
+            '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
         );
 
         await GET(new Request('http://x'), params);
@@ -161,7 +167,7 @@ describe('GET progression', () => {
         );
 
         const { GET } = await import(
-            '@/app/api/campaigns/[id]/characters/[characterId]/progression/route'
+            '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
         );
 
         expect((await GET(new Request('http://x'), params)).status).toBe(403);
@@ -174,7 +180,7 @@ describe('GET progression', () => {
         vi.mocked(prisma.skillTree.findFirst).mockResolvedValue(null);
 
         const { GET } = await import(
-            '@/app/api/campaigns/[id]/characters/[characterId]/progression/route'
+            '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
         );
 
         const body = await getResponseJson<Record<string, unknown>>(

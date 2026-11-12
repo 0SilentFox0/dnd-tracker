@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
@@ -7,6 +7,13 @@ import * as access from '@/lib/server/characters/access';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireCampaignAccess: vi.fn(async () => ({
+        userId: 'owner',
+        isDM: false,
+        campaign: { id: 'camp', rules: { system: { key: 'homm' } } },
+    })),
+}));
 vi.mock('@/lib/server/characters/access', () => ({
     requireCharacterAccess: vi.fn(),
 }));
@@ -80,11 +87,22 @@ const post = async (body: object) => {
 
     return POST(
         new Request('http://x', { method: 'POST', body: JSON.stringify(body) }),
-        { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) }
+        {
+            params: Promise.resolve({
+                id: 'camp',
+                characterId: 'ch',
+                action: 'hit-dice',
+            }),
+        }
     ) as Promise<NextResponse>;
 };
 
 describe('POST hit-dice', () => {
+    beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
+        await import('../route');
+    }, 30_000);
+
     beforeEach(() => vi.clearAllMocks());
 
     it('heals d10 + CON and counts the die', async () => {
