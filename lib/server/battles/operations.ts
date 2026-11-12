@@ -178,14 +178,6 @@ const OPERATIONS: Record<string, Loader> = {
             return { schema: bonusActionSchema, mutate: bonusActionMutation };
         },
     }),
-    'crit-choice': operation({
-        access: DM,
-        allowWhileAwaitingDm: true,
-        allowWhileCritPending: true,
-        respond: 'wrapped',
-        load: () =>
-            loadSystemOperation('crit-choice', API_ERRORS.CRIT_CHOICE_NONE),
-    }),
     complete: operation({
         access: DM,
         allowWhileAwaitingDm: true,
@@ -226,16 +218,6 @@ const OPERATIONS: Record<string, Loader> = {
                 mutate: conditionTestMutation,
             };
         },
-    }),
-    channel: operation({
-        access: MEMBER,
-        blockedByMode: true,
-        rateLimitScope: 'attack',
-        load: () =>
-            loadSystemOperation(
-                'channel',
-                API_ERRORS.BATTLE_CHANNEL_UNSUPPORTED
-            ),
     }),
     'system-condition': operation({
         access: DM,
@@ -373,17 +355,6 @@ const OPERATIONS: Record<string, Loader> = {
 
             return { schema: mazeMarkSchema, mutate: mazeMarkMutation };
         },
-    }),
-    'morale-check': operation({
-        access: MEMBER,
-        blockedByMode: true,
-        allowWhileAwaitingDm: true,
-        respond: 'wrapped',
-        load: () =>
-            loadSystemOperation(
-                'morale-check',
-                API_ERRORS.BATTLE_MORALE_DISABLED
-            ),
     }),
     move: operation({
         access: MEMBER,
@@ -539,10 +510,17 @@ export async function getBattleOperation(
     name: string,
     params: BattleOperationParams
 ): Promise<Definition> {
-    const load = Object.hasOwn(OPERATIONS, name) ? OPERATIONS[name] : undefined;
+    if (Object.hasOwn(OPERATIONS, name)) return OPERATIONS[name](params);
 
-    if (!load)
+    const system = systemBattleOperation(name);
+
+    if (!system)
         throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
 
-    return load(params);
+    const { missing, ...settings } = system.settings;
+
+    return operation({
+        ...settings,
+        load: () => loadSystemOperation(name, missing),
+    })(params);
 }

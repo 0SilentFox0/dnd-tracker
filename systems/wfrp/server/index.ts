@@ -1,3 +1,4 @@
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { SystemServer } from '@/lib/server/systems/types';
 import {
     hitModelHeroStats,
@@ -52,6 +53,12 @@ export const WFRP_MODULE_SERVER: SystemServer = {
     },
     battle: {
         channel: {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.BATTLE_CHANNEL_UNSUPPORTED,
+            },
             load: async () => {
                 const { channelMutation, channelSchema } = await import(
                     './battle/channel-mutation'

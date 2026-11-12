@@ -10,6 +10,7 @@ import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
 import type {
     BattleMutationContext,
     MutationResult,
+    RunBattleMutationOptions,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type {
     CampaignSpellContext,
@@ -109,7 +110,14 @@ export interface BattleOperationDeps {
     spell: Resumable<SpellRequestData>;
 }
 
+/** Route settings of a battle operation; `missing` is the API_ERRORS key answered when the battle's composition lacks it */
+export type SystemBattleSettings = Omit<
+    RunBattleMutationOptions<unknown>,
+    'params' | 'schema' | 'mutate' | 'operation'
+> & { missing: string };
+
 export interface SystemBattleOperation {
+    settings: SystemBattleSettings;
     load(deps: BattleOperationDeps): Promise<{
         schema: ZodType;
         mutate(

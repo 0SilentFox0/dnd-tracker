@@ -373,6 +373,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/battles/[battleId]/system/[action]',
+        methods: ['POST'],
+        task: 0,
+        adapter: 'module battle operations, assistant adapter after the epic',
+        state: 'planned',
+    },
+    {
         route: 'campaigns/[id]/battles/[battleId]/condition-test',
         methods: ['POST'],
         task: 0,
