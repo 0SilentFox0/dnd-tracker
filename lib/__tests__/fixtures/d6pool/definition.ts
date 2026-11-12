@@ -25,6 +25,7 @@ const d6Attack = (ctx: ResolveAttackCtx): ResolvedAttack => {
 export const D6POOL_SYSTEM: RuleSystemDefinition = {
   key: "d6pool",
   progression: { levels: false, hpTerm: "wounds", maxHp: () => ({ total: 10, breakdown: [] }) },
+  stats: { columns: [{ owns: [], fill: () => ({ level: 1, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 10, class: "", classes: [], initiative: 0, speed: 30 }) }] },
   characteristics: {
     persisted: true,
     defaults: () => ({ pool: 3 }),

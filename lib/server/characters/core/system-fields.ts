@@ -24,9 +24,11 @@ export function normalizeCharacterInput<T extends CreateCharacterInput | UpdateC
 
   if (statColumnsOf(system).has("classes") && classMissing(data, mode)) throw new ContentError(API_ERRORS.HERO_CLASS_REQUIRED, 400);
 
-  if (!system.characteristics.persisted) return omit(data, ["characteristics"]);
+  const owned = omit(data, foreignColumnsOf(system));
 
-  if (mode === "update") return { ...omit(data, foreignColumnsOf(system)), ...(data.characteristics && { characteristics: parseSystemData(rules, data.characteristics) }) };
+  if (!system.characteristics.persisted) return omit(owned, ["characteristics"]);
+
+  if (mode === "update") return { ...owned, ...(data.characteristics && { characteristics: parseSystemData(rules, data.characteristics) }) };
 
   if (!data.characteristics) throw new ContentError(API_ERRORS.CHARACTERISTICS_REQUIRED, 400);
 
@@ -34,5 +36,5 @@ export function normalizeCharacterInput<T extends CreateCharacterInput | UpdateC
 
   const characteristics = system.characteristics.initial?.(parsed) ?? parsed;
 
-  return { ...data, characteristics, ...statColumnFillOf(system, rules) };
+  return { ...owned, characteristics, ...statColumnFillOf(system, rules) };
 }

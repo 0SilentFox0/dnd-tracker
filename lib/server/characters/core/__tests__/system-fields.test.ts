@@ -74,6 +74,14 @@ describe("normalizeCharacterInput", () => {
     expect(normalizeCharacterInput(d20, updateCharacterSchema.parse({ name: "N" }), DEFAULT_RULES, "update")).toEqual({ name: "N" });
   });
 
+  it("drops input for columns the composition does not own, for non-persisted systems too", () => {
+    const noArchetype = { ...d20, stats: { columns: [{ owns: ["strength", "level"] as const }] } };
+
+    const data = normalizeCharacterInput(noArchetype, updateCharacterSchema.parse({ name: "N", strength: 12, level: 2, archetype: "mage", speed: 40 }), DEFAULT_RULES, "update");
+
+    expect(data).toEqual({ name: "N", strength: 12, level: 2 });
+  });
+
   it("d20 drops characteristics", () => {
     const data = normalizeCharacterInput(d20, create({ characteristics: {} }), DEFAULT_RULES, "create");
 

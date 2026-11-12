@@ -3,10 +3,14 @@ import { expect } from "vitest";
 import type { SystemUi } from "@/components/systems/types";
 import { CHARACTER_SYSTEM_COLUMNS } from "@/lib/constants/stat-columns";
 import type { SystemServer } from "@/lib/server/systems/types";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems";
 import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
+import { statColumnFillOf } from "@/lib/utils/rules/systems/stats";
 
-const FLAGS = ["lineage", "attacks", "spells", "items", "inventory"] as const;
+const NULLABLE_COLUMNS: readonly string[] = ["subclass", "archetype"];
+
+const FLAGS =["lineage", "attacks", "spells", "items", "inventory"] as const;
 
 export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDefinition, ui: SystemUi, server: SystemServer): void {
   expect(meta.module).toMatch(/^[a-z0-9]+$/);
@@ -25,6 +29,17 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
   for (const flag of FLAGS) expect(typeof definition[flag]).toBe("boolean");
   expect(Array.isArray(definition.stats?.columns ?? [])).toBe(true);
   for (const part of definition.stats?.columns ?? []) for (const column of part.owns) expect(CHARACTER_SYSTEM_COLUMNS).toContain(column);
+
+  const owned = (definition.stats?.columns ?? []).flatMap((part) => part.owns);
+
+  expect(new Set(owned).size).toBe(owned.length);
+
+  if (definition.characteristics.persisted) {
+    const covered = new Set([...owned, ...Object.keys(statColumnFillOf(definition, DEFAULT_RULES)), ...NULLABLE_COLUMNS]);
+
+    expect(CHARACTER_SYSTEM_COLUMNS.filter((column) => !covered.has(column))).toEqual([]);
+  }
+
   expect(typeof definition.identity.alignments).toBe("boolean");
   expect(typeof definition.rest.kinds).toBe("boolean");
   expect(typeof definition.sheetTest.accepts).toBe("function");
