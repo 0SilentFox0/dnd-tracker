@@ -7,6 +7,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 const attacksOf = (p: BattleParticipant) => p.battleData.attacks ?? [];
 
+// offense/defense/damage are required by the contract but only read for non-d20 hit models; d20 balance uses winChance/refHit
 export const d20HitModel: RuleSystemCombat["hitModel"] = {
   offense: (p) => attacksOf(p).reduce((best, a) => Math.max(best, a.attackBonus), 0),
   defense: (p) => getEffectiveArmorClass(p),

@@ -57,7 +57,6 @@ export type SystemInputCtx =
       actor: BattleParticipant;
       /** A cast outside the cost rules (DM-granted) */
       free: boolean;
-      /** The cast has a casting test */
       tested: boolean;
     };
 
@@ -136,7 +135,6 @@ export interface DamageCtx {
 }
 
 export interface DamageResult {
-  /** A critical rolls the damage dice twice */
   doubleDice: boolean;
   mitigated?: MitigateResult;
 }

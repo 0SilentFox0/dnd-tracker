@@ -48,7 +48,9 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
   expect(typeof combat.resolveAttack).toBe("function");
   expect(typeof combat.abortedRoll).toBe("function");
 
-  if (combat.hitModel) expect(combat.hitModel.refHit).toBeGreaterThan(0);
+  for (const hook of [combat.initiative, combat.tieBreak, combat.damage]) expect(typeof hook).toBe("function");
+
+  expect(combat.hitModel.refHit).toBeGreaterThan(0);
 
   expect(typeof definition.conditionSet?.apply).toBe("function");
   expect(typeof definition.conditionSet?.effectInput).toBe("function");
