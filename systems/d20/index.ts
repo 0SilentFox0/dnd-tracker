@@ -13,6 +13,7 @@ import { proficiencyForLevel } from "./rules/proficiency/level";
 import { d20MaxHp } from "./rules/progression/max-hp";
 import { D20_REACTIONS, d20ProvokedOpportunity } from "./rules/reactions";
 import { D20_PROFICIENCY, D20_SAVES } from "./rules/saves";
+import { d20SheetBlock } from "./rules/sheet/block";
 import { rollFromSheet } from "./rules/sheet-roll";
 import { D20_TURN } from "./rules/turn";
 
@@ -24,6 +25,7 @@ export const D20_MODULE: RuleSystemDefinition = {
   key: "d20",
   progression: { levels: true, hpTerm: "hp", maxHp: d20MaxHp, proficiency: (level, rules) => proficiencyForLevel(level, rules.formulas) },
   stats: { columns: [{ owns: CHARACTER_SYSTEM_COLUMNS }] },
+  sheet: { blocks: [d20SheetBlock] },
   characteristics: { persisted: false, defaults: () => undefined, isEmpty: (v) => v == null || (typeof v === "object" && Object.keys(v).length === 0), sheetBlock: () => undefined },
   sheetTest: {
     accepts: (body) => body.kind !== "test",

@@ -1,25 +1,24 @@
-import { abilityLabel, abilityLines, armorTotal, attackSheet, checkBonus } from "./lines";
+import { attackSheet } from "./lines";
 
-import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { ARTIFACT_GRID_9 } from "@/lib/constants/artifacts";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
-import { DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
 import { parseGoals } from "@/lib/schemas/character-goals";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import { pactSlot, slotLevels } from "@/lib/utils/battle/view";
 import { describeFeatPicks } from "@/lib/utils/characters/choices/describe";
 import type { ChoiceSelections } from "@/lib/utils/characters/choices/selections";
-import { buildClassProgression, hitDiceLabel } from "@/lib/utils/characters/classes";
+import { buildClassProgression } from "@/lib/utils/characters/classes";
 import { classTableLines } from "@/lib/utils/characters/classes/columns";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { readResources } from "@/lib/utils/characters/resources/schema";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SheetBlockCtx, SheetBlockPart } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
 import type { ResolvedClassEntry } from "@/types/classes";
@@ -72,7 +71,7 @@ export interface SheetInput {
   progression: CharacterSheet["progression"];
 }
 
-const flags = (raw: unknown) => (raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, boolean>) : {});
+const NEUTRAL_BLOCK: Required<SheetBlockPart> = { abilities: [], proficiency: 0, armorClass: { total: 0, lines: [] }, saves: [], skills: [], passives: { perception: 0, investigation: 0, insight: 0 }, hitDice: null };
 
 const strings = (raw: unknown) => (Array.isArray(raw) ? raw.map(String) : []);
 
@@ -82,33 +81,7 @@ const proficiencyList = (raw: unknown) =>
 export function buildCharacterSheet(input: SheetInput): CharacterSheet {
   const { participant: p, character: c } = input;
 
-  const prof = p.abilities.proficiencyBonus;
-
-  const scores = Object.fromEntries(ABILITY_KEYS.map((k) => [k, p.abilities[k]])) as Record<AbilityKey, number>;
-
   const primary = p.abilities.primaryAbility ?? null;
-
-  const manualSaves = flags(c.savingThrows);
-
-  const isSaveProficient = (key: AbilityKey) => !!manualSaves[key] || !!p.abilities.saveProficiencies?.includes(key);
-
-  const skillFlags = flags(c.skills);
-
-  const fromChoices = new Set<string>(input.choices?.selections.skills ?? []);
-
-  const expert = new Set<string>(input.choices?.selections.expertise ?? []);
-
-  const skills = DND_SKILLS.map((key) => {
-    const meta = DND_SKILL_META[key];
-
-    const proficient = !!skillFlags[key] || fromChoices.has(key);
-
-    const expertise = proficient && expert.has(key);
-
-    return { key, label: `gameTerms.dndSkills.${key}`, ability: meta.ability, proficient, bonus: checkBonus(scores[meta.ability], proficient, expertise ? prof * 2 : prof), ...(expertise && { expertise: true as const }) };
-  });
-
-  const passive = (key: string) => 10 + (skills.find((s) => s.key === key)?.bonus ?? 0);
 
   const attacks = p.battleData.attacks.map((a) => attackSheet(p, a));
 
@@ -116,33 +89,39 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const showSubrace = !!input.choices && (!!classEntries || input.choices.selections.lineage !== null);
 
-  const hp = characterBaseHp(c, { entries: input.classes, rules: input.rules ?? DEFAULT_RULES, characteristics: c.characteristics });
+  const rules = input.rules ?? DEFAULT_RULES;
+
+  const hp = characterBaseHp(c, { entries: input.classes, rules, characteristics: c.characteristics });
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 
   const { spellSaveDC, spellAttackBonus } = p.spellcasting;
 
-  const system = input.rules ? ruleSystemOf(input.rules) : null;
+  const system = ruleSystemOf(rules);
 
-  const systemSlot = system?.characteristics.sheetBlock({ characteristics: c.characteristics, resources: readResources(c.resources) });
+  const systemSlot = system.characteristics.sheetBlock({ characteristics: c.characteristics, resources: readResources(c.resources) });
+
+  const blockCtx: SheetBlockCtx = { participant: p, character: c, rules, classes: classEntries, choices: { skills: new Set(input.choices?.selections.skills), expertise: new Set(input.choices?.selections.expertise) } };
+
+  const blocks = Object.assign({}, NEUTRAL_BLOCK, ...(system.sheet?.blocks ?? []).map((block) => block(blockCtx))) as Required<SheetBlockPart>;
 
   const grid = Object.fromEntries(ARTIFACT_GRID_9.map((cell) => [cell.key, input.artifacts.find((a) => a.slot === cell.key) ?? null]));
 
   return {
-    system: system?.key ?? "homm",
+    system: system.key,
     ...(systemSlot && { systemSlot }),
     viewer: input.viewer,
     review: { pending: c.status === CharacterStatus.PENDING, note: c.status === CharacterStatus.PENDING ? (c.reviewNote ?? null) : null },
     maxLevel: input.maxLevel,
     identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).key ?? "universal", subclass: c.subclass, race: c.race, ...(showSubrace && c.subrace && { subrace: c.subrace }), raceIcon: input.raceIcon, alignment: c.alignment },
-    abilities: systemSlot ? [] : ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
+    abilities: blocks.abilities,
     primaryAbility: primary,
-    proficiency: systemSlot ? 0 : prof,
+    proficiency: blocks.proficiency,
     hp: {
       total: p.combatStats.maxHp,
       lines: [...hp.breakdown.map((b) => ({ ...b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: sheetLineKey("bonuses"), value: signed(hpBonus) }] : [])],
     },
-    armorClass: systemSlot ? { total: 0, lines: [] } : armorTotal(p),
+    armorClass: blocks.armorClass,
     initiative: calculateInitiative(p),
     speed: p.combatStats.speed,
     morale: p.combatStats.morale,
@@ -152,11 +131,11 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     proficiencies: [...new Set([...proficiencyList(c.proficiencies), ...(input.choices?.selections.tools ?? [])])],
     attacks,
     bestToHit: attacks.length ? Math.max(...attacks.map((a) => a.toHit.total)) : null,
-    saves: systemSlot ? [] : ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
-    skills: systemSlot ? [] : skills,
-    passives: systemSlot ? { perception: 0, investigation: 0, insight: 0 } : { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
+    saves: blocks.saves,
+    skills: blocks.skills,
+    passives: blocks.passives,
     magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: c.spellcastingAbility as AbilityKey, saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
-    hitDice: classEntries && !systemSlot ? hitDiceLabel(classEntries) : null,
+    hitDice: blocks.hitDice,
     ...(classEntries && { classTable: classTableLines(classEntries), classProgression: classEntries.flatMap((e) => (e.class ? [buildClassProgression(e.class, e)] : [])) }),
     pact: pactSlot(p),
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),

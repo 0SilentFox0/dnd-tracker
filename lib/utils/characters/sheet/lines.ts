@@ -1,47 +1,18 @@
-import { bakedStatSources } from "@/lib/utils/abilities/build/bake";
-import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
 import { attackDamageModifier, attackRollModifier } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
-import { classArmorBase, isClassModeHero } from "@/lib/utils/characters/classes/armor-class";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { abilityLabel, asSource, labelParts } from "@/lib/utils/characters/sheet/line-parts";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
+import type { SheetAttack, SheetLine } from "@/types/characters";
 import type { LogLine } from "@/types/text";
-
-export const abilityLabel = (key: AbilityKey) => `gameTerms.abilities.${key}.label`;
-
-const labelParts = (label: LogLine): Pick<SheetLine, "label" | "params"> => (typeof label === "string" ? { label } : { label: label.message, params: label.params });
 
 const plainLabel = (label: LogLine) => (typeof label === "string" ? label : label.message);
 
 const HERO_LEVEL_STEP = "battleLog.damage.steps.heroLevel";
-
-const asSource = (t: string): SheetLineSource => t as SheetLineSource;
-
-export function abilityLines(p: BattleParticipant, key: AbilityKey, base: number): SheetLine[] {
-  return [{ label: sheetLineKey("base"), value: String(base), source: "base" }, ...bakedStatSources(p, key).map((s) => ({ ...labelParts(s.label), value: signed(s.value), source: asSource(s.sourceType) }))];
-}
-
-export function armorTotal(p: BattleParticipant): SheetTotal {
-  const mods = collectModifiers([p], p.basicInfo.id, { stat: "armor" });
-
-  const base: SheetLine[] = isClassModeHero(p) ? classArmorBase(p).lines : [{ label: sheetLineKey("base"), value: String(p.combatStats.armorClass), source: "base" }];
-
-  return {
-    total: statWithModifiers([p], p.basicInfo.id, "armor", p.combatStats.armorClass),
-    lines: [
-      ...base,
-      ...mods.entries.flatMap((e) => [
-        ...(e.flat ? [{ ...labelParts(e.label), value: signed(e.flat), source: asSource(e.sourceType) }] : []),
-        ...(e.percent ? [{ ...labelParts(e.label), value: `${signed(e.percent)}%`, source: asSource(e.sourceType) }] : []),
-      ]),
-    ],
-  };
-}
 
 export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAttack {
   const type = attackKindOf(attack.type);
@@ -83,5 +54,3 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
     avgDamage: { total: avg.total, lines: damageLines },
   };
 }
-
-export const checkBonus = (score: number, proficient: boolean, prof: number) => getAbilityModifier(score) + (proficient ? prof : 0);

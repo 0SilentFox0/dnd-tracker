@@ -21,7 +21,6 @@
   "lib/server/races/profile-usage.ts": 2,
   "lib/server/templates/sync/profile-refs.ts": 1,
   "lib/utils/battle/log/codec.ts": 1,
-  "lib/utils/characters/sheet/build-sheet.ts": 1,
   "lib/utils/content/import/fields/careers.ts": 1,
   "lib/utils/rules/defaults.ts": 1,
   "lib/utils/rules/schema.ts": 2,
