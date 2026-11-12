@@ -14,6 +14,7 @@ import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 import { createWfrpDraft } from "@/systems/wfrp/server/draft/create-wfrp-draft";
 import type { CharacterClassEntry } from "@/types/classes";
 
@@ -26,7 +27,7 @@ export async function createDraft(request: Request, campaignId: string): Promise
 
   if (ruleSystemOf(campaign.rules).creation) return createWfrpDraft(request, campaign, access);
 
-  if (!ruleSystemOf(campaign.rules).d20Stats) return errorResponse(API_ERRORS.SYSTEM_DRAFTS_UNSUPPORTED, 409);
+  if (!statColumnsOf(ruleSystemOf(campaign.rules)).has("classes")) return errorResponse(API_ERRORS.SYSTEM_DRAFTS_UNSUPPORTED, 409);
 
   const parsed = await parseDraftBody(request, campaign);
 

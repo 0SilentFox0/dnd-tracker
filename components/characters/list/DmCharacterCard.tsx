@@ -15,6 +15,7 @@ import { useRuleSystem } from "@/lib/hooks/systems";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { currentHp } from "@/lib/utils/characters/resources/hp";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { CharacterListItem } from "@/types/characters";
 
@@ -38,7 +39,9 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const { key: systemKey, system, ready } = useRuleSystem({ campaignId });
 
-  const d20Stats = !!system?.d20Stats;
+  const columns = system ? statColumnsOf(system) : undefined;
+
+  const d20Stats = !!columns?.has("armorClass");
 
   const hideProgression = !ready || systemUiOf(systemKey).hideProgression;
 
@@ -66,7 +69,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
           <p className="hud-sc truncate text-lg leading-6 text-hud-ink">{character.name}</p>
           <p className="truncate text-xs text-hud-muted">
             {character.race}
-            {character.subrace ? ` (${character.subrace})` : ""}{system?.classes && ` · ${character.class}`}
+            {character.subrace ? ` (${character.subrace})` : ""}{columns?.has("classes") && ` · ${character.class}`}
           </p>
           <div className="flex min-w-0 items-center gap-1.5">
             <HudPill tone={isNpc ? "silver" : "gold"}>{isNpc ? t("npcHero") : t("player")}</HudPill>

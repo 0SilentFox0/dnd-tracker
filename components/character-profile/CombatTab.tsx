@@ -15,6 +15,7 @@ import { AttackType } from "@/lib/constants/battle";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { signed } from "@/lib/utils/common/format";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 import type { SheetLine } from "@/types/characters";
 
 function Row({ label, value, lines }: { label: string; value: string; lines?: SheetLine[] }) {
@@ -44,7 +45,11 @@ export function CombatTab() {
 
   const Ui = systemUiOf(sheet.system);
 
-  const { attacks: showAttacks, d20Stats } = RULE_SYSTEM_REGISTRY[sheet.system];
+  const system = RULE_SYSTEM_REGISTRY[sheet.system];
+
+  const showAttacks = system.attacks;
+
+  const d20Stats = statColumnsOf(system).has("armorClass");
 
   const [openAttack, setOpenAttack] = useState<string | null>(null);
 

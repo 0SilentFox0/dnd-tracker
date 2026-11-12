@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { SwitchField } from "@/components/ui/switch-field";
 import { useInspiration } from "@/lib/hooks/characters";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 import type { SheetRest } from "@/types/characters";
 
 export function DmRestActions() {
@@ -38,7 +39,7 @@ function DmRestControls({ rest }: { rest: SheetRest }) {
           {t("resources")}
         </Button>
       )}
-      {system.d20Stats && rest.inspiration !== null && (
+      {statColumnsOf(system).has("armorClass") && rest.inspiration !== null && (
         <SwitchField id="dm-inspiration" label={t("inspiration")} checked={rest.inspiration} disabled={inspiration.isPending} onCheckedChange={(v) => void inspiration.mutateOk(v)} />
       )}
       {open && <ResourcesDialog rest={rest} open onOpenChange={setOpen} />}

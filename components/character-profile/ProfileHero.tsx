@@ -14,6 +14,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { systemUiOf } from "@/components/systems";
 import { signed } from "@/lib/utils/common/format";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 
 export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badge?: ReactNode; ref?: Ref<HTMLElement> }) {
   const { sheet, canEdit } = useProfile();
@@ -40,7 +41,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
               <h1 className="hud-sc truncate text-xl leading-7 text-hud-ink">{id.name}</h1>
               <p className="flex min-w-0 items-center gap-1.5 text-xs text-hud-muted">
                 <span className="truncate">
-                  {!Ui.hideProgression && `${t("level", { level: id.level })} · `}{sheet.hitDice === null && !Ui.hideProgression && `${id.archetype} · `}{system.classes && `${id.className}${id.subclass ? ` (${id.subclass})` : ""} · `}
+                  {!Ui.hideProgression && `${t("level", { level: id.level })} · `}{sheet.hitDice === null && !Ui.hideProgression && `${id.archetype} · `}{statColumnsOf(system).has("classes") && `${id.className}${id.subclass ? ` (${id.subclass})` : ""} · `}
                 </span>
                 {badge}
                 {id.raceIcon && <OptimizedImage src={id.raceIcon} alt="" width={14} height={14} className="size-3.5 shrink-0 rounded-sm" />}

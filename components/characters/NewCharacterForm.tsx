@@ -21,6 +21,7 @@ import { useClassMode } from "@/lib/hooks/classes";
 import { useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems";
 import { pruneFormChoices } from "@/lib/utils/characters/choices/prune";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 
 type NewCharacterFormProps = { campaignId: string; characterType: CharacterTypeValue; systemKey: string };
 
@@ -56,7 +57,7 @@ export function NewCharacterForm({ campaignId: id, characterType, systemKey }: N
   } = useCharacterForm({
     type: characterType,
     requireRace: system.lineage,
-    requireClass: system.classes,
+    requireClass: statColumnsOf(system).has("classes"),
     seedCharacteristics: system.characteristics.defaults,
     recommendScores: classMode.byId,
     onSubmit: async (data) => {
@@ -79,7 +80,7 @@ export function NewCharacterForm({ campaignId: id, characterType, systemKey }: N
     {
       id: CHARACTER_FORM_TAB.basic,
       label: tc("tabs.basic"),
-      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system.lineage} hideClass={!system.classes} hideAlignment={!system.identity.alignments} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system.lineage} hideClass={!statColumnsOf(system).has("classes")} hideAlignment={!system.identity.alignments} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,

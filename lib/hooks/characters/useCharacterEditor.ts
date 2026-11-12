@@ -10,6 +10,7 @@ import { useCampaignMembers } from "@/lib/hooks/campaigns";
 import { useRaces } from "@/lib/hooks/races";
 import { useRuleSystem } from "@/lib/hooks/systems";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 import type { EquippedItems } from "@/types/inventory";
 
 export function useCharacterEditor({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved: () => void }) {
@@ -31,7 +32,7 @@ export function useCharacterEditor({ campaignId, characterId, onSaved }: { campa
 
   const form = useCharacterForm({
     requireRace: system?.lineage,
-    requireClass: system?.classes,
+    requireClass: system ? statColumnsOf(system).has("classes") : undefined,
     onSubmit: async (data) => {
       const saved = await update.mutateAsync(data).catch(async (e: unknown) => {
         if (e instanceof ApiError && e.status === 409) {

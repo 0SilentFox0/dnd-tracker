@@ -1,3 +1,5 @@
+import { ResourceFields } from "./rest/ResourceFields";
+import { RestBadges } from "./rest/RestBadges";
 import { ActionsSection } from "./rules/ActionsSection";
 import { ClassesSection } from "./rules/ClassesSection";
 import { ConcentrationSection } from "./rules/ConcentrationSection";
@@ -27,6 +29,16 @@ export const D20_MODULE_UI: SystemUi = {
     actions: ActionsSection,
     classes: ClassesSection,
   },
-  HeroStats, StatsTab, RollDialogBody, StatsFields, UnitStatsFields,
+  HeroStats,
+  StatsTab,
+  RollDialogBody,
+  StatsFields,
+  UnitStatsFields,
+  RestBadges,
+  ResourceFields,
+  resourceDefaults: (sheet) => ({
+    tempHp: String(sheet.rest?.hp?.temp ?? 0),
+    exhaustion: String(sheet.rest?.exhaustion ?? 0),
+  }),
   hideProgression: false,
 };

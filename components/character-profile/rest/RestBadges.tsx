@@ -25,8 +25,6 @@ export function RestBadges() {
     <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
       {rest.dead && <HudPill tone="silver">{t("dead")}</HudPill>}
       {Badges && <Badges sheet={sheet} />}
-      {system.d20Stats && rest.exhaustion > 0 && <HudPill tone="silver">{t("exhaustion", { level: rest.exhaustion })}</HudPill>}
-      {system.d20Stats && rest.inspiration && <HudPill tone="gold">{t("inspiration")}</HudPill>}
       {system.rest.kinds && rest.shortRestOpen && <HudPill tone="gold">{t("shortRest")}</HudPill>}
       {rest.xp && (
         <span className="text-hud-muted">
