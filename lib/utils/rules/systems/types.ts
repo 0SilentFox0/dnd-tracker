@@ -19,7 +19,7 @@ import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract
 import type { RuleSystemProficiency, RuleSystemSaves } from "@/lib/utils/battle/saves/types";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
-import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
+import type { ExtractedAttack, UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ChoiceGroup } from "@/lib/utils/characters/choices/selections";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
@@ -507,9 +507,7 @@ export interface CharacterPartRow {
   level: number;
 }
 
-export interface UnitPartRow {
-  level: number;
-}
+export type UnitPartRow = UnitFromPrisma;
 
 export interface ParticipantPartCtx<R> {
   row: R;

@@ -26,7 +26,7 @@ describe("morale module on d20", () => {
     expect(() => assertCanAct(ctxOf(bare), "hero")).not.toThrow();
     expect(() => assertCanEndTurn(ctxOf(bare), "hero")).not.toThrow();
     expect(beforeAdvanceHooks(bare)).toEqual([]);
-    expect(ruleSystemOf(bare).participant?.fromUnit).toBeUndefined();
+    expect(ruleSystemOf(bare).participant?.fromUnit).not.toContain(moraleCapPart);
   });
 
   it("with the module an unresolved check blocks acting and ending, skipMorale waives the act gate", () => {

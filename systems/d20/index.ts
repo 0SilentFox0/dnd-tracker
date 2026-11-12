@@ -8,6 +8,7 @@ import { d20OnZeroHp } from "./rules/death-saves/on-zero-hp";
 import { reviveFromDying } from "./rules/death-saves/state";
 import { d20Initiative, d20TieBreak } from "./rules/initiative";
 import { D20_MAGIC } from "./rules/magic";
+import { d20UnitSpellDc } from "./rules/participant/unit-spell-dc";
 import { D20_REACTIONS, d20ProvokedOpportunity } from "./rules/reactions";
 import { D20_PROFICIENCY, D20_SAVES } from "./rules/saves";
 import { rollFromSheet } from "./rules/sheet-roll";
@@ -26,6 +27,7 @@ export const D20_MODULE: RuleSystemDefinition = {
   },
   rest: { kinds: true },
   combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true }, resolveAttack: resolveD20Attack, damage: d20Damage, abortedRoll: d20AbortedRoll, onZeroHp: d20OnZeroHp, onDamaged: [concentrationFallout], onRevived: reviveFromDying, turn: D20_TURN, actions: D20_ACTIONS, reactions: D20_REACTIONS, saves: D20_SAVES, proficiency: D20_PROFICIENCY, afterAttack: [d20ProvokedOpportunity],initiative: d20Initiative, tieBreak: d20TieBreak, hitModel: d20HitModel },
+  participant: { fromUnit: [d20UnitSpellDc] },
   conditionSet: D20_CONDITION_SET,
   magic: D20_MAGIC,
   identity: { alignments: true },
