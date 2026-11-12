@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { wfrpActionDetails } from "@/systems/wfrp/rules/combat/details";
-import { WFRP_MAGIC } from "@/systems/wfrp/rules/magic";
+import { WFRP_TESTED_MAGIC } from "@/systems/wfrp/rules/magic";
 import { ACTION_SLOT } from "@/systems/wfrp/rules/slots";
 
 const EXT = { homm: { note: 1 } };
@@ -21,7 +21,7 @@ describe("wfrp slot writes keep foreign ext", () => {
   });
 
   it("avertMiscast keeps ext", () => {
-    const out = WFRP_MAGIC.avertMiscast?.({ miscast: "minor", details: withExt({ cast }), lines: [] } as never, {} as never);
+    const out = WFRP_TESTED_MAGIC.avertMiscast({ miscast: "minor", details: withExt({ cast }), lines: [] } as never, {} as never);
 
     expect((out?.details.data as { ext?: unknown }).ext).toEqual(EXT);
   });

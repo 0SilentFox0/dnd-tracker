@@ -6,6 +6,7 @@ import { D20_CONDITION_SET } from "./rules/conditions";
 import { d20Damage } from "./rules/damage";
 import { d20OnZeroHp } from "./rules/death-saves/on-zero-hp";
 import { d20Initiative, d20TieBreak } from "./rules/initiative";
+import { D20_MAGIC } from "./rules/magic";
 import { D20_REACTIONS, d20ProvokedOpportunity } from "./rules/reactions";
 import { D20_PROFICIENCY, D20_SAVES } from "./rules/saves";
 import { rollFromSheet } from "./rules/sheet-roll";
@@ -25,6 +26,7 @@ export const D20_MODULE: RuleSystemDefinition = {
   rest: { kinds: true },
   combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true }, resolveAttack: resolveD20Attack, damage: d20Damage, abortedRoll: d20AbortedRoll, onZeroHp: d20OnZeroHp, onDamaged: [concentrationFallout], turn: D20_TURN, actions: D20_ACTIONS, reactions: D20_REACTIONS, saves: D20_SAVES, proficiency: D20_PROFICIENCY, afterAttack: [d20ProvokedOpportunity],initiative: d20Initiative, tieBreak: d20TieBreak, hitModel: d20HitModel },
   conditionSet: D20_CONDITION_SET,
+  magic: D20_MAGIC,
   identity: { alignments: true },
   lineage: true,
   classes: true,

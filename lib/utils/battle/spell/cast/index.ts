@@ -62,7 +62,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const readyCaster = getP(flow, casterId);
 
-  const magic = params.rules ? ruleSystemOf(params.rules).magic : undefined;
+  const magic = ruleSystemOf(params.rules).magic.tested;
 
   const percentile = magic && !isDMCast && !params.isLegendaryCast && !params.grant ? magic : undefined;
 

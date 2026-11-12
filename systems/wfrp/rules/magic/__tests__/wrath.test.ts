@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { WFRP_MAGIC } from "../index";
+import { WFRP_TESTED_MAGIC } from "../index";
 
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
@@ -14,7 +14,7 @@ describe("wrath", () => {
 
     const preset = DEFAULT_TABLES.wrath[1].max;
 
-    const r = WFRP_MAGIC.miscast([caster], "c", "wrath", { round: 1, rng: mulberry32(1), rules: WFRP_RULES, applyDamage: applyDamageConsequences, presetRoll: preset });
+    const r = WFRP_TESTED_MAGIC.miscast([caster], "c", "wrath", { round: 1, rng: mulberry32(1), rules: WFRP_RULES, applyDamage: applyDamageConsequences, presetRoll: preset });
 
     expect(r.messages[0]).toMatchObject({ message: "wfrpMagic.log.wrath", params: { effect: { message: "wfrpMagic.miscast.wrath.2" } } });
   });

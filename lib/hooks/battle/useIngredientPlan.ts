@@ -30,7 +30,7 @@ export function useIngredientPlan(caster: BattleParticipant | null, spell: { ing
 
   const rule = rules?.spellIngredients;
 
-  const optional = !!rules && ruleSystemOf(rules).magic?.ingredients === "avertMiscast";
+  const optional = !!rules && ruleSystemOf(rules).magic.tested?.ingredients === "avertMiscast";
 
   const stock = caster?.battleData.ingredientStock;
 

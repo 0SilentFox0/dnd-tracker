@@ -124,7 +124,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const { legendaryAbility, free, grant } = source;
 
-    const tested = !!ruleSystemOf(ctx.meta.rules).magic && !free && !legendaryAbility && !grant;
+    const tested = !!ruleSystemOf(ctx.meta.rules).magic.tested && !free && !legendaryAbility && !grant;
 
     if (tested && (!definition.casting?.magic || definition.resolution.kind !== "auto" || definition.cost === "long")) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH);
 
@@ -146,7 +146,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const castLevel = (grant ? data.castLevel : undefined) ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
 
-    const ingredients = ingredientsGate(caster, spell, ctx.meta.rules, source, { optional: ruleSystemOf(ctx.meta.rules).magic?.ingredients === "avertMiscast", use: !!data.useIngredient });
+    const ingredients = ingredientsGate(caster, spell, ctx.meta.rules, source, { optional: ruleSystemOf(ctx.meta.rules).magic.tested?.ingredients === "avertMiscast", use: !!data.useIngredient });
 
     if (definition.cost === "long" && !free && !data.preview) {
       const long = beginLongCast(ctx, order, caster, spell, data, { grantKey: grant?.key, castLevel, hasGrant: !!grant });

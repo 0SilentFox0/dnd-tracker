@@ -1,5 +1,6 @@
 import type { SystemData, SystemSlot } from "./slot";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { Coin } from "@/lib/constants/inventory";
 import type { Translator } from "@/lib/i18n/translator";
@@ -341,8 +342,23 @@ export interface CastTestResult {
   casterData?: Partial<BattleParticipant["battleData"]>;
 }
 
-export interface RuleSystemMagic {
-  slots: false;
+export type CastResourceGate = { ok: true; castLevel?: number } | { ok: false; error: string };
+
+export interface CastResourceChoice {
+  level: number;
+  /** The caster's explicit choice of the resource; absent: the default one */
+  slotKey?: string;
+}
+
+/** What a cast spends (spell slots); a system without one lets every cast through */
+export interface RuleSystemMagicResource {
+  /** `castLevel` is set when the choice raises the cast above the spell's level */
+  canCast(caster: BattleParticipant, choice: CastResourceChoice): CastResourceGate;
+  spend(caster: BattleParticipant, choice: CastResourceChoice): BattleParticipant;
+}
+
+/** Casting-test magic: the cast is a roll with a miscast, not a spent resource */
+export interface RuleSystemTestedMagic {
   /** Ingredients are optional: spending one cancels the miscast instead of gating the cast */
   ingredients?: "avertMiscast";
   /** Drops the miscast of a cast that used an ingredient */
@@ -355,6 +371,14 @@ export interface RuleSystemMagic {
   attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
   /** Token badge for banked channelling */
   badge(p: BattleParticipant): ActiveEffect | null;
+}
+
+export interface RuleSystemMagic {
+  resource?: RuleSystemMagicResource;
+  /** Save DC of a spell; `ability` overrides the caster's spellcasting ability */
+  saveDc(caster: BattleParticipant, ability: AbilityKey | undefined, base: number): number;
+  upcast: { steps(spellLevel: number, castLevel: number): number };
+  tested?: RuleSystemTestedMagic;
 }
 
 export interface ActionDetailsView {
@@ -453,7 +477,7 @@ export interface RuleSystemDefinition {
   combat: RuleSystemCombat;
   conditionSet: RuleSystemConditionSet;
   conditions?: RuleSystemConditions;
-  magic?: RuleSystemMagic;
+  magic: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;
   equipment?: RuleSystemEquipment;
   traits?: RuleSystemTraits;

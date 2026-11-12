@@ -20,5 +20,5 @@ export const parsePercentileField = (raw: string) => parseDieInput(raw, PERCENTI
 
 /** Casting-test numbers shown before the roll; null outside systems with a casting test. */
 export function castPreviewOf(caster: BattleParticipant, rules: Ruleset, kind?: SpellMagicKind): { target: number; channelTarget: number; channelled: number; armourSl: number } | null {
-  return ruleSystemOf(rules).magic?.castPreview(caster, kind) ?? null;
+  return ruleSystemOf(rules).magic.tested?.castPreview(caster, kind) ?? null;
 }

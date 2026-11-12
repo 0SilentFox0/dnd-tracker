@@ -27,7 +27,7 @@ export function buildDisplayEffects(order: BattleParticipant[], prev?: Map<strin
 
       const collapsed = levels?.length ? collapseSystemConditions(all, levels) : all;
 
-      const badge = system?.magic?.badge(p);
+      const badge = system?.magic.tested?.badge(p);
 
       const list = badge ? [...collapsed, badge] : collapsed;
 
