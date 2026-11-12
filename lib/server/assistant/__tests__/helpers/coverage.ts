@@ -765,6 +765,20 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/characters/[characterId]/system/[action]',
+        methods: ['DELETE', 'GET', 'POST', 'PUT'],
+        task: 9,
+        adapter: 'characters',
+        state: 'active',
+    },
+    {
+        route: 'campaigns/[id]/system/[action]',
+        methods: ['POST'],
+        task: 9,
+        adapter: 'characters',
+        state: 'active',
+    },
+    {
         route: 'campaigns/[id]/characters/[characterId]/arcane-recovery',
         methods: ['POST'],
         task: 9,

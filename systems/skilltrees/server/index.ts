@@ -6,5 +6,15 @@ import { defineAddon } from '@/lib/utils/rules/systems/compose';
 
 export const SKILLTREES_MODULE_SERVER = defineAddon<SystemServer>(() => ({
     operations: SKILLTREES_OPERATIONS,
+    routes: {
+        character: {
+            progression: { GET: { operation: 'progression' } },
+            'progression.learn': { POST: { operation: 'progression.learn' } },
+            'progression.unlearn': {
+                POST: { operation: 'progression.unlearn' },
+            },
+            'progression.reset': { POST: { operation: 'progression.reset' } },
+        },
+    },
     participant: { learnedSpells: [resolveLearnedSpellsAndMastery] },
 }));

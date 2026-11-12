@@ -4,6 +4,7 @@ import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
 import type { ArtifactSetRowLike } from '@/lib/utils/abilities/build/collect';
+import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import type { getCharacterStats, UnitStats } from '@/lib/utils/battle/balance';
 import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
 import type {
@@ -34,6 +35,27 @@ export interface SystemOperation {
     /** The gate yields a `CampaignScope`; the registry then answers 404 where the campaign's composition lacks the operation. */
     scoped?: true;
 }
+
+export type SystemHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export interface SystemHandlerCtx {
+    campaignId: string;
+    access: CampaignAccessResult;
+    input: unknown;
+    searchParams: URLSearchParams;
+}
+
+export interface SystemHandler {
+    access: 'member' | 'dm';
+    schema?: ZodType;
+    query?: (searchParams: URLSearchParams) => unknown;
+    handle(ctx: SystemHandlerCtx): Promise<Response>;
+}
+
+/** `{ operation }` is a key of the same module's `operations`; the character operation gates its own access */
+export type SystemRouteTarget = { operation: string } | SystemHandler;
+
+export type SystemRoute = Partial<Record<SystemHttpMethod, SystemRouteTarget>>;
 
 export type SystemToolNote =
     | 'get_party'
@@ -132,5 +154,10 @@ export interface SystemServer {
     operations?: Record<string, SystemOperation>;
     /** Battle operations the route layer resolves by name; the core settings (access, gates) stay with the route */
     battle?: Record<string, SystemBattleOperation>;
+    /** Keys are old paths with `/` as `.`; the method picks the target */
+    routes?: {
+        campaign?: Record<string, SystemRoute>;
+        character?: Record<string, SystemRoute>;
+    };
     ai?: SystemAi;
 }

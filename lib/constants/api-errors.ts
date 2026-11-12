@@ -92,6 +92,7 @@ export const API_ERRORS = {
     SYSTEM_LEVELS_UNSUPPORTED: 'errors.systemLevelsUnsupported',
     EFFECT_OUTSIDE_COMPOSITION: 'errors.effectOutsideComposition',
     SYSTEM_DRAFTS_UNSUPPORTED: 'errors.systemDraftsUnsupported',
+    SYSTEM_ACTION_UNKNOWN: 'errors.systemActionUnknown',
     ROLL_KIND_MISMATCH: 'errors.rollKindMismatch',
     ROLL_OUT_OF_RANGE: 'errors.rollOutOfRange',
     SKILL_UNTRAINED: 'errors.skillUntrained',

@@ -31,6 +31,25 @@ export const WFRP_MODULE_SERVER: SystemServer = {
         readsBuiltRules: true,
     },
     operations: WFRP_OPERATIONS,
+    routes: {
+        character: {
+            advance: {
+                POST: { operation: 'advance' },
+                DELETE: { operation: 'advance.undo' },
+            },
+            career: { POST: { operation: 'career.set' } },
+            'career.advance': { POST: { operation: 'career.advance' } },
+            corruption: { POST: { operation: 'corruption.grant' } },
+            'corruption.undo': { POST: { operation: 'corruption.undo' } },
+            downtime: { PUT: { operation: 'downtime.set' } },
+        },
+        campaign: {
+            'downtime.period': { POST: { operation: 'downtime.period' } },
+            'downtime.period-undo': {
+                POST: { operation: 'downtime.period.undo' },
+            },
+        },
+    },
     battle: {
         channel: {
             load: async () => {
