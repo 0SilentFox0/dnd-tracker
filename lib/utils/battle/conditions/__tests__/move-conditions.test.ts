@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
-import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { frightenedBlocksMove } from "@/lib/utils/battle/grid";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
 const map = { cols: 10, rows: 5, background: null, opacity: 0.3 };

@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { textOf } from "@/lib/i18n/test/text";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
-import { CONDITION_5E_REGISTRY, exhaustionEffects, expandCondition5e } from "@/lib/utils/battle/conditions";
-import { conditionEffectInput } from "@/lib/utils/battle/conditions/registry";
+import { exhaustionEffects } from "@/lib/utils/battle/conditions";
+import { CONDITION_5E_REGISTRY, conditionEffectInput, expandCondition5e } from "@/systems/d20/rules/conditions/registry";
 import type { TextRef } from "@/types/text";
 
 const types = (m: { type: string }[]) => m.map((x) => x.type).sort();

@@ -6,11 +6,11 @@ import { runCoreAction } from "../run";
 import { AttackType } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { cellKey } from "@/lib/utils/battle/grid";
 import { pathTo, reachable } from "@/lib/utils/battle/grid/path";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };

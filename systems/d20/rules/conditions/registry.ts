@@ -1,11 +1,10 @@
-import { exhaustionEffects } from "./exhaustion";
-import type { ConditionEffectOptions, ExhaustionVariant } from "./set";
-
 import { EffectMarker } from "@/lib/constants/battle";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { type Condition5eKey, type CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
+import { exhaustionEffects } from "@/lib/utils/battle/conditions/exhaustion";
+import type { ConditionEffectOptions, ExhaustionVariant } from "@/lib/utils/battle/conditions/set";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect } from "@/types/battle";
 

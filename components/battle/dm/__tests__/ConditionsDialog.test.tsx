@@ -7,7 +7,8 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "h
 import { ConditionsDialog } from "@/components/battle/dm/ConditionsDialog";
 import { render } from "@/lib/i18n/test/render-uk";
 import { hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
-import { applyCondition5e,CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions";
+import { CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 
 vi.unmock("next-intl");
 

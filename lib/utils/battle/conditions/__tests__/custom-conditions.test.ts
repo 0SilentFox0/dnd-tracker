@@ -6,7 +6,7 @@ import { attackBodySchema } from "@/lib/schemas/battles";
 import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { applyCondition5e, removeCondition5e } from "@/lib/utils/battle/conditions";
+import { removeCondition5e } from "@/lib/utils/battle/conditions";
 import { hazardHit } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { castSpell } from "@/lib/utils/battle/spell";
@@ -14,6 +14,7 @@ import { pacifiedBlock } from "@/lib/utils/battle/spell/spell-targeting";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleParticipant, TerrainCell } from "@/types/battle";
 
 const PACIFIED = {

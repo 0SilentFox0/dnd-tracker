@@ -10,7 +10,7 @@ import { localSource } from "@/lib/i18n/local-source";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import { ACTION_REASONS, actionReason } from "@/lib/utils/battle/actions/reasons";
-import { CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions/registry";
+import { CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions/set";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 
 const lookup = (tree: Record<string, unknown>, path: string) => path.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], tree);

@@ -101,8 +101,8 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
   const LEAK_NAMES: Record<string, number> = {
     "D20_[A-Z]+": 0,
     judgeD20: 1,
-    CONDITION_5E_: 12,
-    applyCondition5e: 6,
+    CONDITION_5E_: 11,
+    applyCondition5e: 0,
     isHomm: 0,
     "HOMM_[A-Z]+": 2,
   };
@@ -113,7 +113,7 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
     criticals: 8,
     deathSaves: 5,
     concentration: 5,
-    conditions: 7,
+    conditions: 5,
     actions: 10,
     classes: 19,
     encounters: 9,

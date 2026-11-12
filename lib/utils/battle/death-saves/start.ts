@@ -7,7 +7,7 @@ import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 
-// Separate from index: ruleSystemOf here would close an import cycle through wfrp → hp → death-saves.
+// Separate from index: ruleSystemOf here would close an import cycle (registry → system conditions → hp → death-saves).
 export function startDying(p: BattleParticipant, rules: Ruleset): BattleParticipant {
   const unconscious = ruleSystemOf(rules).conditionSet.effectInput("unconscious", { timedKey: DEATH_SAVES_TIMED_KEY, rounds: PERMANENT_ROUNDS, permanent: true, exhaustion: rules.conditions.exhaustion });
 

@@ -5,8 +5,9 @@ import { battleConditionsMutation, battleConditionsSchema } from "../conditions-
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { beginConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
-import { applyCondition5e, hasCondition } from "@/lib/utils/battle/conditions";
+import { hasCondition } from "@/lib/utils/battle/conditions";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
 const dmCtx = (participants: BattleParticipant[] = [hero, goblin]) => context({ participants, isDM: true });

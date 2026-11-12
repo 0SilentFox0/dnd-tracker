@@ -8,10 +8,10 @@ import { ReadiedAttackButton } from "../ReadiedAttackButton";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { render } from "@/lib/i18n/test/render-uk";
 import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/registry";
-import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import battle from "@/messages/uk/battle.json";
 import battleCommon from "@/messages/uk/battleCommon.json";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.unmock("next-intl");

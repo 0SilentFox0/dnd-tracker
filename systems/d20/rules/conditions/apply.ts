@@ -1,7 +1,4 @@
-import { releaseGrapples } from "./grapple-links";
-import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhaustion } from "./query";
 import { conditionEffectInput, customConditionDef, customConditionInput } from "./registry";
-import type { ApplyConditionOptions, ApplyConditionResult, ConditionKey } from "./set";
 
 import { CombatStatus, EffectMarker } from "@/lib/constants/battle";
 import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
@@ -11,6 +8,9 @@ import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/uti
 import { type Condition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { DODGE_KEY_PREFIX, upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { concentrationBroken, dropConcentration } from "@/lib/utils/battle/concentration";
+import { releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
+import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhaustion } from "@/lib/utils/battle/conditions/query";
+import type { ApplyConditionOptions, ApplyConditionResult, ConditionKey } from "@/lib/utils/battle/conditions/set";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";

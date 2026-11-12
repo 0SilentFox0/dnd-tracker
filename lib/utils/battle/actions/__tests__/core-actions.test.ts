@@ -8,13 +8,13 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { passivePerception } from "@/lib/utils/battle/checks";
-import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { finishTurnEffects } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { resetTurnState } from "@/lib/utils/battle/turn/turn-state";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };

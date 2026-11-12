@@ -5,8 +5,9 @@ import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { CLAWS, placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { rollModeReasons } from "@/lib/utils/battle/attack/bonus";
-import { applyCondition5e, type Condition5eKey } from "@/lib/utils/battle/conditions";
+import { type Condition5eKey } from "@/lib/utils/battle/conditions";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
 const sensed = (sense: string, range = 30) => placed("monster", { at: { x: 0, y: 0 }, abilities: [resolved({ name: "Чуття", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "sense", sense, range } as never] })] });
