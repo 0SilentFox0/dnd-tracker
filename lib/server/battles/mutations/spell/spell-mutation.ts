@@ -260,7 +260,7 @@ function beginLongCast(
 ): { result: MutationResult } | { caster: BattleParticipant; order: BattleParticipant[] } {
   const resource = ruleSystemOf(ctx.meta.rules).magic.resource;
 
-  if (!opts.hasGrant && resource && !resource.canCast(caster, { level: spell.level, slotKey: data.slotKey }).ok) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT_TO_CAST);
+  if (!opts.hasGrant && resource && !resource.canCast(caster, { level: spell.level, slotKey: resource.picksSlot(caster) ? data.slotKey : undefined }).ok) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT_TO_CAST);
 
   const prepared = prepareLongCast({ ...ctx, participants: order }, caster, spell, { grantKey: opts.grantKey, slotKey: data.slotKey, castLevel: opts.castLevel }, data.castingRounds);
 
