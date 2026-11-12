@@ -12,7 +12,7 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError, dmEvent } from '@/lib/utils/battle/store';
 
-export type CritChoiceDeps = BattleOperationDeps;
+export type CritChoiceDeps = Pick<BattleOperationDeps, 'attack' | 'spell'>;
 
 export function createCritChoiceMutation(deps: CritChoiceDeps) {
     return async (

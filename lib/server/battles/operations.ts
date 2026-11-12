@@ -89,6 +89,13 @@ async function loadSystemOperation(
 
             return createSpellMutation()(ctx, request, resume);
         },
+        legendary: async (ctx, request) => {
+            const { legendaryMutation } = await import(
+                '@/lib/server/battles/mutations/core-action/legendary-mutation'
+            );
+
+            return legendaryMutation(ctx, request);
+        },
     };
 
     const { schema } = await known.load(deps);
@@ -204,35 +211,6 @@ const OPERATIONS: Record<string, Loader> = {
             };
         },
     }),
-    'condition-test': operation({
-        access: MEMBER,
-        blockedByMode: true,
-        rateLimitScope: 'attack',
-        load: async () => {
-            const { conditionTestMutation, conditionTestSchema } = await import(
-                '@/lib/server/battles/mutations/condition-test/condition-test-mutation'
-            );
-
-            return {
-                schema: conditionTestSchema,
-                mutate: conditionTestMutation,
-            };
-        },
-    }),
-    'system-condition': operation({
-        access: DM,
-        load: async () => {
-            const { systemConditionMutation, systemConditionSchema } =
-                await import(
-                    '@/lib/server/battles/mutations/system-condition/system-condition-mutation'
-                );
-
-            return {
-                schema: systemConditionSchema,
-                mutate: systemConditionMutation,
-            };
-        },
-    }),
     'initiative-reorder': operation({
         access: DM,
         load: async () => {
@@ -258,31 +236,6 @@ const OPERATIONS: Record<string, Loader> = {
             return {
                 schema: initiativeRollSchema,
                 mutate: initiativeRollMutation,
-            };
-        },
-    }),
-    'core-action': operation({
-        access: MEMBER,
-        blockedByMode: true,
-        load: async () => {
-            const { coreActionMutation } = await import(
-                '@/lib/server/battles/mutations/core-action/core-action-mutation'
-            );
-
-            const { legendaryMutation } = await import(
-                '@/lib/server/battles/mutations/core-action/legendary-mutation'
-            );
-
-            const { coreActionRouteSchema } = await import(
-                '@/lib/utils/battle/actions/schema'
-            );
-
-            return {
-                schema: coreActionRouteSchema,
-                mutate: (ctx, body) =>
-                    body.action === 'legendary'
-                        ? legendaryMutation(ctx, body)
-                        : coreActionMutation(ctx, body),
             };
         },
     }),

@@ -3,6 +3,12 @@ import { D20_OPERATIONS } from './operations';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { SystemServer } from '@/lib/server/systems/types';
+import type {
+    CoreActionBody,
+    LegendaryActionBody,
+} from '@/lib/utils/battle/actions/schema';
+
+type CoreActionRouteBody = CoreActionBody | LegendaryActionBody;
 
 export const D20_MODULE_SERVER: SystemServer = {
     schemas: {},
@@ -16,6 +22,30 @@ export const D20_MODULE_SERVER: SystemServer = {
         },
     },
     battle: {
+        'core-action': {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                missing: API_ERRORS.BATTLE_CORE_ACTIONS_DISABLED,
+            },
+            load: async (deps) => {
+                const { coreActionRouteSchema } = await import(
+                    '@/lib/utils/battle/actions/schema'
+                );
+
+                const { coreActionMutation } = await import(
+                    './battle/core-action-mutation'
+                );
+
+                return {
+                    schema: coreActionRouteSchema,
+                    mutate: (ctx, body: CoreActionRouteBody) =>
+                        body.action === 'legendary'
+                            ? deps.legendary(ctx, body)
+                            : coreActionMutation(ctx, body),
+                };
+            },
+        },
         'crit-choice': {
             settings: {
                 access: 'dm',

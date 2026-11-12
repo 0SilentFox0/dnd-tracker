@@ -1,16 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
-import { context, goblin, hero } from './fixtures';
-
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
-    systemConditionMutation,
-    systemConditionSchema,
-} from '@/lib/server/battles/mutations/system-condition/system-condition-mutation';
+    context,
+    goblin,
+    hero,
+} from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import {
+    systemConditionMutation,
+    systemConditionSchema,
+} from '@/systems/wfrp/server/battle/system-condition-mutation';
 
 const conditions = ruleSystemOf(WFRP_RULES).conditions!;
 

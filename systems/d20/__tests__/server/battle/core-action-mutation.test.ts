@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { context, goblin, hero } from './fixtures';
-
-import { coreActionMutation } from '@/lib/server/battles/mutations/core-action/core-action-mutation';
+import {
+    context,
+    goblin,
+    hero,
+} from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { BattleAccessError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { coreActionMutation } from '@/systems/d20/server/battle/core-action-mutation';
 
 const on = (over: Parameters<typeof context>[0] = {}) => {
     const base = context(over);

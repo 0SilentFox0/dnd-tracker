@@ -73,6 +73,38 @@ export const WFRP_MODULE_SERVER: SystemServer = {
         },
     },
     battle: {
+        'condition-test': {
+            settings: {
+                access: 'member',
+                blockedByMode: true,
+                rateLimitScope: 'attack',
+                missing: API_ERRORS.CONDITION_UNSUPPORTED,
+            },
+            load: async () => {
+                const { conditionTestMutation, conditionTestSchema } =
+                    await import('./battle/condition-test-mutation');
+
+                return {
+                    schema: conditionTestSchema,
+                    mutate: conditionTestMutation,
+                };
+            },
+        },
+        'system-condition': {
+            settings: {
+                access: 'dm',
+                missing: API_ERRORS.CONDITION_UNSUPPORTED,
+            },
+            load: async () => {
+                const { systemConditionMutation, systemConditionSchema } =
+                    await import('./battle/system-condition-mutation');
+
+                return {
+                    schema: systemConditionSchema,
+                    mutate: systemConditionMutation,
+                };
+            },
+        },
         channel: {
             settings: {
                 access: 'member',

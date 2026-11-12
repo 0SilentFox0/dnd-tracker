@@ -9,6 +9,7 @@ describe('WFRP_MODULE_SERVER.battle', () => {
         const op = await WFRP_MODULE_SERVER.battle?.channel.load({
             attack: vi.fn(),
             spell: vi.fn(),
+            legendary: vi.fn(),
         });
 
         expect(

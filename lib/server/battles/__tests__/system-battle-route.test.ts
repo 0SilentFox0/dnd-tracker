@@ -84,6 +84,40 @@ describe('module battle operations own their route settings', () => {
         ).rejects.toThrow('errors.battleMoraleDisabled');
     });
 
+    it('condition-test, system-condition and core-action keep the settings they had in the core table', async () => {
+        expect(
+            await getBattleOperation('condition-test', params)
+        ).toMatchObject({
+            access: 'member',
+            blockedByMode: true,
+            rateLimitScope: 'attack',
+        });
+        expect(
+            await getBattleOperation('system-condition', params)
+        ).toMatchObject({ access: 'dm' });
+        expect(await getBattleOperation('core-action', params)).toMatchObject({
+            access: 'member',
+            blockedByMode: true,
+        });
+    });
+
+    it.each([
+        ['condition-test', 'dnd5e', 'errors.conditionUnsupported'],
+        ['system-condition', 'dnd5e', 'errors.conditionUnsupported'],
+        ['core-action', 'wfrp', 'errors.battleCoreActionsDisabled'],
+    ])(
+        '%s in a battle of %s answers its own refusal',
+        async (action, system, message) => {
+            const def = await getBattleOperation(action, params);
+
+            const rules = parseRules({ system: { key: system } });
+
+            await expect(
+                def.mutate({ meta: { rules } } as never, {} as never)
+            ).rejects.toThrow(message);
+        }
+    );
+
     it('a core operation keeps resolving from the core table', async () => {
         expect(await getBattleOperation('attack', params)).toMatchObject({
             access: 'member',

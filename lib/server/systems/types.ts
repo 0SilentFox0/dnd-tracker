@@ -6,6 +6,7 @@ import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mu
 import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
 import type { ArtifactSetRowLike } from '@/lib/utils/abilities/build/collect';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
+import type { LegendaryActionBody } from '@/lib/utils/battle/actions/schema';
 import type { getCharacterStats, UnitStats } from '@/lib/utils/battle/balance';
 import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
 import type {
@@ -110,6 +111,11 @@ type Resumable<T> = (
 export interface BattleOperationDeps {
     attack: Resumable<AttackBody>;
     spell: Resumable<SpellRequestData>;
+    /** Legendary and lair actions: they run the core summon and spell pipelines, which reach the registry */
+    legendary(
+        ctx: BattleMutationContext,
+        request: LegendaryActionBody
+    ): Promise<MutationResult>;
 }
 
 /** Route settings of a battle operation; `missing` is the API_ERRORS key answered when the battle's composition lacks it */

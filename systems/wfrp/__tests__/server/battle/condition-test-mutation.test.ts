@@ -1,15 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import { context, goblin, hero } from './fixtures';
-
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
-    conditionTestMutation,
-    conditionTestSchema,
-} from '@/lib/server/battles/mutations/condition-test/condition-test-mutation';
+    context,
+    goblin,
+    hero,
+} from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import {
+    conditionTestMutation,
+    conditionTestSchema,
+} from '@/systems/wfrp/server/battle/condition-test-mutation';
 import type { BattleParticipant } from '@/types/battle';
 
 const conditions = ruleSystemOf(WFRP_RULES).conditions!;
