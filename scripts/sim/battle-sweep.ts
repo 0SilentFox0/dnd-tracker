@@ -20,9 +20,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { assertLocalProdcopy, parseTemplateKeys } from "./battle-sweep/args";
-import { modeRuns, type SweepProfile } from "./battle-sweep/profiles";
+import { modeRuns, moraleExpectation, type SweepProfile } from "./battle-sweep/profiles";
 import { diffRowCounts, overallExit, type SweepRunResult } from "./battle-sweep/row-counts";
-import { openTemplateRun, snapshotRowCounts, type TemplateRun } from "./battle-sweep/template-campaign";
+import { openTemplateRun,snapshotRowCounts, type TemplateRun } from "./battle-sweep/template-campaign";
 import { resultTextOf } from "./log-text";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -209,9 +209,17 @@ function invariants(label: string) {
   }
 }
 
+const moraleStats = { checks: 0, d10Events: 0, moraleFirstRejects: 0, awaited: 0 };
+
 const MORALE_GATED = new Set(["move", "attack", "spell", "aura-zone", "ability", "ability-action", "maze-mark"]);
 
-const awaitsMorale = (id: string) => awaitsMoraleCheck({ participants: P(), scene: { turnIndex: state.currentTurnIndex, pendingMoraleCheck: state.pendingMoraleCheck } }, id);
+const awaitsMorale = (id: string) => {
+  const awaits = awaitsMoraleCheck({ participants: P(), scene: { turnIndex: state.currentTurnIndex, pendingMoraleCheck: state.pendingMoraleCheck } }, id);
+
+  if (awaits) moraleStats.awaited++;
+
+  return awaits;
+};
 
 async function call(label: string, options: any, body: any = {}, as?: string): Promise<any> {
   const actorId = body.participantId ?? body.attackerId ?? body.casterId;
@@ -270,10 +278,16 @@ async function call(label: string, options: any, body: any = {}, as?: string): P
 
     rejections.set(key, (rejections.get(key) ?? 0) + 1);
 
+    if (JSON.stringify(json).includes(REJECT.moraleFirst)) moraleStats.moraleFirstRejects++;
+
     if (res.status >= 500) issue("error", `${label}: ${res.status} ${JSON.stringify(json).slice(0, 300)}`);
   }
 
+  if (label === "morale-check" && res.status === 200) moraleStats.checks++;
+
   for (const e of newLog) {
+    if (typeof e.actionDetails?.d10Roll === "number") moraleStats.d10Events++;
+
     const t = `[${battleLabel} р${e.round}] ${resultTextOf(e)}`;
 
     fullLog.push(t);
@@ -1091,6 +1105,8 @@ async function main() {
 
   if (runs("system")) await systemChecks(spells);
 
+  if (runs("sweep")) moraleModuleChecks();
+
   if (targetedResults.length) report.push("\n## Цільові перевірки", ...targetedResults.map((t) => `- ${t}`));
 
   if (runs("sweep")) report.push(...coverageReport());
@@ -1120,6 +1136,17 @@ const targetedResults: string[] = [];
 const tcheck = (name: string, ok: boolean, detail: string) => { targetedResults.push(`${ok ? "✅" : "❌"} ${name} — ${detail}`);
 
  if (!ok) issue("error", `ЦІЛЬОВИЙ: ${name} — ${detail}`); };
+
+function moraleModuleChecks() {
+  const expectation = moraleExpectation(PROFILE);
+
+  const detail = `morale-check ${moraleStats.checks}, події з d10Roll ${moraleStats.d10Events}, очікувань ${moraleStats.awaited}, moraleFirst ${moraleStats.moraleFirstRejects}`;
+
+  if (expectation === "required") {
+    tcheck("Мораль (модуль): ≥ 1 morale-check і подія журналу з d10Roll", moraleStats.checks >= 1 && moraleStats.d10Events >= 1, detail);
+    tcheck("Мораль (модуль): сценарій не отримує moraleFirst", moraleStats.moraleFirstRejects === 0, detail);
+  } else if (expectation === "absent") tcheck("Мораль без модуля: жодного morale-check, awaitsMorale завжди false", moraleStats.checks === 0 && moraleStats.awaited === 0 && moraleStats.d10Events === 0, detail);
+}
 
 /** Сценарій не склався (напр., бій уже завершився) — пропуск із поясненням замість хибного провалу. */
 const tskip = (name: string, detail: string) => { targetedResults.push(`⏭️ ${name} — пропущено: ${detail}`);
