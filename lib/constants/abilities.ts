@@ -1,4 +1,6 @@
-export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
+import { STAT_COLUMNS } from "./stat-columns";
+
+export const ABILITY_KEYS = STAT_COLUMNS;
 
 export const ABILITY_SCORE_CAP = 20;
 

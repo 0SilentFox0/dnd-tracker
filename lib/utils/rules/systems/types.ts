@@ -3,6 +3,7 @@ import type { SystemData, SystemSlot } from "./slot";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { Coin } from "@/lib/constants/inventory";
+import type { CharacterSystemColumn } from "@/lib/constants/stat-columns";
 import type { Translator } from "@/lib/i18n/translator";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
@@ -28,8 +29,9 @@ import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SpellMagic, SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { ActiveEffect, BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
-import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
+import type { CharacterResources, CharacterSheet, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { FeatData } from "@/types/choices";
+import type { ResolvedClassEntry } from "@/types/classes";
 import type { LogLine, TextRef } from "@/types/text";
 
 export interface CharacterHpInput {
@@ -429,7 +431,35 @@ export interface RuleSystemMagic {
   saveDc(caster: BattleParticipant, ability: AbilityKey | undefined, base: number): number;
   upcast: { steps(spellLevel: number, castLevel: number): number };
   tested?: RuleSystemTestedMagic;
+  /** Derived save DC and attack bonus of a caster; none means the system has no such derivation */
+  spellcasting?(input: SpellcastingInput): { saveDC: number; attackBonus: number } | null;
 }
+
+export interface SpellcastingInput {
+  level: number;
+  ability: string | null | undefined;
+  scores: Record<AbilityKey, number>;
+  rules: Ruleset;
+}
+
+export interface StatColumnsPart {
+  /** Columns this layer reads and writes; input for columns no layer owns is dropped */
+  owns: readonly CharacterSystemColumn[];
+  /** Create-time values for non-null columns the composition does not own */
+  fill?(rules: Ruleset): Partial<Record<CharacterSystemColumn, unknown>>;
+}
+
+export interface SheetBlockCtx {
+  participant: BattleParticipant;
+  character: Record<AbilityKey, number> & { savingThrows: unknown; skills: unknown };
+  rules: Ruleset;
+  classes?: ResolvedClassEntry[] | null;
+  choices?: { skills: ReadonlySet<string>; expertise: ReadonlySet<string> };
+}
+
+export type SheetBlockPart = Partial<Pick<CharacterSheet, "abilities" | "proficiency" | "armorClass" | "saves" | "skills" | "passives" | "hitDice">>;
+
+export type SheetBlock = (ctx: SheetBlockCtx) => SheetBlockPart;
 
 export interface ActionDetailsView {
   hideNumbers: boolean;
@@ -530,7 +560,11 @@ export interface RuleSystemDefinition {
     levels: boolean;
     maxHp(input: { character: CharacterHpInput; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;
     hpTerm: "hp" | "wounds";
+    /** Proficiency bonus of a level; none means the system has no such bonus */
+    proficiency?(level: number, rules: Ruleset): number;
   };
+  stats?: { columns: readonly StatColumnsPart[] };
+  sheet?: { blocks: readonly SheetBlock[] };
   characteristics: {
     /** The `characteristics` column carries system data (otherwise it is dropped on write) */
     persisted: boolean;

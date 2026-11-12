@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { type Addon, composeCached, composeParts, composeSystem, compositionOrder, validateComposition } from "@/lib/utils/rules/systems/compose";
 import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 import { ruleSystemByKey } from "@/lib/utils/rules/systems/registry";
-import type { ActGate, ParticipantPart, UnitPartRow } from "@/lib/utils/rules/systems/types";
+import type { ActGate, ParticipantPart, SheetBlock, UnitPartRow } from "@/lib/utils/rules/systems/types";
 
 const m = (module: string, extra: Partial<SystemMeta> = {}): SystemMeta => ({ module, kind: "addon", keys: [], requires: ["core"], i18n: {}, ...extra });
 
@@ -159,6 +159,24 @@ describe("composeSystem", () => {
 
     expect(out.participant?.fromUnit?.slice(-2)).toEqual([partA, partB]);
     expect(out.combat.turn?.actGates).toEqual([gateA, gateB]);
+  });
+
+  it("concatenates stat column parts and sheet blocks across layers", () => {
+    const d20 = ruleSystemByKey("dnd5e");
+
+    if (!d20) throw new Error("dnd5e missing");
+
+    const blockA: SheetBlock = () => ({});
+
+    const blockB: SheetBlock = () => ({});
+
+    const out = composeSystem(d20, [
+      { id: "a", build: () => ({ stats: { columns: [{ owns: ["archetype"] }] }, sheet: { blocks: [blockA] } }) },
+      { id: "b", build: () => ({ stats: { columns: [{ owns: ["speed"] }] }, sheet: { blocks: [blockB] } }) },
+    ]);
+
+    expect(out.stats?.columns.slice(-2)).toEqual([{ owns: ["archetype"] }, { owns: ["speed"] }]);
+    expect(out.sheet?.blocks.slice(-2)).toEqual([blockA, blockB]);
   });
 });
 
