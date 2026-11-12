@@ -1,4 +1,4 @@
-import { markLevelSeen } from '@/lib/server/characters/core/progression-action-handler';
+import { markLevelSeen } from '@/lib/server/characters/core/seen-level-handler';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 
 export async function POST(

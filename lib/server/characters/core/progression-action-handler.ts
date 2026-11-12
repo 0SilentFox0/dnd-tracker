@@ -122,25 +122,6 @@ export async function runProgressionActionUnlocked(
     return NextResponse.json({ unlocked });
 }
 
-export async function markLevelSeenUnlocked(
-    campaignId: string,
-    characterId: string,
-    actor?: Actor
-): Promise<NextResponse> {
-    const ctx = await loadProgressionContext(campaignId, characterId, actor);
-
-    if (ctx instanceof NextResponse) return ctx;
-
-    if (!ctx.isOwner) return errorResponse(API_ERRORS.FORBIDDEN, 403);
-
-    await prisma.character.updateMany({
-        where: { id: ctx.character.id },
-        data: { seenLevel: ctx.character.level },
-    });
-
-    return NextResponse.json({ seenLevel: ctx.character.level });
-}
-
 async function locked(
     campaignId: string,
     characterId: string,
@@ -167,13 +148,4 @@ export const runProgressionAction = (
 ) =>
     locked(campaignId, characterId, actor, () =>
         runProgressionActionUnlocked(campaignId, characterId, action, actor)
-    );
-
-export const markLevelSeen = (
-    campaignId: string,
-    characterId: string,
-    actor?: Actor
-) =>
-    locked(campaignId, characterId, actor, () =>
-        markLevelSeenUnlocked(campaignId, characterId, actor)
     );

@@ -8,16 +8,14 @@ import {
 
 import { buildProgressionDto } from '@/lib/server/characters/core/get-progression-handler';
 import { loadProgressionContext } from '@/lib/server/characters/core/load-progression-context';
-import {
-    markLevelSeenUnlocked,
-    runProgressionActionUnlocked,
-} from '@/lib/server/characters/core/progression-action-handler';
+import { runProgressionActionUnlocked } from '@/lib/server/characters/core/progression-action-handler';
 import { readCharacterLog } from '@/lib/server/characters/core/read-character-log';
 import { readFreeArtifacts } from '@/lib/server/characters/core/read-free-artifacts';
 import { readInventory } from '@/lib/server/characters/core/read-inventory';
 import { readLog } from '@/lib/server/characters/core/read-log';
 import { readCharacterSheet } from '@/lib/server/characters/core/read-sheet';
 import { readStash } from '@/lib/server/characters/core/read-stash';
+import { markLevelSeenUnlocked } from '@/lib/server/characters/core/seen-level-handler';
 
 const byId = z.object({ characterId: z.string() });
 
