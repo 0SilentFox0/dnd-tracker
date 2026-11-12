@@ -1,0 +1,572 @@
+{
+  "system": "wfrp",
+  "systemSlot": {
+    "key": "wfrp",
+    "data": {
+      "characteristics": [
+        {
+          "key": "ws",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "bs",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "s",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "t",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "i",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "ag",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "dex",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "int",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "wp",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        },
+        {
+          "key": "fel",
+          "base": 30,
+          "advances": 0,
+          "value": 30,
+          "bonus": 3,
+          "mod": 0
+        }
+      ],
+      "wounds": {
+        "max": 12,
+        "breakdown": [
+          {
+            "label": "characterProfile.sheet.lines.wounds",
+            "params": {
+              "sb": 3,
+              "tb": 3,
+              "wpb": 3,
+              "extra": 0
+            }
+          }
+        ]
+      },
+      "move": {
+        "value": 4,
+        "walkYd": 8,
+        "runYd": 16
+      },
+      "skills": [
+        {
+          "key": "athletics",
+          "characteristic": "ag",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "charm",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "climb",
+          "characteristic": "s",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "cool",
+          "characteristic": "wp",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "dodge",
+          "characteristic": "ag",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "drink",
+          "characteristic": "t",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "drive",
+          "characteristic": "ag",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "endurance",
+          "characteristic": "t",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "entertain",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "gamble",
+          "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "gossip",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "haggle",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "intimidate",
+          "characteristic": "s",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "intuition",
+          "characteristic": "i",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "leadership",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "melee",
+          "spec": "basic",
+          "characteristic": "ws",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "advanced"
+        },
+        {
+          "key": "navigation",
+          "characteristic": "i",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "perception",
+          "characteristic": "i",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "ride",
+          "characteristic": "ag",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "row",
+          "characteristic": "s",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "stealth",
+          "characteristic": "ag",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "survival",
+          "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "swim",
+          "characteristic": "s",
+          "target": 30,
+          "advances": 0,
+          "trained": true,
+          "kind": "basic"
+        },
+        {
+          "key": "animal-care",
+          "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "channelling",
+          "characteristic": "wp",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "evaluate",
+          "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "heal",
+          "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "lockpicking",
+          "characteristic": "dex",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "pray",
+          "characteristic": "fel",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "research",
+          "characteristic": "int",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "signs",
+          "characteristic": "i",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "sleight-of-hand",
+          "characteristic": "dex",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "track",
+          "characteristic": "i",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        },
+        {
+          "key": "traps",
+          "characteristic": "dex",
+          "target": 30,
+          "advances": 0,
+          "trained": false,
+          "kind": "advanced"
+        }
+      ],
+      "fate": 0,
+      "fortune": 0,
+      "sin": 0,
+      "corruption": {
+        "points": 0,
+        "threshold": 6,
+        "mutations": []
+      }
+    }
+  },
+  "viewer": {
+    "isDM": true,
+    "isOwner": false
+  },
+  "review": {
+    "pending": false,
+    "note": null
+  },
+  "maxLevel": 20,
+  "identity": {
+    "id": "ch1",
+    "name": "Герой",
+    "avatar": null,
+    "level": 3,
+    "className": "",
+    "archetype": "universal",
+    "subclass": null,
+    "race": "Людина",
+    "raceIcon": null,
+    "alignment": null
+  },
+  "abilities": [],
+  "primaryAbility": null,
+  "proficiency": 0,
+  "hp": {
+    "total": 12,
+    "lines": [
+      {
+        "label": "characterProfile.sheet.lines.wounds",
+        "params": {
+          "sb": 3,
+          "tb": 3,
+          "wpb": 3,
+          "extra": 0
+        },
+        "value": "",
+        "source": "level"
+      }
+    ]
+  },
+  "armorClass": {
+    "total": 0,
+    "lines": []
+  },
+  "initiative": 30,
+  "speed": 24,
+  "morale": 1,
+  "targets": {
+    "min": 1,
+    "max": 1
+  },
+  "immunities": [],
+  "languages": [],
+  "proficiencies": [],
+  "attacks": [
+    {
+      "id": "default-melee",
+      "name": "Unarmed Strike",
+      "kind": "melee",
+      "toHit": {
+        "total": 0,
+        "lines": [
+          {
+            "label": "gameTerms.abilities.strength.label",
+            "value": "+0",
+            "source": "ability"
+          },
+          {
+            "label": "characterProfile.sheet.lines.proficiency",
+            "value": "+0",
+            "source": "proficiency"
+          }
+        ]
+      },
+      "avgDamage": {
+        "total": 8,
+        "lines": [
+          {
+            "label": "characterProfile.sheet.lines.levelDice",
+            "params": {
+              "dice": "2d4"
+            },
+            "value": "8.0",
+            "source": "level"
+          },
+          {
+            "label": "gameTerms.abilities.strength.label",
+            "value": "+0",
+            "source": "ability"
+          }
+        ]
+      }
+    },
+    {
+      "id": "default-ranged",
+      "name": "Ranged Attack",
+      "kind": "ranged",
+      "toHit": {
+        "total": 1,
+        "lines": [
+          {
+            "label": "gameTerms.abilities.dexterity.label",
+            "value": "+1",
+            "source": "ability"
+          },
+          {
+            "label": "characterProfile.sheet.lines.proficiency",
+            "value": "+0",
+            "source": "proficiency"
+          }
+        ]
+      },
+      "avgDamage": {
+        "total": 9,
+        "lines": [
+          {
+            "label": "characterProfile.sheet.lines.levelDice",
+            "params": {
+              "dice": "2d4"
+            },
+            "value": "8.0",
+            "source": "level"
+          },
+          {
+            "label": "gameTerms.abilities.dexterity.label",
+            "value": "+1",
+            "source": "ability"
+          }
+        ]
+      }
+    }
+  ],
+  "bestToHit": 1,
+  "saves": [],
+  "skills": [],
+  "passives": {
+    "perception": 0,
+    "investigation": 0,
+    "insight": 0
+  },
+  "magic": null,
+  "hitDice": null,
+  "pact": null,
+  "slots": [
+    {
+      "level": 1,
+      "count": 3,
+      "current": 3
+    }
+  ],
+  "rest": null,
+  "spells": [],
+  "items": {
+    "grid": {
+      "ring1": null,
+      "helmet": null,
+      "necklace": null,
+      "range_weapon": null,
+      "armor": null,
+      "shield": null,
+      "weapon": null,
+      "boots": null,
+      "cape": null
+    },
+    "artifacts": [],
+    "sets": []
+  },
+  "personalSkill": null,
+  "progression": {
+    "freePoints": 0,
+    "level": 3,
+    "seenLevel": null
+  },
+  "story": {
+    "biography": null,
+    "goals": [],
+    "notes": null,
+    "chapters": [],
+    "tokens": []
+  }
+}

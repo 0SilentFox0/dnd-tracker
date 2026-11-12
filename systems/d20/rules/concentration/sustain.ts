@@ -1,149 +1,302 @@
-import { CombatStatus } from "@/lib/constants/battle";
-import { textRef } from "@/lib/i18n/text-ref";
-import { findParticipant, replaceParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { ConcentrationTag } from "@/lib/utils/battle/concentration";
-import { hasCondition, removeEffects } from "@/lib/utils/battle/conditions/query";
-import type { RuleSystemSustain, SustainResult } from "@/lib/utils/rules/systems/types";
-import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import { CombatStatus } from '@/lib/constants/battle';
+import { textRef } from '@/lib/i18n/text-ref';
+import {
+    findParticipant,
+    replaceParticipant,
+    withActiveEffects,
+} from '@/lib/utils/abilities/engine/core/participants';
+import { upsertTimedEffect } from '@/lib/utils/abilities/engine/effects/timed-effects';
+import type { ConcentrationTag } from '@/lib/utils/battle/concentration';
+import {
+    hasCondition,
+    removeEffects,
+} from '@/lib/utils/battle/conditions/query';
+import type {
+    RuleSystemSustain,
+    SustainResult,
+} from '@/lib/utils/rules/systems/types';
+import type {
+    ActiveEffect,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
-export const concentrationOn = (p: BattleParticipant) => p.battleData.activeEffects.find((e) => e.concentration);
+export const concentrationOn = (p: BattleParticipant) =>
+    p.battleData.activeEffects.find((e) => e.concentration);
 
-export const hasConcentration = (p: BattleParticipant): boolean => !!concentrationOn(p);
+export const hasConcentration = (p: BattleParticipant): boolean =>
+    !!concentrationOn(p);
 
-export function stripConcentration(ps: BattleParticipant[], casterId: string): { participants: BattleParticipant[]; spellName: string } | null {
-  const caster = findParticipant(ps, casterId);
+export function stripConcentration(
+    ps: BattleParticipant[],
+    casterId: string
+): { participants: BattleParticipant[]; spellName: string } | null {
+    const caster = findParticipant(ps, casterId);
 
-  const marker = caster && concentrationOn(caster);
+    const marker = caster && concentrationOn(caster);
 
-  if (!marker?.concentration) return null;
+    if (!marker?.concentration) return null;
 
-  const { castId, spellName } = marker.concentration;
+    const { castId, spellName } = marker.concentration;
 
-  const ended = (e: ActiveEffect) => e.concentration?.castId === castId || (e.concentrationOf?.casterId === casterId && e.concentrationOf.castId === castId);
+    const ended = (e: ActiveEffect) =>
+        e.concentration?.castId === castId ||
+        (e.concentrationOf?.casterId === casterId &&
+            e.concentrationOf.castId === castId);
 
-  return { spellName, participants: ps.map((p) => {
-    const next = removeEffects(p, ended).participant;
+    return {
+        spellName,
+        participants: ps.map((p) => {
+            const next = removeEffects(p, ended).participant;
 
-    return p.basicInfo.id === casterId && next.battleData.pendingCast ? { ...next, battleData: { ...next.battleData, pendingCast: undefined } } : next;
-  }) };
+            return p.basicInfo.id === casterId && next.battleData.pendingCast
+                ? {
+                      ...next,
+                      battleData: {
+                          ...next.battleData,
+                          pendingCast: undefined,
+                      },
+                  }
+                : next;
+        }),
+    };
 }
 
-export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: LogLine): SustainResult {
-  const stripped = stripConcentration(ps, casterId);
+export function dropConcentration(
+    ps: BattleParticipant[],
+    casterId: string,
+    reason: LogLine
+): SustainResult {
+    const stripped = stripConcentration(ps, casterId);
 
-  if (!stripped) return { participants: ps, messages: [] };
+    if (!stripped) return { participants: ps, messages: [] };
 
-  const name = findParticipant(ps, casterId)?.basicInfo.name ?? casterId;
+    const name = findParticipant(ps, casterId)?.basicInfo.name ?? casterId;
 
-  return { participants: stripped.participants, messages: [textRef("battleLog.concentration.lost", { name, spell: stripped.spellName, reason: reason ? textRef("battleLog.concentration.reasonTail", { reason }) : "" })] };
+    return {
+        participants: stripped.participants,
+        messages: [
+            textRef('battleLog.concentration.lost', {
+                name,
+                spell: stripped.spellName,
+                reason: reason
+                    ? textRef('battleLog.concentration.reasonTail', { reason })
+                    : '',
+            }),
+        ],
+    };
 }
 
-export function beginConcentration(ps: BattleParticipant[], casterId: string, castId: string, spellName: string, rounds: number, round = 0): SustainResult {
-  const dropped = dropConcentration(ps, casterId, textRef("battleLog.concentration.reasons.newSpell"));
+export function beginConcentration(
+    ps: BattleParticipant[],
+    casterId: string,
+    castId: string,
+    spellName: string,
+    rounds: number,
+    round = 0
+): SustainResult {
+    const dropped = dropConcentration(
+        ps,
+        casterId,
+        textRef('battleLog.concentration.reasons.newSpell')
+    );
 
-  const caster = findParticipant(dropped.participants, casterId);
+    const caster = findParticipant(dropped.participants, casterId);
 
-  if (!caster) return dropped;
+    if (!caster) return dropped;
 
-  const upserted = upsertTimedEffect(caster, { timedKey: "concentration", name: spellName, type: "buff", rounds, stackable: false, concentration: { castId, spellName } }, round);
+    const upserted = upsertTimedEffect(
+        caster,
+        {
+            timedKey: 'concentration',
+            name: spellName,
+            type: 'buff',
+            rounds,
+            stackable: false,
+            concentration: { castId, spellName },
+        },
+        round
+    );
 
-  const label = textRef("battleLog.concentration.effect", { spell: spellName });
+    const label = textRef('battleLog.concentration.effect', {
+        spell: spellName,
+    });
 
-  const next = { ...upserted, battleData: { ...upserted.battleData, activeEffects: upserted.battleData.activeEffects.map((e) => (e.concentration?.castId === castId ? { ...e, label } : e)) } };
+    const next = {
+        ...upserted,
+        battleData: {
+            ...upserted.battleData,
+            activeEffects: upserted.battleData.activeEffects.map((e) =>
+                e.concentration?.castId === castId ? { ...e, label } : e
+            ),
+        },
+    };
 
-  return { participants: replaceParticipant(dropped.participants, next), messages: dropped.messages };
+    return {
+        participants: replaceParticipant(dropped.participants, next),
+        messages: dropped.messages,
+    };
 }
 
-export function tagConcentration(before: BattleParticipant[], after: BattleParticipant[], tag: ConcentrationTag, abilityKey: string): BattleParticipant[] {
-  const beforeById = new Map(before.map((p) => [p.basicInfo.id, p]));
+export function tagConcentration(
+    before: BattleParticipant[],
+    after: BattleParticipant[],
+    tag: ConcentrationTag,
+    abilityKey: string
+): BattleParticipant[] {
+    const beforeById = new Map(before.map((p) => [p.basicInfo.id, p]));
 
-  let tagged = false;
+    let tagged = false;
 
-  const result = after.map((p) => {
-    const beforeP = beforeById.get(p.basicInfo.id);
+    const result = after.map((p) => {
+        const beforeP = beforeById.get(p.basicInfo.id);
 
-    if (p === beforeP) return p;
+        if (p === beforeP) return p;
 
-    const known = beforeP?.battleData.activeEffects ?? [];
+        const known = beforeP?.battleData.activeEffects ?? [];
 
-    const fresh = (e: ActiveEffect) => !e.concentration && !e.concentrationOf && !known.includes(e) && e.abilityKey?.startsWith(`${abilityKey}#`);
+        const fresh = (e: ActiveEffect) =>
+            !e.concentration &&
+            !e.concentrationOf &&
+            !known.includes(e) &&
+            e.abilityKey?.startsWith(`${abilityKey}#`);
 
-    if (!p.battleData.activeEffects.some(fresh)) return p;
+        if (!p.battleData.activeEffects.some(fresh)) return p;
 
-    tagged = true;
+        tagged = true;
 
-    return withActiveEffects(p, (list) => list.map((e) => (fresh(e) ? { ...e, concentrationOf: tag } : e)));
-  });
+        return withActiveEffects(p, (list) =>
+            list.map((e) => (fresh(e) ? { ...e, concentrationOf: tag } : e))
+        );
+    });
 
-  if (!tagged) return result;
+    if (!tagged) return result;
 
-  return result.map((p) => (p.basicInfo.id === tag.casterId ? withActiveEffects(p, (list) => list.map((e) => (e.concentration?.castId === tag.castId ? { ...e, concentration: { ...e.concentration, tracksEffects: true as const } } : e))) : p));
+    return result.map((p) =>
+        p.basicInfo.id === tag.casterId
+            ? withActiveEffects(p, (list) =>
+                  list.map((e) =>
+                      e.concentration?.castId === tag.castId
+                          ? {
+                                ...e,
+                                concentration: {
+                                    ...e.concentration,
+                                    tracksEffects: true as const,
+                                },
+                            }
+                          : e
+                  )
+              )
+            : p
+    );
 }
 
-function carriesCast(p: BattleParticipant, castId: string, round: number): boolean {
-  const is = (tag?: ConcentrationTag) => tag?.castId === castId;
+function carriesCast(
+    p: BattleParticipant,
+    castId: string,
+    round: number
+): boolean {
+    const is = (tag?: ConcentrationTag) => tag?.castId === castId;
 
-  const { object, transform } = p.battleData;
+    const { object, transform } = p.battleData;
 
-  return (
-    p.battleData.activeEffects.some((e) => is(e.concentrationOf)) ||
-    (!!object && p.combatStats.status !== CombatStatus.DEAD && is(object.concentrationOf)) ||
-    is(transform?.concentrationOf) ||
-    (p.spellcasting.grants ?? []).some((g) => is(g.concentrationOf) && (g.expiresRound === undefined || round <= g.expiresRound))
-  );
+    return (
+        p.battleData.activeEffects.some((e) => is(e.concentrationOf)) ||
+        (!!object &&
+            p.combatStats.status !== CombatStatus.DEAD &&
+            is(object.concentrationOf)) ||
+        is(transform?.concentrationOf) ||
+        (p.spellcasting.grants ?? []).some(
+            (g) =>
+                is(g.concentrationOf) &&
+                (g.expiresRound === undefined || round <= g.expiresRound)
+        )
+    );
 }
 
-function mapCarriesCast(map: BattleMapConfig | null | undefined, castId: string): boolean {
-  return (
-    Object.values(map?.spellZones ?? {}).some((z) => z.concentrationOf?.castId === castId) ||
-    Object.values(map?.terrain ?? {}).some((c) => c.damage?.concentrationOf?.castId === castId)
-  );
+function mapCarriesCast(
+    map: BattleMapConfig | null | undefined,
+    castId: string
+): boolean {
+    return (
+        Object.values(map?.spellZones ?? {}).some(
+            (z) => z.concentrationOf?.castId === castId
+        ) ||
+        Object.values(map?.terrain ?? {}).some(
+            (c) => c.damage?.concentrationOf?.castId === castId
+        )
+    );
 }
 
 /** Заклинання, чиї ефекти, зони, предмети й гранти всі зняті (втеча, СК, дісел, спливання), більше не тримає концентрацію. */
-export function dropOrphanedConcentration(ps: BattleParticipant[], map?: BattleMapConfig | null, round = 0): SustainResult {
-  let next = ps;
+export function dropOrphanedConcentration(
+    ps: BattleParticipant[],
+    map?: BattleMapConfig | null,
+    round = 0
+): SustainResult {
+    let next = ps;
 
-  const messages: LogLine[] = [];
+    const messages: LogLine[] = [];
 
-  for (const p of ps) {
-    const marker = concentrationOn(p);
+    for (const p of ps) {
+        const marker = concentrationOn(p);
 
-    if (!marker?.concentration?.tracksEffects) continue;
+        if (!marker?.concentration?.tracksEffects) continue;
 
-    const { castId } = marker.concentration;
+        const { castId } = marker.concentration;
 
-    if (mapCarriesCast(map, castId) || next.some((q) => carriesCast(q, castId, round))) continue;
+        if (
+            mapCarriesCast(map, castId) ||
+            next.some((q) => carriesCast(q, castId, round))
+        )
+            continue;
 
-    const dropped = dropConcentration(next, p.basicInfo.id, textRef("battleLog.concentration.reasons.effectsEnded"));
+        const dropped = dropConcentration(
+            next,
+            p.basicInfo.id,
+            textRef('battleLog.concentration.reasons.effectsEnded')
+        );
 
-    next = dropped.participants;
-    messages.push(...dropped.messages);
-  }
+        next = dropped.participants;
+        messages.push(...dropped.messages);
+    }
 
-  return { participants: next, messages };
+    return { participants: next, messages };
 }
 
 export function concentrationBroken(p: BattleParticipant): boolean {
-  return p.combatStats.status === CombatStatus.DEAD || p.combatStats.currentHp <= 0 || hasCondition(p, "incapacitated");
+    return (
+        p.combatStats.status === CombatStatus.DEAD ||
+        p.combatStats.currentHp <= 0 ||
+        hasCondition(p, 'incapacitated')
+    );
 }
 
-export function isZoneConcentrationLive(ps: BattleParticipant[], tag: ConcentrationTag | undefined): boolean {
-  if (!tag) return true;
+export function isZoneConcentrationLive(
+    ps: BattleParticipant[],
+    tag: ConcentrationTag | undefined
+): boolean {
+    if (!tag) return true;
 
-  const caster = findParticipant(ps, tag.casterId);
+    const caster = findParticipant(ps, tag.casterId);
 
-  return !!caster && caster.combatStats.status !== CombatStatus.DEAD && caster.battleData.activeEffects.some((e) => e.concentration?.castId === tag.castId);
+    return (
+        !!caster &&
+        caster.combatStats.status !== CombatStatus.DEAD &&
+        caster.battleData.activeEffects.some(
+            (e) => e.concentration?.castId === tag.castId
+        )
+    );
 }
 
 export const D20_SUSTAIN: RuleSystemSustain = {
-  anchorLive: isZoneConcentrationLive,
-  holds: (rules, spell) => rules.concentration.enabled && spell.concentration === true,
-  holding: hasConcentration,
-  begin: beginConcentration,
-  drop: dropConcentration,
-  tag: tagConcentration,
-  dropOrphaned: dropOrphanedConcentration,
+    anchorLive: isZoneConcentrationLive,
+    holds: (rules, spell) =>
+        rules.concentration.enabled && spell.concentration === true,
+    holding: hasConcentration,
+    begin: beginConcentration,
+    drop: dropConcentration,
+    tag: tagConcentration,
+    dropOrphaned: dropOrphanedConcentration,
 };

@@ -1,158 +1,173 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { getSessionUserId } from "@/lib/auth";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { isDemoKind } from "@/lib/constants/campaigns";
-import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { isDmMember } from "@/lib/utils/api/is-dm";
-import { checkRateLimit, DEMO_READ_RATE_LIMIT, rateLimitResponse } from "@/lib/utils/api/rate-limit";
-import type { Ruleset } from "@/lib/utils/rules";
-import { parseRules } from "@/lib/utils/rules/schema";
+import { getSessionUserId } from '@/lib/auth';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { isDemoKind } from '@/lib/constants/campaigns';
+import { prisma } from '@/lib/db';
+import { createClient } from '@/lib/supabase/server';
+import { errorResponse } from '@/lib/utils/api/api-response';
+import { isDmMember } from '@/lib/utils/api/is-dm';
+import {
+    checkRateLimit,
+    DEMO_READ_RATE_LIMIT,
+    rateLimitResponse,
+} from '@/lib/utils/api/rate-limit';
+import type { Ruleset } from '@/lib/utils/rules';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export interface AuthResult {
-  userId: string;
+    userId: string;
 }
 
 export interface AuthUserResult extends AuthResult {
-  authUser: {
-    id: string;
-    email?: string | null;
-    user_metadata?: {
-      full_name?: string;
-      name?: string;
-      avatar_url?: string;
-      picture?: string;
-    } | null;
-  };
+    authUser: {
+        id: string;
+        email?: string | null;
+        user_metadata?: {
+            full_name?: string;
+            name?: string;
+            avatar_url?: string;
+            picture?: string;
+        } | null;
+    };
 }
 
 export interface CampaignAccessResult extends AuthResult {
-  isDM: boolean;
-  isDemo?: boolean;
-  campaign: {
-    id: string;
-    kind: string;
-    maxLevel: number;
-    rules: Ruleset;
-    allowPlayerEdit: boolean;
-    members: Array<{ userId: string; role: string }>;
-  };
+    isDM: boolean;
+    isDemo?: boolean;
+    campaign: {
+        id: string;
+        kind: string;
+        maxLevel: number;
+        rules: Ruleset;
+        allowPlayerEdit: boolean;
+        members: Array<{ userId: string; role: string }>;
+    };
 }
 
 const unauthorized = () => errorResponse(API_ERRORS.UNAUTHORIZED, 401);
 
 /** Session check from the JWT claims — verified locally, no Supabase Auth round trip. */
 export async function requireAuth(): Promise<AuthResult | NextResponse> {
-  const userId = await getSessionUserId();
+    const userId = await getSessionUserId();
 
-  return userId ? { userId } : unauthorized();
+    return userId ? { userId } : unauthorized();
 }
 
 /** Fresh email / user_metadata from Supabase Auth — only where a DB user row is created. */
-export async function requireAuthUser(): Promise<AuthUserResult | NextResponse> {
-  const supabase = await createClient();
+export async function requireAuthUser(): Promise<
+    AuthUserResult | NextResponse
+> {
+    const supabase = await createClient();
 
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
+    const {
+        data: { user: authUser },
+    } = await supabase.auth.getUser();
 
-  if (!authUser) return unauthorized();
+    if (!authUser) return unauthorized();
 
-  return {
-    userId: authUser.id,
-    authUser: {
-      id: authUser.id,
-      email: authUser.email,
-      user_metadata: authUser.user_metadata,
-    },
-  };
+    return {
+        userId: authUser.id,
+        authUser: {
+            id: authUser.id,
+            email: authUser.email,
+            user_metadata: authUser.user_metadata,
+        },
+    };
 }
 
 export async function requireCampaignAccess(
-  campaignId: string,
-  requireDM: boolean = false,
-  options: { allowDemo?: boolean } = {},
+    campaignId: string,
+    requireDM: boolean = false,
+    options: { allowDemo?: boolean } = {}
 ): Promise<CampaignAccessResult | NextResponse> {
-  const authResult = await requireAuth();
+    const authResult = await requireAuth();
 
-  if (authResult instanceof NextResponse) {
-    return authResult;
-  }
+    if (authResult instanceof NextResponse) {
+        return authResult;
+    }
 
-  const { userId } = authResult;
+    const { userId } = authResult;
 
-  const campaign = await prisma.campaign.findUnique({
-    where: { id: campaignId },
-    select: {
-      id: true,
-      kind: true,
-      maxLevel: true,
-      rules: true,
-      allowPlayerEdit: true,
-      members: {
-        where: { userId },
-        select: { userId: true, role: true },
-      },
-    },
-  });
+    const campaign = await prisma.campaign.findUnique({
+        where: { id: campaignId },
+        select: {
+            id: true,
+            kind: true,
+            maxLevel: true,
+            rules: true,
+            allowPlayerEdit: true,
+            members: {
+                where: { userId },
+                select: { userId: true, role: true },
+            },
+        },
+    });
 
-  if (!campaign) {
-    return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
-  }
+    if (!campaign) {
+        return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
+    }
 
-  const isDemo = options.allowDemo === true && isDemoKind(campaign.kind);
+    const isDemo = options.allowDemo === true && isDemoKind(campaign.kind);
 
-  if (campaign.members.length === 0 && !isDemo) {
-    return errorResponse(API_ERRORS.FORBIDDEN, 403);
-  }
+    if (campaign.members.length === 0 && !isDemo) {
+        return errorResponse(API_ERRORS.FORBIDDEN, 403);
+    }
 
-  if (isDemo) {
-    const rate = await checkRateLimit({ userId: authResult.userId, scope: "demo-read", battleId: campaignId, ...DEMO_READ_RATE_LIMIT, memoryFallback: true });
+    if (isDemo) {
+        const rate = await checkRateLimit({
+            userId: authResult.userId,
+            scope: 'demo-read',
+            battleId: campaignId,
+            ...DEMO_READ_RATE_LIMIT,
+            memoryFallback: true,
+        });
 
-    if (!rate.allowed) return rateLimitResponse(rate);
-  }
+        if (!rate.allowed) return rateLimitResponse(rate);
+    }
 
-  const isDM = isDmMember(campaign.members);
+    const isDM = isDmMember(campaign.members);
 
-  if (requireDM && (isDemo || !isDM)) {
-    return errorResponse(API_ERRORS.FORBIDDEN, 403);
-  }
+    if (requireDM && (isDemo || !isDM)) {
+        return errorResponse(API_ERRORS.FORBIDDEN, 403);
+    }
 
-  return {
-    ...authResult,
-    isDM,
-    isDemo,
-    campaign: {
-      id: campaign.id,
-      kind: campaign.kind,
-      maxLevel: campaign.maxLevel,
-      rules: parseRules(campaign.rules),
-      allowPlayerEdit: campaign.allowPlayerEdit,
-      members: campaign.members.map((m) => ({
-        userId: m.userId,
-        role: m.role,
-      })),
-    },
-  };
+    return {
+        ...authResult,
+        isDM,
+        isDemo,
+        campaign: {
+            id: campaign.id,
+            kind: campaign.kind,
+            maxLevel: campaign.maxLevel,
+            rules: parseRules(campaign.rules),
+            allowPlayerEdit: campaign.allowPlayerEdit,
+            members: campaign.members.map((m) => ({
+                userId: m.userId,
+                role: m.role,
+            })),
+        },
+    };
 }
 
 export async function requireDM(
-  campaignId: string
+    campaignId: string
 ): Promise<CampaignAccessResult | NextResponse> {
-  return requireCampaignAccess(campaignId, true);
+    return requireCampaignAccess(campaignId, true);
 }
 
 /** Read campaign-DM content for its DM or an authenticated Demo visitor. */
 export async function requireCampaignDMOrDemoAccess(
-  campaignId: string,
+    campaignId: string
 ): Promise<CampaignAccessResult | NextResponse> {
-  const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
+    const access = await requireCampaignAccess(campaignId, false, {
+        allowDemo: true,
+    });
 
-  if (access instanceof NextResponse) return access;
+    if (access instanceof NextResponse) return access;
 
-  if (!access.isDM && !access.isDemo) return errorResponse(API_ERRORS.FORBIDDEN, 403);
+    if (!access.isDM && !access.isDemo)
+        return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
-  return access;
+    return access;
 }

@@ -1,11 +1,23 @@
-import { AI_LIMITS } from "@/lib/constants/ai";
+import { AI_LIMITS } from '@/lib/constants/ai';
 
-export function createRunSignal(clientSignal?: AbortSignal, remainingMs: number = AI_LIMITS.requestDeadlineMs) {
-  const deadline = new AbortController();
+export function createRunSignal(
+    clientSignal?: AbortSignal,
+    remainingMs: number = AI_LIMITS.requestDeadlineMs
+) {
+    const deadline = new AbortController();
 
-  const timer = setTimeout(() => deadline.abort(new DOMException("Request deadline exceeded", "TimeoutError")), Math.max(0, remainingMs));
+    const timer = setTimeout(
+        () =>
+            deadline.abort(
+                new DOMException('Request deadline exceeded', 'TimeoutError')
+            ),
+        Math.max(0, remainingMs)
+    );
 
-  const signal = AbortSignal.any([deadline.signal, ...(clientSignal ? [clientSignal] : [])]);
+    const signal = AbortSignal.any([
+        deadline.signal,
+        ...(clientSignal ? [clientSignal] : []),
+    ]);
 
-  return { signal, dispose: () => clearTimeout(timer) };
+    return { signal, dispose: () => clearTimeout(timer) };
 }

@@ -1,120 +1,219 @@
-import "server-only";
-import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
-import { prisma } from "@/lib/db";
-import { pageFactsSchema } from "@/lib/schemas/scenario-index";
-import { relationsSchema } from "@/lib/schemas/scenario-summary";
-import { listPages, readContent } from "@/lib/server/scenario/page-store";
-import { buildScenarioIndex, entityKey } from "@/lib/utils/scenario/index/build";
-import { extractPageFacts } from "@/lib/utils/scenario/index/extract";
-import type { IndexRelation, MentionType, PageFacts, ScenarioIndex } from "@/types/scenario";
+import 'server-only';
+import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
+import { prisma } from '@/lib/db';
+import { pageFactsSchema } from '@/lib/schemas/scenario-index';
+import { relationsSchema } from '@/lib/schemas/scenario-summary';
+import { listPages, readContent } from '@/lib/server/scenario/page-store';
+import {
+    buildScenarioIndex,
+    entityKey,
+} from '@/lib/utils/scenario/index/build';
+import { extractPageFacts } from '@/lib/utils/scenario/index/extract';
+import type {
+    IndexRelation,
+    MentionType,
+    PageFacts,
+    ScenarioIndex,
+} from '@/types/scenario';
 
 const BATCH = 20;
 
 type NameRow = { id: string; name: string; image?: string | null };
 
-export async function upsertPageFacts(pageId: string, campaignId: string, version: number, facts: PageFacts) {
-  // older builds must not overwrite newer facts; the page may be deleted mid-build, so insert only while it exists
-  await prisma.$executeRaw`INSERT INTO scenario_page_index ("pageId", "campaignId", version, facts, "updatedAt")
+export async function upsertPageFacts(
+    pageId: string,
+    campaignId: string,
+    version: number,
+    facts: PageFacts
+) {
+    // older builds must not overwrite newer facts; the page may be deleted mid-build, so insert only while it exists
+    await prisma.$executeRaw`INSERT INTO scenario_page_index ("pageId", "campaignId", version, facts, "updatedAt")
     SELECT id, ${campaignId}::text, ${version}::int, ${JSON.stringify(facts)}::jsonb, now() FROM scenario_pages WHERE id = ${pageId}
     ON CONFLICT ("pageId") DO UPDATE SET version = EXCLUDED.version, facts = EXCLUDED.facts, "updatedAt" = now()
     WHERE scenario_page_index.version <= EXCLUDED.version`;
 }
 
-async function loadFacts(campaignId: string, pages: { id: string; version: number }[]): Promise<Map<string, PageFacts>> {
-  const facts = new Map<string, PageFacts>();
+async function loadFacts(
+    campaignId: string,
+    pages: { id: string; version: number }[]
+): Promise<Map<string, PageFacts>> {
+    const facts = new Map<string, PageFacts>();
 
-  const cached = await prisma.scenarioPageIndex.findMany({ where: { campaignId }, select: { pageId: true, version: true, facts: true } });
+    const cached = await prisma.scenarioPageIndex.findMany({
+        where: { campaignId },
+        select: { pageId: true, version: true, facts: true },
+    });
 
-  const cachedById = new Map(cached.map((row) => [row.pageId, row]));
+    const cachedById = new Map(cached.map((row) => [row.pageId, row]));
 
-  const stale: string[] = [];
+    const stale: string[] = [];
 
-  for (const page of pages) {
-    const row = cachedById.get(page.id);
+    for (const page of pages) {
+        const row = cachedById.get(page.id);
 
-    const parsed = row && row.version === page.version ? pageFactsSchema.safeParse(row.facts) : null;
+        const parsed =
+            row && row.version === page.version
+                ? pageFactsSchema.safeParse(row.facts)
+                : null;
 
-    if (parsed?.success) facts.set(page.id, parsed.data);
-    else stale.push(page.id);
-  }
+        if (parsed?.success) facts.set(page.id, parsed.data);
+        else stale.push(page.id);
+    }
 
-  for (let i = 0; i < stale.length; i += BATCH) {
-    const rows = await prisma.scenarioPage.findMany({ where: { id: { in: stale.slice(i, i + BATCH) }, campaignId }, select: { id: true, version: true, content: true } });
+    for (let i = 0; i < stale.length; i += BATCH) {
+        const rows = await prisma.scenarioPage.findMany({
+            where: { id: { in: stale.slice(i, i + BATCH) }, campaignId },
+            select: { id: true, version: true, content: true },
+        });
 
-    await Promise.all(
-      rows.map(async (row) => {
-        const pageFacts = extractPageFacts(readContent(row.content));
+        await Promise.all(
+            rows.map(async (row) => {
+                const pageFacts = extractPageFacts(readContent(row.content));
 
-        facts.set(row.id, pageFacts);
-        await upsertPageFacts(row.id, campaignId, row.version, pageFacts);
-      }),
+                facts.set(row.id, pageFacts);
+                await upsertPageFacts(
+                    row.id,
+                    campaignId,
+                    row.version,
+                    pageFacts
+                );
+            })
+        );
+    }
+
+    return facts;
+}
+
+async function resolveEntities(
+    campaignId: string,
+    facts: Map<string, PageFacts>
+): Promise<Map<string, { label: string; image: string | null }>> {
+    const ids = new Map<MentionType, Set<string>>();
+
+    for (const page of facts.values()) {
+        for (const section of page.sections) {
+            for (const ref of section.refs)
+                ids.set(ref.type, (ids.get(ref.type) ?? new Set()).add(ref.id));
+        }
+    }
+
+    const find = (type: MentionType): Promise<NameRow[]> => {
+        const where = { id: { in: [...(ids.get(type) ?? [])] }, campaignId };
+
+        const select = { id: true, name: true };
+
+        switch (type) {
+            case 'unit':
+                return prisma.unit
+                    .findMany({ where, select: { ...select, avatar: true } })
+                    .then((rows) =>
+                        rows.map((r) => ({
+                            id: r.id,
+                            name: r.name,
+                            image: r.avatar,
+                        }))
+                    );
+            case 'artifact':
+                return prisma.artifact
+                    .findMany({ where, select: { ...select, icon: true } })
+                    .then((rows) =>
+                        rows.map((r) => ({
+                            id: r.id,
+                            name: r.name,
+                            image: r.icon,
+                        }))
+                    );
+            case 'character':
+                return prisma.character
+                    .findMany({
+                        where: { ...where, ...ACTIVE_CHARACTER },
+                        select: { ...select, avatar: true },
+                    })
+                    .then((rows) =>
+                        rows.map((r) => ({
+                            id: r.id,
+                            name: r.name,
+                            image: r.avatar,
+                        }))
+                    );
+            case 'spell':
+                return prisma.spell
+                    .findMany({ where, select: { ...select, icon: true } })
+                    .then((rows) =>
+                        rows.map((r) => ({
+                            id: r.id,
+                            name: r.name,
+                            image: r.icon,
+                        }))
+                    );
+            case 'battle':
+                return prisma.battleScene.findMany({ where, select });
+            case 'acquaintance':
+                return prisma.acquaintance
+                    .findMany({ where, select: { ...select, avatarUrl: true } })
+                    .then((rows) =>
+                        rows.map((r) => ({
+                            id: r.id,
+                            name: r.name,
+                            image: r.avatarUrl,
+                        }))
+                    );
+            case 'marker':
+                return prisma.worldMarker.findMany({
+                    where: { id: where.id, map: { campaignId } },
+                    select,
+                });
+        }
+    };
+
+    const types = [...ids.keys()];
+
+    const groups = await Promise.all(types.map(find));
+
+    const resolved = new Map<string, { label: string; image: string | null }>();
+
+    groups.forEach((rows, i) =>
+        rows.forEach((row) =>
+            resolved.set(entityKey(types[i], row.id), {
+                label: row.name,
+                image: row.image ?? null,
+            })
+        )
     );
-  }
 
-  return facts;
+    return resolved;
 }
 
-async function resolveEntities(campaignId: string, facts: Map<string, PageFacts>): Promise<Map<string, { label: string; image: string | null }>> {
-  const ids = new Map<MentionType, Set<string>>();
+export async function loadSummaryRelations(
+    campaignId: string,
+    pageIds: ReadonlySet<string>
+): Promise<IndexRelation[]> {
+    const rows = await prisma.$queryRaw<
+        { pageId: string; relations: unknown }[]
+    >`SELECT "pageId", summary->'relations' AS relations FROM scenario_page_summaries WHERE "campaignId" = ${campaignId}`;
 
-  for (const page of facts.values()) {
-    for (const section of page.sections) {
-      for (const ref of section.refs) ids.set(ref.type, (ids.get(ref.type) ?? new Set()).add(ref.id));
-    }
-  }
+    return rows.flatMap((row) => {
+        const parsed = pageIds.has(row.pageId)
+            ? relationsSchema.safeParse(row.relations)
+            : null;
 
-  const find = (type: MentionType): Promise<NameRow[]> => {
-    const where = { id: { in: [...(ids.get(type) ?? [])] }, campaignId };
-
-    const select = { id: true, name: true };
-
-    switch (type) {
-      case "unit":
-        return prisma.unit.findMany({ where, select: { ...select, avatar: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.avatar })));
-      case "artifact":
-        return prisma.artifact.findMany({ where, select: { ...select, icon: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.icon })));
-      case "character":
-        return prisma.character.findMany({ where: { ...where, ...ACTIVE_CHARACTER }, select: { ...select, avatar: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.avatar })));
-      case "spell":
-        return prisma.spell.findMany({ where, select: { ...select, icon: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.icon })));
-      case "battle":
-        return prisma.battleScene.findMany({ where, select });
-      case "acquaintance":
-        return prisma.acquaintance.findMany({ where, select: { ...select, avatarUrl: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.avatarUrl })));
-      case "marker":
-        return prisma.worldMarker.findMany({ where: { id: where.id, map: { campaignId } }, select });
-    }
-  };
-
-  const types = [...ids.keys()];
-
-  const groups = await Promise.all(types.map(find));
-
-  const resolved = new Map<string, { label: string; image: string | null }>();
-
-  groups.forEach((rows, i) => rows.forEach((row) => resolved.set(entityKey(types[i], row.id), { label: row.name, image: row.image ?? null })));
-
-  return resolved;
+        return parsed?.success ? parsed.data : [];
+    });
 }
 
-export async function loadSummaryRelations(campaignId: string, pageIds: ReadonlySet<string>): Promise<IndexRelation[]> {
-  const rows = await prisma.$queryRaw<{ pageId: string; relations: unknown }[]>`SELECT "pageId", summary->'relations' AS relations FROM scenario_page_summaries WHERE "campaignId" = ${campaignId}`;
+export async function loadScenarioIndex(
+    campaignId: string
+): Promise<ScenarioIndex> {
+    const pages = await listPages(campaignId);
 
-  return rows.flatMap((row) => {
-    const parsed = pageIds.has(row.pageId) ? relationsSchema.safeParse(row.relations) : null;
+    const facts = await loadFacts(campaignId, pages);
 
-    return parsed?.success ? parsed.data : [];
-  });
-}
+    const present = pages.filter((page) => facts.has(page.id));
 
-export async function loadScenarioIndex(campaignId: string): Promise<ScenarioIndex> {
-  const pages = await listPages(campaignId);
+    const [resolved, relations] = await Promise.all([
+        resolveEntities(campaignId, facts),
+        loadSummaryRelations(campaignId, new Set(present.map((p) => p.id))),
+    ]);
 
-  const facts = await loadFacts(campaignId, pages);
-
-  const present = pages.filter((page) => facts.has(page.id));
-
-  const [resolved, relations] = await Promise.all([resolveEntities(campaignId, facts), loadSummaryRelations(campaignId, new Set(present.map((p) => p.id)))]);
-
-  return buildScenarioIndex({ pages: present, facts, resolved, relations });
+    return buildScenarioIndex({ pages: present, facts, resolved, relations });
 }

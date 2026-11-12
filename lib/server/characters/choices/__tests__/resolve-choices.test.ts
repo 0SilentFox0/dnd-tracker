@@ -1,62 +1,202 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
-vi.mock("server-only", () => ({}));
-vi.mock("@/lib/server/characters/choices/load-refs", () => ({ loadChoiceRefs: vi.fn() }));
+vi.mock('server-only', () => ({}));
+vi.mock('@/lib/server/characters/choices/load-refs', () => ({
+    loadChoiceRefs: vi.fn(),
+}));
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { characterClassMode, resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
-import { refs, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
-import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import {
+    characterClassMode,
+    resolveCharacterChoices,
+} from '@/lib/server/characters/choices/resolve-choices';
+import {
+    refs,
+    scores,
+    sorcerer,
+} from '@/lib/utils/characters/choices/__tests__/fixtures';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
 const rules = { ...DEFAULT_RULES, classes: { enabled: true } };
 
-const character = { race: "Elf", level: 4, skills: {}, ...scores };
+const character = { race: 'Elf', level: 4, skills: {}, ...scores };
 
-describe("resolveCharacterChoices", () => {
-  it("class mode needs rules and at least one class entry", () => {
-    expect(characterClassMode(rules, [{ classId: "c", level: 1 }])).toBe(true);
-    expect(characterClassMode(rules, [])).toBe(false);
-    expect(characterClassMode(DEFAULT_RULES, [{ classId: "c", level: 1 }])).toBe(false);
-  });
+describe('resolveCharacterChoices', () => {
+    it('class mode needs rules and at least one class entry', () => {
+        expect(characterClassMode(rules, [{ classId: 'c', level: 1 }])).toBe(
+            true
+        );
+        expect(characterClassMode(rules, [])).toBe(false);
+        expect(
+            characterClassMode(DEFAULT_RULES, [{ classId: 'c', level: 1 }])
+        ).toBe(false);
+    });
 
-  it("returns prisma fields: JSON columns, subrace, changed scores", async () => {
-    const before = { raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 4 }] };
+    it('returns prisma fields: JSON columns, subrace, changed scores', async () => {
+        const before = {
+            raceChoices: {},
+            feats: [],
+            classes: [{ classId: sorcerer.id, level: 4 }],
+        };
 
-    const after = { ...before, raceChoices: { "elven-lineage": [{ id: "drow" }] }, classes: [{ classId: sorcerer.id, level: 4, choices: { "ability-score-improvement-4": [{ id: "f-asi", picks: { asi: [{ id: "strength" }, { id: "dexterity" }] } }] } }] };
+        const after = {
+            ...before,
+            raceChoices: { 'elven-lineage': [{ id: 'drow' }] },
+            classes: [
+                {
+                    classId: sorcerer.id,
+                    level: 4,
+                    choices: {
+                        'ability-score-improvement-4': [
+                            {
+                                id: 'f-asi',
+                                picks: {
+                                    asi: [
+                                        { id: 'strength' },
+                                        { id: 'dexterity' },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
 
-    const result = await resolveCharacterChoices({ campaignId: "c1", rules, isDM: true, character, before, after, refs });
+        const result = await resolveCharacterChoices({
+            campaignId: 'c1',
+            rules,
+            isDM: true,
+            character,
+            before,
+            after,
+            refs,
+        });
 
-    expect(result).toMatchObject({ ok: true, fields: { raceChoices: after.raceChoices, subrace: "Drow", strength: 16, dexterity: 15, classes: after.classes, feats: [] } });
-  });
+        expect(result).toMatchObject({
+            ok: true,
+            fields: {
+                raceChoices: after.raceChoices,
+                subrace: 'Drow',
+                strength: 16,
+                dexterity: 15,
+                classes: after.classes,
+                feats: [],
+            },
+        });
+    });
 
-  it("422 with issues on an invalid pick", async () => {
-    const result = await resolveCharacterChoices({ campaignId: "c1", rules, isDM: true, character, before: { raceChoices: {}, feats: [], classes: [] }, after: { raceChoices: { "keen-senses": [{ id: "arcana" }] }, feats: [], classes: [] }, refs });
+    it('422 with issues on an invalid pick', async () => {
+        const result = await resolveCharacterChoices({
+            campaignId: 'c1',
+            rules,
+            isDM: true,
+            character,
+            before: { raceChoices: {}, feats: [], classes: [] },
+            after: {
+                raceChoices: { 'keen-senses': [{ id: 'arcana' }] },
+                feats: [],
+                classes: [],
+            },
+            refs,
+        });
 
-    expect(result.ok).toBe(false);
+        expect(result.ok).toBe(false);
 
-    if (result.ok) return;
+        if (result.ok) return;
 
-    expect(result.response.status).toBe(422);
-    expect(await result.response.json()).toMatchObject({ error: `${API_ERRORS.SKILL_NOT_ALLOWED} ${JSON.stringify({ detail: ": arcana" })}`, issues: [{ code: "SKILL_NOT_ALLOWED", path: "raceChoices.keen-senses" }] });
-  });
+        expect(result.response.status).toBe(422);
+        expect(await result.response.json()).toMatchObject({
+            error: `${API_ERRORS.SKILL_NOT_ALLOWED} ${JSON.stringify({ detail: ': arcana' })}`,
+            issues: [
+                { code: 'SKILL_NOT_ALLOWED', path: 'raceChoices.keen-senses' },
+            ],
+        });
+    });
 
-  it("reapplying ASI choices has zero delta; swapping only moves the selected points", async () => {
-    const before = { raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 4, choices: { "ability-score-improvement-4": [{ id: "f-asi", picks: { asi: [{ id: "strength" }, { id: "strength" }] } }] } }] };
+    it('reapplying ASI choices has zero delta; swapping only moves the selected points', async () => {
+        const before = {
+            raceChoices: {},
+            feats: [],
+            classes: [
+                {
+                    classId: sorcerer.id,
+                    level: 4,
+                    choices: {
+                        'ability-score-improvement-4': [
+                            {
+                                id: 'f-asi',
+                                picks: {
+                                    asi: [
+                                        { id: 'strength' },
+                                        { id: 'strength' },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
 
-    const current = { ...character, strength: scores.strength + 2 };
+        const current = { ...character, strength: scores.strength + 2 };
 
-    const unchanged = await resolveCharacterChoices({ campaignId: "c1", rules, isDM: true, character: current, before, after: before, refs });
+        const unchanged = await resolveCharacterChoices({
+            campaignId: 'c1',
+            rules,
+            isDM: true,
+            character: current,
+            before,
+            after: before,
+            refs,
+        });
 
-    expect(unchanged.ok).toBe(true);
+        expect(unchanged.ok).toBe(true);
 
-    if (!unchanged.ok) return;
+        if (!unchanged.ok) return;
 
-    for (const ability of Object.keys(scores)) expect(unchanged.fields).not.toHaveProperty(ability);
+        for (const ability of Object.keys(scores))
+            expect(unchanged.fields).not.toHaveProperty(ability);
 
-    const after = { ...before, classes: [{ classId: sorcerer.id, level: 4, choices: { "ability-score-improvement-4": [{ id: "f-asi", picks: { asi: [{ id: "dexterity" }, { id: "dexterity" }] } }] } }] };
+        const after = {
+            ...before,
+            classes: [
+                {
+                    classId: sorcerer.id,
+                    level: 4,
+                    choices: {
+                        'ability-score-improvement-4': [
+                            {
+                                id: 'f-asi',
+                                picks: {
+                                    asi: [
+                                        { id: 'dexterity' },
+                                        { id: 'dexterity' },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
 
-    const swapped = await resolveCharacterChoices({ campaignId: "c1", rules, isDM: true, character: current, before, after, refs });
+        const swapped = await resolveCharacterChoices({
+            campaignId: 'c1',
+            rules,
+            isDM: true,
+            character: current,
+            before,
+            after,
+            refs,
+        });
 
-    expect(swapped).toMatchObject({ ok: true, fields: { strength: scores.strength, dexterity: scores.dexterity + 2 } });
-  });
+        expect(swapped).toMatchObject({
+            ok: true,
+            fields: {
+                strength: scores.strength,
+                dexterity: scores.dexterity + 2,
+            },
+        });
+    });
 });

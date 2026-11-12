@@ -1,46 +1,65 @@
-import { type HitDiceEntry, restoreHitDice } from "./hit-dice";
-import { compactResources } from "./hp";
+import { type HitDiceEntry, restoreHitDice } from './hit-dice';
+import { compactResources } from './hp';
 
-import { PACT_KEY } from "@/lib/utils/spells/slot-keys";
-import type { CharacterResources } from "@/types/characters";
+import { PACT_KEY } from '@/lib/utils/spells/slot-keys';
+import type { CharacterResources } from '@/types/characters';
 
-export type RestAction = "short" | "long" | "close";
+export type RestAction = 'short' | 'long' | 'close';
 
-function withoutKey<T>(record: Record<string, T> | undefined, drop: (key: string, value: T) => boolean): Record<string, T> | undefined {
-  return record && Object.fromEntries(Object.entries(record).filter(([k, v]) => !drop(k, v)));
+function withoutKey<T>(
+    record: Record<string, T> | undefined,
+    drop: (key: string, value: T) => boolean
+): Record<string, T> | undefined {
+    return (
+        record &&
+        Object.fromEntries(
+            Object.entries(record).filter(([k, v]) => !drop(k, v))
+        )
+    );
 }
 
-function shortRestCharges(charges: CharacterResources["charges"]): CharacterResources["charges"] {
-  const next = Object.entries(charges ?? {}).flatMap(([key, c]) => {
-    if (c.rest === "short") return [];
+function shortRestCharges(
+    charges: CharacterResources['charges']
+): CharacterResources['charges'] {
+    const next = Object.entries(charges ?? {}).flatMap(([key, c]) => {
+        if (c.rest === 'short') return [];
 
-    const left = c.rest === "long" && c.regain ? c.used - c.regain : c.used;
+        const left = c.rest === 'long' && c.regain ? c.used - c.regain : c.used;
 
-    return left > 0 ? [[key, { ...c, used: left }] as const] : [];
-  });
-
-  return charges && Object.fromEntries(next);
-}
-
-export function applyRest(action: RestAction, r: CharacterResources, opts: { pool: HitDiceEntry[]; longRestHitDice: "half" | "all" }): CharacterResources {
-  if (action === "close") return compactResources({ ...r, shortRestOpen: undefined });
-
-  if (r.dead) return r;
-
-  if (action === "short") {
-    return compactResources({
-      ...r,
-      slotsSpent: withoutKey(r.slotsSpent, (k) => k === PACT_KEY),
-      charges: shortRestCharges(r.charges),
-      shortRestOpen: true,
+        return left > 0 ? [[key, { ...c, used: left }] as const] : [];
     });
-  }
 
-  return compactResources({
-    hitDiceSpent: restoreHitDice(r.hitDiceSpent, opts.pool, opts.longRestHitDice),
-    exhaustion: Math.max(0, (r.exhaustion ?? 0) - 1),
-    charges: withoutKey(r.charges, (_k, c) => c.rest !== null),
-    fortune: r.fortune,
-    sin: r.sin,
-  });
+    return charges && Object.fromEntries(next);
+}
+
+export function applyRest(
+    action: RestAction,
+    r: CharacterResources,
+    opts: { pool: HitDiceEntry[]; longRestHitDice: 'half' | 'all' }
+): CharacterResources {
+    if (action === 'close')
+        return compactResources({ ...r, shortRestOpen: undefined });
+
+    if (r.dead) return r;
+
+    if (action === 'short') {
+        return compactResources({
+            ...r,
+            slotsSpent: withoutKey(r.slotsSpent, (k) => k === PACT_KEY),
+            charges: shortRestCharges(r.charges),
+            shortRestOpen: true,
+        });
+    }
+
+    return compactResources({
+        hitDiceSpent: restoreHitDice(
+            r.hitDiceSpent,
+            opts.pool,
+            opts.longRestHitDice
+        ),
+        exhaustion: Math.max(0, (r.exhaustion ?? 0) - 1),
+        charges: withoutKey(r.charges, (_k, c) => c.rest !== null),
+        fortune: r.fortune,
+        sin: r.sin,
+    });
 }

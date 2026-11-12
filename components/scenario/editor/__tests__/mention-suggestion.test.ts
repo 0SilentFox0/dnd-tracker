@@ -1,92 +1,121 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("@tiptap/react", () => ({
-  ReactRenderer: class {
-    element = document.createElement("div");
+vi.mock('@tiptap/react', () => ({
+    ReactRenderer: class {
+        element = document.createElement('div');
 
-    ref = null;
+        ref = null;
 
-    updateProps = vi.fn();
+        updateProps = vi.fn();
 
-    destroy = vi.fn();
-  },
+        destroy = vi.fn();
+    },
 }));
-vi.mock("@/components/scenario/editor/MentionList", () => ({ MentionList: () => null }));
+vi.mock('@/components/scenario/editor/MentionList', () => ({
+    MentionList: () => null,
+}));
 
-import { mentionSuggestion } from "@/components/scenario/editor/mention-suggestion";
+import { mentionSuggestion } from '@/components/scenario/editor/mention-suggestion';
 
 const lifecycle = () => {
-  const render = mentionSuggestion(async () => [])?.render?.();
+    const render = mentionSuggestion(async () => [])?.render?.();
 
-  if (!render) throw new Error("no render");
+    if (!render) throw new Error('no render');
 
-  return render;
+    return render;
 };
 
-const props = (rect: { left: number; top: number; bottom: number } | null, coords = { left: 5, top: 5, bottom: 20 }) =>
-  ({ clientRect: rect && (() => rect), editor: { view: { coordsAtPos: () => coords } }, range: { from: 0, to: 1 } }) as never;
+const props = (
+    rect: { left: number; top: number; bottom: number } | null,
+    coords = { left: 5, top: 5, bottom: 20 }
+) =>
+    ({
+        clientRect: rect && (() => rect),
+        editor: { view: { coordsAtPos: () => coords } },
+        range: { from: 0, to: 1 },
+    }) as never;
 
 afterEach(() => {
-  document.body.innerHTML = "";
+    document.body.innerHTML = '';
 });
 
-describe("mentionSuggestion render", () => {
-  it("кладе список під каретку з position: fixed", () => {
-    const r = lifecycle();
+describe('mentionSuggestion render', () => {
+    it('кладе список під каретку з position: fixed', () => {
+        const r = lifecycle();
 
-    r.onStart?.(props({ left: 100, top: 200, bottom: 220 }));
+        r.onStart?.(props({ left: 100, top: 200, bottom: 220 }));
 
-    const el = document.body.firstElementChild as HTMLElement;
+        const el = document.body.firstElementChild as HTMLElement;
 
-    expect(el.style.position).toBe("fixed");
-    expect(el.style.left).toBe("100px");
-    expect(el.style.top).toBe("226px");
+        expect(el.style.position).toBe('fixed');
+        expect(el.style.left).toBe('100px');
+        expect(el.style.top).toBe('226px');
 
-    r.onUpdate?.(props({ left: 120, top: 300, bottom: 320 }));
-    expect(el.style.left).toBe("120px");
-    expect(el.style.top).toBe("326px");
-  });
+        r.onUpdate?.(props({ left: 120, top: 300, bottom: 320 }));
+        expect(el.style.left).toBe('120px');
+        expect(el.style.top).toBe('326px');
+    });
 
-  it("без clientRect бере координати каретки з редактора", () => {
-    const r = lifecycle();
+    it('без clientRect бере координати каретки з редактора', () => {
+        const r = lifecycle();
 
-    r.onStart?.(props(null));
+        r.onStart?.(props(null));
 
-    const el = document.body.firstElementChild as HTMLElement;
+        const el = document.body.firstElementChild as HTMLElement;
 
-    expect(el.style.position).toBe("fixed");
-    expect(el.style.left).toBe("5px");
-    expect(el.style.top).toBe("26px");
-  });
+        expect(el.style.position).toBe('fixed');
+        expect(el.style.left).toBe('5px');
+        expect(el.style.top).toBe('26px');
+    });
 
-  it("біля нижнього краю відкривається над кареткою, а правий край затискається", () => {
-    const r = lifecycle();
+    it('біля нижнього краю відкривається над кареткою, а правий край затискається', () => {
+        const r = lifecycle();
 
-    r.onStart?.(props({ left: window.innerWidth - 10, top: window.innerHeight - 30, bottom: window.innerHeight - 10 }));
+        r.onStart?.(
+            props({
+                left: window.innerWidth - 10,
+                top: window.innerHeight - 30,
+                bottom: window.innerHeight - 10,
+            })
+        );
 
-    const el = document.body.firstElementChild as HTMLElement;
+        const el = document.body.firstElementChild as HTMLElement;
 
-    expect(Number.parseFloat(el.style.top)).toBe(window.innerHeight - 30 - 6 - 288);
-    expect(Number.parseFloat(el.style.left)).toBe(window.innerWidth - 288 - 6);
-  });
+        expect(Number.parseFloat(el.style.top)).toBe(
+            window.innerHeight - 30 - 6 - 288
+        );
+        expect(Number.parseFloat(el.style.left)).toBe(
+            window.innerWidth - 288 - 6
+        );
+    });
 
-  it("використовує виміряну висоту списку для відкриття над кареткою", () => {
-    const r = lifecycle();
+    it('використовує виміряну висоту списку для відкриття над кареткою', () => {
+        const r = lifecycle();
 
-    const rect = { left: 10, top: window.innerHeight - 150, bottom: window.innerHeight - 130 };
+        const rect = {
+            left: 10,
+            top: window.innerHeight - 150,
+            bottom: window.innerHeight - 130,
+        };
 
-    const height = vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(100);
+        const height = vi
+            .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
+            .mockReturnValue(100);
 
-    r.onStart?.(props(rect));
+        r.onStart?.(props(rect));
 
-    const el = document.body.firstElementChild as HTMLElement;
+        const el = document.body.firstElementChild as HTMLElement;
 
-    expect(Number.parseFloat(el.style.top)).toBe(window.innerHeight - 130 + 6);
+        expect(Number.parseFloat(el.style.top)).toBe(
+            window.innerHeight - 130 + 6
+        );
 
-    height.mockReturnValue(160);
-    r.onUpdate?.(props(rect));
-    expect(Number.parseFloat(el.style.top)).toBe(window.innerHeight - 150 - 6 - 160);
-    height.mockRestore();
-  });
+        height.mockReturnValue(160);
+        r.onUpdate?.(props(rect));
+        expect(Number.parseFloat(el.style.top)).toBe(
+            window.innerHeight - 150 - 6 - 160
+        );
+        height.mockRestore();
+    });
 });

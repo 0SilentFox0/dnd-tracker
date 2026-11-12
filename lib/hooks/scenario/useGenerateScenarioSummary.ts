@@ -1,23 +1,36 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { scenarioKeys } from "./keys";
+import { scenarioKeys } from './keys';
 
-import { generateScenarioSummary } from "@/lib/api/scenario";
-import { errorMessage } from "@/lib/utils/common/error-message";
+import { generateScenarioSummary } from '@/lib/api/scenario';
+import { errorMessage } from '@/lib/utils/common/error-message';
 
 export function useGenerateScenarioSummary(campaignId: string) {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: ({ pageId, force }: { pageId: string; force?: boolean }) => generateScenarioSummary(campaignId, pageId, force),
-    onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: scenarioKeys.summaries(campaignId) }), queryClient.invalidateQueries({ queryKey: scenarioKeys.index(campaignId) })]),
-  });
+    const mutation = useMutation({
+        mutationFn: ({ pageId, force }: { pageId: string; force?: boolean }) =>
+            generateScenarioSummary(campaignId, pageId, force),
+        onSuccess: () =>
+            Promise.all([
+                queryClient.invalidateQueries({
+                    queryKey: scenarioKeys.summaries(campaignId),
+                }),
+                queryClient.invalidateQueries({
+                    queryKey: scenarioKeys.index(campaignId),
+                }),
+            ]),
+    });
 
-  return {
-    generate: (pageId: string, force?: boolean) => mutation.mutate({ pageId, force }),
-    pendingPageId: mutation.isPending ? mutation.variables.pageId : null,
-    errorFor: (pageId: string) => (mutation.isError && mutation.variables.pageId === pageId ? errorMessage(mutation.error, "") : null),
-  };
+    return {
+        generate: (pageId: string, force?: boolean) =>
+            mutation.mutate({ pageId, force }),
+        pendingPageId: mutation.isPending ? mutation.variables.pageId : null,
+        errorFor: (pageId: string) =>
+            mutation.isError && mutation.variables.pageId === pageId
+                ? errorMessage(mutation.error, '')
+                : null,
+    };
 }

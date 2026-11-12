@@ -1,79 +1,141 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const prismaMock = vi.hoisted(() => ({
-  aiThread: { findMany: vi.fn(), create: vi.fn() },
-  aiMessage: { findMany: vi.fn() },
-  assistantRun: { findMany: vi.fn(async () => []) },
-  aiCredential: { findUnique: vi.fn() },
+    aiThread: { findMany: vi.fn(), create: vi.fn() },
+    aiMessage: { findMany: vi.fn() },
+    assistantRun: { findMany: vi.fn(async () => []) },
+    aiCredential: { findUnique: vi.fn() },
 }));
 
-vi.mock("@/lib/db", () => ({ prisma: prismaMock }));
+vi.mock('@/lib/db', () => ({ prisma: prismaMock }));
 
-const row = (id: string) => ({ id, mode: "live", scenarioPageId: null, title: id, provider: "anthropic", model: "m", updatedAt: new Date(0) });
+const row = (id: string) => ({
+    id,
+    mode: 'live',
+    scenarioPageId: null,
+    title: id,
+    provider: 'anthropic',
+    model: 'm',
+    updatedAt: new Date(0),
+});
 
-describe("threads", () => {
-  beforeEach(() => vi.clearAllMocks());
+describe('threads', () => {
+    beforeEach(() => vi.clearAllMocks());
 
-  it("listThreads рахує токени всіх тредів одним запитом", async () => {
-    const { listThreads } = await import("@/lib/ai/threads");
+    it('listThreads рахує токени всіх тредів одним запитом', async () => {
+        const { listThreads } = await import('@/lib/ai/threads');
 
-    prismaMock.aiThread.findMany.mockResolvedValue([row("a"), row("b"), row("c")]);
-    prismaMock.aiMessage.findMany.mockResolvedValue([
-      { threadId: "a", metadata: { usage: { inputTokens: 10, outputTokens: 5 } } },
-      { threadId: "a", metadata: { usage: { inputTokens: 1, outputTokens: 2 } } },
-      { threadId: "b", metadata: {} },
-    ]);
+        prismaMock.aiThread.findMany.mockResolvedValue([
+            row('a'),
+            row('b'),
+            row('c'),
+        ]);
+        prismaMock.aiMessage.findMany.mockResolvedValue([
+            {
+                threadId: 'a',
+                metadata: { usage: { inputTokens: 10, outputTokens: 5 } },
+            },
+            {
+                threadId: 'a',
+                metadata: { usage: { inputTokens: 1, outputTokens: 2 } },
+            },
+            { threadId: 'b', metadata: {} },
+        ]);
 
-    const list = await listThreads("camp", "dm");
+        const list = await listThreads('camp', 'dm');
 
-    expect(prismaMock.aiMessage.findMany).toHaveBeenCalledTimes(1);
-    expect(list.map((t) => t.usage)).toEqual([
-      { inputTokens: 11, outputTokens: 7 },
-      { inputTokens: null, outputTokens: null, partial: true },
-      { inputTokens: 0, outputTokens: 0 },
-    ]);
-  });
+        expect(prismaMock.aiMessage.findMany).toHaveBeenCalledTimes(1);
+        expect(list.map((t) => t.usage)).toEqual([
+            { inputTokens: 11, outputTokens: 7 },
+            { inputTokens: null, outputTokens: null, partial: true },
+            { inputTokens: 0, outputTokens: 0 },
+        ]);
+    });
 
-  it("a crashed run without an assistant message is unknown usage, not a free request", async () => {
-    const { listThreads } = await import("@/lib/ai/threads");
+    it('a crashed run without an assistant message is unknown usage, not a free request', async () => {
+        const { listThreads } = await import('@/lib/ai/threads');
 
-    prismaMock.aiThread.findMany.mockResolvedValue([row("a")]);
-    prismaMock.aiMessage.findMany.mockResolvedValue([]);
-    prismaMock.assistantRun.findMany.mockResolvedValueOnce([{ id: "run", threadId: "a", resultRefs: { usage: { inputTokens: 17, outputTokens: null, partial: true } } }] as never);
-    expect((await listThreads("camp", "dm"))[0].usage).toEqual({ inputTokens: 17, outputTokens: null, partial: true });
-  });
+        prismaMock.aiThread.findMany.mockResolvedValue([row('a')]);
+        prismaMock.aiMessage.findMany.mockResolvedValue([]);
+        prismaMock.assistantRun.findMany.mockResolvedValueOnce([
+            {
+                id: 'run',
+                threadId: 'a',
+                resultRefs: {
+                    usage: {
+                        inputTokens: 17,
+                        outputTokens: null,
+                        partial: true,
+                    },
+                },
+            },
+        ] as never);
+        expect((await listThreads('camp', 'dm'))[0].usage).toEqual({
+            inputTokens: 17,
+            outputTokens: null,
+            partial: true,
+        });
+    });
 
-  it("a completed run is not counted again beside its saved assistant message", async () => {
-    const { listThreads } = await import("@/lib/ai/threads");
+    it('a completed run is not counted again beside its saved assistant message', async () => {
+        const { listThreads } = await import('@/lib/ai/threads');
 
-    prismaMock.aiThread.findMany.mockResolvedValue([row("a")]);
-    prismaMock.aiMessage.findMany.mockResolvedValue([{ id: "assistant-run", threadId: "a", metadata: { usage: { inputTokens: 17, outputTokens: 3 } } }]);
-    prismaMock.assistantRun.findMany.mockResolvedValueOnce([{ id: "run", threadId: "a", resultRefs: { usage: { inputTokens: 17, outputTokens: 3, partial: true } } }] as never);
-    expect((await listThreads("camp", "dm"))[0].usage).toEqual({ inputTokens: 17, outputTokens: 3 });
-  });
+        prismaMock.aiThread.findMany.mockResolvedValue([row('a')]);
+        prismaMock.aiMessage.findMany.mockResolvedValue([
+            {
+                id: 'assistant-run',
+                threadId: 'a',
+                metadata: { usage: { inputTokens: 17, outputTokens: 3 } },
+            },
+        ]);
+        prismaMock.assistantRun.findMany.mockResolvedValueOnce([
+            {
+                id: 'run',
+                threadId: 'a',
+                resultRefs: {
+                    usage: { inputTokens: 17, outputTokens: 3, partial: true },
+                },
+            },
+        ] as never);
+        expect((await listThreads('camp', 'dm'))[0].usage).toEqual({
+            inputTokens: 17,
+            outputTokens: 3,
+        });
+    });
 
-  it("createThread без model бере defaultModel ключа", async () => {
-    const { createThread } = await import("@/lib/ai/threads");
+    it('createThread без model бере defaultModel ключа', async () => {
+        const { createThread } = await import('@/lib/ai/threads');
 
-    prismaMock.aiThread.create.mockResolvedValue(row("x"));
+        prismaMock.aiThread.create.mockResolvedValue(row('x'));
 
-    const { AI_MODELS } = await import("@/lib/constants/ai");
+        const { AI_MODELS } = await import('@/lib/constants/ai');
 
-    const known = AI_MODELS.anthropic[AI_MODELS.anthropic.length - 1].id;
+        const known = AI_MODELS.anthropic[AI_MODELS.anthropic.length - 1].id;
 
-    prismaMock.aiCredential.findUnique.mockResolvedValue({ defaultModel: known });
-    await createThread("camp", "dm", { mode: "live", provider: "anthropic" });
+        prismaMock.aiCredential.findUnique.mockResolvedValue({
+            defaultModel: known,
+        });
+        await createThread('camp', 'dm', {
+            mode: 'live',
+            provider: 'anthropic',
+        });
 
-    expect(prismaMock.aiThread.create.mock.calls[0][0].data.model).toBe(known);
-  });
+        expect(prismaMock.aiThread.create.mock.calls[0][0].data.model).toBe(
+            known
+        );
+    });
 
-  it("resolveDefaultModel: невідома модель ключа → дефолт режиму", async () => {
-    const { resolveDefaultModel } = await import("@/lib/ai/threads");
+    it('resolveDefaultModel: невідома модель ключа → дефолт режиму', async () => {
+        const { resolveDefaultModel } = await import('@/lib/ai/threads');
 
-    const { defaultModelFor } = await import("@/lib/constants/ai");
+        const { defaultModelFor } = await import('@/lib/constants/ai');
 
-    prismaMock.aiCredential.findUnique.mockResolvedValue({ defaultModel: "nope" });
+        prismaMock.aiCredential.findUnique.mockResolvedValue({
+            defaultModel: 'nope',
+        });
 
-    expect(await resolveDefaultModel("dm", "anthropic", "scenario")).toBe(defaultModelFor("anthropic", "scenario"));
-  });
+        expect(await resolveDefaultModel('dm', 'anthropic', 'scenario')).toBe(
+            defaultModelFor('anthropic', 'scenario')
+        );
+    });
 });

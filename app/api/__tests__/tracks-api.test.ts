@@ -1,264 +1,615 @@
-import { NextResponse } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as apiTokens from "@/lib/ai/api-tokens";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import * as storage from "@/lib/supabase/battle-music-storage";
-import * as apiAuth from "@/lib/utils/api/api-auth";
-import * as oembed from "@/lib/utils/audio/youtube-oembed";
+import * as apiTokens from '@/lib/ai/api-tokens';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import * as storage from '@/lib/supabase/battle-music-storage';
+import * as apiAuth from '@/lib/utils/api/api-auth';
+import * as oembed from '@/lib/utils/audio/youtube-oembed';
 
-vi.mock("@/lib/ai/api-tokens", async (orig) => ({ ...(await orig<typeof apiTokens>()), verifyApiToken: vi.fn() }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
-vi.mock("@/lib/supabase/battle-music-storage", async (orig) => ({
-  ...(await orig<typeof storage>()),
-  createTrackUploadTicket: vi.fn(),
-  verifyUploadedTrack: vi.fn(),
-  trackObjectPath: vi.fn(),
-  removeTrackFile: vi.fn(),
+vi.mock('@/lib/ai/api-tokens', async (orig) => ({
+    ...(await orig<typeof apiTokens>()),
+    verifyApiToken: vi.fn(),
 }));
-vi.mock("@/lib/utils/audio/youtube-oembed", () => ({ fetchYoutubeTitle: vi.fn(async () => null) }));
-vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/server")>()), after: (cb: () => unknown) => cb() }));
-vi.mock("@/lib/db", () => ({
-  prisma: {
-    campaignTrack: { count: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn(), aggregate: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn(), deleteMany: vi.fn() },
-    $transaction: vi.fn(async (callback: unknown) => typeof callback === "function" ? callback({ $queryRaw: async () => [{ id: "camp1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }) : callback),
-  },
+vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
+vi.mock('@/lib/supabase/battle-music-storage', async (orig) => ({
+    ...(await orig<typeof storage>()),
+    createTrackUploadTicket: vi.fn(),
+    verifyUploadedTrack: vi.fn(),
+    trackObjectPath: vi.fn(),
+    removeTrackFile: vi.fn(),
+}));
+vi.mock('@/lib/utils/audio/youtube-oembed', () => ({
+    fetchYoutubeTitle: vi.fn(async () => null),
+}));
+vi.mock('next/server', async (orig) => ({
+    ...(await orig<typeof import('next/server')>()),
+    after: (cb: () => unknown) => cb(),
+}));
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        campaignTrack: {
+            count: vi.fn(),
+            findFirst: vi.fn(),
+            findMany: vi.fn(),
+            create: vi.fn(),
+            aggregate: vi.fn(),
+            findUnique: vi.fn(),
+            update: vi.fn(),
+            delete: vi.fn(),
+            deleteMany: vi.fn(),
+        },
+        $transaction: vi.fn(async (callback: unknown) =>
+            typeof callback === 'function'
+                ? callback({
+                      $queryRaw: async () => [{ id: 'camp1' }],
+                      campaign: { update: async () => ({ contentVersion: 1 }) },
+                  })
+                : callback
+        ),
+    },
 }));
 
-const dm = { userId: "dm", isDM: true, campaign: { id: "camp1", maxLevel: 20, members: [] } } as never;
+const dm = {
+    userId: 'dm',
+    isDM: true,
+    campaign: { id: 'camp1', maxLevel: 20, members: [] },
+} as never;
 
-const PATH = "camp1/0123456789abcdef0123456789abcdef.mp3";
+const PATH = 'camp1/0123456789abcdef0123456789abcdef.mp3';
 
 const row = (over: Record<string, unknown> = {}) => ({
-  id: "t1", campaignId: "camp1", title: "Бій", kind: "file", url: "https://s/battle-music/x.mp3", youtubeId: null, durationSec: 120, sortOrder: 0, createdAt: new Date("2026-10-19T00:00:00Z"), ...over,
+    id: 't1',
+    campaignId: 'camp1',
+    title: 'Бій',
+    kind: 'file',
+    url: 'https://s/battle-music/x.mp3',
+    youtubeId: null,
+    durationSec: 120,
+    sortOrder: 0,
+    createdAt: new Date('2026-10-19T00:00:00Z'),
+    ...over,
 });
 
-const req = (method: string, body?: unknown) => new Request("http://x", { method, ...(body !== undefined && { body: JSON.stringify(body) }) });
+const req = (method: string, body?: unknown) =>
+    new Request('http://x', {
+        method,
+        ...(body !== undefined && { body: JSON.stringify(body) }),
+    });
 
-const params = (extra: Record<string, string> = {}) => ({ params: Promise.resolve({ id: "camp1", ...extra }) }) as never;
+const params = (extra: Record<string, string> = {}) =>
+    ({ params: Promise.resolve({ id: 'camp1', ...extra }) }) as never;
 
 async function tracksRoute() {
-  return import("@/app/api/campaigns/[id]/tracks/route");
+    return import('@/app/api/campaigns/[id]/tracks/route');
 }
 
-describe("tracks API", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
-    vi.mocked(prisma.campaignTrack.count).mockResolvedValue(3);
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(null);
-    vi.mocked(prisma.campaignTrack.aggregate).mockResolvedValue({ _max: { sortOrder: 2 } } as never);
-    vi.mocked(prisma.campaignTrack.create).mockImplementation((async ({ data }: { data: Record<string, unknown> }) => row({ ...data, id: "new" })) as never);
-    vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: true, value: "https://s/battle-music/x.mp3" });
-  });
-
-  it("не ДМ — 403 і без запису", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: "forbidden" }, { status: 403 }) as never);
-
-    const { POST } = await tracksRoute();
-
-    expect((await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params())).status).toBe(403);
-    expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
-  });
-
-  it("токен: файл — 403 без запису, YouTube — 201", async () => {
-    vi.mocked(apiTokens.verifyApiToken).mockResolvedValue({ id: "verified-token", campaignId: "camp1", userId: "dm", scopes: ["content:write"], locale: "uk" as const });
-
-    const { POST } = await tracksRoute();
-
-    const viaToken = (body: unknown) => new Request("http://x", { method: "POST", headers: { authorization: "Bearer dnd_tok" }, body: JSON.stringify(body) });
-
-    expect((await POST(viaToken({ kind: "file", path: PATH, title: "x" }), params())).status).toBe(403);
-    expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
-
-    expect((await POST(viaToken({ kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ", title: "Y" }), params())).status).toBe(201);
-  });
-
-  it("файл: перевірений шлях кампанії → 201, url зі Storage, sortOrder у кінець", async () => {
-    const { POST } = await tracksRoute();
-
-    const res = await POST(req("POST", { kind: "file", path: PATH, title: "  Бій  ", durationSec: 120 }), params());
-
-    expect(res.status).toBe(201);
-    expect(prisma.campaignTrack.create).toHaveBeenCalledWith({
-      data: { campaignId: "camp1", kind: "file", title: "Бій", url: "https://s/battle-music/x.mp3", youtubeId: null, durationSec: 120, sortOrder: 3 },
+describe('tracks API', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
+        vi.mocked(prisma.campaignTrack.count).mockResolvedValue(3);
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(null);
+        vi.mocked(prisma.campaignTrack.aggregate).mockResolvedValue({
+            _max: { sortOrder: 2 },
+        } as never);
+        vi.mocked(prisma.campaignTrack.create).mockImplementation((async ({
+            data,
+        }: {
+            data: Record<string, unknown>;
+        }) => row({ ...data, id: 'new' })) as never);
+        vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({
+            ok: true,
+            value: 'https://s/battle-music/x.mp3',
+        });
     });
-    expect(await res.json()).toMatchObject({ id: "new", kind: "file", createdAt: "2026-10-19T00:00:00.000Z" });
-  });
 
-  it("файл: шлях іншої кампанії або неперевірений обʼєкт — 400 без запису", async () => {
-    const { POST } = await tracksRoute();
+    it('не ДМ — 403 і без запису', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(
+            NextResponse.json({ error: 'forbidden' }, { status: 403 }) as never
+        );
 
-    expect((await POST(req("POST", { kind: "file", path: PATH.replace("camp1", "camp2"), title: "x" }), params())).status).toBe(400);
-    expect(storage.verifyUploadedTrack).not.toHaveBeenCalled();
+        const { POST } = await tracksRoute();
 
-    vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: false, message: API_ERRORS.TRACK_FILE_INVALID });
-    expect((await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params())).status).toBe(400);
-    expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
-  });
+        expect(
+            (
+                await POST(
+                    req('POST', {
+                        kind: 'youtube',
+                        url: 'https://youtu.be/dQw4w9WgXcQ',
+                    }),
+                    params()
+                )
+            ).status
+        ).toBe(403);
+        expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
+    });
 
-  it("файл: шлях, уже зареєстрований у бібліотеці, — 400 без другого рядка (видалення одного зламало б інший)", async () => {
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(row() as never);
+    it('токен: файл — 403 без запису, YouTube — 201', async () => {
+        vi.mocked(apiTokens.verifyApiToken).mockResolvedValue({
+            id: 'verified-token',
+            campaignId: 'camp1',
+            userId: 'dm',
+            scopes: ['content:write'],
+            locale: 'uk' as const,
+        });
 
-    const { POST } = await tracksRoute();
+        const { POST } = await tracksRoute();
 
-    const res = await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params());
+        const viaToken = (body: unknown) =>
+            new Request('http://x', {
+                method: 'POST',
+                headers: { authorization: 'Bearer dnd_tok' },
+                body: JSON.stringify(body),
+            });
 
-    expect(res.status).toBe(400);
-    expect(await res.json()).toMatchObject({ error: API_ERRORS.TRACK_DUPLICATE });
-    expect(prisma.campaignTrack.findFirst).toHaveBeenCalledWith({ where: { campaignId: "camp1", url: "https://s/battle-music/x.mp3" }, select: { id: true } });
-    expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
-  });
+        expect(
+            (
+                await POST(
+                    viaToken({ kind: 'file', path: PATH, title: 'x' }),
+                    params()
+                )
+            ).status
+        ).toBe(403);
+        expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
 
-  it("YouTube: id з посилання, назва ДМ або oEmbed, інакше «YouTube <id>»", async () => {
-    const { POST } = await tracksRoute();
+        expect(
+            (
+                await POST(
+                    viaToken({
+                        kind: 'youtube',
+                        url: 'https://youtu.be/dQw4w9WgXcQ',
+                        title: 'Y',
+                    }),
+                    params()
+                )
+            ).status
+        ).toBe(201);
+    });
 
-    await POST(req("POST", { kind: "youtube", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", title: "Таверна" }), params());
-    expect(prisma.campaignTrack.create).toHaveBeenLastCalledWith({ data: expect.objectContaining({ kind: "youtube", youtubeId: "dQw4w9WgXcQ", title: "Таверна", url: null }) });
-    expect(oembed.fetchYoutubeTitle).not.toHaveBeenCalled();
+    it('файл: перевірений шлях кампанії → 201, url зі Storage, sortOrder у кінець', async () => {
+        const { POST } = await tracksRoute();
 
-    vi.mocked(oembed.fetchYoutubeTitle).mockResolvedValueOnce("Epic Battle");
-    await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params());
-    expect(prisma.campaignTrack.create).toHaveBeenLastCalledWith({ data: expect.objectContaining({ title: "Epic Battle" }) });
+        const res = await POST(
+            req('POST', {
+                kind: 'file',
+                path: PATH,
+                title: '  Бій  ',
+                durationSec: 120,
+            }),
+            params()
+        );
 
-    await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params());
-    expect(prisma.campaignTrack.create).toHaveBeenLastCalledWith({ data: expect.objectContaining({ title: "YouTube dQw4w9WgXcQ" }) });
-  });
+        expect(res.status).toBe(201);
+        expect(prisma.campaignTrack.create).toHaveBeenCalledWith({
+            data: {
+                campaignId: 'camp1',
+                kind: 'file',
+                title: 'Бій',
+                url: 'https://s/battle-music/x.mp3',
+                youtubeId: null,
+                durationSec: 120,
+                sortOrder: 3,
+            },
+        });
+        expect(await res.json()).toMatchObject({
+            id: 'new',
+            kind: 'file',
+            createdAt: '2026-10-19T00:00:00.000Z',
+        });
+    });
 
-  it("ліміт 200: і квиток, і створення відмовляють", async () => {
-    vi.mocked(prisma.campaignTrack.count).mockResolvedValue(200);
+    it('файл: шлях іншої кампанії або неперевірений обʼєкт — 400 без запису', async () => {
+        const { POST } = await tracksRoute();
 
-    const { POST } = await tracksRoute();
+        expect(
+            (
+                await POST(
+                    req('POST', {
+                        kind: 'file',
+                        path: PATH.replace('camp1', 'camp2'),
+                        title: 'x',
+                    }),
+                    params()
+                )
+            ).status
+        ).toBe(400);
+        expect(storage.verifyUploadedTrack).not.toHaveBeenCalled();
 
-    const { POST: ticket } = await import("@/app/api/campaigns/[id]/tracks/upload-url/route");
+        vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({
+            ok: false,
+            message: API_ERRORS.TRACK_FILE_INVALID,
+        });
+        expect(
+            (
+                await POST(
+                    req('POST', { kind: 'file', path: PATH, title: 'x' }),
+                    params()
+                )
+            ).status
+        ).toBe(400);
+        expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
+    });
 
-    const created = await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params());
+    it('файл: шлях, уже зареєстрований у бібліотеці, — 400 без другого рядка (видалення одного зламало б інший)', async () => {
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(
+            row() as never
+        );
 
-    expect(created.status).toBe(400);
-    expect(await created.json()).toMatchObject({ errorKey: API_ERRORS.TRACK_LIMIT });
-    expect((await ticket(req("POST", { name: "a.mp3", size: 100, contentType: "audio/mpeg" }), params())).status).toBe(400);
-    expect(storage.createTrackUploadTicket).not.toHaveBeenCalled();
-  });
+        const { POST } = await tracksRoute();
 
-  it("квиток: перевіряє тип і розмір, видає підписаний шлях", async () => {
-    vi.mocked(storage.createTrackUploadTicket).mockResolvedValue({ ok: true, value: { bucket: "battle-music", path: PATH, token: "tok", contentType: "audio/mpeg" } });
+        const res = await POST(
+            req('POST', { kind: 'file', path: PATH, title: 'x' }),
+            params()
+        );
 
-    const { POST: ticket } = await import("@/app/api/campaigns/[id]/tracks/upload-url/route");
+        expect(res.status).toBe(400);
+        expect(await res.json()).toMatchObject({
+            error: API_ERRORS.TRACK_DUPLICATE,
+        });
+        expect(prisma.campaignTrack.findFirst).toHaveBeenCalledWith({
+            where: { campaignId: 'camp1', url: 'https://s/battle-music/x.mp3' },
+            select: { id: true },
+        });
+        expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
+    });
 
-    expect((await ticket(req("POST", { name: "a.ogg", size: 100, contentType: "audio/ogg" }), params())).status).toBe(400);
+    it('YouTube: id з посилання, назва ДМ або oEmbed, інакше «YouTube <id>»', async () => {
+        const { POST } = await tracksRoute();
 
-    const ok = await ticket(req("POST", { name: "a.mp3", size: 100, contentType: "audio/mpeg" }), params());
+        await POST(
+            req('POST', {
+                kind: 'youtube',
+                url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                title: 'Таверна',
+            }),
+            params()
+        );
+        expect(prisma.campaignTrack.create).toHaveBeenLastCalledWith({
+            data: expect.objectContaining({
+                kind: 'youtube',
+                youtubeId: 'dQw4w9WgXcQ',
+                title: 'Таверна',
+                url: null,
+            }),
+        });
+        expect(oembed.fetchYoutubeTitle).not.toHaveBeenCalled();
 
-    expect(await ok.json()).toEqual({ bucket: "battle-music", path: PATH, token: "tok", contentType: "audio/mpeg" });
-    expect(storage.createTrackUploadTicket).toHaveBeenCalledWith("camp1", "mp3");
-  });
+        vi.mocked(oembed.fetchYoutubeTitle).mockResolvedValueOnce(
+            'Epic Battle'
+        );
+        await POST(
+            req('POST', {
+                kind: 'youtube',
+                url: 'https://youtu.be/dQw4w9WgXcQ',
+            }),
+            params()
+        );
+        expect(prisma.campaignTrack.create).toHaveBeenLastCalledWith({
+            data: expect.objectContaining({ title: 'Epic Battle' }),
+        });
 
-  it("DELETE: трек іншої кампанії — 404; свій файл — запис і обʼєкт Storage", async () => {
-    const { DELETE } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+        await POST(
+            req('POST', {
+                kind: 'youtube',
+                url: 'https://youtu.be/dQw4w9WgXcQ',
+            }),
+            params()
+        );
+        expect(prisma.campaignTrack.create).toHaveBeenLastCalledWith({
+            data: expect.objectContaining({ title: 'YouTube dQw4w9WgXcQ' }),
+        });
+    });
 
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(null as never);
-    expect((await DELETE(req("DELETE"), params({ trackId: "t1" }))).status).toBe(404);
+    it('ліміт 200: і квиток, і створення відмовляють', async () => {
+        vi.mocked(prisma.campaignTrack.count).mockResolvedValue(200);
 
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(row() as never);
-    vi.mocked(storage.trackObjectPath).mockReturnValue("camp1/0123456789abcdef0123456789abcdef.mp3");
+        const { POST } = await tracksRoute();
 
-    const res = await DELETE(req("DELETE"), params({ trackId: "t1" }));
+        const { POST: ticket } = await import(
+            '@/app/api/campaigns/[id]/tracks/upload-url/route'
+        );
 
-    expect(await res.json()).toEqual({ ok: true });
-    expect(prisma.campaignTrack.deleteMany).toHaveBeenCalledWith({ where: { id: "t1", campaignId: "camp1" } });
-    expect(storage.removeTrackFile).toHaveBeenCalledWith("https://s/battle-music/x.mp3");
-  });
+        const created = await POST(
+            req('POST', {
+                kind: 'youtube',
+                url: 'https://youtu.be/dQw4w9WgXcQ',
+            }),
+            params()
+        );
 
-  it("DELETE файлу: шлях іншої кампанії у URL — не видаляє обʼєкт Storage", async () => {
-    const { DELETE } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+        expect(created.status).toBe(400);
+        expect(await created.json()).toMatchObject({
+            errorKey: API_ERRORS.TRACK_LIMIT,
+        });
+        expect(
+            (
+                await ticket(
+                    req('POST', {
+                        name: 'a.mp3',
+                        size: 100,
+                        contentType: 'audio/mpeg',
+                    }),
+                    params()
+                )
+            ).status
+        ).toBe(400);
+        expect(storage.createTrackUploadTicket).not.toHaveBeenCalled();
+    });
 
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(
-      row({ url: "https://s/battle-music/other-camp.mp3" }) as never,
-    );
-    vi.mocked(storage.trackObjectPath).mockReturnValue("camp2/0123456789abcdef0123456789abcdef.mp3");
+    it('квиток: перевіряє тип і розмір, видає підписаний шлях', async () => {
+        vi.mocked(storage.createTrackUploadTicket).mockResolvedValue({
+            ok: true,
+            value: {
+                bucket: 'battle-music',
+                path: PATH,
+                token: 'tok',
+                contentType: 'audio/mpeg',
+            },
+        });
 
-    const res = await DELETE(req("DELETE"), params({ trackId: "t1" }));
+        const { POST: ticket } = await import(
+            '@/app/api/campaigns/[id]/tracks/upload-url/route'
+        );
 
-    expect(await res.json()).toEqual({ ok: true });
-    expect(prisma.campaignTrack.deleteMany).toHaveBeenCalledWith({ where: { id: "t1", campaignId: "camp1" } });
-    expect(storage.removeTrackFile).not.toHaveBeenCalled();
-  });
+        expect(
+            (
+                await ticket(
+                    req('POST', {
+                        name: 'a.ogg',
+                        size: 100,
+                        contentType: 'audio/ogg',
+                    }),
+                    params()
+                )
+            ).status
+        ).toBe(400);
 
-  it("DELETE файлу: null у trackObjectPath — не видаляє обʼєкт Storage", async () => {
-    const { DELETE } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+        const ok = await ticket(
+            req('POST', {
+                name: 'a.mp3',
+                size: 100,
+                contentType: 'audio/mpeg',
+            }),
+            params()
+        );
 
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(row() as never);
-    vi.mocked(storage.trackObjectPath).mockReturnValue(null);
+        expect(await ok.json()).toEqual({
+            bucket: 'battle-music',
+            path: PATH,
+            token: 'tok',
+            contentType: 'audio/mpeg',
+        });
+        expect(storage.createTrackUploadTicket).toHaveBeenCalledWith(
+            'camp1',
+            'mp3'
+        );
+    });
 
-    const res = await DELETE(req("DELETE"), params({ trackId: "t1" }));
+    it('DELETE: трек іншої кампанії — 404; свій файл — запис і обʼєкт Storage', async () => {
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/tracks/[trackId]/route'
+        );
 
-    expect(await res.json()).toEqual({ ok: true });
-    expect(prisma.campaignTrack.deleteMany).toHaveBeenCalledWith({ where: { id: "t1", campaignId: "camp1" } });
-    expect(storage.removeTrackFile).not.toHaveBeenCalled();
-  });
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(
+            null as never
+        );
+        expect(
+            (await DELETE(req('DELETE'), params({ trackId: 't1' }))).status
+        ).toBe(404);
 
-  it("PATCH перейменовує", async () => {
-    const { PATCH } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(
+            row() as never
+        );
+        vi.mocked(storage.trackObjectPath).mockReturnValue(
+            'camp1/0123456789abcdef0123456789abcdef.mp3'
+        );
 
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(row() as never);
-    vi.mocked(prisma.campaignTrack.update).mockResolvedValueOnce(row({ title: "Нова" }) as never);
+        const res = await DELETE(req('DELETE'), params({ trackId: 't1' }));
 
-    const res = await PATCH(req("PATCH", { title: " Нова " }), params({ trackId: "t1" }));
+        expect(await res.json()).toEqual({ ok: true });
+        expect(prisma.campaignTrack.deleteMany).toHaveBeenCalledWith({
+            where: { id: 't1', campaignId: 'camp1' },
+        });
+        expect(storage.removeTrackFile).toHaveBeenCalledWith(
+            'https://s/battle-music/x.mp3'
+        );
+    });
 
-    expect(prisma.campaignTrack.update).toHaveBeenCalledWith({ where: { id: "t1" }, data: { title: "Нова" } });
-    expect(await res.json()).toMatchObject({ title: "Нова" });
-  });
+    it('DELETE файлу: шлях іншої кампанії у URL — не видаляє обʼєкт Storage', async () => {
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/tracks/[trackId]/route'
+        );
 
-  it("PATCH змінює посилання YouTube й тривалість; для файлу посилання заборонене; порожній запит — 400", async () => {
-    const { PATCH } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(
+            row({ url: 'https://s/battle-music/other-camp.mp3' }) as never
+        );
+        vi.mocked(storage.trackObjectPath).mockReturnValue(
+            'camp2/0123456789abcdef0123456789abcdef.mp3'
+        );
 
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(row({ kind: "youtube", url: null, youtubeId: "oldVideoId_1" }) as never);
-    vi.mocked(prisma.campaignTrack.update).mockResolvedValue(row() as never);
+        const res = await DELETE(req('DELETE'), params({ trackId: 't1' }));
 
-    expect((await PATCH(req("PATCH", { url: "https://youtu.be/dQw4w9WgXcQ", durationSec: null }), params({ trackId: "t1" }))).status).toBe(200);
-    expect(prisma.campaignTrack.update).toHaveBeenCalledWith({ where: { id: "t1" }, data: { youtubeId: "dQw4w9WgXcQ", durationSec: null } });
+        expect(await res.json()).toEqual({ ok: true });
+        expect(prisma.campaignTrack.deleteMany).toHaveBeenCalledWith({
+            where: { id: 't1', campaignId: 'camp1' },
+        });
+        expect(storage.removeTrackFile).not.toHaveBeenCalled();
+    });
 
-    expect((await PATCH(req("PATCH", {}), params({ trackId: "t1" }))).status).toBe(400);
-    expect((await PATCH(req("PATCH", { url: "https://example.com" }), params({ trackId: "t1" }))).status).toBe(400);
+    it('DELETE файлу: null у trackObjectPath — не видаляє обʼєкт Storage', async () => {
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/tracks/[trackId]/route'
+        );
 
-    vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(row() as never);
-    vi.mocked(prisma.campaignTrack.update).mockClear();
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(
+            row() as never
+        );
+        vi.mocked(storage.trackObjectPath).mockReturnValue(null);
 
-    expect((await PATCH(req("PATCH", { url: "https://youtu.be/dQw4w9WgXcQ" }), params({ trackId: "t1" }))).status).toBe(400);
-    expect(prisma.campaignTrack.update).not.toHaveBeenCalled();
-  });
+        const res = await DELETE(req('DELETE'), params({ trackId: 't1' }));
 
-  it("PUT order: лише повний набір треків кампанії", async () => {
-    const { PUT } = await import("@/app/api/campaigns/[id]/tracks/order/route");
+        expect(await res.json()).toEqual({ ok: true });
+        expect(prisma.campaignTrack.deleteMany).toHaveBeenCalledWith({
+            where: { id: 't1', campaignId: 'camp1' },
+        });
+        expect(storage.removeTrackFile).not.toHaveBeenCalled();
+    });
 
-    vi.mocked(prisma.campaignTrack.findMany).mockResolvedValue([row({ id: "a" }), row({ id: "b" })] as never);
+    it('PATCH перейменовує', async () => {
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/tracks/[trackId]/route'
+        );
 
-    expect((await PUT(req("PUT", { ids: ["a"] }), params())).status).toBe(400);
-    expect((await PUT(req("PUT", { ids: ["a", "x"] }), params())).status).toBe(400);
-    expect((await PUT(req("PUT", { ids: ["a", "a"] }), params())).status).toBe(400);
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValueOnce(
+            row() as never
+        );
+        vi.mocked(prisma.campaignTrack.update).mockResolvedValueOnce(
+            row({ title: 'Нова' }) as never
+        );
 
-    await PUT(req("PUT", { ids: ["b", "a"] }), params());
+        const res = await PATCH(
+            req('PATCH', { title: ' Нова ' }),
+            params({ trackId: 't1' })
+        );
 
-    expect(prisma.campaignTrack.update).toHaveBeenCalledWith({ where: { id: "b" }, data: { sortOrder: 0 } });
-    expect(prisma.campaignTrack.update).toHaveBeenCalledWith({ where: { id: "a" }, data: { sortOrder: 1 } });
-  });
+        expect(prisma.campaignTrack.update).toHaveBeenCalledWith({
+            where: { id: 't1' },
+            data: { title: 'Нова' },
+        });
+        expect(await res.json()).toMatchObject({ title: 'Нова' });
+    });
+
+    it('PATCH змінює посилання YouTube й тривалість; для файлу посилання заборонене; порожній запит — 400', async () => {
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/tracks/[trackId]/route'
+        );
+
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(
+            row({
+                kind: 'youtube',
+                url: null,
+                youtubeId: 'oldVideoId_1',
+            }) as never
+        );
+        vi.mocked(prisma.campaignTrack.update).mockResolvedValue(
+            row() as never
+        );
+
+        expect(
+            (
+                await PATCH(
+                    req('PATCH', {
+                        url: 'https://youtu.be/dQw4w9WgXcQ',
+                        durationSec: null,
+                    }),
+                    params({ trackId: 't1' })
+                )
+            ).status
+        ).toBe(200);
+        expect(prisma.campaignTrack.update).toHaveBeenCalledWith({
+            where: { id: 't1' },
+            data: { youtubeId: 'dQw4w9WgXcQ', durationSec: null },
+        });
+
+        expect(
+            (await PATCH(req('PATCH', {}), params({ trackId: 't1' }))).status
+        ).toBe(400);
+        expect(
+            (
+                await PATCH(
+                    req('PATCH', { url: 'https://example.com' }),
+                    params({ trackId: 't1' })
+                )
+            ).status
+        ).toBe(400);
+
+        vi.mocked(prisma.campaignTrack.findFirst).mockResolvedValue(
+            row() as never
+        );
+        vi.mocked(prisma.campaignTrack.update).mockClear();
+
+        expect(
+            (
+                await PATCH(
+                    req('PATCH', { url: 'https://youtu.be/dQw4w9WgXcQ' }),
+                    params({ trackId: 't1' })
+                )
+            ).status
+        ).toBe(400);
+        expect(prisma.campaignTrack.update).not.toHaveBeenCalled();
+    });
+
+    it('PUT order: лише повний набір треків кампанії', async () => {
+        const { PUT } = await import(
+            '@/app/api/campaigns/[id]/tracks/order/route'
+        );
+
+        vi.mocked(prisma.campaignTrack.findMany).mockResolvedValue([
+            row({ id: 'a' }),
+            row({ id: 'b' }),
+        ] as never);
+
+        expect((await PUT(req('PUT', { ids: ['a'] }), params())).status).toBe(
+            400
+        );
+        expect(
+            (await PUT(req('PUT', { ids: ['a', 'x'] }), params())).status
+        ).toBe(400);
+        expect(
+            (await PUT(req('PUT', { ids: ['a', 'a'] }), params())).status
+        ).toBe(400);
+
+        await PUT(req('PUT', { ids: ['b', 'a'] }), params());
+
+        expect(prisma.campaignTrack.update).toHaveBeenCalledWith({
+            where: { id: 'b' },
+            data: { sortOrder: 0 },
+        });
+        expect(prisma.campaignTrack.update).toHaveBeenCalledWith({
+            where: { id: 'a' },
+            data: { sortOrder: 1 },
+        });
+    });
 });
 
-it("network title lookup runs before the content lock", async () => {
-  const { currentContentWrite } = await import("@/lib/server/content/write-context");
+it('network title lookup runs before the content lock', async () => {
+    const { currentContentWrite } = await import(
+        '@/lib/server/content/write-context'
+    );
 
-  vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
-  vi.mocked(prisma.campaignTrack.count).mockResolvedValue(0);
-  vi.mocked(prisma.$transaction).mockImplementation((async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "camp1" }], campaign: { update: async () => ({ contentVersion: 1 }) } })) as never);
-  vi.mocked(oembed.fetchYoutubeTitle).mockImplementation(async () => {
-    expect(currentContentWrite()).toBeUndefined();
-    throw new Error("STOP_BEFORE_DB");
-  });
+    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
+    vi.mocked(prisma.campaignTrack.count).mockResolvedValue(0);
+    vi.mocked(prisma.$transaction).mockImplementation((async (
+        callback: (tx: object) => unknown
+    ) =>
+        callback({
+            $queryRaw: async () => [{ id: 'camp1' }],
+            campaign: { update: async () => ({ contentVersion: 1 }) },
+        })) as never);
+    vi.mocked(oembed.fetchYoutubeTitle).mockImplementation(async () => {
+        expect(currentContentWrite()).toBeUndefined();
+        throw new Error('STOP_BEFORE_DB');
+    });
 
-  const { createContent } = await import("@/lib/server/content/service");
+    const { createContent } = await import('@/lib/server/content/service');
 
-  const { tracksResource } = await import("@/lib/server/content/resources/tracks");
+    const { tracksResource } = await import(
+        '@/lib/server/content/resources/tracks'
+    );
 
-  await expect(createContent(tracksResource, { campaignId: "camp1", userId: "dm", isDM: true, via: "session", scopes: null }, { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" })).rejects.toThrow("STOP_BEFORE_DB");
+    await expect(
+        createContent(
+            tracksResource,
+            {
+                campaignId: 'camp1',
+                userId: 'dm',
+                isDM: true,
+                via: 'session',
+                scopes: null,
+            },
+            { kind: 'youtube', url: 'https://youtu.be/dQw4w9WgXcQ' }
+        )
+    ).rejects.toThrow('STOP_BEFORE_DB');
 });

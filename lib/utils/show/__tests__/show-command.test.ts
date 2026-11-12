@@ -1,529 +1,1160 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { applyShowCommand, refreshShowSlide, type ShowDeck, showNeedsLibrary, targetSlideTrack, withoutBattle } from "../show-command";
+import {
+    applyShowCommand,
+    refreshShowSlide,
+    type ShowDeck,
+    showNeedsLibrary,
+    targetSlideTrack,
+    withoutBattle,
+} from '../show-command';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import type { AudioLibraryEntry } from "@/lib/utils/audio/audio-command";
-import type { BattleAudioState } from "@/types/audio";
-import type { ShowState, Slide } from "@/types/show";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import type { AudioLibraryEntry } from '@/lib/utils/audio/audio-command';
+import type { BattleAudioState } from '@/types/audio';
+import type { ShowState, Slide } from '@/types/show';
 
-const img = (n: number) => `https://s.supabase.co/storage/v1/object/public/scene-slides/c1/${n}.webp`;
+const img = (n: number) =>
+    `https://s.supabase.co/storage/v1/object/public/scene-slides/c1/${n}.webp`;
 
-const s = (n: number, trackId?: string): Slide => ({ id: `slide-000${n}`, imageUrl: img(n), title: `Слайд ${n}`, ...(trackId && { trackId }) });
+const s = (n: number, trackId?: string): Slide => ({
+    id: `slide-000${n}`,
+    imageUrl: img(n),
+    title: `Слайд ${n}`,
+    ...(trackId && { trackId }),
+});
 
-const deck: ShowDeck = { id: "d1", title: "Таверна", slides: [s(1), s(2, "t2"), s(3)] };
+const deck: ShowDeck = {
+    id: 'd1',
+    title: 'Таверна',
+    slides: [s(1), s(2, 't2'), s(3)],
+};
 
 const library: AudioLibraryEntry[] = [
-  { id: "t1", track: { title: "Бій", kind: "file", url: "https://a/1.mp3", youtubeId: null, durationSec: 100 } },
-  { id: "t2", track: { title: "Таверна", kind: "file", url: "https://a/2.mp3", youtubeId: null, durationSec: 100 } },
+    {
+        id: 't1',
+        track: {
+            title: 'Бій',
+            kind: 'file',
+            url: 'https://a/1.mp3',
+            youtubeId: null,
+            durationSec: 100,
+        },
+    },
+    {
+        id: 't2',
+        track: {
+            title: 'Таверна',
+            kind: 'file',
+            url: 'https://a/2.mp3',
+            youtubeId: null,
+            durationSec: 100,
+        },
+    },
 ];
 
 const ctx = { now: 5_000, deck, library };
 
-const audio = (over: Partial<BattleAudioState> = {}): BattleAudioState => ({ trackId: "t1", track: library[0].track, playing: true, offsetSec: 0, startedAt: 1_000, seq: 7, ...over });
+const audio = (over: Partial<BattleAudioState> = {}): BattleAudioState => ({
+    trackId: 't1',
+    track: library[0].track,
+    playing: true,
+    offsetSec: 0,
+    startedAt: 1_000,
+    seq: 7,
+    ...over,
+});
 
-const showing = (slideIdx: number, over: Partial<ShowState> = {}): ShowState => ({
-  deckId: "d1",
-  deckTitle: "Таверна",
-  slide: deck.slides[slideIdx],
-  nextImageUrl: deck.slides[slideIdx + 1]?.imageUrl ?? null,
-  audio: null,
-  seq: 4,
-  ...over,
+const showing = (
+    slideIdx: number,
+    over: Partial<ShowState> = {}
+): ShowState => ({
+    deckId: 'd1',
+    deckTitle: 'Таверна',
+    slide: deck.slides[slideIdx],
+    nextImageUrl: deck.slides[slideIdx + 1]?.imageUrl ?? null,
+    audio: null,
+    seq: 4,
+    ...over,
 });
 
 const ok = (r: ReturnType<typeof applyShowCommand>) => {
-  if (!r.ok) throw new Error(r.message);
+    if (!r.ok) throw new Error(r.message);
 
-  return r.value;
+    return r.value;
 };
 
-describe("applyShowCommand", () => {
-  it("open без slideId — перший слайд, наступна картинка, seq з 1", () => {
-    expect(ok(applyShowCommand(null, { action: "open", deckId: "d1" }, ctx))).toEqual({ deckId: "d1", deckTitle: "Таверна", slide: s(1), nextImageUrl: img(2), audio: null, trail: [{ slide: s(1) }], seq: 1 });
-  });
-
-  it("open конкретного слайда з треком — play цього треку", () => {
-    const next = ok(applyShowCommand(showing(0), { action: "open", deckId: "d1", slideId: "slide-0002" }, ctx));
-
-    expect(next.slide).toEqual(s(2, "t2"));
-    expect(next.audio).toMatchObject({ trackId: "t2", playing: true, startedAt: 5_000, seq: 1 });
-    expect(next.seq).toBe(5);
-  });
-
-  it("трек слайда вже грає або на паузі — аудіо без змін (той самий об'єкт)", () => {
-    const playing = audio({ trackId: "t2", track: library[1].track });
-
-    expect(ok(applyShowCommand(showing(0, { audio: playing }), { action: "next" }, ctx)).audio).toBe(playing);
-
-    const paused = audio({ trackId: "t2", track: library[1].track, playing: false });
-
-    expect(ok(applyShowCommand(showing(0, { audio: paused }), { action: "next" }, ctx)).audio).toBe(paused);
-  });
-
-  it("трек слайда видалено з бібліотеки — слайд відкривається, музика як була", () => {
-    const current = audio();
-
-    const next = ok(applyShowCommand(showing(0, { audio: current }), { action: "next" }, { ...ctx, library: [library[0]] }));
-
-    expect(next.slide?.id).toBe("slide-0002");
-    expect(next.audio).toBe(current);
-  });
-
-  it("слайд без треку — музика не чіпається", () => {
-    const current = audio();
-
-    expect(ok(applyShowCommand(showing(1, { audio: current }), { action: "next" }, ctx)).audio).toBe(current);
-  });
-
-  it("next/prev на краю — той самий стан без підвищення seq", () => {
-    const last = showing(2);
-
-    expect(ok(applyShowCommand(last, { action: "next" }, ctx))).toBe(last);
-
-    const first = showing(0);
-
-    expect(ok(applyShowCommand(first, { action: "prev" }, ctx))).toBe(first);
-  });
-
-  it("останній слайд — nextImageUrl null", () => {
-    expect(ok(applyShowCommand(showing(1), { action: "next" }, ctx)).nextImageUrl).toBeNull();
-  });
-
-  it("поточний слайд видалено з набору — next/prev ідуть на перший", () => {
-    const gone = showing(0, { slide: { id: "slide-gone", imageUrl: img(9) } });
-
-    expect(ok(applyShowCommand(gone, { action: "next" }, ctx)).slide?.id).toBe("slide-0001");
-    expect(ok(applyShowCommand(gone, { action: "prev" }, ctx)).slide?.id).toBe("slide-0001");
-  });
-
-  it("помилки: немає набору, порожній набір, невідомий слайд, next без показу", () => {
-    expect(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...ctx, deck: null })).toEqual({ ok: false, message: API_ERRORS.DECK_NOT_FOUND });
-    expect(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...ctx, deck: { ...deck, slides: [] } })).toEqual({ ok: false, message: API_ERRORS.SHOW_DECK_EMPTY });
-    expect(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-nope" }, ctx)).toEqual({ ok: false, message: API_ERRORS.SLIDE_NOT_FOUND });
-    expect(applyShowCommand(null, { action: "next" }, ctx)).toEqual({ ok: false, message: API_ERRORS.SHOW_NOT_RUNNING });
-    expect(applyShowCommand(showing(0), { action: "next" }, { ...ctx, deck: null })).toEqual({ ok: false, message: API_ERRORS.DECK_NOT_FOUND });
-  });
-
-  it("end: очищає показ, зупиняє музику, seq і audio.seq ростуть; повторний open після end має більший seq", () => {
-    const ended = ok(applyShowCommand(showing(1, { audio: audio() }), { action: "end" }, ctx));
-
-    expect(ended).toEqual({ deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: { trackId: null, track: null, playing: false, offsetSec: 0, startedAt: 5_000, seq: 8 }, seq: 5 });
-
-    const reopened = ok(applyShowCommand(ended, { action: "open", deckId: "d1", slideId: "slide-0002" }, ctx));
-
-    expect(reopened.seq).toBe(6);
-    expect(reopened.audio?.seq).toBe(9);
-  });
-
-  it("end без музики — audio лишається null", () => {
-    expect(ok(applyShowCommand(showing(0), { action: "end" }, ctx)).audio).toBeNull();
-  });
-
-  it("audio: команда плеєра працює і без відкритого набору; помилка плеєра — помилка", () => {
-    const next = ok(applyShowCommand(null, { action: "audio", command: { action: "play", trackId: "t1" } }, ctx));
-
-    expect(next).toMatchObject({ deckId: null, slide: null, seq: 1, audio: { trackId: "t1", playing: true } });
-    expect(applyShowCommand(null, { action: "audio", command: { action: "pause" } }, ctx)).toEqual({ ok: false, message: API_ERRORS.BATTLE_AUDIO_NO_TRACK });
-  });
-});
-
-describe("refreshShowSlide", () => {
-  const at = { before: deck.slides, now: 5_000 };
-
-  it("змінився підпис поточного слайда — новий знімок і seq+1", () => {
-    const edited: ShowDeck = { ...deck, slides: [{ ...s(1), caption: "Новий" }, s(2, "t2"), s(3)] };
-
-    expect(refreshShowSlide(showing(0), edited, at)).toEqual({ ...showing(0), slide: { ...s(1), caption: "Новий" }, trail: [{ slide: { ...s(1), caption: "Новий" } }], seq: 5 });
-  });
-
-  it("змінився наступний слайд — новий nextImageUrl", () => {
-    const edited: ShowDeck = { ...deck, slides: [s(1), s(3)] };
-
-    expect(refreshShowSlide(showing(0), edited, at)?.nextImageUrl).toBe(img(3));
-  });
-
-  it("нічого не змінилося або інший набір — null", () => {
-    expect(refreshShowSlide(showing(0), deck, at)).toBeNull();
-    expect(refreshShowSlide(showing(0), { ...deck, id: "d2" }, at)).toBeNull();
-  });
-
-  it("поточний слайд видалено — сусід на тому ж місці без автотреку, музика та сама", () => {
-    const playing = audio();
-
-    expect(refreshShowSlide(showing(0, { audio: playing }), { ...deck, slides: [s(2, "t2"), s(3)] }, at)).toEqual({
-      ...showing(0, { audio: playing }),
-      slide: s(2, "t2"),
-      nextImageUrl: img(3),
-      trail: [{ slide: s(2, "t2") }],
-      seq: 5,
+describe('applyShowCommand', () => {
+    it('open без slideId — перший слайд, наступна картинка, seq з 1', () => {
+        expect(
+            ok(applyShowCommand(null, { action: 'open', deckId: 'd1' }, ctx))
+        ).toEqual({
+            deckId: 'd1',
+            deckTitle: 'Таверна',
+            slide: s(1),
+            nextImageUrl: img(2),
+            audio: null,
+            trail: [{ slide: s(1) }],
+            seq: 1,
+        });
     });
-    expect(refreshShowSlide(showing(2), { ...deck, slides: [s(1), s(2, "t2")] }, at)).toMatchObject({ slide: s(2, "t2"), nextImageUrl: null, seq: 5 });
-  });
 
-  it("набір спорожнів — показ завершено, як командою end", () => {
-    const prev = showing(1, { audio: audio() });
+    it('open конкретного слайда з треком — play цього треку', () => {
+        const next = ok(
+            applyShowCommand(
+                showing(0),
+                { action: 'open', deckId: 'd1', slideId: 'slide-0002' },
+                ctx
+            )
+        );
 
-    const ended = ok(applyShowCommand(prev, { action: "end" }, { ...ctx, deck: null, library: [] }));
+        expect(next.slide).toEqual(s(2, 't2'));
+        expect(next.audio).toMatchObject({
+            trackId: 't2',
+            playing: true,
+            startedAt: 5_000,
+            seq: 1,
+        });
+        expect(next.seq).toBe(5);
+    });
 
-    expect(refreshShowSlide(prev, { ...deck, slides: [] }, at)).toEqual(ended);
-    expect(ended).toMatchObject({ deckId: null, slide: null, nextImageUrl: null, audio: { playing: false }, seq: 5 });
-  });
+    it("трек слайда вже грає або на паузі — аудіо без змін (той самий об'єкт)", () => {
+        const playing = audio({ trackId: 't2', track: library[1].track });
+
+        expect(
+            ok(
+                applyShowCommand(
+                    showing(0, { audio: playing }),
+                    { action: 'next' },
+                    ctx
+                )
+            ).audio
+        ).toBe(playing);
+
+        const paused = audio({
+            trackId: 't2',
+            track: library[1].track,
+            playing: false,
+        });
+
+        expect(
+            ok(
+                applyShowCommand(
+                    showing(0, { audio: paused }),
+                    { action: 'next' },
+                    ctx
+                )
+            ).audio
+        ).toBe(paused);
+    });
+
+    it('трек слайда видалено з бібліотеки — слайд відкривається, музика як була', () => {
+        const current = audio();
+
+        const next = ok(
+            applyShowCommand(
+                showing(0, { audio: current }),
+                { action: 'next' },
+                { ...ctx, library: [library[0]] }
+            )
+        );
+
+        expect(next.slide?.id).toBe('slide-0002');
+        expect(next.audio).toBe(current);
+    });
+
+    it('слайд без треку — музика не чіпається', () => {
+        const current = audio();
+
+        expect(
+            ok(
+                applyShowCommand(
+                    showing(1, { audio: current }),
+                    { action: 'next' },
+                    ctx
+                )
+            ).audio
+        ).toBe(current);
+    });
+
+    it('next/prev на краю — той самий стан без підвищення seq', () => {
+        const last = showing(2);
+
+        expect(ok(applyShowCommand(last, { action: 'next' }, ctx))).toBe(last);
+
+        const first = showing(0);
+
+        expect(ok(applyShowCommand(first, { action: 'prev' }, ctx))).toBe(
+            first
+        );
+    });
+
+    it('останній слайд — nextImageUrl null', () => {
+        expect(
+            ok(applyShowCommand(showing(1), { action: 'next' }, ctx))
+                .nextImageUrl
+        ).toBeNull();
+    });
+
+    it('поточний слайд видалено з набору — next/prev ідуть на перший', () => {
+        const gone = showing(0, {
+            slide: { id: 'slide-gone', imageUrl: img(9) },
+        });
+
+        expect(
+            ok(applyShowCommand(gone, { action: 'next' }, ctx)).slide?.id
+        ).toBe('slide-0001');
+        expect(
+            ok(applyShowCommand(gone, { action: 'prev' }, ctx)).slide?.id
+        ).toBe('slide-0001');
+    });
+
+    it('помилки: немає набору, порожній набір, невідомий слайд, next без показу', () => {
+        expect(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1' },
+                { ...ctx, deck: null }
+            )
+        ).toEqual({ ok: false, message: API_ERRORS.DECK_NOT_FOUND });
+        expect(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1' },
+                { ...ctx, deck: { ...deck, slides: [] } }
+            )
+        ).toEqual({ ok: false, message: API_ERRORS.SHOW_DECK_EMPTY });
+        expect(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1', slideId: 'slide-nope' },
+                ctx
+            )
+        ).toEqual({ ok: false, message: API_ERRORS.SLIDE_NOT_FOUND });
+        expect(applyShowCommand(null, { action: 'next' }, ctx)).toEqual({
+            ok: false,
+            message: API_ERRORS.SHOW_NOT_RUNNING,
+        });
+        expect(
+            applyShowCommand(
+                showing(0),
+                { action: 'next' },
+                { ...ctx, deck: null }
+            )
+        ).toEqual({ ok: false, message: API_ERRORS.DECK_NOT_FOUND });
+    });
+
+    it('end: очищає показ, зупиняє музику, seq і audio.seq ростуть; повторний open після end має більший seq', () => {
+        const ended = ok(
+            applyShowCommand(
+                showing(1, { audio: audio() }),
+                { action: 'end' },
+                ctx
+            )
+        );
+
+        expect(ended).toEqual({
+            deckId: null,
+            deckTitle: null,
+            slide: null,
+            nextImageUrl: null,
+            audio: {
+                trackId: null,
+                track: null,
+                playing: false,
+                offsetSec: 0,
+                startedAt: 5_000,
+                seq: 8,
+            },
+            seq: 5,
+        });
+
+        const reopened = ok(
+            applyShowCommand(
+                ended,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0002' },
+                ctx
+            )
+        );
+
+        expect(reopened.seq).toBe(6);
+        expect(reopened.audio?.seq).toBe(9);
+    });
+
+    it('end без музики — audio лишається null', () => {
+        expect(
+            ok(applyShowCommand(showing(0), { action: 'end' }, ctx)).audio
+        ).toBeNull();
+    });
+
+    it('audio: команда плеєра працює і без відкритого набору; помилка плеєра — помилка', () => {
+        const next = ok(
+            applyShowCommand(
+                null,
+                { action: 'audio', command: { action: 'play', trackId: 't1' } },
+                ctx
+            )
+        );
+
+        expect(next).toMatchObject({
+            deckId: null,
+            slide: null,
+            seq: 1,
+            audio: { trackId: 't1', playing: true },
+        });
+        expect(
+            applyShowCommand(
+                null,
+                { action: 'audio', command: { action: 'pause' } },
+                ctx
+            )
+        ).toEqual({ ok: false, message: API_ERRORS.BATTLE_AUDIO_NO_TRACK });
+    });
 });
 
-describe("targetSlideTrack / showNeedsLibrary", () => {
-  it("open і next/prev дають трек слайда-цілі", () => {
-    expect(targetSlideTrack(null, { action: "open", deckId: "d1" }, deck)).toBeUndefined();
-    expect(targetSlideTrack(null, { action: "open", deckId: "d1", slideId: "slide-0002" }, deck)).toBe("t2");
-    expect(targetSlideTrack(showing(0), { action: "next" }, deck)).toBe("t2");
-    expect(targetSlideTrack(showing(2), { action: "prev" }, deck)).toBe("t2");
-    expect(targetSlideTrack(showing(2), { action: "next" }, deck)).toBeUndefined();
-    expect(targetSlideTrack(showing(0), { action: "end" }, deck)).toBeUndefined();
-    expect(targetSlideTrack(showing(0), { action: "next" }, null)).toBeUndefined();
-  });
+describe('refreshShowSlide', () => {
+    const at = { before: deck.slides, now: 5_000 };
 
-  it("бібліотека потрібна лише для нового треку або команди аудіо з вибором", () => {
-    expect(showNeedsLibrary(showing(1), { action: "next" }, deck)).toBe(false);
-    expect(showNeedsLibrary(showing(0), { action: "next" }, deck)).toBe(true);
-    expect(showNeedsLibrary(showing(0, { audio: audio({ trackId: "t2" }) }), { action: "next" }, deck)).toBe(false);
-    expect(showNeedsLibrary(showing(0), { action: "audio", command: { action: "pause" } }, deck)).toBe(false);
-    expect(showNeedsLibrary(showing(0), { action: "audio", command: { action: "play", trackId: "t1" } }, deck)).toBe(true);
-  });
+    it('змінився підпис поточного слайда — новий знімок і seq+1', () => {
+        const edited: ShowDeck = {
+            ...deck,
+            slides: [{ ...s(1), caption: 'Новий' }, s(2, 't2'), s(3)],
+        };
+
+        expect(refreshShowSlide(showing(0), edited, at)).toEqual({
+            ...showing(0),
+            slide: { ...s(1), caption: 'Новий' },
+            trail: [{ slide: { ...s(1), caption: 'Новий' } }],
+            seq: 5,
+        });
+    });
+
+    it('змінився наступний слайд — новий nextImageUrl', () => {
+        const edited: ShowDeck = { ...deck, slides: [s(1), s(3)] };
+
+        expect(refreshShowSlide(showing(0), edited, at)?.nextImageUrl).toBe(
+            img(3)
+        );
+    });
+
+    it('нічого не змінилося або інший набір — null', () => {
+        expect(refreshShowSlide(showing(0), deck, at)).toBeNull();
+        expect(
+            refreshShowSlide(showing(0), { ...deck, id: 'd2' }, at)
+        ).toBeNull();
+    });
+
+    it('поточний слайд видалено — сусід на тому ж місці без автотреку, музика та сама', () => {
+        const playing = audio();
+
+        expect(
+            refreshShowSlide(
+                showing(0, { audio: playing }),
+                { ...deck, slides: [s(2, 't2'), s(3)] },
+                at
+            )
+        ).toEqual({
+            ...showing(0, { audio: playing }),
+            slide: s(2, 't2'),
+            nextImageUrl: img(3),
+            trail: [{ slide: s(2, 't2') }],
+            seq: 5,
+        });
+        expect(
+            refreshShowSlide(
+                showing(2),
+                { ...deck, slides: [s(1), s(2, 't2')] },
+                at
+            )
+        ).toMatchObject({ slide: s(2, 't2'), nextImageUrl: null, seq: 5 });
+    });
+
+    it('набір спорожнів — показ завершено, як командою end', () => {
+        const prev = showing(1, { audio: audio() });
+
+        const ended = ok(
+            applyShowCommand(
+                prev,
+                { action: 'end' },
+                { ...ctx, deck: null, library: [] }
+            )
+        );
+
+        expect(refreshShowSlide(prev, { ...deck, slides: [] }, at)).toEqual(
+            ended
+        );
+        expect(ended).toMatchObject({
+            deckId: null,
+            slide: null,
+            nextImageUrl: null,
+            audio: { playing: false },
+            seq: 5,
+        });
+    });
 });
 
-describe("команда battle", () => {
-  const battle = (status: string) => ({ id: "b1", name: "Засідка", status });
+describe('targetSlideTrack / showNeedsLibrary', () => {
+    it('open і next/prev дають трек слайда-цілі', () => {
+        expect(
+            targetSlideTrack(null, { action: 'open', deckId: 'd1' }, deck)
+        ).toBeUndefined();
+        expect(
+            targetSlideTrack(
+                null,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0002' },
+                deck
+            )
+        ).toBe('t2');
+        expect(targetSlideTrack(showing(0), { action: 'next' }, deck)).toBe(
+            't2'
+        );
+        expect(targetSlideTrack(showing(2), { action: 'prev' }, deck)).toBe(
+            't2'
+        );
+        expect(
+            targetSlideTrack(showing(2), { action: 'next' }, deck)
+        ).toBeUndefined();
+        expect(
+            targetSlideTrack(showing(0), { action: 'end' }, deck)
+        ).toBeUndefined();
+        expect(
+            targetSlideTrack(showing(0), { action: 'next' }, null)
+        ).toBeUndefined();
+    });
 
-  it("активний бій: battle у стані, музика зупинена, seq+1, слайд лишається", () => {
-    const next = ok(applyShowCommand(showing(1, { audio: audio() }), { action: "battle", battleId: "b1" }, { ...ctx, battle: battle("active") }));
-
-    expect(next.battle).toEqual({ id: "b1", name: "Засідка" });
-    expect(next.slide).toEqual(s(2, "t2"));
-    expect(next.audio).toMatchObject({ trackId: null, playing: false });
-    expect(next.seq).toBe(5);
-  });
-
-  it("без запущеного показу — стан без слайда з battle", () => {
-    const next = ok(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle("active") }));
-
-    expect(next).toMatchObject({ deckId: null, slide: null, battle: { id: "b1", name: "Засідка" }, seq: 1 });
-  });
-
-  it("бій не active — помилка", () => {
-    for (const status of ["prepared", "completed"]) {
-      expect(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle(status) })).toEqual({ ok: false, message: API_ERRORS.SHOW_BATTLE_NOT_ACTIVE });
-    }
-  });
-
-  it("open / next / prev / end скидають battle", () => {
-    const called = showing(0, { battle: { id: "b1", name: "Засідка" } });
-
-    expect(ok(applyShowCommand(called, { action: "next" }, ctx))).not.toHaveProperty("battle");
-    expect(ok(applyShowCommand(showing(1, { battle: { id: "b1", name: "Засідка" } }), { action: "prev" }, ctx))).not.toHaveProperty("battle");
-    expect(ok(applyShowCommand(called, { action: "open", deckId: "d1", slideId: "slide-0003" }, ctx))).not.toHaveProperty("battle");
-    expect(ok(applyShowCommand(called, { action: "end" }, ctx))).not.toHaveProperty("battle");
-  });
-
-  it("audio-команда не скидає battle", () => {
-    const called = showing(0, { battle: { id: "b1", name: "Засідка" } });
-
-    expect(ok(applyShowCommand(called, { action: "audio", command: { action: "play", trackId: "t1" } }, ctx)).battle).toEqual({ id: "b1", name: "Засідка" });
-  });
+    it('бібліотека потрібна лише для нового треку або команди аудіо з вибором', () => {
+        expect(showNeedsLibrary(showing(1), { action: 'next' }, deck)).toBe(
+            false
+        );
+        expect(showNeedsLibrary(showing(0), { action: 'next' }, deck)).toBe(
+            true
+        );
+        expect(
+            showNeedsLibrary(
+                showing(0, { audio: audio({ trackId: 't2' }) }),
+                { action: 'next' },
+                deck
+            )
+        ).toBe(false);
+        expect(
+            showNeedsLibrary(
+                showing(0),
+                { action: 'audio', command: { action: 'pause' } },
+                deck
+            )
+        ).toBe(false);
+        expect(
+            showNeedsLibrary(
+                showing(0),
+                { action: 'audio', command: { action: 'play', trackId: 't1' } },
+                deck
+            )
+        ).toBe(true);
+    });
 });
 
-describe("виклик battle на межі набору", () => {
-  const called = { id: "b1", name: "Засідка" };
+describe('команда battle', () => {
+    const battle = (status: string) => ({ id: 'b1', name: 'Засідка', status });
 
-  it("next на останньому і prev на першому слайді скидають battle (seq+1)", () => {
-    const last = ok(applyShowCommand(showing(2, { battle: called }), { action: "next" }, ctx));
+    it('активний бій: battle у стані, музика зупинена, seq+1, слайд лишається', () => {
+        const next = ok(
+            applyShowCommand(
+                showing(1, { audio: audio() }),
+                { action: 'battle', battleId: 'b1' },
+                { ...ctx, battle: battle('active') }
+            )
+        );
 
-    expect(last).not.toHaveProperty("battle");
-    expect(last).toMatchObject({ seq: 5, slide: deck.slides[2] });
+        expect(next.battle).toEqual({ id: 'b1', name: 'Засідка' });
+        expect(next.slide).toEqual(s(2, 't2'));
+        expect(next.audio).toMatchObject({ trackId: null, playing: false });
+        expect(next.seq).toBe(5);
+    });
 
-    const first = ok(applyShowCommand(showing(0, { battle: called }), { action: "prev" }, ctx));
+    it('без запущеного показу — стан без слайда з battle', () => {
+        const next = ok(
+            applyShowCommand(
+                null,
+                { action: 'battle', battleId: 'b1' },
+                { ...ctx, battle: battle('active') }
+            )
+        );
 
-    expect(first).not.toHaveProperty("battle");
-    expect(first.seq).toBe(5);
-  });
+        expect(next).toMatchObject({
+            deckId: null,
+            slide: null,
+            battle: { id: 'b1', name: 'Засідка' },
+            seq: 1,
+        });
+    });
 
-  it("без battle на межі стан не змінюється", () => {
-    const prev = showing(2);
+    it('бій не active — помилка', () => {
+        for (const status of ['prepared', 'completed']) {
+            expect(
+                applyShowCommand(
+                    null,
+                    { action: 'battle', battleId: 'b1' },
+                    { ...ctx, battle: battle(status) }
+                )
+            ).toEqual({
+                ok: false,
+                message: API_ERRORS.SHOW_BATTLE_NOT_ACTIVE,
+            });
+        }
+    });
 
-    expect(ok(applyShowCommand(prev, { action: "next" }, ctx))).toBe(prev);
-  });
+    it('open / next / prev / end скидають battle', () => {
+        const called = showing(0, { battle: { id: 'b1', name: 'Засідка' } });
+
+        expect(
+            ok(applyShowCommand(called, { action: 'next' }, ctx))
+        ).not.toHaveProperty('battle');
+        expect(
+            ok(
+                applyShowCommand(
+                    showing(1, { battle: { id: 'b1', name: 'Засідка' } }),
+                    { action: 'prev' },
+                    ctx
+                )
+            )
+        ).not.toHaveProperty('battle');
+        expect(
+            ok(
+                applyShowCommand(
+                    called,
+                    { action: 'open', deckId: 'd1', slideId: 'slide-0003' },
+                    ctx
+                )
+            )
+        ).not.toHaveProperty('battle');
+        expect(
+            ok(applyShowCommand(called, { action: 'end' }, ctx))
+        ).not.toHaveProperty('battle');
+    });
+
+    it('audio-команда не скидає battle', () => {
+        const called = showing(0, { battle: { id: 'b1', name: 'Засідка' } });
+
+        expect(
+            ok(
+                applyShowCommand(
+                    called,
+                    {
+                        action: 'audio',
+                        command: { action: 'play', trackId: 't1' },
+                    },
+                    ctx
+                )
+            ).battle
+        ).toEqual({ id: 'b1', name: 'Засідка' });
+    });
 });
 
-describe("withoutBattle", () => {
-  const called = { id: "b1", name: "Засідка" };
+describe('виклик battle на межі набору', () => {
+    const called = { id: 'b1', name: 'Засідка' };
 
-  it("знімає виклик цього бою, seq+1, решту лишає", () => {
-    const next = withoutBattle(showing(1, { battle: called }), "b1");
+    it('next на останньому і prev на першому слайді скидають battle (seq+1)', () => {
+        const last = ok(
+            applyShowCommand(
+                showing(2, { battle: called }),
+                { action: 'next' },
+                ctx
+            )
+        );
 
-    expect(next).not.toHaveProperty("battle");
-    expect(next).toMatchObject({ deckId: "d1", seq: 5, slide: deck.slides[1] });
-  });
+        expect(last).not.toHaveProperty('battle');
+        expect(last).toMatchObject({ seq: 5, slide: deck.slides[2] });
 
-  it("null, якщо показу немає, виклику немає або він про інший бій", () => {
-    expect(withoutBattle(null, "b1")).toBeNull();
-    expect(withoutBattle(showing(0), "b1")).toBeNull();
-    expect(withoutBattle(showing(0, { battle: called }), "b2")).toBeNull();
-  });
+        const first = ok(
+            applyShowCommand(
+                showing(0, { battle: called }),
+                { action: 'prev' },
+                ctx
+            )
+        );
+
+        expect(first).not.toHaveProperty('battle');
+        expect(first.seq).toBe(5);
+    });
+
+    it('без battle на межі стан не змінюється', () => {
+        const prev = showing(2);
+
+        expect(ok(applyShowCommand(prev, { action: 'next' }, ctx))).toBe(prev);
+    });
 });
 
-describe("заглушка (curtain / cover)", () => {
-  const cover = { deckId: "d1", slide: { id: "slide-0002", imageUrl: img(2), title: "Слайд 2" } };
+describe('withoutBattle', () => {
+    const called = { id: 'b1', name: 'Засідка' };
 
-  it("setCover — знімок слайда без треку, показ не змінюється", () => {
-    const next = ok(applyShowCommand(showing(0), { action: "setCover", deckId: "d1", slideId: "slide-0002" }, ctx));
+    it('знімає виклик цього бою, seq+1, решту лишає', () => {
+        const next = withoutBattle(showing(1, { battle: called }), 'b1');
 
-    expect(next.cover).toEqual(cover);
-    expect(next.slide).toEqual(s(1));
-    expect(next.seq).toBe(5);
-  });
+        expect(next).not.toHaveProperty('battle');
+        expect(next).toMatchObject({
+            deckId: 'd1',
+            seq: 5,
+            slide: deck.slides[1],
+        });
+    });
 
-  it("setCover без показу створює стан; невідомий слайд — помилка", () => {
-    expect(ok(applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-0001" }, ctx))).toMatchObject({ deckId: null, cover: { deckId: "d1" }, seq: 1 });
-    expect(applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-9999" }, ctx).ok).toBe(false);
-  });
-
-  it("clearCover прибирає заглушку; без неї — той самий стан", () => {
-    const prev = showing(0);
-
-    expect(ok(applyShowCommand(showing(0, { cover }), { action: "clearCover" }, ctx))).not.toHaveProperty("cover");
-    expect(ok(applyShowCommand(prev, { action: "clearCover" }, ctx))).toBe(prev);
-  });
-
-  it("curtain on/off лишає слайд і музику", () => {
-    const playing = audio();
-
-    const on = ok(applyShowCommand(showing(1, { audio: playing }), { action: "curtain", on: true }, ctx));
-
-    expect(on).toMatchObject({ curtain: true, slide: deck.slides[1], seq: 5 });
-    expect(on.audio).toBe(playing);
-
-    const off = ok(applyShowCommand(on, { action: "curtain", on: false }, ctx));
-
-    expect(off).not.toHaveProperty("curtain");
-    expect(off.slide).toEqual(deck.slides[1]);
-  });
-
-  it("без on — перемикання; без показу вмикається з порожнього стану", () => {
-    expect(ok(applyShowCommand(showing(0, { curtain: true }), { action: "curtain" }, ctx))).not.toHaveProperty("curtain");
-    expect(ok(applyShowCommand(null, { action: "curtain" }, ctx))).toMatchObject({ curtain: true, deckId: null, seq: 1 });
-  });
-
-  it("повтор того самого стану нічого не змінює", () => {
-    const prev = showing(0, { curtain: true });
-
-    expect(ok(applyShowCommand(prev, { action: "curtain", on: true }, ctx))).toBe(prev);
-  });
-
-  it("перемикання слайда знімає заглушку, але зберігає cover; на межі набору теж", () => {
-    const next = ok(applyShowCommand(showing(0, { curtain: true, cover }), { action: "next" }, ctx));
-
-    expect(next).not.toHaveProperty("curtain");
-    expect(next.cover).toEqual(cover);
-
-    const edge = ok(applyShowCommand(showing(2, { curtain: true, cover }), { action: "next" }, ctx));
-
-    expect(edge).not.toHaveProperty("curtain");
-    expect(edge.seq).toBe(5);
-  });
-
-  it("end зберігає cover і знімає curtain", () => {
-    const ended = ok(applyShowCommand(showing(0, { curtain: true, cover }), { action: "end" }, ctx));
-
-    expect(ended).toMatchObject({ deckId: null, slide: null, cover });
-    expect(ended).not.toHaveProperty("curtain");
-  });
+    it('null, якщо показу немає, виклику немає або він про інший бій', () => {
+        expect(withoutBattle(null, 'b1')).toBeNull();
+        expect(withoutBattle(showing(0), 'b1')).toBeNull();
+        expect(withoutBattle(showing(0, { battle: called }), 'b2')).toBeNull();
+    });
 });
 
-describe("applyShowCommand world", () => {
-  const world = { action: "world", mapId: "m1" } as const;
+describe('заглушка (curtain / cover)', () => {
+    const cover = {
+        deckId: 'd1',
+        slide: { id: 'slide-0002', imageUrl: img(2), title: 'Слайд 2' },
+    };
 
-  it("creates a state with seq 1 from nothing", () => {
-    expect(ok(applyShowCommand(null, world, ctx))).toMatchObject({ world: { mapId: "m1" }, seq: 1, slide: null });
-  });
+    it('setCover — знімок слайда без треку, показ не змінюється', () => {
+        const next = ok(
+            applyShowCommand(
+                showing(0),
+                { action: 'setCover', deckId: 'd1', slideId: 'slide-0002' },
+                ctx
+            )
+        );
 
-  it("drops the curtain and keeps deck, slide, cover, audio and battle", () => {
-    const cover = { deckId: "d1", slide: s(1) };
+        expect(next.cover).toEqual(cover);
+        expect(next.slide).toEqual(s(1));
+        expect(next.seq).toBe(5);
+    });
 
-    const battle = { id: "b1", name: "Бій" };
+    it('setCover без показу створює стан; невідомий слайд — помилка', () => {
+        expect(
+            ok(
+                applyShowCommand(
+                    null,
+                    { action: 'setCover', deckId: 'd1', slideId: 'slide-0001' },
+                    ctx
+                )
+            )
+        ).toMatchObject({ deckId: null, cover: { deckId: 'd1' }, seq: 1 });
+        expect(
+            applyShowCommand(
+                null,
+                { action: 'setCover', deckId: 'd1', slideId: 'slide-9999' },
+                ctx
+            ).ok
+        ).toBe(false);
+    });
 
-    const prev = showing(1, { curtain: true, cover, audio: audio(), battle });
+    it('clearCover прибирає заглушку; без неї — той самий стан', () => {
+        const prev = showing(0);
 
-    const next = ok(applyShowCommand(prev, { ...world, focusMarkerId: "k1" }, ctx));
+        expect(
+            ok(
+                applyShowCommand(
+                    showing(0, { cover }),
+                    { action: 'clearCover' },
+                    ctx
+                )
+            )
+        ).not.toHaveProperty('cover');
+        expect(ok(applyShowCommand(prev, { action: 'clearCover' }, ctx))).toBe(
+            prev
+        );
+    });
 
-    expect(next).toMatchObject({ deckId: "d1", slide: deck.slides[1], cover, battle, world: { mapId: "m1", focusMarkerId: "k1" }, seq: 5 });
-    expect(next.audio).toEqual(prev.audio);
-    expect(next.curtain).toBeUndefined();
-  });
+    it('curtain on/off лишає слайд і музику', () => {
+        const playing = audio();
 
-  it("returns prev for the same target", () => {
-    const prev = ok(applyShowCommand(null, world, ctx));
+        const on = ok(
+            applyShowCommand(
+                showing(1, { audio: playing }),
+                { action: 'curtain', on: true },
+                ctx
+            )
+        );
 
-    expect(ok(applyShowCommand(prev, world, ctx))).toBe(prev);
-  });
+        expect(on).toMatchObject({
+            curtain: true,
+            slide: deck.slides[1],
+            seq: 5,
+        });
+        expect(on.audio).toBe(playing);
 
-  it("worldOff: no-op without world, fails without state, removes world", () => {
-    const plain = showing(0);
+        const off = ok(
+            applyShowCommand(on, { action: 'curtain', on: false }, ctx)
+        );
 
-    expect(ok(applyShowCommand(plain, { action: "worldOff" }, ctx))).toBe(plain);
-    expect(applyShowCommand(null, { action: "worldOff" }, ctx)).toMatchObject({ ok: false });
+        expect(off).not.toHaveProperty('curtain');
+        expect(off.slide).toEqual(deck.slides[1]);
+    });
 
-    const off = ok(applyShowCommand(showing(0, { world: { mapId: "m1" } }), { action: "worldOff" }, ctx));
+    it('без on — перемикання; без показу вмикається з порожнього стану', () => {
+        expect(
+            ok(
+                applyShowCommand(
+                    showing(0, { curtain: true }),
+                    { action: 'curtain' },
+                    ctx
+                )
+            )
+        ).not.toHaveProperty('curtain');
+        expect(
+            ok(applyShowCommand(null, { action: 'curtain' }, ctx))
+        ).toMatchObject({ curtain: true, deckId: null, seq: 1 });
+    });
 
-    expect(off.seq).toBe(5);
-    expect(off).not.toHaveProperty("world");
-  });
+    it('повтор того самого стану нічого не змінює', () => {
+        const prev = showing(0, { curtain: true });
 
-  it("open, next and end drop the world; curtain keeps it", () => {
-    const prev = showing(0, { world: { mapId: "m1" } });
+        expect(
+            ok(applyShowCommand(prev, { action: 'curtain', on: true }, ctx))
+        ).toBe(prev);
+    });
 
-    expect(ok(applyShowCommand(prev, { action: "open", deckId: "d1" }, ctx)).world).toBeUndefined();
-    expect(ok(applyShowCommand(prev, { action: "next" }, ctx)).world).toBeUndefined();
-    expect(ok(applyShowCommand(showing(2, { world: { mapId: "m1" } }), { action: "next" }, ctx)).world).toBeUndefined();
-    expect(ok(applyShowCommand(prev, { action: "end" }, ctx)).world).toBeUndefined();
-    expect(ok(applyShowCommand(prev, { action: "curtain", on: true }, ctx)).world).toEqual({ mapId: "m1" });
-  });
+    it('перемикання слайда знімає заглушку, але зберігає cover; на межі набору теж', () => {
+        const next = ok(
+            applyShowCommand(
+                showing(0, { curtain: true, cover }),
+                { action: 'next' },
+                ctx
+            )
+        );
+
+        expect(next).not.toHaveProperty('curtain');
+        expect(next.cover).toEqual(cover);
+
+        const edge = ok(
+            applyShowCommand(
+                showing(2, { curtain: true, cover }),
+                { action: 'next' },
+                ctx
+            )
+        );
+
+        expect(edge).not.toHaveProperty('curtain');
+        expect(edge.seq).toBe(5);
+    });
+
+    it('end зберігає cover і знімає curtain', () => {
+        const ended = ok(
+            applyShowCommand(
+                showing(0, { curtain: true, cover }),
+                { action: 'end' },
+                ctx
+            )
+        );
+
+        expect(ended).toMatchObject({ deckId: null, slide: null, cover });
+        expect(ended).not.toHaveProperty('curtain');
+    });
 });
 
-describe("пазл-слайд", () => {
-  const spec = { cut: "classic" as const, count: 6, seed: 2, imageWidth: 600, imageHeight: 400 };
+describe('applyShowCommand world', () => {
+    const world = { action: 'world', mapId: 'm1' } as const;
 
-  const pz: Slide = { id: "slide-0009", imageUrl: img(9), kind: "puzzle", puzzle: spec };
+    it('creates a state with seq 1 from nothing', () => {
+        expect(ok(applyShowCommand(null, world, ctx))).toMatchObject({
+            world: { mapId: 'm1' },
+            seq: 1,
+            slide: null,
+        });
+    });
 
-  const pdeck: ShowDeck = { id: "d1", title: "Таверна", slides: [s(1), pz, s(3)] };
+    it('drops the curtain and keeps deck, slide, cover, audio and battle', () => {
+        const cover = { deckId: 'd1', slide: s(1) };
 
-  const pctx = { ...ctx, deck: pdeck };
+        const battle = { id: 'b1', name: 'Бій' };
 
-  it("open пазл-слайда ініціалізує puzzle, next/prev з нього знімає", () => {
-    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+        const prev = showing(1, {
+            curtain: true,
+            cover,
+            audio: audio(),
+            battle,
+        });
 
-    expect(opened.puzzle?.solved).toBe(false);
-    expect(Object.keys(opened.puzzle!.pieces).length).toBeGreaterThan(0);
-    expect(ok(applyShowCommand(opened, { action: "next" }, pctx)).puzzle).toBeUndefined();
-    expect(ok(applyShowCommand(opened, { action: "end" }, pctx)).puzzle).toBeUndefined();
-  });
+        const next = ok(
+            applyShowCommand(prev, { ...world, focusMarkerId: 'k1' }, ctx)
+        );
 
-  it("curtain і world не гублять puzzle", () => {
-    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+        expect(next).toMatchObject({
+            deckId: 'd1',
+            slide: deck.slides[1],
+            cover,
+            battle,
+            world: { mapId: 'm1', focusMarkerId: 'k1' },
+            seq: 5,
+        });
+        expect(next.audio).toEqual(prev.audio);
+        expect(next.curtain).toBeUndefined();
+    });
 
-    expect(ok(applyShowCommand(opened, { action: "curtain", on: true }, pctx)).puzzle).toBe(opened.puzzle);
-  });
+    it('returns prev for the same target', () => {
+        const prev = ok(applyShowCommand(null, world, ctx));
 
-  it("повторний open того ж пазл-слайда зберігає прогрес, але знімає curtain/world/battle", () => {
-    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+        expect(ok(applyShowCommand(prev, world, ctx))).toBe(prev);
+    });
 
-    const progressed = { ...opened, curtain: true as const, puzzle: { ...opened.puzzle!, solved: true } };
+    it('worldOff: no-op without world, fails without state, removes world', () => {
+        const plain = showing(0);
 
-    const again = ok(applyShowCommand(progressed, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+        expect(ok(applyShowCommand(plain, { action: 'worldOff' }, ctx))).toBe(
+            plain
+        );
+        expect(
+            applyShowCommand(null, { action: 'worldOff' }, ctx)
+        ).toMatchObject({ ok: false });
 
-    expect(again.puzzle).toBe(progressed.puzzle);
-    expect(again.curtain).toBeUndefined();
-  });
+        const off = ok(
+            applyShowCommand(
+                showing(0, { world: { mapId: 'm1' } }),
+                { action: 'worldOff' },
+                ctx
+            )
+        );
 
-  it("setCover відкидає kind і puzzle", () => {
-    const next = ok(applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-0009" }, pctx));
+        expect(off.seq).toBe(5);
+        expect(off).not.toHaveProperty('world');
+    });
 
-    expect(next.cover?.slide).toEqual({ id: "slide-0009", imageUrl: img(9) });
-  });
+    it('open, next and end drop the world; curtain keeps it', () => {
+        const prev = showing(0, { world: { mapId: 'm1' } });
 
-  it("refreshShowSlide: зміна параметрів перевидає puzzle, незмінні — зберігають, не-пазл знімає", () => {
-    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
-
-    const same = refreshShowSlide({ ...opened, puzzle: { ...opened.puzzle!, solved: true } }, { ...pdeck, title: "Нова" }, { before: pdeck.slides, now: 1 });
-
-    expect(same?.puzzle?.solved).toBe(true);
-
-    const changed = refreshShowSlide(opened, { ...pdeck, slides: [s(1), { ...pz, puzzle: { ...spec, seed: 99 } }, s(3)] }, { before: pdeck.slides, now: 1 });
-
-    expect(changed?.puzzle).toBeDefined();
-    expect(changed?.puzzle).not.toEqual(opened.puzzle);
-
-    const plain = refreshShowSlide(opened, { ...pdeck, slides: [s(1), { id: "slide-0009", imageUrl: img(9) }, s(3)] }, { before: pdeck.slides, now: 1 });
-
-    expect(plain?.puzzle).toBeUndefined();
-  });
+        expect(
+            ok(applyShowCommand(prev, { action: 'open', deckId: 'd1' }, ctx))
+                .world
+        ).toBeUndefined();
+        expect(
+            ok(applyShowCommand(prev, { action: 'next' }, ctx)).world
+        ).toBeUndefined();
+        expect(
+            ok(
+                applyShowCommand(
+                    showing(2, { world: { mapId: 'm1' } }),
+                    { action: 'next' },
+                    ctx
+                )
+            ).world
+        ).toBeUndefined();
+        expect(
+            ok(applyShowCommand(prev, { action: 'end' }, ctx)).world
+        ).toBeUndefined();
+        expect(
+            ok(applyShowCommand(prev, { action: 'curtain', on: true }, ctx))
+                .world
+        ).toEqual({ mapId: 'm1' });
+    });
 });
 
-describe("стежка і аудиторія", () => {
-  const restricted = (n: number): Slide => ({ ...s(n), audience: ["h1"] });
+describe('пазл-слайд', () => {
+    const spec = {
+        cut: 'classic' as const,
+        count: 6,
+        seed: 2,
+        imageWidth: 600,
+        imageHeight: 400,
+    };
 
-  const aDeck: ShowDeck = { id: "d1", title: "Т", slides: [s(1), restricted(2), restricted(3), s(4)] };
+    const pz: Slide = {
+        id: 'slide-0009',
+        imageUrl: img(9),
+        kind: 'puzzle',
+        puzzle: spec,
+    };
 
-  const actx = { now: 1, deck: aDeck, library: [] };
+    const pdeck: ShowDeck = {
+        id: 'd1',
+        title: 'Таверна',
+        slides: [s(1), pz, s(3)],
+    };
 
-  const ids = (st: ShowState) => st.trail?.map((e) => e.slide.id);
+    const pctx = { ...ctx, deck: pdeck };
 
-  it("open resets the trail to the target", () => {
-    const st = ok(applyShowCommand({ ...showing(0), trail: [{ slide: restricted(2) }] }, { action: "open", deckId: "d1", slideId: aDeck.slides[1].id }, actx));
+    it('open пазл-слайда ініціалізує puzzle, next/prev з нього знімає', () => {
+        const opened = ok(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0009' },
+                pctx
+            )
+        );
 
-    expect(ids(st)).toEqual(["slide-0002"]);
-  });
+        expect(opened.puzzle?.solved).toBe(false);
+        expect(Object.keys(opened.puzzle!.pieces).length).toBeGreaterThan(0);
+        expect(
+            ok(applyShowCommand(opened, { action: 'next' }, pctx)).puzzle
+        ).toBeUndefined();
+        expect(
+            ok(applyShowCommand(opened, { action: 'end' }, pctx)).puzzle
+        ).toBeUndefined();
+    });
 
-  it("next appends restricted slides and a public slide compacts", () => {
-    let st = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, actx));
+    it('curtain і world не гублять puzzle', () => {
+        const opened = ok(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0009' },
+                pctx
+            )
+        );
 
-    st = ok(applyShowCommand(st, { action: "next" }, actx));
-    st = ok(applyShowCommand(st, { action: "next" }, actx));
+        expect(
+            ok(applyShowCommand(opened, { action: 'curtain', on: true }, pctx))
+                .puzzle
+        ).toBe(opened.puzzle);
+    });
 
-    expect(ids(st)).toEqual(["slide-0001", "slide-0002", "slide-0003"]);
+    it('повторний open того ж пазл-слайда зберігає прогрес, але знімає curtain/world/battle', () => {
+        const opened = ok(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0009' },
+                pctx
+            )
+        );
 
-    st = ok(applyShowCommand(st, { action: "next" }, actx));
+        const progressed = {
+            ...opened,
+            curtain: true as const,
+            puzzle: { ...opened.puzzle!, solved: true },
+        };
 
-    expect(ids(st)).toEqual(["slide-0004"]);
-  });
+        const again = ok(
+            applyShowCommand(
+                progressed,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0009' },
+                pctx
+            )
+        );
 
-  it("prev moves a revisited slide to the end without duplicates", () => {
-    let st = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0002" }, actx));
+        expect(again.puzzle).toBe(progressed.puzzle);
+        expect(again.curtain).toBeUndefined();
+    });
 
-    st = ok(applyShowCommand(st, { action: "next" }, actx));
-    st = ok(applyShowCommand(st, { action: "prev" }, actx));
+    it('setCover відкидає kind і puzzle', () => {
+        const next = ok(
+            applyShowCommand(
+                null,
+                { action: 'setCover', deckId: 'd1', slideId: 'slide-0009' },
+                pctx
+            )
+        );
 
-    expect(ids(st)).toEqual(["slide-0003", "slide-0002"]);
-  });
+        expect(next.cover?.slide).toEqual({
+            id: 'slide-0009',
+            imageUrl: img(9),
+        });
+    });
 
-  it("strips puzzle fields from the trail snapshot", () => {
-    const pz: Slide = { ...s(5), kind: "puzzle", puzzle: { cut: "classic", count: 4, seed: 1, imageWidth: 10, imageHeight: 10 } };
+    it('refreshShowSlide: зміна параметрів перевидає puzzle, незмінні — зберігають, не-пазл знімає', () => {
+        const opened = ok(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0009' },
+                pctx
+            )
+        );
 
-    const st = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...actx, deck: { ...aDeck, slides: [pz] } }));
+        const same = refreshShowSlide(
+            { ...opened, puzzle: { ...opened.puzzle!, solved: true } },
+            { ...pdeck, title: 'Нова' },
+            { before: pdeck.slides, now: 1 }
+        );
 
-    expect(st.trail?.[0].slide.kind).toBeUndefined();
-  });
+        expect(same?.puzzle?.solved).toBe(true);
 
-  it("end clears the trail", () => {
-    expect(ok(applyShowCommand({ ...showing(0), trail: [{ slide: s(1) }] }, { action: "end" }, actx)).trail).toBeUndefined();
-  });
+        const changed = refreshShowSlide(
+            opened,
+            {
+                ...pdeck,
+                slides: [s(1), { ...pz, puzzle: { ...spec, seed: 99 } }, s(3)],
+            },
+            { before: pdeck.slides, now: 1 }
+        );
 
-  it("hides the image of a restricted next slide", () => {
-    expect(ok(applyShowCommand(null, { action: "open", deckId: "d1" }, actx)).nextImageUrl).toBeNull();
-    expect(ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0003" }, actx)).nextImageUrl).toBe(img(4));
-  });
+        expect(changed?.puzzle).toBeDefined();
+        expect(changed?.puzzle).not.toEqual(opened.puzzle);
 
-  it("rejects a restricted slide as cover", () => {
-    const r = applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-0002" }, actx);
+        const plain = refreshShowSlide(
+            opened,
+            {
+                ...pdeck,
+                slides: [s(1), { id: 'slide-0009', imageUrl: img(9) }, s(3)],
+            },
+            { before: pdeck.slides, now: 1 }
+        );
 
-    expect(r).toEqual({ ok: false, message: API_ERRORS.SHOW_COVER_RESTRICTED });
-  });
+        expect(plain?.puzzle).toBeUndefined();
+    });
+});
 
-  it("refreshShowSlide updates the last trail entry when audience changes", () => {
-    const prev = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, actx));
+describe('стежка і аудиторія', () => {
+    const restricted = (n: number): Slide => ({ ...s(n), audience: ['h1'] });
 
-    const edited: ShowDeck = { ...aDeck, slides: [{ ...aDeck.slides[0], audience: ["h9"] }, ...aDeck.slides.slice(1)] };
+    const aDeck: ShowDeck = {
+        id: 'd1',
+        title: 'Т',
+        slides: [s(1), restricted(2), restricted(3), s(4)],
+    };
 
-    const next = refreshShowSlide(prev, edited, { before: aDeck.slides, now: 1 });
+    const actx = { now: 1, deck: aDeck, library: [] };
 
-    expect(next?.trail?.[0].slide.audience).toEqual(["h9"]);
-  });
+    const ids = (st: ShowState) => st.trail?.map((e) => e.slide.id);
 
-  it("caps the trail length", () => {
-    const many: ShowDeck = { id: "d1", title: "Т", slides: Array.from({ length: 40 }, (_, i) => ({ id: `slide-${String(i).padStart(4, "0")}`, imageUrl: img(i), audience: ["h1"] })) };
+    it('open resets the trail to the target', () => {
+        const st = ok(
+            applyShowCommand(
+                { ...showing(0), trail: [{ slide: restricted(2) }] },
+                { action: 'open', deckId: 'd1', slideId: aDeck.slides[1].id },
+                actx
+            )
+        );
 
-    let st = ok(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...actx, deck: many }));
+        expect(ids(st)).toEqual(['slide-0002']);
+    });
 
-    for (let i = 0; i < 39; i++) st = ok(applyShowCommand(st, { action: "next" }, { ...actx, deck: many }));
+    it('next appends restricted slides and a public slide compacts', () => {
+        let st = ok(
+            applyShowCommand(null, { action: 'open', deckId: 'd1' }, actx)
+        );
 
-    expect(st.trail).toHaveLength(30);
-  });
+        st = ok(applyShowCommand(st, { action: 'next' }, actx));
+        st = ok(applyShowCommand(st, { action: 'next' }, actx));
+
+        expect(ids(st)).toEqual(['slide-0001', 'slide-0002', 'slide-0003']);
+
+        st = ok(applyShowCommand(st, { action: 'next' }, actx));
+
+        expect(ids(st)).toEqual(['slide-0004']);
+    });
+
+    it('prev moves a revisited slide to the end without duplicates', () => {
+        let st = ok(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1', slideId: 'slide-0002' },
+                actx
+            )
+        );
+
+        st = ok(applyShowCommand(st, { action: 'next' }, actx));
+        st = ok(applyShowCommand(st, { action: 'prev' }, actx));
+
+        expect(ids(st)).toEqual(['slide-0003', 'slide-0002']);
+    });
+
+    it('strips puzzle fields from the trail snapshot', () => {
+        const pz: Slide = {
+            ...s(5),
+            kind: 'puzzle',
+            puzzle: {
+                cut: 'classic',
+                count: 4,
+                seed: 1,
+                imageWidth: 10,
+                imageHeight: 10,
+            },
+        };
+
+        const st = ok(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1' },
+                { ...actx, deck: { ...aDeck, slides: [pz] } }
+            )
+        );
+
+        expect(st.trail?.[0].slide.kind).toBeUndefined();
+    });
+
+    it('end clears the trail', () => {
+        expect(
+            ok(
+                applyShowCommand(
+                    { ...showing(0), trail: [{ slide: s(1) }] },
+                    { action: 'end' },
+                    actx
+                )
+            ).trail
+        ).toBeUndefined();
+    });
+
+    it('hides the image of a restricted next slide', () => {
+        expect(
+            ok(applyShowCommand(null, { action: 'open', deckId: 'd1' }, actx))
+                .nextImageUrl
+        ).toBeNull();
+        expect(
+            ok(
+                applyShowCommand(
+                    null,
+                    { action: 'open', deckId: 'd1', slideId: 'slide-0003' },
+                    actx
+                )
+            ).nextImageUrl
+        ).toBe(img(4));
+    });
+
+    it('rejects a restricted slide as cover', () => {
+        const r = applyShowCommand(
+            null,
+            { action: 'setCover', deckId: 'd1', slideId: 'slide-0002' },
+            actx
+        );
+
+        expect(r).toEqual({
+            ok: false,
+            message: API_ERRORS.SHOW_COVER_RESTRICTED,
+        });
+    });
+
+    it('refreshShowSlide updates the last trail entry when audience changes', () => {
+        const prev = ok(
+            applyShowCommand(null, { action: 'open', deckId: 'd1' }, actx)
+        );
+
+        const edited: ShowDeck = {
+            ...aDeck,
+            slides: [
+                { ...aDeck.slides[0], audience: ['h9'] },
+                ...aDeck.slides.slice(1),
+            ],
+        };
+
+        const next = refreshShowSlide(prev, edited, {
+            before: aDeck.slides,
+            now: 1,
+        });
+
+        expect(next?.trail?.[0].slide.audience).toEqual(['h9']);
+    });
+
+    it('caps the trail length', () => {
+        const many: ShowDeck = {
+            id: 'd1',
+            title: 'Т',
+            slides: Array.from({ length: 40 }, (_, i) => ({
+                id: `slide-${String(i).padStart(4, '0')}`,
+                imageUrl: img(i),
+                audience: ['h1'],
+            })),
+        };
+
+        let st = ok(
+            applyShowCommand(
+                null,
+                { action: 'open', deckId: 'd1' },
+                { ...actx, deck: many }
+            )
+        );
+
+        for (let i = 0; i < 39; i++)
+            st = ok(
+                applyShowCommand(
+                    st,
+                    { action: 'next' },
+                    { ...actx, deck: many }
+                )
+            );
+
+        expect(st.trail).toHaveLength(30);
+    });
 });

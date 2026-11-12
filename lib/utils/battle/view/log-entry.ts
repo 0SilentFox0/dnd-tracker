@@ -1,78 +1,100 @@
-import { BattleActionType } from "@/lib/constants/battle";
-import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
-import { splitLegacyTriggers } from "@/lib/utils/battle/log/legacy";
-import { actionLines } from "@/lib/utils/battle/log/lines";
-import { getLogEntryDetailItems } from "@/lib/utils/battle/view/log-format";
-import type { BattleAction } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import { BattleActionType } from '@/lib/constants/battle';
+import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
+import { splitLegacyTriggers } from '@/lib/utils/battle/log/legacy';
+import { actionLines } from '@/lib/utils/battle/log/lines';
+import { getLogEntryDetailItems } from '@/lib/utils/battle/view/log-format';
+import type { BattleAction } from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
-const KNOWN_KINDS: ReadonlySet<string> = new Set(Object.values(BattleActionType));
+const KNOWN_KINDS: ReadonlySet<string> = new Set(
+    Object.values(BattleActionType)
+);
 
 export interface LogEntryView {
-  headline: LogLine;
-  lines: LogLine[];
-  hp: { id: string; name: string; delta: number }[];
-  kindLabel: LogLine;
-  hasDetails: boolean;
-  isTrigger: boolean;
-  kind?: "hazard";
+    headline: LogLine;
+    lines: LogLine[];
+    hp: { id: string; name: string; delta: number }[];
+    kindLabel: LogLine;
+    hasDetails: boolean;
+    isTrigger: boolean;
+    kind?: 'hazard';
 }
 
 export interface LogRoundGroup {
-  round: number;
-  entries: BattleAction[];
+    round: number;
+    entries: BattleAction[];
 }
 
 /** Послідовні записи одного раунду; порядок вхідного списку зберігається. */
 export function groupLogByRound(entries: BattleAction[]): LogRoundGroup[] {
-  const groups: LogRoundGroup[] = [];
+    const groups: LogRoundGroup[] = [];
 
-  for (const e of entries) {
-    const last = groups.at(-1);
+    for (const e of entries) {
+        const last = groups.at(-1);
 
-    if (last && last.round === e.round) last.entries.push(e);
-    else groups.push({ round: e.round, entries: [e] });
-  }
+        if (last && last.round === e.round) last.entries.push(e);
+        else groups.push({ round: e.round, entries: [e] });
+    }
 
-  return groups;
+    return groups;
 }
 
 /** Headline and sub-lines of an entry: structured logs are used as they are, legacy rows are split the old way. */
-export function logParts(e: Pick<BattleAction, "log" | "resultText">): { headline: LogLine; lines: LogLine[]; isTrigger: boolean } {
-  const parts = splitLegacyTriggers(actionLines(e));
+export function logParts(e: Pick<BattleAction, 'log' | 'resultText'>): {
+    headline: LogLine;
+    lines: LogLine[];
+    isTrigger: boolean;
+} {
+    const parts = splitLegacyTriggers(actionLines(e));
 
-  if (!e.log) return parts;
+    if (!e.log) return parts;
 
-  const first = e.log[0];
+    const first = e.log[0];
 
-  return { ...parts, isTrigger: typeof first === "object" && first.message.startsWith("battleLog.triggers.") };
+    return {
+        ...parts,
+        isTrigger:
+            typeof first === 'object' &&
+            first.message.startsWith('battleLog.triggers.'),
+    };
 }
 
 /** Запис журналу для показу: перший сегмент — заголовок, решта — підрядки; зміни HP — окремо (шкода з мінусом). */
 export function logEntryView(e: BattleAction): LogEntryView {
-  const { headline, lines, isTrigger } = logParts(e);
+    const { headline, lines, isTrigger } = logParts(e);
 
-  const byId = new Map<string, { id: string; name: string; delta: number }>();
+    const byId = new Map<string, { id: string; name: string; delta: number }>();
 
-  for (const c of e.hpChanges ?? []) {
-    const prev = byId.get(c.participantId);
+    for (const c of e.hpChanges ?? []) {
+        const prev = byId.get(c.participantId);
 
-    byId.set(c.participantId, { id: c.participantId, name: c.participantName, delta: (prev?.delta ?? 0) - c.change });
-  }
+        byId.set(c.participantId, {
+            id: c.participantId,
+            name: c.participantName,
+            delta: (prev?.delta ?? 0) - c.change,
+        });
+    }
 
-  const hazard = !!e.actionDetails?.hazard;
+    const hazard = !!e.actionDetails?.hazard;
 
-  const rolls = e.actionDetails?.damageRolls;
+    const rolls = e.actionDetails?.damageRolls;
 
-  const turnStart = !!rolls?.length && rolls.every((r) => r.damageType === "dot");
+    const turnStart =
+        !!rolls?.length && rolls.every((r) => r.damageType === 'dot');
 
-  return {
-    headline,
-    lines,
-    hp: [...byId.values()].filter((h) => h.delta !== 0),
-    kindLabel: hazard ? textRef("battleCommon.actionKinds.hazard") : turnStart ? textRef("battleCommon.actionKinds.turnStart") : KNOWN_KINDS.has(e.actionType) ? dynamicTextRef(`battleCommon.actionKinds.${e.actionType}`) : textRef("battleCommon.actionKinds.event"),
-    hasDetails: getLogEntryDetailItems(e).length > 0,
-    isTrigger,
-    ...(hazard && { kind: "hazard" as const }),
-  };
+    return {
+        headline,
+        lines,
+        hp: [...byId.values()].filter((h) => h.delta !== 0),
+        kindLabel: hazard
+            ? textRef('battleCommon.actionKinds.hazard')
+            : turnStart
+              ? textRef('battleCommon.actionKinds.turnStart')
+              : KNOWN_KINDS.has(e.actionType)
+                ? dynamicTextRef(`battleCommon.actionKinds.${e.actionType}`)
+                : textRef('battleCommon.actionKinds.event'),
+        hasDetails: getLogEntryDetailItems(e).length > 0,
+        isTrigger,
+        ...(hazard && { kind: 'hazard' as const }),
+    };
 }

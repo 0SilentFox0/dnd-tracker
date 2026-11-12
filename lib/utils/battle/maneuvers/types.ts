@@ -1,24 +1,28 @@
-import type { Downed, Rng } from "@/lib/utils/abilities/engine/core/types";
-import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import type { Downed, Rng } from '@/lib/utils/abilities/engine/core/types';
+import type { Ruleset } from '@/lib/utils/rules';
+import type {
+    BattleMapConfig,
+    BattleParticipant,
+    GridPoint,
+} from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 export interface ManeuverInput {
-  actorId: string;
-  name: string;
-  percentOfAttack: number;
-  targetIds: string[];
-  targetCell?: GridPoint;
-  range?: number;
-  maxTargets?: number;
-  map?: BattleMapConfig | null;
-  round: number;
-  rng: Rng;
-  rules: Ruleset;
+    actorId: string;
+    name: string;
+    percentOfAttack: number;
+    targetIds: string[];
+    targetCell?: GridPoint;
+    range?: number;
+    maxTargets?: number;
+    map?: BattleMapConfig | null;
+    round: number;
+    rng: Rng;
+    rules: Ruleset;
 }
 
 export interface ManeuverResult {
-  participants: BattleParticipant[];
-  messages: LogLine[];
-  downed: Downed[];
+    participants: BattleParticipant[];
+    messages: LogLine[];
+    downed: Downed[];
 }

@@ -1,39 +1,60 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import type { MoraleCheckInput } from "@/lib/schemas";
-import { requireActor } from "@/lib/utils/battle/common/control";
-import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/morale/threshold";
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError, rejectAction } from "@/lib/utils/battle/store";
-import { checkMorale } from "@/systems/morale/rules/check";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import type { MoraleCheckInput } from '@/lib/schemas';
+import { requireActor } from '@/lib/utils/battle/common/control';
+import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/morale/threshold';
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { BattleRuleError, rejectAction } from '@/lib/utils/battle/store';
+import { checkMorale } from '@/systems/morale/rules/check';
 
-export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleCheckInput): MutationResult {
-  if (!ctx.meta.rules.morale.enabled) rejectAction(API_ERRORS.BATTLE_MORALE_DISABLED);
+export function moraleCheckMutation(
+    ctx: BattleMutationContext,
+    data: MoraleCheckInput
+): MutationResult {
+    if (!ctx.meta.rules.morale.enabled)
+        rejectAction(API_ERRORS.BATTLE_MORALE_DISABLED);
 
-  const participant = requireActor(ctx, data.participantId, { missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE, forbidden: API_ERRORS.FORBIDDEN });
+    const participant = requireActor(ctx, data.participantId, {
+        missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
+        forbidden: API_ERRORS.FORBIDDEN,
+    });
 
-  const pending = ctx.scene.pendingMoraleCheck as PendingMoraleCheckPayload | null;
+    const pending = ctx.scene
+        .pendingMoraleCheck as PendingMoraleCheckPayload | null;
 
-  if (pending?.participantId === data.participantId) {
-    throw new BattleRuleError("action_used", API_ERRORS.BATTLE_MORALE_ALREADY_CHECKED);
-  }
+    if (pending?.participantId === data.participantId) {
+        throw new BattleRuleError(
+            'action_used',
+            API_ERRORS.BATTLE_MORALE_ALREADY_CHECKED
+        );
+    }
 
-  if (participant.battleData.extraTurnActive) {
-    throw new BattleRuleError("action_used", API_ERRORS.BATTLE_MORALE_EXTRA_TURN);
-  }
+    if (participant.battleData.extraTurnActive) {
+        throw new BattleRuleError(
+            'action_used',
+            API_ERRORS.BATTLE_MORALE_EXTRA_TURN
+        );
+    }
 
-  const moraleResult = checkMorale(participant, data.d10Roll, ctx.participants);
+    const moraleResult = checkMorale(
+        participant,
+        data.d10Roll,
+        ctx.participants
+    );
 
-  const pendingMoraleCheck: PendingMoraleCheckPayload = {
-    participantId: data.participantId,
-    d10Roll: data.d10Roll,
-    moraleResult,
-  };
+    const pendingMoraleCheck: PendingMoraleCheckPayload = {
+        participantId: data.participantId,
+        d10Roll: data.d10Roll,
+        moraleResult,
+    };
 
-  return {
-    participants: ctx.participants,
-    pending: ctx.pending,
-    scene: { pendingMoraleCheck },
-    events: [],
-    response: { moraleResult },
-  };
+    return {
+        participants: ctx.participants,
+        pending: ctx.pending,
+        scene: { pendingMoraleCheck },
+        events: [],
+        response: { moraleResult },
+    };
 }

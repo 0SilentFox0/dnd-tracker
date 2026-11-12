@@ -1,117 +1,215 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 
-import { AwaitingDmBanner } from "./AwaitingDmBanner";
-import { BattleOverBanner } from "./BattleOverBanner";
-import { BattleTopBar } from "./BattleTopBar";
-import { ConnectionBanner } from "./ConnectionBanner";
-import { LastActionTicker } from "./LastActionTicker";
+import { AwaitingDmBanner } from './AwaitingDmBanner';
+import { BattleOverBanner } from './BattleOverBanner';
+import { BattleTopBar } from './BattleTopBar';
+import { ConnectionBanner } from './ConnectionBanner';
+import { LastActionTicker } from './LastActionTicker';
 
-import { SideDot } from "@/components/battle/hud";
-import { BattleLog } from "@/components/battle/log/BattleLog";
-import { BattleMapPanel } from "@/components/battle/map/BattleMapPanel";
-import { MapToolsSlotContext } from "@/components/battle/map/MapToolsSlot";
-import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
-import { MyHeroPanel } from "@/components/battle/participants/MyHeroPanel";
-import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
-import { ParticipantList } from "@/components/battle/participants/ParticipantList";
-import { ReserveGroup } from "@/components/battle/participants/ReservePanel";
-import { MyTurnControls } from "@/components/battle/turn/MyTurnControls";
-import { HudChipTabs } from "@/components/hud/page/HudChipTabs";
-import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
-import { useBattleScene, useBattleViewMode, useSelectedParticipant, useTrackReorder } from "@/lib/hooks/battle";
-import { myTurnKey } from "@/lib/utils/battle/view";
+import { SideDot } from '@/components/battle/hud';
+import { BattleLog } from '@/components/battle/log/BattleLog';
+import { BattleMapPanel } from '@/components/battle/map/BattleMapPanel';
+import { MapToolsSlotContext } from '@/components/battle/map/MapToolsSlot';
+import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
+import { MyHeroPanel } from '@/components/battle/participants/MyHeroPanel';
+import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
+import { ParticipantList } from '@/components/battle/participants/ParticipantList';
+import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
+import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
+import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
+import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
+import {
+    useBattleScene,
+    useBattleViewMode,
+    useSelectedParticipant,
+    useTrackReorder,
+} from '@/lib/hooks/battle';
+import { myTurnKey } from '@/lib/utils/battle/view';
 
-const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
+const DmPanel = dynamic(
+    () => import('@/components/battle/dm/DmPanel').then((m) => m.DmPanel),
+    { ssr: false }
+);
 
-const H3 = ({ side, children }: { side: ParticipantSide; children: React.ReactNode }) => (
-  <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
-    <SideDot side={side} />
-    {children}
-  </h3>
+const H3 = ({
+    side,
+    children,
+}: {
+    side: ParticipantSide;
+    children: React.ReactNode;
+}) => (
+    <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
+        <SideDot side={side} />
+        {children}
+    </h3>
 );
 
 function BattleColumns() {
-  const t = useTranslations("battle.sides");
+    const t = useTranslations('battle.sides');
 
-  const { roster: { allies, enemies } } = useBattleScene();
+    const {
+        roster: { allies, enemies },
+    } = useBattleScene();
 
-  return (
-    <>
-      <div className="min-w-0"><H3 side={ParticipantSide.ALLY}>{t("alliesCount", { count: allies.length })}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
-      <div className="min-w-0"><H3 side={ParticipantSide.ENEMY}>{t("enemiesCount", { count: enemies.length })}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
-    </>
-  );
+    return (
+        <>
+            <div className="min-w-0">
+                <H3 side={ParticipantSide.ALLY}>
+                    {t('alliesCount', { count: allies.length })}
+                </H3>
+                <ParticipantList side={ParticipantSide.ALLY} className="px-0" />
+            </div>
+            <div className="min-w-0">
+                <H3 side={ParticipantSide.ENEMY}>
+                    {t('enemiesCount', { count: enemies.length })}
+                </H3>
+                <ParticipantList
+                    side={ParticipantSide.ENEMY}
+                    className="px-0"
+                />
+            </div>
+        </>
+    );
 }
 
-export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
-  const t = useTranslations("battle.scene");
+export function DesktopBattleLayout({
+    onComplete,
+}: {
+    onComplete: () => void;
+}) {
+    const t = useTranslations('battle.scene');
 
-  const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM, readOnly }, select, log, intents } = useBattleScene();
+    const {
+        battle,
+        battleId,
+        awaiting,
+        roster: { hero },
+        turn: { isMyTurn },
+        viewer: { isDM, readOnly },
+        select,
+        log,
+        intents,
+    } = useBattleScene();
 
-  const onReorder = useTrackReorder();
+    const onReorder = useTrackReorder();
 
-  const [storedMode, setViewMode] = useBattleViewMode(battleId);
+    const [storedMode, setViewMode] = useBattleViewMode(battleId);
 
-  // наведення шаблону тимчасово показує карту, не змінюючи збережений вибір
-  const viewMode = (intents.mapAim || intents.mapPick) ? "map" : storedMode;
+    // наведення шаблону тимчасово показує карту, не змінюючи збережений вибір
+    const viewMode = intents.mapAim || intents.mapPick ? 'map' : storedMode;
 
-  const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
+    const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);
 
-  const selected = useSelectedParticipant();
+    const selected = useSelectedParticipant();
 
-  return (
-    <div className="below-header flex flex-col overflow-hidden">
-      <ConnectionBanner />
-      <BattleTopBar onComplete={onComplete} />
-      {battle.status === BattleStatus.COMPLETED && <BattleOverBanner />}
-      {awaiting && <AwaitingDmBanner />}
-      <div className="flex h-20 items-center border-y border-white/[.08]">
-        <div className="min-w-0 flex-1"><InitiativeTrack onReorder={onReorder} /></div>
-        <div className="w-[420px] shrink-0"><LastActionTicker /></div>
-      </div>
-      <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_280px]">
-        <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5 pb-20">
-          {hero && <MyHeroPanel hero={hero} />}
-          {isMyTurn && hero && <MyTurnControls key={myTurnKey(hero, battle.currentRound)} hero={hero} />}
-          {!isMyTurn && !isDM && !readOnly && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">{t("actionsWait")}</div>}
-          {isDM && <DmPanel />}
-          {battle.map && viewMode === "map" && <ReserveGroup />}
-        </aside>
-        {battle.map ? (
-          <main className="flex min-h-0 flex-col">
-            <div data-tour="battle.map-tools" className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-1 pt-1">
-              <div ref={setToolsSlot} className="flex min-w-0 items-center" />
-              <HudChipTabs
-                ariaLabel={t("viewMode")}
-                items={[
-                  { key: "map", label: t("viewMap"), active: viewMode === "map", onSelect: () => setViewMode("map") },
-                  { key: "columns", label: t("viewColumns"), active: viewMode === "columns", onSelect: () => setViewMode("columns") },
-                ]}
-              />
+    return (
+        <div className="below-header flex flex-col overflow-hidden">
+            <ConnectionBanner />
+            <BattleTopBar onComplete={onComplete} />
+            {battle.status === BattleStatus.COMPLETED && <BattleOverBanner />}
+            {awaiting && <AwaitingDmBanner />}
+            <div className="flex h-20 items-center border-y border-white/[.08]">
+                <div className="min-w-0 flex-1">
+                    <InitiativeTrack onReorder={onReorder} />
+                </div>
+                <div className="w-[420px] shrink-0">
+                    <LastActionTicker />
+                </div>
             </div>
-            {viewMode === "map" ? (
-              <div className="min-h-0 flex-1 p-1">
-                <MapToolsSlotContext.Provider value={toolsSlot}><BattleMapPanel /></MapToolsSlotContext.Provider>
-              </div>
-            ) : (
-              <div className="grid min-h-0 flex-1 grid-cols-2 gap-6 overflow-y-auto px-6 py-4"><BattleColumns /></div>
-            )}
-          </main>
-        ) : (
-          <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4"><BattleColumns /></main>
-        )}
-        <aside data-tour="battle.log" className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
-          <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
-            {selected ? t("participant") : t("log")}
-            {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]">{t("backToLog")}</button>}
-          </h3>
-          {selected ? <div className="pt-3"><ParticipantDetails participant={selected} /></div> : <BattleLog key={log.focus ?? "latest"} />}
-        </aside>
-      </div>
-    </div>
-  );
+            <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_280px]">
+                <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5 pb-20">
+                    {hero && <MyHeroPanel hero={hero} />}
+                    {isMyTurn && hero && (
+                        <MyTurnControls
+                            key={myTurnKey(hero, battle.currentRound)}
+                            hero={hero}
+                        />
+                    )}
+                    {!isMyTurn &&
+                        !isDM &&
+                        !readOnly &&
+                        battle.status === BattleStatus.ACTIVE && (
+                            <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm text-[var(--hud-muted)] italic">
+                                {t('actionsWait')}
+                            </div>
+                        )}
+                    {isDM && <DmPanel />}
+                    {battle.map && viewMode === 'map' && <ReserveGroup />}
+                </aside>
+                {battle.map ? (
+                    <main className="flex min-h-0 flex-col">
+                        <div
+                            data-tour="battle.map-tools"
+                            className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-1 pt-1"
+                        >
+                            <div
+                                ref={setToolsSlot}
+                                className="flex min-w-0 items-center"
+                            />
+                            <HudChipTabs
+                                ariaLabel={t('viewMode')}
+                                items={[
+                                    {
+                                        key: 'map',
+                                        label: t('viewMap'),
+                                        active: viewMode === 'map',
+                                        onSelect: () => setViewMode('map'),
+                                    },
+                                    {
+                                        key: 'columns',
+                                        label: t('viewColumns'),
+                                        active: viewMode === 'columns',
+                                        onSelect: () => setViewMode('columns'),
+                                    },
+                                ]}
+                            />
+                        </div>
+                        {viewMode === 'map' ? (
+                            <div className="min-h-0 flex-1 p-1">
+                                <MapToolsSlotContext.Provider value={toolsSlot}>
+                                    <BattleMapPanel />
+                                </MapToolsSlotContext.Provider>
+                            </div>
+                        ) : (
+                            <div className="grid min-h-0 flex-1 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
+                                <BattleColumns />
+                            </div>
+                        )}
+                    </main>
+                ) : (
+                    <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4">
+                        <BattleColumns />
+                    </main>
+                )}
+                <aside
+                    data-tour="battle.log"
+                    className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4"
+                >
+                    <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
+                        {selected ? t('participant') : t('log')}
+                        {selected && (
+                            <button
+                                type="button"
+                                onClick={() => select(null)}
+                                className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]"
+                            >
+                                {t('backToLog')}
+                            </button>
+                        )}
+                    </h3>
+                    {selected ? (
+                        <div className="pt-3">
+                            <ParticipantDetails participant={selected} />
+                        </div>
+                    ) : (
+                        <BattleLog key={log.focus ?? 'latest'} />
+                    )}
+                </aside>
+            </div>
+        </div>
+    );
 }

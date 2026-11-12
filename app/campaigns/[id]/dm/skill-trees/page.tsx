@@ -1,11 +1,15 @@
-import { SkillTreePageClient } from "./page-client";
+import { SkillTreePageClient } from './page-client';
 
-import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
+import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 
-export default async function SkillTreesPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function SkillTreesPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-  const { isDemo } = await requireCampaignDMOrDemo(id);
+    const { isDemo } = await requireCampaignDMOrDemo(id);
 
-  return <SkillTreePageClient campaignId={id} canEdit={!isDemo} />;
+    return <SkillTreePageClient campaignId={id} canEdit={!isDemo} />;
 }

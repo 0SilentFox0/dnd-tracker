@@ -1,77 +1,105 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
-import { useConfirm } from "@/lib/hooks/common";
-import { useTranslator } from "@/lib/i18n/use-translator";
-import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
+import { abilitySaveError, useAbilityValidity } from '@/lib/hooks/abilities';
+import { useConfirm } from '@/lib/hooks/common';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import type { ArmorStats } from '@/lib/utils/artifacts/armor-stats';
 import {
-  type ArtifactFormState,
-  type ArtifactFormSubmitPayload,
-  buildArtifactPayload,
-} from "@/lib/utils/artifacts/artifact-form";
-import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
-import type { ItemStats } from "@/lib/utils/items/item-stats";
+    type ArtifactFormState,
+    type ArtifactFormSubmitPayload,
+    buildArtifactPayload,
+} from '@/lib/utils/artifacts/artifact-form';
+import type { WeaponStats } from '@/lib/utils/artifacts/weapon-stats';
+import type { ItemStats } from '@/lib/utils/items/item-stats';
 
 interface UseArtifactFormOptions {
-  initial: Omit<ArtifactFormState, "weapon" | "armor" | "item"> & { weapon?: WeaponStats; armor?: ArmorStats | null; item?: ItemStats | null };
-  mode: "create" | "edit";
-  onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
-  onDelete?: () => Promise<void>;
+    initial: Omit<ArtifactFormState, 'weapon' | 'armor' | 'item'> & {
+        weapon?: WeaponStats;
+        armor?: ArmorStats | null;
+        item?: ItemStats | null;
+    };
+    mode: 'create' | 'edit';
+    onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
+    onDelete?: () => Promise<void>;
 }
 
-export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifactFormOptions) {
-  const t = useTranslations();
+export function useArtifactForm({
+    initial,
+    mode,
+    onSubmit,
+    onDelete,
+}: UseArtifactFormOptions) {
+    const t = useTranslations();
 
-  const ta = useTranslator("abilities");
+    const ta = useTranslator('abilities');
 
-  const confirm = useConfirm();
+    const confirm = useConfirm();
 
-  const [fields, setFields] = useState<ArtifactFormState>({ ...initial, weapon: initial.weapon ?? {}, armor: initial.armor ?? null });
+    const [fields, setFields] = useState<ArtifactFormState>({
+        ...initial,
+        weapon: initial.weapon ?? {},
+        armor: initial.armor ?? null,
+    });
 
-  const abilities = useAbilityValidity();
+    const abilities = useAbilityValidity();
 
-  const [isSaving, setIsSaving] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-  const setField = <K extends keyof ArtifactFormState>(key: K, value: ArtifactFormState[K]) =>
-    setFields((prev) => ({ ...prev, [key]: value }));
+    const setField = <K extends keyof ArtifactFormState>(
+        key: K,
+        value: ArtifactFormState[K]
+    ) => setFields((prev) => ({ ...prev, [key]: value }));
 
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault();
+    const submit = async (event: React.FormEvent) => {
+        event.preventDefault();
 
-    if (!abilities.valid) return;
+        if (!abilities.valid) return;
 
-    if (!fields.name.trim()) {
-      setError(t("common.form.nameRequired"));
+        if (!fields.name.trim()) {
+            setError(t('common.form.nameRequired'));
 
-      return;
-    }
+            return;
+        }
 
-    setIsSaving(true);
-    setError(null);
+        setIsSaving(true);
+        setError(null);
 
-    try {
-      await onSubmit(buildArtifactPayload(fields, mode));
-    } catch (err) {
-      setError(abilitySaveError(err, mode === "edit" ? t("common.form.updateFailed") : t("common.form.createFailed"), ta));
-    } finally {
-      setIsSaving(false);
-    }
-  };
+        try {
+            await onSubmit(buildArtifactPayload(fields, mode));
+        } catch (err) {
+            setError(
+                abilitySaveError(
+                    err,
+                    mode === 'edit'
+                        ? t('common.form.updateFailed')
+                        : t('common.form.createFailed'),
+                    ta
+                )
+            );
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
-  const remove = () =>
-    onDelete
-      ? confirm({ title: t("artifacts.list.confirmDelete"), confirmLabel: t("common.actions.delete"), destructive: true, onConfirm: onDelete })
-      : Promise.resolve(false);
+    const remove = () =>
+        onDelete
+            ? confirm({
+                  title: t('artifacts.list.confirmDelete'),
+                  confirmLabel: t('common.actions.delete'),
+                  destructive: true,
+                  onConfirm: onDelete,
+              })
+            : Promise.resolve(false);
 
-  return {
-    form: { data: fields, set: setField },
-    abilities,
-    status: { isSaving, isBusy: isSaving, error },
-    actions: { submit, remove },
-  };
+    return {
+        form: { data: fields, set: setField },
+        abilities,
+        status: { isSaving, isBusy: isSaving, error },
+        actions: { submit, remove },
+    };
 }

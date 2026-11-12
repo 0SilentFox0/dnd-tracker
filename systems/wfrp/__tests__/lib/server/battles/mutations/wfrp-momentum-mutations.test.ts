@@ -1,78 +1,183 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
-import { coreActionMutation } from "@/lib/server/battles/mutations/core-action/core-action-mutation";
-import { legendaryMutation } from "@/lib/server/battles/mutations/core-action/legendary-mutation";
-import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { momentumOf, sceneOf, slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
-import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
-import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
-import type { SceneMomentum } from "@/systems/wfrp/rules/slots";
-import type { BattleParticipant } from "@/types/battle";
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import {
+    context,
+    goblin,
+    hero,
+} from '@/lib/server/battles/__tests__/mutations/fixtures';
+import { coreActionMutation } from '@/lib/server/battles/mutations/core-action/core-action-mutation';
+import { legendaryMutation } from '@/lib/server/battles/mutations/core-action/legendary-mutation';
+import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import {
+    momentumOf,
+    sceneOf,
+    slotOf,
+} from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
+import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import type { SceneMomentum } from '@/systems/wfrp/rules/slots';
+import type { BattleParticipant } from '@/types/battle';
 
-const sword = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" } as const;
+const sword = {
+    id: 'sw',
+    name: 'Sword',
+    type: AttackType.MELEE,
+    attackBonus: 0,
+    damageDice: '1d6',
+    damageType: 'slashing',
+} as const;
 
-const fighter = (id: string, side: ParticipantSide, extra: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => {
-  const p = makeParticipant({ id, side, hp: 40, maxHp: 40 });
+const fighter = (
+    id: string,
+    side: ParticipantSide,
+    extra: Partial<BattleParticipant['battleData']> = {}
+): BattleParticipant => {
+    const p = makeParticipant({ id, side, hp: 40, maxHp: 40 });
 
-  return {
-    ...p,
-    basicInfo: { ...p.basicInfo, battleId: "b1", controlledBy: "dm" },
-    abilities: { ...p.abilities, system: slotOf({ ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } }) },
-    battleData: { ...p.battleData, attacks: [sword], ...extra },
-  };
+    return {
+        ...p,
+        basicInfo: { ...p.basicInfo, battleId: 'b1', controlledBy: 'dm' },
+        abilities: {
+            ...p.abilities,
+            system: slotOf({
+                ...DEFAULT_CHARACTERISTICS,
+                base: {
+                    ...DEFAULT_CHARACTERISTICS.base,
+                    ws: 40,
+                    bs: 40,
+                    ag: 40,
+                },
+            }),
+        },
+        battleData: { ...p.battleData, attacks: [sword], ...extra },
+    };
 };
 
 const byCall = (...values: number[]) => {
-  let i = 0;
+    let i = 0;
 
-  return () => values[i++] ?? 0.5;
+    return () => values[i++] ?? 0.5;
 };
 
-const boss = () => fighter("boss", ParticipantSide.ENEMY, { legendary: { actions: 3, actionsLeft: 3, resistLeft: 0 } });
+const boss = () =>
+    fighter('boss', ParticipantSide.ENEMY, {
+        legendary: { actions: 3, actionsLeft: 3, resistLeft: 0 },
+    });
 
-const wfrpCtx = (momentum: SceneMomentum, rng: () => number): BattleMutationContext => {
-  const base = context({ participants: [boss(), fighter("a", ParticipantSide.ALLY)], isDM: true, userId: "dm" });
+const wfrpCtx = (
+    momentum: SceneMomentum,
+    rng: () => number
+): BattleMutationContext => {
+    const base = context({
+        participants: [boss(), fighter('a', ParticipantSide.ALLY)],
+        isDM: true,
+        userId: 'dm',
+    });
 
-  return { ...base, rng, meta: { ...base.meta, rules: WFRP_RULES }, scene: { ...base.scene, turnIndex: 1, sceneState: sceneOf(momentum) } };
+    return {
+        ...base,
+        rng,
+        meta: { ...base.meta, rules: WFRP_RULES },
+        scene: { ...base.scene, turnIndex: 1, sceneState: sceneOf(momentum) },
+    };
 };
 
-const body = { action: "legendary" as const, participantId: "boss", option: { kind: "attack" as const, attackIndex: 0, targetId: "a" } };
+const body = {
+    action: 'legendary' as const,
+    participantId: 'boss',
+    option: { kind: 'attack' as const, attackIndex: 0, targetId: 'a' },
+};
 
-describe("legendary mutation momentum", () => {
-  it("writes the token to the scene when it changes", async () => {
-    const out = await legendaryMutation(wfrpCtx({}, byCall(0.295, 0.795)), body);
+describe('legendary mutation momentum', () => {
+    it('writes the token to the scene when it changes', async () => {
+        const out = await legendaryMutation(
+            wfrpCtx({}, byCall(0.295, 0.795)),
+            body
+        );
 
-    expect(momentumOf(out.scene?.sceneState ?? undefined)).toEqual({ enemy: true });
-  });
+        expect(momentumOf(out.scene?.sceneState ?? undefined)).toEqual({
+            enemy: true,
+        });
+    });
 
-  it("omits scene when the value is unchanged", async () => {
-    const out = await legendaryMutation(wfrpCtx({ enemy: true }, byCall(0.295, 0.795)), body);
+    it('omits scene when the value is unchanged', async () => {
+        const out = await legendaryMutation(
+            wfrpCtx({ enemy: true }, byCall(0.295, 0.795)),
+            body
+        );
 
-    expect(out.scene).toBeUndefined();
-  });
+        expect(out.scene).toBeUndefined();
+    });
 
-  it("d20 battles never emit scene.momentum", async () => {
-    const d20 = fighter("boss", ParticipantSide.ENEMY, { legendary: { actions: 3, actionsLeft: 3, resistLeft: 0 } });
+    it('d20 battles never emit scene.momentum', async () => {
+        const d20 = fighter('boss', ParticipantSide.ENEMY, {
+            legendary: { actions: 3, actionsLeft: 3, resistLeft: 0 },
+        });
 
-    const out = await legendaryMutation(context({ participants: [hero, { ...goblin, ...d20, basicInfo: { ...goblin.basicInfo, id: "boss", controlledBy: "dm" } }], isDM: true, userId: "dm", rng: () => 0.5 }), { ...body, option: { ...body.option, targetId: "hero" } });
+        const out = await legendaryMutation(
+            context({
+                participants: [
+                    hero,
+                    {
+                        ...goblin,
+                        ...d20,
+                        basicInfo: {
+                            ...goblin.basicInfo,
+                            id: 'boss',
+                            controlledBy: 'dm',
+                        },
+                    },
+                ],
+                isDM: true,
+                userId: 'dm',
+                rng: () => 0.5,
+            }),
+            { ...body, option: { ...body.option, targetId: 'hero' } }
+        );
 
-    expect(out.scene?.sceneState).toBeUndefined();
-  });
+        expect(out.scene?.sceneState).toBeUndefined();
+    });
 });
 
-describe("core-action mutation momentum", () => {
-  it("d20 readied attacks never emit scene.momentum", () => {
-    const base = context({ participants: [{ ...hero, battleData: { ...hero.battleData, attacks: [sword], readied: { kind: "attack", round: 1 } } }, goblin], isDM: true, userId: "dm" });
+describe('core-action mutation momentum', () => {
+    it('d20 readied attacks never emit scene.momentum', () => {
+        const base = context({
+            participants: [
+                {
+                    ...hero,
+                    battleData: {
+                        ...hero.battleData,
+                        attacks: [sword],
+                        readied: { kind: 'attack', round: 1 },
+                    },
+                },
+                goblin,
+            ],
+            isDM: true,
+            userId: 'dm',
+        });
 
-    const ctx = { ...base, meta: { ...base.meta, rules: { ...DEFAULT_RULES, actions: { ...DEFAULT_RULES.actions, enabled: true } } } };
+        const ctx = {
+            ...base,
+            meta: {
+                ...base.meta,
+                rules: {
+                    ...DEFAULT_RULES,
+                    actions: { ...DEFAULT_RULES.actions, enabled: true },
+                },
+            },
+        };
 
-    const out = coreActionMutation(ctx, { action: "readiedAttack", participantId: "hero", targetId: "gob" });
+        const out = coreActionMutation(ctx, {
+            action: 'readiedAttack',
+            participantId: 'hero',
+            targetId: 'gob',
+        });
 
-    expect(out.events.length).toBeGreaterThan(0);
-    expect(out.scene?.sceneState).toBeUndefined();
-  });
+        expect(out.events.length).toBeGreaterThan(0);
+        expect(out.scene?.sceneState).toBeUndefined();
+    });
 });

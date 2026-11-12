@@ -1,69 +1,128 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { joinLines, textRef } from "@/lib/i18n/text-ref";
-import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { modeEnter } from "@/lib/utils/battle/modes/server";
-import { dropBattleFlag, isReserved } from "@/lib/utils/battle/participant/reserve";
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, dmEvent } from "@/lib/utils/battle/store";
-import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
-import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
-import { rngOf } from "@/lib/utils/common/rng";
-import type { BattleParticipant } from "@/types/battle";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { joinLines, textRef } from '@/lib/i18n/text-ref';
+import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
+import { modeEnter } from '@/lib/utils/battle/modes/server';
+import {
+    dropBattleFlag,
+    isReserved,
+} from '@/lib/utils/battle/participant/reserve';
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { BattleAccessError, dmEvent } from '@/lib/utils/battle/store';
+import { calculateInitiative } from '@/lib/utils/battle/turn/initiative';
+import { runJoinTriggers } from '@/lib/utils/battle/turn/join-triggers';
+import { rngOf } from '@/lib/utils/common/rng';
+import type { BattleParticipant } from '@/types/battle';
 
-export const revealParticipantSchema = z.object({ participantIds: z.array(z.string()).min(1) });
+export const revealParticipantSchema = z.object({
+    participantIds: z.array(z.string()).min(1),
+});
 
 export type RevealParticipantBody = z.infer<typeof revealParticipantSchema>;
 
-function insertAfterCurrent(order: BattleParticipant[], turnIndex: number, p: BattleParticipant): BattleParticipant[] {
-  let at = turnIndex + 1;
+function insertAfterCurrent(
+    order: BattleParticipant[],
+    turnIndex: number,
+    p: BattleParticipant
+): BattleParticipant[] {
+    let at = turnIndex + 1;
 
-  while (order[at]?.battleData.revealPending) at++;
+    while (order[at]?.battleData.revealPending) at++;
 
-  return [...order.slice(0, at), p, ...order.slice(at)];
+    return [...order.slice(0, at), p, ...order.slice(at)];
 }
 
-export function revealParticipantMutation(ctx: BattleMutationContext, body: RevealParticipantBody): MutationResult {
-  let order = ctx.participants;
+export function revealParticipantMutation(
+    ctx: BattleMutationContext,
+    body: RevealParticipantBody
+): MutationResult {
+    let order = ctx.participants;
 
-  let pending = ctx.pending;
+    let pending = ctx.pending;
 
-  const revealed: BattleParticipant[] = [];
+    const revealed: BattleParticipant[] = [];
 
-  for (const id of body.participantIds) {
-    const found = pending.find((p) => p.basicInfo.id === id && isReserved(p));
+    for (const id of body.participantIds) {
+        const found = pending.find(
+            (p) => p.basicInfo.id === id && isReserved(p)
+        );
 
-    if (!found) throw new BattleAccessError(404, API_ERRORS.BATTLE_RESERVE_NOT_FOUND);
+        if (!found)
+            throw new BattleAccessError(
+                404,
+                API_ERRORS.BATTLE_RESERVE_NOT_FOUND
+            );
 
-    pending = pending.filter((p) => p !== found);
+        pending = pending.filter((p) => p !== found);
 
-    const clean = dropBattleFlag(found, "reserved");
+        const clean = dropBattleFlag(found, 'reserved');
 
-    const entering = modeEnter(ctx.meta.map, { ...clean, battleData: { ...clean.battleData, revealPending: true } });
+        const entering = modeEnter(ctx.meta.map, {
+            ...clean,
+            battleData: { ...clean.battleData, revealPending: true },
+        });
 
-    order = insertAfterCurrent(order, ctx.scene.turnIndex, entering);
-    revealed.push(entering);
-  }
+        order = insertAfterCurrent(order, ctx.scene.turnIndex, entering);
+        revealed.push(entering);
+    }
 
-  const ids = new Set(revealed.map((p) => p.basicInfo.id));
+    const ids = new Set(revealed.map((p) => p.basicInfo.id));
 
-  const joined = runJoinTriggers(applyBakedAuras(order, ids), { round: ctx.scene.round, rng: rngOf(ctx), map: ctx.meta.map, rules: ctx.meta.rules }, [...ids]);
+    const joined = runJoinTriggers(
+        applyBakedAuras(order, ids),
+        {
+            round: ctx.scene.round,
+            rng: rngOf(ctx),
+            map: ctx.meta.map,
+            rules: ctx.meta.rules,
+        },
+        [...ids]
+    );
 
-  const participants = joined.participants.map((p) => (ids.has(p.basicInfo.id) ? { ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, joined.participants) } } : p));
+    const participants = joined.participants.map((p) =>
+        ids.has(p.basicInfo.id)
+            ? {
+                  ...p,
+                  abilities: {
+                      ...p.abilities,
+                      initiative: calculateInitiative(p, joined.participants),
+                  },
+              }
+            : p
+    );
 
-  const names = revealed.map((p) => p.basicInfo.name).join(", ");
+    const names = revealed.map((p) => p.basicInfo.name).join(', ');
 
-  return {
-    participants,
-    pending,
-    events: [
-      dmEvent(
-        ctx.scene.round,
-        joined.messages.length > 0 ? textRef("battleLog.dm.revealedWith", { names, rest: joinLines(joined.messages, "; ") }) : textRef("battleLog.dm.revealed", { names }),
-        revealed.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
-      ),
-      ...(joined.psychology.lines.length > 0 ? [dmEvent(ctx.scene.round, joined.psychology.lines, joined.psychology.targets)] : []),
-    ],
-  };
+    return {
+        participants,
+        pending,
+        events: [
+            dmEvent(
+                ctx.scene.round,
+                joined.messages.length > 0
+                    ? textRef('battleLog.dm.revealedWith', {
+                          names,
+                          rest: joinLines(joined.messages, '; '),
+                      })
+                    : textRef('battleLog.dm.revealed', { names }),
+                revealed.map((p) => ({
+                    participantId: p.basicInfo.id,
+                    participantName: p.basicInfo.name,
+                }))
+            ),
+            ...(joined.psychology.lines.length > 0
+                ? [
+                      dmEvent(
+                          ctx.scene.round,
+                          joined.psychology.lines,
+                          joined.psychology.targets
+                      ),
+                  ]
+                : []),
+        ],
+    };
 }

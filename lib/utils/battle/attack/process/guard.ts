@@ -1,37 +1,54 @@
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { GUARD_KEY } from "@/lib/utils/abilities/engine/effects/marks";
-import type { BattleParticipant } from "@/types/battle";
+import {
+    findParticipant,
+    isActive,
+} from '@/lib/utils/abilities/engine/core/participants';
+import { GUARD_KEY } from '@/lib/utils/abilities/engine/effects/marks';
+import type { BattleParticipant } from '@/types/battle';
 
 export interface GuardSplit {
-  targetDamage: number;
-  guardianId: string | null;
-  guardianDamage: number;
+    targetDamage: number;
+    guardianId: string | null;
+    guardianDamage: number;
 }
 
-export function splitGuardedDamage(ps: BattleParticipant[], targetId: string, damage: number): GuardSplit {
-  const none = { targetDamage: damage, guardianId: null, guardianDamage: 0 };
+export function splitGuardedDamage(
+    ps: BattleParticipant[],
+    targetId: string,
+    damage: number
+): GuardSplit {
+    const none = { targetDamage: damage, guardianId: null, guardianDamage: 0 };
 
-  const target = findParticipant(ps, targetId);
+    const target = findParticipant(ps, targetId);
 
-  if (!target || damage <= 0) return none;
+    if (!target || damage <= 0) return none;
 
-  for (const e of target.battleData.activeEffects) {
-    const guardianId = e.source?.participantId;
+    for (const e of target.battleData.activeEffects) {
+        const guardianId = e.source?.participantId;
 
-    const percent = e.effects.find((x) => x.type === GUARD_KEY)?.value;
+        const percent = e.effects.find((x) => x.type === GUARD_KEY)?.value;
 
-    if (e.abilityKey !== GUARD_KEY || !guardianId || guardianId === targetId || !percent) continue;
+        if (
+            e.abilityKey !== GUARD_KEY ||
+            !guardianId ||
+            guardianId === targetId ||
+            !percent
+        )
+            continue;
 
-    const guardian = findParticipant(ps, guardianId);
+        const guardian = findParticipant(ps, guardianId);
 
-    if (!guardian || !isActive(guardian)) continue;
+        if (!guardian || !isActive(guardian)) continue;
 
-    const guardianDamage = Math.floor((damage * percent) / 100);
+        const guardianDamage = Math.floor((damage * percent) / 100);
 
-    if (guardianDamage === 0) continue;
+        if (guardianDamage === 0) continue;
 
-    return { targetDamage: damage - guardianDamage, guardianId, guardianDamage };
-  }
+        return {
+            targetDamage: damage - guardianDamage,
+            guardianId,
+            guardianDamage,
+        };
+    }
 
-  return none;
+    return none;
 }

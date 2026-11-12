@@ -1,69 +1,73 @@
 import {
-  ApiError,
-  campaignDelete,
-  campaignGet,
-  campaignPatch,
-  campaignPost,
-  createCampaignCrudApi,
-} from "@/lib/api/client";
-import type { SkillPayload, SkillUpdatePayload } from "@/types/api";
-import type { PersonalSkillOption, Skill } from "@/types/skills";
+    ApiError,
+    campaignDelete,
+    campaignGet,
+    campaignPatch,
+    campaignPost,
+    createCampaignCrudApi,
+} from '@/lib/api/client';
+import type { SkillPayload, SkillUpdatePayload } from '@/types/api';
+import type { PersonalSkillOption, Skill } from '@/types/skills';
 
 const skillsApi = createCampaignCrudApi<
-  Skill,
-  SkillPayload,
-  SkillUpdatePayload,
-  { ok: true }
->("/skills", { listCache: "no-store", getCache: "no-store" });
+    Skill,
+    SkillPayload,
+    SkillUpdatePayload,
+    { ok: true }
+>('/skills', { listCache: 'no-store', getCache: 'no-store' });
 
 export const getSkills = skillsApi.list;
 
 export const getSkillsByMainSkill = (campaignId: string, mainSkillId: string) =>
-  campaignGet<PersonalSkillOption[]>(campaignId, `/skills?mainSkillId=${encodeURIComponent(mainSkillId)}`, { cache: "no-store" });
+    campaignGet<PersonalSkillOption[]>(
+        campaignId,
+        `/skills?mainSkillId=${encodeURIComponent(mainSkillId)}`,
+        { cache: 'no-store' }
+    );
 export const createSkill = skillsApi.create;
 export const updateSkill = skillsApi.update;
 
 export async function getSkill(
-  campaignId: string,
-  skillId: string,
+    campaignId: string,
+    skillId: string
 ): Promise<Skill> {
-  try {
-    return await skillsApi.get(campaignId, skillId);
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 404) {
-      throw new Error("Skill not found");
-    }
+    try {
+        return await skillsApi.get(campaignId, skillId);
+    } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+            throw new Error('Skill not found');
+        }
 
-    throw err;
-  }
+        throw err;
+    }
 }
 
 export async function deleteSkill(
-  campaignId: string,
-  skillId: string,
+    campaignId: string,
+    skillId: string
 ): Promise<{ ok: true }> {
-  return campaignDelete<{ ok: true }>(campaignId, `/skills/${skillId}`);
+    return campaignDelete<{ ok: true }>(campaignId, `/skills/${skillId}`);
 }
 
 export async function updateSkillAppearance(
-  campaignId: string,
-  skillId: string,
-  appearanceDescription: string | null,
+    campaignId: string,
+    skillId: string,
+    appearanceDescription: string | null
 ): Promise<Skill> {
-  return campaignPatch<Skill>(campaignId, `/skills/${skillId}`, {
-    appearanceDescription,
-  });
+    return campaignPatch<Skill>(campaignId, `/skills/${skillId}`, {
+        appearanceDescription,
+    });
 }
 
 export async function duplicateSkill(
-  campaignId: string,
-  skillId: string,
+    campaignId: string,
+    skillId: string
 ): Promise<Skill> {
-  return campaignPost<Skill>(campaignId, `/skills/${skillId}/duplicate`, {});
+    return campaignPost<Skill>(campaignId, `/skills/${skillId}/duplicate`, {});
 }
 
 export async function deleteAllSkills(
-  campaignId: string,
+    campaignId: string
 ): Promise<{ ok: true; deleted: number }> {
-  return campaignDelete<{ ok: true; deleted: number }>(campaignId, "/skills");
+    return campaignDelete<{ ok: true; deleted: number }>(campaignId, '/skills');
 }

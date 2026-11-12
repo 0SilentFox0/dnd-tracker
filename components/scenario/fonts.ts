@@ -1,1 +1,1 @@
-export const scenarioFontClassName = "font-scenario";
+export const scenarioFontClassName = 'font-scenario';

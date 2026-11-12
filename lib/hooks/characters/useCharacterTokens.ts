@@ -1,40 +1,55 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { characterKeys } from "./keys";
+import { characterKeys } from './keys';
 
-import { createCharacterToken, deleteCharacterToken } from "@/lib/api/characters";
-import { useCrudMutation } from "@/lib/hooks/common";
-import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
-import type { CharacterSheet, CharacterToken } from "@/types/characters";
+import {
+    createCharacterToken,
+    deleteCharacterToken,
+} from '@/lib/api/characters';
+import { useCrudMutation } from '@/lib/hooks/common';
+import type { CreateTokenInput } from '@/lib/schemas/character-tokens';
+import type { CharacterSheet, CharacterToken } from '@/types/characters';
 
 export function useCharacterTokens(campaignId: string, characterId: string) {
-  const t = useTranslations("characterProfile.tokens");
+    const t = useTranslations('characterProfile.tokens');
 
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const key = characterKeys.sheet(campaignId, characterId);
+    const key = characterKeys.sheet(campaignId, characterId);
 
-  const patchTokens = (update: (tokens: CharacterToken[]) => CharacterToken[]) =>
-    queryClient.setQueryData<CharacterSheet>(key, (old) => (old ? { ...old, story: { ...old.story, tokens: update(old.story.tokens) } } : old));
+    const patchTokens = (
+        update: (tokens: CharacterToken[]) => CharacterToken[]
+    ) =>
+        queryClient.setQueryData<CharacterSheet>(key, (old) =>
+            old
+                ? {
+                      ...old,
+                      story: { ...old.story, tokens: update(old.story.tokens) },
+                  }
+                : old
+        );
 
-  const addMutation = useCrudMutation({
-    mutationFn: (input: CreateTokenInput) => createCharacterToken(campaignId, characterId, input),
-    errorText: t("saveFailed"),
-    onSuccess: ({ token }) => patchTokens((tokens) => [token, ...tokens]),
-  });
+    const addMutation = useCrudMutation({
+        mutationFn: (input: CreateTokenInput) =>
+            createCharacterToken(campaignId, characterId, input),
+        errorText: t('saveFailed'),
+        onSuccess: ({ token }) => patchTokens((tokens) => [token, ...tokens]),
+    });
 
-  const removeMutation = useCrudMutation({
-    mutationFn: (tokenId: string) => deleteCharacterToken(campaignId, characterId, tokenId),
-    errorText: t("saveFailed"),
-    onSuccess: (_res, tokenId) => patchTokens((tokens) => tokens.filter((t) => t.id !== tokenId)),
-  });
+    const removeMutation = useCrudMutation({
+        mutationFn: (tokenId: string) =>
+            deleteCharacterToken(campaignId, characterId, tokenId),
+        errorText: t('saveFailed'),
+        onSuccess: (_res, tokenId) =>
+            patchTokens((tokens) => tokens.filter((t) => t.id !== tokenId)),
+    });
 
-  return {
-    add: addMutation.mutateOk,
-    remove: removeMutation.mutateOk,
-    isPending: addMutation.isPending || removeMutation.isPending,
-  };
+    return {
+        add: addMutation.mutateOk,
+        remove: removeMutation.mutateOk,
+        isPending: addMutation.isPending || removeMutation.isPending,
+    };
 }

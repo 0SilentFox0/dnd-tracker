@@ -1,121 +1,160 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { ChevronRight, Home } from "lucide-react";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { ChevronRight, Home } from 'lucide-react';
 
-import { DM_SECTIONS } from "@/lib/constants/campaigns";
-import { LANDING_PATHS } from "@/lib/constants/site";
-import type { Translator } from "@/lib/i18n/translator";
-import { useTranslator } from "@/lib/i18n/use-translator";
+import { DM_SECTIONS } from '@/lib/constants/campaigns';
+import { LANDING_PATHS } from '@/lib/constants/site';
+import type { Translator } from '@/lib/i18n/translator';
+import { useTranslator } from '@/lib/i18n/use-translator';
 
-const SEGMENT_KEYS = ["campaigns", "dm", "character", "inventory", "new", "edit", "sets", "groups", "main-skills", "info", "print", "world", "show", "scenario", "graph"] as const;
+const SEGMENT_KEYS = [
+    'campaigns',
+    'dm',
+    'character',
+    'inventory',
+    'new',
+    'edit',
+    'sets',
+    'groups',
+    'main-skills',
+    'info',
+    'print',
+    'world',
+    'show',
+    'scenario',
+    'graph',
+] as const;
 
-const ID_KEYS = ["campaigns", "battles", "characters", "units", "spells", "artifacts", "sets"] as const;
+const ID_KEYS = [
+    'campaigns',
+    'battles',
+    'characters',
+    'units',
+    'spells',
+    'artifacts',
+    'sets',
+] as const;
 
-const isIn = <T extends string>(keys: readonly T[], value: string | undefined): value is T => !!value && (keys as readonly string[]).includes(value);
+const isIn = <T extends string>(
+    keys: readonly T[],
+    value: string | undefined
+): value is T => !!value && (keys as readonly string[]).includes(value);
 
-type Translate = ReturnType<typeof useTranslations<"common.breadcrumbs">>;
+type Translate = ReturnType<typeof useTranslations<'common.breadcrumbs'>>;
 
 const DM_SECTION_PATHS = DM_SECTIONS.map((s) => s.path);
 
-function getLabel(t: Translate, tCommon: Translator, segment: string, previous?: string) {
-  if (isIn(SEGMENT_KEYS, segment)) return t(`segments.${segment}`);
+function getLabel(
+    t: Translate,
+    tCommon: Translator,
+    segment: string,
+    previous?: string
+) {
+    if (isIn(SEGMENT_KEYS, segment)) return t(`segments.${segment}`);
 
-  if (isIn(DM_SECTION_PATHS, segment)) return tCommon(`dmSections.${segment}`);
+    if (isIn(DM_SECTION_PATHS, segment))
+        return tCommon(`dmSections.${segment}`);
 
-  if (isIn(ID_KEYS, previous)) return t(`ids.${previous}`);
+    if (isIn(ID_KEYS, previous)) return t(`ids.${previous}`);
 
-  return t("details");
+    return t('details');
 }
 
 export function Breadcrumbs() {
-  const t = useTranslations("common.breadcrumbs");
+    const t = useTranslations('common.breadcrumbs');
 
-  const tHeader = useTranslations("common.header");
+    const tHeader = useTranslations('common.header');
 
-  const tCommon = useTranslator("common");
+    const tCommon = useTranslator('common');
 
-  const pathname = usePathname();
+    const pathname = usePathname();
 
-  if (
-    pathname?.startsWith("/sign-in") ||
-    pathname?.startsWith("/sign-up") ||
-    LANDING_PATHS.includes(pathname)
-  ) {
-    return null;
-  }
-
-  const allSegments = pathname.split("/").filter(Boolean);
-
-  if (allSegments.length === 0) return null;
-
-  const crumbs: Array<{ href: string; label: string; isLast: boolean }> = [];
-
-  let previousDisplaySegment: string | undefined;
-
-  for (let i = 0; i < allSegments.length; i++) {
-    const segment = allSegments[i];
-
-    const isLastSegment = i === allSegments.length - 1;
-
-    // dm/battles stay in hrefs but only get their own crumb when they are the page itself; /settings has no page
-    if (segment === "dm" || segment === "settings" || (segment === "battles" && !isLastSegment)) {
-      previousDisplaySegment = segment;
-      continue;
+    if (
+        pathname?.startsWith('/sign-in') ||
+        pathname?.startsWith('/sign-up') ||
+        LANDING_PATHS.includes(pathname)
+    ) {
+        return null;
     }
 
-    // the home icon is the "campaigns" crumb
-    if (segment === "campaigns" && i === 0 && !isLastSegment) {
-      previousDisplaySegment = segment;
-      continue;
+    const allSegments = pathname.split('/').filter(Boolean);
+
+    if (allSegments.length === 0) return null;
+
+    const crumbs: Array<{ href: string; label: string; isLast: boolean }> = [];
+
+    let previousDisplaySegment: string | undefined;
+
+    for (let i = 0; i < allSegments.length; i++) {
+        const segment = allSegments[i];
+
+        const isLastSegment = i === allSegments.length - 1;
+
+        // dm/battles stay in hrefs but only get their own crumb when they are the page itself; /settings has no page
+        if (
+            segment === 'dm' ||
+            segment === 'settings' ||
+            (segment === 'battles' && !isLastSegment)
+        ) {
+            previousDisplaySegment = segment;
+            continue;
+        }
+
+        // the home icon is the "campaigns" crumb
+        if (segment === 'campaigns' && i === 0 && !isLastSegment) {
+            previousDisplaySegment = segment;
+            continue;
+        }
+
+        crumbs.push({
+            href: `/${allSegments.slice(0, i + 1).join('/')}`,
+            label: getLabel(t, tCommon, segment, previousDisplaySegment),
+            isLast: isLastSegment,
+        });
+
+        previousDisplaySegment = segment;
     }
 
-    crumbs.push({
-      href: `/${allSegments.slice(0, i + 1).join("/")}`,
-      label: getLabel(t, tCommon, segment, previousDisplaySegment),
-      isLast: isLastSegment,
-    });
+    if (crumbs.length === 0) return null;
 
-    previousDisplaySegment = segment;
-  }
+    const homeCrumb = allSegments[0] !== 'campaigns' || allSegments.length > 1;
 
-  if (crumbs.length === 0) return null;
-
-  const homeCrumb = allSegments[0] !== "campaigns" || allSegments.length > 1;
-
-  return (
-    <nav
-      aria-label={t("label")}
-      className="h-6 text-xs text-hud-muted"
-    >
-      <ol className="flex h-full flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap">
-        {homeCrumb && (
-          <li className="flex items-center gap-1">
-            <Link href="/campaigns" className="flex items-center text-hud-gold transition-colors hover:text-hud-gold-strong">
-              <Home className="h-3.5 w-3.5" />
-              <span className="sr-only">{tHeader("home")}</span>
-            </Link>
-            <ChevronRight className="h-3 w-3 text-hud-line" />
-          </li>
-        )}
-        {crumbs.map((crumb) => (
-          <li key={crumb.href} className="flex items-center gap-1">
-            {crumb.isLast ? (
-              <span className="text-hud-ink">{crumb.label}</span>
-            ) : (
-              <Link
-                href={crumb.href}
-                className="transition-colors hover:text-hud-ink"
-              >
-                {crumb.label}
-              </Link>
-            )}
-            {!crumb.isLast && <ChevronRight className="h-3 w-3 text-hud-line" />}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
+    return (
+        <nav aria-label={t('label')} className="h-6 text-xs text-hud-muted">
+            <ol className="flex h-full flex-nowrap items-center gap-1 overflow-x-auto whitespace-nowrap">
+                {homeCrumb && (
+                    <li className="flex items-center gap-1">
+                        <Link
+                            href="/campaigns"
+                            className="flex items-center text-hud-gold transition-colors hover:text-hud-gold-strong"
+                        >
+                            <Home className="h-3.5 w-3.5" />
+                            <span className="sr-only">{tHeader('home')}</span>
+                        </Link>
+                        <ChevronRight className="h-3 w-3 text-hud-line" />
+                    </li>
+                )}
+                {crumbs.map((crumb) => (
+                    <li key={crumb.href} className="flex items-center gap-1">
+                        {crumb.isLast ? (
+                            <span className="text-hud-ink">{crumb.label}</span>
+                        ) : (
+                            <Link
+                                href={crumb.href}
+                                className="transition-colors hover:text-hud-ink"
+                            >
+                                {crumb.label}
+                            </Link>
+                        )}
+                        {!crumb.isLast && (
+                            <ChevronRight className="h-3 w-3 text-hud-line" />
+                        )}
+                    </li>
+                ))}
+            </ol>
+        </nav>
+    );
 }

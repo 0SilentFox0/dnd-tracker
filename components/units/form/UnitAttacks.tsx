@@ -1,80 +1,85 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { HudSection } from "@/components/hud/form";
-import { Button } from "@/components/ui/button";
-import { UnitAttack as UnitAttackEditor } from "@/components/units/form/UnitAttack";
-import type { Unit, UnitAttack } from "@/types/units";
+import { HudSection } from '@/components/hud/form';
+import { Button } from '@/components/ui/button';
+import { UnitAttack as UnitAttackEditor } from '@/components/units/form/UnitAttack';
+import type { Unit, UnitAttack } from '@/types/units';
 
 interface UnitAttacksProps {
-  formData: Partial<Unit>;
-  onChange: (data: Partial<Unit>) => void;
+    formData: Partial<Unit>;
+    onChange: (data: Partial<Unit>) => void;
 }
 
 const defaultAttack: UnitAttack = {
-  name: "",
-  attackBonus: 0,
-  damageDice: "1d6",
-  damageType: "bludgeoning",
+    name: '',
+    attackBonus: 0,
+    damageDice: '1d6',
+    damageType: 'bludgeoning',
 };
 
 export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
-  const t = useTranslations("units.attacks");
+    const t = useTranslations('units.attacks');
 
-  const attacks: UnitAttack[] = Array.isArray(formData.attacks)
-    ? formData.attacks
-    : [];
+    const attacks: UnitAttack[] = Array.isArray(formData.attacks)
+        ? formData.attacks
+        : [];
 
-  const handleAdd = () => {
-    onChange({
-      attacks: [
-        ...attacks,
-        { ...defaultAttack, damageType: "bludgeoning" },
-      ],
-    });
-  };
+    const handleAdd = () => {
+        onChange({
+            attacks: [
+                ...attacks,
+                { ...defaultAttack, damageType: 'bludgeoning' },
+            ],
+        });
+    };
 
-  const handleChange = (index: number, attack: UnitAttack) => {
-    const updated = [...attacks];
+    const handleChange = (index: number, attack: UnitAttack) => {
+        const updated = [...attacks];
 
-    updated[index] = attack;
-    onChange({ attacks: updated });
-  };
+        updated[index] = attack;
+        onChange({ attacks: updated });
+    };
 
-  const handleRemove = (index: number) => {
-    const updated = attacks.filter((_, i) => i !== index);
+    const handleRemove = (index: number) => {
+        const updated = attacks.filter((_, i) => i !== index);
 
-    onChange({ attacks: updated });
-  };
+        onChange({ attacks: updated });
+    };
 
-  return (
-    <HudSection
-      title={t("title")}
-      className="space-y-4"
-      action={
-        <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-          {t("add")}
-        </Button>
-      }
-    >
-      {attacks.length > 0 ? (
-        <div className="space-y-3">
-          {attacks.map((attack, index) => (
-            <UnitAttackEditor
-              key={index}
-              attack={attack}
-              index={index}
-              onChange={(updated) => handleChange(index, updated)}
-              onRemove={() => handleRemove(index)}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground py-4">
-          {t("empty")}
-        </p>
-      )}
-    </HudSection>
-  );
+    return (
+        <HudSection
+            title={t('title')}
+            className="space-y-4"
+            action={
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAdd}
+                >
+                    {t('add')}
+                </Button>
+            }
+        >
+            {attacks.length > 0 ? (
+                <div className="space-y-3">
+                    {attacks.map((attack, index) => (
+                        <UnitAttackEditor
+                            key={index}
+                            attack={attack}
+                            index={index}
+                            onChange={(updated) => handleChange(index, updated)}
+                            onRemove={() => handleRemove(index)}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <p className="py-4 text-sm text-muted-foreground">
+                    {t('empty')}
+                </p>
+            )}
+        </HudSection>
+    );
 }

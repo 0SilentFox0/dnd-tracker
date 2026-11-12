@@ -1,113 +1,212 @@
 // @vitest-environment happy-dom
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
-import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
+import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 
 const deleteAllCharacters = vi.fn(async () => ({}));
 
 const getCharacters = vi.hoisted(() =>
-  vi.fn(async (_campaignId?: string, opts?: { status?: string }) => (opts?.status === "pending" ? [] : [
-    { id: "ch1", name: "Арвен", type: "player", race: "Ельф", class: "Лучник", level: 3, strength: 10, armorClass: 14, initiative: 2, avatar: null },
-    { id: "ch2", name: "Борин", type: "npc_hero", race: "Гном", class: "Воїн", level: 4, strength: 14, armorClass: 16, initiative: 1, avatar: null },
-  ])),
+    vi.fn(async (_campaignId?: string, opts?: { status?: string }) =>
+        opts?.status === 'pending'
+            ? []
+            : [
+                  {
+                      id: 'ch1',
+                      name: 'Арвен',
+                      type: 'player',
+                      race: 'Ельф',
+                      class: 'Лучник',
+                      level: 3,
+                      strength: 10,
+                      armorClass: 14,
+                      initiative: 2,
+                      avatar: null,
+                  },
+                  {
+                      id: 'ch2',
+                      name: 'Борин',
+                      type: 'npc_hero',
+                      race: 'Гном',
+                      class: 'Воїн',
+                      level: 4,
+                      strength: 14,
+                      armorClass: 16,
+                      initiative: 1,
+                      avatar: null,
+                  },
+              ]
+    )
 );
 
-vi.mock("@/lib/api/characters", () => ({
-  getCharacters: (...a: unknown[]) => getCharacters(...(a as [])),
-  deleteAllCharacters: (...a: unknown[]) => deleteAllCharacters(...(a as [])),
-  deleteCharacter: vi.fn(),
-  levelUpCharacter: vi.fn(),
+vi.mock('@/lib/api/characters', () => ({
+    getCharacters: (...a: unknown[]) => getCharacters(...(a as [])),
+    deleteAllCharacters: (...a: unknown[]) => deleteAllCharacters(...(a as [])),
+    deleteCharacter: vi.fn(),
+    levelUpCharacter: vi.fn(),
 }));
-vi.mock("next/link", () => ({
-  default: ({ children, href, ...rest }: { children: React.ReactNode; href: string } & Record<string, unknown>) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
+vi.mock('next/link', () => ({
+    default: ({
+        children,
+        href,
+        ...rest
+    }: { children: React.ReactNode; href: string } & Record<
+        string,
+        unknown
+    >) => (
+        <a href={href} {...rest}>
+            {children}
+        </a>
+    ),
 }));
-vi.mock("@/components/common/OptimizedImage", () => ({ OptimizedImage: () => null }));
-vi.mock("@/lib/hooks/systems", () => ({ useRuleSystem: () => ({ key: "dnd5e", system: RULE_SYSTEM_REGISTRY.dnd5e, ready: true }) }));
+vi.mock('@/components/common/OptimizedImage', () => ({
+    OptimizedImage: () => null,
+}));
+vi.mock('@/lib/hooks/systems', () => ({
+    useRuleSystem: () => ({
+        key: 'dnd5e',
+        system: RULE_SYSTEM_REGISTRY.dnd5e,
+        ready: true,
+    }),
+}));
 
-import { DMCharactersClient } from "@/app/campaigns/[id]/dm/characters/page-client";
+import { DMCharactersClient } from '@/app/campaigns/[id]/dm/characters/page-client';
 
-const renderIt = (type?: "player" | "npc_hero") =>
-  renderWithConfirm(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <DMCharactersClient campaignId="c1" type={type} maxLevel={4} />
-    </QueryClientProvider>,
-  );
+const renderIt = (type?: 'player' | 'npc_hero') =>
+    renderWithConfirm(
+        <QueryClientProvider
+            client={
+                new QueryClient({
+                    defaultOptions: { queries: { retry: false } },
+                })
+            }
+        >
+            <DMCharactersClient campaignId="c1" type={type} maxLevel={4} />
+        </QueryClientProvider>
+    );
 
 afterEach(() => {
-  cleanup();
-  deleteAllCharacters.mockReset();
-  getCharacters.mockClear();
+    cleanup();
+    deleteAllCharacters.mockReset();
+    getCharacters.mockClear();
 });
 
-describe("DMCharactersClient delete all", () => {
-  it("deletes everyone after confirm", async () => {
-    deleteAllCharacters.mockResolvedValue({});
-    renderIt();
-    fireEvent.click(await screen.findByRole("button", { name: "characters.list.deleteAllLabel" }));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "characters.list.deleteAllLabel" }));
-    await vi.waitFor(() => expect(deleteAllCharacters).toHaveBeenCalledWith("c1"));
-  });
+describe('DMCharactersClient delete all', () => {
+    it('deletes everyone after confirm', async () => {
+        deleteAllCharacters.mockResolvedValue({});
+        renderIt();
+        fireEvent.click(
+            await screen.findByRole('button', {
+                name: 'characters.list.deleteAllLabel',
+            })
+        );
+        fireEvent.click(
+            within(await screen.findByRole('alertdialog')).getByRole('button', {
+                name: 'characters.list.deleteAllLabel',
+            })
+        );
+        await vi.waitFor(() =>
+            expect(deleteAllCharacters).toHaveBeenCalledWith('c1')
+        );
+    });
 
-  it("keeps the dialog open with the server error", async () => {
-    deleteAllCharacters.mockRejectedValue(new Error("Збій"));
-    renderIt();
-    fireEvent.click(await screen.findByRole("button", { name: "characters.list.deleteAllLabel" }));
+    it('keeps the dialog open with the server error', async () => {
+        deleteAllCharacters.mockRejectedValue(new Error('Збій'));
+        renderIt();
+        fireEvent.click(
+            await screen.findByRole('button', {
+                name: 'characters.list.deleteAllLabel',
+            })
+        );
 
-    const dialog = await screen.findByRole("alertdialog");
+        const dialog = await screen.findByRole('alertdialog');
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "characters.list.deleteAllLabel" }));
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Збій");
-  });
+        fireEvent.click(
+            within(dialog).getByRole('button', {
+                name: 'characters.list.deleteAllLabel',
+            })
+        );
+        expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+            'Збій'
+        );
+    });
 });
 
-describe("DMCharactersClient tabs", () => {
-  it("NPC-герої: запит з type, активна вкладка, «Створити» передає тип", async () => {
-    renderIt("npc_hero");
+describe('DMCharactersClient tabs', () => {
+    it('NPC-герої: запит з type, активна вкладка, «Створити» передає тип', async () => {
+        renderIt('npc_hero');
 
-    await screen.findByText("Борин");
+        await screen.findByText('Борин');
 
-    expect(getCharacters).toHaveBeenCalledWith("c1", { type: "npc_hero" });
-    expect(screen.getByRole("link", { name: "characters.list.tabs.npcHeroes" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "characters.list.tabs.all" })).toHaveAttribute("href", "/campaigns/c1/dm/characters");
-    expect(screen.getByRole("link", { name: "characters.list.tabs.players" })).toHaveAttribute("href", "/campaigns/c1/dm/characters?type=player");
-    expect(screen.getByRole("link", { name: "characters.list.create" })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new?type=npc_hero");
-  });
+        expect(getCharacters).toHaveBeenCalledWith('c1', { type: 'npc_hero' });
+        expect(
+            screen.getByRole('link', { name: 'characters.list.tabs.npcHeroes' })
+        ).toHaveAttribute('aria-current', 'page');
+        expect(
+            screen.getByRole('link', { name: 'characters.list.tabs.all' })
+        ).toHaveAttribute('href', '/campaigns/c1/dm/characters');
+        expect(
+            screen.getByRole('link', { name: 'characters.list.tabs.players' })
+        ).toHaveAttribute('href', '/campaigns/c1/dm/characters?type=player');
+        expect(
+            screen.getByRole('link', { name: 'characters.list.create' })
+        ).toHaveAttribute(
+            'href',
+            '/campaigns/c1/dm/characters/new?type=npc_hero'
+        );
+    });
 
-  it("без type — усі персонажі, активна «Усі»", async () => {
-    renderIt();
+    it('без type — усі персонажі, активна «Усі»', async () => {
+        renderIt();
 
-    await screen.findByText("Арвен");
+        await screen.findByText('Арвен');
 
-    expect(getCharacters).toHaveBeenCalledWith("c1", undefined);
-    expect(screen.getByRole("link", { name: "characters.list.tabs.all" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "characters.list.create" })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new");
-  });
+        expect(getCharacters).toHaveBeenCalledWith('c1', undefined);
+        expect(
+            screen.getByRole('link', { name: 'characters.list.tabs.all' })
+        ).toHaveAttribute('aria-current', 'page');
+        expect(
+            screen.getByRole('link', { name: 'characters.list.create' })
+        ).toHaveAttribute('href', '/campaigns/c1/dm/characters/new');
+    });
 });
 
-describe("DMCharactersClient level up", () => {
-  const openMenu = async (name: string) => {
-    const card = (await screen.findByText(name)).closest(".space-y-3") as HTMLElement;
+describe('DMCharactersClient level up', () => {
+    const openMenu = async (name: string) => {
+        const card = (await screen.findByText(name)).closest(
+            '.space-y-3'
+        ) as HTMLElement;
 
-    fireEvent.pointerDown(within(card).getByRole("button", { name: "characters.card.actions" }), { button: 0, ctrlKey: false, pointerType: "mouse" });
+        fireEvent.pointerDown(
+            within(card).getByRole('button', {
+                name: 'characters.card.actions',
+            }),
+            { button: 0, ctrlKey: false, pointerType: 'mouse' }
+        );
 
-    return screen.findByRole("menu");
-  };
+        return screen.findByRole('menu');
+    };
 
-  it("«Підняти рівень» лише нижче максимального рівня кампанії", async () => {
-    renderIt();
+    it('«Підняти рівень» лише нижче максимального рівня кампанії', async () => {
+        renderIt();
 
-    expect(within(await openMenu("Арвен")).getByRole("menuitem", { name: "characters.card.levelUp" })).toBeInTheDocument();
+        expect(
+            within(await openMenu('Арвен')).getByRole('menuitem', {
+                name: 'characters.card.levelUp',
+            })
+        ).toBeInTheDocument();
 
-    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
-    await vi.waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+        fireEvent.keyDown(document.activeElement ?? document.body, {
+            key: 'Escape',
+        });
+        await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
 
-    expect(within(await openMenu("Борин")).queryByRole("menuitem", { name: "characters.card.levelUp" })).toBeNull();
-  });
+        expect(
+            within(await openMenu('Борин')).queryByRole('menuitem', {
+                name: 'characters.card.levelUp',
+            })
+        ).toBeNull();
+    });
 });

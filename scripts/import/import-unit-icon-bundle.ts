@@ -4,30 +4,37 @@
  *
  *   pnpm import-unit-icons <bundle.json>
  */
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from 'fs';
+import * as path from 'path';
 
-import { decodeImageDataUrl } from "./wiki-icons-lib";
+import { decodeImageDataUrl } from './wiki-icons-lib';
 
-const DIR = path.join(process.cwd(), "assets", "unit-icons");
+const DIR = path.join(process.cwd(), 'assets', 'unit-icons');
 
 function main() {
-  const bundlePath = process.argv[2];
+    const bundlePath = process.argv[2];
 
-  if (!bundlePath) {
-    console.error("Використання: import-unit-icons <bundle.json>");
-    process.exit(1);
-  }
+    if (!bundlePath) {
+        console.error('Використання: import-unit-icons <bundle.json>');
+        process.exit(1);
+    }
 
-  const bundle = JSON.parse(fs.readFileSync(bundlePath, "utf8")) as { data: Record<string, string> };
+    const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8')) as {
+        data: Record<string, string>;
+    };
 
-  fs.mkdirSync(DIR, { recursive: true });
+    fs.mkdirSync(DIR, { recursive: true });
 
-  for (const [key, dataUrl] of Object.entries(bundle.data)) {
-    fs.writeFileSync(path.join(DIR, `${key}.webp`), decodeImageDataUrl(dataUrl));
-  }
+    for (const [key, dataUrl] of Object.entries(bundle.data)) {
+        fs.writeFileSync(
+            path.join(DIR, `${key}.webp`),
+            decodeImageDataUrl(dataUrl)
+        );
+    }
 
-  console.log(`✓ ${Object.keys(bundle.data).length} іконок юнітів у assets/unit-icons`);
+    console.log(
+        `✓ ${Object.keys(bundle.data).length} іконок юнітів у assets/unit-icons`
+    );
 }
 
 main();

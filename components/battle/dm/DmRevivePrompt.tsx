@@ -1,41 +1,60 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
-import { HeartPulse, Skull, X } from "lucide-react";
+import { useTranslations } from 'next-intl';
+import { HeartPulse, Skull, X } from 'lucide-react';
 
-import { useBattleRules, useDownedHeroPrompt } from "@/lib/hooks/battle";
+import { useBattleRules, useDownedHeroPrompt } from '@/lib/hooks/battle';
 
 export function DmRevivePrompt() {
-  const t = useTranslations("battleDm.revive");
+    const t = useTranslations('battleDm.revive');
 
-  const { hpTerm } = useBattleRules();
+    const { hpTerm } = useBattleRules();
 
-  const { heroes, isPending, revive, dismiss } = useDownedHeroPrompt();
+    const { heroes, isPending, revive, dismiss } = useDownedHeroPrompt();
 
-  if (heroes.length === 0) return null;
+    if (heroes.length === 0) return null;
 
-  return (
-    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md flex-col gap-2 animate-[hud-fade_.2s]">
-      {heroes.map((p) => (
-        <div key={p.basicInfo.id} role="alert" className="flex min-h-12 items-center gap-2.5 border border-hud-danger/50 bg-hud-surface/95 px-3 text-sm text-hud-text">
-          <Skull className="size-4 shrink-0 text-hud-danger" />
-          <span className="min-w-0 flex-1">
-            {t.rich(hpTerm === "wounds" ? "messageWounds" : "message", { name: p.basicInfo.name, b: (chunks) => <b className="hud-sc text-[var(--ink)]">{chunks}</b> })}
-          </span>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => revive(p)}
-            className="flex h-8 shrink-0 items-center gap-1.5 border border-[var(--gold)]/50 px-2.5 text-[13px] text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:opacity-50"
-          >
-            <HeartPulse className="size-3.5" />
-            {t("action")}
-          </button>
-          <button type="button" title={t("hide")} onClick={() => dismiss(p)} className="flex size-8 shrink-0 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]">
-            <X className="size-4" />
-          </button>
+    return (
+        <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md animate-[hud-fade_.2s] flex-col gap-2">
+            {heroes.map((p) => (
+                <div
+                    key={p.basicInfo.id}
+                    role="alert"
+                    className="flex min-h-12 items-center gap-2.5 border border-hud-danger/50 bg-hud-surface/95 px-3 text-sm text-hud-text"
+                >
+                    <Skull className="size-4 shrink-0 text-hud-danger" />
+                    <span className="min-w-0 flex-1">
+                        {t.rich(
+                            hpTerm === 'wounds' ? 'messageWounds' : 'message',
+                            {
+                                name: p.basicInfo.name,
+                                b: (chunks) => (
+                                    <b className="hud-sc text-[var(--ink)]">
+                                        {chunks}
+                                    </b>
+                                ),
+                            }
+                        )}
+                    </span>
+                    <button
+                        type="button"
+                        disabled={isPending}
+                        onClick={() => revive(p)}
+                        className="flex h-8 shrink-0 items-center gap-1.5 border border-[var(--gold)]/50 px-2.5 text-[13px] text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:opacity-50"
+                    >
+                        <HeartPulse className="size-3.5" />
+                        {t('action')}
+                    </button>
+                    <button
+                        type="button"
+                        title={t('hide')}
+                        onClick={() => dismiss(p)}
+                        className="flex size-8 shrink-0 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]"
+                    >
+                        <X className="size-4" />
+                    </button>
+                </div>
+            ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 }

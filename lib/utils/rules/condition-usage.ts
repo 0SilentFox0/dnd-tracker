@@ -1,3 +1,4 @@
-import type { ConditionUsage } from "@/types/campaigns";
+import type { ConditionUsage } from '@/types/campaigns';
 
-export const isConditionUsed = (usage: ConditionUsage) => Object.values(usage).some((list) => list.length > 0);
+export const isConditionUsed = (usage: ConditionUsage) =>
+    Object.values(usage).some((list) => list.length > 0);

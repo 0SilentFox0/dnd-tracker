@@ -1,18 +1,24 @@
-import { abilitiesField, defineSpec, jsonField, nameField, textField } from "./common";
+import {
+    abilitiesField,
+    defineSpec,
+    jsonField,
+    nameField,
+    textField,
+} from './common';
 
-import { FEAT_TYPES } from "@/lib/constants/choices";
+import { FEAT_TYPES } from '@/lib/constants/choices';
 export const FEATS_IMPORT = defineSpec({
-  kind: "feats",
-  fields: [
-    nameField(),
-    textField("icon"),
-    { key: "type", type: "enum", enumValues: FEAT_TYPES },
-    jsonField("prerequisite"),
-    { key: "repeatable", type: "bool" },
-    { key: "xpCost", type: "int" },
-    { key: "maxRank", type: "int" },
-    textField("description"),
-    abilitiesField(),
-    jsonField("choices"),
-  ],
+    kind: 'feats',
+    fields: [
+        nameField(),
+        textField('icon'),
+        { key: 'type', type: 'enum', enumValues: FEAT_TYPES },
+        jsonField('prerequisite'),
+        { key: 'repeatable', type: 'bool' },
+        { key: 'xpCost', type: 'int' },
+        { key: 'maxRank', type: 'int' },
+        textField('description'),
+        abilitiesField(),
+        jsonField('choices'),
+    ],
 });

@@ -1,23 +1,30 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
-vi.mock("server-only", () => ({}));
-vi.mock("@/lib/utils/api/actor", () => ({ resolveActor: vi.fn() }));
+vi.mock('server-only', () => ({}));
+vi.mock('@/lib/utils/api/actor', () => ({ resolveActor: vi.fn() }));
 
-import { buildOpenApi } from "@/lib/server/content/openapi";
+import { buildOpenApi } from '@/lib/server/content/openapi';
 
 const doc = buildOpenApi();
 
 const json = (v: unknown) => JSON.stringify(v);
 
-describe("OpenAPI 4f-2", () => {
-  it("Formula, Flat, Amount and ArmorStats are shared components", () => {
-    for (const id of ["Formula", "Flat", "Amount", "ArmorStats"]) expect(doc.components.schemas).toHaveProperty(id);
-    expect(json(doc.components.schemas["Effect.heal"])).toContain("#/components/schemas/Amount");
-    expect(json(doc.components.schemas["Effect.modifyStat"])).toContain("#/components/schemas/Flat");
-    expect(json(doc.components.schemas.ArtifactsCreate)).toContain("#/components/schemas/ArmorStats");
-  });
+describe('OpenAPI 4f-2', () => {
+    it('Formula, Flat, Amount and ArmorStats are shared components', () => {
+        for (const id of ['Formula', 'Flat', 'Amount', 'ArmorStats'])
+            expect(doc.components.schemas).toHaveProperty(id);
+        expect(json(doc.components.schemas['Effect.heal'])).toContain(
+            '#/components/schemas/Amount'
+        );
+        expect(json(doc.components.schemas['Effect.modifyStat'])).toContain(
+            '#/components/schemas/Flat'
+        );
+        expect(json(doc.components.schemas.ArtifactsCreate)).toContain(
+            '#/components/schemas/ArmorStats'
+        );
+    });
 
-  it("stays compact", () => {
-    expect(json(doc).length).toBeLessThan(195_000); // 5h-1 trait effects ~1.4 KB, 5h-2 rules.tables ~7.2 KB, 5h-4 downtime actions, 5h-3 mutation slots ~2 KB, 5h-3 corruption actions ~0 KB (total ~193.7 KB)
-  });
+    it('stays compact', () => {
+        expect(json(doc).length).toBeLessThan(195_000); // 5h-1 trait effects ~1.4 KB, 5h-2 rules.tables ~7.2 KB, 5h-4 downtime actions, 5h-3 mutation slots ~2 KB, 5h-3 corruption actions ~0 KB (total ~193.7 KB)
+    });
 });

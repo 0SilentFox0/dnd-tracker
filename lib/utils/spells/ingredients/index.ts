@@ -1,1 +1,1 @@
-export { ingredientKey, itemIngredientKey, trackedIngredients } from "./key";
+export { ingredientKey, itemIngredientKey, trackedIngredients } from './key';

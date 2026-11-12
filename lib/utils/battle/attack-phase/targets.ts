@@ -1,108 +1,221 @@
-import { AttackType } from "@/lib/constants/battle";
-import type { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, isAttackable } from "@/lib/utils/abilities/engine/core/participants";
-import { attackMaxTargets, isCleave } from "@/lib/utils/battle/attack/max-targets";
-import { cleaveTargets } from "@/lib/utils/battle/attack/process/cleave";
-import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
-import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { enemiesInReach, templateArea } from "@/lib/utils/battle/grid";
-import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
-import { isHostile } from "@/lib/utils/battle/modes/engine";
-import { BattleRuleError } from "@/lib/utils/battle/store/errors";
-import { REJECT } from "@/lib/utils/battle/store/reject";
-import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import { AttackType } from '@/lib/constants/battle';
+import type { findFlagsMany } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import {
+    findParticipant,
+    isAttackable,
+} from '@/lib/utils/abilities/engine/core/participants';
+import {
+    attackMaxTargets,
+    isCleave,
+} from '@/lib/utils/battle/attack/max-targets';
+import { cleaveTargets } from '@/lib/utils/battle/attack/process/cleave';
+import { piercingTargets } from '@/lib/utils/battle/attack/process/piercing';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import { enemiesInReach, templateArea } from '@/lib/utils/battle/grid';
+import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
+import { isHostile } from '@/lib/utils/battle/modes/engine';
+import { BattleRuleError } from '@/lib/utils/battle/store/errors';
+import { REJECT } from '@/lib/utils/battle/store/reject';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import type {
+    BattleAttack,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
 
-type AttackFlags = ReturnType<typeof findFlagsMany<"attackHitsAllEnemies" | "piercingShot" | "multiTargetFalloff" | "chainShot">>;
+type AttackFlags = ReturnType<
+    typeof findFlagsMany<
+        | 'attackHitsAllEnemies'
+        | 'piercingShot'
+        | 'multiTargetFalloff'
+        | 'chainShot'
+    >
+>;
 
 export interface AttackTargetsInput {
-  order: BattleParticipant[];
-  attacker: BattleParticipant;
-  attack: BattleAttack;
-  chosen: BattleParticipant[];
-  targetIds: string[];
-  map?: BattleMapConfig | null;
-  flags: AttackFlags;
-  rules: Ruleset;
+    order: BattleParticipant[];
+    attacker: BattleParticipant;
+    attack: BattleAttack;
+    chosen: BattleParticipant[];
+    targetIds: string[];
+    map?: BattleMapConfig | null;
+    flags: AttackFlags;
+    rules: Ruleset;
 }
 
 export interface AttackTargets {
-  targets: BattleParticipant[];
-  expanded: boolean;
-  piercing: boolean;
-  /** Кожна ціль — окремий удар з власними кубиками; основна — повна шкода, решта — за falloff. */
-  volley: boolean;
-  falloff: number;
-  /** З цього індексу d20 і кубики шкоди кидає сервер (автоцілі розщеплення). */
-  serverRolledFrom: number;
-  /** `percent` — частка шкоди попереднього пострілу на кожен стрибок. */
-  chain: { jumps: number; percent: number } | null;
+    targets: BattleParticipant[];
+    expanded: boolean;
+    piercing: boolean;
+    /** Кожна ціль — окремий удар з власними кубиками; основна — повна шкода, решта — за falloff. */
+    volley: boolean;
+    falloff: number;
+    /** З цього індексу d20 і кубики шкоди кидає сервер (автоцілі розщеплення). */
+    serverRolledFrom: number;
+    /** `percent` — частка шкоди попереднього пострілу на кожен стрибок. */
+    chain: { jumps: number; percent: number } | null;
 }
 
-const enemyOf = (map: BattleMapConfig | null | undefined, attacker: BattleParticipant) => (t: BattleParticipant) => isHostile(map, attacker, t) && isAttackable(t);
+const enemyOf =
+    (map: BattleMapConfig | null | undefined, attacker: BattleParticipant) =>
+    (t: BattleParticipant) =>
+        isHostile(map, attacker, t) && isAttackable(t);
 
 /** Центральна ціль плюс вороги в радіусі `radius` клітинок навколо неї. */
-function blastTargets({ map, order, attacker, centre, radius, rules }: { map: BattleMapConfig; order: BattleParticipant[]; attacker: BattleParticipant; centre: BattleParticipant; radius: number; rules: Ruleset }): BattleParticipant[] {
-  const aim = centre.battleData.position;
+function blastTargets({
+    map,
+    order,
+    attacker,
+    centre,
+    radius,
+    rules,
+}: {
+    map: BattleMapConfig;
+    order: BattleParticipant[];
+    attacker: BattleParticipant;
+    centre: BattleParticipant;
+    radius: number;
+    rules: Ruleset;
+}): BattleParticipant[] {
+    const aim = centre.battleData.position;
 
-  if (!aim) return [centre];
+    if (!aim) return [centre];
 
-  // verify against 5e book: Blast X radius in cells
-  const { targets } = templateArea(map, order, attacker, { shape: "circle", size: radius * cellFeetOf(rules), exact: true }, aim, rules);
+    // verify against 5e book: Blast X radius in cells
+    const { targets } = templateArea(
+        map,
+        order,
+        attacker,
+        { shape: 'circle', size: radius * cellFeetOf(rules), exact: true },
+        aim,
+        rules
+    );
 
-  return [centre, ...targets.filter((t) => t.basicInfo.id !== centre.basicInfo.id && t.basicInfo.id !== attacker.basicInfo.id && isAttackable(t))];
+    return [
+        centre,
+        ...targets.filter(
+            (t) =>
+                t.basicInfo.id !== centre.basicInfo.id &&
+                t.basicInfo.id !== attacker.basicInfo.id &&
+                isAttackable(t)
+        ),
+    ];
 }
 
-export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags, rules }: AttackTargetsInput): AttackTargets {
-  const isAoe = attack.targetType === "aoe";
+export function resolveAttackTargets({
+    order,
+    attacker,
+    attack,
+    chosen,
+    targetIds,
+    map,
+    flags,
+    rules,
+}: AttackTargetsInput): AttackTargets {
+    const isAoe = attack.targetType === 'aoe';
 
-  const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
+    const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
 
-  const hitsAllEnemies = flags.attackHitsAllEnemies.length > 0;
+    const hitsAllEnemies = flags.attackHitsAllEnemies.length > 0;
 
-  const piercing = !hitsAllEnemies && !isAoe && isRanged && !!map && flags.piercingShot.length > 0;
+    const piercing =
+        !hitsAllEnemies &&
+        !isAoe &&
+        isRanged &&
+        !!map &&
+        flags.piercingShot.length > 0;
 
-  const expanded = hitsAllEnemies || piercing;
+    const expanded = hitsAllEnemies || piercing;
 
-  const onMap = !!map && !!attacker.battleData.position;
+    const onMap = !!map && !!attacker.battleData.position;
 
-  const cleave = !expanded && isCleave(attack) && onMap;
+    const cleave = !expanded && isCleave(attack) && onMap;
 
-  const byId = (ids: string[]) => ids.flatMap((id) => findParticipant(order, id) ?? []);
+    const byId = (ids: string[]) =>
+        ids.flatMap((id) => findParticipant(order, id) ?? []);
 
-  const reachable = (): BattleParticipant[] => (onMap ? enemiesInReach(map, order, attacker, attack, rules) : order.filter(enemyOf(map, attacker)));
+    const reachable = (): BattleParticipant[] =>
+        onMap
+            ? enemiesInReach(map, order, attacker, attack, rules)
+            : order.filter(enemyOf(map, attacker));
 
-  const isChain = !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
+    const isChain =
+        !expanded && isRanged && !isAoe && flags.chainShot.length > 0;
 
-  const blast = isAoe && onMap && !expanded ? (attack.blastRadius ?? 0) : 0;
+    const blast = isAoe && onMap && !expanded ? (attack.blastRadius ?? 0) : 0;
 
-  const limit = attackMaxTargets(attacker, attack, { chain: isChain, onMap });
+    const limit = attackMaxTargets(attacker, attack, { chain: isChain, onMap });
 
-  if (!expanded && chosen.length > limit) throw new BattleRuleError("action_rejected", REJECT.tooManyTargets, { max: limit });
+    if (!expanded && chosen.length > limit)
+        throw new BattleRuleError('action_rejected', REJECT.tooManyTargets, {
+            max: limit,
+        });
 
-  const targets = hitsAllEnemies
-    ? [...chosen.filter(enemyOf(map, attacker)), ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id))]
-    : piercing
-      ? byId([...new Set([...piercingTargets(map, order, attacker, chosen[0].basicInfo.id), ...targetIds])])
-      : blast && map
-        ? blastTargets({ map, order, attacker, centre: chosen[0], radius: blast, rules })
-        : cleave
-            ? [chosen[0], ...cleaveTargets(map, order, attacker, chosen[0], (attack.maxTargets ?? 1) - 1)]
-          : chosen;
+    const targets = hitsAllEnemies
+        ? [
+              ...chosen.filter(enemyOf(map, attacker)),
+              ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id)),
+          ]
+        : piercing
+          ? byId([
+                ...new Set([
+                    ...piercingTargets(
+                        map,
+                        order,
+                        attacker,
+                        chosen[0].basicInfo.id
+                    ),
+                    ...targetIds,
+                ]),
+            ])
+          : blast && map
+            ? blastTargets({
+                  map,
+                  order,
+                  attacker,
+                  centre: chosen[0],
+                  radius: blast,
+                  rules,
+              })
+            : cleave
+              ? [
+                    chosen[0],
+                    ...cleaveTargets(
+                        map,
+                        order,
+                        attacker,
+                        chosen[0],
+                        (attack.maxTargets ?? 1) - 1
+                    ),
+                ]
+              : chosen;
 
-  if (targets.length === 0) throw new BattleRuleError("action_rejected", REJECT.noEnemyInReach);
+    if (targets.length === 0)
+        throw new BattleRuleError('action_rejected', REJECT.noEnemyInReach);
 
-  const volley = !isChain && (expanded || cleave || (!isAoe && (isRanged || isCleave(attack)) && limit > 1));
+    const volley =
+        !isChain &&
+        (expanded ||
+            cleave ||
+            (!isAoe && (isRanged || isCleave(attack)) && limit > 1));
 
-  const falloffPercents = expanded ? [] : flags.multiTargetFalloff.map((f) => f.percent);
+    const falloffPercents = expanded
+        ? []
+        : flags.multiTargetFalloff.map((f) => f.percent);
 
-  return {
-    targets,
-    expanded,
-    piercing,
-    volley,
-    falloff: falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1,
-    serverRolledFrom: cleave ? 1 : blast ? chosen.length : targets.length,
-    chain: isChain ? { jumps: Math.max(0, ...flags.chainShot.map((f) => f.jumps)), percent: (flags.chainShot[0]?.percent ?? 100) / 100 } : null,
-  };
+    return {
+        targets,
+        expanded,
+        piercing,
+        volley,
+        falloff:
+            falloffPercents.length > 0 ? Math.min(...falloffPercents) / 100 : 1,
+        serverRolledFrom: cleave ? 1 : blast ? chosen.length : targets.length,
+        chain: isChain
+            ? {
+                  jumps: Math.max(0, ...flags.chainShot.map((f) => f.jumps)),
+                  percent: (flags.chainShot[0]?.percent ?? 100) / 100,
+              }
+            : null,
+    };
 }

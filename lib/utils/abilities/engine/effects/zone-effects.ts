@@ -1,31 +1,39 @@
-import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { numericStrength } from "@/lib/utils/abilities/engine/core/strength-core";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import {
+    findParticipant,
+    isActive,
+} from '@/lib/utils/abilities/engine/core/participants';
+import { numericStrength } from '@/lib/utils/abilities/engine/core/strength-core';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
-const effectStrength = (e: ActiveEffect) => (e.abilityEffects ?? []).reduce((sum, s) => sum + numericStrength(s), 0);
+const effectStrength = (e: ActiveEffect) =>
+    (e.abilityEffects ?? []).reduce((sum, s) => sum + numericStrength(s), 0);
 
 /**
  * Ефекти, що діють на учасника: зони мертвих власників не діють, однакові аури кількох власників — лише найсильніша.
  * Без списку учасників (рекурсивні формули) власника не перевіряємо.
  */
-export function liveActiveEffects(p: BattleParticipant, ps?: BattleParticipant[]): ActiveEffect[] {
-  const effects = p.battleData.activeEffects;
+export function liveActiveEffects(
+    p: BattleParticipant,
+    ps?: BattleParticipant[]
+): ActiveEffect[] {
+    const effects = p.battleData.activeEffects;
 
-  if (!effects.some((e) => e.zone)) return effects;
+    if (!effects.some((e) => e.zone)) return effects;
 
-  const best = new Map<string, ActiveEffect>();
+    const best = new Map<string, ActiveEffect>();
 
-  for (const e of effects) {
-    if (!e.zone) continue;
+    for (const e of effects) {
+        if (!e.zone) continue;
 
-    const owner = ps && findParticipant(ps, e.zone.ownerId);
+        const owner = ps && findParticipant(ps, e.zone.ownerId);
 
-    if (ps && (!owner || !isActive(owner))) continue;
+        if (ps && (!owner || !isActive(owner))) continue;
 
-    const kept = best.get(e.zone.key);
+        const kept = best.get(e.zone.key);
 
-    if (!kept || effectStrength(e) > effectStrength(kept)) best.set(e.zone.key, e);
-  }
+        if (!kept || effectStrength(e) > effectStrength(kept))
+            best.set(e.zone.key, e);
+    }
 
-  return effects.filter((e) => !e.zone || best.get(e.zone.key) === e);
+    return effects.filter((e) => !e.zone || best.get(e.zone.key) === e);
 }

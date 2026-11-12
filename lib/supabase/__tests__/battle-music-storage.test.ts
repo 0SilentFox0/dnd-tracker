@@ -1,82 +1,138 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
-  createTrackUploadTicket,
-  removeTrackFile,
-  trackObjectPath,
-  trackPathOwnedBy,
-  verifyUploadedTrack,
-} from "@/lib/supabase/battle-music-storage";
+    createTrackUploadTicket,
+    removeTrackFile,
+    trackObjectPath,
+    trackPathOwnedBy,
+    verifyUploadedTrack,
+} from '@/lib/supabase/battle-music-storage';
 
 const bucketApi = vi.hoisted(() => ({
-  createSignedUploadUrl: vi.fn(),
-  info: vi.fn(),
-  remove: vi.fn(async () => ({ data: [], error: null })),
-  getPublicUrl: vi.fn((path: string) => ({ data: { publicUrl: `https://x.supabase.co/storage/v1/object/public/battle-music/${path}` } })),
+    createSignedUploadUrl: vi.fn(),
+    info: vi.fn(),
+    remove: vi.fn(async () => ({ data: [], error: null })),
+    getPublicUrl: vi.fn((path: string) => ({
+        data: {
+            publicUrl: `https://x.supabase.co/storage/v1/object/public/battle-music/${path}`,
+        },
+    })),
 }));
 
 const storage = vi.hoisted(() => ({
-  listBuckets: vi.fn(async () => ({ data: [{ name: "battle-music" }], error: null })),
-  createBucket: vi.fn(async () => ({ data: { name: "battle-music" }, error: null })),
-  from: vi.fn(() => bucketApi),
+    listBuckets: vi.fn(async () => ({
+        data: [{ name: 'battle-music' }],
+        error: null,
+    })),
+    createBucket: vi.fn(async () => ({
+        data: { name: 'battle-music' },
+        error: null,
+    })),
+    from: vi.fn(() => bucketApi),
 }));
 
-vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({ storage }) }));
+vi.mock('@/lib/supabase/admin', () => ({
+    createAdminClient: () => ({ storage }),
+}));
 
-const PATH = "camp1/0123456789abcdef0123456789abcdef.mp3";
+const PATH = 'camp1/0123456789abcdef0123456789abcdef.mp3';
 
-describe("battle-music storage", () => {
-  beforeEach(() => vi.clearAllMocks());
+describe('battle-music storage', () => {
+    beforeEach(() => vi.clearAllMocks());
 
-  it("шлях належить кампанії лише у форматі <campaignId>/<uuid32>.mp3|m4a", () => {
-    expect(trackPathOwnedBy(PATH, "camp1")).toBe(true);
-    expect(trackPathOwnedBy(PATH, "camp2")).toBe(false);
-    expect(trackPathOwnedBy("camp1/../camp2/x.mp3", "camp1")).toBe(false);
-    expect(trackPathOwnedBy("camp1/0123456789abcdef0123456789abcdef.ogg", "camp1")).toBe(false);
-  });
+    it('шлях належить кампанії лише у форматі <campaignId>/<uuid32>.mp3|m4a', () => {
+        expect(trackPathOwnedBy(PATH, 'camp1')).toBe(true);
+        expect(trackPathOwnedBy(PATH, 'camp2')).toBe(false);
+        expect(trackPathOwnedBy('camp1/../camp2/x.mp3', 'camp1')).toBe(false);
+        expect(
+            trackPathOwnedBy(
+                'camp1/0123456789abcdef0123456789abcdef.ogg',
+                'camp1'
+            )
+        ).toBe(false);
+    });
 
-  it("квиток: бакет створюється з лімітом 10 МБ і аудіо-типами, шлях у теці кампанії", async () => {
-    storage.listBuckets.mockResolvedValueOnce({ data: [], error: null });
-    bucketApi.createSignedUploadUrl.mockImplementation(async (path: string) => ({ data: { path, token: "tok", signedUrl: "u" }, error: null }));
+    it('квиток: бакет створюється з лімітом 10 МБ і аудіо-типами, шлях у теці кампанії', async () => {
+        storage.listBuckets.mockResolvedValueOnce({ data: [], error: null });
+        bucketApi.createSignedUploadUrl.mockImplementation(
+            async (path: string) => ({
+                data: { path, token: 'tok', signedUrl: 'u' },
+                error: null,
+            })
+        );
 
-    const r = await createTrackUploadTicket("camp1", "m4a");
+        const r = await createTrackUploadTicket('camp1', 'm4a');
 
-    expect(storage.createBucket).toHaveBeenCalledWith("battle-music", { public: true, fileSizeLimit: 10 * 1024 * 1024, allowedMimeTypes: ["audio/mpeg", "audio/mp4"] });
-    expect(r).toMatchObject({ ok: true, value: { bucket: "battle-music", token: "tok", contentType: "audio/mp4" } });
-    expect(r.ok && trackPathOwnedBy(r.value.path, "camp1")).toBe(true);
-  });
+        expect(storage.createBucket).toHaveBeenCalledWith('battle-music', {
+            public: true,
+            fileSizeLimit: 10 * 1024 * 1024,
+            allowedMimeTypes: ['audio/mpeg', 'audio/mp4'],
+        });
+        expect(r).toMatchObject({
+            ok: true,
+            value: {
+                bucket: 'battle-music',
+                token: 'tok',
+                contentType: 'audio/mp4',
+            },
+        });
+        expect(r.ok && trackPathOwnedBy(r.value.path, 'camp1')).toBe(true);
+    });
 
-  it("перевірка: існує, ≤ 10 МБ, аудіо — публічний URL; інакше обʼєкт видаляється", async () => {
-    bucketApi.info.mockResolvedValueOnce({ data: { size: 5_000_000, contentType: "audio/mpeg" }, error: null });
-    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: true, value: `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}` });
+    it('перевірка: існує, ≤ 10 МБ, аудіо — публічний URL; інакше обʼєкт видаляється', async () => {
+        bucketApi.info.mockResolvedValueOnce({
+            data: { size: 5_000_000, contentType: 'audio/mpeg' },
+            error: null,
+        });
+        expect(await verifyUploadedTrack(PATH)).toEqual({
+            ok: true,
+            value: `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}`,
+        });
 
-    bucketApi.info.mockResolvedValueOnce({ data: { size: 20_000_000, contentType: "audio/mpeg" }, error: null });
-    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: false, message: API_ERRORS.TRACK_FILE_INVALID });
-    expect(bucketApi.remove).toHaveBeenCalledWith([PATH]);
+        bucketApi.info.mockResolvedValueOnce({
+            data: { size: 20_000_000, contentType: 'audio/mpeg' },
+            error: null,
+        });
+        expect(await verifyUploadedTrack(PATH)).toEqual({
+            ok: false,
+            message: API_ERRORS.TRACK_FILE_INVALID,
+        });
+        expect(bucketApi.remove).toHaveBeenCalledWith([PATH]);
 
-    bucketApi.info.mockResolvedValueOnce({ data: null, error: { message: "not found" } });
-    expect(await verifyUploadedTrack(PATH)).toEqual({ ok: false, message: API_ERRORS.TRACK_UPLOAD_MISSING });
-  });
+        bucketApi.info.mockResolvedValueOnce({
+            data: null,
+            error: { message: 'not found' },
+        });
+        expect(await verifyUploadedTrack(PATH)).toEqual({
+            ok: false,
+            message: API_ERRORS.TRACK_UPLOAD_MISSING,
+        });
+    });
 
-  it("видалення: шлях із публічного URL; чужий URL — нічого", async () => {
-    const url = `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}`;
+    it('видалення: шлях із публічного URL; чужий URL — нічого', async () => {
+        const url = `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}`;
 
-    expect(trackObjectPath(url)).toBe(PATH);
-    expect(trackObjectPath("https://example.com/a.mp3")).toBeNull();
+        expect(trackObjectPath(url)).toBe(PATH);
+        expect(trackObjectPath('https://example.com/a.mp3')).toBeNull();
 
-    await removeTrackFile(url);
-    expect(bucketApi.remove).toHaveBeenCalledWith([PATH]);
+        await removeTrackFile(url);
+        expect(bucketApi.remove).toHaveBeenCalledWith([PATH]);
 
-    bucketApi.remove.mockClear();
-    await removeTrackFile("https://example.com/a.mp3");
-    expect(bucketApi.remove).not.toHaveBeenCalled();
-  });
+        bucketApi.remove.mockClear();
+        await removeTrackFile('https://example.com/a.mp3');
+        expect(bucketApi.remove).not.toHaveBeenCalled();
+    });
 });
 
-it("durable cleanup propagates Storage failure for receipt reconciliation", async () => {
-  const failure = new Error("offline");
+it('durable cleanup propagates Storage failure for receipt reconciliation', async () => {
+    const failure = new Error('offline');
 
-  bucketApi.remove.mockRejectedValueOnce(failure);
-  await expect(removeTrackFile(`https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}`, { strict: true })).rejects.toThrow("offline");
+    bucketApi.remove.mockRejectedValueOnce(failure);
+    await expect(
+        removeTrackFile(
+            `https://x.supabase.co/storage/v1/object/public/battle-music/${PATH}`,
+            { strict: true }
+        )
+    ).rejects.toThrow('offline');
 });

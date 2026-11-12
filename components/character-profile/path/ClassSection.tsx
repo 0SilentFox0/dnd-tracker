@@ -1,55 +1,78 @@
-"use client";
+'use client';
 
-import { type ReactNode, useState } from "react";
-import { useTranslations } from "next-intl";
+import { type ReactNode, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { EntityIcon } from "@/components/common/EntityIcon";
-import { chosenSubclassId, pathSummary } from "@/lib/utils/characters/classes/path";
-import type { ClassProgression } from "@/types/classes";
+import { EntityIcon } from '@/components/common/EntityIcon';
+import {
+    chosenSubclassId,
+    pathSummary,
+} from '@/lib/utils/characters/classes/path';
+import type { ClassProgression } from '@/types/classes';
 
 interface ClassSectionProps {
-  progression: ClassProgression;
-  defaultOpen: boolean;
-  children: ReactNode;
+    progression: ClassProgression;
+    defaultOpen: boolean;
+    children: ReactNode;
 }
 
-export function ClassSection({ progression, defaultOpen, children }: ClassSectionProps) {
-  const t = useTranslations("characterProfile.path");
+export function ClassSection({
+    progression,
+    defaultOpen,
+    children,
+}: ClassSectionProps) {
+    const t = useTranslations('characterProfile.path');
 
-  const [open, setOpen] = useState(defaultOpen);
+    const [open, setOpen] = useState(defaultOpen);
 
-  const [seenDefault, setSeenDefault] = useState(defaultOpen);
+    const [seenDefault, setSeenDefault] = useState(defaultOpen);
 
-  if (seenDefault !== defaultOpen) {
-    setSeenDefault(defaultOpen);
+    if (seenDefault !== defaultOpen) {
+        setSeenDefault(defaultOpen);
 
-    if (defaultOpen) setOpen(true);
-  }
+        if (defaultOpen) setOpen(true);
+    }
 
-  const { level } = pathSummary(progression);
+    const { level } = pathSummary(progression);
 
-  const chosen = chosenSubclassId(progression);
+    const chosen = chosenSubclassId(progression);
 
-  const chosenSubclass = progression.subclasses.find((s) => s.id === chosen);
+    const chosenSubclass = progression.subclasses.find((s) => s.id === chosen);
 
-  const subclass = chosenSubclass?.name;
+    const subclass = chosenSubclass?.name;
 
-  return (
-    <section className="mb-3">
-      <details open={open} onToggle={(e) => setOpen(e.currentTarget.open)} className="space-y-2">
-        <summary className="flex cursor-pointer flex-wrap items-baseline gap-2">
-          <EntityIcon src={progression.icon} name={progression.className} className="size-6 text-xs" />
-          <h3 className="inline">{progression.className}</h3>
-          {level !== null ? <span className="text-sm text-hud-muted">{t("sectionLevel", { level })}</span> : null}
-          {subclass ? (
-            <span className="inline-flex items-center gap-1 text-sm text-hud-muted">
-              <EntityIcon src={chosenSubclass?.icon} name={subclass} className="size-5 text-[10px]" />
-              {t("sectionSubclass", { subclass })}
-            </span>
-          ) : null}
-        </summary>
-        <div className="mt-2 space-y-2">{children}</div>
-      </details>
-    </section>
-  );
+    return (
+        <section className="mb-3">
+            <details
+                open={open}
+                onToggle={(e) => setOpen(e.currentTarget.open)}
+                className="space-y-2"
+            >
+                <summary className="flex cursor-pointer flex-wrap items-baseline gap-2">
+                    <EntityIcon
+                        src={progression.icon}
+                        name={progression.className}
+                        className="size-6 text-xs"
+                    />
+                    <h3 className="inline">{progression.className}</h3>
+                    {level !== null ? (
+                        <span className="text-sm text-hud-muted">
+                            {t('sectionLevel', { level })}
+                        </span>
+                    ) : null}
+                    {subclass ? (
+                        <span className="inline-flex items-center gap-1 text-sm text-hud-muted">
+                            <EntityIcon
+                                src={chosenSubclass?.icon}
+                                name={subclass}
+                                className="size-5 text-[10px]"
+                            />
+                            {t('sectionSubclass', { subclass })}
+                        </span>
+                    ) : null}
+                </summary>
+                <div className="mt-2 space-y-2">{children}</div>
+            </details>
+        </section>
+    );
 }

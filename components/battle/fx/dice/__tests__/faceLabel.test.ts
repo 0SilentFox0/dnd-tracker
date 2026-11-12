@@ -1,17 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { faceLabel } from "../scene";
+import { faceLabel } from '../scene';
 
-describe("faceLabel", () => {
-  it("десятки читаються як 00..90", () => {
-    expect(faceLabel(10, true)).toBe("00");
-    expect(faceLabel(4, true)).toBe("40");
-  });
+describe('faceLabel', () => {
+    it('десятки читаються як 00..90', () => {
+        expect(faceLabel(10, true)).toBe('00');
+        expect(faceLabel(4, true)).toBe('40');
+    });
 
-  it("одиниці без змін", () => {
-    expect(faceLabel(10, false)).toBe("10");
-    expect(faceLabel(10, false, true)).toBe("0");
-    expect(faceLabel(7, false, true)).toBe("7");
-    expect(faceLabel(7, false)).toBe("7");
-  });
+    it('одиниці без змін', () => {
+        expect(faceLabel(10, false)).toBe('10');
+        expect(faceLabel(10, false, true)).toBe('0');
+        expect(faceLabel(7, false, true)).toBe('7');
+        expect(faceLabel(7, false)).toBe('7');
+    });
 });

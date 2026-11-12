@@ -1,1 +1,1 @@
-export { PUT } from "@/systems/wfrp/server/operations/downtime";
+export { PUT } from '@/systems/wfrp/server/operations/downtime';

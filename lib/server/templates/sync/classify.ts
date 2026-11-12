@@ -1,143 +1,245 @@
-import { BUNDLE_SETTING_KEYS, BUNDLE_TABLES, type BundleTableDef, pick } from "@/lib/server/templates/bundle";
-import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-ids";
-import { mechanicKeysOf, rowHash, settingsHash } from "@/lib/server/templates/sync/hash";
-import { indexOf, type SyncIndex } from "@/lib/server/templates/sync/index";
-import { getEntry } from "@/lib/server/templates/sync/state";
-import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
-import { hashJson } from "@/lib/utils/battle/store/stable-json";
-import { parseRules } from "@/lib/utils/rules/schema";
-import type { SourceSyncStatus } from "@/types/campaigns";
+import {
+    BUNDLE_SETTING_KEYS,
+    BUNDLE_TABLES,
+    type BundleTableDef,
+    pick,
+} from '@/lib/server/templates/bundle';
+import {
+    collectKeysAndStrings,
+    remapIds,
+} from '@/lib/server/templates/remap-ids';
+import {
+    mechanicKeysOf,
+    rowHash,
+    settingsHash,
+} from '@/lib/server/templates/sync/hash';
+import { indexOf, type SyncIndex } from '@/lib/server/templates/sync/index';
+import { getEntry } from '@/lib/server/templates/sync/state';
+import {
+    IGNORED_DELETED,
+    type SyncContext,
+    type SyncItem,
+} from '@/lib/server/templates/sync/types';
+import { hashJson } from '@/lib/utils/battle/store/stable-json';
+import { parseRules } from '@/lib/utils/rules/schema';
+import type { SourceSyncStatus } from '@/types/campaigns';
 
 type Row = Record<string, unknown> & { id: string };
 
-type ItemFields = Pick<SyncItem, "scope" | "key" | "name" | "status" | "changedFields" | "sourceHash"> & Partial<Pick<SyncItem, "localId" | "requires" | "visible">>;
+type ItemFields = Pick<
+    SyncItem,
+    'scope' | 'key' | 'name' | 'status' | 'changedFields' | 'sourceHash'
+> &
+    Partial<Pick<SyncItem, 'localId' | 'requires' | 'visible'>>;
 
-export const rowName = (row: Record<string, unknown>): string => String(row.name ?? row.title ?? row.race ?? row.id);
+export const rowName = (row: Record<string, unknown>): string =>
+    String(row.name ?? row.title ?? row.race ?? row.id);
 
 // S/B/L present → status; null = no change
-export function pairStatus(s: string, b: string | undefined, l: string): SourceSyncStatus | null {
-  if (s === l || s === b) return null;
+export function pairStatus(
+    s: string,
+    b: string | undefined,
+    l: string
+): SourceSyncStatus | null {
+    if (s === l || s === b) return null;
 
-  if (b === undefined) return "conflict";
+    if (b === undefined) return 'conflict';
 
-  return l === b ? "updated" : "conflict";
+    return l === b ? 'updated' : 'conflict';
 }
 
-export const changed = (a: Record<string, unknown>, b: Record<string, unknown>, keys: readonly string[]) => keys.filter((k) => k !== "id" && k !== "slug" && hashJson(a[k] ?? null) !== hashJson(b[k] ?? null));
-
-export function item(ctx: Pick<SyncContext, "ignored">, fields: ItemFields): SyncItem {
-  const ignoredHash = getEntry(ctx.ignored, fields.scope, fields.key);
-
-  return { localId: null, requires: [], visible: true, ...fields, ignored: ignoredHash !== undefined && ignoredHash === (fields.sourceHash ?? IGNORED_DELETED) };
-}
-
-export function classify(ctx: SyncContext, ruleLabel: (key: string) => string = (key) => key): SyncItem[] {
-  const index = indexOf(ctx);
-
-  return [...BUNDLE_TABLES.flatMap((t) => classifyTable(ctx, t, index)), ...classifyRules(ctx, ruleLabel), ...classifySettings(ctx)];
-}
-
-function classifyTable(ctx: SyncContext, t: BundleTableDef, index: SyncIndex): SyncItem[] {
-  const sourceRows = new Map(ctx.sourceBundle[t.key].map((r) => [r.id, r]));
-
-  const localRows = new Map(index.rowsByTable.get(t.key)!.filter((r) => r.sourceId).map((r) => [r.sourceId!, r]));
-
-  const base = ctx.baseline.tables[t.key] ?? {};
-
-  const keys = new Set([...sourceRows.keys(), ...Object.keys(base), ...localRows.keys()]);
-
-  const out: SyncItem[] = [];
-
-  for (const key of keys) {
-    const src = sourceRows.get(key);
-
-    const loc = localRows.get(key);
-
-    const b = base[key];
-
-    const s = src ? rowHash(src, t) : null;
-
-    const locInSource = loc ? (remapIds(pick(loc, t.columns), index.localToSource) as Row) : null;
-
-    const l = locInSource ? rowHash(locInSource, t) : null;
-
-    let status: SourceSyncStatus | null;
-
-    let visible = true;
-
-    if (s && l) status = pairStatus(s, b, l);
-    else if (!s && l) status = "deletedInSource";
-    else if (s && !l) {
-      status = b === undefined ? "new" : "deletedLocally";
-      visible = b === undefined || s !== b;
-    } else status = null;
-
-    if (!status) continue;
-
-    const requires =
-      src && status !== "deletedInSource"
-        ? [...collectKeysAndStrings(src)]
-            .filter((v) => v !== key && index.sourceIndex.has(v) && !index.sourceToLocal.has(v))
-            .map((v) => ({ scope: index.sourceIndex.get(v)!.table, key: v, name: rowName(index.sourceIndex.get(v)!.row) }))
-        : [];
-
-    out.push(
-      item(ctx, {
-        scope: t.key,
-        key,
-        localId: loc?.id ?? null,
-        name: rowName(src ?? loc!),
-        status,
-        changedFields: src && locInSource ? changed(src, locInSource, t.columns) : [],
-        sourceHash: s,
-        requires,
-        visible,
-      }),
+export const changed = (
+    a: Record<string, unknown>,
+    b: Record<string, unknown>,
+    keys: readonly string[]
+) =>
+    keys.filter(
+        (k) =>
+            k !== 'id' &&
+            k !== 'slug' &&
+            hashJson(a[k] ?? null) !== hashJson(b[k] ?? null)
     );
-  }
 
-  return out;
+export function item(
+    ctx: Pick<SyncContext, 'ignored'>,
+    fields: ItemFields
+): SyncItem {
+    const ignoredHash = getEntry(ctx.ignored, fields.scope, fields.key);
+
+    return {
+        localId: null,
+        requires: [],
+        visible: true,
+        ...fields,
+        ignored:
+            ignoredHash !== undefined &&
+            ignoredHash === (fields.sourceHash ?? IGNORED_DELETED),
+    };
 }
 
-function classifyRules(ctx: SyncContext, ruleLabel: (key: string) => string): SyncItem[] {
-  const src = parseRules(ctx.sourceBundle.rules) as Record<string, unknown>;
+export function classify(
+    ctx: SyncContext,
+    ruleLabel: (key: string) => string = (key) => key
+): SyncItem[] {
+    const index = indexOf(ctx);
 
-  const loc = parseRules(ctx.target.rules) as Record<string, unknown>;
+    return [
+        ...BUNDLE_TABLES.flatMap((t) => classifyTable(ctx, t, index)),
+        ...classifyRules(ctx, ruleLabel),
+        ...classifySettings(ctx),
+    ];
+}
 
-  const keys = mechanicKeysOf(ctx.sourceBundle.rules);
+function classifyTable(
+    ctx: SyncContext,
+    t: BundleTableDef,
+    index: SyncIndex
+): SyncItem[] {
+    const sourceRows = new Map(ctx.sourceBundle[t.key].map((r) => [r.id, r]));
 
-  return keys.flatMap((key): SyncItem[] => {
-    const s = hashJson(src[key]);
+    const localRows = new Map(
+        index.rowsByTable
+            .get(t.key)!
+            .filter((r) => r.sourceId)
+            .map((r) => [r.sourceId!, r])
+    );
 
-    const l = hashJson(loc[key]);
+    const base = ctx.baseline.tables[t.key] ?? {};
 
-    const status = pairStatus(s, ctx.baseline.rules[key] ?? l, l);
+    const keys = new Set([
+        ...sourceRows.keys(),
+        ...Object.keys(base),
+        ...localRows.keys(),
+    ]);
 
-    if (!status) return [];
+    const out: SyncItem[] = [];
 
-    const a = (src[key] ?? {}) as Record<string, unknown>;
+    for (const key of keys) {
+        const src = sourceRows.get(key);
 
-    const b = (loc[key] ?? {}) as Record<string, unknown>;
+        const loc = localRows.get(key);
 
-    return [item(ctx, { scope: "rules", key, name: ruleLabel(key), status, changedFields: changed(a, b, [...new Set([...Object.keys(a), ...Object.keys(b)])]), sourceHash: s })];
-  });
+        const b = base[key];
+
+        const s = src ? rowHash(src, t) : null;
+
+        const locInSource = loc
+            ? (remapIds(pick(loc, t.columns), index.localToSource) as Row)
+            : null;
+
+        const l = locInSource ? rowHash(locInSource, t) : null;
+
+        let status: SourceSyncStatus | null;
+
+        let visible = true;
+
+        if (s && l) status = pairStatus(s, b, l);
+        else if (!s && l) status = 'deletedInSource';
+        else if (s && !l) {
+            status = b === undefined ? 'new' : 'deletedLocally';
+            visible = b === undefined || s !== b;
+        } else status = null;
+
+        if (!status) continue;
+
+        const requires =
+            src && status !== 'deletedInSource'
+                ? [...collectKeysAndStrings(src)]
+                      .filter(
+                          (v) =>
+                              v !== key &&
+                              index.sourceIndex.has(v) &&
+                              !index.sourceToLocal.has(v)
+                      )
+                      .map((v) => ({
+                          scope: index.sourceIndex.get(v)!.table,
+                          key: v,
+                          name: rowName(index.sourceIndex.get(v)!.row),
+                      }))
+                : [];
+
+        out.push(
+            item(ctx, {
+                scope: t.key,
+                key,
+                localId: loc?.id ?? null,
+                name: rowName(src ?? loc!),
+                status,
+                changedFields:
+                    src && locInSource
+                        ? changed(src, locInSource, t.columns)
+                        : [],
+                sourceHash: s,
+                requires,
+                visible,
+            })
+        );
+    }
+
+    return out;
+}
+
+function classifyRules(
+    ctx: SyncContext,
+    ruleLabel: (key: string) => string
+): SyncItem[] {
+    const src = parseRules(ctx.sourceBundle.rules) as Record<string, unknown>;
+
+    const loc = parseRules(ctx.target.rules) as Record<string, unknown>;
+
+    const keys = mechanicKeysOf(ctx.sourceBundle.rules);
+
+    return keys.flatMap((key): SyncItem[] => {
+        const s = hashJson(src[key]);
+
+        const l = hashJson(loc[key]);
+
+        const status = pairStatus(s, ctx.baseline.rules[key] ?? l, l);
+
+        if (!status) return [];
+
+        const a = (src[key] ?? {}) as Record<string, unknown>;
+
+        const b = (loc[key] ?? {}) as Record<string, unknown>;
+
+        return [
+            item(ctx, {
+                scope: 'rules',
+                key,
+                name: ruleLabel(key),
+                status,
+                changedFields: changed(a, b, [
+                    ...new Set([...Object.keys(a), ...Object.keys(b)]),
+                ]),
+                sourceHash: s,
+            }),
+        ];
+    });
 }
 
 function classifySettings(ctx: SyncContext): SyncItem[] {
-  const s = settingsHash(ctx.sourceBundle.settings);
+    const s = settingsHash(ctx.sourceBundle.settings);
 
-  const status = pairStatus(s, ctx.baseline.settings, settingsHash(ctx.target.settings));
+    const status = pairStatus(
+        s,
+        ctx.baseline.settings,
+        settingsHash(ctx.target.settings)
+    );
 
-  if (!status) return [];
+    if (!status) return [];
 
-  return [
-    item(ctx, {
-      scope: "settings",
-      key: "settings",
-      name: "Campaign settings",
-      status,
-      changedFields: changed(ctx.sourceBundle.settings, ctx.target.settings, BUNDLE_SETTING_KEYS),
-      sourceHash: s,
-    }),
-  ];
+    return [
+        item(ctx, {
+            scope: 'settings',
+            key: 'settings',
+            name: 'Campaign settings',
+            status,
+            changedFields: changed(
+                ctx.sourceBundle.settings,
+                ctx.target.settings,
+                BUNDLE_SETTING_KEYS
+            ),
+            sourceHash: s,
+        }),
+    ];
 }

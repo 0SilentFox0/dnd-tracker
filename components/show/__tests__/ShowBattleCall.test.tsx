@@ -1,27 +1,37 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { ShowBattleCall } from "@/components/show/stage/ShowBattleCall";
+import { ShowBattleCall } from '@/components/show/stage/ShowBattleCall';
 
 afterEach(cleanup);
 
-describe("ShowBattleCall", () => {
-  it("посилання на бій з назвою", () => {
-    render(<ShowBattleCall campaignId="c1" battle={{ id: "b1", name: "Засідка" }} />);
+describe('ShowBattleCall', () => {
+    it('посилання на бій з назвою', () => {
+        render(
+            <ShowBattleCall
+                campaignId="c1"
+                battle={{ id: 'b1', name: 'Засідка' }}
+            />
+        );
 
-    const link = screen.getByRole("link", { name: /show.battleCall.go/ });
+        const link = screen.getByRole('link', { name: /show.battleCall.go/ });
 
-    expect(link.getAttribute("href")).toBe("/campaigns/c1/battles/b1");
-    expect(screen.getByText("Засідка")).toBeTruthy();
-  });
+        expect(link.getAttribute('href')).toBe('/campaigns/c1/battles/b1');
+        expect(screen.getByText('Засідка')).toBeTruthy();
+    });
 
-  it("посилання повністю непрозоре: пульсує лише ореол", () => {
-    render(<ShowBattleCall campaignId="c1" battle={{ id: "b1", name: "Засідка" }} />);
+    it('посилання повністю непрозоре: пульсує лише ореол', () => {
+        render(
+            <ShowBattleCall
+                campaignId="c1"
+                battle={{ id: 'b1', name: 'Засідка' }}
+            />
+        );
 
-    const link = screen.getByRole("link", { name: /show.battleCall.go/ });
+        const link = screen.getByRole('link', { name: /show.battleCall.go/ });
 
-    expect(link.className).not.toContain("animate-pulse");
-    expect(link.querySelector(".animate-pulse")).toBeTruthy();
-  });
+        expect(link.className).not.toContain('animate-pulse');
+        expect(link.querySelector('.animate-pulse')).toBeTruthy();
+    });
 });

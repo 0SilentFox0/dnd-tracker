@@ -1,70 +1,93 @@
-import { areaAuras, auraZoneEffect, zoneCandidates } from "./area-aura";
+import { areaAuras, auraZoneEffect, zoneCandidates } from './area-aura';
 
-import { AURA_RADIUS_CELLS } from "@/lib/constants/battle";
-import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
-import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
-import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import { AURA_RADIUS_CELLS } from '@/lib/constants/battle';
+import { inPlay } from '@/lib/utils/abilities/engine/core/participants';
+import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
+import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
+import type {
+    ActiveEffect,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
 
 /** Область-аури на карті: склад зони — живі в радіусі; власник без позиції лишається в ручному режимі. */
-export function syncMapAuras(participants: BattleParticipant[], map: BattleMapConfig | null): BattleParticipant[] {
-  if (!map) return participants;
+export function syncMapAuras(
+    participants: BattleParticipant[],
+    map: BattleMapConfig | null
+): BattleParticipant[] {
+    if (!map) return participants;
 
-  const managed = new Set<string>();
+    const managed = new Set<string>();
 
-  const wanted = new Map<string, ActiveEffect[]>();
+    const wanted = new Map<string, ActiveEffect[]>();
 
-  for (const owner of participants) {
-    const ownerId = owner.basicInfo.id;
+    for (const owner of participants) {
+        const ownerId = owner.basicInfo.id;
 
-    if (!inPlay(owner)) {
-      managed.add(ownerId);
+        if (!inPlay(owner)) {
+            managed.add(ownerId);
 
-      continue;
+            continue;
+        }
+
+        if (!isOnMap(owner)) continue;
+
+        managed.add(ownerId);
+
+        const ownerCells = cellsOf(owner);
+
+        for (const aura of areaAuras(owner)) {
+            const round = owner.battleData.auraZones?.[aura.id] ?? 1;
+
+            const effect = auraZoneEffect(owner, aura, round);
+
+            for (const m of zoneCandidates(participants, owner, aura.target)) {
+                if (
+                    !isOnMap(m) ||
+                    footprintDistance(ownerCells, cellsOf(m)) >
+                        AURA_RADIUS_CELLS
+                )
+                    continue;
+
+                const id = m.basicInfo.id;
+
+                wanted.set(id, [...(wanted.get(id) ?? []), effect]);
+            }
+        }
     }
 
-    if (!isOnMap(owner)) continue;
+    let changed = false;
 
-    managed.add(ownerId);
+    const out = participants.map((p) => {
+        const want = wanted.get(p.basicInfo.id) ?? [];
 
-    const ownerCells = cellsOf(owner);
+        const wantIds = new Set(want.map((e) => e.id));
 
-    for (const aura of areaAuras(owner)) {
-      const round = owner.battleData.auraZones?.[aura.id] ?? 1;
+        const have = new Set(p.battleData.activeEffects.map((e) => e.id));
 
-      const effect = auraZoneEffect(owner, aura, round);
+        const stale = p.battleData.activeEffects.some(
+            (e) => e.zone && managed.has(e.zone.ownerId) && !wantIds.has(e.id)
+        );
 
-      for (const m of zoneCandidates(participants, owner, aura.target)) {
-        if (!isOnMap(m) || footprintDistance(ownerCells, cellsOf(m)) > AURA_RADIUS_CELLS) continue;
+        const missing = want.filter((e) => !have.has(e.id));
 
-        const id = m.basicInfo.id;
+        if (!stale && !missing.length) return p;
 
-        wanted.set(id, [...(wanted.get(id) ?? []), effect]);
-      }
-    }
-  }
+        changed = true;
 
-  let changed = false;
+        const kept = p.battleData.activeEffects.filter(
+            (e) =>
+                !(e.zone && managed.has(e.zone.ownerId) && !wantIds.has(e.id))
+        );
 
-  const out = participants.map((p) => {
-    const want = wanted.get(p.basicInfo.id) ?? [];
+        return {
+            ...p,
+            battleData: {
+                ...p.battleData,
+                activeEffects: [...kept, ...missing],
+            },
+        };
+    });
 
-    const wantIds = new Set(want.map((e) => e.id));
-
-    const have = new Set(p.battleData.activeEffects.map((e) => e.id));
-
-    const stale = p.battleData.activeEffects.some((e) => e.zone && managed.has(e.zone.ownerId) && !wantIds.has(e.id));
-
-    const missing = want.filter((e) => !have.has(e.id));
-
-    if (!stale && !missing.length) return p;
-
-    changed = true;
-
-    const kept = p.battleData.activeEffects.filter((e) => !(e.zone && managed.has(e.zone.ownerId) && !wantIds.has(e.id)));
-
-    return { ...p, battleData: { ...p.battleData, activeEffects: [...kept, ...missing] } };
-  });
-
-  return changed ? out : participants;
+    return changed ? out : participants;
 }

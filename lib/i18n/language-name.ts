@@ -1,7 +1,10 @@
-import type { Locale } from "./config";
+import type { Locale } from './config';
 
-const NAMES: Record<Locale, "Ukrainian" | "English"> = { uk: "Ukrainian", en: "English" };
+const NAMES: Record<Locale, 'Ukrainian' | 'English'> = {
+    uk: 'Ukrainian',
+    en: 'English',
+};
 
-export function languageName(locale: Locale): "Ukrainian" | "English" {
-  return NAMES[locale];
+export function languageName(locale: Locale): 'Ukrainian' | 'English' {
+    return NAMES[locale];
 }

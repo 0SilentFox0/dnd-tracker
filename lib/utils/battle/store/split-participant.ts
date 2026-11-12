@@ -1,165 +1,242 @@
-import { hashJson } from "./stable-json";
-import type { ParticipantSnapshot, ParticipantState, StoredParticipant } from "./types";
+import { hashJson } from './stable-json';
+import type {
+    ParticipantSnapshot,
+    ParticipantState,
+    StoredParticipant,
+} from './types';
 
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant } from '@/types/battle';
 
-function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([k]) => !keys.includes(k as K)),
-  ) as Omit<T, K>;
+function omit<T extends object, K extends keyof T>(
+    obj: T,
+    keys: K[]
+): Omit<T, K> {
+    return Object.fromEntries(
+        Object.entries(obj).filter(([k]) => !keys.includes(k as K))
+    ) as Omit<T, K>;
 }
 
 export function splitParticipant(
-  p: BattleParticipant,
-  place: { orderIndex: number; isPending: boolean },
+    p: BattleParticipant,
+    place: { orderIndex: number; isPending: boolean }
 ): StoredParticipant {
-  const { id, sourceType, sourceId, side, controlledBy, ...basicWithBattle } = p.basicInfo;
+    const { id, sourceType, sourceId, side, controlledBy, ...basicWithBattle } =
+        p.basicInfo;
 
-  const basicRest = omit(basicWithBattle, ["battleId"]);
+    const basicRest = omit(basicWithBattle, ['battleId']);
 
-  const { initiative, ...abilitiesRest } = p.abilities;
+    const { initiative, ...abilitiesRest } = p.abilities;
 
-  const { currentHp, tempHp, maxHp, morale, status, ...combatRest } = p.combatStats;
+    const { currentHp, tempHp, maxHp, morale, status, ...combatRest } =
+        p.combatStats;
 
-  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, turnStartPosition, returnedThisTurn, airborne, hazardHitRound, zoneHits, pendingHits, retaliationsUsed, dormant, facing, escaped, mazeWakeRound, ingredientStock, ammo, reload, psychologyTested, ...battleDataWithScoped } = p.battleData;
+    const {
+        activeEffects,
+        abilityUsage,
+        pendingExtraActions,
+        position,
+        movementUsed,
+        turnStartPosition,
+        returnedThisTurn,
+        airborne,
+        hazardHitRound,
+        zoneHits,
+        pendingHits,
+        retaliationsUsed,
+        dormant,
+        facing,
+        escaped,
+        mazeWakeRound,
+        ingredientStock,
+        ammo,
+        reload,
+        psychologyTested,
+        ...battleDataWithScoped
+    } = p.battleData;
 
-  // потрібне лише під час старту бою
-  const battleDataRest = omit(battleDataWithScoped as typeof battleDataWithScoped & { pendingScopedArtifactBonuses?: unknown }, ["pendingScopedArtifactBonuses"]);
+    // потрібне лише під час старту бою
+    const battleDataRest = omit(
+        battleDataWithScoped as typeof battleDataWithScoped & {
+            pendingScopedArtifactBonuses?: unknown;
+        },
+        ['pendingScopedArtifactBonuses']
+    );
 
-  const spellSlotsCurrent: Record<string, number> = {};
+    const spellSlotsCurrent: Record<string, number> = {};
 
-  const spellSlotsMax: Record<string, { max: number; level?: number }> = {};
+    const spellSlotsMax: Record<string, { max: number; level?: number }> = {};
 
-  for (const [level, slot] of Object.entries(p.spellcasting.spellSlots ?? {})) {
-    spellSlotsCurrent[level] = slot.current;
-    spellSlotsMax[level] = { max: slot.max, ...(slot.level !== undefined && { level: slot.level }) };
-  }
+    for (const [level, slot] of Object.entries(
+        p.spellcasting.spellSlots ?? {}
+    )) {
+        spellSlotsCurrent[level] = slot.current;
+        spellSlotsMax[level] = {
+            max: slot.max,
+            ...(slot.level !== undefined && { level: slot.level }),
+        };
+    }
 
-  const snapshot: ParticipantSnapshot = {
-    basicInfo: basicRest,
-    abilities: abilitiesRest,
-    combatStats: combatRest,
-    spellcasting: { ...p.spellcasting, spellSlots: spellSlotsMax },
-    battleData: battleDataRest,
-  };
+    const snapshot: ParticipantSnapshot = {
+        basicInfo: basicRest,
+        abilities: abilitiesRest,
+        combatStats: combatRest,
+        spellcasting: { ...p.spellcasting, spellSlots: spellSlotsMax },
+        battleData: battleDataRest,
+    };
 
-  const state: ParticipantState = {
-    activeEffects: activeEffects ?? [],
-    abilityUsage,
-    pendingExtraActions,
-    ...(position !== undefined && { position }),
-    ...(movementUsed !== undefined && { movementUsed }),
-    ...(turnStartPosition !== undefined && { turnStartPosition }),
-    ...(returnedThisTurn !== undefined && { returnedThisTurn }),
-    ...(airborne !== undefined && { airborne }),
-    ...(hazardHitRound !== undefined && { hazardHitRound }),
-    ...(zoneHits !== undefined && { zoneHits }),
-    ...(pendingHits !== undefined && { pendingHits }),
-    ...(retaliationsUsed !== undefined && { retaliationsUsed }),
-    ...(dormant !== undefined && { dormant }),
-    ...(facing !== undefined && { facing }),
-    ...(escaped !== undefined && { escaped }),
-    ...(mazeWakeRound !== undefined && { mazeWakeRound }),
-    ...(ingredientStock !== undefined && { ingredientStock }),
-    ...(ammo !== undefined && { ammo }),
-    ...(reload !== undefined && { reload }),
-    ...(psychologyTested !== undefined && { psychologyTested }),
-    spellSlotsCurrent,
-  };
+    const state: ParticipantState = {
+        activeEffects: activeEffects ?? [],
+        abilityUsage,
+        pendingExtraActions,
+        ...(position !== undefined && { position }),
+        ...(movementUsed !== undefined && { movementUsed }),
+        ...(turnStartPosition !== undefined && { turnStartPosition }),
+        ...(returnedThisTurn !== undefined && { returnedThisTurn }),
+        ...(airborne !== undefined && { airborne }),
+        ...(hazardHitRound !== undefined && { hazardHitRound }),
+        ...(zoneHits !== undefined && { zoneHits }),
+        ...(pendingHits !== undefined && { pendingHits }),
+        ...(retaliationsUsed !== undefined && { retaliationsUsed }),
+        ...(dormant !== undefined && { dormant }),
+        ...(facing !== undefined && { facing }),
+        ...(escaped !== undefined && { escaped }),
+        ...(mazeWakeRound !== undefined && { mazeWakeRound }),
+        ...(ingredientStock !== undefined && { ingredientStock }),
+        ...(ammo !== undefined && { ammo }),
+        ...(reload !== undefined && { reload }),
+        ...(psychologyTested !== undefined && { psychologyTested }),
+        spellSlotsCurrent,
+    };
 
-  // колонки INTEGER: JSON раніше приймав дроби від відсоткових модифікаторів
-  return {
-    columns: {
-      id,
-      sourceType,
-      sourceId,
-      side,
-      controlledBy,
-      orderIndex: place.orderIndex,
-      isPending: place.isPending,
-      extraTurnOf: null,
-      currentHp: Math.round(currentHp),
-      tempHp: Math.round(tempHp),
-      maxHp: Math.round(maxHp),
-      morale: Math.round(morale),
-      status,
-      initiative: Math.round(initiative),
-      hasUsedAction: p.actionFlags.hasUsedAction,
-      hasUsedBonusAction: p.actionFlags.hasUsedBonusAction,
-      hasUsedReaction: p.actionFlags.hasUsedReaction,
-      hasExtraTurn: p.actionFlags.hasExtraTurn,
-    },
-    snapshot,
-    state,
-    snapshotHash: hashJson(snapshot),
-  };
+    // колонки INTEGER: JSON раніше приймав дроби від відсоткових модифікаторів
+    return {
+        columns: {
+            id,
+            sourceType,
+            sourceId,
+            side,
+            controlledBy,
+            orderIndex: place.orderIndex,
+            isPending: place.isPending,
+            extraTurnOf: null,
+            currentHp: Math.round(currentHp),
+            tempHp: Math.round(tempHp),
+            maxHp: Math.round(maxHp),
+            morale: Math.round(morale),
+            status,
+            initiative: Math.round(initiative),
+            hasUsedAction: p.actionFlags.hasUsedAction,
+            hasUsedBonusAction: p.actionFlags.hasUsedBonusAction,
+            hasUsedReaction: p.actionFlags.hasUsedReaction,
+            hasExtraTurn: p.actionFlags.hasExtraTurn,
+        },
+        snapshot,
+        state,
+        snapshotHash: hashJson(snapshot),
+    };
 }
 
-export function joinParticipant(stored: StoredParticipant, battleId: string): BattleParticipant {
-  const { columns: c, state } = stored;
+export function joinParticipant(
+    stored: StoredParticipant,
+    battleId: string
+): BattleParticipant {
+    const { columns: c, state } = stored;
 
-  const s = stored.snapshot as {
-    basicInfo: Record<string, unknown>;
-    abilities: Record<string, unknown>;
-    combatStats: Record<string, unknown>;
-    spellcasting: Record<string, unknown> & { spellSlots?: Record<string, { max: number; level?: number }> };
-    battleData: Record<string, unknown>;
-  };
+    const s = stored.snapshot as {
+        basicInfo: Record<string, unknown>;
+        abilities: Record<string, unknown>;
+        combatStats: Record<string, unknown>;
+        spellcasting: Record<string, unknown> & {
+            spellSlots?: Record<string, { max: number; level?: number }>;
+        };
+        battleData: Record<string, unknown>;
+    };
 
-  const spellSlots: Record<string, { max: number; current: number; level?: number }> = {};
+    const spellSlots: Record<
+        string,
+        { max: number; current: number; level?: number }
+    > = {};
 
-  for (const [level, slot] of Object.entries(s.spellcasting.spellSlots ?? {})) {
-    spellSlots[level] = { max: slot.max, current: state.spellSlotsCurrent[level] ?? slot.max, ...(slot.level !== undefined && { level: slot.level }) };
-  }
+    for (const [level, slot] of Object.entries(
+        s.spellcasting.spellSlots ?? {}
+    )) {
+        spellSlots[level] = {
+            max: slot.max,
+            current: state.spellSlotsCurrent[level] ?? slot.max,
+            ...(slot.level !== undefined && { level: slot.level }),
+        };
+    }
 
-  return {
-    basicInfo: {
-      ...s.basicInfo,
-      id: c.id,
-      battleId,
-      sourceId: c.sourceId,
-      sourceType: c.sourceType,
-      side: c.side,
-      controlledBy: c.controlledBy,
-    },
-    abilities: { ...s.abilities, initiative: c.initiative },
-    combatStats: {
-      ...s.combatStats,
-      currentHp: c.currentHp,
-      tempHp: c.tempHp,
-      maxHp: c.maxHp,
-      morale: c.morale,
-      status: c.status,
-    },
-    spellcasting: { ...s.spellcasting, spellSlots },
-    battleData: {
-      ...s.battleData,
-      activeEffects: state.activeEffects,
-      ...(state.abilityUsage !== undefined && { abilityUsage: state.abilityUsage }),
-      ...(state.pendingExtraActions !== undefined && { pendingExtraActions: state.pendingExtraActions }),
-      ...(state.position !== undefined && { position: state.position }),
-      ...(state.movementUsed !== undefined && { movementUsed: state.movementUsed }),
-      ...(state.turnStartPosition !== undefined && { turnStartPosition: state.turnStartPosition }),
-      ...(state.returnedThisTurn !== undefined && { returnedThisTurn: state.returnedThisTurn }),
-      ...(state.airborne !== undefined && { airborne: state.airborne }),
-      ...(state.hazardHitRound !== undefined && { hazardHitRound: state.hazardHitRound }),
-      ...(state.zoneHits !== undefined && { zoneHits: state.zoneHits }),
-      ...(state.pendingHits !== undefined && { pendingHits: state.pendingHits }),
-      ...(state.retaliationsUsed !== undefined && { retaliationsUsed: state.retaliationsUsed }),
-      ...(state.dormant !== undefined && { dormant: state.dormant }),
-      ...(state.facing !== undefined && { facing: state.facing }),
-      ...(state.escaped !== undefined && { escaped: state.escaped }),
-      ...(state.mazeWakeRound !== undefined && { mazeWakeRound: state.mazeWakeRound }),
-      ...(state.ingredientStock !== undefined && { ingredientStock: state.ingredientStock }),
-      ...(state.ammo !== undefined && { ammo: state.ammo }),
-      ...(state.reload !== undefined && { reload: state.reload }),
-      ...(state.psychologyTested !== undefined && { psychologyTested: state.psychologyTested }),
-    },
-    actionFlags: {
-      hasUsedAction: c.hasUsedAction,
-      hasUsedBonusAction: c.hasUsedBonusAction,
-      hasUsedReaction: c.hasUsedReaction,
-      hasExtraTurn: c.hasExtraTurn,
-    },
-  } as BattleParticipant;
+    return {
+        basicInfo: {
+            ...s.basicInfo,
+            id: c.id,
+            battleId,
+            sourceId: c.sourceId,
+            sourceType: c.sourceType,
+            side: c.side,
+            controlledBy: c.controlledBy,
+        },
+        abilities: { ...s.abilities, initiative: c.initiative },
+        combatStats: {
+            ...s.combatStats,
+            currentHp: c.currentHp,
+            tempHp: c.tempHp,
+            maxHp: c.maxHp,
+            morale: c.morale,
+            status: c.status,
+        },
+        spellcasting: { ...s.spellcasting, spellSlots },
+        battleData: {
+            ...s.battleData,
+            activeEffects: state.activeEffects,
+            ...(state.abilityUsage !== undefined && {
+                abilityUsage: state.abilityUsage,
+            }),
+            ...(state.pendingExtraActions !== undefined && {
+                pendingExtraActions: state.pendingExtraActions,
+            }),
+            ...(state.position !== undefined && { position: state.position }),
+            ...(state.movementUsed !== undefined && {
+                movementUsed: state.movementUsed,
+            }),
+            ...(state.turnStartPosition !== undefined && {
+                turnStartPosition: state.turnStartPosition,
+            }),
+            ...(state.returnedThisTurn !== undefined && {
+                returnedThisTurn: state.returnedThisTurn,
+            }),
+            ...(state.airborne !== undefined && { airborne: state.airborne }),
+            ...(state.hazardHitRound !== undefined && {
+                hazardHitRound: state.hazardHitRound,
+            }),
+            ...(state.zoneHits !== undefined && { zoneHits: state.zoneHits }),
+            ...(state.pendingHits !== undefined && {
+                pendingHits: state.pendingHits,
+            }),
+            ...(state.retaliationsUsed !== undefined && {
+                retaliationsUsed: state.retaliationsUsed,
+            }),
+            ...(state.dormant !== undefined && { dormant: state.dormant }),
+            ...(state.facing !== undefined && { facing: state.facing }),
+            ...(state.escaped !== undefined && { escaped: state.escaped }),
+            ...(state.mazeWakeRound !== undefined && {
+                mazeWakeRound: state.mazeWakeRound,
+            }),
+            ...(state.ingredientStock !== undefined && {
+                ingredientStock: state.ingredientStock,
+            }),
+            ...(state.ammo !== undefined && { ammo: state.ammo }),
+            ...(state.reload !== undefined && { reload: state.reload }),
+            ...(state.psychologyTested !== undefined && {
+                psychologyTested: state.psychologyTested,
+            }),
+        },
+        actionFlags: {
+            hasUsedAction: c.hasUsedAction,
+            hasUsedBonusAction: c.hasUsedBonusAction,
+            hasUsedReaction: c.hasUsedReaction,
+            hasExtraTurn: c.hasExtraTurn,
+        },
+    } as BattleParticipant;
 }

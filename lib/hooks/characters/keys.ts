@@ -1,26 +1,38 @@
-import { battleKeys } from "@/lib/hooks/battles/keys";
+import { battleKeys } from '@/lib/hooks/battles/keys';
 
 export const characterKeys = {
-  lists: (campaignId: string) => ["characters", campaignId] as const,
-  list: (campaignId: string, type: string, compact: boolean) => ["characters", campaignId, type, compact ? "compact" : "full"] as const,
-  detail: (campaignId: string, characterId: string) => ["character", campaignId, characterId] as const,
-  details: (campaignId: string) => ["character", campaignId] as const,
-  roster: (campaignId: string) => ["character-roster", campaignId] as const,
-  stash: (campaignId: string, characterId: string) => ["character-stash", campaignId, characterId] as const,
-  stashes: (campaignId: string) => ["character-stash", campaignId] as const,
-  freeArtifacts: (campaignId: string) => ["free-artifacts", campaignId] as const,
-  backstoryAvailability: (campaignId: string) => ["draft-backstory-available", campaignId] as const,
-  draftPortraits: (campaignId: string) => ["draft-portraits", campaignId] as const,
-  inventoryLogs: (campaignId: string) => ["inventory-log", campaignId] as const,
-  inventoryLog: (campaignId: string, characterId: string) => ["inventory-log", campaignId, characterId] as const,
-  log: (campaignId: string, characterId: string) => ["character-log", campaignId, characterId] as const,
-  logs: (campaignId: string) => ["character-log", campaignId] as const,
-  sheet: (campaignId: string, characterId?: string) => (characterId ? (["character-sheet", campaignId, characterId] as const) : (["character-sheet", campaignId] as const)),
+    lists: (campaignId: string) => ['characters', campaignId] as const,
+    list: (campaignId: string, type: string, compact: boolean) =>
+        ['characters', campaignId, type, compact ? 'compact' : 'full'] as const,
+    detail: (campaignId: string, characterId: string) =>
+        ['character', campaignId, characterId] as const,
+    details: (campaignId: string) => ['character', campaignId] as const,
+    roster: (campaignId: string) => ['character-roster', campaignId] as const,
+    stash: (campaignId: string, characterId: string) =>
+        ['character-stash', campaignId, characterId] as const,
+    stashes: (campaignId: string) => ['character-stash', campaignId] as const,
+    freeArtifacts: (campaignId: string) =>
+        ['free-artifacts', campaignId] as const,
+    backstoryAvailability: (campaignId: string) =>
+        ['draft-backstory-available', campaignId] as const,
+    draftPortraits: (campaignId: string) =>
+        ['draft-portraits', campaignId] as const,
+    inventoryLogs: (campaignId: string) =>
+        ['inventory-log', campaignId] as const,
+    inventoryLog: (campaignId: string, characterId: string) =>
+        ['inventory-log', campaignId, characterId] as const,
+    log: (campaignId: string, characterId: string) =>
+        ['character-log', campaignId, characterId] as const,
+    logs: (campaignId: string) => ['character-log', campaignId] as const,
+    sheet: (campaignId: string, characterId?: string) =>
+        characterId
+            ? (['character-sheet', campaignId, characterId] as const)
+            : (['character-sheet', campaignId] as const),
 };
 
 /** Keys every character create/update/delete affects: lists, the hero roster and the party power in battle balance. */
 export const characterWriteKeys = (campaignId: string) => [
-  characterKeys.lists(campaignId),
-  characterKeys.roster(campaignId),
-  battleKeys.balance(campaignId),
+    characterKeys.lists(campaignId),
+    characterKeys.roster(campaignId),
+    battleKeys.balance(campaignId),
 ];

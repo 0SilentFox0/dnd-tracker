@@ -1,151 +1,343 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Plus } from "lucide-react";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Plus } from 'lucide-react';
 
-import { ChoiceHeaderRow } from "./ChoiceHeaderRow";
-import { AbilityScoreChoiceFields, OptionChoiceFields, SkillChoiceFields, SpellChoiceFields } from "./ChoiceKindFields";
+import { ChoiceHeaderRow } from './ChoiceHeaderRow';
+import {
+    AbilityScoreChoiceFields,
+    OptionChoiceFields,
+    SkillChoiceFields,
+    SpellChoiceFields,
+} from './ChoiceKindFields';
 
-import { MarkdownLite } from "@/components/common/MarkdownLite";
-import { HUD_SELECT_CLASS } from "@/components/hud/form";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ABILITY_SCORE_CAP } from "@/lib/constants/abilities";
-import { CHOICE_KINDS, CHOICE_LIMITS } from "@/lib/constants/choices";
-import { useErrorTotals, useRowKeys } from "@/lib/hooks/common";
-import { choiceSlug } from "@/lib/utils/characters/choices/slug";
-import { hasMarkdownTable } from "@/lib/utils/text/markdown-lite";
-import type { Choice, ChoiceKind, ChoiceOwner } from "@/types/choices";
-import type { ClassColumn } from "@/types/classes";
+import { MarkdownLite } from '@/components/common/MarkdownLite';
+import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ABILITY_SCORE_CAP } from '@/lib/constants/abilities';
+import { CHOICE_KINDS, CHOICE_LIMITS } from '@/lib/constants/choices';
+import { useErrorTotals, useRowKeys } from '@/lib/hooks/common';
+import { choiceSlug } from '@/lib/utils/characters/choices/slug';
+import { hasMarkdownTable } from '@/lib/utils/text/markdown-lite';
+import type { Choice, ChoiceKind, ChoiceOwner } from '@/types/choices';
+import type { ClassColumn } from '@/types/classes';
 
 interface ChoiceListEditorProps {
-  campaignId: string;
-  owner: ChoiceOwner;
-  value: Choice[];
-  onChange: (next: Choice[]) => void;
-  classColumns?: readonly ClassColumn[];
-  onValidityChange?: (ok: boolean, errorCount: number) => void;
+    campaignId: string;
+    owner: ChoiceOwner;
+    value: Choice[];
+    onChange: (next: Choice[]) => void;
+    classColumns?: readonly ClassColumn[];
+    onValidityChange?: (ok: boolean, errorCount: number) => void;
 }
 
 const KIND_DEFAULTS: Record<ChoiceKind, Partial<Choice>> = {
-  option: { options: [] },
-  feat: { featTypes: ["general"] },
-  skill: {},
-  expertise: {},
-  abilityScore: { points: 2, max: ABILITY_SCORE_CAP },
-  spell: { spells: { lists: [], minLevel: 0, maxLevel: 0 } },
+    option: { options: [] },
+    feat: { featTypes: ['general'] },
+    skill: {},
+    expertise: {},
+    abilityScore: { points: 2, max: ABILITY_SCORE_CAP },
+    spell: { spells: { lists: [], minLevel: 0, maxLevel: 0 } },
 };
 
-export function ChoiceListEditor({ campaignId, owner, value, onChange, classColumns = [], onValidityChange }: ChoiceListEditorProps) {
-  const t = useTranslations("choices");
+export function ChoiceListEditor({
+    campaignId,
+    owner,
+    value,
+    onChange,
+    classColumns = [],
+    onValidityChange,
+}: ChoiceListEditorProps) {
+    const t = useTranslations('choices');
 
-  const { report, drop } = useErrorTotals(onValidityChange);
+    const { report, drop } = useErrorTotals(onValidityChange);
 
-  const { keys, removeAt } = useRowKeys(value.length);
+    const { keys, removeAt } = useRowKeys(value.length);
 
-  const kinds = CHOICE_KINDS.filter((k) => owner !== "feat" || k !== "feat");
+    const kinds = CHOICE_KINDS.filter((k) => owner !== 'feat' || k !== 'feat');
 
-  const update = (i: number, patch: Partial<Choice>) => onChange(value.map((c, k) => (k === i ? { ...c, ...patch } : c)));
+    const update = (i: number, patch: Partial<Choice>) =>
+        onChange(value.map((c, k) => (k === i ? { ...c, ...patch } : c)));
 
-  const switchKind = (i: number, kind: ChoiceKind) => {
-    const { id, label, level, count, description, lineage } = value[i];
+    const switchKind = (i: number, kind: ChoiceKind) => {
+        const { id, label, level, count, description, lineage } = value[i];
 
-    onChange(value.map((c, k) => (k === i ? { id, label, level, count, ...(description && { description }), ...(lineage && { lineage }), kind, ...KIND_DEFAULTS[kind] } : c)));
-  };
-
-  const [fresh, setFresh] = useState<number | null>(null);
-
-  const add = () => {
-    setFresh(value.length);
-    onChange([...value, { id: choiceSlug("choice", value.map((c) => c.id)), label: t("list.newChoice"), level: 1, count: 1, kind: "skill" }]);
-  };
-
-  const remove = (i: number) => {
-    drop(`c${keys[i]}`);
-    removeAt(i);
-    onChange(value.filter((_, k) => k !== i));
-  };
-
-  return (
-    <div className="space-y-3">
-      {value.map((choice, i) => {
-        const onPatch = (patch: Partial<Choice>) => update(i, patch);
-
-        return (
-          <details key={keys[i]} open={fresh === i || value.length === 1} className="group rounded-md border border-hud-line/60">
-            <summary className="flex cursor-pointer flex-wrap items-center gap-2 px-3 py-2 text-sm">
-              <span className="hud-sc">{choice.label || t("list.newChoice")}</span>
-              <span className="text-xs text-hud-muted">{[t(`kinds.${choice.kind}`), typeof choice.count === "number" ? `×${choice.count}` : null, choice.lineage ? t("list.lineageTag") : null].filter(Boolean).join(" · ")}</span>
-            </summary>
-            <div className="space-y-3 p-3 pt-1">
-              <ChoiceHeaderRow index={i} choice={choice} owner={owner} kinds={kinds} actions={{ onPatch, onSwitchKind: (kind) => switchKind(i, kind), onRemove: () => remove(i) }} />
-
-              <div className="flex flex-wrap items-end gap-3">
-                {choice.kind !== "abilityScore" && (
-                  <div className="w-24 space-y-1">
-                    <Label htmlFor={`choice-${i}-count`}>{t("list.count")}</Label>
-                    <Input id={`choice-${i}-count`} type="number" min={1} max={CHOICE_LIMITS.count} disabled={typeof choice.count !== "number"} value={typeof choice.count === "number" ? choice.count : ""} onChange={(e) => onPatch({ count: Number(e.target.value) || 1 })} />
-                  </div>
-                )}
-                {owner === "class" && choice.kind !== "abilityScore" && (
-                  <div className="space-y-1">
-                    <Label htmlFor={`choice-${i}-scale`}>{t("list.scale")}</Label>
-                    <select id={`choice-${i}-scale`} className={HUD_SELECT_CLASS} value={typeof choice.count === "number" ? "" : choice.count.scale} onChange={(e) => onPatch({ count: e.target.value ? { scale: e.target.value } : 1 })}>
-                      <option value="">{t("list.scaleNumber")}</option>
-                      {classColumns.map((c) => (
-                        <option key={c.key} value={c.key}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                {owner === "race" && choice.kind === "option" && (
-                  <label className="flex items-center gap-2 text-sm">
-                    <Checkbox checked={!!choice.lineage} onCheckedChange={(on) => onPatch({ lineage: on ? true : undefined })} />
-                    {t("list.lineage")}
-                  </label>
-                )}
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor={`choice-${i}-description`}>{t("list.description")}</Label>
-              <Textarea id={`choice-${i}-description`} rows={3} value={choice.description ?? ""} onChange={(e) => onPatch({ description: e.target.value || undefined })} />
-              <p className="text-xs text-hud-muted">{t("list.descriptionHint")}</p>
-              {choice.description && hasMarkdownTable(choice.description) && (
-                <div className="rounded-md border border-hud-line/40 p-2">
-                  <p className="text-xs text-hud-muted">{t("list.preview")}</p>
-                  <MarkdownLite className="space-y-2 text-sm" text={choice.description} />
-                </div>
-              )}
-            </div>
-
-            {(choice.kind === "skill" || choice.kind === "expertise") && <SkillChoiceFields choice={choice} onPatch={onPatch} />}
-            {choice.kind === "abilityScore" && <AbilityScoreChoiceFields choice={choice} onPatch={onPatch} />}
-            {choice.kind === "spell" && <SpellChoiceFields choice={choice} owner={owner} onPatch={onPatch} />}
-            {(choice.kind === "option" || choice.kind === "feat") && (
-              <OptionChoiceFields choice={choice} owner={owner} campaignId={campaignId} classColumns={classColumns} onPatch={onPatch} errors={{ report, drop, prefix: `c${keys[i]}` }} />
-            )}
-            <details className="rounded-md border border-hud-line/30 px-3 py-2 text-sm">
-              <summary className="cursor-pointer text-hud-muted">{t("header.technical")}</summary>
-              <div className="mt-2 w-56 space-y-1">
-                <Label htmlFor={`choice-${i}-id`}>{t("header.id")}</Label>
-                <Input id={`choice-${i}-id`} value={choice.id} onChange={(e) => onPatch({ id: e.target.value })} />
-                <p className="text-xs text-hud-muted">{t("header.idHint")}</p>
-              </div>
-            </details>
-            </div>
-          </details>
+        onChange(
+            value.map((c, k) =>
+                k === i
+                    ? {
+                          id,
+                          label,
+                          level,
+                          count,
+                          ...(description && { description }),
+                          ...(lineage && { lineage }),
+                          kind,
+                          ...KIND_DEFAULTS[kind],
+                      }
+                    : c
+            )
         );
-      })}
-      <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="h-4 w-4" />
-        {t("list.add")}
-      </Button>
-    </div>
-  );
+    };
+
+    const [fresh, setFresh] = useState<number | null>(null);
+
+    const add = () => {
+        setFresh(value.length);
+        onChange([
+            ...value,
+            {
+                id: choiceSlug(
+                    'choice',
+                    value.map((c) => c.id)
+                ),
+                label: t('list.newChoice'),
+                level: 1,
+                count: 1,
+                kind: 'skill',
+            },
+        ]);
+    };
+
+    const remove = (i: number) => {
+        drop(`c${keys[i]}`);
+        removeAt(i);
+        onChange(value.filter((_, k) => k !== i));
+    };
+
+    return (
+        <div className="space-y-3">
+            {value.map((choice, i) => {
+                const onPatch = (patch: Partial<Choice>) => update(i, patch);
+
+                return (
+                    <details
+                        key={keys[i]}
+                        open={fresh === i || value.length === 1}
+                        className="group rounded-md border border-hud-line/60"
+                    >
+                        <summary className="flex cursor-pointer flex-wrap items-center gap-2 px-3 py-2 text-sm">
+                            <span className="hud-sc">
+                                {choice.label || t('list.newChoice')}
+                            </span>
+                            <span className="text-xs text-hud-muted">
+                                {[
+                                    t(`kinds.${choice.kind}`),
+                                    typeof choice.count === 'number'
+                                        ? `×${choice.count}`
+                                        : null,
+                                    choice.lineage
+                                        ? t('list.lineageTag')
+                                        : null,
+                                ]
+                                    .filter(Boolean)
+                                    .join(' · ')}
+                            </span>
+                        </summary>
+                        <div className="space-y-3 p-3 pt-1">
+                            <ChoiceHeaderRow
+                                index={i}
+                                choice={choice}
+                                owner={owner}
+                                kinds={kinds}
+                                actions={{
+                                    onPatch,
+                                    onSwitchKind: (kind) => switchKind(i, kind),
+                                    onRemove: () => remove(i),
+                                }}
+                            />
+
+                            <div className="flex flex-wrap items-end gap-3">
+                                {choice.kind !== 'abilityScore' && (
+                                    <div className="w-24 space-y-1">
+                                        <Label htmlFor={`choice-${i}-count`}>
+                                            {t('list.count')}
+                                        </Label>
+                                        <Input
+                                            id={`choice-${i}-count`}
+                                            type="number"
+                                            min={1}
+                                            max={CHOICE_LIMITS.count}
+                                            disabled={
+                                                typeof choice.count !== 'number'
+                                            }
+                                            value={
+                                                typeof choice.count === 'number'
+                                                    ? choice.count
+                                                    : ''
+                                            }
+                                            onChange={(e) =>
+                                                onPatch({
+                                                    count:
+                                                        Number(
+                                                            e.target.value
+                                                        ) || 1,
+                                                })
+                                            }
+                                        />
+                                    </div>
+                                )}
+                                {owner === 'class' &&
+                                    choice.kind !== 'abilityScore' && (
+                                        <div className="space-y-1">
+                                            <Label
+                                                htmlFor={`choice-${i}-scale`}
+                                            >
+                                                {t('list.scale')}
+                                            </Label>
+                                            <select
+                                                id={`choice-${i}-scale`}
+                                                className={HUD_SELECT_CLASS}
+                                                value={
+                                                    typeof choice.count ===
+                                                    'number'
+                                                        ? ''
+                                                        : choice.count.scale
+                                                }
+                                                onChange={(e) =>
+                                                    onPatch({
+                                                        count: e.target.value
+                                                            ? {
+                                                                  scale: e
+                                                                      .target
+                                                                      .value,
+                                                              }
+                                                            : 1,
+                                                    })
+                                                }
+                                            >
+                                                <option value="">
+                                                    {t('list.scaleNumber')}
+                                                </option>
+                                                {classColumns.map((c) => (
+                                                    <option
+                                                        key={c.key}
+                                                        value={c.key}
+                                                    >
+                                                        {c.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                {owner === 'race' &&
+                                    choice.kind === 'option' && (
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <Checkbox
+                                                checked={!!choice.lineage}
+                                                onCheckedChange={(on) =>
+                                                    onPatch({
+                                                        lineage: on
+                                                            ? true
+                                                            : undefined,
+                                                    })
+                                                }
+                                            />
+                                            {t('list.lineage')}
+                                        </label>
+                                    )}
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label htmlFor={`choice-${i}-description`}>
+                                    {t('list.description')}
+                                </Label>
+                                <Textarea
+                                    id={`choice-${i}-description`}
+                                    rows={3}
+                                    value={choice.description ?? ''}
+                                    onChange={(e) =>
+                                        onPatch({
+                                            description:
+                                                e.target.value || undefined,
+                                        })
+                                    }
+                                />
+                                <p className="text-xs text-hud-muted">
+                                    {t('list.descriptionHint')}
+                                </p>
+                                {choice.description &&
+                                    hasMarkdownTable(choice.description) && (
+                                        <div className="rounded-md border border-hud-line/40 p-2">
+                                            <p className="text-xs text-hud-muted">
+                                                {t('list.preview')}
+                                            </p>
+                                            <MarkdownLite
+                                                className="space-y-2 text-sm"
+                                                text={choice.description}
+                                            />
+                                        </div>
+                                    )}
+                            </div>
+
+                            {(choice.kind === 'skill' ||
+                                choice.kind === 'expertise') && (
+                                <SkillChoiceFields
+                                    choice={choice}
+                                    onPatch={onPatch}
+                                />
+                            )}
+                            {choice.kind === 'abilityScore' && (
+                                <AbilityScoreChoiceFields
+                                    choice={choice}
+                                    onPatch={onPatch}
+                                />
+                            )}
+                            {choice.kind === 'spell' && (
+                                <SpellChoiceFields
+                                    choice={choice}
+                                    owner={owner}
+                                    onPatch={onPatch}
+                                />
+                            )}
+                            {(choice.kind === 'option' ||
+                                choice.kind === 'feat') && (
+                                <OptionChoiceFields
+                                    choice={choice}
+                                    owner={owner}
+                                    campaignId={campaignId}
+                                    classColumns={classColumns}
+                                    onPatch={onPatch}
+                                    errors={{
+                                        report,
+                                        drop,
+                                        prefix: `c${keys[i]}`,
+                                    }}
+                                />
+                            )}
+                            <details className="rounded-md border border-hud-line/30 px-3 py-2 text-sm">
+                                <summary className="cursor-pointer text-hud-muted">
+                                    {t('header.technical')}
+                                </summary>
+                                <div className="mt-2 w-56 space-y-1">
+                                    <Label htmlFor={`choice-${i}-id`}>
+                                        {t('header.id')}
+                                    </Label>
+                                    <Input
+                                        id={`choice-${i}-id`}
+                                        value={choice.id}
+                                        onChange={(e) =>
+                                            onPatch({ id: e.target.value })
+                                        }
+                                    />
+                                    <p className="text-xs text-hud-muted">
+                                        {t('header.idHint')}
+                                    </p>
+                                </div>
+                            </details>
+                        </div>
+                    </details>
+                );
+            })}
+            <Button type="button" variant="outline" size="sm" onClick={add}>
+                <Plus className="h-4 w-4" />
+                {t('list.add')}
+            </Button>
+        </div>
+    );
 }

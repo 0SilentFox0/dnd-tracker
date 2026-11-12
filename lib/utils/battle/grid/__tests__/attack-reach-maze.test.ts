@@ -1,121 +1,299 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { attackReachError, enemiesInReach } from "../attack-reach";
+import { attackReachError, enemiesInReach } from '../attack-reach';
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { textOf } from "@/lib/i18n/test/text";
-import { textRef } from "@/lib/i18n/text-ref";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
-import { REJECT } from "@/lib/utils/battle/store/reject";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { BattleAttack, BattleMapConfig, BattleParticipant, Direction8, GridPoint, MazeConfig } from "@/types/battle";
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import { textOf } from '@/lib/i18n/test/text';
+import { textRef } from '@/lib/i18n/text-ref';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
+import { REJECT } from '@/lib/utils/battle/store/reject';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type {
+    BattleAttack,
+    BattleMapConfig,
+    BattleParticipant,
+    Direction8,
+    GridPoint,
+    MazeConfig,
+} from '@/types/battle';
 
-const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => mazeMap({ exit: { x: 9, y: 9 }, ...over }, 10);
+const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig =>
+    mazeMap({ exit: { x: 9, y: 9 }, ...over }, 10);
 
-function at(id: string, position: GridPoint, side: string, extra: { facing?: Direction8; dormant?: boolean } = {}): BattleParticipant {
-  const p = createMockParticipant();
+function at(
+    id: string,
+    position: GridPoint,
+    side: string,
+    extra: { facing?: Direction8; dormant?: boolean } = {}
+): BattleParticipant {
+    const p = createMockParticipant();
 
-  return {
-    ...p,
-    basicInfo: { ...p.basicInfo, id, side: side as BattleParticipant["basicInfo"]["side"] },
-    battleData: { ...p.battleData, position, ...extra },
-  };
+    return {
+        ...p,
+        basicInfo: {
+            ...p.basicInfo,
+            id,
+            side: side as BattleParticipant['basicInfo']['side'],
+        },
+        battleData: { ...p.battleData, position, ...extra },
+    };
 }
 
-const sword = { id: "s", name: "Меч", type: AttackType.MELEE } as BattleAttack;
+const sword = { id: 's', name: 'Меч', type: AttackType.MELEE } as BattleAttack;
 
-const bow = { id: "b", name: "Лук", type: AttackType.RANGED, range: "80/320 фт" } as BattleAttack;
+const bow = {
+    id: 'b',
+    name: 'Лук',
+    type: AttackType.RANGED,
+    range: '80/320 фт',
+} as BattleAttack;
 
-const hero = at("h", { x: 5, y: 5 }, ParticipantSide.ALLY, { facing: "e" });
+const hero = at('h', { x: 5, y: 5 }, ParticipantSide.ALLY, { facing: 'e' });
 
-describe("ближня атака в лабіринті", () => {
-  it("сусід за стіною — «Між вами стіна»; без стіни — ок", () => {
-    const foe = at("e", { x: 6, y: 5 }, ParticipantSide.ENEMY);
+describe('ближня атака в лабіринті', () => {
+    it('сусід за стіною — «Між вами стіна»; без стіни — ок', () => {
+        const foe = at('e', { x: 6, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(textOf(attackReachError(mapOf({ walls: ["5:5:e"] }), [hero, foe], hero, sword, [foe], DEFAULT_RULES) as never)).toBe("Між вами стіна");
-    expect(attackReachError(mapOf(), [hero, foe], hero, sword, [foe], DEFAULT_RULES)).toBeNull();
-  });
+        expect(
+            textOf(
+                attackReachError(
+                    mapOf({ walls: ['5:5:e'] }),
+                    [hero, foe],
+                    hero,
+                    sword,
+                    [foe],
+                    DEFAULT_RULES
+                ) as never
+            )
+        ).toBe('Між вами стіна');
+        expect(
+            attackReachError(
+                mapOf(),
+                [hero, foe],
+                hero,
+                sword,
+                [foe],
+                DEFAULT_RULES
+            )
+        ).toBeNull();
+    });
 
-  it("по діагоналі через закритий кут — стіна; через відкрите ребро — ок", () => {
-    const foe = at("e", { x: 6, y: 6 }, ParticipantSide.ENEMY);
+    it('по діагоналі через закритий кут — стіна; через відкрите ребро — ок', () => {
+        const foe = at('e', { x: 6, y: 6 }, ParticipantSide.ENEMY);
 
-    expect(textOf(attackReachError(mapOf({ walls: ["5:5:s"] }), [hero, foe], hero, sword, [foe], DEFAULT_RULES) as never)).toBe("Між вами стіна");
-    expect(attackReachError(mapOf({ walls: ["4:5:e"] }), [hero, foe], hero, sword, [foe], DEFAULT_RULES)).toBeNull();
-  });
+        expect(
+            textOf(
+                attackReachError(
+                    mapOf({ walls: ['5:5:s'] }),
+                    [hero, foe],
+                    hero,
+                    sword,
+                    [foe],
+                    DEFAULT_RULES
+                ) as never
+            )
+        ).toBe('Між вами стіна');
+        expect(
+            attackReachError(
+                mapOf({ walls: ['4:5:e'] }),
+                [hero, foe],
+                hero,
+                sword,
+                [foe],
+                DEFAULT_RULES
+            )
+        ).toBeNull();
+    });
 
-  it("далекий ворог — як раніше «не поруч»", () => {
-    const foe = at("e", { x: 8, y: 5 }, ParticipantSide.ENEMY);
+    it('далекий ворог — як раніше «не поруч»', () => {
+        const foe = at('e', { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf(), [hero, foe], hero, sword, [foe], DEFAULT_RULES)).toEqual(textRef(REJECT.targetNotNear));
-  });
+        expect(
+            attackReachError(
+                mapOf(),
+                [hero, foe],
+                hero,
+                sword,
+                [foe],
+                DEFAULT_RULES
+            )
+        ).toEqual(textRef(REJECT.targetNotNear));
+    });
 });
 
-describe("дальня атака в лабіринті", () => {
-  it("ціль у конусі — ок; за стіною чи поза конусом — «Ціль поза полем зору»", () => {
-    const ahead = at("e", { x: 8, y: 5 }, ParticipantSide.ENEMY);
+describe('дальня атака в лабіринті', () => {
+    it('ціль у конусі — ок; за стіною чи поза конусом — «Ціль поза полем зору»', () => {
+        const ahead = at('e', { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-    const behind = at("e2", { x: 2, y: 5 }, ParticipantSide.ENEMY);
+        const behind = at('e2', { x: 2, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf(), [hero, ahead], hero, bow, [ahead], DEFAULT_RULES)).toBeNull();
-    expect(textOf(attackReachError(mapOf({ walls: ["6:5:e"] }), [hero, ahead], hero, bow, [ahead], DEFAULT_RULES) as never)).toBe("Ціль поза полем зору");
-    expect(textOf(attackReachError(mapOf(), [hero, behind], hero, bow, [behind], DEFAULT_RULES) as never)).toBe("Ціль поза полем зору");
-  });
+        expect(
+            attackReachError(
+                mapOf(),
+                [hero, ahead],
+                hero,
+                bow,
+                [ahead],
+                DEFAULT_RULES
+            )
+        ).toBeNull();
+        expect(
+            textOf(
+                attackReachError(
+                    mapOf({ walls: ['6:5:e'] }),
+                    [hero, ahead],
+                    hero,
+                    bow,
+                    [ahead],
+                    DEFAULT_RULES
+                ) as never
+            )
+        ).toBe('Ціль поза полем зору');
+        expect(
+            textOf(
+                attackReachError(
+                    mapOf(),
+                    [hero, behind],
+                    hero,
+                    bow,
+                    [behind],
+                    DEFAULT_RULES
+                ) as never
+            )
+        ).toBe('Ціль поза полем зору');
+    });
 
-  it("ціль у тумані видно лише впритул", () => {
-    const foe = at("e", { x: 7, y: 5 }, ParticipantSide.ENEMY);
+    it('ціль у тумані видно лише впритул', () => {
+        const foe = at('e', { x: 7, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(textOf(attackReachError(mapOf({ fog: ["7:5"] }), [hero, foe], hero, bow, [foe], DEFAULT_RULES) as never)).toBe("Ціль поза полем зору");
-  });
+        expect(
+            textOf(
+                attackReachError(
+                    mapOf({ fog: ['7:5'] }),
+                    [hero, foe],
+                    hero,
+                    bow,
+                    [foe],
+                    DEFAULT_RULES
+                ) as never
+            )
+        ).toBe('Ціль поза полем зору');
+    });
 
-  it("сусідній ворог і далі блокує постріл", () => {
-    const adj = at("e1", { x: 5, y: 6 }, ParticipantSide.ENEMY);
+    it('сусідній ворог і далі блокує постріл', () => {
+        const adj = at('e1', { x: 5, y: 6 }, ParticipantSide.ENEMY);
 
-    const ahead = at("e2", { x: 8, y: 5 }, ParticipantSide.ENEMY);
+        const ahead = at('e2', { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf(), [hero, adj, ahead], hero, bow, [ahead], DEFAULT_RULES)).toEqual(textRef(REJECT.enemyNearNoShoot));
-  });
+        expect(
+            attackReachError(
+                mapOf(),
+                [hero, adj, ahead],
+                hero,
+                bow,
+                [ahead],
+                DEFAULT_RULES
+            )
+        ).toEqual(textRef(REJECT.enemyNearNoShoot));
+    });
 
-  it("enemiesInReach бере лише видимих", () => {
-    const ahead = at("e1", { x: 8, y: 5 }, ParticipantSide.ENEMY);
+    it('enemiesInReach бере лише видимих', () => {
+        const ahead = at('e1', { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-    const behind = at("e2", { x: 2, y: 5 }, ParticipantSide.ENEMY);
+        const behind = at('e2', { x: 2, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(enemiesInReach(mapOf(), [hero, ahead, behind], hero, bow, DEFAULT_RULES).map((p) => p.basicInfo.id)).toEqual(["e1"]);
-  });
+        expect(
+            enemiesInReach(
+                mapOf(),
+                [hero, ahead, behind],
+                hero,
+                bow,
+                DEFAULT_RULES
+            ).map((p) => p.basicInfo.id)
+        ).toEqual(['e1']);
+    });
 });
 
-const target = at("t", { x: 8, y: 5 }, ParticipantSide.ENEMY);
+const target = at('t', { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
 const ENGAGED = textRef(REJECT.enemyNearNoShoot);
 
-describe("лабіринт: «поруч ворог» для дальньої атаки", () => {
-  it("ворог за стіною поруч не заважає стріляти", () => {
-    const behindWall = at("w", { x: 5, y: 6 }, ParticipantSide.ENEMY);
+describe('лабіринт: «поруч ворог» для дальньої атаки', () => {
+    it('ворог за стіною поруч не заважає стріляти', () => {
+        const behindWall = at('w', { x: 5, y: 6 }, ParticipantSide.ENEMY);
 
-    const map = mapOf({ walls: ["5:5:s"] });
+        const map = mapOf({ walls: ['5:5:s'] });
 
-    expect(attackReachError(map, [hero, behindWall, target], hero, bow, [target], DEFAULT_RULES)).toBeNull();
-    expect(enemiesInReach(map, [hero, behindWall, target], hero, bow, DEFAULT_RULES).map((p) => p.basicInfo.id)).toEqual(["t"]);
-  });
+        expect(
+            attackReachError(
+                map,
+                [hero, behindWall, target],
+                hero,
+                bow,
+                [target],
+                DEFAULT_RULES
+            )
+        ).toBeNull();
+        expect(
+            enemiesInReach(
+                map,
+                [hero, behindWall, target],
+                hero,
+                bow,
+                DEFAULT_RULES
+            ).map((p) => p.basicInfo.id)
+        ).toEqual(['t']);
+    });
 
-  it("сплячий ворог поруч не заважає стріляти", () => {
-    const sleeper = at("z", { x: 4, y: 5 }, ParticipantSide.ENEMY, { dormant: true });
+    it('сплячий ворог поруч не заважає стріляти', () => {
+        const sleeper = at('z', { x: 4, y: 5 }, ParticipantSide.ENEMY, {
+            dormant: true,
+        });
 
-    expect(attackReachError(mapOf(), [hero, sleeper, target], hero, bow, [target], DEFAULT_RULES)).toBeNull();
-  });
+        expect(
+            attackReachError(
+                mapOf(),
+                [hero, sleeper, target],
+                hero,
+                bow,
+                [target],
+                DEFAULT_RULES
+            )
+        ).toBeNull();
+    });
 
-  it("несплячий ворог поруч без стіни — як і раніше заважає", () => {
-    const awake = at("a", { x: 4, y: 5 }, ParticipantSide.ENEMY);
+    it('несплячий ворог поруч без стіни — як і раніше заважає', () => {
+        const awake = at('a', { x: 4, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf(), [hero, awake, target], hero, bow, [target], DEFAULT_RULES)).toEqual(ENGAGED);
-  });
+        expect(
+            attackReachError(
+                mapOf(),
+                [hero, awake, target],
+                hero,
+                bow,
+                [target],
+                DEFAULT_RULES
+            )
+        ).toEqual(ENGAGED);
+    });
 
-  it("поза лабіринтом сплячий прапорець нічого не змінює", () => {
-    const sleeper = at("z", { x: 4, y: 5 }, ParticipantSide.ENEMY, { dormant: true });
+    it('поза лабіринтом сплячий прапорець нічого не змінює', () => {
+        const sleeper = at('z', { x: 4, y: 5 }, ParticipantSide.ENEMY, {
+            dormant: true,
+        });
 
-    const plain: BattleMapConfig = { ...mapOf(), maze: null };
+        const plain: BattleMapConfig = { ...mapOf(), maze: null };
 
-    expect(attackReachError(plain, [hero, sleeper, target], hero, bow, [target], DEFAULT_RULES)).toEqual(ENGAGED);
-  });
+        expect(
+            attackReachError(
+                plain,
+                [hero, sleeper, target],
+                hero,
+                bow,
+                [target],
+                DEFAULT_RULES
+            )
+        ).toEqual(ENGAGED);
+    });
 });

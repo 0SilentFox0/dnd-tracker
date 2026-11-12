@@ -1,4 +1,4 @@
-import { unitsResource } from "@/lib/server/content/resources/units";
-import { collectionRoutes } from "@/lib/utils/api/content-routes";
+import { unitsResource } from '@/lib/server/content/resources/units';
+import { collectionRoutes } from '@/lib/utils/api/content-routes';
 
 export const { DELETE } = collectionRoutes(unitsResource);

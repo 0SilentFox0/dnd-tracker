@@ -1,78 +1,175 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { resolveSpellTargets, spellTargetingFor, spellWideningOf, validateSpellTargetCount } from "@/lib/utils/battle/spell/spell-targeting";
-import type { BattleParticipant } from "@/types/battle";
+import { ParticipantSide } from '@/lib/constants/battle';
+import {
+    makeParticipant,
+    resolved,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import {
+    resolveSpellTargets,
+    spellTargetingFor,
+    spellWideningOf,
+    validateSpellTargetCount,
+} from '@/lib/utils/battle/spell/spell-targeting';
+import type { BattleParticipant } from '@/types/battle';
 
-const spell = { id: "bless", groupId: "light", level: 2 };
+const spell = { id: 'bless', groupId: 'light', level: 2 };
 
 const caster = (effects: Effect[] = []) =>
-  makeParticipant({ id: "c", abilities: effects.length ? [resolved({ trigger: { event: "passive" }, effects })] : [] });
+    makeParticipant({
+        id: 'c',
+        abilities: effects.length
+            ? [resolved({ trigger: { event: 'passive' }, effects })]
+            : [],
+    });
 
 const ally = (id: string) => makeParticipant({ id });
 
-const enemy = (id: string) => makeParticipant({ id, side: ParticipantSide.ENEMY });
+const enemy = (id: string) =>
+    makeParticipant({ id, side: ParticipantSide.ENEMY });
 
 const downedAlly = (id: string): BattleParticipant => {
-  const p = ally(id);
+    const p = ally(id);
 
-  return { ...p, combatStats: { ...p.combatStats, status: "dead" } } as BattleParticipant;
+    return {
+        ...p,
+        combatStats: { ...p.combatStats, status: 'dead' },
+    } as BattleParticipant;
 };
 
-describe("spell targeting", () => {
-  it("no flag → single", () => {
-    expect(spellTargetingFor([caster()], "c", spell)).toEqual({ mode: "single", maxTargets: 1 });
-  });
-
-  it("school area flag → area 3", () => {
-    const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "area", school: "light" }]);
-
-    expect(spellTargetingFor([c], "c", spell)).toEqual({ mode: "area", maxTargets: 3 });
-  });
-
-  it("spellWideningOf names the source of the winning flag", () => {
-    const c = makeParticipant({
-      id: "c",
-      abilities: [
-        resolved({ id: "a1", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 2 }] }, { id: "s1", name: "Розщеплення" }),
-        resolved({ id: "a2", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 4 }] }, { id: "s2", name: "Подвоєння" }),
-      ],
+describe('spell targeting', () => {
+    it('no flag → single', () => {
+        expect(spellTargetingFor([caster()], 'c', spell)).toEqual({
+            mode: 'single',
+            maxTargets: 1,
+        });
     });
 
-    expect(spellWideningOf([c], "c", spell)).toEqual({ mode: "area", maxTargets: 4, source: "Подвоєння" });
-    expect(spellWideningOf([caster()], "c", spell)).toEqual({ mode: "single", maxTargets: 1 });
-  });
+    it('school area flag → area 3', () => {
+        const c = caster([
+            {
+                kind: 'flag',
+                flag: 'spellTargeting',
+                mode: 'area',
+                school: 'light',
+            },
+        ]);
 
-  it("flag for another school is ignored", () => {
-    const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "area", school: "chaos" }]);
+        expect(spellTargetingFor([c], 'c', spell)).toEqual({
+            mode: 'area',
+            maxTargets: 3,
+        });
+    });
 
-    expect(spellTargetingFor([c], "c", spell).mode).toBe("single");
-  });
+    it('spellWideningOf names the source of the winning flag', () => {
+        const c = makeParticipant({
+            id: 'c',
+            abilities: [
+                resolved(
+                    {
+                        id: 'a1',
+                        trigger: { event: 'passive' },
+                        effects: [
+                            {
+                                kind: 'flag',
+                                flag: 'spellTargeting',
+                                mode: 'area',
+                                maxTargets: 2,
+                            },
+                        ],
+                    },
+                    { id: 's1', name: 'Розщеплення' }
+                ),
+                resolved(
+                    {
+                        id: 'a2',
+                        trigger: { event: 'passive' },
+                        effects: [
+                            {
+                                kind: 'flag',
+                                flag: 'spellTargeting',
+                                mode: 'area',
+                                maxTargets: 4,
+                            },
+                        ],
+                    },
+                    { id: 's2', name: 'Подвоєння' }
+                ),
+            ],
+        });
 
-  it("all beats area; maxLevel excludes level 5", () => {
-    const c = caster([
-      { kind: "flag", flag: "spellTargeting", mode: "area", school: "light" },
-      { kind: "flag", flag: "spellTargeting", mode: "all", school: "light", maxLevel: 4 },
-    ]);
+        expect(spellWideningOf([c], 'c', spell)).toEqual({
+            mode: 'area',
+            maxTargets: 4,
+            source: 'Подвоєння',
+        });
+        expect(spellWideningOf([caster()], 'c', spell)).toEqual({
+            mode: 'single',
+            maxTargets: 1,
+        });
+    });
 
-    expect(spellTargetingFor([c], "c", spell).mode).toBe("all");
-    expect(spellTargetingFor([c], "c", { ...spell, level: 5 }).mode).toBe("area");
-  });
+    it('flag for another school is ignored', () => {
+        const c = caster([
+            {
+                kind: 'flag',
+                flag: 'spellTargeting',
+                mode: 'area',
+                school: 'chaos',
+            },
+        ]);
 
-  it("all: уся сторона заклинання, полеглі не потрапляють; обрані ігноруються", () => {
-    const c = caster([{ kind: "flag", flag: "spellTargeting", mode: "all" }]);
+        expect(spellTargetingFor([c], 'c', spell).mode).toBe('single');
+    });
 
-    const ps = [c, ally("a1"), ally("a2"), downedAlly("a3"), enemy("e1")];
+    it('all beats area; maxLevel excludes level 5', () => {
+        const c = caster([
+            {
+                kind: 'flag',
+                flag: 'spellTargeting',
+                mode: 'area',
+                school: 'light',
+            },
+            {
+                kind: 'flag',
+                flag: 'spellTargeting',
+                mode: 'all',
+                school: 'light',
+                maxLevel: 4,
+            },
+        ]);
 
-    expect(resolveSpellTargets(ps, c, spell, { kind: "ally" }, ["a3"])).toEqual({ ok: true, targetIds: ["c", "a1", "a2"] });
-    expect(resolveSpellTargets(ps, c, spell, { kind: "enemy" }, [])).toEqual({ ok: true, targetIds: ["e1"] });
-  });
+        expect(spellTargetingFor([c], 'c', spell).mode).toBe('all');
+        expect(spellTargetingFor([c], 'c', { ...spell, level: 5 }).mode).toBe(
+            'area'
+        );
+    });
 
-  it("rejects more targets than the skill allows", () => {
-    expect(validateSpellTargetCount({ mode: "area", maxTargets: 3 }, 4)).toBe(false);
-    expect(validateSpellTargetCount({ mode: "single", maxTargets: 1 }, 2)).toBe(false);
-    expect(validateSpellTargetCount({ mode: "all", maxTargets: Infinity }, 5)).toBe(true);
-  });
+    it('all: уся сторона заклинання, полеглі не потрапляють; обрані ігноруються', () => {
+        const c = caster([
+            { kind: 'flag', flag: 'spellTargeting', mode: 'all' },
+        ]);
+
+        const ps = [c, ally('a1'), ally('a2'), downedAlly('a3'), enemy('e1')];
+
+        expect(
+            resolveSpellTargets(ps, c, spell, { kind: 'ally' }, ['a3'])
+        ).toEqual({ ok: true, targetIds: ['c', 'a1', 'a2'] });
+        expect(
+            resolveSpellTargets(ps, c, spell, { kind: 'enemy' }, [])
+        ).toEqual({ ok: true, targetIds: ['e1'] });
+    });
+
+    it('rejects more targets than the skill allows', () => {
+        expect(
+            validateSpellTargetCount({ mode: 'area', maxTargets: 3 }, 4)
+        ).toBe(false);
+        expect(
+            validateSpellTargetCount({ mode: 'single', maxTargets: 1 }, 2)
+        ).toBe(false);
+        expect(
+            validateSpellTargetCount({ mode: 'all', maxTargets: Infinity }, 5)
+        ).toBe(true);
+    });
 });

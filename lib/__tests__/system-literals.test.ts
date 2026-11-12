@@ -1,128 +1,214 @@
-import fs from "node:fs";
-import path from "node:path";
-import { describe, expect, it } from "vitest";
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
 
-import { countLiterals, isLiteralAllowed, literalTokens, readImportsExempt, readLiteralsExempt, ROOT, scanLiterals, sourceFiles, SYSTEM_ROOTS } from "@/scripts/shared/system-ratchet";
+import {
+    countLiterals,
+    isLiteralAllowed,
+    literalTokens,
+    readImportsExempt,
+    readLiteralsExempt,
+    ROOT,
+    scanLiterals,
+    sourceFiles,
+    SYSTEM_ROOTS,
+} from '@/scripts/shared/system-ratchet';
 
-describe("system literals ratchet", () => {
-  const exempt = readLiteralsExempt();
+describe('system literals ratchet', () => {
+    const exempt = readLiteralsExempt();
 
-  const found = scanLiterals();
+    const found = scanLiterals();
 
-  it("counts match the recorded numbers exactly", () => {
-    const problems = [
-      ...Object.entries(found).filter(([file, n]) => n > (exempt[file] ?? 0)).map(([file, n]) => `new leak: ${file} has ${n}, allowed ${exempt[file] ?? 0}`),
-      ...Object.entries(exempt).filter(([file, max]) => (found[file] ?? 0) < max).map(([file, max]) => `lower the entry: ${file} has ${found[file] ?? 0}, recorded ${max}`),
-    ];
+    it('counts match the recorded numbers exactly', () => {
+        const problems = [
+            ...Object.entries(found)
+                .filter(([file, n]) => n > (exempt[file] ?? 0))
+                .map(
+                    ([file, n]) =>
+                        `new leak: ${file} has ${n}, allowed ${exempt[file] ?? 0}`
+                ),
+            ...Object.entries(exempt)
+                .filter(([file, max]) => (found[file] ?? 0) < max)
+                .map(
+                    ([file, max]) =>
+                        `lower the entry: ${file} has ${found[file] ?? 0}, recorded ${max}`
+                ),
+        ];
 
-    expect(problems).toEqual([]);
-  });
-
-  it("scans neither systems/ nor system-owned folders", () => {
-    const tokens = literalTokens();
-
-    expect(Object.keys(found).filter((f) => f.startsWith("systems/") || isLiteralAllowed(f, tokens))).toEqual([]);
-  });
-
-  describe("countLiterals", () => {
-    const tokens = literalTokens();
-
-    it("counts wfrp case-insensitively as a substring", () => expect(countLiterals("const WFRP_X = wfrpThing; // Wfrp", tokens)).toBe(3));
-
-    it("counts a d20 key only as a quoted literal", () => {
-      expect(countLiterals('const a = "homm"; const b = homm;', tokens)).toBe(1);
-      expect(countLiterals("key === 'dnd5e'", tokens)).toBe(1);
+        expect(problems).toEqual([]);
     });
 
-    it("counts a template key outside the registry", () => expect(countLiterals('const k = "srd-5.2";', tokens)).toBe(1));
+    it('scans neither systems/ nor system-owned folders', () => {
+        const tokens = literalTokens();
 
-    it("ignores unrelated text", () => expect(countLiterals("const x = 1; // plain", tokens)).toBe(0));
-  });
+        expect(
+            Object.keys(found).filter(
+                (f) => f.startsWith('systems/') || isLiteralAllowed(f, tokens)
+            )
+        ).toEqual([]);
+    });
 
-  it("allows system folders and the template registry", () => {
-    const tokens = literalTokens();
+    describe('countLiterals', () => {
+        const tokens = literalTokens();
 
-    expect(isLiteralAllowed("systems/d20/index.ts", tokens)).toBe(false);
-    expect(isLiteralAllowed("scripts/templates/systems/wfrp/units.ts", tokens)).toBe(true);
-    expect(isLiteralAllowed("scripts/templates/grim-d100/validate.ts", tokens)).toBe(true);
-    expect(isLiteralAllowed("lib/utils/templates/registry.ts", tokens)).toBe(true);
-    expect(isLiteralAllowed("scripts/sim/battle-sweep/profiles/grim-d100.ts", tokens)).toBe(true);
-    expect(isLiteralAllowed("scripts/sim/battle-sweep/run.ts", tokens)).toBe(false);
-    expect(isLiteralAllowed("lib/utils/battle/foo.ts", tokens)).toBe(false);
-    expect(isLiteralAllowed("scripts/templates/lib/foo.ts", tokens)).toBe(false);
-  });
+        it('counts wfrp case-insensitively as a substring', () =>
+            expect(
+                countLiterals('const WFRP_X = wfrpThing; // Wfrp', tokens)
+            ).toBe(3));
+
+        it('counts a d20 key only as a quoted literal', () => {
+            expect(
+                countLiterals('const a = "homm"; const b = homm;', tokens)
+            ).toBe(1);
+            expect(countLiterals("key === 'dnd5e'", tokens)).toBe(1);
+        });
+
+        it('counts a template key outside the registry', () =>
+            expect(countLiterals('const k = "srd-5.2";', tokens)).toBe(1));
+
+        it('ignores unrelated text', () =>
+            expect(countLiterals('const x = 1; // plain', tokens)).toBe(0));
+    });
+
+    it('allows system folders and the template registry', () => {
+        const tokens = literalTokens();
+
+        expect(isLiteralAllowed('systems/d20/index.ts', tokens)).toBe(false);
+        expect(
+            isLiteralAllowed('scripts/templates/systems/wfrp/units.ts', tokens)
+        ).toBe(true);
+        expect(
+            isLiteralAllowed('scripts/templates/grim-d100/validate.ts', tokens)
+        ).toBe(true);
+        expect(
+            isLiteralAllowed('lib/utils/templates/registry.ts', tokens)
+        ).toBe(true);
+        expect(
+            isLiteralAllowed(
+                'scripts/sim/battle-sweep/profiles/grim-d100.ts',
+                tokens
+            )
+        ).toBe(true);
+        expect(
+            isLiteralAllowed('scripts/sim/battle-sweep/run.ts', tokens)
+        ).toBe(false);
+        expect(isLiteralAllowed('lib/utils/battle/foo.ts', tokens)).toBe(false);
+        expect(isLiteralAllowed('scripts/templates/lib/foo.ts', tokens)).toBe(
+            false
+        );
+    });
 });
 
-describe("wfrp leaks outside the allowed files", () => {
-  const ALLOWED = new Set([...readImportsExempt().map((e) => e.file), "lib/onboarding/whats-new.ts", "lib/constants/api-errors.ts", "lib/server/assistant/actions/character-coverage.ts", "app/campaigns/[id]/dm/careers/careers-client.tsx"]);
+describe('wfrp leaks outside the allowed files', () => {
+    const ALLOWED = new Set([
+        ...readImportsExempt().map((e) => e.file),
+        'lib/onboarding/whats-new.ts',
+        'lib/constants/api-errors.ts',
+        'lib/server/assistant/actions/character-coverage.ts',
+        'app/campaigns/[id]/dm/careers/careers-client.tsx',
+    ]);
 
-  const literals = readLiteralsExempt();
+    const literals = readLiteralsExempt();
 
-  it("only route / content-kind / ruleset-section files, whats-new, api-errors, character-coverage and the careers page mention wfrp", () => {
-    const leaks = Object.keys(literals).filter((file) => /wfrp/i.test(fs.readFileSync(path.join(ROOT, file), "utf8")) && !ALLOWED.has(file));
+    it('only route / content-kind / ruleset-section files, whats-new, api-errors, character-coverage and the careers page mention wfrp', () => {
+        const leaks = Object.keys(literals).filter(
+            (file) =>
+                /wfrp/i.test(fs.readFileSync(path.join(ROOT, file), 'utf8')) &&
+                !ALLOWED.has(file)
+        );
 
-    expect(leaks).toEqual([]);
-  });
+        expect(leaks).toEqual([]);
+    });
 
-  it("no core file compares to the wfrp key or names its constants", () => {
+    it('no core file compares to the wfrp key or names its constants', () => {
+        const roots = new Set(SYSTEM_ROOTS);
+
+        const offenders = sourceFiles(['lib', 'app', 'components', 'types'])
+            .filter(
+                (file) =>
+                    !roots.has(file) &&
+                    !readImportsExempt().some((e) => e.file === file) &&
+                    file !== 'lib/constants/api-errors.ts'
+            )
+            .filter((file) =>
+                /=== "wfrp"|isWfrpCampaign|\bWFRP_|\.wfrp\b|\b(?:system|characteristics)\.kind === "d20"/.test(
+                    fs.readFileSync(path.join(ROOT, file), 'utf8')
+                )
+            );
+
+        expect(offenders).toEqual([]);
+    });
+});
+
+describe('d20 / HOMM names and rule-section readers leaving core', () => {
+    // Counts files (not hits) in lib/ app/ components/ types/ scripts/ except registry roots and scripts/templates/systems/**.
+    // A number may only fall: both growth and a stale (too high) maximum fail. Target is 0 once Part 2+ moves the rules out.
     const roots = new Set(SYSTEM_ROOTS);
 
-    const offenders = sourceFiles(["lib", "app", "components", "types"])
-      .filter((file) => !roots.has(file) && !readImportsExempt().some((e) => e.file === file) && file !== "lib/constants/api-errors.ts")
-      .filter((file) => /=== "wfrp"|isWfrpCampaign|\bWFRP_|\.wfrp\b|\b(?:system|characteristics)\.kind === "d20"/.test(fs.readFileSync(path.join(ROOT, file), "utf8")));
+    const files = sourceFiles().filter(
+        (f) => !roots.has(f) && !f.startsWith('scripts/templates/systems/')
+    );
 
-    expect(offenders).toEqual([]);
-  });
-});
+    const texts = new Map(
+        files.map((f) => [f, fs.readFileSync(path.join(ROOT, f), 'utf8')])
+    );
 
-describe("d20 / HOMM names and rule-section readers leaving core", () => {
-  // Counts files (not hits) in lib/ app/ components/ types/ scripts/ except registry roots and scripts/templates/systems/**.
-  // A number may only fall: both growth and a stale (too high) maximum fail. Target is 0 once Part 2+ moves the rules out.
-  const roots = new Set(SYSTEM_ROOTS);
+    const filesMatching = (re: RegExp) =>
+        files.filter((f) => re.test(texts.get(f) ?? ''));
 
-  const files = sourceFiles().filter((f) => !roots.has(f) && !f.startsWith("scripts/templates/systems/"));
+    const check = (
+        table: Record<string, number>,
+        toRegExp: (key: string) => RegExp
+    ) => {
+        const problems = Object.entries(table).flatMap(([key, max]) => {
+            const n = filesMatching(toRegExp(key)).length;
 
-  const texts = new Map(files.map((f) => [f, fs.readFileSync(path.join(ROOT, f), "utf8")]));
+            if (n > max) return [`${key}: ${n} files, max ${max}`];
 
-  const filesMatching = (re: RegExp) => files.filter((f) => re.test(texts.get(f) ?? ""));
+            return n < max
+                ? [`${key}: lower the maximum to ${n} (was ${max})`]
+                : [];
+        });
 
-  const check = (table: Record<string, number>, toRegExp: (key: string) => RegExp) => {
-    const problems = Object.entries(table).flatMap(([key, max]) => {
-      const n = filesMatching(toRegExp(key)).length;
+        expect(problems).toEqual([]);
+    };
 
-      if (n > max) return [`${key}: ${n} files, max ${max}`];
+    const LEAK_NAMES: Record<string, number> = {
+        'D20_[A-Z]+': 0,
+        judgeD20: 0,
+        CONDITION_5E_: 11,
+        applyCondition5e: 0,
+        isHomm: 0,
+        'HOMM_[A-Z]+': 2,
+        proficiencyForLevel: 0,
+        spellcastingDerived: 0,
+        heroHpFormula: 0,
+    };
 
-      return n < max ? [`${key}: lower the maximum to ${n} (was ${max})`] : [];
-    });
+    const RULES_SECTION_READERS: Record<string, number> = {
+        morale: 1,
+        heroScaling: 1,
+        criticals: 5,
+        deathSaves: 1,
+        concentration: 1,
+        conditions: 3,
+        actions: 1,
+        classes: 17,
+        encounters: 9,
+        formulas: 3,
+        initiative: 6,
+        saves: 1,
+    };
 
-    expect(problems).toEqual([]);
-  };
+    it('leaked names stay under their maximum', () =>
+        check(LEAK_NAMES, (p) => new RegExp(p)));
 
-  const LEAK_NAMES: Record<string, number> = {
-    "D20_[A-Z]+": 0,
-    judgeD20: 0,
-    CONDITION_5E_: 11,
-    applyCondition5e: 0,
-    isHomm: 0,
-    "HOMM_[A-Z]+": 2,
-  };
-
-  const RULES_SECTION_READERS: Record<string, number> = {
-    morale: 3,
-    heroScaling: 4,
-    criticals: 5,
-    deathSaves: 1,
-    concentration: 1,
-    conditions: 3,
-    actions: 1,
-    classes: 19,
-    encounters: 9,
-    formulas: 4,
-    initiative: 7,
-    saves: 1,
-  };
-
-  it("leaked names stay under their maximum", () => check(LEAK_NAMES, (p) => new RegExp(p)));
-
-  it("reads of rules.<section> stay under their maximum", () => check(RULES_SECTION_READERS, (s) => new RegExp(`\\b(?:rules|ruleset|ruleSet|sections)\\??\\.${s}\\b`)));
+    it('reads of rules.<section> stay under their maximum', () =>
+        check(
+            RULES_SECTION_READERS,
+            (s) =>
+                new RegExp(
+                    `\\b(?:rules|ruleset|ruleSet|sections)\\??\\.${s}\\b`
+                )
+        ));
 });

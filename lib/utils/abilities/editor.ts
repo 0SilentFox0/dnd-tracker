@@ -1,199 +1,359 @@
-import type { ErrorParams } from "@/lib/constants/api-errors";
-import { issueParams } from "@/lib/i18n/translate-issue";
-import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
-import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
-import { MODULE_EFFECT_DEFAULTS } from "@/lib/utils/abilities/registry/effects/module-effect-rows";
-import { SYSTEM_EFFECT_DEFAULTS } from "@/lib/utils/abilities/registry/effects/system-rows";
-import { AbilitiesSchema, type Ability, AbilitySchema, type AnyEffect, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
-import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
-import type { ModuleEffectKind } from "@/lib/utils/abilities/schema/module-effects";
-import type { SystemEffect } from "@/lib/utils/abilities/schema/system-effects";
-import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
-import type { ClassColumn } from "@/types/classes";
+import type { ErrorParams } from '@/lib/constants/api-errors';
+import { issueParams } from '@/lib/i18n/translate-issue';
+import { columnRefIssues } from '@/lib/utils/abilities/class-columns';
+import { EFFECT_REGISTRY } from '@/lib/utils/abilities/registry/effects';
+import { MODULE_EFFECT_DEFAULTS } from '@/lib/utils/abilities/registry/effects/module-effect-rows';
+import { SYSTEM_EFFECT_DEFAULTS } from '@/lib/utils/abilities/registry/effects/system-rows';
+import {
+    AbilitiesSchema,
+    type Ability,
+    AbilitySchema,
+    type AnyEffect,
+    type Effect,
+    type EffectKind,
+    isActionScopedTrigger,
+    isStaticEffect,
+    type Trigger,
+    type TriggerEvent,
+} from '@/lib/utils/abilities/schema';
+import { PASSIVE_TARGETS } from '@/lib/utils/abilities/schema/kinds';
+import type { ModuleEffectKind } from '@/lib/utils/abilities/schema/module-effects';
+import type { SystemEffect } from '@/lib/utils/abilities/schema/system-effects';
+import { ITEM_CHARGES_KEY } from '@/lib/utils/items/pools';
+import type { ClassColumn } from '@/types/classes';
 
 export type AbilityError = string | { message: string; params?: ErrorParams };
 
-const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"];
+const STATIC_KINDS: EffectKind[] = [
+    'modifyStat',
+    'damageBonus',
+    'flag',
+    'note',
+];
 
-const ALL_KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter((k) => (EFFECT_REGISTRY[k] as { pickable?: false }).pickable !== false);
+const ALL_KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter(
+    (k) => (EFFECT_REGISTRY[k] as { pickable?: false }).pickable !== false
+);
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
-  if (trigger.event === "passive") return STATIC_KINDS;
+    if (trigger.event === 'passive') return STATIC_KINDS;
 
-  return trigger.event === "bonusAction" || trigger.event === "action" ? ALL_KINDS : ALL_KINDS.filter((k) => k !== "summon" && k !== "maneuver");
+    return trigger.event === 'bonusAction' || trigger.event === 'action'
+        ? ALL_KINDS
+        : ALL_KINDS.filter((k) => k !== 'summon' && k !== 'maneuver');
 }
 
-type WithoutKind<T> = T extends unknown ? Omit<T, "kind"> : never;
+type WithoutKind<T> = T extends unknown ? Omit<T, 'kind'> : never;
 
-const BASE_DEFAULTS: { [K in Exclude<EffectKind, SystemEffect["kind"] | ModuleEffectKind>]: WithoutKind<Extract<AnyEffect, { kind: K }>> } = {
-  modifyStat: { stat: "armor", flat: 1 },
-  damageBonus: { filter: { kind: "all" }, percent: 10 },
-  flag: { flag: "advantage", attackKind: "all" },
-  note: { text: "" },
-  grantAction: { refreshAction: true },
-  dealDamage: { amount: "1d6", target: "eventTarget" },
-  heal: { amount: "1d8" },
-  dot: { damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" },
-  hot: { healPerRound: "1d4", duration: { rounds: 2 }, target: "eventTarget" },
-  berserk: { damageBonusPercent: 50, duration: { rounds: 1 }, target: "eventTarget" },
-  charm: { duration: { rounds: 1 }, target: "eventTarget" },
-  applyCondition: { condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" },
-  restoreSpellSlot: { count: 1 },
-  restoreSpellSlotLevels: { budget: { formula: "ceil(class_level / 2)" }, maxSlotLevel: 5 },
-  drainSpellSlot: { count: 1, target: "eventTarget" },
-  cleanse: {},
-  copySpellBuffs: {},
-  summon: { tier: 1 },
-  raiseDead: { hpPercent: 50, target: "eventTarget" },
-  guard: { percent: 50, duration: { rounds: 2 }, target: "eventTarget" },
-  mark: { markId: "mark", duration: { rounds: 2 }, target: "eventTarget" },
-  maneuver: { maneuver: "fireBurst", percentOfAttack: 50 },
-  help: { target: "eventTarget" },
-  push: { feet: 10, from: "caster", target: "eventTarget" },
-  randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "heal", amount: "1d6" }] },
+const BASE_DEFAULTS: {
+    [K in Exclude<
+        EffectKind,
+        SystemEffect['kind'] | ModuleEffectKind
+    >]: WithoutKind<Extract<AnyEffect, { kind: K }>>;
+} = {
+    modifyStat: { stat: 'armor', flat: 1 },
+    damageBonus: { filter: { kind: 'all' }, percent: 10 },
+    flag: { flag: 'advantage', attackKind: 'all' },
+    note: { text: '' },
+    grantAction: { refreshAction: true },
+    dealDamage: { amount: '1d6', target: 'eventTarget' },
+    heal: { amount: '1d8' },
+    dot: {
+        damagePerRound: '1d4',
+        damageType: 'bleed',
+        duration: { rounds: 2 },
+        target: 'eventTarget',
+    },
+    hot: {
+        healPerRound: '1d4',
+        duration: { rounds: 2 },
+        target: 'eventTarget',
+    },
+    berserk: {
+        damageBonusPercent: 50,
+        duration: { rounds: 1 },
+        target: 'eventTarget',
+    },
+    charm: { duration: { rounds: 1 }, target: 'eventTarget' },
+    applyCondition: {
+        condition: 'no_reaction',
+        duration: { rounds: 1 },
+        target: 'eventTarget',
+    },
+    restoreSpellSlot: { count: 1 },
+    restoreSpellSlotLevels: {
+        budget: { formula: 'ceil(class_level / 2)' },
+        maxSlotLevel: 5,
+    },
+    drainSpellSlot: { count: 1, target: 'eventTarget' },
+    cleanse: {},
+    copySpellBuffs: {},
+    summon: { tier: 1 },
+    raiseDead: { hpPercent: 50, target: 'eventTarget' },
+    guard: { percent: 50, duration: { rounds: 2 }, target: 'eventTarget' },
+    mark: { markId: 'mark', duration: { rounds: 2 }, target: 'eventTarget' },
+    maneuver: { maneuver: 'fireBurst', percentOfAttack: 50 },
+    help: { target: 'eventTarget' },
+    push: { feet: 10, from: 'caster', target: 'eventTarget' },
+    randomOf: {
+        options: [
+            { kind: 'heal', amount: '1d4' },
+            { kind: 'heal', amount: '1d6' },
+        ],
+    },
 };
 
-const EFFECT_DEFAULTS = { ...BASE_DEFAULTS, ...SYSTEM_EFFECT_DEFAULTS, ...MODULE_EFFECT_DEFAULTS } as { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>> };
+const EFFECT_DEFAULTS = {
+    ...BASE_DEFAULTS,
+    ...SYSTEM_EFFECT_DEFAULTS,
+    ...MODULE_EFFECT_DEFAULTS,
+} as { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>> };
 
-const baseEffect = (kind: EffectKind, noteText: string): Effect => ({ kind, ...structuredClone(EFFECT_DEFAULTS[kind]), ...(kind === "note" && { text: noteText }) }) as Effect;
+const baseEffect = (kind: EffectKind, noteText: string): Effect =>
+    ({
+        kind,
+        ...structuredClone(EFFECT_DEFAULTS[kind]),
+        ...(kind === 'note' && { text: noteText }),
+    }) as Effect;
 
 function fitToTrigger(effect: Effect, trigger: Trigger): Effect {
-  if (trigger.event === "passive") {
-    // keep incompatible effects intact so validation names the real problem instead of a missing field
-    if (effect.kind !== "note" && !isStaticEffect(effect)) return effect;
+    if (trigger.event === 'passive') {
+        // keep incompatible effects intact so validation names the real problem instead of a missing field
+        if (effect.kind !== 'note' && !isStaticEffect(effect)) return effect;
 
-    const next = { ...effect } as Record<string, unknown>;
+        const next = { ...effect } as Record<string, unknown>;
 
-    delete next.duration;
+        delete next.duration;
 
-    if (typeof next.target === "string" && !PASSIVE_TARGETS.has(next.target)) delete next.target;
+        if (
+            typeof next.target === 'string' &&
+            !PASSIVE_TARGETS.has(next.target)
+        )
+            delete next.target;
 
-    return next as Effect;
-  }
+        return next as Effect;
+    }
 
-  if (isStaticEffect(effect) && !effect.duration && !isActionScopedTrigger(trigger)) return { ...effect, duration: { rounds: 1 } };
+    if (
+        isStaticEffect(effect) &&
+        !effect.duration &&
+        !isActionScopedTrigger(trigger)
+    )
+        return { ...effect, duration: { rounds: 1 } };
 
-  return effect;
+    return effect;
 }
 
-export function newEffect(kind: EffectKind, trigger: Trigger, noteText = ""): Effect {
-  return fitToTrigger(baseEffect(kind, noteText), trigger);
+export function newEffect(
+    kind: EffectKind,
+    trigger: Trigger,
+    noteText = ''
+): Effect {
+    return fitToTrigger(baseEffect(kind, noteText), trigger);
 }
 
-export function changeEffectKind(effect: Effect, kind: EffectKind, trigger: Trigger, noteText = ""): Effect {
-  const next = baseEffect(kind, noteText) as Record<string, unknown>;
+export function changeEffectKind(
+    effect: Effect,
+    kind: EffectKind,
+    trigger: Trigger,
+    noteText = ''
+): Effect {
+    const next = baseEffect(kind, noteText) as Record<string, unknown>;
 
-  const old = effect as Record<string, unknown>;
+    const old = effect as Record<string, unknown>;
 
-  if ("target" in old && old.target !== undefined && kind !== "note" && kind !== "randomOf") next.target = old.target;
+    if (
+        'target' in old &&
+        old.target !== undefined &&
+        kind !== 'note' &&
+        kind !== 'randomOf'
+    )
+        next.target = old.target;
 
-  return fitToTrigger(next as Effect, trigger);
+    return fitToTrigger(next as Effect, trigger);
 }
 
 export function newTrigger(event: TriggerEvent): Trigger {
-  switch (event) {
-    case "attack":
-      return { event, phase: "before", role: "attacker" };
-    case "hit":
-      return { event, role: "attacker" };
-    case "kill":
-      return { event, role: "killer" };
-    case "spellCast":
-      return { event, phase: "after", role: "caster" };
-    case "moraleCheck":
-      return { event, result: "success", whose: "self" };
-    default:
-      return { event } as Trigger;
-  }
+    switch (event) {
+        case 'attack':
+            return { event, phase: 'before', role: 'attacker' };
+        case 'hit':
+            return { event, role: 'attacker' };
+        case 'kill':
+            return { event, role: 'killer' };
+        case 'spellCast':
+            return { event, phase: 'after', role: 'caster' };
+        case 'moraleCheck':
+            return { event, result: 'success', whose: 'self' };
+        default:
+            return { event } as Trigger;
+    }
 }
 
-export function changeTriggerEvent(ability: Ability, event: TriggerEvent): Ability {
-  const trigger = newTrigger(event);
+export function changeTriggerEvent(
+    ability: Ability,
+    event: TriggerEvent
+): Ability {
+    const trigger = newTrigger(event);
 
-  const { limits, maxTargets, stackable, maxStacks, ...rest } = ability;
+    const { limits, maxTargets, stackable, maxStacks, ...rest } = ability;
 
-  const button = event === "bonusAction" || event === "action";
+    const button = event === 'bonusAction' || event === 'action';
 
-  return {
-    ...rest,
-    ...(event !== "passive" && limits && { limits }),
-    ...(event !== "passive" && stackable && { stackable }),
-    ...(event !== "passive" && stackable && maxStacks !== undefined && { maxStacks }),
-    ...(button && maxTargets !== undefined && { maxTargets }),
-    trigger, effects: ability.effects.map((e) => fitToTrigger(e, trigger)),
-  };
+    return {
+        ...rest,
+        ...(event !== 'passive' && limits && { limits }),
+        ...(event !== 'passive' && stackable && { stackable }),
+        ...(event !== 'passive' &&
+            stackable &&
+            maxStacks !== undefined && { maxStacks }),
+        ...(button && maxTargets !== undefined && { maxTargets }),
+        trigger,
+        effects: ability.effects.map((e) => fitToTrigger(e, trigger)),
+    };
 }
 
-const segs = (path: string) => path.split(".").filter(Boolean);
+const segs = (path: string) => path.split('.').filter(Boolean);
 
 export function getAtPath(obj: unknown, path: string): unknown {
-  return segs(path).reduce<unknown>((acc, k) => (acc && typeof acc === "object" ? (acc as Record<string, unknown>)[k] : undefined), obj);
+    return segs(path).reduce<unknown>(
+        (acc, k) =>
+            acc && typeof acc === 'object'
+                ? (acc as Record<string, unknown>)[k]
+                : undefined,
+        obj
+    );
 }
 
 export function setAtPath<T>(obj: T, path: string, value: unknown): T {
-  const [head, ...tail] = segs(path);
+    const [head, ...tail] = segs(path);
 
-  const src = (obj ?? {}) as Record<string, unknown> | unknown[];
+    const src = (obj ?? {}) as Record<string, unknown> | unknown[];
 
-  const copy = (Array.isArray(src) ? [...src] : { ...src }) as Record<string, unknown>;
+    const copy = (Array.isArray(src) ? [...src] : { ...src }) as Record<
+        string,
+        unknown
+    >;
 
-  if (tail.length === 0) {
-    if (value === undefined) delete copy[head];
-    else copy[head] = value;
-  } else {
-    const child = setAtPath(copy[head], tail.join("."), value);
+    if (tail.length === 0) {
+        if (value === undefined) delete copy[head];
+        else copy[head] = value;
+    } else {
+        const child = setAtPath(copy[head], tail.join('.'), value);
 
-    if (value === undefined && child && typeof child === "object" && !Array.isArray(child) && Object.keys(child).length === 0) delete copy[head];
-    else copy[head] = child;
-  }
+        if (
+            value === undefined &&
+            child &&
+            typeof child === 'object' &&
+            !Array.isArray(child) &&
+            Object.keys(child).length === 0
+        )
+            delete copy[head];
+        else copy[head] = child;
+    }
 
-  return copy as T;
+    return copy as T;
 }
 
-export function validateAbilities(list: unknown[], opts: { classColumns?: readonly ClassColumn[]; itemCharges?: boolean; attacks?: readonly { name: string }[]; spellIds?: readonly string[] } = {}): { ok: boolean; errorsByPath: Record<string, AbilityError[]> } {
-  const errorsByPath: Record<string, AbilityError[]> = {};
+export function validateAbilities(
+    list: unknown[],
+    opts: {
+        classColumns?: readonly ClassColumn[];
+        itemCharges?: boolean;
+        attacks?: readonly { name: string }[];
+        spellIds?: readonly string[];
+    } = {}
+): { ok: boolean; errorsByPath: Record<string, AbilityError[]> } {
+    const errorsByPath: Record<string, AbilityError[]> = {};
 
-  const push = (path: PropertyKey[], message: string, params?: ErrorParams) => (errorsByPath[path.map(String).join(".")] ??= []).push(params ? { message, params } : message);
+    const push = (path: PropertyKey[], message: string, params?: ErrorParams) =>
+        (errorsByPath[path.map(String).join('.')] ??= []).push(
+            params ? { message, params } : message
+        );
 
-  const r = AbilitiesSchema.safeParse(list);
+    const r = AbilitiesSchema.safeParse(list);
 
-  if (!r.success) for (const issue of r.error.issues) push(issue.path, issue.message, issueParams(issue as { message: string; params?: ErrorParams }));
+    if (!r.success)
+        for (const issue of r.error.issues)
+            push(
+                issue.path,
+                issue.message,
+                issueParams(issue as { message: string; params?: ErrorParams })
+            );
 
-  list.forEach((raw, i) => {
-    const one = AbilitySchema.safeParse(raw);
+    list.forEach((raw, i) => {
+        const one = AbilitySchema.safeParse(raw);
 
-    if (!one.success) return;
+        if (!one.success) return;
 
-    const perform = one.data.perform;
+        const perform = one.data.perform;
 
-    one.data.effects.forEach((e, ei) => {
-      if (e.kind === "damageBonus" && typeof e.flat === "object" && "spellRoll" in e.flat) push([i, "effects", ei, "flat"], "abilities.validation.spellRollOnlyInSpell");
+        one.data.effects.forEach((e, ei) => {
+            if (
+                e.kind === 'damageBonus' &&
+                typeof e.flat === 'object' &&
+                'spellRoll' in e.flat
+            )
+                push(
+                    [i, 'effects', ei, 'flat'],
+                    'abilities.validation.spellRollOnlyInSpell'
+                );
+        });
+
+        if (
+            perform?.kind === 'attack' &&
+            opts.attacks &&
+            !opts.attacks.some(
+                (a) =>
+                    a.name.toLocaleLowerCase() ===
+                    perform.attack.toLocaleLowerCase()
+            )
+        )
+            push(
+                [i, 'perform', 'attack'],
+                'abilities.validation.attackNotFound'
+            );
+
+        if (
+            perform?.kind === 'spell' &&
+            opts.spellIds &&
+            !opts.spellIds.includes(perform.spellId)
+        )
+            push(
+                [i, 'perform', 'spellId'],
+                'abilities.validation.spellNotFound'
+            );
+
+        const checked =
+            opts.itemCharges && one.data.limits?.pool?.key === ITEM_CHARGES_KEY
+                ? {
+                      ...one.data,
+                      limits: { ...one.data.limits, pool: undefined },
+                  }
+                : one.data;
+
+        for (const issue of columnRefIssues(
+            [checked],
+            opts.classColumns ?? null
+        ))
+            push([i, ...issue.path.slice(1)], issue.message, issue.params);
     });
 
-    if (perform?.kind === "attack" && opts.attacks && !opts.attacks.some((a) => a.name.toLocaleLowerCase() === perform.attack.toLocaleLowerCase())) push([i, "perform", "attack"], "abilities.validation.attackNotFound");
-
-    if (perform?.kind === "spell" && opts.spellIds && !opts.spellIds.includes(perform.spellId)) push([i, "perform", "spellId"], "abilities.validation.spellNotFound");
-
-    const checked = opts.itemCharges && one.data.limits?.pool?.key === ITEM_CHARGES_KEY ? { ...one.data, limits: { ...one.data.limits, pool: undefined } } : one.data;
-
-    for (const issue of columnRefIssues([checked], opts.classColumns ?? null)) push([i, ...issue.path.slice(1)], issue.message, issue.params);
-  });
-
-  return { ok: Object.keys(errorsByPath).length === 0, errorsByPath };
+    return { ok: Object.keys(errorsByPath).length === 0, errorsByPath };
 }
 
 export function withFreshIds(list: Ability[], taken: string[]): Ability[] {
-  const used = new Set(taken);
+    const used = new Set(taken);
 
-  let n = 1;
+    let n = 1;
 
-  return list.map((a) => {
-    while (used.has(`a${n}`)) n++;
+    return list.map((a) => {
+        while (used.has(`a${n}`)) n++;
 
-    const id = `a${n}`;
+        const id = `a${n}`;
 
-    used.add(id);
+        used.add(id);
 
-    return { ...a, id };
-  });
+        return { ...a, id };
+    });
 }

@@ -1,79 +1,147 @@
-import { prisma } from "@/lib/db";
-import type { CampaignSpellContext, CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
-import { logger } from "@/lib/utils/common/logger";
-import { type BranchLevel, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
-import { learnedSpellIdsFromNodes, toSpellSkillInfo } from "@/lib/utils/spells";
-import { schoolMasteryFromLearned } from "@/lib/utils/spells/model/dice";
+import { prisma } from '@/lib/db';
+import type {
+    CampaignSpellContext,
+    CharacterFromPrisma,
+} from '@/lib/utils/battle/types/participant';
+import { logger } from '@/lib/utils/common/logger';
+import {
+    type BranchLevel,
+    normalizeTree,
+    resolveLearned,
+} from '@/lib/utils/skills/progression';
+import { learnedSpellIdsFromNodes, toSpellSkillInfo } from '@/lib/utils/spells';
+import { schoolMasteryFromLearned } from '@/lib/utils/spells/model/dice';
 
 // персональне вміння не лежить у дереві, тож його закляття додаємо окремо
-async function personalSpellIds(character: CharacterFromPrisma, context?: CampaignSpellContext): Promise<string[]> {
-  const id = character.personalSkillId?.trim();
+async function personalSpellIds(
+    character: CharacterFromPrisma,
+    context?: CampaignSpellContext
+): Promise<string[]> {
+    const id = character.personalSkillId?.trim();
 
-  if (!id) return [];
+    if (!id) return [];
 
-  const skill = context ? context.allSkills.find((s) => s.id === id) : await prisma.skill.findFirst({ where: { id, campaignId: character.campaignId } });
+    const skill = context
+        ? context.allSkills.find((s) => s.id === id)
+        : await prisma.skill.findFirst({
+              where: { id, campaignId: character.campaignId },
+          });
 
-  const spellId = skill ? toSpellSkillInfo(skill).grantedSpellId : null;
+    const spellId = skill ? toSpellSkillInfo(skill).grantedSpellId : null;
 
-  return spellId ? [spellId] : [];
+    return spellId ? [spellId] : [];
 }
 
 export async function resolveLearnedSpellsAndMastery(
-  character: CharacterFromPrisma,
-  knownSpells: string[],
-  context?: CampaignSpellContext,
-): Promise<{ knownSpells: string[]; schoolMastery: Record<string, BranchLevel> }> {
-  let baseKnownSpells = knownSpells;
+    character: CharacterFromPrisma,
+    knownSpells: string[],
+    context?: CampaignSpellContext
+): Promise<{
+    knownSpells: string[];
+    schoolMastery: Record<string, BranchLevel>;
+}> {
+    let baseKnownSpells = knownSpells;
 
-  const none = () => ({ knownSpells: baseKnownSpells, schoolMastery: {} });
+    const none = () => ({ knownSpells: baseKnownSpells, schoolMastery: {} });
 
-  try {
-    baseKnownSpells = [...new Set([...knownSpells, ...(await personalSpellIds(character, context))])];
+    try {
+        baseKnownSpells = [
+            ...new Set([
+                ...knownSpells,
+                ...(await personalSpellIds(character, context)),
+            ]),
+        ];
 
-    const treeRow = context ? (context.skillTreeByRace[character.race] ?? null) : await prisma.skillTree.findFirst({ where: { campaignId: character.campaignId, race: character.race } });
+        const treeRow = context
+            ? (context.skillTreeByRace[character.race] ?? null)
+            : await prisma.skillTree.findFirst({
+                  where: {
+                      campaignId: character.campaignId,
+                      race: character.race,
+                  },
+              });
 
-    if (!treeRow) return none();
+        if (!treeRow) return none();
 
-    const tree = normalizeTree(treeRow);
+        const tree = normalizeTree(treeRow);
 
-    const learned = resolveLearned(tree, character.skillTreeProgress);
+        const learned = resolveLearned(tree, character.skillTreeProgress);
 
-    if (learned.length === 0) return none();
+        if (learned.length === 0) return none();
 
-    const skillIds = learned.map((n) => n.skillId).filter((id): id is string => !!id);
+        const skillIds = learned
+            .map((n) => n.skillId)
+            .filter((id): id is string => !!id);
 
-    const branchIds = tree.branches.map((b) => b.id);
+        const branchIds = tree.branches.map((b) => b.id);
 
-    const [skills, spells, mainSkills] = context
-      ? [context.allSkills.filter((s) => skillIds.includes(s.id)), context.spells, context.mainSkills]
-      : await Promise.all([
-          prisma.skill.findMany({ where: { campaignId: character.campaignId, id: { in: skillIds } } }),
-          prisma.spell.findMany({ where: { campaignId: character.campaignId }, select: { id: true, level: true, spellGroup: { select: { id: true } } } }),
-          prisma.mainSkill.findMany({ where: { campaignId: character.campaignId, id: { in: branchIds } }, select: { id: true, spellGroupId: true } }),
-        ]);
+        const [skills, spells, mainSkills] = context
+            ? [
+                  context.allSkills.filter((s) => skillIds.includes(s.id)),
+                  context.spells,
+                  context.mainSkills,
+              ]
+            : await Promise.all([
+                  prisma.skill.findMany({
+                      where: {
+                          campaignId: character.campaignId,
+                          id: { in: skillIds },
+                      },
+                  }),
+                  prisma.spell.findMany({
+                      where: { campaignId: character.campaignId },
+                      select: {
+                          id: true,
+                          level: true,
+                          spellGroup: { select: { id: true } },
+                      },
+                  }),
+                  prisma.mainSkill.findMany({
+                      where: {
+                          campaignId: character.campaignId,
+                          id: { in: branchIds },
+                      },
+                      select: { id: true, spellGroupId: true },
+                  }),
+              ]);
 
-    const branchSpellGroup = Object.fromEntries(tree.branches.map((b) => [b.id, mainSkills.find((m) => m.id === b.id)?.spellGroupId ?? b.spellGroupId]));
+        const branchSpellGroup = Object.fromEntries(
+            tree.branches.map((b) => [
+                b.id,
+                mainSkills.find((m) => m.id === b.id)?.spellGroupId ??
+                    b.spellGroupId,
+            ])
+        );
 
-    const fromTree = learnedSpellIdsFromNodes(learned, {
-      branchSpellGroup,
-      skills: Object.fromEntries(skills.map((s) => [s.id, toSpellSkillInfo(s)])),
-      spells,
-    });
+        const fromTree = learnedSpellIdsFromNodes(learned, {
+            branchSpellGroup,
+            skills: Object.fromEntries(
+                skills.map((s) => [s.id, toSpellSkillInfo(s)])
+            ),
+            spells,
+        });
 
-    const masteryOf = schoolMasteryFromLearned(learned, branchSpellGroup);
+        const masteryOf = schoolMasteryFromLearned(learned, branchSpellGroup);
 
-    const schoolMastery: Record<string, BranchLevel> = {};
+        const schoolMastery: Record<string, BranchLevel> = {};
 
-    for (const group of new Set(Object.values(branchSpellGroup))) {
-      const level = group ? masteryOf(group) : null;
+        for (const group of new Set(Object.values(branchSpellGroup))) {
+            const level = group ? masteryOf(group) : null;
 
-      if (group && level) schoolMastery[group] = level;
+            if (group && level) schoolMastery[group] = level;
+        }
+
+        return {
+            knownSpells: [...new Set([...baseKnownSpells, ...fromTree])],
+            schoolMastery,
+        };
+    } catch (e) {
+        logger.error(
+            '[battle/learned-spells] load from tree failed',
+            { characterId: character.id, race: character.race },
+            e
+        );
+
+        return none();
     }
-
-    return { knownSpells: [...new Set([...baseKnownSpells, ...fromTree])], schoolMastery };
-  } catch (e) {
-    logger.error("[battle/learned-spells] load from tree failed", { characterId: character.id, race: character.race }, e);
-
-    return none();
-  }
 }

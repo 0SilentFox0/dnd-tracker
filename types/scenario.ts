@@ -1,5 +1,14 @@
-import type { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, MENTION_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SECTION_ICON_KEYS } from "@/lib/constants/scenario";
-import type { PageSummary } from "@/lib/schemas/scenario-summary";
+import type {
+    CALLOUT_KINDS,
+    LEGEND_KINDS,
+    MARK_TYPES,
+    MENTION_TYPES,
+    NODE_TYPES,
+    PAGE_KINDS,
+    PAGE_STATUSES,
+    SECTION_ICON_KEYS,
+} from '@/lib/constants/scenario';
+import type { PageSummary } from '@/lib/schemas/scenario-summary';
 
 export type ScenarioPageKind = (typeof PAGE_KINDS)[number];
 export type ScenarioPageStatus = (typeof PAGE_STATUSES)[number];
@@ -11,211 +20,228 @@ export type RichMarkType = (typeof MARK_TYPES)[number];
 export type SectionIconKey = (typeof SECTION_ICON_KEYS)[number];
 
 export interface RichMark {
-  type: RichMarkType;
-  attrs?: Record<string, unknown>;
+    type: RichMarkType;
+    attrs?: Record<string, unknown>;
 }
 
 export interface RichNode {
-  type: RichNodeType;
-  attrs?: Record<string, unknown>;
-  content?: RichNode[];
-  marks?: RichMark[];
-  text?: string;
+    type: RichNodeType;
+    attrs?: Record<string, unknown>;
+    content?: RichNode[];
+    marks?: RichMark[];
+    text?: string;
 }
 
 export interface RichDoc {
-  type: "doc";
-  content: RichNode[];
+    type: 'doc';
+    content: RichNode[];
 }
 
 export interface ScenarioRowSlide {
-  deckId: string;
-  slideId: string;
+    deckId: string;
+    slideId: string;
 }
 
 export interface ScenarioMarkerRef {
-  mapId: string;
-  markerId: string;
+    mapId: string;
+    markerId: string;
 }
 
 export interface ScenarioRow {
-  id: string;
-  story: RichDoc;
-  notes: RichDoc;
-  slide?: ScenarioRowSlide;
-  battleId?: string;
-  marker?: ScenarioMarkerRef;
+    id: string;
+    story: RichDoc;
+    notes: RichDoc;
+    slide?: ScenarioRowSlide;
+    battleId?: string;
+    marker?: ScenarioMarkerRef;
 }
 
-export type RevealRule = { mode: "manual" } | { mode: "afterSection"; pageId: string; sectionId: string };
+export type RevealRule =
+    | { mode: 'manual' }
+    | { mode: 'afterSection'; pageId: string; sectionId: string };
 
 export interface ScenarioSection {
-  id: string;
-  title: string;
-  played: boolean;
-  icon?: SectionIconKey;
-  /** Трек із музичної бібліотеки: вмикається, коли ДМ запускає рядок розділу. */
-  trackId?: string;
-  reveal?: RevealRule;
-  marker?: ScenarioMarkerRef;
-  revealedAt?: string | null;
-  rows: ScenarioRow[];
+    id: string;
+    title: string;
+    played: boolean;
+    icon?: SectionIconKey;
+    /** Трек із музичної бібліотеки: вмикається, коли ДМ запускає рядок розділу. */
+    trackId?: string;
+    reveal?: RevealRule;
+    marker?: ScenarioMarkerRef;
+    revealedAt?: string | null;
+    rows: ScenarioRow[];
 }
 
 export interface LegendEntry {
-  kind: LegendKind;
-  label: string;
-  color?: string;
+    kind: LegendKind;
+    label: string;
+    color?: string;
 }
 
 export interface ScenarioContent {
-  legend: LegendEntry[];
-  sections: ScenarioSection[];
+    legend: LegendEntry[];
+    sections: ScenarioSection[];
 }
 
 export interface ScenarioPageSummary {
-  id: string;
-  kind: ScenarioPageKind;
-  arc: string | null;
-  title: string;
-  subtitle: string | null;
-  status: ScenarioPageStatus;
-  sortOrder: number;
-  characterId: string | null;
-  version: number;
-  updatedAt: string;
+    id: string;
+    kind: ScenarioPageKind;
+    arc: string | null;
+    title: string;
+    subtitle: string | null;
+    status: ScenarioPageStatus;
+    sortOrder: number;
+    characterId: string | null;
+    version: number;
+    updatedAt: string;
 }
 
 export interface ScenarioPage extends ScenarioPageSummary {
-  content: ScenarioContent;
+    content: ScenarioContent;
 }
 
 export interface ScenarioVersionSummary {
-  id: string;
-  createdAt: string;
-  createdBy: string;
+    id: string;
+    createdAt: string;
+    createdBy: string;
 }
 
 export interface ScenarioSearchHit {
-  pageId: string;
-  pageTitle: string;
-  sectionId: string | null;
-  snippet: string;
+    pageId: string;
+    pageTitle: string;
+    sectionId: string | null;
+    snippet: string;
 }
 
 export interface MentionOption {
-  type: MentionType;
-  id: string;
-  label: string;
+    type: MentionType;
+    id: string;
+    label: string;
 }
 
 export interface StoryChapter {
-  id: string;
-  title: string;
-  rows: RichDoc[];
+    id: string;
+    title: string;
+    rows: RichDoc[];
 }
 
 export interface CreateScenarioPageData {
-  kind: ScenarioPageKind;
-  title: string;
-  arc?: string | null;
-  subtitle?: string | null;
-  characterId?: string | null;
+    kind: ScenarioPageKind;
+    title: string;
+    arc?: string | null;
+    subtitle?: string | null;
+    characterId?: string | null;
 }
 
-export interface UpdateScenarioMetaData extends Partial<CreateScenarioPageData> {
-  status?: ScenarioPageStatus;
-  sortOrder?: number;
+export interface UpdateScenarioMetaData
+    extends Partial<CreateScenarioPageData> {
+    status?: ScenarioPageStatus;
+    sortOrder?: number;
 }
 
 export interface SaveScenarioContentData {
-  expectedVersion: number;
-  content: ScenarioContent;
+    expectedVersion: number;
+    content: ScenarioContent;
 }
 
 export interface ScenarioSectionPatch {
-  played?: boolean;
-  revealed?: boolean;
+    played?: boolean;
+    revealed?: boolean;
 }
 
 export interface ScenarioIndexGroups {
-  arcs: { arc: string; pages: (ScenarioPageSummary & { number: number })[] }[];
-  heroes: ScenarioPageSummary[];
-  notes: ScenarioPageSummary[];
+    arcs: {
+        arc: string;
+        pages: (ScenarioPageSummary & { number: number })[];
+    }[];
+    heroes: ScenarioPageSummary[];
+    notes: ScenarioPageSummary[];
 }
 
 export interface IndexRef {
-  type: MentionType;
-  id: string;
-  label: string;
-  count: number;
-  secret: boolean;
+    type: MentionType;
+    id: string;
+    label: string;
+    count: number;
+    secret: boolean;
 }
 
 export interface PageFacts {
-  sections: { id: string; title: string; played: boolean; refs: IndexRef[] }[];
+    sections: {
+        id: string;
+        title: string;
+        played: boolean;
+        refs: IndexRef[];
+    }[];
 }
 
 export interface IndexEntityNode {
-  kind: "entity";
-  type: MentionType;
-  id: string;
-  label: string;
-  degree: number;
-  sceneIds: string[];
-  missing: boolean;
-  image?: string | null;
+    kind: 'entity';
+    type: MentionType;
+    id: string;
+    label: string;
+    degree: number;
+    sceneIds: string[];
+    missing: boolean;
+    image?: string | null;
 }
 
 export interface IndexSceneNode {
-  kind: "scene";
-  id: string;
-  title: string;
-  pageKind: ScenarioPageKind;
-  status: ScenarioPageStatus;
-  order: number;
-  sections: { id: string; title: string; played: boolean }[];
+    kind: 'scene';
+    id: string;
+    title: string;
+    pageKind: ScenarioPageKind;
+    status: ScenarioPageStatus;
+    order: number;
+    sections: { id: string; title: string; played: boolean }[];
 }
 
 export interface IndexEdge {
-  sceneId: string;
-  entityType: MentionType;
-  entityId: string;
-  count: number;
-  sectionIds: string[];
-  secret: boolean;
+    sceneId: string;
+    entityType: MentionType;
+    entityId: string;
+    count: number;
+    sectionIds: string[];
+    secret: boolean;
 }
 
 export interface IndexRelation {
-  a: string;
-  b: string;
-  label: string;
+    a: string;
+    b: string;
+    label: string;
 }
 
 export interface ScenarioIndex {
-  scenes: IndexSceneNode[];
-  entities: IndexEntityNode[];
-  edges: IndexEdge[];
-  relations: IndexRelation[];
-  counts: { scenes: number; entities: number; edges: number; byType: Partial<Record<MentionType, number>>; missing: number };
+    scenes: IndexSceneNode[];
+    entities: IndexEntityNode[];
+    edges: IndexEdge[];
+    relations: IndexRelation[];
+    counts: {
+        scenes: number;
+        entities: number;
+        edges: number;
+        byType: Partial<Record<MentionType, number>>;
+        missing: number;
+    };
 }
 
 export interface ScenarioSummaryEntry {
-  summary: PageSummary;
-  version: number;
-  stale: boolean;
-  model: string;
-  createdAt: string;
+    summary: PageSummary;
+    version: number;
+    stale: boolean;
+    model: string;
+    createdAt: string;
 }
 
 export interface ScenarioSummaries {
-  available: boolean;
-  summaries: Record<string, ScenarioSummaryEntry>;
+    available: boolean;
+    summaries: Record<string, ScenarioSummaryEntry>;
 }
 
 export interface GeneratedSummary {
-  summary: PageSummary;
-  version: number;
-  stale: false;
-  truncated: boolean;
+    summary: PageSummary;
+    version: number;
+    stale: false;
+    truncated: boolean;
 }

@@ -1,58 +1,68 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 
 const ROOT = process.cwd();
 
 const IMPORT_RE = /(?:from|import)\s*\(?\s*["']@\/([^"']+)["']/g;
 
 // type-only imports are erased and never reach a bundle
-const TYPE_IMPORT_RE = /(?:import|export)\s+type\s[^;"']*?from\s*["'][^"']+["'];?/g;
+const TYPE_IMPORT_RE =
+    /(?:import|export)\s+type\s[^;"']*?from\s*["'][^"']+["'];?/g;
 
-const EXTS = [".ts", ".tsx", "/index.ts", "/index.tsx"];
+const EXTS = ['.ts', '.tsx', '/index.ts', '/index.tsx'];
 
 export function walkSources(dir: string, out: string[] = []): string[] {
-  const abs = join(ROOT, dir);
+    const abs = join(ROOT, dir);
 
-  if (!existsSync(abs)) return out;
+    if (!existsSync(abs)) return out;
 
-  for (const name of readdirSync(abs)) {
-    const rel = `${dir}/${name}`;
+    for (const name of readdirSync(abs)) {
+        const rel = `${dir}/${name}`;
 
-    if (name === "__tests__" || name === "node_modules") continue;
+        if (name === '__tests__' || name === 'node_modules') continue;
 
-    if (statSync(join(ROOT, rel)).isDirectory()) walkSources(rel, out);
-    else if (/\.tsx?$/.test(name)) out.push(rel);
-  }
+        if (statSync(join(ROOT, rel)).isDirectory()) walkSources(rel, out);
+        else if (/\.tsx?$/.test(name)) out.push(rel);
+    }
 
-  return out;
+    return out;
 }
 
-export const readSource = (file: string) => readFileSync(join(ROOT, file), "utf8");
+export const readSource = (file: string) =>
+    readFileSync(join(ROOT, file), 'utf8');
 
-const resolveImport = (spec: string) => EXTS.map((ext) => `${spec}${ext}`).concat(spec).find((p) => /\.tsx?$/.test(p) && existsSync(join(ROOT, p)));
+const resolveImport = (spec: string) =>
+    EXTS.map((ext) => `${spec}${ext}`)
+        .concat(spec)
+        .find((p) => /\.tsx?$/.test(p) && existsSync(join(ROOT, p)));
 
-export function reachableSources(roots: readonly string[], skip: (file: string, text: string) => boolean): Map<string, string> {
-  const seen = new Map<string, string>();
+export function reachableSources(
+    roots: readonly string[],
+    skip: (file: string, text: string) => boolean
+): Map<string, string> {
+    const seen = new Map<string, string>();
 
-  const queue = [...roots];
+    const queue = [...roots];
 
-  while (queue.length) {
-    const file = queue.pop() as string;
+    while (queue.length) {
+        const file = queue.pop() as string;
 
-    if (seen.has(file)) continue;
+        if (seen.has(file)) continue;
 
-    const text = readSource(file);
+        const text = readSource(file);
 
-    if (skip(file, text)) continue;
+        if (skip(file, text)) continue;
 
-    seen.set(file, text);
+        seen.set(file, text);
 
-    for (const [, spec] of text.replace(TYPE_IMPORT_RE, "").matchAll(IMPORT_RE)) {
-      const next = resolveImport(spec);
+        for (const [, spec] of text
+            .replace(TYPE_IMPORT_RE, '')
+            .matchAll(IMPORT_RE)) {
+            const next = resolveImport(spec);
 
-      if (next) queue.push(next);
+            if (next) queue.push(next);
+        }
     }
-  }
 
-  return seen;
+    return seen;
 }

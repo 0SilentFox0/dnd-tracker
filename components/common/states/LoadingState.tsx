@@ -1,16 +1,32 @@
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
-export function LoadingState({ rows = 3, label, className }: { rows?: number; label?: string; className?: string }) {
-  const t = useTranslations("common.states");
+export function LoadingState({
+    rows = 3,
+    label,
+    className,
+}: {
+    rows?: number;
+    label?: string;
+    className?: string;
+}) {
+    const t = useTranslations('common.states');
 
-  return (
-    <div role="status" aria-busy="true" className={cn("space-y-2", className)}>
-      <span className="sr-only">{label ?? t("loading")}</span>
-      {Array.from({ length: rows }, (_, i) => (
-        <div key={i} data-slot="skeleton-row" className="h-14 animate-pulse rounded-lg bg-muted" />
-      ))}
-    </div>
-  );
+    return (
+        <div
+            role="status"
+            aria-busy="true"
+            className={cn('space-y-2', className)}
+        >
+            <span className="sr-only">{label ?? t('loading')}</span>
+            {Array.from({ length: rows }, (_, i) => (
+                <div
+                    key={i}
+                    data-slot="skeleton-row"
+                    className="h-14 animate-pulse rounded-lg bg-muted"
+                />
+            ))}
+        </div>
+    );
 }

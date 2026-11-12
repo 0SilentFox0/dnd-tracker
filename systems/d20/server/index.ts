@@ -1,19 +1,26 @@
-import { D20_BALANCE } from "./balance";
+import { D20_BALANCE } from './balance';
+import { D20_OPERATIONS } from './operations';
 
-import type { SystemServer } from "@/lib/server/systems/types";
+import type { SystemServer } from '@/lib/server/systems/types';
 
 export const D20_MODULE_SERVER: SystemServer = {
-  schemas: {},
-  balance: D20_BALANCE,
-  battle: {
-    "crit-choice": {
-      load: async (deps) => {
-        const { critChoiceSchema } = await import("@/lib/schemas");
+    schemas: {},
+    balance: D20_BALANCE,
+    operations: D20_OPERATIONS,
+    battle: {
+        'crit-choice': {
+            load: async (deps) => {
+                const { critChoiceSchema } = await import('@/lib/schemas');
 
-        const { createCritChoiceMutation } = await import("./battle/crit-choice-mutation");
+                const { createCritChoiceMutation } = await import(
+                    './battle/crit-choice-mutation'
+                );
 
-        return { schema: critChoiceSchema, mutate: createCritChoiceMutation(deps) };
-      },
+                return {
+                    schema: critChoiceSchema,
+                    mutate: createCritChoiceMutation(deps),
+                };
+            },
+        },
     },
-  },
 };

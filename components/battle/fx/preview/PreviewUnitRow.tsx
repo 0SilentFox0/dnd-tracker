@@ -1,87 +1,137 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { AuraCanvas } from "@/components/battle/fx/auras/AuraCanvas";
-import { FRAMES } from "@/components/battle/fx/frames";
-import { CanvasFrame } from "@/components/battle/fx/frames/CanvasFrame";
-import { cn } from "@/lib/utils";
-import type { PreviewUnit, SpellFxTarget } from "@/lib/utils/battle/fx";
+import { AuraCanvas } from '@/components/battle/fx/auras/AuraCanvas';
+import { FRAMES } from '@/components/battle/fx/frames';
+import { CanvasFrame } from '@/components/battle/fx/frames/CanvasFrame';
+import { cn } from '@/lib/utils';
+import type { PreviewUnit, SpellFxTarget } from '@/lib/utils/battle/fx';
 
-const HP: Record<PreviewUnit["id"], number> = { caster: 1, ally: 0.2, fallen: 0, e1: 1, e2: 1 };
+const HP: Record<PreviewUnit['id'], number> = {
+    caster: 1,
+    ally: 0.2,
+    fallen: 0,
+    e1: 1,
+    e2: 1,
+};
 
 const ROW_LOOK = {
-  hud: {
-    row: "rounded-lg border border-white/[.08] bg-black/30 text-[var(--ink,#efe5d2)]",
-    portrait: "bg-[#241d16] text-[var(--bone,#e6dccb)]",
-    ring: "#000",
-    fallenName: "text-hud-muted",
-    track: "h-1 bg-white/10",
-    bar: { ally: "bg-[#c0392b]", enemy: "bg-[#c0392b]" },
-  },
-  book: {
-    row: "spell-book-preview-row rounded-[3px] border",
-    portrait: "spell-book-preview-portrait",
-    ring: "var(--book-ink,#2a1d14)",
-    fallenName: "spell-book-muted",
-    track: "spell-book-preview-track h-[3px]",
-    bar: { ally: "bg-[#4a6b3a]", enemy: "bg-[#8a2e22]" },
-  },
+    hud: {
+        row: 'rounded-lg border border-white/[.08] bg-black/30 text-[var(--ink,#efe5d2)]',
+        portrait: 'bg-[#241d16] text-[var(--bone,#e6dccb)]',
+        ring: '#000',
+        fallenName: 'text-hud-muted',
+        track: 'h-1 bg-white/10',
+        bar: { ally: 'bg-[#c0392b]', enemy: 'bg-[#c0392b]' },
+    },
+    book: {
+        row: 'spell-book-preview-row rounded-[3px] border',
+        portrait: 'spell-book-preview-portrait',
+        ring: 'var(--book-ink,#2a1d14)',
+        fallenName: 'spell-book-muted',
+        track: 'spell-book-preview-track h-[3px]',
+        bar: { ally: 'bg-[#4a6b3a]', enemy: 'bg-[#8a2e22]' },
+    },
 };
 
 const ROW_SIZE = {
-  regular: { portrait: 40, row: "min-h-[60px] px-3 py-2 text-sm" },
-  compact: { portrait: 32, row: "min-h-[46px] px-2.5 py-1.5 text-xs" },
+    regular: { portrait: 40, row: 'min-h-[60px] px-3 py-2 text-sm' },
+    compact: { portrait: 32, row: 'min-h-[46px] px-2.5 py-1.5 text-xs' },
 };
 
 interface RowLook {
-  /** Auras paint one static frame (reduced motion). */
-  still: boolean;
-  compact: boolean;
-  /** The light parchment of the spellbook. */
-  book: boolean;
+    /** Auras paint one static frame (reduced motion). */
+    still: boolean;
+    compact: boolean;
+    /** The light parchment of the spellbook. */
+    book: boolean;
 }
 
 interface Props {
-  unit: PreviewUnit;
-  target: SpellFxTarget | undefined;
-  /** Remount key and delay of the hit frame; null — no frame. */
-  hit: { token: number; delayMs: number } | null;
-  aurasOn: boolean;
-  look?: Partial<RowLook>;
+    unit: PreviewUnit;
+    target: SpellFxTarget | undefined;
+    /** Remount key and delay of the hit frame; null — no frame. */
+    hit: { token: number; delayMs: number } | null;
+    aurasOn: boolean;
+    look?: Partial<RowLook>;
 }
 
-export function PreviewUnitRow({ unit, target, hit, aurasOn, look = {} }: Props) {
-  const t = useTranslations("spells.fx.previewUnits");
+export function PreviewUnitRow({
+    unit,
+    target,
+    hit,
+    aurasOn,
+    look = {},
+}: Props) {
+    const t = useTranslations('spells.fx.previewUnits');
 
-  const { still = false, compact = false, book = false } = look;
+    const { still = false, compact = false, book = false } = look;
 
-  const name = t(unit.id);
+    const name = t(unit.id);
 
-  const tone = ROW_LOOK[book ? "book" : "hud"];
+    const tone = ROW_LOOK[book ? 'book' : 'hud'];
 
-  const size = ROW_SIZE[compact ? "compact" : "regular"];
+    const size = ROW_SIZE[compact ? 'compact' : 'regular'];
 
-  const fallen = unit.id === "fallen";
+    const fallen = unit.id === 'fallen';
 
-  return (
-    <div data-fx-participant={unit.id} className={cn("relative flex items-center gap-2.5 font-bold", tone.row, size.row)}>
-      {hit && target?.frame ? <CanvasFrame key={hit.token} frame={FRAMES[target.frame]} delayMs={hit.delayMs} light={book} /> : null}
-      <span className="relative shrink-0">
-        <span
-          className={cn("flex items-center justify-center rounded-full text-xs", tone.portrait, fallen && "opacity-50 grayscale")}
-          style={{ width: size.portrait, height: size.portrait, boxShadow: `0 0 0 2px ${unit.side === "ally" ? "var(--ally, #6f8fb0)" : "var(--enemy, #9c2a1d)"}, 0 0 0 3px ${tone.ring}` }}
+    return (
+        <div
+            data-fx-participant={unit.id}
+            className={cn(
+                'relative flex items-center gap-2.5 font-bold',
+                tone.row,
+                size.row
+            )}
         >
-          {fallen ? "†" : name.slice(0, 2)}
-        </span>
-        {aurasOn && target?.auras.length ? <AuraCanvas kinds={target.auras} size={size.portrait} still={still} /> : null}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className={cn("block truncate", fallen && tone.fallenName)}>{name}</span>
-        <span className={cn("mt-1 block rounded-full", tone.track)}>
-          <span className={cn("block h-full rounded-full", tone.bar[unit.side])} style={{ width: `${HP[unit.id] * 100}%` }} />
-        </span>
-      </span>
-    </div>
-  );
+            {hit && target?.frame ? (
+                <CanvasFrame
+                    key={hit.token}
+                    frame={FRAMES[target.frame]}
+                    delayMs={hit.delayMs}
+                    light={book}
+                />
+            ) : null}
+            <span className="relative shrink-0">
+                <span
+                    className={cn(
+                        'flex items-center justify-center rounded-full text-xs',
+                        tone.portrait,
+                        fallen && 'opacity-50 grayscale'
+                    )}
+                    style={{
+                        width: size.portrait,
+                        height: size.portrait,
+                        boxShadow: `0 0 0 2px ${unit.side === 'ally' ? 'var(--ally, #6f8fb0)' : 'var(--enemy, #9c2a1d)'}, 0 0 0 3px ${tone.ring}`,
+                    }}
+                >
+                    {fallen ? '†' : name.slice(0, 2)}
+                </span>
+                {aurasOn && target?.auras.length ? (
+                    <AuraCanvas
+                        kinds={target.auras}
+                        size={size.portrait}
+                        still={still}
+                    />
+                ) : null}
+            </span>
+            <span className="min-w-0 flex-1">
+                <span
+                    className={cn('block truncate', fallen && tone.fallenName)}
+                >
+                    {name}
+                </span>
+                <span className={cn('mt-1 block rounded-full', tone.track)}>
+                    <span
+                        className={cn(
+                            'block h-full rounded-full',
+                            tone.bar[unit.side]
+                        )}
+                        style={{ width: `${HP[unit.id] * 100}%` }}
+                    />
+                </span>
+            </span>
+        </div>
+    );
 }

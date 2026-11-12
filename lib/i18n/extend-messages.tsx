@@ -1,20 +1,39 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
-import { type AbstractIntlMessages, NextIntlClientProvider, useLocale, useMessages, useTimeZone } from "next-intl";
+import { useMemo } from 'react';
+import {
+    type AbstractIntlMessages,
+    NextIntlClientProvider,
+    useLocale,
+    useMessages,
+    useTimeZone,
+} from 'next-intl';
 
-export function ExtendMessages({ messages, children }: { messages: AbstractIntlMessages; children: React.ReactNode }) {
-  const outer = useMessages();
+export function ExtendMessages({
+    messages,
+    children,
+}: {
+    messages: AbstractIntlMessages;
+    children: React.ReactNode;
+}) {
+    const outer = useMessages();
 
-  const locale = useLocale();
+    const locale = useLocale();
 
-  const timeZone = useTimeZone();
+    const timeZone = useTimeZone();
 
-  const merged = useMemo(() => ({ ...outer, ...messages }), [outer, messages]);
+    const merged = useMemo(
+        () => ({ ...outer, ...messages }),
+        [outer, messages]
+    );
 
-  return (
-    <NextIntlClientProvider locale={locale} messages={merged} timeZone={timeZone}>
-      {children}
-    </NextIntlClientProvider>
-  );
+    return (
+        <NextIntlClientProvider
+            locale={locale}
+            messages={merged}
+            timeZone={timeZone}
+        >
+            {children}
+        </NextIntlClientProvider>
+    );
 }

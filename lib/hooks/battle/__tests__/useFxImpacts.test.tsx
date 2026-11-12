@@ -1,72 +1,123 @@
 // @vitest-environment happy-dom
-import { renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useFxImpacts } from "../useFxImpacts";
+import { useFxImpacts } from '../useFxImpacts';
 
-import { AttackType } from "@/lib/constants/battle";
-import { action } from "@/lib/utils/battle/fx/__tests__/action-fixture";
-import type { BattleAction } from "@/types/battle";
+import { AttackType } from '@/lib/constants/battle';
+import { action } from '@/lib/utils/battle/fx/__tests__/action-fixture';
+import type { BattleAction } from '@/types/battle';
 
-const h = vi.hoisted(() => ({ log: [] as BattleAction[], morale: null as unknown, hidden: false }));
+const h = vi.hoisted(() => ({
+    log: [] as BattleAction[],
+    morale: null as unknown,
+    hidden: false,
+}));
 
-vi.mock("../useBattleScene", () => ({ useBattleSceneData: () => ({ battle: { battleLog: h.log, pendingMoraleCheck: h.morale } }) }));
-vi.mock("../useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: true }) }));
-vi.mock("@/lib/hooks/common", () => ({ usePageHidden: () => h.hidden }));
+vi.mock('../useBattleScene', () => ({
+    useBattleSceneData: () => ({
+        battle: { battleLog: h.log, pendingMoraleCheck: h.morale },
+    }),
+}));
+vi.mock('../useFxEnabled', () => ({ useFxEnabled: () => ({ enabled: true }) }));
+vi.mock('@/lib/hooks/common', () => ({ usePageHidden: () => h.hidden }));
 
 const melee = { attackKind: AttackType.MELEE, isHit: true };
 
-const attack = action({ id: "atk", actionIndex: 1, actorId: "a", targets: [{ participantId: "d", participantName: "D" }], actionType: "attack", actionDetails: melee });
-
-const retaliation = action({ id: "ret", actionIndex: 2, actorId: "d", targets: [{ participantId: "a", participantName: "A" }], actionType: "retaliation", actionDetails: melee });
-
-beforeEach(() => {
-  h.log = [attack, retaliation];
-  h.morale = null;
-  h.hidden = false;
+const attack = action({
+    id: 'atk',
+    actionIndex: 1,
+    actorId: 'a',
+    targets: [{ participantId: 'd', participantName: 'D' }],
+    actionType: 'attack',
+    actionDetails: melee,
 });
 
-describe("useFxImpacts", () => {
-  it("атака + відповідний удар в одній дельті: кожен отримує свою дію", () => {
-    const { result } = renderHook(() => useFxImpacts());
+const retaliation = action({
+    id: 'ret',
+    actionIndex: 2,
+    actorId: 'd',
+    targets: [{ participantId: 'a', participantName: 'A' }],
+    actionType: 'retaliation',
+    actionDetails: melee,
+});
 
-    expect(result.current("d")?.actionId).toBe("atk");
-    expect(result.current("a")?.actionId).toBe("ret");
-  });
+beforeEach(() => {
+    h.log = [attack, retaliation];
+    h.morale = null;
+    h.hidden = false;
+});
 
-  it("waitMs росте з кількістю дій у черзі", () => {
-    const { result } = renderHook(() => useFxImpacts());
+describe('useFxImpacts', () => {
+    it('атака + відповідний удар в одній дельті: кожен отримує свою дію', () => {
+        const { result } = renderHook(() => useFxImpacts());
 
-    const first = result.current("d")?.waitMs ?? 0;
+        expect(result.current('d')?.actionId).toBe('atk');
+        expect(result.current('a')?.actionId).toBe('ret');
+    });
 
-    const last = result.current("a")?.waitMs ?? 0;
+    it('waitMs росте з кількістю дій у черзі', () => {
+        const { result } = renderHook(() => useFxImpacts());
 
-    expect(first).toBeGreaterThan(last);
-  });
+        const first = result.current('d')?.waitMs ?? 0;
 
-  it("мораль у черзі збільшує запобіжник", () => {
-    const base = renderHook(() => useFxImpacts()).result.current("a")?.waitMs ?? 0;
+        const last = result.current('a')?.waitMs ?? 0;
 
-    h.morale = { participantId: "a" };
+        expect(first).toBeGreaterThan(last);
+    });
 
-    expect(renderHook(() => useFxImpacts()).result.current("a")?.waitMs).toBeGreaterThan(base);
-  });
+    it('мораль у черзі збільшує запобіжник', () => {
+        const base =
+            renderHook(() => useFxImpacts()).result.current('a')?.waitMs ?? 0;
 
-  it("прихована сторінка — вплив без actionId", () => {
-    h.hidden = true;
+        h.morale = { participantId: 'a' };
 
-    const impact = renderHook(() => useFxImpacts()).result.current("d");
+        expect(
+            renderHook(() => useFxImpacts()).result.current('a')?.waitMs
+        ).toBeGreaterThan(base);
+    });
 
-    expect(impact).not.toBeNull();
-    expect(impact?.actionId).toBeUndefined();
-  });
+    it('прихована сторінка — вплив без actionId', () => {
+        h.hidden = true;
 
-  it("вторинна жертва отримує вплив тієї ж дії", () => {
-    h.log = [action({ id: "fw", actionIndex: 1, actionType: "attack", targets: [{ participantId: "t", participantName: "T" }], actionDetails: { attackKind: AttackType.RANGED, isHit: true }, hpChanges: [{ participantId: "t", participantName: "T", oldHp: 50, newHp: 42, change: 8 }, { participantId: "s", participantName: "S", oldHp: 50, newHp: 46, change: 4 }] })];
+        const impact = renderHook(() => useFxImpacts()).result.current('d');
 
-    const { result } = renderHook(() => useFxImpacts());
+        expect(impact).not.toBeNull();
+        expect(impact?.actionId).toBeUndefined();
+    });
 
-    expect(result.current("s")?.actionId).toBe("fw");
-    expect(result.current("s")?.actionId).toBe(result.current("t")?.actionId);
-  });
+    it('вторинна жертва отримує вплив тієї ж дії', () => {
+        h.log = [
+            action({
+                id: 'fw',
+                actionIndex: 1,
+                actionType: 'attack',
+                targets: [{ participantId: 't', participantName: 'T' }],
+                actionDetails: { attackKind: AttackType.RANGED, isHit: true },
+                hpChanges: [
+                    {
+                        participantId: 't',
+                        participantName: 'T',
+                        oldHp: 50,
+                        newHp: 42,
+                        change: 8,
+                    },
+                    {
+                        participantId: 's',
+                        participantName: 'S',
+                        oldHp: 50,
+                        newHp: 46,
+                        change: 4,
+                    },
+                ],
+            }),
+        ];
+
+        const { result } = renderHook(() => useFxImpacts());
+
+        expect(result.current('s')?.actionId).toBe('fw');
+        expect(result.current('s')?.actionId).toBe(
+            result.current('t')?.actionId
+        );
+    });
 });

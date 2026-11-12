@@ -1,141 +1,299 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 
-import { useProfile } from "./ProfileContext";
+import { useProfile } from './ProfileContext';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { GOAL_TEXT_MAX, GOAL_TITLE_MAX, GoalAuthor, GoalKind, GoalStatus } from "@/lib/constants/characters";
-import { useCharacterGoals } from "@/lib/hooks/characters";
-import { useConfirm } from "@/lib/hooks/common";
-import { cn } from "@/lib/utils";
-import type { CharacterGoal } from "@/types/characters";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    GOAL_TEXT_MAX,
+    GOAL_TITLE_MAX,
+    GoalAuthor,
+    GoalKind,
+    GoalStatus,
+} from '@/lib/constants/characters';
+import { useCharacterGoals } from '@/lib/hooks/characters';
+import { useConfirm } from '@/lib/hooks/common';
+import { cn } from '@/lib/utils';
+import type { CharacterGoal } from '@/types/characters';
 
-const ORDER: Record<GoalStatus, number> = { [GoalStatus.ACTIVE]: 0, [GoalStatus.DONE]: 1, [GoalStatus.FAILED]: 2 };
+const ORDER: Record<GoalStatus, number> = {
+    [GoalStatus.ACTIVE]: 0,
+    [GoalStatus.DONE]: 1,
+    [GoalStatus.FAILED]: 2,
+};
 
-const NEXT: Record<GoalStatus, GoalStatus> = { [GoalStatus.ACTIVE]: GoalStatus.DONE, [GoalStatus.DONE]: GoalStatus.FAILED, [GoalStatus.FAILED]: GoalStatus.ACTIVE };
+const NEXT: Record<GoalStatus, GoalStatus> = {
+    [GoalStatus.ACTIVE]: GoalStatus.DONE,
+    [GoalStatus.DONE]: GoalStatus.FAILED,
+    [GoalStatus.FAILED]: GoalStatus.ACTIVE,
+};
 
 const goalName = (g: CharacterGoal) => g.title ?? g.text;
 
-const newId = () => `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+const newId = () =>
+    `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
 export function GoalList() {
-  const { campaignId, characterId, sheet } = useProfile();
+    const { campaignId, characterId, sheet } = useProfile();
 
-  const t = useTranslations("characterProfile.goals");
+    const t = useTranslations('characterProfile.goals');
 
-  const tc = useTranslations("common.actions");
+    const tc = useTranslations('common.actions');
 
-  const { save, isPending } = useCharacterGoals(campaignId, characterId);
+    const { save, isPending } = useCharacterGoals(campaignId, characterId);
 
-  const confirm = useConfirm();
+    const confirm = useConfirm();
 
-  const isDM = sheet.viewer.isDM;
+    const isDM = sheet.viewer.isDM;
 
-  const all = sheet.story.goals;
+    const all = sheet.story.goals;
 
-  const goals = [...all].sort((a, b) => ORDER[a.status] - ORDER[b.status]);
+    const goals = [...all].sort((a, b) => ORDER[a.status] - ORDER[b.status]);
 
-  const canEdit = (g: CharacterGoal) => isDM || (sheet.viewer.isOwner && g.author === GoalAuthor.PLAYER);
+    const canEdit = (g: CharacterGoal) =>
+        isDM || (sheet.viewer.isOwner && g.author === GoalAuthor.PLAYER);
 
-  const [draft, setDraft] = useState<{ id: string | null; title: string; text: string } | null>(null);
+    const [draft, setDraft] = useState<{
+        id: string | null;
+        title: string;
+        text: string;
+    } | null>(null);
 
-  const send = (next: CharacterGoal[]) => (isDM ? save(next, all.map((g) => g.id)) : save(next.filter((g) => g.author === GoalAuthor.PLAYER)));
+    const send = (next: CharacterGoal[]) =>
+        isDM
+            ? save(
+                  next,
+                  all.map((g) => g.id)
+              )
+            : save(next.filter((g) => g.author === GoalAuthor.PLAYER));
 
-  const commit = async () => {
-    const text = draft?.text.trim().slice(0, GOAL_TEXT_MAX);
+    const commit = async () => {
+        const text = draft?.text.trim().slice(0, GOAL_TEXT_MAX);
 
-    if (!draft || !text) return;
+        if (!draft || !text) return;
 
-    const title = draft.title.trim().slice(0, GOAL_TITLE_MAX) || undefined;
+        const title = draft.title.trim().slice(0, GOAL_TITLE_MAX) || undefined;
 
-    const next = draft.id
-      ? all.map((g) => (g.id === draft.id ? { ...g, text, title } : g))
-      : [...all, { id: newId(), text, ...(title && { title }), status: GoalStatus.ACTIVE, author: isDM ? GoalAuthor.DM : GoalAuthor.PLAYER }];
+        const next = draft.id
+            ? all.map((g) => (g.id === draft.id ? { ...g, text, title } : g))
+            : [
+                  ...all,
+                  {
+                      id: newId(),
+                      text,
+                      ...(title && { title }),
+                      status: GoalStatus.ACTIVE,
+                      author: isDM ? GoalAuthor.DM : GoalAuthor.PLAYER,
+                  },
+              ];
 
-    if (await send(next)) setDraft(null);
-  };
+        if (await send(next)) setDraft(null);
+    };
 
-  const remove = async (g: CharacterGoal) => {
-    if (await confirm({ title: t("deleteConfirm", { name: goalName(g) }), confirmLabel: tc("delete") })) await send(all.filter((x) => x.id !== g.id));
-  };
-
-  return (
-    <section>
-      <h2 className="hud-sc mb-1.5 text-[13px] tracking-[.06em] text-hud-gold">{t("title")}</h2>
-      {goals.length === 0 && <p className="text-sm text-hud-muted">{t("empty")}</p>}
-      <ul>
-        {goals.map((g) => (
-          <li key={g.id} className="flex items-start gap-2 border-b border-hud-raised py-2.5 text-sm last:border-b-0">
-            <button
-              type="button"
-              disabled={!isDM || isPending}
-              aria-label={t("statusLabel", { name: goalName(g), status: t(`status.${g.status}`) })}
-              onClick={() => void send(all.map((x) => (x.id === g.id ? { ...x, status: NEXT[x.status] } : x)))}
-              className="flex size-8 shrink-0 items-center justify-center text-hud-gold disabled:cursor-default"
-            >
-              {g.status === "done" ? <Check className="size-4" /> : g.status === "failed" ? <X className="size-4" /> : "◆"}
-            </button>
-            <div className="min-w-0 flex-1 pt-1.5">
-              {(g.title || g.kind || g.author === GoalAuthor.PLAYER) && (
-                <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                  {g.title && <span className={cn("hud-sc text-[15px]", g.status === GoalStatus.ACTIVE ? "text-hud-bone" : "text-hud-muted line-through")}>{g.title}</span>}
-                  {g.kind && (
-                    <span className={cn("rounded border px-1.5 text-[10px] uppercase tracking-[.06em]", g.kind === GoalKind.SECRET ? "border-hud-danger text-hud-danger" : "border-hud-gold text-hud-gold")}>
-                      {t(g.kind)}
-                    </span>
-                  )}
-                  {g.author === GoalAuthor.PLAYER && <span className="inline-block rounded border border-hud-info px-1 text-[10px] text-hud-info">{t("fromPlayer")}</span>}
-                </div>
-              )}
-              <p className={cn("leading-relaxed", g.status !== GoalStatus.ACTIVE || g.title ? "text-hud-muted" : "text-hud-bone", g.status !== GoalStatus.ACTIVE && "line-through")}>{g.text}</p>
-            </div>
-            {canEdit(g) && (
-              <>
-                <Button type="button" size="icon" variant="ghost" className="size-8" aria-label={t("editLabel", { name: goalName(g) })} onClick={() => setDraft({ id: g.id, title: g.title ?? "", text: g.text })}>
-                  <Pencil className="size-4" />
-                </Button>
-                <Button type="button" size="icon" variant="ghost" className="size-8" aria-label={t("deleteLabel", { name: goalName(g) })} onClick={() => void remove(g)}>
-                  <Trash2 className="size-4" />
-                </Button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-      {draft ? (
-        <div className="mt-2 flex items-start gap-2">
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <Input aria-label={t("nameField")} placeholder={t("namePlaceholder")} maxLength={GOAL_TITLE_MAX} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="h-11" />
-            <Textarea aria-label={t("textField")} maxLength={GOAL_TEXT_MAX} value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })}
-              onKeyDown={(e) => {
-                if (e.key !== "Enter" || e.shiftKey) return;
-
-                e.preventDefault();
-                void commit();
-              }}
-              autoFocus
-            />
-          </div>
-          <Button type="button" className="h-11" aria-label={t("save")} disabled={isPending || !draft.text.trim()} onClick={() => void commit()}>
-            <Check className="size-4" />
-          </Button>
-          <Button type="button" variant="ghost" className="h-11" aria-label={tc("cancel")} onClick={() => setDraft(null)}>
-            <X className="size-4" />
-          </Button>
-        </div>
-      ) : (
-        (isDM || sheet.viewer.isOwner) && (
-          <Button type="button" variant="ghost" className="mt-1 h-11 gap-1 px-0 text-hud-gold" onClick={() => setDraft({ id: null, title: "", text: "" })}>
-            <Plus className="size-4" />
-            {t("add")}
-          </Button>
+    const remove = async (g: CharacterGoal) => {
+        if (
+            await confirm({
+                title: t('deleteConfirm', { name: goalName(g) }),
+                confirmLabel: tc('delete'),
+            })
         )
-      )}
-    </section>
-  );
+            await send(all.filter((x) => x.id !== g.id));
+    };
+
+    return (
+        <section>
+            <h2 className="hud-sc mb-1.5 text-[13px] tracking-[.06em] text-hud-gold">
+                {t('title')}
+            </h2>
+            {goals.length === 0 && (
+                <p className="text-sm text-hud-muted">{t('empty')}</p>
+            )}
+            <ul>
+                {goals.map((g) => (
+                    <li
+                        key={g.id}
+                        className="flex items-start gap-2 border-b border-hud-raised py-2.5 text-sm last:border-b-0"
+                    >
+                        <button
+                            type="button"
+                            disabled={!isDM || isPending}
+                            aria-label={t('statusLabel', {
+                                name: goalName(g),
+                                status: t(`status.${g.status}`),
+                            })}
+                            onClick={() =>
+                                void send(
+                                    all.map((x) =>
+                                        x.id === g.id
+                                            ? { ...x, status: NEXT[x.status] }
+                                            : x
+                                    )
+                                )
+                            }
+                            className="flex size-8 shrink-0 items-center justify-center text-hud-gold disabled:cursor-default"
+                        >
+                            {g.status === 'done' ? (
+                                <Check className="size-4" />
+                            ) : g.status === 'failed' ? (
+                                <X className="size-4" />
+                            ) : (
+                                '◆'
+                            )}
+                        </button>
+                        <div className="min-w-0 flex-1 pt-1.5">
+                            {(g.title ||
+                                g.kind ||
+                                g.author === GoalAuthor.PLAYER) && (
+                                <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                    {g.title && (
+                                        <span
+                                            className={cn(
+                                                'hud-sc text-[15px]',
+                                                g.status === GoalStatus.ACTIVE
+                                                    ? 'text-hud-bone'
+                                                    : 'text-hud-muted line-through'
+                                            )}
+                                        >
+                                            {g.title}
+                                        </span>
+                                    )}
+                                    {g.kind && (
+                                        <span
+                                            className={cn(
+                                                'rounded border px-1.5 text-[10px] tracking-[.06em] uppercase',
+                                                g.kind === GoalKind.SECRET
+                                                    ? 'border-hud-danger text-hud-danger'
+                                                    : 'border-hud-gold text-hud-gold'
+                                            )}
+                                        >
+                                            {t(g.kind)}
+                                        </span>
+                                    )}
+                                    {g.author === GoalAuthor.PLAYER && (
+                                        <span className="inline-block rounded border border-hud-info px-1 text-[10px] text-hud-info">
+                                            {t('fromPlayer')}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            <p
+                                className={cn(
+                                    'leading-relaxed',
+                                    g.status !== GoalStatus.ACTIVE || g.title
+                                        ? 'text-hud-muted'
+                                        : 'text-hud-bone',
+                                    g.status !== GoalStatus.ACTIVE &&
+                                        'line-through'
+                                )}
+                            >
+                                {g.text}
+                            </p>
+                        </div>
+                        {canEdit(g) && (
+                            <>
+                                <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-8"
+                                    aria-label={t('editLabel', {
+                                        name: goalName(g),
+                                    })}
+                                    onClick={() =>
+                                        setDraft({
+                                            id: g.id,
+                                            title: g.title ?? '',
+                                            text: g.text,
+                                        })
+                                    }
+                                >
+                                    <Pencil className="size-4" />
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-8"
+                                    aria-label={t('deleteLabel', {
+                                        name: goalName(g),
+                                    })}
+                                    onClick={() => void remove(g)}
+                                >
+                                    <Trash2 className="size-4" />
+                                </Button>
+                            </>
+                        )}
+                    </li>
+                ))}
+            </ul>
+            {draft ? (
+                <div className="mt-2 flex items-start gap-2">
+                    <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <Input
+                            aria-label={t('nameField')}
+                            placeholder={t('namePlaceholder')}
+                            maxLength={GOAL_TITLE_MAX}
+                            value={draft.title}
+                            onChange={(e) =>
+                                setDraft({ ...draft, title: e.target.value })
+                            }
+                            className="h-11"
+                        />
+                        <Textarea
+                            aria-label={t('textField')}
+                            maxLength={GOAL_TEXT_MAX}
+                            value={draft.text}
+                            onChange={(e) =>
+                                setDraft({ ...draft, text: e.target.value })
+                            }
+                            onKeyDown={(e) => {
+                                if (e.key !== 'Enter' || e.shiftKey) return;
+
+                                e.preventDefault();
+                                void commit();
+                            }}
+                            autoFocus
+                        />
+                    </div>
+                    <Button
+                        type="button"
+                        className="h-11"
+                        aria-label={t('save')}
+                        disabled={isPending || !draft.text.trim()}
+                        onClick={() => void commit()}
+                    >
+                        <Check className="size-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-11"
+                        aria-label={tc('cancel')}
+                        onClick={() => setDraft(null)}
+                    >
+                        <X className="size-4" />
+                    </Button>
+                </div>
+            ) : (
+                (isDM || sheet.viewer.isOwner) && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="mt-1 h-11 gap-1 px-0 text-hud-gold"
+                        onClick={() =>
+                            setDraft({ id: null, title: '', text: '' })
+                        }
+                    >
+                        <Plus className="size-4" />
+                        {t('add')}
+                    </Button>
+                )
+            )}
+        </section>
+    );
 }

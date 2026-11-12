@@ -1,96 +1,131 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { useCampaignRules, useUpdateCampaignRules } from "./useCampaignRules";
+import { useCampaignRules, useUpdateCampaignRules } from './useCampaignRules';
 
-import { AttackType } from "@/lib/constants/battle";
-import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { useNotify } from "@/lib/hooks/common";
-import { DEFAULT_RULES, type Ruleset, type RulesetPatch } from "@/lib/utils/rules";
+import { AttackType } from '@/lib/constants/battle';
+import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
+import { getHeroDamageDiceForLevel } from '@/lib/constants/hero-scaling';
+import { useNotify } from '@/lib/hooks/common';
+import {
+    DEFAULT_RULES,
+    type Ruleset,
+    type RulesetPatch,
+} from '@/lib/utils/rules';
 
-export const HERO_LEVELS = Array.from({ length: MAX_CLASS_LEVEL }, (_, i) => i + 1);
+export const HERO_LEVELS = Array.from(
+    { length: MAX_CLASS_LEVEL },
+    (_, i) => i + 1
+);
 
 export interface RulesFormState {
-  campaignId: string;
-  data: Ruleset;
-  set: <K extends keyof Ruleset>(key: K, value: Ruleset[K]) => void;
+    campaignId: string;
+    data: Ruleset;
+    set: <K extends keyof Ruleset>(key: K, value: Ruleset[K]) => void;
 }
 
 type DiceTable = Record<string, string> | null;
 
-const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+const same = (a: unknown, b: unknown) =>
+    JSON.stringify(a) === JSON.stringify(b);
 
 const fillDiceTable = (table: DiceTable, type: AttackType): DiceTable =>
-  table && Object.fromEntries(HERO_LEVELS.map((level) => [level, table[level]?.trim() || getHeroDamageDiceForLevel(level, type)]));
+    table &&
+    Object.fromEntries(
+        HERO_LEVELS.map((level) => [
+            level,
+            table[level]?.trim() || getHeroDamageDiceForLevel(level, type),
+        ])
+    );
 
-const withFilledDice = (heroScaling: Ruleset["heroScaling"]): Ruleset["heroScaling"] => ({
-  ...heroScaling,
-  meleeDiceByLevel: fillDiceTable(heroScaling.meleeDiceByLevel, AttackType.MELEE),
-  rangedDiceByLevel: fillDiceTable(heroScaling.rangedDiceByLevel, AttackType.RANGED),
+const withFilledDice = (
+    heroScaling: Ruleset['heroScaling']
+): Ruleset['heroScaling'] => ({
+    ...heroScaling,
+    meleeDiceByLevel: fillDiceTable(
+        heroScaling.meleeDiceByLevel,
+        AttackType.MELEE
+    ),
+    rangedDiceByLevel: fillDiceTable(
+        heroScaling.rangedDiceByLevel,
+        AttackType.RANGED
+    ),
 });
 
 export function useRulesForm(campaignId: string) {
-  const query = useCampaignRules(campaignId);
+    const query = useCampaignRules(campaignId);
 
-  const update = useUpdateCampaignRules(campaignId);
+    const update = useUpdateCampaignRules(campaignId);
 
-  const notify = useNotify();
+    const notify = useNotify();
 
-  const t = useTranslations("rules");
+    const t = useTranslations('rules');
 
-  const [changes, setChanges] = useState<Partial<Ruleset>>({});
+    const [changes, setChanges] = useState<Partial<Ruleset>>({});
 
-  const server = query.data ?? DEFAULT_RULES;
+    const server = query.data ?? DEFAULT_RULES;
 
-  const merged: Ruleset = { ...server, ...changes };
+    const merged: Ruleset = { ...server, ...changes };
 
-  const data: Ruleset = { ...merged, conditions: { ...merged.conditions, custom: server.conditions.custom } };
-
-  const dirtyKeys = (Object.keys(changes) as (keyof Ruleset)[]).filter((key) => !same(changes[key], server[key]));
-
-  const form: RulesFormState = {
-    campaignId,
-    data,
-    set: (key, value) => setChanges((prev) => ({ ...prev, [key]: value })),
-  };
-
-  const save = async () => {
-    if (dirtyKeys.length === 0) return true;
-
-    const patchValue = (key: keyof Ruleset) => {
-      if (key === "heroScaling") return withFilledDice(data.heroScaling);
-
-      if (key === "conditions") return { enabled: data.conditions.enabled, exhaustion: data.conditions.exhaustion };
-
-      return data[key];
+    const data: Ruleset = {
+        ...merged,
+        conditions: { ...merged.conditions, custom: server.conditions.custom },
     };
 
-    const patch = Object.fromEntries(dirtyKeys.map((key) => [key, patchValue(key)])) as RulesetPatch;
+    const dirtyKeys = (Object.keys(changes) as (keyof Ruleset)[]).filter(
+        (key) => !same(changes[key], server[key])
+    );
 
-    try {
-      await update.mutateAsync(patch);
-      setChanges({});
+    const form: RulesFormState = {
+        campaignId,
+        data,
+        set: (key, value) => setChanges((prev) => ({ ...prev, [key]: value })),
+    };
 
-      return true;
-    } catch (error) {
-      await notify(error instanceof Error ? error.message : t("form.saveFailed"));
+    const save = async () => {
+        if (dirtyKeys.length === 0) return true;
 
-      return false;
-    }
-  };
+        const patchValue = (key: keyof Ruleset) => {
+            if (key === 'heroScaling') return withFilledDice(data.heroScaling);
 
-  return {
-    form,
-    save,
-    isSaving: update.isPending,
-    isDirty: dirtyKeys.length > 0,
-    systemLocked: query.data?.systemLocked ?? false,
-    isLoading: query.isLoading,
-    loadError: query.isError ? query.error : null,
-    reload: () => void query.refetch(),
-    reset: () => setChanges({}),
-  };
+            if (key === 'conditions')
+                return {
+                    enabled: data.conditions.enabled,
+                    exhaustion: data.conditions.exhaustion,
+                };
+
+            return data[key];
+        };
+
+        const patch = Object.fromEntries(
+            dirtyKeys.map((key) => [key, patchValue(key)])
+        ) as RulesetPatch;
+
+        try {
+            await update.mutateAsync(patch);
+            setChanges({});
+
+            return true;
+        } catch (error) {
+            await notify(
+                error instanceof Error ? error.message : t('form.saveFailed')
+            );
+
+            return false;
+        }
+    };
+
+    return {
+        form,
+        save,
+        isSaving: update.isPending,
+        isDirty: dirtyKeys.length > 0,
+        systemLocked: query.data?.systemLocked ?? false,
+        isLoading: query.isLoading,
+        loadError: query.isError ? query.error : null,
+        reload: () => void query.refetch(),
+        reset: () => setChanges({}),
+    };
 }

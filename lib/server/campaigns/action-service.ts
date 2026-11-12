@@ -1,400 +1,677 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT, createCampaignForUser, createCampaignFromBundle } from "./create-campaign";
+import {
+    CAMPAIGN_INCLUDE,
+    CAMPAIGN_OMIT,
+    createCampaignForUser,
+    createCampaignFromBundle,
+} from './create-campaign';
 
-import "server-only";
-import { saveAiSettings } from "@/lib/ai/settings";
-import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
-import { invalidateAllReference } from "@/lib/cache/tags";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CampaignKind, CampaignRole, type CampaignRoleValue, CampaignVisibility } from "@/lib/constants/campaigns";
-import { prisma } from "@/lib/db";
-import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
-import { getTranslator } from "@/lib/i18n/translator";
-import { checklistProgress, checklistState } from "@/lib/onboarding/progress";
-import { stepText } from "@/lib/onboarding/step-text";
-import { aiSettingsSchema } from "@/lib/schemas/ai";
-import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
-import { cloneCampaignSchema, saveAsTemplateSchema } from "@/lib/schemas/templates";
-import { actionResult } from "@/lib/server/assistant/json";
-import { resultLabel } from "@/lib/server/assistant/result-labels";
-import type { ActionResult } from "@/lib/server/assistant/types";
-import { assertCan } from "@/lib/server/content/access";
-import { ContentError, parseInput } from "@/lib/server/content/errors";
-import { withCampaignContentWrite, withCampaignRuntimeWrite } from "@/lib/server/content/write";
-import { afterContentCommit } from "@/lib/server/content/write-context";
-import { readOnboardingSnapshot } from "@/lib/server/onboarding/facts";
-import { BUNDLE_FORMAT_VERSION } from "@/lib/server/templates/bundle";
-import { listTemplates } from "@/lib/server/templates/list-templates";
-import { prepareCampaignSource, type PreparedCampaignSource } from "@/lib/server/templates/prepare-source";
-import type { Actor } from "@/lib/utils/api/actor";
-import { windowOf } from "@/lib/utils/api/page-of";
-import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
-import { requestDigest } from "@/lib/utils/battle/store/stable-json";
-import { ownHandler } from "@/lib/utils/common/own-handler";
-import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
+import 'server-only';
+import { saveAiSettings } from '@/lib/ai/settings';
+import { invalidateCampaignLists } from '@/lib/cache/campaign-list';
+import { invalidateAllReference } from '@/lib/cache/tags';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import {
+    CampaignKind,
+    CampaignRole,
+    type CampaignRoleValue,
+    CampaignVisibility,
+} from '@/lib/constants/campaigns';
+import { prisma } from '@/lib/db';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
+import { getTranslator } from '@/lib/i18n/translator';
+import { checklistProgress, checklistState } from '@/lib/onboarding/progress';
+import { stepText } from '@/lib/onboarding/step-text';
+import { aiSettingsSchema } from '@/lib/schemas/ai';
+import {
+    createCampaignSchema,
+    updateCampaignSchema,
+} from '@/lib/schemas/campaigns';
+import {
+    cloneCampaignSchema,
+    saveAsTemplateSchema,
+} from '@/lib/schemas/templates';
+import { actionResult } from '@/lib/server/assistant/json';
+import { resultLabel } from '@/lib/server/assistant/result-labels';
+import type { ActionResult } from '@/lib/server/assistant/types';
+import { assertCan } from '@/lib/server/content/access';
+import { ContentError, parseInput } from '@/lib/server/content/errors';
+import {
+    withCampaignContentWrite,
+    withCampaignRuntimeWrite,
+} from '@/lib/server/content/write';
+import { afterContentCommit } from '@/lib/server/content/write-context';
+import { readOnboardingSnapshot } from '@/lib/server/onboarding/facts';
+import { BUNDLE_FORMAT_VERSION } from '@/lib/server/templates/bundle';
+import { listTemplates } from '@/lib/server/templates/list-templates';
+import {
+    prepareCampaignSource,
+    type PreparedCampaignSource,
+} from '@/lib/server/templates/prepare-source';
+import type { Actor } from '@/lib/utils/api/actor';
+import { windowOf } from '@/lib/utils/api/page-of';
+import { isPlatformAdmin } from '@/lib/utils/api/platform-admin';
+import { requestDigest } from '@/lib/utils/battle/store/stable-json';
+import { ownHandler } from '@/lib/utils/common/own-handler';
+import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
 
-export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(20) });
+export const campaignWindowSchema = z.object({
+    offset: z.number().int().min(0).default(0),
+    limit: z.number().int().min(1).max(50).default(20),
+});
 
 function windowItems(items: unknown[], raw: unknown) {
-  const { offset, limit } = parseInput(campaignWindowSchema, raw);
+    const { offset, limit } = parseInput(campaignWindowSchema, raw);
 
-  return windowOf(items, offset, limit);
+    return windowOf(items, offset, limit);
 }
 
 export async function loadCampaignMembers(campaignId: string) {
-  return prisma.campaignMember.findMany({
-    where: { campaignId },
-    select: { id: true, userId: true, role: true, user: { select: { id: true, displayName: true, email: true } } },
-    orderBy: { joinedAt: "asc" },
-  });
+    return prisma.campaignMember.findMany({
+        where: { campaignId },
+        select: {
+            id: true,
+            userId: true,
+            role: true,
+            user: { select: { id: true, displayName: true, email: true } },
+        },
+        orderBy: { joinedAt: 'asc' },
+    });
 }
 export const CAMPAIGN_SETTINGS_SELECT = {
-  id: true,
-  name: true,
-  description: true,
-  kind: true,
-  visibility: true,
-  maxLevel: true,
-  allowPlayerEdit: true,
-  critChoiceByDm: true,
-  acquaintancesEnabled: true,
-  status: true,
-  friendlyFire: true,
-  xpMultiplier: true,
-  credits: true,
-  updatedAt: true,
+    id: true,
+    name: true,
+    description: true,
+    kind: true,
+    visibility: true,
+    maxLevel: true,
+    allowPlayerEdit: true,
+    critChoiceByDm: true,
+    acquaintancesEnabled: true,
+    status: true,
+    friendlyFire: true,
+    xpMultiplier: true,
+    credits: true,
+    updatedAt: true,
 } as const;
 
 function safeSettings(row: Record<string, unknown>) {
-  return Object.fromEntries(Object.keys(CAMPAIGN_SETTINGS_SELECT).map(key => [key, row[key]]));
+    return Object.fromEntries(
+        Object.keys(CAMPAIGN_SETTINGS_SELECT).map((key) => [key, row[key]])
+    );
 }
 
 const need = (write = true, sessionOnly = false) => ({
-  access: "dm" as const,
-  scope: write ? ("campaign:write" as const) : ("campaign:read" as const),
-  ...(sessionOnly && { sessionOnly: true as const }),
+    access: 'dm' as const,
+    scope: write ? ('campaign:write' as const) : ('campaign:read' as const),
+    ...(sessionOnly && { sessionOnly: true as const }),
 });
 
 const DELETE_DEPENDENCIES = {
-  artifactSets: { select: { id: true }, orderBy: { id: "asc" } },
-  artifacts: { select: { id: true }, orderBy: { id: "asc" } },
-  battles: { select: { id: true }, orderBy: { id: "asc" } },
-  characters: { select: { id: true }, orderBy: { id: "asc" } },
-  mainSkills: { select: { id: true }, orderBy: { id: "asc" } },
-  races: { select: { id: true }, orderBy: { id: "asc" } },
-  classes: { select: { id: true }, orderBy: { id: "asc" } },
-  backgrounds: { select: { id: true }, orderBy: { id: "asc" } },
-  feats: { select: { id: true }, orderBy: { id: "asc" } },
-  scenarioPages: { select: { id: true }, orderBy: { id: "asc" } },
-  skillTrees: { select: { id: true }, orderBy: { id: "asc" } },
-  skills: { select: { id: true }, orderBy: { id: "asc" } },
-  spellGroups: { select: { id: true }, orderBy: { id: "asc" } },
-  spells: { select: { id: true }, orderBy: { id: "asc" } },
-  tracks: { select: { id: true }, orderBy: { id: "asc" } },
-  slideDecks: { select: { id: true }, orderBy: { id: "asc" } },
-  units: { select: { id: true }, orderBy: { id: "asc" } },
-  aiThreads: { select: { id: true }, orderBy: { id: "asc" } },
-  aiProposals: { select: { id: true }, orderBy: { id: "asc" } },
-  apiTokens: { select: { id: true }, orderBy: { id: "asc" } },
-  compendiumSources: { select: { id: true }, orderBy: { id: "asc" } },
-  compendiumEntries: { select: { id: true }, orderBy: { id: "asc" } },
-  compendiumRuns: { select: { id: true }, orderBy: { id: "asc" } },
-  inventoryLog: { select: { id: true }, orderBy: { id: "asc" } },
-  characterLog: { select: { id: true }, orderBy: { id: "asc" } },
+    artifactSets: { select: { id: true }, orderBy: { id: 'asc' } },
+    artifacts: { select: { id: true }, orderBy: { id: 'asc' } },
+    battles: { select: { id: true }, orderBy: { id: 'asc' } },
+    characters: { select: { id: true }, orderBy: { id: 'asc' } },
+    mainSkills: { select: { id: true }, orderBy: { id: 'asc' } },
+    races: { select: { id: true }, orderBy: { id: 'asc' } },
+    classes: { select: { id: true }, orderBy: { id: 'asc' } },
+    backgrounds: { select: { id: true }, orderBy: { id: 'asc' } },
+    feats: { select: { id: true }, orderBy: { id: 'asc' } },
+    scenarioPages: { select: { id: true }, orderBy: { id: 'asc' } },
+    skillTrees: { select: { id: true }, orderBy: { id: 'asc' } },
+    skills: { select: { id: true }, orderBy: { id: 'asc' } },
+    spellGroups: { select: { id: true }, orderBy: { id: 'asc' } },
+    spells: { select: { id: true }, orderBy: { id: 'asc' } },
+    tracks: { select: { id: true }, orderBy: { id: 'asc' } },
+    slideDecks: { select: { id: true }, orderBy: { id: 'asc' } },
+    units: { select: { id: true }, orderBy: { id: 'asc' } },
+    aiThreads: { select: { id: true }, orderBy: { id: 'asc' } },
+    aiProposals: { select: { id: true }, orderBy: { id: 'asc' } },
+    apiTokens: { select: { id: true }, orderBy: { id: 'asc' } },
+    compendiumSources: { select: { id: true }, orderBy: { id: 'asc' } },
+    compendiumEntries: { select: { id: true }, orderBy: { id: 'asc' } },
+    compendiumRuns: { select: { id: true }, orderBy: { id: 'asc' } },
+    inventoryLog: { select: { id: true }, orderBy: { id: 'asc' } },
+    characterLog: { select: { id: true }, orderBy: { id: 'asc' } },
 } as const;
 
 type PreparedSource = PreparedCampaignSource;
 
-async function loadCampaignState(actor: Actor, operation: string, input: Record<string, unknown>) {
-  const row = await prisma.campaign.findUnique({
-    where: { id: actor.campaignId },
-    select: { ...CAMPAIGN_SETTINGS_SELECT, aiInstructions: true, rules: true, ...(operation === "delete" && DELETE_DEPENDENCIES) },
-  });
-
-  if (!row) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
-
-  const members = await prisma.campaignMember.findMany({ where: { campaignId: actor.campaignId }, select: { id: true, userId: true, role: true }, orderBy: { id: "asc" } });
-
-  let sourceHash: string | null = null;
-
-  let source: PreparedSource | null = null;
-
-  const sourceId = operation === "create" && input.templateId ? String(input.templateId) : ["clone", "template.save"].includes(operation) ? actor.campaignId : null;
-
-  if (sourceId) {
-    source = await prepareCampaignSource(prisma, sourceId, {
-      userId: actor.userId,
-      mode: operation === "template.save" ? "save" : operation === "clone" ? "clone" : "create",
-      contentLocale: input.contentLocale as TemplateContentLocale | undefined,
-      beforeExport: async (resolvedId) => {
-        if (resolvedId === actor.campaignId) return;
-
-        try { await prisma.$queryRaw`SELECT id FROM campaigns WHERE id = ${resolvedId} FOR SHARE NOWAIT`; }
-        catch { throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_CHANGING, 409); }
-      },
+async function loadCampaignState(
+    actor: Actor,
+    operation: string,
+    input: Record<string, unknown>
+) {
+    const row = await prisma.campaign.findUnique({
+        where: { id: actor.campaignId },
+        select: {
+            ...CAMPAIGN_SETTINGS_SELECT,
+            aiInstructions: true,
+            rules: true,
+            ...(operation === 'delete' && DELETE_DEPENDENCIES),
+        },
     });
-  }
 
-  if (source) sourceHash = requestDigest({ id: source.id, contentLocale: source.contentLocale, bundle: source.bundle, ...(source.layer && { layer: source.layer }) });
+    if (!row) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
-  const state = {
-    settings: safeSettings(row),
-    instructions: row.aiInstructions,
-    rulesHash: requestDigest(row.rules ?? null),
-    members,
-    sourceHash,
-    dependencies:
-      operation === "delete"
-        ? Object.fromEntries(Object.keys(DELETE_DEPENDENCIES).map((key) => [key, (row as unknown as Record<string, unknown>)[key] ?? []]))
-        : null,
-  };
+    const members = await prisma.campaignMember.findMany({
+        where: { campaignId: actor.campaignId },
+        select: { id: true, userId: true, role: true },
+        orderBy: { id: 'asc' },
+    });
 
-  return { state, source };
+    let sourceHash: string | null = null;
+
+    let source: PreparedSource | null = null;
+
+    const sourceId =
+        operation === 'create' && input.templateId
+            ? String(input.templateId)
+            : ['clone', 'template.save'].includes(operation)
+              ? actor.campaignId
+              : null;
+
+    if (sourceId) {
+        source = await prepareCampaignSource(prisma, sourceId, {
+            userId: actor.userId,
+            mode:
+                operation === 'template.save'
+                    ? 'save'
+                    : operation === 'clone'
+                      ? 'clone'
+                      : 'create',
+            contentLocale: input.contentLocale as
+                | TemplateContentLocale
+                | undefined,
+            beforeExport: async (resolvedId) => {
+                if (resolvedId === actor.campaignId) return;
+
+                try {
+                    await prisma.$queryRaw`SELECT id FROM campaigns WHERE id = ${resolvedId} FOR SHARE NOWAIT`;
+                } catch {
+                    throw new ContentError(
+                        API_ERRORS.ASSISTANT_TEMPLATE_CHANGING,
+                        409
+                    );
+                }
+            },
+        });
+    }
+
+    if (source)
+        sourceHash = requestDigest({
+            id: source.id,
+            contentLocale: source.contentLocale,
+            bundle: source.bundle,
+            ...(source.layer && { layer: source.layer }),
+        });
+
+    const state = {
+        settings: safeSettings(row),
+        instructions: row.aiInstructions,
+        rulesHash: requestDigest(row.rules ?? null),
+        members,
+        sourceHash,
+        dependencies:
+            operation === 'delete'
+                ? Object.fromEntries(
+                      Object.keys(DELETE_DEPENDENCIES).map((key) => [
+                          key,
+                          (row as unknown as Record<string, unknown>)[key] ??
+                              [],
+                      ])
+                  )
+                : null,
+    };
+
+    return { state, source };
 }
 
-export async function campaignState(actor: Actor, operation: string, input: Record<string, unknown>) {
-  return (await loadCampaignState(actor, operation, input)).state;
+export async function campaignState(
+    actor: Actor,
+    operation: string,
+    input: Record<string, unknown>
+) {
+    return (await loadCampaignState(actor, operation, input)).state;
 }
 
 export async function updateCampaignSettings(actor: Actor, raw: unknown) {
-  assertCan(actor, need());
+    assertCan(actor, need());
 
-  const data = parseInput(updateCampaignSchema, raw);
+    const data = parseInput(updateCampaignSchema, raw);
 
-  return withCampaignContentWrite(actor.campaignId, async () => {
-    if (data.visibility !== undefined) {
-      const row = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { kind: true } });
+    return withCampaignContentWrite(actor.campaignId, async () => {
+        if (data.visibility !== undefined) {
+            const row = await prisma.campaign.findUnique({
+                where: { id: actor.campaignId },
+                select: { kind: true },
+            });
 
-      if (actor.via !== "session" || row?.kind !== CampaignKind.TEMPLATE || !isPlatformAdmin(actor.userId)) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
-    }
+            if (
+                actor.via !== 'session' ||
+                row?.kind !== CampaignKind.TEMPLATE ||
+                !isPlatformAdmin(actor.userId)
+            )
+                throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+        }
 
-    const updated = await prisma.campaign.update({
-      where: { id: actor.campaignId },
-      data: { ...data, ...(data.description !== undefined && { description: data.description || null }) },
-      include: CAMPAIGN_INCLUDE,
-      omit: CAMPAIGN_OMIT,
+        const updated = await prisma.campaign.update({
+            where: { id: actor.campaignId },
+            data: {
+                ...data,
+                ...(data.description !== undefined && {
+                    description: data.description || null,
+                }),
+            },
+            include: CAMPAIGN_INCLUDE,
+            omit: CAMPAIGN_OMIT,
+        });
+
+        afterContentCommit(() =>
+            invalidateCampaignLists(updated.members.map((m) => m.userId))
+        );
+
+        return updated;
     });
-
-    afterContentCommit(() => invalidateCampaignLists(updated.members.map(m => m.userId)));
-
-    return updated;
-  });
 }
 export async function removeCampaignMember(actor: Actor, memberId: string) {
-  assertCan(actor, need());
+    assertCan(actor, need());
 
-  return withCampaignContentWrite(actor.campaignId, async () => {
-    const member = await prisma.campaignMember.findUnique({ where: { id: memberId }, select: { campaignId: true, role: true, userId: true } });
+    return withCampaignContentWrite(actor.campaignId, async () => {
+        const member = await prisma.campaignMember.findUnique({
+            where: { id: memberId },
+            select: { campaignId: true, role: true, userId: true },
+        });
 
-    if (!member) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+        if (!member) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
-    if (member.campaignId !== actor.campaignId) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+        if (member.campaignId !== actor.campaignId)
+            throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-    if (member.role === CampaignRole.DM) throw new ContentError(API_ERRORS.CANNOT_REMOVE_DM, 400);
+        if (member.role === CampaignRole.DM)
+            throw new ContentError(API_ERRORS.CANNOT_REMOVE_DM, 400);
 
-    await prisma.campaignMember.deleteMany({ where: { id: memberId } });
+        await prisma.campaignMember.deleteMany({ where: { id: memberId } });
 
-    const remaining = await prisma.campaignMember.findMany({ where: { campaignId: actor.campaignId }, select: { userId: true } });
+        const remaining = await prisma.campaignMember.findMany({
+            where: { campaignId: actor.campaignId },
+            select: { userId: true },
+        });
 
-    afterContentCommit(() => invalidateCampaignLists([member.userId, ...remaining.map(m => m.userId)]));
+        afterContentCommit(() =>
+            invalidateCampaignLists([
+                member.userId,
+                ...remaining.map((m) => m.userId),
+            ])
+        );
 
-    return { success: true };
-  });
+        return { success: true };
+    });
 }
-export async function setCampaignMemberRole(actor: Actor, memberId: string, role: CampaignRoleValue) {
-  assertCan(actor, need());
+export async function setCampaignMemberRole(
+    actor: Actor,
+    memberId: string,
+    role: CampaignRoleValue
+) {
+    assertCan(actor, need());
 
-  return withCampaignContentWrite(actor.campaignId, async () => {
-    const member = await prisma.campaignMember.findUnique({ where: { id: memberId }, select: { campaignId: true, userId: true } });
+    return withCampaignContentWrite(actor.campaignId, async () => {
+        const member = await prisma.campaignMember.findUnique({
+            where: { id: memberId },
+            select: { campaignId: true, userId: true },
+        });
 
-    if (!member) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+        if (!member) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
-    if (member.campaignId !== actor.campaignId) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+        if (member.campaignId !== actor.campaignId)
+            throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-    if (role === CampaignRole.PLAYER) {
-      const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { dmUserId: true } });
+        if (role === CampaignRole.PLAYER) {
+            const campaign = await prisma.campaign.findUnique({
+                where: { id: actor.campaignId },
+                select: { dmUserId: true },
+            });
 
-      if (campaign?.dmUserId !== actor.userId) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+            if (campaign?.dmUserId !== actor.userId)
+                throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-      if (member.userId === campaign.dmUserId) throw new ContentError(API_ERRORS.CANNOT_DEMOTE_OWNER, 400);
-    }
+            if (member.userId === campaign.dmUserId)
+                throw new ContentError(API_ERRORS.CANNOT_DEMOTE_OWNER, 400);
+        }
 
-    await prisma.campaignMember.updateMany({ where: { id: memberId }, data: { role } });
-    afterContentCommit(() => invalidateCampaignLists([member.userId]));
+        await prisma.campaignMember.updateMany({
+            where: { id: memberId },
+            data: { role },
+        });
+        afterContentCommit(() => invalidateCampaignLists([member.userId]));
 
-    return { success: true };
-  });
+        return { success: true };
+    });
 }
 export async function deleteCampaign(actor: Actor) {
-  assertCan(actor, need(true, true));
+    assertCan(actor, need(true, true));
 
-  return withCampaignRuntimeWrite(actor.campaignId, async () => {
-    const members = await prisma.campaignMember.findMany({ where: { campaignId: actor.campaignId }, select: { userId: true } });
+    return withCampaignRuntimeWrite(actor.campaignId, async () => {
+        const members = await prisma.campaignMember.findMany({
+            where: { campaignId: actor.campaignId },
+            select: { userId: true },
+        });
 
-    await prisma.campaignContentHide.deleteMany({ where: { campaignId: actor.campaignId } });
-    await prisma.campaign.delete({ where: { id: actor.campaignId } });
-    afterContentCommit(async () => {
-      await invalidateCampaignLists(members.map(m => m.userId));
-      invalidateAllReference(actor.campaignId);
+        await prisma.campaignContentHide.deleteMany({
+            where: { campaignId: actor.campaignId },
+        });
+        await prisma.campaign.delete({ where: { id: actor.campaignId } });
+        afterContentCommit(async () => {
+            await invalidateCampaignLists(members.map((m) => m.userId));
+            invalidateAllReference(actor.campaignId);
+        });
+
+        return { success: true };
     });
-
-    return { success: true };
-  });
 }
-export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepared?: PreparedCampaignSource) {
-  assertCan(actor, need(true, true));
+export async function saveCampaignAsTemplate(
+    actor: Actor,
+    raw: unknown,
+    prepared?: PreparedCampaignSource
+) {
+    assertCan(actor, need(true, true));
 
-  const data = parseInput(saveAsTemplateSchema, raw);
+    const data = parseInput(saveAsTemplateSchema, raw);
 
-  return withCampaignRuntimeWrite(actor.campaignId, async () => {
-    const source = prepared ?? await prepareCampaignSource(prisma, actor.campaignId, { userId: actor.userId, mode: "save" });
+    return withCampaignRuntimeWrite(actor.campaignId, async () => {
+        const source =
+            prepared ??
+            (await prepareCampaignSource(prisma, actor.campaignId, {
+                userId: actor.userId,
+                mode: 'save',
+            }));
 
-    const created = await createCampaignFromBundle({
-      userId: actor.userId,
-      name: data.name,
-      description: data.description,
-      bundle: source.bundle,
-      contentLocale: source.contentLocale,
-      kind: CampaignKind.TEMPLATE,
-      visibility: CampaignVisibility.PRIVATE,
-      createdFromId: source.id,
-      sourceVersion: source.contentVersion,
-      layer: source.layer,
+        const created = await createCampaignFromBundle({
+            userId: actor.userId,
+            name: data.name,
+            description: data.description,
+            bundle: source.bundle,
+            contentLocale: source.contentLocale,
+            kind: CampaignKind.TEMPLATE,
+            visibility: CampaignVisibility.PRIVATE,
+            createdFromId: source.id,
+            sourceVersion: source.contentVersion,
+            layer: source.layer,
+        });
+
+        afterContentCommit(() => invalidateCampaignLists([actor.userId]));
+
+        return created;
     });
-
-    afterContentCommit(() => invalidateCampaignLists([actor.userId]));
-
-    return created;
-  });
 }
 type CampaignRun = {
-  actor: Actor;
-  input: Record<string, unknown>;
-  locale: Locale;
-  loaded: Awaited<ReturnType<typeof loadCampaignState>>;
-  result: ReturnType<typeof actionResult>;
+    actor: Actor;
+    input: Record<string, unknown>;
+    locale: Locale;
+    loaded: Awaited<ReturnType<typeof loadCampaignState>>;
+    result: ReturnType<typeof actionResult>;
 };
 
 type CampaignHandler = (run: CampaignRun) => Promise<ActionResult>;
 
 const createdResult = (
-  { result }: CampaignRun,
-  created: { campaign: { id: string; name: string }; warnings: ActionResult["warnings"] },
+    { result }: CampaignRun,
+    created: {
+        campaign: { id: string; name: string };
+        warnings: ActionResult['warnings'];
+    }
 ): ActionResult => ({
-  ...result({ id: created.campaign.id, name: created.campaign.name, href: `/campaigns/${created.campaign.id}/dm` }, created.campaign.id),
-  warnings: created.warnings,
+    ...result(
+        {
+            id: created.campaign.id,
+            name: created.campaign.name,
+            href: `/campaigns/${created.campaign.id}/dm`,
+        },
+        created.campaign.id
+    ),
+    warnings: created.warnings,
 });
 
-async function createFromSource(run: CampaignRun, operation: "create" | "clone"): Promise<ActionResult> {
-  const { actor, input, loaded, locale } = run;
+async function createFromSource(
+    run: CampaignRun,
+    operation: 'create' | 'clone'
+): Promise<ActionResult> {
+    const { actor, input, loaded, locale } = run;
 
-  const creation = operation === "create" ? parseInput(createCampaignSchema, input) : undefined;
+    const creation =
+        operation === 'create'
+            ? parseInput(createCampaignSchema, input)
+            : undefined;
 
-  const data = creation ?? parseInput(cloneCampaignSchema, input);
+    const data = creation ?? parseInput(cloneCampaignSchema, input);
 
-  const created = await createCampaignForUser(
-    actor.userId,
-    { ...data, ...(creation && { maxLevel: creation.maxLevel, allowPlayerEdit: creation.allowPlayerEdit, critChoiceByDm: creation.critChoiceByDm }) },
-    { source: loaded.source ?? undefined, defer: afterContentCommit, locale },
-  );
+    const created = await createCampaignForUser(
+        actor.userId,
+        {
+            ...data,
+            ...(creation && {
+                maxLevel: creation.maxLevel,
+                allowPlayerEdit: creation.allowPlayerEdit,
+                critChoiceByDm: creation.critChoiceByDm,
+            }),
+        },
+        {
+            source: loaded.source ?? undefined,
+            defer: afterContentCommit,
+            locale,
+        }
+    );
 
-  if (!created.ok) throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE, created.status);
+    if (!created.ok)
+        throw new ContentError(
+            API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE,
+            created.status
+        );
 
-  return createdResult(run, created);
+    return createdResult(run, created);
 }
 
-async function updateSettings(run: CampaignRun, templateOnly: boolean): Promise<ActionResult> {
-  const { actor, input, loaded, result } = run;
+async function updateSettings(
+    run: CampaignRun,
+    templateOnly: boolean
+): Promise<ActionResult> {
+    const { actor, input, loaded, result } = run;
 
-  if (templateOnly && loaded.state.settings.kind !== CampaignKind.TEMPLATE) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+    if (templateOnly && loaded.state.settings.kind !== CampaignKind.TEMPLATE)
+        throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-  return result(safeSettings(await updateCampaignSettings(actor, input.patch)), actor.campaignId);
+    return result(
+        safeSettings(await updateCampaignSettings(actor, input.patch)),
+        actor.campaignId
+    );
 }
 
 const CAMPAIGN_HANDLERS: Record<string, CampaignHandler> = {
-  status: async ({ result, loaded, actor }) => result(loaded.state.settings, actor.campaignId),
-  instructions: async ({ result, loaded, actor }) => result({ instructions: loaded.state.instructions }, actor.campaignId),
-  members: async ({ result, actor, input }) =>
-    result(
-      windowItems(
-        (await loadCampaignMembers(actor.campaignId)).map((row) => ({ id: row.id, userId: row.userId, role: row.role, displayName: row.user.displayName })),
-        input,
-      ),
-      actor.campaignId,
-    ),
-  export: async ({ result, actor }) =>
-    result(
-      { href: `/api/campaigns/${actor.campaignId}/export`, formatVersion: BUNDLE_FORMAT_VERSION, description: "Download the current campaign in the app" },
-      actor.campaignId,
-    ),
-  settings: run => updateSettings(run, false),
-  "template.update": run => updateSettings(run, true),
-  "instructions.set": async ({ result, actor, input }) => {
-    const body = parseInput(aiSettingsSchema, input);
+    status: async ({ result, loaded, actor }) =>
+        result(loaded.state.settings, actor.campaignId),
+    instructions: async ({ result, loaded, actor }) =>
+        result({ instructions: loaded.state.instructions }, actor.campaignId),
+    members: async ({ result, actor, input }) =>
+        result(
+            windowItems(
+                (await loadCampaignMembers(actor.campaignId)).map((row) => ({
+                    id: row.id,
+                    userId: row.userId,
+                    role: row.role,
+                    displayName: row.user.displayName,
+                })),
+                input
+            ),
+            actor.campaignId
+        ),
+    export: async ({ result, actor }) =>
+        result(
+            {
+                href: `/api/campaigns/${actor.campaignId}/export`,
+                formatVersion: BUNDLE_FORMAT_VERSION,
+                description: 'Download the current campaign in the app',
+            },
+            actor.campaignId
+        ),
+    settings: (run) => updateSettings(run, false),
+    'template.update': (run) => updateSettings(run, true),
+    'instructions.set': async ({ result, actor, input }) => {
+        const body = parseInput(aiSettingsSchema, input);
 
-    return result(await saveAiSettings(actor.campaignId, body.instructions.trim() || null), actor.campaignId);
-  },
-  "members.remove": async ({ result, actor, input }) => result(await removeCampaignMember(actor, String(input.memberId)), actor.campaignId),
-  delete: async ({ result, actor }) => result(await deleteCampaign(actor), actor.campaignId),
-  "template.save": async (run) => createdResult(run, await saveCampaignAsTemplate(run.actor, run.input, run.loaded.source ?? undefined)),
-  create: run => createFromSource(run, "create"),
-  clone: run => createFromSource(run, "clone"),
+        return result(
+            await saveAiSettings(
+                actor.campaignId,
+                body.instructions.trim() || null
+            ),
+            actor.campaignId
+        );
+    },
+    'members.remove': async ({ result, actor, input }) =>
+        result(
+            await removeCampaignMember(actor, String(input.memberId)),
+            actor.campaignId
+        ),
+    delete: async ({ result, actor }) =>
+        result(await deleteCampaign(actor), actor.campaignId),
+    'template.save': async (run) =>
+        createdResult(
+            run,
+            await saveCampaignAsTemplate(
+                run.actor,
+                run.input,
+                run.loaded.source ?? undefined
+            )
+        ),
+    create: (run) => createFromSource(run, 'create'),
+    clone: (run) => createFromSource(run, 'clone'),
 };
 
-async function listTemplatesResult({ result, actor, input }: Omit<CampaignRun, "loaded">) {
-  const templates = await listTemplates(actor.userId);
+async function listTemplatesResult({
+    result,
+    actor,
+    input,
+}: Omit<CampaignRun, 'loaded'>) {
+    const templates = await listTemplates(actor.userId);
 
-  return result(windowItems([...templates.official.map(item => ({ ...item, group: "official" })), ...templates.mine.map(item => ({ ...item, group: "mine" }))], input), actor.campaignId);
+    return result(
+        windowItems(
+            [
+                ...templates.official.map((item) => ({
+                    ...item,
+                    group: 'official',
+                })),
+                ...templates.mine.map((item) => ({ ...item, group: 'mine' })),
+            ],
+            input
+        ),
+        actor.campaignId
+    );
 }
 
-async function onboardingResult({ result, actor, locale }: Omit<CampaignRun, "loaded" | "input">) {
-  const { facts, checklistFlag } = await readOnboardingSnapshot(actor.campaignId, actor.userId, true);
+async function onboardingResult({
+    result,
+    actor,
+    locale,
+}: Omit<CampaignRun, 'loaded' | 'input'>) {
+    const { facts, checklistFlag } = await readOnboardingSnapshot(
+        actor.campaignId,
+        actor.userId,
+        true
+    );
 
-  const progress = checklistProgress(facts, actor.campaignId);
+    const progress = checklistProgress(facts, actor.campaignId);
 
-  const t = await getTranslator(locale, "onboarding");
+    const t = await getTranslator(locale, 'onboarding');
 
-  const steps = progress.steps.map((s) => ({ ...s, ...stepText(t, facts.role, s) }));
+    const steps = progress.steps.map((s) => ({
+        ...s,
+        ...stepText(t, facts.role, s),
+    }));
 
-  return result(
-    {
-      role: facts.role,
-      state: checklistState(checklistFlag ?? undefined, progress.allRequiredDone, new Date()),
-      steps,
-      requiredDone: progress.requiredDone,
-      requiredTotal: progress.requiredTotal,
-    },
-    actor.campaignId,
-  );
+    return result(
+        {
+            role: facts.role,
+            state: checklistState(
+                checklistFlag ?? undefined,
+                progress.allRequiredDone,
+                new Date()
+            ),
+            steps,
+            requiredDone: progress.requiredDone,
+            requiredTotal: progress.requiredTotal,
+        },
+        actor.campaignId
+    );
 }
 
-const NO_BUMP_OPERATIONS = new Set(["create", "clone", "delete", "template.save", "instructions.set", "members.remove"]);
+const NO_BUMP_OPERATIONS = new Set([
+    'create',
+    'clone',
+    'delete',
+    'template.save',
+    'instructions.set',
+    'members.remove',
+]);
 
-export async function runCampaignOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
-  const campaignResult = actionResult("campaign", resultLabel(locale, "campaign"));
+export async function runCampaignOperation(
+    actor: Actor,
+    operation: string,
+    input: Record<string, unknown>,
+    expected?: string,
+    locale: Locale = DEFAULT_LOCALE
+): Promise<ActionResult> {
+    const campaignResult = actionResult(
+        'campaign',
+        resultLabel(locale, 'campaign')
+    );
 
-  const read = ["status", "instructions", "members", "templates", "export", "onboarding"].includes(operation);
+    const read = [
+        'status',
+        'instructions',
+        'members',
+        'templates',
+        'export',
+        'onboarding',
+    ].includes(operation);
 
-  const sessionOnly = ["create", "clone", "delete", "template.save", "template.update"].includes(operation);
+    const sessionOnly = [
+        'create',
+        'clone',
+        'delete',
+        'template.save',
+        'template.update',
+    ].includes(operation);
 
-  assertCan(actor, need(!read, sessionOnly));
+    assertCan(actor, need(!read, sessionOnly));
 
-  const base = { actor, input, locale, result: campaignResult };
+    const base = { actor, input, locale, result: campaignResult };
 
-  if (operation === "templates") return listTemplatesResult(base);
+    if (operation === 'templates') return listTemplatesResult(base);
 
-  if (operation === "onboarding") return onboardingResult(base);
+    if (operation === 'onboarding') return onboardingResult(base);
 
-  return withCampaignContentWrite(actor.campaignId, async () => {
-    const loaded = await loadCampaignState(actor, operation, input);
+    return withCampaignContentWrite(
+        actor.campaignId,
+        async () => {
+            const loaded = await loadCampaignState(actor, operation, input);
 
-    if (expected && requestDigest(loaded.state) !== expected) throw new ContentError(API_ERRORS.ASSISTANT_CAMPAIGN_SETTINGS_CHANGED, 409);
+            if (expected && requestDigest(loaded.state) !== expected)
+                throw new ContentError(
+                    API_ERRORS.ASSISTANT_CAMPAIGN_SETTINGS_CHANGED,
+                    409
+                );
 
-    const handler = ownHandler(CAMPAIGN_HANDLERS, operation);
+            const handler = ownHandler(CAMPAIGN_HANDLERS, operation);
 
-    if (!handler) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
+            if (!handler)
+                throw new ContentError(
+                    API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION,
+                    400
+                );
 
-    return handler({ ...base, loaded });
-  }, { bump: !read && !NO_BUMP_OPERATIONS.has(operation) });
+            return handler({ ...base, loaded });
+        },
+        { bump: !read && !NO_BUMP_OPERATIONS.has(operation) }
+    );
 }

@@ -1,143 +1,149 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client';
 
-import "server-only";
-import { prisma } from "@/lib/db";
-import { abilitiesJson } from "@/lib/utils/abilities/read";
-import type { Ability } from "@/lib/utils/abilities/schema";
-import { withAbilitySummary } from "@/lib/utils/abilities/summary";
+import 'server-only';
+import { prisma } from '@/lib/db';
+import { abilitiesJson } from '@/lib/utils/abilities/read';
+import type { Ability } from '@/lib/utils/abilities/schema';
+import { withAbilitySummary } from '@/lib/utils/abilities/summary';
 
 const includeList = {
-  artifacts: {
-    select: { id: true, name: true, slot: true },
-  },
+    artifacts: {
+        select: { id: true, name: true, slot: true },
+    },
 } as const;
 
 const includeDetail = {
-  artifacts: {
-    select: { id: true, name: true, slot: true, icon: true },
-  },
+    artifacts: {
+        select: { id: true, name: true, slot: true, icon: true },
+    },
 } as const;
 
 function setBonusToPrismaInput(
-  value: unknown | undefined | null,
+    value: unknown | undefined | null
 ): Prisma.InputJsonValue | typeof Prisma.JsonNull {
-  if (value === undefined) return Prisma.JsonNull;
+    if (value === undefined) return Prisma.JsonNull;
 
-  if (value === null) return Prisma.JsonNull;
+    if (value === null) return Prisma.JsonNull;
 
-  return value as Prisma.InputJsonValue;
+    return value as Prisma.InputJsonValue;
 }
 
 export function buildArtifactSetPatchInput(data: {
-  name?: string;
-  description?: string | null;
-  setBonus?: unknown | null;
-  icon?: string | null;
-  abilities?: Ability[];
+    name?: string;
+    description?: string | null;
+    setBonus?: unknown | null;
+    icon?: string | null;
+    abilities?: Ability[];
 }): Prisma.ArtifactSetUpdateInput {
-  const update: Prisma.ArtifactSetUpdateInput = {};
+    const update: Prisma.ArtifactSetUpdateInput = {};
 
-  if (data.name !== undefined) update.name = data.name;
+    if (data.name !== undefined) update.name = data.name;
 
-  if (data.description !== undefined) {
-    update.description = data.description;
-  }
+    if (data.description !== undefined) {
+        update.description = data.description;
+    }
 
-  if (data.setBonus !== undefined) {
-    update.setBonus =
-      data.setBonus === null
-        ? Prisma.JsonNull
-        : (data.setBonus as Prisma.InputJsonValue);
-  }
+    if (data.setBonus !== undefined) {
+        update.setBonus =
+            data.setBonus === null
+                ? Prisma.JsonNull
+                : (data.setBonus as Prisma.InputJsonValue);
+    }
 
-  if (data.icon !== undefined) {
-    update.icon = data.icon;
-  }
+    if (data.icon !== undefined) {
+        update.icon = data.icon;
+    }
 
-  if (data.abilities !== undefined) update.abilities = abilitiesJson(data.abilities);
+    if (data.abilities !== undefined)
+        update.abilities = abilitiesJson(data.abilities);
 
-  return update;
+    return update;
 }
 
 export async function listArtifactSets(campaignId: string) {
-  const sets = await prisma.artifactSet.findMany({
-    where: { campaignId },
-    include: includeList,
-    orderBy: { createdAt: "desc" },
-  });
+    const sets = await prisma.artifactSet.findMany({
+        where: { campaignId },
+        include: includeList,
+        orderBy: { createdAt: 'desc' },
+    });
 
-  return sets.map((s) => withAbilitySummary("artifactSet", s));
+    return sets.map((s) => withAbilitySummary('artifactSet', s));
 }
 
 export async function findArtifactSetInCampaign(
-  campaignId: string,
-  setId: string,
+    campaignId: string,
+    setId: string
 ) {
-  return prisma.artifactSet.findFirst({
-    where: { id: setId, campaignId },
-    include: includeDetail,
-  });
+    return prisma.artifactSet.findFirst({
+        where: { id: setId, campaignId },
+        include: includeDetail,
+    });
 }
 
-export async function reloadArtifactSetDetail(campaignId: string, setId: string) {
-  const row = await prisma.artifactSet.findFirst({
-    where: { id: setId, campaignId },
-    include: includeDetail,
-  });
+export async function reloadArtifactSetDetail(
+    campaignId: string,
+    setId: string
+) {
+    const row = await prisma.artifactSet.findFirst({
+        where: { id: setId, campaignId },
+        include: includeDetail,
+    });
 
-  if (!row) {
-    throw new Error(`ArtifactSet not found: ${setId}`);
-  }
+    if (!row) {
+        throw new Error(`ArtifactSet not found: ${setId}`);
+    }
 
-  return row;
+    return row;
 }
 
 export async function insertArtifactSet(
-  campaignId: string,
-  input: {
-    name: string;
-    description: string | null;
-    setBonus: unknown | undefined;
-    icon?: string | null;
-    abilities?: Ability[];
-  },
+    campaignId: string,
+    input: {
+        name: string;
+        description: string | null;
+        setBonus: unknown | undefined;
+        icon?: string | null;
+        abilities?: Ability[];
+    }
 ) {
-  const row = await prisma.artifactSet.create({
-    data: {
-      campaignId,
-      name: input.name,
-      description: input.description,
-      setBonus: setBonusToPrismaInput(input.setBonus),
-      ...(input.abilities && { abilities: abilitiesJson(input.abilities) }),
-      icon: input.icon?.trim() ? input.icon.trim() : null,
-    },
-    include: includeList,
-  });
+    const row = await prisma.artifactSet.create({
+        data: {
+            campaignId,
+            name: input.name,
+            description: input.description,
+            setBonus: setBonusToPrismaInput(input.setBonus),
+            ...(input.abilities && {
+                abilities: abilitiesJson(input.abilities),
+            }),
+            icon: input.icon?.trim() ? input.icon.trim() : null,
+        },
+        include: includeList,
+    });
 
-  return row;
+    return row;
 }
 
 export async function updateArtifactSetRow(
-  setId: string,
-  data: Prisma.ArtifactSetUpdateInput,
+    setId: string,
+    data: Prisma.ArtifactSetUpdateInput
 ) {
-  const row = await prisma.artifactSet.update({
-    where: { id: setId },
-    data,
-  });
+    const row = await prisma.artifactSet.update({
+        where: { id: setId },
+        data,
+    });
 
-  return row;
+    return row;
 }
 
 export async function deleteArtifactSetAndClearArtifacts(
-  campaignId: string,
-  setId: string,
+    campaignId: string,
+    setId: string
 ) {
-  await prisma.$transaction([
-    prisma.artifact.updateMany({
-      where: { campaignId, setId },
-      data: { setId: null },
-    }),
-    prisma.artifactSet.deleteMany({ where: { id: setId, campaignId } }),
-  ]);
+    await prisma.$transaction([
+        prisma.artifact.updateMany({
+            where: { campaignId, setId },
+            data: { setId: null },
+        }),
+        prisma.artifactSet.deleteMany({ where: { id: setId, campaignId } }),
+    ]);
 }

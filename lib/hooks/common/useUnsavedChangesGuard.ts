@@ -1,55 +1,80 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
-import { useConfirm } from "./useConfirm";
+import { useConfirm } from './useConfirm';
 
-const MODIFIED = (e: MouseEvent) => e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
+const MODIFIED = (e: MouseEvent) =>
+    e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
 
 /** Поки active: закриття вкладки, і клік по внутрішньому посиланню питають підтвердження. */
 export function useUnsavedChangesGuard(active: boolean): void {
-  const t = useTranslations("common");
+    const t = useTranslations('common');
 
-  const router = useRouter();
+    const router = useRouter();
 
-  const confirm = useConfirm();
+    const confirm = useConfirm();
 
-  const latest = useRef({ router, confirm, t });
+    const latest = useRef({ router, confirm, t });
 
-  useEffect(() => {
-    latest.current = { router, confirm, t };
-  });
+    useEffect(() => {
+        latest.current = { router, confirm, t };
+    });
 
-  useEffect(() => {
-    if (!active) return;
+    useEffect(() => {
+        if (!active) return;
 
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+        const warn = (e: BeforeUnloadEvent) => e.preventDefault();
 
-    const onClick = (e: MouseEvent) => {
-      if (e.defaultPrevented || MODIFIED(e)) return;
+        const onClick = (e: MouseEvent) => {
+            if (e.defaultPrevented || MODIFIED(e)) return;
 
-      const anchor = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+            const anchor = (e.target as Element | null)?.closest?.(
+                'a[href]'
+            ) as HTMLAnchorElement | null;
 
-      if (!anchor || (anchor.target && anchor.target !== "_self") || anchor.hasAttribute("download")) return;
+            if (
+                !anchor ||
+                (anchor.target && anchor.target !== '_self') ||
+                anchor.hasAttribute('download')
+            )
+                return;
 
-      const url = new URL(anchor.href, window.location.href);
+            const url = new URL(anchor.href, window.location.href);
 
-      if (url.origin !== window.location.origin || (url.pathname === window.location.pathname && url.search === window.location.search)) return;
+            if (
+                url.origin !== window.location.origin ||
+                (url.pathname === window.location.pathname &&
+                    url.search === window.location.search)
+            )
+                return;
 
-      e.preventDefault();
-      e.stopPropagation();
+            e.preventDefault();
+            e.stopPropagation();
 
-      void latest.current.confirm({ title: latest.current.t("confirm.unsavedTitle"), confirmLabel: latest.current.t("confirm.leave"), destructive: true }).then((ok) => ok && latest.current.router.push(url.pathname + url.search + url.hash));
-    };
+            void latest.current
+                .confirm({
+                    title: latest.current.t('confirm.unsavedTitle'),
+                    confirmLabel: latest.current.t('confirm.leave'),
+                    destructive: true,
+                })
+                .then(
+                    (ok) =>
+                        ok &&
+                        latest.current.router.push(
+                            url.pathname + url.search + url.hash
+                        )
+                );
+        };
 
-    window.addEventListener("beforeunload", warn);
-    document.addEventListener("click", onClick, true);
+        window.addEventListener('beforeunload', warn);
+        document.addEventListener('click', onClick, true);
 
-    return () => {
-      window.removeEventListener("beforeunload", warn);
-      document.removeEventListener("click", onClick, true);
-    };
-  }, [active]);
+        return () => {
+            window.removeEventListener('beforeunload', warn);
+            document.removeEventListener('click', onClick, true);
+        };
+    }, [active]);
 }

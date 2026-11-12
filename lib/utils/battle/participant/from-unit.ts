@@ -1,271 +1,421 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from '@prisma/client';
 
-import type { UnitFromPrisma } from "../types/participant";
-import { runParticipantParts } from "./parts";
+import type { UnitFromPrisma } from '../types/participant';
+import { runParticipantParts } from './parts';
 
-import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { UNIT_SPELL_SLOTS } from "@/lib/constants/battle-balance";
-import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
-import type { WeaponTrait } from "@/lib/constants/weapon-traits";
-import { loadUnitRace } from "@/lib/server/battles/participant/load-race";
-import { bakePassives } from "@/lib/utils/abilities/build/bake";
-import { collectUnitAbilities } from "@/lib/utils/abilities/build/collect";
-import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
-import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import { logger } from "@/lib/utils/common/logger";
-import { spellGrantFields, spellPoolKey } from "@/lib/utils/items/pools";
-import { getUnitImmunities } from "@/lib/utils/races/race-effects";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
-import { bestMentalAbility, isMonster5e, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
-import type { ResolvedAbility } from "@/types/abilities";
-import type { AbilityPool, BattleAttack, BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
-import type { Unit } from "@/types/units";
+import {
+    AttackType,
+    CombatStatus,
+    ParticipantSide,
+    ParticipantSourceType,
+} from '@/lib/constants/battle';
+import { UNIT_SPELL_SLOTS } from '@/lib/constants/battle-balance';
+import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
+import type { WeaponTrait } from '@/lib/constants/weapon-traits';
+import { loadUnitRace } from '@/lib/server/battles/participant/load-race';
+import { bakePassives } from '@/lib/utils/abilities/build/bake';
+import { collectUnitAbilities } from '@/lib/utils/abilities/build/collect';
+import { immunityAbilities } from '@/lib/utils/abilities/build/immunities';
+import { resolveLimitFormulas } from '@/lib/utils/abilities/build/limit-formulas';
+import { getAbilityModifier } from '@/lib/utils/common/calculations';
+import { logger } from '@/lib/utils/common/logger';
+import { spellGrantFields, spellPoolKey } from '@/lib/utils/items/pools';
+import { getUnitImmunities } from '@/lib/utils/races/race-effects';
+import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
+import {
+    bestMentalAbility,
+    isMonster5e,
+    monsterSenseAbilities,
+    multiattackAbilities,
+    readSaveProficiencies,
+    unitXp,
+} from '@/lib/utils/units/monster';
+import type { ResolvedAbility } from '@/types/abilities';
+import type {
+    AbilityPool,
+    BattleAttack,
+    BattleParticipant,
+    BattleParticipantSpellcasting,
+} from '@/types/battle';
+import type { Unit } from '@/types/units';
 
-function monsterSpellcasting(unit: UnitFromPrisma): { spellcasting: BattleParticipantSpellcasting; pools: Record<string, AbilityPool> } {
-  const monster = isMonster5e(unit);
+function monsterSpellcasting(unit: UnitFromPrisma): {
+    spellcasting: BattleParticipantSpellcasting;
+    pools: Record<string, AbilityPool>;
+} {
+    const monster = isMonster5e(unit);
 
-  const config = monster ? ((unit.spellcasting ?? { spells: [] }) as unknown as NonNullable<Unit["spellcasting"]>) : { spells: [] };
+    const config = monster
+        ? ((unit.spellcasting ?? { spells: [] }) as unknown as NonNullable<
+              Unit['spellcasting']
+          >)
+        : { spells: [] };
 
-  const configuredSpells = Array.isArray(config.spells) ? config.spells : [];
+    const configuredSpells = Array.isArray(config.spells) ? config.spells : [];
 
-  const knownSpells = monster ? [...new Set([...(unit.knownSpells as string[] || []), ...configuredSpells.map((grant) => grant.spellId)])] : (unit.knownSpells as string[]) || [];
+    const knownSpells = monster
+        ? [
+              ...new Set([
+                  ...((unit.knownSpells as string[]) || []),
+                  ...configuredSpells.map((grant) => grant.spellId),
+              ]),
+          ]
+        : (unit.knownSpells as string[]) || [];
 
-  const configured = new Set(configuredSpells.map((grant) => grant.spellId));
+    const configured = new Set(configuredSpells.map((grant) => grant.spellId));
 
-  const grants = [
-    ...configuredSpells.map((grant) => ({
-      spellId: grant.spellId,
-      ...(grant.perBattle !== undefined && { pool: spellPoolKey(grant.spellId), cost: 1 }),
-      ...spellGrantFields({ castLevel: grant.castLevel, dc: grant.dc, attackBonus: grant.attackBonus }),
-      ...(grant.legendaryOnly && { legendaryOnly: true as const }),
-    })),
-    ...knownSpells.filter((id) => !configured.has(id)).map((spellId) => ({ spellId })),
-  ];
+    const grants = [
+        ...configuredSpells.map((grant) => ({
+            spellId: grant.spellId,
+            ...(grant.perBattle !== undefined && {
+                pool: spellPoolKey(grant.spellId),
+                cost: 1,
+            }),
+            ...spellGrantFields({
+                castLevel: grant.castLevel,
+                dc: grant.dc,
+                attackBonus: grant.attackBonus,
+            }),
+            ...(grant.legendaryOnly && { legendaryOnly: true as const }),
+        })),
+        ...knownSpells
+            .filter((id) => !configured.has(id))
+            .map((spellId) => ({ spellId })),
+    ];
 
-  const pools = Object.fromEntries(configuredSpells.flatMap((grant) => grant.perBattle === undefined ? [] : [[spellPoolKey(grant.spellId), { label: grant.spellId, max: grant.perBattle, rest: null, ...(grant.recharge !== undefined && { recharge: grant.recharge }) }]]));
+    const pools = Object.fromEntries(
+        configuredSpells.flatMap((grant) =>
+            grant.perBattle === undefined
+                ? []
+                : [
+                      [
+                          spellPoolKey(grant.spellId),
+                          {
+                              label: grant.spellId,
+                              max: grant.perBattle,
+                              rest: null,
+                              ...(grant.recharge !== undefined && {
+                                  recharge: grant.recharge,
+                              }),
+                          },
+                      ],
+                  ]
+        )
+    );
 
-  return {
-    pools,
-    spellcasting: {
-      spellcastingAbility: monster ? (config.ability ?? bestMentalAbility(unit)) : undefined,
-      spellAttackBonus: monster ? config.attackBonus : undefined,
-      spellSlots: monster ? {} : { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
-      knownSpells,
-      ...(monster && grants.length > 0 && { grants }),
-    },
-  };
+    return {
+        pools,
+        spellcasting: {
+            spellcastingAbility: monster
+                ? (config.ability ?? bestMentalAbility(unit))
+                : undefined,
+            spellAttackBonus: monster ? config.attackBonus : undefined,
+            spellSlots: monster
+                ? {}
+                : {
+                      universal: {
+                          max: UNIT_SPELL_SLOTS,
+                          current: UNIT_SPELL_SLOTS,
+                      },
+                  },
+            knownSpells,
+            ...(monster && grants.length > 0 && { grants }),
+        },
+    };
 }
 
 type UnitRace = Awaited<ReturnType<typeof loadUnitRace>>;
 
-type UnitStatblock = NonNullable<Unit["statblock"]>;
+type UnitStatblock = NonNullable<Unit['statblock']>;
 
 function unitModifiers(unit: UnitFromPrisma) {
-  return {
-    strength: getAbilityModifier(unit.strength),
-    dexterity: getAbilityModifier(unit.dexterity),
-    constitution: getAbilityModifier(unit.constitution),
-    intelligence: getAbilityModifier(unit.intelligence),
-    wisdom: getAbilityModifier(unit.wisdom),
-    charisma: getAbilityModifier(unit.charisma),
-  };
+    return {
+        strength: getAbilityModifier(unit.strength),
+        dexterity: getAbilityModifier(unit.dexterity),
+        constitution: getAbilityModifier(unit.constitution),
+        intelligence: getAbilityModifier(unit.intelligence),
+        wisdom: getAbilityModifier(unit.wisdom),
+        charisma: getAbilityModifier(unit.charisma),
+    };
 }
 
 function unitBattleAttacks(unit: UnitFromPrisma): BattleAttack[] {
-  const attacks =
-    (unit.attacks as Array<{
-      name: string;
-      attackBonus: number;
-      damageDice: string;
-      damageType: string;
-      type?: AttackType;
-      range?: string;
-      properties?: string;
-      traits?: WeaponTrait[];
-      versatileDice?: string;
-    }>) || [];
+    const attacks =
+        (unit.attacks as Array<{
+            name: string;
+            attackBonus: number;
+            damageDice: string;
+            damageType: string;
+            type?: AttackType;
+            range?: string;
+            properties?: string;
+            traits?: WeaponTrait[];
+            versatileDice?: string;
+        }>) || [];
 
-  return attacks.map((attack, index) => {
-    const rawType = (attack as { type?: string }).type;
+    return attacks.map((attack, index) => {
+        const rawType = (attack as { type?: string }).type;
 
-    const attackType: AttackType =
-      rawType === AttackType.RANGED
-        ? AttackType.RANGED
-        : rawType === AttackType.MELEE
-          ? AttackType.MELEE
-           
-          : attack.range && !/^5\s*(фт|ft)/i.test(attack.range)
-            ? AttackType.RANGED
-            : AttackType.MELEE;
+        const attackType: AttackType =
+            rawType === AttackType.RANGED
+                ? AttackType.RANGED
+                : rawType === AttackType.MELEE
+                  ? AttackType.MELEE
+                  : attack.range && !/^5\s*(фт|ft)/i.test(attack.range)
+                    ? AttackType.RANGED
+                    : AttackType.MELEE;
 
-    const a = attack as {
-      targetType?: string;
-      maxTargets?: number;
-      damageDistribution?: number[];
-      guaranteedDamage?: number;
-    };
+        const a = attack as {
+            targetType?: string;
+            maxTargets?: number;
+            damageDistribution?: number[];
+            guaranteedDamage?: number;
+        };
+
+        return {
+            id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
+            name: attack.name,
+            type: attackType,
+            attackBonus: attack.attackBonus,
+            damageDice: attack.damageDice,
+            damageType: attack.damageType,
+            range: attack.range,
+            properties: attack.properties,
+            targetType:
+                a.targetType === 'aoe'
+                    ? ('aoe' as const)
+                    : a.targetType === 'target'
+                      ? ('target' as const)
+                      : undefined,
+            maxTargets: a.maxTargets,
+            damageDistribution: a.damageDistribution,
+            guaranteedDamage: a.guaranteedDamage,
+            ...(attack.traits && { traits: attack.traits }),
+            ...(attack.versatileDice && {
+                versatileDice: attack.versatileDice,
+            }),
+        };
+    });
+}
+
+async function loadRaceSafe(
+    unit: UnitFromPrisma,
+    racesById?: Record<string, Prisma.RaceGetPayload<object> | null>
+): Promise<UnitRace> {
+    try {
+        return await loadUnitRace(
+            unit.raceId,
+            unit.campaignId,
+            racesById ? (racesById[unit.raceId ?? ''] ?? null) : undefined
+        );
+    } catch (error) {
+        logger.error(
+            '[battle/from-unit] load race failed',
+            {
+                unitId: unit.id,
+                raceId: unit.raceId,
+                campaignId: unit.campaignId,
+            },
+            error
+        );
+
+        return null;
+    }
+}
+
+function unitLegendary(
+    unit: UnitFromPrisma,
+    monster: boolean,
+    statblock: UnitStatblock
+): NonNullable<BattleParticipant['battleData']['legendary']> | undefined {
+    return monster &&
+        (unit.legendaryActions > 0 ||
+            unit.legendaryResistances > 0 ||
+            (statblock.lairResistances ?? 0) > 0)
+        ? {
+              actions: unit.legendaryActions,
+              actionsLeft: unit.legendaryActions,
+              resistLeft: unit.legendaryResistances,
+          }
+        : undefined;
+}
+
+type UnitTraits = ReturnType<
+    NonNullable<ReturnType<typeof ruleSystemOf>['traits']>['unitBuild']
+>;
+
+function unitAbilities(
+    unit: UnitFromPrisma,
+    race: UnitRace,
+    rules: Ruleset,
+    monster: boolean,
+    statblock: UnitStatblock,
+    traits?: UnitTraits
+): BattleParticipant['abilities'] {
+    const saveProficiencies = monster
+        ? readSaveProficiencies(unit.saveProficiencies)
+        : [];
+
+    const baseStats = ruleSystemOf(rules).combat.baseStats?.(unit);
 
     return {
-      id: (attack as { id?: string }).id || `${unit.id}-attack-${index}`,
-      name: attack.name,
-      type: attackType,
-      attackBonus: attack.attackBonus,
-      damageDice: attack.damageDice,
-      damageType: attack.damageType,
-      range: attack.range,
-      properties: attack.properties,
-      targetType:
-        a.targetType === "aoe"
-          ? ("aoe" as const)
-          : a.targetType === "target"
-            ? ("target" as const)
-            : undefined,
-      maxTargets: a.maxTargets,
-      damageDistribution: a.damageDistribution,
-      guaranteedDamage: a.guaranteedDamage,
-      ...(attack.traits && { traits: attack.traits }),
-      ...(attack.versatileDice && { versatileDice: attack.versatileDice }),
+        level: unit.level,
+        initiative: baseStats?.initiative ?? unit.initiative,
+        baseInitiative: baseStats?.initiative ?? unit.initiative,
+        strength: unit.strength,
+        dexterity: unit.dexterity,
+        constitution: unit.constitution,
+        intelligence: unit.intelligence,
+        wisdom: unit.wisdom,
+        charisma: unit.charisma,
+        modifiers: unitModifiers(unit),
+        proficiencyBonus: unit.proficiencyBonus,
+        race: race?.name ?? '',
+        raceId: race?.id,
+        moraleCap: 0,
+        ...(monster && { damageModel: '5e' as const }),
+        ...systemSlotOf(
+            traits
+                ? traits.fields
+                : ruleSystemOf(rules).combat.participantFields?.(unit)
+        ),
+        ...(statblock.creatureType && { creatureType: statblock.creatureType }),
+        ...(monster && unit.cr != null && { cr: unit.cr }),
+        ...(saveProficiencies.length > 0 && { saveProficiencies }),
     };
-  });
 }
 
-async function loadRaceSafe(unit: UnitFromPrisma, racesById?: Record<string, Prisma.RaceGetPayload<object> | null>): Promise<UnitRace> {
-  try {
-    return await loadUnitRace(unit.raceId, unit.campaignId, racesById ? (racesById[unit.raceId ?? ""] ?? null) : undefined);
-  } catch (error) {
-    logger.error("[battle/from-unit] load race failed", { unitId: unit.id, raceId: unit.raceId, campaignId: unit.campaignId }, error);
-
-    return null;
-  }
+function unitCombatStats(
+    unit: UnitFromPrisma,
+    rules: Ruleset
+): BattleParticipant['combatStats'] {
+    return {
+        maxHp: unit.maxHp,
+        currentHp: unit.maxHp,
+        tempHp: 0,
+        armorClass: unit.armorClass,
+        speed: ruleSystemOf(rules).combat.baseStats?.(unit).speed ?? unit.speed,
+        gridSize: unit.gridSize ?? 1,
+        morale: (unit as { morale?: number }).morale || 0,
+        status: CombatStatus.ACTIVE,
+        minTargets: unit.minTargets ?? 1,
+        maxTargets: unit.maxTargets ?? 1,
+    };
 }
 
-function unitLegendary(unit: UnitFromPrisma, monster: boolean, statblock: UnitStatblock): NonNullable<BattleParticipant["battleData"]["legendary"]> | undefined {
-  return monster && (unit.legendaryActions > 0 || unit.legendaryResistances > 0 || (statblock.lairResistances ?? 0) > 0)
-    ? { actions: unit.legendaryActions, actionsLeft: unit.legendaryActions, resistLeft: unit.legendaryResistances }
-    : undefined;
-}
+function unitBattleData(
+    unit: UnitFromPrisma,
+    monster: boolean,
+    statblock: UnitStatblock,
+    pools: Record<string, AbilityPool>,
+    resolvedAbilities: ResolvedAbility[],
+    traits?: UnitTraits
+): BattleParticipant['battleData'] {
+    const legendary = unitLegendary(unit, monster, statblock);
 
-type UnitTraits = ReturnType<NonNullable<ReturnType<typeof ruleSystemOf>["traits"]>["unitBuild"]>;
-
-function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, monster: boolean, statblock: UnitStatblock, traits?: UnitTraits): BattleParticipant["abilities"] {
-  const saveProficiencies = monster ? readSaveProficiencies(unit.saveProficiencies) : [];
-
-  const baseStats = ruleSystemOf(rules).combat.baseStats?.(unit);
-
-  return {
-    level: unit.level,
-    initiative: baseStats?.initiative ?? unit.initiative,
-    baseInitiative: baseStats?.initiative ?? unit.initiative,
-    strength: unit.strength,
-    dexterity: unit.dexterity,
-    constitution: unit.constitution,
-    intelligence: unit.intelligence,
-    wisdom: unit.wisdom,
-    charisma: unit.charisma,
-    modifiers: unitModifiers(unit),
-    proficiencyBonus: unit.proficiencyBonus,
-    race: race?.name ?? "",
-    raceId: race?.id,
-    moraleCap: 0,
-    ...(monster && { damageModel: "5e" as const }),
-    ...systemSlotOf(traits ? traits.fields : ruleSystemOf(rules).combat.participantFields?.(unit)),
-    ...(statblock.creatureType && { creatureType: statblock.creatureType }),
-    ...(monster && unit.cr != null && { cr: unit.cr }),
-    ...(saveProficiencies.length > 0 && { saveProficiencies }),
-  };
-}
-
-function unitCombatStats(unit: UnitFromPrisma, rules: Ruleset): BattleParticipant["combatStats"] {
-  return {
-    maxHp: unit.maxHp,
-    currentHp: unit.maxHp,
-    tempHp: 0,
-    armorClass: unit.armorClass,
-    speed: ruleSystemOf(rules).combat.baseStats?.(unit).speed ?? unit.speed,
-    gridSize: unit.gridSize ?? 1,
-    morale: (unit as { morale?: number }).morale || 0,
-    status: CombatStatus.ACTIVE,
-    minTargets: unit.minTargets ?? 1,
-    maxTargets: unit.maxTargets ?? 1,
-  };
-}
-
-function unitBattleData(unit: UnitFromPrisma, monster: boolean, statblock: UnitStatblock, pools: Record<string, AbilityPool>, resolvedAbilities: ResolvedAbility[], traits?: UnitTraits): BattleParticipant["battleData"] {
-  const legendary = unitLegendary(unit, monster, statblock);
-
-  return {
-    attacks: [...unitBattleAttacks(unit), ...(traits?.attacks ?? [])],
-    activeEffects: [],
-    equippedArtifacts: [],
-    resolvedAbilities,
-    abilityUsage: {},
-    pendingExtraActions: 0,
-    ...(legendary && { legendary }),
-    ...(monster && { lair: { active: false, baseResistances: unit.legendaryResistances, resistSpent: 0 } }),
-    ...(statblock.lairResistances !== undefined && { lairResistances: statblock.lairResistances }),
-    ...(Object.keys(pools).length > 0 && { pools }),
-    ...(statblock.senses && { senses: statblock.senses }),
-    ...(statblock.movement && { movement: statblock.movement }),
-    ...(statblock.languages && { languages: statblock.languages }),
-    ...(statblock.telepathy !== undefined && { telepathy: statblock.telepathy }),
-  };
+    return {
+        attacks: [...unitBattleAttacks(unit), ...(traits?.attacks ?? [])],
+        activeEffects: [],
+        equippedArtifacts: [],
+        resolvedAbilities,
+        abilityUsage: {},
+        pendingExtraActions: 0,
+        ...(legendary && { legendary }),
+        ...(monster && {
+            lair: {
+                active: false,
+                baseResistances: unit.legendaryResistances,
+                resistSpent: 0,
+            },
+        }),
+        ...(statblock.lairResistances !== undefined && {
+            lairResistances: statblock.lairResistances,
+        }),
+        ...(Object.keys(pools).length > 0 && { pools }),
+        ...(statblock.senses && { senses: statblock.senses }),
+        ...(statblock.movement && { movement: statblock.movement }),
+        ...(statblock.languages && { languages: statblock.languages }),
+        ...(statblock.telepathy !== undefined && {
+            telepathy: statblock.telepathy,
+        }),
+    };
 }
 
 export async function createBattleParticipantFromUnit(
-  unit: UnitFromPrisma,
-  battleId: string,
-  side: ParticipantSide,
-  instanceNumber: number,
-  racesById?: Record<string, Prisma.RaceGetPayload<object> | null>,
-  rules: Ruleset = DEFAULT_RULES,
+    unit: UnitFromPrisma,
+    battleId: string,
+    side: ParticipantSide,
+    instanceNumber: number,
+    racesById?: Record<string, Prisma.RaceGetPayload<object> | null>,
+    rules: Ruleset = DEFAULT_RULES
 ): Promise<BattleParticipant> {
-  const race = await loadRaceSafe(unit, racesById);
+    const race = await loadRaceSafe(unit, racesById);
 
-  const monster = isMonster5e(unit);
+    const monster = isMonster5e(unit);
 
-  const xp = unitXp(unit);
+    const xp = unitXp(unit);
 
-  const statblock = monster ? ((unit.statblock ?? {}) as UnitStatblock) : {};
+    const statblock = monster ? ((unit.statblock ?? {}) as UnitStatblock) : {};
 
-  const { spellcasting, pools } = monsterSpellcasting(unit);
+    const { spellcasting, pools } = monsterSpellcasting(unit);
 
-  const resolvedAbilities = [
-    ...collectUnitAbilities(unit, race),
-    ...(monster ? multiattackAbilities(unit) : []),
-    ...monsterSenseAbilities(unit, statblock.senses),
-    ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
-  ];
+    const resolvedAbilities = [
+        ...collectUnitAbilities(unit, race),
+        ...(monster ? multiattackAbilities(unit) : []),
+        ...monsterSenseAbilities(unit, statblock.senses),
+        ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), {
+            type: 'unit',
+            id: unit.id,
+        }),
+    ];
 
-  const traits = ruleSystemOf(rules).traits?.unitBuild(unit, resolvedAbilities);
+    const traits = ruleSystemOf(rules).traits?.unitBuild(
+        unit,
+        resolvedAbilities
+    );
 
-  const participant: BattleParticipant = {
-    basicInfo: {
-      id: `${unit.id}-${instanceNumber}-${Date.now()}`,
-      battleId,
-      sourceId: unit.id,
-      sourceType: ParticipantSourceType.UNIT,
-      instanceNumber,
-      instanceId: `${unit.id}-${instanceNumber - 1}`,
-      name: `${unit.name} #${instanceNumber}`,
-      avatar: unit.avatar || undefined,
-      side,
-      controlledBy: CONTROLLED_BY_DM,
-      ...(xp !== null && { xp }),
-    },
-    abilities: unitAbilities(unit, race, rules, monster, statblock, traits),
-    combatStats: unitCombatStats(unit, rules),
-    spellcasting,
-    battleData: unitBattleData(unit, monster, statblock, pools, resolvedAbilities, traits),
-    actionFlags: {
-      hasUsedAction: false,
-      hasUsedBonusAction: false,
-      hasUsedReaction: false,
-      hasExtraTurn: false,
-    },
-  };
+    const participant: BattleParticipant = {
+        basicInfo: {
+            id: `${unit.id}-${instanceNumber}-${Date.now()}`,
+            battleId,
+            sourceId: unit.id,
+            sourceType: ParticipantSourceType.UNIT,
+            instanceNumber,
+            instanceId: `${unit.id}-${instanceNumber - 1}`,
+            name: `${unit.name} #${instanceNumber}`,
+            avatar: unit.avatar || undefined,
+            side,
+            controlledBy: CONTROLLED_BY_DM,
+            ...(xp !== null && { xp }),
+        },
+        abilities: unitAbilities(unit, race, rules, monster, statblock, traits),
+        combatStats: unitCombatStats(unit, rules),
+        spellcasting,
+        battleData: unitBattleData(
+            unit,
+            monster,
+            statblock,
+            pools,
+            resolvedAbilities,
+            traits
+        ),
+        actionFlags: {
+            hasUsedAction: false,
+            hasUsedBonusAction: false,
+            hasUsedReaction: false,
+            hasExtraTurn: false,
+        },
+    };
 
-  return resolveLimitFormulas(bakePassives(runParticipantParts(ruleSystemOf(rules).participant?.fromUnit, participant, { row: unit, rules, refs: {} })));
+    return resolveLimitFormulas(
+        bakePassives(
+            runParticipantParts(
+                ruleSystemOf(rules).participant?.fromUnit,
+                participant,
+                { row: unit, rules, refs: {} }
+            )
+        )
+    );
 }

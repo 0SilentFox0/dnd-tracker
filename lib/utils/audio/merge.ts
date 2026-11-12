@@ -1,18 +1,29 @@
-import type { BattleAudioSnapshot, BattleAudioState } from "@/types/audio";
+import type { BattleAudioSnapshot, BattleAudioState } from '@/types/audio';
 
-export function mergeAudio(cached: BattleAudioState | null, incoming: BattleAudioState | null | undefined): BattleAudioState | null {
-  if (!incoming) return cached;
+export function mergeAudio(
+    cached: BattleAudioState | null,
+    incoming: BattleAudioState | null | undefined
+): BattleAudioState | null {
+    if (!incoming) return cached;
 
-  return !cached || incoming.seq > cached.seq ? incoming : cached;
+    return !cached || incoming.seq > cached.seq ? incoming : cached;
 }
 
 /** Стан — лише за seq, годинник — лише з HTTP-відповіді; без змін повертає prev, щоб не будити спостерігачів. */
-export type AudioIncoming = { audio: BattleAudioState | null | undefined; clockOffsetMs?: number | null };
+export type AudioIncoming = {
+    audio: BattleAudioState | null | undefined;
+    clockOffsetMs?: number | null;
+};
 
-export function mergeAudioSnapshot(prev: BattleAudioSnapshot | undefined, incoming: AudioIncoming): BattleAudioSnapshot {
-  const audio = mergeAudio(prev?.audio ?? null, incoming.audio);
+export function mergeAudioSnapshot(
+    prev: BattleAudioSnapshot | undefined,
+    incoming: AudioIncoming
+): BattleAudioSnapshot {
+    const audio = mergeAudio(prev?.audio ?? null, incoming.audio);
 
-  const clockOffsetMs = incoming.clockOffsetMs ?? prev?.clockOffsetMs ?? null;
+    const clockOffsetMs = incoming.clockOffsetMs ?? prev?.clockOffsetMs ?? null;
 
-  return prev && audio === prev.audio && clockOffsetMs === prev.clockOffsetMs ? prev : { audio, clockOffsetMs };
+    return prev && audio === prev.audio && clockOffsetMs === prev.clockOffsetMs
+        ? prev
+        : { audio, clockOffsetMs };
 }

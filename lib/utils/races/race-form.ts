@@ -1,36 +1,45 @@
-import { DEFAULT_SPELL_SLOT_PROGRESSION } from "@/lib/constants/spells";
-import type { Ability } from "@/lib/utils/abilities/schema";
-import { normalizePassiveAbility } from "@/lib/utils/races/race-summary";
-import type { Choice } from "@/types/choices";
-import type { RaceFormData, SpellSlotProgression } from "@/types/races";
+import { DEFAULT_SPELL_SLOT_PROGRESSION } from '@/lib/constants/spells';
+import type { Ability } from '@/lib/utils/abilities/schema';
+import { normalizePassiveAbility } from '@/lib/utils/races/race-summary';
+import type { Choice } from '@/types/choices';
+import type { RaceFormData, SpellSlotProgression } from '@/types/races';
 
 export function getInitialRaceFormData(race: {
-  name: string;
-  icon?: string | null;
-  color?: string | null;
-  availableSkills: unknown;
-  disabledSkills?: string[];
-  passiveAbility?: unknown;
-  spellSlotProgression?: unknown;
-  abilities?: Ability[];
-  choices?: Choice[];
+    name: string;
+    icon?: string | null;
+    color?: string | null;
+    availableSkills: unknown;
+    disabledSkills?: string[];
+    passiveAbility?: unknown;
+    spellSlotProgression?: unknown;
+    abilities?: Ability[];
+    choices?: Choice[];
 }): RaceFormData {
-  const passive = normalizePassiveAbility(race);
+    const passive = normalizePassiveAbility(race);
 
-  const progression = Array.isArray(race.spellSlotProgression)
-    ? (race.spellSlotProgression as SpellSlotProgression[])
-    : [];
+    const progression = Array.isArray(race.spellSlotProgression)
+        ? (race.spellSlotProgression as SpellSlotProgression[])
+        : [];
 
-  return {
-    name: race.name,
-    icon: race.icon ?? "",
-    color: race.color ?? "",
-    availableSkills: Array.isArray(race.availableSkills) ? race.availableSkills : [],
-    disabledSkills: race.disabledSkills ?? [],
-    passiveAbility: { ...passive, description: passive?.description ?? "", statImprovements: passive?.statImprovements ?? "", statModifiers: passive?.statModifiers ?? {} },
-    spellSlotProgression:
-      progression.length > 0 ? progression : DEFAULT_SPELL_SLOT_PROGRESSION,
-    abilities: race.abilities ?? [],
-    ...(race.choices?.length && { choices: race.choices }),
-  };
+    return {
+        name: race.name,
+        icon: race.icon ?? '',
+        color: race.color ?? '',
+        availableSkills: Array.isArray(race.availableSkills)
+            ? race.availableSkills
+            : [],
+        disabledSkills: race.disabledSkills ?? [],
+        passiveAbility: {
+            ...passive,
+            description: passive?.description ?? '',
+            statImprovements: passive?.statImprovements ?? '',
+            statModifiers: passive?.statModifiers ?? {},
+        },
+        spellSlotProgression:
+            progression.length > 0
+                ? progression
+                : DEFAULT_SPELL_SLOT_PROGRESSION,
+        abilities: race.abilities ?? [],
+        ...(race.choices?.length && { choices: race.choices }),
+    };
 }

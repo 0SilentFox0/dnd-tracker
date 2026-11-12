@@ -1,88 +1,179 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
-import { importUnitsSchema } from "@/lib/schemas/units";
-import { importUnitsIntoCampaign, resolveImportRaces, toUnitCreateData } from "@/lib/utils/units/import-units";
+import { importUnitsSchema } from '@/lib/schemas/units';
+import {
+    importUnitsIntoCampaign,
+    resolveImportRaces,
+    toUnitCreateData,
+} from '@/lib/utils/units/import-units';
 
 const races = [
-  { id: "r-old", name: "Гобліни" },
-  { id: "r-new", name: "гобліни" },
-  { id: "r-orc", name: "Орки" },
+    { id: 'r-old', name: 'Гобліни' },
+    { id: 'r-new', name: 'гобліни' },
+    { id: 'r-orc', name: 'Орки' },
 ];
 
-const aoe = { name: "Вогняний подих", type: "ranged", targetType: "aoe", attackBonus: 5, damageType: "fire", damageDice: "3d6", maxTargets: 3, damageDistribution: [50, 30, 20], guaranteedDamage: 2 };
+const aoe = {
+    name: 'Вогняний подих',
+    type: 'ranged',
+    targetType: 'aoe',
+    attackBonus: 5,
+    damageType: 'fire',
+    damageDice: '3d6',
+    maxTargets: 3,
+    damageDistribution: [50, 30, 20],
+    guaranteedDamage: 2,
+};
 
 const [row] = importUnitsSchema.parse({
-  units: [{ name: "Дракончик", raceName: "ГОБЛІНИ", attacks: [aoe], specialAbilities: [{ name: "Луска", description: "Опір вогню", type: "passive" }] }],
+    units: [
+        {
+            name: 'Дракончик',
+            raceName: 'ГОБЛІНИ',
+            attacks: [aoe],
+            specialAbilities: [
+                { name: 'Луска', description: 'Опір вогню', type: 'passive' },
+            ],
+        },
+    ],
 }).units;
 
-describe("unit import mapping", () => {
-  it("abilities pass through first; a specialAbility with the same name is skipped", () => {
-    const ward = { id: "ward", name: "Ward 9+", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] };
+describe('unit import mapping', () => {
+    it('abilities pass through first; a specialAbility with the same name is skipped', () => {
+        const ward = {
+            id: 'ward',
+            name: 'Ward 9+',
+            trigger: { event: 'passive' },
+            effects: [{ kind: 'wfrpWard', value: 9 }],
+        };
 
-    const [unit] = importUnitsSchema.parse({ units: [{ name: "Shade", abilities: [ward], specialAbilities: [{ name: "ward 9+", description: "dup", type: "passive" }, { name: "Chill", description: "Cold aura", type: "passive" }] }] }).units;
+        const [unit] = importUnitsSchema.parse({
+            units: [
+                {
+                    name: 'Shade',
+                    abilities: [ward],
+                    specialAbilities: [
+                        {
+                            name: 'ward 9+',
+                            description: 'dup',
+                            type: 'passive',
+                        },
+                        {
+                            name: 'Chill',
+                            description: 'Cold aura',
+                            type: 'passive',
+                        },
+                    ],
+                },
+            ],
+        }).units;
 
-    const data = toUnitCreateData("c1", unit, null, true) as unknown as { abilities: Array<{ name: string }> };
+        const data = toUnitCreateData('c1', unit, null, true) as unknown as {
+            abilities: Array<{ name: string }>;
+        };
 
-    expect(data.abilities.map((a) => a.name)).toEqual(["Ward 9+", "Chill"]);
-    expect(data.abilities[0]).toEqual(ward);
-  });
+        expect(data.abilities.map((a) => a.name)).toEqual(['Ward 9+', 'Chill']);
+        expect(data.abilities[0]).toEqual(ward);
+    });
 
-  it("раса за назвою без урахування регістру; найстаріша виграє; невідомі — у звіт без дублів", () => {
-    const { raceIdOf, unknownRaces } = resolveImportRaces(["гобліни", " Орки ", "Ельфи", "ельфи", undefined, ""], races);
+    it('раса за назвою без урахування регістру; найстаріша виграє; невідомі — у звіт без дублів', () => {
+        const { raceIdOf, unknownRaces } = resolveImportRaces(
+            ['гобліни', ' Орки ', 'Ельфи', 'ельфи', undefined, ''],
+            races
+        );
 
-    expect(raceIdOf("ГОБЛІНИ")).toBe("r-old");
-    expect(raceIdOf("орки")).toBe("r-orc");
-    expect(raceIdOf("Ельфи")).toBeNull();
-    expect(raceIdOf(undefined)).toBeNull();
-    expect(unknownRaces).toEqual(["Ельфи"]);
-  });
+        expect(raceIdOf('ГОБЛІНИ')).toBe('r-old');
+        expect(raceIdOf('орки')).toBe('r-orc');
+        expect(raceIdOf('Ельфи')).toBeNull();
+        expect(raceIdOf(undefined)).toBeNull();
+        expect(unknownRaces).toEqual(['Ельфи']);
+    });
 
-  it("атаки з усіма полями, raceId, abilities з особливостей; legacy-колонки не пишуться", () => {
-    const data = toUnitCreateData("c1", row, "r-old");
+    it('атаки з усіма полями, raceId, abilities з особливостей; legacy-колонки не пишуться', () => {
+        const data = toUnitCreateData('c1', row, 'r-old');
 
-    expect(data).toMatchObject({ campaignId: "c1", name: "Дракончик", raceId: "r-old", attacks: [aoe] });
-    expect(Array.isArray(data.abilities)).toBe(true);
-    expect(data).not.toHaveProperty("groupId");
-    expect(data).not.toHaveProperty("race");
-  });
+        expect(data).toMatchObject({
+            campaignId: 'c1',
+            name: 'Дракончик',
+            raceId: 'r-old',
+            attacks: [aoe],
+        });
+        expect(Array.isArray(data.abilities)).toBe(true);
+        expect(data).not.toHaveProperty('groupId');
+        expect(data).not.toHaveProperty('race');
+    });
 
-  it("importUnitsIntoCampaign: пропускає наявні назви, ставить raceId, звітує невідомі раси", async () => {
-    const db = {
-      race: { findMany: vi.fn(async () => races) },
-      unit: { findMany: vi.fn(async () => [{ name: "Вовк" }]), createMany: vi.fn(async ({ data }: { data: unknown[] }) => ({ count: data.length })) },
-    };
+    it('importUnitsIntoCampaign: пропускає наявні назви, ставить raceId, звітує невідомі раси', async () => {
+        const db = {
+            race: { findMany: vi.fn(async () => races) },
+            unit: {
+                findMany: vi.fn(async () => [{ name: 'Вовк' }]),
+                createMany: vi.fn(async ({ data }: { data: unknown[] }) => ({
+                    count: data.length,
+                })),
+            },
+        };
 
-    const rows = importUnitsSchema.parse({
-      units: [
-        { name: "Вовк", raceName: "Орки" },
-        { name: "Гоблін", raceName: "гобліни" },
-        { name: "Привид", raceName: "Нежить" },
-      ],
-    }).units;
+        const rows = importUnitsSchema.parse({
+            units: [
+                { name: 'Вовк', raceName: 'Орки' },
+                { name: 'Гоблін', raceName: 'гобліни' },
+                { name: 'Привид', raceName: 'Нежить' },
+            ],
+        }).units;
 
-    const report = await importUnitsIntoCampaign(db as never, "c1", rows);
+        const report = await importUnitsIntoCampaign(db as never, 'c1', rows);
 
-    expect(db.race.findMany).toHaveBeenCalledWith({ where: { campaignId: "c1" }, select: { id: true, name: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
-    expect((db.unit.createMany.mock.calls[0][0].data as Array<{ name: string; raceId: string | null }>).map((d) => [d.name, d.raceId])).toEqual([
-      ["Гоблін", "r-old"],
-      ["Привид", null],
-    ]);
-    expect(report).toEqual({ imported: 2, total: 3, skipped: 1, unknownRaces: ["Нежить"] });
-  });
+        expect(db.race.findMany).toHaveBeenCalledWith({
+            where: { campaignId: 'c1' },
+            select: { id: true, name: true },
+            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        });
+        expect(
+            (
+                db.unit.createMany.mock.calls[0][0].data as Array<{
+                    name: string;
+                    raceId: string | null;
+                }>
+            ).map((d) => [d.name, d.raceId])
+        ).toEqual([
+            ['Гоблін', 'r-old'],
+            ['Привид', null],
+        ]);
+        expect(report).toEqual({
+            imported: 2,
+            total: 3,
+            skipped: 1,
+            unknownRaces: ['Нежить'],
+        });
+    });
 
-  it("characteristics are written only for a wfrp campaign", () => {
-    const wfrpRow = { ...row, characteristics: { base: { s: 40 } } } as never;
+    it('characteristics are written only for a wfrp campaign', () => {
+        const wfrpRow = {
+            ...row,
+            characteristics: { base: { s: 40 } },
+        } as never;
 
-    expect(toUnitCreateData("c1", wfrpRow, null)).not.toHaveProperty("characteristics");
-    expect(toUnitCreateData("c1", wfrpRow, null, true)).toHaveProperty("characteristics");
-  });
+        expect(toUnitCreateData('c1', wfrpRow, null)).not.toHaveProperty(
+            'characteristics'
+        );
+        expect(toUnitCreateData('c1', wfrpRow, null, true)).toHaveProperty(
+            'characteristics'
+        );
+    });
 
-  it("imported specialAbilities become note effects only, in every system", () => {
-    for (const wfrp of [false, true]) {
-      const data = toUnitCreateData("c1", row, null, wfrp) as { abilities?: { effects: { kind: string }[] }[] };
+    it('imported specialAbilities become note effects only, in every system', () => {
+        for (const wfrp of [false, true]) {
+            const data = toUnitCreateData('c1', row, null, wfrp) as {
+                abilities?: { effects: { kind: string }[] }[];
+            };
 
-      expect(data.abilities?.length).toBeGreaterThan(0);
-      expect(data.abilities?.flatMap((a) => a.effects.map((e) => e.kind))).toEqual(data.abilities?.flatMap((a) => a.effects.map(() => "note")));
-    }
-  });
+            expect(data.abilities?.length).toBeGreaterThan(0);
+            expect(
+                data.abilities?.flatMap((a) => a.effects.map((e) => e.kind))
+            ).toEqual(
+                data.abilities?.flatMap((a) => a.effects.map(() => 'note'))
+            );
+        }
+    });
 });

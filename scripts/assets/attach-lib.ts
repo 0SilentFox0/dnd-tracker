@@ -1,106 +1,169 @@
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
-import { SRD_KINDS, type SrdData, type SrdKind } from "../srd/lib/types";
+import { SRD_KINDS, type SrdData, type SrdKind } from '../srd/lib/types';
 
-import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
-import type { ICON_BUCKETS } from "@/lib/constants/storage";
-import { sharedAssetPath } from "@/lib/utils/common/image-url";
-import type { IdName } from "@/types/common";
+import { CampaignKind, CampaignVisibility } from '@/lib/constants/campaigns';
+import type { ICON_BUCKETS } from '@/lib/constants/storage';
+import { sharedAssetPath } from '@/lib/utils/common/image-url';
+import type { IdName } from '@/types/common';
 
-export const ATTACH_KINDS = ["units", "spells", "artifacts", "classes", "races", "skills", "main-skills"] as const;
+export const ATTACH_KINDS = [
+    'units',
+    'spells',
+    'artifacts',
+    'classes',
+    'races',
+    'skills',
+    'main-skills',
+] as const;
 
 export type AttachKind = (typeof ATTACH_KINDS)[number];
 
-export const isAttachKind = (v: string | undefined): v is AttachKind => !!v && (ATTACH_KINDS as readonly string[]).includes(v);
+export const isAttachKind = (v: string | undefined): v is AttachKind =>
+    !!v && (ATTACH_KINDS as readonly string[]).includes(v);
 
-export const ICON_FIELD: Record<AttachKind, "avatar" | "icon"> = { units: "avatar", spells: "icon", artifacts: "icon", classes: "icon", races: "icon", skills: "icon", "main-skills": "icon" };
-
-export const ASSET_BUCKET: Record<AttachKind, (typeof ICON_BUCKETS)[number]> = {
-  units: "unit-icons",
-  spells: "spell-icons",
-  artifacts: "artifact-icons",
-  classes: "class-icons",
-  races: "race-icons",
-  skills: "skill-icons",
-  "main-skills": "main-skill-icons",
+export const ICON_FIELD: Record<AttachKind, 'avatar' | 'icon'> = {
+    units: 'avatar',
+    spells: 'icon',
+    artifacts: 'icon',
+    classes: 'icon',
+    races: 'icon',
+    skills: 'icon',
+    'main-skills': 'icon',
 };
 
-export const IMAGE_TYPES: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".gif": "image/gif" };
+export const ASSET_BUCKET: Record<AttachKind, (typeof ICON_BUCKETS)[number]> = {
+    units: 'unit-icons',
+    spells: 'spell-icons',
+    artifacts: 'artifact-icons',
+    classes: 'class-icons',
+    races: 'race-icons',
+    skills: 'skill-icons',
+    'main-skills': 'main-skill-icons',
+};
 
-export function assertAttachAllowed(campaign: { kind: string; visibility: string }, allowOfficial: boolean): void {
-  if (campaign.kind === CampaignKind.TEMPLATE && campaign.visibility === CampaignVisibility.OFFICIAL && !allowOfficial) {
-    throw new Error("Це офіційний шаблон: додайте --allow-official, лише якщо іконки ваші (токени Forgotten Adventures — ніколи)");
-  }
+export const IMAGE_TYPES: Record<string, string> = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp',
+    '.gif': 'image/gif',
+};
+
+export function assertAttachAllowed(
+    campaign: { kind: string; visibility: string },
+    allowOfficial: boolean
+): void {
+    if (
+        campaign.kind === CampaignKind.TEMPLATE &&
+        campaign.visibility === CampaignVisibility.OFFICIAL &&
+        !allowOfficial
+    ) {
+        throw new Error(
+            'Це офіційний шаблон: додайте --allow-official, лише якщо іконки ваші (токени Forgotten Adventures — ніколи)'
+        );
+    }
 }
 
 export const assetKey = (s: string) =>
-  s
-    .normalize("NFKC")
-    .toLocaleLowerCase("uk")
-    .replace(/[_\-:/'’\s]+/g, " ")
-    .trim();
+    s
+        .normalize('NFKC')
+        .toLocaleLowerCase('uk')
+        .replace(/[_\-:/'’\s]+/g, ' ')
+        .trim();
 
 const VARIANT = /\s+(?:[a-z]\d+|v\d+|\d+)$/;
 
 export function fileKeys(fileName: string): string[] {
-  const keys = [assetKey(fileName.replace(/\.[^.]+$/, ""))];
+    const keys = [assetKey(fileName.replace(/\.[^.]+$/, ''))];
 
-  while (VARIANT.test(keys[keys.length - 1])) keys.push(keys[keys.length - 1].replace(VARIANT, ""));
+    while (VARIANT.test(keys[keys.length - 1]))
+        keys.push(keys[keys.length - 1].replace(VARIANT, ''));
 
-  return keys.filter(Boolean);
+    return keys.filter(Boolean);
 }
 
-export function srdSlugNames(kind: AttachKind, data: SrdData): Map<string, string> {
-  if (!(SRD_KINDS as readonly string[]).includes(kind)) return new Map();
+export function srdSlugNames(
+    kind: AttachKind,
+    data: SrdData
+): Map<string, string> {
+    if (!(SRD_KINDS as readonly string[]).includes(kind)) return new Map();
 
-  return new Map((data[kind as SrdKind] as ReadonlyArray<{ slug: string; name: string }>).map((r) => [r.slug, r.name]));
+    return new Map(
+        (
+            data[kind as SrdKind] as ReadonlyArray<{
+                slug: string;
+                name: string;
+            }>
+        ).map((r) => [r.slug, r.name])
+    );
 }
 
 export interface AssetMatch {
-  file: string;
-  id: string;
-  name: string;
+    file: string;
+    id: string;
+    name: string;
 }
 
-export function matchAssets(files: readonly string[], names: readonly IdName[], slugNames: ReadonlyMap<string, string> = new Map()): { matches: AssetMatch[]; unmatched: string[]; duplicates: string[] } {
-  const byKey = new Map<string, IdName>();
+export function matchAssets(
+    files: readonly string[],
+    names: readonly IdName[],
+    slugNames: ReadonlyMap<string, string> = new Map()
+): { matches: AssetMatch[]; unmatched: string[]; duplicates: string[] } {
+    const byKey = new Map<string, IdName>();
 
-  for (const n of names) if (!byKey.has(assetKey(n.name))) byKey.set(assetKey(n.name), n);
+    for (const n of names)
+        if (!byKey.has(assetKey(n.name))) byKey.set(assetKey(n.name), n);
 
-  for (const [slug, name] of slugNames) {
-    const target = byKey.get(assetKey(name));
+    for (const [slug, name] of slugNames) {
+        const target = byKey.get(assetKey(name));
 
-    if (!target) continue;
+        if (!target) continue;
 
-    for (const key of [assetKey(slug), assetKey(slug.replace(/^srd-\d{4}_/, ""))]) if (!byKey.has(key)) byKey.set(key, target);
-  }
-
-  const taken = new Set<string>();
-
-  const matches: AssetMatch[] = [];
-
-  const unmatched: string[] = [];
-
-  const duplicates: string[] = [];
-
-  for (const file of [...files].sort((a, b) => a.localeCompare(b))) {
-    const hit = fileKeys(file)
-      .map((k) => byKey.get(k))
-      .find((n): n is IdName => !!n);
-
-    if (!hit) unmatched.push(file);
-    else if (taken.has(hit.id)) duplicates.push(file);
-    else {
-      taken.add(hit.id);
-      matches.push({ file, id: hit.id, name: hit.name });
+        for (const key of [
+            assetKey(slug),
+            assetKey(slug.replace(/^srd-\d{4}_/, '')),
+        ])
+            if (!byKey.has(key)) byKey.set(key, target);
     }
-  }
 
-  return { matches, unmatched, duplicates };
+    const taken = new Set<string>();
+
+    const matches: AssetMatch[] = [];
+
+    const unmatched: string[] = [];
+
+    const duplicates: string[] = [];
+
+    for (const file of [...files].sort((a, b) => a.localeCompare(b))) {
+        const hit = fileKeys(file)
+            .map((k) => byKey.get(k))
+            .find((n): n is IdName => !!n);
+
+        if (!hit) unmatched.push(file);
+        else if (taken.has(hit.id)) duplicates.push(file);
+        else {
+            taken.add(hit.id);
+            matches.push({ file, id: hit.id, name: hit.name });
+        }
+    }
+
+    return { matches, unmatched, duplicates };
 }
 
-export function objectPath(setKey: string, content: Buffer, ext: string): string {
-  return sharedAssetPath(setKey, createHash("sha1").update(content).digest("hex"), ext);
+export function objectPath(
+    setKey: string,
+    content: Buffer,
+    ext: string
+): string {
+    return sharedAssetPath(
+        setKey,
+        createHash('sha1').update(content).digest('hex'),
+        ext
+    );
 }
 
-export const isAlreadyExistsError = (e: { message: string; statusCode?: string | number }) => String(e.statusCode) === "409" || /already exists/i.test(e.message);
+export const isAlreadyExistsError = (e: {
+    message: string;
+    statusCode?: string | number;
+}) => String(e.statusCode) === '409' || /already exists/i.test(e.message);

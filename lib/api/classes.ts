@@ -1,7 +1,12 @@
-import { createCampaignCrudApi } from "@/lib/api/client";
-import type { ClassFormData, GameClassData } from "@/types/classes";
+import { createCampaignCrudApi } from '@/lib/api/client';
+import type { ClassFormData, GameClassData } from '@/types/classes';
 
-const classesApi = createCampaignCrudApi<GameClassData, ClassFormData, Partial<ClassFormData>, { ok: true }>("/classes");
+const classesApi = createCampaignCrudApi<
+    GameClassData,
+    ClassFormData,
+    Partial<ClassFormData>,
+    { ok: true }
+>('/classes');
 
 export const getClasses = classesApi.list;
 export const getClass = classesApi.get;

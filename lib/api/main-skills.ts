@@ -1,12 +1,12 @@
-import { createCampaignCrudApi } from "@/lib/api/client";
-import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
+import { createCampaignCrudApi } from '@/lib/api/client';
+import type { MainSkill, MainSkillFormData } from '@/types/main-skills';
 
 const mainSkillsApi = createCampaignCrudApi<
-  MainSkill,
-  MainSkillFormData,
-  Partial<MainSkillFormData>,
-  { ok: true }
->("/main-skills");
+    MainSkill,
+    MainSkillFormData,
+    Partial<MainSkillFormData>,
+    { ok: true }
+>('/main-skills');
 
 export const getMainSkills = mainSkillsApi.list;
 export const createMainSkill = mainSkillsApi.create;

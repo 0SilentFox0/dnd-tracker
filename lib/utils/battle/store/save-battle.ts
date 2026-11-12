@@ -1,54 +1,58 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client';
 
-import type { ParticipantsDiff, ParticipantUpdate } from "./diff-participants";
-import { diffParticipants } from "./diff-participants";
-import { BattleConflictError } from "./errors";
-import type { BattleDb } from "./load-battle";
-import { persistConsumables } from "./persist-consumables";
-import { persistIngredients } from "./persist-ingredients";
-import { persistCharacterResources } from "./persist-resources";
-import { persistBattleXp } from "./persist-xp";
-import { buildSnapshotState } from "./snapshot-state";
-import { joinParticipant, splitParticipant } from "./split-participant";
+import type { ParticipantsDiff, ParticipantUpdate } from './diff-participants';
+import { diffParticipants } from './diff-participants';
+import { BattleConflictError } from './errors';
+import type { BattleDb } from './load-battle';
+import { persistConsumables } from './persist-consumables';
+import { persistIngredients } from './persist-ingredients';
+import { persistCharacterResources } from './persist-resources';
+import { persistBattleXp } from './persist-xp';
+import { buildSnapshotState } from './snapshot-state';
+import { joinParticipant, splitParticipant } from './split-participant';
 import type {
-  BattleDelta,
-  BattleMutationOutcome,
-  BattleSceneState,
-  LoadedBattle,
-  ParticipantColumns,
-  StoredBattleEvent,
-  StoredParticipant,
-} from "./types";
+    BattleDelta,
+    BattleMutationOutcome,
+    BattleSceneState,
+    LoadedBattle,
+    ParticipantColumns,
+    StoredBattleEvent,
+    StoredParticipant,
+} from './types';
 
-import { BATTLE_LOG_TEXT_FALLBACK, BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
-import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
-import { getTranslator } from "@/lib/i18n/translator";
-import { encodeLog } from "@/lib/utils/battle/log/codec";
-import { formatBattleLog } from "@/lib/utils/battle/log/lines";
-import { applyScenePatch } from "@/lib/utils/battle/scene-state";
-import type { BattleParticipant } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import {
+    BATTLE_LOG_TEXT_FALLBACK,
+    BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE,
+    BattleStatus,
+} from '@/lib/constants/battle';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
+import { getTranslator } from '@/lib/i18n/translator';
+import { encodeLog } from '@/lib/utils/battle/log/codec';
+import { formatBattleLog } from '@/lib/utils/battle/log/lines';
+import { applyScenePatch } from '@/lib/utils/battle/scene-state';
+import type { BattleParticipant } from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
-type UpdatableColumn = Exclude<keyof ParticipantColumns, "id">;
+type UpdatableColumn = Exclude<keyof ParticipantColumns, 'id'>;
 
-const COLUMN_SQL_TYPES: Record<UpdatableColumn, "text" | "int" | "boolean"> = {
-  sourceType: "text",
-  sourceId: "text",
-  side: "text",
-  controlledBy: "text",
-  orderIndex: "int",
-  isPending: "boolean",
-  extraTurnOf: "text",
-  currentHp: "int",
-  tempHp: "int",
-  maxHp: "int",
-  morale: "int",
-  status: "text",
-  initiative: "int",
-  hasUsedAction: "boolean",
-  hasUsedBonusAction: "boolean",
-  hasUsedReaction: "boolean",
-  hasExtraTurn: "boolean",
+const COLUMN_SQL_TYPES: Record<UpdatableColumn, 'text' | 'int' | 'boolean'> = {
+    sourceType: 'text',
+    sourceId: 'text',
+    side: 'text',
+    controlledBy: 'text',
+    orderIndex: 'int',
+    isPending: 'boolean',
+    extraTurnOf: 'text',
+    currentHp: 'int',
+    tempHp: 'int',
+    maxHp: 'int',
+    morale: 'int',
+    status: 'text',
+    initiative: 'int',
+    hasUsedAction: 'boolean',
+    hasUsedBonusAction: 'boolean',
+    hasUsedReaction: 'boolean',
+    hasExtraTurn: 'boolean',
 };
 
 const UPDATABLE_COLUMNS = Object.keys(COLUMN_SQL_TYPES) as UpdatableColumn[];
@@ -56,18 +60,26 @@ const UPDATABLE_COLUMNS = Object.keys(COLUMN_SQL_TYPES) as UpdatableColumn[];
 const quoted = (name: string) => Prisma.raw(`"${name}"`);
 
 // один UPDATE … FROM (VALUES …) без RETURNING: кількість запитів не росте з кількістю учасників
-function updateParticipantsSql(battleId: string, updates: ParticipantUpdate[]): Prisma.Sql {
-  const rows = updates.map(({ next, snapshotChanged }) => {
-    const values = UPDATABLE_COLUMNS.map((c) => Prisma.sql`${next.columns[c]}::${Prisma.raw(COLUMN_SQL_TYPES[c])}`);
+function updateParticipantsSql(
+    battleId: string,
+    updates: ParticipantUpdate[]
+): Prisma.Sql {
+    const rows = updates.map(({ next, snapshotChanged }) => {
+        const values = UPDATABLE_COLUMNS.map(
+            (c) =>
+                Prisma.sql`${next.columns[c]}::${Prisma.raw(COLUMN_SQL_TYPES[c])}`
+        );
 
-    return Prisma.sql`(${next.columns.id}, ${Prisma.join(values)}, ${JSON.stringify(next.state)}::jsonb, ${
-      snapshotChanged ? JSON.stringify(next.snapshot) : null
-    }::jsonb, ${snapshotChanged ? next.snapshotHash : null}::text)`;
-  });
+        return Prisma.sql`(${next.columns.id}, ${Prisma.join(values)}, ${JSON.stringify(next.state)}::jsonb, ${
+            snapshotChanged ? JSON.stringify(next.snapshot) : null
+        }::jsonb, ${snapshotChanged ? next.snapshotHash : null}::text)`;
+    });
 
-  const assignments = UPDATABLE_COLUMNS.map((c) => Prisma.sql`${quoted(c)} = v.${quoted(c)}`);
+    const assignments = UPDATABLE_COLUMNS.map(
+        (c) => Prisma.sql`${quoted(c)} = v.${quoted(c)}`
+    );
 
-  return Prisma.sql`
+    return Prisma.sql`
     UPDATE battle_participants AS p SET
       ${Prisma.join(assignments)},
       state = v.state,
@@ -79,7 +91,7 @@ function updateParticipantsSql(battleId: string, updates: ParticipantUpdate[]): 
 }
 
 function pruneSnapshotsSql(battleId: string): Prisma.Sql {
-  return Prisma.sql`
+    return Prisma.sql`
     DELETE FROM battle_snapshots
     WHERE "battleId" = ${battleId} AND seq < (
       SELECT seq FROM battle_snapshots WHERE "battleId" = ${battleId}
@@ -88,195 +100,300 @@ function pruneSnapshotsSql(battleId: string): Prisma.Sql {
   `;
 }
 
-function toStored(participants: BattleParticipant[], pending: BattleParticipant[]): StoredParticipant[] {
-  return [
-    ...participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false })),
-    ...pending.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: true })),
-  ];
+function toStored(
+    participants: BattleParticipant[],
+    pending: BattleParticipant[]
+): StoredParticipant[] {
+    return [
+        ...participants.map((p, i) =>
+            splitParticipant(p, { orderIndex: i, isPending: false })
+        ),
+        ...pending.map((p, i) =>
+            splitParticipant(p, { orderIndex: i, isPending: true })
+        ),
+    ];
 }
 
-function jsonOrNull(value: unknown): Prisma.InputJsonValue | typeof Prisma.DbNull {
-  return value === null ? Prisma.DbNull : (value as Prisma.InputJsonValue);
+function jsonOrNull(
+    value: unknown
+): Prisma.InputJsonValue | typeof Prisma.DbNull {
+    return value === null ? Prisma.DbNull : (value as Prisma.InputJsonValue);
 }
 
 export interface PreparedSave {
-  beforeStored: StoredParticipant[];
-  diff: ParticipantsDiff;
-  events: StoredBattleEvent[];
-  clearHistory: boolean;
-  delta: BattleDelta;
-  turnStartedAt: Date | null;
+    beforeStored: StoredParticipant[];
+    diff: ParticipantsDiff;
+    events: StoredBattleEvent[];
+    clearHistory: boolean;
+    delta: BattleDelta;
+    turnStartedAt: Date | null;
 }
 
 export type BattleWrite = { logLocale: Locale };
 
-export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome, logText?: (log: LogLine[]) => string): PreparedSave {
-  const { scene } = before;
+export function prepareSave(
+    before: LoadedBattle,
+    outcome: BattleMutationOutcome,
+    logText?: (log: LogLine[]) => string
+): PreparedSave {
+    const { scene } = before;
 
-  const beforeStored = toStored(before.participants, before.pending);
+    const beforeStored = toStored(before.participants, before.pending);
 
-  const diff = diffParticipants(beforeStored, toStored(outcome.participants, outcome.pending));
+    const diff = diffParticipants(
+        beforeStored,
+        toStored(outcome.participants, outcome.pending)
+    );
 
-  const clearHistory = Boolean(outcome.history && "clear" in outcome.history);
+    const clearHistory = Boolean(outcome.history && 'clear' in outcome.history);
 
-  const firstSeq = clearHistory ? 1 : scene.eventSeq + 1;
+    const firstSeq = clearHistory ? 1 : scene.eventSeq + 1;
 
-  const events: StoredBattleEvent[] = outcome.events.map((e, i) => ({
-    seq: firstSeq + i,
-    type: e.type,
-    round: e.round,
-    actorId: e.actorId ?? null,
-    targets: e.targets ?? [],
-    details: e.details ?? {},
-    hpChanges: e.hpChanges ?? [],
-    resultText: e.resultText,
-  }));
+    const events: StoredBattleEvent[] = outcome.events.map((e, i) => ({
+        seq: firstSeq + i,
+        type: e.type,
+        round: e.round,
+        actorId: e.actorId ?? null,
+        targets: e.targets ?? [],
+        details: e.details ?? {},
+        hpChanges: e.hpChanges ?? [],
+        resultText: e.resultText,
+    }));
 
-  const stored = events.map((e) => {
-    const log = (e.details as { log?: LogLine[] }).log;
+    const stored = events.map((e) => {
+        const log = (e.details as { log?: LogLine[] }).log;
 
-    if (!log) return e;
+        if (!log) return e;
 
-    const resultText = logText && BATTLE_LOG_TEXT_FALLBACK ? logText(log) : e.resultText;
+        const resultText =
+            logText && BATTLE_LOG_TEXT_FALLBACK ? logText(log) : e.resultText;
 
-    return { ...e, resultText, details: { ...e.details, log: encodeLog(log) } };
-  });
+        return {
+            ...e,
+            resultText,
+            details: { ...e.details, log: encodeLog(log) },
+        };
+    });
 
-  const nextPatched = applyScenePatch(scene, outcome.scene ?? {});
+    const nextPatched = applyScenePatch(scene, outcome.scene ?? {});
 
-  const moved = nextPatched.round !== scene.round || nextPatched.turnIndex !== scene.turnIndex || nextPatched.status !== scene.status;
+    const moved =
+        nextPatched.round !== scene.round ||
+        nextPatched.turnIndex !== scene.turnIndex ||
+        nextPatched.status !== scene.status;
 
-  const turnStartedAt = moved ? new Date() : (scene.turnStartedAt ?? null);
+    const turnStartedAt = moved ? new Date() : (scene.turnStartedAt ?? null);
 
-  const nextScene: BattleSceneState = { ...nextPatched, turnStartedAt };
+    const nextScene: BattleSceneState = { ...nextPatched, turnStartedAt };
 
-  const delta: BattleDelta = {
-    battleId: scene.id,
-    version: scene.version + 1,
-    scene: {
-      status: nextScene.status,
-      round: nextScene.round,
-      turnIndex: nextScene.turnIndex,
-      pendingMoraleCheck: nextScene.pendingMoraleCheck,
-      pendingChoice: nextScene.pendingChoice,
-      turnStartedAt,
-      ...(nextScene.sceneState && { sceneState: nextScene.sceneState }),
-    },
-    upserted: [...diff.created, ...diff.updated.map((u) => u.next)].map((p) => joinParticipant(p, scene.id)),
-    fullIds: [...diff.created, ...diff.updated.filter((u) => u.snapshotChanged).map((u) => u.next)].map((p) => p.columns.id),
-    removed: diff.removed.map((p) => p.columns.id),
-    events,
-  };
+    const delta: BattleDelta = {
+        battleId: scene.id,
+        version: scene.version + 1,
+        scene: {
+            status: nextScene.status,
+            round: nextScene.round,
+            turnIndex: nextScene.turnIndex,
+            pendingMoraleCheck: nextScene.pendingMoraleCheck,
+            pendingChoice: nextScene.pendingChoice,
+            turnStartedAt,
+            ...(nextScene.sceneState && { sceneState: nextScene.sceneState }),
+        },
+        upserted: [...diff.created, ...diff.updated.map((u) => u.next)].map(
+            (p) => joinParticipant(p, scene.id)
+        ),
+        fullIds: [
+            ...diff.created,
+            ...diff.updated.filter((u) => u.snapshotChanged).map((u) => u.next),
+        ].map((p) => p.columns.id),
+        removed: diff.removed.map((p) => p.columns.id),
+        events,
+    };
 
-  return { beforeStored, diff, events: stored, clearHistory, delta, turnStartedAt };
+    return {
+        beforeStored,
+        diff,
+        events: stored,
+        clearHistory,
+        delta,
+        turnStartedAt,
+    };
 }
 
 export async function saveBattle(
-  db: BattleDb,
-  before: LoadedBattle,
-  outcome: BattleMutationOutcome,
-  write: BattleWrite = { logLocale: DEFAULT_LOCALE },
+    db: BattleDb,
+    before: LoadedBattle,
+    outcome: BattleMutationOutcome,
+    write: BattleWrite = { logLocale: DEFAULT_LOCALE }
 ): Promise<BattleDelta> {
-  const { scene } = before;
+    const { scene } = before;
 
-  const patch = outcome.scene ?? {};
+    const patch = outcome.scene ?? {};
 
-  const t = BATTLE_LOG_TEXT_FALLBACK ? await getTranslator(write.logLocale) : undefined;
+    const t = BATTLE_LOG_TEXT_FALLBACK
+        ? await getTranslator(write.logLocale)
+        : undefined;
 
-  const { beforeStored, diff, events, clearHistory, delta, turnStartedAt } = prepareSave(
-    before,
-    outcome,
-    t && ((log) => formatBattleLog(t, { log, resultText: "" })),
-  );
+    const { beforeStored, diff, events, clearHistory, delta, turnStartedAt } =
+        prepareSave(
+            before,
+            outcome,
+            t && ((log) => formatBattleLog(t, { log, resultText: '' }))
+        );
 
-  const completing = patch.status === BattleStatus.COMPLETED && scene.status !== BattleStatus.COMPLETED;
+    const completing =
+        patch.status === BattleStatus.COMPLETED &&
+        scene.status !== BattleStatus.COMPLETED;
 
-  await db.$transaction(async (tx) => {
-    const { count } = await tx.battleScene.updateMany({
-      where: { id: scene.id, version: scene.version },
-      data: {
-        version: { increment: 1 },
-        eventSeq: clearHistory ? events.length : scene.eventSeq + events.length,
-        ...(patch.status !== undefined && { status: patch.status }),
-        ...(patch.round !== undefined && { currentRound: patch.round }),
-        ...(patch.turnIndex !== undefined && { currentTurnIndex: patch.turnIndex }),
-        ...(patch.pendingMoraleCheck !== undefined && { pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck) }),
-        ...(patch.pendingChoice !== undefined && { pendingCritChoice: jsonOrNull(patch.pendingChoice) }),
-        ...(patch.sceneState !== undefined && { systemState: patch.sceneState ? (patch.sceneState as unknown as Prisma.InputJsonValue) : Prisma.DbNull }),
-        ...(patch.startedAt !== undefined && { startedAt: patch.startedAt }),
-        ...(turnStartedAt !== (scene.turnStartedAt ?? null) && { turnStartedAt }),
-        ...(patch.completedAt !== undefined && { completedAt: patch.completedAt }),
-        ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
-        ...(patch.rules !== undefined && { rules: patch.rules as Prisma.InputJsonValue }),
-      },
+    await db.$transaction(async (tx) => {
+        const { count } = await tx.battleScene.updateMany({
+            where: { id: scene.id, version: scene.version },
+            data: {
+                version: { increment: 1 },
+                eventSeq: clearHistory
+                    ? events.length
+                    : scene.eventSeq + events.length,
+                ...(patch.status !== undefined && { status: patch.status }),
+                ...(patch.round !== undefined && { currentRound: patch.round }),
+                ...(patch.turnIndex !== undefined && {
+                    currentTurnIndex: patch.turnIndex,
+                }),
+                ...(patch.pendingMoraleCheck !== undefined && {
+                    pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck),
+                }),
+                ...(patch.pendingChoice !== undefined && {
+                    pendingCritChoice: jsonOrNull(patch.pendingChoice),
+                }),
+                ...(patch.sceneState !== undefined && {
+                    systemState: patch.sceneState
+                        ? (patch.sceneState as unknown as Prisma.InputJsonValue)
+                        : Prisma.DbNull,
+                }),
+                ...(patch.startedAt !== undefined && {
+                    startedAt: patch.startedAt,
+                }),
+                ...(turnStartedAt !== (scene.turnStartedAt ?? null) && {
+                    turnStartedAt,
+                }),
+                ...(patch.completedAt !== undefined && {
+                    completedAt: patch.completedAt,
+                }),
+                ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
+                ...(patch.rules !== undefined && {
+                    rules: patch.rules as Prisma.InputJsonValue,
+                }),
+            },
+        });
+
+        if (count === 0) throw new BattleConflictError();
+
+        if (diff.created.length > 0) {
+            await tx.battleParticipant.createMany({
+                data: diff.created.map((p) => ({
+                    ...p.columns,
+                    battleId: scene.id,
+                    snapshot: p.snapshot as Prisma.InputJsonValue,
+                    state: p.state as unknown as Prisma.InputJsonValue,
+                    snapshotHash: p.snapshotHash,
+                })),
+            });
+        }
+
+        if (diff.removed.length > 0) {
+            await tx.battleParticipant.deleteMany({
+                where: {
+                    battleId: scene.id,
+                    id: { in: diff.removed.map((p) => p.columns.id) },
+                },
+            });
+        }
+
+        if (diff.updated.length > 0)
+            await tx.$executeRaw(updateParticipantsSql(scene.id, diff.updated));
+
+        if (outcome.history && 'cancelFromSeq' in outcome.history) {
+            await tx.battleEvent.updateMany({
+                where: {
+                    battleId: scene.id,
+                    seq: { gte: outcome.history.cancelFromSeq },
+                    cancelledAt: null,
+                },
+                data: { cancelledAt: new Date() },
+            });
+            await tx.battleSnapshot.deleteMany({
+                where: {
+                    battleId: scene.id,
+                    seq: { gte: outcome.history.cancelFromSeq },
+                },
+            });
+        }
+
+        if (clearHistory) {
+            await tx.battleEvent.deleteMany({ where: { battleId: scene.id } });
+            await tx.battleSnapshot.deleteMany({
+                where: { battleId: scene.id },
+            });
+        }
+
+        if (events.length > 0) {
+            await tx.battleSnapshot.createMany({
+                data: [
+                    {
+                        battleId: scene.id,
+                        seq: events[0].seq,
+                        state: buildSnapshotState(
+                            scene,
+                            beforeStored,
+                            diff,
+                            before.meta.map
+                        ) as unknown as Prisma.InputJsonValue,
+                    },
+                ],
+            });
+            await tx.battleEvent.createMany({
+                data: events.map((e) => ({
+                    ...e,
+                    battleId: scene.id,
+                    targets: e.targets as Prisma.InputJsonValue,
+                    details: e.details as Prisma.InputJsonValue,
+                    hpChanges: e.hpChanges as Prisma.InputJsonValue,
+                })),
+            });
+        }
+
+        if (completing) {
+            await persistCharacterResources(
+                tx,
+                {
+                    campaignId: scene.campaignId,
+                    battleId: scene.id,
+                    rules: before.meta.rules,
+                },
+                outcome.participants
+            );
+            await persistBattleXp(
+                tx,
+                {
+                    campaignId: scene.campaignId,
+                    battleId: scene.id,
+                    rules: before.meta.rules,
+                    locale: write.logLocale,
+                },
+                outcome.participants,
+                outcome.events
+            );
+            await persistConsumables(
+                tx,
+                { campaignId: scene.campaignId },
+                outcome.participants
+            );
+            await persistIngredients(
+                tx,
+                { campaignId: scene.campaignId, rules: before.meta.rules },
+                outcome.participants
+            );
+            await tx.$executeRaw(pruneSnapshotsSql(scene.id));
+        }
     });
 
-    if (count === 0) throw new BattleConflictError();
-
-    if (diff.created.length > 0) {
-      await tx.battleParticipant.createMany({
-        data: diff.created.map((p) => ({
-          ...p.columns,
-          battleId: scene.id,
-          snapshot: p.snapshot as Prisma.InputJsonValue,
-          state: p.state as unknown as Prisma.InputJsonValue,
-          snapshotHash: p.snapshotHash,
-        })),
-      });
-    }
-
-    if (diff.removed.length > 0) {
-      await tx.battleParticipant.deleteMany({
-        where: { battleId: scene.id, id: { in: diff.removed.map((p) => p.columns.id) } },
-      });
-    }
-
-    if (diff.updated.length > 0) await tx.$executeRaw(updateParticipantsSql(scene.id, diff.updated));
-
-    if (outcome.history && "cancelFromSeq" in outcome.history) {
-      await tx.battleEvent.updateMany({
-        where: { battleId: scene.id, seq: { gte: outcome.history.cancelFromSeq }, cancelledAt: null },
-        data: { cancelledAt: new Date() },
-      });
-      await tx.battleSnapshot.deleteMany({
-        where: { battleId: scene.id, seq: { gte: outcome.history.cancelFromSeq } },
-      });
-    }
-
-    if (clearHistory) {
-      await tx.battleEvent.deleteMany({ where: { battleId: scene.id } });
-      await tx.battleSnapshot.deleteMany({ where: { battleId: scene.id } });
-    }
-
-    if (events.length > 0) {
-      await tx.battleSnapshot.createMany({
-        data: [
-          {
-            battleId: scene.id,
-            seq: events[0].seq,
-            state: buildSnapshotState(scene, beforeStored, diff, before.meta.map) as unknown as Prisma.InputJsonValue,
-          },
-        ],
-      });
-      await tx.battleEvent.createMany({
-        data: events.map((e) => ({
-          ...e,
-          battleId: scene.id,
-          targets: e.targets as Prisma.InputJsonValue,
-          details: e.details as Prisma.InputJsonValue,
-          hpChanges: e.hpChanges as Prisma.InputJsonValue,
-        })),
-      });
-    }
-
-    if (completing) {
-      await persistCharacterResources(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants);
-      await persistBattleXp(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules, locale: write.logLocale }, outcome.participants, outcome.events);
-      await persistConsumables(tx, { campaignId: scene.campaignId }, outcome.participants);
-      await persistIngredients(tx, { campaignId: scene.campaignId, rules: before.meta.rules }, outcome.participants);
-      await tx.$executeRaw(pruneSnapshotsSql(scene.id));
-    }
-  });
-
-  return delta;
+    return delta;
 }

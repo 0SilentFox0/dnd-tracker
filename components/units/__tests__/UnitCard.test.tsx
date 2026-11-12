@@ -1,78 +1,142 @@
 /**
  * @vitest-environment happy-dom
  */
-import type { ReactElement } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactElement } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+    cleanup,
+    fireEvent,
+    render as rtlRender,
+    screen,
+    waitFor,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockMatchMedia } from "@/components/ui/__tests__/match-media";
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { UnitCard } from "@/components/units/list/UnitCard";
-import type { Unit } from "@/lib/hooks/units";
+import { mockMatchMedia } from '@/components/ui/__tests__/match-media';
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import { UnitCard } from '@/components/units/list/UnitCard';
+import type { Unit } from '@/lib/hooks/units';
 
 const unit = {
-  id: "unit-1",
-  name: "Гоблін",
-  level: 1,
-  attacks: [],
+    id: 'unit-1',
+    name: 'Гоблін',
+    level: 1,
+    attacks: [],
 } as unknown as Unit;
 
 function render(ui: ReactElement) {
-  return rtlRender(
-    <QueryClientProvider client={new QueryClient()}>
-      <ConfirmProvider>{ui}</ConfirmProvider>
-    </QueryClientProvider>,
-  );
+    return rtlRender(
+        <QueryClientProvider client={new QueryClient()}>
+            <ConfirmProvider>{ui}</ConfirmProvider>
+        </QueryClientProvider>
+    );
 }
 
-describe("UnitCard delete", () => {
-  beforeEach(() => mockMatchMedia(false));
-  afterEach(cleanup);
+describe('UnitCard delete', () => {
+    beforeEach(() => mockMatchMedia(false));
+    afterEach(cleanup);
 
-  it("не видаляє юніт, якщо користувач скасував підтвердження", async () => {
-    const onDelete = vi.fn();
+    it('не видаляє юніт, якщо користувач скасував підтвердження', async () => {
+        const onDelete = vi.fn();
 
-    render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
-    fireEvent.click(screen.getByRole("button", { name: 'units.card.deleteLabel {"name":"Гоблін"}' }));
-    fireEvent.click(await screen.findByRole("button", { name: "common.actions.cancel" }));
+        render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'units.card.deleteLabel {"name":"Гоблін"}',
+            })
+        );
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'common.actions.cancel' })
+        );
 
-    await waitFor(() => expect(screen.queryByRole("button", { name: "common.actions.cancel" })).toBeNull());
-    await new Promise((r) => setTimeout(r, 0));
-    expect(onDelete).not.toHaveBeenCalled();
-  });
+        await waitFor(() =>
+            expect(
+                screen.queryByRole('button', { name: 'common.actions.cancel' })
+            ).toBeNull()
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(onDelete).not.toHaveBeenCalled();
+    });
 
-  it("видаляє юніт після підтвердження", async () => {
-    const onDelete = vi.fn();
+    it('видаляє юніт після підтвердження', async () => {
+        const onDelete = vi.fn();
 
-    render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
-    fireEvent.click(screen.getByRole("button", { name: 'units.card.deleteLabel {"name":"Гоблін"}' }));
-    fireEvent.click(await screen.findByRole("button", { name: "common.actions.delete" }));
+        render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'units.card.deleteLabel {"name":"Гоблін"}',
+            })
+        );
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'common.actions.delete' })
+        );
 
-    await waitFor(() => expect(onDelete).toHaveBeenCalledWith("unit-1"));
-  });
+        await waitFor(() => expect(onDelete).toHaveBeenCalledWith('unit-1'));
+    });
 });
 
-describe("UnitCard вміння", () => {
-  afterEach(cleanup);
+describe('UnitCard вміння', () => {
+    afterEach(cleanup);
 
-  it("показує опис умінь", () => {
-    render(<UnitCard unit={{ ...unit, abilitySummary: [{ when: [{ key: "summary.text", params: { value: "bleed" } }], if: [], then: [], limits: [] }] } as Unit} campaignId="c1" onDelete={vi.fn()} />);
+    it('показує опис умінь', () => {
+        render(
+            <UnitCard
+                unit={
+                    {
+                        ...unit,
+                        abilitySummary: [
+                            {
+                                when: [
+                                    {
+                                        key: 'summary.text',
+                                        params: { value: 'bleed' },
+                                    },
+                                ],
+                                if: [],
+                                then: [],
+                                limits: [],
+                            },
+                        ],
+                    } as Unit
+                }
+                campaignId="c1"
+                onDelete={vi.fn()}
+            />
+        );
 
-    expect(screen.getByText("units.card.abilities")).toBeInTheDocument();
-    expect(screen.getByText('abilityRegistry.summary.text {"value":"bleed"}')).toBeInTheDocument();
-  });
+        expect(screen.getByText('units.card.abilities')).toBeInTheDocument();
+        expect(
+            screen.getByText('abilityRegistry.summary.text {"value":"bleed"}')
+        ).toBeInTheDocument();
+    });
 });
 
-describe("UnitCard середня шкода", () => {
-  afterEach(cleanup);
+describe('UnitCard середня шкода', () => {
+    afterEach(cleanup);
 
-  it("як у бою: кубики + Сила для ближньої, + Спритність для дальньої", () => {
-    const archer = { ...unit, strength: 10, dexterity: 16, attacks: [{ name: "Лук", type: "ranged", attackBonus: 0, damageDice: "1d8", damageType: "piercing" }] } as unknown as Unit;
+    it('як у бою: кубики + Сила для ближньої, + Спритність для дальньої', () => {
+        const archer = {
+            ...unit,
+            strength: 10,
+            dexterity: 16,
+            attacks: [
+                {
+                    name: 'Лук',
+                    type: 'ranged',
+                    attackBonus: 0,
+                    damageDice: '1d8',
+                    damageType: 'piercing',
+                },
+            ],
+        } as unknown as Unit;
 
-    render(<UnitCard unit={archer} campaignId="c1" onDelete={vi.fn()} />);
+        render(<UnitCard unit={archer} campaignId="c1" onDelete={vi.fn()} />);
 
-    expect(screen.getByText(/units.card.damage \{"average":8\}/)).toBeInTheDocument();
-    expect(screen.getByText("(1d8 +3 gameTerms.abilities.dexterity.short)")).toBeInTheDocument();
-  });
+        expect(
+            screen.getByText(/units.card.damage \{"average":8\}/)
+        ).toBeInTheDocument();
+        expect(
+            screen.getByText('(1d8 +3 gameTerms.abilities.dexterity.short)')
+        ).toBeInTheDocument();
+    });
 });

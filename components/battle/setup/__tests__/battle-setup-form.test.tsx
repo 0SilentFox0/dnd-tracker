@@ -1,114 +1,210 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { battleQueryKey } from "@/lib/hooks/battles";
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import { battleQueryKey } from '@/lib/hooks/battles';
 
-const battle = { id: "b1", name: "Засідка", description: "Ніч", status: "prepared", participants: [{ id: "ch1", type: "character", side: "ally" }] };
+const battle = {
+    id: 'b1',
+    name: 'Засідка',
+    description: 'Ніч',
+    status: 'prepared',
+    participants: [{ id: 'ch1', type: 'character', side: 'ally' }],
+};
 
-const api = vi.hoisted(() => ({ createBattle: vi.fn(), updateBattle: vi.fn(), deleteBattle: vi.fn() }));
+const api = vi.hoisted(() => ({
+    createBattle: vi.fn(),
+    updateBattle: vi.fn(),
+    deleteBattle: vi.fn(),
+}));
 
 const router = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
 
-vi.mock("next/navigation", () => ({ useRouter: () => router }));
-vi.mock("next/image", () => ({ default: () => null }));
-vi.mock("@/lib/api/battles", async (orig) => {
-  const actual = await orig<Record<string, unknown>>();
+vi.mock('next/navigation', () => ({ useRouter: () => router }));
+vi.mock('next/image', () => ({ default: () => null }));
+vi.mock('@/lib/api/battles', async (orig) => {
+    const actual = await orig<Record<string, unknown>>();
 
-  return {
-    ...Object.fromEntries(Object.keys(actual).map((k) => [k, vi.fn()])),
-    ...api,
-    getBattle: vi.fn(async () => battle),
-    getBattleBalance: vi.fn(async () => ({})),
-    getBattleBalanceStats: vi.fn(async () => ({ characterStats: {}, unitStats: {} })),
-  };
+    return {
+        ...Object.fromEntries(Object.keys(actual).map((k) => [k, vi.fn()])),
+        ...api,
+        getBattle: vi.fn(async () => battle),
+        getBattleBalance: vi.fn(async () => ({})),
+        getBattleBalanceStats: vi.fn(async () => ({
+            characterStats: {},
+            unitStats: {},
+        })),
+    };
 });
-vi.mock("@/lib/api/characters", () => ({ getCharacters: vi.fn(async () => [{ id: "ch1", name: "Арвен", type: "player", controlledBy: "u1", avatar: null }]) }));
-vi.mock("@/lib/api/units", () => ({ getUnits: vi.fn(async () => []) }));
-vi.mock("@/lib/api/rules", async () => ({ getCampaignRules: vi.fn(async () => (await import("@/lib/utils/rules")).DEFAULT_RULES), updateCampaignRules: vi.fn() }));
-vi.mock("@/lib/api/races", () => ({ getRaces: vi.fn(async () => []) }));
+vi.mock('@/lib/api/characters', () => ({
+    getCharacters: vi.fn(async () => [
+        {
+            id: 'ch1',
+            name: 'Арвен',
+            type: 'player',
+            controlledBy: 'u1',
+            avatar: null,
+        },
+    ]),
+}));
+vi.mock('@/lib/api/units', () => ({ getUnits: vi.fn(async () => []) }));
+vi.mock('@/lib/api/rules', async () => ({
+    getCampaignRules: vi.fn(
+        async () => (await import('@/lib/utils/rules')).DEFAULT_RULES
+    ),
+    updateCampaignRules: vi.fn(),
+}));
+vi.mock('@/lib/api/races', () => ({ getRaces: vi.fn(async () => []) }));
 
-import { BattleSetupForm } from "@/components/battle/setup/BattleSetupForm";
+import { BattleSetupForm } from '@/components/battle/setup/BattleSetupForm';
 
 let client: QueryClient;
 
 const renderForm = (ui: ReactNode) =>
-  render(
-    <QueryClientProvider client={client}>
-      <ConfirmProvider>{ui}</ConfirmProvider>
-    </QueryClientProvider>,
-  );
+    render(
+        <QueryClientProvider client={client}>
+            <ConfirmProvider>{ui}</ConfirmProvider>
+        </QueryClientProvider>
+    );
 
 beforeEach(() => {
-  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  vi.clearAllMocks();
+    client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    vi.clearAllMocks();
 });
 
 afterEach(cleanup);
 
-describe("BattleSetupForm", () => {
-  it("create mode: empty form, autopick card, create button", async () => {
-    renderForm(<BattleSetupForm campaignId="c1" />);
+describe('BattleSetupForm', () => {
+    it('create mode: empty form, autopick card, create button', async () => {
+        renderForm(<BattleSetupForm campaignId="c1" />);
 
-    expect(((await screen.findByLabelText("battleSetup.basic.name")) as HTMLInputElement).value).toBe("");
-    expect(screen.getByRole("heading", { name: "battleSetup.form.title.create" })).toBeTruthy();
-    expect(screen.getByText("battleSetup.autopick.title")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "common.actions.delete" })).toBeNull();
-    expect(screen.getByRole("button", { name: "battleSetup.form.title.create" })).toBeTruthy();
-  });
+        expect(
+            (
+                (await screen.findByLabelText(
+                    'battleSetup.basic.name'
+                )) as HTMLInputElement
+            ).value
+        ).toBe('');
+        expect(
+            screen.getByRole('heading', {
+                name: 'battleSetup.form.title.create',
+            })
+        ).toBeTruthy();
+        expect(screen.getByText('battleSetup.autopick.title')).toBeTruthy();
+        expect(
+            screen.queryByRole('button', { name: 'common.actions.delete' })
+        ).toBeNull();
+        expect(
+            screen.getByRole('button', {
+                name: 'battleSetup.form.title.create',
+            })
+        ).toBeTruthy();
+    });
 
-  it("create mode: submitting without participants does not call the API", async () => {
-    renderForm(<BattleSetupForm campaignId="c1" />);
+    it('create mode: submitting without participants does not call the API', async () => {
+        renderForm(<BattleSetupForm campaignId="c1" />);
 
-    await screen.findByText("battleSetup.autopick.title");
-    fireEvent.change(screen.getByLabelText("battleSetup.basic.name"), { target: { value: "Нова" } });
-    fireEvent.submit(document.getElementById("battle-form") as HTMLFormElement);
+        await screen.findByText('battleSetup.autopick.title');
+        fireEvent.change(screen.getByLabelText('battleSetup.basic.name'), {
+            target: { value: 'Нова' },
+        });
+        fireEvent.submit(
+            document.getElementById('battle-form') as HTMLFormElement
+        );
 
-    expect(api.createBattle).not.toHaveBeenCalled();
-  });
+        expect(api.createBattle).not.toHaveBeenCalled();
+    });
 
-  it("edit mode: seeds from the battle once and keeps edits when it refetches", async () => {
-    renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
+    it('edit mode: seeds from the battle once and keeps edits when it refetches', async () => {
+        renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
 
-    const name = (await screen.findByLabelText("battleSetup.basic.name")) as HTMLInputElement;
+        const name = (await screen.findByLabelText(
+            'battleSetup.basic.name'
+        )) as HTMLInputElement;
 
-    expect(name.value).toBe("Засідка");
-    expect((screen.getByLabelText("battleSetup.basic.description") as HTMLTextAreaElement).value).toBe("Ніч");
-    expect(screen.getByRole("tab", { name: /battleSetup\.form\.tabs\.roster/ })).toBeTruthy();
-    expect(screen.queryByText("battleSetup.autopick.title")).toBeNull();
+        expect(name.value).toBe('Засідка');
+        expect(
+            (
+                screen.getByLabelText(
+                    'battleSetup.basic.description'
+                ) as HTMLTextAreaElement
+            ).value
+        ).toBe('Ніч');
+        expect(
+            screen.getByRole('tab', { name: /battleSetup\.form\.tabs\.roster/ })
+        ).toBeTruthy();
+        expect(screen.queryByText('battleSetup.autopick.title')).toBeNull();
 
-    fireEvent.change(name, { target: { value: "Нова" } });
-    client.setQueryData(battleQueryKey("c1", "b1"), { ...battle, name: "Серверна", updatedAt: "2026-10-05T12:00:00Z" });
-    await waitFor(() => expect(client.getQueryData<{ updatedAt?: string }>(battleQueryKey("c1", "b1"))?.updatedAt).toBeDefined());
+        fireEvent.change(name, { target: { value: 'Нова' } });
+        client.setQueryData(battleQueryKey('c1', 'b1'), {
+            ...battle,
+            name: 'Серверна',
+            updatedAt: '2026-10-05T12:00:00Z',
+        });
+        await waitFor(() =>
+            expect(
+                client.getQueryData<{ updatedAt?: string }>(
+                    battleQueryKey('c1', 'b1')
+                )?.updatedAt
+            ).toBeDefined()
+        );
 
-    expect((screen.getByLabelText("battleSetup.basic.name") as HTMLInputElement).value).toBe("Нова");
-  });
+        expect(
+            (
+                screen.getByLabelText(
+                    'battleSetup.basic.name'
+                ) as HTMLInputElement
+            ).value
+        ).toBe('Нова');
+    });
 
-  it("edit mode: does not poll the prepared battle and shows the delete button", async () => {
-    renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
+    it('edit mode: does not poll the prepared battle and shows the delete button', async () => {
+        renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
 
-    await screen.findByLabelText("battleSetup.basic.name");
+        await screen.findByLabelText('battleSetup.basic.name');
 
-    const query = client.getQueryCache().find({ queryKey: battleQueryKey("c1", "b1") });
+        const query = client
+            .getQueryCache()
+            .find({ queryKey: battleQueryKey('c1', 'b1') });
 
-    const interval = query?.observers[0]?.options.refetchInterval;
+        const interval = query?.observers[0]?.options.refetchInterval;
 
-    expect(typeof interval === "function" ? interval(query as never) : interval).toBe(false);
-    expect(screen.getByRole("button", { name: "common.actions.delete" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "battleSetup.form.saveChanges" })).toBeTruthy();
-  });
+        expect(
+            typeof interval === 'function' ? interval(query as never) : interval
+        ).toBe(false);
+        expect(
+            screen.getByRole('button', { name: 'common.actions.delete' })
+        ).toBeTruthy();
+        expect(
+            screen.getByRole('button', { name: 'battleSetup.form.saveChanges' })
+        ).toBeTruthy();
+    });
 
-  it("edit mode: saves the seeded participants", async () => {
-    api.updateBattle.mockResolvedValue(battle);
-    renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
+    it('edit mode: saves the seeded participants', async () => {
+        api.updateBattle.mockResolvedValue(battle);
+        renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
 
-    await screen.findByLabelText("battleSetup.basic.name");
-    fireEvent.submit(document.getElementById("battle-edit-form") as HTMLFormElement);
+        await screen.findByLabelText('battleSetup.basic.name');
+        fireEvent.submit(
+            document.getElementById('battle-edit-form') as HTMLFormElement
+        );
 
-    await waitFor(() => expect(api.updateBattle).toHaveBeenCalled());
-    expect(api.updateBattle.mock.calls[0]?.[2]).toEqual({ name: "Засідка", description: "Ніч", participants: battle.participants, map: null, turnTimerSeconds: null });
-  });
+        await waitFor(() => expect(api.updateBattle).toHaveBeenCalled());
+        expect(api.updateBattle.mock.calls[0]?.[2]).toEqual({
+            name: 'Засідка',
+            description: 'Ніч',
+            participants: battle.participants,
+            map: null,
+            turnTimerSeconds: null,
+        });
+    });
 });

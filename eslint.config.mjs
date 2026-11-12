@@ -1,438 +1,713 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { defineConfig } from "eslint/config";
-import { builtinRules } from "eslint/use-at-your-own-risk";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
-import typescriptParser from "@typescript-eslint/parser";
-import importPlugin from "eslint-plugin-import";
-import reactPlugin from "eslint-plugin-react";
-import reactRefreshPlugin from "eslint-plugin-react-refresh";
-import simpleImportSortPlugin from "eslint-plugin-simple-import-sort";
-import prettierConfig from "eslint-config-prettier";
-import reactHooks from "eslint-plugin-react-hooks";
-import { foreignSystemGroup, readRequires } from "./scripts/shared/system-requires.mjs";
+import { readdirSync, readFileSync } from 'node:fs';
+import { defineConfig } from 'eslint/config';
+import { builtinRules } from 'eslint/use-at-your-own-risk';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import typescriptParser from '@typescript-eslint/parser';
+import importPlugin from 'eslint-plugin-import';
+import reactPlugin from 'eslint-plugin-react';
+import reactRefreshPlugin from 'eslint-plugin-react-refresh';
+import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort';
+import prettierConfig from 'eslint-config-prettier';
+import reactHooks from 'eslint-plugin-react-hooks';
+import {
+    foreignSystemGroup,
+    readRequires,
+} from './scripts/shared/system-requires.mjs';
 
 const DIALOG_RESTRICTED_PATHS = [
-  { name: "@/components/ui/dialog", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
-  { name: "@/components/ui/alert-dialog", message: "Використайте useConfirm з @/lib/hooks/common" },
-  { name: "vaul", message: "Використайте ResponsiveDialog з @/components/ui/responsive-dialog" },
+    {
+        name: '@/components/ui/dialog',
+        message:
+            'Використайте ResponsiveDialog з @/components/ui/responsive-dialog',
+    },
+    {
+        name: '@/components/ui/alert-dialog',
+        message: 'Використайте useConfirm з @/lib/hooks/common',
+    },
+    {
+        name: 'vaul',
+        message:
+            'Використайте ResponsiveDialog з @/components/ui/responsive-dialog',
+    },
 ];
 
-const THREE_RESTRICTED_PATH = { name: "three", message: "three лише в components/battle/fx/dice/scene.ts (лінивий чанк)" };
+const THREE_RESTRICTED_PATH = {
+    name: 'three',
+    message: 'three лише в components/battle/fx/dice/scene.ts (лінивий чанк)',
+};
 
-const THREE_IMPORT_PATTERN = { group: ["three/*"], message: THREE_RESTRICTED_PATH.message };
+const THREE_IMPORT_PATTERN = {
+    group: ['three/*'],
+    message: THREE_RESTRICTED_PATH.message,
+};
 
 // next/font/google тягне шрифти з мережі під час збірки й ламає деплой
-const GOOGLE_FONT_RESTRICTED_PATH = { name: "next/font/google", message: "Шрифти локальні: додайте файл у public/fonts і @font-face в app/fonts.css" };
+const GOOGLE_FONT_RESTRICTED_PATH = {
+    name: 'next/font/google',
+    message:
+        'Шрифти локальні: додайте файл у public/fonts і @font-face в app/fonts.css',
+};
 
-const RESTRICTED_PATHS = [...DIALOG_RESTRICTED_PATHS, THREE_RESTRICTED_PATH, GOOGLE_FONT_RESTRICTED_PATH];
+const RESTRICTED_PATHS = [
+    ...DIALOG_RESTRICTED_PATHS,
+    THREE_RESTRICTED_PATH,
+    GOOGLE_FONT_RESTRICTED_PATH,
+];
 
 const API_IMPORT_PATTERN = {
-  group: ["@/lib/api", "@/lib/api/*"],
-  message: "Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.",
+    group: ['@/lib/api', '@/lib/api/*'],
+    message:
+        'Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.',
 };
 
 const APP_IMPORT_PATTERN = {
-  group: ["@/app", "@/app/*"],
-  message: "lib не залежить від app: винесіть код у lib/server/<domain> і імпортуйте його з роутів.",
+    group: ['@/app', '@/app/*'],
+    message:
+        'lib не залежить від app: винесіть код у lib/server/<domain> і імпортуйте його з роутів.',
 };
 
 const APP_API_IMPORT_PATTERN = {
-  group: ["@/app/api", "@/app/api/*"],
-  message: "Сторінки й компоненти не імпортують із app/api: винесіть код у lib/server/<domain>.",
+    group: ['@/app/api', '@/app/api/*'],
+    message:
+        'Сторінки й компоненти не імпортують із app/api: винесіть код у lib/server/<domain>.',
 };
 
 const AI_IN_ASSISTANT_PATTERN = {
-  group: ["@/lib/ai/chat", "@/lib/ai/chat/*", "@/lib/ai/tools", "@/lib/ai/tools/*", "@/lib/ai/context", "@/lib/ai/context/*", "@/lib/ai/context-http", "@/lib/ai/recovered-state", "@/lib/ai/proposals"],
-  message: "lib/ai — адаптер над lib/server/assistant, не навпаки: спільний код винесіть у lib/utils або lib/server/assistant.",
+    group: [
+        '@/lib/ai/chat',
+        '@/lib/ai/chat/*',
+        '@/lib/ai/tools',
+        '@/lib/ai/tools/*',
+        '@/lib/ai/context',
+        '@/lib/ai/context/*',
+        '@/lib/ai/context-http',
+        '@/lib/ai/recovered-state',
+        '@/lib/ai/proposals',
+    ],
+    message:
+        'lib/ai — адаптер над lib/server/assistant, не навпаки: спільний код винесіть у lib/utils або lib/server/assistant.',
 };
 
-const DICE_SCENE_FILE = "components/battle/fx/dice/scene.ts";
+const DICE_SCENE_FILE = 'components/battle/fx/dice/scene.ts';
 
 const MODE_IMPORT_PATTERN = {
-  group: ["@/lib/utils/battle/modes/maze*", "@/lib/hooks/battle/modes/maze*", "@/components/battle/modes/maze*"],
-  message: "Режим карти — лише через реєстр (@/lib/utils/battle/modes, @/components/battle/modes).",
+    group: [
+        '@/lib/utils/battle/modes/maze*',
+        '@/lib/hooks/battle/modes/maze*',
+        '@/components/battle/modes/maze*',
+    ],
+    message:
+        'Режим карти — лише через реєстр (@/lib/utils/battle/modes, @/components/battle/modes).',
 };
 
-const SYSTEM_IDS = readdirSync(new URL("./systems", import.meta.url), { withFileTypes: true })
-  .filter((d) => d.isDirectory())
-  .map((d) => d.name);
+const SYSTEM_IDS = readdirSync(new URL('./systems', import.meta.url), {
+    withFileTypes: true,
+})
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
 
 const SYSTEM_ROOTS = [
-  "lib/utils/rules/systems/meta.ts",
-  "lib/utils/rules/systems/registry.ts",
-  "lib/utils/rules/systems/sections.ts",
-  "components/systems/registry.ts",
-  "lib/server/systems/registry.ts",
-  "lib/utils/abilities/schema/system-effects.ts",
-  "lib/utils/abilities/registry/effects/system-rows.ts",
-  "lib/utils/abilities/schema/system-flags.ts",
-  "lib/utils/abilities/registry/effects/system-flag-rows.ts",
-  "lib/utils/abilities/schema/module-effects.ts",
-  "lib/utils/abilities/registry/effects/module-effect-rows.ts",
-  "lib/utils/abilities/registry/system-variables.ts",
-  "lib/utils/abilities/templates/system-recipes.ts",
-  "lib/utils/abilities/build/system-sources.ts",
-  "scripts/templates/systems/index.ts",
-  "scripts/templates/systems/adapters.ts",
+    'lib/utils/rules/systems/meta.ts',
+    'lib/utils/rules/systems/registry.ts',
+    'lib/utils/rules/systems/sections.ts',
+    'components/systems/registry.ts',
+    'lib/server/systems/registry.ts',
+    'lib/utils/abilities/schema/system-effects.ts',
+    'lib/utils/abilities/registry/effects/system-rows.ts',
+    'lib/utils/abilities/schema/system-flags.ts',
+    'lib/utils/abilities/registry/effects/system-flag-rows.ts',
+    'lib/utils/abilities/schema/module-effects.ts',
+    'lib/utils/abilities/registry/effects/module-effect-rows.ts',
+    'lib/utils/abilities/registry/system-variables.ts',
+    'lib/utils/abilities/templates/system-recipes.ts',
+    'lib/utils/abilities/build/system-sources.ts',
+    'scripts/templates/systems/index.ts',
+    'scripts/templates/systems/adapters.ts',
 ];
 
-const SYSTEM_IMPORT_EXEMPT = JSON.parse(readFileSync(new URL("./system-imports-exempt.json", import.meta.url), "utf8")).map((e) => e.file.replace(/[[\]]/g, "\\$&"));
+const SYSTEM_IMPORT_EXEMPT = JSON.parse(
+    readFileSync(
+        new URL('./system-imports-exempt.json', import.meta.url),
+        'utf8'
+    )
+).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
 
-const SYSTEM_ZONE_PATTERN = { group: ["@/systems/*", "@/systems/**"], message: "Система — лише через реєстри (D38): корені SYSTEM_ROOTS або system-imports-exempt.json" };
+const SYSTEM_ZONE_PATTERN = {
+    group: ['@/systems/*', '@/systems/**'],
+    message:
+        'Система — лише через реєстри (D38): корені SYSTEM_ROOTS або system-imports-exempt.json',
+};
 
-const SYSTEM_OWNED_FILES = ["lib/utils/rules/systems/**", "lib/hooks/systems/**", "components/systems/**", "systems/**"];
+const SYSTEM_OWNED_FILES = [
+    'lib/utils/rules/systems/**',
+    'lib/hooks/systems/**',
+    'components/systems/**',
+    'systems/**',
+];
 
-const SYSTEMS_DIR = new URL("./systems/", import.meta.url);
+const SYSTEMS_DIR = new URL('./systems/', import.meta.url);
 
 const requiresOf = (id) => readRequires(SYSTEMS_DIR, id);
 
 const SYSTEM_SELF_PATTERNS = (id) => [
-  ...(foreignSystemGroup(id, SYSTEM_IDS, requiresOf).length > 0 ? [{ group: foreignSystemGroup(id, SYSTEM_IDS, requiresOf), message: "Система не імпортує іншу систему (крім модулів зі своїх requires)." }] : []),
-  { group: ["@/app", "@/app/*", "@/scripts", "@/scripts/*"], message: "Система не залежить від app і scripts." },
-  MODE_IMPORT_PATTERN,
-  THREE_IMPORT_PATTERN,
+    ...(foreignSystemGroup(id, SYSTEM_IDS, requiresOf).length > 0
+        ? [
+              {
+                  group: foreignSystemGroup(id, SYSTEM_IDS, requiresOf),
+                  message:
+                      'Система не імпортує іншу систему (крім модулів зі своїх requires).',
+              },
+          ]
+        : []),
+    {
+        group: ['@/app', '@/app/*', '@/scripts', '@/scripts/*'],
+        message: 'Система не залежить від app і scripts.',
+    },
+    MODE_IMPORT_PATTERN,
+    THREE_IMPORT_PATTERN,
 ];
 
-const SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*"], message: "rules/** — чиста логіка без сервера." };
+const SERVER_IMPORT_PATTERN = {
+    group: ['@/lib/server', '@/lib/server/*'],
+    message: 'rules/** — чиста логіка без сервера.',
+};
 
-const SYSTEM_SERVER_IMPORT_PATTERN = { group: ["@/lib/server", "@/lib/server/*", "@/systems/*/server", "@/systems/*/server/*"], message: "ui/** і hooks/** не імпортують сервер." };
+const SYSTEM_SERVER_IMPORT_PATTERN = {
+    group: [
+        '@/lib/server',
+        '@/lib/server/*',
+        '@/systems/*/server',
+        '@/systems/*/server/*',
+    ],
+    message: 'ui/** і hooks/** не імпортують сервер.',
+};
 
-const API_UTILS_IMPORT_PATTERN = { group: ["@/lib/utils/api/*", "!@/lib/utils/api/content-error"], message: "rules/** — лише @/lib/utils/api/content-error з утиліт API." };
+const API_UTILS_IMPORT_PATTERN = {
+    group: ['@/lib/utils/api/*', '!@/lib/utils/api/content-error'],
+    message: 'rules/** — лише @/lib/utils/api/content-error з утиліт API.',
+};
 
-const SYSTEM_API_IMPORT_PATTERN = { group: ["@/systems/*/api", "@/systems/*/api/*"], allowTypeImports: true, message: "ui/** не ходить в API — використайте хук із systems/<id>/hooks." };
+const SYSTEM_API_IMPORT_PATTERN = {
+    group: ['@/systems/*/api', '@/systems/*/api/*'],
+    allowTypeImports: true,
+    message: 'ui/** не ходить в API — використайте хук із systems/<id>/hooks.',
+};
 
 const SYSTEM_LAYERS = (id) => {
-  const self = SYSTEM_SELF_PATTERNS(id);
+    const self = SYSTEM_SELF_PATTERNS(id);
 
-  const layer = (dir, paths, patterns, extraIgnores = []) => ({
-    files: [`systems/${id}/${dir}/**/*.{ts,tsx}`],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...extraIgnores],
-    rules: { "no-restricted-imports": ["error", { paths, patterns: [...self, ...patterns] }] },
-  });
+    const layer = (dir, paths, patterns, extraIgnores = []) => ({
+        files: [`systems/${id}/${dir}/**/*.{ts,tsx}`],
+        ignores: ['**/__tests__/**', '**/*.test.{ts,tsx}', ...extraIgnores],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                { paths, patterns: [...self, ...patterns] },
+            ],
+        },
+    });
 
-  return [
-    layer("*", RESTRICTED_PATHS, []),
-    layer("rules", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SERVER_IMPORT_PATTERN, API_UTILS_IMPORT_PATTERN]),
-    layer("ui", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, SYSTEM_API_IMPORT_PATTERN, SYSTEM_SERVER_IMPORT_PATTERN]),
-    layer("hooks", [...RESTRICTED_PATHS, DB_IMPORT_PATH], [SYSTEM_SERVER_IMPORT_PATTERN]),
-    layer("api", RESTRICTED_PATHS, []),
-    layer("server", RESTRICTED_PATHS, []),
-  ].map((block, i) => (i === 0 ? { ...block, files: [`systems/${id}/**/*.{ts,tsx}`] } : block));
+    return [
+        layer('*', RESTRICTED_PATHS, []),
+        layer(
+            'rules',
+            [...RESTRICTED_PATHS, DB_IMPORT_PATH],
+            [SERVER_IMPORT_PATTERN, API_UTILS_IMPORT_PATTERN]
+        ),
+        layer(
+            'ui',
+            [...RESTRICTED_PATHS, DB_IMPORT_PATH],
+            [
+                API_IMPORT_PATTERN,
+                APP_API_IMPORT_PATTERN,
+                SYSTEM_API_IMPORT_PATTERN,
+                SYSTEM_SERVER_IMPORT_PATTERN,
+            ]
+        ),
+        layer(
+            'hooks',
+            [...RESTRICTED_PATHS, DB_IMPORT_PATH],
+            [SYSTEM_SERVER_IMPORT_PATTERN]
+        ),
+        layer('api', RESTRICTED_PATHS, []),
+        layer('server', RESTRICTED_PATHS, []),
+    ].map((block, i) =>
+        i === 0 ? { ...block, files: [`systems/${id}/**/*.{ts,tsx}`] } : block
+    );
 };
 
 const MODE_OWNED_FILES = [
-  "lib/utils/battle/modes/**",
-  "lib/hooks/battle/modes/**",
-  "components/battle/modes/**",
-  "lib/server/battles/mutations/maze/**",
-  "lib/server/battles/mutations/maze-mark/**",
-  "lib/server/battles/mutations/move/**",
+    'lib/utils/battle/modes/**',
+    'lib/hooks/battle/modes/**',
+    'components/battle/modes/**',
+    'lib/server/battles/mutations/maze/**',
+    'lib/server/battles/mutations/maze-mark/**',
+    'lib/server/battles/mutations/move/**',
 ];
 
 const DB_IMPORT_PATH = {
-  name: "@/lib/db",
-  message: "lib/utils — чиста логіка без БД: завантаження в lib/server/<domain> (ratchet-список DB_IN_UTILS_EXEMPT лише скорочується).",
+    name: '@/lib/db',
+    message:
+        'lib/utils — чиста логіка без БД: завантаження в lib/server/<domain> (ratchet-список DB_IN_UTILS_EXEMPT лише скорочується).',
 };
 
-const DB_IN_UTILS_EXEMPT = ["lib/utils/api/api-auth.ts"];
+const DB_IN_UTILS_EXEMPT = ['lib/utils/api/api-auth.ts'];
 
-const I18N_EXEMPT = JSON.parse(readFileSync(new URL("./i18n-exempt.json", import.meta.url), "utf8")).map((e) => e.glob);
+const I18N_EXEMPT = JSON.parse(
+    readFileSync(new URL('./i18n-exempt.json', import.meta.url), 'utf8')
+).map((e) => e.glob);
 
-const CYRILLIC_MESSAGE = "Текст — у messages/*.json через t()";
+const CYRILLIC_MESSAGE = 'Текст — у messages/*.json через t()';
 
-const CYRILLIC_SELECTORS = ["Literal[value=/[\\u0400-\\u04FF]/]", "JSXText[value=/[\\u0400-\\u04FF]/]", "TemplateElement[value.raw=/[\\u0400-\\u04FF]/]"];
+const CYRILLIC_SELECTORS = [
+    'Literal[value=/[\\u0400-\\u04FF]/]',
+    'JSXText[value=/[\\u0400-\\u04FF]/]',
+    'TemplateElement[value.raw=/[\\u0400-\\u04FF]/]',
+];
 
 const eslintConfig = defineConfig([
-  { ignores: [".superpowers/**"] },
-  ...nextVitals,
-  ...nextTs,
-  {
-    ignores: [".claude/**", "**/dist/**", "**/*.gen.ts", ".next/**", "out/**", "build/**", "next-env.d.ts"],
-    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      parser: typescriptParser,
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
+    { ignores: ['.superpowers/**'] },
+    ...nextVitals,
+    ...nextTs,
+    {
+        ignores: [
+            '.claude/**',
+            '**/dist/**',
+            '**/*.gen.ts',
+            '.next/**',
+            'out/**',
+            'build/**',
+            'next-env.d.ts',
+        ],
+        files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            parser: typescriptParser,
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
         },
-      },
-    },
-    plugins: {
-      import: importPlugin,
-      react: reactPlugin,
-      "react-hooks": reactHooks,
-      "react-refresh": reactRefreshPlugin,
-      "simple-import-sort": simpleImportSortPlugin,
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
-      "import/resolver": {
-        typescript: {
-          alwaysTryTypes: true,
+        plugins: {
+            import: importPlugin,
+            react: reactPlugin,
+            'react-hooks': reactHooks,
+            'react-refresh': reactRefreshPlugin,
+            'simple-import-sort': simpleImportSortPlugin,
         },
-      },
-    },
-    rules: {
-      ...reactPlugin.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
-      ...prettierConfig.rules,
-      "react-hooks/exhaustive-deps": "error",
-      "react/prop-types": "off",
-      "react/react-in-jsx-scope": "off",
-      "react-refresh/only-export-components": "off",
-      "@typescript-eslint/no-non-null-assertion": "warn",
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-empty-object-type": [
-        "error",
-        {
-          allowInterfaces: "always",
+        settings: {
+            react: {
+                version: 'detect',
+            },
+            'import/resolver': {
+                typescript: {
+                    alwaysTryTypes: true,
+                },
+            },
         },
-      ],
-      "@typescript-eslint/no-namespace": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", ignoreRestSiblings: true },
-      ],
-      "@typescript-eslint/no-restricted-types": "warn",
-      "simple-import-sort/imports": [
-        "error",
-        {
-          groups: [
-            [
-              "^react", // Packages. `react` related packages come first.
-              "^next", // Next.js imports
-              "^@?\\w", // Things that start with a letter or `@` followed by a letter.
+        rules: {
+            ...reactPlugin.configs.recommended.rules,
+            ...reactHooks.configs.recommended.rules,
+            ...prettierConfig.rules,
+            'react-hooks/exhaustive-deps': 'error',
+            'react/prop-types': 'off',
+            'react/react-in-jsx-scope': 'off',
+            'react-refresh/only-export-components': 'off',
+            '@typescript-eslint/no-non-null-assertion': 'warn',
+            '@typescript-eslint/no-explicit-any': 'warn',
+            '@typescript-eslint/no-empty-object-type': [
+                'error',
+                {
+                    allowInterfaces: 'always',
+                },
             ],
-            [
-              // Absolute imports and Relative imports.
-              "^(utils|services|hooks|types|pages|gql|components|layouts|styles|app-constants|lib|types)(/.*|$)",
-              "^\\.\\.(?!/?$)", // Parent imports.
-              "^\\.\\./?$", // Same-folder imports.
-              "^\\./(?=.*/)(?!/?$)",
-              "^\\.(?!/?$)",
-              "^\\./?$",
-              "^\\.",
+            '@typescript-eslint/no-namespace': 'off',
+            '@typescript-eslint/no-unused-vars': [
+                'warn',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    ignoreRestSiblings: true,
+                },
             ],
-            // CSS and assets imports
-            ["^.+\\.gql$", "^.+\\.svg$", "^.+\\.s?css$", "^[^.]"],
-          ],
+            '@typescript-eslint/no-restricted-types': 'warn',
+            'simple-import-sort/imports': [
+                'error',
+                {
+                    groups: [
+                        [
+                            '^react', // Packages. `react` related packages come first.
+                            '^next', // Next.js imports
+                            '^@?\\w', // Things that start with a letter or `@` followed by a letter.
+                        ],
+                        [
+                            // Absolute imports and Relative imports.
+                            '^(utils|services|hooks|types|pages|gql|components|layouts|styles|app-constants|lib|types)(/.*|$)',
+                            '^\\.\\.(?!/?$)', // Parent imports.
+                            '^\\.\\./?$', // Same-folder imports.
+                            '^\\./(?=.*/)(?!/?$)',
+                            '^\\.(?!/?$)',
+                            '^\\./?$',
+                            '^\\.',
+                        ],
+                        // CSS and assets imports
+                        ['^.+\\.gql$', '^.+\\.svg$', '^.+\\.s?css$', '^[^.]'],
+                    ],
+                },
+            ],
+            'simple-import-sort/exports': 'error',
+            'block-spacing': 'error',
+            'no-console': [
+                'warn',
+                {
+                    allow: ['info', 'warn', 'error'],
+                },
+            ],
+            'padding-line-between-statements': [
+                'error',
+                {
+                    blankLine: 'always',
+                    prev: [
+                        'const',
+                        'let',
+                        'var',
+                        'if',
+                        'class',
+                        'function',
+                        'block',
+                    ],
+                    next: ['*'],
+                },
+                {
+                    blankLine: 'always',
+                    prev: ['*'],
+                    next: [
+                        'const',
+                        'let',
+                        'var',
+                        'if',
+                        'class',
+                        'function',
+                        'block',
+                        'return',
+                    ],
+                },
+            ],
+            'import/no-cycle': [2, { maxDepth: 6 }],
+            'react/jsx-key': 'warn',
         },
-      ],
-      "simple-import-sort/exports": "error",
-      "block-spacing": "error",
-      "no-console": [
-        "warn",
-        {
-          allow: ["info", "warn", "error"],
+    },
+    {
+        files: ['*.gen.ts'],
+        rules: {},
+    },
+    {
+        files: ['scripts/**/*.ts', 'app/api/**/*.ts'],
+        rules: {
+            'no-console': 'off',
         },
-      ],
-      "padding-line-between-statements": [
-        "error",
-        {
-          blankLine: "always",
-          prev: ["const", "let", "var", "if", "class", "function", "block"],
-          next: ["*"],
+    },
+    {
+        files: ['**/*.{ts,tsx,js,jsx}'],
+        ignores: [DICE_SCENE_FILE],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: [THREE_RESTRICTED_PATH],
+                    patterns: [THREE_IMPORT_PATTERN],
+                },
+            ],
         },
-        {
-          blankLine: "always",
-          prev: ["*"],
-          next: ["const", "let", "var", "if", "class", "function", "block", "return"],
+    },
+    {
+        files: [
+            'app/**/*.{ts,tsx}',
+            'components/**/*.{ts,tsx}',
+            'lib/**/*.{ts,tsx}',
+            'systems/**/*.{ts,tsx}',
+        ],
+        ignores: ['components/ui/**'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+                },
+            ],
+            'no-restricted-globals': [
+                'error',
+                {
+                    name: 'confirm',
+                    message: 'Використайте useConfirm з @/lib/hooks/common',
+                },
+                {
+                    name: 'alert',
+                    message: 'Використайте useNotify з @/lib/hooks/common',
+                },
+            ],
+            'no-restricted-properties': [
+                'error',
+                {
+                    object: 'window',
+                    property: 'confirm',
+                    message: 'Використайте useConfirm з @/lib/hooks/common',
+                },
+                {
+                    object: 'window',
+                    property: 'alert',
+                    message: 'Використайте useNotify з @/lib/hooks/common',
+                },
+            ],
         },
-      ],
-      "import/no-cycle": [2, { maxDepth: 6 }],
-      "react/jsx-key": "warn",
     },
-  },
-  {
-    files: ["*.gen.ts"],
-    rules: {},
-  },
-  {
-    files: ["scripts/**/*.ts", "app/api/**/*.ts"],
-    rules: {
-      "no-console": "off",
-    },
-  },
-  {
-    files: ["**/*.{ts,tsx,js,jsx}"],
-    ignores: [DICE_SCENE_FILE],
-    rules: {
-      "no-restricted-imports": ["error", { paths: [THREE_RESTRICTED_PATH], patterns: [THREE_IMPORT_PATTERN] }],
-    },
-  },
-  {
-    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "systems/**/*.{ts,tsx}"],
-    ignores: ["components/ui/**"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: RESTRICTED_PATHS,
-          patterns: [MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+    {
+        files: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+        ignores: ['app/api/**', 'components/ui/**', '**/__tests__/**'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [
+                        API_IMPORT_PATTERN,
+                        APP_API_IMPORT_PATTERN,
+                        MODE_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                    ],
+                },
+            ],
         },
-      ],
-      "no-restricted-globals": [
-        "error",
-        { name: "confirm", message: "Використайте useConfirm з @/lib/hooks/common" },
-        { name: "alert", message: "Використайте useNotify з @/lib/hooks/common" },
-      ],
-      "no-restricted-properties": [
-        "error",
-        { object: "window", property: "confirm", message: "Використайте useConfirm з @/lib/hooks/common" },
-        { object: "window", property: "alert", message: "Використайте useNotify з @/lib/hooks/common" },
-      ],
     },
-  },
-  {
-    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
-    ignores: ["app/api/**", "components/ui/**", "**/__tests__/**"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+    {
+        files: ['lib/**/*.{ts,tsx}'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [
+                        APP_IMPORT_PATTERN,
+                        MODE_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                    ],
+                },
+            ],
         },
-      ],
     },
-  },
-  {
-    files: ["lib/**/*.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+    {
+        files: ['lib/utils/**/*.{ts,tsx}'],
+        ignores: [
+            '**/__tests__/**',
+            '**/*.test.{ts,tsx}',
+            ...DB_IN_UTILS_EXEMPT,
+            ...MODE_OWNED_FILES.filter((g) => g.startsWith('lib/utils')),
+            ...SYSTEM_OWNED_FILES.filter((g) => g.startsWith('lib/utils')),
+        ],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
+                    patterns: [
+                        APP_IMPORT_PATTERN,
+                        MODE_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                    ],
+                },
+            ],
         },
-      ],
     },
-  },
-  {
-    files: ["lib/utils/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...DB_IN_UTILS_EXEMPT, ...MODE_OWNED_FILES.filter((g) => g.startsWith("lib/utils")), ...SYSTEM_OWNED_FILES.filter((g) => g.startsWith("lib/utils"))],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+    {
+        files: ['lib/server/assistant/**/*.{ts,tsx}'],
+        ignores: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [
+                        APP_IMPORT_PATTERN,
+                        MODE_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                        AI_IN_ASSISTANT_PATTERN,
+                    ],
+                },
+            ],
         },
-      ],
     },
-  },
-  {
-    files: ["lib/server/assistant/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: RESTRICTED_PATHS,
-          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN, AI_IN_ASSISTANT_PATTERN],
+    {
+        files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}'],
+        ignores: ['components/ui/**'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                { paths: RESTRICTED_PATHS, patterns: [THREE_IMPORT_PATTERN] },
+            ],
         },
-      ],
     },
-  },
-  {
-    files: ["**/__tests__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}"],
-    ignores: ["components/ui/**"],
-    rules: {
-      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [THREE_IMPORT_PATTERN] }],
-    },
-  },
-  {
-    files: MODE_OWNED_FILES.filter((g) => g.startsWith("lib/")).map((glob) => `${glob}/*.{ts,tsx}`),
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [APP_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
-    },
-  },
-  {
-    files: ["lib/utils/battle/modes/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": ["error", { paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH], patterns: [APP_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
-    },
-  },
-  {
-    files: SYSTEM_OWNED_FILES.filter((g) => g.startsWith("lib/")).map((glob) => `${glob}/*.{ts,tsx}`),
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
-    },
-  },
-  {
-    files: ["lib/utils/rules/systems/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
-    rules: {
-      "no-restricted-imports": ["error", { paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH], patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
-    },
-  },
-  {
-    files: ["components/systems/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+    {
+        files: MODE_OWNED_FILES.filter((g) => g.startsWith('lib/')).map(
+            (glob) => `${glob}/*.{ts,tsx}`
+        ),
+        ignores: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [APP_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+                },
+            ],
         },
-      ],
     },
-  },
-  ...SYSTEM_IDS.flatMap(SYSTEM_LAYERS),
-  {
-    files: ["components/battle/modes/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+    {
+        files: ['lib/utils/battle/modes/**/*.{ts,tsx}'],
+        ignores: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
+                    patterns: [APP_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+                },
+            ],
         },
-      ],
     },
-  },
-  {
-    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "types/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...SYSTEM_ROOTS, ...SYSTEM_IMPORT_EXEMPT, "scripts/templates/systems/*/**", "scripts/assets/grim-icons/**", "scripts/db/lib/legacy-rules-parse/**"],
-    plugins: { systems: { rules: { zone: builtinRules.get("no-restricted-imports") } } },
-    rules: { "systems/zone": ["error", { patterns: [SYSTEM_ZONE_PATTERN] }] },
-  },
-  {
-    files: [DICE_SCENE_FILE],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: DIALOG_RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
+    {
+        files: SYSTEM_OWNED_FILES.filter((g) => g.startsWith('lib/')).map(
+            (glob) => `${glob}/*.{ts,tsx}`
+        ),
+        ignores: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [
+                        APP_IMPORT_PATTERN,
+                        MODE_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                    ],
+                },
+            ],
         },
-      ],
     },
-  },
-  {
-    files: ["**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", ...I18N_EXEMPT],
-    rules: {
-      "no-restricted-syntax": ["error", ...CYRILLIC_SELECTORS.map((selector) => ({ selector, message: CYRILLIC_MESSAGE }))],
+    {
+        files: ['lib/utils/rules/systems/**/*.{ts,tsx}'],
+        ignores: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
+                    patterns: [
+                        APP_IMPORT_PATTERN,
+                        MODE_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                    ],
+                },
+            ],
+        },
     },
-  },
-  {
-    files: ["**/*.tsx"],
-    rules: {
-      "react/no-unescaped-entities": "warn",
-      "react-hooks/static-components": "off", // Вимикаємо для компонентів, які повертають посилання на існуючі компоненти
+    {
+        files: ['components/systems/**/*.{ts,tsx}'],
+        ignores: ['**/__tests__/**'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [
+                        API_IMPORT_PATTERN,
+                        APP_API_IMPORT_PATTERN,
+                        MODE_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                    ],
+                },
+            ],
+        },
     },
-  },
+    ...SYSTEM_IDS.flatMap(SYSTEM_LAYERS),
+    {
+        files: ['components/battle/modes/**/*.{ts,tsx}'],
+        ignores: ['**/__tests__/**'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: RESTRICTED_PATHS,
+                    patterns: [
+                        API_IMPORT_PATTERN,
+                        APP_API_IMPORT_PATTERN,
+                        THREE_IMPORT_PATTERN,
+                    ],
+                },
+            ],
+        },
+    },
+    {
+        files: [
+            'app/**/*.{ts,tsx}',
+            'components/**/*.{ts,tsx}',
+            'lib/**/*.{ts,tsx}',
+            'types/**/*.{ts,tsx}',
+            'scripts/**/*.{ts,tsx}',
+        ],
+        ignores: [
+            '**/__tests__/**',
+            '**/*.test.{ts,tsx}',
+            ...SYSTEM_ROOTS,
+            ...SYSTEM_IMPORT_EXEMPT,
+            'scripts/templates/systems/*/**',
+            'scripts/assets/grim-icons/**',
+            'scripts/db/lib/legacy-rules-parse/**',
+        ],
+        plugins: {
+            systems: {
+                rules: { zone: builtinRules.get('no-restricted-imports') },
+            },
+        },
+        rules: {
+            'systems/zone': ['error', { patterns: [SYSTEM_ZONE_PATTERN] }],
+        },
+    },
+    {
+        files: [DICE_SCENE_FILE],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: DIALOG_RESTRICTED_PATHS,
+                    patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN],
+                },
+            ],
+        },
+    },
+    {
+        files: ['**/*.{ts,tsx}'],
+        ignores: ['**/__tests__/**', ...I18N_EXEMPT],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                ...CYRILLIC_SELECTORS.map((selector) => ({
+                    selector,
+                    message: CYRILLIC_MESSAGE,
+                })),
+            ],
+        },
+    },
+    {
+        files: ['**/*.tsx'],
+        rules: {
+            'react/no-unescaped-entities': 'warn',
+            'react-hooks/static-components': 'off', // Вимикаємо для компонентів, які повертають посилання на існуючі компоненти
+        },
+    },
 ]);
 
 export default eslintConfig;

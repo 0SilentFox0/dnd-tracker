@@ -1,4 +1,5 @@
-import { bonus } from "../characteristics/derive";
-import type { Characteristics } from "../characteristics/keys";
+import { bonus } from '../characteristics/derive';
+import type { Characteristics } from '../characteristics/keys';
 
-export const corruptionThreshold = (c: Characteristics) => bonus(c, "t") + bonus(c, "wp");
+export const corruptionThreshold = (c: Characteristics) =>
+    bonus(c, 't') + bonus(c, 'wp');

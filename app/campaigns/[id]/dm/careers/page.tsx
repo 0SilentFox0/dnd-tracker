@@ -1,19 +1,29 @@
-import { notFound } from "next/navigation";
+import { notFound } from 'next/navigation';
 
-import { DMCareersPageClient } from "./careers-client";
+import { DMCareersPageClient } from './careers-client';
 
-import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
-import { parseRules } from "@/lib/utils/rules/schema";
-import { metaOf } from "@/lib/utils/rules/systems/meta";
+import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
+import { metaOf } from '@/lib/utils/rules/systems/meta';
 
-export default async function DMCareersPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function DMCareersPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-  const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
-  const systemKey = parseRules(campaign.rules).system.key;
+    const systemKey = parseRules(campaign.rules).system.key;
 
-  if (!metaOf(systemKey)?.dmSections?.includes("careers")) notFound();
+    if (!metaOf(systemKey)?.dmSections?.includes('careers')) notFound();
 
-  return <DMCareersPageClient campaignId={id} systemKey={systemKey} canEdit={!isDemo} />;
+    return (
+        <DMCareersPageClient
+            campaignId={id}
+            systemKey={systemKey}
+            canEdit={!isDemo}
+        />
+    );
 }

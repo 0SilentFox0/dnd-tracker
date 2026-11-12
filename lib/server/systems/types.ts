@@ -1,80 +1,123 @@
-import type { ZodType } from "zod";
+import type { ZodType } from 'zod';
 
-import type { SpellRequestData } from "@/lib/schemas/battles";
-import type { AttackBody } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import type { CharacterOperation } from "@/lib/server/characters/operation-runner";
-import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
-import type { getCharacterStats, UnitStats } from "@/lib/utils/battle/balance";
-import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
-import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { branchLevels } from "@/lib/utils/skills/progression";
-import type { BattleParticipant, EquippedArtifact } from "@/types/battle";
-import type { SetProgress } from "@/types/characters";
+import type { SpellRequestData } from '@/lib/schemas/battles';
+import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
+import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
+import type { ArtifactSetRowLike } from '@/lib/utils/abilities/build/collect';
+import type { getCharacterStats, UnitStats } from '@/lib/utils/battle/balance';
+import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { branchLevels } from '@/lib/utils/skills/progression';
+import type { BattleParticipant, EquippedArtifact } from '@/types/battle';
+import type { SetProgress } from '@/types/characters';
 
 export interface SystemSchemas {
-  characteristics?: ZodType;
-  unitCharacteristics?: ZodType;
-  systemStats?: ZodType;
-  /** Whole attack body in, the system's own slot out (or undefined); the legacy request shape is mapped here */
-  attackInput?: ZodType<SystemSlot | undefined>;
-  castInput?: ZodType<SystemSlot | undefined>;
+    characteristics?: ZodType;
+    unitCharacteristics?: ZodType;
+    systemStats?: ZodType;
+    /** Whole attack body in, the system's own slot out (or undefined); the legacy request shape is mapped here */
+    attackInput?: ZodType<SystemSlot | undefined>;
+    castInput?: ZodType<SystemSlot | undefined>;
 }
 
 export interface SystemOperation {
-  operation: CharacterOperation;
-  input: ZodType;
+    operation: CharacterOperation;
+    input: ZodType;
 }
 
-export type SystemToolNote = "get_party" | "read_character" | "get_battle_state";
+export type SystemToolNote =
+    | 'get_party'
+    | 'read_character'
+    | 'get_battle_state';
 
 export interface SystemAi {
-  promptLine?: string;
-  toolNotes?: Partial<Record<SystemToolNote, string>>;
-  heroSelect?: Record<string, true>;
-  party?(campaignId: string, query: Record<string, unknown>): Promise<Record<string, unknown>[]>;
-  hero?(campaignId: string, row: Record<string, unknown>): Promise<Record<string, unknown>>;
-  participantView?(p: BattleParticipant): Record<string, unknown>;
-  unitView?(row: { characteristics?: unknown }): Record<string, unknown>;
+    promptLine?: string;
+    toolNotes?: Partial<Record<SystemToolNote, string>>;
+    heroSelect?: Record<string, true>;
+    party?(
+        campaignId: string,
+        query: Record<string, unknown>
+    ): Promise<Record<string, unknown>[]>;
+    hero?(
+        campaignId: string,
+        row: Record<string, unknown>
+    ): Promise<Record<string, unknown>>;
+    participantView?(p: BattleParticipant): Record<string, unknown>;
+    unitView?(row: { characteristics?: unknown }): Record<string, unknown>;
 }
 
 export interface SystemBalance {
-  /** Hero numbers for the setup UI and the fair-scaling pass, from the participant built out of the character */
-  heroPower(input: { built: BattleParticipant; character: { race: string; skillTreeProgress?: unknown }; campaignContext: CampaignSpellContext | undefined }): { levels: ReturnType<typeof branchLevels>; stats: ReturnType<typeof getCharacterStats> };
-  /** Library unit numbers; `base` is the d20 reading of the row, `built` the participant the unit would become */
-  unitStats(base: UnitStats, built: BattleParticipant): UnitStats;
-  /** Library units are built with the campaign rules before they are read */
-  readsBuiltRules: boolean;
+    /** Hero numbers for the setup UI and the fair-scaling pass, from the participant built out of the character */
+    heroPower(input: {
+        built: BattleParticipant;
+        character: { race: string; skillTreeProgress?: unknown };
+        campaignContext: CampaignSpellContext | undefined;
+    }): {
+        levels: ReturnType<typeof branchLevels>;
+        stats: ReturnType<typeof getCharacterStats>;
+    };
+    /** Library unit numbers; `base` is the d20 reading of the row, `built` the participant the unit would become */
+    unitStats(base: UnitStats, built: BattleParticipant): UnitStats;
+    /** Library units are built with the campaign rules before they are read */
+    readsBuiltRules: boolean;
 }
 
-type Resumable<T> = (ctx: BattleMutationContext, request: T, resume: CritResume, replay?: { serverRolls?: boolean }) => Promise<MutationResult>;
+type Resumable<T> = (
+    ctx: BattleMutationContext,
+    request: T,
+    resume: CritResume,
+    replay?: { serverRolls?: boolean }
+) => Promise<MutationResult>;
 
 /** Core mutations a system operation replays; injected by the route layer so system code never imports the mutations back */
 export interface BattleOperationDeps {
-  attack: Resumable<AttackBody>;
-  spell: Resumable<SpellRequestData>;
+    attack: Resumable<AttackBody>;
+    spell: Resumable<SpellRequestData>;
 }
 
 export interface SystemBattleOperation {
-  load(deps: BattleOperationDeps): Promise<{ schema: ZodType; mutate(ctx: BattleMutationContext, body: never): MutationResult | Promise<MutationResult> }>;
+    load(
+        deps: BattleOperationDeps
+    ): Promise<{
+        schema: ZodType;
+        mutate(
+            ctx: BattleMutationContext,
+            body: never
+        ): MutationResult | Promise<MutationResult>;
+    }>;
 }
 
-export type CharacterRefLoader = (input: { equipped: EquippedArtifact[]; campaignId: string; context?: CampaignSpellContext }) => Promise<Partial<{ completed: { sets: ArtifactSetRowLike[]; progress: SetProgress[] } }>>;
+export type CharacterRefLoader = (input: {
+    equipped: EquippedArtifact[];
+    campaignId: string;
+    context?: CampaignSpellContext;
+}) => Promise<
+    Partial<{
+        completed: { sets: ArtifactSetRowLike[]; progress: SetProgress[] };
+    }>
+>;
 
-export type ContextPreparer = (campaignId: string, context: CampaignSpellContext) => Promise<void>;
+export type ContextPreparer = (
+    campaignId: string,
+    context: CampaignSpellContext
+) => Promise<void>;
 
 export interface SystemParticipantServer {
-  characterRefs?: readonly CharacterRefLoader[];
-  prepareContext?: readonly ContextPreparer[];
+    characterRefs?: readonly CharacterRefLoader[];
+    prepareContext?: readonly ContextPreparer[];
 }
 
 export interface SystemServer {
-  schemas: SystemSchemas;
-  participant?: SystemParticipantServer;
-  balance: SystemBalance;
-  operations?: Record<string, SystemOperation>;
-  /** Battle operations the route layer resolves by name; the core settings (access, gates) stay with the route */
-  battle?: Record<string, SystemBattleOperation>;
-  ai?: SystemAi;
+    schemas: SystemSchemas;
+    participant?: SystemParticipantServer;
+    balance: SystemBalance;
+    operations?: Record<string, SystemOperation>;
+    /** Battle operations the route layer resolves by name; the core settings (access, gates) stay with the route */
+    battle?: Record<string, SystemBattleOperation>;
+    ai?: SystemAi;
 }

@@ -1,1 +1,1 @@
-export { POST } from "@/systems/wfrp/server/operations/corruption-undo";
+export { POST } from '@/systems/wfrp/server/operations/corruption-undo';

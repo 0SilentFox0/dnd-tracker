@@ -1,5 +1,9 @@
-import { LocaleScope } from "@/lib/i18n/locale-scope";
+import { LocaleScope } from '@/lib/i18n/locale-scope';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <LocaleScope namespaces={["common", "validation", "auth", "ai"]}>{children}</LocaleScope>;
+    return (
+        <LocaleScope namespaces={['common', 'validation', 'auth', 'ai']}>
+            {children}
+        </LocaleScope>
+    );
 }

@@ -1,166 +1,172 @@
-import type { BattleAudioCommand, BattleAudioState } from "@/types/audio";
+import type { BattleAudioCommand, BattleAudioState } from '@/types/audio';
 
-export type PuzzleCut = "classic" | "organic" | "straight";
+export type PuzzleCut = 'classic' | 'organic' | 'straight';
 
 export interface PuzzleSpec {
-  cut: PuzzleCut;
-  count: number;
-  seed: number;
-  imageWidth: number;
-  imageHeight: number;
+    cut: PuzzleCut;
+    count: number;
+    seed: number;
+    imageWidth: number;
+    imageHeight: number;
 }
 
 export interface PuzzleHolder {
-  userId: string;
-  name: string;
-  until: number;
+    userId: string;
+    name: string;
+    until: number;
 }
 
 export interface PuzzlePieceState {
-  x: number;
-  y: number;
-  rot: number;
-  place: "tray" | "board";
-  correct: boolean;
-  holder?: PuzzleHolder;
+    x: number;
+    y: number;
+    rot: number;
+    place: 'tray' | 'board';
+    correct: boolean;
+    holder?: PuzzleHolder;
 }
 
 export interface PuzzleState {
-  pieces: Record<string, PuzzlePieceState>;
-  solved: boolean;
+    pieces: Record<string, PuzzlePieceState>;
+    solved: boolean;
 }
 
 export type PuzzleCommand =
-  | { action: "puzzleGrab"; pieceId: string }
-  | { action: "puzzleKeepAlive"; pieceId: string }
-  | { action: "puzzleDrop"; pieceId: string; x: number; y: number; rot: number }
-  | { action: "puzzleReturn"; pieceId: string }
-  | { action: "puzzleRelease"; pieceId?: string }
-  | { action: "puzzleReset" };
+    | { action: 'puzzleGrab'; pieceId: string }
+    | { action: 'puzzleKeepAlive'; pieceId: string }
+    | {
+          action: 'puzzleDrop';
+          pieceId: string;
+          x: number;
+          y: number;
+          rot: number;
+      }
+    | { action: 'puzzleReturn'; pieceId: string }
+    | { action: 'puzzleRelease'; pieceId?: string }
+    | { action: 'puzzleReset' };
 
 export interface Slide {
-  id: string;
-  imageUrl: string;
-  title?: string;
-  caption?: string;
-  trackId?: string;
-  kind?: "puzzle";
-  puzzle?: PuzzleSpec;
-  /** id героїв, яким видно слайд; відсутнє — усім. */
-  audience?: string[];
+    id: string;
+    imageUrl: string;
+    title?: string;
+    caption?: string;
+    trackId?: string;
+    kind?: 'puzzle';
+    puzzle?: PuzzleSpec;
+    /** id героїв, яким видно слайд; відсутнє — усім. */
+    audience?: string[];
 }
 
 /** Знімок слайда для стежки показу; лише на сервері. */
 export interface SlideTrailEntry {
-  slide: Slide;
+    slide: Slide;
 }
 
 /** Заглушка кампанії: знімок обраного слайда (без треку). */
 export interface ShowCover {
-  deckId: string;
-  slide: Slide;
+    deckId: string;
+    slide: Slide;
 }
 
 export interface ShowBattle {
-  id: string;
-  name: string;
+    id: string;
+    name: string;
 }
 
 export interface ShowWorld {
-  mapId: string;
-  focusMarkerId?: string;
+    mapId: string;
+    focusMarkerId?: string;
 }
 
 export interface SlideDeck {
-  id: string;
-  title: string;
-  scenarioPageId: string | null;
-  slides: Slide[];
-  updatedAt: string;
+    id: string;
+    title: string;
+    scenarioPageId: string | null;
+    slides: Slide[];
+    updatedAt: string;
 }
 
 export interface SlideDeckSummary {
-  id: string;
-  title: string;
-  scenarioPageId: string | null;
-  slideCount: number;
-  coverUrl: string | null;
-  updatedAt: string;
+    id: string;
+    title: string;
+    scenarioPageId: string | null;
+    slideCount: number;
+    coverUrl: string | null;
+    updatedAt: string;
 }
 
 export interface DeckSceneData {
-  scenarioPageId: string | null;
+    scenarioPageId: string | null;
 }
 
 export interface CreateDeckData {
-  title: string;
+    title: string;
 }
 
 export interface SaveDeckData {
-  title: string;
-  slides: Slide[];
-  expectedUpdatedAt: string;
+    title: string;
+    slides: Slide[];
+    expectedUpdatedAt: string;
 }
 
 /** Те, що бачать усі учасники: лише поточний слайд і картинка наступного (без набору — спойлери). */
 export interface ShowState {
-  deckId: string | null;
-  deckTitle: string | null;
-  slide: Slide | null;
-  nextImageUrl: string | null;
-  audio: BattleAudioState | null;
-  /** Бій, до якого кличуть гравців; відсутнє — нікого не кличемо. */
-  battle?: ShowBattle;
-  cover?: ShowCover;
-  /** Гравці бачать заглушку замість слайда; позиція в наборі й музика лишаються. */
-  curtain?: true;
-  /** Карта світу на екрані гравців: лише id, вигляд кожен клієнт дочитує сам. */
-  world?: ShowWorld;
-  puzzle?: PuzzleState;
-  /** Лише серверне: ніколи не віддається клієнтам. */
-  trail?: SlideTrailEntry[];
-  seq: number;
+    deckId: string | null;
+    deckTitle: string | null;
+    slide: Slide | null;
+    nextImageUrl: string | null;
+    audio: BattleAudioState | null;
+    /** Бій, до якого кличуть гравців; відсутнє — нікого не кличемо. */
+    battle?: ShowBattle;
+    cover?: ShowCover;
+    /** Гравці бачать заглушку замість слайда; позиція в наборі й музика лишаються. */
+    curtain?: true;
+    /** Карта світу на екрані гравців: лише id, вигляд кожен клієнт дочитує сам. */
+    world?: ShowWorld;
+    puzzle?: PuzzleState;
+    /** Лише серверне: ніколи не віддається клієнтам. */
+    trail?: SlideTrailEntry[];
+    seq: number;
 }
 
 export type ShowCommand =
-  | { action: "open"; deckId: string; slideId?: string }
-  | { action: "next" }
-  | { action: "prev" }
-  | { action: "end" }
-  | { action: "audio"; command: BattleAudioCommand }
-  | { action: "battle"; battleId: string }
-  | { action: "curtain"; on?: boolean }
-  | { action: "world"; mapId: string; focusMarkerId?: string }
-  | { action: "worldOff" }
-  | { action: "setCover"; deckId: string; slideId: string }
-  | { action: "clearCover" };
+    | { action: 'open'; deckId: string; slideId?: string }
+    | { action: 'next' }
+    | { action: 'prev' }
+    | { action: 'end' }
+    | { action: 'audio'; command: BattleAudioCommand }
+    | { action: 'battle'; battleId: string }
+    | { action: 'curtain'; on?: boolean }
+    | { action: 'world'; mapId: string; focusMarkerId?: string }
+    | { action: 'worldOff' }
+    | { action: 'setCover'; deckId: string; slideId: string }
+    | { action: 'clearCover' };
 
 export interface ShowResponse {
-  show: ShowState | null;
+    show: ShowState | null;
 }
 
 export interface ShowSnapshot {
-  show: ShowState | null;
-  clockOffsetMs: number | null;
+    show: ShowState | null;
+    clockOffsetMs: number | null;
 }
 
 /** Pusher `show-state` */
 export interface ShowEvent {
-  campaignId: string;
-  /** Відсутній, коли показ обмежений: клієнт перечитує власний вигляд. */
-  show?: ShowState;
-  seq: number;
+    campaignId: string;
+    /** Відсутній, коли показ обмежений: клієнт перечитує власний вигляд. */
+    show?: ShowState;
+    seq: number;
 }
 
 export interface SlideUploadRequest {
-  size: number;
-  contentType: string;
+    size: number;
+    contentType: string;
 }
 
 export interface SlideUploadTicket {
-  bucket: string;
-  path: string;
-  token: string;
-  contentType: string;
-  publicUrl: string;
+    bucket: string;
+    path: string;
+    token: string;
+    contentType: string;
+    publicUrl: string;
 }

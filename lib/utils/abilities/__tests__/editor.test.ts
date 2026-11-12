@@ -1,121 +1,223 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
 import {
-  allowedEffectKinds,
-  changeEffectKind,
-  changeTriggerEvent,
-  getAtPath,
-  newEffect,
-  newTrigger,
-  setAtPath,
-  validateAbilities,
-  withFreshIds,
-} from "@/lib/utils/abilities/editor";
-import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
-import { isSystemEffectKind } from "@/lib/utils/abilities/registry/effects/system-rows";
-import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
-import { type Ability, AbilitySchema, type EffectKind, type TriggerEvent } from "@/lib/utils/abilities/schema";
+    allowedEffectKinds,
+    changeEffectKind,
+    changeTriggerEvent,
+    getAtPath,
+    newEffect,
+    newTrigger,
+    setAtPath,
+    validateAbilities,
+    withFreshIds,
+} from '@/lib/utils/abilities/editor';
+import { EFFECT_REGISTRY } from '@/lib/utils/abilities/registry/effects';
+import { isSystemEffectKind } from '@/lib/utils/abilities/registry/effects/system-rows';
+import { TRIGGER_REGISTRY } from '@/lib/utils/abilities/registry/triggers';
+import {
+    type Ability,
+    AbilitySchema,
+    type EffectKind,
+    type TriggerEvent,
+} from '@/lib/utils/abilities/schema';
 
 const EVENTS = Object.keys(TRIGGER_REGISTRY) as TriggerEvent[];
 
-const KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter((k) => !isSystemEffectKind(k));
+const KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter(
+    (k) => !isSystemEffectKind(k)
+);
 
-describe("editor helpers", () => {
-  it("newEffect валідний для кожного виду в кожному дозволеному тригері", () => {
-    for (const event of EVENTS) {
-      const trigger = newTrigger(event);
+describe('editor helpers', () => {
+    it('newEffect валідний для кожного виду в кожному дозволеному тригері', () => {
+        for (const event of EVENTS) {
+            const trigger = newTrigger(event);
 
-      for (const kind of allowedEffectKinds(trigger)) {
-        if (kind === "summon") continue;
+            for (const kind of allowedEffectKinds(trigger)) {
+                if (kind === 'summon') continue;
 
-        const a = { id: "a", name: "Т", trigger, effects: [newEffect(kind, trigger, "note")] };
+                const a = {
+                    id: 'a',
+                    name: 'Т',
+                    trigger,
+                    effects: [newEffect(kind, trigger, 'note')],
+                };
 
-        expect(AbilitySchema.safeParse(a).success, `${event}/${kind}`).toBe(true);
-      }
-    }
-  });
+                expect(
+                    AbilitySchema.safeParse(a).success,
+                    `${event}/${kind}`
+                ).toBe(true);
+            }
+        }
+    });
 
-  it("пасивка не пропонує нестатичні ефекти", () => {
-    expect(allowedEffectKinds({ event: "passive" })).toEqual(["modifyStat", "damageBonus", "flag", "note"]);
-    expect(allowedEffectKinds({ event: "turnStart" })).toEqual(KINDS.filter((k) => k !== "summon" && k !== "maneuver"));
-    expect(allowedEffectKinds({ event: "action" })).toEqual(KINDS);
-  });
+    it('пасивка не пропонує нестатичні ефекти', () => {
+        expect(allowedEffectKinds({ event: 'passive' })).toEqual([
+            'modifyStat',
+            'damageBonus',
+            'flag',
+            'note',
+        ]);
+        expect(allowedEffectKinds({ event: 'turnStart' })).toEqual(
+            KINDS.filter((k) => k !== 'summon' && k !== 'maneuver')
+        );
+        expect(allowedEffectKinds({ event: 'action' })).toEqual(KINDS);
+    });
 
-  it("changeEffectKind зберігає сумісну ціль", () => {
-    const trigger = newTrigger("hit");
+    it('changeEffectKind зберігає сумісну ціль', () => {
+        const trigger = newTrigger('hit');
 
-    const dot = newEffect("dot", trigger);
+        const dot = newEffect('dot', trigger);
 
-    const next = changeEffectKind({ ...dot, target: "allEnemies" } as typeof dot, "applyCondition", trigger);
+        const next = changeEffectKind(
+            { ...dot, target: 'allEnemies' } as typeof dot,
+            'applyCondition',
+            trigger
+        );
 
-    expect(next).toMatchObject({ kind: "applyCondition", target: "allEnemies" });
-  });
+        expect(next).toMatchObject({
+            kind: 'applyCondition',
+            target: 'allEnemies',
+        });
+    });
 
-  it("changeTriggerEvent на пасивку прибирає ліміти й тривалості", () => {
-    const a = { id: "a", name: "Т", trigger: newTrigger("hit"), limits: { perBattle: 1 }, effects: [{ kind: "modifyStat" as const, stat: "armor" as const, flat: 1, duration: { rounds: 1 }, target: "eventTarget" as const }] };
+    it('changeTriggerEvent на пасивку прибирає ліміти й тривалості', () => {
+        const a = {
+            id: 'a',
+            name: 'Т',
+            trigger: newTrigger('hit'),
+            limits: { perBattle: 1 },
+            effects: [
+                {
+                    kind: 'modifyStat' as const,
+                    stat: 'armor' as const,
+                    flat: 1,
+                    duration: { rounds: 1 },
+                    target: 'eventTarget' as const,
+                },
+            ],
+        };
 
-    const p = changeTriggerEvent(a, "passive");
+        const p = changeTriggerEvent(a, 'passive');
 
-    expect(p.limits).toBeUndefined();
-    expect(p.effects[0]).toEqual({ kind: "modifyStat", stat: "armor", flat: 1 });
-    expect(changeTriggerEvent(p, "hit").effects[0]).toMatchObject({ duration: { rounds: 1 } });
-  });
+        expect(p.limits).toBeUndefined();
+        expect(p.effects[0]).toEqual({
+            kind: 'modifyStat',
+            stat: 'armor',
+            flat: 1,
+        });
+        expect(changeTriggerEvent(p, 'hit').effects[0]).toMatchObject({
+            duration: { rounds: 1 },
+        });
+    });
 
-  it("setAtPath / getAtPath", () => {
-    const o = { filter: { kind: "melee" }, percent: 10 };
+    it('setAtPath / getAtPath', () => {
+        const o = { filter: { kind: 'melee' }, percent: 10 };
 
-    const n = setAtPath(o, "filter.kind", "ranged");
+        const n = setAtPath(o, 'filter.kind', 'ranged');
 
-    expect(n).toEqual({ filter: { kind: "ranged" }, percent: 10 });
-    expect(o.filter.kind).toBe("melee");
-    expect(getAtPath(n, "filter.kind")).toBe("ranged");
-    expect(setAtPath(o, "percent", undefined)).toEqual({ filter: { kind: "melee" } });
-  });
+        expect(n).toEqual({ filter: { kind: 'ranged' }, percent: 10 });
+        expect(o.filter.kind).toBe('melee');
+        expect(getAtPath(n, 'filter.kind')).toBe('ranged');
+        expect(setAtPath(o, 'percent', undefined)).toEqual({
+            filter: { kind: 'melee' },
+        });
+    });
 
-  it("setAtPath прибирає порожній вкладений об'єкт після очищення останнього поля", () => {
-    const o = { kind: "dealDamage", delayIfBeyond: { feet: 30 } };
+    it("setAtPath прибирає порожній вкладений об'єкт після очищення останнього поля", () => {
+        const o = { kind: 'dealDamage', delayIfBeyond: { feet: 30 } };
 
-    expect(setAtPath(o, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage" });
-    expect(setAtPath({ ...o, delayIfBeyond: { feet: 30, perRoundFeet: 10 } }, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage", delayIfBeyond: { perRoundFeet: 10 } });
-  });
+        expect(setAtPath(o, 'delayIfBeyond.feet', undefined)).toEqual({
+            kind: 'dealDamage',
+        });
+        expect(
+            setAtPath(
+                { ...o, delayIfBeyond: { feet: 30, perRoundFeet: 10 } },
+                'delayIfBeyond.feet',
+                undefined
+            )
+        ).toEqual({ kind: 'dealDamage', delayIfBeyond: { perRoundFeet: 10 } });
+    });
 
-  it("validateAbilities — шляхи помилок", () => {
-    const r = validateAbilities([{ id: "a1", name: "Нове вміння", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1 }] }, { id: "x", name: "Б", trigger: { event: "passive" }, effects: [{ kind: "heal", amount: 5 }] }]);
+    it('validateAbilities — шляхи помилок', () => {
+        const r = validateAbilities([
+            {
+                id: 'a1',
+                name: 'Нове вміння',
+                trigger: { event: 'passive' },
+                effects: [{ kind: 'modifyStat', stat: 'armor', flat: 1 }],
+            },
+            {
+                id: 'x',
+                name: 'Б',
+                trigger: { event: 'passive' },
+                effects: [{ kind: 'heal', amount: 5 }],
+            },
+        ]);
 
-    expect(r.ok).toBe(false);
-    expect(Object.keys(r.errorsByPath)).toContain("1.effects.0");
-  });
+        expect(r.ok).toBe(false);
+        expect(Object.keys(r.errorsByPath)).toContain('1.effects.0');
+    });
 
-  it("withFreshIds — без колізій", () => {
-    const base = { name: "Т", trigger: { event: "passive" as const }, effects: [{ kind: "note" as const, text: "x" }] };
+    it('withFreshIds — без колізій', () => {
+        const base = {
+            name: 'Т',
+            trigger: { event: 'passive' as const },
+            effects: [{ kind: 'note' as const, text: 'x' }],
+        };
 
-    const out = withFreshIds([{ id: "a1", ...base }, { id: "a1", ...base }], ["a1", "a2"]);
+        const out = withFreshIds(
+            [
+                { id: 'a1', ...base },
+                { id: 'a1', ...base },
+            ],
+            ['a1', 'a2']
+        );
 
-    expect(out.map((a) => a.id)).toEqual(["a3", "a4"]);
-  });
+        expect(out.map((a) => a.id)).toEqual(['a3', 'a4']);
+    });
 
-  it("changeTriggerEvent: maxTargets живе лише на бонусній дії та дії, стаки не на пасивці", () => {
-    const a = { id: "a", name: "Т", trigger: { event: "bonusAction" }, maxTargets: 3, stackable: true, maxStacks: 2, effects: [{ kind: "note", text: "x" }] } as Ability;
+    it('changeTriggerEvent: maxTargets живе лише на бонусній дії та дії, стаки не на пасивці', () => {
+        const a = {
+            id: 'a',
+            name: 'Т',
+            trigger: { event: 'bonusAction' },
+            maxTargets: 3,
+            stackable: true,
+            maxStacks: 2,
+            effects: [{ kind: 'note', text: 'x' }],
+        } as Ability;
 
-    expect(changeTriggerEvent(a, "action")).toMatchObject({ maxTargets: 3, stackable: true, maxStacks: 2 });
+        expect(changeTriggerEvent(a, 'action')).toMatchObject({
+            maxTargets: 3,
+            stackable: true,
+            maxStacks: 2,
+        });
 
-    const hit = changeTriggerEvent(a, "hit");
+        const hit = changeTriggerEvent(a, 'hit');
 
-    expect(hit.maxTargets).toBeUndefined();
-    expect(hit.stackable).toBe(true);
-    expect(AbilitySchema.safeParse(hit).success).toBe(true);
+        expect(hit.maxTargets).toBeUndefined();
+        expect(hit.stackable).toBe(true);
+        expect(AbilitySchema.safeParse(hit).success).toBe(true);
 
-    const passive = changeTriggerEvent(a, "passive");
+        const passive = changeTriggerEvent(a, 'passive');
 
-    expect(passive).not.toHaveProperty("stackable");
-    expect(passive).not.toHaveProperty("maxStacks");
-    expect(AbilitySchema.safeParse(passive).success).toBe(true);
-  });
+        expect(passive).not.toHaveProperty('stackable');
+        expect(passive).not.toHaveProperty('maxStacks');
+        expect(AbilitySchema.safeParse(passive).success).toBe(true);
+    });
 
-  it("setAtPath: очищення останнього вкладеного поля прибирає порожній об'єкт-предок", () => {
-    const e = { kind: "dealDamage", delayIfBeyond: { feet: 30 } };
+    it("setAtPath: очищення останнього вкладеного поля прибирає порожній об'єкт-предок", () => {
+        const e = { kind: 'dealDamage', delayIfBeyond: { feet: 30 } };
 
-    expect(setAtPath(e, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage" });
-    expect(setAtPath({ ...e, delayIfBeyond: { feet: 30, perRoundFeet: 10 } }, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage", delayIfBeyond: { perRoundFeet: 10 } });
-  });
+        expect(setAtPath(e, 'delayIfBeyond.feet', undefined)).toEqual({
+            kind: 'dealDamage',
+        });
+        expect(
+            setAtPath(
+                { ...e, delayIfBeyond: { feet: 30, perRoundFeet: 10 } },
+                'delayIfBeyond.feet',
+                undefined
+            )
+        ).toEqual({ kind: 'dealDamage', delayIfBeyond: { perRoundFeet: 10 } });
+    });
 });

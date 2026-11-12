@@ -1,174 +1,202 @@
-import { useCallback, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useCallback, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
-import { characterToFormData } from "@/lib/utils/characters/character-form";
-import { buildCharacterFormBindings } from "@/lib/utils/characters/form/bindings";
-import { defaultCharacterFormData } from "@/lib/utils/characters/form/defaults";
-import { withRecommendedScores } from "@/lib/utils/characters/form/recommended-scores";
-import type { SystemData } from "@/lib/utils/rules/systems/slot";
-import type { Character } from "@/types/characters";
-import { CharacterFormData } from "@/types/characters";
-import type { GameClassData } from "@/types/classes";
+import {
+    CharacterType,
+    type CharacterTypeValue,
+} from '@/lib/constants/characters';
+import { characterToFormData } from '@/lib/utils/characters/character-form';
+import { buildCharacterFormBindings } from '@/lib/utils/characters/form/bindings';
+import { defaultCharacterFormData } from '@/lib/utils/characters/form/defaults';
+import { withRecommendedScores } from '@/lib/utils/characters/form/recommended-scores';
+import type { SystemData } from '@/lib/utils/rules/systems/slot';
+import type { Character } from '@/types/characters';
+import { CharacterFormData } from '@/types/characters';
+import type { GameClassData } from '@/types/classes';
 
 interface UseCharacterFormOptions {
-  initialData?: Partial<Character> | Partial<CharacterFormData>;
-  type?: CharacterTypeValue;
-  recommendScores?: Record<string, GameClassData>;
-  requireRace?: boolean;
-  requireClass?: boolean;
-  seedCharacteristics?: () => SystemData | undefined;
-  onSubmit: (data: CharacterFormData) => Promise<CharacterFormData | void>;
-  onCancel?: () => void;
+    initialData?: Partial<Character> | Partial<CharacterFormData>;
+    type?: CharacterTypeValue;
+    recommendScores?: Record<string, GameClassData>;
+    requireRace?: boolean;
+    requireClass?: boolean;
+    seedCharacteristics?: () => SystemData | undefined;
+    onSubmit: (data: CharacterFormData) => Promise<CharacterFormData | void>;
+    onCancel?: () => void;
 }
 
 export function useCharacterForm(options: UseCharacterFormOptions) {
-  const t = useTranslations("characters.form.validation");
+    const t = useTranslations('characters.form.validation');
 
-  const base = options.initialData
-    ? "basicInfo" in options.initialData
-      ? { ...defaultCharacterFormData, ...options.initialData }
-      : characterToFormData(options.initialData as Partial<Character>)
-    : defaultCharacterFormData;
+    const base = options.initialData
+        ? 'basicInfo' in options.initialData
+            ? { ...defaultCharacterFormData, ...options.initialData }
+            : characterToFormData(options.initialData as Partial<Character>)
+        : defaultCharacterFormData;
 
-  const [formData, setFormData] = useState<CharacterFormData>(() => {
-    const typed = options.type ? { ...base, basicInfo: { ...base.basicInfo, type: options.type } } : base;
+    const [formData, setFormData] = useState<CharacterFormData>(() => {
+        const typed = options.type
+            ? { ...base, basicInfo: { ...base.basicInfo, type: options.type } }
+            : base;
 
-    const seed = typed.characteristics ? undefined : options.seedCharacteristics?.();
+        const seed = typed.characteristics
+            ? undefined
+            : options.seedCharacteristics?.();
 
-    return seed ? { ...typed, characteristics: seed } : typed;
-  });
+        return seed ? { ...typed, characteristics: seed } : typed;
+    });
 
-  const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-  const updateField = useCallback(
-    <K extends keyof CharacterFormData>(
-      field: K,
-      value: CharacterFormData[K],
-    ) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
-
-  const updateFields = useCallback((fields: Partial<CharacterFormData>) => {
-    setFormData((prev) => ({ ...prev, ...fields }));
-  }, []);
-
-  const toggleSavingThrow = useCallback((ability: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: {
-        ...prev.skills,
-        savingThrows: {
-          ...prev.skills.savingThrows,
-          [ability]: !prev.skills.savingThrows[ability],
+    const updateField = useCallback(
+        <K extends keyof CharacterFormData>(
+            field: K,
+            value: CharacterFormData[K]
+        ) => {
+            setFormData((prev) => ({ ...prev, [field]: value }));
         },
-      },
-    }));
-  }, []);
+        []
+    );
 
-  const toggleSkill = useCallback((skill: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: {
-        ...prev.skills,
-        skills: {
-          ...prev.skills.skills,
-          [skill]: !prev.skills.skills[skill],
+    const updateFields = useCallback((fields: Partial<CharacterFormData>) => {
+        setFormData((prev) => ({ ...prev, ...fields }));
+    }, []);
+
+    const toggleSavingThrow = useCallback((ability: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            skills: {
+                ...prev.skills,
+                savingThrows: {
+                    ...prev.skills.savingThrows,
+                    [ability]: !prev.skills.savingThrows[ability],
+                },
+            },
+        }));
+    }, []);
+
+    const toggleSkill = useCallback((skill: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            skills: {
+                ...prev.skills,
+                skills: {
+                    ...prev.skills.skills,
+                    [skill]: !prev.skills.skills[skill],
+                },
+            },
+        }));
+    }, []);
+
+    const recommendScores = options.recommendScores;
+
+    const requireRace = options.requireRace ?? true;
+
+    const requireClass = options.requireClass ?? true;
+
+    const setWithRecommendation = useCallback<typeof setFormData>(
+        (update) =>
+            setFormData((prev) => {
+                const next =
+                    typeof update === 'function' ? update(prev) : update;
+
+                return recommendScores
+                    ? withRecommendedScores(prev, next, recommendScores)
+                    : next;
+            }),
+        [recommendScores]
+    );
+
+    const handleSubmit = useCallback(
+        async (e: React.FormEvent) => {
+            e.preventDefault();
+            setError(null);
+
+            if (requireRace && !formData.basicInfo.race) {
+                setError(t('raceRequired'));
+
+                return;
+            }
+
+            if (requireClass && !formData.basicInfo.class.trim()) {
+                setError(t('classRequired'));
+
+                return;
+            }
+
+            if (
+                formData.basicInfo.type === CharacterType.PLAYER &&
+                !formData.basicInfo.controlledBy
+            ) {
+                setError(t('controllerRequired'));
+
+                return;
+            }
+
+            setIsLoading(true);
+            try {
+                const next = await options.onSubmit(formData);
+
+                if (next) setFormData(next);
+            } catch (err) {
+                setError((err as Error).message);
+            } finally {
+                setIsLoading(false);
+            }
         },
-      },
-    }));
-  }, []);
+        [formData, options, requireRace, requireClass, t]
+    );
 
-  const recommendScores = options.recommendScores;
+    const handleCancel = useCallback(() => {
+        if (options.onCancel) {
+            options.onCancel();
+        }
+    }, [options]);
 
-  const requireRace = options.requireRace ?? true;
+    const {
+        basicInfo,
+        abilityScores,
+        combatStats,
+        skills,
+        spellcasting,
+        abilities,
+        characteristics,
+    } = useMemo(
+        () =>
+            buildCharacterFormBindings(
+                formData,
+                recommendScores ? setWithRecommendation : setFormData,
+                { toggleSavingThrow, toggleSkill }
+            ),
+        [
+            formData,
+            recommendScores,
+            setWithRecommendation,
+            toggleSavingThrow,
+            toggleSkill,
+        ]
+    );
 
-  const requireClass = options.requireClass ?? true;
-
-  const setWithRecommendation = useCallback<typeof setFormData>(
-    (update) =>
-      setFormData((prev) => {
-        const next = typeof update === "function" ? update(prev) : update;
-
-        return recommendScores ? withRecommendedScores(prev, next, recommendScores) : next;
-      }),
-    [recommendScores],
-  );
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setError(null);
-
-      if (requireRace && !formData.basicInfo.race) {
-        setError(t("raceRequired"));
-
-        return;
-      }
-
-      if (requireClass && !formData.basicInfo.class.trim()) {
-        setError(t("classRequired"));
-
-        return;
-      }
-
-      if (
-        formData.basicInfo.type === CharacterType.PLAYER &&
-        !formData.basicInfo.controlledBy
-      ) {
-        setError(t("controllerRequired"));
-
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const next = await options.onSubmit(formData);
-
-        if (next) setFormData(next);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [formData, options, requireRace, requireClass, t],
-  );
-
-  const handleCancel = useCallback(() => {
-    if (options.onCancel) {
-      options.onCancel();
-    }
-  }, [options]);
-
-  const {
-    basicInfo,
-    abilityScores,
-    combatStats,
-    skills,
-    spellcasting,
-    abilities,
-    characteristics,
-  } = useMemo(
-    () =>
-      buildCharacterFormBindings(formData, recommendScores ? setWithRecommendation : setFormData, { toggleSavingThrow, toggleSkill }),
-    [formData, recommendScores, setWithRecommendation, toggleSavingThrow, toggleSkill],
-  );
-
-  return {
-    formData,
-    status: { isLoading, error },
-    basicInfo,
-    abilityScores,
-    combatStats,
-    skills,
-    spellcasting,
-    abilities,
-    characteristics,
-    actions: { updateField, updateFields, toggleSavingThrow, toggleSkill, handleSubmit, handleCancel, setFormData },
-  };
+    return {
+        formData,
+        status: { isLoading, error },
+        basicInfo,
+        abilityScores,
+        combatStats,
+        skills,
+        spellcasting,
+        abilities,
+        characteristics,
+        actions: {
+            updateField,
+            updateFields,
+            toggleSavingThrow,
+            toggleSkill,
+            handleSubmit,
+            handleCancel,
+            setFormData,
+        },
+    };
 }

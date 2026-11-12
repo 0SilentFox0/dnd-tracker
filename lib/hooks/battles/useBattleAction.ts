@@ -1,76 +1,117 @@
-import { useTranslations } from "next-intl";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from 'next-intl';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { battleKeys, battleQueryKey } from "./keys";
-import { writeBattleDelta } from "./write-battle-delta";
+import { battleKeys, battleQueryKey } from './keys';
+import { writeBattleDelta } from './write-battle-delta';
 
-import { ApiError } from "@/lib/api/client";
-import { BattleStatus } from "@/lib/constants/battle";
-import { characterKeys } from "@/lib/hooks/characters/keys";
-import { errorMessage } from "@/lib/utils/common/error-message";
-import type { BattleMutationResponse, BattleScene } from "@/types/api";
+import { ApiError } from '@/lib/api/client';
+import { BattleStatus } from '@/lib/constants/battle';
+import { characterKeys } from '@/lib/hooks/characters/keys';
+import { errorMessage } from '@/lib/utils/common/error-message';
+import type { BattleMutationResponse, BattleScene } from '@/types/api';
 
 export interface BattleActionOptions {
-  invalidate?: ("battles" | "active-battles")[];
-  onConflict?: () => void;
-  onFailure?: (message: string) => void;
-  /** one retry after a 409 with the version from the re-read cache, for idempotent actions only */
-  retryOnConflict?: boolean;
+    invalidate?: ('battles' | 'active-battles')[];
+    onConflict?: () => void;
+    onFailure?: (message: string) => void;
+    /** one retry after a 409 with the version from the re-read cache, for idempotent actions only */
+    retryOnConflict?: boolean;
 }
 
-const isConflict = (error: unknown) => error instanceof ApiError && error.status === 409;
+const isConflict = (error: unknown) =>
+    error instanceof ApiError && error.status === 409;
 
-export function useBattleAction<TVars extends object, TResp = Record<string, unknown>>(
-  campaignId: string,
-  battleId: string,
-  fn: (vars: TVars & { expectedVersion?: number }) => Promise<BattleMutationResponse<TResp>>,
-  options: BattleActionOptions = {},
+export function useBattleAction<
+    TVars extends object,
+    TResp = Record<string, unknown>,
+>(
+    campaignId: string,
+    battleId: string,
+    fn: (
+        vars: TVars & { expectedVersion?: number }
+    ) => Promise<BattleMutationResponse<TResp>>,
+    options: BattleActionOptions = {}
 ) {
-  const t = useTranslations("battle.notify");
+    const t = useTranslations('battle.notify');
 
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const key = battleQueryKey(campaignId, battleId);
+    const key = battleQueryKey(campaignId, battleId);
 
-  return useMutation({
-    mutationFn: async (vars: TVars) => {
-      const pinned = (vars as { expectedVersion?: number }).expectedVersion;
+    return useMutation({
+        mutationFn: async (vars: TVars) => {
+            const pinned = (vars as { expectedVersion?: number })
+                .expectedVersion;
 
-      const send = () => fn({ ...vars, expectedVersion: pinned ?? queryClient.getQueryData<BattleScene>(key)?.version });
+            const send = () =>
+                fn({
+                    ...vars,
+                    expectedVersion:
+                        pinned ??
+                        queryClient.getQueryData<BattleScene>(key)?.version,
+                });
 
-      const { delta, response } = await send().catch(async (error: unknown) => {
-        if (!options.retryOnConflict || pinned !== undefined || !isConflict(error)) throw error;
+            const { delta, response } = await send().catch(
+                async (error: unknown) => {
+                    if (
+                        !options.retryOnConflict ||
+                        pinned !== undefined ||
+                        !isConflict(error)
+                    )
+                        throw error;
 
-        await queryClient.invalidateQueries({ queryKey: key });
+                    await queryClient.invalidateQueries({ queryKey: key });
 
-        return send();
-      });
+                    return send();
+                }
+            );
 
-      const wasCompleted = queryClient.getQueryData<BattleScene>(key)?.status === BattleStatus.COMPLETED;
+            const wasCompleted =
+                queryClient.getQueryData<BattleScene>(key)?.status ===
+                BattleStatus.COMPLETED;
 
-      await writeBattleDelta(queryClient, key, delta);
+            await writeBattleDelta(queryClient, key, delta);
 
-      if (!wasCompleted && queryClient.getQueryData<BattleScene>(key)?.status === BattleStatus.COMPLETED) {
-        for (const characterKey of [characterKeys.sheet(campaignId), characterKeys.lists(campaignId), characterKeys.logs(campaignId)]) void queryClient.invalidateQueries({ queryKey: characterKey });
-      }
+            if (
+                !wasCompleted &&
+                queryClient.getQueryData<BattleScene>(key)?.status ===
+                    BattleStatus.COMPLETED
+            ) {
+                for (const characterKey of [
+                    characterKeys.sheet(campaignId),
+                    characterKeys.lists(campaignId),
+                    characterKeys.logs(campaignId),
+                ])
+                    void queryClient.invalidateQueries({
+                        queryKey: characterKey,
+                    });
+            }
 
-      for (const list of options.invalidate ?? []) {
-        void queryClient.invalidateQueries({ queryKey: list === "battles" ? battleKeys.list(campaignId) : battleKeys.active() });
+            for (const list of options.invalidate ?? []) {
+                void queryClient.invalidateQueries({
+                    queryKey:
+                        list === 'battles'
+                            ? battleKeys.list(campaignId)
+                            : battleKeys.active(),
+                });
 
-        if (list === "battles") void queryClient.invalidateQueries({ queryKey: battleKeys.briefs(campaignId) });
-      }
+                if (list === 'battles')
+                    void queryClient.invalidateQueries({
+                        queryKey: battleKeys.briefs(campaignId),
+                    });
+            }
 
-      return response;
-    },
-    onError: (error) => {
-      if (isConflict(error)) {
-        void queryClient.invalidateQueries({ queryKey: key });
-        options.onConflict?.();
+            return response;
+        },
+        onError: (error) => {
+            if (isConflict(error)) {
+                void queryClient.invalidateQueries({ queryKey: key });
+                options.onConflict?.();
 
-        return;
-      }
+                return;
+            }
 
-      options.onFailure?.(errorMessage(error, t("actionFailed")));
-    },
-  });
+            options.onFailure?.(errorMessage(error, t('actionFailed')));
+        },
+    });
 }

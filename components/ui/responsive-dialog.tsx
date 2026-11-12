@@ -1,126 +1,220 @@
-"use client";
+'use client';
 
-import { createContext, type ReactNode, useContext, useRef } from "react";
-import { Drawer } from "vaul";
+import { createContext, type ReactNode, useContext, useRef } from 'react';
+import { Drawer } from 'vaul';
 
-import "@/components/hud/hud.css";
-import { HUD_SURFACE } from "@/components/hud";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { HudPortalClassProvider } from "@/components/ui/portal-class";
-import { useIsMobile } from "@/lib/hooks/common/useIsMobile";
-import { cn } from "@/lib/utils";
+import '@/components/hud/hud.css';
+import { HUD_SURFACE } from '@/components/hud';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { HudPortalClassProvider } from '@/components/ui/portal-class';
+import { useIsMobile } from '@/lib/hooks/common/useIsMobile';
+import { cn } from '@/lib/utils';
 
-const SIZE_CLASS = { sm: "sm:max-w-sm", md: "sm:max-w-lg", lg: "sm:max-w-2xl" } as const;
+const SIZE_CLASS = {
+    sm: 'sm:max-w-sm',
+    md: 'sm:max-w-lg',
+    lg: 'sm:max-w-2xl',
+} as const;
 
 const InsideSheet = createContext(false);
 
-const HUD_TITLE = "hud-sc font-normal text-hud-ink";
+const HUD_TITLE = 'hud-sc font-normal text-hud-ink';
 
-const LAYOUT_TOKEN = /^(sm:|md:|lg:|fixed$|absolute$|inset-|top-|bottom-|left-|right-|-?translate-|w-|max-w-|max-h-|min-h-|overflow-)/;
+const LAYOUT_TOKEN =
+    /^(sm:|md:|lg:|fixed$|absolute$|inset-|top-|bottom-|left-|right-|-?translate-|w-|max-w-|max-h-|min-h-|overflow-)/;
 
 // callers style the desktop modal; the sheet keeps only colours/borders
-const sheetClasses = (className?: string) => className?.split(/\s+/).filter((t) => t && !LAYOUT_TOKEN.test(t)).join(" ");
+const sheetClasses = (className?: string) =>
+    className
+        ?.split(/\s+/)
+        .filter((t) => t && !LAYOUT_TOKEN.test(t))
+        .join(' ');
 
 // plain max-w-* must beat the sm:max-w-* size class at ≥640px
-const desktopClasses = (className?: string) => className?.split(/\s+/).map((t) => (/^max-w-/.test(t) ? `sm:${t}` : t)).join(" ");
+const desktopClasses = (className?: string) =>
+    className
+        ?.split(/\s+/)
+        .map((t) => (/^max-w-/.test(t) ? `sm:${t}` : t))
+        .join(' ');
 
 export interface ResponsiveDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: ReactNode;
-  description?: ReactNode;
-  footer?: ReactNode;
-  size?: keyof typeof SIZE_CLASS;
-  dismissible?: boolean;
-  className?: string;
-  hud?: boolean;
-  role?: "dialog" | "alertdialog";
-  children?: ReactNode;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    title: ReactNode;
+    description?: ReactNode;
+    footer?: ReactNode;
+    size?: keyof typeof SIZE_CLASS;
+    dismissible?: boolean;
+    className?: string;
+    hud?: boolean;
+    role?: 'dialog' | 'alertdialog';
+    children?: ReactNode;
 }
 
-export function ResponsiveDialog({ open, onOpenChange, title, description, footer, size = "md", dismissible = true, className, hud = false, role = "dialog", children }: ResponsiveDialogProps) {
-  const isMobile = useIsMobile();
+export function ResponsiveDialog({
+    open,
+    onOpenChange,
+    title,
+    description,
+    footer,
+    size = 'md',
+    dismissible = true,
+    className,
+    hud = false,
+    role = 'dialog',
+    children,
+}: ResponsiveDialogProps) {
+    const isMobile = useIsMobile();
 
-  const nested = useContext(InsideSheet);
+    const nested = useContext(InsideSheet);
 
-  const hudClass = hud ? `${HUD_SURFACE} hud-form hud-form-page` : undefined;
+    const hudClass = hud ? `${HUD_SURFACE} hud-form hud-form-page` : undefined;
 
-  const body = <HudPortalClassProvider value={hud ? HUD_SURFACE : null}>{children}</HudPortalClassProvider>;
+    const body = (
+        <HudPortalClassProvider value={hud ? HUD_SURFACE : null}>
+            {children}
+        </HudPortalClassProvider>
+    );
 
-  const opener = useRef<HTMLElement | null>(null);
+    const opener = useRef<HTMLElement | null>(null);
 
-  const rememberOpener = () => {
-    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-  };
+    const rememberOpener = () => {
+        opener.current =
+            document.activeElement instanceof HTMLElement
+                ? document.activeElement
+                : null;
+    };
 
-  const restoreOpener = (e: Event) => {
-    const el = opener.current;
+    const restoreOpener = (e: Event) => {
+        const el = opener.current;
 
-    opener.current = null;
+        opener.current = null;
 
-    if (el?.isConnected) {
-      e.preventDefault();
-      el.focus();
+        if (el?.isConnected) {
+            e.preventDefault();
+            el.focus();
+        }
+    };
+
+    const handleOpenChange = (next: boolean) => {
+        if (!next && !dismissible) return;
+
+        onOpenChange(next);
+    };
+
+    if (isMobile) {
+        const Root = nested ? Drawer.NestedRoot : Drawer.Root;
+
+        return (
+            <Root
+                open={open}
+                onOpenChange={handleOpenChange}
+                dismissible={dismissible}
+            >
+                <Drawer.Portal>
+                    {/* the closing overlay and sheet stay mounted for the exit animation; let taps through to the page */}
+                    <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=closed]:pointer-events-none!" />
+                    <Drawer.Content
+                        data-slot="sheet"
+                        role={role}
+                        onOpenAutoFocus={rememberOpener}
+                        onCloseAutoFocus={restoreOpener}
+                        {...(description
+                            ? {}
+                            : { 'aria-describedby': undefined })}
+                        className={cn(
+                            'fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none data-[state=closed]:pointer-events-none!',
+                            hudClass,
+                            sheetClasses(className)
+                        )}
+                    >
+                        <div
+                            data-slot="sheet-handle"
+                            aria-hidden
+                            className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted"
+                        />
+                        <div className="space-y-1 px-4 pt-3 pb-2">
+                            <Drawer.Title
+                                className={cn(
+                                    'text-lg leading-tight font-semibold',
+                                    hud && HUD_TITLE
+                                )}
+                            >
+                                {title}
+                            </Drawer.Title>
+                            {description ? (
+                                <Drawer.Description className="text-sm text-muted-foreground">
+                                    {description}
+                                </Drawer.Description>
+                            ) : null}
+                        </div>
+                        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+                            <InsideSheet.Provider value={true}>
+                                {body}
+                            </InsideSheet.Provider>
+                        </div>
+                        {footer ? (
+                            <div
+                                data-slot="sheet-footer"
+                                className={cn(
+                                    'flex gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1',
+                                    hud && 'border-hud-rule bg-hud-page/95'
+                                )}
+                            >
+                                {footer}
+                            </div>
+                        ) : null}
+                    </Drawer.Content>
+                </Drawer.Portal>
+            </Root>
+        );
     }
-  };
 
-  const handleOpenChange = (next: boolean) => {
-    if (!next && !dismissible) return;
-
-    onOpenChange(next);
-  };
-
-  if (isMobile) {
-    const Root = nested ? Drawer.NestedRoot : Drawer.Root;
+    const block = (e: Event) => {
+        if (!dismissible) e.preventDefault();
+    };
 
     return (
-      <Root open={open} onOpenChange={handleOpenChange} dismissible={dismissible}>
-        <Drawer.Portal>
-          {/* the closing overlay and sheet stay mounted for the exit animation; let taps through to the page */}
-          <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=closed]:pointer-events-none!" />
-          <Drawer.Content data-slot="sheet" role={role} onOpenAutoFocus={rememberOpener} onCloseAutoFocus={restoreOpener} {...(description ? {} : { "aria-describedby": undefined })} className={cn("fixed inset-x-0 bottom-0 z-50 flex max-h-[90dvh] flex-col rounded-t-xl border-t bg-background outline-none data-[state=closed]:pointer-events-none!", hudClass, sheetClasses(className))}>
-            <div data-slot="sheet-handle" aria-hidden className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted" />
-            <div className="space-y-1 px-4 pt-3 pb-2">
-              <Drawer.Title className={cn("text-lg font-semibold leading-tight", hud && HUD_TITLE)}>{title}</Drawer.Title>
-              {description ? <Drawer.Description className="text-sm text-muted-foreground">{description}</Drawer.Description> : null}
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
-              <InsideSheet.Provider value={true}>{body}</InsideSheet.Provider>
-            </div>
-            {footer ? (
-              <div data-slot="sheet-footer" className={cn("flex gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1", hud && "border-hud-rule bg-hud-page/95")}>
-                {footer}
-              </div>
-            ) : null}
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Root>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
+            <DialogContent
+                role={role}
+                onOpenAutoFocus={rememberOpener}
+                onCloseAutoFocus={restoreOpener}
+                {...(description ? {} : { 'aria-describedby': undefined })}
+                className={cn(
+                    'flex flex-col overflow-hidden',
+                    SIZE_CLASS[size],
+                    hudClass,
+                    desktopClasses(className)
+                )}
+                showCloseButton={dismissible}
+                onEscapeKeyDown={block}
+                onInteractOutside={block}
+            >
+                <DialogHeader>
+                    <DialogTitle className={cn(hud && HUD_TITLE)}>
+                        {title}
+                    </DialogTitle>
+                    {description ? (
+                        <DialogDescription>{description}</DialogDescription>
+                    ) : null}
+                </DialogHeader>
+                <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">
+                    {body}
+                </div>
+                {footer ? (
+                    <DialogFooter className={cn(hud && 'border-hud-rule')}>
+                        {footer}
+                    </DialogFooter>
+                ) : null}
+            </DialogContent>
+        </Dialog>
     );
-  }
-
-  const block = (e: Event) => {
-    if (!dismissible) e.preventDefault();
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent
-        role={role}
-        onOpenAutoFocus={rememberOpener}
-        onCloseAutoFocus={restoreOpener}
-        {...(description ? {} : { "aria-describedby": undefined })}
-        className={cn("flex flex-col overflow-hidden", SIZE_CLASS[size], hudClass, desktopClasses(className))}
-        showCloseButton={dismissible}
-        onEscapeKeyDown={block}
-        onInteractOutside={block}
-      >
-        <DialogHeader>
-          <DialogTitle className={cn(hud && HUD_TITLE)}>{title}</DialogTitle>
-          {description ? <DialogDescription>{description}</DialogDescription> : null}
-        </DialogHeader>
-        <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">{body}</div>
-        {footer ? <DialogFooter className={cn(hud && "border-hud-rule")}>{footer}</DialogFooter> : null}
-      </DialogContent>
-    </Dialog>
-  );
 }

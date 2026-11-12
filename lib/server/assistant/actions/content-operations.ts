@@ -1,164 +1,434 @@
-import type { ActionPreview, AssistantActionDef, EffectDescription, TargetRef } from "../types";
-import { withContentEffects } from "./content-effects";
-import { contentMediaHandoff } from "./content-media";
-import { operationPreview } from "./content-operation-preview";
-import { contentOperationState } from "./content-preview";
-import { contentSnapshot, jsonContent, snapshotHash } from "./content-snapshot";
+import type {
+    ActionPreview,
+    AssistantActionDef,
+    EffectDescription,
+    TargetRef,
+} from '../types';
+import { withContentEffects } from './content-effects';
+import { contentMediaHandoff } from './content-media';
+import { operationPreview } from './content-operation-preview';
+import { contentOperationState } from './content-preview';
+import { contentSnapshot, jsonContent, snapshotHash } from './content-snapshot';
 
-import "server-only";
-import { ALL_REFERENCE_KINDS } from "@/lib/cache/tags";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import type { Locale } from "@/lib/i18n/config";
-import { getTranslator } from "@/lib/i18n/translator";
-import { ContentError } from "@/lib/server/content/errors";
-import { translateImportReport } from "@/lib/server/content/import/translate-report";
-import { type ContentOperationId, contentOperationSchema, runContentOperation } from "@/lib/server/content/operation-service";
-import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
-import { withCampaignRuntimeWrite } from "@/lib/server/content/write";
-import { previewSourceSelection } from "@/lib/server/templates/sync/apply";
-import { pageSourceDiff } from "@/lib/server/templates/sync/page-diff";
-import type { Actor } from "@/lib/utils/api/actor";
-import type { SourceDiff } from "@/types/campaigns";
-import type { ImportReport } from "@/types/content-import";
+import 'server-only';
+import { ALL_REFERENCE_KINDS } from '@/lib/cache/tags';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import type { Locale } from '@/lib/i18n/config';
+import { getTranslator } from '@/lib/i18n/translator';
+import { ContentError } from '@/lib/server/content/errors';
+import { translateImportReport } from '@/lib/server/content/import/translate-report';
+import {
+    type ContentOperationId,
+    contentOperationSchema,
+    runContentOperation,
+} from '@/lib/server/content/operation-service';
+import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
+import { withCampaignRuntimeWrite } from '@/lib/server/content/write';
+import { previewSourceSelection } from '@/lib/server/templates/sync/apply';
+import { pageSourceDiff } from '@/lib/server/templates/sync/page-diff';
+import type { Actor } from '@/lib/utils/api/actor';
+import type { SourceDiff } from '@/types/campaigns';
+import type { ImportReport } from '@/types/content-import';
 
-type Selection = { sourceId: string; items: Array<{ scope: string; key: string; name: string; status: string; before: unknown; after: unknown }>; autoAdded: unknown[]; credits: { before: string | null; after: string | null } };
+type Selection = {
+    sourceId: string;
+    items: Array<{
+        scope: string;
+        key: string;
+        name: string;
+        status: string;
+        before: unknown;
+        after: unknown;
+    }>;
+    autoAdded: unknown[];
+    credits: { before: string | null; after: string | null };
+};
 type Deps = {
-  snapshot?: (actor: Actor) => Promise<unknown>;
-  operationState?: (actor: Actor, state: unknown, operation: string, input: Record<string, unknown>) => Promise<unknown>;
-  guard?: <T>(id: string, fn: () => Promise<T>) => Promise<T>;
-  invoke?: (id: ContentOperationId, actor: Actor, input: unknown, locale: Locale | null) => Promise<unknown>;
-  sourcePreview?: (actor: Actor, input: unknown) => Promise<Selection>;
+    snapshot?: (actor: Actor) => Promise<unknown>;
+    operationState?: (
+        actor: Actor,
+        state: unknown,
+        operation: string,
+        input: Record<string, unknown>
+    ) => Promise<unknown>;
+    guard?: <T>(id: string, fn: () => Promise<T>) => Promise<T>;
+    invoke?: (
+        id: ContentOperationId,
+        actor: Actor,
+        input: unknown,
+        locale: Locale | null
+    ) => Promise<unknown>;
+    sourcePreview?: (actor: Actor, input: unknown) => Promise<Selection>;
 };
 
-export function createContentOperationActions(deps: Deps = {}): AssistantActionDef[] {
-  const invoke = deps.invoke ?? runContentOperation;
+export function createContentOperationActions(
+    deps: Deps = {}
+): AssistantActionDef[] {
+    const invoke = deps.invoke ?? runContentOperation;
 
-  const guard = deps.guard ?? ((id, fn) => withCampaignRuntimeWrite(id, fn));
+    const guard = deps.guard ?? ((id, fn) => withCampaignRuntimeWrite(id, fn));
 
-  const snapshot = deps.snapshot ?? contentSnapshot;
+    const snapshot = deps.snapshot ?? contentSnapshot;
 
-  const loadState = deps.operationState ?? (deps.snapshot ? async (_actor: Actor, state: unknown) => state : (actor: Actor, _state: unknown, operation: string, input: Record<string, unknown>) => contentOperationState(actor, operation, input));
+    const loadState =
+        deps.operationState ??
+        (deps.snapshot
+            ? async (_actor: Actor, state: unknown) => state
+            : (
+                  actor: Actor,
+                  _state: unknown,
+                  operation: string,
+                  input: Record<string, unknown>
+              ) => contentOperationState(actor, operation, input));
 
-  const sourcePreview = deps.sourcePreview ?? (async (actor, input) => {
-    const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { createdFromId: true } });
+    const sourcePreview =
+        deps.sourcePreview ??
+        (async (actor, input) => {
+            const campaign = await prisma.campaign.findUnique({
+                where: { id: actor.campaignId },
+                select: { createdFromId: true },
+            });
 
-    if (campaign?.createdFromId) {
-      // The executor already holds the target. NOWAIT prevents opposite syncs
-      // from deadlocking while ensuring source writes cannot race the guard.
-      await prisma.$queryRaw`SELECT id FROM campaigns WHERE id = ${campaign.createdFromId} FOR SHARE NOWAIT`;
-    }
+            if (campaign?.createdFromId) {
+                // The executor already holds the target. NOWAIT prevents opposite syncs
+                // from deadlocking while ensuring source writes cannot race the guard.
+                await prisma.$queryRaw`SELECT id FROM campaigns WHERE id = ${campaign.createdFromId} FOR SHARE NOWAIT`;
+            }
 
-    return previewSourceSelection(prisma, actor.campaignId, CONTENT_OPERATIONS["source.apply"].body.parse(input), actor);
-  });
+            return previewSourceSelection(
+                prisma,
+                actor.campaignId,
+                CONTENT_OPERATIONS['source.apply'].body.parse(input),
+                actor
+            );
+        });
 
-  const actions: AssistantActionDef[] = [];
+    const actions: AssistantActionDef[] = [];
 
-  for (const operation of Object.values(CONTENT_OPERATIONS)) {
-    const schema = contentOperationSchema(operation.id);
+    for (const operation of Object.values(CONTENT_OPERATIONS)) {
+        const schema = contentOperationSchema(operation.id);
 
-    const base = { id: operation.id, title: operation.summary, description: operation.description, input: schema, need: operation.need };
+        const base = {
+            id: operation.id,
+            title: operation.summary,
+            description: operation.description,
+            input: schema,
+            need: operation.need,
+        };
 
-    if (operation.id === "campaign.export") {
-      // One canonical id retains the existing content:read grant. The browser
-      // downloads raw bundles; tool history must never contain source notes.
-      actions.push({ ...base, effect: "handoff", execute: async (caller) => ({ href: `/api/campaigns/${caller.actor.campaignId}/export`, reason: (await getTranslator(caller.locale, "assistant"))("handoffs.campaignExport") }) });
-      continue;
-    }
-
-    if (operation.method === "GET") {
-      actions.push({ ...base, effect: "read", execute: async (caller, raw) => {
-        const input = raw as Record<string, unknown>;
-
-        const data = await invoke(operation.id, caller.actor, input, caller.locale);
-
-        return { data: jsonContent(operation.id === "source.diff" ? pageSourceDiff(data as SourceDiff, Number(input.offset), Number(input.limit)) : data), affected: [], warnings: [] };
-      } });
-      continue;
-    }
-
-    actions.push({ ...base, effect: "write", confirmation: operation.need.sessionOnly || ["spell-groups.remove-all-spells", "skill-trees.save"].includes(operation.id) ? "always" : "standard",
-      prepare: async (caller, raw) => guard(caller.actor.campaignId, async (): Promise<ActionPreview> => {
-        const t = await getTranslator(caller.locale, "assistant");
-
-        const label = t(`operations.${operation.id}`);
-
-        const input = raw as Record<string, unknown>;
-
-        const body = (input as Record<string, unknown>).body;
-
-        const target: TargetRef = { domain: "content", id: caller.actor.campaignId, name: label };
-
-        const state = await snapshot(caller.actor);
-
-        const warnings: string[] = [];
-
-        let targets = [target];
-
-        const projected = operationPreview(operation.id, input, t, await loadState(caller.actor, state, operation.id, input));
-
-        if (projected?.targets.length) targets = projected.targets;
-
-        let changes = projected?.changes ?? [{ target, path: "$operation", before: jsonContent(state), after: jsonContent(input) }];
-
-        let effects: EffectDescription[] = [{ kind: "update", targets, description: label }];
-
-        let selection: Selection | null = null;
-
-        if (operation.id === "source.apply") {
-          selection = await sourcePreview(caller.actor, body);
-          targets = selection.items.map((item) => ({ domain: item.scope, id: item.key, name: item.name }));
-          changes = selection.items.map((item, i) => ({ target: targets[i], path: "$record", before: jsonContent(item.before), after: jsonContent(item.after) }));
-          changes.push({ target, path: "credits", before: selection.credits.before, after: selection.credits.after });
-          effects = selection.items.map((item, i) => ({ kind: item.status === "deletedInSource" ? "delete" : item.scope === "skillTrees" ? "erase-progress" : "update", targets: [targets[i]], description: item.name }));
-
-          if (!effects.length) effects = [{ kind: "update", targets: [target], description: t("effects.sourceMarks") }];
-
-          warnings.push(t("warnings.sourceApply"));
-        } else if (operation.id === "content.import") {
-          const parsed = CONTENT_OPERATIONS["content.import"].body.parse(body);
-
-          if (parsed.dryRun) throw new ContentError(API_ERRORS.ASSISTANT_DRY_RUN_USE_PREVIEW, 400);
-
-          for (const row of parsed.rows) {
-            const handoff = contentMediaHandoff(String(input.kind), row);
-
-            if (handoff) throw new ContentError(handoff, 422, [{ code: "UI_HANDOFF", path: [] }]);
-          }
-
-          const report = await invoke("content.import", caller.actor, { ...input, body: { ...parsed, dryRun: true } }, null) as ImportReport;
-
-          const shown = translateImportReport(await getTranslator(caller.locale), report);
-
-          changes.push({ target, path: "$dryRun", before: null, after: jsonContent(shown) });
-          warnings.push(t("warnings.importPartial"), t("warnings.manualSetup"));
-
-          // The report is a guard too, kept untranslated so the digest is locale-independent.
-          return { summary: label, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), report: jsonContent(report) } };
-        } else if (operation.id === "spells.delete-by-level" || operation.id === "spell-groups.remove-all-spells") {
-          effects = [{ kind: "delete", targets, description: label }];
-        } else if (operation.id === "skill-trees.save") {
-          effects = [{ kind: "erase-progress", targets, description: t("effects.skillTreeReplace") }];
+        if (operation.id === 'campaign.export') {
+            // One canonical id retains the existing content:read grant. The browser
+            // downloads raw bundles; tool history must never contain source notes.
+            actions.push({
+                ...base,
+                effect: 'handoff',
+                execute: async (caller) => ({
+                    href: `/api/campaigns/${caller.actor.campaignId}/export`,
+                    reason: (await getTranslator(caller.locale, 'assistant'))(
+                        'handoffs.campaignExport'
+                    ),
+                }),
+            });
+            continue;
         }
 
-        return { summary: label, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), selection: jsonContent(selection) } };
-      }),
-      execute: async (ctx, input) => withContentEffects(ctx, ALL_REFERENCE_KINDS, async () => {
-        const data = await invoke(operation.id, ctx.caller.actor, input, ctx.caller.locale);
+        if (operation.method === 'GET') {
+            actions.push({
+                ...base,
+                effect: 'read',
+                execute: async (caller, raw) => {
+                    const input = raw as Record<string, unknown>;
 
-        const report = data as { counts?: { error: number } };
+                    const data = await invoke(
+                        operation.id,
+                        caller.actor,
+                        input,
+                        caller.locale
+                    );
 
-        const t = await getTranslator(ctx.caller.locale, "assistant");
+                    return {
+                        data: jsonContent(
+                            operation.id === 'source.diff'
+                                ? pageSourceDiff(
+                                      data as SourceDiff,
+                                      Number(input.offset),
+                                      Number(input.limit)
+                                  )
+                                : data
+                        ),
+                        affected: [],
+                        warnings: [],
+                    };
+                },
+            });
+            continue;
+        }
 
-        return { data: jsonContent(data), affected: [{ domain: "content", id: ctx.caller.actor.campaignId, name: t(`operations.${operation.id}`) }], warnings: operation.id === "content.import" && report?.counts?.error ? [t("warnings.importPartialDone")] : [] };
-      }),
+        actions.push({
+            ...base,
+            effect: 'write',
+            confirmation:
+                operation.need.sessionOnly ||
+                ['spell-groups.remove-all-spells', 'skill-trees.save'].includes(
+                    operation.id
+                )
+                    ? 'always'
+                    : 'standard',
+            prepare: async (caller, raw) =>
+                guard(
+                    caller.actor.campaignId,
+                    async (): Promise<ActionPreview> => {
+                        const t = await getTranslator(
+                            caller.locale,
+                            'assistant'
+                        );
+
+                        const label = t(`operations.${operation.id}`);
+
+                        const input = raw as Record<string, unknown>;
+
+                        const body = (input as Record<string, unknown>).body;
+
+                        const target: TargetRef = {
+                            domain: 'content',
+                            id: caller.actor.campaignId,
+                            name: label,
+                        };
+
+                        const state = await snapshot(caller.actor);
+
+                        const warnings: string[] = [];
+
+                        let targets = [target];
+
+                        const projected = operationPreview(
+                            operation.id,
+                            input,
+                            t,
+                            await loadState(
+                                caller.actor,
+                                state,
+                                operation.id,
+                                input
+                            )
+                        );
+
+                        if (projected?.targets.length)
+                            targets = projected.targets;
+
+                        let changes = projected?.changes ?? [
+                            {
+                                target,
+                                path: '$operation',
+                                before: jsonContent(state),
+                                after: jsonContent(input),
+                            },
+                        ];
+
+                        let effects: EffectDescription[] = [
+                            { kind: 'update', targets, description: label },
+                        ];
+
+                        let selection: Selection | null = null;
+
+                        if (operation.id === 'source.apply') {
+                            selection = await sourcePreview(caller.actor, body);
+                            targets = selection.items.map((item) => ({
+                                domain: item.scope,
+                                id: item.key,
+                                name: item.name,
+                            }));
+                            changes = selection.items.map((item, i) => ({
+                                target: targets[i],
+                                path: '$record',
+                                before: jsonContent(item.before),
+                                after: jsonContent(item.after),
+                            }));
+                            changes.push({
+                                target,
+                                path: 'credits',
+                                before: selection.credits.before,
+                                after: selection.credits.after,
+                            });
+                            effects = selection.items.map((item, i) => ({
+                                kind:
+                                    item.status === 'deletedInSource'
+                                        ? 'delete'
+                                        : item.scope === 'skillTrees'
+                                          ? 'erase-progress'
+                                          : 'update',
+                                targets: [targets[i]],
+                                description: item.name,
+                            }));
+
+                            if (!effects.length)
+                                effects = [
+                                    {
+                                        kind: 'update',
+                                        targets: [target],
+                                        description: t('effects.sourceMarks'),
+                                    },
+                                ];
+
+                            warnings.push(t('warnings.sourceApply'));
+                        } else if (operation.id === 'content.import') {
+                            const parsed =
+                                CONTENT_OPERATIONS['content.import'].body.parse(
+                                    body
+                                );
+
+                            if (parsed.dryRun)
+                                throw new ContentError(
+                                    API_ERRORS.ASSISTANT_DRY_RUN_USE_PREVIEW,
+                                    400
+                                );
+
+                            for (const row of parsed.rows) {
+                                const handoff = contentMediaHandoff(
+                                    String(input.kind),
+                                    row
+                                );
+
+                                if (handoff)
+                                    throw new ContentError(handoff, 422, [
+                                        { code: 'UI_HANDOFF', path: [] },
+                                    ]);
+                            }
+
+                            const report = (await invoke(
+                                'content.import',
+                                caller.actor,
+                                { ...input, body: { ...parsed, dryRun: true } },
+                                null
+                            )) as ImportReport;
+
+                            const shown = translateImportReport(
+                                await getTranslator(caller.locale),
+                                report
+                            );
+
+                            changes.push({
+                                target,
+                                path: '$dryRun',
+                                before: null,
+                                after: jsonContent(shown),
+                            });
+                            warnings.push(
+                                t('warnings.importPartial'),
+                                t('warnings.manualSetup')
+                            );
+
+                            // The report is a guard too, kept untranslated so the digest is locale-independent.
+                            return {
+                                summary: label,
+                                targets,
+                                changes,
+                                warnings,
+                                effects,
+                                preconditions: {
+                                    snapshot: snapshotHash(state),
+                                    input: jsonContent(input),
+                                    report: jsonContent(report),
+                                },
+                            };
+                        } else if (
+                            operation.id === 'spells.delete-by-level' ||
+                            operation.id === 'spell-groups.remove-all-spells'
+                        ) {
+                            effects = [
+                                { kind: 'delete', targets, description: label },
+                            ];
+                        } else if (operation.id === 'skill-trees.save') {
+                            effects = [
+                                {
+                                    kind: 'erase-progress',
+                                    targets,
+                                    description: t('effects.skillTreeReplace'),
+                                },
+                            ];
+                        }
+
+                        return {
+                            summary: label,
+                            targets,
+                            changes,
+                            warnings,
+                            effects,
+                            preconditions: {
+                                snapshot: snapshotHash(state),
+                                input: jsonContent(input),
+                                selection: jsonContent(selection),
+                            },
+                        };
+                    }
+                ),
+            execute: async (ctx, input) =>
+                withContentEffects(ctx, ALL_REFERENCE_KINDS, async () => {
+                    const data = await invoke(
+                        operation.id,
+                        ctx.caller.actor,
+                        input,
+                        ctx.caller.locale
+                    );
+
+                    const report = data as { counts?: { error: number } };
+
+                    const t = await getTranslator(
+                        ctx.caller.locale,
+                        'assistant'
+                    );
+
+                    return {
+                        data: jsonContent(data),
+                        affected: [
+                            {
+                                domain: 'content',
+                                id: ctx.caller.actor.campaignId,
+                                name: t(`operations.${operation.id}`),
+                            },
+                        ],
+                        warnings:
+                            operation.id === 'content.import' &&
+                            report?.counts?.error
+                                ? [t('warnings.importPartialDone')]
+                                : [],
+                    };
+                }),
+        });
+    }
+    actions.push({
+        id: 'content.import-preview',
+        title: 'Check import',
+        description: 'Dry run without writing or an intent',
+        input: contentOperationSchema('content.import'),
+        need: CONTENT_OPERATIONS['content.import'].need,
+        effect: 'read',
+        execute: async (caller, raw) => {
+            const input = contentOperationSchema('content.import').parse(raw);
+
+            return {
+                data: jsonContent(
+                    await invoke(
+                        'content.import',
+                        caller.actor,
+                        {
+                            ...input,
+                            body: {
+                                ...CONTENT_OPERATIONS[
+                                    'content.import'
+                                ].body.parse(input.body),
+                                dryRun: true,
+                            },
+                        },
+                        caller.locale
+                    )
+                ),
+                affected: [],
+                warnings: [],
+            };
+        },
     });
-  }
-  actions.push({ id: "content.import-preview", title: "Check import", description: "Dry run without writing or an intent", input: contentOperationSchema("content.import"), need: CONTENT_OPERATIONS["content.import"].need, effect: "read", execute: async (caller, raw) => {
-    const input = contentOperationSchema("content.import").parse(raw);
 
-    return { data: jsonContent(await invoke("content.import", caller.actor, { ...input, body: { ...CONTENT_OPERATIONS["content.import"].body.parse(input.body), dryRun: true } }, caller.locale)), affected: [], warnings: [] };
-  } });
-
-  return actions;
+    return actions;
 }

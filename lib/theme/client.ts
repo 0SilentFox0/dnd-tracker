@@ -1,36 +1,55 @@
-import { DEFAULT_PALETTE, isPalettePath, LIGHT_PALETTES, PALETTE_IDS, paletteFor } from "@/lib/theme/palettes";
-import type { PaletteId, PaletteSettings } from "@/types/theme";
+import {
+    DEFAULT_PALETTE,
+    isPalettePath,
+    LIGHT_PALETTES,
+    PALETTE_IDS,
+    paletteFor,
+} from '@/lib/theme/palettes';
+import type { PaletteId, PaletteSettings } from '@/types/theme';
 
-export const ACTIVE_PALETTE_KEY = "dnd-palette-active";
+export const ACTIVE_PALETTE_KEY = 'dnd-palette-active';
 export const paletteStorageKey = (userId: string) => `dnd-palette:${userId}`;
 
 export function readCachedPalette(userId: string): PaletteId {
-  try { return paletteFor(localStorage.getItem(paletteStorageKey(userId))); } catch { return DEFAULT_PALETTE; }
+    try {
+        return paletteFor(localStorage.getItem(paletteStorageKey(userId)));
+    } catch {
+        return DEFAULT_PALETTE;
+    }
 }
 
 export function cachePalette(settings: PaletteSettings): void {
-  try {
-    localStorage.setItem(paletteStorageKey(settings.userId), settings.palette);
-    localStorage.setItem(ACTIVE_PALETTE_KEY, JSON.stringify(settings));
-  } catch { /* Browsers with disabled storage still support the account setting. */ }
+    try {
+        localStorage.setItem(
+            paletteStorageKey(settings.userId),
+            settings.palette
+        );
+        localStorage.setItem(ACTIVE_PALETTE_KEY, JSON.stringify(settings));
+    } catch {
+        /* Browsers with disabled storage still support the account setting. */
+    }
 }
 
 export function clearActivePalette(): void {
-  try { localStorage.removeItem(ACTIVE_PALETTE_KEY); } catch { /* Storage is optional. */ }
+    try {
+        localStorage.removeItem(ACTIVE_PALETTE_KEY);
+    } catch {
+        /* Storage is optional. */
+    }
 }
 
 export function applyPalette(palette: PaletteId | null): void {
-  const root = document.documentElement;
+    const root = document.documentElement;
 
-  if (palette === null) {
-    root.removeAttribute("data-palette");
-    root.classList.add("dark");
+    if (palette === null) {
+        root.removeAttribute('data-palette');
+        root.classList.add('dark');
 
-    return;
-  }
+        return;
+    }
 
-  root.dataset.palette = palette;
-  root.classList.toggle("dark", !LIGHT_PALETTES.includes(palette));
+    root.dataset.palette = palette;
+    root.classList.toggle('dark', !LIGHT_PALETTES.includes(palette));
 }
 
 // Runs before paint; only validated identifiers enter the DOM. The root stays static.

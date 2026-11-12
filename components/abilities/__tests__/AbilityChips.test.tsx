@@ -1,35 +1,61 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AbilityChips, pickAfterRemove } from "@/components/abilities/AbilityChips";
-import type { Ability } from "@/lib/utils/abilities/schema";
+import {
+    AbilityChips,
+    pickAfterRemove,
+} from '@/components/abilities/AbilityChips';
+import type { Ability } from '@/lib/utils/abilities/schema';
 
-const ab = (id: string, name: string): Ability => ({ id, name, trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] });
-
-describe("pickAfterRemove", () => {
-  it("picks right neighbour, then left, then null", () => {
-    expect(pickAfterRemove(["a", "b", "c"], 1)).toBe("c");
-    expect(pickAfterRemove(["a", "b", "c"], 2)).toBe("b");
-    expect(pickAfterRemove(["a"], 0)).toBeNull();
-  });
+const ab = (id: string, name: string): Ability => ({
+    id,
+    name,
+    trigger: { event: 'passive' },
+    effects: [{ kind: 'note', text: 'x' }],
 });
 
-describe("AbilityChips", () => {
-  afterEach(cleanup);
+describe('pickAfterRemove', () => {
+    it('picks right neighbour, then left, then null', () => {
+        expect(pickAfterRemove(['a', 'b', 'c'], 1)).toBe('c');
+        expect(pickAfterRemove(['a', 'b', 'c'], 2)).toBe('b');
+        expect(pickAfterRemove(['a'], 0)).toBeNull();
+    });
+});
 
-  it("marks selected and invalid chips and adds", () => {
-    const onAdd = vi.fn();
+describe('AbilityChips', () => {
+    afterEach(cleanup);
 
-    const onSelect = vi.fn();
+    it('marks selected and invalid chips and adds', () => {
+        const onAdd = vi.fn();
 
-    render(<AbilityChips abilities={[ab("a", "Лють"), ab("b", "Кровотеча")]} selectedId="a" invalidIds={new Set(["b"])} onSelect={onSelect} onAdd={onAdd} />);
+        const onSelect = vi.fn();
 
-    expect(screen.getByRole("tab", { name: /Лють/ }).getAttribute("aria-selected")).toBe("true");
-    expect(screen.getByRole("tab", { name: /Кровотеча/ }).querySelector("[data-invalid-dot]")).not.toBeNull();
-    fireEvent.click(screen.getByRole("tab", { name: /Кровотеча/ }));
-    expect(onSelect).toHaveBeenCalledWith("b");
-    fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
-    expect(onAdd).toHaveBeenCalled();
-  });
+        render(
+            <AbilityChips
+                abilities={[ab('a', 'Лють'), ab('b', 'Кровотеча')]}
+                selectedId="a"
+                invalidIds={new Set(['b'])}
+                onSelect={onSelect}
+                onAdd={onAdd}
+            />
+        );
+
+        expect(
+            screen
+                .getByRole('tab', { name: /Лють/ })
+                .getAttribute('aria-selected')
+        ).toBe('true');
+        expect(
+            screen
+                .getByRole('tab', { name: /Кровотеча/ })
+                .querySelector('[data-invalid-dot]')
+        ).not.toBeNull();
+        fireEvent.click(screen.getByRole('tab', { name: /Кровотеча/ }));
+        expect(onSelect).toHaveBeenCalledWith('b');
+        fireEvent.click(
+            screen.getByRole('button', { name: 'abilities.chips.add' })
+        );
+        expect(onAdd).toHaveBeenCalled();
+    });
 });

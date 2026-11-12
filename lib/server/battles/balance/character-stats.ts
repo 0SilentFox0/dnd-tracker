@@ -1,27 +1,52 @@
-import { ParticipantSide } from "@/lib/constants/battle";
-import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
-import { prisma } from "@/lib/db";
-import { buildCampaignContextForStart } from "@/lib/server/battles/mutations/start/start-build-context";
-import { systemServerOf } from "@/lib/server/systems/registry";
-import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
+import { prisma } from '@/lib/db';
+import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
+import { systemServerOf } from '@/lib/server/systems/registry';
+import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant';
+import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 
 /** Same participants as at battle start, from one context load (no per-character queries). */
-export async function loadCharacterBalanceStats(campaignId: string, characterIds?: string[], rules: Ruleset = DEFAULT_RULES) {
-  const characters = await prisma.character.findMany({
-    where: { campaignId, ...ACTIVE_CHARACTER, ...(characterIds && { id: { in: characterIds } }) },
-    include: { inventory: true },
-  });
+export async function loadCharacterBalanceStats(
+    campaignId: string,
+    characterIds?: string[],
+    rules: Ruleset = DEFAULT_RULES
+) {
+    const characters = await prisma.character.findMany({
+        where: {
+            campaignId,
+            ...ACTIVE_CHARACTER,
+            ...(characterIds && { id: { in: characterIds } }),
+        },
+        include: { inventory: true },
+    });
 
-  if (characters.length === 0) return [];
+    if (characters.length === 0) return [];
 
-  const { campaignContext } = await buildCampaignContextForStart(campaignId, characters, []);
+    const { campaignContext } = await buildCampaignContextForStart(
+        campaignId,
+        characters,
+        []
+    );
 
-  return Promise.all(
-    characters.map(async (character) => {
-      const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, campaignContext);
+    return Promise.all(
+        characters.map(async (character) => {
+            const built = await createBattleParticipantFromCharacter(
+                character,
+                '',
+                ParticipantSide.ALLY,
+                undefined,
+                campaignContext
+            );
 
-      return { character, ...systemServerOf(rules).balance.heroPower({ built, character, campaignContext }) };
-    }),
-  );
+            return {
+                character,
+                ...systemServerOf(rules).balance.heroPower({
+                    built,
+                    character,
+                    campaignContext,
+                }),
+            };
+        })
+    );
 }

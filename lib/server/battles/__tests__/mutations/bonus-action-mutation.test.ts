@@ -1,77 +1,165 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { context, goblin, participant } from "./fixtures";
+import { context, goblin, participant } from './fixtures';
 
-import { bonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
-import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { BattleAccessError } from "@/lib/utils/battle/store";
-import { REJECT } from "@/lib/utils/battle/store/reject";
+import { bonusActionMutation } from '@/lib/server/battles/mutations/bonus-action/bonus-action-mutation';
+import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
+import { BattleAccessError } from '@/lib/utils/battle/store';
+import { REJECT } from '@/lib/utils/battle/store/reject';
 
-const rally = resolved({ id: "r", trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "changeMorale", delta: 1, target: "eventTarget" }] });
+const rally = resolved({
+    id: 'r',
+    trigger: { event: 'bonusAction' },
+    limits: { perBattle: 1 },
+    effects: [{ kind: 'changeMorale', delta: 1, target: 'eventTarget' }],
+});
 
-const hero = participant("hero", { controlledBy: "user-1" }, {});
+const hero = participant('hero', { controlledBy: 'user-1' }, {});
 
-const heroWith = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [rally] } };
+const heroWith = {
+    ...hero,
+    battleData: { ...hero.battleData, resolvedAbilities: [rally] },
+};
 
-describe("bonusActionMutation", () => {
-  it("виконує обране вміння, витрачає бонусну дію і ліміт", async () => {
-    const r = await bonusActionMutation(context({ participants: [heroWith, goblin] }), { participantId: "hero", abilityKey: rally.key, targetParticipantId: "hero" });
+describe('bonusActionMutation', () => {
+    it('виконує обране вміння, витрачає бонусну дію і ліміт', async () => {
+        const r = await bonusActionMutation(
+            context({ participants: [heroWith, goblin] }),
+            {
+                participantId: 'hero',
+                abilityKey: rally.key,
+                targetParticipantId: 'hero',
+            }
+        );
 
-    const h = r.participants.find((p) => p.basicInfo.id === "hero");
+        const h = r.participants.find((p) => p.basicInfo.id === 'hero');
 
-    if (!h) throw new Error("hero missing");
+        if (!h) throw new Error('hero missing');
 
-    expect(h.combatStats.morale).toBe(1);
-    expect(h.actionFlags.hasUsedBonusAction).toBe(true);
-    expect(h.battleData.abilityUsage?.[rally.key].battle).toBe(1);
-    expect(r.events[0]).toMatchObject({ type: "ability", details: { actionDetails: { abilityKey: rally.key, skillName: rally.name } } });
-  });
+        expect(h.combatStats.morale).toBe(1);
+        expect(h.actionFlags.hasUsedBonusAction).toBe(true);
+        expect(h.battleData.abilityUsage?.[rally.key].battle).toBe(1);
+        expect(r.events[0]).toMatchObject({
+            type: 'ability',
+            details: {
+                actionDetails: { abilityKey: rally.key, skillName: rally.name },
+            },
+        });
+    });
 
-  it("мітка «атакуючі мають перевагу» — лише на ворога; союзник → invalid_target", async () => {
-    const mark = resolved({ id: "m", trigger: { event: "bonusAction" }, effects: [{ kind: "flag", flag: "advantageForAttackers", target: "eventTarget", duration: { rounds: 1 } }] });
+    it('мітка «атакуючі мають перевагу» — лише на ворога; союзник → invalid_target', async () => {
+        const mark = resolved({
+            id: 'm',
+            trigger: { event: 'bonusAction' },
+            effects: [
+                {
+                    kind: 'flag',
+                    flag: 'advantageForAttackers',
+                    target: 'eventTarget',
+                    duration: { rounds: 1 },
+                },
+            ],
+        });
 
-    const hunter = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [mark] } };
+        const hunter = {
+            ...hero,
+            battleData: { ...hero.battleData, resolvedAbilities: [mark] },
+        };
 
-    const ally = participant("ally", {}, {});
+        const ally = participant('ally', {}, {});
 
-    await expect(bonusActionMutation(context({ participants: [hunter, ally, goblin] }), { participantId: "hero", abilityKey: mark.key, targetParticipantId: "ally" })).rejects.toThrow(
-      expect.objectContaining({ code: "invalid_target" }),
-    );
+        await expect(
+            bonusActionMutation(
+                context({ participants: [hunter, ally, goblin] }),
+                {
+                    participantId: 'hero',
+                    abilityKey: mark.key,
+                    targetParticipantId: 'ally',
+                }
+            )
+        ).rejects.toThrow(expect.objectContaining({ code: 'invalid_target' }));
 
-    const r = await bonusActionMutation(context({ participants: [hunter, ally, goblin] }), { participantId: "hero", abilityKey: mark.key, targetParticipantId: goblin.basicInfo.id });
+        const r = await bonusActionMutation(
+            context({ participants: [hunter, ally, goblin] }),
+            {
+                participantId: 'hero',
+                abilityKey: mark.key,
+                targetParticipantId: goblin.basicInfo.id,
+            }
+        );
 
-    expect(r.events[0]).toMatchObject({ type: "ability" });
-  });
+        expect(r.events[0]).toMatchObject({ type: 'ability' });
+    });
 
-  it("ліміт вичерпано → ability_limit", async () => {
-    const used = { ...heroWith, battleData: { ...heroWith.battleData, abilityUsage: { [rally.key]: { battle: 1, round: 1, turn: 1 } } } };
+    it('ліміт вичерпано → ability_limit', async () => {
+        const used = {
+            ...heroWith,
+            battleData: {
+                ...heroWith.battleData,
+                abilityUsage: { [rally.key]: { battle: 1, round: 1, turn: 1 } },
+            },
+        };
 
-    await expect(bonusActionMutation(context({ participants: [used, goblin] }), { participantId: "hero", abilityKey: rally.key })).rejects.toThrow(REJECT.abilityLimit);
-  });
+        await expect(
+            bonusActionMutation(context({ participants: [used, goblin] }), {
+                participantId: 'hero',
+                abilityKey: rally.key,
+            })
+        ).rejects.toThrow(REJECT.abilityLimit);
+    });
 
-  it("невідоме вміння → action_rejected", async () => {
-    await expect(bonusActionMutation(context({ participants: [heroWith, goblin] }), { participantId: "hero", abilityKey: "nope" })).rejects.toThrow();
-  });
+    it('невідоме вміння → action_rejected', async () => {
+        await expect(
+            bonusActionMutation(context({ participants: [heroWith, goblin] }), {
+                participantId: 'hero',
+                abilityKey: 'nope',
+            })
+        ).rejects.toThrow();
+    });
 
-  it("чужий учасник — 403; бонусна дія вже використана — action_used", async () => {
-    await expect(bonusActionMutation(context({ participants: [heroWith, goblin], userId: "someone" }), { participantId: "hero", abilityKey: rally.key })).rejects.toThrow(
-      BattleAccessError,
-    );
+    it('чужий учасник — 403; бонусна дія вже використана — action_used', async () => {
+        await expect(
+            bonusActionMutation(
+                context({
+                    participants: [heroWith, goblin],
+                    userId: 'someone',
+                }),
+                { participantId: 'hero', abilityKey: rally.key }
+            )
+        ).rejects.toThrow(BattleAccessError);
 
-    const used = { ...heroWith, actionFlags: { ...heroWith.actionFlags, hasUsedBonusAction: true } };
+        const used = {
+            ...heroWith,
+            actionFlags: { ...heroWith.actionFlags, hasUsedBonusAction: true },
+        };
 
-    await expect(bonusActionMutation(context({ participants: [used, goblin] }), { participantId: "hero", abilityKey: rally.key })).rejects.toThrow(
-      expect.objectContaining({ code: "action_used" }),
-    );
-  });
+        await expect(
+            bonusActionMutation(context({ participants: [used, goblin] }), {
+                participantId: 'hero',
+                abilityKey: rally.key,
+            })
+        ).rejects.toThrow(expect.objectContaining({ code: 'action_used' }));
+    });
 
-  it("учасник у паніці — action_used", async () => {
-    const panic = { participantId: "hero", d10Roll: 1, moraleResult: { shouldSkipTurn: true, hasExtraTurn: false, moralePositive: false, message: "" } };
+    it('учасник у паніці — action_used', async () => {
+        const panic = {
+            participantId: 'hero',
+            d10Roll: 1,
+            moraleResult: {
+                shouldSkipTurn: true,
+                hasExtraTurn: false,
+                moralePositive: false,
+                message: '',
+            },
+        };
 
-    const ctx = context({ participants: [heroWith, goblin] });
+        const ctx = context({ participants: [heroWith, goblin] });
 
-    await expect(bonusActionMutation({ ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } }, { participantId: "hero", abilityKey: rally.key })).rejects.toThrow(
-      expect.objectContaining({ code: "action_used" }),
-    );
-  });
+        await expect(
+            bonusActionMutation(
+                { ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } },
+                { participantId: 'hero', abilityKey: rally.key }
+            )
+        ).rejects.toThrow(expect.objectContaining({ code: 'action_used' }));
+    });
 });

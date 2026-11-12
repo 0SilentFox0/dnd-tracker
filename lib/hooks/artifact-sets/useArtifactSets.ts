@@ -1,36 +1,45 @@
-"use client";
+'use client';
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 
-import { artifactSetKeys } from "./keys";
+import { artifactSetKeys } from './keys';
 
 import {
-  type ArtifactSetCreatePayload,
-  createArtifactSet,
-  deleteArtifactSet,
-  getArtifactSets,
-  updateArtifactSet,
-} from "@/lib/api/artifact-sets";
-import { artifactKeys } from "@/lib/hooks/artifacts/keys";
-import { useCrudMutation } from "@/lib/hooks/common";
+    type ArtifactSetCreatePayload,
+    createArtifactSet,
+    deleteArtifactSet,
+    getArtifactSets,
+    updateArtifactSet,
+} from '@/lib/api/artifact-sets';
+import { artifactKeys } from '@/lib/hooks/artifacts/keys';
+import { useCrudMutation } from '@/lib/hooks/common';
 
 const keys = (campaignId: string) => [
-  artifactSetKeys.list(campaignId),
-  artifactKeys.list(campaignId),
+    artifactSetKeys.list(campaignId),
+    artifactKeys.list(campaignId),
 ];
 
 export function useArtifactSetsList(campaignId: string) {
-  return useQuery({ queryKey: artifactSetKeys.list(campaignId), queryFn: () => getArtifactSets(campaignId), enabled: !!campaignId });
+    return useQuery({
+        queryKey: artifactSetKeys.list(campaignId),
+        queryFn: () => getArtifactSets(campaignId),
+        enabled: !!campaignId,
+    });
 }
 
 export function useSaveArtifactSet(campaignId: string, setId?: string) {
-  return useCrudMutation({
-    mutationFn: (payload: ArtifactSetCreatePayload) =>
-      setId ? updateArtifactSet(campaignId, setId, payload) : createArtifactSet(campaignId, payload),
-    invalidateKeys: keys(campaignId),
-  });
+    return useCrudMutation({
+        mutationFn: (payload: ArtifactSetCreatePayload) =>
+            setId
+                ? updateArtifactSet(campaignId, setId, payload)
+                : createArtifactSet(campaignId, payload),
+        invalidateKeys: keys(campaignId),
+    });
 }
 
 export function useDeleteArtifactSet(campaignId: string) {
-  return useCrudMutation({ mutationFn: (setId: string) => deleteArtifactSet(campaignId, setId), invalidateKeys: keys(campaignId) });
+    return useCrudMutation({
+        mutationFn: (setId: string) => deleteArtifactSet(campaignId, setId),
+        invalidateKeys: keys(campaignId),
+    });
 }

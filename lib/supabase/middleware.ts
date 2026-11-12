@@ -1,142 +1,163 @@
-import { type NextRequest,NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { type NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
-import { LANDING_PATHS } from '@/lib/constants/site'
-import { bearerToken } from '@/lib/utils/api/bearer'
+import { LANDING_PATHS } from '@/lib/constants/site';
+import { bearerToken } from '@/lib/utils/api/bearer';
 
 /**
  * CSRF defense for mutating /api/* requests: Origin (або Sec-Fetch-Site) POST/PATCH/PUT/DELETE має бути same-origin.
  * Без Origin (server-side fetch, сторонні клієнти) запит пропускається — auth cookie все одно потрібна.
  * `/api/pusher/auth` не виключено: клієнт завжди same-origin.
  */
-const SIGN_OUT_PATH = "/auth/signout";
+const SIGN_OUT_PATH = '/auth/signout';
 
-export function rejectCrossOriginMutation(request: NextRequest): NextResponse | null {
-  const method = request.method.toUpperCase();
+export function rejectCrossOriginMutation(
+    request: NextRequest
+): NextResponse | null {
+    const method = request.method.toUpperCase();
 
-  if (method !== "POST" && method !== "PATCH" && method !== "PUT" && method !== "DELETE") {
+    if (
+        method !== 'POST' &&
+        method !== 'PATCH' &&
+        method !== 'PUT' &&
+        method !== 'DELETE'
+    ) {
+        return null;
+    }
+
+    const { pathname } = request.nextUrl;
+
+    if (!pathname.startsWith('/api/') && pathname !== SIGN_OUT_PATH)
+        return null;
+
+    // bearer requests never read cookies, so CSRF does not apply
+    if (bearerToken(request)) return null;
+
+    if (pathname === '/api/mcp' || pathname.startsWith('/api/mcp/'))
+        return null;
+
+    const origin = request.headers.get('origin');
+
+    if (!origin) return null;
+
+    let originHost: string;
+
+    try {
+        originHost = new URL(origin).host;
+    } catch {
+        return NextResponse.json(
+            { error: 'Invalid Origin header' },
+            { status: 403 }
+        );
+    }
+
+    const requestHost = request.headers.get('host') ?? request.nextUrl.host;
+
+    if (originHost !== requestHost) {
+        return NextResponse.json(
+            { error: 'Cross-origin request rejected' },
+            { status: 403 }
+        );
+    }
+
     return null;
-  }
-
-  const { pathname } = request.nextUrl;
-
-  if (!pathname.startsWith("/api/") && pathname !== SIGN_OUT_PATH) return null;
-
-  // bearer requests never read cookies, so CSRF does not apply
-  if (bearerToken(request)) return null;
-
-  if (pathname === "/api/mcp" || pathname.startsWith("/api/mcp/")) return null;
-
-  const origin = request.headers.get("origin");
-
-  if (!origin) return null;
-
-  let originHost: string;
-
-  try {
-    originHost = new URL(origin).host;
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid Origin header" },
-      { status: 403 },
-    );
-  }
-
-  const requestHost = request.headers.get("host") ?? request.nextUrl.host;
-
-  if (originHost !== requestHost) {
-    return NextResponse.json(
-      { error: "Cross-origin request rejected" },
-      { status: 403 },
-    );
-  }
-
-  return null;
 }
 
 export async function updateSession(request: NextRequest) {
-  const csrfReject = rejectCrossOriginMutation(request);
+    const csrfReject = rejectCrossOriginMutation(request);
 
-  if (csrfReject) return csrfReject;
+    if (csrfReject) return csrfReject;
 
-  // Routes check the session themselves (401) and refresh the token through their own server client.
-  // The sign-out route must receive its POST as is (a redirect to /sign-in would downgrade it) and clears the cookies itself.
-  if (request.nextUrl.pathname.startsWith('/api/') || request.nextUrl.pathname === SIGN_OUT_PATH) return NextResponse.next()
+    // Routes check the session themselves (401) and refresh the token through their own server client.
+    // The sign-out route must receive its POST as is (a redirect to /sign-in would downgrade it) and clears the cookies itself.
+    if (
+        request.nextUrl.pathname.startsWith('/api/') ||
+        request.nextUrl.pathname === SIGN_OUT_PATH
+    )
+        return NextResponse.next();
 
-  if (LANDING_PATHS.includes(request.nextUrl.pathname)) {
-    // Supabase falls back to the Site URL when a redirectTo isn't allow-listed: finish the auth link anyway
-    if (request.nextUrl.searchParams.has('code') || request.nextUrl.searchParams.has('token_hash')) {
-      const url = request.nextUrl.clone()
+    if (LANDING_PATHS.includes(request.nextUrl.pathname)) {
+        // Supabase falls back to the Site URL when a redirectTo isn't allow-listed: finish the auth link anyway
+        if (
+            request.nextUrl.searchParams.has('code') ||
+            request.nextUrl.searchParams.has('token_hash')
+        ) {
+            const url = request.nextUrl.clone();
 
-      url.pathname = '/auth/callback'
+            url.pathname = '/auth/callback';
 
-      return NextResponse.redirect(url)
+            return NextResponse.redirect(url);
+        }
+
+        // the landing is static and session-agnostic: no Supabase round trip in front of the CDN
+        return NextResponse.next();
     }
 
-    // the landing is static and session-agnostic: no Supabase round trip in front of the CDN
-    return NextResponse.next()
-  }
+    let supabaseResponse = NextResponse.next({
+        request,
+    });
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    throw new Error("Missing Supabase environment variables");
-  }
-
-  const supabase = createServerClient(
-    url,
-    key,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value)
-          })
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options)
-          })
-        },
-      },
+    if (!url || !key) {
+        throw new Error('Missing Supabase environment variables');
     }
-  )
 
-  // getClaims refreshes an expired session and verifies the JWT locally against the cached JWKS
-  const { data } = await supabase.auth.getClaims()
+    const supabase = createServerClient(url, key, {
+        cookies: {
+            getAll() {
+                return request.cookies.getAll();
+            },
+            setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value }) => {
+                    request.cookies.set(name, value);
+                });
+                supabaseResponse = NextResponse.next({
+                    request,
+                });
+                cookiesToSet.forEach(({ name, value, options }) => {
+                    supabaseResponse.cookies.set(name, value, options);
+                });
+            },
+        },
+    });
 
-  const user = data?.claims?.sub ?? null
+    // getClaims refreshes an expired session and verifies the JWT locally against the cached JWKS
+    const { data } = await supabase.auth.getClaims();
 
-  const publicPaths = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/auth/callback', ...(process.env.NODE_ENV === 'development' ? ['/dev/'] : [])]
+    const user = data?.claims?.sub ?? null;
 
-  const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
-  
-  if (!user && !isPublicPath) {
-    const url = request.nextUrl.clone()
+    const publicPaths = [
+        '/sign-in',
+        '/sign-up',
+        '/forgot-password',
+        '/reset-password',
+        '/auth/callback',
+        ...(process.env.NODE_ENV === 'development' ? ['/dev/'] : []),
+    ];
 
-    url.pathname = '/sign-in'
+    const isPublicPath = publicPaths.some((path) =>
+        request.nextUrl.pathname.startsWith(path)
+    );
 
-    return NextResponse.redirect(url)
-  }
-  
-  // Якщо користувач авторизований і на сторінці входу - перенаправляємо на campaigns
-  if (user && request.nextUrl.pathname.startsWith('/sign-in')) {
-    const url = request.nextUrl.clone()
+    if (!user && !isPublicPath) {
+        const url = request.nextUrl.clone();
 
-    url.pathname = '/campaigns'
+        url.pathname = '/sign-in';
 
-    return NextResponse.redirect(url)
-  }
+        return NextResponse.redirect(url);
+    }
 
-  return supabaseResponse
+    // Якщо користувач авторизований і на сторінці входу - перенаправляємо на campaigns
+    if (user && request.nextUrl.pathname.startsWith('/sign-in')) {
+        const url = request.nextUrl.clone();
+
+        url.pathname = '/campaigns';
+
+        return NextResponse.redirect(url);
+    }
+
+    return supabaseResponse;
 }

@@ -1,63 +1,120 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from '@prisma/client';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CharacterLogKind } from "@/lib/constants/character-log";
-import { CharacterStatus } from "@/lib/constants/characters";
-import { prisma } from "@/lib/db";
-import type { RestInput } from "@/lib/schemas/out-of-combat";
-import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
-import { lockCharacters } from "@/lib/server/characters/lock";
-import { writeCharacterLog } from "@/lib/server/characters/log";
-import { ContentError } from "@/lib/server/content/errors";
-import type { CampaignAccessResult } from "@/lib/utils/api/api-auth";
-import { loadClassesById } from "@/lib/utils/battle/participant/load-classes";
-import { hitDicePoolFor } from "@/lib/utils/characters/resources/hit-dice";
-import { applyRest, type RestAction } from "@/lib/utils/characters/resources/rest";
-import { readResources } from "@/lib/utils/characters/resources/schema";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { CharacterLogKind } from '@/lib/constants/character-log';
+import { CharacterStatus } from '@/lib/constants/characters';
+import { prisma } from '@/lib/db';
+import type { RestInput } from '@/lib/schemas/out-of-combat';
+import { assertNotInActiveBattle } from '@/lib/server/characters/battle-lock';
+import { lockCharacters } from '@/lib/server/characters/lock';
+import { writeCharacterLog } from '@/lib/server/characters/log';
+import { ContentError } from '@/lib/server/content/errors';
+import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
+import { loadClassesById } from '@/lib/utils/battle/participant/load-classes';
+import { hitDicePoolFor } from '@/lib/utils/characters/resources/hit-dice';
+import {
+    applyRest,
+    type RestAction,
+} from '@/lib/utils/characters/resources/rest';
+import { readResources } from '@/lib/utils/characters/resources/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
-const LOG_KIND = { short: CharacterLogKind.SHORT_REST, long: CharacterLogKind.LONG_REST, close: CharacterLogKind.REST_CLOSED, session: CharacterLogKind.SESSION } as const;
+const LOG_KIND = {
+    short: CharacterLogKind.SHORT_REST,
+    long: CharacterLogKind.LONG_REST,
+    close: CharacterLogKind.REST_CLOSED,
+    session: CharacterLogKind.SESSION,
+} as const;
 
 export async function restParty(access: CampaignAccessResult, body: RestInput) {
-  const { campaign } = access;
+    const { campaign } = access;
 
-  const { outOfCombat } = campaign.rules;
+    const { outOfCombat } = campaign.rules;
 
-  if (!outOfCombat.persistResources) throw new ContentError(API_ERRORS.OOC_RESOURCES_DISABLED, 409);
+    if (!outOfCombat.persistResources)
+        throw new ContentError(API_ERRORS.OOC_RESOURCES_DISABLED, 409);
 
-  const onSession = body.kind === "session" ? ruleSystemOf(campaign.rules).rest.onSession : undefined;
+    const onSession =
+        body.kind === 'session'
+            ? ruleSystemOf(campaign.rules).rest.onSession
+            : undefined;
 
-  if (body.kind === "session" && !onSession) throw new ContentError(API_ERRORS.REST_KIND_UNSUPPORTED, 409);
+    if (body.kind === 'session' && !onSession)
+        throw new ContentError(API_ERRORS.REST_KIND_UNSUPPORTED, 409);
 
-  const ids = [...new Set(body.characterIds)];
+    const ids = [...new Set(body.characterIds)];
 
-  const characters = await prisma.character.findMany({ where: { id: { in: ids }, campaignId: campaign.id, status: CharacterStatus.ACTIVE }, select: { id: true, classes: true, resources: true, characteristics: true } });
-
-  if (characters.length !== ids.length) throw new ContentError(API_ERRORS.REST_CHARACTERS_INVALID, 400);
-
-  await assertNotInActiveBattle(campaign.id, ids);
-
-  const classesById = body.kind === "long" && campaign.rules.classes.enabled ? await loadClassesById(campaign.id) : {};
-
-  const updated = await prisma.$transaction(async (tx) => {
-    const locked = await lockCharacters(tx, ids);
-
-    const rested = characters.map((c) => {
-      const current = locked.get(c.id)?.resources ?? readResources(c.resources);
-
-      const pool = hitDicePoolFor(c.classes, classesById);
-
-      if (onSession) return { id: c.id, resources: onSession(current, c.characteristics), dead: !!current.dead };
-
-      return { id: c.id, resources: applyRest(body.kind as RestAction, current, { pool, longRestHitDice: outOfCombat.longRestHitDice }), dead: !!current.dead };
+    const characters = await prisma.character.findMany({
+        where: {
+            id: { in: ids },
+            campaignId: campaign.id,
+            status: CharacterStatus.ACTIVE,
+        },
+        select: {
+            id: true,
+            classes: true,
+            resources: true,
+            characteristics: true,
+        },
     });
 
-    for (const u of rested) await tx.character.update({ where: { id: u.id }, data: { resources: u.resources as Prisma.InputJsonValue } });
+    if (characters.length !== ids.length)
+        throw new ContentError(API_ERRORS.REST_CHARACTERS_INVALID, 400);
 
-    await writeCharacterLog(tx, rested.filter((u) => !u.dead).map((u) => ({ campaignId: campaign.id, characterId: u.id, actorUserId: access.userId, kind: LOG_KIND[body.kind], data: {} })));
+    await assertNotInActiveBattle(campaign.id, ids);
 
-    return rested.map(({ id, resources }) => ({ id, resources }));
-  });
+    const classesById =
+        body.kind === 'long' && campaign.rules.classes.enabled
+            ? await loadClassesById(campaign.id)
+            : {};
 
-  return { characters: updated };
+    const updated = await prisma.$transaction(async (tx) => {
+        const locked = await lockCharacters(tx, ids);
+
+        const rested = characters.map((c) => {
+            const current =
+                locked.get(c.id)?.resources ?? readResources(c.resources);
+
+            const pool = hitDicePoolFor(c.classes, classesById);
+
+            if (onSession)
+                return {
+                    id: c.id,
+                    resources: onSession(current, c.characteristics),
+                    dead: !!current.dead,
+                };
+
+            return {
+                id: c.id,
+                resources: applyRest(body.kind as RestAction, current, {
+                    pool,
+                    longRestHitDice: outOfCombat.longRestHitDice,
+                }),
+                dead: !!current.dead,
+            };
+        });
+
+        for (const u of rested)
+            await tx.character.update({
+                where: { id: u.id },
+                data: { resources: u.resources as Prisma.InputJsonValue },
+            });
+
+        await writeCharacterLog(
+            tx,
+            rested
+                .filter((u) => !u.dead)
+                .map((u) => ({
+                    campaignId: campaign.id,
+                    characterId: u.id,
+                    actorUserId: access.userId,
+                    kind: LOG_KIND[body.kind],
+                    data: {},
+                }))
+        );
+
+        return rested.map(({ id, resources }) => ({ id, resources }));
+    });
+
+    return { characters: updated };
 }

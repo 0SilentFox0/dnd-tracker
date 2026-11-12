@@ -1,186 +1,358 @@
-import { COMPENDIUM_INFO_ISSUE_CODES, type JsonRecord } from "@/lib/constants/compendium-import";
-import type { Translator } from "@/lib/i18n/translator";
-import { isRecord } from "@/lib/utils/common/is-record";
-import type { ImportIssue, MediaProgress } from "@/types/compendium-import";
+import {
+    COMPENDIUM_INFO_ISSUE_CODES,
+    type JsonRecord,
+} from '@/lib/constants/compendium-import';
+import type { Translator } from '@/lib/i18n/translator';
+import { isRecord } from '@/lib/utils/common/is-record';
+import type { ImportIssue, MediaProgress } from '@/types/compendium-import';
 
-const known = (t: Translator, group: string, id: string) => t.has(`${group}.${id}`) ? t(`${group}.${id}`) : undefined;
+const known = (t: Translator, group: string, id: string) =>
+    t.has(`${group}.${id}`) ? t(`${group}.${id}`) : undefined;
 
-export const kindLabel = (t: Translator, kind: string): string => kind.startsWith("template:") ? t("templateKind", { kind: known(t, "targetKinds", kind.slice(9)) ?? kind.slice(9) }) : known(t, "inputKinds", kind) ?? known(t, "targetKinds", kind) ?? kind;
+export const kindLabel = (t: Translator, kind: string): string =>
+    kind.startsWith('template:')
+        ? t('templateKind', {
+              kind: known(t, 'targetKinds', kind.slice(9)) ?? kind.slice(9),
+          })
+        : (known(t, 'inputKinds', kind) ??
+          known(t, 'targetKinds', kind) ??
+          kind);
 
-export const editionLabel = (t: Translator, edition: string) => t(`editions.${edition === "classic" || edition === "one" ? edition : "unknown"}`);
+export const editionLabel = (t: Translator, edition: string) =>
+    t(
+        `editions.${edition === 'classic' || edition === 'one' ? edition : 'unknown'}`
+    );
 
-function leadingKey(text: string): { key: unknown[]; rest: string } | undefined {
-  if (!text.startsWith("[1,")) return;
+function leadingKey(
+    text: string
+): { key: unknown[]; rest: string } | undefined {
+    if (!text.startsWith('[1,')) return;
 
-  let depth = 0, inString = false;
+    let depth = 0,
+        inString = false;
 
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
 
-    if (inString) { if (c === "\\") i++; else if (c === '"') inString = false; } else if (c === '"') inString = true;
-    else if (c === "[") depth++;
-    else if (c === "]" && --depth === 0) {
-      try {
-        const key = JSON.parse(text.slice(0, i + 1));
+        if (inString) {
+            if (c === '\\') i++;
+            else if (c === '"') inString = false;
+        } else if (c === '"') inString = true;
+        else if (c === '[') depth++;
+        else if (c === ']' && --depth === 0) {
+            try {
+                const key = JSON.parse(text.slice(0, i + 1));
 
-        return Array.isArray(key) ? { key, rest: text.slice(i + 1).replace(/^\./, "") } : undefined;
-      } catch { return; }
+                return Array.isArray(key)
+                    ? { key, rest: text.slice(i + 1).replace(/^\./, '') }
+                    : undefined;
+            } catch {
+                return;
+            }
+        }
     }
-  }
 }
 
 function keyParts(t: Translator, key: unknown[]) {
-  const [, kind, source, , name, parent] = key;
+    const [, kind, source, , name, parent] = key;
 
-  return { kind: kindLabel(t, String(kind)), name: String(name), owner: Array.isArray(parent) && parent.length ? ` (${parent.join(", ")})` : "", source: source ? String(source) : "" };
+    return {
+        kind: kindLabel(t, String(kind)),
+        name: String(name),
+        owner:
+            Array.isArray(parent) && parent.length
+                ? ` (${parent.join(', ')})`
+                : '',
+        source: source ? String(source) : '',
+    };
 }
 
 function keyLabel(t: Translator, key: unknown[]) {
-  const { kind, name, owner, source } = keyParts(t, key);
+    const { kind, name, owner, source } = keyParts(t, key);
 
-  return `${kind} «${name}»${owner}${source ? ` · ${source}` : ""}`;
+    return `${kind} «${name}»${owner}${source ? ` · ${source}` : ''}`;
 }
 
 export function entryParts(t: Translator, key: string) {
-  const parsed = leadingKey(key);
+    const parsed = leadingKey(key);
 
-  return parsed ? keyParts(t, parsed.key) : { kind: "", name: key, owner: "", source: "" };
+    return parsed
+        ? keyParts(t, parsed.key)
+        : { kind: '', name: key, owner: '', source: '' };
 }
 
 export function entryLabel(t: Translator, key: string) {
-  const parsed = leadingKey(key);
+    const parsed = leadingKey(key);
 
-  return parsed ? keyLabel(t, parsed.key) : key;
+    return parsed ? keyLabel(t, parsed.key) : key;
 }
 
 export function readablePath(t: Translator, path: string) {
-  const parsed = leadingKey(path);
+    const parsed = leadingKey(path);
 
-  if (parsed) return parsed.rest ? `${keyLabel(t, parsed.key)} · ${t("path.field", { path: parsed.rest })}` : keyLabel(t, parsed.key);
+    if (parsed)
+        return parsed.rest
+            ? `${keyLabel(t, parsed.key)} · ${t('path.field', { path: parsed.rest })}`
+            : keyLabel(t, parsed.key);
 
-  const input = /^([a-zA-Z]+)\[(\d+)\](.*)$/.exec(path);
+    const input = /^([a-zA-Z]+)\[(\d+)\](.*)$/.exec(path);
 
-  if (input) return `${t("path.inFile", { kind: known(t, "inputKinds", input[1]) ?? input[1], n: Number(input[2]) + 1 })}${input[3] ? ` · ${input[3].replace(/^\./, "")}` : ""}`;
+    if (input)
+        return `${t('path.inFile', { kind: known(t, 'inputKinds', input[1]) ?? input[1], n: Number(input[2]) + 1 })}${input[3] ? ` · ${input[3].replace(/^\./, '')}` : ''}`;
 
-  return path;
+    return path;
 }
 
-export const statusLabel = (t: Translator, status: string) => known(t, "statuses", status) ?? status;
+export const statusLabel = (t: Translator, status: string) =>
+    known(t, 'statuses', status) ?? status;
 
-export const coverageLabel = (t: Translator, coverage: string) => t(`coverage.${coverage === "native" || coverage === "manual" ? coverage : "partial"}`);
+export const coverageLabel = (t: Translator, coverage: string) =>
+    t(
+        `coverage.${coverage === 'native' || coverage === 'manual' ? coverage : 'partial'}`
+    );
 
-type CategoryCount = { present: number; mapped: number; partial: number; skipped: number };
+type CategoryCount = {
+    present: number;
+    mapped: number;
+    partial: number;
+    skipped: number;
+};
 
 export function splitCategories(counts: Record<string, CategoryCount>) {
-  const entries = Object.entries(counts).filter(([, count]) => count.present > 0);
+    const entries = Object.entries(counts).filter(
+        ([, count]) => count.present > 0
+    );
 
-  const technical = (count: CategoryCount) => count.mapped === 0 && count.partial === 0 && count.skipped >= count.present;
+    const technical = (count: CategoryCount) =>
+        count.mapped === 0 &&
+        count.partial === 0 &&
+        count.skipped >= count.present;
 
-  return { main: entries.filter(([, count]) => !technical(count)), technical: entries.filter(([, count]) => technical(count)) };
+    return {
+        main: entries.filter(([, count]) => !technical(count)),
+        technical: entries.filter(([, count]) => technical(count)),
+    };
 }
 
-export const issueCodeLabel = (t: Translator, code: string) => known(t, "issueTitles", code) ?? code;
+export const issueCodeLabel = (t: Translator, code: string) =>
+    known(t, 'issueTitles', code) ?? code;
 
-export type IssueGroup = { code: string; title: string; severity: ImportIssue["severity"]; action?: string; items: Array<{ path: string; action?: string }> };
+export type IssueGroup = {
+    code: string;
+    title: string;
+    severity: ImportIssue['severity'];
+    action?: string;
+    items: Array<{ path: string; action?: string }>;
+};
 
-export function groupIssues(t: Translator, issues: ImportIssue[]): IssueGroup[] {
-  const groups = new Map<string, IssueGroup>();
+export function groupIssues(
+    t: Translator,
+    issues: ImportIssue[]
+): IssueGroup[] {
+    const groups = new Map<string, IssueGroup>();
 
-  for (const issue of issues) {
-    const group = groups.get(issue.code) ?? { code: issue.code, title: issueCodeLabel(t, issue.code), severity: issue.severity, action: issue.action, items: [] };
+    for (const issue of issues) {
+        const group = groups.get(issue.code) ?? {
+            code: issue.code,
+            title: issueCodeLabel(t, issue.code),
+            severity: issue.severity,
+            action: issue.action,
+            items: [],
+        };
 
-    if (issue.severity === "error") group.severity = "error";
+        if (issue.severity === 'error') group.severity = 'error';
 
-    group.items.push({ path: issue.path, ...(issue.action !== group.action && { action: issue.action }) });
-    groups.set(issue.code, group);
-  }
+        group.items.push({
+            path: issue.path,
+            ...(issue.action !== group.action && { action: issue.action }),
+        });
+        groups.set(issue.code, group);
+    }
 
-  return [...groups.values()].sort((a, b) => Number(b.severity === "error") - Number(a.severity === "error") || b.items.length - a.items.length);
+    return [...groups.values()].sort(
+        (a, b) =>
+            Number(b.severity === 'error') - Number(a.severity === 'error') ||
+            b.items.length - a.items.length
+    );
 }
 
 type ReportRow = { status: string; issues: ImportIssue[] };
 
-export const rowActionCount = (row: ReportRow) => splitInfoIssues(row.issues).actions.length;
+export const rowActionCount = (row: ReportRow) =>
+    splitInfoIssues(row.issues).actions.length;
 
-export const REPORT_ROW_FILTERS = { changed: (row: ReportRow) => row.status !== "unchanged", manual: (row: ReportRow) => rowActionCount(row) > 0, all: () => true } as const;
+export const REPORT_ROW_FILTERS = {
+    changed: (row: ReportRow) => row.status !== 'unchanged',
+    manual: (row: ReportRow) => rowActionCount(row) > 0,
+    all: () => true,
+} as const;
 
 export function sourceLabel(t: Translator, source: unknown) {
-  if (!isRecord(source)) return String(source);
+    if (!isRecord(source)) return String(source);
 
-  const name = String(source.full ?? source.json ?? t("path.unknownSource"));
+    const name = String(source.full ?? source.json ?? t('path.unknownSource'));
 
-  const authors = Array.isArray(source.authors) ? source.authors.join(", ") : "";
+    const authors = Array.isArray(source.authors)
+        ? source.authors.join(', ')
+        : '';
 
-  return [name, source.abbreviation && `(${String(source.abbreviation)})`, authors && `— ${authors}`, source.version && `v${String(source.version)}`, source.dateReleased && String(source.dateReleased), typeof source.url === "string" && source.url].filter(Boolean).join(" ");
+    return [
+        name,
+        source.abbreviation && `(${String(source.abbreviation)})`,
+        authors && `— ${authors}`,
+        source.version && `v${String(source.version)}`,
+        source.dateReleased && String(source.dateReleased),
+        typeof source.url === 'string' && source.url,
+    ]
+        .filter(Boolean)
+        .join(' ');
 }
 
-const metaEditionLabel = (t: Translator, edition: unknown) => edition === "classic" || edition === "one" ? editionLabel(t, edition) : undefined;
+const metaEditionLabel = (t: Translator, edition: unknown) =>
+    edition === 'classic' || edition === 'one'
+        ? editionLabel(t, edition)
+        : undefined;
 
-export function metaSummary(t: Translator, meta: unknown): { sources: string[]; edition?: string } {
-  const record = isRecord(meta) ? meta : {};
+export function metaSummary(
+    t: Translator,
+    meta: unknown
+): { sources: string[]; edition?: string } {
+    const record = isRecord(meta) ? meta : {};
 
-  return { sources: Array.isArray(record.sources) ? record.sources.map((source) => sourceLabel(t, source)) : [], edition: metaEditionLabel(t, record.edition) };
+    return {
+        sources: Array.isArray(record.sources)
+            ? record.sources.map((source) => sourceLabel(t, source))
+            : [],
+        edition: metaEditionLabel(t, record.edition),
+    };
 }
 
-export function describeRulesPatch(t: Translator, patch: JsonRecord | undefined) {
-  if (!patch) return t("rulesPatch.none");
+export function describeRulesPatch(
+    t: Translator,
+    patch: JsonRecord | undefined
+) {
+    if (!patch) return t('rulesPatch.none');
 
-  const parts: string[] = [];
+    const parts: string[] = [];
 
-  if (isRecord(patch.classes) && typeof patch.classes.enabled === "boolean") parts.push(t(patch.classes.enabled ? "rulesPatch.enableClasses" : "rulesPatch.disableClasses"));
+    if (isRecord(patch.classes) && typeof patch.classes.enabled === 'boolean')
+        parts.push(
+            t(
+                patch.classes.enabled
+                    ? 'rulesPatch.enableClasses'
+                    : 'rulesPatch.disableClasses'
+            )
+        );
 
-  const custom = isRecord(patch.conditions) && Array.isArray(patch.conditions.custom) ? patch.conditions.custom.length : 0;
+    const custom =
+        isRecord(patch.conditions) && Array.isArray(patch.conditions.custom)
+            ? patch.conditions.custom.length
+            : 0;
 
-  if (custom) parts.push(t("rulesPatch.customConditions", { count: custom }));
+    if (custom) parts.push(t('rulesPatch.customConditions', { count: custom }));
 
-  const other = Object.keys(patch).filter((key) => key !== "classes" && !(key === "conditions" && custom)).length;
+    const other = Object.keys(patch).filter(
+        (key) => key !== 'classes' && !(key === 'conditions' && custom)
+    ).length;
 
-  if (other) parts.push(t("rulesPatch.otherSections", { count: other }));
+    if (other) parts.push(t('rulesPatch.otherSections', { count: other }));
 
-  return parts.join("; ") || t("rulesPatch.none");
+    return parts.join('; ') || t('rulesPatch.none');
 }
 
 export function summaryLines(t: Translator, summary: unknown): string[] {
-  if (!isRecord(summary)) return [];
+    if (!isRecord(summary)) return [];
 
-  const count = (value: unknown) => Array.isArray(value) ? value.length : 0;
+    const count = (value: unknown) => (Array.isArray(value) ? value.length : 0);
 
-  const originFeat = Array.isArray(summary.originFeat) ? summary.originFeat.map((feat) => isRecord(feat) ? `«${String(feat.name)}»` : "").filter(Boolean).join(", ") : "";
+    const originFeat = Array.isArray(summary.originFeat)
+        ? summary.originFeat
+              .map((feat) => (isRecord(feat) ? `«${String(feat.name)}»` : ''))
+              .filter(Boolean)
+              .join(', ')
+        : '';
 
-  return [t("summary.choices", { count: count(summary.choices) }), t("summary.skillsTools", { skills: count(summary.skills), tools: count(summary.tools) }), ...(originFeat ? [t("summary.originFeat", { names: originFeat })] : []), t("summary.manualGear")];
+    return [
+        t('summary.choices', { count: count(summary.choices) }),
+        t('summary.skillsTools', {
+            skills: count(summary.skills),
+            tools: count(summary.tools),
+        }),
+        ...(originFeat ? [t('summary.originFeat', { names: originFeat })] : []),
+        t('summary.manualGear'),
+    ];
 }
 
 export function splitInfoIssues(issues: ImportIssue[]) {
-  const info = issues.filter((i) => COMPENDIUM_INFO_ISSUE_CODES.has(i.code));
+    const info = issues.filter((i) => COMPENDIUM_INFO_ISSUE_CODES.has(i.code));
 
-  return { actions: issues.filter((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code)), info };
+    return {
+        actions: issues.filter((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code)),
+        info,
+    };
 }
 
 export function infoSummary(t: Translator, info: ImportIssue[]) {
-  if (!info.length) return "";
+    if (!info.length) return '';
 
-  const categories = [...new Set(info.filter((i) => i.code === "UNSUPPORTED_CATEGORY").map((i) => i.path))];
+    const categories = [
+        ...new Set(
+            info
+                .filter((i) => i.code === 'UNSUPPORTED_CATEGORY')
+                .map((i) => i.path)
+        ),
+    ];
 
-  const media = info.filter((i) => i.code === "MEDIA_OR_FOUNDRY_SKIPPED").length;
+    const media = info.filter(
+        (i) => i.code === 'MEDIA_OR_FOUNDRY_SKIPPED'
+    ).length;
 
-  return [categories.length && t("info.unsupportedCategories", { categories: categories.join(", ") }), media && t("info.mediaSkipped", { count: media })].filter(Boolean).join(". ");
+    return [
+        categories.length &&
+            t('info.unsupportedCategories', {
+                categories: categories.join(', '),
+            }),
+        media && t('info.mediaSkipped', { count: media }),
+    ]
+        .filter(Boolean)
+        .join('. ');
 }
 
-export const mediaReasonLabel = (t: Translator, reason: string, params?: { status?: number }) => t.has(`import.media.reasons.${reason}`) ? t(`import.media.reasons.${reason}`, { status: params?.status ?? "" }) : reason;
+export const mediaReasonLabel = (
+    t: Translator,
+    reason: string,
+    params?: { status?: number }
+) =>
+    t.has(`import.media.reasons.${reason}`)
+        ? t(`import.media.reasons.${reason}`, { status: params?.status ?? '' })
+        : reason;
 
-type MediaFailure = MediaProgress["failures"][number];
+type MediaFailure = MediaProgress['failures'][number];
 
 export function groupMediaFailures(failures: MediaFailure[]) {
-  const groups = new Map<string, { reason: string; params?: MediaFailure["params"]; items: MediaFailure[] }>();
+    const groups = new Map<
+        string,
+        {
+            reason: string;
+            params?: MediaFailure['params'];
+            items: MediaFailure[];
+        }
+    >();
 
-  for (const failure of failures) {
-    const key = `${failure.reason}:${failure.params?.status ?? ""}`;
+    for (const failure of failures) {
+        const key = `${failure.reason}:${failure.params?.status ?? ''}`;
 
-    const group = groups.get(key) ?? { reason: failure.reason, params: failure.params, items: [] };
+        const group = groups.get(key) ?? {
+            reason: failure.reason,
+            params: failure.params,
+            items: [],
+        };
 
-    group.items.push(failure);
-    groups.set(key, group);
-  }
+        group.items.push(failure);
+        groups.set(key, group);
+    }
 
-  return [...groups.entries()].map(([key, group]) => ({ key, ...group })).sort((a, b) => b.items.length - a.items.length);
+    return [...groups.entries()]
+        .map(([key, group]) => ({ key, ...group }))
+        .sort((a, b) => b.items.length - a.items.length);
 }

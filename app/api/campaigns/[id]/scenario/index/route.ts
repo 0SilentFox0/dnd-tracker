@@ -1,5 +1,8 @@
-import { scenarioIndexHandler } from "./index-handler";
+import { scenarioIndexHandler } from './index-handler';
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  return scenarioIndexHandler((await params).id);
+export async function GET(
+    _req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    return scenarioIndexHandler((await params).id);
 }

@@ -1,25 +1,51 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { downedHeroes } from "@/lib/utils/battle/view";
-import type { BattleParticipant } from "@/types/battle";
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { downedHeroes } from '@/lib/utils/battle/view';
+import type { BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();
 
-function make(id: string, info: Partial<BattleParticipant["basicInfo"]>, stats: Partial<BattleParticipant["combatStats"]> = {}) {
-  return createMockParticipant({ basicInfo: { ...base.basicInfo, id, ...info }, combatStats: { ...base.combatStats, ...stats } });
+function make(
+    id: string,
+    info: Partial<BattleParticipant['basicInfo']>,
+    stats: Partial<BattleParticipant['combatStats']> = {}
+) {
+    return createMockParticipant({
+        basicInfo: { ...base.basicInfo, id, ...info },
+        combatStats: { ...base.combatStats, ...stats },
+    });
 }
 
-describe("downedHeroes", () => {
-  it("лише полеглі герої-союзники", () => {
-    const list = [
-      make("alive", { side: "ally", sourceType: "character" }),
-      make("dead", { side: "ally", sourceType: "character" }, { currentHp: 0, status: "dead" }),
-      make("ko", { side: "ally", sourceType: "character" }, { currentHp: 0, status: "unconscious" }),
-      make("unit", { side: "ally", sourceType: "unit" }, { currentHp: 0, status: "dead" }),
-      make("enemy", { side: "enemy", sourceType: "character" }, { currentHp: 0, status: "dead" }),
-    ];
+describe('downedHeroes', () => {
+    it('лише полеглі герої-союзники', () => {
+        const list = [
+            make('alive', { side: 'ally', sourceType: 'character' }),
+            make(
+                'dead',
+                { side: 'ally', sourceType: 'character' },
+                { currentHp: 0, status: 'dead' }
+            ),
+            make(
+                'ko',
+                { side: 'ally', sourceType: 'character' },
+                { currentHp: 0, status: 'unconscious' }
+            ),
+            make(
+                'unit',
+                { side: 'ally', sourceType: 'unit' },
+                { currentHp: 0, status: 'dead' }
+            ),
+            make(
+                'enemy',
+                { side: 'enemy', sourceType: 'character' },
+                { currentHp: 0, status: 'dead' }
+            ),
+        ];
 
-    expect(downedHeroes(list).map((p) => p.basicInfo.id)).toEqual(["dead", "ko"]);
-  });
+        expect(downedHeroes(list).map((p) => p.basicInfo.id)).toEqual([
+            'dead',
+            'ko',
+        ]);
+    });
 });

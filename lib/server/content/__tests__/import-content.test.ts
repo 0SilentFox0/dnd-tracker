@@ -1,309 +1,620 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { stubImportDeps } from "@/lib/server/content/__tests__/stub-import-deps";
+import { stubImportDeps } from '@/lib/server/content/__tests__/stub-import-deps';
 
 const invalidateReference = vi.hoisted(() => vi.fn());
 
-vi.mock("server-only", () => ({}));
-vi.mock("@/lib/db", () => ({ prisma: {} }));
-vi.mock("@/lib/cache/tags", () => ({ invalidateReference }));
-vi.mock("@/lib/server/content/resources", () => ({ CONTENT_RESOURCES: {} }));
+vi.mock('server-only', () => ({}));
+vi.mock('@/lib/db', () => ({ prisma: {} }));
+vi.mock('@/lib/cache/tags', () => ({ invalidateReference }));
+vi.mock('@/lib/server/content/resources', () => ({ CONTENT_RESOURCES: {} }));
 
-import type { ZodType } from "zod";
+import type { ZodType } from 'zod';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { exampleOf } from "@/lib/constants/import-aliases";
-import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createCareerSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
-import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
-import { type AnyContentResource, defineResource } from "@/lib/server/content/define-resource";
-import { ContentError } from "@/lib/server/content/errors";
-import { compactImportReport, importContent } from "@/lib/server/content/import/import-content";
-import type { Actor } from "@/lib/utils/api/actor";
-import { IMPORT_KINDS, IMPORT_SPECS } from "@/lib/utils/content/import";
-import type { IdName } from "@/types/common";
-import type { ImportKind, ImportMode } from "@/types/content-import";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { exampleOf } from '@/lib/constants/import-aliases';
+import {
+    createArtifactSchema,
+    createArtifactSetSchema,
+    createBackgroundSchema,
+    createCareerSchema,
+    createClassSchema,
+    createFeatSchema,
+    createMainSkillSchema,
+    createRaceSchema,
+    createSkillSchema,
+    createSpellGroupSchema,
+    createSpellSchema,
+} from '@/lib/schemas';
+import { createUnitSchema, updateUnitSchema } from '@/lib/schemas/units';
+import {
+    type AnyContentResource,
+    defineResource,
+} from '@/lib/server/content/define-resource';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    compactImportReport,
+    importContent,
+} from '@/lib/server/content/import/import-content';
+import type { Actor } from '@/lib/utils/api/actor';
+import { IMPORT_KINDS, IMPORT_SPECS } from '@/lib/utils/content/import';
+import type { IdName } from '@/types/common';
+import type { ImportKind, ImportMode } from '@/types/content-import';
 
-const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
+const actor: Actor = {
+    campaignId: 'c1',
+    userId: 'u',
+    isDM: true,
+    via: 'session',
+    scopes: null,
+};
 
 let names: Record<string, IdName[]>;
 
-const create = vi.fn(async (_a: unknown, input: Record<string, unknown>) => ({ id: "new", name: String(input.name) }));
+const create = vi.fn(async (_a: unknown, input: Record<string, unknown>) => ({
+    id: 'new',
+    name: String(input.name),
+}));
 
-const update = vi.fn(async (_a: unknown, existing: { id: string }, input: Record<string, unknown>) => ({ ...existing, ...input }));
+const update = vi.fn(
+    async (
+        _a: unknown,
+        existing: { id: string },
+        input: Record<string, unknown>
+    ) => ({ ...existing, ...input })
+);
 
-const find = vi.fn(async (_a: unknown, id: string) => ({ id, name: "наявний" }));
+const find = vi.fn(async (_a: unknown, id: string) => ({
+    id,
+    name: 'наявний',
+}));
 
 const resource = defineResource({
-  kind: "units",
-  listFields: [],
-  idParam: "unitId",
-  label: "Юніти",
-  description: "",
-  path: "/units",
-  schemas: { create: createUnitSchema, update: updateUnitSchema },
-  access: { list: "member", item: "member" },
-  invalidates: ["units"],
-  notFound: "Немає",
-  list: async () => [],
-  find: find as never,
-  create: create as never,
-  update: update as never,
-  remove: async () => {},
+    kind: 'units',
+    listFields: [],
+    idParam: 'unitId',
+    label: 'Юніти',
+    description: '',
+    path: '/units',
+    schemas: { create: createUnitSchema, update: updateUnitSchema },
+    access: { list: 'member', item: 'member' },
+    invalidates: ['units'],
+    notFound: 'Немає',
+    list: async () => [],
+    find: find as never,
+    create: create as never,
+    update: update as never,
+    remove: async () => {},
 });
 
-const deps = stubImportDeps({ resource: () => resource, loadNames: async (_c, kind) => names[kind] ?? [] });
+const deps = stubImportDeps({
+    resource: () => resource,
+    loadNames: async (_c, kind) => names[kind] ?? [],
+});
 
-const run = (rows: Record<string, unknown>[], mode: ImportMode = "create", dryRun = false, who: Actor = actor) => importContent(who, "units", { rows, mode, dryRun }, deps);
+const run = (
+    rows: Record<string, unknown>[],
+    mode: ImportMode = 'create',
+    dryRun = false,
+    who: Actor = actor
+) => importContent(who, 'units', { rows, mode, dryRun }, deps);
 
-describe("importContent", () => {
-  it("units: characteristics JSON and trait abilities reach the resource body", async () => {
-    const ward = { id: "ward", name: "Ward 9+", trigger: { event: "passive" }, effects: [{ kind: "wfrpWard", value: 9 }] };
+describe('importContent', () => {
+    it('units: characteristics JSON and trait abilities reach the resource body', async () => {
+        const ward = {
+            id: 'ward',
+            name: 'Ward 9+',
+            trigger: { event: 'passive' },
+            effects: [{ kind: 'wfrpWard', value: 9 }],
+        };
 
-    const report = await run([{ name: "Shade", characteristics: { base: { ws: 45 }, move: 6 }, abilities: [ward] }, { name: "Plain", characteristics: "{}" }]);
+        const report = await run([
+            {
+                name: 'Shade',
+                characteristics: { base: { ws: 45 }, move: 6 },
+                abilities: [ward],
+            },
+            { name: 'Plain', characteristics: '{}' },
+        ]);
 
-    expect(report.results.flatMap((r) => r.issues)).toEqual([]);
+        expect(report.results.flatMap((r) => r.issues)).toEqual([]);
 
-    const bodies = create.mock.calls.map((c) => c[1] as { characteristics?: Record<string, unknown>; abilities?: unknown[] });
+        const bodies = create.mock.calls.map(
+            (c) =>
+                c[1] as {
+                    characteristics?: Record<string, unknown>;
+                    abilities?: unknown[];
+                }
+        );
 
-    expect(bodies[0].characteristics).toMatchObject({ base: { ws: 45 }, move: 6 });
-    expect(bodies[0].abilities).toEqual([ward]);
-    expect(bodies[1].characteristics).toEqual({});
-  });
+        expect(bodies[0].characteristics).toMatchObject({
+            base: { ws: 45 },
+            move: 6,
+        });
+        expect(bodies[0].abilities).toEqual([ward]);
+        expect(bodies[1].characteristics).toEqual({});
+    });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    names = {
-      units: [{ id: "u1", name: "Вовк" }],
-      races: [{ id: "r1", name: "Гноми" }, { id: "r2", name: "Гноми" }],
-      spells: [{ id: "s1", name: "Вогонь" }],
-    };
-  });
+    beforeEach(() => {
+        vi.clearAllMocks();
+        names = {
+            units: [{ id: 'u1', name: 'Вовк' }],
+            races: [
+                { id: 'r1', name: 'Гноми' },
+                { id: 'r2', name: 'Гноми' },
+            ],
+            spells: [{ id: 's1', name: 'Вогонь' }],
+        };
+    });
 
-  it("create: новий запис створюється, наявна назва — помилка рядка; лічильники", async () => {
-    const report = await run([{ name: "Біс", maxHp: "18 (4к6)" }, { name: "  вовк " }]);
+    it('create: новий запис створюється, наявна назва — помилка рядка; лічильники', async () => {
+        const report = await run([
+            { name: 'Біс', maxHp: '18 (4к6)' },
+            { name: '  вовк ' },
+        ]);
 
-    expect(create).toHaveBeenCalledTimes(1);
-    expect(create.mock.calls[0][1]).toMatchObject({ name: "Біс", maxHp: 18, level: 1 });
-    expect(report.results.map((r) => r.status)).toEqual(["created", "error"]);
-    expect(report.results[1].issues[0]).toMatchObject({ message: "contentImport.issues.alreadyExists", params: { name: "вовк" } });
-    expect(report.counts).toEqual({ created: 1, updated: 0, skipped: 0, error: 1 });
-    expect(invalidateReference).toHaveBeenCalledWith(["units"], "c1");
-  });
+        expect(create).toHaveBeenCalledTimes(1);
+        expect(create.mock.calls[0][1]).toMatchObject({
+            name: 'Біс',
+            maxHp: 18,
+            level: 1,
+        });
+        expect(report.results.map((r) => r.status)).toEqual([
+            'created',
+            'error',
+        ]);
+        expect(report.results[1].issues[0]).toMatchObject({
+            message: 'contentImport.issues.alreadyExists',
+            params: { name: 'вовк' },
+        });
+        expect(report.counts).toEqual({
+            created: 1,
+            updated: 0,
+            skipped: 0,
+            error: 1,
+        });
+        expect(invalidateReference).toHaveBeenCalledWith(['units'], 'c1');
+    });
 
-  it("update: наявний — оновлення лише наданими полями (порожні клітинки не скидають); відсутній — створення", async () => {
-    const report = await run([{ name: "Вовк", maxHp: "20", speed: "" }, { name: "Біс" }], "update");
+    it('update: наявний — оновлення лише наданими полями (порожні клітинки не скидають); відсутній — створення', async () => {
+        const report = await run(
+            [{ name: 'Вовк', maxHp: '20', speed: '' }, { name: 'Біс' }],
+            'update'
+        );
 
-    expect(find).toHaveBeenCalledWith(actor, "u1", "write");
-    expect(update.mock.calls[0][2]).toEqual({ name: "Вовк", maxHp: 20 });
-    expect(create).toHaveBeenCalledTimes(1);
-    expect(report.results.map((r) => r.status)).toEqual(["updated", "created"]);
-  });
+        expect(find).toHaveBeenCalledWith(actor, 'u1', 'write');
+        expect(update.mock.calls[0][2]).toEqual({ name: 'Вовк', maxHp: 20 });
+        expect(create).toHaveBeenCalledTimes(1);
+        expect(report.results.map((r) => r.status)).toEqual([
+            'updated',
+            'created',
+        ]);
+    });
 
-  it("update: кілька наявних з однією назвою — перший і попередження", async () => {
-    names.units = [{ id: "u1", name: "Вовк" }, { id: "u2", name: "вовк" }];
+    it('update: кілька наявних з однією назвою — перший і попередження', async () => {
+        names.units = [
+            { id: 'u1', name: 'Вовк' },
+            { id: 'u2', name: 'вовк' },
+        ];
 
-    const report = await run([{ name: "Вовк" }], "update");
+        const report = await run([{ name: 'Вовк' }], 'update');
 
-    expect(find).toHaveBeenCalledWith(actor, "u1", "write");
-    expect(report.results[0].issues).toEqual([{ level: "warning", message: "contentImport.issues.multipleMatches", params: { name: "Вовк" } }]);
-  });
+        expect(find).toHaveBeenCalledWith(actor, 'u1', 'write');
+        expect(report.results[0].issues).toEqual([
+            {
+                level: 'warning',
+                message: 'contentImport.issues.multipleMatches',
+                params: { name: 'Вовк' },
+            },
+        ]);
+    });
 
-  it("skip: наявні пропускаються без запису", async () => {
-    const report = await run([{ name: "Вовк" }, { name: "Біс" }], "skip");
+    it('skip: наявні пропускаються без запису', async () => {
+        const report = await run([{ name: 'Вовк' }, { name: 'Біс' }], 'skip');
 
-    expect(report.results.map((r) => r.status)).toEqual(["skipped", "created"]);
-    expect(update).not.toHaveBeenCalled();
-    expect(create).toHaveBeenCalledTimes(1);
-  });
+        expect(report.results.map((r) => r.status)).toEqual([
+            'skipped',
+            'created',
+        ]);
+        expect(update).not.toHaveBeenCalled();
+        expect(create).toHaveBeenCalledTimes(1);
+    });
 
-  it("посилання: назва без регістру й пробілів, точний id, кілька однакових — перша", async () => {
-    const report = await run([
-      { name: "А", raceId: "  гноми ", knownSpells: "вогонь" },
-      { name: "Б", raceId: "r2" },
-    ]);
+    it('посилання: назва без регістру й пробілів, точний id, кілька однакових — перша', async () => {
+        const report = await run([
+            { name: 'А', raceId: '  гноми ', knownSpells: 'вогонь' },
+            { name: 'Б', raceId: 'r2' },
+        ]);
 
-    expect(create.mock.calls.map((c) => [c[1].raceId, c[1].knownSpells])).toEqual([["r1", ["s1"]], ["r2", []]]);
-    expect(report.results.map((r) => r.status)).toEqual(["created", "created"]);
-  });
+        expect(
+            create.mock.calls.map((c) => [c[1].raceId, c[1].knownSpells])
+        ).toEqual([
+            ['r1', ['s1']],
+            ['r2', []],
+        ]);
+        expect(report.results.map((r) => r.status)).toEqual([
+            'created',
+            'created',
+        ]);
+    });
 
-  it("невідоме посилання в необов'язковому полі — попередження, значення null, рядок записано", async () => {
-    const report = await run([{ name: "В", raceId: "Ельфи", knownSpells: ["Вогонь", "Лід"] }]);
+    it("невідоме посилання в необов'язковому полі — попередження, значення null, рядок записано", async () => {
+        const report = await run([
+            { name: 'В', raceId: 'Ельфи', knownSpells: ['Вогонь', 'Лід'] },
+        ]);
 
-    expect(report.results[0].status).toBe("created");
-    expect(report.results[0].issues).toEqual([
-      { field: "raceId", level: "warning", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.units.raceId", value: "Ельфи", kind: "contentImport.kinds.races" } },
-      { field: "knownSpells", level: "warning", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.units.knownSpells", value: "Лід", kind: "contentImport.kinds.spells" } },
-    ]);
-    expect(create.mock.calls[0][1]).toMatchObject({ raceId: null, knownSpells: ["s1"] });
-  });
+        expect(report.results[0].status).toBe('created');
+        expect(report.results[0].issues).toEqual([
+            {
+                field: 'raceId',
+                level: 'warning',
+                message: 'contentImport.issues.refNotFound',
+                params: {
+                    field: 'contentImport.fields.units.raceId',
+                    value: 'Ельфи',
+                    kind: 'contentImport.kinds.races',
+                },
+            },
+            {
+                field: 'knownSpells',
+                level: 'warning',
+                message: 'contentImport.issues.refNotFound',
+                params: {
+                    field: 'contentImport.fields.units.knownSpells',
+                    value: 'Лід',
+                    kind: 'contentImport.kinds.spells',
+                },
+            },
+        ]);
+        expect(create.mock.calls[0][1]).toMatchObject({
+            raceId: null,
+            knownSpells: ['s1'],
+        });
+    });
 
-  it("update: одне невідоме заклинання у списку не відв'язує наявні — ключ пропускається", async () => {
-    const report = await run([{ name: "Вовк", knownSpells: ["Вогонь", "Невідоме"] }], "update");
+    it("update: одне невідоме заклинання у списку не відв'язує наявні — ключ пропускається", async () => {
+        const report = await run(
+            [{ name: 'Вовк', knownSpells: ['Вогонь', 'Невідоме'] }],
+            'update'
+        );
 
-    expect(update.mock.calls[0][2]).not.toHaveProperty("knownSpells");
-    expect(report.results[0].issues).toHaveLength(1);
-  });
+        expect(update.mock.calls[0][2]).not.toHaveProperty('knownSpells');
+        expect(report.results[0].issues).toHaveLength(1);
+    });
 
-  it("невідоме посилання в необов'язковому полі при update не скидає наявне значення", async () => {
-    await run([{ name: "Вовк", raceId: "Ельфи" }], "update");
+    it("невідоме посилання в необов'язковому полі при update не скидає наявне значення", async () => {
+        await run([{ name: 'Вовк', raceId: 'Ельфи' }], 'update');
 
-    expect(update.mock.calls[0][2]).not.toHaveProperty("raceId");
-  });
+        expect(update.mock.calls[0][2]).not.toHaveProperty('raceId');
+    });
 
-  it("невідоме посилання в обов'язковому полі — помилка рядка, не записано", async () => {
-    const field = IMPORT_SPECS.units.fields.find((f) => f.key === "raceId") as { required?: boolean };
+    it("невідоме посилання в обов'язковому полі — помилка рядка, не записано", async () => {
+        const field = IMPORT_SPECS.units.fields.find(
+            (f) => f.key === 'raceId'
+        ) as { required?: boolean };
 
-    field.required = true;
+        field.required = true;
 
-    try {
-      const report = await run([{ name: "Г", raceId: "Ельфи" }]);
+        try {
+            const report = await run([{ name: 'Г', raceId: 'Ельфи' }]);
 
-      expect(report.results[0].status).toBe("error");
-      expect(report.results[0].issues).toEqual([{ field: "raceId", level: "error", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.units.raceId", value: "Ельфи", kind: "contentImport.kinds.races" } }]);
-      expect(create).not.toHaveBeenCalled();
-    } finally {
-      delete field.required;
-    }
-  });
+            expect(report.results[0].status).toBe('error');
+            expect(report.results[0].issues).toEqual([
+                {
+                    field: 'raceId',
+                    level: 'error',
+                    message: 'contentImport.issues.refNotFound',
+                    params: {
+                        field: 'contentImport.fields.units.raceId',
+                        value: 'Ельфи',
+                        kind: 'contentImport.kinds.races',
+                    },
+                },
+            ]);
+            expect(create).not.toHaveBeenCalled();
+        } finally {
+            delete field.required;
+        }
+    });
 
-  it("частковий успіх: погане значення й помилка схеми — помилки рядків, валідний записано", async () => {
-    const report = await run([{ name: "А", maxHp: "багато" }, { name: "Б", level: "50" }, { name: "В" }, {}]);
+    it('частковий успіх: погане значення й помилка схеми — помилки рядків, валідний записано', async () => {
+        const report = await run([
+            { name: 'А', maxHp: 'багато' },
+            { name: 'Б', level: '50' },
+            { name: 'В' },
+            {},
+        ]);
 
-    expect(report.results.map((r) => r.status)).toEqual(["created", "error", "created", "error"]);
-    expect(report.results[0].issues[0]).toMatchObject({ field: "maxHp", level: "warning" });
-    expect(report.results[1].issues[0]).toMatchObject({ field: "level", level: "error" });
-    expect(report.results[3].issues).toEqual([{ field: "name", level: "error", message: "contentImport.issues.noName" }]);
-    expect(create).toHaveBeenCalledTimes(2);
-  });
+        expect(report.results.map((r) => r.status)).toEqual([
+            'created',
+            'error',
+            'created',
+            'error',
+        ]);
+        expect(report.results[0].issues[0]).toMatchObject({
+            field: 'maxHp',
+            level: 'warning',
+        });
+        expect(report.results[1].issues[0]).toMatchObject({
+            field: 'level',
+            level: 'error',
+        });
+        expect(report.results[3].issues).toEqual([
+            {
+                field: 'name',
+                level: 'error',
+                message: 'contentImport.issues.noName',
+            },
+        ]);
+        expect(create).toHaveBeenCalledTimes(2);
+    });
 
-  it("dryRun: нічого не пише й не скидає кеш, статуси — заплановані", async () => {
-    const report = await run([{ name: "Вовк" }, { name: "Біс" }], "update", true);
+    it('dryRun: нічого не пише й не скидає кеш, статуси — заплановані', async () => {
+        const report = await run(
+            [{ name: 'Вовк' }, { name: 'Біс' }],
+            'update',
+            true
+        );
 
-    expect(report.dryRun).toBe(true);
-    expect(report.results.map((r) => r.status)).toEqual(["updated", "created"]);
-    expect(create).not.toHaveBeenCalled();
-    expect(update).not.toHaveBeenCalled();
-    expect(invalidateReference).not.toHaveBeenCalled();
-  });
+        expect(report.dryRun).toBe(true);
+        expect(report.results.map((r) => r.status)).toEqual([
+            'updated',
+            'created',
+        ]);
+        expect(create).not.toHaveBeenCalled();
+        expect(update).not.toHaveBeenCalled();
+        expect(invalidateReference).not.toHaveBeenCalled();
+    });
 
-  it("дублі назв у файлі: create — помилка другого, skip — пропуск другого", async () => {
-    expect((await run([{ name: "Біс" }, { name: "БІС" }])).results.map((r) => r.status)).toEqual(["created", "error"]);
-    expect((await run([{ name: "Біс" }, { name: "біс" }], "skip")).results.map((r) => r.status)).toEqual(["created", "skipped"]);
-  });
+    it('дублі назв у файлі: create — помилка другого, skip — пропуск другого', async () => {
+        expect(
+            (await run([{ name: 'Біс' }, { name: 'БІС' }])).results.map(
+                (r) => r.status
+            )
+        ).toEqual(['created', 'error']);
+        expect(
+            (await run([{ name: 'Біс' }, { name: 'біс' }], 'skip')).results.map(
+                (r) => r.status
+            )
+        ).toEqual(['created', 'skipped']);
+    });
 
-  it("права: гравець і токен лише з content:read — 403, нічого не читається", async () => {
-    await expect(run([{ name: "А" }], "create", false, { ...actor, isDM: false })).rejects.toMatchObject({ status: 403 });
-    await expect(run([{ name: "А" }], "create", false, { ...actor, via: "token", scopes: ["content:read"] })).rejects.toBeInstanceOf(ContentError);
-    expect(create).not.toHaveBeenCalled();
-  });
+    it('права: гравець і токен лише з content:read — 403, нічого не читається', async () => {
+        await expect(
+            run([{ name: 'А' }], 'create', false, { ...actor, isDM: false })
+        ).rejects.toMatchObject({ status: 403 });
+        await expect(
+            run([{ name: 'А' }], 'create', false, {
+                ...actor,
+                via: 'token',
+                scopes: ['content:read'],
+            })
+        ).rejects.toBeInstanceOf(ContentError);
+        expect(create).not.toHaveBeenCalled();
+    });
 
-  it("помилка запису: ContentError — її текст; інша — загальний текст; решта рядків пишеться", async () => {
-    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    it('помилка запису: ContentError — її текст; інша — загальний текст; решта рядків пишеться', async () => {
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    create.mockRejectedValueOnce(new ContentError("Раса «А» уже є в кампанії", 409)).mockRejectedValueOnce(new Error("db down"));
+        create
+            .mockRejectedValueOnce(
+                new ContentError('Раса «А» уже є в кампанії', 409)
+            )
+            .mockRejectedValueOnce(new Error('db down'));
 
-    const report = await run([{ name: "А" }, { name: "Б" }, { name: "В" }]);
+        const report = await run([{ name: 'А' }, { name: 'Б' }, { name: 'В' }]);
 
-    expect(report.results.map((r) => [r.status, r.issues[0]?.message])).toEqual([["error", "Раса «А» уже є в кампанії"], ["error", API_ERRORS.IMPORT_ROW_FAILED], ["created", undefined]]);
-    expect(error).toHaveBeenCalledWith("[content import]", "units", "Error");
-    error.mockRestore();
-  });
+        expect(
+            report.results.map((r) => [r.status, r.issues[0]?.message])
+        ).toEqual([
+            ['error', 'Раса «А» уже є в кампанії'],
+            ['error', API_ERRORS.IMPORT_ROW_FAILED],
+            ['created', undefined],
+        ]);
+        expect(error).toHaveBeenCalledWith(
+            '[content import]',
+            'units',
+            'Error'
+        );
+        error.mockRestore();
+    });
 
-  it("нічого не записано — кеш не скидається", async () => {
-    await run([{ name: "Вовк" }]);
+    it('нічого не записано — кеш не скидається', async () => {
+        await run([{ name: 'Вовк' }]);
 
-    expect(invalidateReference).not.toHaveBeenCalled();
-  });
+        expect(invalidateReference).not.toHaveBeenCalled();
+    });
 
-  it("deps.invalidate замінює інвалідацію кешу Next (скрипти поза Next)", async () => {
-    const invalidate = vi.fn();
+    it('deps.invalidate замінює інвалідацію кешу Next (скрипти поза Next)', async () => {
+        const invalidate = vi.fn();
 
-    await importContent(actor, "units", { rows: [{ name: "Біс" }], mode: "create", dryRun: false }, stubImportDeps({ resource: () => resource, loadNames: async (_c, kind) => names[kind] ?? [], invalidate }));
+        await importContent(
+            actor,
+            'units',
+            { rows: [{ name: 'Біс' }], mode: 'create', dryRun: false },
+            stubImportDeps({
+                resource: () => resource,
+                loadNames: async (_c, kind) => names[kind] ?? [],
+                invalidate,
+            })
+        );
 
-    expect(invalidate).toHaveBeenCalledWith(["units"], "c1");
-    expect(invalidateReference).not.toHaveBeenCalled();
-  });
+        expect(invalidate).toHaveBeenCalledWith(['units'], 'c1');
+        expect(invalidateReference).not.toHaveBeenCalled();
+    });
 });
 
 const CREATE: Record<ImportKind, ZodType> = {
-  units: createUnitSchema,
-  spells: createSpellSchema,
-  skills: createSkillSchema,
-  "main-skills": createMainSkillSchema,
-  "spell-groups": createSpellGroupSchema,
-  races: createRaceSchema,
-  classes: createClassSchema,
-  backgrounds: createBackgroundSchema,
-  careers: createCareerSchema,
-  feats: createFeatSchema,
-  artifacts: createArtifactSchema,
-  "artifact-sets": createArtifactSetSchema,
+    units: createUnitSchema,
+    spells: createSpellSchema,
+    skills: createSkillSchema,
+    'main-skills': createMainSkillSchema,
+    'spell-groups': createSpellGroupSchema,
+    races: createRaceSchema,
+    classes: createClassSchema,
+    backgrounds: createBackgroundSchema,
+    careers: createCareerSchema,
+    feats: createFeatSchema,
+    artifacts: createArtifactSchema,
+    'artifact-sets': createArtifactSetSchema,
 };
 
-describe("importContent: кожен вид", () => {
-  it.each(IMPORT_KINDS)("%s: перший рядок прикладу (сирі клітинки під ключами полів) проходить серверний шлях", async (kind) => {
-    const row = Object.fromEntries(IMPORT_SPECS[kind].fields.map((f) => [f.key, exampleOf("uk", kind, f.key)[0]]));
+describe('importContent: кожен вид', () => {
+    it.each(IMPORT_KINDS)(
+        '%s: перший рядок прикладу (сирі клітинки під ключами полів) проходить серверний шлях',
+        async (kind) => {
+            const row = Object.fromEntries(
+                IMPORT_SPECS[kind].fields.map((f) => [
+                    f.key,
+                    exampleOf('uk', kind, f.key)[0],
+                ])
+            );
 
-    const kindResource: AnyContentResource = { ...resource, schemas: { create: CREATE[kind], update: CREATE[kind] } };
+            const kindResource: AnyContentResource = {
+                ...resource,
+                schemas: { create: CREATE[kind], update: CREATE[kind] },
+            };
 
-    const report = await importContent(actor, kind, { rows: [row], mode: "create", dryRun: true }, stubImportDeps({ resource: () => kindResource, loadNames: async () => [] }));
+            const report = await importContent(
+                actor,
+                kind,
+                { rows: [row], mode: 'create', dryRun: true },
+                stubImportDeps({
+                    resource: () => kindResource,
+                    loadNames: async () => [],
+                })
+            );
 
-    expect(report.results[0]).toMatchObject({ status: "created", issues: [] });
-  });
+            expect(report.results[0]).toMatchObject({
+                status: 'created',
+                issues: [],
+            });
+        }
+    );
 });
 
-describe("compactImportReport", () => {
-  it("лише рядки з помилками/попередженнями, до ліміту, решта — omitted", () => {
-    const results = [
-      { row: 1, status: "created" as const, issues: [] },
-      ...Array.from({ length: 3 }, (_, i) => ({ row: i + 2, status: "error" as const, issues: [{ level: "error" as const, message: "x" }] })),
-    ];
+describe('compactImportReport', () => {
+    it('лише рядки з помилками/попередженнями, до ліміту, решта — omitted', () => {
+        const results = [
+            { row: 1, status: 'created' as const, issues: [] },
+            ...Array.from({ length: 3 }, (_, i) => ({
+                row: i + 2,
+                status: 'error' as const,
+                issues: [{ level: 'error' as const, message: 'x' }],
+            })),
+        ];
 
-    const compact = compactImportReport({ dryRun: false, results, counts: { created: 1, updated: 0, skipped: 0, error: 3 } }, 2);
+        const compact = compactImportReport(
+            {
+                dryRun: false,
+                results,
+                counts: { created: 1, updated: 0, skipped: 0, error: 3 },
+            },
+            2
+        );
 
-    expect(compact.rows.map((r) => r.row)).toEqual([2, 3]);
-    expect(compact.omitted).toBe(1);
-    expect(compact.counts.error).toBe(3);
-  });
+        expect(compact.rows.map((r) => r.row)).toEqual([2, 3]);
+        expect(compact.omitted).toBe(1);
+        expect(compact.counts.error).toBe(3);
+    });
 });
 
-it("background import resolves origin names and rejects unresolved explicit origin refs", async () => {
-  const resourceForBackgrounds: AnyContentResource = { ...resource, schemas: { create: createBackgroundSchema, update: createBackgroundSchema } };
+it('background import resolves origin names and rejects unresolved explicit origin refs', async () => {
+    const resourceForBackgrounds: AnyContentResource = {
+        ...resource,
+        schemas: {
+            create: createBackgroundSchema,
+            update: createBackgroundSchema,
+        },
+    };
 
-  const deps = stubImportDeps({ resource: () => resourceForBackgrounds, loadNames: async (_c, kind) => kind === "feats" ? [{ id: "f", name: "Alert" }] : [] });
+    const deps = stubImportDeps({
+        resource: () => resourceForBackgrounds,
+        loadNames: async (_c, kind) =>
+            kind === 'feats' ? [{ id: 'f', name: 'Alert' }] : [],
+    });
 
-  const good = await importContent(actor, "backgrounds", { rows: [{ name: "Criminal", originFeatId: "Alert" }], mode: "create", dryRun: true }, deps);
+    const good = await importContent(
+        actor,
+        'backgrounds',
+        {
+            rows: [{ name: 'Criminal', originFeatId: 'Alert' }],
+            mode: 'create',
+            dryRun: true,
+        },
+        deps
+    );
 
-  expect(good.results[0].status).toBe("created");
+    expect(good.results[0].status).toBe('created');
 
-  const bad = await importContent(actor, "backgrounds", { rows: [{ name: "Sage", originFeatId: "missing" }], mode: "create", dryRun: true }, deps);
+    const bad = await importContent(
+        actor,
+        'backgrounds',
+        {
+            rows: [{ name: 'Sage', originFeatId: 'missing' }],
+            mode: 'create',
+            dryRun: true,
+        },
+        deps
+    );
 
-  expect(bad.results[0].status).toBe("error");
+    expect(bad.results[0].status).toBe('error');
 });
 
-it("defers import invalidation until outer transaction commits", async () => {
-  const { runContentWriteContext } = await import("@/lib/server/content/write-context");
+it('defers import invalidation until outer transaction commits', async () => {
+    const { runContentWriteContext } = await import(
+        '@/lib/server/content/write-context'
+    );
 
-  const callbacks: Array<() => void> = [];
+    const callbacks: Array<() => void> = [];
 
-  invalidateReference.mockClear();
+    invalidateReference.mockClear();
 
-  const report = await runContentWriteContext("c1", {}, () => importContent(actor, "units", { rows: [{ name: "Біс" }], mode: "create", dryRun: false }, deps), callbacks);
+    const report = await runContentWriteContext(
+        'c1',
+        {},
+        () =>
+            importContent(
+                actor,
+                'units',
+                { rows: [{ name: 'Біс' }], mode: 'create', dryRun: false },
+                deps
+            ),
+        callbacks
+    );
 
-  expect(report.counts.created).toBe(1);
-  expect(invalidateReference).not.toHaveBeenCalled();
-  for (const callback of callbacks) callback();
-  expect(invalidateReference).toHaveBeenCalledWith(["units"], "c1");
+    expect(report.counts.created).toBe(1);
+    expect(invalidateReference).not.toHaveBeenCalled();
+    for (const callback of callbacks) callback();
+    expect(invalidateReference).toHaveBeenCalledWith(['units'], 'c1');
 });
 
-it("bumps the content version once when an executor-context import writes rows", async () => {
-  const { runContentWriteContext } = await import("@/lib/server/content/write-context");
+it('bumps the content version once when an executor-context import writes rows', async () => {
+    const { runContentWriteContext } = await import(
+        '@/lib/server/content/write-context'
+    );
 
-  const tx = { $executeRaw: vi.fn(async () => 1), campaign: { update: vi.fn(async () => ({ contentVersion: 1 })) } };
+    const tx = {
+        $executeRaw: vi.fn(async () => 1),
+        campaign: { update: vi.fn(async () => ({ contentVersion: 1 })) },
+    };
 
-  const report = await runContentWriteContext("c1", tx, () => importContent(actor, "units", { rows: [{ name: "Біс" }, { name: "Імп" }], mode: "create", dryRun: false }, { ...deps, transactional: true }));
+    const report = await runContentWriteContext('c1', tx, () =>
+        importContent(
+            actor,
+            'units',
+            {
+                rows: [{ name: 'Біс' }, { name: 'Імп' }],
+                mode: 'create',
+                dryRun: false,
+            },
+            { ...deps, transactional: true }
+        )
+    );
 
-  expect(report.counts.created).toBe(2);
-  expect(tx.campaign.update).toHaveBeenCalledOnce();
-  expect(tx.campaign.update).toHaveBeenCalledWith(expect.objectContaining({ data: { contentVersion: { increment: 1 } } }));
+    expect(report.counts.created).toBe(2);
+    expect(tx.campaign.update).toHaveBeenCalledOnce();
+    expect(tx.campaign.update).toHaveBeenCalledWith(
+        expect.objectContaining({ data: { contentVersion: { increment: 1 } } })
+    );
 });

@@ -1,84 +1,183 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { textOf } from "@/lib/i18n/test/text";
-import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { renderSegments } from "@/lib/utils/abilities/segments";
-import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
-import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { textOf } from '@/lib/i18n/test/text';
+import { ukT } from '@/lib/utils/abilities/__tests__/describe-fixtures';
+import {
+    makeParticipant,
+    resolved,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import {
+    applyEffect,
+    describeEffect,
+} from '@/lib/utils/abilities/registry/effects';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import { renderSegments } from '@/lib/utils/abilities/segments';
+import { endTurnCleanup } from '@/lib/utils/battle/turn/end-turn-cleanup';
+import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-const hot: Effect = { kind: "hot", healPerRound: "1d4", duration: { rounds: 3 }, target: "eventTarget" };
+const hot: Effect = {
+    kind: 'hot',
+    healPerRound: '1d4',
+    duration: { rounds: 3 },
+    target: 'eventTarget',
+};
 
 function cast(targetHp = 10) {
-  const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", hp: targetHp, maxHp: 20, side: ParticipantSide.ALLY })];
+    const ps = [
+        makeParticipant({ id: 'o' }),
+        makeParticipant({
+            id: 't',
+            hp: targetHp,
+            maxHp: 20,
+            side: ParticipantSide.ALLY,
+        }),
+    ];
 
-  return applyEffect({
-    participants: ps,
-    ability: resolved({ trigger: { event: "action" }, effects: [hot] }),
-    effectIndex: 0,
-    ownerId: "o",
-    effect: hot,
-    targetIds: ["t"],
-    event: { type: "action", actorId: "o", abilityKey: "k" },
-    ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
-  });
+    return applyEffect({
+        participants: ps,
+        ability: resolved({ trigger: { event: 'action' }, effects: [hot] }),
+        effectIndex: 0,
+        ownerId: 'o',
+        effect: hot,
+        targetIds: ['t'],
+        event: { type: 'action', actorId: 'o', abilityKey: 'k' },
+        ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
+    });
 }
 
-describe("hot", () => {
-  it("кидає кубики один раз і вішає бафф з hotHeal", () => {
-    const r = cast();
+describe('hot', () => {
+    it('кидає кубики один раз і вішає бафф з hotHeal', () => {
+        const r = cast();
 
-    expect(r.participants[1].battleData.activeEffects[0]).toMatchObject({ type: "buff", duration: 3, hotHeal: { healPerRound: 3 } });
-    expect(textOf(r.messages[0])).toContain("💚");
-  });
+        expect(r.participants[1].battleData.activeEffects[0]).toMatchObject({
+            type: 'buff',
+            duration: 3,
+            hotHeal: { healPerRound: 3 },
+        });
+        expect(textOf(r.messages[0])).toContain('💚');
+    });
 
-  it("лікує на початку ходу цілі, не вище max HP, і спливає за тривалістю", () => {
-    const target = cast(19).participants[1];
+    it('лікує на початку ходу цілі, не вище max HP, і спливає за тривалістю', () => {
+        const target = cast(19).participants[1];
 
-    const out = processStartOfTurn(target, 2, [target], undefined, undefined, DEFAULT_RULES);
+        const out = processStartOfTurn(
+            target,
+            2,
+            [target],
+            undefined,
+            undefined,
+            DEFAULT_RULES
+        );
 
-    expect(out.participant.combatStats.currentHp).toBe(20);
-    expect(out.abilityMessages.some((m) => textOf(m).includes("+1 HP"))).toBe(true);
-    expect(out.participant.battleData.activeEffects[0].duration).toBe(3);
-    expect(endTurnCleanup(out.participant).battleData.activeEffects[0].duration).toBe(2);
-  });
+        expect(out.participant.combatStats.currentHp).toBe(20);
+        expect(
+            out.abilityMessages.some((m) => textOf(m).includes('+1 HP'))
+        ).toBe(true);
+        expect(out.participant.battleData.activeEffects[0].duration).toBe(3);
+        expect(
+            endTurnCleanup(out.participant).battleData.activeEffects[0].duration
+        ).toBe(2);
+    });
 
-  it("повне лікування за раунд", () => {
-    const target = cast(5).participants[1];
+    it('повне лікування за раунд', () => {
+        const target = cast(5).participants[1];
 
-    expect(processStartOfTurn(target, 2, [target], undefined, undefined, DEFAULT_RULES).participant.combatStats.currentHp).toBe(8);
-  });
+        expect(
+            processStartOfTurn(
+                target,
+                2,
+                [target],
+                undefined,
+                undefined,
+                DEFAULT_RULES
+            ).participant.combatStats.currentHp
+        ).toBe(8);
+    });
 
-  it("опис", async () => {
-    expect(renderSegments(await ukT(), describeEffect(hot)).join(" · ")).toContain("раунд");
-  });
+    it('опис', async () => {
+        expect(
+            renderSegments(await ukT(), describeEffect(hot)).join(' · ')
+        ).toContain('раунд');
+    });
 });
 
-describe("dot з кубиками", () => {
-  const dot: Effect = { kind: "dot", damagePerRound: "1d6", damageType: "poison", duration: { rounds: 3 }, target: "eventTarget" };
+describe('dot з кубиками', () => {
+    const dot: Effect = {
+        kind: 'dot',
+        damagePerRound: '1d6',
+        damageType: 'poison',
+        duration: { rounds: 3 },
+        target: 'eventTarget',
+    };
 
-  const applied = () => {
-    const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", hp: 30, maxHp: 30, side: ParticipantSide.ENEMY })];
+    const applied = () => {
+        const ps = [
+            makeParticipant({ id: 'o' }),
+            makeParticipant({
+                id: 't',
+                hp: 30,
+                maxHp: 30,
+                side: ParticipantSide.ENEMY,
+            }),
+        ];
 
-    return applyEffect({ participants: ps, ability: resolved({ trigger: { event: "action" }, effects: [dot] }), effectIndex: 0, ownerId: "o", effect: dot, targetIds: ["t"], event: { type: "action", actorId: "o", abilityKey: "k" }, ctx: { round: 1, rng: seq(0.1), rules: DEFAULT_RULES } }).participants[1];
-  };
+        return applyEffect({
+            participants: ps,
+            ability: resolved({ trigger: { event: 'action' }, effects: [dot] }),
+            effectIndex: 0,
+            ownerId: 'o',
+            effect: dot,
+            targetIds: ['t'],
+            event: { type: 'action', actorId: 'o', abilityKey: 'k' },
+            ctx: { round: 1, rng: seq(0.1), rules: DEFAULT_RULES },
+        }).participants[1];
+    };
 
-  it("кидає кубики щоразу на початку ходу, а не фіксує при накладанні", () => {
-    const target = applied();
+    it('кидає кубики щоразу на початку ходу, а не фіксує при накладанні', () => {
+        const target = applied();
 
-    expect(target.battleData.activeEffects[0].dotDamage).toMatchObject({ damagePerRound: 1, dice: "1d6" });
-    expect(processStartOfTurn(target, 2, [target], () => 0.99, undefined, DEFAULT_RULES).participant.combatStats.currentHp).toBe(24);
-  });
+        expect(target.battleData.activeEffects[0].dotDamage).toMatchObject({
+            damagePerRound: 1,
+            dice: '1d6',
+        });
+        expect(
+            processStartOfTurn(
+                target,
+                2,
+                [target],
+                () => 0.99,
+                undefined,
+                DEFAULT_RULES
+            ).participant.combatStats.currentHp
+        ).toBe(24);
+    });
 
-  it("числовий DoT лишається фіксованим", () => {
-    const target = applied();
+    it('числовий DoT лишається фіксованим', () => {
+        const target = applied();
 
-    const fixed = { ...target, battleData: { ...target.battleData, activeEffects: target.battleData.activeEffects.map((e) => ({ ...e, dotDamage: { damagePerRound: 4, damageType: "poison" } })) } };
+        const fixed = {
+            ...target,
+            battleData: {
+                ...target.battleData,
+                activeEffects: target.battleData.activeEffects.map((e) => ({
+                    ...e,
+                    dotDamage: { damagePerRound: 4, damageType: 'poison' },
+                })),
+            },
+        };
 
-    expect(processStartOfTurn(fixed, 2, [fixed], () => 0.99, undefined, DEFAULT_RULES).participant.combatStats.currentHp).toBe(26);
-  });
+        expect(
+            processStartOfTurn(
+                fixed,
+                2,
+                [fixed],
+                () => 0.99,
+                undefined,
+                DEFAULT_RULES
+            ).participant.combatStats.currentHp
+        ).toBe(26);
+    });
 });

@@ -1,10 +1,14 @@
-import { SpellCreateForm } from "@/components/spells/form/SpellCreateForm";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { SpellCreateForm } from '@/components/spells/form/SpellCreateForm';
+import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
-export default async function NewSpellPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function NewSpellPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-  await requireCampaignDM(id);
+    await requireCampaignDM(id);
 
-  return <SpellCreateForm campaignId={id} />;
+    return <SpellCreateForm campaignId={id} />;
 }

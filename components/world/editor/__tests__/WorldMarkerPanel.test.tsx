@@ -1,124 +1,191 @@
 // @vitest-environment happy-dom
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { WorldEditorContext } from "../WorldEditorContext";
-import { WorldMarkerPanel } from "../WorldMarkerPanel";
+import { WorldEditorContext } from '../WorldEditorContext';
+import { WorldMarkerPanel } from '../WorldMarkerPanel';
 
-import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
-import type { WorldEditorCtx } from "@/lib/hooks/world";
-import type { WorldMarker } from "@/types/world";
+import { renderWithConfirm } from '@/components/ui/__tests__/uk-intl';
+import type { WorldEditorCtx } from '@/lib/hooks/world';
+import type { WorldMarker } from '@/types/world';
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
 const update = vi.fn();
 
 const remove = vi.fn();
 
 const marker = (over: Partial<WorldMarker>): WorldMarker => ({
-  id: "k1", mapId: "m1", kind: "point", x: 0.5, y: 0.5, polygon: null, name: "Місто", icon: "city", color: null, dmNote: null, alwaysVisible: false, sortOrder: 0, childMapId: null, ...over,
+    id: 'k1',
+    mapId: 'm1',
+    kind: 'point',
+    x: 0.5,
+    y: 0.5,
+    polygon: null,
+    name: 'Місто',
+    icon: 'city',
+    color: null,
+    dmNote: null,
+    alwaysVisible: false,
+    sortOrder: 0,
+    childMapId: null,
+    ...over,
 });
 
 const renderPanel = (m: WorldMarker) => {
-  const ctx = {
-    campaignId: "c1",
-    detail: { map: { id: "m1" }, markers: [m] },
-    maps: [],
-    selectedId: m.id,
-    select: vi.fn(),
-    openMap: vi.fn(),
-    tool: "select",
-    setTool: vi.fn(),
-    redrawId: null,
-    redraw: vi.fn(),
-    editor: { marker: { update: { mutateOk: update }, remove: { mutateOk: remove } }, map: { create: { isPending: false } } },
-  } as unknown as WorldEditorCtx;
+    const ctx = {
+        campaignId: 'c1',
+        detail: { map: { id: 'm1' }, markers: [m] },
+        maps: [],
+        selectedId: m.id,
+        select: vi.fn(),
+        openMap: vi.fn(),
+        tool: 'select',
+        setTool: vi.fn(),
+        redrawId: null,
+        redraw: vi.fn(),
+        editor: {
+            marker: {
+                update: { mutateOk: update },
+                remove: { mutateOk: remove },
+            },
+            map: { create: { isPending: false } },
+        },
+    } as unknown as WorldEditorCtx;
 
-  return renderWithConfirm(
-    <QueryClientProvider client={new QueryClient()}>
-      <WorldEditorContext.Provider value={ctx}>
-        <WorldMarkerPanel />
-      </WorldEditorContext.Provider>
-    </QueryClientProvider>,
-  );
+    return renderWithConfirm(
+        <QueryClientProvider client={new QueryClient()}>
+            <WorldEditorContext.Provider value={ctx}>
+                <WorldMarkerPanel />
+            </WorldEditorContext.Provider>
+        </QueryClientProvider>
+    );
 };
 
 beforeEach(() => {
-  vi.stubGlobal("matchMedia", (q: string) => ({ matches: false, media: q, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
-  remove.mockResolvedValue(true);
+    vi.stubGlobal('matchMedia', (q: string) => ({
+        matches: false,
+        media: q,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+    }));
+    remove.mockResolvedValue(true);
 });
 
 afterEach(() => {
-  cleanup();
-  vi.clearAllMocks();
+    cleanup();
+    vi.clearAllMocks();
 });
 
-describe("WorldMarkerPanel", () => {
-  it("saves the name on blur", () => {
-    renderPanel(marker({}));
+describe('WorldMarkerPanel', () => {
+    it('saves the name on blur', () => {
+        renderPanel(marker({}));
 
-    const input = screen.getByLabelText("Назва");
+        const input = screen.getByLabelText('Назва');
 
-    fireEvent.change(input, { target: { value: "Столиця" } });
-    fireEvent.blur(input);
+        fireEvent.change(input, { target: { value: 'Столиця' } });
+        fireEvent.blur(input);
 
-    expect(update).toHaveBeenCalledWith({ id: "k1", data: { name: "Столиця" } });
-  });
+        expect(update).toHaveBeenCalledWith({
+            id: 'k1',
+            data: { name: 'Столиця' },
+        });
+    });
 
-  it("warns about nested maps and does not delete without confirmation", async () => {
-    renderPanel(marker({ childMapId: "m2" }));
+    it('warns about nested maps and does not delete without confirmation', async () => {
+        renderPanel(marker({ childMapId: 'm2' }));
 
-    fireEvent.click(screen.getByRole("button", { name: /Видалити/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Видалити/ }));
 
-    expect(await screen.findByText(/вкладені карти/)).toBeTruthy();
+        expect(await screen.findByText(/вкладені карти/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
-    await waitFor(() => expect(screen.queryByText(/вкладені карти/)).toBeNull());
+        fireEvent.click(screen.getByRole('button', { name: 'Скасувати' }));
+        await waitFor(() =>
+            expect(screen.queryByText(/вкладені карти/)).toBeNull()
+        );
 
-    expect(remove).not.toHaveBeenCalled();
-  });
+        expect(remove).not.toHaveBeenCalled();
+    });
 
-  it("picks the icon from a button grid and groups fields into sections", () => {
-    renderPanel(marker({ icon: "city" }));
+    it('picks the icon from a button grid and groups fields into sections', () => {
+        renderPanel(marker({ icon: 'city' }));
 
-    expect(screen.getByRole("heading", { name: "Основне" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Для майстра" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Вкладена карта" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Місто" }).getAttribute("aria-pressed")).toBe("true");
+        expect(screen.getByRole('heading', { name: 'Основне' })).toBeTruthy();
+        expect(
+            screen.getByRole('heading', { name: 'Для майстра' })
+        ).toBeTruthy();
+        expect(
+            screen.getByRole('heading', { name: 'Вкладена карта' })
+        ).toBeTruthy();
+        expect(
+            screen
+                .getByRole('button', { name: 'Місто' })
+                .getAttribute('aria-pressed')
+        ).toBe('true');
 
-    fireEvent.click(screen.getByRole("button", { name: "Замок" }));
+        fireEvent.click(screen.getByRole('button', { name: 'Замок' }));
 
-    expect(update).toHaveBeenCalledWith({ id: "k1", data: { icon: "castle" } });
-  });
+        expect(update).toHaveBeenCalledWith({
+            id: 'k1',
+            data: { icon: 'castle' },
+        });
+    });
 
-  it("shows the colour only for zones", () => {
-    renderPanel(marker({ kind: "point" }));
+    it('shows the colour only for zones', () => {
+        renderPanel(marker({ kind: 'point' }));
 
-    expect(screen.queryByLabelText("Колір зони")).toBeNull();
+        expect(screen.queryByLabelText('Колір зони')).toBeNull();
 
-    cleanup();
-    renderPanel(marker({ kind: "zone", polygon: [[0, 0], [1, 0], [1, 1], [0, 0]], icon: null }));
+        cleanup();
+        renderPanel(
+            marker({
+                kind: 'zone',
+                polygon: [
+                    [0, 0],
+                    [1, 0],
+                    [1, 1],
+                    [0, 0],
+                ],
+                icon: null,
+            })
+        );
 
-    expect(screen.getByLabelText("Колір зони")).toBeTruthy();
-  });
+        expect(screen.getByLabelText('Колір зони')).toBeTruthy();
+    });
 
-  it("flushes the pending colour save on unmount", () => {
-    vi.useFakeTimers();
+    it('flushes the pending colour save on unmount', () => {
+        vi.useFakeTimers();
 
-    const { unmount } = renderPanel(marker({ kind: "zone", polygon: [[0, 0], [1, 0], [1, 1], [0, 0]], icon: null }));
+        const { unmount } = renderPanel(
+            marker({
+                kind: 'zone',
+                polygon: [
+                    [0, 0],
+                    [1, 0],
+                    [1, 1],
+                    [0, 0],
+                ],
+                icon: null,
+            })
+        );
 
-    fireEvent.change(screen.getByLabelText("Колір зони"), { target: { value: "#112233" } });
+        fireEvent.change(screen.getByLabelText('Колір зони'), {
+            target: { value: '#112233' },
+        });
 
-    expect(update).not.toHaveBeenCalled();
+        expect(update).not.toHaveBeenCalled();
 
-    unmount();
+        unmount();
 
-    expect(update).toHaveBeenCalledWith({ id: "k1", data: { color: "#112233" } });
+        expect(update).toHaveBeenCalledWith({
+            id: 'k1',
+            data: { color: '#112233' },
+        });
 
-    vi.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
 
-    expect(update).toHaveBeenCalledTimes(1);
-    vi.useRealTimers();
-  });
+        expect(update).toHaveBeenCalledTimes(1);
+        vi.useRealTimers();
+    });
 });

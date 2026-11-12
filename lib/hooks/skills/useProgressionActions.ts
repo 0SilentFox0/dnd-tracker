@@ -1,96 +1,157 @@
-"use client";
+'use client';
 
-import { useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { skillKeys } from "./keys";
+import { skillKeys } from './keys';
 
-import { learnNode, resetProgression, unlearnNodes } from "@/lib/api/character-progression";
-import { ApiError } from "@/lib/api/client";
-import { battleKeys } from "@/lib/hooks/battles/keys";
-import { characterKeys } from "@/lib/hooks/characters/keys";
-import { useNotify, useSingleFlight } from "@/lib/hooks/common";
-import { useTranslator } from "@/lib/i18n/use-translator";
-import { BRANCH_MIN_LEVEL, normalizeTree, skillPoints } from "@/lib/utils/skills/progression";
-import type { CharacterSheet } from "@/types/characters";
-import type { CharacterProgressionDto } from "@/types/progression";
+import {
+    learnNode,
+    resetProgression,
+    unlearnNodes,
+} from '@/lib/api/character-progression';
+import { ApiError } from '@/lib/api/client';
+import { battleKeys } from '@/lib/hooks/battles/keys';
+import { characterKeys } from '@/lib/hooks/characters/keys';
+import { useNotify, useSingleFlight } from '@/lib/hooks/common';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import {
+    BRANCH_MIN_LEVEL,
+    normalizeTree,
+    skillPoints,
+} from '@/lib/utils/skills/progression';
+import type { CharacterSheet } from '@/types/characters';
+import type { CharacterProgressionDto } from '@/types/progression';
 
 const SHEET_REFRESH_DELAY_MS = 1000;
 
 export function useProgressionActions(campaignId: string, characterId: string) {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const t = useTranslator("skillTree");
+    const t = useTranslator('skillTree');
 
-  const notify = useNotify();
+    const notify = useNotify();
 
-  const [pendingNodeId, setPendingNodeId] = useState<string | null>(null);
+    const [pendingNodeId, setPendingNodeId] = useState<string | null>(null);
 
-  const singleFlight = useSingleFlight();
+    const singleFlight = useSingleFlight();
 
-  const sheetRefresh = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const sheetRefresh = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const key = skillKeys.progression(campaignId, characterId);
+    const key = skillKeys.progression(campaignId, characterId);
 
-  const sheetKey = characterKeys.sheet(campaignId, characterId);
+    const sheetKey = characterKeys.sheet(campaignId, characterId);
 
-  const patchSheet = (unlocked: string[]) => {
-    const dto = queryClient.getQueryData<CharacterProgressionDto>(key);
+    const patchSheet = (unlocked: string[]) => {
+        const dto = queryClient.getQueryData<CharacterProgressionDto>(key);
 
-    if (dto?.treeId && dto.tree) {
-      const free = skillPoints(normalizeTree({ id: dto.treeId, race: dto.race, skills: dto.tree }), unlocked, dto.level).free;
+        if (dto?.treeId && dto.tree) {
+            const free = skillPoints(
+                normalizeTree({
+                    id: dto.treeId,
+                    race: dto.race,
+                    skills: dto.tree,
+                }),
+                unlocked,
+                dto.level
+            ).free;
 
-      queryClient.setQueryData<CharacterSheet>(sheetKey, (old) => (old ? { ...old, progression: { ...old.progression, freePoints: free } } : old));
-    }
-
-    if (sheetRefresh.current) clearTimeout(sheetRefresh.current);
-
-    sheetRefresh.current = setTimeout(() => void queryClient.invalidateQueries({ queryKey: sheetKey }), SHEET_REFRESH_DELAY_MS);
-  };
-
-  const run = (nodeId: string, call: () => Promise<{ unlocked: string[] }>): Promise<boolean> =>
-    singleFlight(async () => {
-      setPendingNodeId(nodeId);
-
-      try {
-        const { unlocked } = await call();
-
-        queryClient.setQueryData<CharacterProgressionDto>(key, (old) => (old ? { ...old, unlocked } : old));
-        queryClient.setQueryData<{ skillTreeProgress?: Record<string, object> | null }>(characterKeys.detail(campaignId, characterId), (old) => {
-          const treeId = queryClient.getQueryData<CharacterProgressionDto>(key)?.treeId;
-
-          if (!old || !treeId) return old;
-
-          const progress = old.skillTreeProgress ?? {};
-
-          return { ...old, skillTreeProgress: { ...progress, [treeId]: { ...progress[treeId], unlockedSkills: unlocked } } };
-        });
-        patchSheet(unlocked);
-        void queryClient.invalidateQueries({ queryKey: battleKeys.balanceAll(), refetchType: "none" });
-
-        return true;
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 409) {
-          void queryClient.invalidateQueries({ queryKey: key });
-          await notify(t("progression.changed"));
-        } else if (error instanceof ApiError && error.status === 422) {
-          const reason = (error.body as { reason?: string } | undefined)?.reason ?? "";
-
-          await notify(t.has(`reasons.${reason}`) ? t(`reasons.${reason}`, { level: BRANCH_MIN_LEVEL.expert }) : error.message);
-        } else {
-          await notify((error as Error).message);
+            queryClient.setQueryData<CharacterSheet>(sheetKey, (old) =>
+                old
+                    ? {
+                          ...old,
+                          progression: { ...old.progression, freePoints: free },
+                      }
+                    : old
+            );
         }
 
-        return false;
-      } finally {
-        setPendingNodeId(null);
-      }
-    }) ?? Promise.resolve(false);
+        if (sheetRefresh.current) clearTimeout(sheetRefresh.current);
 
-  return {
-    learn: (nodeId: string) => run(nodeId, () => learnNode(campaignId, characterId, nodeId)),
-    unlearn: (nodeIds: string[]) => run(nodeIds.length === 1 ? nodeIds[0] : "orphans", () => unlearnNodes(campaignId, characterId, nodeIds)),
-    reset: () => run("reset", () => resetProgression(campaignId, characterId)),
-    pendingNodeId,
-  };
+        sheetRefresh.current = setTimeout(
+            () => void queryClient.invalidateQueries({ queryKey: sheetKey }),
+            SHEET_REFRESH_DELAY_MS
+        );
+    };
+
+    const run = (
+        nodeId: string,
+        call: () => Promise<{ unlocked: string[] }>
+    ): Promise<boolean> =>
+        singleFlight(async () => {
+            setPendingNodeId(nodeId);
+
+            try {
+                const { unlocked } = await call();
+
+                queryClient.setQueryData<CharacterProgressionDto>(key, (old) =>
+                    old ? { ...old, unlocked } : old
+                );
+                queryClient.setQueryData<{
+                    skillTreeProgress?: Record<string, object> | null;
+                }>(characterKeys.detail(campaignId, characterId), (old) => {
+                    const treeId =
+                        queryClient.getQueryData<CharacterProgressionDto>(
+                            key
+                        )?.treeId;
+
+                    if (!old || !treeId) return old;
+
+                    const progress = old.skillTreeProgress ?? {};
+
+                    return {
+                        ...old,
+                        skillTreeProgress: {
+                            ...progress,
+                            [treeId]: {
+                                ...progress[treeId],
+                                unlockedSkills: unlocked,
+                            },
+                        },
+                    };
+                });
+                patchSheet(unlocked);
+                void queryClient.invalidateQueries({
+                    queryKey: battleKeys.balanceAll(),
+                    refetchType: 'none',
+                });
+
+                return true;
+            } catch (error) {
+                if (error instanceof ApiError && error.status === 409) {
+                    void queryClient.invalidateQueries({ queryKey: key });
+                    await notify(t('progression.changed'));
+                } else if (error instanceof ApiError && error.status === 422) {
+                    const reason =
+                        (error.body as { reason?: string } | undefined)
+                            ?.reason ?? '';
+
+                    await notify(
+                        t.has(`reasons.${reason}`)
+                            ? t(`reasons.${reason}`, {
+                                  level: BRANCH_MIN_LEVEL.expert,
+                              })
+                            : error.message
+                    );
+                } else {
+                    await notify((error as Error).message);
+                }
+
+                return false;
+            } finally {
+                setPendingNodeId(null);
+            }
+        }) ?? Promise.resolve(false);
+
+    return {
+        learn: (nodeId: string) =>
+            run(nodeId, () => learnNode(campaignId, characterId, nodeId)),
+        unlearn: (nodeIds: string[]) =>
+            run(nodeIds.length === 1 ? nodeIds[0] : 'orphans', () =>
+                unlearnNodes(campaignId, characterId, nodeIds)
+            ),
+        reset: () =>
+            run('reset', () => resetProgression(campaignId, characterId)),
+        pendingNodeId,
+    };
 }

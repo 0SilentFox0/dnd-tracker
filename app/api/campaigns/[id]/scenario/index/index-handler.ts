@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { loadScenarioIndex } from "@/lib/server/scenario/index-store";
-import { requireCampaignDMOrDemoAccess } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { loadScenarioIndex } from '@/lib/server/scenario/index-store';
+import { requireCampaignDMOrDemoAccess } from '@/lib/utils/api/api-auth';
+import { handleApiError } from '@/lib/utils/api/error-handler';
 
 export async function scenarioIndexHandler(campaignId: string) {
-  try {
-    const access = await requireCampaignDMOrDemoAccess(campaignId);
+    try {
+        const access = await requireCampaignDMOrDemoAccess(campaignId);
 
-    if (access instanceof NextResponse) return access;
+        if (access instanceof NextResponse) return access;
 
-    return NextResponse.json(await loadScenarioIndex(campaignId));
-  } catch (error) {
-    return handleApiError(error, { action: "get scenario index" });
-  }
+        return NextResponse.json(await loadScenarioIndex(campaignId));
+    } catch (error) {
+        return handleApiError(error, { action: 'get scenario index' });
+    }
 }

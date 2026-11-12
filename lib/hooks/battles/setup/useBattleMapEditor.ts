@@ -1,162 +1,270 @@
-"use client";
+'use client';
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
 
-import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
-import { useMapMotionTool } from "@/lib/hooks/battle/useMapMotionTool";
-import { useImageSize } from "@/lib/hooks/common";
-import { textRef } from "@/lib/i18n/text-ref";
 import {
-  applyMargins,
-  clampMargins,
-  gridForCellSize,
-  hasPlayableArea,
-  hazardDamage,
-  impliedCellPx,
-  inferMargins,
-  isPreviewSafeBackground,
-  type Margins,
-  paintCells,
-  resizeMap,
-  type SetupTool,
-} from "@/lib/utils/battle/grid";
-import { MAP_MODE_REGISTRY, type MapModeDefinition, type MapModeKey } from "@/lib/utils/battle/modes";
-import type { BattleMapConfig, GridPoint, MapMotion } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+    DEFAULT_BATTLE_MAP,
+    DEFAULT_HAZARD_DAMAGE_TYPE,
+    DEFAULT_HAZARD_DICE,
+    DEFAULT_MAP_BACKGROUND,
+} from '@/lib/constants/battle';
+import { useMapMotionTool } from '@/lib/hooks/battle/useMapMotionTool';
+import { useImageSize } from '@/lib/hooks/common';
+import { textRef } from '@/lib/i18n/text-ref';
+import {
+    applyMargins,
+    clampMargins,
+    gridForCellSize,
+    hasPlayableArea,
+    hazardDamage,
+    impliedCellPx,
+    inferMargins,
+    isPreviewSafeBackground,
+    type Margins,
+    paintCells,
+    resizeMap,
+    type SetupTool,
+} from '@/lib/utils/battle/grid';
+import {
+    MAP_MODE_REGISTRY,
+    type MapModeDefinition,
+    type MapModeKey,
+} from '@/lib/utils/battle/modes';
+import type { BattleMapConfig, GridPoint, MapMotion } from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
 
-const modeOf = (key: MapModeKey) => MAP_MODE_REGISTRY[key] as MapModeDefinition<unknown>;
+const modeOf = (key: MapModeKey) =>
+    MAP_MODE_REGISTRY[key] as MapModeDefinition<unknown>;
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 
 /** Hazard brush; empty dice means a hazard without damage */
 export interface HazardBrush {
-  label: string;
-  dice: string;
-  damageType: string;
+    label: string;
+    dice: string;
+    damageType: string;
 }
 
-const DEFAULT_BRUSH: HazardBrush = { label: "", dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
+const DEFAULT_BRUSH: HazardBrush = {
+    label: '',
+    dice: DEFAULT_HAZARD_DICE,
+    damageType: DEFAULT_HAZARD_DAMAGE_TYPE,
+};
 
-export const NO_PLAYABLE_NOTICE = textRef("battleSetup.map.noPlayable");
+export const NO_PLAYABLE_NOTICE = textRef('battleSetup.map.noPlayable');
 
-export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) {
-  const [enabled, setEnabledState] = useState(Boolean(initial));
+export function useBattleMapEditor(
+    initial: BattleMapConfig | null | undefined
+) {
+    const [enabled, setEnabledState] = useState(Boolean(initial));
 
-  const [map, setMap] = useState<BattleMapConfig>(() => initial ?? { ...DEFAULT_BATTLE_MAP });
+    const [map, setMap] = useState<BattleMapConfig>(
+        () => initial ?? { ...DEFAULT_BATTLE_MAP }
+    );
 
-  const [margins, setMarginsState] = useState<Margins>(() => (initial ? inferMargins(initial) : NO_MARGINS));
+    const [margins, setMarginsState] = useState<Margins>(() =>
+        initial ? inferMargins(initial) : NO_MARGINS
+    );
 
-  const [tool, setToolState] = useState<SetupTool | null>(null);
+    const [tool, setToolState] = useState<SetupTool | null>(null);
 
-  const [brush, setBrushState] = useState<HazardBrush>(DEFAULT_BRUSH);
+    const [brush, setBrushState] = useState<HazardBrush>(DEFAULT_BRUSH);
 
-  const setBrush = useCallback((patch: Partial<HazardBrush>) => setBrushState((b) => ({ ...b, ...patch })), []);
+    const setBrush = useCallback(
+        (patch: Partial<HazardBrush>) =>
+            setBrushState((b) => ({ ...b, ...patch })),
+        []
+    );
 
-  const [notice, setNotice] = useState<LogLine | null>(null);
+    const [notice, setNotice] = useState<LogLine | null>(null);
 
-  const setEnabled = useCallback((value: boolean) => {
-    setEnabledState(value);
+    const setEnabled = useCallback((value: boolean) => {
+        setEnabledState(value);
 
-    if (!value) setNotice(null);
-  }, []);
+        if (!value) setNotice(null);
+    }, []);
 
-  const setTool = useCallback((value: SetupTool | null) => {
-    setToolState(value);
-    setNotice(null);
-  }, []);
+    const setTool = useCallback((value: SetupTool | null) => {
+        setToolState(value);
+        setNotice(null);
+    }, []);
 
-  const image = useImageSize(enabled ? (isPreviewSafeBackground(map.background) ? map.background : DEFAULT_MAP_BACKGROUND) : null);
+    const image = useImageSize(
+        enabled
+            ? isPreviewSafeBackground(map.background)
+                ? map.background
+                : DEFAULT_MAP_BACKGROUND
+            : null
+    );
 
-  const resize = useCallback(
-    (cols: number, rows: number, backgroundCols: number | undefined) => {
-      const nextMargins = clampMargins({ cols, rows }, margins);
+    const resize = useCallback(
+        (cols: number, rows: number, backgroundCols: number | undefined) => {
+            const nextMargins = clampMargins({ cols, rows }, margins);
 
-      const { backgroundCols: _old, ...sized } = applyMargins(resizeMap(applyMargins(map, NO_MARGINS, margins), cols, rows), nextMargins, NO_MARGINS);
+            const { backgroundCols: _old, ...sized } = applyMargins(
+                resizeMap(applyMargins(map, NO_MARGINS, margins), cols, rows),
+                nextMargins,
+                NO_MARGINS
+            );
 
-      const next = backgroundCols === undefined ? sized : { ...sized, backgroundCols };
+            const next =
+                backgroundCols === undefined
+                    ? sized
+                    : { ...sized, backgroundCols };
 
-      if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
+            if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
 
-      setNotice(null);
-      setMap(next);
-      setMarginsState(nextMargins);
-    },
-    [map, margins],
-  );
+            setNotice(null);
+            setMap(next);
+            setMarginsState(nextMargins);
+        },
+        [map, margins]
+    );
 
-  // ручний розмір скидає масштаб фону: він знову вписується в сітку, а повзунок показує нову клітинку
-  const setSize = useCallback((cols: number, rows: number) => resize(cols, rows, undefined), [resize]);
+    // ручний розмір скидає масштаб фону: він знову вписується в сітку, а повзунок показує нову клітинку
+    const setSize = useCallback(
+        (cols: number, rows: number) => resize(cols, rows, undefined),
+        [resize]
+    );
 
-  const setCellSize = useCallback(
-    (cellPx: number) => {
-      if (!image) return;
+    const setCellSize = useCallback(
+        (cellPx: number) => {
+            if (!image) return;
 
-      const grid = gridForCellSize(image, cellPx);
+            const grid = gridForCellSize(image, cellPx);
 
-      resize(grid.cols, grid.rows, grid.backgroundCols);
-    },
-    [image, resize],
-  );
+            resize(grid.cols, grid.rows, grid.backgroundCols);
+        },
+        [image, resize]
+    );
 
-  const setGridOffset = useCallback((gridOffset: { x: number; y: number }) => setMap((m) => ({ ...m, gridOffset })), []);
+    const setGridOffset = useCallback(
+        (gridOffset: { x: number; y: number }) =>
+            setMap((m) => ({ ...m, gridOffset })),
+        []
+    );
 
-  const setMargins = useCallback(
-    (next: Margins) => {
-      const nextMap = applyMargins(map, next, margins);
+    const setMargins = useCallback(
+        (next: Margins) => {
+            const nextMap = applyMargins(map, next, margins);
 
-      if (!hasPlayableArea(nextMap)) return setNotice(NO_PLAYABLE_NOTICE);
+            if (!hasPlayableArea(nextMap)) return setNotice(NO_PLAYABLE_NOTICE);
 
-      setNotice(null);
-      setMap(nextMap);
-      setMarginsState(next);
-    },
-    [map, margins],
-  );
+            setNotice(null);
+            setMap(nextMap);
+            setMarginsState(next);
+        },
+        [map, margins]
+    );
 
-  const setOpacity = useCallback((opacity: number) => setMap((m) => ({ ...m, opacity })), []);
+    const setOpacity = useCallback(
+        (opacity: number) => setMap((m) => ({ ...m, opacity })),
+        []
+    );
 
-  // масштаб і зсув належать старому фону
-  const setBackground = useCallback((background: string | null) => setMap(({ backgroundCols: _cols, gridOffset: _offset, ...m }) => ({ ...m, background })), []);
+    // масштаб і зсув належать старому фону
+    const setBackground = useCallback(
+        (background: string | null) =>
+            setMap(({ backgroundCols: _cols, gridOffset: _offset, ...m }) => ({
+                ...m,
+                background,
+            })),
+        []
+    );
 
-  const setMode = useCallback((key: MapModeKey, on: boolean) => {
-    const mode = modeOf(key);
+    const setMode = useCallback((key: MapModeKey, on: boolean) => {
+        const mode = modeOf(key);
 
-    // один режим на бій
-    setMap((m) => mode.withConfig(MODE_KEYS.reduce((acc, other) => (other === key ? acc : modeOf(other).withConfig(acc, null)), m), on ? (mode.emptyConfig?.() ?? null) : null));
+        // один режим на бій
+        setMap((m) =>
+            mode.withConfig(
+                MODE_KEYS.reduce(
+                    (acc, other) =>
+                        other === key
+                            ? acc
+                            : modeOf(other).withConfig(acc, null),
+                    m
+                ),
+                on ? (mode.emptyConfig?.() ?? null) : null
+            )
+        );
 
-    if (on) setToolState(null);
-  }, []);
+        if (on) setToolState(null);
+    }, []);
 
-  const setMotion = useCallback((motion: MapMotion | null) => setMap((m) => ({ ...m, motion })), []);
+    const setMotion = useCallback(
+        (motion: MapMotion | null) => setMap((m) => ({ ...m, motion })),
+        []
+    );
 
-  const motionMutation = useMemo(() => ({ mutate: ({ motion }: { motion: MapMotion | null }) => setMotion(motion), isPending: false }), [setMotion]);
+    const motionMutation = useMemo(
+        () => ({
+            mutate: ({ motion }: { motion: MapMotion | null }) =>
+                setMotion(motion),
+            isPending: false,
+        }),
+        [setMotion]
+    );
 
-  const motionTool = useMapMotionTool({ isDM: true, current: map.motion ?? null, mutation: motionMutation });
+    const motionTool = useMapMotionTool({
+        isDM: true,
+        current: map.motion ?? null,
+        mutation: motionMutation,
+    });
 
-  const onStroke = useCallback(
-    (cells: GridPoint[]) => {
-      if (!tool || cells.length === 0) return;
+    const onStroke = useCallback(
+        (cells: GridPoint[]) => {
+            if (!tool || cells.length === 0) return;
 
-      const hazard = tool === "hazard" ? { label: brush.label.trim(), damage: hazardDamage(brush.dice, brush.damageType) } : undefined;
+            const hazard =
+                tool === 'hazard'
+                    ? {
+                          label: brush.label.trim(),
+                          damage: hazardDamage(brush.dice, brush.damageType),
+                      }
+                    : undefined;
 
-      const next = paintCells(map, cells, tool, hazard);
+            const next = paintCells(map, cells, tool, hazard);
 
-      if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
+            if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
 
-      setNotice(null);
-      setMap(next);
-    },
-    [tool, map, brush],
-  );
+            setNotice(null);
+            setMap(next);
+        },
+        [tool, map, brush]
+    );
 
-  return {
-    state: { enabled, map, mode: MODE_KEYS.find((key) => modeOf(key).configOf(map) !== null) ?? null, margins, tool, notice, value: enabled ? map : null, cellPx: image ? impliedCellPx(map, image) : null },
-    brush,
-    motionTool,
-    actions: { setEnabled, setSize, setCellSize, setGridOffset, setOpacity, setMargins, setTool, setBackground, setBrush, setMode, onStroke },
-  };
+    return {
+        state: {
+            enabled,
+            map,
+            mode:
+                MODE_KEYS.find((key) => modeOf(key).configOf(map) !== null) ??
+                null,
+            margins,
+            tool,
+            notice,
+            value: enabled ? map : null,
+            cellPx: image ? impliedCellPx(map, image) : null,
+        },
+        brush,
+        motionTool,
+        actions: {
+            setEnabled,
+            setSize,
+            setCellSize,
+            setGridOffset,
+            setOpacity,
+            setMargins,
+            setTool,
+            setBackground,
+            setBrush,
+            setMode,
+            onStroke,
+        },
+    };
 }
 
 export type BattleMapEditor = ReturnType<typeof useBattleMapEditor>;

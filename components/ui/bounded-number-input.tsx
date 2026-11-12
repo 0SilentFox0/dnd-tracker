@@ -1,58 +1,80 @@
-"use client";
+'use client';
 
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useState } from 'react';
 
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 
-type BoundedNumberInputProps = Omit<ComponentProps<typeof Input>, "type" | "value" | "defaultValue" | "onChange" | "onBlur" | "min" | "max"> & {
-  value: number;
-  min: number;
-  max: number;
-  onCommit: (value: number) => void;
-  onValueChange?: (value: number) => void;
-  decimal?: boolean;
+type BoundedNumberInputProps = Omit<
+    ComponentProps<typeof Input>,
+    'type' | 'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'min' | 'max'
+> & {
+    value: number;
+    min: number;
+    max: number;
+    onCommit: (value: number) => void;
+    onValueChange?: (value: number) => void;
+    decimal?: boolean;
 };
 
 /** Чернетка під час введення (можна стерти й набрати заново); обмеження й запис — на blur чи Enter (onValueChange — живо, лише для коректного значення в межах), порожнє повертає останнє значення. */
-export function BoundedNumberInput({ value, min, max, onCommit, onValueChange, onKeyDown, decimal = false, inputMode = decimal ? "decimal" : "numeric", ...props }: BoundedNumberInputProps) {
-  const [draft, setDraft] = useState<string | null>(null);
+export function BoundedNumberInput({
+    value,
+    min,
+    max,
+    onCommit,
+    onValueChange,
+    onKeyDown,
+    decimal = false,
+    inputMode = decimal ? 'decimal' : 'numeric',
+    ...props
+}: BoundedNumberInputProps) {
+    const [draft, setDraft] = useState<string | null>(null);
 
-  const commit = () => {
-    if (draft === null) return;
+    const commit = () => {
+        if (draft === null) return;
 
-    setDraft(null);
+        setDraft(null);
 
-    const n = Number(draft);
+        const n = Number(draft);
 
-    if (draft.trim() === "" || !Number.isFinite(n)) return;
+        if (draft.trim() === '' || !Number.isFinite(n)) return;
 
-    const next = Math.max(min, Math.min(max, decimal ? n : Math.trunc(n)));
+        const next = Math.max(min, Math.min(max, decimal ? n : Math.trunc(n)));
 
-    if (next !== value) onCommit(next);
-  };
+        if (next !== value) onCommit(next);
+    };
 
-  return (
-    <Input
-      {...props}
-      inputMode={inputMode}
-      value={draft ?? String(value)}
-      onChange={(e) => {
-        setDraft(e.target.value);
+    return (
+        <Input
+            {...props}
+            inputMode={inputMode}
+            value={draft ?? String(value)}
+            onChange={(e) => {
+                setDraft(e.target.value);
 
-        const n = Number(e.target.value);
+                const n = Number(e.target.value);
 
-        if (onValueChange && e.target.value.trim() !== "" && Number.isFinite(n) && (decimal || Number.isInteger(n)) && n >= min && n <= max && n !== value) onValueChange(n);
-      }}
-      onBlur={commit}
-      onKeyDown={(e) => {
-        // Enter у формі бою інакше відправив би всю форму
-        if (e.key === "Enter") {
-          e.preventDefault();
-          commit();
-        }
+                if (
+                    onValueChange &&
+                    e.target.value.trim() !== '' &&
+                    Number.isFinite(n) &&
+                    (decimal || Number.isInteger(n)) &&
+                    n >= min &&
+                    n <= max &&
+                    n !== value
+                )
+                    onValueChange(n);
+            }}
+            onBlur={commit}
+            onKeyDown={(e) => {
+                // Enter у формі бою інакше відправив би всю форму
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    commit();
+                }
 
-        onKeyDown?.(e);
-      }}
-    />
-  );
+                onKeyDown?.(e);
+            }}
+        />
+    );
 }

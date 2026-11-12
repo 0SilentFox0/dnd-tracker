@@ -1,62 +1,97 @@
-import { ParticipantSourceType } from "@/lib/constants/battle";
-import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
-import { isFiveE } from "@/lib/utils/battle/attack/ability";
-import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { diceAverage, diceCount, diceSlots, mergeDiceFormulas, parseDiceLenient } from "@/lib/utils/common/dice";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { ParticipantSourceType } from '@/lib/constants/battle';
+import { getHeroDamageDiceForLevel } from '@/lib/constants/hero-scaling';
+import { isFiveE } from '@/lib/utils/battle/attack/ability';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import {
+    diceAverage,
+    diceCount,
+    diceSlots,
+    mergeDiceFormulas,
+    parseDiceLenient,
+} from '@/lib/utils/common/dice';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 export interface HeroAttackDamageParts {
-  weaponDice: string;
-  heroDice: string;
-  formula: string;
+    weaponDice: string;
+    heroDice: string;
+    formula: string;
 }
 
-export function heroAttackDamageParts(p: BattleParticipant, attack: BattleAttack): HeroAttackDamageParts {
-  const weaponDice = attack.damageDice ?? "";
+export function heroAttackDamageParts(
+    p: BattleParticipant,
+    attack: BattleAttack
+): HeroAttackDamageParts {
+    const weaponDice = attack.damageDice ?? '';
 
-  if (attack.noLevelDice) return { weaponDice, heroDice: "", formula: weaponDice };
+    if (attack.noLevelDice)
+        return { weaponDice, heroDice: '', formula: weaponDice };
 
-  if (p.basicInfo.sourceType !== ParticipantSourceType.CHARACTER || isFiveE(p)) return { weaponDice, heroDice: "", formula: weaponDice };
+    if (
+        p.basicInfo.sourceType !== ParticipantSourceType.CHARACTER ||
+        isFiveE(p)
+    )
+        return { weaponDice, heroDice: '', formula: weaponDice };
 
-  const type = attackKindOf(attack.type);
+    const type = attackKindOf(attack.type);
 
-  const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type, { meleeDiceByLevel: p.abilities.heroDice?.melee, rangedDiceByLevel: p.abilities.heroDice?.ranged });
+    const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type, {
+        meleeDiceByLevel: p.abilities.heroDice?.melee,
+        rangedDiceByLevel: p.abilities.heroDice?.ranged,
+    });
 
-  return { weaponDice, heroDice, formula: mergeDiceFormulas(weaponDice, heroDice) };
+    return {
+        weaponDice,
+        heroDice,
+        formula: mergeDiceFormulas(weaponDice, heroDice),
+    };
 }
 
 /** Розміри кубиків шкоди за зростанням, як у формі гравця; вільний текст юніта («2d6 + STR») читається за першою групою. */
-export function damageDiceSlots(p: BattleParticipant, attack: BattleAttack): number[] {
-  const { formula } = heroAttackDamageParts(p, attack);
+export function damageDiceSlots(
+    p: BattleParticipant,
+    attack: BattleAttack
+): number[] {
+    const { formula } = heroAttackDamageParts(p, attack);
 
-  const strict = diceSlots(formula);
+    const strict = diceSlots(formula);
 
-  if (strict.length || attack.noLevelDice) return strict;
+    if (strict.length || attack.noLevelDice) return strict;
 
-  return parseDiceLenient(formula).groups.flatMap((g) => Array.from({ length: g.count }, () => g.size));
+    return parseDiceLenient(formula).groups.flatMap((g) =>
+        Array.from({ length: g.count }, () => g.size)
+    );
 }
 
 export interface HeroDamageContext {
-  heroLevelPart: number;
-  heroDicePart: number;
-  heroDiceNotation: string;
-  weaponDiceNotation: string | undefined;
+    heroLevelPart: number;
+    heroDicePart: number;
+    heroDiceNotation: string;
+    weaponDiceNotation: string | undefined;
 }
 
 /** Клієнт героя кидає зброю разом із кубиками рівня; якщо кидків менше — кубики рівня йдуть середнім. */
-export function heroDamageContext(p: BattleParticipant, attack: BattleAttack, damageRolls: number[]): HeroDamageContext {
-  const { weaponDice, heroDice, formula } = heroAttackDamageParts(p, attack);
+export function heroDamageContext(
+    p: BattleParticipant,
+    attack: BattleAttack,
+    damageRolls: number[]
+): HeroDamageContext {
+    const { weaponDice, heroDice, formula } = heroAttackDamageParts(p, attack);
 
-  const isHero = p.basicInfo.sourceType === ParticipantSourceType.CHARACTER;
+    const isHero = p.basicInfo.sourceType === ParticipantSourceType.CHARACTER;
 
-  const fullDiceCount = diceCount(weaponDice) + diceCount(heroDice);
+    const fullDiceCount = diceCount(weaponDice) + diceCount(heroDice);
 
-  const fullRolls = isHero && fullDiceCount > 0 && (damageRolls.length === fullDiceCount || damageRolls.length === 2 * fullDiceCount);
+    const fullRolls =
+        isHero &&
+        fullDiceCount > 0 &&
+        (damageRolls.length === fullDiceCount ||
+            damageRolls.length === 2 * fullDiceCount);
 
-  return {
-    heroLevelPart: isHero && !isFiveE(p) ? p.abilities.level : 0,
-    heroDicePart: heroDice && !fullRolls ? diceAverage(heroDice) : 0,
-    heroDiceNotation: fullRolls ? "" : heroDice,
-    weaponDiceNotation: (fullRolls ? formula : "") || weaponDice || undefined,
-  };
+    return {
+        heroLevelPart: isHero && !isFiveE(p) ? p.abilities.level : 0,
+        heroDicePart: heroDice && !fullRolls ? diceAverage(heroDice) : 0,
+        heroDiceNotation: fullRolls ? '' : heroDice,
+        weaponDiceNotation:
+            (fullRolls ? formula : '') || weaponDice || undefined,
+    };
 }

@@ -1,67 +1,120 @@
-import { spellPoolKey } from "@/lib/utils/items/pools";
-import type { BattleParticipant, BattleParticipantSpellcasting, IngredientStock } from "@/types/battle";
+import { spellPoolKey } from '@/lib/utils/items/pools';
+import type {
+    BattleParticipant,
+    BattleParticipantSpellcasting,
+    IngredientStock,
+} from '@/types/battle';
 
-function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: BattleParticipantSpellcasting["spellSlots"]) {
-  const out: BattleParticipantSpellcasting["spellSlots"] = {};
+function mergeSlots(
+    live: BattleParticipantSpellcasting['spellSlots'],
+    fresh: BattleParticipantSpellcasting['spellSlots']
+) {
+    const out: BattleParticipantSpellcasting['spellSlots'] = {};
 
-  for (const key of new Set([...Object.keys(live ?? {}), ...Object.keys(fresh ?? {})])) {
-    const max = fresh?.[key]?.max ?? 0;
+    for (const key of new Set([
+        ...Object.keys(live ?? {}),
+        ...Object.keys(fresh ?? {}),
+    ])) {
+        const max = fresh?.[key]?.max ?? 0;
 
-    const old = live?.[key];
+        const old = live?.[key];
 
-    if (max === 0 && !old) continue;
+        if (max === 0 && !old) continue;
 
-    const spent = old ? old.max - old.current : 0;
+        const spent = old ? old.max - old.current : 0;
 
-    const level = fresh?.[key]?.level;
+        const level = fresh?.[key]?.level;
 
-    out[key] = { max, current: Math.min(Math.max(max - spent, 0), max), ...(level !== undefined && { level }) };
-  }
+        out[key] = {
+            max,
+            current: Math.min(Math.max(max - spent, 0), max),
+            ...(level !== undefined && { level }),
+        };
+    }
 
-  return out;
+    return out;
 }
 
-function mergeIngredientStock(live: IngredientStock | undefined, fresh: IngredientStock | undefined) {
-  if (!fresh) return {};
+function mergeIngredientStock(
+    live: IngredientStock | undefined,
+    fresh: IngredientStock | undefined
+) {
+    if (!fresh) return {};
 
-  const used = new Map(live?.items.map((i) => [i.id, i.used]));
+    const used = new Map(live?.items.map((i) => [i.id, i.used]));
 
-  return { ingredientStock: { ...fresh, usedCp: Math.min(live?.usedCp ?? 0, fresh.purseCp), items: fresh.items.map((i) => ({ ...i, used: Math.min(used.get(i.id) ?? 0, i.qty) })) } };
+    return {
+        ingredientStock: {
+            ...fresh,
+            usedCp: Math.min(live?.usedCp ?? 0, fresh.purseCp),
+            items: fresh.items.map((i) => ({
+                ...i,
+                used: Math.min(used.get(i.id) ?? 0, i.qty),
+            })),
+        },
+    };
 }
 
 /** Takes only what the library edits (abilities, attacks, spells, slot maxima, grid size, speed); HP, morale, effects, usage and flags stay live. */
-export function refreshFromSource(live: BattleParticipant, fresh: BattleParticipant): BattleParticipant {
-  const pools = fresh.battleData.pools && Object.fromEntries(Object.entries(fresh.battleData.pools).map(([key, pool]) => {
-    const liveLabel = live.battleData.pools?.[key]?.label;
+export function refreshFromSource(
+    live: BattleParticipant,
+    fresh: BattleParticipant
+): BattleParticipant {
+    const pools =
+        fresh.battleData.pools &&
+        Object.fromEntries(
+            Object.entries(fresh.battleData.pools).map(([key, pool]) => {
+                const liveLabel = live.battleData.pools?.[key]?.label;
 
-    // Збирач юніта має лише ID заклинань; назву розв'язує успішний каст.
-    return [key, key === spellPoolKey(pool.label) && liveLabel ? { ...pool, label: liveLabel } : pool];
-  }));
+                // Збирач юніта має лише ID заклинань; назву розв'язує успішний каст.
+                return [
+                    key,
+                    key === spellPoolKey(pool.label) && liveLabel
+                        ? { ...pool, label: liveLabel }
+                        : pool,
+                ];
+            })
+        );
 
-  return {
-    ...live,
-    abilities: { ...live.abilities, creatureType: fresh.abilities.creatureType, cr: fresh.abilities.cr, ...(fresh.abilities.system && { system: fresh.abilities.system }) },
-    combatStats: { ...live.combatStats, gridSize: fresh.combatStats.gridSize, speed: fresh.combatStats.speed },
-    battleData: {
-      ...live.battleData,
-      resolvedAbilities: fresh.battleData.resolvedAbilities,
-      attacks: fresh.battleData.attacks,
-      pools,
-      ...mergeIngredientStock(live.battleData.ingredientStock, fresh.battleData.ingredientStock),
-      senses: fresh.battleData.senses,
-      movement: fresh.battleData.movement,
-      languages: fresh.battleData.languages,
-      telepathy: fresh.battleData.telepathy,
-    },
-    spellcasting: {
-      ...live.spellcasting,
-      knownSpells: fresh.spellcasting.knownSpells,
-      grants: fresh.spellcasting.grants,
-      slotSpells: fresh.spellcasting.slotSpells,
-      spellSaveDC: fresh.spellcasting.spellSaveDC,
-      spellAttackBonus: fresh.spellcasting.spellAttackBonus,
-      spellcastingAbility: fresh.spellcasting.spellcastingAbility,
-      spellSlots: mergeSlots(live.spellcasting.spellSlots, fresh.spellcasting.spellSlots),
-    },
-  };
+    return {
+        ...live,
+        abilities: {
+            ...live.abilities,
+            creatureType: fresh.abilities.creatureType,
+            cr: fresh.abilities.cr,
+            ...(fresh.abilities.system && { system: fresh.abilities.system }),
+        },
+        combatStats: {
+            ...live.combatStats,
+            gridSize: fresh.combatStats.gridSize,
+            speed: fresh.combatStats.speed,
+        },
+        battleData: {
+            ...live.battleData,
+            resolvedAbilities: fresh.battleData.resolvedAbilities,
+            attacks: fresh.battleData.attacks,
+            pools,
+            ...mergeIngredientStock(
+                live.battleData.ingredientStock,
+                fresh.battleData.ingredientStock
+            ),
+            senses: fresh.battleData.senses,
+            movement: fresh.battleData.movement,
+            languages: fresh.battleData.languages,
+            telepathy: fresh.battleData.telepathy,
+        },
+        spellcasting: {
+            ...live.spellcasting,
+            knownSpells: fresh.spellcasting.knownSpells,
+            grants: fresh.spellcasting.grants,
+            slotSpells: fresh.spellcasting.slotSpells,
+            spellSaveDC: fresh.spellcasting.spellSaveDC,
+            spellAttackBonus: fresh.spellcasting.spellAttackBonus,
+            spellcastingAbility: fresh.spellcasting.spellcastingAbility,
+            spellSlots: mergeSlots(
+                live.spellcasting.spellSlots,
+                fresh.spellcasting.spellSlots
+            ),
+        },
+    };
 }

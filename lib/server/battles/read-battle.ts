@@ -1,111 +1,180 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
-import { defaultPipelineDeps, defaultReadDeps } from "./pipeline-deps";
-import { battleErrorResponse } from "./run-mutation";
+import { defaultPipelineDeps, defaultReadDeps } from './pipeline-deps';
+import { battleErrorResponse } from './run-mutation';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
-import { type PipelineDeps, readScenePreview } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError } from "@/lib/utils/battle/store";
-import { summarizeBattle } from "@/lib/utils/battle/view/summary";
-import { type RedactionCtx, redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
-import type { BattleEventsPage, BattleSummary, BattleVersion } from "@/types/api";
-import type { BattleAction } from "@/types/battle";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { BATTLE_LOG_RECENT_EVENTS } from '@/lib/constants/battle';
+import {
+    type PipelineDeps,
+    readScenePreview,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { BattleAccessError } from '@/lib/utils/battle/store';
+import { summarizeBattle } from '@/lib/utils/battle/view/summary';
+import {
+    type RedactionCtx,
+    redactLogForPlayers,
+} from '@/lib/utils/battle/view/visibility';
+import type {
+    BattleEventsPage,
+    BattleSummary,
+    BattleVersion,
+} from '@/types/api';
+import type { BattleAction } from '@/types/battle';
 
 type BattleParams = { id: string; battleId: string };
 
 export interface BattleReadDeps {
-  getUserId(): Promise<string | null>;
-  loadAccess(args: { battleId: string; campaignId: string; userId: string }): Promise<{ version: number; isMember: boolean; isDM?: boolean; isDemo?: boolean } | null>;
-  loadEventsBefore(battleId: string, page: { before: number; limit: number }): Promise<BattleEventsPage>;
-  loadAllEvents(battleId: string): Promise<BattleAction[]>;
-  loadRedactionCtx(args: { battleId: string; campaignId: string; userId: string }): Promise<RedactionCtx | null>;
+    getUserId(): Promise<string | null>;
+    loadAccess(args: {
+        battleId: string;
+        campaignId: string;
+        userId: string;
+    }): Promise<{
+        version: number;
+        isMember: boolean;
+        isDM?: boolean;
+        isDemo?: boolean;
+    } | null>;
+    loadEventsBefore(
+        battleId: string,
+        page: { before: number; limit: number }
+    ): Promise<BattleEventsPage>;
+    loadAllEvents(battleId: string): Promise<BattleAction[]>;
+    loadRedactionCtx(args: {
+        battleId: string;
+        campaignId: string;
+        userId: string;
+    }): Promise<RedactionCtx | null>;
 }
 
-const canRead = (access: { isMember: boolean; isDemo?: boolean }) => access.isMember || Boolean(access.isDemo);
+const canRead = (access: { isMember: boolean; isDemo?: boolean }) =>
+    access.isMember || Boolean(access.isDemo);
 
 async function authorize(params: BattleParams, deps: BattleReadDeps) {
-  const userId = await deps.getUserId();
-
-  if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
-
-  const access = await deps.loadAccess({ battleId: params.battleId, campaignId: params.id, userId });
-
-  if (!access) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
-
-  if (!canRead(access)) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
-
-  return { ...access, userId };
-}
-
-/** Full scene for a member, as `GET /battles/[battleId]` answers it; the battle page reuses it for the first HTML. */
-export async function readBattleScene(params: BattleParams, deps: PipelineDeps = defaultPipelineDeps): Promise<NextResponse> {
-  try {
     const userId = await deps.getUserId();
 
     if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
 
-    const run = async () => {
-      const loaded = await deps.loadBattle({ battleId: params.battleId, campaignId: params.id, userId });
+    const access = await deps.loadAccess({
+        battleId: params.battleId,
+        campaignId: params.id,
+        userId,
+    });
 
-      if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
+    if (!access) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-      if (!canRead(loaded)) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+    if (!canRead(access))
+        throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-      return NextResponse.json(await readScenePreview(userId, loaded, { includeRecentEvents: BATTLE_LOG_RECENT_EVENTS, includeKnowledge: true }, deps));
-    };
-
-    return await (deps.withWrite ? deps.withWrite(params.id, run) : run());
-  } catch (err) {
-    return battleErrorResponse(err);
-  }
+    return { ...access, userId };
 }
 
-export async function readBattleVersion(params: BattleParams, deps: BattleReadDeps = defaultReadDeps): Promise<NextResponse> {
-  try {
-    const { version } = await authorize(params, deps);
+/** Full scene for a member, as `GET /battles/[battleId]` answers it; the battle page reuses it for the first HTML. */
+export async function readBattleScene(
+    params: BattleParams,
+    deps: PipelineDeps = defaultPipelineDeps
+): Promise<NextResponse> {
+    try {
+        const userId = await deps.getUserId();
 
-    return NextResponse.json({ version } satisfies BattleVersion);
-  } catch (err) {
-    return battleErrorResponse(err);
-  }
+        if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
+
+        const run = async () => {
+            const loaded = await deps.loadBattle({
+                battleId: params.battleId,
+                campaignId: params.id,
+                userId,
+            });
+
+            if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
+
+            if (!canRead(loaded))
+                throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+
+            return NextResponse.json(
+                await readScenePreview(
+                    userId,
+                    loaded,
+                    {
+                        includeRecentEvents: BATTLE_LOG_RECENT_EVENTS,
+                        includeKnowledge: true,
+                    },
+                    deps
+                )
+            );
+        };
+
+        return await (deps.withWrite ? deps.withWrite(params.id, run) : run());
+    } catch (err) {
+        return battleErrorResponse(err);
+    }
+}
+
+export async function readBattleVersion(
+    params: BattleParams,
+    deps: BattleReadDeps = defaultReadDeps
+): Promise<NextResponse> {
+    try {
+        const { version } = await authorize(params, deps);
+
+        return NextResponse.json({ version } satisfies BattleVersion);
+    } catch (err) {
+        return battleErrorResponse(err);
+    }
 }
 
 export async function readBattleEvents(
-  params: BattleParams,
-  page: { before: number; limit: number },
-  deps: BattleReadDeps = defaultReadDeps,
+    params: BattleParams,
+    page: { before: number; limit: number },
+    deps: BattleReadDeps = defaultReadDeps
 ): Promise<NextResponse> {
-  try {
-    const { userId, isDM } = await authorize(params, deps);
+    try {
+        const { userId, isDM } = await authorize(params, deps);
 
-    const events = await deps.loadEventsBefore(params.battleId, page);
+        const events = await deps.loadEventsBefore(params.battleId, page);
 
-    if (isDM) return NextResponse.json(events);
+        if (isDM) return NextResponse.json(events);
 
-    const ctx = await deps.loadRedactionCtx({ battleId: params.battleId, campaignId: params.id, userId });
+        const ctx = await deps.loadRedactionCtx({
+            battleId: params.battleId,
+            campaignId: params.id,
+            userId,
+        });
 
-    if (!ctx) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
+        if (!ctx) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-    return NextResponse.json({ ...events, events: redactLogForPlayers(events.events, ctx).entries });
-  } catch (err) {
-    return battleErrorResponse(err);
-  }
+        return NextResponse.json({
+            ...events,
+            events: redactLogForPlayers(events.events, ctx).entries,
+        });
+    } catch (err) {
+        return battleErrorResponse(err);
+    }
 }
 
-export async function readBattleSummary(params: BattleParams, deps: BattleReadDeps = defaultReadDeps): Promise<NextResponse> {
-  try {
-    const { userId } = await authorize(params, deps);
+export async function readBattleSummary(
+    params: BattleParams,
+    deps: BattleReadDeps = defaultReadDeps
+): Promise<NextResponse> {
+    try {
+        const { userId } = await authorize(params, deps);
 
-    const [events, ctx] = await Promise.all([
-      deps.loadAllEvents(params.battleId),
-      deps.loadRedactionCtx({ battleId: params.battleId, campaignId: params.id, userId }),
-    ]);
+        const [events, ctx] = await Promise.all([
+            deps.loadAllEvents(params.battleId),
+            deps.loadRedactionCtx({
+                battleId: params.battleId,
+                campaignId: params.id,
+                userId,
+            }),
+        ]);
 
-    if (!ctx) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
+        if (!ctx) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-    return NextResponse.json(summarizeBattle(events, ctx.participants) satisfies BattleSummary);
-  } catch (err) {
-    return battleErrorResponse(err);
-  }
+        return NextResponse.json(
+            summarizeBattle(events, ctx.participants) satisfies BattleSummary
+        );
+    } catch (err) {
+        return battleErrorResponse(err);
+    }
 }

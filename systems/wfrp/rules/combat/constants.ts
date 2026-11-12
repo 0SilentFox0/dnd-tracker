@@ -5,11 +5,11 @@ export const MOMENTUM_SL_BONUS = 1;
 
 export const MIN_DAMAGE = 1;
 
-export const LOCATIONS = ["head", "arm", "body", "leg"] as const;
+export const LOCATIONS = ['head', 'arm', 'body', 'leg'] as const;
 
 export type HitLocation = (typeof LOCATIONS)[number];
 
-export type DefenseKind = "parry" | "dodge" | "shield";
+export type DefenseKind = 'parry' | 'dodge' | 'shield';
 
 export const BALANCE_REF_TB = 3;
 

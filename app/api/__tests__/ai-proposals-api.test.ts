@@ -1,144 +1,287 @@
-import { NextResponse } from "next/server";
-import { randomBytes } from "node:crypto";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { randomBytes } from 'node:crypto';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as preloadedModule1 from "@/app/api/campaigns/[id]/ai/ai-handlers";
-import * as preloadedModule0 from "@/app/api/campaigns/[id]/ai/proposals/[proposalId]/apply/route";
-import * as preloadedModule2 from "@/app/api/campaigns/[id]/ai/proposals/route";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import { makeT } from "@/lib/i18n/test/mock-t";
-import * as apiAuth from "@/lib/utils/api/api-auth";
-import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
+import * as preloadedModule1 from '@/app/api/campaigns/[id]/ai/ai-handlers';
+import * as preloadedModule0 from '@/app/api/campaigns/[id]/ai/proposals/[proposalId]/apply/route';
+import * as preloadedModule2 from '@/app/api/campaigns/[id]/ai/proposals/route';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import { makeT } from '@/lib/i18n/test/mock-t';
+import * as apiAuth from '@/lib/utils/api/api-auth';
+import { resolveAiOps } from '@/lib/utils/scenario/ai-ops';
 
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
-vi.mock("@/lib/db", () => {
-  const tx = {
-    $queryRaw: vi.fn(async () => [{ id: "camp" }]),
-    assistantIntent: { findUnique: vi.fn(async () => null) },
-    aiProposal: { findUnique: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
-    scenarioPage: { findFirst: vi.fn(), findUnique: vi.fn(), updateMany: vi.fn() },
-    scenarioPageVersion: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn(async () => []), deleteMany: vi.fn() },
-  };
+vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
+vi.mock('@/lib/db', () => {
+    const tx = {
+        $queryRaw: vi.fn(async () => [{ id: 'camp' }]),
+        assistantIntent: { findUnique: vi.fn(async () => null) },
+        aiProposal: {
+            findUnique: vi.fn(),
+            findMany: vi.fn(),
+            findFirst: vi.fn(),
+            update: vi.fn(),
+            updateMany: vi.fn(),
+        },
+        scenarioPage: {
+            findFirst: vi.fn(),
+            findUnique: vi.fn(),
+            updateMany: vi.fn(),
+        },
+        scenarioPageVersion: {
+            findFirst: vi.fn(),
+            create: vi.fn(),
+            findMany: vi.fn(async () => []),
+            deleteMany: vi.fn(),
+        },
+    };
 
-  return { prisma: { ...tx, $transaction: vi.fn(async (fn: (t: typeof tx) => unknown) => fn(tx)) } };
+    return {
+        prisma: {
+            ...tx,
+            $transaction: vi.fn(async (fn: (t: typeof tx) => unknown) =>
+                fn(tx)
+            ),
+        },
+    };
 });
 
-const dm = { userId: "dm", isDM: true, campaign: { id: "camp1" } } as never;
+const dm = { userId: 'dm', isDM: true, campaign: { id: 'camp1' } } as never;
 
-const doc = (text: string) => ({ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] });
+const doc = (text: string) => ({
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+});
 
-const content = { legend: [], sections: [{ id: "s1", title: "Собор", played: false, rows: [{ id: "r1", story: doc("Дзвони"), notes: doc("") }] }] };
-
-const page = (over: Record<string, unknown> = {}) => ({ id: "p1", campaignId: "camp1", kind: "scene", arc: null, title: "Монастир", subtitle: null, status: "draft", sortOrder: 0, characterId: null, version: 3, updatedAt: new Date(), content, ...over });
-
-const ops = () => {
-  const r = resolveAiOps(content as never, [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: "Дзвони гудуть" }], makeT("assistant"));
-
-  if (!r.ok) throw new Error(r.error.message);
-
-  return r.ops;
+const content = {
+    legend: [],
+    sections: [
+        {
+            id: 's1',
+            title: 'Собор',
+            played: false,
+            rows: [{ id: 'r1', story: doc('Дзвони'), notes: doc('') }],
+        },
+    ],
 };
 
-const proposal = (over: Record<string, unknown> = {}) => ({ id: "ap1", pageId: "p1", threadId: "t1", summary: "s", ops: ops(), status: "pending", appliedVersion: null, createdAt: new Date(), ...over });
+const page = (over: Record<string, unknown> = {}) => ({
+    id: 'p1',
+    campaignId: 'camp1',
+    kind: 'scene',
+    arc: null,
+    title: 'Монастир',
+    subtitle: null,
+    status: 'draft',
+    sortOrder: 0,
+    characterId: null,
+    version: 3,
+    updatedAt: new Date(),
+    content,
+    ...over,
+});
 
-const params = { params: Promise.resolve({ id: "camp1", proposalId: "ap1" }) } as never;
+const ops = () => {
+    const r = resolveAiOps(
+        content as never,
+        [
+            {
+                op: 'replaceRow',
+                sectionId: 's1',
+                rowId: 'r1',
+                story: 'Дзвони гудуть',
+            },
+        ],
+        makeT('assistant')
+    );
 
-const apply = async () => (preloadedModule0).POST(new Request("http://x", { method: "POST" }), params);
+    if (!r.ok) throw new Error(r.error.message);
 
-describe("AI proposals API", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.stubEnv("AI_KEYS_SECRET", randomBytes(32).toString("base64"));
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
-    vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(proposal() as never);
-    vi.mocked(prisma.aiProposal.updateMany).mockResolvedValue({ count: 1 } as never);
-    vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(page() as never);
-    vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(page() as never);
-    vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({ count: 1 } as never);
-  });
+    return r.ops;
+};
 
-  afterEach(() => vi.unstubAllEnvs());
+const proposal = (over: Record<string, unknown> = {}) => ({
+    id: 'ap1',
+    pageId: 'p1',
+    threadId: 't1',
+    summary: 's',
+    ops: ops(),
+    status: 'pending',
+    appliedVersion: null,
+    createdAt: new Date(),
+    ...over,
+});
 
-  it("review and apply do not require AI_KEYS_SECRET", async () => {
-    vi.stubEnv("AI_KEYS_SECRET", "");
-    expect((await apply()).status).toBe(200);
+const params = {
+    params: Promise.resolve({ id: 'camp1', proposalId: 'ap1' }),
+} as never;
 
-    const { listProposalsHandler } = preloadedModule1;
+const apply = async () =>
+    preloadedModule0.POST(new Request('http://x', { method: 'POST' }), params);
 
-    vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([]);
-    expect((await listProposalsHandler(new Request("http://x"), "camp1")).status).toBe(200);
-  });
+describe('AI proposals API', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.stubEnv('AI_KEYS_SECRET', randomBytes(32).toString('base64'));
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
+        vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(
+            proposal() as never
+        );
+        vi.mocked(prisma.aiProposal.updateMany).mockResolvedValue({
+            count: 1,
+        } as never);
+        vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(
+            page() as never
+        );
+        vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(
+            page() as never
+        );
+        vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({
+            count: 1,
+        } as never);
+    });
 
-  it("keyless reject remains available while paid generation remains guarded", async () => {
-    vi.stubEnv("AI_KEYS_SECRET", "");
-    vi.mocked(prisma.aiProposal.findUnique).mockResolvedValue(proposal({ status: "rejected" }) as never);
+    afterEach(() => vi.unstubAllEnvs());
 
-    const { rejectProposalHandler, generateSlideImageHandler } = preloadedModule1;
+    it('review and apply do not require AI_KEYS_SECRET', async () => {
+        vi.stubEnv('AI_KEYS_SECRET', '');
+        expect((await apply()).status).toBe(200);
 
-    expect((await rejectProposalHandler("camp1", "ap1")).status).toBe(200);
-    expect((await generateSlideImageHandler(new Request("http://x", { method: "POST" }), "camp1")).status).toBe(503);
-  });
+        const { listProposalsHandler } = preloadedModule1;
 
-  it("не DM — 403", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }) as never);
+        vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([]);
+        expect(
+            (await listProposalsHandler(new Request('http://x'), 'camp1'))
+                .status
+        ).toBe(200);
+    });
 
-    expect((await apply()).status).toBe(403);
-  });
+    it('keyless reject remains available while paid generation remains guarded', async () => {
+        vi.stubEnv('AI_KEYS_SECRET', '');
+        vi.mocked(prisma.aiProposal.findUnique).mockResolvedValue(
+            proposal({ status: 'rejected' }) as never
+        );
 
-  it("apply: знімок версії ДО правки, version+1, статус applied", async () => {
-    const res = await apply();
+        const { rejectProposalHandler, generateSlideImageHandler } =
+            preloadedModule1;
 
-    expect(res.status).toBe(200);
-    expect((await res.json()).version).toBe(4);
-    expect(prisma.scenarioPageVersion.create).toHaveBeenCalled();
-    expect(vi.mocked(prisma.scenarioPageVersion.create).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(prisma.scenarioPage.updateMany).mock.invocationCallOrder[0]);
-    expect(vi.mocked(prisma.scenarioPage.updateMany).mock.calls[0][0]).toMatchObject({ where: { id: "p1", version: 3 } });
-    expect(vi.mocked(prisma.aiProposal.update).mock.calls[0][0]).toMatchObject({ data: { status: "applied", appliedVersion: 4 } });
-  });
+        expect((await rejectProposalHandler('camp1', 'ap1')).status).toBe(200);
+        expect(
+            (
+                await generateSlideImageHandler(
+                    new Request('http://x', { method: 'POST' }),
+                    'camp1'
+                )
+            ).status
+        ).toBe(503);
+    });
 
-  it("рядок змінено — 409 stale, сторінка не змінена", async () => {
-    vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(page({ content: { ...content, sections: [{ ...content.sections[0], rows: [{ id: "r1", story: doc("Дзвони!"), notes: doc("") }] }] } }) as never);
+    it('не DM — 403', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(
+            NextResponse.json({ error: 'x' }, { status: 403 }) as never
+        );
 
-    const res = await apply();
+        expect((await apply()).status).toBe(403);
+    });
 
-    expect(res.status).toBe(409);
-    expect(prisma.scenarioPage.updateMany).not.toHaveBeenCalled();
-    expect(vi.mocked(prisma.aiProposal.update).mock.calls[0][0]).toMatchObject({ data: { status: "stale" } });
-  });
+    it('apply: знімок версії ДО правки, version+1, статус applied', async () => {
+        const res = await apply();
 
-  it("повторний apply — 409 «вже застосовано», сторінка не змінена", async () => {
-    vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(proposal({ status: "applied", appliedVersion: 4 }) as never);
+        expect(res.status).toBe(200);
+        expect((await res.json()).version).toBe(4);
+        expect(prisma.scenarioPageVersion.create).toHaveBeenCalled();
+        expect(
+            vi.mocked(prisma.scenarioPageVersion.create).mock
+                .invocationCallOrder[0]
+        ).toBeLessThan(
+            vi.mocked(prisma.scenarioPage.updateMany).mock
+                .invocationCallOrder[0]
+        );
+        expect(
+            vi.mocked(prisma.scenarioPage.updateMany).mock.calls[0][0]
+        ).toMatchObject({ where: { id: 'p1', version: 3 } });
+        expect(
+            vi.mocked(prisma.aiProposal.update).mock.calls[0][0]
+        ).toMatchObject({ data: { status: 'applied', appliedVersion: 4 } });
+    });
 
-    const res = await apply();
+    it('рядок змінено — 409 stale, сторінка не змінена', async () => {
+        vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(
+            page({
+                content: {
+                    ...content,
+                    sections: [
+                        {
+                            ...content.sections[0],
+                            rows: [
+                                {
+                                    id: 'r1',
+                                    story: doc('Дзвони!'),
+                                    notes: doc(''),
+                                },
+                            ],
+                        },
+                    ],
+                },
+            }) as never
+        );
 
-    expect(res.status).toBe(409);
-    expect((await res.json()).error).toBe(API_ERRORS.AI_PROPOSAL_DONE);
-    expect(prisma.scenarioPage.updateMany).not.toHaveBeenCalled();
-  });
+        const res = await apply();
 
-  it("сторінки немає — 404, статус лишається pending", async () => {
-    vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(null);
+        expect(res.status).toBe(409);
+        expect(prisma.scenarioPage.updateMany).not.toHaveBeenCalled();
+        expect(
+            vi.mocked(prisma.aiProposal.update).mock.calls[0][0]
+        ).toMatchObject({ data: { status: 'stale' } });
+    });
 
-    expect((await apply()).status).toBe(404);
-    expect(prisma.aiProposal.update).not.toHaveBeenCalled();
-    expect(prisma.aiProposal.updateMany).toHaveBeenLastCalledWith({ where: { id: "ap1" }, data: { status: "pending" } });
-  });
+    it('повторний apply — 409 «вже застосовано», сторінка не змінена', async () => {
+        vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(
+            proposal({ status: 'applied', appliedVersion: 4 }) as never
+        );
 
-  it("чужа кампанія — 404", async () => {
-    vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(null);
+        const res = await apply();
 
-    expect((await apply()).status).toBe(404);
-  });
+        expect(res.status).toBe(409);
+        expect((await res.json()).error).toBe(API_ERRORS.AI_PROPOSAL_DONE);
+        expect(prisma.scenarioPage.updateMany).not.toHaveBeenCalled();
+    });
 
-  it("GET ?summary=1 вибирає лише id і status, без ops", async () => {
-    vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([{ id: "ap1", status: "pending" }] as never);
+    it('сторінки немає — 404, статус лишається pending', async () => {
+        vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(null);
 
-    const { GET } = preloadedModule2;
+        expect((await apply()).status).toBe(404);
+        expect(prisma.aiProposal.update).not.toHaveBeenCalled();
+        expect(prisma.aiProposal.updateMany).toHaveBeenLastCalledWith({
+            where: { id: 'ap1' },
+            data: { status: 'pending' },
+        });
+    });
 
-    const res = await GET(new Request("http://x?pageId=p1&status=pending&summary=1"), { params: Promise.resolve({ id: "camp1" }) } as never);
+    it('чужа кампанія — 404', async () => {
+        vi.mocked(prisma.aiProposal.findFirst).mockResolvedValue(null);
 
-    expect(await res.json()).toEqual([{ id: "ap1", status: "pending" }]);
-    expect(vi.mocked(prisma.aiProposal.findMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "camp1", pageId: "p1", status: "pending" }, select: { id: true, status: true } });
-  });
+        expect((await apply()).status).toBe(404);
+    });
+
+    it('GET ?summary=1 вибирає лише id і status, без ops', async () => {
+        vi.mocked(prisma.aiProposal.findMany).mockResolvedValue([
+            { id: 'ap1', status: 'pending' },
+        ] as never);
+
+        const { GET } = preloadedModule2;
+
+        const res = await GET(
+            new Request('http://x?pageId=p1&status=pending&summary=1'),
+            { params: Promise.resolve({ id: 'camp1' }) } as never
+        );
+
+        expect(await res.json()).toEqual([{ id: 'ap1', status: 'pending' }]);
+        expect(
+            vi.mocked(prisma.aiProposal.findMany).mock.calls[0][0]
+        ).toMatchObject({
+            where: { campaignId: 'camp1', pageId: 'p1', status: 'pending' },
+            select: { id: true, status: true },
+        });
+    });
 });

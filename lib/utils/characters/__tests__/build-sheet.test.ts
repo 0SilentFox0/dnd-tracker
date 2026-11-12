@@ -1,180 +1,396 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { AttackType } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { calculateAttackBonus } from "@/lib/utils/battle/attack";
-import { buildCharacterSheet, type SheetInput } from "@/lib/utils/characters/sheet";
-import type { BattleAttack } from "@/types/battle";
-import type { AbilityKey } from "@/types/characters";
+import { AttackType } from '@/lib/constants/battle';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { calculateAttackBonus } from '@/lib/utils/battle/attack';
+import {
+    buildCharacterSheet,
+    type SheetInput,
+} from '@/lib/utils/characters/sheet';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleAttack } from '@/types/battle';
+import type { AbilityKey } from '@/types/characters';
 
-const bow = { id: "bow", name: "Довгий лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d8" } as BattleAttack;
+const bow = {
+    id: 'bow',
+    name: 'Довгий лук',
+    type: AttackType.RANGED,
+    attackBonus: 0,
+    damageDice: '1d8',
+} as BattleAttack;
 
-const sword = { id: "sw", name: "Кинджал", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d4" } as BattleAttack;
+const sword = {
+    id: 'sw',
+    name: 'Кинджал',
+    type: AttackType.MELEE,
+    attackBonus: 0,
+    damageDice: '1d4',
+} as BattleAttack;
 
-function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack[] = [bow, sword], meleeMultiplier = 1): SheetInput {
-  const p = createMockParticipant();
+function lira(
+    over: Partial<SheetInput['character']> = {},
+    attacks: BattleAttack[] = [bow, sword],
+    meleeMultiplier = 1
+): SheetInput {
+    const p = createMockParticipant();
 
-  p.abilities = { ...p.abilities, level: 30, strength: 10, dexterity: 18, modifiers: { ...p.abilities.modifiers, strength: 0, dexterity: 4 }, proficiencyBonus: 9, primaryAbility: (over.primaryAbility ?? undefined) as AbilityKey | undefined, meleeMultiplier, rangedMultiplier: 1 };
-  p.battleData.attacks = attacks;
-  p.combatStats = { ...p.combatStats, armorClass: 14, maxHp: 127 };
+    p.abilities = {
+        ...p.abilities,
+        level: 30,
+        strength: 10,
+        dexterity: 18,
+        modifiers: { ...p.abilities.modifiers, strength: 0, dexterity: 4 },
+        proficiencyBonus: 9,
+        primaryAbility: (over.primaryAbility ?? undefined) as
+            | AbilityKey
+            | undefined,
+        meleeMultiplier,
+        rangedMultiplier: 1,
+    };
+    p.battleData.attacks = attacks;
+    p.combatStats = { ...p.combatStats, armorClass: 14, maxHp: 127 };
 
-  return {
-    participant: p,
-    viewer: { isDM: false, isOwner: true },
-    maxLevel: 20,
-    character: {
-      id: "lira", name: "Ліра", avatar: null, level: 30, class: "Ranger", subclass: null, race: "Ельф", alignment: null,
-      strength: 10, dexterity: 18, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
-      armorClass: 14, savingThrows: { dexterity: true }, skills: { stealth: true, perception: true },
-      languages: ["Ельфійська"], proficiencies: {}, spellcastingAbility: null, archetype: null,
-      primaryAbility: null, background: "Вона ==вірить== у брата", goals: [{ id: "g", text: "Знайти брата", status: "active", author: "dm" }],
-      ...over,
-    },
-    raceIcon: null,
-    immunities: [],
-    artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: null, effects: [{ when: [{ key: "summary.text", params: { value: "AC +2" } }], if: [], then: [], limits: [] }] }],
-    spells: [],
-    personalSkill: null,
-    progression: { freePoints: 0, level: 5, seenLevel: null },
-  };
+    return {
+        participant: p,
+        viewer: { isDM: false, isOwner: true },
+        maxLevel: 20,
+        rules: DEFAULT_RULES,
+        character: {
+            id: 'lira',
+            name: 'Ліра',
+            avatar: null,
+            level: 30,
+            class: 'Ranger',
+            subclass: null,
+            race: 'Ельф',
+            alignment: null,
+            strength: 10,
+            dexterity: 18,
+            constitution: 10,
+            intelligence: 10,
+            wisdom: 10,
+            charisma: 10,
+            armorClass: 14,
+            savingThrows: { dexterity: true },
+            skills: { stealth: true, perception: true },
+            languages: ['Ельфійська'],
+            proficiencies: {},
+            spellcastingAbility: null,
+            archetype: null,
+            primaryAbility: null,
+            background: 'Вона ==вірить== у брата',
+            goals: [
+                {
+                    id: 'g',
+                    text: 'Знайти брата',
+                    status: 'active',
+                    author: 'dm',
+                },
+            ],
+            ...over,
+        },
+        raceIcon: null,
+        immunities: [],
+        artifacts: [
+            {
+                id: 'a1',
+                name: 'Кольчуга ельфів',
+                icon: null,
+                slot: 'armor',
+                rarity: 'rare',
+                description: null,
+                effects: [
+                    {
+                        when: [
+                            { key: 'summary.text', params: { value: 'AC +2' } },
+                        ],
+                        if: [],
+                        then: [],
+                        limits: [],
+                    },
+                ],
+            },
+        ],
+        spells: [],
+        personalSkill: null,
+        progression: { freePoints: 0, level: 5, seenLevel: null },
+    };
 }
 
-describe("buildCharacterSheet", () => {
-  it("review: чернетка з приміткою, активний без", () => {
-    expect(buildCharacterSheet(lira({ status: "pending", reviewNote: "додай ціль" })).review).toEqual({ pending: true, note: "додай ціль" });
-    expect(buildCharacterSheet(lira({ status: "active", reviewNote: "стара" })).review).toEqual({ pending: false, note: null });
-  });
+describe('buildCharacterSheet', () => {
+    it('review: чернетка з приміткою, активний без', () => {
+        expect(
+            buildCharacterSheet(
+                lira({ status: 'pending', reviewNote: 'додай ціль' })
+            ).review
+        ).toEqual({ pending: true, note: 'додай ціль' });
+        expect(
+            buildCharacterSheet(lira({ status: 'active', reviewNote: 'стара' }))
+                .review
+        ).toEqual({ pending: false, note: null });
+    });
 
-  it("майстерність від рівня і модифікатори характеристик", () => {
-    const s = buildCharacterSheet(lira());
+    it('майстерність від рівня і модифікатори характеристик', () => {
+        const s = buildCharacterSheet(lira());
 
-    expect(s.proficiency).toBe(9);
-    expect(s.abilities.find((a) => a.key === "dexterity")).toMatchObject({ score: 18, mod: 4, isPrimary: false });
-  });
+        expect(s.proficiency).toBe(9);
+        expect(s.abilities.find((a) => a.key === 'dexterity')).toMatchObject({
+            score: 18,
+            mod: 4,
+            isPrimary: false,
+        });
+    });
 
-  it("основна СПР → +4 і в ближній атаці; влучання = бойовий calculateAttackBonus", () => {
-    const input = lira({ primaryAbility: "dexterity" });
+    it('основна СПР → +4 і в ближній атаці; влучання = бойовий calculateAttackBonus', () => {
+        const input = lira({ primaryAbility: 'dexterity' });
 
-    const s = buildCharacterSheet(input);
+        const s = buildCharacterSheet(input);
 
-    const dagger = s.attacks.find((a) => a.id === "sw");
+        const dagger = s.attacks.find((a) => a.id === 'sw');
 
-    expect(dagger?.toHit.total).toBe(calculateAttackBonus(input.participant, sword));
-    expect(dagger?.toHit.total).toBe(4 + 9);
-    expect(dagger?.toHit.lines[0]).toMatchObject({ label: "gameTerms.abilities.dexterity.label", suffix: " ★", value: "+4" });
-    expect(s.abilities.find((a) => a.key === "dexterity")?.isPrimary).toBe(true);
-  });
+        expect(dagger?.toHit.total).toBe(
+            calculateAttackBonus(input.participant, sword)
+        );
+        expect(dagger?.toHit.total).toBe(4 + 9);
+        expect(dagger?.toHit.lines[0]).toMatchObject({
+            label: 'gameTerms.abilities.dexterity.label',
+            suffix: ' ★',
+            value: '+4',
+        });
+        expect(s.abilities.find((a) => a.key === 'dexterity')?.isPrimary).toBe(
+            true
+        );
+    });
 
-  it("без основної ближня атака бере СИЛ", () => {
-    expect(buildCharacterSheet(lira()).attacks.find((a) => a.id === "sw")?.toHit.total).toBe(0 + 9);
-  });
+    it('без основної ближня атака бере СИЛ', () => {
+        expect(
+            buildCharacterSheet(lira()).attacks.find((a) => a.id === 'sw')
+                ?.toHit.total
+        ).toBe(0 + 9);
+    });
 
-  it("середня шкода: кубики зброї + рівень + кубики рівня + характеристика, з коефіцієнтом ДМа", () => {
-    const plain = buildCharacterSheet(lira()).attacks.find((a) => a.id === "sw")?.avgDamage.total;
+    it('середня шкода: кубики зброї + рівень + кубики рівня + характеристика, з коефіцієнтом ДМа', () => {
+        const plain = buildCharacterSheet(lira()).attacks.find(
+            (a) => a.id === 'sw'
+        )?.avgDamage.total;
 
-    const doubled = buildCharacterSheet(lira({}, [bow, sword], 2)).attacks.find((a) => a.id === "sw")?.avgDamage.total;
+        const doubled = buildCharacterSheet(
+            lira({}, [bow, sword], 2)
+        ).attacks.find((a) => a.id === 'sw')?.avgDamage.total;
 
-    expect(plain).toBeGreaterThan(30);
-    expect(doubled).toBe(Math.floor((plain ?? 0) * 2));
-  });
+        expect(plain).toBeGreaterThan(30);
+        expect(doubled).toBe(Math.floor((plain ?? 0) * 2));
+    });
 
-  it("найкраще влучання; без атак — null", () => {
-    expect(buildCharacterSheet(lira()).bestToHit).toBe(13);
-    expect(buildCharacterSheet(lira({}, [])).bestToHit).toBeNull();
-  });
+    it('найкраще влучання; без атак — null', () => {
+        expect(buildCharacterSheet(lira()).bestToHit).toBe(13);
+        expect(buildCharacterSheet(lira({}, [])).bestToHit).toBeNull();
+    });
 
-  it("рятівні кидки й навички з майстерністю; пасивне сприйняття", () => {
-    const s = buildCharacterSheet(lira());
+    it('рятівні кидки й навички з майстерністю; пасивне сприйняття', () => {
+        const s = buildCharacterSheet(lira());
 
-    expect(s.saves.find((x) => x.key === "dexterity")).toMatchObject({ bonus: 13, proficient: true });
-    expect(s.skills.find((x) => x.key === "stealth")).toMatchObject({ label: "gameTerms.dndSkills.stealth", bonus: 13 });
-    expect(s.passives.perception).toBe(10 + 0 + 9);
-  });
+        expect(s.saves.find((x) => x.key === 'dexterity')).toMatchObject({
+            bonus: 13,
+            proficient: true,
+        });
+        expect(s.skills.find((x) => x.key === 'stealth')).toMatchObject({
+            label: 'gameTerms.dndSkills.stealth',
+            bonus: 13,
+        });
+        expect(s.passives.perception).toBe(10 + 0 + 9);
+    });
 
-  it("без магії — magic null і порожні слоти", () => {
-    const s = buildCharacterSheet(lira());
+    it('без магії — magic null і порожні слоти', () => {
+        const s = buildCharacterSheet(lira());
 
-    expect(s.magic).toBeNull();
-    expect(s.slots).toEqual([]);
-  });
+        expect(s.magic).toBeNull();
+        expect(s.slots).toEqual([]);
+    });
 
-  it("історія й ефекти артефактів проходять як є", () => {
-    const s = buildCharacterSheet(lira());
+    it('історія й ефекти артефактів проходять як є', () => {
+        const s = buildCharacterSheet(lira());
 
-    expect(s.story.biography).toBe("Вона ==вірить== у брата");
-    expect(s.story.goals).toHaveLength(1);
-    expect(s.items.artifacts[0].effects).toEqual([{ when: [{ key: "summary.text", params: { value: "AC +2" } }], if: [], then: [], limits: [] }]);
-    expect(s.items.grid.armor?.id).toBe("a1");
-  });
+        expect(s.story.biography).toBe('Вона ==вірить== у брата');
+        expect(s.story.goals).toHaveLength(1);
+        expect(s.items.artifacts[0].effects).toEqual([
+            {
+                when: [{ key: 'summary.text', params: { value: 'AC +2' } }],
+                if: [],
+                then: [],
+                limits: [],
+            },
+        ]);
+        expect(s.items.grid.armor?.id).toBe('a1');
+    });
 
-  it("жетони проходять із датою рядком; без жетонів — порожньо", () => {
-    const createdAt = new Date("2026-10-09T10:00:00Z");
+    it('жетони проходять із датою рядком; без жетонів — порожньо', () => {
+        const createdAt = new Date('2026-10-09T10:00:00Z');
 
-    expect(buildCharacterSheet(lira({ tokens: [{ id: "t1", color: "green", label: "Врятував селян", createdAt }] })).story.tokens).toEqual([
-      { id: "t1", color: "green", label: "Врятував селян", createdAt: "2026-10-09T10:00:00.000Z" },
-    ]);
-    expect(buildCharacterSheet(lira()).story.tokens).toEqual([]);
-  });
+        expect(
+            buildCharacterSheet(
+                lira({
+                    tokens: [
+                        {
+                            id: 't1',
+                            color: 'green',
+                            label: 'Врятував селян',
+                            createdAt,
+                        },
+                    ],
+                })
+            ).story.tokens
+        ).toEqual([
+            {
+                id: 't1',
+                color: 'green',
+                label: 'Врятував селян',
+                createdAt: '2026-10-09T10:00:00.000Z',
+            },
+        ]);
+        expect(buildCharacterSheet(lira()).story.tokens).toEqual([]);
+    });
 
-  it("СЛ і атака заклинанням — ті самі, що в бою (з учасника, а не з бонусних характеристик)", () => {
-    const input = lira({ spellcastingAbility: "intelligence" });
+    it('СЛ і атака заклинанням — ті самі, що в бою (з учасника, а не з бонусних характеристик)', () => {
+        const input = lira({ spellcastingAbility: 'intelligence' });
 
-    input.participant.abilities.intelligence = 12;
-    input.participant.spellcasting = { ...input.participant.spellcasting, spellSaveDC: 17, spellAttackBonus: 9 };
+        input.participant.abilities.intelligence = 12;
+        input.participant.spellcasting = {
+            ...input.participant.spellcasting,
+            spellSaveDC: 17,
+            spellAttackBonus: 9,
+        };
 
-    expect(buildCharacterSheet(input).magic).toEqual({ ability: "intelligence", saveDC: 17, attackBonus: 9 });
-  });
+        expect(buildCharacterSheet(input).magic).toEqual({
+            ability: 'intelligence',
+            saveDC: 17,
+            attackBonus: 9,
+        });
+    });
 
-  it("імунітети — зібрані з персонажа й раси (як у бою)", () => {
-    const input = lira();
+    it('імунітети — зібрані з персонажа й раси (як у бою)', () => {
+        const input = lira();
 
-    input.immunities = ["отрута", "сон"];
+        input.immunities = ['отрута', 'сон'];
 
-    expect(buildCharacterSheet(input).immunities).toEqual(["отрута", "сон"]);
-  });
+        expect(buildCharacterSheet(input).immunities).toEqual([
+            'отрута',
+            'сон',
+        ]);
+    });
 
-  it("рядки шкоди підписані своїм джерелом: артефакт, а не вміння", () => {
-    const input = lira();
+    it('рядки шкоди підписані своїм джерелом: артефакт, а не вміння', () => {
+        const input = lira();
 
-    input.participant.battleData.resolvedAbilities = [
-      { key: "bow", name: "Лук вітру", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "ranged" }, flat: 3 }], source: { type: "artifact", id: "a", name: "Лук вітру" } },
-      { key: "arch", name: "Стрільба", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "ranged" }, percent: 10 }], source: { type: "skill", id: "s", name: "Стрільба" } },
-    ] as never;
+        input.participant.battleData.resolvedAbilities = [
+            {
+                key: 'bow',
+                name: 'Лук вітру',
+                trigger: { event: 'passive' },
+                effects: [
+                    {
+                        kind: 'damageBonus',
+                        filter: { kind: 'ranged' },
+                        flat: 3,
+                    },
+                ],
+                source: { type: 'artifact', id: 'a', name: 'Лук вітру' },
+            },
+            {
+                key: 'arch',
+                name: 'Стрільба',
+                trigger: { event: 'passive' },
+                effects: [
+                    {
+                        kind: 'damageBonus',
+                        filter: { kind: 'ranged' },
+                        percent: 10,
+                    },
+                ],
+                source: { type: 'skill', id: 's', name: 'Стрільба' },
+            },
+        ] as never;
 
-    const lines = buildCharacterSheet(input).attacks.find((a) => a.id === "bow")?.avgDamage.lines ?? [];
+        const lines =
+            buildCharacterSheet(input).attacks.find((a) => a.id === 'bow')
+                ?.avgDamage.lines ?? [];
 
-    expect(lines.find((l) => l.label === "Лук вітру")?.source).toBe("artifact");
-    expect(lines.find((l) => l.label === "Стрільба")?.source).toBe("skill");
-  });
+        expect(lines.find((l) => l.label === 'Лук вітру')?.source).toBe(
+            'artifact'
+        );
+        expect(lines.find((l) => l.label === 'Стрільба')?.source).toBe('skill');
+    });
 
-  it("сети бере з учасника", () => {
-    const input = lira();
+    it('сети бере з учасника', () => {
+        const input = lira();
 
-    const set = { setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: [{ when: [{ key: "summary.text", params: { value: "Ініціатива +1" } }], if: [], then: [], limits: [] }] };
+        const set = {
+            setId: 's1',
+            name: 'Мисливець',
+            have: 2,
+            total: 3,
+            complete: false,
+            effects: [
+                {
+                    when: [
+                        {
+                            key: 'summary.text',
+                            params: { value: 'Ініціатива +1' },
+                        },
+                    ],
+                    if: [],
+                    then: [],
+                    limits: [],
+                },
+            ],
+        };
 
-    input.participant.battleData.artifactSets = [set];
+        input.participant.battleData.artifactSets = [set];
 
-    expect(buildCharacterSheet(input).items.sets).toEqual([set]);
-  });
+        expect(buildCharacterSheet(input).items.sets).toEqual([set]);
+    });
 
-  it("рятівні від класу (участник) показані з майстерністю в режимі класів", () => {
-    const input = lira({ savingThrows: {} });
+    it('рятівні від класу (участник) показані з майстерністю в режимі класів', () => {
+        const input = lira({ savingThrows: {} });
 
-    input.participant.abilities = { ...input.participant.abilities, saveProficiencies: ["strength", "constitution"] };
+        input.participant.abilities = {
+            ...input.participant.abilities,
+            saveProficiencies: ['strength', 'constitution'],
+        };
 
-    const saves = buildCharacterSheet(input).saves;
+        const saves = buildCharacterSheet(input).saves;
 
-    expect(saves.find((x) => x.key === "strength")).toMatchObject({ proficient: true, bonus: 0 + 9 });
-    expect(saves.find((x) => x.key === "dexterity")?.proficient).toBe(false);
-  });
+        expect(saves.find((x) => x.key === 'strength')).toMatchObject({
+            proficient: true,
+            bonus: 0 + 9,
+        });
+        expect(saves.find((x) => x.key === 'dexterity')?.proficient).toBe(
+            false
+        );
+    });
 
-  it("classProgression: по запису на клас із class, без класів поля немає", () => {
-    const cls = { id: "f", name: "Fighter", color: null, features: [], subclassLevel: null, subclasses: [] };
+    it('classProgression: по запису на клас із class, без класів поля немає', () => {
+        const cls = {
+            id: 'f',
+            name: 'Fighter',
+            color: null,
+            features: [],
+            subclassLevel: null,
+            subclasses: [],
+        };
 
-    const withClasses = buildCharacterSheet({ ...lira(), classes: [{ classId: "f", level: 3, class: cls, subclass: null }, { classId: "gone", level: 1, class: null, subclass: null }] as never });
+        const withClasses = buildCharacterSheet({
+            ...lira(),
+            classes: [
+                { classId: 'f', level: 3, class: cls, subclass: null },
+                { classId: 'gone', level: 1, class: null, subclass: null },
+            ] as never,
+        });
 
-    expect(withClasses.classProgression).toHaveLength(1);
-    expect(withClasses.classProgression?.[0].className).toBe("Fighter");
-    expect(buildCharacterSheet(lira())).not.toHaveProperty("classProgression");
-  });
+        expect(withClasses.classProgression).toHaveLength(1);
+        expect(withClasses.classProgression?.[0].className).toBe('Fighter');
+        expect(buildCharacterSheet(lira())).not.toHaveProperty(
+            'classProgression'
+        );
+    });
 });

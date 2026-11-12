@@ -1,14 +1,24 @@
-import { DMShowPageClient } from "./page-client";
+import { DMShowPageClient } from './page-client';
 
-import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
-import { listDecks } from "@/lib/server/show/deck-store";
+import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
+import { listDecks } from '@/lib/server/show/deck-store';
 
-export default async function DMShowPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function DMShowPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-  const { isDemo } = await requireCampaignDMOrDemo(id);
+    const { isDemo } = await requireCampaignDMOrDemo(id);
 
-  const initialDecks = await listDecks(id);
+    const initialDecks = await listDecks(id);
 
-  return <DMShowPageClient campaignId={id} initialDecks={initialDecks} canEdit={!isDemo} />;
+    return (
+        <DMShowPageClient
+            campaignId={id}
+            initialDecks={initialDecks}
+            canEdit={!isDemo}
+        />
+    );
 }

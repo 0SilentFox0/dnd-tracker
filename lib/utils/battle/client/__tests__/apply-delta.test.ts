@@ -1,258 +1,505 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { acceptFullBattle, applyBattleDelta, prependBattleLog } from "@/lib/utils/battle/client/apply-delta";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { momentumOf, sceneOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
-import type { BattleScene, ClientBattleDelta } from "@/types/api";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import {
+    acceptFullBattle,
+    applyBattleDelta,
+    prependBattleLog,
+} from '@/lib/utils/battle/client/apply-delta';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import {
+    momentumOf,
+    sceneOf,
+} from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import type { BattleScene, ClientBattleDelta } from '@/types/api';
+import type { BattleAction, BattleParticipant } from '@/types/battle';
 
 const p = (id: string, hp = 10): BattleParticipant => {
-  const base = createMockParticipant();
+    const base = createMockParticipant();
 
-  return { ...base, basicInfo: { ...base.basicInfo, id }, combatStats: { ...base.combatStats, currentHp: hp } };
+    return {
+        ...base,
+        basicInfo: { ...base.basicInfo, id },
+        combatStats: { ...base.combatStats, currentHp: hp },
+    };
 };
 
-const entry = (actionIndex: number): BattleAction => ({ actionIndex, resultText: `#${actionIndex}` }) as BattleAction;
+const entry = (actionIndex: number): BattleAction =>
+    ({ actionIndex, resultText: `#${actionIndex}` }) as BattleAction;
 
-const a = p("a"), b = p("b");
+const a = p('a'),
+    b = p('b');
 
 const cached: BattleScene = {
-  id: "b1", campaignId: "c1", name: "Бій", status: "active", participants: [], currentRound: 1, currentTurnIndex: 0,
-  initiativeOrder: [a, b], pendingSummons: [], rules: DEFAULT_RULES, battleLog: [entry(1), entry(2)], createdAt: "x", version: 5,
-  isDM: true, userRole: "dm", campaign: { id: "c1", friendlyFire: false },
+    id: 'b1',
+    campaignId: 'c1',
+    name: 'Бій',
+    status: 'active',
+    participants: [],
+    currentRound: 1,
+    currentTurnIndex: 0,
+    initiativeOrder: [a, b],
+    pendingSummons: [],
+    rules: DEFAULT_RULES,
+    battleLog: [entry(1), entry(2)],
+    createdAt: 'x',
+    version: 5,
+    isDM: true,
+    userRole: 'dm',
+    campaign: { id: 'c1', friendlyFire: false },
 };
 
 const delta = (over: Partial<ClientBattleDelta> = {}): ClientBattleDelta => ({
-  battleId: "b1", version: 6,
-  scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null },
-  upserted: [], removed: [], log: [], ...over,
+    battleId: 'b1',
+    version: 6,
+    scene: {
+        status: 'active',
+        round: 1,
+        turnIndex: 1,
+        pendingMoraleCheck: null,
+        pendingChoice: null,
+    },
+    upserted: [],
+    removed: [],
+    log: [],
+    ...over,
 });
 
-describe("applyBattleDelta", () => {
-  it("стара або та сама версія — кеш без змін (те саме посилання)", () => {
-    expect(applyBattleDelta(cached, delta({ version: 5 }))).toBe(cached);
-    expect(applyBattleDelta(cached, delta({ version: 3 }))).toBe(cached);
-  });
+describe('applyBattleDelta', () => {
+    it('стара або та сама версія — кеш без змін (те саме посилання)', () => {
+        expect(applyBattleDelta(cached, delta({ version: 5 }))).toBe(cached);
+        expect(applyBattleDelta(cached, delta({ version: 3 }))).toBe(cached);
+    });
 
-  it("пропуск версії — refetch", () => {
-    expect(applyBattleDelta(cached, delta({ version: 7 }))).toBe("refetch");
-    expect(applyBattleDelta({ ...cached, version: undefined }, delta())).toBe("refetch");
-  });
+    it('пропуск версії — refetch', () => {
+        expect(applyBattleDelta(cached, delta({ version: 7 }))).toBe('refetch');
+        expect(
+            applyBattleDelta({ ...cached, version: undefined }, delta())
+        ).toBe('refetch');
+    });
 
-  it("послідовна — патч учасника, решта зберігає посилання, мета-поля кешу лишаються", () => {
-    const b2 = p("b", 3);
+    it('послідовна — патч учасника, решта зберігає посилання, мета-поля кешу лишаються', () => {
+        const b2 = p('b', 3);
 
-    const next = applyBattleDelta(cached, delta({ upserted: [b2], log: [entry(3)] })) as BattleScene;
+        const next = applyBattleDelta(
+            cached,
+            delta({ upserted: [b2], log: [entry(3)] })
+        ) as BattleScene;
 
-    expect(next.version).toBe(6);
-    expect(next.currentTurnIndex).toBe(1);
-    expect(next.initiativeOrder[0]).toBe(a);
-    expect(next.initiativeOrder[1]).toBe(b2);
-    expect(next.battleLog.map((e) => e.actionIndex)).toEqual([1, 2, 3]);
-    expect(next).toMatchObject({ isDM: true, userRole: "dm", campaign: { id: "c1", friendlyFire: false } });
-  });
+        expect(next.version).toBe(6);
+        expect(next.currentTurnIndex).toBe(1);
+        expect(next.initiativeOrder[0]).toBe(a);
+        expect(next.initiativeOrder[1]).toBe(b2);
+        expect(next.battleLog.map((e) => e.actionIndex)).toEqual([1, 2, 3]);
+        expect(next).toMatchObject({
+            isDM: true,
+            userRole: 'dm',
+            campaign: { id: 'c1', friendlyFire: false },
+        });
+    });
 
-  it("scene.map замінює карту в кеші; без неї карта лишається", () => {
-    const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+    it('scene.map замінює карту в кеші; без неї карта лишається', () => {
+        const map = { cols: 8, rows: 8, background: null, opacity: 0.3 };
 
-    const withMap = { ...cached, map };
+        const withMap = { ...cached, map };
 
-    expect((applyBattleDelta(withMap, delta()) as BattleScene).map).toBe(map);
+        expect((applyBattleDelta(withMap, delta()) as BattleScene).map).toBe(
+            map
+        );
 
-    const terrain = { ...map, terrain: { "1:1": { kind: "barrier" as const, untilRound: 2 } } };
+        const terrain = {
+            ...map,
+            terrain: { '1:1': { kind: 'barrier' as const, untilRound: 2 } },
+        };
 
-    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null, map: terrain };
+        const scene = {
+            status: 'active' as const,
+            round: 1,
+            turnIndex: 1,
+            pendingMoraleCheck: null,
+            pendingChoice: null,
+            map: terrain,
+        };
 
-    expect((applyBattleDelta(withMap, delta({ scene })) as BattleScene).map).toEqual(terrain);
-  });
+        expect(
+            (applyBattleDelta(withMap, delta({ scene })) as BattleScene).map
+        ).toEqual(terrain);
+    });
 
-  it("scene.terrain домерджується в кешовану карту новим записом; без карти в кеші — refetch", () => {
-    const map = { cols: 8, rows: 8, background: null, opacity: 0.3, terrain: { "1:1": { kind: "wall" as const }, "2:2": { kind: "wall" as const } } };
+    it('scene.terrain домерджується в кешовану карту новим записом; без карти в кеші — refetch', () => {
+        const map = {
+            cols: 8,
+            rows: 8,
+            background: null,
+            opacity: 0.3,
+            terrain: {
+                '1:1': { kind: 'wall' as const },
+                '2:2': { kind: 'wall' as const },
+            },
+        };
 
-    const withMap = { ...cached, map };
+        const withMap = { ...cached, map };
 
-    const terrain = { set: [{ cell: { kind: "hazard" as const, label: "Лава" }, keys: ["3:3", "4:4"] }], removed: ["1:1"] };
+        const terrain = {
+            set: [
+                {
+                    cell: { kind: 'hazard' as const, label: 'Лава' },
+                    keys: ['3:3', '4:4'],
+                },
+            ],
+            removed: ['1:1'],
+        };
 
-    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null, terrain };
+        const scene = {
+            status: 'active' as const,
+            round: 1,
+            turnIndex: 1,
+            pendingMoraleCheck: null,
+            pendingChoice: null,
+            terrain,
+        };
 
-    const next = applyBattleDelta(withMap, delta({ scene })) as BattleScene;
+        const next = applyBattleDelta(withMap, delta({ scene })) as BattleScene;
 
-    expect(next.map?.terrain).toEqual({ "2:2": { kind: "wall" }, "3:3": { kind: "hazard", label: "Лава" }, "4:4": { kind: "hazard", label: "Лава" } });
-    expect(next.map?.terrain).not.toBe(map.terrain);
-    expect(map.terrain).toEqual({ "1:1": { kind: "wall" }, "2:2": { kind: "wall" } });
-    expect(applyBattleDelta(cached, delta({ scene }))).toBe("refetch");
-  });
+        expect(next.map?.terrain).toEqual({
+            '2:2': { kind: 'wall' },
+            '3:3': { kind: 'hazard', label: 'Лава' },
+            '4:4': { kind: 'hazard', label: 'Лава' },
+        });
+        expect(next.map?.terrain).not.toBe(map.terrain);
+        expect(map.terrain).toEqual({
+            '1:1': { kind: 'wall' },
+            '2:2': { kind: 'wall' },
+        });
+        expect(applyBattleDelta(cached, delta({ scene }))).toBe('refetch');
+    });
 
-  it("patched — мердж розділів поверх кешованого учасника; незмінені розділи й учасники зберігають посилання", () => {
-    const effects = [{ id: "e1", name: "Кровотеча" }] as unknown as BattleParticipant["battleData"]["activeEffects"];
+    it('patched — мердж розділів поверх кешованого учасника; незмінені розділи й учасники зберігають посилання', () => {
+        const effects = [
+            { id: 'e1', name: 'Кровотеча' },
+        ] as unknown as BattleParticipant['battleData']['activeEffects'];
 
-    const next = applyBattleDelta(
-      cached,
-      delta({ patched: [{ id: "b", combatStats: { currentHp: 2 }, battleData: { activeEffects: effects } }] }),
-    ) as BattleScene;
+        const next = applyBattleDelta(
+            cached,
+            delta({
+                patched: [
+                    {
+                        id: 'b',
+                        combatStats: { currentHp: 2 },
+                        battleData: { activeEffects: effects },
+                    },
+                ],
+            })
+        ) as BattleScene;
 
-    const merged = next.initiativeOrder[1];
+        const merged = next.initiativeOrder[1];
 
-    expect(next.initiativeOrder[0]).toBe(a);
-    expect(merged.combatStats).toEqual({ ...b.combatStats, currentHp: 2 });
-    expect(merged.battleData.activeEffects).toBe(effects);
-    expect(merged.battleData.attacks).toBe(b.battleData.attacks);
-    expect(merged.abilities).toBe(b.abilities);
-    expect(merged.actionFlags).toBe(b.actionFlags);
-  });
+        expect(next.initiativeOrder[0]).toBe(a);
+        expect(merged.combatStats).toEqual({ ...b.combatStats, currentHp: 2 });
+        expect(merged.battleData.activeEffects).toBe(effects);
+        expect(merged.battleData.attacks).toBe(b.battleData.attacks);
+        expect(merged.abilities).toBe(b.abilities);
+        expect(merged.actionFlags).toBe(b.actionFlags);
+    });
 
-  it("patched на невідомий id — refetch", () => {
-    expect(applyBattleDelta(cached, delta({ patched: [{ id: "ghost", combatStats: { currentHp: 1 } }] }))).toBe("refetch");
-  });
+    it('patched на невідомий id — refetch', () => {
+        expect(
+            applyBattleDelta(
+                cached,
+                delta({
+                    patched: [{ id: 'ghost', combatStats: { currentHp: 1 } }],
+                })
+            )
+        ).toBe('refetch');
+    });
 
-  it("order + removed + pending", () => {
-    const s = p("s");
+    it('order + removed + pending', () => {
+        const s = p('s');
 
-    const next = applyBattleDelta(cached, delta({ removed: ["a"], order: ["b", "s"], upserted: [s], pending: [] })) as BattleScene;
+        const next = applyBattleDelta(
+            cached,
+            delta({
+                removed: ['a'],
+                order: ['b', 's'],
+                upserted: [s],
+                pending: [],
+            })
+        ) as BattleScene;
 
-    expect(next.initiativeOrder.map((x) => x.basicInfo.id)).toEqual(["b", "s"]);
-    expect(next.pendingSummons).toEqual([]);
-  });
+        expect(next.initiativeOrder.map((x) => x.basicInfo.id)).toEqual([
+            'b',
+            's',
+        ]);
+        expect(next.pendingSummons).toEqual([]);
+    });
 
-  it("cancelledFrom скидає знання з сервера (бо воно могло спиратися на скасовані події), звичайна дельта — зберігає", () => {
-    const knowledge = { b: { ac: { min: 12, max: 15, evidence: [] }, traits: [] } };
+    it('cancelledFrom скидає знання з сервера (бо воно могло спиратися на скасовані події), звичайна дельта — зберігає', () => {
+        const knowledge = {
+            b: { ac: { min: 12, max: 15, evidence: [] }, traits: [] },
+        };
 
-    const withKnowledge = { ...cached, knowledge };
+        const withKnowledge = { ...cached, knowledge };
 
-    expect((applyBattleDelta(withKnowledge, delta()) as BattleScene).knowledge).toBe(knowledge);
-    expect(applyBattleDelta(withKnowledge, delta({ cancelledFrom: 2 }))).not.toHaveProperty("knowledge");
-    expect(applyBattleDelta(withKnowledge, delta({ cancelledFrom: 0 }))).not.toHaveProperty("knowledge");
+        expect(
+            (applyBattleDelta(withKnowledge, delta()) as BattleScene).knowledge
+        ).toBe(knowledge);
+        expect(
+            applyBattleDelta(withKnowledge, delta({ cancelledFrom: 2 }))
+        ).not.toHaveProperty('knowledge');
+        expect(
+            applyBattleDelta(withKnowledge, delta({ cancelledFrom: 0 }))
+        ).not.toHaveProperty('knowledge');
 
-    const fresh = { b: { ac: { min: 10, evidence: [] }, traits: [] } };
+        const fresh = { b: { ac: { min: 10, evidence: [] }, traits: [] } };
 
-    expect((applyBattleDelta(withKnowledge, delta({ cancelledFrom: 2, knowledge: fresh })) as BattleScene).knowledge).toBe(fresh);
-  });
+        expect(
+            (
+                applyBattleDelta(
+                    withKnowledge,
+                    delta({ cancelledFrom: 2, knowledge: fresh })
+                ) as BattleScene
+            ).knowledge
+        ).toBe(fresh);
+    });
 
-  it("cancelledFrom обрізає журнал; повторне застосування тієї ж дельти — без змін", () => {
-    const d = delta({ cancelledFrom: 2, log: [entry(2)] });
+    it('cancelledFrom обрізає журнал; повторне застосування тієї ж дельти — без змін', () => {
+        const d = delta({ cancelledFrom: 2, log: [entry(2)] });
 
-    const next = applyBattleDelta(cached, d) as BattleScene;
+        const next = applyBattleDelta(cached, d) as BattleScene;
 
-    expect(next.battleLog.map((e) => e.resultText)).toEqual(["#1", "#2"]);
-    expect(applyBattleDelta(next, d)).toBe(next);
-  });
+        expect(next.battleLog.map((e) => e.resultText)).toEqual(['#1', '#2']);
+        expect(applyBattleDelta(next, d)).toBe(next);
+    });
 
-  it("reset у prepared: setup і порожні учасники", () => {
-    const setup = [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }];
+    it('reset у prepared: setup і порожні учасники', () => {
+        const setup = [
+            { id: 'u1', type: 'unit' as const, side: ParticipantSide.ENEMY },
+        ];
 
-    const next = applyBattleDelta(cached, delta({
-      scene: { status: "prepared", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null },
-      removed: ["a", "b"], order: [], setup, cancelledFrom: 0,
-    })) as BattleScene;
+        const next = applyBattleDelta(
+            cached,
+            delta({
+                scene: {
+                    status: 'prepared',
+                    round: 1,
+                    turnIndex: 0,
+                    pendingMoraleCheck: null,
+                    pendingChoice: null,
+                },
+                removed: ['a', 'b'],
+                order: [],
+                setup,
+                cancelledFrom: 0,
+            })
+        ) as BattleScene;
 
-    expect(next.status).toBe("prepared");
-    expect(next.initiativeOrder).toEqual([]);
-    expect(next.participants).toEqual(setup);
-    expect(next.battleLog).toEqual([]);
-  });
+        expect(next.status).toBe('prepared');
+        expect(next.initiativeOrder).toEqual([]);
+        expect(next.participants).toEqual(setup);
+        expect(next.battleLog).toEqual([]);
+    });
 
-  it("зворотний порядок: v7 раніше за v6 → refetch, потім v6 після refetch(v7) ігнорується", () => {
-    expect(applyBattleDelta(cached, delta({ version: 7 }))).toBe("refetch");
+    it('зворотний порядок: v7 раніше за v6 → refetch, потім v6 після refetch(v7) ігнорується', () => {
+        expect(applyBattleDelta(cached, delta({ version: 7 }))).toBe('refetch');
 
-    const refetched = { ...cached, version: 7 };
+        const refetched = { ...cached, version: 7 };
 
-    expect(applyBattleDelta(refetched, delta({ version: 6 }))).toBe(refetched);
-  });
+        expect(applyBattleDelta(refetched, delta({ version: 6 }))).toBe(
+            refetched
+        );
+    });
 });
 
-describe("applyBattleDelta — відкат завершеного бою", () => {
-  it("completedAt: null прибирає дату завершення з кешу", () => {
-    const done = { ...cached, status: "completed" as const, completedAt: "2026-01-02T00:00:00.000Z" };
+describe('applyBattleDelta — відкат завершеного бою', () => {
+    it('completedAt: null прибирає дату завершення з кешу', () => {
+        const done = {
+            ...cached,
+            status: 'completed' as const,
+            completedAt: '2026-01-02T00:00:00.000Z',
+        };
 
-    const next = applyBattleDelta(done, delta({ scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null, completedAt: null } })) as BattleScene;
+        const next = applyBattleDelta(
+            done,
+            delta({
+                scene: {
+                    status: 'active',
+                    round: 1,
+                    turnIndex: 0,
+                    pendingMoraleCheck: null,
+                    pendingChoice: null,
+                    completedAt: null,
+                },
+            })
+        ) as BattleScene;
 
-    expect(next.status).toBe("active");
-    expect(next.completedAt).toBeUndefined();
-  });
+        expect(next.status).toBe('active');
+        expect(next.completedAt).toBeUndefined();
+    });
 });
 
-describe("applyBattleDelta — system state", () => {
-  const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null };
+describe('applyBattleDelta — system state', () => {
+    const scene = {
+        status: 'active' as const,
+        round: 1,
+        turnIndex: 1,
+        pendingMoraleCheck: null,
+        pendingChoice: null,
+    };
 
-  it("кладе стан системи у кеш, відсутнє поле зберігає, null очищає", () => {
-    const withTokens = applyBattleDelta(cached, delta({ scene: { ...scene, system: sceneOf({ ally: true }) } })) as BattleScene;
+    it('кладе стан системи у кеш, відсутнє поле зберігає, null очищає', () => {
+        const withTokens = applyBattleDelta(
+            cached,
+            delta({ scene: { ...scene, system: sceneOf({ ally: true }) } })
+        ) as BattleScene;
 
-    expect(momentumOf(withTokens.system)).toEqual({ ally: true });
+        expect(momentumOf(withTokens.system)).toEqual({ ally: true });
 
-    const kept = applyBattleDelta(withTokens, delta({ version: (withTokens.version ?? 0) + 1, scene })) as BattleScene;
+        const kept = applyBattleDelta(
+            withTokens,
+            delta({ version: (withTokens.version ?? 0) + 1, scene })
+        ) as BattleScene;
 
-    expect(kept.system).toBe(withTokens.system);
+        expect(kept.system).toBe(withTokens.system);
 
-    const cleared = applyBattleDelta(kept, delta({ version: (kept.version ?? 0) + 1, scene: { ...scene, system: null } })) as BattleScene;
+        const cleared = applyBattleDelta(
+            kept,
+            delta({
+                version: (kept.version ?? 0) + 1,
+                scene: { ...scene, system: null },
+            })
+        ) as BattleScene;
 
-    expect(cleared.system).toBeUndefined();
-  });
+        expect(cleared.system).toBeUndefined();
+    });
 });
 
-describe("acceptFullBattle", () => {
-  it("зберігає isDM/userRole/campaign, якщо у відповіді їх немає; ігнорує старішу версію", () => {
-    const incoming = { ...cached, version: 9, isDM: undefined, userRole: undefined, campaign: undefined };
+describe('acceptFullBattle', () => {
+    it('зберігає isDM/userRole/campaign, якщо у відповіді їх немає; ігнорує старішу версію', () => {
+        const incoming = {
+            ...cached,
+            version: 9,
+            isDM: undefined,
+            userRole: undefined,
+            campaign: undefined,
+        };
 
-    expect(acceptFullBattle(cached, incoming)).toMatchObject({ version: 9, isDM: true, userRole: "dm" });
-    expect(acceptFullBattle(cached, { ...cached, version: 4 })).toBe(cached);
-  });
+        expect(acceptFullBattle(cached, incoming)).toMatchObject({
+            version: 9,
+            isDM: true,
+            userRole: 'dm',
+        });
+        expect(acceptFullBattle(cached, { ...cached, version: 4 })).toBe(
+            cached
+        );
+    });
 });
 
-describe("acceptFullBattle — журнал за межами вікна GET", () => {
-  const withLog = (version: number, idx: number[]) => ({ ...cached, version, battleLog: idx.map(entry) });
+describe('acceptFullBattle — журнал за межами вікна GET', () => {
+    const withLog = (version: number, idx: number[]) => ({
+        ...cached,
+        version,
+        battleLog: idx.map(entry),
+    });
 
-  it("старіші записи з кешу лишаються, коли GET приніс лише останнє вікно", () => {
-    const next = acceptFullBattle(withLog(5, [1, 2, 3, 4]), withLog(6, [3, 4, 5]));
+    it('старіші записи з кешу лишаються, коли GET приніс лише останнє вікно', () => {
+        const next = acceptFullBattle(
+            withLog(5, [1, 2, 3, 4]),
+            withLog(6, [3, 4, 5])
+        );
 
-    expect(next.battleLog.map((e) => e.actionIndex)).toEqual([1, 2, 3, 4, 5]);
-  });
+        expect(next.battleLog.map((e) => e.actionIndex)).toEqual([
+            1, 2, 3, 4, 5,
+        ]);
+    });
 
-  it("записи, яких немає у вікні GET (скасовані відкатом), зникають; новий бій після reset — без старих", () => {
-    expect(acceptFullBattle(withLog(5, [1, 2, 3, 4]), withLog(6, [2, 3])).battleLog.map((e) => e.actionIndex)).toEqual([1, 2, 3]);
-    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(6, [1])).battleLog.map((e) => e.actionIndex)).toEqual([1]);
-    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(6, [])).battleLog).toEqual([]);
-  });
+    it('записи, яких немає у вікні GET (скасовані відкатом), зникають; новий бій після reset — без старих', () => {
+        expect(
+            acceptFullBattle(
+                withLog(5, [1, 2, 3, 4]),
+                withLog(6, [2, 3])
+            ).battleLog.map((e) => e.actionIndex)
+        ).toEqual([1, 2, 3]);
+        expect(
+            acceptFullBattle(
+                withLog(5, [1, 2, 3]),
+                withLog(6, [1])
+            ).battleLog.map((e) => e.actionIndex)
+        ).toEqual([1]);
+        expect(
+            acceptFullBattle(withLog(5, [1, 2, 3]), withLog(6, [])).battleLog
+        ).toEqual([]);
+    });
 });
 
-describe("acceptFullBattle — дірки в журналі", () => {
-  const withLog = (version: number, idx: number[]) => ({ ...cached, version, battleLog: idx.map(entry) });
+describe('acceptFullBattle — дірки в журналі', () => {
+    const withLog = (version: number, idx: number[]) => ({
+        ...cached,
+        version,
+        battleLog: idx.map(entry),
+    });
 
-  it("кеш відстав більше ніж на вікно — старіші записи не доклеюються (їх дотягне пагінація)", () => {
-    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(9, [20, 21])).battleLog.map((e) => e.actionIndex)).toEqual([20, 21]);
-  });
+    it('кеш відстав більше ніж на вікно — старіші записи не доклеюються (їх дотягне пагінація)', () => {
+        expect(
+            acceptFullBattle(
+                withLog(5, [1, 2, 3]),
+                withLog(9, [20, 21])
+            ).battleLog.map((e) => e.actionIndex)
+        ).toEqual([20, 21]);
+    });
 
-  it("кеш закінчується впритул до вікна, але без перекриття — між ними міг бути відкат, не доклеюємо", () => {
-    expect(acceptFullBattle(withLog(5, [1, 2, 3]), withLog(9, [4, 5])).battleLog.map((e) => e.actionIndex)).toEqual([4, 5]);
-  });
+    it('кеш закінчується впритул до вікна, але без перекриття — між ними міг бути відкат, не доклеюємо', () => {
+        expect(
+            acceptFullBattle(
+                withLog(5, [1, 2, 3]),
+                withLog(9, [4, 5])
+            ).battleLog.map((e) => e.actionIndex)
+        ).toEqual([4, 5]);
+    });
 
-  it("скасовані записи з кешу не доклеюються", () => {
-    const log = [entry(1), { ...entry(2), isCancelled: true }, entry(3)];
+    it('скасовані записи з кешу не доклеюються', () => {
+        const log = [entry(1), { ...entry(2), isCancelled: true }, entry(3)];
 
-    expect(acceptFullBattle({ ...cached, version: 5, battleLog: log }, withLog(9, [3, 4])).battleLog.map((e) => e.actionIndex)).toEqual([1, 3, 4]);
-  });
+        expect(
+            acceptFullBattle(
+                { ...cached, version: 5, battleLog: log },
+                withLog(9, [3, 4])
+            ).battleLog.map((e) => e.actionIndex)
+        ).toEqual([1, 3, 4]);
+    });
 });
 
-describe("acceptFullBattle — інший запуск бою", () => {
-  it("після reset (інший startedAt) старі записи з кешу не доклеюються", () => {
-    const old = { ...cached, version: 5, startedAt: "2026-01-01T00:00:00.000Z", battleLog: [1, 2, 3].map(entry) };
+describe('acceptFullBattle — інший запуск бою', () => {
+    it('після reset (інший startedAt) старі записи з кешу не доклеюються', () => {
+        const old = {
+            ...cached,
+            version: 5,
+            startedAt: '2026-01-01T00:00:00.000Z',
+            battleLog: [1, 2, 3].map(entry),
+        };
 
-    const rerun = { ...cached, version: 9, startedAt: "2026-01-02T00:00:00.000Z", battleLog: [3, 4].map(entry) };
+        const rerun = {
+            ...cached,
+            version: 9,
+            startedAt: '2026-01-02T00:00:00.000Z',
+            battleLog: [3, 4].map(entry),
+        };
 
-    expect(acceptFullBattle(old, rerun).battleLog.map((e) => e.actionIndex)).toEqual([3, 4]);
-  });
+        expect(
+            acceptFullBattle(old, rerun).battleLog.map((e) => e.actionIndex)
+        ).toEqual([3, 4]);
+    });
 });
 
-describe("prependBattleLog", () => {
-  it("старіші події стають на початок журналу; дублікати не повторюються; решта кешу без змін", () => {
-    const withLog = { ...cached, battleLog: [entry(4), entry(5)] };
+describe('prependBattleLog', () => {
+    it('старіші події стають на початок журналу; дублікати не повторюються; решта кешу без змін', () => {
+        const withLog = { ...cached, battleLog: [entry(4), entry(5)] };
 
-    const next = prependBattleLog(withLog, [entry(2), entry(3), entry(4)]);
+        const next = prependBattleLog(withLog, [entry(2), entry(3), entry(4)]);
 
-    expect(next.battleLog.map((e) => e.actionIndex)).toEqual([2, 3, 4, 5]);
-    expect(next.battleLog[2]).toBe(withLog.battleLog[0]);
-    expect(next.initiativeOrder).toBe(withLog.initiativeOrder);
-    expect(next.version).toBe(withLog.version);
-  });
+        expect(next.battleLog.map((e) => e.actionIndex)).toEqual([2, 3, 4, 5]);
+        expect(next.battleLog[2]).toBe(withLog.battleLog[0]);
+        expect(next.initiativeOrder).toBe(withLog.initiativeOrder);
+        expect(next.version).toBe(withLog.version);
+    });
 });

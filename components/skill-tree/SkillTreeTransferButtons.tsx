@@ -1,43 +1,57 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
-import { useTranslations } from "next-intl";
-import { Download, Upload } from "lucide-react";
+import { useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import { Download, Upload } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { useSkillTreeTransfer } from "@/lib/hooks/skills";
+import { Button } from '@/components/ui/button';
+import { useSkillTreeTransfer } from '@/lib/hooks/skills';
 
-export function SkillTreeTransferButtons({ campaignId }: { campaignId: string }) {
-  const t = useTranslations("skillTree.transfer");
+export function SkillTreeTransferButtons({
+    campaignId,
+}: {
+    campaignId: string;
+}) {
+    const t = useTranslations('skillTree.transfer');
 
-  const transfer = useSkillTreeTransfer(campaignId);
+    const transfer = useSkillTreeTransfer(campaignId);
 
-  const input = useRef<HTMLInputElement>(null);
+    const input = useRef<HTMLInputElement>(null);
 
-  return (
-    <div className="flex flex-wrap justify-end gap-2">
-      <input
-        ref={input}
-        type="file"
-        accept=".json"
-        className="hidden"
-        aria-label={t("fileLabel")}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
+    return (
+        <div className="flex flex-wrap justify-end gap-2">
+            <input
+                ref={input}
+                type="file"
+                accept=".json"
+                className="hidden"
+                aria-label={t('fileLabel')}
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
 
-          e.target.value = "";
+                    e.target.value = '';
 
-          if (file) void transfer.actions.importFile(file);
-        }}
-      />
-      <Button variant="outline" size="sm" disabled={!transfer.ready || transfer.busy} onClick={() => input.current?.click()}>
-        <Upload className="h-4 w-4" />
-        {t("import")}
-      </Button>
-      <Button variant="outline" size="sm" disabled={!transfer.ready} onClick={transfer.actions.exportAll}>
-        <Download className="h-4 w-4" />
-        {t("export")}
-      </Button>
-    </div>
-  );
+                    if (file) void transfer.actions.importFile(file);
+                }}
+            />
+            <Button
+                variant="outline"
+                size="sm"
+                disabled={!transfer.ready || transfer.busy}
+                onClick={() => input.current?.click()}
+            >
+                <Upload className="h-4 w-4" />
+                {t('import')}
+            </Button>
+            <Button
+                variant="outline"
+                size="sm"
+                disabled={!transfer.ready}
+                onClick={transfer.actions.exportAll}
+            >
+                <Download className="h-4 w-4" />
+                {t('export')}
+            </Button>
+        </div>
+    );
 }

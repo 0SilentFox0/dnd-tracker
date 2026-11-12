@@ -1,131 +1,164 @@
-"use client";
+'use client';
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { type MediaHandle, useDriftSync } from "./useDriftSync";
+import { type MediaHandle, useDriftSync } from './useDriftSync';
 
-import { YOUTUBE_NOCOOKIE_HOST, YOUTUBE_PLAYER_PX } from "@/lib/constants/music";
-import { loadYoutubeIframeApi, YT_STATE, type YtPlayer } from "@/lib/utils/audio/youtube-iframe-api";
-import type { BattleAudioState } from "@/types/audio";
+import {
+    YOUTUBE_NOCOOKIE_HOST,
+    YOUTUBE_PLAYER_PX,
+} from '@/lib/constants/music';
+import {
+    loadYoutubeIframeApi,
+    YT_STATE,
+    type YtPlayer,
+} from '@/lib/utils/audio/youtube-iframe-api';
+import type { BattleAudioState } from '@/types/audio';
 
 const TAP_HINT_AFTER_MS = 3_000;
 
 // при зміні відео ефекти синхронізації ще бачать старий плеєр, а виклик після destroy() кидає «reading 'src'»
 const destroyedPlayers = new WeakSet<YtPlayer>();
 
-export function useYoutubeSync(input: { videoId: string | null; state: BattleAudioState | null; clockOffsetMs: number; volume: number; muted: boolean }): {
-  ref: (el: HTMLDivElement | null) => void;
-  needsTap: boolean;
-  failed: boolean;
+export function useYoutubeSync(input: {
+    videoId: string | null;
+    state: BattleAudioState | null;
+    clockOffsetMs: number;
+    volume: number;
+    muted: boolean;
+}): {
+    ref: (el: HTMLDivElement | null) => void;
+    needsTap: boolean;
+    failed: boolean;
 } {
-  const [host, setHost] = useState<HTMLDivElement | null>(null);
+    const [host, setHost] = useState<HTMLDivElement | null>(null);
 
-  const [player, setPlayer] = useState<YtPlayer | null>(null);
+    const [player, setPlayer] = useState<YtPlayer | null>(null);
 
-  const [needsTap, setNeedsTap] = useState(false);
+    const [needsTap, setNeedsTap] = useState(false);
 
-  const [failed, setFailed] = useState(false);
+    const [failed, setFailed] = useState(false);
 
-  // PLAYING: тривалість стає відомою лише тепер — не чекаємо перевірки дрейфу
-  const [starts, setStarts] = useState(0);
+    // PLAYING: тривалість стає відомою лише тепер — не чекаємо перевірки дрейфу
+    const [starts, setStarts] = useState(0);
 
-  const tapHint = useRef<number | undefined>(undefined);
+    const tapHint = useRef<number | undefined>(undefined);
 
-  const { videoId } = input;
+    const { videoId } = input;
 
-  useEffect(() => {
-    if (!host || !videoId) return;
+    useEffect(() => {
+        if (!host || !videoId) return;
 
-    let alive = true;
+        let alive = true;
 
-    let created: YtPlayer | null = null;
+        let created: YtPlayer | null = null;
 
-    const mount = document.createElement("div");
+        const mount = document.createElement('div');
 
-    host.appendChild(mount);
+        host.appendChild(mount);
 
-    void loadYoutubeIframeApi().then(
-      (YT) => {
-        if (!alive) return;
+        void loadYoutubeIframeApi().then(
+            (YT) => {
+                if (!alive) return;
 
-        created = new YT.Player(mount, {
-          host: YOUTUBE_NOCOOKIE_HOST,
-          videoId,
-          width: YOUTUBE_PLAYER_PX,
-          height: YOUTUBE_PLAYER_PX,
-          playerVars: { autoplay: 0, controls: 1, loop: 1, playlist: videoId, playsinline: 1, rel: 0 },
-          events: {
-            onReady: () => alive && setPlayer(created),
-            onStateChange: (e) => {
-              if (e.data !== YT_STATE.PLAYING) return;
+                created = new YT.Player(mount, {
+                    host: YOUTUBE_NOCOOKIE_HOST,
+                    videoId,
+                    width: YOUTUBE_PLAYER_PX,
+                    height: YOUTUBE_PLAYER_PX,
+                    playerVars: {
+                        autoplay: 0,
+                        controls: 1,
+                        loop: 1,
+                        playlist: videoId,
+                        playsinline: 1,
+                        rel: 0,
+                    },
+                    events: {
+                        onReady: () => alive && setPlayer(created),
+                        onStateChange: (e) => {
+                            if (e.data !== YT_STATE.PLAYING) return;
 
-              setNeedsTap(false);
-              setStarts((n) => n + 1);
+                            setNeedsTap(false);
+                            setStarts((n) => n + 1);
+                        },
+                        onError: () => setFailed(true),
+                    },
+                });
             },
-            onError: () => setFailed(true),
-          },
-        });
-      },
-      () => alive && setFailed(true),
-    );
+            () => alive && setFailed(true)
+        );
 
-    return () => {
-      alive = false;
+        return () => {
+            alive = false;
 
-      if (created) {
-        destroyedPlayers.add(created);
-        created.destroy();
-      }
+            if (created) {
+                destroyedPlayers.add(created);
+                created.destroy();
+            }
 
-      setPlayer(null);
-      setNeedsTap(false);
-      setFailed(false);
-      mount.remove();
-    };
-  }, [host, videoId]);
+            setPlayer(null);
+            setNeedsTap(false);
+            setFailed(false);
+            mount.remove();
+        };
+    }, [host, videoId]);
 
-  const media = useMemo<MediaHandle | null>(() => {
-    if (!player) return null;
+    const media = useMemo<MediaHandle | null>(() => {
+        if (!player) return null;
 
-    const alive = () => !destroyedPlayers.has(player);
+        const alive = () => !destroyedPlayers.has(player);
 
-    return {
-        ready: alive,
-        currentTime: () => (alive() ? player.getCurrentTime() : 0),
-        paused: () => !alive() || player.getPlayerState() !== YT_STATE.PLAYING,
-        duration: () => (alive() && player.getDuration()) || null,
-        play: () => {
-          if (!alive()) return;
+        return {
+            ready: alive,
+            currentTime: () => (alive() ? player.getCurrentTime() : 0),
+            paused: () =>
+                !alive() || player.getPlayerState() !== YT_STATE.PLAYING,
+            duration: () => (alive() && player.getDuration()) || null,
+            play: () => {
+                if (!alive()) return;
 
-          player.playVideo();
-          // iOS може проігнорувати playVideo без дотику до самого плеєра
-          window.clearTimeout(tapHint.current);
-          tapHint.current = window.setTimeout(() => alive() && setNeedsTap(player.getPlayerState() !== YT_STATE.PLAYING), TAP_HINT_AFTER_MS);
-        },
-        pause: () => {
-          if (alive()) player.pauseVideo();
-        },
-        // до метаданих ціль не загорнута в петлю; наступна перевірка дрейфу перемотає
-        seek: (sec) => {
-          if (alive() && player.getDuration()) player.seekTo(sec, true);
-        },
-    };
-  }, [player]);
+                player.playVideo();
+                // iOS може проігнорувати playVideo без дотику до самого плеєра
+                window.clearTimeout(tapHint.current);
+                tapHint.current = window.setTimeout(
+                    () =>
+                        alive() &&
+                        setNeedsTap(
+                            player.getPlayerState() !== YT_STATE.PLAYING
+                        ),
+                    TAP_HINT_AFTER_MS
+                );
+            },
+            pause: () => {
+                if (alive()) player.pauseVideo();
+            },
+            // до метаданих ціль не загорнута в петлю; наступна перевірка дрейфу перемотає
+            seek: (sec) => {
+                if (alive() && player.getDuration()) player.seekTo(sec, true);
+            },
+        };
+    }, [player]);
 
-  const { state, clockOffsetMs, volume, muted } = input;
+    const { state, clockOffsetMs, volume, muted } = input;
 
-  useDriftSync(media, { state, clockOffsetMs, canPlay: true, resyncKey: starts });
+    useDriftSync(media, {
+        state,
+        clockOffsetMs,
+        canPlay: true,
+        resyncKey: starts,
+    });
 
-  useEffect(() => {
-    if (!player || destroyedPlayers.has(player)) return;
+    useEffect(() => {
+        if (!player || destroyedPlayers.has(player)) return;
 
-    player.setVolume(Math.round(volume * 100));
+        player.setVolume(Math.round(volume * 100));
 
-    if (muted) player.mute();
-    else player.unMute();
-  }, [player, volume, muted]);
+        if (muted) player.mute();
+        else player.unMute();
+    }, [player, volume, muted]);
 
-  useEffect(() => () => window.clearTimeout(tapHint.current), [player]);
+    useEffect(() => () => window.clearTimeout(tapHint.current), [player]);
 
-  return { ref: setHost, needsTap, failed };
+    return { ref: setHost, needsTap, failed };
 }

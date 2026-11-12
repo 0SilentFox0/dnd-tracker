@@ -1,79 +1,98 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { act, cleanup, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { act, cleanup, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ConfirmContext } from "../confirm-context";
-import { useUnsavedChangesGuard } from "../useUnsavedChangesGuard";
+import { ConfirmContext } from '../confirm-context';
+import { useUnsavedChangesGuard } from '../useUnsavedChangesGuard';
 
 const push = vi.hoisted(() => vi.fn());
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
 const confirm = vi.fn();
 
-const wrapper = ({ children }: { children: ReactNode }) => <ConfirmContext.Provider value={confirm}>{children}</ConfirmContext.Provider>;
+const wrapper = ({ children }: { children: ReactNode }) => (
+    <ConfirmContext.Provider value={confirm}>
+        {children}
+    </ConfirmContext.Provider>
+);
 
 const link = (href: string, attrs: Record<string, string> = {}) => {
-  const a = document.body.appendChild(document.createElement("a"));
+    const a = document.body.appendChild(document.createElement('a'));
 
-  a.setAttribute("href", href);
-  Object.entries(attrs).forEach(([k, v]) => a.setAttribute(k, v));
+    a.setAttribute('href', href);
+    Object.entries(attrs).forEach(([k, v]) => a.setAttribute(k, v));
 
-  return a;
+    return a;
 };
 
 const click = (el: Element, init: MouseEventInit = {}) => {
-  const event = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0, ...init });
+    const event = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        ...init,
+    });
 
-  el.dispatchEvent(event);
+    el.dispatchEvent(event);
 
-  return event;
+    return event;
 };
 
 const flush = () => act(async () => void (await Promise.resolve()));
 
 beforeEach(() => {
-  confirm.mockReset();
-  push.mockReset();
+    confirm.mockReset();
+    push.mockReset();
 });
 
 afterEach(() => {
-  cleanup();
-  document.body.innerHTML = "";
+    cleanup();
+    document.body.innerHTML = '';
 });
 
-describe("useUnsavedChangesGuard", () => {
-  it("неактивний — клік проходить", () => {
-    renderHook(() => useUnsavedChangesGuard(false), { wrapper });
+describe('useUnsavedChangesGuard', () => {
+    it('неактивний — клік проходить', () => {
+        renderHook(() => useUnsavedChangesGuard(false), { wrapper });
 
-    expect(click(link("/campaigns/x")).defaultPrevented).toBe(false);
-    expect(confirm).not.toHaveBeenCalled();
-  });
+        expect(click(link('/campaigns/x')).defaultPrevented).toBe(false);
+        expect(confirm).not.toHaveBeenCalled();
+    });
 
-  it("внутрішнє посилання: підтвердження, потім router.push; відмова — лишаємось", async () => {
-    renderHook(() => useUnsavedChangesGuard(true), { wrapper });
-    confirm.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    it('внутрішнє посилання: підтвердження, потім router.push; відмова — лишаємось', async () => {
+        renderHook(() => useUnsavedChangesGuard(true), { wrapper });
+        confirm.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
-    const a = link("/campaigns/x?y=1#z");
+        const a = link('/campaigns/x?y=1#z');
 
-    expect(click(a).defaultPrevented).toBe(true);
-    await flush();
-    expect(push).not.toHaveBeenCalled();
+        expect(click(a).defaultPrevented).toBe(true);
+        await flush();
+        expect(push).not.toHaveBeenCalled();
 
-    click(a);
-    await flush();
-    expect(push).toHaveBeenCalledWith("/campaigns/x?y=1#z");
-    expect(confirm).toHaveBeenCalledWith({ title: "common.confirm.unsavedTitle", confirmLabel: "common.confirm.leave", destructive: true });
-  });
+        click(a);
+        await flush();
+        expect(push).toHaveBeenCalledWith('/campaigns/x?y=1#z');
+        expect(confirm).toHaveBeenCalledWith({
+            title: 'common.confirm.unsavedTitle',
+            confirmLabel: 'common.confirm.leave',
+            destructive: true,
+        });
+    });
 
-  it("зовнішні, _blank, модифіковані кліки й якір на цій сторінці — без підтвердження", () => {
-    renderHook(() => useUnsavedChangesGuard(true), { wrapper });
+    it('зовнішні, _blank, модифіковані кліки й якір на цій сторінці — без підтвердження', () => {
+        renderHook(() => useUnsavedChangesGuard(true), { wrapper });
 
-    expect(click(link("https://example.com/a")).defaultPrevented).toBe(false);
-    expect(click(link("/x", { target: "_blank" })).defaultPrevented).toBe(false);
-    expect(click(link("/y"), { ctrlKey: true }).defaultPrevented).toBe(false);
-    expect(click(link("#top")).defaultPrevented).toBe(false);
-    expect(confirm).not.toHaveBeenCalled();
-  });
+        expect(click(link('https://example.com/a')).defaultPrevented).toBe(
+            false
+        );
+        expect(click(link('/x', { target: '_blank' })).defaultPrevented).toBe(
+            false
+        );
+        expect(click(link('/y'), { ctrlKey: true }).defaultPrevented).toBe(
+            false
+        );
+        expect(click(link('#top')).defaultPrevented).toBe(false);
+        expect(confirm).not.toHaveBeenCalled();
+    });
 });

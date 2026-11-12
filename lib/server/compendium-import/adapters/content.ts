@@ -1,319 +1,788 @@
-import { renderEntries, renderEntryBlocks } from "../entries";
-import { nestedId, stableJson } from "../identity";
-import { mediaIdOf, type MediaRef } from "../media/types";
-import { type Adapter, type AdapterContext, issue } from "../types";
-import { customConditionKeys } from "./custom-conditions";
-import { EFFECT_FIELDS, itemEffects } from "./item-effects";
-import { type MonsterStats, parseAttack, parseMultiattack, plainName } from "./monster-attacks";
-import { CastingBuilder, defenseAbilities, legendaryAbilities, legendaryResistances, saveProficiencies } from "./monster-traits";
-import { ABILITIES, array, description, num, object, str, unsupported } from "./shared";
-import { spellCast } from "./spell-cast";
-import { deriveSpell } from "./spell-derive";
+import { renderEntries, renderEntryBlocks } from '../entries';
+import { nestedId, stableJson } from '../identity';
+import { mediaIdOf, type MediaRef } from '../media/types';
+import { type Adapter, type AdapterContext, issue } from '../types';
+import { customConditionKeys } from './custom-conditions';
+import { EFFECT_FIELDS, itemEffects } from './item-effects';
+import {
+    type MonsterStats,
+    parseAttack,
+    parseMultiattack,
+    plainName,
+} from './monster-attacks';
+import {
+    CastingBuilder,
+    defenseAbilities,
+    legendaryAbilities,
+    legendaryResistances,
+    saveProficiencies,
+} from './monster-traits';
+import {
+    ABILITIES,
+    array,
+    description,
+    num,
+    object,
+    str,
+    unsupported,
+} from './shared';
+import { spellCast } from './spell-cast';
+import { deriveSpell } from './spell-derive';
 
-import type { AbilityKey } from "@/lib/constants/abilities";
-import { schoolByCode } from "@/lib/constants/spell-groups";
-import type { Ability } from "@/lib/utils/abilities/schema";
-import { buildSearchText } from "@/lib/utils/scenario/search-text";
-import { castingFields, spellHead } from "@/lib/utils/spells/derive/mechanics";
-import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
-import type { RichNode, ScenarioContent } from "@/types/scenario";
+import type { AbilityKey } from '@/lib/constants/abilities';
+import { schoolByCode } from '@/lib/constants/spell-groups';
+import type { Ability } from '@/lib/utils/abilities/schema';
+import { buildSearchText } from '@/lib/utils/scenario/search-text';
+import { castingFields, spellHead } from '@/lib/utils/spells/derive/mechanics';
+import { battleSpeed, coreTrait } from '@/lib/utils/units/monster-core-traits';
+import type { RichNode, ScenarioContent } from '@/types/scenario';
 
-const SPELL_CONSUMED = ["level", "school", "classes", "time", "range", "components", "duration", "meta", "damageInflict", "savingThrow", "spellAttack", "scalingLevelDice", "conditionInflict", "damageImmune", "damageResist", "damageVulnerable", "conditionImmune", "abilityCheck", "areaTags", "miscTags"];
+const SPELL_CONSUMED = [
+    'level',
+    'school',
+    'classes',
+    'time',
+    'range',
+    'components',
+    'duration',
+    'meta',
+    'damageInflict',
+    'savingThrow',
+    'spellAttack',
+    'scalingLevelDice',
+    'conditionInflict',
+    'damageImmune',
+    'damageResist',
+    'damageVulnerable',
+    'conditionImmune',
+    'abilityCheck',
+    'areaTags',
+    'miscTags',
+];
 
-const MANUAL_SPELL_BODY = { executionMode: "manual", targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [] };
-
-export const spell: Adapter = (row, ctx) => {
-  const cast = spellCast(row);
-
-  const lists = array(object(row.classes).fromClassList).map((r) => str(object(r).name)).filter(Boolean);
-
-  const school = schoolByCode(str(row.school))?.name ?? str(row.school);
-
-  const head = spellHead({ level: row.level as number, school, casting: cast.castingText, ritual: cast.ritual, range: cast.rangeText, components: cast.components, duration: cast.durationText, concentration: cast.concentration, classes: lists });
-
-  const text = renderEntries(row.entries, `${ctx.path}.entries`);
-
-  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast, ctx.t, customConditionKeys(ctx.root));
-
-  const mechanics = "native" in derived ? { executionMode: "native", ...derived.native.fields } : MANUAL_SPELL_BODY;
-
-  if ("blocker" in derived) ctx.issues.push(issue(`MANUAL_SPELL_${derived.blocker}`, ctx.path, "warning", derived.detail));
-  else if (derived.native.narrative) ctx.issues.push(issue("SPELL_NARRATIVE_ONLY", ctx.path, "warning"));
-  else if (derived.native.riders.length > 0) ctx.issues.push(issue("SPELL_RIDER_MANUAL", ctx.path, "warning", { riders: derived.native.riders.join(", ") }));
-
-  return { kind: "spells", refs: "native" in derived ? (derived.native.refs ?? []).map((r) => ({ ...r, edition: ctx.edition })) : [], body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, ritual: cast.ritual, componentFlags: cast.componentFlags, ingredients: cast.ingredients, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
+const MANUAL_SPELL_BODY = {
+    executionMode: 'manual',
+    targeting: { kind: 'self' },
+    resolution: { kind: 'auto' },
+    dice: 0,
+    spellEffects: [],
 };
 
-const MONSTER_FIELDS = ["trait", "action", "bonus", "reaction", "legendary", "spellcasting"] as const;
+export const spell: Adapter = (row, ctx) => {
+    const cast = spellCast(row);
 
-const renderRaw = (entries: unknown[]): string => entries.map((e) => (typeof e === "string" ? e : "")).join(" ");
+    const lists = array(object(row.classes).fromClassList)
+        .map((r) => str(object(r).name))
+        .filter(Boolean);
 
-const SIZE_NAMES: Record<string, string> = { T: "tiny", S: "small", M: "medium", L: "large", H: "huge", G: "gargantuan" };
+    const school = schoolByCode(str(row.school))?.name ?? str(row.school);
 
-const SPEED_KEYS = ["walk", "fly", "swim", "climb", "burrow"];
+    const head = spellHead({
+        level: row.level as number,
+        school,
+        casting: cast.castingText,
+        ritual: cast.ritual,
+        range: cast.rangeText,
+        components: cast.components,
+        duration: cast.durationText,
+        concentration: cast.concentration,
+        classes: lists,
+    });
+
+    const text = renderEntries(row.entries, `${ctx.path}.entries`);
+
+    const derived = deriveSpell(
+        row,
+        text.text,
+        renderEntries(row.entriesHigherLevel).text,
+        cast,
+        ctx.t,
+        customConditionKeys(ctx.root)
+    );
+
+    const mechanics =
+        'native' in derived
+            ? { executionMode: 'native', ...derived.native.fields }
+            : MANUAL_SPELL_BODY;
+
+    if ('blocker' in derived)
+        ctx.issues.push(
+            issue(
+                `MANUAL_SPELL_${derived.blocker}`,
+                ctx.path,
+                'warning',
+                derived.detail
+            )
+        );
+    else if (derived.native.narrative)
+        ctx.issues.push(issue('SPELL_NARRATIVE_ONLY', ctx.path, 'warning'));
+    else if (derived.native.riders.length > 0)
+        ctx.issues.push(
+            issue('SPELL_RIDER_MANUAL', ctx.path, 'warning', {
+                riders: derived.native.riders.join(', '),
+            })
+        );
+
+    return {
+        kind: 'spells',
+        refs:
+            'native' in derived
+                ? (derived.native.refs ?? []).map((r) => ({
+                      ...r,
+                      edition: ctx.edition,
+                  }))
+                : [],
+        body: {
+            name: row.name,
+            level: row.level,
+            description: [head, description(row, ctx)]
+                .filter(Boolean)
+                .join('\n\n'),
+            ...mechanics,
+            ...castingFields(cast.castingKey, cast.trigger),
+            concentration: cast.concentration,
+            ritual: cast.ritual,
+            componentFlags: cast.componentFlags,
+            ingredients: cast.ingredients,
+            lists,
+        },
+        notes: unsupported(row, SPELL_CONSUMED, ctx),
+    };
+};
+
+const MONSTER_FIELDS = [
+    'trait',
+    'action',
+    'bonus',
+    'reaction',
+    'legendary',
+    'spellcasting',
+] as const;
+
+const renderRaw = (entries: unknown[]): string =>
+    entries.map((e) => (typeof e === 'string' ? e : '')).join(' ');
+
+const SIZE_NAMES: Record<string, string> = {
+    T: 'tiny',
+    S: 'small',
+    M: 'medium',
+    L: 'large',
+    H: 'huge',
+    G: 'gargantuan',
+};
+
+const SPEED_KEYS = ['walk', 'fly', 'swim', 'climb', 'burrow'];
 
 function readCombatStats(row: Record<string, unknown>, ctx: AdapterContext) {
-  const ac = array(row.ac).map((v) => num(v) ?? num(object(v).ac)).find((v) => v !== undefined);
+    const ac = array(row.ac)
+        .map((v) => num(v) ?? num(object(v).ac))
+        .find((v) => v !== undefined);
 
-  const hpRow = object(row.hp);
+    const hpRow = object(row.hp);
 
-  const special = /^\s*(\d[\d,]*)\s*\(/.exec(str(hpRow.special))?.[1];
+    const special = /^\s*(\d[\d,]*)\s*\(/.exec(str(hpRow.special))?.[1];
 
-  const parsedHp = num(hpRow.average) ?? (special ? Number(special.replace(/,/g, "")) : undefined);
+    const parsedHp =
+        num(hpRow.average) ??
+        (special ? Number(special.replace(/,/g, '')) : undefined);
 
-  const hp = parsedHp !== undefined && parsedHp >= 1 ? parsedHp : undefined;
+    const hp = parsedHp !== undefined && parsedHp >= 1 ? parsedHp : undefined;
 
-  if (hp === undefined && typeof hpRow.special === "string") ctx.issues.push(issue("MANUAL_MONSTER_HP", `${ctx.path}.hp`, "warning", { value: hpRow.special }));
-  else if (ac === undefined || hp === undefined) ctx.issues.push(issue("REQUIRED_MONSTER_STATS", ctx.path, "error"));
+    if (hp === undefined && typeof hpRow.special === 'string')
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_HP', `${ctx.path}.hp`, 'warning', {
+                value: hpRow.special,
+            })
+        );
+    else if (ac === undefined || hp === undefined)
+        ctx.issues.push(issue('REQUIRED_MONSTER_STATS', ctx.path, 'error'));
 
-  const scores = Object.fromEntries(Object.entries(ABILITIES).map(([short, long]) => [long, num(row[short])]));
+    const scores = Object.fromEntries(
+        Object.entries(ABILITIES).map(([short, long]) => [
+            long,
+            num(row[short]),
+        ])
+    );
 
-  if (Object.values(scores).some((v) => v === undefined)) ctx.issues.push(issue("MONSTER_ABILITY_REQUIRED", ctx.path, "error"));
+    if (Object.values(scores).some((v) => v === undefined))
+        ctx.issues.push(issue('MONSTER_ABILITY_REQUIRED', ctx.path, 'error'));
 
-  const rawCr = str(row.cr) || str(object(row.cr).cr);
+    const rawCr = str(row.cr) || str(object(row.cr).cr);
 
-  const cr = /^\d+\/\d+$/.test(rawCr) ? Number(rawCr.split("/")[0]) / Number(rawCr.split("/")[1]) : rawCr ? Number(rawCr) : null;
+    const cr = /^\d+\/\d+$/.test(rawCr)
+        ? Number(rawCr.split('/')[0]) / Number(rawCr.split('/')[1])
+        : rawCr
+          ? Number(rawCr)
+          : null;
 
-  const movement = object(row.speed);
+    const movement = object(row.speed);
 
-  const speeds = Object.fromEntries(SPEED_KEYS.map((k) => [k, num(movement[k]) ?? num(object(movement[k]).number)]));
+    const speeds = Object.fromEntries(
+        SPEED_KEYS.map((k) => [
+            k,
+            num(movement[k]) ?? num(object(movement[k]).number),
+        ])
+    );
 
-  const complete = Object.values(scores).every((v) => v !== undefined);
+    const complete = Object.values(scores).every((v) => v !== undefined);
 
-  const stats: MonsterStats = { scores: complete ? (scores as Record<AbilityKey, number>) : null, cr: cr !== null && Number.isFinite(cr) ? cr : null };
+    const stats: MonsterStats = {
+        scores: complete ? (scores as Record<AbilityKey, number>) : null,
+        cr: cr !== null && Number.isFinite(cr) ? cr : null,
+    };
 
-  return { ac, hp, scores, cr, movement, speeds, stats };
+    return { ac, hp, scores, cr, movement, speeds, stats };
 }
 
 interface MonsterActions {
-  attacks: Array<Record<string, unknown>>;
-  abilities: Ability[];
-  multiattack: number;
-  resistances: ReturnType<typeof legendaryResistances> | undefined;
-  unhandled: Record<string, unknown[]>;
+    attacks: Array<Record<string, unknown>>;
+    abilities: Ability[];
+    multiattack: number;
+    resistances: ReturnType<typeof legendaryResistances> | undefined;
+    unhandled: Record<string, unknown[]>;
 }
 
-function collectActions(row: Record<string, unknown>, ctx: AdapterContext, stats: MonsterStats, casting: CastingBuilder): MonsterActions {
-  const out: MonsterActions = { attacks: [], abilities: [], multiattack: 1, resistances: undefined, unhandled: {} };
+function collectActions(
+    row: Record<string, unknown>,
+    ctx: AdapterContext,
+    stats: MonsterStats,
+    casting: CastingBuilder
+): MonsterActions {
+    const out: MonsterActions = {
+        attacks: [],
+        abilities: [],
+        multiattack: 1,
+        resistances: undefined,
+        unhandled: {},
+    };
 
-  const keep = (field: string, item: unknown) => (out.unhandled[field] ??= []).push(item);
+    const keep = (field: string, item: unknown) =>
+        (out.unhandled[field] ??= []).push(item);
 
-  for (const field of MONSTER_FIELDS) {
-    for (const [index, item] of array(row[field]).entries()) {
-      const entry = object(item);
+    for (const field of MONSTER_FIELDS) {
+        for (const [index, item] of array(row[field]).entries()) {
+            const entry = object(item);
 
-      const name = plainName(str(entry.name));
+            const name = plainName(str(entry.name));
 
-      if (field === "spellcasting") {
-        casting.block(item);
-        keep(field, { name, entries: array(entry.headerEntries) });
-        continue;
-      }
+            if (field === 'spellcasting') {
+                casting.block(item);
+                keep(field, { name, entries: array(entry.headerEntries) });
+                continue;
+            }
 
-      if (field === "legendary") {
-        keep(field, item);
-        continue;
-      }
+            if (field === 'legendary') {
+                keep(field, item);
+                continue;
+            }
 
-      const entries = array(entry.entries);
+            const entries = array(entry.entries);
 
-      const core = field === "trait" ? coreTrait(name, renderRaw(entries)) : undefined;
+            const core =
+                field === 'trait'
+                    ? coreTrait(name, renderRaw(entries))
+                    : undefined;
 
-      if (core) {
-        out.abilities.push({ id: `trait-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || index}`, name, description: renderEntries(entries).text, ...core });
-        continue;
-      }
+            if (core) {
+                out.abilities.push({
+                    id: `trait-${
+                        name
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-|-$/g, '') || index
+                    }`,
+                    name,
+                    description: renderEntries(entries).text,
+                    ...core,
+                });
+                continue;
+            }
 
-      if (field === "trait" && /^Legendary Resistance \(\d+\/Day/i.test(name)) {
-        out.resistances = legendaryResistances([item]);
-        continue;
-      }
+            if (
+                field === 'trait' &&
+                /^Legendary Resistance \(\d+\/Day/i.test(name)
+            ) {
+                out.resistances = legendaryResistances([item]);
+                continue;
+            }
 
-      if (field === "action" && collectAttack(out, ctx, { stats, item, name, entries, index })) continue;
+            if (
+                field === 'action' &&
+                collectAttack(out, ctx, { stats, item, name, entries, index })
+            )
+                continue;
 
-      if (field !== "trait" && casting.action(str(entry.name), renderRaw(entries))) {
-        keep(field, item);
-        continue;
-      }
+            if (
+                field !== 'trait' &&
+                casting.action(str(entry.name), renderRaw(entries))
+            ) {
+                keep(field, item);
+                continue;
+            }
 
-      keep(field, item);
-      ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${field}[${index}]`, "warning", { variant: "action", name: name || `#${index + 1}` }));
+            keep(field, item);
+            ctx.issues.push(
+                issue(
+                    'MANUAL_MONSTER_ACTION',
+                    `${ctx.path}.${field}[${index}]`,
+                    'warning',
+                    { variant: 'action', name: name || `#${index + 1}` }
+                )
+            );
+        }
     }
-  }
 
-  return out;
+    return out;
 }
 
 /** Multiattack or a parsable attack from an action row; true when the row was consumed. */
-function collectAttack(out: MonsterActions, ctx: AdapterContext, row: { stats: MonsterStats; item: unknown; name: string; entries: unknown[]; index: number }): boolean {
-  const { stats, item, name, entries, index } = row;
+function collectAttack(
+    out: MonsterActions,
+    ctx: AdapterContext,
+    row: {
+        stats: MonsterStats;
+        item: unknown;
+        name: string;
+        entries: unknown[];
+        index: number;
+    }
+): boolean {
+    const { stats, item, name, entries, index } = row;
 
-  const multi = parseMultiattack({ name, entries });
+    const multi = parseMultiattack({ name, entries });
 
-  if (multi) {
-    out.multiattack = multi.count;
-    (out.unhandled.action ??= []).push(item);
+    if (multi) {
+        out.multiattack = multi.count;
+        (out.unhandled.action ??= []).push(item);
 
-    if (multi.complex) ctx.issues.push(issue("MANUAL_MULTIATTACK_DETAIL", `${ctx.path}.action[${index}]`, "warning"));
+        if (multi.complex)
+            ctx.issues.push(
+                issue(
+                    'MANUAL_MULTIATTACK_DETAIL',
+                    `${ctx.path}.action[${index}]`,
+                    'warning'
+                )
+            );
+
+        return true;
+    }
+
+    const parsed = parseAttack(
+        { name: str(object(item).name), entries },
+        stats
+    );
+
+    if (!parsed) return false;
+
+    out.attacks.push(parsed.row);
+
+    if (parsed.rider)
+        ctx.issues.push(
+            issue(
+                'MANUAL_ATTACK_RIDER',
+                `${ctx.path}.action[${index}]`,
+                'warning',
+                { name }
+            )
+        );
+
+    if (parsed.mixedDamage)
+        ctx.issues.push(
+            issue(
+                'MONSTER_ATTACK_MIXED_DAMAGE',
+                `${ctx.path}.action[${index}]`,
+                'warning',
+                { name }
+            )
+        );
 
     return true;
-  }
-
-  const parsed = parseAttack({ name: str(object(item).name), entries }, stats);
-
-  if (!parsed) return false;
-
-  out.attacks.push(parsed.row);
-
-  if (parsed.rider) ctx.issues.push(issue("MANUAL_ATTACK_RIDER", `${ctx.path}.action[${index}]`, "warning", { name }));
-
-  if (parsed.mixedDamage) ctx.issues.push(issue("MONSTER_ATTACK_MIXED_DAMAGE", `${ctx.path}.action[${index}]`, "warning", { name }));
-
-  return true;
 }
 
-const MONSTER_CONSUMED = ["ac", "hp", "cr", "speed", "size", "type", "languages", "save", "resist", "immune", "vulnerable", "conditionImmune", "legendaryActions", ...Object.keys(ABILITIES), ...MONSTER_FIELDS];
+const MONSTER_CONSUMED = [
+    'ac',
+    'hp',
+    'cr',
+    'speed',
+    'size',
+    'type',
+    'languages',
+    'save',
+    'resist',
+    'immune',
+    'vulnerable',
+    'conditionImmune',
+    'legendaryActions',
+    ...Object.keys(ABILITIES),
+    ...MONSTER_FIELDS,
+];
 
-function monsterNotes(row: Record<string, unknown>, ctx: AdapterContext, unhandled: Record<string, unknown[]>): string {
-  return [description(row, ctx), ...MONSTER_FIELDS.map((field) => {
-    const rendered = renderEntries(unhandled[field] ?? [], `${ctx.path}.${field}`);
+function monsterNotes(
+    row: Record<string, unknown>,
+    ctx: AdapterContext,
+    unhandled: Record<string, unknown[]>
+): string {
+    return [
+        description(row, ctx),
+        ...MONSTER_FIELDS.map((field) => {
+            const rendered = renderEntries(
+                unhandled[field] ?? [],
+                `${ctx.path}.${field}`
+            );
 
-    ctx.issues.push(...rendered.issues);
+            ctx.issues.push(...rendered.issues);
 
-    return rendered.text;
-  }), unsupported(row, MONSTER_CONSUMED, ctx)].filter(Boolean).join("\n");
+            return rendered.text;
+        }),
+        unsupported(row, MONSTER_CONSUMED, ctx),
+    ]
+        .filter(Boolean)
+        .join('\n');
 }
 
 export const monster: Adapter = (row, ctx) => {
-  const { ac, hp, scores, cr, movement, speeds, stats } = readCombatStats(row, ctx);
+    const { ac, hp, scores, cr, movement, speeds, stats } = readCombatStats(
+        row,
+        ctx
+    );
 
-  const type = str(row.type) || str(object(row.type).type);
+    const type = str(row.type) || str(object(row.type).type);
 
-  const casting = new CastingBuilder(ctx.edition);
+    const casting = new CastingBuilder(ctx.edition);
 
-  const { attacks, abilities, multiattack, resistances, unhandled } = collectActions(row, ctx, stats, casting);
+    const { attacks, abilities, multiattack, resistances, unhandled } =
+        collectActions(row, ctx, stats, casting);
 
-  const defenses = defenseAbilities(row);
+    const defenses = defenseAbilities(row);
 
-  abilities.push(...defenses.abilities);
+    abilities.push(...defenses.abilities);
 
-  for (const text of defenses.unresolved) ctx.issues.push(issue("MANUAL_MONSTER_DEFENSE", `${ctx.path}.defenses`, "warning", { text }));
+    for (const text of defenses.unresolved)
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_DEFENSE', `${ctx.path}.defenses`, 'warning', {
+                text,
+            })
+        );
 
-  if (defenses.nonMagicalApprox) ctx.issues.push(issue("MONSTER_NONMAGICAL_APPROX", `${ctx.path}.defenses`, "warning"));
+    if (defenses.nonMagicalApprox)
+        ctx.issues.push(
+            issue(
+                'MONSTER_NONMAGICAL_APPROX',
+                `${ctx.path}.defenses`,
+                'warning'
+            )
+        );
 
-  const legendary = legendaryAbilities(row.legendary, attacks.map((a) => String(a.name)));
+    const legendary = legendaryAbilities(
+        row.legendary,
+        attacks.map((a) => String(a.name))
+    );
 
-  abilities.push(...legendary.abilities);
+    abilities.push(...legendary.abilities);
 
-  for (const name of legendary.manual) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.legendary`, "warning", { variant: "legendary", name }));
+    for (const name of legendary.manual)
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_ACTION', `${ctx.path}.legendary`, 'warning', {
+                variant: 'legendary',
+                name,
+            })
+        );
 
-  const built = casting.build();
+    const built = casting.build();
 
-  if (built?.approximate) ctx.issues.push(issue("MONSTER_SPELL_SLOTS_APPROX", `${ctx.path}.spellcasting`, "warning"));
+    if (built?.approximate)
+        ctx.issues.push(
+            issue(
+                'MONSTER_SPELL_SLOTS_APPROX',
+                `${ctx.path}.spellcasting`,
+                'warning'
+            )
+        );
 
-  for (const key of built?.unresolved ?? []) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${key}`, "warning", { variant: "spells" }));
+    for (const key of built?.unresolved ?? [])
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_ACTION', `${ctx.path}.${key}`, 'warning', {
+                variant: 'spells',
+            })
+        );
 
-  const size = SIZE_NAMES[str(array(row.size)[0])];
+    const size = SIZE_NAMES[str(array(row.size)[0])];
 
-  const statblock = { ...(type && { creatureType: type }), ...(size && { size }), ...(Array.isArray(row.languages) && { languages: row.languages.map(str).join(", ") }), ...(resistances?.lair !== undefined && { lairResistances: resistances.lair }), movement: { ...Object.fromEntries(["fly", "swim", "climb", "burrow"].filter((k) => (speeds[k] ?? 0) >= 5).map((k) => [k, speeds[k]])), ...(movement.canHover === true && { hover: true }) } };
+    const statblock = {
+        ...(type && { creatureType: type }),
+        ...(size && { size }),
+        ...(Array.isArray(row.languages) && {
+            languages: row.languages.map(str).join(', '),
+        }),
+        ...(resistances?.lair !== undefined && {
+            lairResistances: resistances.lair,
+        }),
+        movement: {
+            ...Object.fromEntries(
+                ['fly', 'swim', 'climb', 'burrow']
+                    .filter((k) => (speeds[k] ?? 0) >= 5)
+                    .map((k) => [k, speeds[k]])
+            ),
+            ...(movement.canHover === true && { hover: true }),
+        },
+    };
 
-  const notes = monsterNotes(row, ctx, unhandled);
+    const notes = monsterNotes(row, ctx, unhandled);
 
-  const legendaryCount = num(row.legendaryActions) ?? (legendary.abilities.length > 0 ? 3 : 0);
+    const legendaryCount =
+        num(row.legendaryActions) ?? (legendary.abilities.length > 0 ? 3 : 0);
 
-  return {
-    kind: "units",
-    refs: built?.refs,
-    body: { name: row.name, ...scores, armorClass: ac, maxHp: hp ?? 1, speed: battleSpeed(speeds) || (num(row.speed) ?? 0), gridSize: str(array(row.size)[0]) === "L" ? 2 : ["H", "G"].includes(str(array(row.size)[0])) ? 3 : 1, cr, statblock, attacks, abilities, multiattack, saveProficiencies: saveProficiencies(row.save, stats.scores), legendaryActions: Math.min(5, legendaryCount), legendaryResistances: Math.min(10, resistances?.count ?? 0), ...(built && { spellcasting: built.config }) },
-    notes,
-  };
+    return {
+        kind: 'units',
+        refs: built?.refs,
+        body: {
+            name: row.name,
+            ...scores,
+            armorClass: ac,
+            maxHp: hp ?? 1,
+            speed: battleSpeed(speeds) || (num(row.speed) ?? 0),
+            gridSize:
+                str(array(row.size)[0]) === 'L'
+                    ? 2
+                    : ['H', 'G'].includes(str(array(row.size)[0]))
+                      ? 3
+                      : 1,
+            cr,
+            statblock,
+            attacks,
+            abilities,
+            multiattack,
+            saveProficiencies: saveProficiencies(row.save, stats.scores),
+            legendaryActions: Math.min(5, legendaryCount),
+            legendaryResistances: Math.min(10, resistances?.count ?? 0),
+            ...(built && { spellcasting: built.config }),
+        },
+        notes,
+    };
 };
 
-const DAMAGE: Record<string, string> = { P: "piercing", S: "slashing", B: "bludgeoning", A: "acid", C: "cold", F: "fire", L: "lightning", N: "necrotic", O: "force", R: "radiant", T: "thunder", Y: "psychic", I: "poison" };
+const DAMAGE: Record<string, string> = {
+    P: 'piercing',
+    S: 'slashing',
+    B: 'bludgeoning',
+    A: 'acid',
+    C: 'cold',
+    F: 'fire',
+    L: 'lightning',
+    N: 'necrotic',
+    O: 'force',
+    R: 'radiant',
+    T: 'thunder',
+    Y: 'psychic',
+    I: 'poison',
+};
 
-const CONSUMABLE_TYPES = new Set(["P", "SC", "A", "AF", "EXP", "FD"]);
+const CONSUMABLE_TYPES = new Set(['P', 'SC', 'A', 'AF', 'EXP', 'FD']);
 
-const CONSUMABLE_TYPE_NAME = /^(?:ingredient|potion|scroll|ammunition|food|drink)/i;
+const CONSUMABLE_TYPE_NAME =
+    /^(?:ingredient|potion|scroll|ammunition|food|drink)/i;
 
-const UNIQUE_RARITIES = new Set(["artifact", "unknown", "unknown (magic)"]);
+const UNIQUE_RARITIES = new Set(['artifact', 'unknown', 'unknown (magic)']);
 
-const OTHER_EFFECT_FIELDS = /^(?:bonus|modifySpeed$|attachedSpells$|charges$|recharge|grantsProficiency$|conditionImmune$|immune$|vulnerable$|ability$|crit)/;
+const OTHER_EFFECT_FIELDS =
+    /^(?:bonus|modifySpeed$|attachedSpells$|charges$|recharge|grantsProficiency$|conditionImmune$|immune$|vulnerable$|ability$|crit)/;
 
 export const item: Adapter = (row, ctx) => {
-  const type = str(row.type).split("|")[0];
+    const type = str(row.type).split('|')[0];
 
-  const slots: Record<string, string> = { M: "weapon", R: "range_weapon", S: "shield", LA: "armor", MA: "armor", HA: "armor", RG: "ring" };
+    const slots: Record<string, string> = {
+        M: 'weapon',
+        R: 'range_weapon',
+        S: 'shield',
+        LA: 'armor',
+        MA: 'armor',
+        HA: 'armor',
+        RG: 'ring',
+    };
 
-  const slot = slots[type] ?? "item";
+    const slot = slots[type] ?? 'item';
 
-  const rarity = str(row.rarity);
+    const rarity = str(row.rarity);
 
-  const rarities: Record<string, string> = { common: "common", uncommon: "uncommon", rare: "rare", "very rare": "epic", legendary: "legendary" };
+    const rarities: Record<string, string> = {
+        common: 'common',
+        uncommon: 'uncommon',
+        rare: 'rare',
+        'very rare': 'epic',
+        legendary: 'legendary',
+    };
 
-  const customType = array(ctx.root.itemType).map(object).find((t) => t.abbreviation === type);
+    const customType = array(ctx.root.itemType)
+        .map(object)
+        .find((t) => t.abbreviation === type);
 
-  const consumable = array(row.miscTags).includes("CNS") || CONSUMABLE_TYPES.has(type) || CONSUMABLE_TYPE_NAME.test(str(customType?.name));
+    const consumable =
+        array(row.miscTags).includes('CNS') ||
+        CONSUMABLE_TYPES.has(type) ||
+        CONSUMABLE_TYPE_NAME.test(str(customType?.name));
 
-  const text = description(row, ctx);
+    const text = description(row, ctx);
 
-  const hasWeapon = ["M", "R"].includes(type) && typeof row.dmg1 === "string";
+    const hasWeapon = ['M', 'R'].includes(type) && typeof row.dmg1 === 'string';
 
-  const effects = itemEffects(row, { consumable, potion: type === "P", hasWeapon, text }, ctx.t);
+    const effects = itemEffects(
+        row,
+        { consumable, potion: type === 'P', hasWeapon, text },
+        ctx.t
+    );
 
-  const unique = !consumable && ctx.inputKind !== "baseitem" && UNIQUE_RARITIES.has(rarity);
+    const unique =
+        !consumable &&
+        ctx.inputKind !== 'baseitem' &&
+        UNIQUE_RARITIES.has(rarity);
 
-  const body: Record<string, unknown> = { name: row.name, description: text, slot, item: { unique, ...(consumable && { consumable: true }), ...(row.reqAttune !== undefined && !consumable && { attunement: row.reqAttune !== false }) } };
+    const body: Record<string, unknown> = {
+        name: row.name,
+        description: text,
+        slot,
+        item: {
+            unique,
+            ...(consumable && { consumable: true }),
+            ...(row.reqAttune !== undefined &&
+                !consumable && { attunement: row.reqAttune !== false }),
+        },
+    };
 
-  if (rarities[rarity]) body.rarity = rarities[rarity];
+    if (rarities[rarity]) body.rarity = rarities[rarity];
 
-  if (hasWeapon) body.weapon = { damageDice: row.dmg1, damageType: DAMAGE[str(row.dmgType)] ?? str(row.dmgType), attackType: type === "M" ? "melee" : "ranged", ...(typeof row.dmg2 === "string" && { versatileDice: row.dmg2 }), ...effects.weapon };
+    if (hasWeapon)
+        body.weapon = {
+            damageDice: row.dmg1,
+            damageType: DAMAGE[str(row.dmgType)] ?? str(row.dmgType),
+            attackType: type === 'M' ? 'melee' : 'ranged',
+            ...(typeof row.dmg2 === 'string' && { versatileDice: row.dmg2 }),
+            ...effects.weapon,
+        };
 
-  if (["LA", "MA", "HA"].includes(type) && num(row.ac) !== undefined) body.armor = { category: { LA: "light", MA: "medium", HA: "heavy" }[type], base: row.ac, ...(type === "MA" && { dexCap: 2 }), ...(type === "HA" && { dexCap: 0 }) };
+    if (['LA', 'MA', 'HA'].includes(type) && num(row.ac) !== undefined)
+        body.armor = {
+            category: { LA: 'light', MA: 'medium', HA: 'heavy' }[type],
+            base: row.ac,
+            ...(type === 'MA' && { dexCap: 2 }),
+            ...(type === 'HA' && { dexCap: 0 }),
+        };
 
-  if (effects.abilities.length > 0) body.abilities = effects.abilities;
+    if (effects.abilities.length > 0) body.abilities = effects.abilities;
 
-  const manual = [...new Set([...effects.manual, ...Object.keys(row).filter((f) => OTHER_EFFECT_FIELDS.test(f) && !EFFECT_FIELDS.includes(f as never))])];
+    const manual = [
+        ...new Set([
+            ...effects.manual,
+            ...Object.keys(row).filter(
+                (f) =>
+                    OTHER_EFFECT_FIELDS.test(f) &&
+                    !EFFECT_FIELDS.includes(f as never)
+            ),
+        ]),
+    ];
 
-  for (const field of manual) ctx.issues.push(issue("MANUAL_ITEM_EFFECT", `${ctx.path}.${field}`, "warning"));
+    for (const field of manual)
+        ctx.issues.push(
+            issue('MANUAL_ITEM_EFFECT', `${ctx.path}.${field}`, 'warning')
+        );
 
-  const notes = [unsupported(row, ["type", "rarity", "dmg1", "dmg2", "dmgType", "ac", "reqAttune", "miscTags", "wondrous", ...EFFECT_FIELDS, ...Object.keys(row).filter((f) => OTHER_EFFECT_FIELDS.test(f))], ctx), ...manual.map((f) => `${f}: ${stableJson(row[f])}`)].filter(Boolean).join("\n");
+    const notes = [
+        unsupported(
+            row,
+            [
+                'type',
+                'rarity',
+                'dmg1',
+                'dmg2',
+                'dmgType',
+                'ac',
+                'reqAttune',
+                'miscTags',
+                'wondrous',
+                ...EFFECT_FIELDS,
+                ...Object.keys(row).filter((f) => OTHER_EFFECT_FIELDS.test(f)),
+            ],
+            ctx
+        ),
+        ...manual.map((f) => `${f}: ${stableJson(row[f])}`),
+    ]
+        .filter(Boolean)
+        .join('\n');
 
-  return { kind: "artifacts", body, notes };
+    return { kind: 'artifacts', body, notes };
 };
 
 export const materialPage: Adapter = (row, ctx) => {
-  const rendered = renderEntryBlocks(row.entries ?? row, ctx.path);
+    const rendered = renderEntryBlocks(row.entries ?? row, ctx.path);
 
-  ctx.issues.push(...rendered.issues);
+    ctx.issues.push(...rendered.issues);
 
-  const id = nestedId(ctx.key);
+    const id = nestedId(ctx.key);
 
-  const nodes: RichNode[] = [];
+    const nodes: RichNode[] = [];
 
-  const media: MediaRef[] = [];
+    const media: MediaRef[] = [];
 
-  for (const block of rendered.blocks) {
-    if ("text" in block) {
-      nodes.push({ type: "paragraph", content: [{ type: "text", text: block.text }] });
+    for (const block of rendered.blocks) {
+        if ('text' in block) {
+            nodes.push({
+                type: 'paragraph',
+                content: [{ type: 'text', text: block.text }],
+            });
 
-      continue;
+            continue;
+        }
+
+        const { url, alt, caption, path, skip } = block.image;
+
+        if (skip) {
+            media.push({ url, role: 'inline', path, skip });
+
+            continue;
+        }
+
+        const mediaId = mediaIdOf(url);
+
+        nodes.push({
+            type: 'image',
+            attrs: {
+                mediaId,
+                ...(alt && { alt }),
+                ...(caption && { caption }),
+            },
+        });
+        media.push({ url, role: 'inline', path, mediaId, ...(alt && { alt }) });
     }
 
-    const { url, alt, caption, path, skip } = block.image;
+    const content: ScenarioContent = {
+        legend: [],
+        sections: [
+            {
+                id,
+                title: str(row.name) || ctx.t('derived.material'),
+                played: false,
+                rows: [
+                    {
+                        id: `${id}-row`,
+                        story: { type: 'doc', content: [] },
+                        notes: { type: 'doc', content: nodes },
+                    },
+                ],
+            },
+        ],
+    };
 
-    if (skip) {
-      media.push({ url, role: "inline", path, skip });
-
-      continue;
-    }
-
-    const mediaId = mediaIdOf(url);
-
-    nodes.push({ type: "image", attrs: { mediaId, ...(alt && { alt }), ...(caption && { caption }) } });
-    media.push({ url, role: "inline", path, mediaId, ...(alt && { alt }) });
-  }
-
-  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || ctx.t("derived.material"), played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: nodes } }] }] };
-
-  return { kind: "scenarioPages", body: { kind: "note", status: "draft", characterId: null, title: row.name, content, searchText: buildSearchText(str(row.name), content), version: 0 }, notes: "", ...(media.length > 0 && { media }) };
+    return {
+        kind: 'scenarioPages',
+        body: {
+            kind: 'note',
+            status: 'draft',
+            characterId: null,
+            title: row.name,
+            content,
+            searchText: buildSearchText(str(row.name), content),
+            version: 0,
+        },
+        notes: '',
+        ...(media.length > 0 && { media }),
+    };
 };

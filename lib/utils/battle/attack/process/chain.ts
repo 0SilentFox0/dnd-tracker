@@ -1,30 +1,62 @@
-import { isDormant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
-import { attackRangeCells, cellsOf, footprintDistance, isOnMap, nearestTo } from "@/lib/utils/battle/grid";
-import { isHostile, modeSees } from "@/lib/utils/battle/modes/engine";
-import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import {
+    isDormant,
+    isTargetable,
+} from '@/lib/utils/abilities/engine/core/participants';
+import {
+    attackRangeCells,
+    cellsOf,
+    footprintDistance,
+    isOnMap,
+    nearestTo,
+} from '@/lib/utils/battle/grid';
+import { isHostile, modeSees } from '@/lib/utils/battle/modes/engine';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import type {
+    BattleAttack,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
 
 export interface ChainStep {
-  map: BattleMapConfig | null | undefined;
-  order: BattleParticipant[];
-  attacker: BattleParticipant;
-  attack: BattleAttack;
-  /** Попередня ціль (може бути вже мертвою — стрибок іде від її клітинки). */
-  from: BattleParticipant;
-  hit: ReadonlySet<string>;
-  rules: Ruleset;
+    map: BattleMapConfig | null | undefined;
+    order: BattleParticipant[];
+    attacker: BattleParticipant;
+    attack: BattleAttack;
+    /** Попередня ціль (може бути вже мертвою — стрибок іде від її клітинки). */
+    from: BattleParticipant;
+    hit: ReadonlySet<string>;
+    rules: Ruleset;
 }
 
-export function nextChainTarget({ map, order, attacker, attack, from, hit, rules }: ChainStep): BattleParticipant | undefined {
-  const range = attackRangeCells(attack.range, rules);
+export function nextChainTarget({
+    map,
+    order,
+    attacker,
+    attack,
+    from,
+    hit,
+    rules,
+}: ChainStep): BattleParticipant | undefined {
+    const range = attackRangeCells(attack.range, rules);
 
-  const origin = cellsOf(from);
+    const origin = cellsOf(from);
 
-  const inRange = (p: BattleParticipant) => !map || range === null || origin.length === 0 || !isOnMap(p) || footprintDistance(origin, cellsOf(p)) <= range;
+    const inRange = (p: BattleParticipant) =>
+        !map ||
+        range === null ||
+        origin.length === 0 ||
+        !isOnMap(p) ||
+        footprintDistance(origin, cellsOf(p)) <= range;
 
-  const candidates = order.filter(
-    (p) => isHostile(map, attacker, p) && !hit.has(p.basicInfo.id) && isTargetable(p) && !isDormant(p) && modeSees(map, attacker, p) && inRange(p),
-  );
+    const candidates = order.filter(
+        (p) =>
+            isHostile(map, attacker, p) &&
+            !hit.has(p.basicInfo.id) &&
+            isTargetable(p) &&
+            !isDormant(p) &&
+            modeSees(map, attacker, p) &&
+            inRange(p)
+    );
 
-  return map ? nearestTo(from, candidates) : candidates[0];
+    return map ? nearestTo(from, candidates) : candidates[0];
 }

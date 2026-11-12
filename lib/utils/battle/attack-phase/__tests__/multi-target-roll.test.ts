@@ -1,321 +1,732 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
+import { type AttackPhaseInput, runAttackPhase } from '../run-attack-phase';
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
-import { REJECT } from "@/lib/utils/battle/store/reject";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import {
+    makeParticipant,
+    resolved,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
+import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
+import { REJECT } from '@/lib/utils/battle/store/reject';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
-const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d6", damageType: "piercing" };
+const sword: BattleAttack = {
+    id: 'sw',
+    name: 'Меч',
+    type: AttackType.RANGED,
+    attackBonus: 5,
+    damageDice: '1d6',
+    damageType: 'piercing',
+};
 
 const attacker = (() => {
-  const p = makeParticipant({ id: "a" });
+    const p = makeParticipant({ id: 'a' });
 
-  return { ...p, combatStats: { ...p.combatStats, maxTargets: 2 }, battleData: { ...p.battleData, attacks: [sword] } };
+    return {
+        ...p,
+        combatStats: { ...p.combatStats, maxTargets: 2 },
+        battleData: { ...p.battleData, attacks: [sword] },
+    };
 })();
 
-const hindering = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "disadvantageForAttackers" }] });
+const hindering = resolved({
+    trigger: { event: 'passive' },
+    effects: [{ kind: 'flag', flag: 'disadvantageForAttackers' }],
+});
 
-const foe = (id: string, abilities: ReturnType<typeof resolved>[] = []) => makeParticipant({ id, side: ParticipantSide.ENEMY, abilities, hp: 50, maxHp: 50 });
-
-const run = (order: BattleParticipant[], data: Partial<AttackPhaseInput["data"]>) =>
-  runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", damageRolls: [4, 4], ...data }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5) });
-
-const hits = (r: ReturnType<typeof run>) => r.allBattleActions.filter((e) => e.actionType === "attack").map((e) => e.actionDetails.isHit);
-
-describe("multi-target advantage resolution", () => {
-  it("disadvantage on one target applies exactly once, the other target is untouched", () => {
-    const r = run([attacker, foe("t1", [hindering]), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [17, 17], secondRolls: [2, 2] });
-
-    expect(hits(r)).toEqual([false, true]);
-  });
-
-  it("without client second rolls the server rolls once per affected target", () => {
-    const r = run([attacker, foe("t1", [hindering]), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [17, 17] });
-
-    expect(eventTextOf(r.allBattleActions[0])).toContain("недолік: другий d20 = 11 (сервер), обрано 11");
-    expect(r.allBattleActions[0].actionDetails).toMatchObject({ chosenD20: 11, secondRoll: { serverRolled: true } });
-    expect(eventTextOf(r.allBattleActions[1])).not.toContain("другий d20");
-  });
-
-  it("single target: an explicit client second roll is respected", () => {
-    const r = run([attacker, foe("t1", [hindering])], { targetId: "t1", attackRoll: 17, disadvantageRoll: 2 });
-
-    expect(hits(r)).toEqual([false]);
-    expect(eventTextOf(r.allBattleActions[0])).toContain("другий d20 = 2, обрано 2");
-    expect(eventTextOf(r.allBattleActions[0])).not.toContain("(сервер)");
-    expect(r.allBattleActions[0].actionDetails).toMatchObject({ chosenD20: 2, secondRoll: { mode: "disadvantage", value: 2, serverRolled: false } });
-  });
-
-  it("advantage and disadvantage cancel out", () => {
-    const marked = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "advantageForAttackers" }] }, { id: "m" });
-
-    const r = run([attacker, foe("t1", [hindering, marked])], { targetId: "t1", attackRoll: 17, disadvantageRoll: 2, advantageRoll: 20 });
-
-    expect(hits(r)).toEqual([true]);
-  });
-
-  describe("attackHitsAllEnemies", () => {
-    const melee: BattleAttack = { id: "m", name: "Клинок", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
-
-    const sweeper = (flag: boolean) => {
-      const p = makeParticipant({ id: "a", abilities: flag ? [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "attackHitsAllEnemies" }] })] : [] });
-
-      return { ...p, battleData: { ...p.battleData, attacks: [melee] } };
-    };
-
-    const enemies = () => [foe("t1"), foe("t2"), foe("t3")];
-
-    const lost = (r: ReturnType<typeof run>, id: string) => 50 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 0);
-
-    it("a melee attacker with the flag hits every living enemy for full damage", () => {
-      const r = run([sweeper(true), ...enemies()], { targetIds: ["t1", "t2", "t3"], attackRolls: [17, 17, 17], damageRolls: Array(12).fill(4) });
-
-      expect(["t1", "t2", "t3"].map((id) => lost(r, id))).toEqual([lost(r, "t1"), lost(r, "t1"), lost(r, "t1")]);
-      expect(lost(r, "t1")).toBeGreaterThanOrEqual(4);
+const foe = (id: string, abilities: ReturnType<typeof resolved>[] = []) =>
+    makeParticipant({
+        id,
+        side: ParticipantSide.ENEMY,
+        abilities,
+        hp: 50,
+        maxHp: 50,
     });
 
-    it("the server expands a partial selection to all enemies", () => {
-      const r = run([sweeper(true), ...enemies()], { targetIds: ["t1"], attackRolls: [17], damageRolls: Array(12).fill(4) });
-
-      expect(["t2", "t3"].every((id) => lost(r, id) > 0)).toBe(true);
-    });
-
-    it("on a map the server expands only to enemies in reach", () => {
-      const at = (p: BattleParticipant, x: number) => ({ ...p, battleData: { ...p.battleData, position: { x, y: 0 } } });
-
-      const order = [at(sweeper(true), 0), at(foe("t1"), 1), at(foe("t2"), 1), at(foe("t3"), 9)];
-
-      const r = runAttackPhase({ rules: DEFAULT_RULES,
-        battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 },
-        data: { attackerId: "a", targetIds: ["t1"], attackRolls: [17], damageRolls: Array(12).fill(4) },
-        battleId: "b",
-        userId: "u",
+const run = (
+    order: BattleParticipant[],
+    data: Partial<AttackPhaseInput['data']>
+) =>
+    runAttackPhase({
+        rules: DEFAULT_RULES,
+        battle: {
+            initiativeOrder: order,
+            currentRound: 1,
+            currentTurnIndex: 0,
+        },
+        data: { attackerId: 'a', damageRolls: [4, 4], ...data },
+        battleId: 'b',
+        userId: 'u',
         isDM: true,
         rng: seq(0.5),
-        map: { cols: 20, rows: 5, background: null, opacity: 0.3 },
-      });
-
-      expect(lost(r, "t2")).toBeGreaterThan(0);
-      expect(lost(r, "t3")).toBe(0);
     });
 
-    it("missing damage dice are rolled by the server, never reduced damage", () => {
-      const r = run([sweeper(true), ...enemies()], { targetIds: ["t1"], attackRolls: [17], damageRolls: [4, 4] });
+const hits = (r: ReturnType<typeof run>) =>
+    r.allBattleActions
+        .filter((e) => e.actionType === 'attack')
+        .map((e) => e.actionDetails.isHit);
 
-      const losses = ["t1", "t2", "t3"].map((id) => lost(r, id));
+describe('multi-target advantage resolution', () => {
+    it('disadvantage on one target applies exactly once, the other target is untouched', () => {
+        const r = run([attacker, foe('t1', [hindering]), foe('t2')], {
+            targetIds: ['t1', 't2'],
+            attackRolls: [17, 17],
+            secondRolls: [2, 2],
+        });
 
-      expect(losses.every((l) => l > 0)).toBe(true);
-      expect(losses[1]).toBe(losses[2]);
-      expect(r.allBattleActions.filter((e) => e.actionType === "attack").slice(1).every((e) => eventTextOf(e).includes("кубики шкоди кинув сервер"))).toBe(true);
+        expect(hits(r)).toEqual([false, true]);
     });
-  });
 
-  it("melee cleave: player picks one, adjacent enemies get server-rolled strikes with falloff", () => {
-    const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
+    it('without client second rolls the server rolls once per affected target', () => {
+        const r = run([attacker, foe('t1', [hindering]), foe('t2')], {
+            targetIds: ['t1', 't2'],
+            attackRolls: [17, 17],
+        });
 
-    const falloff = resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "multiTargetFalloff", percent: 50 }] });
+        expect(eventTextOf(r.allBattleActions[0])).toContain(
+            'недолік: другий d20 = 11 (сервер), обрано 11'
+        );
+        expect(r.allBattleActions[0].actionDetails).toMatchObject({
+            chosenD20: 11,
+            secondRoll: { serverRolled: true },
+        });
+        expect(eventTextOf(r.allBattleActions[1])).not.toContain('другий d20');
+    });
 
-    const cerb = placed("a", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 }, attacks: [bite], abilities: [falloff] });
+    it('single target: an explicit client second roll is respected', () => {
+        const r = run([attacker, foe('t1', [hindering])], {
+            targetId: 't1',
+            attackRoll: 17,
+            disadvantageRoll: 2,
+        });
 
-    const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), placed("x", { at: { x: 6, y: 4 }, hp: 50 }), placed("y", { at: { x: 6, y: 6 }, hp: 50 })];
+        expect(hits(r)).toEqual([false]);
+        expect(eventTextOf(r.allBattleActions[0])).toContain(
+            'другий d20 = 2, обрано 2'
+        );
+        expect(eventTextOf(r.allBattleActions[0])).not.toContain('(сервер)');
+        expect(r.allBattleActions[0].actionDetails).toMatchObject({
+            chosenD20: 2,
+            secondRoll: { mode: 'disadvantage', value: 2, serverRolled: false },
+        });
+    });
 
-    const r = runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
+    it('advantage and disadvantage cancel out', () => {
+        const marked = resolved(
+            {
+                trigger: { event: 'passive' },
+                effects: [{ kind: 'flag', flag: 'advantageForAttackers' }],
+            },
+            { id: 'm' }
+        );
 
-    const attacks = r.allBattleActions.filter((e) => e.actionType === "attack");
+        const r = run([attacker, foe('t1', [hindering, marked])], {
+            targetId: 't1',
+            attackRoll: 17,
+            disadvantageRoll: 2,
+            advantageRoll: 20,
+        });
 
-    const dmg = (id: string) => attacks.flatMap((e) => e.hpChanges).filter((h) => h.participantId === id).reduce((s, h) => s + h.change, 0);
+        expect(hits(r)).toEqual([true]);
+    });
 
-    expect(attacks.map((e) => e.targets[0].participantId)).toEqual(["t", "x", "y"]);
-    expect(dmg("x")).toBeLessThanOrEqual(dmg("t"));
-    expect(dmg("y")).toBeLessThanOrEqual(dmg("t"));
-  });
+    describe('attackHitsAllEnemies', () => {
+        const melee: BattleAttack = {
+            id: 'm',
+            name: 'Клинок',
+            type: AttackType.MELEE,
+            attackBonus: 5,
+            damageDice: '1d6',
+            damageType: 'slashing',
+        };
 
-  it("melee cleave: server-rolled heads do not reuse the player's second die", () => {
-    const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
+        const sweeper = (flag: boolean) => {
+            const p = makeParticipant({
+                id: 'a',
+                abilities: flag
+                    ? [
+                          resolved({
+                              trigger: { event: 'passive' },
+                              effects: [
+                                  {
+                                      kind: 'flag',
+                                      flag: 'attackHitsAllEnemies',
+                                  },
+                              ],
+                          }),
+                      ]
+                    : [],
+            });
 
-    const cerb = placed("a", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 }, attacks: [bite] });
+            return { ...p, battleData: { ...p.battleData, attacks: [melee] } };
+        };
 
-    const hindered = (id: string, at: { x: number; y: number }) => placed(id, { at, hp: 50, abilities: [hindering] });
+        const enemies = () => [foe('t1'), foe('t2'), foe('t3')];
 
-    const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), hindered("x", { x: 6, y: 4 }), hindered("y", { x: 6, y: 6 })];
+        const lost = (r: ReturnType<typeof run>, id: string) =>
+            50 -
+            (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)
+                ?.combatStats.currentHp ?? 0);
 
-    const r = runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t"], attackRoll: 15, disadvantageRoll: 1, damageRolls: [6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() });
+        it('a melee attacker with the flag hits every living enemy for full damage', () => {
+            const r = run([sweeper(true), ...enemies()], {
+                targetIds: ['t1', 't2', 't3'],
+                attackRolls: [17, 17, 17],
+                damageRolls: Array(12).fill(4),
+            });
 
-    const attacks = r.allBattleActions.filter((e) => e.actionType === "attack");
+            expect(['t1', 't2', 't3'].map((id) => lost(r, id))).toEqual([
+                lost(r, 't1'),
+                lost(r, 't1'),
+                lost(r, 't1'),
+            ]);
+            expect(lost(r, 't1')).toBeGreaterThanOrEqual(4);
+        });
 
-    expect(attacks.map((e) => e.targets[0].participantId)).toEqual(["t", "x", "y"]);
-    expect(attacks.slice(1).map((e) => e.actionDetails.isHit)).toEqual([true, true]);
-  });
+        it('the server expands a partial selection to all enemies', () => {
+            const r = run([sweeper(true), ...enemies()], {
+                targetIds: ['t1'],
+                attackRolls: [17],
+                damageRolls: Array(12).fill(4),
+            });
 
-  it("melee cleave on the map rejects a second chosen target", () => {
-    const bite: BattleAttack = { id: "m", name: "Три голови", type: AttackType.MELEE, attackBonus: 20, damageDice: "1d6", damageType: "piercing", maxTargets: 3 };
+            expect(['t2', 't3'].every((id) => lost(r, id) > 0)).toBe(true);
+        });
 
-    const cerb = placed("a", { side: ParticipantSide.ALLY, at: { x: 5, y: 5 }, attacks: [bite] });
+        it('on a map the server expands only to enemies in reach', () => {
+            const at = (p: BattleParticipant, x: number) => ({
+                ...p,
+                battleData: { ...p.battleData, position: { x, y: 0 } },
+            });
 
-    const order = [cerb, placed("t", { at: { x: 6, y: 5 }, hp: 50 }), placed("x", { at: { x: 6, y: 4 }, hp: 50 })];
+            const order = [
+                at(sweeper(true), 0),
+                at(foe('t1'), 1),
+                at(foe('t2'), 1),
+                at(foe('t3'), 9),
+            ];
 
-    expect(() =>
-      runAttackPhase({ rules: DEFAULT_RULES, battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t", "x"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() }),
-    ).toThrow(REJECT.tooManyTargets);
-  });
+            const r = runAttackPhase({
+                rules: DEFAULT_RULES,
+                battle: {
+                    initiativeOrder: order,
+                    currentRound: 1,
+                    currentTurnIndex: 0,
+                },
+                data: {
+                    attackerId: 'a',
+                    targetIds: ['t1'],
+                    attackRolls: [17],
+                    damageRolls: Array(12).fill(4),
+                },
+                battleId: 'b',
+                userId: 'u',
+                isDM: true,
+                rng: seq(0.5),
+                map: { cols: 20, rows: 5, background: null, opacity: 0.3 },
+            });
 
-  it("a consumable advantage effect applies to the first target only and is spent", () => {
-    const buffed = {
-      ...attacker,
-      battleData: {
-        ...attacker.battleData,
-        activeEffects: [
-          { id: "adv", name: "adv", type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], abilityEffects: [{ kind: "flag", flag: "advantage", attackKind: "all" }], consumeOn: "ownAttack" },
-        ],
-      },
-    } as BattleParticipant;
+            expect(lost(r, 't2')).toBeGreaterThan(0);
+            expect(lost(r, 't3')).toBe(0);
+        });
 
-    const r = run([buffed, foe("t1"), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [17, 17] });
+        it('missing damage dice are rolled by the server, never reduced damage', () => {
+            const r = run([sweeper(true), ...enemies()], {
+                targetIds: ['t1'],
+                attackRolls: [17],
+                damageRolls: [4, 4],
+            });
 
-    expect(r.allBattleActions[0].actionDetails.secondRoll).toMatchObject({ mode: "advantage" });
-    expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
-    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects).toEqual([]);
-  });
+            const losses = ['t1', 't2', 't3'].map((id) => lost(r, id));
+
+            expect(losses.every((l) => l > 0)).toBe(true);
+            expect(losses[1]).toBe(losses[2]);
+            expect(
+                r.allBattleActions
+                    .filter((e) => e.actionType === 'attack')
+                    .slice(1)
+                    .every((e) =>
+                        eventTextOf(e).includes('кубики шкоди кинув сервер')
+                    )
+            ).toBe(true);
+        });
+    });
+
+    it('melee cleave: player picks one, adjacent enemies get server-rolled strikes with falloff', () => {
+        const bite: BattleAttack = {
+            id: 'm',
+            name: 'Три голови',
+            type: AttackType.MELEE,
+            attackBonus: 20,
+            damageDice: '1d6',
+            damageType: 'piercing',
+            maxTargets: 3,
+        };
+
+        const falloff = resolved({
+            trigger: { event: 'passive' },
+            effects: [
+                { kind: 'flag', flag: 'multiTargetFalloff', percent: 50 },
+            ],
+        });
+
+        const cerb = placed('a', {
+            side: ParticipantSide.ALLY,
+            at: { x: 5, y: 5 },
+            attacks: [bite],
+            abilities: [falloff],
+        });
+
+        const order = [
+            cerb,
+            placed('t', { at: { x: 6, y: 5 }, hp: 50 }),
+            placed('x', { at: { x: 6, y: 4 }, hp: 50 }),
+            placed('y', { at: { x: 6, y: 6 }, hp: 50 }),
+        ];
+
+        const r = runAttackPhase({
+            rules: DEFAULT_RULES,
+            battle: {
+                initiativeOrder: order,
+                currentRound: 1,
+                currentTurnIndex: 0,
+            },
+            data: {
+                attackerId: 'a',
+                targetIds: ['t'],
+                attackRoll: 15,
+                damageRolls: [6],
+            },
+            battleId: 'b',
+            userId: 'u',
+            isDM: true,
+            rng: seq(0.5),
+            map: testMap(),
+        });
+
+        const attacks = r.allBattleActions.filter(
+            (e) => e.actionType === 'attack'
+        );
+
+        const dmg = (id: string) =>
+            attacks
+                .flatMap((e) => e.hpChanges)
+                .filter((h) => h.participantId === id)
+                .reduce((s, h) => s + h.change, 0);
+
+        expect(attacks.map((e) => e.targets[0].participantId)).toEqual([
+            't',
+            'x',
+            'y',
+        ]);
+        expect(dmg('x')).toBeLessThanOrEqual(dmg('t'));
+        expect(dmg('y')).toBeLessThanOrEqual(dmg('t'));
+    });
+
+    it("melee cleave: server-rolled heads do not reuse the player's second die", () => {
+        const bite: BattleAttack = {
+            id: 'm',
+            name: 'Три голови',
+            type: AttackType.MELEE,
+            attackBonus: 20,
+            damageDice: '1d6',
+            damageType: 'piercing',
+            maxTargets: 3,
+        };
+
+        const cerb = placed('a', {
+            side: ParticipantSide.ALLY,
+            at: { x: 5, y: 5 },
+            attacks: [bite],
+        });
+
+        const hindered = (id: string, at: { x: number; y: number }) =>
+            placed(id, { at, hp: 50, abilities: [hindering] });
+
+        const order = [
+            cerb,
+            placed('t', { at: { x: 6, y: 5 }, hp: 50 }),
+            hindered('x', { x: 6, y: 4 }),
+            hindered('y', { x: 6, y: 6 }),
+        ];
+
+        const r = runAttackPhase({
+            rules: DEFAULT_RULES,
+            battle: {
+                initiativeOrder: order,
+                currentRound: 1,
+                currentTurnIndex: 0,
+            },
+            data: {
+                attackerId: 'a',
+                targetIds: ['t'],
+                attackRoll: 15,
+                disadvantageRoll: 1,
+                damageRolls: [6],
+            },
+            battleId: 'b',
+            userId: 'u',
+            isDM: true,
+            rng: seq(0.5),
+            map: testMap(),
+        });
+
+        const attacks = r.allBattleActions.filter(
+            (e) => e.actionType === 'attack'
+        );
+
+        expect(attacks.map((e) => e.targets[0].participantId)).toEqual([
+            't',
+            'x',
+            'y',
+        ]);
+        expect(attacks.slice(1).map((e) => e.actionDetails.isHit)).toEqual([
+            true,
+            true,
+        ]);
+    });
+
+    it('melee cleave on the map rejects a second chosen target', () => {
+        const bite: BattleAttack = {
+            id: 'm',
+            name: 'Три голови',
+            type: AttackType.MELEE,
+            attackBonus: 20,
+            damageDice: '1d6',
+            damageType: 'piercing',
+            maxTargets: 3,
+        };
+
+        const cerb = placed('a', {
+            side: ParticipantSide.ALLY,
+            at: { x: 5, y: 5 },
+            attacks: [bite],
+        });
+
+        const order = [
+            cerb,
+            placed('t', { at: { x: 6, y: 5 }, hp: 50 }),
+            placed('x', { at: { x: 6, y: 4 }, hp: 50 }),
+        ];
+
+        expect(() =>
+            runAttackPhase({
+                rules: DEFAULT_RULES,
+                battle: {
+                    initiativeOrder: order,
+                    currentRound: 1,
+                    currentTurnIndex: 0,
+                },
+                data: {
+                    attackerId: 'a',
+                    targetIds: ['t', 'x'],
+                    attackRolls: [15, 15],
+                    damageRolls: [6, 6],
+                },
+                battleId: 'b',
+                userId: 'u',
+                isDM: true,
+                rng: seq(0.5),
+                map: testMap(),
+            })
+        ).toThrow(REJECT.tooManyTargets);
+    });
+
+    it('a consumable advantage effect applies to the first target only and is spent', () => {
+        const buffed = {
+            ...attacker,
+            battleData: {
+                ...attacker.battleData,
+                activeEffects: [
+                    {
+                        id: 'adv',
+                        name: 'adv',
+                        type: 'buff',
+                        duration: 2,
+                        appliedAt: { round: 1, timestamp: new Date(0) },
+                        effects: [],
+                        abilityEffects: [
+                            {
+                                kind: 'flag',
+                                flag: 'advantage',
+                                attackKind: 'all',
+                            },
+                        ],
+                        consumeOn: 'ownAttack',
+                    },
+                ],
+            },
+        } as BattleParticipant;
+
+        const r = run([buffed, foe('t1'), foe('t2')], {
+            targetIds: ['t1', 't2'],
+            attackRolls: [17, 17],
+        });
+
+        expect(r.allBattleActions[0].actionDetails.secondRoll).toMatchObject({
+            mode: 'advantage',
+        });
+        expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
+        expect(
+            r.finalInitiativeOrder.find((p) => p.basicInfo.id === 'a')
+                ?.battleData.activeEffects
+        ).toEqual([]);
+    });
 });
 
-describe("free attack crit on a multi-target attack", () => {
-  it("critical effect 6 on the first target leaves the attacker an action", () => {
-    const r = runAttackPhase({ rules: DEFAULT_RULES,
-      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 5] },
-      battleId: "b",
-      userId: "u",
-      isDM: true,
-      rng: seq(0.55),
-    });
+describe('free attack crit on a multi-target attack', () => {
+    it('critical effect 6 on the first target leaves the attacker an action', () => {
+        const r = runAttackPhase({
+            rules: DEFAULT_RULES,
+            battle: {
+                initiativeOrder: [attacker, foe('t1'), foe('t2')],
+                currentRound: 1,
+                currentTurnIndex: 0,
+            },
+            data: {
+                attackerId: 'a',
+                damageRolls: [4, 4],
+                targetIds: ['t1', 't2'],
+                attackRolls: [20, 5],
+            },
+            battleId: 'b',
+            userId: 'u',
+            isDM: true,
+            rng: seq(0.55),
+        });
 
-    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.actionFlags.hasUsedAction).toBe(false);
-  });
+        expect(
+            r.finalInitiativeOrder.find((p) => p.basicInfo.id === 'a')
+                ?.actionFlags.hasUsedAction
+        ).toBe(false);
+    });
 });
 
-describe("crit effects on the attacker are for the next attack", () => {
-  const effectsOf = (r: ReturnType<typeof run>) => r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects ?? [];
+describe('crit effects on the attacker are for the next attack', () => {
+    const effectsOf = (r: ReturnType<typeof run>) =>
+        r.finalInitiativeOrder.find((p) => p.basicInfo.id === 'a')?.battleData
+            .activeEffects ?? [];
 
-  const volley = (critRng: number) =>
-    runAttackPhase({ rules: DEFAULT_RULES,
-      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 15] },
-      battleId: "b",
-      userId: "u",
-      isDM: true,
-      rng: seq(critRng, 0.5),
+    const volley = (critRng: number) =>
+        runAttackPhase({
+            rules: DEFAULT_RULES,
+            battle: {
+                initiativeOrder: [attacker, foe('t1'), foe('t2')],
+                currentRound: 1,
+                currentTurnIndex: 0,
+            },
+            data: {
+                attackerId: 'a',
+                damageRolls: [4, 4],
+                targetIds: ['t1', 't2'],
+                attackRolls: [20, 15],
+            },
+            battleId: 'b',
+            userId: 'u',
+            isDM: true,
+            rng: seq(critRng, 0.5),
+        });
+
+    it('S3 advantage from the crit on target 1 is not used by target 2 and survives the action', () => {
+        const r = volley(0.25);
+
+        expect(eventTextOf(r.allBattleActions[0])).toContain(
+            'Advantage на наступну'
+        );
+        expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
+        expect(effectsOf(r).map((e) => e.consumeOn)).toEqual(['ownAttack']);
     });
 
-  it("S3 advantage from the crit on target 1 is not used by target 2 and survives the action", () => {
-    const r = volley(0.25);
+    it('S10 combo disadvantage is not applied to target 2 and the extra action stays', () => {
+        const r = volley(0.95);
 
-    expect(eventTextOf(r.allBattleActions[0])).toContain("Advantage на наступну");
-    expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
-    expect(effectsOf(r).map((e) => e.consumeOn)).toEqual(["ownAttack"]);
-  });
-
-  it("S10 combo disadvantage is not applied to target 2 and the extra action stays", () => {
-    const r = volley(0.95);
-
-    expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
-    expect(effectsOf(r).map((e) => e.consumeOn)).toEqual(["ownAttack"]);
-    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.actionFlags.hasUsedAction).toBe(false);
-  });
+        expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
+        expect(effectsOf(r).map((e) => e.consumeOn)).toEqual(['ownAttack']);
+        expect(
+            r.finalInitiativeOrder.find((p) => p.basicInfo.id === 'a')
+                ?.actionFlags.hasUsedAction
+        ).toBe(false);
+    });
 });
 
 describe("effects from the attacker's own abilities stay active during the volley", () => {
-  const rage = resolved({
-    trigger: { event: "hit", role: "attacker" },
-    effects: [{ kind: "damageBonus", filter: { kind: "all" }, flat: 10, target: "self", duration: { rounds: 1 } }],
-  });
-
-  const buffed = (() => {
-    const p = makeParticipant({ id: "a", abilities: [rage] });
-
-    return { ...p, combatStats: { ...p.combatStats, maxTargets: 2 }, battleData: { ...p.battleData, attacks: [sword] } };
-  })();
-
-  const damageDone = (r: ReturnType<typeof run>, id: string) => 50 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 50);
-
-  it("an on-hit self buff from target 1 empowers the hit on target 2", () => {
-    const r = run([buffed, foe("t1"), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [15, 15] });
-
-    expect(damageDone(r, "t2")).toBeGreaterThan(damageDone(r, "t1"));
-    expect(r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects.length).toBeGreaterThan(0);
-  });
-
-  it("two crits in one volley get distinct effect ids", () => {
-    const r = runAttackPhase({ rules: DEFAULT_RULES,
-      battle: { initiativeOrder: [attacker, foe("t1"), foe("t2")], currentRound: 1, currentTurnIndex: 0 },
-      data: { attackerId: "a", damageRolls: [4, 4], targetIds: ["t1", "t2"], attackRolls: [20, 20] },
-      battleId: "b",
-      userId: "u",
-      isDM: true,
-      rng: seq(0.25),
+    const rage = resolved({
+        trigger: { event: 'hit', role: 'attacker' },
+        effects: [
+            {
+                kind: 'damageBonus',
+                filter: { kind: 'all' },
+                flat: 10,
+                target: 'self',
+                duration: { rounds: 1 },
+            },
+        ],
     });
 
-    const ids = r.finalInitiativeOrder.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects.map((e) => e.id) ?? [];
+    const buffed = (() => {
+        const p = makeParticipant({ id: 'a', abilities: [rage] });
 
-    expect(ids.length).toBe(2);
-    expect(new Set(ids).size).toBe(2);
-  });
+        return {
+            ...p,
+            combatStats: { ...p.combatStats, maxTargets: 2 },
+            battleData: { ...p.battleData, attacks: [sword] },
+        };
+    })();
+
+    const damageDone = (r: ReturnType<typeof run>, id: string) =>
+        50 -
+        (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats
+            .currentHp ?? 50);
+
+    it('an on-hit self buff from target 1 empowers the hit on target 2', () => {
+        const r = run([buffed, foe('t1'), foe('t2')], {
+            targetIds: ['t1', 't2'],
+            attackRolls: [15, 15],
+        });
+
+        expect(damageDone(r, 't2')).toBeGreaterThan(damageDone(r, 't1'));
+        expect(
+            r.finalInitiativeOrder.find((p) => p.basicInfo.id === 'a')
+                ?.battleData.activeEffects.length
+        ).toBeGreaterThan(0);
+    });
+
+    it('two crits in one volley get distinct effect ids', () => {
+        const r = runAttackPhase({
+            rules: DEFAULT_RULES,
+            battle: {
+                initiativeOrder: [attacker, foe('t1'), foe('t2')],
+                currentRound: 1,
+                currentTurnIndex: 0,
+            },
+            data: {
+                attackerId: 'a',
+                damageRolls: [4, 4],
+                targetIds: ['t1', 't2'],
+                attackRolls: [20, 20],
+            },
+            battleId: 'b',
+            userId: 'u',
+            isDM: true,
+            rng: seq(0.25),
+        });
+
+        const ids =
+            r.finalInitiativeOrder
+                .find((p) => p.basicInfo.id === 'a')
+                ?.battleData.activeEffects.map((e) => e.id) ?? [];
+
+        expect(ids.length).toBe(2);
+        expect(new Set(ids).size).toBe(2);
+    });
 });
 
 // герой L1: повна формула удару — 1d6 зброї + 1d4 рівня, тож по 2 кубики на кожне влучання
-describe("pick order and multiTargetFalloff", () => {
-  const bow = (maxTargets: number) => {
-    const p = makeParticipant({ id: "a", abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "multiTargetFalloff", percent: 50 }] })] });
+describe('pick order and multiTargetFalloff', () => {
+    const bow = (maxTargets: number) => {
+        const p = makeParticipant({
+            id: 'a',
+            abilities: [
+                resolved({
+                    trigger: { event: 'passive' },
+                    effects: [
+                        {
+                            kind: 'flag',
+                            flag: 'multiTargetFalloff',
+                            percent: 50,
+                        },
+                    ],
+                }),
+            ],
+        });
 
-    return { ...p, combatStats: { ...p.combatStats, maxTargets }, battleData: { ...p.battleData, attacks: [sword] } };
-  };
+        return {
+            ...p,
+            combatStats: { ...p.combatStats, maxTargets },
+            battleData: { ...p.battleData, attacks: [sword] },
+        };
+    };
 
-  const plain = (maxTargets: number) => ({ ...attacker, combatStats: { ...attacker.combatStats, maxTargets } });
+    const plain = (maxTargets: number) => ({
+        ...attacker,
+        combatStats: { ...attacker.combatStats, maxTargets },
+    });
 
-  const lost = (r: ReturnType<typeof run>, id: string) => 50 - (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats.currentHp ?? 50);
+    const lost = (r: ReturnType<typeof run>, id: string) =>
+        50 -
+        (r.finalInitiativeOrder.find((p) => p.basicInfo.id === id)?.combatStats
+            .currentHp ?? 50);
 
-  it("rolls and damage dice follow the pick order, not the initiative order", () => {
-    const r = run([plain(2), foe("t1"), foe("t2")], { targetIds: ["t2", "t1"], attackRolls: [2, 17], damageRolls: [1, 4] });
+    it('rolls and damage dice follow the pick order, not the initiative order', () => {
+        const r = run([plain(2), foe('t1'), foe('t2')], {
+            targetIds: ['t2', 't1'],
+            attackRolls: [2, 17],
+            damageRolls: [1, 4],
+        });
 
-    expect(lost(r, "t2")).toBe(0);
-    expect(lost(r, "t1")).toBeGreaterThan(0);
+        expect(lost(r, 't2')).toBe(0);
+        expect(lost(r, 't1')).toBeGreaterThan(0);
 
-    const r2 = run([plain(2), foe("t1"), foe("t2")], { targetIds: ["t2", "t1"], attackRolls: [17, 17], damageRolls: [6, 4, 1, 4] });
+        const r2 = run([plain(2), foe('t1'), foe('t2')], {
+            targetIds: ['t2', 't1'],
+            attackRolls: [17, 17],
+            damageRolls: [6, 4, 1, 4],
+        });
 
-    expect(lost(r2, "t2") - lost(r2, "t1")).toBe(5);
-  });
+        expect(lost(r2, 't2') - lost(r2, 't1')).toBe(5);
+    });
 
-  it("the first picked target takes full damage even when it is later in initiative", () => {
-    const r = run([bow(2), foe("t1"), foe("t2")], { targetIds: ["t2", "t1"], attackRolls: [17, 17], damageRolls: [6, 4, 6, 4] });
+    it('the first picked target takes full damage even when it is later in initiative', () => {
+        const r = run([bow(2), foe('t1'), foe('t2')], {
+            targetIds: ['t2', 't1'],
+            attackRolls: [17, 17],
+            damageRolls: [6, 4, 6, 4],
+        });
 
-    expect(lost(r, "t2")).toBeGreaterThan(lost(r, "t1"));
-    expect(lost(r, "t1")).toBe(lost(r, "t2") / 2);
-  });
+        expect(lost(r, 't2')).toBeGreaterThan(lost(r, 't1'));
+        expect(lost(r, 't1')).toBe(lost(r, 't2') / 2);
+    });
 
-  it("three targets take 100 / 50 / 50 percent", () => {
-    const r = run([bow(3), foe("t1"), foe("t2"), foe("t3")], { targetIds: ["t1", "t2", "t3"], attackRolls: [17, 17, 17], damageRolls: [6, 4, 6, 4, 6, 4] });
+    it('three targets take 100 / 50 / 50 percent', () => {
+        const r = run([bow(3), foe('t1'), foe('t2'), foe('t3')], {
+            targetIds: ['t1', 't2', 't3'],
+            attackRolls: [17, 17, 17],
+            damageRolls: [6, 4, 6, 4, 6, 4],
+        });
 
-    expect(lost(r, "t2")).toBe(lost(r, "t1") / 2);
-    expect(lost(r, "t3")).toBe(lost(r, "t1") / 2);
-    expect(lost(r, "t1")).toBeGreaterThan(0);
-  });
+        expect(lost(r, 't2')).toBe(lost(r, 't1') / 2);
+        expect(lost(r, 't3')).toBe(lost(r, 't1') / 2);
+        expect(lost(r, 't1')).toBeGreaterThan(0);
+    });
 
-  it("a missed primary stays primary: the next hit takes 50 %", () => {
-    const full = run([bow(2), foe("t1")], { targetId: "t1", attackRoll: 17, damageRolls: [6, 4] });
+    it('a missed primary stays primary: the next hit takes 50 %', () => {
+        const full = run([bow(2), foe('t1')], {
+            targetId: 't1',
+            attackRoll: 17,
+            damageRolls: [6, 4],
+        });
 
-    const r = run([bow(2), foe("t1"), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [2, 17], damageRolls: [6, 4] });
+        const r = run([bow(2), foe('t1'), foe('t2')], {
+            targetIds: ['t1', 't2'],
+            attackRolls: [2, 17],
+            damageRolls: [6, 4],
+        });
 
-    expect(lost(r, "t1")).toBe(0);
-    expect(lost(r, "t2")).toBe(lost(full, "t1") / 2);
-  });
+        expect(lost(r, 't1')).toBe(0);
+        expect(lost(r, 't2')).toBe(lost(full, 't1') / 2);
+    });
 
-  it("dice of a later hit are not shifted by an earlier miss", () => {
-    const r = run([bow(3), foe("t1"), foe("t2"), foe("t3")], { targetIds: ["t1", "t2", "t3"], attackRolls: [2, 17, 17], damageRolls: [6, 4, 2, 1] });
+    it('dice of a later hit are not shifted by an earlier miss', () => {
+        const r = run([bow(3), foe('t1'), foe('t2'), foe('t3')], {
+            targetIds: ['t1', 't2', 't3'],
+            attackRolls: [2, 17, 17],
+            damageRolls: [6, 4, 2, 1],
+        });
 
-    expect(lost(r, "t2")).toBeGreaterThan(lost(r, "t3"));
-  });
+        expect(lost(r, 't2')).toBeGreaterThan(lost(r, 't3'));
+    });
 });

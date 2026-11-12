@@ -1,86 +1,144 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+    act,
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+    within,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const nav = vi.hoisted(() => ({
-  calls: [] as string[],
-  form: null as null | { actions: { onSubmit: (payload: unknown) => Promise<void>; onDelete?: () => Promise<void> } },
+    calls: [] as string[],
+    form: null as null | {
+        actions: {
+            onSubmit: (payload: unknown) => Promise<void>;
+            onDelete?: () => Promise<void>;
+        };
+    },
 }));
 
 function form() {
-  if (!nav.form) throw new Error("форма не відрендерилась");
+    if (!nav.form) throw new Error('форма не відрендерилась');
 
-  return nav.form;
+    return nav.form;
 }
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: (href: string) => nav.calls.push(`push ${href}`), refresh: () => nav.calls.push("refresh") }),
+vi.mock('next/navigation', () => ({
+    useRouter: () => ({
+        push: (href: string) => nav.calls.push(`push ${href}`),
+        refresh: () => nav.calls.push('refresh'),
+    }),
 }));
-vi.mock("@/lib/api/artifacts", () => ({
-  createArtifact: vi.fn(async () => ({})),
-  updateArtifact: vi.fn(async () => ({})),
-  deleteArtifact: vi.fn(async () => undefined),
-  deleteAllArtifacts: vi.fn(async () => undefined),
-  getArtifacts: vi.fn(async () => []),
+vi.mock('@/lib/api/artifacts', () => ({
+    createArtifact: vi.fn(async () => ({})),
+    updateArtifact: vi.fn(async () => ({})),
+    deleteArtifact: vi.fn(async () => undefined),
+    deleteAllArtifacts: vi.fn(async () => undefined),
+    getArtifacts: vi.fn(async () => []),
 }));
-vi.mock("@/components/artifacts/ArtifactForm", () => ({
-  ArtifactForm: (props: NonNullable<typeof nav.form>) => {
-    nav.form = props;
+vi.mock('@/components/artifacts/ArtifactForm', () => ({
+    ArtifactForm: (props: NonNullable<typeof nav.form>) => {
+        nav.form = props;
 
-    return null;
-  },
+        return null;
+    },
 }));
 
-import { ArtifactCreateForm } from "@/components/artifacts/ArtifactCreateForm";
-import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
-import { ArtifactEditForm } from "@/components/artifacts/ArtifactEditForm";
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { deleteArtifact } from "@/lib/api/artifacts";
+import { ArtifactCreateForm } from '@/components/artifacts/ArtifactCreateForm';
+import { ArtifactDeleteButton } from '@/components/artifacts/ArtifactDeleteButton';
+import { ArtifactEditForm } from '@/components/artifacts/ArtifactEditForm';
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import { deleteArtifact } from '@/lib/api/artifacts';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <QueryClientProvider client={new QueryClient()}>
-    <ConfirmProvider>{children}</ConfirmProvider>
-  </QueryClientProvider>
+    <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>{children}</ConfirmProvider>
+    </QueryClientProvider>
 );
 
-const artifact = { id: "a1", name: "Кільце", description: null, rarity: null, slot: "ring", icon: null, setId: null, abilities: [], abilityIssues: [] } as never;
+const artifact = {
+    id: 'a1',
+    name: 'Кільце',
+    description: null,
+    rarity: null,
+    slot: 'ring',
+    icon: null,
+    setId: null,
+    abilities: [],
+    abilityIssues: [],
+} as never;
 
 beforeEach(() => {
-  nav.calls.length = 0;
-  nav.form = null;
+    nav.calls.length = 0;
+    nav.form = null;
 });
 
 afterEach(cleanup);
 
-describe("навігація артефактів", () => {
-  it("створення: спершу перехід до списку, потім refresh", async () => {
-    render(<ArtifactCreateForm campaignId="c1" artifactSets={[]} />, { wrapper });
+describe('навігація артефактів', () => {
+    it('створення: спершу перехід до списку, потім refresh', async () => {
+        render(<ArtifactCreateForm campaignId="c1" artifactSets={[]} />, {
+            wrapper,
+        });
 
-    await act(() => form().actions.onSubmit({ name: "Кільце", description: null, setId: null }));
+        await act(() =>
+            form().actions.onSubmit({
+                name: 'Кільце',
+                description: null,
+                setId: null,
+            })
+        );
 
-    expect(nav.calls).toEqual(["push /campaigns/c1/dm/artifacts", "refresh"]);
-  });
+        expect(nav.calls).toEqual([
+            'push /campaigns/c1/dm/artifacts',
+            'refresh',
+        ]);
+    });
 
-  it("редагування і видалення з форми: перехід, потім refresh", async () => {
-    render(<ArtifactEditForm campaignId="c1" artifact={artifact} artifactSets={[]} />, { wrapper });
+    it('редагування і видалення з форми: перехід, потім refresh', async () => {
+        render(
+            <ArtifactEditForm
+                campaignId="c1"
+                artifact={artifact}
+                artifactSets={[]}
+            />,
+            { wrapper }
+        );
 
-    await act(() => form().actions.onSubmit({ name: "Кільце" }));
-    expect(nav.calls).toEqual(["push /campaigns/c1/dm/artifacts", "refresh"]);
+        await act(() => form().actions.onSubmit({ name: 'Кільце' }));
+        expect(nav.calls).toEqual([
+            'push /campaigns/c1/dm/artifacts',
+            'refresh',
+        ]);
 
-    nav.calls.length = 0;
-    await act(() => form().actions.onDelete?.());
-    expect(nav.calls).toEqual(["push /campaigns/c1/dm/artifacts", "refresh"]);
-  });
+        nav.calls.length = 0;
+        await act(() => form().actions.onDelete?.());
+        expect(nav.calls).toEqual([
+            'push /campaigns/c1/dm/artifacts',
+            'refresh',
+        ]);
+    });
 
-  it("кнопка видалення в списку видаляє через мутацію без refresh сторінки", async () => {
-    render(<ArtifactDeleteButton campaignId="c1" artifactId="a1" />, { wrapper });
+    it('кнопка видалення в списку видаляє через мутацію без refresh сторінки', async () => {
+        render(<ArtifactDeleteButton campaignId="c1" artifactId="a1" />, {
+            wrapper,
+        });
 
-    fireEvent.click(screen.getByTitle("artifacts.card.deleteTitle"));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "common.actions.delete" }));
+        fireEvent.click(screen.getByTitle('artifacts.card.deleteTitle'));
+        fireEvent.click(
+            within(await screen.findByRole('alertdialog')).getByRole('button', {
+                name: 'common.actions.delete',
+            })
+        );
 
-    await waitFor(() => expect(deleteArtifact).toHaveBeenCalledWith("c1", "a1"));
-    expect(nav.calls).toEqual([]);
-  });
+        await waitFor(() =>
+            expect(deleteArtifact).toHaveBeenCalledWith('c1', 'a1')
+        );
+        expect(nav.calls).toEqual([]);
+    });
 });

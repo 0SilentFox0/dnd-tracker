@@ -1,17 +1,22 @@
 import {
-  campaignDelete,
-  campaignGet,
-  campaignPatch,
-  campaignPost,
-  campaignRequest,
-  createCampaignCrudApi,
-} from "@/lib/api/client";
-import { SPELL_IDS_QUERY_MAX } from "@/lib/constants/spells";
-import type { CreateSpellInput, UpdateSpellInput } from "@/lib/schemas/spells";
-import type { SpellRef } from "@/types/choices";
-import type { BookSpell, Spell, SpellGroup } from "@/types/spells";
+    campaignDelete,
+    campaignGet,
+    campaignPatch,
+    campaignPost,
+    campaignRequest,
+    createCampaignCrudApi,
+} from '@/lib/api/client';
+import { SPELL_IDS_QUERY_MAX } from '@/lib/constants/spells';
+import type { CreateSpellInput, UpdateSpellInput } from '@/lib/schemas/spells';
+import type { SpellRef } from '@/types/choices';
+import type { BookSpell, Spell, SpellGroup } from '@/types/spells';
 
-const spellsApi = createCampaignCrudApi<Spell, CreateSpellInput, UpdateSpellInput, { ok: true }>("/spells");
+const spellsApi = createCampaignCrudApi<
+    Spell,
+    CreateSpellInput,
+    UpdateSpellInput,
+    { ok: true }
+>('/spells');
 
 export const getSpells = spellsApi.list;
 export const getSpell = spellsApi.get;
@@ -20,105 +25,118 @@ export const updateSpell = spellsApi.update;
 export const deleteSpell = spellsApi.remove;
 
 export async function updateSpellAppearance(
-  campaignId: string,
-  spellId: string,
-  appearanceDescription: string | null,
+    campaignId: string,
+    spellId: string,
+    appearanceDescription: string | null
 ): Promise<Spell> {
-  return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, {
-    appearanceDescription,
-  });
+    return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, {
+        appearanceDescription,
+    });
 }
 
 export async function getSpellRefs(campaignId: string): Promise<SpellRef[]> {
-  return campaignGet<SpellRef[]>(campaignId, "/spells/refs");
+    return campaignGet<SpellRef[]>(campaignId, '/spells/refs');
 }
 
-export async function getSpellsByIds(campaignId: string, ids: string[]): Promise<BookSpell[]> {
-  const chunks: string[][] = [];
+export async function getSpellsByIds(
+    campaignId: string,
+    ids: string[]
+): Promise<BookSpell[]> {
+    const chunks: string[][] = [];
 
-  for (let i = 0; i < ids.length; i += SPELL_IDS_QUERY_MAX) chunks.push(ids.slice(i, i + SPELL_IDS_QUERY_MAX));
+    for (let i = 0; i < ids.length; i += SPELL_IDS_QUERY_MAX)
+        chunks.push(ids.slice(i, i + SPELL_IDS_QUERY_MAX));
 
-  const pages = await Promise.all(chunks.map((chunk) => campaignGet<BookSpell[]>(campaignId, `/spells?ids=${chunk.map(encodeURIComponent).join(",")}`)));
+    const pages = await Promise.all(
+        chunks.map((chunk) =>
+            campaignGet<BookSpell[]>(
+                campaignId,
+                `/spells?ids=${chunk.map(encodeURIComponent).join(',')}`
+            )
+        )
+    );
 
-  return pages.flat();
+    return pages.flat();
 }
 
 export async function getSpellGroups(
-  campaignId: string,
+    campaignId: string
 ): Promise<SpellGroup[]> {
-  return campaignGet<SpellGroup[]>(campaignId, "/spells/groups");
+    return campaignGet<SpellGroup[]>(campaignId, '/spells/groups');
 }
 
 export async function createSpellGroup(
-  campaignId: string,
-  data: { name: string },
+    campaignId: string,
+    data: { name: string }
 ): Promise<SpellGroup> {
-  return campaignPost<SpellGroup>(campaignId, "/spells/groups", data);
+    return campaignPost<SpellGroup>(campaignId, '/spells/groups', data);
 }
 
 export async function renameSpellGroup(
-  campaignId: string,
-  groupId: string,
-  name: string,
+    campaignId: string,
+    groupId: string,
+    name: string
 ): Promise<SpellGroup> {
-  return campaignPatch<SpellGroup>(
-    campaignId,
-    `/spells/groups/${groupId}`,
-    { name: name.trim() },
-  );
+    return campaignPatch<SpellGroup>(campaignId, `/spells/groups/${groupId}`, {
+        name: name.trim(),
+    });
 }
 
 export async function updateSpellGroup(
-  campaignId: string,
-  groupId: string,
-  data: { name?: string; color?: string | null; icon?: string | null },
+    campaignId: string,
+    groupId: string,
+    data: { name?: string; color?: string | null; icon?: string | null }
 ): Promise<SpellGroup> {
-  return campaignPatch<SpellGroup>(campaignId, `/spells/groups/${groupId}`, data);
+    return campaignPatch<SpellGroup>(
+        campaignId,
+        `/spells/groups/${groupId}`,
+        data
+    );
 }
 
 export async function removeAllSpellsFromGroup(
-  campaignId: string,
-  groupId: string,
+    campaignId: string,
+    groupId: string
 ): Promise<{ ok: boolean }> {
-  return campaignPost<{ ok: boolean }>(
-    campaignId,
-    `/spells/groups/${groupId}/remove-all-spells`,
-    {},
-  );
+    return campaignPost<{ ok: boolean }>(
+        campaignId,
+        `/spells/groups/${groupId}/remove-all-spells`,
+        {}
+    );
 }
 
 export async function removeSpellFromGroup(
-  campaignId: string,
-  spellId: string,
+    campaignId: string,
+    spellId: string
 ): Promise<Spell> {
-  return campaignPost<Spell>(
-    campaignId,
-    `/spells/${spellId}/remove-from-group`,
-    {},
-  );
+    return campaignPost<Spell>(
+        campaignId,
+        `/spells/${spellId}/remove-from-group`,
+        {}
+    );
 }
 
 export async function moveSpellToGroup(
-  campaignId: string,
-  spellId: string,
-  groupId: string | null,
+    campaignId: string,
+    spellId: string,
+    groupId: string | null
 ): Promise<Spell> {
-  return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, { groupId });
+    return campaignPatch<Spell>(campaignId, `/spells/${spellId}`, { groupId });
 }
 
 export async function deleteAllSpells(
-  campaignId: string,
+    campaignId: string
 ): Promise<{ ok: true; deleted: number }> {
-  return campaignDelete<{ ok: true; deleted: number }>(campaignId, "/spells");
+    return campaignDelete<{ ok: true; deleted: number }>(campaignId, '/spells');
 }
 
 export async function deleteSpellsByLevel(
-  campaignId: string,
-  level: number,
+    campaignId: string,
+    level: number
 ): Promise<{ ok: true; deleted: number }> {
-  return campaignRequest<{ ok: true; deleted: number }>(
-    campaignId,
-    "/spells/delete-by-level",
-    { method: "DELETE", body: { level } },
-  );
+    return campaignRequest<{ ok: true; deleted: number }>(
+        campaignId,
+        '/spells/delete-by-level',
+        { method: 'DELETE', body: { level } }
+    );
 }

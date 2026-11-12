@@ -1,111 +1,126 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
-import { Edit, X } from "lucide-react";
+import { useTranslations } from 'next-intl';
+import { Edit, X } from 'lucide-react';
 
-import { GroupAccordionItem } from "@/components/common/GroupAccordionItem";
-import { RenameGroupDialog } from "@/components/common/RenameGroupDialog";
-import { type SpellGroupItemActions, SpellLevelAccordion } from "@/components/spells/list/SpellLevelAccordion";
-import { Accordion } from "@/components/ui/accordion";
-import { groupDisplayName, isUngroupedKey } from "@/lib/constants/ungrouped";
-import { useSpellGroupActions } from "@/lib/hooks/spells";
-import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
-import { calculateTotalSpellsInGroup } from "@/lib/utils/spells/spells";
-import type { Spell, SpellGroup } from "@/types/spells";
+import { GroupAccordionItem } from '@/components/common/GroupAccordionItem';
+import { RenameGroupDialog } from '@/components/common/RenameGroupDialog';
+import {
+    type SpellGroupItemActions,
+    SpellLevelAccordion,
+} from '@/components/spells/list/SpellLevelAccordion';
+import { Accordion } from '@/components/ui/accordion';
+import { groupDisplayName, isUngroupedKey } from '@/lib/constants/ungrouped';
+import { useSpellGroupActions } from '@/lib/hooks/spells';
+import { getSpellGroupIcon } from '@/lib/utils/spells/spell-icons';
+import { calculateTotalSpellsInGroup } from '@/lib/utils/spells/spells';
+import type { Spell, SpellGroup } from '@/types/spells';
 
 interface SpellGroupAccordionProps {
-  groupName: string;
-  levels: [number, Spell[]][];
-  campaignId: string;
-  spellGroups: SpellGroup[];
-  spellActions: SpellGroupItemActions;
-  canEdit?: boolean;
-  tour?: boolean;
+    groupName: string;
+    levels: [number, Spell[]][];
+    campaignId: string;
+    spellGroups: SpellGroup[];
+    spellActions: SpellGroupItemActions;
+    canEdit?: boolean;
+    tour?: boolean;
 }
 
 export function SpellGroupAccordion({
-  groupName,
-  levels,
-  campaignId,
-  spellGroups,
-  spellActions,
-  canEdit = true,
-  tour = false,
-}: SpellGroupAccordionProps) {
-  const t = useTranslations("spells");
-
-  const tc = useTranslations("gameTerms.ungrouped");
-
-  const group = spellGroups.find((g) => g.name === groupName);
-
-  const groupId = group?.id;
-
-  const isUngrouped = isUngroupedKey(groupName);
-
-  const displayName = groupDisplayName(groupName, tc("spellGroup"));
-
-  const totalSpells = calculateTotalSpellsInGroup(levels);
-
-  const GroupIcon = getSpellGroupIcon(group);
-
-  const actions = useSpellGroupActions({
+    groupName,
+    levels,
     campaignId,
-    groupName: displayName,
-    groupId,
-  });
+    spellGroups,
+    spellActions,
+    canEdit = true,
+    tour = false,
+}: SpellGroupAccordionProps) {
+    const t = useTranslations('spells');
 
-  const menuActions =
-    canEdit && !isUngrouped && groupId
-      ? [
-          { label: t("groupActions.rename"), icon: Edit, onSelect: actions.handlers.openRenameDialog },
-          { label: t("groupActions.removeAll"), icon: X, onSelect: () => void actions.handlers.confirmRemoveAll() },
-        ]
-      : undefined;
+    const tc = useTranslations('gameTerms.ungrouped');
 
-  return (
-    <>
-      <GroupAccordionItem
-        value={groupName}
-        title={displayName}
-        countLabel={t("list.count", { count: totalSpells })}
-        icon={GroupIcon}
-        menuActions={menuActions}
-        data-tour={tour ? "libraries.group" : undefined}
-      >
-        <Accordion
-          type="multiple"
-          defaultValue={levels.map(([level]) => String(level))}
-          className="space-y-2"
-        >
-          {levels.map(([level, levelSpells], levelIndex) => {
-            return (
-              <SpellLevelAccordion
-                key={level}
-                level={level}
-                spells={levelSpells}
-                campaignId={campaignId}
-                spellGroups={spellGroups}
-                actions={canEdit ? spellActions : undefined}
-                canEdit={canEdit}
-                tour={tour && levelIndex === 0}
-              />
-            );
-          })}
-        </Accordion>
-      </GroupAccordionItem>
+    const group = spellGroups.find((g) => g.name === groupName);
 
-      {canEdit && <RenameGroupDialog
-        groupName={groupName}
-        dialog={{ open: actions.dialogs.rename.open, onOpenChange: actions.dialogs.rename.setOpen }}
-        rename={{
-          value: actions.state.newGroupName,
-          onChange: actions.state.setNewGroupName,
-          onConfirm: actions.handlers.handleRenameGroup,
-          onCancel: actions.handlers.closeRenameDialog,
-          isPending: actions.pending.isRenaming,
-        }}
-      />}
+    const groupId = group?.id;
 
-    </>
-  );
+    const isUngrouped = isUngroupedKey(groupName);
+
+    const displayName = groupDisplayName(groupName, tc('spellGroup'));
+
+    const totalSpells = calculateTotalSpellsInGroup(levels);
+
+    const GroupIcon = getSpellGroupIcon(group);
+
+    const actions = useSpellGroupActions({
+        campaignId,
+        groupName: displayName,
+        groupId,
+    });
+
+    const menuActions =
+        canEdit && !isUngrouped && groupId
+            ? [
+                  {
+                      label: t('groupActions.rename'),
+                      icon: Edit,
+                      onSelect: actions.handlers.openRenameDialog,
+                  },
+                  {
+                      label: t('groupActions.removeAll'),
+                      icon: X,
+                      onSelect: () => void actions.handlers.confirmRemoveAll(),
+                  },
+              ]
+            : undefined;
+
+    return (
+        <>
+            <GroupAccordionItem
+                value={groupName}
+                title={displayName}
+                countLabel={t('list.count', { count: totalSpells })}
+                icon={GroupIcon}
+                menuActions={menuActions}
+                data-tour={tour ? 'libraries.group' : undefined}
+            >
+                <Accordion
+                    type="multiple"
+                    defaultValue={levels.map(([level]) => String(level))}
+                    className="space-y-2"
+                >
+                    {levels.map(([level, levelSpells], levelIndex) => {
+                        return (
+                            <SpellLevelAccordion
+                                key={level}
+                                level={level}
+                                spells={levelSpells}
+                                campaignId={campaignId}
+                                spellGroups={spellGroups}
+                                actions={canEdit ? spellActions : undefined}
+                                canEdit={canEdit}
+                                tour={tour && levelIndex === 0}
+                            />
+                        );
+                    })}
+                </Accordion>
+            </GroupAccordionItem>
+
+            {canEdit && (
+                <RenameGroupDialog
+                    groupName={groupName}
+                    dialog={{
+                        open: actions.dialogs.rename.open,
+                        onOpenChange: actions.dialogs.rename.setOpen,
+                    }}
+                    rename={{
+                        value: actions.state.newGroupName,
+                        onChange: actions.state.setNewGroupName,
+                        onConfirm: actions.handlers.handleRenameGroup,
+                        onCancel: actions.handlers.closeRenameDialog,
+                        isPending: actions.pending.isRenaming,
+                    }}
+                />
+            )}
+        </>
+    );
 }

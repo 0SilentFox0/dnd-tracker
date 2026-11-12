@@ -1,128 +1,201 @@
-import { effectiveUnit, type Entry, type PartyPower, type RosterEntry, scaleEntries, targetEnemyPower, weakestPerTier } from "./fair";
-import type { UnitStats } from "./stats";
+import {
+    effectiveUnit,
+    type Entry,
+    type PartyPower,
+    type RosterEntry,
+    scaleEntries,
+    targetEnemyPower,
+    weakestPerTier,
+} from './fair';
+import type { UnitStats } from './stats';
 
-import { BALANCE_TOLERANCE, MAX_PICK_TOTAL, PICK_CANDIDATE_UNITS, PICK_MAX_DISTINCT_UNITS, PICK_TOLERANCE, SCALE_MAX, SCALE_MIN } from "@/lib/constants/battle-balance";
+import {
+    BALANCE_TOLERANCE,
+    MAX_PICK_TOTAL,
+    PICK_CANDIDATE_UNITS,
+    PICK_MAX_DISTINCT_UNITS,
+    PICK_TOLERANCE,
+    SCALE_MAX,
+    SCALE_MIN,
+} from '@/lib/constants/battle-balance';
 
 export interface PickedEnemy extends RosterEntry {
-  name: string;
+    name: string;
 }
 
 export interface PickResult {
-  roster: PickedEnemy[];
-  hpScale: number;
-  dmgScale: number;
-  withinTolerance: boolean;
+    roster: PickedEnemy[];
+    hpScale: number;
+    dmgScale: number;
+    withinTolerance: boolean;
 }
 
-const lnDistance = (a: number, b: number) => (a > 0 && b > 0 ? Math.abs(Math.log(a / b)) : 0);
+const lnDistance = (a: number, b: number) =>
+    a > 0 && b > 0 ? Math.abs(Math.log(a / b)) : 0;
 
 function* compositions(total: number, parts: number): Generator<number[]> {
-  if (parts === 1) {
-    yield [total];
+    if (parts === 1) {
+        yield [total];
 
-    return;
-  }
+        return;
+    }
 
-  for (let first = 1; first <= total - (parts - 1); first++) {
-    for (const rest of compositions(total - first, parts - 1)) yield [first, ...rest];
-  }
+    for (let first = 1; first <= total - (parts - 1); first++) {
+        for (const rest of compositions(total - first, parts - 1))
+            yield [first, ...rest];
+    }
 }
 
 function* combinations<T>(items: T[], size: number, start = 0): Generator<T[]> {
-  if (size === 0) {
-    yield [];
+    if (size === 0) {
+        yield [];
 
-    return;
-  }
+        return;
+    }
 
-  for (let i = start; i <= items.length - size; i++) {
-    for (const rest of combinations(items, size - 1, i + 1)) yield [items[i], ...rest];
-  }
+    for (let i = start; i <= items.length - size; i++) {
+        for (const rest of combinations(items, size - 1, i + 1))
+            yield [items[i], ...rest];
+    }
 }
 
 /**
  * Склад, для якого hpScale і dmgScale найближчі до 1 (±PICK_TOLERANCE).
  * Пріоритет: юніти тіру, близького до сили одного героя → кількість у [⌈N/2⌉, 2N] → менше різних юнітів.
  */
-export function pickEnemyRoster(party: PartyPower, rawLibrary: UnitStats[], raceId?: string | null): PickResult | null {
-  const library = rawLibrary.map((u) => effectiveUnit(u, party));
+export function pickEnemyRoster(
+    party: PartyPower,
+    rawLibrary: UnitStats[],
+    raceId?: string | null
+): PickResult | null {
+    const library = rawLibrary.map((u) => effectiveUnit(u, party));
 
-  const pool = (raceId ? library.filter((u) => u.raceId === raceId) : library).filter((u) => u.hp > 0 && u.dpr > 0 && !u.summon);
+    const pool = (
+        raceId ? library.filter((u) => u.raceId === raceId) : library
+    ).filter((u) => u.hp > 0 && u.dpr > 0 && !u.summon);
 
-  const heroes = Math.max(1, party.heroCount);
+    const heroes = Math.max(1, party.heroCount);
 
-  if (pool.length === 0 || party.dpr <= 0 || party.hp <= 0) return null;
+    if (pool.length === 0 || party.dpr <= 0 || party.hp <= 0) return null;
 
-  const target = targetEnemyPower(party);
+    const target = targetEnemyPower(party);
 
-  const perHero = { hp: party.hp / heroes, dpr: party.dpr / heroes };
+    const perHero = { hp: party.hp / heroes, dpr: party.dpr / heroes };
 
-  const closeness = (u: UnitStats) => lnDistance(u.hp, perHero.hp) + lnDistance(u.dpr, perHero.dpr);
+    const closeness = (u: UnitStats) =>
+        lnDistance(u.hp, perHero.hp) + lnDistance(u.dpr, perHero.dpr);
 
-  const candidates = [...pool].sort((a, b) => closeness(a) - closeness(b)).slice(0, PICK_CANDIDATE_UNITS);
+    const candidates = [...pool]
+        .sort((a, b) => closeness(a) - closeness(b))
+        .slice(0, PICK_CANDIDATE_UNITS);
 
-  const maxTotal = Math.min(heroes * 2, MAX_PICK_TOTAL);
+    const maxTotal = Math.min(heroes * 2, MAX_PICK_TOTAL);
 
-  const minTotal = Math.min(Math.ceil(heroes / 2), maxTotal);
+    const minTotal = Math.min(Math.ceil(heroes / 2), maxTotal);
 
-  const weakest = weakestPerTier(library);
+    const weakest = weakestPerTier(library);
 
-  const found: { best: { score: [number, number, number, number]; roster: PickedEnemy[]; hpScale: number; dmgScale: number; within: boolean } | null } = { best: null };
+    const found: {
+        best: {
+            score: [number, number, number, number];
+            roster: PickedEnemy[];
+            hpScale: number;
+            dmgScale: number;
+            within: boolean;
+        } | null;
+    } = { best: null };
 
-  const consider = (units: UnitStats[], quantities: number[]) => {
-    const entries: Entry[] = units.map((unit, i) => ({ unit, quantity: quantities[i] }));
+    const consider = (units: UnitStats[], quantities: number[]) => {
+        const entries: Entry[] = units.map((unit, i) => ({
+            unit,
+            quantity: quantities[i],
+        }));
 
-    const { base, reached } = scaleEntries(target, entries, weakest);
+        const { base, reached } = scaleEntries(target, entries, weakest);
 
-    if (base.hp <= 0 || base.dpr <= 0) return;
+        if (base.hp <= 0 || base.dpr <= 0) return;
 
-    const rawHp = target.hp / base.hp;
+        const rawHp = target.hp / base.hp;
 
-    const rawDmg = target.dpr / base.dpr;
+        const rawDmg = target.dpr / base.dpr;
 
-    const hpScale = reached.hp / base.hp;
+        const hpScale = reached.hp / base.hp;
 
-    const dmgScale = reached.dpr / base.dpr;
+        const dmgScale = reached.dpr / base.dpr;
 
-    // стеля тіру може обрізати множник — тоді склад не дотягує до цілі, хоч масштаб і «≈1»
-    const reaches = Math.abs(reached.hp / target.hp - 1) <= BALANCE_TOLERANCE && Math.abs(reached.dpr / target.dpr - 1) <= BALANCE_TOLERANCE;
+        // стеля тіру може обрізати множник — тоді склад не дотягує до цілі, хоч масштаб і «≈1»
+        const reaches =
+            Math.abs(reached.hp / target.hp - 1) <= BALANCE_TOLERANCE &&
+            Math.abs(reached.dpr / target.dpr - 1) <= BALANCE_TOLERANCE;
 
-    const shortfall = lnDistance(reached.hp, target.hp) + lnDistance(reached.dpr, target.dpr);
+        const shortfall =
+            lnDistance(reached.hp, target.hp) +
+            lnDistance(reached.dpr, target.dpr);
 
-    const within = reaches && Math.abs(hpScale - 1) <= PICK_TOLERANCE && Math.abs(dmgScale - 1) <= PICK_TOLERANCE;
+        const within =
+            reaches &&
+            Math.abs(hpScale - 1) <= PICK_TOLERANCE &&
+            Math.abs(dmgScale - 1) <= PICK_TOLERANCE;
 
-    const inRange = rawHp >= SCALE_MIN && rawHp <= SCALE_MAX && rawDmg >= SCALE_MIN && rawDmg <= SCALE_MAX;
+        const inRange =
+            rawHp >= SCALE_MIN &&
+            rawHp <= SCALE_MAX &&
+            rawDmg >= SCALE_MIN &&
+            rawDmg <= SCALE_MAX;
 
-    const total = quantities.reduce((a, b) => a + b, 0);
+        const total = quantities.reduce((a, b) => a + b, 0);
 
-    const weighted = units.reduce((a, u, i) => a + closeness(u) * quantities[i], 0) / total;
+        const weighted =
+            units.reduce((a, u, i) => a + closeness(u) * quantities[i], 0) /
+            total;
 
-    const deviation = lnDistance(hpScale, 1) + lnDistance(dmgScale, 1) + shortfall;
+        const deviation =
+            lnDistance(hpScale, 1) + lnDistance(dmgScale, 1) + shortfall;
 
-    const score: [number, number, number, number] = [within ? 0 : reaches ? 1 : inRange ? 2 : 3, within ? Math.round(weighted * 4) : 0, units.length, within ? deviation : deviation + weighted / 100];
+        const score: [number, number, number, number] = [
+            within ? 0 : reaches ? 1 : inRange ? 2 : 3,
+            within ? Math.round(weighted * 4) : 0,
+            units.length,
+            within ? deviation : deviation + weighted / 100,
+        ];
 
-    if (found.best && compareScore(score, found.best.score) >= 0) return;
+        if (found.best && compareScore(score, found.best.score) >= 0) return;
 
-    found.best = { score, roster: units.map((u, i) => ({ unitId: u.unitId, name: u.name, quantity: quantities[i] })), hpScale, dmgScale, within };
-  };
+        found.best = {
+            score,
+            roster: units.map((u, i) => ({
+                unitId: u.unitId,
+                name: u.name,
+                quantity: quantities[i],
+            })),
+            hpScale,
+            dmgScale,
+            within,
+        };
+    };
 
-  for (let total = minTotal; total <= maxTotal; total++) {
-    for (let distinct = 1; distinct <= Math.min(PICK_MAX_DISTINCT_UNITS, total); distinct++) {
-      for (const units of combinations(candidates, distinct)) {
-        for (const quantities of compositions(total, distinct)) consider(units, quantities);
-      }
+    for (let total = minTotal; total <= maxTotal; total++) {
+        for (
+            let distinct = 1;
+            distinct <= Math.min(PICK_MAX_DISTINCT_UNITS, total);
+            distinct++
+        ) {
+            for (const units of combinations(candidates, distinct)) {
+                for (const quantities of compositions(total, distinct))
+                    consider(units, quantities);
+            }
+        }
     }
-  }
 
-  if (!found.best) return null;
+    if (!found.best) return null;
 
-  const { roster, hpScale, dmgScale, within } = found.best;
+    const { roster, hpScale, dmgScale, within } = found.best;
 
-  return { roster, hpScale, dmgScale, withinTolerance: within };
+    return { roster, hpScale, dmgScale, withinTolerance: within };
 }
 
 function compareScore(a: number[], b: number[]): number {
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
 
-  return 0;
+    return 0;
 }

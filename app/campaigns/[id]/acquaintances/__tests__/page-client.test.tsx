@@ -1,75 +1,153 @@
 // @vitest-environment happy-dom
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+    act,
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const state = vi.hoisted(() => ({ data: undefined as unknown }));
 
-vi.mock("@/lib/hooks/acquaintances", () => ({
-  useAcquaintances: () => ({ data: state.data, isPending: false, isError: false, error: null, refetch: vi.fn() }),
-  useAcquaintanceNote: () => ({ save: vi.fn(), isPending: false }),
+vi.mock('@/lib/hooks/acquaintances', () => ({
+    useAcquaintances: () => ({
+        data: state.data,
+        isPending: false,
+        isError: false,
+        error: null,
+        refetch: vi.fn(),
+    }),
+    useAcquaintanceNote: () => ({ save: vi.fn(), isPending: false }),
 }));
-vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: vi.fn(() => new Set<string>()) }));
+vi.mock('@/lib/hooks/notifications', () => ({
+    useSeenOnOpen: vi.fn(() => new Set<string>()),
+}));
 
-import { AcquaintancesPageClient } from "../page-client";
+import { AcquaintancesPageClient } from '../page-client';
 
-import { useSeenOnOpen } from "@/lib/hooks/notifications";
-import type { AcquaintanceView } from "@/types/acquaintances";
+import { useSeenOnOpen } from '@/lib/hooks/notifications';
+import type { AcquaintanceView } from '@/types/acquaintances';
 
 Object.assign(Element.prototype, { scrollIntoView: vi.fn() });
 
-const view = (id: string, name: string): AcquaintanceView => ({ id, kind: "micro", characterId: null, name, avatarUrl: null, description: "", sourcePageId: "p1", sourceSectionId: "s1", hidden: false, entries: [], notes: [] });
+const view = (id: string, name: string): AcquaintanceView => ({
+    id,
+    kind: 'micro',
+    characterId: null,
+    name,
+    avatarUrl: null,
+    description: '',
+    sourcePageId: 'p1',
+    sourceSectionId: 's1',
+    hidden: false,
+    entries: [],
+    notes: [],
+});
 
 beforeEach(() => {
-  state.data = { isDM: false, enabled: true, items: [view("a1", "Ярема"), view("a2", "Борис")] };
+    state.data = {
+        isDM: false,
+        enabled: true,
+        items: [view('a1', 'Ярема'), view('a2', 'Борис')],
+    };
 });
 
 afterEach(() => {
-  cleanup();
-  vi.clearAllMocks();
+    cleanup();
+    vi.clearAllMocks();
 });
 
-const type = (value: string) => act(() => void fireEvent.change(screen.getByLabelText("acquaintances.page.search"), { target: { value } }));
+const type = (value: string) =>
+    act(
+        () =>
+            void fireEvent.change(
+                screen.getByLabelText('acquaintances.page.search'),
+                { target: { value } }
+            )
+    );
 
-describe("AcquaintancesPageClient", () => {
-  it("filters cards by name", async () => {
-    render(<AcquaintancesPageClient campaignId="c1" isDM={false} focusId={undefined} />);
+describe('AcquaintancesPageClient', () => {
+    it('filters cards by name', async () => {
+        render(
+            <AcquaintancesPageClient
+                campaignId="c1"
+                isDM={false}
+                focusId={undefined}
+            />
+        );
 
-    type("Бор");
+        type('Бор');
 
-    expect(await screen.findByText("Борис")).toBeTruthy();
-    await waitFor(() => expect(screen.queryByText("Ярема")).toBeNull());
-  });
+        expect(await screen.findByText('Борис')).toBeTruthy();
+        await waitFor(() => expect(screen.queryByText('Ярема')).toBeNull());
+    });
 
-  it("shows the search empty state when nothing matches", async () => {
-    render(<AcquaintancesPageClient campaignId="c1" isDM={false} focusId={undefined} />);
+    it('shows the search empty state when nothing matches', async () => {
+        render(
+            <AcquaintancesPageClient
+                campaignId="c1"
+                isDM={false}
+                focusId={undefined}
+            />
+        );
 
-    type("zzz");
+        type('zzz');
 
-    expect(await screen.findByText(/common.search.noResults/)).toBeTruthy();
-  });
+        expect(await screen.findByText(/common.search.noResults/)).toBeTruthy();
+    });
 
-  it("subscribes to seen-on-open only for players", () => {
-    render(<AcquaintancesPageClient campaignId="c1" isDM focusId={undefined} />);
+    it('subscribes to seen-on-open only for players', () => {
+        render(
+            <AcquaintancesPageClient campaignId="c1" isDM focusId={undefined} />
+        );
 
-    expect(useSeenOnOpen).toHaveBeenCalledWith("c1", { types: ["acquaintance"], enabled: false });
+        expect(useSeenOnOpen).toHaveBeenCalledWith('c1', {
+            types: ['acquaintance'],
+            enabled: false,
+        });
 
-    cleanup();
-    render(<AcquaintancesPageClient campaignId="c1" isDM={false} focusId={undefined} />);
+        cleanup();
+        render(
+            <AcquaintancesPageClient
+                campaignId="c1"
+                isDM={false}
+                focusId={undefined}
+            />
+        );
 
-    expect(useSeenOnOpen).toHaveBeenLastCalledWith("c1", { types: ["acquaintance"], enabled: true });
-  });
+        expect(useSeenOnOpen).toHaveBeenLastCalledWith('c1', {
+            types: ['acquaintance'],
+            enabled: true,
+        });
+    });
 
-  it("tells the DM that players do not see the section while the toggle is off", () => {
-    state.data = { isDM: true, enabled: false, items: [view("a1", "Ярема")] };
+    it('tells the DM that players do not see the section while the toggle is off', () => {
+        state.data = {
+            isDM: true,
+            enabled: false,
+            items: [view('a1', 'Ярема')],
+        };
 
-    render(<AcquaintancesPageClient campaignId="c1" isDM focusId={undefined} />);
+        render(
+            <AcquaintancesPageClient campaignId="c1" isDM focusId={undefined} />
+        );
 
-    expect(screen.getByText(/acquaintances.page.hiddenFromPlayers/)).toBeTruthy();
-  });
+        expect(
+            screen.getByText(/acquaintances.page.hiddenFromPlayers/)
+        ).toBeTruthy();
+    });
 
-  it("scrolls the focused card into view", () => {
-    render(<AcquaintancesPageClient campaignId="c1" isDM={false} focusId="a2" />);
+    it('scrolls the focused card into view', () => {
+        render(
+            <AcquaintancesPageClient
+                campaignId="c1"
+                isDM={false}
+                focusId="a2"
+            />
+        );
 
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
-  });
+        expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+    });
 });

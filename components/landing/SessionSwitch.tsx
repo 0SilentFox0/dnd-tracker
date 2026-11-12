@@ -1,9 +1,15 @@
-"use client";
+'use client';
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { useHasSessionCookie } from "@/lib/hooks/auth";
+import { useHasSessionCookie } from '@/lib/hooks/auth';
 
-export function SessionSwitch({ guest, member }: { guest: ReactNode; member: ReactNode }) {
-  return useHasSessionCookie() ? member : guest;
+export function SessionSwitch({
+    guest,
+    member,
+}: {
+    guest: ReactNode;
+    member: ReactNode;
+}) {
+    return useHasSessionCookie() ? member : guest;
 }

@@ -1,43 +1,71 @@
-import type { ModeView } from "../types";
-import { mazeGridOf } from "./grid";
-import { disguiseFor, illusionPairs } from "./illusion";
-import { type DisguiseOf, maskAction, maskEffectMap, maskParticipantBy, maskQueueBy } from "./illusion-mask";
-import { isMazeHero, isPlaced } from "./status";
-import { seesParticipant, unionVision, type Viewpoint, viewpointOf } from "./vision";
-import { edgeCells } from "./walls";
+import type { ModeView } from '../types';
+import { mazeGridOf } from './grid';
+import { disguiseFor, illusionPairs } from './illusion';
+import {
+    type DisguiseOf,
+    maskAction,
+    maskEffectMap,
+    maskParticipantBy,
+    maskQueueBy,
+} from './illusion-mask';
+import { isMazeHero, isPlaced } from './status';
+import {
+    seesParticipant,
+    unionVision,
+    type Viewpoint,
+    viewpointOf,
+} from './vision';
+import { edgeCells } from './walls';
 
-import { CombatStatus, DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { inPlay, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
-import { cellKey } from "@/lib/utils/battle/grid/geometry";
-import { filterQueueByView, type QueueEntry } from "@/lib/utils/battle/view/queue";
-import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import {
+    CombatStatus,
+    DM_ACTOR,
+    ParticipantSide,
+    SYSTEM_ACTOR,
+} from '@/lib/constants/battle';
+import {
+    inPlay,
+    isActive,
+    isEscaped,
+} from '@/lib/utils/abilities/engine/core/participants';
+import { cellKey } from '@/lib/utils/battle/grid/geometry';
+import {
+    filterQueueByView,
+    type QueueEntry,
+} from '@/lib/utils/battle/view/queue';
+import type {
+    ActiveEffect,
+    BattleAction,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
 
-export type MazeRole = "dm" | "player" | "spectator";
+export type MazeRole = 'dm' | 'player' | 'spectator';
 
 export interface MazeView extends ModeView {
-  role: MazeRole;
-  /** Лише для ДМ: що зараз бачать усі герої на полі разом */
-  partyCells: ReadonlySet<string> | null;
-  /** Стіна на межі видимої клітинки (для гравця) */
-  showWalls: (edge: string) => boolean;
-  showTeleportLinks: boolean;
-  showFog: boolean;
-  showExit: boolean;
-  mazeDark: boolean;
-  /** ким глядач бачить цілі під ілюзією (undefined — нікого не маскує) */
-  disguiseOf?: DisguiseOf;
-  /** справжнє ім'я → маска для кожного, кого глядач бачить під маскою */
-  disguiseNames?: ReadonlyMap<string, string>;
-  /** для ДМ без «як герой»: хто зараз під маскою (позначка в інтерфейсі) */
-  maskedIds: ReadonlySet<string>;
+    role: MazeRole;
+    /** Лише для ДМ: що зараз бачать усі герої на полі разом */
+    partyCells: ReadonlySet<string> | null;
+    /** Стіна на межі видимої клітинки (для гравця) */
+    showWalls: (edge: string) => boolean;
+    showTeleportLinks: boolean;
+    showFog: boolean;
+    showExit: boolean;
+    mazeDark: boolean;
+    /** ким глядач бачить цілі під ілюзією (undefined — нікого не маскує) */
+    disguiseOf?: DisguiseOf;
+    /** справжнє ім'я → маска для кожного, кого глядач бачить під маскою */
+    disguiseNames?: ReadonlyMap<string, string>;
+    /** для ДМ без «як герой»: хто зараз під маскою (позначка в інтерфейсі) */
+    maskedIds: ReadonlySet<string>;
 }
 
 interface DeriveArgs {
-  map: BattleMapConfig;
-  participants: BattleParticipant[];
-  userId: string;
-  isDM: boolean;
-  asHeroId?: string | null;
+    map: BattleMapConfig;
+    participants: BattleParticipant[];
+    userId: string;
+    isDM: boolean;
+    asHeroId?: string | null;
 }
 
 const always = () => true;
@@ -46,215 +74,427 @@ const NO_IDS: ReadonlySet<string> = new Set();
 
 const idOf = (p: BattleParticipant) => p.basicInfo.id;
 
-const isLiveHero = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && isActive(p) && !isEscaped(p) && isPlaced(p);
+const isLiveHero = (p: BattleParticipant) =>
+    p.basicInfo.side === ParticipantSide.ALLY &&
+    isActive(p) &&
+    !isEscaped(p) &&
+    isPlaced(p);
 
 // непритомний герой живий: гравець лишається гравцем зі своїм полем зору, а не глядачем
-const isOwnOnField = (p: BattleParticipant) => p.basicInfo.side === ParticipantSide.ALLY && p.combatStats.status !== CombatStatus.DEAD && !isEscaped(p) && isPlaced(p);
+const isOwnOnField = (p: BattleParticipant) =>
+    p.basicInfo.side === ParticipantSide.ALLY &&
+    p.combatStats.status !== CombatStatus.DEAD &&
+    !isEscaped(p) &&
+    isPlaced(p);
 
 /** Heroes whose fog the DM can project in the player view. */
-export const mazeViewHeroes = (participants: BattleParticipant[]): BattleParticipant[] => participants.filter(isOwnOnField);
+export const mazeViewHeroes = (
+    participants: BattleParticipant[]
+): BattleParticipant[] => participants.filter(isOwnOnField);
 
-export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: DeriveArgs): MazeView | null {
-  const grid = mazeGridOf(map);
+export function deriveMazeView({
+    map,
+    participants,
+    userId,
+    isDM,
+    asHeroId,
+}: DeriveArgs): MazeView | null {
+    const grid = mazeGridOf(map);
 
-  if (!grid) return null;
+    if (!grid) return null;
 
-  const { maze } = grid;
+    const { maze } = grid;
 
-  const viewersOf = (list: BattleParticipant[]) => list.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
+    const viewersOf = (list: BattleParticipant[]) =>
+        list.map(viewpointOf).filter((v): v is Viewpoint => v !== null);
 
-  const pairs = illusionPairs(maze);
+    const pairs = illusionPairs(maze);
 
-  const base = { mazeDark: maze.dark, partyCells: null, maskedIds: NO_IDS };
+    const base = { mazeDark: maze.dark, partyCells: null, maskedIds: NO_IDS };
 
-  const disguiseOfViewers = (viewerIds: string[]): DisguiseOf | undefined => {
-    const seen = pairs.filter((p) => !(viewerIds.includes(p.a) && viewerIds.includes(p.b)));
+    const disguiseOfViewers = (viewerIds: string[]): DisguiseOf | undefined => {
+        const seen = pairs.filter(
+            (p) => !(viewerIds.includes(p.a) && viewerIds.includes(p.b))
+        );
 
-    return seen.length === 0 ? undefined : (targetId) => viewerIds.map((v) => disguiseFor(seen, v, targetId)).find(Boolean);
-  };
+        return seen.length === 0
+            ? undefined
+            : (targetId) =>
+                  viewerIds
+                      .map((v) => disguiseFor(seen, v, targetId))
+                      .find(Boolean);
+    };
 
-  if (isDM && !asHeroId) {
-    return { ...base, maskedIds: new Set(pairs.flatMap((p) => [p.a, p.b])), role: "dm", cells: null, partyCells: unionVision(grid, viewersOf(participants.filter(isMazeHero))), visibleIds: new Set(participants.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: true, showFog: true, showDormant: true, showExit: true, dark: false };
-  }
+    if (isDM && !asHeroId) {
+        return {
+            ...base,
+            maskedIds: new Set(pairs.flatMap((p) => [p.a, p.b])),
+            role: 'dm',
+            cells: null,
+            partyCells: unionVision(
+                grid,
+                viewersOf(participants.filter(isMazeHero))
+            ),
+            visibleIds: new Set(participants.map(idOf)),
+            ownIds: NO_IDS,
+            showWalls: always,
+            showTeleportLinks: true,
+            showFog: true,
+            showDormant: true,
+            showExit: true,
+            dark: false,
+        };
+    }
 
-  const own = participants.filter((p) => (isDM ? idOf(p) === asHeroId : p.basicInfo.controlledBy === userId) && isOwnOnField(p));
+    const own = participants.filter(
+        (p) =>
+            (isDM
+                ? idOf(p) === asHeroId
+                : p.basicInfo.controlledBy === userId) && isOwnOnField(p)
+    );
 
-  if (own.length === 0) {
-    const visible = participants.filter((p) => isPlaced(p) && (isLiveHero(p) || (p.basicInfo.side !== ParticipantSide.ALLY && inPlay(p))));
+    if (own.length === 0) {
+        const visible = participants.filter(
+            (p) =>
+                isPlaced(p) &&
+                (isLiveHero(p) ||
+                    (p.basicInfo.side !== ParticipantSide.ALLY && inPlay(p)))
+        );
 
-    return { ...base, role: "spectator", cells: null, visibleIds: new Set(visible.map(idOf)), ownIds: NO_IDS, showWalls: always, showTeleportLinks: false, showFog: false, showDormant: false, showExit: true, dark: false };
-  }
+        return {
+            ...base,
+            role: 'spectator',
+            cells: null,
+            visibleIds: new Set(visible.map(idOf)),
+            ownIds: NO_IDS,
+            showWalls: always,
+            showTeleportLinks: false,
+            showFog: false,
+            showDormant: false,
+            showExit: true,
+            dark: false,
+        };
+    }
 
-  const viewers = viewersOf(own);
+    const viewers = viewersOf(own);
 
-  const cells = unionVision(grid, viewers);
+    const cells = unionVision(grid, viewers);
 
-  const visibleIds = new Set(own.map(idOf));
+    const visibleIds = new Set(own.map(idOf));
 
-  for (const p of participants) {
-    if (visibleIds.has(idOf(p)) || !isPlaced(p) || isEscaped(p)) continue;
+    for (const p of participants) {
+        if (visibleIds.has(idOf(p)) || !isPlaced(p) || isEscaped(p)) continue;
 
-    if (viewers.some((v) => seesParticipant(grid, cells, v.position, p.battleData.position))) visibleIds.add(idOf(p));
-  }
+        if (
+            viewers.some((v) =>
+                seesParticipant(grid, cells, v.position, p.battleData.position)
+            )
+        )
+            visibleIds.add(idOf(p));
+    }
 
-  const disguiseOf = disguiseOfViewers(own.map(idOf));
+    const disguiseOf = disguiseOfViewers(own.map(idOf));
 
-  return {
-    ...base,
-    role: "player",
-    cells,
-    visibleIds,
-    ownIds: new Set(own.map(idOf)),
-    disguiseOf,
-    ...(disguiseOf && { disguiseNames: disguiseNamesOf(participants, disguiseOf) }),
-    showWalls: (edge) => edgeCells(edge).some((c) => cells.has(cellKey(c))),
-    showTeleportLinks: false,
-    showFog: true,
-    showDormant: true,
-    showExit: true,
-    dark: maze.dark,
-  };
+    return {
+        ...base,
+        role: 'player',
+        cells,
+        visibleIds,
+        ownIds: new Set(own.map(idOf)),
+        disguiseOf,
+        ...(disguiseOf && {
+            disguiseNames: disguiseNamesOf(participants, disguiseOf),
+        }),
+        showWalls: (edge) => edgeCells(edge).some((c) => cells.has(cellKey(c))),
+        showTeleportLinks: false,
+        showFog: true,
+        showDormant: true,
+        showExit: true,
+        dark: maze.dark,
+    };
 }
 
-// eslint-disable-next-line no-restricted-syntax -- uk titles are name data, not UI text
-const NAME_TITLES: ReadonlySet<string> = new Set(["Лорд", "Леді", "Сер", "Мати", "Батько", "Lord", "Lady", "Sir", "Mother", "Father"]);
+/* eslint-disable no-restricted-syntax -- uk titles are name data, not UI text */
+const NAME_TITLES: ReadonlySet<string> = new Set([
+    'Лорд',
+    'Леді',
+    'Сер',
+    'Мати',
+    'Батько',
+    'Lord',
+    'Lady',
+    'Sir',
+    'Mother',
+    'Father',
+]);
+/* eslint-enable no-restricted-syntax */
 
-const nameTokens = (name: string) => name.split(/[^\p{L}\p{N}'’ʼ]+/u).filter((t) => t.length >= 3 && /^\p{Lu}/u.test(t) && !NAME_TITLES.has(t));
+const nameTokens = (name: string) =>
+    name
+        .split(/[^\p{L}\p{N}'’ʼ]+/u)
+        .filter(
+            (t) => t.length >= 3 && /^\p{Lu}/u.test(t) && !NAME_TITLES.has(t)
+        );
 
 /** Повне ім'я й його окремі слова («Годрик» з «Лорд Годрик Єдиноріг»), крім слів, що є й в інших учасників; імена решти — самі в себе, щоб довше ім'я перемагало */
-const disguiseNamesOf = (participants: BattleParticipant[], disguiseOf: DisguiseOf): ReadonlyMap<string, string> => {
-  const count = new Map<string, number>();
+const disguiseNamesOf = (
+    participants: BattleParticipant[],
+    disguiseOf: DisguiseOf
+): ReadonlyMap<string, string> => {
+    const count = new Map<string, number>();
 
-  for (const p of participants) count.set(p.basicInfo.name, (count.get(p.basicInfo.name) ?? 0) + 1);
+    for (const p of participants)
+        count.set(p.basicInfo.name, (count.get(p.basicInfo.name) ?? 0) + 1);
 
-  const tokenOwners = new Map<string, number>();
+    const tokenOwners = new Map<string, number>();
 
-  for (const p of participants) for (const t of new Set(nameTokens(p.basicInfo.name))) tokenOwners.set(t, (tokenOwners.get(t) ?? 0) + 1);
+    for (const p of participants)
+        for (const t of new Set(nameTokens(p.basicInfo.name)))
+            tokenOwners.set(t, (tokenOwners.get(t) ?? 0) + 1);
 
-  const names = new Map<string, string>();
+    const names = new Map<string, string>();
 
-  for (const p of participants) {
-    const d = disguiseOf(idOf(p));
+    for (const p of participants) {
+        const d = disguiseOf(idOf(p));
 
-    if (!d || count.get(p.basicInfo.name) !== 1) continue;
+        if (!d || count.get(p.basicInfo.name) !== 1) continue;
 
-    names.set(p.basicInfo.name, d.name);
+        names.set(p.basicInfo.name, d.name);
 
-    for (const t of nameTokens(p.basicInfo.name)) if (tokenOwners.get(t) === 1 && !count.has(t)) names.set(t, d.name);
-  }
+        for (const t of nameTokens(p.basicInfo.name))
+            if (tokenOwners.get(t) === 1 && !count.has(t)) names.set(t, d.name);
+    }
 
-  const keys = [...names.keys()];
+    const keys = [...names.keys()];
 
-  for (const { basicInfo: { name } } of participants) if (!names.has(name) && keys.some((k) => name.includes(k))) names.set(name, name);
+    for (const {
+        basicInfo: { name },
+    } of participants)
+        if (!names.has(name) && keys.some((k) => name.includes(k)))
+            names.set(name, name);
 
-  return names;
+    return names;
 };
 
-export const MAZE_UNKNOWN_NAME = "???";
+export const MAZE_UNKNOWN_NAME = '???';
 
-const hidesFrom = (view: MazeView | null | undefined): view is MazeView => view?.role === "player";
+const hidesFrom = (view: MazeView | null | undefined): view is MazeView =>
+    view?.role === 'player';
 
-const knows = (view: MazeView, id: string) => view.visibleIds.has(id) || view.ownIds.has(id);
+const knows = (view: MazeView, id: string) =>
+    view.visibleIds.has(id) || view.ownIds.has(id);
 
-const SERVICE_ACTORS: ReadonlySet<string> = new Set([DM_ACTOR.actorId, SYSTEM_ACTOR.actorId]);
+const SERVICE_ACTORS: ReadonlySet<string> = new Set([
+    DM_ACTOR.actorId,
+    SYSTEM_ACTOR.actorId,
+]);
 
 /** Гравець у лабіринті бачить лише своїх і тих, хто зараз у полі зору; ДМ і глядач — усіх. */
-export const mazeVisible = (view: MazeView | null | undefined, p: BattleParticipant): boolean => !hidesFrom(view) || knows(view, idOf(p));
+export const mazeVisible = (
+    view: MazeView | null | undefined,
+    p: BattleParticipant
+): boolean => !hidesFrom(view) || knows(view, idOf(p));
 
-export const visibleParticipants = (view: MazeView | null | undefined, list: BattleParticipant[]): BattleParticipant[] =>
-  hidesFrom(view) ? list.filter((p) => knows(view, idOf(p))) : list;
+export const visibleParticipants = (
+    view: MazeView | null | undefined,
+    list: BattleParticipant[]
+): BattleParticipant[] =>
+    hidesFrom(view) ? list.filter((p) => knows(view, idOf(p))) : list;
 
-const anyTargetKnown = (view: MazeView, e: BattleAction, known: (id: string) => boolean) => (e.targets ?? []).some((t) => known(t.participantId));
+const anyTargetKnown = (
+    view: MazeView,
+    e: BattleAction,
+    known: (id: string) => boolean
+) => (e.targets ?? []).some((t) => known(t.participantId));
 
 /** Журнал гравця: записи своїх і видимих; «помітив» — лише своїх героїв; зміни лабіринту ДМом приховані. Перетасовку не бачить ніхто. */
-export function mazeLogVisible(view: MazeView | null | undefined, e: BattleAction): boolean {
-  const kind = e.actionDetails?.mazeEvent;
+export function mazeLogVisible(
+    view: MazeView | null | undefined,
+    e: BattleAction
+): boolean {
+    const kind = e.actionDetails?.mazeEvent;
 
-  if (kind === "reshuffle") return false;
+    if (kind === 'reshuffle') return false;
 
-  if (!hidesFrom(view)) return true;
+    if (!hidesFrom(view)) return true;
 
-  if (kind === "op") return false;
+    if (kind === 'op') return false;
 
-  if (kind === "spotted") return view.ownIds.has(e.actorId);
+    if (kind === 'spotted') return view.ownIds.has(e.actorId);
 
-  if (SERVICE_ACTORS.has(e.actorId)) return !e.targets?.length || anyTargetKnown(view, e, (id) => knows(view, id));
+    if (SERVICE_ACTORS.has(e.actorId))
+        return (
+            !e.targets?.length ||
+            anyTargetKnown(view, e, (id) => knows(view, id))
+        );
 
-  // удар по своєму героєві гравець відчуває, навіть якщо нападника не видно
-  return knows(view, e.actorId) || anyTargetKnown(view, e, (id) => view.ownIds.has(id));
+    // удар по своєму героєві гравець відчуває, навіть якщо нападника не видно
+    return (
+        knows(view, e.actorId) ||
+        anyTargetKnown(view, e, (id) => view.ownIds.has(id))
+    );
 }
 
 /** FX: лише коли видно виконавця або хоч одну ціль. */
-export function mazeFxVisible(view: MazeView | null | undefined, e: BattleAction): boolean {
-  if (!hidesFrom(view)) return true;
+export function mazeFxVisible(
+    view: MazeView | null | undefined,
+    e: BattleAction
+): boolean {
+    if (!hidesFrom(view)) return true;
 
-  if (e.actionDetails?.mazeEvent) return false;
+    if (e.actionDetails?.mazeEvent) return false;
 
-  return knows(view, e.actorId) || anyTargetKnown(view, e, (id) => knows(view, id));
+    return (
+        knows(view, e.actorId) ||
+        anyTargetKnown(view, e, (id) => knows(view, id))
+    );
 }
 
 /** FX-копія запису для гравця: рятунки невидимих не показуються, імена невидимих — «невідомий». */
-export function maskMazeFxAction(view: MazeView | null | undefined, action: BattleAction): BattleAction {
-  const e = view?.disguiseOf ? maskAction(action, view.disguiseOf, view.disguiseNames) : action;
+export function maskMazeFxAction(
+    view: MazeView | null | undefined,
+    action: BattleAction
+): BattleAction {
+    const e = view?.disguiseOf
+        ? maskAction(action, view.disguiseOf, view.disguiseNames)
+        : action;
 
-  if (!hidesFrom(view)) return e;
+    if (!hidesFrom(view)) return e;
 
-  const name = (id: string, current: string) => (knows(view, id) ? current : MAZE_UNKNOWN_NAME);
+    const name = (id: string, current: string) =>
+        knows(view, id) ? current : MAZE_UNKNOWN_NAME;
 
-  const rolls = e.actionDetails?.diceRolls;
+    const rolls = e.actionDetails?.diceRolls;
 
-  return {
-    ...e,
-    actorName: name(e.actorId, e.actorName),
-    targets: (e.targets ?? []).map((t) => ({ ...t, participantName: name(t.participantId, t.participantName) })),
-    hpChanges: (e.hpChanges ?? []).map((h) => ({ ...h, participantName: name(h.participantId, h.participantName) })),
-    ...(rolls && { actionDetails: { ...e.actionDetails, diceRolls: rolls.filter((g) => g.kind !== "save" || knows(view, g.rollerId)) } }),
-  };
+    return {
+        ...e,
+        actorName: name(e.actorId, e.actorName),
+        targets: (e.targets ?? []).map((t) => ({
+            ...t,
+            participantName: name(t.participantId, t.participantName),
+        })),
+        hpChanges: (e.hpChanges ?? []).map((h) => ({
+            ...h,
+            participantName: name(h.participantId, h.participantName),
+        })),
+        ...(rolls && {
+            actionDetails: {
+                ...e.actionDetails,
+                diceRolls: rolls.filter(
+                    (g) => g.kind !== 'save' || knows(view, g.rollerId)
+                ),
+            },
+        }),
+    };
 }
 
 export interface MazeMaskable {
-  effects?: ReadonlyMap<string, ActiveEffect[]>;
-  battle: { battleLog?: BattleAction[]; initiativeOrder?: BattleParticipant[] };
-  turn: { current: BattleParticipant | null; queue: QueueEntry[] };
-  roster: { allies: BattleParticipant[]; enemies: BattleParticipant[] };
+    effects?: ReadonlyMap<string, ActiveEffect[]>;
+    battle: {
+        battleLog?: BattleAction[];
+        initiativeOrder?: BattleParticipant[];
+    };
+    turn: { current: BattleParticipant | null; queue: QueueEntry[] };
+    roster: { allies: BattleParticipant[]; enemies: BattleParticipant[] };
 }
 
 /** Сцена очима гравця в лабіринті: списки, черга, журнал і «ходить …» без прихованих. Сервер і далі шле повну сцену. */
-export function maskMazeScene<T extends MazeMaskable>(input: T, view: MazeView | null | undefined): T {
-  const scene = view?.disguiseOf ? disguiseScene(input, view.disguiseOf, view.disguiseNames) : input;
+export function maskMazeScene<T extends MazeMaskable>(
+    input: T,
+    view: MazeView | null | undefined
+): T {
+    const scene = view?.disguiseOf
+        ? disguiseScene(input, view.disguiseOf, view.disguiseNames)
+        : input;
 
-  if (!hidesFrom(view)) {
-    const log = scene.battle.battleLog ?? [];
+    if (!hidesFrom(view)) {
+        const log = scene.battle.battleLog ?? [];
 
-    return view && log.some((e) => !mazeLogVisible(view, e)) ? { ...scene, battle: { ...scene.battle, battleLog: log.filter((e) => mazeLogVisible(view, e)) } } : scene;
-  }
+        return view && log.some((e) => !mazeLogVisible(view, e))
+            ? {
+                  ...scene,
+                  battle: {
+                      ...scene.battle,
+                      battleLog: log.filter((e) => mazeLogVisible(view, e)),
+                  },
+              }
+            : scene;
+    }
 
-  const { current } = scene.turn;
+    const { current } = scene.turn;
 
-  const masked = current && !knows(view, idOf(current)) ? { ...current, basicInfo: { ...current.basicInfo, name: MAZE_UNKNOWN_NAME, avatar: undefined } } : current;
+    const masked =
+        current && !knows(view, idOf(current))
+            ? {
+                  ...current,
+                  basicInfo: {
+                      ...current.basicInfo,
+                      name: MAZE_UNKNOWN_NAME,
+                      avatar: undefined,
+                  },
+              }
+            : current;
 
-  return {
-    ...scene,
-    battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).filter((e) => mazeLogVisible(view, e)) },
-    turn: { ...scene.turn, current: masked, queue: filterQueueByView(scene.turn.queue, view) },
-    roster: { ...scene.roster, allies: visibleParticipants(view, scene.roster.allies), enemies: visibleParticipants(view, scene.roster.enemies) },
-  } as T;
+    return {
+        ...scene,
+        battle: {
+            ...scene.battle,
+            battleLog: (scene.battle.battleLog ?? []).filter((e) =>
+                mazeLogVisible(view, e)
+            ),
+        },
+        turn: {
+            ...scene.turn,
+            current: masked,
+            queue: filterQueueByView(scene.turn.queue, view),
+        },
+        roster: {
+            ...scene.roster,
+            allies: visibleParticipants(view, scene.roster.allies),
+            enemies: visibleParticipants(view, scene.roster.enemies),
+        },
+    } as T;
 }
 
-function disguiseScene<T extends MazeMaskable>(scene: T, disguiseOf: DisguiseOf, names?: ReadonlyMap<string, string>): T {
-  const by = (list: BattleParticipant[]) => list.map((p) => maskParticipantBy(p, disguiseOf, names));
+function disguiseScene<T extends MazeMaskable>(
+    scene: T,
+    disguiseOf: DisguiseOf,
+    names?: ReadonlyMap<string, string>
+): T {
+    const by = (list: BattleParticipant[]) =>
+        list.map((p) => maskParticipantBy(p, disguiseOf, names));
 
-  const { current } = scene.turn;
+    const { current } = scene.turn;
 
-  const { initiativeOrder } = scene.battle;
+    const { initiativeOrder } = scene.battle;
 
-  const everyone = by([...scene.roster.allies, ...scene.roster.enemies]);
+    const everyone = by([...scene.roster.allies, ...scene.roster.enemies]);
 
-  return {
-    ...scene,
-    ...(scene.effects && { effects: maskEffectMap(scene.effects, disguiseOf, names) }),
-    battle: { ...scene.battle, battleLog: (scene.battle.battleLog ?? []).map((e) => maskAction(e, disguiseOf, names)), ...(initiativeOrder && { initiativeOrder: by(initiativeOrder) }) },
-    turn: { ...scene.turn, current: current && maskParticipantBy(current, disguiseOf, names), queue: maskQueueBy(scene.turn.queue, disguiseOf, names) },
-    roster: { ...scene.roster, allies: everyone.filter((p) => p.basicInfo.side === ParticipantSide.ALLY), enemies: everyone.filter((p) => p.basicInfo.side !== ParticipantSide.ALLY) },
-  } as T;
+    return {
+        ...scene,
+        ...(scene.effects && {
+            effects: maskEffectMap(scene.effects, disguiseOf, names),
+        }),
+        battle: {
+            ...scene.battle,
+            battleLog: (scene.battle.battleLog ?? []).map((e) =>
+                maskAction(e, disguiseOf, names)
+            ),
+            ...(initiativeOrder && { initiativeOrder: by(initiativeOrder) }),
+        },
+        turn: {
+            ...scene.turn,
+            current: current && maskParticipantBy(current, disguiseOf, names),
+            queue: maskQueueBy(scene.turn.queue, disguiseOf, names),
+        },
+        roster: {
+            ...scene.roster,
+            allies: everyone.filter(
+                (p) => p.basicInfo.side === ParticipantSide.ALLY
+            ),
+            enemies: everyone.filter(
+                (p) => p.basicInfo.side !== ParticipantSide.ALLY
+            ),
+        },
+    } as T;
 }

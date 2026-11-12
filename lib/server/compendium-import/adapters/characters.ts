@@ -1,103 +1,358 @@
-import { stableJson } from "../identity";
-import { type Adapter, issue } from "../types";
-import { equipmentText } from "./equipment";
-import { featPrerequisite } from "./feat-prerequisites";
-import { featSpells } from "./feat-spells";
-import { proficiencyText, raceTraits, resistFlags } from "./race-traits";
-import { ABILITIES, abilityChoices, array, description, num, object, skillName, skills, str, uidRef, unsupported } from "./shared";
+import { stableJson } from '../identity';
+import { type Adapter, issue } from '../types';
+import { equipmentText } from './equipment';
+import { featPrerequisite } from './feat-prerequisites';
+import { featSpells } from './feat-spells';
+import { proficiencyText, raceTraits, resistFlags } from './race-traits';
+import {
+    ABILITIES,
+    abilityChoices,
+    array,
+    description,
+    num,
+    object,
+    skillName,
+    skills,
+    str,
+    uidRef,
+    unsupported,
+} from './shared';
 
 export const background: Adapter = (row, ctx) => {
-  const issuesBefore = ctx.issues.length;
+    const issuesBefore = ctx.issues.length;
 
-  const skill = skills(row.skillProficiencies, ctx);
+    const skill = skills(row.skillProficiencies, ctx);
 
-  const customSkills = ctx.issues.length > issuesBefore;
+    const customSkills = ctx.issues.length > issuesBefore;
 
-  const tools = array(row.toolProficiencies).flatMap((v) => Object.entries(object(v)).filter(([k, enabled]) => enabled === true && !/^(?:any|choose)/.test(k)).map(([k]) => k));
+    const tools = array(row.toolProficiencies).flatMap((v) =>
+        Object.entries(object(v))
+            .filter(
+                ([k, enabled]) => enabled === true && !/^(?:any|choose)/.test(k)
+            )
+            .map(([k]) => k)
+    );
 
-  const toolText = proficiencyText(row.toolProficiencies, ctx.t);
+    const toolText = proficiencyText(row.toolProficiencies, ctx.t);
 
-  if (toolText.choice) ctx.issues.push(issue("MANUAL_TOOL_CHOICE", `${ctx.path}.toolProficiencies`, "warning"));
+    if (toolText.choice)
+        ctx.issues.push(
+            issue(
+                'MANUAL_TOOL_CHOICE',
+                `${ctx.path}.toolProficiencies`,
+                'warning'
+            )
+        );
 
-  const languages = proficiencyText(row.languageProficiencies, ctx.t).text;
+    const languages = proficiencyText(row.languageProficiencies, ctx.t).text;
 
-  const head = [toolText.choice ? ctx.t("derived.head.tools", { value: toolText.text }) : "", languages ? ctx.t("derived.head.languages", { value: languages }) : ""].filter(Boolean).join("\n");
+    const head = [
+        toolText.choice
+            ? ctx.t('derived.head.tools', { value: toolText.text })
+            : '',
+        languages ? ctx.t('derived.head.languages', { value: languages }) : '',
+    ]
+        .filter(Boolean)
+        .join('\n');
 
-  const choices = [...abilityChoices(row.ability, ctx), ...skill.choices];
+    const choices = [...abilityChoices(row.ability, ctx), ...skill.choices];
 
-  if (row.startingEquipment !== undefined) ctx.issues.push(issue("MANUAL_EQUIPMENT", `${ctx.path}.startingEquipment`, "warning"));
+    if (row.startingEquipment !== undefined)
+        ctx.issues.push(
+            issue(
+                'MANUAL_EQUIPMENT',
+                `${ctx.path}.startingEquipment`,
+                'warning'
+            )
+        );
 
-  const featRefs = array(row.feats).flatMap((v) => Object.entries(object(v)).filter(([, enabled]) => enabled === true).map(([k]) => k));
+    const featRefs = array(row.feats).flatMap((v) =>
+        Object.entries(object(v))
+            .filter(([, enabled]) => enabled === true)
+            .map(([k]) => k)
+    );
 
-  const refs = featRefs.length === 1 ? [uidRef(featRefs[0], "feat", ["originFeatId"], ctx)] : [];
+    const refs =
+        featRefs.length === 1
+            ? [uidRef(featRefs[0], 'feat', ['originFeatId'], ctx)]
+            : [];
 
-  if (row.feats !== undefined && featRefs.length !== 1) ctx.issues.push(issue("BACKGROUND_FEAT_CHOICE", `${ctx.path}.feats`, "error"));
+    if (row.feats !== undefined && featRefs.length !== 1)
+        ctx.issues.push(
+            issue('BACKGROUND_FEAT_CHOICE', `${ctx.path}.feats`, 'error')
+        );
 
-  const notes = [unsupported(row, ["ability", "feats", "skillProficiencies", "startingEquipment", "toolProficiencies", "languageProficiencies"], ctx), toolText.choice ? `toolProficiencies: ${stableJson(row.toolProficiencies)}` : "", customSkills ? `skillProficiencies: ${stableJson(row.skillProficiencies)}` : ""].filter(Boolean).join("\n");
+    const notes = [
+        unsupported(
+            row,
+            [
+                'ability',
+                'feats',
+                'skillProficiencies',
+                'startingEquipment',
+                'toolProficiencies',
+                'languageProficiencies',
+            ],
+            ctx
+        ),
+        toolText.choice
+            ? `toolProficiencies: ${stableJson(row.toolProficiencies)}`
+            : '',
+        customSkills
+            ? `skillProficiencies: ${stableJson(row.skillProficiencies)}`
+            : '',
+    ]
+        .filter(Boolean)
+        .join('\n');
 
-  const equipment = row.startingEquipment !== undefined ? equipmentText(row.startingEquipment, ctx.t) : "";
+    const equipment =
+        row.startingEquipment !== undefined
+            ? equipmentText(row.startingEquipment, ctx.t)
+            : '';
 
-  return { kind: "backgrounds", body: { name: row.name, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), choices, skillProficiencies: skill.fixed, toolProficiencies: tools, originFeatId: null, equipmentText: equipment || null }, refs, notes };
+    return {
+        kind: 'backgrounds',
+        body: {
+            name: row.name,
+            description: [head, description(row, ctx)]
+                .filter(Boolean)
+                .join('\n\n'),
+            choices,
+            skillProficiencies: skill.fixed,
+            toolProficiencies: tools,
+            originFeatId: null,
+            equipmentText: equipment || null,
+        },
+        refs,
+        notes,
+    };
 };
 
 export const feat: Adapter = (row, ctx) => {
-  const categories: Record<string, string> = { O: "origin", G: "general", FS: "fightingStyle", EB: "epicBoon" };
+    const categories: Record<string, string> = {
+        O: 'origin',
+        G: 'general',
+        FS: 'fightingStyle',
+        EB: 'epicBoon',
+    };
 
-  const type = categories[str(row.category)] ?? "general";
+    const type = categories[str(row.category)] ?? 'general';
 
-  if (row.category !== undefined && !categories[str(row.category)]) ctx.issues.push(issue("UNSUPPORTED_FEAT_CATEGORY", `${ctx.path}.category`));
+    if (row.category !== undefined && !categories[str(row.category)])
+        ctx.issues.push(
+            issue('UNSUPPORTED_FEAT_CATEGORY', `${ctx.path}.category`)
+        );
 
-  const prerequisite = featPrerequisite(row.prerequisite, ctx);
+    const prerequisite = featPrerequisite(row.prerequisite, ctx);
 
-  const skill = skills(row.skillProficiencies, ctx);
+    const skill = skills(row.skillProficiencies, ctx);
 
-  const fixedSkills = skill.fixed.map((id) => ({ id: `import-skill-${id.toLowerCase()}`, label: id, kind: "skill", count: 1, skills: [id] }));
+    const fixedSkills = skill.fixed.map((id) => ({
+        id: `import-skill-${id.toLowerCase()}`,
+        label: id,
+        kind: 'skill',
+        count: 1,
+        skills: [id],
+    }));
 
-  const baseChoices = [...abilityChoices(row.ability, ctx), ...skill.choices, ...fixedSkills];
+    const baseChoices = [
+        ...abilityChoices(row.ability, ctx),
+        ...skill.choices,
+        ...fixedSkills,
+    ];
 
-  const spells = featSpells(row.additionalSpells, ctx, baseChoices.length);
+    const spells = featSpells(row.additionalSpells, ctx, baseChoices.length);
 
-  if (spells.manual.length > 0) ctx.issues.push(issue("MANUAL_FEAT_SPELLS", `${ctx.path}.additionalSpells`, "warning"));
+    if (spells.manual.length > 0)
+        ctx.issues.push(
+            issue(
+                'MANUAL_FEAT_SPELLS',
+                `${ctx.path}.additionalSpells`,
+                'warning'
+            )
+        );
 
-  const resist = row.resist !== undefined ? resistFlags(row.resist) : undefined;
+    const resist =
+        row.resist !== undefined ? resistFlags(row.resist) : undefined;
 
-  if (resist && !resist.complete) ctx.issues.push(issue("MANUAL_FEAT_RESIST", `${ctx.path}.resist`, "warning"));
+    if (resist && !resist.complete)
+        ctx.issues.push(
+            issue('MANUAL_FEAT_RESIST', `${ctx.path}.resist`, 'warning')
+        );
 
-  const abilities = resist && resist.effects.length > 0 ? [{ id: "resist", name: ctx.t("derived.trait.resist"), trigger: { event: "passive" }, effects: resist.effects }] : [];
+    const abilities =
+        resist && resist.effects.length > 0
+            ? [
+                  {
+                      id: 'resist',
+                      name: ctx.t('derived.trait.resist'),
+                      trigger: { event: 'passive' },
+                      effects: resist.effects,
+                  },
+              ]
+            : [];
 
-  const notes = [unsupported(row, ["category", "repeatable", "prerequisite", "ability", "skillProficiencies", "additionalSpells", "resist"], ctx), spells.manual.length > 0 ? `additionalSpells: ${stableJson(spells.manual)}` : "", resist && !resist.complete ? `resist: ${stableJson(row.resist)}` : ""].filter(Boolean).join("\n");
+    const notes = [
+        unsupported(
+            row,
+            [
+                'category',
+                'repeatable',
+                'prerequisite',
+                'ability',
+                'skillProficiencies',
+                'additionalSpells',
+                'resist',
+            ],
+            ctx
+        ),
+        spells.manual.length > 0
+            ? `additionalSpells: ${stableJson(spells.manual)}`
+            : '',
+        resist && !resist.complete ? `resist: ${stableJson(row.resist)}` : '',
+    ]
+        .filter(Boolean)
+        .join('\n');
 
-  return { kind: "feats", body: { name: row.name, description: description(row, ctx), type, repeatable: row.repeatable === true, prerequisite, choices: [...baseChoices, ...spells.choices], abilities }, refs: spells.refs, notes };
+    return {
+        kind: 'feats',
+        body: {
+            name: row.name,
+            description: description(row, ctx),
+            type,
+            repeatable: row.repeatable === true,
+            prerequisite,
+            choices: [...baseChoices, ...spells.choices],
+            abilities,
+        },
+        refs: spells.refs,
+        notes,
+    };
 };
 
 export const race: Adapter = (row, ctx) => {
-  const skill = skills(row.skillProficiencies, ctx);
+    const skill = skills(row.skillProficiencies, ctx);
 
-  const choices = [...abilityChoices(row.ability, ctx), ...skill.choices, ...skill.fixed.map((s) => ({ id: `import-skill-${s.toLowerCase()}`, label: s, kind: "skill", count: 1, skills: [s] }))];
+    const choices = [
+        ...abilityChoices(row.ability, ctx),
+        ...skill.choices,
+        ...skill.fixed.map((s) => ({
+            id: `import-skill-${s.toLowerCase()}`,
+            label: s,
+            kind: 'skill',
+            count: 1,
+            skills: [s],
+        })),
+    ];
 
-  const traits = raceTraits(row, ctx);
+    const traits = raceTraits(row, ctx);
 
-  return { kind: "races", body: { name: row.name, passiveAbility: { description: [traits.head.join("\n"), description(row, ctx)].filter(Boolean).join("\n\n") }, choices, abilities: traits.abilities }, notes: unsupported(row, ["ability", "skillProficiencies", "size", "speed", "darkvision", "blindsight", "tremorsense", "truesight", "languageProficiencies", "resist", "lineage", "traitTags", "age"], ctx) };
+    return {
+        kind: 'races',
+        body: {
+            name: row.name,
+            passiveAbility: {
+                description: [traits.head.join('\n'), description(row, ctx)]
+                    .filter(Boolean)
+                    .join('\n\n'),
+            },
+            choices,
+            abilities: traits.abilities,
+        },
+        notes: unsupported(
+            row,
+            [
+                'ability',
+                'skillProficiencies',
+                'size',
+                'speed',
+                'darkvision',
+                'blindsight',
+                'tremorsense',
+                'truesight',
+                'languageProficiencies',
+                'resist',
+                'lineage',
+                'traitTags',
+                'age',
+            ],
+            ctx
+        ),
+    };
 };
 
 export const gameClass: Adapter = (row, ctx) => {
-  const casterTypes: Record<string, string> = { full: "full", half: "half", "1/2": "half", "1/3": "third", third: "third", pact: "pact", none: "none" };
+    const casterTypes: Record<string, string> = {
+        full: 'full',
+        half: 'half',
+        '1/2': 'half',
+        '1/3': 'third',
+        third: 'third',
+        pact: 'pact',
+        none: 'none',
+    };
 
-  const caster = row.casterProgression === undefined ? "none" : casterTypes[str(row.casterProgression)];
+    const caster =
+        row.casterProgression === undefined
+            ? 'none'
+            : casterTypes[str(row.casterProgression)];
 
-  if (!caster) ctx.issues.push(issue("UNKNOWN_CASTER", `${ctx.path}.casterProgression`, "error"));
+    if (!caster)
+        ctx.issues.push(
+            issue('UNKNOWN_CASTER', `${ctx.path}.casterProgression`, 'error')
+        );
 
-  const hd = num(object(row.hd).faces);
+    const hd = num(object(row.hd).faces);
 
-  if (![6, 8, 10, 12].includes(hd ?? 0)) ctx.issues.push(issue("CLASS_HIT_DIE", `${ctx.path}.hd`, "error"));
+    if (![6, 8, 10, 12].includes(hd ?? 0))
+        ctx.issues.push(issue('CLASS_HIT_DIE', `${ctx.path}.hd`, 'error'));
 
-  const prof = object(row.startingProficiencies);
+    const prof = object(row.startingProficiencies);
 
-  const skill = object(array(prof.skills)[0]);
+    const skill = object(array(prof.skills)[0]);
 
-  const choose = object(skill.choose);
+    const choose = object(skill.choose);
 
-  const fields = { armor: array(prof.armor).map(str).filter(Boolean), weapons: array(prof.weapons).map(str).filter(Boolean), tools: array(prof.tools).map(str).filter(Boolean) };
+    const fields = {
+        armor: array(prof.armor).map(str).filter(Boolean),
+        weapons: array(prof.weapons).map(str).filter(Boolean),
+        tools: array(prof.tools).map(str).filter(Boolean),
+    };
 
-  return { kind: "classes", body: { name: row.name, hitDie: hd, caster: caster ?? "none", savingThrows: array(row.proficiency).map((s) => ABILITIES[str(s)]).filter(Boolean), proficiencies: fields, spellcastingAbility: ABILITIES[str(row.spellcastingAbility)] ?? null, skillChoices: { count: num(choose.count) ?? 0, from: array(choose.from).map((s) => skillName(str(s))).filter(Boolean) }, features: [], subclasses: [], subclassLevel: null }, notes: unsupported(row, ["hd", "proficiency", "casterProgression", "spellcastingAbility", "startingProficiencies", "classFeatures", "optionalfeatureProgression"], ctx) };
+    return {
+        kind: 'classes',
+        body: {
+            name: row.name,
+            hitDie: hd,
+            caster: caster ?? 'none',
+            savingThrows: array(row.proficiency)
+                .map((s) => ABILITIES[str(s)])
+                .filter(Boolean),
+            proficiencies: fields,
+            spellcastingAbility:
+                ABILITIES[str(row.spellcastingAbility)] ?? null,
+            skillChoices: {
+                count: num(choose.count) ?? 0,
+                from: array(choose.from)
+                    .map((s) => skillName(str(s)))
+                    .filter(Boolean),
+            },
+            features: [],
+            subclasses: [],
+            subclassLevel: null,
+        },
+        notes: unsupported(
+            row,
+            [
+                'hd',
+                'proficiency',
+                'casterProgression',
+                'spellcastingAbility',
+                'startingProficiencies',
+                'classFeatures',
+                'optionalfeatureProgression',
+            ],
+            ctx
+        ),
+    };
 };

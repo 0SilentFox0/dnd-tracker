@@ -1,68 +1,88 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_CURRENCY } from "@/lib/constants/inventory";
-import { formatCoins, gainCoins, spendCoins, toCopper } from "@/lib/utils/inventory/money";
+import { DEFAULT_CURRENCY } from '@/lib/constants/inventory';
+import {
+    formatCoins,
+    gainCoins,
+    spendCoins,
+    toCopper,
+} from '@/lib/utils/inventory/money';
 
 const p = (gp: number, sp: number, cp: number) => ({ gp, sp, cp });
 
-describe("spendCoins", () => {
-  it("pays with the named coin first", () => {
-    expect(spendCoins(p(10, 5, 5), 3, "gp")).toEqual(p(7, 5, 5));
-  });
+describe('spendCoins', () => {
+    it('pays with the named coin first', () => {
+        expect(spendCoins(p(10, 5, 5), 3, 'gp')).toEqual(p(7, 5, 5));
+    });
 
-  it("uses smaller coins when the named coin runs out", () => {
-    expect(spendCoins(p(0, 20, 0), 1, "gp")).toEqual(p(0, 10, 0));
-  });
+    it('uses smaller coins when the named coin runs out', () => {
+        expect(spendCoins(p(0, 20, 0), 1, 'gp')).toEqual(p(0, 10, 0));
+    });
 
-  it("breaks the smallest bigger coin and returns change", () => {
-    expect(spendCoins(p(1, 0, 0), 5, "cp")).toEqual(p(0, 9, 5));
-    expect(spendCoins(p(1, 1, 0), 5, "cp")).toEqual(p(1, 0, 5));
-  });
+    it('breaks the smallest bigger coin and returns change', () => {
+        expect(spendCoins(p(1, 0, 0), 5, 'cp')).toEqual(p(0, 9, 5));
+        expect(spendCoins(p(1, 1, 0), 5, 'cp')).toEqual(p(1, 0, 5));
+    });
 
-  it("returns null when total is not enough", () => {
-    expect(spendCoins(p(0, 9, 9), 1, "gp")).toBeNull();
-  });
+    it('returns null when total is not enough', () => {
+        expect(spendCoins(p(0, 9, 9), 1, 'gp')).toBeNull();
+    });
 
-  it("never produces negative counts and preserves total", () => {
-    const before = p(3, 7, 2);
+    it('never produces negative counts and preserves total', () => {
+        const before = p(3, 7, 2);
 
-    const after = spendCoins(before, 46, "cp")!;
+        const after = spendCoins(before, 46, 'cp')!;
 
-    expect(Object.values(after).every((n) => n >= 0)).toBe(true);
-    expect(toCopper(after)).toBe(toCopper(before) - 46);
-  });
+        expect(Object.values(after).every((n) => n >= 0)).toBe(true);
+        expect(toCopper(after)).toBe(toCopper(before) - 46);
+    });
 });
 
-describe("gainCoins / formatCoins", () => {
-  it("adds without converting", () => {
-    expect(gainCoins(p(1, 0, 0), 25, "sp")).toEqual(p(1, 25, 0));
-  });
+describe('gainCoins / formatCoins', () => {
+    it('adds without converting', () => {
+        expect(gainCoins(p(1, 0, 0), 25, 'sp')).toEqual(p(1, 25, 0));
+    });
 
-  it("formats signed deltas", () => {
-    expect(formatCoins({ gp: -50 }, (c) => ({ gp: "зм", sp: "см", cp: "мм" })[c])).toBe("−50 зм");
-    expect(formatCoins({ gp: 1, cp: 5 }, (c) => ({ gp: "зм", sp: "см", cp: "мм" })[c])).toBe("+1 зм +5 мм");
-  });
+    it('formats signed deltas', () => {
+        expect(
+            formatCoins(
+                { gp: -50 },
+                (c) => ({ gp: 'зм', sp: 'см', cp: 'мм' })[c]
+            )
+        ).toBe('−50 зм');
+        expect(
+            formatCoins(
+                { gp: 1, cp: 5 },
+                (c) => ({ gp: 'зм', sp: 'см', cp: 'мм' })[c]
+            )
+        ).toBe('+1 зм +5 мм');
+    });
 });
 
-describe("12/20 currency table", () => {
-  const WFRP = { gp: 240, sp: 12, cp: 1 };
+describe('12/20 currency table', () => {
+    const WFRP = { gp: 240, sp: 12, cp: 1 };
 
-  it("converts to pence", () => expect(toCopper(p(1, 1, 1), WFRP)).toBe(253));
+    it('converts to pence', () => expect(toCopper(p(1, 1, 1), WFRP)).toBe(253));
 
-  it("breaks a gold crown into 12-table change", () => expect(spendCoins(p(1, 0, 0), 1, "sp", WFRP)).toEqual(p(0, 19, 0)));
+    it('breaks a gold crown into 12-table change', () =>
+        expect(spendCoins(p(1, 0, 0), 1, 'sp', WFRP)).toEqual(p(0, 19, 0)));
 
-  it("pays 5 shillings from a crown", () => expect(spendCoins(p(1, 0, 0), 5, "sp", WFRP)).toEqual(p(0, 15, 0)));
+    it('pays 5 shillings from a crown', () =>
+        expect(spendCoins(p(1, 0, 0), 5, 'sp', WFRP)).toEqual(p(0, 15, 0)));
 
-  it("returns null when short", () => expect(spendCoins(p(0, 1, 0), 1, "gp", WFRP)).toBeNull());
+    it('returns null when short', () =>
+        expect(spendCoins(p(0, 1, 0), 1, 'gp', WFRP)).toBeNull());
 
-  it("zero amount changes nothing", () => expect(spendCoins(p(1, 2, 3), 0, "sp", WFRP)).toEqual(p(1, 2, 3)));
+    it('zero amount changes nothing', () =>
+        expect(spendCoins(p(1, 2, 3), 0, 'sp', WFRP)).toEqual(p(1, 2, 3)));
 
-  it("default table is untouched", () => expect(toCopper(p(1, 1, 1))).toBe(111));
+    it('default table is untouched', () =>
+        expect(toCopper(p(1, 1, 1))).toBe(111));
 });
 
-describe("DEFAULT_CURRENCY", () => {
-  it("keeps the d20 table and inventory labels", () => {
-    expect(DEFAULT_CURRENCY.value).toEqual({ gp: 100, sp: 10, cp: 1 });
-    expect(DEFAULT_CURRENCY.labelKeys.gp).toBe("inventory.coins.gp");
-  });
+describe('DEFAULT_CURRENCY', () => {
+    it('keeps the d20 table and inventory labels', () => {
+        expect(DEFAULT_CURRENCY.value).toEqual({ gp: 100, sp: 10, cp: 1 });
+        expect(DEFAULT_CURRENCY.labelKeys.gp).toBe('inventory.coins.gp');
+    });
 });

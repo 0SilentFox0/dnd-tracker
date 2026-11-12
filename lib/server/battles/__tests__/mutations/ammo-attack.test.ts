@@ -1,103 +1,234 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { context } from "./fixtures";
+import { context } from './fixtures';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { attackBodySchema } from "@/lib/schemas/battles";
-import { validateAttackPreview } from "@/lib/server/battles/dice";
-import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { applyScenePatch } from "@/lib/utils/battle/scene-state";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import { attackBodySchema } from '@/lib/schemas/battles';
+import { validateAttackPreview } from '@/lib/server/battles/dice';
+import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
+import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { applyScenePatch } from '@/lib/utils/battle/scene-state';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
-const bow: BattleAttack = { id: "bow", name: "Bow", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d6", damageType: "piercing", ammo: { capacity: 2, reload: 1 } };
-
-const knife: BattleAttack = { id: "kn", name: "Knife", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d4", damageType: "slashing" };
-
-const fighter = (id: string, side: ParticipantSide, battleData: Partial<BattleParticipant["battleData"]> = {}): BattleParticipant => {
-  const p = makeParticipant({ id, side, hp: 20, maxHp: 20 });
-
-  return { ...p, basicInfo: { ...p.basicInfo, battleId: "b1", controlledBy: "dm" }, battleData: { ...p.battleData, attacks: [bow, knife], ...battleData } };
+const bow: BattleAttack = {
+    id: 'bow',
+    name: 'Bow',
+    type: AttackType.RANGED,
+    attackBonus: 0,
+    damageDice: '1d6',
+    damageType: 'piercing',
+    ammo: { capacity: 2, reload: 1 },
 };
 
-const ctxOf = (archer: BattleParticipant, turnIndex = 0): BattleMutationContext => {
-  const base = context({ participants: [archer, fighter("t", ParticipantSide.ENEMY), fighter("o", ParticipantSide.ALLY)], isDM: true });
-
-  return { ...base, scene: { ...base.scene, turnIndex }, rng: () => 0.5 };
+const knife: BattleAttack = {
+    id: 'kn',
+    name: 'Knife',
+    type: AttackType.MELEE,
+    attackBonus: 0,
+    damageDice: '1d4',
+    damageType: 'slashing',
 };
 
-const body = (attackId: string, endTurn = false) => attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId, d20Roll: 10, damageRolls: [3], endTurn });
+const fighter = (
+    id: string,
+    side: ParticipantSide,
+    battleData: Partial<BattleParticipant['battleData']> = {}
+): BattleParticipant => {
+    const p = makeParticipant({ id, side, hp: 20, maxHp: 20 });
 
-const fresh = (p: BattleParticipant): BattleParticipant => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedAction: false } });
+    return {
+        ...p,
+        basicInfo: { ...p.basicInfo, battleId: 'b1', controlledBy: 'dm' },
+        battleData: { ...p.battleData, attacks: [bow, knife], ...battleData },
+    };
+};
 
-const ammoOf = (participants: BattleParticipant[], id = "a") => participants.find((p) => p.basicInfo.id === id)!.battleData;
+const ctxOf = (
+    archer: BattleParticipant,
+    turnIndex = 0
+): BattleMutationContext => {
+    const base = context({
+        participants: [
+            archer,
+            fighter('t', ParticipantSide.ENEMY),
+            fighter('o', ParticipantSide.ALLY),
+        ],
+        isDM: true,
+    });
 
-describe("attack mutation ammo", () => {
-  it("spends one shot per ranged attack and arms reload at zero", async () => {
-    const first = await attackMutation(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 2 } })), body("bow"));
+    return { ...base, scene: { ...base.scene, turnIndex }, rng: () => 0.5 };
+};
 
-    expect(ammoOf(first.participants).ammo).toEqual({ bow: 1 });
+const body = (attackId: string, endTurn = false) =>
+    attackBodySchema.parse({
+        attackerId: 'a',
+        targetId: 't',
+        attackId,
+        d20Roll: 10,
+        damageRolls: [3],
+        endTurn,
+    });
 
-    const second = await attackMutation(ctxOf(fresh(first.participants.find((p) => p.basicInfo.id === "a")!)), body("bow"));
+const fresh = (p: BattleParticipant): BattleParticipant => ({
+    ...p,
+    actionFlags: { ...p.actionFlags, hasUsedAction: false },
+});
 
-    expect(ammoOf(second.participants).ammo).toEqual({ bow: 0 });
-    expect(ammoOf(second.participants).reload).toEqual({ bow: 2 });
-  });
+const ammoOf = (participants: BattleParticipant[], id = 'a') =>
+    participants.find((p) => p.basicInfo.id === id)!.battleData;
 
-  it("rejects an empty weapon without state change", async () => {
-    const ctx = ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 0 } }));
+describe('attack mutation ammo', () => {
+    it('spends one shot per ranged attack and arms reload at zero', async () => {
+        const first = await attackMutation(
+            ctxOf(fighter('a', ParticipantSide.ALLY, { ammo: { bow: 2 } })),
+            body('bow')
+        );
 
-    await expect(attackMutation(ctx, body("bow"))).rejects.toMatchObject({ message: API_ERRORS.OUT_OF_AMMO });
-    expect(ctx.participants[0].battleData.ammo).toEqual({ bow: 0 });
-  });
+        expect(ammoOf(first.participants).ammo).toEqual({ bow: 1 });
 
-  it("rejects while reloading", async () => {
-    const ctx = ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 0 }, reload: { bow: 1 } }));
+        const second = await attackMutation(
+            ctxOf(
+                fresh(first.participants.find((p) => p.basicInfo.id === 'a')!)
+            ),
+            body('bow')
+        );
 
-    await expect(attackMutation(ctx, body("bow"))).rejects.toMatchObject({ message: API_ERRORS.WEAPON_RELOADING });
-  });
+        expect(ammoOf(second.participants).ammo).toEqual({ bow: 0 });
+        expect(ammoOf(second.participants).reload).toEqual({ bow: 2 });
+    });
 
-  it("leaves melee and legacy participants alone", async () => {
-    const melee = await attackMutation(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 2 } })), body("kn"));
+    it('rejects an empty weapon without state change', async () => {
+        const ctx = ctxOf(
+            fighter('a', ParticipantSide.ALLY, { ammo: { bow: 0 } })
+        );
 
-    expect(ammoOf(melee.participants).ammo).toEqual({ bow: 2 });
+        await expect(attackMutation(ctx, body('bow'))).rejects.toMatchObject({
+            message: API_ERRORS.OUT_OF_AMMO,
+        });
+        expect(ctx.participants[0].battleData.ammo).toEqual({ bow: 0 });
+    });
 
-    const legacy = await attackMutation(ctxOf(fighter("a", ParticipantSide.ALLY)), body("bow"));
+    it('rejects while reloading', async () => {
+        const ctx = ctxOf(
+            fighter('a', ParticipantSide.ALLY, {
+                ammo: { bow: 0 },
+                reload: { bow: 1 },
+            })
+        );
 
-    expect(ammoOf(legacy.participants).ammo).toBeUndefined();
-  });
+        await expect(attackMutation(ctx, body('bow'))).rejects.toMatchObject({
+            message: API_ERRORS.WEAPON_RELOADING,
+        });
+    });
 
-  it("owner turn end ticks reload, refilling after the countdown", async () => {
-    let ctx = ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 1 } }));
+    it('leaves melee and legacy participants alone', async () => {
+        const melee = await attackMutation(
+            ctxOf(fighter('a', ParticipantSide.ALLY, { ammo: { bow: 2 } })),
+            body('kn')
+        );
 
-    const emptied = await attackMutation(ctx, body("bow", true));
+        expect(ammoOf(melee.participants).ammo).toEqual({ bow: 2 });
 
-    expect(ammoOf(emptied.participants).reload).toEqual({ bow: 1 });
-    ctx = { ...ctx, participants: emptied.participants.map(fresh), scene: applyScenePatch(ctx.scene, emptied.scene ?? {}) };
+        const legacy = await attackMutation(
+            ctxOf(fighter('a', ParticipantSide.ALLY)),
+            body('bow')
+        );
 
-    const owner = ctx.participants.findIndex((p) => p.basicInfo.id === "a");
+        expect(ammoOf(legacy.participants).ammo).toBeUndefined();
+    });
 
-    const knifeHit = await attackMutation({ ...ctx, scene: { ...ctx.scene, turnIndex: owner } }, attackBodySchema.parse({ attackerId: "a", targetId: "t", attackId: "kn", d20Roll: 10, damageRolls: [2], endTurn: true }));
+    it('owner turn end ticks reload, refilling after the countdown', async () => {
+        let ctx = ctxOf(
+            fighter('a', ParticipantSide.ALLY, { ammo: { bow: 1 } })
+        );
 
-    expect(ammoOf(knifeHit.participants)).toMatchObject({ ammo: { bow: 2 } });
-    expect(ammoOf(knifeHit.participants).reload).toEqual({});
-  });
+        const emptied = await attackMutation(ctx, body('bow', true));
 
-  it("another participant's turn end does not tick", async () => {
-    const ctx = ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 0 }, reload: { bow: 2 } }), 1);
+        expect(ammoOf(emptied.participants).reload).toEqual({ bow: 1 });
+        ctx = {
+            ...ctx,
+            participants: emptied.participants.map(fresh),
+            scene: applyScenePatch(ctx.scene, emptied.scene ?? {}),
+        };
 
-    const out = await attackMutation(ctx, attackBodySchema.parse({ attackerId: "t", targetId: "o", attackId: "kn", d20Roll: 10, damageRolls: [2], endTurn: true }));
+        const owner = ctx.participants.findIndex((p) => p.basicInfo.id === 'a');
 
-    expect(ammoOf(out.participants).reload).toEqual({ bow: 2 });
-  });
+        const knifeHit = await attackMutation(
+            { ...ctx, scene: { ...ctx.scene, turnIndex: owner } },
+            attackBodySchema.parse({
+                attackerId: 'a',
+                targetId: 't',
+                attackId: 'kn',
+                d20Roll: 10,
+                damageRolls: [2],
+                endTurn: true,
+            })
+        );
 
-  it("assistant preview rejects an empty or reloading weapon like the real attack", () => {
-    const preview = { attackerId: "a", targetId: "t", attackId: "bow", d20Roll: 1 };
+        expect(ammoOf(knifeHit.participants)).toMatchObject({
+            ammo: { bow: 2 },
+        });
+        expect(ammoOf(knifeHit.participants).reload).toEqual({});
+    });
 
-    expect(() => validateAttackPreview(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 0 } })), preview)).toThrow(expect.objectContaining({ message: API_ERRORS.OUT_OF_AMMO }));
-    expect(() => validateAttackPreview(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 0 }, reload: { bow: 1 } })), preview)).toThrow(expect.objectContaining({ message: API_ERRORS.WEAPON_RELOADING }));
-    expect(() => validateAttackPreview(ctxOf(fighter("a", ParticipantSide.ALLY, { ammo: { bow: 2 } })), preview)).not.toThrow();
-  });
+    it("another participant's turn end does not tick", async () => {
+        const ctx = ctxOf(
+            fighter('a', ParticipantSide.ALLY, {
+                ammo: { bow: 0 },
+                reload: { bow: 2 },
+            }),
+            1
+        );
+
+        const out = await attackMutation(
+            ctx,
+            attackBodySchema.parse({
+                attackerId: 't',
+                targetId: 'o',
+                attackId: 'kn',
+                d20Roll: 10,
+                damageRolls: [2],
+                endTurn: true,
+            })
+        );
+
+        expect(ammoOf(out.participants).reload).toEqual({ bow: 2 });
+    });
+
+    it('assistant preview rejects an empty or reloading weapon like the real attack', () => {
+        const preview = {
+            attackerId: 'a',
+            targetId: 't',
+            attackId: 'bow',
+            d20Roll: 1,
+        };
+
+        expect(() =>
+            validateAttackPreview(
+                ctxOf(fighter('a', ParticipantSide.ALLY, { ammo: { bow: 0 } })),
+                preview
+            )
+        ).toThrow(expect.objectContaining({ message: API_ERRORS.OUT_OF_AMMO }));
+        expect(() =>
+            validateAttackPreview(
+                ctxOf(
+                    fighter('a', ParticipantSide.ALLY, {
+                        ammo: { bow: 0 },
+                        reload: { bow: 1 },
+                    })
+                ),
+                preview
+            )
+        ).toThrow(
+            expect.objectContaining({ message: API_ERRORS.WEAPON_RELOADING })
+        );
+        expect(() =>
+            validateAttackPreview(
+                ctxOf(fighter('a', ParticipantSide.ALLY, { ammo: { bow: 2 } })),
+                preview
+            )
+        ).not.toThrow();
+    });
 });

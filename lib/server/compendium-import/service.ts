@@ -1,301 +1,683 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { z } from "zod";
+import { createHmac, timingSafeEqual } from 'node:crypto';
+import { z } from 'zod';
 
-import { type CustomConditionRule, deriveCustomConditions } from "./adapters/custom-conditions";
-import { buildMediaQueue, type MediaReportState, summarizeQueue } from "./media/queue";
-import { adaptCompendium } from "./adapt";
-import { digest } from "./identity";
-import { byteLength, COMPENDIUM_LIMITS, CompendiumError, type JsonRecord, parseCompendium } from "./parse";
-import { ADAPTER_VERSION, buildImportPlan, type ImportPlan, type PlanContext, type PlannedWrite } from "./plan";
-import { type AdaptedEntry, type AdaptOptions, type ImportIssue, issue, TARGET_KINDS, type TargetKind } from "./types";
+import {
+    type CustomConditionRule,
+    deriveCustomConditions,
+} from './adapters/custom-conditions';
+import {
+    buildMediaQueue,
+    type MediaReportState,
+    summarizeQueue,
+} from './media/queue';
+import { adaptCompendium } from './adapt';
+import { digest } from './identity';
+import {
+    byteLength,
+    COMPENDIUM_LIMITS,
+    CompendiumError,
+    type JsonRecord,
+    parseCompendium,
+} from './parse';
+import {
+    ADAPTER_VERSION,
+    buildImportPlan,
+    type ImportPlan,
+    type PlanContext,
+    type PlannedWrite,
+} from './plan';
+import {
+    type AdaptedEntry,
+    type AdaptOptions,
+    type ImportIssue,
+    issue,
+    TARGET_KINDS,
+    type TargetKind,
+} from './types';
 
-import { COMPENDIUM_INFO_ISSUE_CODES } from "@/lib/constants/compendium-import";
-import type { Locale } from "@/lib/i18n/config";
-import { remapIds } from "@/lib/server/templates/remap-ids";
-import type { Actor } from "@/lib/utils/api/actor";
-import { isRecord } from "@/lib/utils/common/is-record";
-import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
+import { COMPENDIUM_INFO_ISSUE_CODES } from '@/lib/constants/compendium-import';
+import type { Locale } from '@/lib/i18n/config';
+import { remapIds } from '@/lib/server/templates/remap-ids';
+import type { Actor } from '@/lib/utils/api/actor';
+import { isRecord } from '@/lib/utils/common/is-record';
+import { RulesetPatchSchema } from '@/lib/utils/rules/schema';
 
-export interface DependencyChoice { refKey: string; templateId: string; kind: TargetKind; localId: string; edition: "classic" | "one" | "unknown" }
-export interface ImportInput extends AdaptOptions { json: string; bindings?: Record<string, { kind: TargetKind; id: string }>; overwriteKeys?: string[]; excludedKeys?: string[]; dependencies?: DependencyChoice[]; allowMixedEdition?: boolean; rulesPatch?: JsonRecord }
+export interface DependencyChoice {
+    refKey: string;
+    templateId: string;
+    kind: TargetKind;
+    localId: string;
+    edition: 'classic' | 'one' | 'unknown';
+}
+export interface ImportInput extends AdaptOptions {
+    json: string;
+    bindings?: Record<string, { kind: TargetKind; id: string }>;
+    overwriteKeys?: string[];
+    excludedKeys?: string[];
+    dependencies?: DependencyChoice[];
+    allowMixedEdition?: boolean;
+    rulesPatch?: JsonRecord;
+}
 
 const targetKind = z.enum(TARGET_KINDS);
 
-const safeKey = z.string().max(2000).refine((s) => !["__proto__", "constructor", "prototype"].includes(s));
+const safeKey = z
+    .string()
+    .max(2000)
+    .refine((s) => !['__proto__', 'constructor', 'prototype'].includes(s));
 
-const boundedRecord = <T extends z.ZodType>(schema: T) => z.record(safeKey, schema).refine((v) => Object.keys(v).length <= 2000);
+const boundedRecord = <T extends z.ZodType>(schema: T) =>
+    z.record(safeKey, schema).refine((v) => Object.keys(v).length <= 2000);
 
 export const ImportInputSchema = z.strictObject({
-  json: z.string().max(COMPENDIUM_LIMITS.bytes),
-  categories: z.array(z.string().min(1).max(100)).max(100).optional(),
-  sourceBindings: boundedRecord(z.string().min(1).max(128)).optional(),
-  bindings: boundedRecord(z.strictObject({ kind: targetKind, id: z.string().min(1).max(100) })).optional(),
-  overwriteKeys: z.array(safeKey).max(2000).optional(),
-  excludedKeys: z.array(safeKey).max(2000).optional(),
-  excludedPaths: z.array(z.string().regex(/^[a-zA-Z][a-zA-Z0-9]*\[\d+\]$/)).max(2000).optional(),
-  dependencies: z.array(z.strictObject({ refKey: safeKey, templateId: z.string().min(1).max(100), kind: targetKind, localId: z.string().min(1).max(100), edition: z.enum(["classic", "one", "unknown"]) })).max(2000).optional(),
-  allowMixedEdition: z.boolean().optional(),
-  rulesPatch: RulesetPatchSchema.optional(),
+    json: z.string().max(COMPENDIUM_LIMITS.bytes),
+    categories: z.array(z.string().min(1).max(100)).max(100).optional(),
+    sourceBindings: boundedRecord(z.string().min(1).max(128)).optional(),
+    bindings: boundedRecord(
+        z.strictObject({ kind: targetKind, id: z.string().min(1).max(100) })
+    ).optional(),
+    overwriteKeys: z.array(safeKey).max(2000).optional(),
+    excludedKeys: z.array(safeKey).max(2000).optional(),
+    excludedPaths: z
+        .array(z.string().regex(/^[a-zA-Z][a-zA-Z0-9]*\[\d+\]$/))
+        .max(2000)
+        .optional(),
+    dependencies: z
+        .array(
+            z.strictObject({
+                refKey: safeKey,
+                templateId: z.string().min(1).max(100),
+                kind: targetKind,
+                localId: z.string().min(1).max(100),
+                edition: z.enum(['classic', 'one', 'unknown']),
+            })
+        )
+        .max(2000)
+        .optional(),
+    allowMixedEdition: z.boolean().optional(),
+    rulesPatch: RulesetPatchSchema.optional(),
 });
 
 function validatedInput(input: ImportInput): ImportInput {
-  const parsed = ImportInputSchema.safeParse(input);
+    const parsed = ImportInputSchema.safeParse(input);
 
-  if (!parsed.success) throw new CompendiumError("INVALID_INPUT");
+    if (!parsed.success) throw new CompendiumError('INVALID_INPUT');
 
-  return parsed.data;
+    return parsed.data;
 }
 
 export interface CompendiumReport {
-  adapterVersion: string;
-  runId?: string;
-  counts: { created: number; updated: number; unchanged: number; errors: number };
-  rows: Array<{ canonicalKey: string; kind: TargetKind; targetId: string; status: string; coverage: "native" | "partial" | "manual"; issues: ImportIssue[] }>;
-  nextActions: ImportIssue[];
-  recommendedRulesPatch?: JsonRecord;
-  readyToImport: boolean;
-  readyToPlay: boolean;
-  sources: JsonRecord[];
-  editionSummary: Record<string, number>;
-  countsByCategory: Record<string, { present: number; mapped: number; partial: number; skipped: number }>;
-  issueCounts: Record<string, number>;
-  omittedIssues: number;
-  media?: MediaReportState;
+    adapterVersion: string;
+    runId?: string;
+    counts: {
+        created: number;
+        updated: number;
+        unchanged: number;
+        errors: number;
+    };
+    rows: Array<{
+        canonicalKey: string;
+        kind: TargetKind;
+        targetId: string;
+        status: string;
+        coverage: 'native' | 'partial' | 'manual';
+        issues: ImportIssue[];
+    }>;
+    nextActions: ImportIssue[];
+    recommendedRulesPatch?: JsonRecord;
+    readyToImport: boolean;
+    readyToPlay: boolean;
+    sources: JsonRecord[];
+    editionSummary: Record<string, number>;
+    countsByCategory: Record<
+        string,
+        { present: number; mapped: number; partial: number; skipped: number }
+    >;
+    issueCounts: Record<string, number>;
+    omittedIssues: number;
+    media?: MediaReportState;
 }
-export interface RepositoryContext extends PlanContext { extraEntries?: AdaptedEntry[]; hasCharacters?: boolean; classesEnabled?: boolean; hasClasses?: boolean; customConditionKeys?: string[] }
+export interface RepositoryContext extends PlanContext {
+    extraEntries?: AdaptedEntry[];
+    hasCharacters?: boolean;
+    classesEnabled?: boolean;
+    hasClasses?: boolean;
+    customConditionKeys?: string[];
+}
 export interface ImportRepository {
-  authorize(actor: Actor): Promise<void>;
-  loadContext(actor: Actor, input: ImportInput, entries?: AdaptedEntry[]): Promise<RepositoryContext>;
-  findRun(actor: Actor, key: string): Promise<{ requestHash: string; report: CompendiumReport } | undefined>;
-  transaction<T>(actor: Actor, callback: (repository: ImportRepository) => Promise<T>): Promise<T>;
-  write(actor: Actor, row: PlannedWrite): Promise<string>;
-  saveEntry(actor: Actor, row: PlannedWrite): Promise<void>;
-  saveSources(actor: Actor, sources: JsonRecord[]): Promise<void>;
-  saveRun(actor: Actor, key: string, requestHash: string, report: CompendiumReport): Promise<void>;
-  applyRules?(actor: Actor, patch: JsonRecord): Promise<void>;
+    authorize(actor: Actor): Promise<void>;
+    loadContext(
+        actor: Actor,
+        input: ImportInput,
+        entries?: AdaptedEntry[]
+    ): Promise<RepositoryContext>;
+    findRun(
+        actor: Actor,
+        key: string
+    ): Promise<{ requestHash: string; report: CompendiumReport } | undefined>;
+    transaction<T>(
+        actor: Actor,
+        callback: (repository: ImportRepository) => Promise<T>
+    ): Promise<T>;
+    write(actor: Actor, row: PlannedWrite): Promise<string>;
+    saveEntry(actor: Actor, row: PlannedWrite): Promise<void>;
+    saveSources(actor: Actor, sources: JsonRecord[]): Promise<void>;
+    saveRun(
+        actor: Actor,
+        key: string,
+        requestHash: string,
+        report: CompendiumReport
+    ): Promise<void>;
+    applyRules?(actor: Actor, patch: JsonRecord): Promise<void>;
 }
 
-const requireActor = (actor: Actor) => { if (!actor.isDM || actor.via !== "session") throw new CompendiumError("FORBIDDEN"); };
+const requireActor = (actor: Actor) => {
+    if (!actor.isDM || actor.via !== 'session')
+        throw new CompendiumError('FORBIDDEN');
+};
 
-function signingKey(secret: string) { if (typeof secret !== "string" || secret.length < 32) throw new CompendiumError("PREVIEW_SECRET_REQUIRED");
+function signingKey(secret: string) {
+    if (typeof secret !== 'string' || secret.length < 32)
+        throw new CompendiumError('PREVIEW_SECRET_REQUIRED');
 
- return secret; }
-
-const signature = (body: string, secret: string) => createHmac("sha256", signingKey(secret)).update(body).digest("base64url");
-
-function tokenFor(actor: Actor, fingerprint: string, planHash: string, secret: string) {
-  const data = Buffer.from(JSON.stringify({ user: actor.userId, campaign: actor.campaignId, fingerprint, planHash, expires: Date.now() + 15 * 60_000 })).toString("base64url");
-
-  return `${data}.${signature(data, secret)}`;
+    return secret;
 }
 
-function tokenData(actor: Actor, token: string, fingerprint: string, secret: string): JsonRecord {
-  const [body, supplied, extra] = token.split(".");
+const signature = (body: string, secret: string) =>
+    createHmac('sha256', signingKey(secret)).update(body).digest('base64url');
 
-  if (!body || !supplied || extra || token.length > 4096) throw new CompendiumError("PREVIEW_INVALID");
+function tokenFor(
+    actor: Actor,
+    fingerprint: string,
+    planHash: string,
+    secret: string
+) {
+    const data = Buffer.from(
+        JSON.stringify({
+            user: actor.userId,
+            campaign: actor.campaignId,
+            fingerprint,
+            planHash,
+            expires: Date.now() + 15 * 60_000,
+        })
+    ).toString('base64url');
 
-  const expected = Buffer.from(signature(body, secret));
-
-  const got = Buffer.from(supplied);
-
-  if (got.length !== expected.length || !timingSafeEqual(got, expected)) throw new CompendiumError("PREVIEW_INVALID");
-
-  let data: unknown;
-
-  try { data = JSON.parse(Buffer.from(body, "base64url").toString("utf8")); } catch { throw new CompendiumError("PREVIEW_INVALID"); }
-
-  if (!isRecord(data) || data.user !== actor.userId || data.campaign !== actor.campaignId || data.fingerprint !== fingerprint || typeof data.expires !== "number" || data.expires < Date.now()) throw new CompendiumError("PREVIEW_STALE");
-
-  return data;
+    return `${data}.${signature(data, secret)}`;
 }
 
-const CLASS_DEPENDENT_KINDS = new Set<TargetKind>(["races", "backgrounds", "feats"]);
+function tokenData(
+    actor: Actor,
+    token: string,
+    fingerprint: string,
+    secret: string
+): JsonRecord {
+    const [body, supplied, extra] = token.split('.');
 
-interface ClassesMode { enabled: boolean; exists: boolean }
+    if (!body || !supplied || extra || token.length > 4096)
+        throw new CompendiumError('PREVIEW_INVALID');
 
-function classesModeOf(plan: ImportPlan, input: ImportInput, ctx: RepositoryContext): ClassesMode | undefined {
-  if (ctx.classesEnabled === undefined && ctx.hasClasses === undefined) return;
+    const expected = Buffer.from(signature(body, secret));
 
-  const patched = isRecord(input.rulesPatch?.classes) ? input.rulesPatch.classes.enabled : undefined;
+    const got = Buffer.from(supplied);
 
-  return { enabled: typeof patched === "boolean" ? patched : ctx.classesEnabled === true, exists: ctx.hasClasses === true || plan.writes.some((w) => w.kind === "classes") };
-}
+    if (got.length !== expected.length || !timingSafeEqual(got, expected))
+        throw new CompendiumError('PREVIEW_INVALID');
 
-function customConditionsToOffer(root: JsonRecord, input: ImportInput, ctx: RepositoryContext): CustomConditionRule[] {
-  const patched = isRecord(input.rulesPatch?.conditions) && Array.isArray(input.rulesPatch.conditions.custom) ? input.rulesPatch.conditions.custom : [];
+    let data: unknown;
 
-  const known = new Set<unknown>([...(ctx.customConditionKeys ?? []), ...patched.map((c) => (isRecord(c) ? c.key : undefined))]);
-
-  return deriveCustomConditions(root).flatMap((d) => (d.rule && !known.has(d.rule.key) ? [d.rule] : []));
-}
-
-function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], embedded: Record<string, number> = {}, hasCharacters?: boolean, classesMode?: ClassesMode, customRules: CustomConditionRule[] = []): CompendiumReport {
-  const counts = { created: 0, updated: 0, unchanged: 0, errors: plan.errors.length };
-
-  const unique = new Map<string, ImportIssue>();
-
-  for (const i of [...plan.errors, ...plan.warnings]) unique.set(`${i.code}:${i.path}`, i);
-
-  const allIssues = [...unique.values()];
-
-  if (hasCharacters === false) allIssues.push(issue("CHARACTERS_REQUIRED", "characters", "warning"));
-
-  const classesMissing = !!classesMode && (!classesMode.enabled || !classesMode.exists) && plan.writes.some((w) => !w.nested && CLASS_DEPENDENT_KINDS.has(w.kind));
-
-  if (classesMissing) allIssues.push(issue("CLASSES_MODE_REQUIRED", "rules.classes", "warning"));
-
-  const issueCounts: Record<string, number> = Object.create(null);
-
-  for (const entry of allIssues) issueCounts[entry.code] = (issueCounts[entry.code] ?? 0) + 1;
-
-  const nextActions = allIssues.slice(0, 10_000);
-
-  let rowBudget = 10_000;
-
-  const rows = plan.writes.map((r) => {
-    if (!r.nested) counts[r.operation === "create" ? "created" : r.operation === "update" ? "updated" : "unchanged"]++;
-
-    const shown = r.issues.slice(0, rowBudget);
-
-    rowBudget -= shown.length;
-
-    return { canonicalKey: r.key, kind: r.kind, targetId: r.localId, status: r.operation, coverage: r.body.executionMode === "manual" ? "manual" as const : r.issues.length || r.notes ? "partial" as const : "native" as const, issues: shown };
-  });
-
-  const countsByCategory = Object.fromEntries(Object.entries(root).filter(([, v]) => Array.isArray(v)).map(([kind, v]) => {
-    if (["book", "bookData", "adventure", "adventureData"].includes(kind)) {
-      const corpus = kind.replace(/Data$/, "");
-
-      const manifests = Array.isArray(root[corpus]) ? root[corpus] as unknown[] : [];
-
-      const chapters = (index: number) => plan.writes.filter(r => r.inputKind === `${corpus}Chapter` && r.inputPath?.startsWith(`${corpus}[${index}].data[`));
-
-      const consumed = (v as unknown[]).map((value, index) => {
-        if (!isRecord(value)) return [];
-
-        if (kind === corpus) return chapters(index);
-
-        return manifests.flatMap((manifest, mi) => isRecord(manifest) && manifest.id === value.id && (!value.source || value.source === manifest.source) ? chapters(mi) : []);
-      });
-
-      const mapped = consumed.filter(rows => rows.length > 0).length;
-
-      return [kind, { present: (v as unknown[]).length, mapped, partial: consumed.filter(rows => rows.some(r => r.issues.length || r.notes)).length, skipped: (v as unknown[]).length - mapped }];
+    try {
+        data = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    } catch {
+        throw new CompendiumError('PREVIEW_INVALID');
     }
 
-    const mapped = plan.writes.filter((r) => r.inputKind === kind);
+    if (
+        !isRecord(data) ||
+        data.user !== actor.userId ||
+        data.campaign !== actor.campaignId ||
+        data.fingerprint !== fingerprint ||
+        typeof data.expires !== 'number' ||
+        data.expires < Date.now()
+    )
+        throw new CompendiumError('PREVIEW_STALE');
 
-    const total = mapped.length + (embedded[kind] ?? 0);
+    return data;
+}
 
-    return [kind, { present: (v as unknown[]).length, mapped: total, partial: mapped.filter((r) => r.issues.length || r.notes).length, skipped: Math.max(0, (v as unknown[]).length - total) }];
-  }));
+const CLASS_DEPENDENT_KINDS = new Set<TargetKind>([
+    'races',
+    'backgrounds',
+    'feats',
+]);
 
-  const editionSummary: Record<string, number> = Object.create(null);
+interface ClassesMode {
+    enabled: boolean;
+    exists: boolean;
+}
 
-  for (const row of plan.writes) editionSummary[row.edition] = (editionSummary[row.edition] ?? 0) + 1;
+function classesModeOf(
+    plan: ImportPlan,
+    input: ImportInput,
+    ctx: RepositoryContext
+): ClassesMode | undefined {
+    if (ctx.classesEnabled === undefined && ctx.hasClasses === undefined)
+        return;
 
-  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), media: summarizeQueue(buildMediaQueue(plan.writes)), nextActions, ...((classesMissing || customRules.length > 0) && { recommendedRulesPatch: { ...(classesMissing && { classes: { enabled: true } }), ...(customRules.length > 0 && { conditions: { custom: customRules } }) } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && customRules.length === 0 && plan.errors.length === 0 && !allIssues.some((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) && /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
+    const patched = isRecord(input.rulesPatch?.classes)
+        ? input.rulesPatch.classes.enabled
+        : undefined;
+
+    return {
+        enabled:
+            typeof patched === 'boolean'
+                ? patched
+                : ctx.classesEnabled === true,
+        exists:
+            ctx.hasClasses === true ||
+            plan.writes.some((w) => w.kind === 'classes'),
+    };
+}
+
+function customConditionsToOffer(
+    root: JsonRecord,
+    input: ImportInput,
+    ctx: RepositoryContext
+): CustomConditionRule[] {
+    const patched =
+        isRecord(input.rulesPatch?.conditions) &&
+        Array.isArray(input.rulesPatch.conditions.custom)
+            ? input.rulesPatch.conditions.custom
+            : [];
+
+    const known = new Set<unknown>([
+        ...(ctx.customConditionKeys ?? []),
+        ...patched.map((c) => (isRecord(c) ? c.key : undefined)),
+    ]);
+
+    return deriveCustomConditions(root).flatMap((d) =>
+        d.rule && !known.has(d.rule.key) ? [d.rule] : []
+    );
+}
+
+function reportOf(
+    plan: ImportPlan,
+    root: JsonRecord,
+    sources: JsonRecord[],
+    embedded: Record<string, number> = {},
+    hasCharacters?: boolean,
+    classesMode?: ClassesMode,
+    customRules: CustomConditionRule[] = []
+): CompendiumReport {
+    const counts = {
+        created: 0,
+        updated: 0,
+        unchanged: 0,
+        errors: plan.errors.length,
+    };
+
+    const unique = new Map<string, ImportIssue>();
+
+    for (const i of [...plan.errors, ...plan.warnings])
+        unique.set(`${i.code}:${i.path}`, i);
+
+    const allIssues = [...unique.values()];
+
+    if (hasCharacters === false)
+        allIssues.push(issue('CHARACTERS_REQUIRED', 'characters', 'warning'));
+
+    const classesMissing =
+        !!classesMode &&
+        (!classesMode.enabled || !classesMode.exists) &&
+        plan.writes.some((w) => !w.nested && CLASS_DEPENDENT_KINDS.has(w.kind));
+
+    if (classesMissing)
+        allIssues.push(
+            issue('CLASSES_MODE_REQUIRED', 'rules.classes', 'warning')
+        );
+
+    const issueCounts: Record<string, number> = Object.create(null);
+
+    for (const entry of allIssues)
+        issueCounts[entry.code] = (issueCounts[entry.code] ?? 0) + 1;
+
+    const nextActions = allIssues.slice(0, 10_000);
+
+    let rowBudget = 10_000;
+
+    const rows = plan.writes.map((r) => {
+        if (!r.nested)
+            counts[
+                r.operation === 'create'
+                    ? 'created'
+                    : r.operation === 'update'
+                      ? 'updated'
+                      : 'unchanged'
+            ]++;
+
+        const shown = r.issues.slice(0, rowBudget);
+
+        rowBudget -= shown.length;
+
+        return {
+            canonicalKey: r.key,
+            kind: r.kind,
+            targetId: r.localId,
+            status: r.operation,
+            coverage:
+                r.body.executionMode === 'manual'
+                    ? ('manual' as const)
+                    : r.issues.length || r.notes
+                      ? ('partial' as const)
+                      : ('native' as const),
+            issues: shown,
+        };
+    });
+
+    const countsByCategory = Object.fromEntries(
+        Object.entries(root)
+            .filter(([, v]) => Array.isArray(v))
+            .map(([kind, v]) => {
+                if (
+                    ['book', 'bookData', 'adventure', 'adventureData'].includes(
+                        kind
+                    )
+                ) {
+                    const corpus = kind.replace(/Data$/, '');
+
+                    const manifests = Array.isArray(root[corpus])
+                        ? (root[corpus] as unknown[])
+                        : [];
+
+                    const chapters = (index: number) =>
+                        plan.writes.filter(
+                            (r) =>
+                                r.inputKind === `${corpus}Chapter` &&
+                                r.inputPath?.startsWith(
+                                    `${corpus}[${index}].data[`
+                                )
+                        );
+
+                    const consumed = (v as unknown[]).map((value, index) => {
+                        if (!isRecord(value)) return [];
+
+                        if (kind === corpus) return chapters(index);
+
+                        return manifests.flatMap((manifest, mi) =>
+                            isRecord(manifest) &&
+                            manifest.id === value.id &&
+                            (!value.source || value.source === manifest.source)
+                                ? chapters(mi)
+                                : []
+                        );
+                    });
+
+                    const mapped = consumed.filter(
+                        (rows) => rows.length > 0
+                    ).length;
+
+                    return [
+                        kind,
+                        {
+                            present: (v as unknown[]).length,
+                            mapped,
+                            partial: consumed.filter((rows) =>
+                                rows.some((r) => r.issues.length || r.notes)
+                            ).length,
+                            skipped: (v as unknown[]).length - mapped,
+                        },
+                    ];
+                }
+
+                const mapped = plan.writes.filter((r) => r.inputKind === kind);
+
+                const total = mapped.length + (embedded[kind] ?? 0);
+
+                return [
+                    kind,
+                    {
+                        present: (v as unknown[]).length,
+                        mapped: total,
+                        partial: mapped.filter(
+                            (r) => r.issues.length || r.notes
+                        ).length,
+                        skipped: Math.max(0, (v as unknown[]).length - total),
+                    },
+                ];
+            })
+    );
+
+    const editionSummary: Record<string, number> = Object.create(null);
+
+    for (const row of plan.writes)
+        editionSummary[row.edition] = (editionSummary[row.edition] ?? 0) + 1;
+
+    return {
+        adapterVersion: ADAPTER_VERSION,
+        counts,
+        rows,
+        sources,
+        editionSummary,
+        countsByCategory,
+        issueCounts,
+        omittedIssues: Math.max(0, allIssues.length - nextActions.length),
+        media: summarizeQueue(buildMediaQueue(plan.writes)),
+        nextActions,
+        ...((classesMissing || customRules.length > 0) && {
+            recommendedRulesPatch: {
+                ...(classesMissing && { classes: { enabled: true } }),
+                ...(customRules.length > 0 && {
+                    conditions: { custom: customRules },
+                }),
+            },
+        }),
+        readyToImport: plan.errors.length === 0,
+        readyToPlay:
+            hasCharacters !== false &&
+            !classesMissing &&
+            customRules.length === 0 &&
+            plan.errors.length === 0 &&
+            !allIssues.some(
+                (i) =>
+                    !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) &&
+                    /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)
+            ),
+    };
 }
 
 function readInput(input: ImportInput) {
-  // Account for JSON escaping in the actual transport, not just source-file bytes.
-  if (byteLength(JSON.stringify(input)) > COMPENDIUM_LIMITS.requestBytes) throw new CompendiumError("REQUEST_SIZE");
+    // Account for JSON escaping in the actual transport, not just source-file bytes.
+    if (byteLength(JSON.stringify(input)) > COMPENDIUM_LIMITS.requestBytes)
+        throw new CompendiumError('REQUEST_SIZE');
 
-  const root = parseCompendium(input.json);
+    const root = parseCompendium(input.json);
 
-  return { root, fingerprint: digest({ ...input, json: root, version: ADAPTER_VERSION }) };
+    return {
+        root,
+        fingerprint: digest({ ...input, json: root, version: ADAPTER_VERSION }),
+    };
 }
 
-async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof parseCompendium>, repository: ImportRepository, locale?: Locale) {
-  const started = Date.now();
+async function planFor(
+    actor: Actor,
+    input: ImportInput,
+    root: ReturnType<typeof parseCompendium>,
+    repository: ImportRepository,
+    locale?: Locale
+) {
+    const started = Date.now();
 
-  const adapted = adaptCompendium(root, { ...input, locale });
+    const adapted = adaptCompendium(root, { ...input, locale });
 
-  const ctx = await repository.loadContext(actor, input, adapted.entries);
+    const ctx = await repository.loadContext(actor, input, adapted.entries);
 
-  if (ctx.campaignId !== actor.campaignId) throw new CompendiumError("FORBIDDEN");
+    if (ctx.campaignId !== actor.campaignId)
+        throw new CompendiumError('FORBIDDEN');
 
-  const plan = buildImportPlan({ ...adapted, entries: [...adapted.entries, ...(ctx.extraEntries ?? [])] }, { ...ctx, overwriteKeys: input.overwriteKeys, excludedKeys: input.excludedKeys, allowMixedEdition: input.allowMixedEdition });
+    const plan = buildImportPlan(
+        {
+            ...adapted,
+            entries: [...adapted.entries, ...(ctx.extraEntries ?? [])],
+        },
+        {
+            ...ctx,
+            overwriteKeys: input.overwriteKeys,
+            excludedKeys: input.excludedKeys,
+            allowMixedEdition: input.allowMixedEdition,
+        }
+    );
 
-  if (Date.now() - started > 15_000) throw new CompendiumError("PLANNING_TIMEOUT");
+    if (Date.now() - started > 15_000)
+        throw new CompendiumError('PLANNING_TIMEOUT');
 
-  return { plan, sources: adapted.sources, embedded: adapted.embedded, hasCharacters: ctx.hasCharacters, classesMode: classesModeOf(plan, input, ctx), customRules: customConditionsToOffer(root, input, ctx) };
+    return {
+        plan,
+        sources: adapted.sources,
+        embedded: adapted.embedded,
+        hasCharacters: ctx.hasCharacters,
+        classesMode: classesModeOf(plan, input, ctx),
+        customRules: customConditionsToOffer(root, input, ctx),
+    };
 }
 
-export async function previewImport(actor: Actor, input: ImportInput, secret: string, repository: ImportRepository, locale?: Locale) {
-  requireActor(actor); signingKey(secret);
-  input = validatedInput(input);
-  await repository.authorize(actor);
+export async function previewImport(
+    actor: Actor,
+    input: ImportInput,
+    secret: string,
+    repository: ImportRepository,
+    locale?: Locale
+) {
+    requireActor(actor);
+    signingKey(secret);
+    input = validatedInput(input);
+    await repository.authorize(actor);
 
-  const { root, fingerprint } = readInput(input);
+    const { root, fingerprint } = readInput(input);
 
-  const { plan, sources, embedded, hasCharacters, classesMode, customRules } = await planFor(actor, input, root, repository, locale);
+    const { plan, sources, embedded, hasCharacters, classesMode, customRules } =
+        await planFor(actor, input, root, repository, locale);
 
-  return { token: tokenFor(actor, fingerprint, plan.hash, secret), report: reportOf(plan, root, sources, embedded, hasCharacters, classesMode, customRules) };
+    return {
+        token: tokenFor(actor, fingerprint, plan.hash, secret),
+        report: reportOf(
+            plan,
+            root,
+            sources,
+            embedded,
+            hasCharacters,
+            classesMode,
+            customRules
+        ),
+    };
 }
 
-export async function confirmImport(actor: Actor, input: ImportInput, token: string, idempotencyKey: string, secret: string, repository: ImportRepository, locale?: Locale): Promise<CompendiumReport> {
-  requireActor(actor); signingKey(secret);
-  input = validatedInput(input);
+export async function confirmImport(
+    actor: Actor,
+    input: ImportInput,
+    token: string,
+    idempotencyKey: string,
+    secret: string,
+    repository: ImportRepository,
+    locale?: Locale
+): Promise<CompendiumReport> {
+    requireActor(actor);
+    signingKey(secret);
+    input = validatedInput(input);
 
-  if (!/^[a-zA-Z0-9_-]{1,100}$/.test(idempotencyKey)) throw new CompendiumError("IDEMPOTENCY_KEY");
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(idempotencyKey))
+        throw new CompendiumError('IDEMPOTENCY_KEY');
 
-  const { root, fingerprint } = readInput(input);
+    const { root, fingerprint } = readInput(input);
 
-  const requestHash = digest({ fingerprint, token });
+    const requestHash = digest({ fingerprint, token });
 
-  return repository.transaction(actor, async (tx) => {
-    await tx.authorize(actor);
+    return repository.transaction(actor, async (tx) => {
+        await tx.authorize(actor);
 
-    const prior = await tx.findRun(actor, idempotencyKey);
+        const prior = await tx.findRun(actor, idempotencyKey);
 
-    if (prior) {
-      if (prior.requestHash !== requestHash) throw new CompendiumError("IDEMPOTENCY_CONFLICT");
+        if (prior) {
+            if (prior.requestHash !== requestHash)
+                throw new CompendiumError('IDEMPOTENCY_CONFLICT');
 
-      return prior.report;
-    }
+            return prior.report;
+        }
 
-    const signed = tokenData(actor, token, fingerprint, secret);
+        const signed = tokenData(actor, token, fingerprint, secret);
 
-    const { plan, sources, embedded, hasCharacters, classesMode, customRules } = await planFor(actor, input, root, tx, locale);
+        const {
+            plan,
+            sources,
+            embedded,
+            hasCharacters,
+            classesMode,
+            customRules,
+        } = await planFor(actor, input, root, tx, locale);
 
-    if (signed.planHash !== plan.hash) throw new CompendiumError("PREVIEW_STALE");
+        if (signed.planHash !== plan.hash)
+            throw new CompendiumError('PREVIEW_STALE');
 
-    if (plan.errors.length) throw new CompendiumError("PLAN_ERRORS");
+        if (plan.errors.length) throw new CompendiumError('PLAN_ERRORS');
 
-    const idMap = new Map<string, string>();
+        const idMap = new Map<string, string>();
 
-    const applied: PlannedWrite[] = [];
+        const applied: PlannedWrite[] = [];
 
-    for (const row of plan.writes) {
-      const next = { ...row, body: remapIds(row.body, idMap), localId: idMap.get(row.localId) ?? row.localId };
+        for (const row of plan.writes) {
+            const next = {
+                ...row,
+                body: remapIds(row.body, idMap),
+                localId: idMap.get(row.localId) ?? row.localId,
+            };
 
-      if (!row.nested && row.operation !== "unchanged") {
-        const actual = await tx.write(actor, next);
+            if (!row.nested && row.operation !== 'unchanged') {
+                const actual = await tx.write(actor, next);
 
-        idMap.set(row.localId, actual);
-        next.localId = actual;
-      }
+                idMap.set(row.localId, actual);
+                next.localId = actual;
+            }
 
-      applied.push(next);
-    }
-    for (const row of applied.filter((r) => r.provenance !== false)) await tx.saveEntry(actor, { ...row, body: remapIds(row.body, idMap), baseline: remapIds(row.baseline, idMap), resolvedBindings: remapIds(row.resolvedBindings, idMap), localId: idMap.get(row.localId) ?? row.localId });
-    await tx.saveSources(actor, sources);
+            applied.push(next);
+        }
+        for (const row of applied.filter((r) => r.provenance !== false))
+            await tx.saveEntry(actor, {
+                ...row,
+                body: remapIds(row.body, idMap),
+                baseline: remapIds(row.baseline, idMap),
+                resolvedBindings: remapIds(row.resolvedBindings, idMap),
+                localId: idMap.get(row.localId) ?? row.localId,
+            });
+        await tx.saveSources(actor, sources);
 
-    if (input.rulesPatch) {
-      if (!tx.applyRules) throw new CompendiumError("RULES_UNSUPPORTED");
+        if (input.rulesPatch) {
+            if (!tx.applyRules) throw new CompendiumError('RULES_UNSUPPORTED');
 
-      await tx.applyRules(actor, input.rulesPatch);
-    }
+            await tx.applyRules(actor, input.rulesPatch);
+        }
 
-    const report = remapIds(reportOf(plan, root, sources, embedded, hasCharacters, classesMode, customRules), idMap);
+        const report = remapIds(
+            reportOf(
+                plan,
+                root,
+                sources,
+                embedded,
+                hasCharacters,
+                classesMode,
+                customRules
+            ),
+            idMap
+        );
 
-    const queue = buildMediaQueue(applied.map((r) => ({ ...r, localId: idMap.get(r.localId) ?? r.localId })));
+        const queue = buildMediaQueue(
+            applied.map((r) => ({
+                ...r,
+                localId: idMap.get(r.localId) ?? r.localId,
+            }))
+        );
 
-    report.media = { ...queue, queued: queue.items.length };
+        report.media = { ...queue, queued: queue.items.length };
 
-    await tx.saveRun(actor, idempotencyKey, requestHash, report);
+        await tx.saveRun(actor, idempotencyKey, requestHash, report);
 
-    return report;
-  });
+        return report;
+    });
 }

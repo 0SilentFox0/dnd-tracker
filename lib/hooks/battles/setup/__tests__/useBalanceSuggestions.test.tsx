@@ -1,41 +1,80 @@
 // @vitest-environment happy-dom
-import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import type { BattlePreparationParticipant } from "@/types/battle";
+import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
+import type { BattlePreparationParticipant } from '@/types/battle';
 
-vi.mock("../../useBattleSetupQueries", () => ({
-  useBattleBalance: () => ({
-    isPending: false,
-    mutate: (_vars: unknown, opts: { onSuccess: (d: unknown) => void }) =>
-      opts.onSuccess({ suggestedEnemies: [{ unitId: "wolf", quantity: 3 }, { unitId: "bat", quantity: 1 }] }),
-  }),
+vi.mock('../../useBattleSetupQueries', () => ({
+    useBattleBalance: () => ({
+        isPending: false,
+        mutate: (_vars: unknown, opts: { onSuccess: (d: unknown) => void }) =>
+            opts.onSuccess({
+                suggestedEnemies: [
+                    { unitId: 'wolf', quantity: 3 },
+                    { unitId: 'bat', quantity: 1 },
+                ],
+            }),
+    }),
 }));
 
-import { useBalanceSuggestions } from "../useBalanceSuggestions";
+import { useBalanceSuggestions } from '../useBalanceSuggestions';
 
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-describe("useBalanceSuggestions", () => {
-  it("прийняття пропозиції зберігає резерв ворогів (обмежений кількістю) і не чіпає союзників", () => {
-    const participants: BattlePreparationParticipant[] = [
-      { id: "h1", type: ParticipantSourceType.CHARACTER, side: ParticipantSide.ALLY, quantity: 1 },
-      { id: "wolf", type: ParticipantSourceType.UNIT, side: ParticipantSide.ENEMY, quantity: 5, reserved: 4 },
-      { id: "old", type: ParticipantSourceType.UNIT, side: ParticipantSide.ENEMY, quantity: 2, reserved: 2 },
-    ];
+describe('useBalanceSuggestions', () => {
+    it('прийняття пропозиції зберігає резерв ворогів (обмежений кількістю) і не чіпає союзників', () => {
+        const participants: BattlePreparationParticipant[] = [
+            {
+                id: 'h1',
+                type: ParticipantSourceType.CHARACTER,
+                side: ParticipantSide.ALLY,
+                quantity: 1,
+            },
+            {
+                id: 'wolf',
+                type: ParticipantSourceType.UNIT,
+                side: ParticipantSide.ENEMY,
+                quantity: 5,
+                reserved: 4,
+            },
+            {
+                id: 'old',
+                type: ParticipantSourceType.UNIT,
+                side: ParticipantSide.ENEMY,
+                quantity: 2,
+                reserved: 2,
+            },
+        ];
 
-    const setParticipants = vi.fn();
+        const setParticipants = vi.fn();
 
-    const { result } = renderHook(() => useBalanceSuggestions({ campaignId: "c", participants, allies: { value: { characterIds: ["h1"], units: [] }, exists: true }, setParticipants, encounters: DEFAULT_RULES.encounters }));
+        const { result } = renderHook(() =>
+            useBalanceSuggestions({
+                campaignId: 'c',
+                participants,
+                allies: {
+                    value: { characterIds: ['h1'], units: [] },
+                    exists: true,
+                },
+                setParticipants,
+                encounters: DEFAULT_RULES.encounters,
+            })
+        );
 
-    act(() => result.current.actions.suggest());
-    act(() => result.current.actions.apply());
+        act(() => result.current.actions.suggest());
+        act(() => result.current.actions.apply());
 
-    expect(setParticipants).toHaveBeenCalledWith([
-      participants[0],
-      { id: "wolf", type: "unit", side: "enemy", quantity: 3, reserved: 3 },
-      { id: "bat", type: "unit", side: "enemy", quantity: 1 },
-    ]);
-  });
+        expect(setParticipants).toHaveBeenCalledWith([
+            participants[0],
+            {
+                id: 'wolf',
+                type: 'unit',
+                side: 'enemy',
+                quantity: 3,
+                reserved: 3,
+            },
+            { id: 'bat', type: 'unit', side: 'enemy', quantity: 1 },
+        ]);
+    });
 });

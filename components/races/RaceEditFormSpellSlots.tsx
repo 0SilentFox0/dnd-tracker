@@ -1,66 +1,82 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { Input } from "@/components/ui/input";
-import type { RaceFormData, SpellSlotProgression } from "@/types/races";
+import { Input } from '@/components/ui/input';
+import type { RaceFormData, SpellSlotProgression } from '@/types/races';
 
 interface RaceEditFormSpellSlotsProps {
-  formData: RaceFormData;
-  setFormData: React.Dispatch<React.SetStateAction<RaceFormData>>;
+    formData: RaceFormData;
+    setFormData: React.Dispatch<React.SetStateAction<RaceFormData>>;
 }
 
 export function RaceEditFormSpellSlots({
-  formData,
-  setFormData,
+    formData,
+    setFormData,
 }: RaceEditFormSpellSlotsProps) {
-  const t = useTranslations("races");
+    const t = useTranslations('races');
 
-  return (
-    <div className="border rounded-md p-4">
-      <div className="mb-2 flex flex-wrap justify-between gap-x-4 border-b pb-2 text-sm font-semibold">
-        <div>{t("form.spellSlots.magicLevel")}</div>
-        <div>{t("form.spellSlots.maxSlots")}</div>
-      </div>
-      <p className="mb-2 text-xs text-muted-foreground">{t("form.spellSlots.hint")}</p>
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-      {[1, 2, 3, 4, 5].map((level) => {
-        const progression = formData.spellSlotProgression?.find(
-          (p) => p.level === level,
-        );
+    return (
+        <div className="rounded-md border p-4">
+            <div className="mb-2 flex flex-wrap justify-between gap-x-4 border-b pb-2 text-sm font-semibold">
+                <div>{t('form.spellSlots.magicLevel')}</div>
+                <div>{t('form.spellSlots.maxSlots')}</div>
+            </div>
+            <p className="mb-2 text-xs text-muted-foreground">
+                {t('form.spellSlots.hint')}
+            </p>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {[1, 2, 3, 4, 5].map((level) => {
+                    const progression = formData.spellSlotProgression?.find(
+                        (p) => p.level === level
+                    );
 
-        return (
-          <div key={level} className="space-y-1">
-            <div className="text-xs leading-tight">{t("form.spellSlots.level", { level })}</div>
-            <Input
-              type="number"
-              min={0}
-              value={progression?.slots ?? 0}
-              onChange={(e) => {
-                const slots = Math.max(0, parseInt(e.target.value, 10) || 0);
+                    return (
+                        <div key={level} className="space-y-1">
+                            <div className="text-xs leading-tight">
+                                {t('form.spellSlots.level', { level })}
+                            </div>
+                            <Input
+                                type="number"
+                                min={0}
+                                value={progression?.slots ?? 0}
+                                onChange={(e) => {
+                                    const slots = Math.max(
+                                        0,
+                                        parseInt(e.target.value, 10) || 0
+                                    );
 
-                setFormData((prev) => {
-                  const current = prev.spellSlotProgression || [];
+                                    setFormData((prev) => {
+                                        const current =
+                                            prev.spellSlotProgression || [];
 
-                  const index = current.findIndex((p) => p.level === level);
+                                        const index = current.findIndex(
+                                            (p) => p.level === level
+                                        );
 
-                  let updated: SpellSlotProgression[];
+                                        let updated: SpellSlotProgression[];
 
-                  if (index >= 0) {
-                    updated = [...current];
-                    updated[index] = { level, slots };
-                  } else {
-                    updated = [...current, { level, slots }];
-                  }
+                                        if (index >= 0) {
+                                            updated = [...current];
+                                            updated[index] = { level, slots };
+                                        } else {
+                                            updated = [
+                                                ...current,
+                                                { level, slots },
+                                            ];
+                                        }
 
-                  return { ...prev, spellSlotProgression: updated };
-                });
-              }}
-            />
-          </div>
-        );
-      })}
-      </div>
-    </div>
-  );
+                                        return {
+                                            ...prev,
+                                            spellSlotProgression: updated,
+                                        };
+                                    });
+                                }}
+                            />
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
 }

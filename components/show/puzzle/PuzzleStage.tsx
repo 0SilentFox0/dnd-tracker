@@ -1,84 +1,145 @@
-"use client";
+'use client';
 
-import { useMemo, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useMemo, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { PuzzleBoard } from "./PuzzleBoard";
-import { PuzzleHand } from "./PuzzleHand";
-import { PuzzleTray } from "./PuzzleTray";
-import type { PuzzleScene } from "./types";
+import { PuzzleBoard } from './PuzzleBoard';
+import { PuzzleHand } from './PuzzleHand';
+import { PuzzleTray } from './PuzzleTray';
+import type { PuzzleScene } from './types';
 
-import { Button } from "@/components/ui/button";
-import { useConfirm, useElementSize, useNotify } from "@/lib/hooks/common";
-import { usePuzzleControl, usePuzzleDrag } from "@/lib/hooks/show";
-import { generatePuzzle } from "@/lib/utils/puzzle/generate";
-import type { PuzzleSpec, PuzzleState } from "@/types/show";
+import { Button } from '@/components/ui/button';
+import { useConfirm, useElementSize, useNotify } from '@/lib/hooks/common';
+import { usePuzzleControl, usePuzzleDrag } from '@/lib/hooks/show';
+import { generatePuzzle } from '@/lib/utils/puzzle/generate';
+import type { PuzzleSpec, PuzzleState } from '@/types/show';
 
 const NO_GRAB = () => undefined;
 
 interface Props {
-  campaignId: string;
-  isDM: boolean;
-  readOnly?: boolean;
-  userId: string;
-  spec: PuzzleSpec;
-  imageUrl: string;
-  puzzle: PuzzleState;
+    campaignId: string;
+    isDM: boolean;
+    readOnly?: boolean;
+    userId: string;
+    spec: PuzzleSpec;
+    imageUrl: string;
+    puzzle: PuzzleState;
 }
 
-export function PuzzleStage({ campaignId, isDM, readOnly = false, userId, spec, imageUrl, puzzle }: Props) {
-  const t = useTranslations("show");
+export function PuzzleStage({
+    campaignId,
+    isDM,
+    readOnly = false,
+    userId,
+    spec,
+    imageUrl,
+    puzzle,
+}: Props) {
+    const t = useTranslations('show');
 
-  const notify = useNotify();
+    const notify = useNotify();
 
-  const confirm = useConfirm();
+    const confirm = useConfirm();
 
-  const control = usePuzzleControl(campaignId, notify);
+    const control = usePuzzleControl(campaignId, notify);
 
-  const pieces = useMemo(() => generatePuzzle(spec), [spec]);
+    const pieces = useMemo(() => generatePuzzle(spec), [spec]);
 
-  const boardRef = useRef<HTMLDivElement>(null);
+    const boardRef = useRef<HTMLDivElement>(null);
 
-  const { drag, start, rotate } = usePuzzleDrag({ puzzle, spec, userId, isDM, control, boardRef });
+    const { drag, start, rotate } = usePuzzleDrag({
+        puzzle,
+        spec,
+        userId,
+        isDM,
+        control,
+        boardRef,
+    });
 
-  const { ref: areaRef, size } = useElementSize<HTMLDivElement>();
+    const { ref: areaRef, size } = useElementSize<HTMLDivElement>();
 
-  const fit = Math.min(size.width / spec.imageWidth, size.height / spec.imageHeight);
+    const fit = Math.min(
+        size.width / spec.imageWidth,
+        size.height / spec.imageHeight
+    );
 
-  const boardStyle = fit > 0 ? { width: spec.imageWidth * fit, height: spec.imageHeight * fit } : { width: "100%", aspectRatio: `${spec.imageWidth}/${spec.imageHeight}` };
+    const boardStyle =
+        fit > 0
+            ? { width: spec.imageWidth * fit, height: spec.imageHeight * fit }
+            : {
+                  width: '100%',
+                  aspectRatio: `${spec.imageWidth}/${spec.imageHeight}`,
+              };
 
-  const scene: PuzzleScene = { pieces, state: puzzle, spec, imageUrl, userId, draggingId: drag?.id ?? null, onGrab: readOnly ? NO_GRAB : start };
+    const scene: PuzzleScene = {
+        pieces,
+        state: puzzle,
+        spec,
+        imageUrl,
+        userId,
+        draggingId: drag?.id ?? null,
+        onGrab: readOnly ? NO_GRAB : start,
+    };
 
-  const held = pieces.find((p) => p.id === drag?.id);
+    const held = pieces.find((p) => p.id === drag?.id);
 
-  const reset = async () => {
-    if (await confirm({ title: t("puzzle.resetConfirm.title"), description: t("puzzle.resetConfirm.description"), confirmLabel: t("puzzle.resetConfirm.confirm"), destructive: true })) void control.send({ action: "puzzleReset" });
-  };
+    const reset = async () => {
+        if (
+            await confirm({
+                title: t('puzzle.resetConfirm.title'),
+                description: t('puzzle.resetConfirm.description'),
+                confirmLabel: t('puzzle.resetConfirm.confirm'),
+                destructive: true,
+            })
+        )
+            void control.send({ action: 'puzzleReset' });
+    };
 
-  return (
-    <div className="absolute inset-0 z-10 flex flex-col-reverse bg-black md:flex-row">
-      <div ref={areaRef} className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center p-2">
-        {isDM && (
-          <div className="absolute right-2 top-2 z-20 flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => void control.send({ action: "puzzleRelease" })}>
-              {t("puzzle.releaseAll")}
-            </Button>
-            <Button size="sm" variant="destructive" onClick={() => void reset()}>
-              {t("puzzle.reset")}
-            </Button>
-          </div>
-        )}
-        <div style={boardStyle} className="max-h-full max-w-full">
-          <PuzzleBoard scene={scene} boardRef={boardRef} />
+    return (
+        <div className="absolute inset-0 z-10 flex flex-col-reverse bg-black md:flex-row">
+            <div
+                ref={areaRef}
+                className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center p-2"
+            >
+                {isDM && (
+                    <div className="absolute top-2 right-2 z-20 flex gap-2">
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() =>
+                                void control.send({ action: 'puzzleRelease' })
+                            }
+                        >
+                            {t('puzzle.releaseAll')}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => void reset()}
+                        >
+                            {t('puzzle.reset')}
+                        </Button>
+                    </div>
+                )}
+                <div style={boardStyle} className="max-h-full max-w-full">
+                    <PuzzleBoard scene={scene} boardRef={boardRef} />
+                </div>
+            </div>
+            <aside className="flex max-h-36 shrink-0 flex-col border-t border-white/15 md:max-h-none md:w-52 md:border-t-0 md:border-l">
+                <div aria-hidden className="hidden h-40 shrink-0 md:block" />
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                    <PuzzleTray scene={scene} />
+                </div>
+            </aside>
+            {drag && held && (
+                <PuzzleHand
+                    drag={drag}
+                    piece={held}
+                    spec={spec}
+                    imageUrl={imageUrl}
+                    onRotate={rotate}
+                />
+            )}
         </div>
-      </div>
-      <aside className="flex max-h-36 shrink-0 flex-col border-t border-white/15 md:max-h-none md:w-52 md:border-l md:border-t-0">
-        <div aria-hidden className="hidden h-40 shrink-0 md:block" />
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <PuzzleTray scene={scene} />
-        </div>
-      </aside>
-      {drag && held && <PuzzleHand drag={drag} piece={held} spec={spec} imageUrl={imageUrl} onRotate={rotate} />}
-    </div>
-  );
+    );
 }

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
-import { useTranslator } from "@/lib/i18n/use-translator";
-import { spellLabelsOf } from "@/lib/utils/spells/model/labels";
+import { useTranslator } from '@/lib/i18n/use-translator';
+import { spellLabelsOf } from '@/lib/utils/spells/model/labels';
 
 export function useSpellLabels() {
-  const t = useTranslator();
+    const t = useTranslator();
 
-  return useMemo(() => spellLabelsOf(t), [t]);
+    return useMemo(() => spellLabelsOf(t), [t]);
 }

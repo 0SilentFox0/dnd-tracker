@@ -1,187 +1,248 @@
 // @vitest-environment happy-dom
-import { useEffect } from "react";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useEffect } from 'react';
+import {
+    act,
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { mockMatchMedia } from "./match-media";
+import { mockMatchMedia } from './match-media';
 
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { type ConfirmFn, useConfirm, useNotify } from "@/lib/hooks/common";
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import { type ConfirmFn, useConfirm, useNotify } from '@/lib/hooks/common';
 
 const holder: { confirm?: ConfirmFn } = {};
 
 const confirm: ConfirmFn = (o) => {
-  if (!holder.confirm) throw new Error("ConfirmProvider не віддав confirm");
+    if (!holder.confirm) throw new Error('ConfirmProvider не віддав confirm');
 
-  return holder.confirm(o);
+    return holder.confirm(o);
 };
 
 function Grab() {
-  const c = useConfirm();
+    const c = useConfirm();
 
-  useEffect(() => {
-    holder.confirm = c;
-  }, [c]);
+    useEffect(() => {
+        holder.confirm = c;
+    }, [c]);
 
-  return null;
+    return null;
 }
 
-const mount = () => render(<ConfirmProvider><Grab /></ConfirmProvider>);
+const mount = () =>
+    render(
+        <ConfirmProvider>
+            <Grab />
+        </ConfirmProvider>
+    );
 
-describe("useConfirm", () => {
-  beforeEach(() => mockMatchMedia(false));
-  afterEach(cleanup);
+describe('useConfirm', () => {
+    beforeEach(() => mockMatchMedia(false));
+    afterEach(cleanup);
 
-  it("confirm → true, cancel → false", async () => {
-    mount();
+    it('confirm → true, cancel → false', async () => {
+        mount();
 
-    let p!: Promise<boolean>;
+        let p!: Promise<boolean>;
 
-    act(() => {
-      p = confirm({ title: "Видалити артефакт?", confirmLabel: "Видалити", destructive: true });
-    });
-    fireEvent.click(await screen.findByRole("button", { name: "Видалити" }));
-    await expect(p).resolves.toBe(true);
+        act(() => {
+            p = confirm({
+                title: 'Видалити артефакт?',
+                confirmLabel: 'Видалити',
+                destructive: true,
+            });
+        });
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'Видалити' })
+        );
+        await expect(p).resolves.toBe(true);
 
-    act(() => {
-      p = confirm({ title: "Ще раз?" });
-    });
-    fireEvent.click(await screen.findByRole("button", { name: "common.actions.cancel" }));
-    await expect(p).resolves.toBe(false);
-  });
-
-  it("Escape → false", async () => {
-    mount();
-
-    let p!: Promise<boolean>;
-
-    act(() => {
-      p = confirm({ title: "Вийти?" });
-    });
-    fireEvent.keyDown(await screen.findByRole("alertdialog"), { key: "Escape" });
-    await expect(p).resolves.toBe(false);
-  });
-
-  it("другий виклик скасовує перший", async () => {
-    mount();
-
-    let first!: Promise<boolean>;
-
-    act(() => {
-      first = confirm({ title: "Перше" });
-    });
-    act(() => {
-      void confirm({ title: "Друге" });
+        act(() => {
+            p = confirm({ title: 'Ще раз?' });
+        });
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'common.actions.cancel' })
+        );
+        await expect(p).resolves.toBe(false);
     });
 
-    await expect(first).resolves.toBe(false);
-    expect(await screen.findByText("Друге")).toBeInTheDocument();
-  });
+    it('Escape → false', async () => {
+        mount();
 
-  it("onConfirm з помилкою лишає діалог відкритим із текстом; повтор з успіхом → true", async () => {
-    mount();
+        let p!: Promise<boolean>;
 
-    let attempt = 0;
-
-    let p!: Promise<boolean>;
-
-    act(() => {
-      p = confirm({ title: "Видалити?", confirmLabel: "Видалити", onConfirm: async () => {
-        attempt++;
-
-        if (attempt === 1) throw new Error("Сервер недоступний");
-      } });
+        act(() => {
+            p = confirm({ title: 'Вийти?' });
+        });
+        fireEvent.keyDown(await screen.findByRole('alertdialog'), {
+            key: 'Escape',
+        });
+        await expect(p).resolves.toBe(false);
     });
-    fireEvent.click(await screen.findByRole("button", { name: "Видалити" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Сервер недоступний");
-    fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
-    await expect(p).resolves.toBe(true);
-    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
-  });
 
-  it("розмонтування провайдера з відкритим підтвердженням → false", async () => {
-    const { unmount } = mount();
+    it('другий виклик скасовує перший', async () => {
+        mount();
 
-    let p!: Promise<boolean>;
+        let first!: Promise<boolean>;
 
-    act(() => {
-      p = confirm({ title: "Видалити?" });
+        act(() => {
+            first = confirm({ title: 'Перше' });
+        });
+        act(() => {
+            void confirm({ title: 'Друге' });
+        });
+
+        await expect(first).resolves.toBe(false);
+        expect(await screen.findByText('Друге')).toBeInTheDocument();
     });
-    unmount();
-    await expect(p).resolves.toBe(false);
-  });
 
-  it("поза провайдером — зрозуміла помилка", () => {
-    expect(() => render(<Grab />)).toThrow(/ConfirmProvider/);
-  });
+    it('onConfirm з помилкою лишає діалог відкритим із текстом; повтор з успіхом → true', async () => {
+        mount();
 
-  it("useNotify: одна кнопка gotIt, без cancel", async () => {
-    let notify!: (message: string) => Promise<void>;
+        let attempt = 0;
 
-    function GrabNotify() {
-      const n = useNotify();
+        let p!: Promise<boolean>;
 
-      useEffect(() => {
-        notify = n;
-      }, [n]);
+        act(() => {
+            p = confirm({
+                title: 'Видалити?',
+                confirmLabel: 'Видалити',
+                onConfirm: async () => {
+                    attempt++;
 
-      return null;
-    }
-
-    render(<ConfirmProvider><GrabNotify /></ConfirmProvider>);
-
-    let p!: Promise<void>;
-
-    act(() => {
-      p = notify("Оберіть хоча б одного учасника");
+                    if (attempt === 1) throw new Error('Сервер недоступний');
+                },
+            });
+        });
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'Видалити' })
+        );
+        expect(await screen.findByRole('alert')).toHaveTextContent(
+            'Сервер недоступний'
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'Видалити' }));
+        await expect(p).resolves.toBe(true);
+        await waitFor(() =>
+            expect(screen.queryByRole('alertdialog')).toBeNull()
+        );
     });
-    expect(await screen.findByText("Оберіть хоча б одного учасника")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "common.notify.title" })).toBeInTheDocument();
 
-    const describedBy = screen.getByRole("alertdialog").getAttribute("aria-describedby");
+    it('розмонтування провайдера з відкритим підтвердженням → false', async () => {
+        const { unmount } = mount();
 
-    expect(describedBy).toBeTruthy();
-    expect(document.getElementById(describedBy ?? "")).toHaveTextContent("Оберіть хоча б одного учасника");
-    expect(screen.queryByRole("button", { name: "common.actions.cancel" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "common.notify.gotIt" }));
-    await expect(p).resolves.toBeUndefined();
-  });
+        let p!: Promise<boolean>;
 
-  it("телефон: під час анімації закриття шторка показує той самий зміст, а не порожній заголовок", async () => {
-    mockMatchMedia(true);
-    mount();
-
-    let p!: Promise<boolean>;
-
-    act(() => {
-      p = confirm({ title: "Видалити юніта?", confirmLabel: "Видалити", cancelLabel: null });
+        act(() => {
+            p = confirm({ title: 'Видалити?' });
+        });
+        unmount();
+        await expect(p).resolves.toBe(false);
     });
-    fireEvent.click(await screen.findByRole("button", { name: "Видалити" }));
-    await expect(p).resolves.toBe(true);
 
-    const sheet = document.querySelector("[data-slot=sheet]");
-
-    expect(sheet).toHaveAttribute("data-state", "closed");
-    expect(sheet).toHaveTextContent("Видалити юніта?");
-    expect(sheet).not.toHaveTextContent("common.actions.cancel");
-  });
-
-  it.each([false, true])("confirm без опису не дає попередження про aria-describedby (mobile=%s)", async (mobile) => {
-    mockMatchMedia(mobile);
-
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-    const error = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    mount();
-    act(() => {
-      void confirm({ title: "Видалити?" });
+    it('поза провайдером — зрозуміла помилка', () => {
+        expect(() => render(<Grab />)).toThrow(/ConfirmProvider/);
     });
-    await screen.findByRole("alertdialog");
-    expect(screen.getByRole("alertdialog")).not.toHaveAttribute("aria-describedby");
-    expect(warn).not.toHaveBeenCalled();
-    expect(error).not.toHaveBeenCalled();
-    warn.mockRestore();
-    error.mockRestore();
-  });
+
+    it('useNotify: одна кнопка gotIt, без cancel', async () => {
+        let notify!: (message: string) => Promise<void>;
+
+        function GrabNotify() {
+            const n = useNotify();
+
+            useEffect(() => {
+                notify = n;
+            }, [n]);
+
+            return null;
+        }
+
+        render(
+            <ConfirmProvider>
+                <GrabNotify />
+            </ConfirmProvider>
+        );
+
+        let p!: Promise<void>;
+
+        act(() => {
+            p = notify('Оберіть хоча б одного учасника');
+        });
+        expect(
+            await screen.findByText('Оберіть хоча б одного учасника')
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole('heading', { name: 'common.notify.title' })
+        ).toBeInTheDocument();
+
+        const describedBy = screen
+            .getByRole('alertdialog')
+            .getAttribute('aria-describedby');
+
+        expect(describedBy).toBeTruthy();
+        expect(document.getElementById(describedBy ?? '')).toHaveTextContent(
+            'Оберіть хоча б одного учасника'
+        );
+        expect(
+            screen.queryByRole('button', { name: 'common.actions.cancel' })
+        ).toBeNull();
+        fireEvent.click(
+            screen.getByRole('button', { name: 'common.notify.gotIt' })
+        );
+        await expect(p).resolves.toBeUndefined();
+    });
+
+    it('телефон: під час анімації закриття шторка показує той самий зміст, а не порожній заголовок', async () => {
+        mockMatchMedia(true);
+        mount();
+
+        let p!: Promise<boolean>;
+
+        act(() => {
+            p = confirm({
+                title: 'Видалити юніта?',
+                confirmLabel: 'Видалити',
+                cancelLabel: null,
+            });
+        });
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'Видалити' })
+        );
+        await expect(p).resolves.toBe(true);
+
+        const sheet = document.querySelector('[data-slot=sheet]');
+
+        expect(sheet).toHaveAttribute('data-state', 'closed');
+        expect(sheet).toHaveTextContent('Видалити юніта?');
+        expect(sheet).not.toHaveTextContent('common.actions.cancel');
+    });
+
+    it.each([false, true])(
+        'confirm без опису не дає попередження про aria-describedby (mobile=%s)',
+        async (mobile) => {
+            mockMatchMedia(mobile);
+
+            const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            const error = vi
+                .spyOn(console, 'error')
+                .mockImplementation(() => {});
+
+            mount();
+            act(() => {
+                void confirm({ title: 'Видалити?' });
+            });
+            await screen.findByRole('alertdialog');
+            expect(screen.getByRole('alertdialog')).not.toHaveAttribute(
+                'aria-describedby'
+            );
+            expect(warn).not.toHaveBeenCalled();
+            expect(error).not.toHaveBeenCalled();
+            warn.mockRestore();
+            error.mockRestore();
+        }
+    );
 });

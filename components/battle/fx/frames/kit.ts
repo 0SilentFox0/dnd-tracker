@@ -1,44 +1,47 @@
-import { clamp01 } from "@/components/battle/fx/runtime/easing";
-import { type FxPoint, rand } from "@/components/battle/fx/runtime/geometry";
-import { emit, type EmitOptions } from "@/components/battle/fx/runtime/primitives";
-import type { Stage } from "@/components/battle/fx/runtime/stage";
+import { clamp01 } from '@/components/battle/fx/runtime/easing';
+import { type FxPoint, rand } from '@/components/battle/fx/runtime/geometry';
+import {
+    emit,
+    type EmitOptions,
+} from '@/components/battle/fx/runtime/primitives';
+import type { Stage } from '@/components/battle/fx/runtime/stage';
 
 export interface FrameBox {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
 }
 
 interface EdgePoint {
-  x: number;
-  y: number;
-  nx: number;
-  ny: number;
+    x: number;
+    y: number;
+    nx: number;
+    ny: number;
 }
 
 export function roundRect(g: CanvasRenderingContext2D, b: FrameBox, r = 6) {
-  g.beginPath();
-  g.roundRect(b.x, b.y, b.w, b.h, r);
+    g.beginPath();
+    g.roundRect(b.x, b.y, b.w, b.h, r);
 }
 
 // t ∈ [0, 1) walks the border clockwise from the top-left corner; (nx, ny) points inward.
 export function perimeter(b: FrameBox, t: number): EdgePoint {
-  const len = 2 * (b.w + b.h);
+    const len = 2 * (b.w + b.h);
 
-  let d = (((t % 1) + 1) % 1) * len;
+    let d = (((t % 1) + 1) % 1) * len;
 
-  if (d < b.w) return { x: b.x + d, y: b.y, nx: 0, ny: 1 };
+    if (d < b.w) return { x: b.x + d, y: b.y, nx: 0, ny: 1 };
 
-  d -= b.w;
+    d -= b.w;
 
-  if (d < b.h) return { x: b.x + b.w, y: b.y + d, nx: -1, ny: 0 };
+    if (d < b.h) return { x: b.x + b.w, y: b.y + d, nx: -1, ny: 0 };
 
-  d -= b.h;
+    d -= b.h;
 
-  if (d < b.w) return { x: b.x + b.w - d, y: b.y + b.h, nx: 0, ny: -1 };
+    if (d < b.w) return { x: b.x + b.w - d, y: b.y + b.h, nx: 0, ny: -1 };
 
-  return { x: b.x, y: b.y + b.h - (d - b.w), nx: 1, ny: 0 };
+    return { x: b.x, y: b.y + b.h - (d - b.w), nx: 1, ny: 0 };
 }
 
 /**
@@ -46,62 +49,103 @@ export function perimeter(b: FrameBox, t: number): EdgePoint {
  * strokes in the same glow), so reset `shadowBlur` when the next strokes must not glow.
  * `fillAlpha` fades the body, so a gradient built once can stand in for one rebuilt every frame with scaled stops.
  */
-export function edgeGlow(g: CanvasRenderingContext2D, box: FrameBox, o: { fill?: string | CanvasGradient; fillAlpha?: number; stroke: string; width: number; shadow?: string; blur?: number; radius?: number }) {
-  roundRect(g, box, o.radius);
+export function edgeGlow(
+    g: CanvasRenderingContext2D,
+    box: FrameBox,
+    o: {
+        fill?: string | CanvasGradient;
+        fillAlpha?: number;
+        stroke: string;
+        width: number;
+        shadow?: string;
+        blur?: number;
+        radius?: number;
+    }
+) {
+    roundRect(g, box, o.radius);
 
-  if (o.fill) {
-    const alpha = g.globalAlpha;
+    if (o.fill) {
+        const alpha = g.globalAlpha;
 
-    g.globalAlpha = alpha * clamp01(o.fillAlpha ?? 1);
-    g.fillStyle = o.fill;
-    g.fill();
-    g.globalAlpha = alpha;
-  }
+        g.globalAlpha = alpha * clamp01(o.fillAlpha ?? 1);
+        g.fillStyle = o.fill;
+        g.fill();
+        g.globalAlpha = alpha;
+    }
 
-  if (o.shadow) {
-    g.shadowColor = o.shadow;
-    g.shadowBlur = o.blur ?? 0;
-  }
+    if (o.shadow) {
+        g.shadowColor = o.shadow;
+        g.shadowBlur = o.blur ?? 0;
+    }
 
-  g.strokeStyle = o.stroke;
-  g.lineWidth = o.width;
-  g.stroke();
+    g.strokeStyle = o.stroke;
+    g.lineWidth = o.width;
+    g.stroke();
 }
 
-export function verticalFill(g: CanvasRenderingContext2D, box: FrameBox, stops: [number, string][]) {
-  const grad = g.createLinearGradient(0, box.y + box.h, 0, box.y);
+export function verticalFill(
+    g: CanvasRenderingContext2D,
+    box: FrameBox,
+    stops: [number, string][]
+) {
+    const grad = g.createLinearGradient(0, box.y + box.h, 0, box.y);
 
-  for (const [offset, color] of stops) grad.addColorStop(offset, color);
+    for (const [offset, color] of stops) grad.addColorStop(offset, color);
 
-  return grad;
+    return grad;
 }
 
 /** The red hit flash of the physical frames; `red` is its strength. */
-export function bloodFlash(g: CanvasRenderingContext2D, box: FrameBox, red: number, o: { fill: number; blur: number; stroke: number }) {
-  edgeGlow(g, box, { fill: `rgba(200,20,15,${o.fill * red})`, shadow: "#ff2a1a", blur: o.blur * red, stroke: `rgba(255,70,50,${o.stroke * red})`, width: 2 });
+export function bloodFlash(
+    g: CanvasRenderingContext2D,
+    box: FrameBox,
+    red: number,
+    o: { fill: number; blur: number; stroke: number }
+) {
+    edgeGlow(g, box, {
+        fill: `rgba(200,20,15,${o.fill * red})`,
+        shadow: '#ff2a1a',
+        blur: o.blur * red,
+        stroke: `rgba(255,70,50,${o.stroke * red})`,
+        width: 2,
+    });
 }
 
 /** A random point on the border, pushed inward by `offset` px. */
-function onPerimeter(box: FrameBox, offset: [number, number] = [0, 0]): EdgePoint {
-  const p = perimeter(box, Math.random());
+function onPerimeter(
+    box: FrameBox,
+    offset: [number, number] = [0, 0]
+): EdgePoint {
+    const p = perimeter(box, Math.random());
 
-  const d = rand(...offset);
+    const d = rand(...offset);
 
-  return { x: p.x + p.nx * d, y: p.y + p.ny * d, nx: p.nx, ny: p.ny };
+    return { x: p.x + p.nx * d, y: p.y + p.ny * d, nx: p.nx, ny: p.ny };
 }
 
 /** `count` particles from one random border point; `inward` aims them along the inward normal ± that many radians. */
-export function emitOnPerimeter(s: Stage, box: FrameBox, opts: EmitOptions, edge: { offset?: [number, number]; count?: number; inward?: number } = {}) {
-  const p = onPerimeter(box, edge.offset);
+export function emitOnPerimeter(
+    s: Stage,
+    box: FrameBox,
+    opts: EmitOptions,
+    edge: { offset?: [number, number]; count?: number; inward?: number } = {}
+) {
+    const p = onPerimeter(box, edge.offset);
 
-  const a = Math.atan2(p.ny, p.nx);
+    const a = Math.atan2(p.ny, p.nx);
 
-  const o: EmitOptions = edge.inward === undefined ? opts : { ...opts, angle: [a - edge.inward, a + edge.inward] };
+    const o: EmitOptions =
+        edge.inward === undefined
+            ? opts
+            : { ...opts, angle: [a - edge.inward, a + edge.inward] };
 
-  for (let i = 0; i < (edge.count ?? 1); i++) emit(s, { x: p.x, y: p.y }, o);
+    for (let i = 0; i < (edge.count ?? 1); i++) emit(s, { x: p.x, y: p.y }, o);
 }
 
 /** A random point on the bottom edge, `inset` px from the corners and up to `rise` px above it. */
 export function bottomPoint(box: FrameBox, inset = 0, rise = 0): FxPoint {
-  return { x: box.x + rand(inset, box.w - inset), y: box.y + box.h - (rise ? rand(0, rise) : 0) };
+    return {
+        x: box.x + rand(inset, box.w - inset),
+        y: box.y + box.h - (rise ? rand(0, rise) : 0),
+    };
 }

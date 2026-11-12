@@ -1,111 +1,211 @@
-import { AttackType } from "@/lib/constants/battle";
-import { textRef } from "@/lib/i18n/text-ref";
-import { findParticipant, isActive, isTargetable, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { processAttack } from "@/lib/utils/battle/attack";
-import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
-import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { logFields, withPrefix } from "@/lib/utils/battle/log/lines";
-import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
-import { pickOne, rollDiceList, rollDie } from "@/lib/utils/common/dice";
-import type { Ruleset } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import { AttackType } from '@/lib/constants/battle';
+import { textRef } from '@/lib/i18n/text-ref';
+import {
+    findParticipant,
+    isActive,
+    isTargetable,
+    updateParticipant,
+} from '@/lib/utils/abilities/engine/core/participants';
+import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
+import { processAttack } from '@/lib/utils/battle/attack';
+import { getDisabledAttackKinds } from '@/lib/utils/battle/attack/disabled-attacks';
+import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { logFields, withPrefix } from '@/lib/utils/battle/log/lines';
+import { endTurnCleanup } from '@/lib/utils/battle/turn/end-turn-cleanup';
+import { pickOne, rollDiceList, rollDie } from '@/lib/utils/common/dice';
+import type { Ruleset } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type {
+    BattleAction,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {
-  return p.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === "berserk").map((d) => d.value)).at(0);
+    return p.battleData.activeEffects
+        .flatMap((e) =>
+            e.effects.filter((d) => d.type === 'berserk').map((d) => d.value)
+        )
+        .at(0);
 }
 
 interface BerserkTurnParams {
-  participants: BattleParticipant[];
-  /** стан учасника на початку ходу: з нього читаються заборони */
-  restrictedBy: BattleParticipant;
-  participantId: string;
-  bonusPercent: number;
-  round: number;
-  battleId: string;
-  actionIndex: number;
-  rng: () => number;
-  map?: BattleMapConfig | null;
-  rules: Ruleset;
+    participants: BattleParticipant[];
+    /** стан учасника на початку ходу: з нього читаються заборони */
+    restrictedBy: BattleParticipant;
+    participantId: string;
+    bonusPercent: number;
+    round: number;
+    battleId: string;
+    actionIndex: number;
+    rng: () => number;
+    map?: BattleMapConfig | null;
+    rules: Ruleset;
 }
 
-function note(p: BattleParticipant, params: BerserkTurnParams, text: LogLine | LogLine[]): BattleAction {
-  return {
-    id: `berserk-${p.basicInfo.id}-${params.round}-${params.actionIndex}`,
-    battleId: params.battleId,
-    round: params.round,
-    actionIndex: params.actionIndex,
-    timestamp: new Date(),
-    actorId: p.basicInfo.id,
-    actorName: p.basicInfo.name,
-    actorSide: p.basicInfo.side,
-    actionType: "ability",
-    targets: [],
-    actionDetails: {},
-    ...logFields(text),
-    hpChanges: [],
-    isCancelled: false,
-  };
+function note(
+    p: BattleParticipant,
+    params: BerserkTurnParams,
+    text: LogLine | LogLine[]
+): BattleAction {
+    return {
+        id: `berserk-${p.basicInfo.id}-${params.round}-${params.actionIndex}`,
+        battleId: params.battleId,
+        round: params.round,
+        actionIndex: params.actionIndex,
+        timestamp: new Date(),
+        actorId: p.basicInfo.id,
+        actorName: p.basicInfo.name,
+        actorSide: p.basicInfo.side,
+        actionType: 'ability',
+        targets: [],
+        actionDetails: {},
+        ...logFields(text),
+        hpChanges: [],
+        isCancelled: false,
+    };
 }
 
 /** Автоматичний хід теж закінчується: спрацьовують turnEnd-вміння, зачарований повертається на свій бік. */
-function finishTurn(participants: BattleParticipant[], actions: BattleAction[], params: BerserkTurnParams) {
-  const id = params.participantId;
+function finishTurn(
+    participants: BattleParticipant[],
+    actions: BattleAction[],
+    params: BerserkTurnParams
+) {
+    const id = params.participantId;
 
-  const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng, map: params.map, rules: params.rules });
+    const ended = runAbilities(
+        participants,
+        { type: 'turnEnd', actorId: id },
+        {
+            round: params.round,
+            rng: params.rng,
+            map: params.map,
+            rules: params.rules,
+        }
+    );
 
-  const order = updateParticipant(ended.participants, id, (p) => endTurnCleanup(p, { participants: ended.participants, rules: params.rules, rng: params.rng, round: params.round }));
+    const order = updateParticipant(ended.participants, id, (p) =>
+        endTurnCleanup(p, {
+            participants: ended.participants,
+            rules: params.rules,
+            rng: params.rng,
+            round: params.round,
+        })
+    );
 
-  const turnEnd = ended.messages.length > 0 ? [{ ...note(findParticipant(order, id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, [textRef("battleLog.triggers.turnEnd"), ...ended.messages]) }] : [];
+    const turnEnd =
+        ended.messages.length > 0
+            ? [
+                  {
+                      ...note(
+                          findParticipant(order, id) as BattleParticipant,
+                          {
+                              ...params,
+                              actionIndex: params.actionIndex + actions.length,
+                          },
+                          [
+                              textRef('battleLog.triggers.turnEnd'),
+                              ...ended.messages,
+                          ]
+                      ),
+                  },
+              ]
+            : [];
 
-  return { participants: order, actions: [...actions, ...turnEnd] };
+    return { participants: order, actions: [...actions, ...turnEnd] };
 }
 
-export function runBerserkTurn(params: BerserkTurnParams): { participants: BattleParticipant[]; actions: BattleAction[] } {
-  const { participants, participantId, rng } = params;
+export function runBerserkTurn(params: BerserkTurnParams): {
+    participants: BattleParticipant[];
+    actions: BattleAction[];
+} {
+    const { participants, participantId, rng } = params;
 
-  const berserker = findParticipant(participants, participantId);
+    const berserker = findParticipant(participants, participantId);
 
-  if (!berserker || !isActive(berserker)) return { participants, actions: [] };
+    if (!berserker || !isActive(berserker))
+        return { participants, actions: [] };
 
-  const disabled = getDisabledAttackKinds(params.restrictedBy);
+    const disabled = getDisabledAttackKinds(params.restrictedBy);
 
-  const attackDisabled = (kind: string) => (kind === AttackType.RANGED ? disabled.ranged : disabled.melee);
+    const attackDisabled = (kind: string) =>
+        kind === AttackType.RANGED ? disabled.ranged : disabled.melee;
 
-  const cannotAct = berserker.actionFlags.hasUsedAction;
+    const cannotAct = berserker.actionFlags.hasUsedAction;
 
-  const victims = participants.filter((p) => p.basicInfo.id !== participantId && isTargetable(p));
+    const victims = participants.filter(
+        (p) => p.basicInfo.id !== participantId && isTargetable(p)
+    );
 
-  const attack = berserker.battleData.attacks.find((a) => a.hand !== "off");
+    const attack = berserker.battleData.attacks.find((a) => a.hand !== 'off');
 
-  if (cannotAct || victims.length === 0 || !attack || attackDisabled(attack.type)) {
-    const reason = textRef(cannotAct ? "battleLog.berserk.losesAction" : "battleLog.berserk.noTarget");
+    if (
+        cannotAct ||
+        victims.length === 0 ||
+        !attack ||
+        attackDisabled(attack.type)
+    ) {
+        const reason = textRef(
+            cannotAct
+                ? 'battleLog.berserk.losesAction'
+                : 'battleLog.berserk.noTarget'
+        );
 
-    return finishTurn(participants, [note(berserker, params, textRef("battleLog.berserk.line", { name: berserker.basicInfo.name, reason }))], params);
-  }
+        return finishTurn(
+            participants,
+            [
+                note(
+                    berserker,
+                    params,
+                    textRef('battleLog.berserk.line', {
+                        name: berserker.basicInfo.name,
+                        reason,
+                    })
+                ),
+            ],
+            params
+        );
+    }
 
-  const target = pickOne(victims, rng);
+    const target = pickOne(victims, rng);
 
-  const result = processAttack({
-    attacker: berserker,
-    target,
-    attack,
-    d20Roll: rollDie(ruleSystemOf(params.rules).combat.dice, rng),
-    damageRolls: rollDiceList(heroAttackDamageParts(berserker, attack).formula, rng),
-    allParticipants: participants,
-    currentRound: params.round,
-    battleId: params.battleId,
-    bonusPercent: params.bonusPercent,
-    bonusLabel: textRef("battleLog.damage.steps.berserk"),
-    rng,
-    map: params.map,
-    rules: params.rules,
-    serverRolled: { d20: true },
-  });
+    const result = processAttack({
+        attacker: berserker,
+        target,
+        attack,
+        d20Roll: rollDie(ruleSystemOf(params.rules).combat.dice, rng),
+        damageRolls: rollDiceList(
+            heroAttackDamageParts(berserker, attack).formula,
+            rng
+        ),
+        allParticipants: participants,
+        currentRound: params.round,
+        battleId: params.battleId,
+        bonusPercent: params.bonusPercent,
+        bonusLabel: textRef('battleLog.damage.steps.berserk'),
+        rng,
+        map: params.map,
+        rules: params.rules,
+        serverRolled: { d20: true },
+    });
 
-  const updated = new Map((result.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));
+    const updated = new Map(
+        (result.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p])
+    );
 
-  return finishTurn(participants.map((p) => updated.get(p.basicInfo.id) ?? p), [{ ...withPrefix(result.battleAction, textRef("battleLog.berserk.prefix")), actionIndex: params.actionIndex }], params);
+    return finishTurn(
+        participants.map((p) => updated.get(p.basicInfo.id) ?? p),
+        [
+            {
+                ...withPrefix(
+                    result.battleAction,
+                    textRef('battleLog.berserk.prefix')
+                ),
+                actionIndex: params.actionIndex,
+            },
+        ],
+        params
+    );
 }

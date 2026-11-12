@@ -2,18 +2,23 @@
 const MAX_DPR = 2;
 
 function canvasDpr() {
-  return Math.min(MAX_DPR, window.devicePixelRatio || 1);
+    return Math.min(MAX_DPR, window.devicePixelRatio || 1);
 }
 
 /** Sizes the backing store to `w × h` CSS px; touches it only on a change, because assigning `width` wipes the canvas. */
-export function fitCanvas(canvas: HTMLCanvasElement, w: number, h: number, dpr = canvasDpr()) {
-  const width = Math.round(w * dpr);
+export function fitCanvas(
+    canvas: HTMLCanvasElement,
+    w: number,
+    h: number,
+    dpr = canvasDpr()
+) {
+    const width = Math.round(w * dpr);
 
-  const height = Math.round(h * dpr);
+    const height = Math.round(h * dpr);
 
-  if (canvas.width !== width) canvas.width = width;
+    if (canvas.width !== width) canvas.width = width;
 
-  if (canvas.height !== height) canvas.height = height;
+    if (canvas.height !== height) canvas.height = height;
 
-  return dpr;
+    return dpr;
 }

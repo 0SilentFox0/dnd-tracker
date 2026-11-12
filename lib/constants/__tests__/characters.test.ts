@@ -1,31 +1,31 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSourceType } from "@/lib/constants/battle";
-import { CampaignRole } from "@/lib/constants/campaigns";
-import { CharacterType, clampHeroInitiative } from "@/lib/constants/characters";
+import { ParticipantSourceType } from '@/lib/constants/battle';
+import { CampaignRole } from '@/lib/constants/campaigns';
+import { CharacterType, clampHeroInitiative } from '@/lib/constants/characters';
 
-describe("stored domain values", () => {
-  it("character type values match the DB", () => {
-    expect(CharacterType.PLAYER).toBe("player");
-    expect(CharacterType.NPC_HERO).toBe("npc_hero");
-  });
+describe('stored domain values', () => {
+    it('character type values match the DB', () => {
+        expect(CharacterType.PLAYER).toBe('player');
+        expect(CharacterType.NPC_HERO).toBe('npc_hero');
+    });
 
-  it("participant source values match snapshots and API payloads", () => {
-    expect(ParticipantSourceType.CHARACTER).toBe("character");
-    expect(ParticipantSourceType.UNIT).toBe("unit");
-  });
+    it('participant source values match snapshots and API payloads', () => {
+        expect(ParticipantSourceType.CHARACTER).toBe('character');
+        expect(ParticipantSourceType.UNIT).toBe('unit');
+    });
 
-  it("campaign role values match campaign_members.role", () => {
-    expect(CampaignRole.DM).toBe("dm");
-    expect(CampaignRole.PLAYER).toBe("player");
-  });
+    it('campaign role values match campaign_members.role', () => {
+        expect(CampaignRole.DM).toBe('dm');
+        expect(CampaignRole.PLAYER).toBe('player');
+    });
 });
 
-describe("clampHeroInitiative", () => {
-  it("keeps hero initiative within 10–16 and defaults to 10", () => {
-    expect(clampHeroInitiative(2)).toBe(10);
-    expect(clampHeroInitiative(13)).toBe(13);
-    expect(clampHeroInitiative(20)).toBe(16);
-    expect(clampHeroInitiative(null)).toBe(10);
-  });
+describe('clampHeroInitiative', () => {
+    it('keeps hero initiative within 10–16 and defaults to 10', () => {
+        expect(clampHeroInitiative(2)).toBe(10);
+        expect(clampHeroInitiative(13)).toBe(13);
+        expect(clampHeroInitiative(20)).toBe(16);
+        expect(clampHeroInitiative(null)).toBe(10);
+    });
 });

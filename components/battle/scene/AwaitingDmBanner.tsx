@@ -1,31 +1,44 @@
-"use client";
+'use client';
 
-import { memo } from "react";
-import { useTranslations } from "next-intl";
-import { Hourglass } from "lucide-react";
+import { memo } from 'react';
+import { useTranslations } from 'next-intl';
+import { Hourglass } from 'lucide-react';
 
-import { useBattleScene } from "@/lib/hooks/battle";
+import { useBattleScene } from '@/lib/hooks/battle';
 
-const BOX = "mx-4 mt-2 flex min-h-10 items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center";
+const BOX =
+    'mx-4 mt-2 flex min-h-10 items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center';
 
 export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
-  const t = useTranslations("battle.scene");
+    const t = useTranslations('battle.scene');
 
-  const { viewer: { isDM }, dialogs } = useBattleScene();
+    const {
+        viewer: { isDM },
+        dialogs,
+    } = useBattleScene();
 
-  if (!isDM) {
+    if (!isDM) {
+        return (
+            <div className={BOX}>
+                <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
+                <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
+                    {t('awaitingDm')}
+                </span>
+            </div>
+        );
+    }
+
     return (
-      <div className={BOX}>
-        <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
-        <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">{t("awaitingDm")}</span>
-      </div>
+        <button
+            type="button"
+            onClick={() => dialogs.awaitingDm.setOpen(true)}
+            disabled={dialogs.awaitingDm.open}
+            className={`${BOX} w-[calc(100%-2rem)]`}
+        >
+            <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
+            <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
+                {t('awaitingYou')}
+            </span>
+        </button>
     );
-  }
-
-  return (
-    <button type="button" onClick={() => dialogs.awaitingDm.setOpen(true)} disabled={dialogs.awaitingDm.open} className={`${BOX} w-[calc(100%-2rem)]`}>
-      <Hourglass className="size-4 shrink-0 text-[var(--gold)]" />
-      <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">{t("awaitingYou")}</span>
-    </button>
-  );
 });

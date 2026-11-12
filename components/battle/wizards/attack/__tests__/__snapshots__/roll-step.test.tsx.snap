@@ -157,7 +157,7 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
     class="mt-3 grid grid-cols-[1.25fr_1fr] gap-2"
   >
     <button
-      class="hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 whitespace-nowrap border text-[15px] font-bold tracking-[.04em] border-white/25 text-[var(--bone)]"
+      class="hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 border text-[15px] font-bold tracking-[.04em] whitespace-nowrap border-white/25 text-[var(--bone)]"
       type="button"
     >
       <svg

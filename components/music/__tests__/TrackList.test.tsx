@@ -1,92 +1,168 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TrackList } from "../TrackList";
+import { TrackList } from '../TrackList';
 
-import type { TrackPreview } from "@/lib/hooks/music";
-import type { CampaignTrack } from "@/types/audio";
+import type { TrackPreview } from '@/lib/hooks/music';
+import type { CampaignTrack } from '@/types/audio';
 
 afterEach(cleanup);
 
-const track = (id: string, kind: CampaignTrack["kind"] = "file"): CampaignTrack => ({ id, title: `Трек ${id}`, kind, url: null, youtubeId: kind === "youtube" ? "dQw4w9WgXcQ" : null, durationSec: 61, sortOrder: 0, createdAt: "" });
+const track = (
+    id: string,
+    kind: CampaignTrack['kind'] = 'file'
+): CampaignTrack => ({
+    id,
+    title: `Трек ${id}`,
+    kind,
+    url: null,
+    youtubeId: kind === 'youtube' ? 'dQw4w9WgXcQ' : null,
+    durationSec: 61,
+    sortOrder: 0,
+    createdAt: '',
+});
 
-const previewOf = (over: Partial<TrackPreview> = {}): TrackPreview => ({ playingId: null, failedId: null, progress: null, toggle: vi.fn(), stop: vi.fn(), ...over });
+const previewOf = (over: Partial<TrackPreview> = {}): TrackPreview => ({
+    playingId: null,
+    failedId: null,
+    progress: null,
+    toggle: vi.fn(),
+    stop: vi.fn(),
+    ...over,
+});
 
 function setup(preview = previewOf()) {
-  const actions = { onRename: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn(), onMove: vi.fn() };
+    const actions = {
+        onRename: vi.fn(),
+        onEdit: vi.fn(),
+        onDelete: vi.fn(),
+        onMove: vi.fn(),
+    };
 
-  const view = render(<TrackList tracks={[{ ...track("a"), url: "https://s/camp1/a.mp3" }, track("b", "youtube"), { ...track("c"), url: "https://s/camp1/c.m4a", durationSec: null }]} busy={false} actions={actions} preview={preview} />);
+    const view = render(
+        <TrackList
+            tracks={[
+                { ...track('a'), url: 'https://s/camp1/a.mp3' },
+                track('b', 'youtube'),
+                {
+                    ...track('c'),
+                    url: 'https://s/camp1/c.m4a',
+                    durationSec: null,
+                },
+            ]}
+            busy={false}
+            actions={actions}
+            preview={preview}
+        />
+    );
 
-  return { ...view, actions, preview };
+    return { ...view, actions, preview };
 }
 
-describe("TrackList", () => {
-  it("назва, формат файлу з посилання (MP3, M4A) і тривалість; крайні стрілки вимкнені", () => {
-    const { getByText, getAllByText, getByDisplayValue, getAllByRole } = setup();
+describe('TrackList', () => {
+    it('назва, формат файлу з посилання (MP3, M4A) і тривалість; крайні стрілки вимкнені', () => {
+        const { getByText, getAllByText, getByDisplayValue, getAllByRole } =
+            setup();
 
-    expect(getByDisplayValue("Трек a")).toBeTruthy();
-    expect(getByText("MP3")).toBeTruthy();
-    expect(getAllByText("1:01")).toHaveLength(2);
-    expect(getByText("M4A")).toBeTruthy();
-    expect(getByText("YouTube")).toBeTruthy();
-    expect((getAllByRole("button", { name: "music.list.earlier" })[0] as HTMLButtonElement).disabled).toBe(true);
-    expect((getAllByRole("button", { name: "music.list.later" })[2] as HTMLButtonElement).disabled).toBe(true);
-  });
+        expect(getByDisplayValue('Трек a')).toBeTruthy();
+        expect(getByText('MP3')).toBeTruthy();
+        expect(getAllByText('1:01')).toHaveLength(2);
+        expect(getByText('M4A')).toBeTruthy();
+        expect(getByText('YouTube')).toBeTruthy();
+        expect(
+            (
+                getAllByRole('button', {
+                    name: 'music.list.earlier',
+                })[0] as HTMLButtonElement
+            ).disabled
+        ).toBe(true);
+        expect(
+            (
+                getAllByRole('button', {
+                    name: 'music.list.later',
+                })[2] as HTMLButtonElement
+            ).disabled
+        ).toBe(true);
+    });
 
-  it("показує посилання: файл — публічний URL, YouTube — youtu.be", () => {
-    const { container } = setup();
+    it('показує посилання: файл — публічний URL, YouTube — youtu.be', () => {
+        const { container } = setup();
 
-    const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+        const hrefs = [...container.querySelectorAll('a')].map((a) =>
+            a.getAttribute('href')
+        );
 
-    expect(hrefs).toEqual(["https://s/camp1/a.mp3", "https://youtu.be/dQw4w9WgXcQ", "https://s/camp1/c.m4a"]);
-  });
+        expect(hrefs).toEqual([
+            'https://s/camp1/a.mp3',
+            'https://youtu.be/dQw4w9WgXcQ',
+            'https://s/camp1/c.m4a',
+        ]);
+    });
 
-  it("«Слухати» вмикає трек; для активного — «Пауза», прогрес і помилка", () => {
-    const { getAllByRole, preview } = setup();
+    it('«Слухати» вмикає трек; для активного — «Пауза», прогрес і помилка', () => {
+        const { getAllByRole, preview } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "music.list.play" })[1]);
-    expect(preview.toggle).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
-    cleanup();
+        fireEvent.click(getAllByRole('button', { name: 'music.list.play' })[1]);
+        expect(preview.toggle).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 'b' })
+        );
+        cleanup();
 
-    const view = setup(previewOf({ playingId: "a", failedId: "b", progress: 0.4 }));
+        const view = setup(
+            previewOf({ playingId: 'a', failedId: 'b', progress: 0.4 })
+        );
 
-    expect(view.getAllByRole("button", { name: "music.list.pause" })).toHaveLength(1);
-    expect(view.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("40");
-    expect(view.getByRole("alert")).toBeTruthy();
-  });
+        expect(
+            view.getAllByRole('button', { name: 'music.list.pause' })
+        ).toHaveLength(1);
+        expect(
+            view.getByRole('progressbar').getAttribute('aria-valuenow')
+        ).toBe('40');
+        expect(view.getByRole('alert')).toBeTruthy();
+    });
 
-  it("«Редагувати» передає трек", () => {
-    const { getAllByRole, actions } = setup();
+    it('«Редагувати» передає трек', () => {
+        const { getAllByRole, actions } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "common.actions.edit" })[1]);
-    expect(actions.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
-  });
+        fireEvent.click(
+            getAllByRole('button', { name: 'common.actions.edit' })[1]
+        );
+        expect(actions.onEdit).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 'b' })
+        );
+    });
 
-  it("стрілка, видалення й перейменування викликають дії", () => {
-    const { getAllByRole, getAllByLabelText, actions } = setup();
+    it('стрілка, видалення й перейменування викликають дії', () => {
+        const { getAllByRole, getAllByLabelText, actions } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "music.list.later" })[0]);
-    expect(actions.onMove).toHaveBeenCalledWith("a", 1);
+        fireEvent.click(
+            getAllByRole('button', { name: 'music.list.later' })[0]
+        );
+        expect(actions.onMove).toHaveBeenCalledWith('a', 1);
 
-    fireEvent.click(getAllByRole("button", { name: "common.actions.delete" })[1]);
-    expect(actions.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
+        fireEvent.click(
+            getAllByRole('button', { name: 'common.actions.delete' })[1]
+        );
+        expect(actions.onDelete).toHaveBeenCalledWith(
+            expect.objectContaining({ id: 'b' })
+        );
 
-    const input = getAllByLabelText("music.list.titleName")[0];
+        const input = getAllByLabelText('music.list.titleName')[0];
 
-    fireEvent.change(input, { target: { value: "Таверна" } });
-    fireEvent.blur(input);
-    expect(actions.onRename).toHaveBeenCalledWith("a", "Таверна");
-  });
+        fireEvent.change(input, { target: { value: 'Таверна' } });
+        fireEvent.blur(input);
+        expect(actions.onRename).toHaveBeenCalledWith('a', 'Таверна');
+    });
 
-  it("незмінена або порожня назва — без перейменування", () => {
-    const { getAllByLabelText, actions } = setup();
+    it('незмінена або порожня назва — без перейменування', () => {
+        const { getAllByLabelText, actions } = setup();
 
-    const input = getAllByLabelText("music.list.titleName")[0];
+        const input = getAllByLabelText('music.list.titleName')[0];
 
-    fireEvent.blur(input);
-    fireEvent.change(input, { target: { value: "   " } });
-    fireEvent.blur(input);
-    expect(actions.onRename).not.toHaveBeenCalled();
-  });
+        fireEvent.blur(input);
+        fireEvent.change(input, { target: { value: '   ' } });
+        fireEvent.blur(input);
+        expect(actions.onRename).not.toHaveBeenCalled();
+    });
 });

@@ -1,59 +1,96 @@
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 
-export function AddBranchSheet({ open, branches, actions }: {
-  open: boolean;
-  branches: Array<{ id: string; name: string; color: string }>;
-  actions: { onClose: () => void; onAdd: (id: string) => void; onCreate: (input: { name: string; color: string }) => Promise<boolean> };
+export function AddBranchSheet({
+    open,
+    branches,
+    actions,
+}: {
+    open: boolean;
+    branches: Array<{ id: string; name: string; color: string }>;
+    actions: {
+        onClose: () => void;
+        onAdd: (id: string) => void;
+        onCreate: (input: { name: string; color: string }) => Promise<boolean>;
+    };
 }) {
-  const t = useTranslations("skillTree.addBranch");
+    const t = useTranslations('skillTree.addBranch');
 
-  const [name, setName] = useState("");
+    const [name, setName] = useState('');
 
-  const [color, setColor] = useState("#8a6414");
+    const [color, setColor] = useState('#8a6414');
 
-  const [creating, setCreating] = useState(false);
+    const [creating, setCreating] = useState(false);
 
-  return (
-    <ResponsiveDialog
-      hud
-      open={open}
-      onOpenChange={(o) => !o && actions.onClose()}
-      title={t("title")}
-      footer={<Button form="new-branch" type="submit" disabled={!name.trim() || creating}>{t("create")}</Button>}
-    >
-      <div className="flex flex-col gap-1">
-        {branches.map((b) => (
-          <Button key={b.id} type="button" variant="ghost" className="justify-start gap-2" onClick={() => actions.onAdd(b.id)}>
-            <span className="h-3 w-3 rounded-full" style={{ background: b.color }} />
-            {b.name}
-          </Button>
-        ))}
-      </div>
-      <form
-        id="new-branch"
-        className="mt-4 flex gap-2"
-        onSubmit={async (e) => {
-          e.preventDefault();
+    return (
+        <ResponsiveDialog
+            hud
+            open={open}
+            onOpenChange={(o) => !o && actions.onClose()}
+            title={t('title')}
+            footer={
+                <Button
+                    form="new-branch"
+                    type="submit"
+                    disabled={!name.trim() || creating}
+                >
+                    {t('create')}
+                </Button>
+            }
+        >
+            <div className="flex flex-col gap-1">
+                {branches.map((b) => (
+                    <Button
+                        key={b.id}
+                        type="button"
+                        variant="ghost"
+                        className="justify-start gap-2"
+                        onClick={() => actions.onAdd(b.id)}
+                    >
+                        <span
+                            className="h-3 w-3 rounded-full"
+                            style={{ background: b.color }}
+                        />
+                        {b.name}
+                    </Button>
+                ))}
+            </div>
+            <form
+                id="new-branch"
+                className="mt-4 flex gap-2"
+                onSubmit={async (e) => {
+                    e.preventDefault();
 
-          if (creating || !name.trim()) return;
+                    if (creating || !name.trim()) return;
 
-          setCreating(true);
+                    setCreating(true);
 
-          try {
-            if (await actions.onCreate({ name: name.trim(), color })) setName("");
-          } finally {
-            setCreating(false);
-          }
-        }}
-      >
-        <Input placeholder={t("namePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="color" aria-label={t("color")} value={color} onChange={(e) => setColor(e.target.value)} />
-      </form>
-    </ResponsiveDialog>
-  );
+                    try {
+                        if (
+                            await actions.onCreate({ name: name.trim(), color })
+                        )
+                            setName('');
+                    } finally {
+                        setCreating(false);
+                    }
+                }}
+            >
+                <Input
+                    placeholder={t('namePlaceholder')}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+                <input
+                    type="color"
+                    aria-label={t('color')}
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                />
+            </form>
+        </ResponsiveDialog>
+    );
 }

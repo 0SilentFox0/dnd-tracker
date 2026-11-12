@@ -1,84 +1,127 @@
-import { NextResponse } from "next/server";
-import { describe, expect, it } from "vitest";
-import { z } from "zod";
+import { NextResponse } from 'next/server';
+import { describe, expect, it } from 'vitest';
+import { z } from 'zod';
 
-import { parseBody } from "../parse-body";
+import { parseBody } from '../parse-body';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS } from '@/lib/constants/api-errors';
 
 const schema = z.object({ name: z.string().min(1) });
 
-const post = (body: string) => new Request("http://localhost/api", { method: "POST", body });
+const post = (body: string) =>
+    new Request('http://localhost/api', { method: 'POST', body });
 
-describe("parseBody", () => {
-  it("валідне тіло — повертає дані", async () => {
-    expect(await parseBody(schema, post(JSON.stringify({ name: "Ельф" })))).toEqual({ name: "Ельф" });
-  });
-
-  it("кривий JSON — 400 замість 500", async () => {
-    const res = await parseBody(schema, post("{not json"));
-
-    expect(res).toBeInstanceOf(NextResponse);
-    expect((res as NextResponse).status).toBe(400);
-    expect(await (res as NextResponse).json()).toMatchObject({ error: API_ERRORS.INVALID_JSON });
-  });
-
-  it("помилка схеми — 400 з error і issues", async () => {
-    const res = (await parseBody(schema, post(JSON.stringify({ name: "" })))) as NextResponse;
-
-    expect(res.status).toBe(400);
-
-    const body = await res.json();
-
-    expect(body.error).toBe(API_ERRORS.INVALID_BODY);
-    expect(Array.isArray(body.issues)).toBe(true);
-    expect(body.issues[0].path).toEqual(["name"]);
-  });
-
-  it("власне повідомлення про помилку схеми", async () => {
-    const res = (await parseBody(schema, post("{}"), "Некоректні цілі")) as NextResponse;
-
-    expect((await res.json()).error).toBe("Некоректні цілі");
-  });
-
-  describe("maxBytes", () => {
-    const chunked = (chunks: string[], onCancel = () => {}) => {
-      const enc = new TextEncoder();
-
-      let i = 0;
-
-      return new Request("http://localhost/api", {
-        method: "POST",
-        body: new ReadableStream({
-          pull(c) {
-            if (i < chunks.length) c.enqueue(enc.encode(chunks[i++]));
-            else c.close();
-          },
-          cancel: onCancel,
-        }),
-        duplex: "half",
-      } as RequestInit);
-    };
-
-    it("Content-Length понад ліміт — 413 до Zod", async () => {
-      const res = (await parseBody(schema, post(JSON.stringify({ name: "x".repeat(200) })), undefined, { maxBytes: 100 })) as NextResponse;
-
-      expect(res.status).toBe(413);
-      expect(await res.json()).toMatchObject({ error: API_ERRORS.BODY_TOO_LARGE });
+describe('parseBody', () => {
+    it('валідне тіло — повертає дані', async () => {
+        expect(
+            await parseBody(schema, post(JSON.stringify({ name: 'Ельф' })))
+        ).toEqual({ name: 'Ельф' });
     });
 
-    it("потік без Content-Length понад ліміт — 413, reader скасовано", async () => {
-      let cancelled = false;
+    it('кривий JSON — 400 замість 500', async () => {
+        const res = await parseBody(schema, post('{not json'));
 
-      const res = (await parseBody(schema, chunked(["{\"name\":\"", "x".repeat(60), "x".repeat(60), "\"}"], () => { cancelled = true; }), undefined, { maxBytes: 100 })) as NextResponse;
-
-      expect(res.status).toBe(413);
-      expect(cancelled).toBe(true);
+        expect(res).toBeInstanceOf(NextResponse);
+        expect((res as NextResponse).status).toBe(400);
+        expect(await (res as NextResponse).json()).toMatchObject({
+            error: API_ERRORS.INVALID_JSON,
+        });
     });
 
-    it("тіло в межах ліміту доходить до Zod", async () => {
-      expect(await parseBody(schema, chunked(["{\"name\":", "\"Ельф\"}"]), undefined, { maxBytes: 100 })).toEqual({ name: "Ельф" });
-      expect(((await parseBody(schema, post("{not"), undefined, { maxBytes: 100 })) as NextResponse).status).toBe(400);
+    it('помилка схеми — 400 з error і issues', async () => {
+        const res = (await parseBody(
+            schema,
+            post(JSON.stringify({ name: '' }))
+        )) as NextResponse;
+
+        expect(res.status).toBe(400);
+
+        const body = await res.json();
+
+        expect(body.error).toBe(API_ERRORS.INVALID_BODY);
+        expect(Array.isArray(body.issues)).toBe(true);
+        expect(body.issues[0].path).toEqual(['name']);
     });
-  });
+
+    it('власне повідомлення про помилку схеми', async () => {
+        const res = (await parseBody(
+            schema,
+            post('{}'),
+            'Некоректні цілі'
+        )) as NextResponse;
+
+        expect((await res.json()).error).toBe('Некоректні цілі');
+    });
+
+    describe('maxBytes', () => {
+        const chunked = (chunks: string[], onCancel = () => {}) => {
+            const enc = new TextEncoder();
+
+            let i = 0;
+
+            return new Request('http://localhost/api', {
+                method: 'POST',
+                body: new ReadableStream({
+                    pull(c) {
+                        if (i < chunks.length)
+                            c.enqueue(enc.encode(chunks[i++]));
+                        else c.close();
+                    },
+                    cancel: onCancel,
+                }),
+                duplex: 'half',
+            } as RequestInit);
+        };
+
+        it('Content-Length понад ліміт — 413 до Zod', async () => {
+            const res = (await parseBody(
+                schema,
+                post(JSON.stringify({ name: 'x'.repeat(200) })),
+                undefined,
+                { maxBytes: 100 }
+            )) as NextResponse;
+
+            expect(res.status).toBe(413);
+            expect(await res.json()).toMatchObject({
+                error: API_ERRORS.BODY_TOO_LARGE,
+            });
+        });
+
+        it('потік без Content-Length понад ліміт — 413, reader скасовано', async () => {
+            let cancelled = false;
+
+            const res = (await parseBody(
+                schema,
+                chunked(
+                    ['{"name":"', 'x'.repeat(60), 'x'.repeat(60), '"}'],
+                    () => {
+                        cancelled = true;
+                    }
+                ),
+                undefined,
+                { maxBytes: 100 }
+            )) as NextResponse;
+
+            expect(res.status).toBe(413);
+            expect(cancelled).toBe(true);
+        });
+
+        it('тіло в межах ліміту доходить до Zod', async () => {
+            expect(
+                await parseBody(
+                    schema,
+                    chunked(['{"name":', '"Ельф"}']),
+                    undefined,
+                    { maxBytes: 100 }
+                )
+            ).toEqual({ name: 'Ельф' });
+            expect(
+                (
+                    (await parseBody(schema, post('{not'), undefined, {
+                        maxBytes: 100,
+                    })) as NextResponse
+                ).status
+            ).toBe(400);
+        });
+    });
 });

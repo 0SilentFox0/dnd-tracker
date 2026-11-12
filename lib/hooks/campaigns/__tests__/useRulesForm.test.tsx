@@ -1,103 +1,151 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { getCampaignRules, updateCampaignRules } from "@/lib/api/rules";
-import { useRulesForm } from "@/lib/hooks/campaigns";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import { getCampaignRules, updateCampaignRules } from '@/lib/api/rules';
+import { useRulesForm } from '@/lib/hooks/campaigns';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-vi.mock("@/lib/api/rules", () => ({ getCampaignRules: vi.fn(), updateCampaignRules: vi.fn() }));
+vi.mock('@/lib/api/rules', () => ({
+    getCampaignRules: vi.fn(),
+    updateCampaignRules: vi.fn(),
+}));
 
-describe("useRulesForm", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(getCampaignRules).mockResolvedValue(DEFAULT_RULES);
-    vi.mocked(updateCampaignRules).mockImplementation(async (_id, patch) => ({ ...DEFAULT_RULES, ...patch }) as typeof DEFAULT_RULES);
-  });
+describe('useRulesForm', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(getCampaignRules).mockResolvedValue(DEFAULT_RULES);
+        vi.mocked(updateCampaignRules).mockImplementation(
+            async (_id, patch) =>
+                ({ ...DEFAULT_RULES, ...patch }) as typeof DEFAULT_RULES
+        );
+    });
 
-  const setup = async () => {
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const setup = async () => {
+        const client = new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+        });
 
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={client}>
-        <ConfirmProvider>{children}</ConfirmProvider>
-      </QueryClientProvider>
-    );
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            <QueryClientProvider client={client}>
+                <ConfirmProvider>{children}</ConfirmProvider>
+            </QueryClientProvider>
+        );
 
-    const view = renderHook(() => useRulesForm("c1"), { wrapper });
+        const view = renderHook(() => useRulesForm('c1'), { wrapper });
 
-    await waitFor(() => expect(view.result.current.isLoading).toBe(false));
+        await waitFor(() => expect(view.result.current.isLoading).toBe(false));
 
-    return view;
-  };
+        return view;
+    };
 
-  it("starts from the server rules and is clean", async () => {
-    const { result } = await setup();
+    it('starts from the server rules and is clean', async () => {
+        const { result } = await setup();
 
-    expect(result.current.form.data).toEqual(DEFAULT_RULES);
-    expect(result.current.isDirty).toBe(false);
-  });
+        expect(result.current.form.data).toEqual(DEFAULT_RULES);
+        expect(result.current.isDirty).toBe(false);
+    });
 
-  it("set marks the form dirty and save patches only changed sections", async () => {
-    const { result } = await setup();
+    it('set marks the form dirty and save patches only changed sections', async () => {
+        const { result } = await setup();
 
-    act(() => result.current.form.set("morale", { enabled: false, cap: 3 }));
+        act(() =>
+            result.current.form.set('morale', { enabled: false, cap: 3 })
+        );
 
-    expect(result.current.isDirty).toBe(true);
+        expect(result.current.isDirty).toBe(true);
 
-    await act(() => result.current.save());
+        await act(() => result.current.save());
 
-    expect(updateCampaignRules).toHaveBeenCalledWith("c1", { morale: { enabled: false, cap: 3 } });
-    expect(result.current.isDirty).toBe(false);
-  });
+        expect(updateCampaignRules).toHaveBeenCalledWith('c1', {
+            morale: { enabled: false, cap: 3 },
+        });
+        expect(result.current.isDirty).toBe(false);
+    });
 
-  it("setting a value back to the server one is not dirty", async () => {
-    const { result } = await setup();
+    it('setting a value back to the server one is not dirty', async () => {
+        const { result } = await setup();
 
-    act(() => result.current.form.set("morale", { enabled: false, cap: 3 }));
-    act(() => result.current.form.set("morale", DEFAULT_RULES.morale));
+        act(() =>
+            result.current.form.set('morale', { enabled: false, cap: 3 })
+        );
+        act(() => result.current.form.set('morale', DEFAULT_RULES.morale));
 
-    expect(result.current.isDirty).toBe(false);
-  });
+        expect(result.current.isDirty).toBe(false);
+    });
 
-  it("fills empty dice cells with the default progression on save", async () => {
-    const { result } = await setup();
+    it('fills empty dice cells with the default progression on save', async () => {
+        const { result } = await setup();
 
-    act(() => result.current.form.set("heroScaling", { ...DEFAULT_RULES.heroScaling, meleeDiceByLevel: { 1: "2d6" } }));
+        act(() =>
+            result.current.form.set('heroScaling', {
+                ...DEFAULT_RULES.heroScaling,
+                meleeDiceByLevel: { 1: '2d6' },
+            })
+        );
 
-    await act(() => result.current.save());
+        await act(() => result.current.save());
 
-    const patch = vi.mocked(updateCampaignRules).mock.calls[0][1];
+        const patch = vi.mocked(updateCampaignRules).mock.calls[0][1];
 
-    const table = patch.heroScaling?.meleeDiceByLevel;
+        const table = patch.heroScaling?.meleeDiceByLevel;
 
-    expect(Object.keys(table ?? {})).toHaveLength(20);
-    expect(table?.["1"]).toBe("2d6");
-    expect(table?.["2"]).toBe("1d6");
-  });
+        expect(Object.keys(table ?? {})).toHaveLength(20);
+        expect(table?.['1']).toBe('2d6');
+        expect(table?.['2']).toBe('1d6');
+    });
 
-  it("conditions patch never carries custom conditions", async () => {
-    vi.mocked(getCampaignRules).mockResolvedValue({ ...DEFAULT_RULES, conditions: { ...DEFAULT_RULES.conditions, custom: [{ key: "custom:x", name: "X", description: "", markers: [] }] } });
+    it('conditions patch never carries custom conditions', async () => {
+        vi.mocked(getCampaignRules).mockResolvedValue({
+            ...DEFAULT_RULES,
+            conditions: {
+                ...DEFAULT_RULES.conditions,
+                custom: [
+                    {
+                        key: 'custom:x',
+                        name: 'X',
+                        description: '',
+                        markers: [],
+                    },
+                ],
+            },
+        });
 
-    const { result } = await setup();
+        const { result } = await setup();
 
-    act(() => result.current.form.set("conditions", { ...result.current.form.data.conditions, enabled: true }));
+        act(() =>
+            result.current.form.set('conditions', {
+                ...result.current.form.data.conditions,
+                enabled: true,
+            })
+        );
 
-    await act(() => result.current.save());
+        await act(() => result.current.save());
 
-    expect(updateCampaignRules).toHaveBeenCalledWith("c1", { conditions: { enabled: true, exhaustion: DEFAULT_RULES.conditions.exhaustion } });
-  });
+        expect(updateCampaignRules).toHaveBeenCalledWith('c1', {
+            conditions: {
+                enabled: true,
+                exhaustion: DEFAULT_RULES.conditions.exhaustion,
+            },
+        });
+    });
 
-  it("reset returns the server data", async () => {
-    const { result } = await setup();
+    it('reset returns the server data', async () => {
+        const { result } = await setup();
 
-    act(() => result.current.form.set("initiative", { heroMin: 1, heroMax: 2, mode: "static" }));
-    act(() => result.current.reset());
+        act(() =>
+            result.current.form.set('initiative', {
+                heroMin: 1,
+                heroMax: 2,
+                mode: 'static',
+            })
+        );
+        act(() => result.current.reset());
 
-    expect(result.current.form.data).toEqual(DEFAULT_RULES);
-    expect(result.current.isDirty).toBe(false);
-  });
+        expect(result.current.form.data).toEqual(DEFAULT_RULES);
+        expect(result.current.isDirty).toBe(false);
+    });
 });

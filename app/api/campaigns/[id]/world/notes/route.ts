@@ -1,9 +1,9 @@
-import { createNoteHandler } from "@/lib/server/world/note-handlers";
+import { createNoteHandler } from '@/lib/server/world/note-handlers';
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(req: Request, { params }: Params) {
-  const { id } = await params;
+    const { id } = await params;
 
-  return createNoteHandler(req, id);
+    return createNoteHandler(req, id);
 }

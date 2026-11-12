@@ -1,52 +1,88 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { activeEffectIds, consumeAttackEffects } from "../consume-effects";
+import { activeEffectIds, consumeAttackEffects } from '../consume-effects';
 
-import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import { makeEffect } from '@/lib/utils/abilities/__tests__/fixtures';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
-const withEffects = (id: string, effects: ActiveEffect[]): BattleParticipant => {
-  const p = createMockParticipant();
+const withEffects = (
+    id: string,
+    effects: ActiveEffect[]
+): BattleParticipant => {
+    const p = createMockParticipant();
 
-  return { ...p, basicInfo: { ...p.basicInfo, id }, battleData: { ...p.battleData, activeEffects: effects } };
+    return {
+        ...p,
+        basicInfo: { ...p.basicInfo, id },
+        battleData: { ...p.battleData, activeEffects: effects },
+    };
 };
 
-const ids = (p: BattleParticipant) => p.battleData.activeEffects.map((e) => e.id);
+const ids = (p: BattleParticipant) =>
+    p.battleData.activeEffects.map((e) => e.id);
 
-describe("consumeAttackEffects", () => {
-  const a = withEffects("a", [makeEffect("adv", { consumeOn: "ownAttack" }), makeEffect("weak", { consumeOn: "ownHit" }), makeEffect("keep")]);
+describe('consumeAttackEffects', () => {
+    const a = withEffects('a', [
+        makeEffect('adv', { consumeOn: 'ownAttack' }),
+        makeEffect('weak', { consumeOn: 'ownHit' }),
+        makeEffect('keep'),
+    ]);
 
-  const t = withEffects("t", [makeEffect("mark", { consumeOn: "attackAgainst" })]);
+    const t = withEffects('t', [
+        makeEffect('mark', { consumeOn: 'attackAgainst' }),
+    ]);
 
-  it("consumes attacker ownAttack and target attackAgainst on a miss, keeps ownHit", () => {
-    const ps = consumeAttackEffects([a, t], { attackerId: "a", targetId: "t", hit: false, existedBefore: activeEffectIds([a, t]) });
+    it('consumes attacker ownAttack and target attackAgainst on a miss, keeps ownHit', () => {
+        const ps = consumeAttackEffects([a, t], {
+            attackerId: 'a',
+            targetId: 't',
+            hit: false,
+            existedBefore: activeEffectIds([a, t]),
+        });
 
-    expect(ids(ps[0])).toEqual(["weak", "keep"]);
-    expect(ids(ps[1])).toEqual([]);
-  });
+        expect(ids(ps[0])).toEqual(['weak', 'keep']);
+        expect(ids(ps[1])).toEqual([]);
+    });
 
-  it("consumes ownHit on a hit", () => {
-    const ps = consumeAttackEffects([a, t], { attackerId: "a", targetId: "t", hit: true, existedBefore: activeEffectIds([a, t]) });
+    it('consumes ownHit on a hit', () => {
+        const ps = consumeAttackEffects([a, t], {
+            attackerId: 'a',
+            targetId: 't',
+            hit: true,
+            existedBefore: activeEffectIds([a, t]),
+        });
 
-    expect(ids(ps[0])).toEqual(["keep"]);
-  });
+        expect(ids(ps[0])).toEqual(['keep']);
+    });
 
-  it("keeps effects applied during this attack", () => {
-    const ps = consumeAttackEffects([a, t], { attackerId: "a", targetId: "t", hit: true, existedBefore: new Set(["a:keep"]) });
+    it('keeps effects applied during this attack', () => {
+        const ps = consumeAttackEffects([a, t], {
+            attackerId: 'a',
+            targetId: 't',
+            hit: true,
+            existedBefore: new Set(['a:keep']),
+        });
 
-    expect(ids(ps[0])).toEqual(["adv", "weak", "keep"]);
-  });
+        expect(ids(ps[0])).toEqual(['adv', 'weak', 'keep']);
+    });
 });
 
-describe("existedBefore keys", () => {
-  it("an effect id that exists on another participant does not make a new one count as old", () => {
-    const attacker = withEffects("a", [makeEffect("shared", { consumeOn: "ownAttack" })]);
+describe('existedBefore keys', () => {
+    it('an effect id that exists on another participant does not make a new one count as old', () => {
+        const attacker = withEffects('a', [
+            makeEffect('shared', { consumeOn: 'ownAttack' }),
+        ]);
 
-    const other = withEffects("t", [makeEffect("shared")]);
+        const other = withEffects('t', [makeEffect('shared')]);
 
-    const ps = consumeAttackEffects([attacker, other], { attackerId: "a", targetId: "t", hit: true, existedBefore: activeEffectIds([other]) });
+        const ps = consumeAttackEffects([attacker, other], {
+            attackerId: 'a',
+            targetId: 't',
+            hit: true,
+            existedBefore: activeEffectIds([other]),
+        });
 
-    expect(ids(ps[0])).toEqual(["shared"]);
-  });
+        expect(ids(ps[0])).toEqual(['shared']);
+    });
 });

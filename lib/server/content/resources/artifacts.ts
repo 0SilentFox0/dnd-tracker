@@ -1,146 +1,279 @@
-import { type Artifact as ArtifactRow, Prisma } from "@prisma/client";
-import { randomUUID } from "crypto";
-import type { z } from "zod";
+import { type Artifact as ArtifactRow, Prisma } from '@prisma/client';
+import { randomUUID } from 'crypto';
+import type { z } from 'zod';
 
-import "server-only";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { ArmorModifierType, ArtifactSlot, ItemModifierType } from "@/lib/constants/artifacts";
-import { prisma } from "@/lib/db";
-import { createArtifactSchema, patchArtifactSchema } from "@/lib/schemas/artifacts";
-import { persistIcon } from "@/lib/server/artifacts/persist-icon";
-import { readArtifactsList } from "@/lib/server/artifacts/read-artifacts-list";
-import { systemStatsOrThrow } from "@/lib/server/artifacts/system-stats";
-import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
-import { loadRules } from "@/lib/server/campaigns/rules";
-import { defineResource } from "@/lib/server/content/define-resource";
-import { ContentError } from "@/lib/server/content/errors";
-import { assertCampaignEffects, storedEffectOwners } from "@/lib/server/content/traits-guard";
-import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
-import { type ArmorStats, armorStatsColumns } from "@/lib/utils/artifacts/armor-stats";
-import { type WeaponStats, weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
-import { type ItemStats, itemStatsColumns } from "@/lib/utils/items/item-stats";
+import 'server-only';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import {
+    ArmorModifierType,
+    ArtifactSlot,
+    ItemModifierType,
+} from '@/lib/constants/artifacts';
+import { prisma } from '@/lib/db';
+import {
+    createArtifactSchema,
+    patchArtifactSchema,
+} from '@/lib/schemas/artifacts';
+import { persistIcon } from '@/lib/server/artifacts/persist-icon';
+import { readArtifactsList } from '@/lib/server/artifacts/read-artifacts-list';
+import { systemStatsOrThrow } from '@/lib/server/artifacts/system-stats';
+import { assertCampaignRefs } from '@/lib/server/campaigns/campaign-refs';
+import { loadRules } from '@/lib/server/campaigns/rules';
+import { defineResource } from '@/lib/server/content/define-resource';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    assertCampaignEffects,
+    storedEffectOwners,
+} from '@/lib/server/content/traits-guard';
+import { abilitiesJson, withAbilityIssues } from '@/lib/utils/abilities/read';
+import {
+    type ArmorStats,
+    armorStatsColumns,
+} from '@/lib/utils/artifacts/armor-stats';
+import {
+    type WeaponStats,
+    weaponStatsColumns,
+} from '@/lib/utils/artifacts/weapon-stats';
+import { type ItemStats, itemStatsColumns } from '@/lib/utils/items/item-stats';
 
 const ARMOR_TYPES = new Set<string>(Object.values(ArmorModifierType));
 
-const withoutArmorModifiers = (modifiers: unknown) => (Array.isArray(modifiers) ? modifiers : []).filter((m) => !(m && typeof m === "object" && ARMOR_TYPES.has((m as { type?: string }).type ?? "")));
+const withoutArmorModifiers = (modifiers: unknown) =>
+    (Array.isArray(modifiers) ? modifiers : []).filter(
+        (m) =>
+            !(
+                m &&
+                typeof m === 'object' &&
+                ARMOR_TYPES.has((m as { type?: string }).type ?? '')
+            )
+    );
 
-const isItemRecord = (m: unknown) => !!m && typeof m === "object" && (m as { type?: string }).type === ItemModifierType.STATS;
+const isItemRecord = (m: unknown) =>
+    !!m &&
+    typeof m === 'object' &&
+    (m as { type?: string }).type === ItemModifierType.STATS;
 
-const itemRecordsOf = (modifiers: unknown) => (Array.isArray(modifiers) ? modifiers : []).filter(isItemRecord);
+const itemRecordsOf = (modifiers: unknown) =>
+    (Array.isArray(modifiers) ? modifiers : []).filter(isItemRecord);
 
 // weapon/armor replace their own records as before; the item record survives unless `item` is sent
-function nextModifiers(existing: unknown, data: { weapon?: WeaponStats; armor?: ArmorStats | null; item?: ItemStats | null }, dropArmor: boolean): unknown[] | undefined {
-  if (!data.weapon && !data.armor && data.item === undefined && !dropArmor) return undefined;
+function nextModifiers(
+    existing: unknown,
+    data: {
+        weapon?: WeaponStats;
+        armor?: ArmorStats | null;
+        item?: ItemStats | null;
+    },
+    dropArmor: boolean
+): unknown[] | undefined {
+    if (!data.weapon && !data.armor && data.item === undefined && !dropArmor)
+        return undefined;
 
-  const base = data.armor
-    ? armorStatsColumns(data.armor).modifiers
-    : data.weapon
-      ? weaponStatsColumns(data.weapon).modifiers
-      : (dropArmor ? withoutArmorModifiers(existing) : Array.isArray(existing) ? existing : []).filter((m) => !isItemRecord(m));
+    const base = data.armor
+        ? armorStatsColumns(data.armor).modifiers
+        : data.weapon
+          ? weaponStatsColumns(data.weapon).modifiers
+          : (dropArmor
+                ? withoutArmorModifiers(existing)
+                : Array.isArray(existing)
+                  ? existing
+                  : []
+            ).filter((m) => !isItemRecord(m));
 
-  const item = data.item === undefined ? itemRecordsOf(existing) : data.item ? itemStatsColumns(data.item).modifiers : [];
+    const item =
+        data.item === undefined
+            ? itemRecordsOf(existing)
+            : data.item
+              ? itemStatsColumns(data.item).modifiers
+              : [];
 
-  return [...base, ...item];
+    return [...base, ...item];
 }
 
-async function systemStatsColumn(campaignId: string, stats: unknown): Promise<{ systemStats?: Prisma.InputJsonValue | typeof Prisma.DbNull }> {
-  if (stats === undefined) return {};
+async function systemStatsColumn(
+    campaignId: string,
+    stats: unknown
+): Promise<{ systemStats?: Prisma.InputJsonValue | typeof Prisma.DbNull }> {
+    if (stats === undefined) return {};
 
-  if (stats === null) return { systemStats: Prisma.DbNull };
+    if (stats === null) return { systemStats: Prisma.DbNull };
 
-  const value = systemStatsOrThrow(await loadRules(campaignId), stats);
+    const value = systemStatsOrThrow(await loadRules(campaignId), stats);
 
-  return { systemStats: value as Prisma.InputJsonValue };
+    return { systemStats: value as Prisma.InputJsonValue };
 }
 
 const withSet = { artifactSet: true } as const;
 
-export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof createArtifactSchema>, z.infer<typeof patchArtifactSchema>>({
-  kind: "artifacts",
-  listFields: ["slot", "rarity", "setId"],
-  idParam: "artifactId",
-  label: "Artifacts",
-  description: "Artifacts: slot, rarity, set, weapon (damageBonus — +N damage with this weapon), 5e armor (armor — armor slot only), 5e item (item: unique, property with appliesTo/nameTemplate, attunement, charges, consumable and spells), bonuses (abilities).",
-  path: "/artifacts",
-  schemas: { create: createArtifactSchema, update: patchArtifactSchema },
-  errors: [422],
-  access: { list: "member", item: "dm" },
-  invalidates: [],
-  notFound: API_ERRORS.NOT_FOUND,
-  list: (actor) => readArtifactsList(actor.campaignId),
-  find: (actor, id, purpose) => prisma.artifact.findFirst({ where: { id, campaignId: actor.campaignId }, ...(purpose === "read" && { include: withSet }) }),
-  toItem: (row) => withAbilityIssues("artifact", row),
-  checkImport: async (actor, data) => {
-    await systemStatsColumn(actor.campaignId, data.systemStats);
-  },
-  prepareCreate: async (actor, data) => {
-    await systemStatsColumn(actor.campaignId, data.systemStats);
+export const artifactsResource = defineResource<
+    ArtifactRow,
+    z.infer<typeof createArtifactSchema>,
+    z.infer<typeof patchArtifactSchema>
+>({
+    kind: 'artifacts',
+    listFields: ['slot', 'rarity', 'setId'],
+    idParam: 'artifactId',
+    label: 'Artifacts',
+    description:
+        'Artifacts: slot, rarity, set, weapon (damageBonus — +N damage with this weapon), 5e armor (armor — armor slot only), 5e item (item: unique, property with appliesTo/nameTemplate, attunement, charges, consumable and spells), bonuses (abilities).',
+    path: '/artifacts',
+    schemas: { create: createArtifactSchema, update: patchArtifactSchema },
+    errors: [422],
+    access: { list: 'member', item: 'dm' },
+    invalidates: [],
+    notFound: API_ERRORS.NOT_FOUND,
+    list: (actor) => readArtifactsList(actor.campaignId),
+    find: (actor, id, purpose) =>
+        prisma.artifact.findFirst({
+            where: { id, campaignId: actor.campaignId },
+            ...(purpose === 'read' && { include: withSet }),
+        }),
+    toItem: (row) => withAbilityIssues('artifact', row),
+    checkImport: async (actor, data) => {
+        await systemStatsColumn(actor.campaignId, data.systemStats);
+    },
+    prepareCreate: async (actor, data) => {
+        await systemStatsColumn(actor.campaignId, data.systemStats);
 
-    return data.icon === undefined ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, randomUUID()) };
-  },
-  prepareUpdate: async (actor, existing, data) => {
-    await systemStatsColumn(actor.campaignId, data.systemStats);
+        return data.icon === undefined
+            ? data
+            : {
+                  ...data,
+                  icon: await persistIcon(
+                      actor.campaignId,
+                      data.icon,
+                      randomUUID()
+                  ),
+              };
+    },
+    prepareUpdate: async (actor, existing, data) => {
+        await systemStatsColumn(actor.campaignId, data.systemStats);
 
-    return data.icon === undefined || data.icon === existing.icon ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, existing.id) };
-  },
-  async create(actor, data) {
-    await assertCampaignEffects(actor.campaignId, data.abilities);
-    await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
+        return data.icon === undefined || data.icon === existing.icon
+            ? data
+            : {
+                  ...data,
+                  icon: await persistIcon(
+                      actor.campaignId,
+                      data.icon,
+                      existing.id
+                  ),
+              };
+    },
+    async create(actor, data) {
+        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertCampaignRefs(actor.campaignId, {
+            artifactSet: data.setId,
+            spell: data.item?.spells?.map(({ spellId }) => spellId),
+        });
 
-    const icon = data.icon !== undefined ? await persistIcon(actor.campaignId, data.icon, randomUUID()) : undefined;
+        const icon =
+            data.icon !== undefined
+                ? await persistIcon(actor.campaignId, data.icon, randomUUID())
+                : undefined;
 
-    const stats = await systemStatsColumn(actor.campaignId, data.systemStats);
+        const stats = await systemStatsColumn(
+            actor.campaignId,
+            data.systemStats
+        );
 
-    return prisma.artifact.create({
-      data: {
-        campaignId: actor.campaignId,
-        name: data.name,
-        description: data.description,
-        rarity: data.rarity,
-        slot: data.slot,
-        ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
-        ...(data.weapon && { bonuses: weaponStatsColumns(data.weapon).bonuses }),
-        ...((data.weapon || data.armor || data.item) && { modifiers: nextModifiers([], data, false) as Prisma.InputJsonValue }),
-        ...stats,
-        setId: data.setId,
-        icon,
-      },
-      include: withSet,
-    });
-  },
-  async update(actor, existing, data) {
-    if (data.armor && (data.slot ?? existing.slot) !== ArtifactSlot.ARMOR) throw new ContentError(API_ERRORS.ARMOR_SLOT_ONLY, 400);
+        return prisma.artifact.create({
+            data: {
+                campaignId: actor.campaignId,
+                name: data.name,
+                description: data.description,
+                rarity: data.rarity,
+                slot: data.slot,
+                ...(data.abilities && {
+                    abilities: abilitiesJson(data.abilities),
+                }),
+                ...(data.weapon && {
+                    bonuses: weaponStatsColumns(data.weapon).bonuses,
+                }),
+                ...((data.weapon || data.armor || data.item) && {
+                    modifiers: nextModifiers(
+                        [],
+                        data,
+                        false
+                    ) as Prisma.InputJsonValue,
+                }),
+                ...stats,
+                setId: data.setId,
+                icon,
+            },
+            include: withSet,
+        });
+    },
+    async update(actor, existing, data) {
+        if (data.armor && (data.slot ?? existing.slot) !== ArtifactSlot.ARMOR)
+            throw new ContentError(API_ERRORS.ARMOR_SLOT_ONLY, 400);
 
-    await assertCampaignEffects(actor.campaignId, data.abilities, storedEffectOwners(existing.abilities));
-    await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
+        await assertCampaignEffects(
+            actor.campaignId,
+            data.abilities,
+            storedEffectOwners(existing.abilities)
+        );
+        await assertCampaignRefs(actor.campaignId, {
+            artifactSet: data.setId,
+            spell: data.item?.spells?.map(({ spellId }) => spellId),
+        });
 
-    const icon = data.icon === undefined ? undefined : data.icon === existing.icon ? data.icon : await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`);
+        const icon =
+            data.icon === undefined
+                ? undefined
+                : data.icon === existing.icon
+                  ? data.icon
+                  : await persistIcon(
+                        actor.campaignId,
+                        data.icon,
+                        `${existing.id}-${randomUUID()}`
+                    );
 
-    const stats = await systemStatsColumn(actor.campaignId, data.systemStats);
+        const stats = await systemStatsColumn(
+            actor.campaignId,
+            data.systemStats
+        );
 
-    const dropArmor = data.armor === null || (data.slot !== undefined && data.slot !== ArtifactSlot.ARMOR);
+        const dropArmor =
+            data.armor === null ||
+            (data.slot !== undefined && data.slot !== ArtifactSlot.ARMOR);
 
-    const modifiers = nextModifiers(existing.modifiers, data, dropArmor);
+        const modifiers = nextModifiers(existing.modifiers, data, dropArmor);
 
-    return prisma.artifact.update({
-      where: { id: existing.id },
-      data: {
-        name: data.name,
-        description: data.description,
-        rarity: data.rarity,
-        slot: data.slot,
-        abilities: data.abilities !== undefined ? abilitiesJson(data.abilities) : undefined,
-        ...(data.weapon && { bonuses: weaponStatsColumns(data.weapon).bonuses }),
-        ...(modifiers && { modifiers: modifiers as Prisma.InputJsonValue }),
-        ...stats,
-        setId: data.setId !== undefined ? data.setId || null : undefined,
-        icon: icon === undefined ? undefined : (icon ?? null),
-      },
-      include: withSet,
-    });
-  },
-  async remove(actor, existing) {
-    await prisma.artifact.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
-  },
-  removeAll: async (actor) => (await prisma.artifact.deleteMany({ where: { campaignId: actor.campaignId } })).count,
+        return prisma.artifact.update({
+            where: { id: existing.id },
+            data: {
+                name: data.name,
+                description: data.description,
+                rarity: data.rarity,
+                slot: data.slot,
+                abilities:
+                    data.abilities !== undefined
+                        ? abilitiesJson(data.abilities)
+                        : undefined,
+                ...(data.weapon && {
+                    bonuses: weaponStatsColumns(data.weapon).bonuses,
+                }),
+                ...(modifiers && {
+                    modifiers: modifiers as Prisma.InputJsonValue,
+                }),
+                ...stats,
+                setId:
+                    data.setId !== undefined ? data.setId || null : undefined,
+                icon: icon === undefined ? undefined : (icon ?? null),
+            },
+            include: withSet,
+        });
+    },
+    async remove(actor, existing) {
+        await prisma.artifact.deleteMany({
+            where: { id: existing.id, campaignId: actor.campaignId },
+        });
+    },
+    removeAll: async (actor) =>
+        (
+            await prisma.artifact.deleteMany({
+                where: { campaignId: actor.campaignId },
+            })
+        ).count,
 });

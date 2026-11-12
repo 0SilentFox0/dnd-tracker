@@ -1,58 +1,112 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { useProfile } from "./ProfileContext";
+import { useProfile } from './ProfileContext';
 
-import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
-import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
-import { systemUiOf } from "@/components/systems";
-import { Button } from "@/components/ui/button";
-import type { DmCharacterEditor } from "@/lib/hooks/characters";
-import { useClassMode } from "@/lib/hooks/classes";
-import { classHp, hitDiceLabel } from "@/lib/utils/characters/classes";
-import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
-import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
-import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
+import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
+import { CharacterHpPreview } from '@/components/characters/stats/CharacterHpPreview';
+import { systemUiOf } from '@/components/systems';
+import { Button } from '@/components/ui/button';
+import { useCampaignRules } from '@/lib/hooks/campaigns';
+import type { DmCharacterEditor } from '@/lib/hooks/characters';
+import { useClassMode } from '@/lib/hooks/classes';
+import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
+import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
+import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 
-export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor; onDeleted: () => void }) {
-  const { form, options } = editor;
+export function BasicEditTab({
+    editor,
+    onDeleted,
+}: {
+    editor: DmCharacterEditor;
+    onDeleted: () => void;
+}) {
+    const { form, options } = editor;
 
-  const t = useTranslations("characterProfile.basic");
+    const t = useTranslations('characterProfile.basic');
 
-  const { campaignId, sheet } = useProfile();
+    const { campaignId, sheet } = useProfile();
 
-  const classMode = useClassMode(campaignId);
+    const classMode = useClassMode(campaignId);
 
-  const [converting, setConverting] = useState(false);
+    const [converting, setConverting] = useState(false);
 
-  const hasEntries = (form.basicInfo.data.classes ?? []).length > 0;
+    const hasEntries = (form.basicInfo.data.classes ?? []).length > 0;
 
-  const classUi = classMode.enabled && (hasEntries || converting);
+    const classUi = classMode.enabled && (hasEntries || converting);
 
-  const classEntries = resolveClassEntries(form.basicInfo.data.classes ?? [], classMode.byId);
+    const classEntries = resolveClassEntries(
+        form.basicInfo.data.classes ?? [],
+        classMode.byId
+    );
 
-  const hp = classUi && classEntries.some((e) => e.class)
-    ? { total: classHp(classEntries, form.abilityScores.data.constitution), lines: [{ label: sheetLineKey("hitDice"), params: { dice: hitDiceLabel(classEntries) }, value: "" }] }
-    : sheet.hp;
+    const { data: rules } = useCampaignRules(campaignId);
 
-  const remove = async () => {
-    if (await editor.dmActions.remove()) onDeleted();
-  };
+    const classHp =
+        classUi && classEntries.some((e) => e.class)
+            ? characterBaseHp(
+                  {
+                      level: form.basicInfo.data.level,
+                      constitution: form.abilityScores.data.constitution,
+                  },
+                  { entries: classEntries, rules: rules ?? DEFAULT_RULES }
+              )
+            : null;
 
-  return (
-    <div className="space-y-6">
-      <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={options.members} races={options.races} hideProgression={systemUiOf(sheet.system).hideProgression} hideLineage={!RULE_SYSTEM_REGISTRY[sheet.system].lineage} hideClass={!RULE_SYSTEM_REGISTRY[sheet.system].classes} hideAlignment={!RULE_SYSTEM_REGISTRY[sheet.system].identity.alignments} classMode={classUi ? classMode : undefined} />
-      {classMode.enabled && !classUi && !systemUiOf(sheet.system).hideProgression && (
-        <Button type="button" variant="outline" size="sm" onClick={() => setConverting(true)}>
-          {t("toClasses")}
-        </Button>
-      )}
-      <CharacterHpPreview hp={hp} />
-      <Button type="button" variant="destructive" className="h-11 w-full" onClick={() => void remove()}>
-        {t("delete")}
-      </Button>
-    </div>
-  );
+    const hp = classHp
+        ? {
+              total: classHp.total,
+              lines: classHp.breakdown.map((b) => ({ ...b, value: '' })),
+          }
+        : sheet.hp;
+
+    const remove = async () => {
+        if (await editor.dmActions.remove()) onDeleted();
+    };
+
+    return (
+        <div className="space-y-6">
+            <CharacterBasicInfo
+                basicInfo={form.basicInfo}
+                campaignMembers={options.members}
+                races={options.races}
+                hideProgression={systemUiOf(sheet.system).hideProgression}
+                hideLineage={!RULE_SYSTEM_REGISTRY[sheet.system].lineage}
+                hideClass={
+                    !statColumnsOf(RULE_SYSTEM_REGISTRY[sheet.system]).has(
+                        'classes'
+                    )
+                }
+                hideAlignment={
+                    !RULE_SYSTEM_REGISTRY[sheet.system].identity.alignments
+                }
+                classMode={classUi ? classMode : undefined}
+            />
+            {classMode.enabled &&
+                !classUi &&
+                !systemUiOf(sheet.system).hideProgression && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConverting(true)}
+                    >
+                        {t('toClasses')}
+                    </Button>
+                )}
+            <CharacterHpPreview hp={hp} />
+            <Button
+                type="button"
+                variant="destructive"
+                className="h-11 w-full"
+                onClick={() => void remove()}
+            >
+                {t('delete')}
+            </Button>
+        </div>
+    );
 }

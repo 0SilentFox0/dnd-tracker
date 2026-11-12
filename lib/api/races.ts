@@ -1,9 +1,12 @@
-import { createCampaignCrudApi } from "@/lib/api/client";
-import type { Race, RaceFormData } from "@/types/races";
+import { createCampaignCrudApi } from '@/lib/api/client';
+import type { Race, RaceFormData } from '@/types/races';
 
-const racesApi = createCampaignCrudApi<Race, RaceFormData, Partial<RaceFormData>, { ok: true }>(
-  "/races",
-);
+const racesApi = createCampaignCrudApi<
+    Race,
+    RaceFormData,
+    Partial<RaceFormData>,
+    { ok: true }
+>('/races');
 
 export const getRaces = racesApi.list;
 export const createRace = racesApi.create;

@@ -1,22 +1,30 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { AiToolError, defineTool } from "./define";
+import { AiToolError, defineTool } from './define';
 
-import "server-only";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
+import 'server-only';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
 
 export const getCampaignBriefTool = defineTool({
-  name: "get_campaign_brief",
-  scopes: ["ai"],
-  title: "Campaign description",
-  description: "Campaign name, description and the DM's standing instructions (tone, atmosphere, setting rules). Call this first when starting work from an external client.",
-  input: z.object({}),
-  handler: async (ctx) => {
-    const campaign = await prisma.campaign.findUnique({ where: { id: ctx.campaignId }, select: { name: true, description: true, aiInstructions: true } });
+    name: 'get_campaign_brief',
+    scopes: ['ai'],
+    title: 'Campaign description',
+    description:
+        "Campaign name, description and the DM's standing instructions (tone, atmosphere, setting rules). Call this first when starting work from an external client.",
+    input: z.object({}),
+    handler: async (ctx) => {
+        const campaign = await prisma.campaign.findUnique({
+            where: { id: ctx.campaignId },
+            select: { name: true, description: true, aiInstructions: true },
+        });
 
-    if (!campaign) throw new AiToolError(API_ERRORS.CAMPAIGN_NOT_FOUND);
+        if (!campaign) throw new AiToolError(API_ERRORS.CAMPAIGN_NOT_FOUND);
 
-    return { name: campaign.name, description: campaign.description, instructions: campaign.aiInstructions };
-  },
+        return {
+            name: campaign.name,
+            description: campaign.description,
+            instructions: campaign.aiInstructions,
+        };
+    },
 });

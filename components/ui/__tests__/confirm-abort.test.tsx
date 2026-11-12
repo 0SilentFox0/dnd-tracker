@@ -1,96 +1,139 @@
 // @vitest-environment happy-dom
-import { useContext, useEffect } from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { useContext, useEffect } from 'react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { ConfirmContext, type ConfirmFn } from "@/lib/hooks/common/confirm-context";
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import {
+    ConfirmContext,
+    type ConfirmFn,
+} from '@/lib/hooks/common/confirm-context';
 
-describe("ConfirmProvider", () => {
-  it("скасування через signal закриває діалог і повертає false", async () => {
-    const got: { confirm?: ConfirmFn | null } = {};
+describe('ConfirmProvider', () => {
+    it('скасування через signal закриває діалог і повертає false', async () => {
+        const got: { confirm?: ConfirmFn | null } = {};
 
-    function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
-      const confirm = useContext(ConfirmContext);
+        function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
+            const confirm = useContext(ConfirmContext);
 
-      useEffect(() => onReady(confirm), [confirm, onReady]);
+            useEffect(() => onReady(confirm), [confirm, onReady]);
 
-      return null;
-    }
+            return null;
+        }
 
-    render(<ConfirmProvider><Grab onReady={(c) => { got.confirm = c; }} /></ConfirmProvider>);
+        render(
+            <ConfirmProvider>
+                <Grab
+                    onReady={(c) => {
+                        got.confirm = c;
+                    }}
+                />
+            </ConfirmProvider>
+        );
 
-    const controller = new AbortController();
+        const controller = new AbortController();
 
-    let answer: Promise<boolean> = Promise.resolve(true);
+        let answer: Promise<boolean> = Promise.resolve(true);
 
-    act(() => {
-      answer = got.confirm?.({ title: "Завершити хід?", signal: controller.signal }) ?? answer;
+        act(() => {
+            answer =
+                got.confirm?.({
+                    title: 'Завершити хід?',
+                    signal: controller.signal,
+                }) ?? answer;
+        });
+
+        expect(await screen.findByText('Завершити хід?')).toBeTruthy();
+
+        act(() => controller.abort());
+
+        await expect(answer).resolves.toBe(false);
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
-    expect(await screen.findByText("Завершити хід?")).toBeTruthy();
+    it('вже скасований signal не відкриває діалог', async () => {
+        const got: { confirm?: ConfirmFn | null } = {};
 
-    act(() => controller.abort());
+        function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
+            const confirm = useContext(ConfirmContext);
 
-    await expect(answer).resolves.toBe(false);
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
-  });
+            useEffect(() => onReady(confirm), [confirm, onReady]);
 
-  it("вже скасований signal не відкриває діалог", async () => {
-    const got: { confirm?: ConfirmFn | null } = {};
+            return null;
+        }
 
-    function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
-      const confirm = useContext(ConfirmContext);
+        render(
+            <ConfirmProvider>
+                <Grab
+                    onReady={(c) => {
+                        got.confirm = c;
+                    }}
+                />
+            </ConfirmProvider>
+        );
 
-      useEffect(() => onReady(confirm), [confirm, onReady]);
+        const controller = new AbortController();
 
-      return null;
-    }
+        controller.abort();
 
-    render(<ConfirmProvider><Grab onReady={(c) => { got.confirm = c; }} /></ConfirmProvider>);
+        let answer: Promise<boolean> = Promise.resolve(true);
 
-    const controller = new AbortController();
+        act(() => {
+            answer =
+                got.confirm?.({
+                    title: 'Завершити хід?',
+                    signal: controller.signal,
+                }) ?? answer;
+        });
 
-    controller.abort();
-
-    let answer: Promise<boolean> = Promise.resolve(true);
-
-    act(() => {
-      answer = got.confirm?.({ title: "Завершити хід?", signal: controller.signal }) ?? answer;
+        await expect(answer).resolves.toBe(false);
+        expect(screen.queryByRole('dialog')).toBeNull();
     });
 
-    await expect(answer).resolves.toBe(false);
-    expect(screen.queryByRole("dialog")).toBeNull();
-  });
+    it('слухач abort знімається після рішення', async () => {
+        const got: { confirm?: ConfirmFn | null } = {};
 
-  it("слухач abort знімається після рішення", async () => {
-    const got: { confirm?: ConfirmFn | null } = {};
+        function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
+            const confirm = useContext(ConfirmContext);
 
-    function Grab({ onReady }: { onReady: (c: ConfirmFn | null) => void }) {
-      const confirm = useContext(ConfirmContext);
+            useEffect(() => onReady(confirm), [confirm, onReady]);
 
-      useEffect(() => onReady(confirm), [confirm, onReady]);
+            return null;
+        }
 
-      return null;
-    }
+        render(
+            <ConfirmProvider>
+                <Grab
+                    onReady={(c) => {
+                        got.confirm = c;
+                    }}
+                />
+            </ConfirmProvider>
+        );
 
-    render(<ConfirmProvider><Grab onReady={(c) => { got.confirm = c; }} /></ConfirmProvider>);
+        const controller = new AbortController();
 
-    const controller = new AbortController();
+        const remove = vi.spyOn(controller.signal, 'removeEventListener');
 
-    const remove = vi.spyOn(controller.signal, "removeEventListener");
+        let answer: Promise<boolean> = Promise.resolve(true);
 
-    let answer: Promise<boolean> = Promise.resolve(true);
+        act(() => {
+            answer =
+                got.confirm?.({
+                    title: 'Завершити хід?',
+                    signal: controller.signal,
+                }) ?? answer;
+        });
 
-    act(() => {
-      answer = got.confirm?.({ title: "Завершити хід?", signal: controller.signal }) ?? answer;
+        act(() =>
+            screen
+                .getByRole('button', { name: 'common.actions.cancel' })
+                .click()
+        );
+
+        await expect(answer).resolves.toBe(false);
+        expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
     });
-
-    act(() => screen.getByRole("button", { name: "common.actions.cancel" }).click());
-
-    await expect(answer).resolves.toBe(false);
-    expect(remove).toHaveBeenCalledWith("abort", expect.any(Function));
-  });
 });

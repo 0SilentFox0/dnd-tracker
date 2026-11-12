@@ -1,36 +1,70 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { makeParticipant, resolved, seq } from "./fixtures";
+import { makeParticipant, resolved, seq } from './fixtures';
 
-import { textOf } from "@/lib/i18n/test/text";
-import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { AbilityEvent } from "@/types/abilities";
-import type { ActiveEffect } from "@/types/battle";
+import { textOf } from '@/lib/i18n/test/text';
+import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { AbilityEvent } from '@/types/abilities';
+import type { ActiveEffect } from '@/types/battle';
 
-const fx = (id: string, type: ActiveEffect["type"]): ActiveEffect => ({ id, name: id, type, duration: 2, appliedAt: { round: 1, timestamp: new Date() }, effects: [] });
+const fx = (id: string, type: ActiveEffect['type']): ActiveEffect => ({
+    id,
+    name: id,
+    type,
+    duration: 2,
+    appliedAt: { round: 1, timestamp: new Date() },
+    effects: [],
+});
 
 const cleanse = (includeConditions?: boolean) => {
-  const ability = resolved({ trigger: { event: "bonusAction" }, effects: [{ kind: "cleanse", includeConditions }] });
+    const ability = resolved({
+        trigger: { event: 'bonusAction' },
+        effects: [{ kind: 'cleanse', includeConditions }],
+    });
 
-  const base = makeParticipant({ id: "a", abilities: [ability] });
+    const base = makeParticipant({ id: 'a', abilities: [ability] });
 
-  const p = { ...base, battleData: { ...base.battleData, activeEffects: [fx("d", "debuff"), fx("c", "condition"), fx("b", "buff")] } };
+    const p = {
+        ...base,
+        battleData: {
+            ...base.battleData,
+            activeEffects: [
+                fx('d', 'debuff'),
+                fx('c', 'condition'),
+                fx('b', 'buff'),
+            ],
+        },
+    };
 
-  const event = { type: "bonusAction", actorId: "a", abilityKey: ability.key } as AbilityEvent;
+    const event = {
+        type: 'bonusAction',
+        actorId: 'a',
+        abilityKey: ability.key,
+    } as AbilityEvent;
 
-  return runAbilities([p], event, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
+    return runAbilities([p], event, {
+        rules: DEFAULT_RULES,
+        round: 1,
+        rng: seq(0),
+    });
 };
 
-describe("cleanse", () => {
-  it("by default removes only debuffs", () => {
-    expect(cleanse().participants[0].battleData.activeEffects.map((e) => e.id)).toEqual(["c", "b"]);
-  });
+describe('cleanse', () => {
+    it('by default removes only debuffs', () => {
+        expect(
+            cleanse().participants[0].battleData.activeEffects.map((e) => e.id)
+        ).toEqual(['c', 'b']);
+    });
 
-  it("includeConditions also removes conditions", () => {
-    const r = cleanse(true);
+    it('includeConditions also removes conditions', () => {
+        const r = cleanse(true);
 
-    expect(r.participants[0].battleData.activeEffects.map((e) => e.id)).toEqual(["b"]);
-    expect(r.messages.map((m) => textOf(m)).join()).toContain("знято дебафи та стани");
-  });
+        expect(
+            r.participants[0].battleData.activeEffects.map((e) => e.id)
+        ).toEqual(['b']);
+        expect(r.messages.map((m) => textOf(m)).join()).toContain(
+            'знято дебафи та стани'
+        );
+    });
 });

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface PageTransitionProps {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }
 
 /**
@@ -14,53 +14,53 @@ interface PageTransitionProps {
  * і знімаємо його, коли фокус всередині контейнера.
  */
 export function PageTransition({ children }: PageTransitionProps) {
-  const pathname = usePathname();
+    const pathname = usePathname();
 
-  const ref = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
 
-  const lastPathname = useRef(pathname);
+    const lastPathname = useRef(pathname);
 
-  useEffect(() => {
-    const el = ref.current;
+    useEffect(() => {
+        const el = ref.current;
 
-    if (!el) return;
+        if (!el) return;
 
-    const observer = new MutationObserver(() => {
-      const active = document.activeElement;
+        const observer = new MutationObserver(() => {
+            const active = document.activeElement;
 
-      if (
-        el.getAttribute("aria-hidden") === "true" &&
-        active &&
-        el.contains(active)
-      ) {
-        el.removeAttribute("aria-hidden");
-        el.removeAttribute("data-aria-hidden");
-      }
-    });
+            if (
+                el.getAttribute('aria-hidden') === 'true' &&
+                active &&
+                el.contains(active)
+            ) {
+                el.removeAttribute('aria-hidden');
+                el.removeAttribute('data-aria-hidden');
+            }
+        });
 
-    observer.observe(el, {
-      attributes: true,
-      attributeFilter: ["aria-hidden", "data-aria-hidden"],
-    });
+        observer.observe(el, {
+            attributes: true,
+            attributeFilter: ['aria-hidden', 'data-aria-hidden'],
+        });
 
-    return () => observer.disconnect();
-  }, []);
+        return () => observer.disconnect();
+    }, []);
 
-  // Перезапуск анімації без `key={pathname}`: ремаунт скидав стан лейаутів (напр. демо-тур під час переходу).
-  useEffect(() => {
-    const el = ref.current;
+    // Перезапуск анімації без `key={pathname}`: ремаунт скидав стан лейаутів (напр. демо-тур під час переходу).
+    useEffect(() => {
+        const el = ref.current;
 
-    if (!el || lastPathname.current === pathname) return;
+        if (!el || lastPathname.current === pathname) return;
 
-    lastPathname.current = pathname;
-    el.style.animation = "none";
-    void el.offsetWidth;
-    el.style.animation = "";
-  }, [pathname]);
+        lastPathname.current = pathname;
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = '';
+    }, [pathname]);
 
-  return (
-    <div ref={ref} className="page-transition">
-      {children}
-    </div>
-  );
+    return (
+        <div ref={ref} className="page-transition">
+            {children}
+        </div>
+    );
 }

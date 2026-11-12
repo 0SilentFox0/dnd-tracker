@@ -1,111 +1,175 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { POST as POST_SAFE } from "@/app/api/campaigns/[id]/source-sync/apply-safe/route";
-import { GET, POST } from "@/app/api/campaigns/[id]/source-sync/route";
-import { verifyApiToken } from "@/lib/ai/api-tokens";
-import { ContentError } from "@/lib/server/content/errors";
-import { applySafeSource, applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
-import * as apiAuth from "@/lib/utils/api/api-auth";
+import { POST as POST_SAFE } from '@/app/api/campaigns/[id]/source-sync/apply-safe/route';
+import { GET, POST } from '@/app/api/campaigns/[id]/source-sync/route';
+import { verifyApiToken } from '@/lib/ai/api-tokens';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    applySafeSource,
+    applySource,
+    getSourceDiff,
+} from '@/lib/server/templates/sync/service';
+import * as apiAuth from '@/lib/utils/api/api-auth';
 
-vi.mock("@/lib/utils/api/api-auth", () => {
-  const requireDM = vi.fn();
+vi.mock('@/lib/utils/api/api-auth', () => {
+    const requireDM = vi.fn();
 
-  return { requireDM, requireCampaignAccess: vi.fn(), requireCampaignDMOrDemoAccess: vi.fn((id: string) => requireDM(id)) };
+    return {
+        requireDM,
+        requireCampaignAccess: vi.fn(),
+        requireCampaignDMOrDemoAccess: vi.fn((id: string) => requireDM(id)),
+    };
 });
-vi.mock("@/lib/ai/api-tokens", () => ({ verifyApiToken: vi.fn() }));
-vi.mock("@/lib/server/templates/sync/service", () => ({ getSourceDiff: vi.fn(), applySource: vi.fn(), applySafeSource: vi.fn() }));
+vi.mock('@/lib/ai/api-tokens', () => ({ verifyApiToken: vi.fn() }));
+vi.mock('@/lib/server/templates/sync/service', () => ({
+    getSourceDiff: vi.fn(),
+    applySource: vi.fn(),
+    applySafeSource: vi.fn(),
+}));
 
-const params = { params: Promise.resolve({ id: "c1" }) };
+const params = { params: Promise.resolve({ id: 'c1' }) };
 
-const post = (body: unknown, headers: Record<string, string> = {}) => POST(new Request("http://x", { method: "POST", body: JSON.stringify(body), headers }), params);
+const post = (body: unknown, headers: Record<string, string> = {}) =>
+    POST(
+        new Request('http://x', {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers,
+        }),
+        params
+    );
 
-const REF = { scope: "spells", key: "k", sourceHash: "h", status: "updated" };
+const REF = { scope: 'spells', key: 'k', sourceHash: 'h', status: 'updated' };
 
-describe("source-sync API", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "u", isDM: true } as never);
-  });
+describe('source-sync API', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'u',
+            isDM: true,
+        } as never);
+    });
 
-  it("GET повертає diff і передає scope з query", async () => {
-    vi.mocked(getSourceDiff).mockResolvedValue({ items: [] } as never);
+    it('GET повертає diff і передає scope з query', async () => {
+        vi.mocked(getSourceDiff).mockResolvedValue({ items: [] } as never);
 
-    const res = await GET(new Request("http://x?scope=spells"), params);
+        const res = await GET(new Request('http://x?scope=spells'), params);
 
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ items: [] });
-    expect(getSourceDiff).toHaveBeenCalledWith(expect.objectContaining({ campaignId: "c1", userId: "u" }), "spells");
-  });
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({ items: [] });
+        expect(getSourceDiff).toHaveBeenCalledWith(
+            expect.objectContaining({ campaignId: 'c1', userId: 'u' }),
+            'spells'
+        );
+    });
 
-  it("GET без scope передає undefined", async () => {
-    vi.mocked(getSourceDiff).mockResolvedValue({} as never);
+    it('GET без scope передає undefined', async () => {
+        vi.mocked(getSourceDiff).mockResolvedValue({} as never);
 
-    await GET(new Request("http://x"), params);
+        await GET(new Request('http://x'), params);
 
-    expect(getSourceDiff).toHaveBeenCalledWith(expect.anything(), undefined);
-  });
+        expect(getSourceDiff).toHaveBeenCalledWith(
+            expect.anything(),
+            undefined
+        );
+    });
 
-  it("GET з невідомим scope: 400 без виклику сервісу", async () => {
-    const res = await GET(new Request("http://x?scope=bogus"), params);
+    it('GET з невідомим scope: 400 без виклику сервісу', async () => {
+        const res = await GET(new Request('http://x?scope=bogus'), params);
 
-    expect(res.status).toBe(400);
-    expect(getSourceDiff).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(400);
+        expect(getSourceDiff).not.toHaveBeenCalled();
+    });
 
-  it("POST з невідомим scope або без status: 400", async () => {
-    expect((await post({ apply: [{ ...REF, scope: "bogus" }] })).status).toBe(400);
-    expect((await post({ apply: [{ scope: "spells", key: "k", sourceHash: "h" }] })).status).toBe(400);
-    expect(applySource).not.toHaveBeenCalled();
-  });
+    it('POST з невідомим scope або без status: 400', async () => {
+        expect(
+            (await post({ apply: [{ ...REF, scope: 'bogus' }] })).status
+        ).toBe(400);
+        expect(
+            (
+                await post({
+                    apply: [{ scope: 'spells', key: 'k', sourceHash: 'h' }],
+                })
+            ).status
+        ).toBe(400);
+        expect(applySource).not.toHaveBeenCalled();
+    });
 
-  it("POST з некоректним тілом: 400 без виклику сервісу", async () => {
-    expect((await post({ apply: "x" })).status).toBe(400);
-    expect(applySource).not.toHaveBeenCalled();
-  });
+    it('POST з некоректним тілом: 400 без виклику сервісу', async () => {
+        expect((await post({ apply: 'x' })).status).toBe(400);
+        expect(applySource).not.toHaveBeenCalled();
+    });
 
-  it("POST з apply: 200 і ignore за замовчуванням []", async () => {
-    vi.mocked(applySource).mockResolvedValue({ applied: 1 } as never);
+    it('POST з apply: 200 і ignore за замовчуванням []', async () => {
+        vi.mocked(applySource).mockResolvedValue({ applied: 1 } as never);
 
-    const res = await post({ apply: [REF] });
+        const res = await post({ apply: [REF] });
 
-    expect(res.status).toBe(200);
-    expect(applySource).toHaveBeenCalledWith(expect.anything(), { apply: [REF], ignore: [] });
-  });
+        expect(res.status).toBe(200);
+        expect(applySource).toHaveBeenCalledWith(expect.anything(), {
+            apply: [REF],
+            ignore: [],
+        });
+    });
 
-  it("ContentError 409 із сервісу → 409 з error", async () => {
-    vi.mocked(applySource).mockRejectedValue(new ContentError("Джерело змінилося", 409));
+    it('ContentError 409 із сервісу → 409 з error', async () => {
+        vi.mocked(applySource).mockRejectedValue(
+            new ContentError('Джерело змінилося', 409)
+        );
 
-    const res = await post({ apply: [REF] });
+        const res = await post({ apply: [REF] });
 
-    expect(res.status).toBe(409);
-    expect(await res.json()).toMatchObject({ error: "Джерело змінилося" });
-  });
+        expect(res.status).toBe(409);
+        expect(await res.json()).toMatchObject({ error: 'Джерело змінилося' });
+    });
 
-  it("токен без content:write на POST: 403", async () => {
-    vi.mocked(verifyApiToken).mockResolvedValue({ campaignId: "c1", userId: "u", scopes: ["content:read"] } as never);
+    it('токен без content:write на POST: 403', async () => {
+        vi.mocked(verifyApiToken).mockResolvedValue({
+            campaignId: 'c1',
+            userId: 'u',
+            scopes: ['content:read'],
+        } as never);
 
-    const res = await post({ apply: [REF] }, { authorization: "Bearer dndt_abc" });
+        const res = await post(
+            { apply: [REF] },
+            { authorization: 'Bearer dndt_abc' }
+        );
 
-    expect(res.status).toBe(403);
-    expect(applySource).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(403);
+        expect(applySource).not.toHaveBeenCalled();
+    });
 
-  it("apply-safe: 200 з результатом сервісу", async () => {
-    vi.mocked(applySafeSource).mockResolvedValue({ applied: 2 } as never);
+    it('apply-safe: 200 з результатом сервісу', async () => {
+        vi.mocked(applySafeSource).mockResolvedValue({ applied: 2 } as never);
 
-    const res = await POST_SAFE(new Request("http://x", { method: "POST" }), params);
+        const res = await POST_SAFE(
+            new Request('http://x', { method: 'POST' }),
+            params
+        );
 
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ applied: 2 });
-    expect(applySafeSource).toHaveBeenCalledWith(expect.objectContaining({ campaignId: "c1", userId: "u" }));
-  });
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({ applied: 2 });
+        expect(applySafeSource).toHaveBeenCalledWith(
+            expect.objectContaining({ campaignId: 'c1', userId: 'u' })
+        );
+    });
 
-  it("apply-safe: токен без content:write: 403", async () => {
-    vi.mocked(verifyApiToken).mockResolvedValue({ campaignId: "c1", userId: "u", scopes: ["content:read"] } as never);
+    it('apply-safe: токен без content:write: 403', async () => {
+        vi.mocked(verifyApiToken).mockResolvedValue({
+            campaignId: 'c1',
+            userId: 'u',
+            scopes: ['content:read'],
+        } as never);
 
-    const res = await POST_SAFE(new Request("http://x", { method: "POST", headers: { authorization: "Bearer dndt_abc" } }), params);
+        const res = await POST_SAFE(
+            new Request('http://x', {
+                method: 'POST',
+                headers: { authorization: 'Bearer dndt_abc' },
+            }),
+            params
+        );
 
-    expect(res.status).toBe(403);
-    expect(applySafeSource).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(403);
+        expect(applySafeSource).not.toHaveBeenCalled();
+    });
 });

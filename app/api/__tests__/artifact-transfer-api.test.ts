@@ -1,250 +1,435 @@
-import { NextResponse } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
-import * as apiAuth from "@/lib/utils/api/api-auth";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import { notifyCharacterOwners } from '@/lib/server/notifications/notify';
+import * as apiAuth from '@/lib/utils/api/api-auth';
 
-vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
+vi.mock('@/lib/server/notifications/notify', () => ({
+    notifyCharacterOwners: vi.fn().mockResolvedValue(0),
+}));
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireCampaignAccess: vi.fn(),
+    requireDM: vi.fn(),
+}));
 
 const tx = vi.hoisted(() => ({
-  $executeRaw: vi.fn(),
-  inventoryLog: { createMany: vi.fn() },
-  characterInventory: { upsert: vi.fn(), update: vi.fn(), create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+    $executeRaw: vi.fn(),
+    inventoryLog: { createMany: vi.fn() },
+    characterInventory: {
+        upsert: vi.fn(),
+        update: vi.fn(),
+        create: vi.fn(),
+        findMany: vi.fn(),
+        findUnique: vi.fn(),
+    },
 }));
 
-vi.mock("@/lib/db", () => ({
-  prisma: {
-    character: { findUnique: vi.fn() },
-    characterInventory: { update: vi.fn(), create: vi.fn() },
-    $transaction: vi.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
-  },
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        character: { findUnique: vi.fn() },
+        characterInventory: { update: vi.fn(), create: vi.fn() },
+        $transaction: vi.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
+    },
 }));
 
-const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", members: [{ userId, role }] } }) as never;
+const access = (userId: string, role: 'dm' | 'player') =>
+    ({
+        userId,
+        isDM: role === 'dm',
+        campaign: { id: 'camp', members: [{ userId, role }] },
+    }) as never;
 
-const params = { params: Promise.resolve({ id: "camp", characterId: "a" }) };
+const params = { params: Promise.resolve({ id: 'camp', characterId: 'a' }) };
 
 const stashes: Record<string, string[]> = {};
 
 const post = async (body: unknown) => {
-  const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/artifacts/transfer/route");
+    const mod = await import(
+        '@/app/api/campaigns/[id]/characters/[characterId]/artifacts/transfer/route'
+    );
 
-  return mod.POST(new Request("http://x", { method: "POST", body: JSON.stringify(body) }), params) as Promise<NextResponse>;
+    return mod.POST(
+        new Request('http://x', { method: 'POST', body: JSON.stringify(body) }),
+        params
+    ) as Promise<NextResponse>;
 };
 
 const patch = async (body: unknown) => {
-  const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/inventory/route");
+    const mod = await import(
+        '@/app/api/campaigns/[id]/characters/[characterId]/inventory/route'
+    );
 
-  return mod.PATCH(new Request("http://x", { method: "PATCH", body: JSON.stringify(body) }), params) as Promise<NextResponse>;
+    return mod.PATCH(
+        new Request('http://x', {
+            method: 'PATCH',
+            body: JSON.stringify(body),
+        }),
+        params
+    ) as Promise<NextResponse>;
 };
 
 const inventories: Record<string, Record<string, string>> = {};
 
-describe("artifact transfer API", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    inventories.a = { helmet: "h1" };
-    inventories.b = {};
-    stashes.a = [];
-    stashes.b = [];
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(access("dm", "dm"));
-    vi.mocked(prisma.character.findUnique).mockImplementation((async ({ where }: { where: { id: string } }) => {
-      if (where.id === "a") return { id: "a", campaignId: "camp", controlledBy: "u1", inventory: { gold: 0, silver: 0, copper: 0, equipped: inventories.a, backpack: [], items: [] } };
+describe('artifact transfer API', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        inventories.a = { helmet: 'h1' };
+        inventories.b = {};
+        stashes.a = [];
+        stashes.b = [];
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('dm', 'dm')
+        );
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(access('dm', 'dm'));
+        vi.mocked(prisma.character.findUnique).mockImplementation((async ({
+            where,
+        }: {
+            where: { id: string };
+        }) => {
+            if (where.id === 'a')
+                return {
+                    id: 'a',
+                    campaignId: 'camp',
+                    controlledBy: 'u1',
+                    inventory: {
+                        gold: 0,
+                        silver: 0,
+                        copper: 0,
+                        equipped: inventories.a,
+                        backpack: [],
+                        items: [],
+                    },
+                };
 
-      if (where.id === "b") return { id: "b", campaignId: "camp", controlledBy: "u3", type: "player" };
+            if (where.id === 'b')
+                return {
+                    id: 'b',
+                    campaignId: 'camp',
+                    controlledBy: 'u3',
+                    type: 'player',
+                };
 
-      if (where.id === "n") return { id: "n", campaignId: "camp", controlledBy: null, type: "npc_hero" };
+            if (where.id === 'n')
+                return {
+                    id: 'n',
+                    campaignId: 'camp',
+                    controlledBy: null,
+                    type: 'npc_hero',
+                };
 
-      if (where.id === "x") return { id: "x", campaignId: "other", controlledBy: null };
+            if (where.id === 'x')
+                return { id: 'x', campaignId: 'other', controlledBy: null };
 
-      return null;
-    }) as never);
-    tx.characterInventory.upsert.mockImplementation(async ({ where }: { where: { characterId: string } }) => ({ characterId: where.characterId, equipped: inventories[where.characterId] ?? {}, stash: stashes[where.characterId] ?? [] }));
-    tx.characterInventory.update.mockImplementation(async ({ where, data }: { where: { characterId: string }; data: { equipped?: unknown } }) => ({ characterId: where.characterId, ...data }));
-    tx.characterInventory.create.mockImplementation(async ({ data }: { data: unknown }) => data);
-    tx.characterInventory.findMany.mockResolvedValue([]);
-  });
+            return null;
+        }) as never);
+        tx.characterInventory.upsert.mockImplementation(
+            async ({ where }: { where: { characterId: string } }) => ({
+                characterId: where.characterId,
+                equipped: inventories[where.characterId] ?? {},
+                stash: stashes[where.characterId] ?? [],
+            })
+        );
+        tx.characterInventory.update.mockImplementation(
+            async ({
+                where,
+                data,
+            }: {
+                where: { characterId: string };
+                data: { equipped?: unknown };
+            }) => ({ characterId: where.characterId, ...data })
+        );
+        tx.characterInventory.create.mockImplementation(
+            async ({ data }: { data: unknown }) => data
+        );
+        tx.characterInventory.findMany.mockResolvedValue([]);
+    });
 
-  it("ДМ передає в вільний слот", async () => {
-    const res = await post({ slot: "helmet", toCharacterId: "b" });
+    it('ДМ передає в вільний слот', async () => {
+        const res = await post({ slot: 'helmet', toCharacterId: 'b' });
 
-    expect(res.status).toBe(200);
-    expect(tx.$executeRaw).toHaveBeenCalled();
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "a" }, data: { equipped: {}, stash: [] } });
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { stash: ["h1"] } });
-    expect(tx.inventoryLog.createMany).toHaveBeenCalled();
-  });
+        expect(res.status).toBe(200);
+        expect(tx.$executeRaw).toHaveBeenCalled();
+        expect(tx.characterInventory.update).toHaveBeenCalledWith({
+            where: { characterId: 'a' },
+            data: { equipped: {}, stash: [] },
+        });
+        expect(tx.characterInventory.update).toHaveBeenCalledWith({
+            where: { characterId: 'b' },
+            data: { stash: ['h1'] },
+        });
+        expect(tx.inventoryLog.createMany).toHaveBeenCalled();
+    });
 
-  it("передача з власного сховку за artifactId", async () => {
-    stashes.a = ["s1", "s2"];
+    it('передача з власного сховку за artifactId', async () => {
+        stashes.a = ['s1', 's2'];
 
-    expect((await post({ artifactId: "s1", toCharacterId: "b" })).status).toBe(200);
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "a" }, data: { equipped: { helmet: "h1" }, stash: ["s2"] } });
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { stash: ["s1"] } });
-  });
+        expect(
+            (await post({ artifactId: 's1', toCharacterId: 'b' })).status
+        ).toBe(200);
+        expect(tx.characterInventory.update).toHaveBeenCalledWith({
+            where: { characterId: 'a' },
+            data: { equipped: { helmet: 'h1' }, stash: ['s2'] },
+        });
+        expect(tx.characterInventory.update).toHaveBeenCalledWith({
+            where: { characterId: 'b' },
+            data: { stash: ['s1'] },
+        });
+    });
 
-  it("сповіщення лише отримувачу", async () => {
-    await post({ slot: "helmet", toCharacterId: "b" });
+    it('сповіщення лише отримувачу', async () => {
+        await post({ slot: 'helmet', toCharacterId: 'b' });
 
-    expect(notifyCharacterOwners).toHaveBeenCalledWith(
-      { campaignId: "camp", actorUserId: "dm", events: [{ characterId: "b", type: "item", refId: "h1" }] },
-      tx,
-    );
-  });
+        expect(notifyCharacterOwners).toHaveBeenCalledWith(
+            {
+                campaignId: 'camp',
+                actorUserId: 'dm',
+                events: [{ characterId: 'b', type: 'item', refId: 'h1' }],
+            },
+            tx
+        );
+    });
 
-  it("артефакта немає в сховку — 400", async () => {
-    const res = await post({ artifactId: "nope", toCharacterId: "b" });
+    it('артефакта немає в сховку — 400', async () => {
+        const res = await post({ artifactId: 'nope', toCharacterId: 'b' });
 
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_NOT_IN_STASH);
-  });
+        expect(res.status).toBe(400);
+        expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_NOT_IN_STASH);
+    });
 
-  it("slot і artifactId разом — 400", async () => {
-    expect((await post({ slot: "helmet", artifactId: "s1", toCharacterId: "b" })).status).toBe(400);
-  });
+    it('slot і artifactId разом — 400', async () => {
+        expect(
+            (
+                await post({
+                    slot: 'helmet',
+                    artifactId: 's1',
+                    toCharacterId: 'b',
+                })
+            ).status
+        ).toBe(400);
+    });
 
-  it("гравець-власник передає свій артефакт", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("u1", "player"));
+    it('гравець-власник передає свій артефакт', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('u1', 'player')
+        );
 
-    expect((await post({ slot: "helmet", toCharacterId: "b" })).status).toBe(200);
-  });
+        expect(
+            (await post({ slot: 'helmet', toCharacterId: 'b' })).status
+        ).toBe(200);
+    });
 
-  it("гравець не може передати артефакт NPC — 403 без транзакції", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("u1", "player"));
+    it('гравець не може передати артефакт NPC — 403 без транзакції', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('u1', 'player')
+        );
 
-    const res = await post({ slot: "helmet", toCharacterId: "n" });
+        const res = await post({ slot: 'helmet', toCharacterId: 'n' });
 
-    expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe(API_ERRORS.FORBIDDEN);
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(403);
+        expect((await res.json()).error).toBe(API_ERRORS.FORBIDDEN);
+        expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
 
-  it("ДМ може передати артефакт NPC", async () => {
-    expect((await post({ slot: "helmet", toCharacterId: "n" })).status).toBe(200);
-  });
+    it('ДМ може передати артефакт NPC', async () => {
+        expect(
+            (await post({ slot: 'helmet', toCharacterId: 'n' })).status
+        ).toBe(200);
+    });
 
-  it("чужий гравець — 403 без транзакції", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("u2", "player"));
+    it('чужий гравець — 403 без транзакції', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('u2', 'player')
+        );
 
-    expect((await post({ slot: "helmet", toCharacterId: "b" })).status).toBe(403);
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-  });
+        expect(
+            (await post({ slot: 'helmet', toCharacterId: 'b' })).status
+        ).toBe(403);
+        expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
 
-  it("отримувач з іншої кампанії — 403, нічого не записано", async () => {
-    expect((await post({ slot: "helmet", toCharacterId: "x" })).status).toBe(403);
-    expect(tx.characterInventory.update).not.toHaveBeenCalled();
-  });
+    it('отримувач з іншої кампанії — 403, нічого не записано', async () => {
+        expect(
+            (await post({ slot: 'helmet', toCharacterId: 'x' })).status
+        ).toBe(403);
+        expect(tx.characterInventory.update).not.toHaveBeenCalled();
+    });
 
-  it("відправник не знайдений — 404", async () => {
-    vi.mocked(prisma.character.findUnique).mockResolvedValue(null as never);
+    it('відправник не знайдений — 404', async () => {
+        vi.mocked(prisma.character.findUnique).mockResolvedValue(null as never);
 
-    expect((await post({ slot: "helmet", toCharacterId: "b" })).status).toBe(404);
-  });
+        expect(
+            (await post({ slot: 'helmet', toCharacterId: 'b' })).status
+        ).toBe(404);
+    });
 
-  it("порожній слот — 400", async () => {
-    const res = await post({ slot: "boots", toCharacterId: "b" });
+    it('порожній слот — 400', async () => {
+        const res = await post({ slot: 'boots', toCharacterId: 'b' });
 
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_SLOT_EMPTY);
-  });
+        expect(res.status).toBe(400);
+        expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_SLOT_EMPTY);
+    });
 
-  it("зайнятий слот одержувача не чіпається — артефакт іде в сховок", async () => {
-    inventories.b = { helmet: "h2" };
+    it('зайнятий слот одержувача не чіпається — артефакт іде в сховок', async () => {
+        inventories.b = { helmet: 'h2' };
 
-    expect((await post({ slot: "helmet", toCharacterId: "b" })).status).toBe(200);
-    expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { stash: ["h1"] } });
-  });
+        expect(
+            (await post({ slot: 'helmet', toCharacterId: 'b' })).status
+        ).toBe(200);
+        expect(tx.characterInventory.update).toHaveBeenCalledWith({
+            where: { characterId: 'b' },
+            data: { stash: ['h1'] },
+        });
+    });
 
-  it("невалідне тіло — 400", async () => {
-    expect((await post({})).status).toBe(400);
-  });
+    it('невалідне тіло — 400', async () => {
+        expect((await post({})).status).toBe(400);
+    });
 });
 
-describe("PATCH inventory — унікальність артефакта", () => {
-  const row = (equipped: Record<string, string>) => ({ characterId: "a", gold: 5, silver: 0, copper: 0, equipped, backpack: [], items: [] });
+describe('PATCH inventory — унікальність артефакта', () => {
+    const row = (equipped: Record<string, string>) => ({
+        characterId: 'a',
+        gold: 5,
+        silver: 0,
+        copper: 0,
+        equipped,
+        backpack: [],
+        items: [],
+    });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(access("dm", "dm"));
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "a", campaignId: "camp" } as never);
-    tx.characterInventory.findUnique.mockResolvedValue(row({}));
-    tx.characterInventory.findMany.mockResolvedValue([]);
-    tx.characterInventory.upsert.mockImplementation(async ({ update }: { update: object }) => update);
-  });
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(access('dm', 'dm'));
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            id: 'a',
+            campaignId: 'camp',
+        } as never);
+        tx.characterInventory.findUnique.mockResolvedValue(row({}));
+        tx.characterInventory.findMany.mockResolvedValue([]);
+        tx.characterInventory.upsert.mockImplementation(
+            async ({ update }: { update: object }) => update
+        );
+    });
 
-  it("артефакт носить інший герой — 409 з ім'ям", async () => {
-    tx.characterInventory.findMany.mockResolvedValue([{ characterId: "b", equipped: { helmet: "h1" }, character: { name: "Боромир" } }]);
+    it("артефакт носить інший герой — 409 з ім'ям", async () => {
+        tx.characterInventory.findMany.mockResolvedValue([
+            {
+                characterId: 'b',
+                equipped: { helmet: 'h1' },
+                character: { name: 'Боромир' },
+            },
+        ]);
 
-    const res = await patch({ equipped: { helmet: "h1" } });
+        const res = await patch({ equipped: { helmet: 'h1' } });
 
-    expect(res.status).toBe(409);
-    expect((await res.json()).error).toContain("Боромир");
-    expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(409);
+        expect((await res.json()).error).toContain('Боромир');
+        expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
+    });
 
-  it("вільний артефакт — 200", async () => {
-    tx.characterInventory.findMany.mockResolvedValue([{ characterId: "b", equipped: { boots: "b1" }, character: { name: "Боромир" } }]);
+    it('вільний артефакт — 200', async () => {
+        tx.characterInventory.findMany.mockResolvedValue([
+            {
+                characterId: 'b',
+                equipped: { boots: 'b1' },
+                character: { name: 'Боромир' },
+            },
+        ]);
 
-    expect((await patch({ equipped: { helmet: "h1" } })).status).toBe(200);
-    expect(tx.characterInventory.upsert).toHaveBeenCalled();
-  });
+        expect((await patch({ equipped: { helmet: 'h1' } })).status).toBe(200);
+        expect(tx.characterInventory.upsert).toHaveBeenCalled();
+    });
 
-  it("equipSlot зливається з рядком, прочитаним у транзакції", async () => {
-    tx.characterInventory.findUnique.mockResolvedValue(row({ cape: "c1" }));
+    it('equipSlot зливається з рядком, прочитаним у транзакції', async () => {
+        tx.characterInventory.findUnique.mockResolvedValue(row({ cape: 'c1' }));
 
-    const res = await patch({ equipSlot: { slot: "helmet", artifactId: "h1" } });
+        const res = await patch({
+            equipSlot: { slot: 'helmet', artifactId: 'h1' },
+        });
 
-    expect(res.status).toBe(200);
-    expect(tx.characterInventory.findUnique).toHaveBeenCalledWith({ where: { characterId: "a" } });
-    expect(tx.characterInventory.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: { equipped: { helmet: "h1", cape: "c1" }, stash: [] } }));
-  });
+        expect(res.status).toBe(200);
+        expect(tx.characterInventory.findUnique).toHaveBeenCalledWith({
+            where: { characterId: 'a' },
+        });
+        expect(tx.characterInventory.upsert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                update: { equipped: { helmet: 'h1', cape: 'c1' }, stash: [] },
+            })
+        );
+    });
 
-  it("equipSlot з artifactId, уже в іншому слоті цього героя — 409", async () => {
-    tx.characterInventory.findUnique.mockResolvedValue(row({ weapon: "w1" }));
+    it('equipSlot з artifactId, уже в іншому слоті цього героя — 409', async () => {
+        tx.characterInventory.findUnique.mockResolvedValue(
+            row({ weapon: 'w1' })
+        );
 
-    const res = await patch({ equipSlot: { slot: "range_weapon", artifactId: "w1" } });
+        const res = await patch({
+            equipSlot: { slot: 'range_weapon', artifactId: 'w1' },
+        });
 
-    expect(res.status).toBe(409);
-    expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED);
-    expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(409);
+        expect((await res.json()).error).toBe(
+            API_ERRORS.ARTIFACT_ALREADY_EQUIPPED
+        );
+        expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
+    });
 
-  it("повна мапа з дублікатом — 409", async () => {
-    const res = await patch({ equipped: { weapon: "w1", range_weapon: "w1" } });
+    it('повна мапа з дублікатом — 409', async () => {
+        const res = await patch({
+            equipped: { weapon: 'w1', range_weapon: 'w1' },
+        });
 
-    expect(res.status).toBe(409);
-    expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(409);
+        expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
+    });
 
-  it("equipSlot з артефактом іншого героя — 409", async () => {
-    tx.characterInventory.findMany.mockResolvedValue([{ characterId: "b", equipped: { helmet: "h1" }, character: { name: "Боромир" } }]);
+    it('equipSlot з артефактом іншого героя — 409', async () => {
+        tx.characterInventory.findMany.mockResolvedValue([
+            {
+                characterId: 'b',
+                equipped: { helmet: 'h1' },
+                character: { name: 'Боромир' },
+            },
+        ]);
 
-    expect((await patch({ equipSlot: { slot: "cape", artifactId: "h1" } })).status).toBe(409);
-  });
+        expect(
+            (await patch({ equipSlot: { slot: 'cape', artifactId: 'h1' } }))
+                .status
+        ).toBe(409);
+    });
 
-  it("без equipped/equipSlot equipped не змінюється", async () => {
-    tx.characterInventory.findUnique.mockResolvedValue(row({ cape: "c1" }));
+    it('без equipped/equipSlot equipped не змінюється', async () => {
+        tx.characterInventory.findUnique.mockResolvedValue(row({ cape: 'c1' }));
 
-    expect((await patch({ gold: 10 })).status).toBe(200);
+        expect((await patch({ gold: 10 })).status).toBe(200);
 
-    const arg = tx.characterInventory.upsert.mock.calls[0][0];
+        const arg = tx.characterInventory.upsert.mock.calls[0][0];
 
-    expect(arg.update).toEqual({ gold: 10 });
-    expect(arg.update).not.toHaveProperty("equipped");
-  });
+        expect(arg.update).toEqual({ gold: 10 });
+        expect(arg.update).not.toHaveProperty('equipped');
+    });
 
-  it("невідомий слот — 400", async () => {
-    const res = await patch({ equipSlot: { slot: "nope", artifactId: "h1" } });
+    it('невідомий слот — 400', async () => {
+        const res = await patch({
+            equipSlot: { slot: 'nope', artifactId: 'h1' },
+        });
 
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_UNKNOWN_SLOT);
-    expect(prisma.$transaction).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(400);
+        expect((await res.json()).error).toBe(API_ERRORS.ARTIFACT_UNKNOWN_SLOT);
+        expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
 });
 
 // Shared campaign and sorted character locks are covered by real storage integration.
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }), withCampaignRuntimeWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
+vi.mock('@/lib/server/content/write', () => ({
+    withCampaignContentWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+    withCampaignRuntimeWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+}));

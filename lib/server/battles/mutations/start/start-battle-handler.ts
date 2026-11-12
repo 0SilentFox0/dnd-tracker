@@ -2,212 +2,292 @@
  * Логіка POST /start: учасники, слоти, ефекти/тригери на старті, ініціатива. Запис і Pusher — у runBattleMutation.
  */
 
-import { buildCampaignContextForStart } from "./start-build-context";
-import { scaleEnemiesForFairBattle } from "./start-fair-scaling";
-import { isReservedSlot, partitionReserve } from "./start-reserve";
+import { buildCampaignContextForStart } from './start-build-context';
+import { scaleEnemiesForFairBattle } from './start-fair-scaling';
+import { isReservedSlot, partitionReserve } from './start-reserve';
 
-import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue, SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
-import { prisma } from "@/lib/db";
-import { textRef } from "@/lib/i18n/text-ref";
-import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
-import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { logFields } from "@/lib/utils/battle/log/lines";
-import { modeEnter } from "@/lib/utils/battle/modes/server";
 import {
-  createBattleParticipantFromCharacter,
-  createBattleParticipantFromUnit,
-} from "@/lib/utils/battle/participant";
+    ParticipantSide,
+    ParticipantSourceType,
+    type ParticipantSourceTypeValue,
+    SYSTEM_ACTOR,
+} from '@/lib/constants/battle';
+import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
+import { prisma } from '@/lib/db';
+import { textRef } from '@/lib/i18n/text-ref';
+import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
+import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
+import { logFields } from '@/lib/utils/battle/log/lines';
+import { modeEnter } from '@/lib/utils/battle/modes/server';
 import {
-  calculateInitiative,
-  sortByInitiative,
-} from "@/lib/utils/battle/turn/initiative";
-import { runJoinTriggers } from "@/lib/utils/battle/turn/join-triggers";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import type { BattleAction, BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+    createBattleParticipantFromCharacter,
+    createBattleParticipantFromUnit,
+} from '@/lib/utils/battle/participant';
+import {
+    calculateInitiative,
+    sortByInitiative,
+} from '@/lib/utils/battle/turn/initiative';
+import { runJoinTriggers } from '@/lib/utils/battle/turn/join-triggers';
+import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import type {
+    BattleAction,
+    BattleMapConfig,
+    BattleParticipant,
+    BattlePreparationParticipant,
+} from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 export async function buildStartOrder(
-  battleId: string,
-  campaignId: string,
-  setup: BattlePreparationParticipant[],
-  map: BattleMapConfig | null = null,
-  rules: Ruleset = DEFAULT_RULES,
-): Promise<{ order: BattleParticipant[]; reserve: BattleParticipant[]; triggerLogEntries: BattleAction[] }> {
-  const participantsRaw = setup as Array<{
-    id: string;
-    type: ParticipantSourceTypeValue;
-    side: string;
-    quantity?: number;
-    reserved?: number;
-  }>;
+    battleId: string,
+    campaignId: string,
+    setup: BattlePreparationParticipant[],
+    map: BattleMapConfig | null = null,
+    rules: Ruleset = DEFAULT_RULES
+): Promise<{
+    order: BattleParticipant[];
+    reserve: BattleParticipant[];
+    triggerLogEntries: BattleAction[];
+}> {
+    const participantsRaw = setup as Array<{
+        id: string;
+        type: ParticipantSourceTypeValue;
+        side: string;
+        quantity?: number;
+        reserved?: number;
+    }>;
 
-  const participants = participantsRaw.map((p) => ({
-    ...p,
-    side: (p.side === ParticipantSide.ALLY
-      ? ParticipantSide.ALLY
-      : ParticipantSide.ENEMY) as ParticipantSide,
-  }));
+    const participants = participantsRaw.map((p) => ({
+        ...p,
+        side: (p.side === ParticipantSide.ALLY
+            ? ParticipantSide.ALLY
+            : ParticipantSide.ENEMY) as ParticipantSide,
+    }));
 
-  const { charIds, unitIds } = participants.reduce(
-    (acc, p) => {
-      if (p.type === ParticipantSourceType.CHARACTER) acc.charIds.push(p.id);
-      else acc.unitIds.push(p.id);
+    const { charIds, unitIds } = participants.reduce(
+        (acc, p) => {
+            if (p.type === ParticipantSourceType.CHARACTER)
+                acc.charIds.push(p.id);
+            else acc.unitIds.push(p.id);
 
-      return acc;
-    },
-    { charIds: [] as string[], unitIds: [] as string[] },
-  );
+            return acc;
+        },
+        { charIds: [] as string[], unitIds: [] as string[] }
+    );
 
-  const [characters, units] = await Promise.all([
-    charIds.length > 0
-      ? prisma.character.findMany({
-          where: { id: { in: charIds }, ...ACTIVE_CHARACTER },
-          include: {
-            inventory: true,
-          },
-        })
-      : [],
-    unitIds.length > 0
-      ? prisma.unit.findMany({
-          where: { id: { in: unitIds }, campaignId },
-        })
-      : [],
-  ]);
+    const [characters, units] = await Promise.all([
+        charIds.length > 0
+            ? prisma.character.findMany({
+                  where: { id: { in: charIds }, ...ACTIVE_CHARACTER },
+                  include: {
+                      inventory: true,
+                  },
+              })
+            : [],
+        unitIds.length > 0
+            ? prisma.unit.findMany({
+                  where: { id: { in: unitIds }, campaignId },
+              })
+            : [],
+    ]);
 
-  const characterMap = new Map(characters.map((c) => [c.id, c]));
+    const characterMap = new Map(characters.map((c) => [c.id, c]));
 
-  const unitMap = new Map(units.map((u) => [u.id, u]));
+    const unitMap = new Map(units.map((u) => [u.id, u]));
 
-  const { campaignContext, racesById } = await buildCampaignContextForStart(campaignId, characters, units);
+    const { campaignContext, racesById } = await buildCampaignContextForStart(
+        campaignId,
+        characters,
+        units
+    );
 
-  type ParticipantSlot =
-    | { type: typeof ParticipantSourceType.CHARACTER; character: (typeof characters)[number]; side: ParticipantSide; reserved: boolean }
-    | {
-        type: typeof ParticipantSourceType.UNIT;
-        unit: (typeof units)[number];
-        side: ParticipantSide;
-        instanceNumber: number;
-        reserved: boolean;
-      };
+    type ParticipantSlot =
+        | {
+              type: typeof ParticipantSourceType.CHARACTER;
+              character: (typeof characters)[number];
+              side: ParticipantSide;
+              reserved: boolean;
+          }
+        | {
+              type: typeof ParticipantSourceType.UNIT;
+              unit: (typeof units)[number];
+              side: ParticipantSide;
+              instanceNumber: number;
+              reserved: boolean;
+          };
 
-  const slots: ParticipantSlot[] = [];
+    const slots: ParticipantSlot[] = [];
 
-  for (const participant of participants) {
-    if (participant.type === ParticipantSourceType.CHARACTER) {
-      const character = characterMap.get(participant.id);
+    for (const participant of participants) {
+        if (participant.type === ParticipantSourceType.CHARACTER) {
+            const character = characterMap.get(participant.id);
 
-      if (character) {
-        slots.push({ type: ParticipantSourceType.CHARACTER, character, side: participant.side, reserved: isReservedSlot(participant, 0) });
-      }
-    } else if (participant.type === ParticipantSourceType.UNIT) {
-      const unit = unitMap.get(participant.id);
+            if (character) {
+                slots.push({
+                    type: ParticipantSourceType.CHARACTER,
+                    character,
+                    side: participant.side,
+                    reserved: isReservedSlot(participant, 0),
+                });
+            }
+        } else if (participant.type === ParticipantSourceType.UNIT) {
+            const unit = unitMap.get(participant.id);
 
-      if (unit) {
-        const quantity = participant.quantity || 1;
+            if (unit) {
+                const quantity = participant.quantity || 1;
 
-        for (let i = 0; i < quantity; i++) {
-          slots.push({
-            type: ParticipantSourceType.UNIT,
-            unit,
-            side: participant.side,
-            instanceNumber: i + 1,
-            reserved: isReservedSlot(participant, i),
-          });
+                for (let i = 0; i < quantity; i++) {
+                    slots.push({
+                        type: ParticipantSourceType.UNIT,
+                        unit,
+                        side: participant.side,
+                        instanceNumber: i + 1,
+                        reserved: isReservedSlot(participant, i),
+                    });
+                }
+            }
         }
-      }
     }
-  }
 
-  const builtRaw = await Promise.all(
-    slots.map((slot) =>
-      slot.type === ParticipantSourceType.CHARACTER
-        ? createBattleParticipantFromCharacter(
-            slot.character,
-            battleId,
-            slot.side,
-            undefined,
-            campaignContext,
-          )
-        : createBattleParticipantFromUnit(slot.unit, battleId, slot.side, slot.instanceNumber, racesById, rules),
-    ),
-  );
+    const builtRaw = await Promise.all(
+        slots.map((slot) =>
+            slot.type === ParticipantSourceType.CHARACTER
+                ? createBattleParticipantFromCharacter(
+                      slot.character,
+                      battleId,
+                      slot.side,
+                      undefined,
+                      campaignContext
+                  )
+                : createBattleParticipantFromUnit(
+                      slot.unit,
+                      battleId,
+                      slot.side,
+                      slot.instanceNumber,
+                      racesById,
+                      rules
+                  )
+        )
+    );
 
-  const built = rules.encounters.balance === "xp" ? builtRaw : await scaleEnemiesForFairBattle(campaignId, slots, builtRaw, campaignContext, rules);
+    const built =
+        rules.encounters.balance === 'xp'
+            ? builtRaw
+            : await scaleEnemiesForFairBattle(
+                  campaignId,
+                  slots,
+                  builtRaw,
+                  campaignContext,
+                  rules
+              );
 
-  const { field, reserve } = partitionReserve(slots, built);
+    const { field, reserve } = partitionReserve(slots, built);
 
-  const initiativeOrder = applyBakedAuras(field, new Set(field.map((p) => p.basicInfo.id)));
+    const initiativeOrder = applyBakedAuras(
+        field,
+        new Set(field.map((p) => p.basicInfo.id))
+    );
 
-  const sortedInitiativeOrder = applyStartOfBattleAndSort(
-    initiativeOrder,
-    battleId,
-    map,
-    rules,
-  );
+    const sortedInitiativeOrder = applyStartOfBattleAndSort(
+        initiativeOrder,
+        battleId,
+        map,
+        rules
+    );
 
-  return {
-    order: sortedInitiativeOrder.order,
-    reserve,
-    triggerLogEntries: sortedInitiativeOrder.triggerLogEntries,
-  };
+    return {
+        order: sortedInitiativeOrder.order,
+        reserve,
+        triggerLogEntries: sortedInitiativeOrder.triggerLogEntries,
+    };
 }
 
 function applyStartOfBattleAndSort(
-  initiativeOrder: BattleParticipant[],
-  battleId: string,
-  map: BattleMapConfig | null,
-  rules: Ruleset,
+    initiativeOrder: BattleParticipant[],
+    battleId: string,
+    map: BattleMapConfig | null,
+    rules: Ruleset
 ): { order: BattleParticipant[]; triggerLogEntries: BattleAction[] } {
-  const ctx = { round: 1, rng: Math.random, map, rules };
+    const ctx = { round: 1, rng: Math.random, map, rules };
 
-  const battleStart = runJoinTriggers(
-    // сплячі вороги лабіринту не спрацьовують на старті
-    initiativeOrder.map((p) => modeEnter(map, p)),
-    ctx,
-  );
+    const battleStart = runJoinTriggers(
+        // сплячі вороги лабіринту не спрацьовують на старті
+        initiativeOrder.map((p) => modeEnter(map, p)),
+        ctx
+    );
 
-  const roundStart = runAbilities(battleStart.participants, { type: "roundStart" }, ctx);
+    const roundStart = runAbilities(
+        battleStart.participants,
+        { type: 'roundStart' },
+        ctx
+    );
 
-  const afterStartOfRound = roundStart.participants;
+    const afterStartOfRound = roundStart.participants;
 
-  const allTriggerMessages = [...battleStart.messages, ...roundStart.messages];
+    const allTriggerMessages = [
+        ...battleStart.messages,
+        ...roundStart.messages,
+    ];
 
-  const withCalculatedInitiative = afterStartOfRound.map((participant) => {
-    const calculatedInitiative = calculateInitiative(participant, afterStartOfRound, { rules });
+    const withCalculatedInitiative = afterStartOfRound.map((participant) => {
+        const calculatedInitiative = calculateInitiative(
+            participant,
+            afterStartOfRound,
+            { rules }
+        );
 
-    return {
-      ...participant,
-      abilities: {
-        ...participant.abilities,
-        initiative: calculatedInitiative,
-      },
-    };
-  });
+        return {
+            ...participant,
+            abilities: {
+                ...participant.abilities,
+                initiative: calculatedInitiative,
+            },
+        };
+    });
 
-  const order = sortByInitiative(withCalculatedInitiative);
+    const order = sortByInitiative(withCalculatedInitiative);
 
-  const triggerLogEntries: BattleAction[] = [];
+    const triggerLogEntries: BattleAction[] = [];
 
-  const entry = (tag: string, lines: LogLine[], targets: BattleAction["targets"]): BattleAction => ({
-    id: `${tag}-${Date.now()}`,
-    battleId,
-    round: 1,
-    actionIndex: triggerLogEntries.length,
-    timestamp: new Date(),
-    ...SYSTEM_ACTOR,
-    actionType: "ability",
-    targets,
-    actionDetails: { triggeredAbilities: [] },
-    ...logFields(lines),
-    hpChanges: [],
-    isCancelled: false,
-    stateBefore: undefined,
-  });
+    const entry = (
+        tag: string,
+        lines: LogLine[],
+        targets: BattleAction['targets']
+    ): BattleAction => ({
+        id: `${tag}-${Date.now()}`,
+        battleId,
+        round: 1,
+        actionIndex: triggerLogEntries.length,
+        timestamp: new Date(),
+        ...SYSTEM_ACTOR,
+        actionType: 'ability',
+        targets,
+        actionDetails: { triggeredAbilities: [] },
+        ...logFields(lines),
+        hpChanges: [],
+        isCancelled: false,
+        stateBefore: undefined,
+    });
 
-  if (allTriggerMessages.length > 0) triggerLogEntries.push(entry("triggers-start", [textRef("battleLog.triggers.battleStart"), ...allTriggerMessages], []));
+    if (allTriggerMessages.length > 0)
+        triggerLogEntries.push(
+            entry(
+                'triggers-start',
+                [
+                    textRef('battleLog.triggers.battleStart'),
+                    ...allTriggerMessages,
+                ],
+                []
+            )
+        );
 
-  if (battleStart.psychology.lines.length > 0) triggerLogEntries.push(entry("psychology-start", battleStart.psychology.lines, battleStart.psychology.targets));
+    if (battleStart.psychology.lines.length > 0)
+        triggerLogEntries.push(
+            entry(
+                'psychology-start',
+                battleStart.psychology.lines,
+                battleStart.psychology.targets
+            )
+        );
 
-  return { order, triggerLogEntries };
+    return { order, triggerLogEntries };
 }

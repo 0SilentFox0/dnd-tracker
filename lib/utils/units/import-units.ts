@@ -1,91 +1,144 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from '@prisma/client';
 
-import type { ImportUnitRow } from "@/lib/schemas/units";
-import { abilitiesJson } from "@/lib/utils/abilities/read";
-import type { Ability } from "@/lib/utils/abilities/schema";
-import { nameKey } from "@/lib/utils/content/import/mapping";
-import type { Ruleset } from "@/lib/utils/rules/schema";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import { resolveUnitProficiency } from "@/lib/utils/units/monster";
-import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
-import type { UnitImportResult } from "@/types/import";
+import type { ImportUnitRow } from '@/lib/schemas/units';
+import { abilitiesJson } from '@/lib/utils/abilities/read';
+import type { Ability } from '@/lib/utils/abilities/schema';
+import { nameKey } from '@/lib/utils/content/import/mapping';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { resolveUnitProficiency } from '@/lib/utils/units/monster';
+import { specialAbilitiesToAbilities } from '@/lib/utils/units/special-abilities';
+import type { UnitImportResult } from '@/types/import';
 
 export interface ImportDb {
-  race: Pick<PrismaClient["race"], "findMany">;
-  unit: Pick<PrismaClient["unit"], "findMany" | "createMany">;
+    race: Pick<PrismaClient['race'], 'findMany'>;
+    unit: Pick<PrismaClient['unit'], 'findMany' | 'createMany'>;
 }
 
-export function resolveImportRaces(names: Array<string | undefined>, races: Array<{ id: string; name: string }>) {
-  const byName = new Map<string, string>();
+export function resolveImportRaces(
+    names: Array<string | undefined>,
+    races: Array<{ id: string; name: string }>
+) {
+    const byName = new Map<string, string>();
 
-  for (const race of races) {
-    if (!byName.has(nameKey(race.name))) byName.set(nameKey(race.name), race.id);
-  }
+    for (const race of races) {
+        if (!byName.has(nameKey(race.name)))
+            byName.set(nameKey(race.name), race.id);
+    }
 
-  const unknown = new Map<string, string>();
+    const unknown = new Map<string, string>();
 
-  for (const name of names) {
-    if (name?.trim() && !byName.has(nameKey(name)) && !unknown.has(nameKey(name))) unknown.set(nameKey(name), name.trim());
-  }
+    for (const name of names) {
+        if (
+            name?.trim() &&
+            !byName.has(nameKey(name)) &&
+            !unknown.has(nameKey(name))
+        )
+            unknown.set(nameKey(name), name.trim());
+    }
 
-  return {
-    raceIdOf: (name?: string): string | null => (name?.trim() ? (byName.get(nameKey(name)) ?? null) : null),
-    unknownRaces: [...unknown.values()],
-  };
+    return {
+        raceIdOf: (name?: string): string | null =>
+            name?.trim() ? (byName.get(nameKey(name)) ?? null) : null,
+        unknownRaces: [...unknown.values()],
+    };
 }
 
 function importedAbilities(unit: ImportUnitRow): Ability[] {
-  const own = unit.abilities ?? [];
+    const own = unit.abilities ?? [];
 
-  const taken = new Set(own.map((a) => nameKey(a.name)));
+    const taken = new Set(own.map((a) => nameKey(a.name)));
 
-  return [...own, ...specialAbilitiesToAbilities(unit.specialAbilities).filter((a) => !taken.has(nameKey(a.name)))];
+    return [
+        ...own,
+        ...specialAbilitiesToAbilities(unit.specialAbilities).filter(
+            (a) => !taken.has(nameKey(a.name))
+        ),
+    ];
 }
 
-export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId: string | null, keepCharacteristics = false): Prisma.UnitCreateManyInput {
-  return {
-    campaignId,
-    name: unit.name,
-    raceId,
-    level: unit.level,
-    strength: unit.strength,
-    dexterity: unit.dexterity,
-    constitution: unit.constitution,
-    intelligence: unit.intelligence,
-    wisdom: unit.wisdom,
-    charisma: unit.charisma,
-    armorClass: unit.armorClass,
-    initiative: unit.initiative,
-    speed: unit.speed,
-    gridSize: unit.gridSize,
-    maxHp: unit.maxHp,
-    proficiencyBonus: resolveUnitProficiency(unit),
-    attacks: unit.attacks as Prisma.InputJsonValue,
-    abilities: abilitiesJson(importedAbilities(unit)),
-    knownSpells: unit.knownSpells,
-    avatar: unit.avatar ?? null,
-    cr: unit.cr ?? null,
-    xp: unit.xp ?? null,
-    multiattack: unit.multiattack,
-    legendaryActions: unit.legendaryActions,
-    legendaryResistances: unit.legendaryResistances,
-    saveProficiencies: unit.saveProficiencies as Prisma.InputJsonValue,
-    ...(keepCharacteristics && unit.characteristics && { characteristics: unit.characteristics as Prisma.InputJsonObject }),
-  };
+export function toUnitCreateData(
+    campaignId: string,
+    unit: ImportUnitRow,
+    raceId: string | null,
+    keepCharacteristics = false
+): Prisma.UnitCreateManyInput {
+    return {
+        campaignId,
+        name: unit.name,
+        raceId,
+        level: unit.level,
+        strength: unit.strength,
+        dexterity: unit.dexterity,
+        constitution: unit.constitution,
+        intelligence: unit.intelligence,
+        wisdom: unit.wisdom,
+        charisma: unit.charisma,
+        armorClass: unit.armorClass,
+        initiative: unit.initiative,
+        speed: unit.speed,
+        gridSize: unit.gridSize,
+        maxHp: unit.maxHp,
+        proficiencyBonus: resolveUnitProficiency(unit),
+        attacks: unit.attacks as Prisma.InputJsonValue,
+        abilities: abilitiesJson(importedAbilities(unit)),
+        knownSpells: unit.knownSpells,
+        avatar: unit.avatar ?? null,
+        cr: unit.cr ?? null,
+        xp: unit.xp ?? null,
+        multiattack: unit.multiattack,
+        legendaryActions: unit.legendaryActions,
+        legendaryResistances: unit.legendaryResistances,
+        saveProficiencies: unit.saveProficiencies as Prisma.InputJsonValue,
+        ...(keepCharacteristics &&
+            unit.characteristics && {
+                characteristics: unit.characteristics as Prisma.InputJsonObject,
+            }),
+    };
 }
 
-export async function importUnitsIntoCampaign(db: ImportDb, campaignId: string, rows: ImportUnitRow[], rules?: Pick<Ruleset, "system">): Promise<UnitImportResult> {
-  const races = await db.race.findMany({ where: { campaignId }, select: { id: true, name: true }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] });
+export async function importUnitsIntoCampaign(
+    db: ImportDb,
+    campaignId: string,
+    rows: ImportUnitRow[],
+    rules?: Pick<Ruleset, 'system'>
+): Promise<UnitImportResult> {
+    const races = await db.race.findMany({
+        where: { campaignId },
+        select: { id: true, name: true },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
 
-  const { raceIdOf, unknownRaces } = resolveImportRaces(rows.map((r) => r.raceName), races);
+    const { raceIdOf, unknownRaces } = resolveImportRaces(
+        rows.map((r) => r.raceName),
+        races
+    );
 
-  const existing = await db.unit.findMany({ where: { campaignId, name: { in: rows.map((r) => r.name) } }, select: { name: true } });
+    const existing = await db.unit.findMany({
+        where: { campaignId, name: { in: rows.map((r) => r.name) } },
+        select: { name: true },
+    });
 
-  const taken = new Set(existing.map((u) => u.name));
+    const taken = new Set(existing.map((u) => u.name));
 
-  const data = rows.filter((r) => !taken.has(r.name)).map((r) => toUnitCreateData(campaignId, r, raceIdOf(r.raceName), !!rules && ruleSystemOf(rules).characteristics.persisted));
+    const data = rows
+        .filter((r) => !taken.has(r.name))
+        .map((r) =>
+            toUnitCreateData(
+                campaignId,
+                r,
+                raceIdOf(r.raceName),
+                !!rules && ruleSystemOf(rules).characteristics.persisted
+            )
+        );
 
-  const { count } = data.length > 0 ? await db.unit.createMany({ data }) : { count: 0 };
+    const { count } =
+        data.length > 0 ? await db.unit.createMany({ data }) : { count: 0 };
 
-  return { imported: count, total: rows.length, skipped: rows.length - data.length, unknownRaces };
+    return {
+        imported: count,
+        total: rows.length,
+        skipped: rows.length - data.length,
+        unknownRaces,
+    };
 }

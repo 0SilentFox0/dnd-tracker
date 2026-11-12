@@ -1,116 +1,116 @@
-import { useTranslations } from "next-intl";
-import { X } from "lucide-react";
+import { useTranslations } from 'next-intl';
+import { X } from 'lucide-react';
 
-import { HudSection } from "@/components/hud/form";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { SelectField } from "@/components/ui/select-field";
-import type { Spell } from "@/types/spells";
-import type { Unit } from "@/types/units";
+import { HudSection } from '@/components/hud/form';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { SelectField } from '@/components/ui/select-field';
+import type { Spell } from '@/types/spells';
+import type { Unit } from '@/types/units';
 
 interface UnitKnownSpellsProps {
-  formData: Partial<Unit>;
-  spells: Spell[];
-  onChange: (data: Partial<Unit>) => void;
+    formData: Partial<Unit>;
+    spells: Spell[];
+    onChange: (data: Partial<Unit>) => void;
 }
 
 export function UnitKnownSpells({
-  formData,
-  spells,
-  onChange,
+    formData,
+    spells,
+    onChange,
 }: UnitKnownSpellsProps) {
-  const t = useTranslations("units.knownSpells");
+    const t = useTranslations('units.knownSpells');
 
-  const knownSpellIds = formData.knownSpells || [];
+    const knownSpellIds = formData.knownSpells || [];
 
-  const knownSpells = spells.filter((spell) =>
-    knownSpellIds.includes(spell.id)
-  );
+    const knownSpells = spells.filter((spell) =>
+        knownSpellIds.includes(spell.id)
+    );
 
-  const handleAdd = (spellId: string) => {
-    if (!spellId || spellId === "none") return;
+    const handleAdd = (spellId: string) => {
+        if (!spellId || spellId === 'none') return;
 
-    if (knownSpellIds.includes(spellId)) return;
+        if (knownSpellIds.includes(spellId)) return;
 
-    onChange({
-      knownSpells: [...knownSpellIds, spellId],
-    });
-  };
+        onChange({
+            knownSpells: [...knownSpellIds, spellId],
+        });
+    };
 
-  const handleRemove = (spellId: string) => {
-    const updated = knownSpellIds.filter((id) => id !== spellId);
+    const handleRemove = (spellId: string) => {
+        const updated = knownSpellIds.filter((id) => id !== spellId);
 
-    onChange({ knownSpells: updated });
-  };
+        onChange({ knownSpells: updated });
+    };
 
-  const availableSpells = spells.filter(
-    (spell) => !knownSpellIds.includes(spell.id)
-  );
+    const availableSpells = spells.filter(
+        (spell) => !knownSpellIds.includes(spell.id)
+    );
 
-  return (
-    <HudSection
-      title={t("title")}
-      className="space-y-4"
-      action={
-        availableSpells.length > 0 && (
-          <SelectField
-            value=""
-            onValueChange={handleAdd}
-            placeholder={t("add")}
-            options={availableSpells.map((spell) => ({
-              value: spell.id,
-              label: `${spell.name}${spell.level > 0 ? t("levelSuffix", { level: spell.level }) : ""}`,
-            }))}
-            triggerClassName="w-[200px]"
-          />
-        )
-      }
-    >
-      {knownSpells.length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">
-            {t("known")}
-          </Label>
-          <div className="flex flex-wrap gap-2">
-            {knownSpells.map((spell) => (
-              <div
-                key={spell.id}
-                className="flex items-center gap-2 bg-muted px-3 py-1 rounded-md"
-              >
-                <span className="text-sm">
-                  {spell.name}
-                  {spell.level > 0 && (
-                    <span className="text-muted-foreground ml-1">
-                      ({spell.level})
-                    </span>
-                  )}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0"
-                  onClick={() => handleRemove(spell.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+    return (
+        <HudSection
+            title={t('title')}
+            className="space-y-4"
+            action={
+                availableSpells.length > 0 && (
+                    <SelectField
+                        value=""
+                        onValueChange={handleAdd}
+                        placeholder={t('add')}
+                        options={availableSpells.map((spell) => ({
+                            value: spell.id,
+                            label: `${spell.name}${spell.level > 0 ? t('levelSuffix', { level: spell.level }) : ''}`,
+                        }))}
+                        triggerClassName="w-[200px]"
+                    />
+                )
+            }
+        >
+            {knownSpells.length > 0 && (
+                <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">
+                        {t('known')}
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                        {knownSpells.map((spell) => (
+                            <div
+                                key={spell.id}
+                                className="flex items-center gap-2 rounded-md bg-muted px-3 py-1"
+                            >
+                                <span className="text-sm">
+                                    {spell.name}
+                                    {spell.level > 0 && (
+                                        <span className="ml-1 text-muted-foreground">
+                                            ({spell.level})
+                                        </span>
+                                    )}
+                                </span>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-5 w-5 p-0"
+                                    onClick={() => handleRemove(spell.id)}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
-      {knownSpells.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-2">
-          {t("empty")}
-        </p>
-      )}
+            {knownSpells.length === 0 && (
+                <p className="py-2 text-center text-sm text-muted-foreground">
+                    {t('empty')}
+                </p>
+            )}
 
-      {spells.length === 0 && (
-        <p className="text-sm text-muted-foreground text-center py-2">
-          {t("none")}
-        </p>
-      )}
-    </HudSection>
-  );
+            {spells.length === 0 && (
+                <p className="py-2 text-center text-sm text-muted-foreground">
+                    {t('none')}
+                </p>
+            )}
+        </HudSection>
+    );
 }

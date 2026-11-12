@@ -1,9 +1,9 @@
-import "./print.css";
+import './print.css';
 
 export default function PrintLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  return <div className="print-page">{children}</div>;
+    return <div className="print-page">{children}</div>;
 }

@@ -1,39 +1,69 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { CombatStatus, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
-import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import { d20OnZeroHp } from "@/systems/d20/rules/death-saves/on-zero-hp";
-import type { BattleParticipant } from "@/types/battle";
+import {
+    CombatStatus,
+    ParticipantSourceType,
+    type ParticipantSourceTypeValue,
+} from '@/lib/constants/battle';
+import { applyRawDamage } from '@/lib/utils/abilities/engine/effects/hp';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { d20OnZeroHp } from '@/systems/d20/rules/death-saves/on-zero-hp';
+import type { BattleParticipant } from '@/types/battle';
 
-const rules: Ruleset = { ...DEFAULT_RULES, deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true, unitsDieAtZero: true } };
-
-const mock = (sourceType: ParticipantSourceTypeValue, hp: number, maxHp = 20): BattleParticipant => {
-  const base = createMockParticipant();
-
-  return createMockParticipant({ basicInfo: { ...base.basicInfo, sourceType }, combatStats: { ...base.combatStats, currentHp: hp, maxHp, tempHp: 0 } });
+const rules: Ruleset = {
+    ...DEFAULT_RULES,
+    deathSaves: {
+        ...DEFAULT_RULES.deathSaves,
+        enabled: true,
+        unitsDieAtZero: true,
+    },
 };
 
-const hit = (before: BattleParticipant, amount: number) => d20OnZeroHp({ before, after: applyRawDamage(before, amount), amount, rules, rng: () => 0.5, participants: [before] });
+const mock = (
+    sourceType: ParticipantSourceTypeValue,
+    hp: number,
+    maxHp = 20
+): BattleParticipant => {
+    const base = createMockParticipant();
 
-describe("d20OnZeroHp", () => {
-  it("a hero dropped to 0 starts dying", () => {
-    const r = hit(mock(ParticipantSourceType.CHARACTER, 5), 6);
+    return createMockParticipant({
+        basicInfo: { ...base.basicInfo, sourceType },
+        combatStats: { ...base.combatStats, currentHp: hp, maxHp, tempHp: 0 },
+    });
+};
 
-    expect(r.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-    expect(r.participant.battleData.deathSaves).toEqual({ successes: 0, failures: 0, stable: false });
-  });
+const hit = (before: BattleParticipant, amount: number) =>
+    d20OnZeroHp({
+        before,
+        after: applyRawDamage(before, amount),
+        amount,
+        rules,
+        rng: () => 0.5,
+        participants: [before],
+    });
 
-  it("overflow of at least max HP kills a hero outright", () => {
-    const r = hit(mock(ParticipantSourceType.CHARACTER, 5), 30);
+describe('d20OnZeroHp', () => {
+    it('a hero dropped to 0 starts dying', () => {
+        const r = hit(mock(ParticipantSourceType.CHARACTER, 5), 6);
 
-    expect(r.participant.combatStats.status).toBe(CombatStatus.DEAD);
-  });
+        expect(r.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
+        expect(r.participant.battleData.deathSaves).toEqual({
+            successes: 0,
+            failures: 0,
+            stable: false,
+        });
+    });
 
-  it("a unit dies at 0", () => {
-    const r = hit(mock(ParticipantSourceType.UNIT, 5), 6);
+    it('overflow of at least max HP kills a hero outright', () => {
+        const r = hit(mock(ParticipantSourceType.CHARACTER, 5), 30);
 
-    expect(r.participant.combatStats.status).toBe(CombatStatus.DEAD);
-  });
+        expect(r.participant.combatStats.status).toBe(CombatStatus.DEAD);
+    });
+
+    it('a unit dies at 0', () => {
+        const r = hit(mock(ParticipantSourceType.UNIT, 5), 6);
+
+        expect(r.participant.combatStats.status).toBe(CombatStatus.DEAD);
+    });
 });

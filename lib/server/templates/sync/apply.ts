@@ -1,400 +1,744 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from '@prisma/client';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { SYNC_DEFAULT_ON } from "@/lib/constants/source-sync";
-import { getTranslator } from "@/lib/i18n/translator";
-import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
-import type { CompendiumBundleDb } from "@/lib/server/compendium-import/bundle";
-import { syncCompendiumProvenance } from "@/lib/server/compendium-import/sync";
-import { DETACH_KIND_BY_TABLE, detachRefs } from "@/lib/server/content/detach-refs";
-import { ContentError } from "@/lib/server/content/errors";
-import { moveSkillTreeProgress } from "@/lib/server/skills/progress-move";
-import { assertNoLeak, findForeignContentIds } from "@/lib/server/templates/assert-no-leak";
-import { BUNDLE_TABLES, type BundleTableDef, delegateOf, pick, settingsOf, TemplateLeakError, toPrismaJson } from "@/lib/server/templates/bundle";
-import { newContentId } from "@/lib/server/templates/ids";
-import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-ids";
-import { dropTakenSlugs } from "@/lib/server/templates/slug-collisions";
-import { classify } from "@/lib/server/templates/sync/classify";
-import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
-import { indexOf } from "@/lib/server/templates/sync/index";
-import { type LayeredDb,layerOf } from "@/lib/server/templates/sync/layered";
-import { applyLayered, previewLayeredSelection } from "@/lib/server/templates/sync/layered-apply";
-import { assertSrdNameReferences } from "@/lib/server/templates/sync/name-references";
-import { createRefChecker, danglingProfileWarnings } from "@/lib/server/templates/sync/profile-refs";
-import { keyOf, sourceChanged, sourceSelection } from "@/lib/server/templates/sync/selection";
-import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
-import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
-import { localeOrRequest } from "@/lib/utils/api/translate-error";
-import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
-import { backgroundReferenceError } from "@/lib/utils/backgrounds/integrity";
-import { parseRules } from "@/lib/utils/rules/schema";
-import { readTreeJson } from "@/lib/utils/skills/progression";
-import type { SourceApplyResult, SyncRef } from "@/types/campaigns";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { SYNC_DEFAULT_ON } from '@/lib/constants/source-sync';
+import { getTranslator } from '@/lib/i18n/translator';
+import type { SourceSyncApplyInput } from '@/lib/schemas/source-sync';
+import type { CompendiumBundleDb } from '@/lib/server/compendium-import/bundle';
+import { syncCompendiumProvenance } from '@/lib/server/compendium-import/sync';
+import {
+    DETACH_KIND_BY_TABLE,
+    detachRefs,
+} from '@/lib/server/content/detach-refs';
+import { ContentError } from '@/lib/server/content/errors';
+import { moveSkillTreeProgress } from '@/lib/server/skills/progress-move';
+import {
+    assertNoLeak,
+    findForeignContentIds,
+} from '@/lib/server/templates/assert-no-leak';
+import {
+    BUNDLE_TABLES,
+    type BundleTableDef,
+    delegateOf,
+    pick,
+    settingsOf,
+    TemplateLeakError,
+    toPrismaJson,
+} from '@/lib/server/templates/bundle';
+import { newContentId } from '@/lib/server/templates/ids';
+import {
+    collectKeysAndStrings,
+    remapIds,
+} from '@/lib/server/templates/remap-ids';
+import { dropTakenSlugs } from '@/lib/server/templates/slug-collisions';
+import { classify } from '@/lib/server/templates/sync/classify';
+import {
+    loadSyncContext,
+    type SyncDb,
+} from '@/lib/server/templates/sync/context';
+import { indexOf } from '@/lib/server/templates/sync/index';
+import { type LayeredDb, layerOf } from '@/lib/server/templates/sync/layered';
+import {
+    applyLayered,
+    previewLayeredSelection,
+} from '@/lib/server/templates/sync/layered-apply';
+import { assertSrdNameReferences } from '@/lib/server/templates/sync/name-references';
+import {
+    createRefChecker,
+    danglingProfileWarnings,
+} from '@/lib/server/templates/sync/profile-refs';
+import {
+    keyOf,
+    sourceChanged,
+    sourceSelection,
+} from '@/lib/server/templates/sync/selection';
+import { cloneState, setEntry } from '@/lib/server/templates/sync/state';
+import {
+    IGNORED_DELETED,
+    type SyncContext,
+    type SyncItem,
+} from '@/lib/server/templates/sync/types';
+import { localeOrRequest } from '@/lib/utils/api/translate-error';
+import { backgroundAsiRules } from '@/lib/utils/backgrounds/asi';
+import { backgroundReferenceError } from '@/lib/utils/backgrounds/integrity';
+import { parseRules } from '@/lib/utils/rules/schema';
+import { readTreeJson } from '@/lib/utils/skills/progression';
+import type { SourceApplyResult, SyncRef } from '@/types/campaigns';
 
-async function loadClassified(db: SyncDb, campaignId: string, access?: { userId: string }) {
-  const ctx = await loadSyncContext(db, campaignId, access);
+async function loadClassified(
+    db: SyncDb,
+    campaignId: string,
+    access?: { userId: string }
+) {
+    const ctx = await loadSyncContext(db, campaignId, access);
 
-  return { ctx, all: new Map(classify(ctx).map((i) => [keyOf(i), i])) };
+    return { ctx, all: new Map(classify(ctx).map((i) => [keyOf(i), i])) };
 }
 
-export async function previewSourceSelection(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }) {
-  const layer = await layerOf(db, campaignId);
+export async function previewSourceSelection(
+    db: SyncDb,
+    campaignId: string,
+    body: SourceSyncApplyInput,
+    access?: { userId: string }
+) {
+    const layer = await layerOf(db, campaignId);
 
-  if (layer) return previewLayeredSelection(db as LayeredDb, campaignId, layer, body, access);
+    if (layer)
+        return previewLayeredSelection(
+            db as LayeredDb,
+            campaignId,
+            layer,
+            body,
+            access
+        );
 
-  const { ctx, all } = await loadClassified(db, campaignId, access);
+    const { ctx, all } = await loadClassified(db, campaignId, access);
 
-  const { items, ignored, autoAdded } = sourceSelection(all, body);
+    const { items, ignored, autoAdded } = sourceSelection(all, body);
 
-  const index = indexOf(ctx);
+    const index = indexOf(ctx);
 
-  return {
-    sourceId: ctx.source.id,
-    items: items.map((item) => ({ ...item, before: item.localId ? index.localById.get(item.localId)?.row ?? null : item.scope === "rules" ? parseRules(ctx.target.rules)[item.key as keyof ReturnType<typeof parseRules>] : item.scope === "settings" ? ctx.target.settings : null, after: item.status === "deletedInSource" ? null : index.sourceIndex.get(item.key)?.row ?? (item.scope === "rules" ? parseRules(ctx.sourceBundle.rules)[item.key as keyof ReturnType<typeof parseRules>] : item.scope === "settings" ? ctx.sourceBundle.settings : null) })),
-    ignored, autoAdded,
-    credits: { before: ctx.target.credits ?? null, after: ctx.sourceBundle.credits ?? null },
-  };
+    return {
+        sourceId: ctx.source.id,
+        items: items.map((item) => ({
+            ...item,
+            before: item.localId
+                ? (index.localById.get(item.localId)?.row ?? null)
+                : item.scope === 'rules'
+                  ? parseRules(ctx.target.rules)[
+                        item.key as keyof ReturnType<typeof parseRules>
+                    ]
+                  : item.scope === 'settings'
+                    ? ctx.target.settings
+                    : null,
+            after:
+                item.status === 'deletedInSource'
+                    ? null
+                    : (index.sourceIndex.get(item.key)?.row ??
+                      (item.scope === 'rules'
+                          ? parseRules(ctx.sourceBundle.rules)[
+                                item.key as keyof ReturnType<typeof parseRules>
+                            ]
+                          : item.scope === 'settings'
+                            ? ctx.sourceBundle.settings
+                            : null)),
+        })),
+        ignored,
+        autoAdded,
+        credits: {
+            before: ctx.target.credits ?? null,
+            after: ctx.sourceBundle.credits ?? null,
+        },
+    };
 }
 
-async function applySelection(db: SyncDb, ctx: SyncContext, all: Map<string, SyncItem>, body: SourceSyncApplyInput): Promise<SourceApplyResult> {
-  const { selected, autoAdded, items, ignored } = sourceSelection(all, body);
+async function applySelection(
+    db: SyncDb,
+    ctx: SyncContext,
+    all: Map<string, SyncItem>,
+    body: SourceSyncApplyInput
+): Promise<SourceApplyResult> {
+    const { selected, autoAdded, items, ignored } = sourceSelection(all, body);
 
-  const warnings = await writeTables(db, ctx, selected);
+    const warnings = await writeTables(db, ctx, selected);
 
-  await writeCampaign(db, ctx, items);
+    await writeCampaign(db, ctx, items);
 
-  await saveState(db, ctx, items, ignored);
+    await saveState(db, ctx, items, ignored);
 
-  return { applied: items.length, ignored: ignored.length, autoAdded: autoAdded.map(({ scope, key, name }) => ({ scope, key, name })), warnings };
+    return {
+        applied: items.length,
+        ignored: ignored.length,
+        autoAdded: autoAdded.map(({ scope, key, name }) => ({
+            scope,
+            key,
+            name,
+        })),
+        warnings,
+    };
 }
 
-export async function applySourceChanges(db: SyncDb, campaignId: string, body: SourceSyncApplyInput, access?: { userId: string }): Promise<SourceApplyResult> {
-  const layer = await layerOf(db, campaignId);
+export async function applySourceChanges(
+    db: SyncDb,
+    campaignId: string,
+    body: SourceSyncApplyInput,
+    access?: { userId: string }
+): Promise<SourceApplyResult> {
+    const layer = await layerOf(db, campaignId);
 
-  if (layer) return applyLayered(db as LayeredDb, campaignId, layer, body, access);
+    if (layer)
+        return applyLayered(db as LayeredDb, campaignId, layer, body, access);
 
-  const { ctx, all } = await loadClassified(db, campaignId, access);
+    const { ctx, all } = await loadClassified(db, campaignId, access);
 
-  return applySelection(db, ctx, all, body);
+    return applySelection(db, ctx, all, body);
 }
 
-export async function applySafeSourceChanges(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SourceApplyResult> {
-  const layer = await layerOf(db, campaignId);
+export async function applySafeSourceChanges(
+    db: SyncDb,
+    campaignId: string,
+    access?: { userId: string }
+): Promise<SourceApplyResult> {
+    const layer = await layerOf(db, campaignId);
 
-  if (layer) return applyLayered(db as LayeredDb, campaignId, layer, "safe", access);
+    if (layer)
+        return applyLayered(db as LayeredDb, campaignId, layer, 'safe', access);
 
-  const { ctx, all } = await loadClassified(db, campaignId, access);
+    const { ctx, all } = await loadClassified(db, campaignId, access);
 
-  const safe = [...all.values()].filter((i) => i.visible && !i.ignored && SYNC_DEFAULT_ON.has(i.status) && !needsBlockedDependency(i, all));
+    const safe = [...all.values()].filter(
+        (i) =>
+            i.visible &&
+            !i.ignored &&
+            SYNC_DEFAULT_ON.has(i.status) &&
+            !needsBlockedDependency(i, all)
+    );
 
-  return applySelection(db, ctx, all, { apply: safe.map(({ scope, key, sourceHash, status }) => ({ scope, key, sourceHash, status })), ignore: [] });
+    return applySelection(db, ctx, all, {
+        apply: safe.map(({ scope, key, sourceHash, status }) => ({
+            scope,
+            key,
+            sourceHash,
+            status,
+        })),
+        ignore: [],
+    });
 }
 
 function needsBlockedDependency(item: SyncItem, all: Map<string, SyncItem>) {
-  const seen = new Set<string>();
+    const seen = new Set<string>();
 
-  const queue = [item];
+    const queue = [item];
 
-  while (queue.length > 0) {
-    for (const req of queue.pop()!.requires) {
-      const k = keyOf(req);
+    while (queue.length > 0) {
+        for (const req of queue.pop()!.requires) {
+            const k = keyOf(req);
 
-      const dep = all.get(k);
+            const dep = all.get(k);
 
-      if (seen.has(k) || !dep || (dep.status !== "new" && dep.status !== "deletedLocally")) continue;
+            if (
+                seen.has(k) ||
+                !dep ||
+                (dep.status !== 'new' && dep.status !== 'deletedLocally')
+            )
+                continue;
 
-      if (dep.ignored || dep.status === "deletedLocally") return true;
+            if (dep.ignored || dep.status === 'deletedLocally') return true;
 
-      seen.add(k);
-      queue.push(dep);
+            seen.add(k);
+            queue.push(dep);
+        }
     }
-  }
 
-  return false;
+    return false;
 }
 
-function cleanRow(t: BundleTableDef, src: Record<string, unknown>, item: SyncItem, map: Map<string, string>, warnings: string[]) {
-  const clean = pick(src, t.columns);
+function cleanRow(
+    t: BundleTableDef,
+    src: Record<string, unknown>,
+    item: SyncItem,
+    map: Map<string, string>,
+    warnings: string[]
+) {
+    const clean = pick(src, t.columns);
 
-  for (const col of Object.keys(t.fks)) {
-    const ref = clean[col];
+    for (const col of Object.keys(t.fks)) {
+        const ref = clean[col];
 
-    if (typeof ref === "string" && !map.has(ref)) {
-      if (t.key === "backgrounds") throw new ContentError(API_ERRORS.BACKGROUND_FEAT_INVALID, 422);
+        if (typeof ref === 'string' && !map.has(ref)) {
+            if (t.key === 'backgrounds')
+                throw new ContentError(API_ERRORS.BACKGROUND_FEAT_INVALID, 422);
 
-      warnings.push(`${t.key} ${item.name}: ${col} → null`);
-      clean[col] = null;
+            warnings.push(`${t.key} ${item.name}: ${col} → null`);
+            clean[col] = null;
+        }
     }
-  }
 
-  const data = remapIds(clean, map);
+    const data = remapIds(clean, map);
 
-  delete data.id;
+    delete data.id;
 
-  return data;
+    return data;
 }
 
-async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>, warnings: string[]): Promise<Set<string>> {
-  const blocked = new Set<string>();
+async function deleteRemoved(
+    db: SyncDb,
+    ctx: SyncContext,
+    selected: Map<string, SyncItem>,
+    warnings: string[]
+): Promise<Set<string>> {
+    const blocked = new Set<string>();
 
-  const refs = createRefChecker(db, ctx.campaignId);
+    const refs = createRefChecker(db, ctx.campaignId);
 
-  for (const t of [...BUNDLE_TABLES].reverse()) {
-    for (const i of selected.values()) {
-      if (i.scope !== t.key || i.status !== "deletedInSource" || !i.localId) continue;
+    for (const t of [...BUNDLE_TABLES].reverse()) {
+        for (const i of selected.values()) {
+            if (
+                i.scope !== t.key ||
+                i.status !== 'deletedInSource' ||
+                !i.localId
+            )
+                continue;
 
-      if (t.key === "backgrounds") {
-        const used = await db.character.findMany({ where: { campaignId: ctx.campaignId, backgroundId: i.localId }, select: { id: true } });
+            if (t.key === 'backgrounds') {
+                const used = await db.character.findMany({
+                    where: {
+                        campaignId: ctx.campaignId,
+                        backgroundId: i.localId,
+                    },
+                    select: { id: true },
+                });
 
-        if (used.length) throw new ContentError(API_ERRORS.BACKGROUND_IN_USE, 409);
-      }
+                if (used.length)
+                    throw new ContentError(API_ERRORS.BACKGROUND_IN_USE, 409);
+            }
 
-      if (t.key === "feats") {
-        const backgrounds = await db.background.findMany({ where: { campaignId: ctx.campaignId } });
+            if (t.key === 'feats') {
+                const backgrounds = await db.background.findMany({
+                    where: { campaignId: ctx.campaignId },
+                });
 
-        if (backgrounds.some((b) => b.originFeatId === i.localId || collectKeysAndStrings(b.choices).has(i.localId!))) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
-      }
+                if (
+                    backgrounds.some(
+                        (b) =>
+                            b.originFeatId === i.localId ||
+                            collectKeysAndStrings(b.choices).has(i.localId!)
+                    )
+                )
+                    throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+            }
 
-      const blockedWarning = await refs.blockedBy(t.key, [i.localId], i.name);
+            const blockedWarning = await refs.blockedBy(
+                t.key,
+                [i.localId],
+                i.name
+            );
 
-      if (blockedWarning) {
-        warnings.push(blockedWarning);
-        blocked.add(i.localId);
+            if (blockedWarning) {
+                warnings.push(blockedWarning);
+                blocked.add(i.localId);
 
-        continue;
-      }
+                continue;
+            }
 
-      const kind = DETACH_KIND_BY_TABLE[t.key];
+            const kind = DETACH_KIND_BY_TABLE[t.key];
 
-      if (kind) await detachRefs(db as unknown as Parameters<typeof detachRefs>[0], ctx.campaignId, kind, [i.localId]);
+            if (kind)
+                await detachRefs(
+                    db as unknown as Parameters<typeof detachRefs>[0],
+                    ctx.campaignId,
+                    kind,
+                    [i.localId]
+                );
 
-      await delegateOf(db, t).deleteMany({ where: { id: i.localId, campaignId: ctx.campaignId } });
+            await delegateOf(db, t).deleteMany({
+                where: { id: i.localId, campaignId: ctx.campaignId },
+            });
 
-      refs.deleted(t.key);
+            refs.deleted(t.key);
+        }
     }
-  }
 
-  return blocked;
+    return blocked;
 }
 
-async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnType<typeof indexOf>, selected: Map<string, SyncItem>, map: Map<string, string>) {
-  // Validate the resulting graph before any writes, including refs to unchanged local rows.
-  const effective = new Map(ctx.target.rows.map((r) => [r.row.id, { table: r.table, row: r.row as Record<string, unknown> }]));
-
-  for (const item of selected.values()) {
-    if (item.status === "deletedInSource" && item.localId) effective.delete(item.localId);
-    else {
-      const src = index.sourceIndex.get(item.key);
-
-      const table = src && BUNDLE_TABLES.find((t) => t.key === src.table);
-
-      if (src && table) effective.set(item.localId ?? map.get(item.key)!, { table: src.table, row: { ...cleanRow(table, src.row, item, map, []), id: item.localId ?? map.get(item.key)! } });
-    }
-  }
-
-  const resulting = [...effective.values()];
-
-  // Templates without classes have no providers for spell-list names.
-  if (ctx.templateOverlay && ctx.sourceBundle.classes.length > 0) {
-    const selectedLocalIds = new Set([...selected.values()].map((item) => item.localId ?? map.get(item.key)).filter((id): id is string => !!id));
-
-    assertSrdNameReferences(ctx.target.rows, resulting, selectedLocalIds, { rows: [...index.sourceIndex.values()], sourceToLocal: map });
-  }
-
-  const feats = resulting.filter((r) => r.table === "feats").map(({ row }) => ({ id: row.id, type: row.type }));
-
-  const spells = new Set(resulting.filter((r) => r.table === "spells").map((r) => r.row.id));
-
-  for (const { row } of resulting.filter((r) => r.table === "backgrounds")) {
-    const error = backgroundReferenceError({ originFeatId: row.originFeatId, choices: row.choices }, feats, spells);
-
-    if (error) {
-      const existed = ctx.target.rows.some((r) => r.table === "backgrounds" && r.row.id === row.id && r.row.originFeatId === row.originFeatId);
-
-      throw new ContentError(error, existed ? 409 : 422);
-    }
-  }
-
-  if ([...selected.values()].some((i) => i.scope === "backgrounds" || i.scope === "feats")) {
-    const characters = await db.character.findMany({ where: { campaignId: ctx.campaignId }, select: { backgroundId: true, backgroundChoices: true } });
-
-    const signature = (row: Record<string, unknown> | undefined, lookup: (id: string) => Record<string, unknown> | undefined) => [backgroundAsiRules(row?.choices), backgroundAsiRules(typeof row?.originFeatId === "string" ? lookup(row.originFeatId)?.choices : [])];
-
-    for (const character of characters) {
-      if (!character.backgroundId) continue;
-
-      const old = index.localById.get(character.backgroundId)?.row;
-
-      const next = effective.get(character.backgroundId)?.row;
-
-      if (!next) throw new ContentError(API_ERRORS.BACKGROUND_IN_USE, 409);
-
-      if (JSON.stringify(signature(old, (id) => index.localById.get(id)?.row)) !== JSON.stringify(signature(next, (id) => effective.get(id)?.row))) throw new ContentError(API_ERRORS.BACKGROUND_ASI_IN_USE, 409);
-
-      for (const id of collectKeysAndStrings(character.backgroundChoices)) {
-        const previous = index.localById.get(id);
-
-        if (previous?.table !== "feats") continue;
-
-        const updated = effective.get(id)?.row;
-
-        if (!updated) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
-
-        if (JSON.stringify(backgroundAsiRules(previous.row.choices)) !== JSON.stringify(backgroundAsiRules(updated.choices))) throw new ContentError(API_ERRORS.BACKGROUND_ASI_IN_USE, 409);
-      }
-    }
-  }
-}
-
-async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>): Promise<string[]> {
-  const warnings: string[] = [];
-
-  const index = indexOf(ctx);
-
-  const map = new Map(index.sourceToLocal);
-
-  for (const i of selected.values()) if (i.status === "new" || i.status === "deletedLocally") map.set(i.key, newContentId());
-
-  await assertResultingGraph(db, ctx, index, selected, map);
-
-  const written: unknown[] = [];
-
-  for (const t of BUNDLE_TABLES) {
-    const toCreate: Record<string, unknown>[] = [];
-
-    const taken = new Map(ctx.target.rows.filter((r) => r.table === t.key && r.row.slug).map((r) => [String(r.row.slug), r.row.id]));
-
-    const slugs = new Map(
-      dropTakenSlugs(
-        ctx.sourceBundle[t.key].filter((src) => selected.has(`${t.key}:${src.id}`)).map((src) => ({ id: selected.get(`${t.key}:${src.id}`)!.localId ?? map.get(src.id)!, slug: src.slug as string | null | undefined })),
-        taken,
-      ).map((r) => [r.id, r.slug ?? null]),
+async function assertResultingGraph(
+    db: SyncDb,
+    ctx: SyncContext,
+    index: ReturnType<typeof indexOf>,
+    selected: Map<string, SyncItem>,
+    map: Map<string, string>
+) {
+    // Validate the resulting graph before any writes, including refs to unchanged local rows.
+    const effective = new Map(
+        ctx.target.rows.map((r) => [
+            r.row.id,
+            { table: r.table, row: r.row as Record<string, unknown> },
+        ])
     );
 
-    for (const src of ctx.sourceBundle[t.key]) {
-      const item = selected.get(`${t.key}:${src.id}`);
+    for (const item of selected.values()) {
+        if (item.status === 'deletedInSource' && item.localId)
+            effective.delete(item.localId);
+        else {
+            const src = index.sourceIndex.get(item.key);
 
-      if (!item) continue;
+            const table = src && BUNDLE_TABLES.find((t) => t.key === src.table);
 
-      const data = cleanRow(t, src, item, map, warnings);
-
-      if ("slug" in data) data.slug = slugs.get(item.localId ?? map.get(src.id)!) ?? null;
-
-      written.push(data);
-
-      if (item.localId) {
-
-        const { count } = await delegateOf(db, t).updateMany({
-          where: { id: item.localId, campaignId: ctx.campaignId },
-          data: toPrismaJson({ ...data, sourceHash: item.sourceHash }, t),
-        });
-
-        if (count !== 1) throw sourceChanged();
-
-        if (t.key === "skillTrees") await moveTreeProgress(db, ctx, item.localId, data);
-      } else {
-        toCreate.push(toPrismaJson({ ...data, id: map.get(src.id), campaignId: ctx.campaignId, sourceId: src.id, sourceHash: item.sourceHash }, t));
-      }
+            if (src && table)
+                effective.set(item.localId ?? map.get(item.key)!, {
+                    table: src.table,
+                    row: {
+                        ...cleanRow(table, src.row, item, map, []),
+                        id: item.localId ?? map.get(item.key)!,
+                    },
+                });
+        }
     }
 
-    if (toCreate.length > 0) await delegateOf(db, t).createMany({ data: toCreate });
-  }
+    const resulting = [...effective.values()];
 
-  await assertWritable(db, ctx, written, index.sourceIds, new Set(map.values()));
+    // Templates without classes have no providers for spell-list names.
+    if (ctx.templateOverlay && ctx.sourceBundle.classes.length > 0) {
+        const selectedLocalIds = new Set(
+            [...selected.values()]
+                .map((item) => item.localId ?? map.get(item.key))
+                .filter((id): id is string => !!id)
+        );
 
-  const blocked = await deleteRemoved(db, ctx, selected, warnings);
+        assertSrdNameReferences(ctx.target.rows, resulting, selectedLocalIds, {
+            rows: [...index.sourceIndex.values()],
+            sourceToLocal: map,
+        });
+    }
 
-  warnings.push(...(await danglingProfileWarnings(db, ctx.campaignId)));
+    const feats = resulting
+        .filter((r) => r.table === 'feats')
+        .map(({ row }) => ({ id: row.id, type: row.type }));
 
-  if (db.compendiumEntry && db.compendiumSource) {
-    await syncCompendiumProvenance(db as CompendiumBundleDb, ctx.sourceBundle.compendium, ctx.campaignId, map, new Set([...selected.values()].filter((i) => i.status !== "deletedInSource").map((i) => i.key)));
-    for (const item of selected.values()) if (item.status === "deletedInSource" && item.localId && !blocked.has(item.localId)) await db.compendiumEntry.deleteMany({ where: { campaignId: ctx.campaignId, localId: item.localId } });
-  }
+    const spells = new Set(
+        resulting.filter((r) => r.table === 'spells').map((r) => r.row.id)
+    );
 
-  if (ctx.sourceBundle.compendium?.pages.length) warnings.push((await getTranslator(await localeOrRequest(), "campaigns"))("sync.compendiumNotSynced"));
+    for (const { row } of resulting.filter((r) => r.table === 'backgrounds')) {
+        const error = backgroundReferenceError(
+            { originFeatId: row.originFeatId, choices: row.choices },
+            feats,
+            spells
+        );
 
-  return warnings;
+        if (error) {
+            const existed = ctx.target.rows.some(
+                (r) =>
+                    r.table === 'backgrounds' &&
+                    r.row.id === row.id &&
+                    r.row.originFeatId === row.originFeatId
+            );
+
+            throw new ContentError(error, existed ? 409 : 422);
+        }
+    }
+
+    if (
+        [...selected.values()].some(
+            (i) => i.scope === 'backgrounds' || i.scope === 'feats'
+        )
+    ) {
+        const characters = await db.character.findMany({
+            where: { campaignId: ctx.campaignId },
+            select: { backgroundId: true, backgroundChoices: true },
+        });
+
+        const signature = (
+            row: Record<string, unknown> | undefined,
+            lookup: (id: string) => Record<string, unknown> | undefined
+        ) => [
+            backgroundAsiRules(row?.choices),
+            backgroundAsiRules(
+                typeof row?.originFeatId === 'string'
+                    ? lookup(row.originFeatId)?.choices
+                    : []
+            ),
+        ];
+
+        for (const character of characters) {
+            if (!character.backgroundId) continue;
+
+            const old = index.localById.get(character.backgroundId)?.row;
+
+            const next = effective.get(character.backgroundId)?.row;
+
+            if (!next)
+                throw new ContentError(API_ERRORS.BACKGROUND_IN_USE, 409);
+
+            if (
+                JSON.stringify(
+                    signature(old, (id) => index.localById.get(id)?.row)
+                ) !==
+                JSON.stringify(signature(next, (id) => effective.get(id)?.row))
+            )
+                throw new ContentError(API_ERRORS.BACKGROUND_ASI_IN_USE, 409);
+
+            for (const id of collectKeysAndStrings(
+                character.backgroundChoices
+            )) {
+                const previous = index.localById.get(id);
+
+                if (previous?.table !== 'feats') continue;
+
+                const updated = effective.get(id)?.row;
+
+                if (!updated)
+                    throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+
+                if (
+                    JSON.stringify(backgroundAsiRules(previous.row.choices)) !==
+                    JSON.stringify(backgroundAsiRules(updated.choices))
+                )
+                    throw new ContentError(
+                        API_ERRORS.BACKGROUND_ASI_IN_USE,
+                        409
+                    );
+            }
+        }
+    }
 }
 
-async function assertWritable(db: SyncDb, ctx: SyncContext, written: unknown[], sourceIds: Set<string>, newIds: Set<string>) {
-  try {
-    assertNoLeak(written, sourceIds);
-  } catch (error) {
-    if (error instanceof TemplateLeakError) throw new ContentError(API_ERRORS.SOURCE_LEAK, 422);
+async function writeTables(
+    db: SyncDb,
+    ctx: SyncContext,
+    selected: Map<string, SyncItem>
+): Promise<string[]> {
+    const warnings: string[] = [];
 
-    throw error;
-  }
+    const index = indexOf(ctx);
 
-  const own = new Set([...indexOf(ctx).localById.keys(), ...newIds]);
+    const map = new Map(index.sourceToLocal);
 
-  const foreign = await findForeignContentIds(db, collectKeysAndStrings(written), own);
+    for (const i of selected.values())
+        if (i.status === 'new' || i.status === 'deletedLocally')
+            map.set(i.key, newContentId());
 
-  if (foreign.length > 0) throw new ContentError(API_ERRORS.SOURCE_FOREIGN_IDS, 422);
+    await assertResultingGraph(db, ctx, index, selected, map);
+
+    const written: unknown[] = [];
+
+    for (const t of BUNDLE_TABLES) {
+        const toCreate: Record<string, unknown>[] = [];
+
+        const taken = new Map(
+            ctx.target.rows
+                .filter((r) => r.table === t.key && r.row.slug)
+                .map((r) => [String(r.row.slug), r.row.id])
+        );
+
+        const slugs = new Map(
+            dropTakenSlugs(
+                ctx.sourceBundle[t.key]
+                    .filter((src) => selected.has(`${t.key}:${src.id}`))
+                    .map((src) => ({
+                        id:
+                            selected.get(`${t.key}:${src.id}`)!.localId ??
+                            map.get(src.id)!,
+                        slug: src.slug as string | null | undefined,
+                    })),
+                taken
+            ).map((r) => [r.id, r.slug ?? null])
+        );
+
+        for (const src of ctx.sourceBundle[t.key]) {
+            const item = selected.get(`${t.key}:${src.id}`);
+
+            if (!item) continue;
+
+            const data = cleanRow(t, src, item, map, warnings);
+
+            if ('slug' in data)
+                data.slug = slugs.get(item.localId ?? map.get(src.id)!) ?? null;
+
+            written.push(data);
+
+            if (item.localId) {
+                const { count } = await delegateOf(db, t).updateMany({
+                    where: { id: item.localId, campaignId: ctx.campaignId },
+                    data: toPrismaJson(
+                        { ...data, sourceHash: item.sourceHash },
+                        t
+                    ),
+                });
+
+                if (count !== 1) throw sourceChanged();
+
+                if (t.key === 'skillTrees')
+                    await moveTreeProgress(db, ctx, item.localId, data);
+            } else {
+                toCreate.push(
+                    toPrismaJson(
+                        {
+                            ...data,
+                            id: map.get(src.id),
+                            campaignId: ctx.campaignId,
+                            sourceId: src.id,
+                            sourceHash: item.sourceHash,
+                        },
+                        t
+                    )
+                );
+            }
+        }
+
+        if (toCreate.length > 0)
+            await delegateOf(db, t).createMany({ data: toCreate });
+    }
+
+    await assertWritable(
+        db,
+        ctx,
+        written,
+        index.sourceIds,
+        new Set(map.values())
+    );
+
+    const blocked = await deleteRemoved(db, ctx, selected, warnings);
+
+    warnings.push(...(await danglingProfileWarnings(db, ctx.campaignId)));
+
+    if (db.compendiumEntry && db.compendiumSource) {
+        await syncCompendiumProvenance(
+            db as CompendiumBundleDb,
+            ctx.sourceBundle.compendium,
+            ctx.campaignId,
+            map,
+            new Set(
+                [...selected.values()]
+                    .filter((i) => i.status !== 'deletedInSource')
+                    .map((i) => i.key)
+            )
+        );
+        for (const item of selected.values())
+            if (
+                item.status === 'deletedInSource' &&
+                item.localId &&
+                !blocked.has(item.localId)
+            )
+                await db.compendiumEntry.deleteMany({
+                    where: {
+                        campaignId: ctx.campaignId,
+                        localId: item.localId,
+                    },
+                });
+    }
+
+    if (ctx.sourceBundle.compendium?.pages.length)
+        warnings.push(
+            (await getTranslator(await localeOrRequest(), 'campaigns'))(
+                'sync.compendiumNotSynced'
+            )
+        );
+
+    return warnings;
 }
 
-async function moveTreeProgress(db: SyncDb, ctx: SyncContext, localId: string, next: Record<string, unknown>) {
-  const old = indexOf(ctx).localById.get(localId)?.row;
+async function assertWritable(
+    db: SyncDb,
+    ctx: SyncContext,
+    written: unknown[],
+    sourceIds: Set<string>,
+    newIds: Set<string>
+) {
+    try {
+        assertNoLeak(written, sourceIds);
+    } catch (error) {
+        if (error instanceof TemplateLeakError)
+            throw new ContentError(API_ERRORS.SOURCE_LEAK, 422);
 
-  const from = old && readTreeJson(old.skills).id;
+        throw error;
+    }
 
-  const to = readTreeJson(next.skills).id;
+    const own = new Set([...indexOf(ctx).localById.keys(), ...newIds]);
 
-  if (!old || !from || !to || from === to) return;
+    const foreign = await findForeignContentIds(
+        db,
+        collectKeysAndStrings(written),
+        own
+    );
 
-  await moveSkillTreeProgress(db, ctx.campaignId, String(old.race), from, to);
+    if (foreign.length > 0)
+        throw new ContentError(API_ERRORS.SOURCE_FOREIGN_IDS, 422);
 }
 
-async function writeCampaign(db: SyncDb, ctx: SyncContext, selected: SyncItem[]) {
-  const rules = selected.filter((i) => i.scope === "rules");
+async function moveTreeProgress(
+    db: SyncDb,
+    ctx: SyncContext,
+    localId: string,
+    next: Record<string, unknown>
+) {
+    const old = indexOf(ctx).localById.get(localId)?.row;
 
-  const settings = selected.some((i) => i.scope === "settings");
+    const from = old && readTreeJson(old.skills).id;
 
-  const credits = ctx.sourceBundle.credits ?? null;
+    const to = readTreeJson(next.skills).id;
 
-  const creditsChanged = credits !== (ctx.target.credits ?? null);
+    if (!old || !from || !to || from === to) return;
 
-  if (rules.length === 0 && !settings && !creditsChanged) return;
-
-  const src = parseRules(ctx.sourceBundle.rules) as Record<string, unknown>;
-
-  const next = { ...(parseRules(ctx.target.rules) as Record<string, unknown>) };
-
-  for (const r of rules) next[r.key] = src[r.key];
-
-  await db.campaign.update({
-    where: { id: ctx.campaignId },
-    data: {
-      ...(rules.length > 0 && { rules: next as Prisma.InputJsonObject }),
-      ...(settings && settingsOf(ctx.sourceBundle.settings)),
-      ...(creditsChanged && { credits }),
-    },
-  });
+    await moveSkillTreeProgress(db, ctx.campaignId, String(old.race), from, to);
 }
 
-async function saveState(db: SyncDb, ctx: SyncContext, selected: SyncItem[], ignored: SyncItem[]) {
-  const baseline = cloneState(ctx.baseline);
+async function writeCampaign(
+    db: SyncDb,
+    ctx: SyncContext,
+    selected: SyncItem[]
+) {
+    const rules = selected.filter((i) => i.scope === 'rules');
 
-  const ign = cloneState(ctx.ignored);
+    const settings = selected.some((i) => i.scope === 'settings');
 
-  for (const i of selected) {
-    setEntry(baseline, i.scope, i.key, i.status === "deletedInSource" ? undefined : i.sourceHash!);
-    setEntry(ign, i.scope, i.key, undefined);
-  }
+    const credits = ctx.sourceBundle.credits ?? null;
 
-  for (const i of ignored) setEntry(ign, i.scope, i.key, i.sourceHash ?? IGNORED_DELETED);
+    const creditsChanged = credits !== (ctx.target.credits ?? null);
 
-  // deleted on both sides: no S, no local row
-  const { sourceIds, sourceToLocal } = indexOf(ctx);
+    if (rules.length === 0 && !settings && !creditsChanged) return;
 
-  for (const t of BUNDLE_TABLES) for (const k of Object.keys(baseline.tables[t.key] ?? {})) if (!sourceIds.has(k) && !sourceToLocal.has(k)) delete baseline.tables[t.key]![k];
+    const src = parseRules(ctx.sourceBundle.rules) as Record<string, unknown>;
 
-  const data = {
-    sourceCampaignId: ctx.source.id,
-    sourceVersion: ctx.source.contentVersion,
-    baseline: baseline as Prisma.InputJsonObject,
-    ignored: ign as Prisma.InputJsonObject,
-    syncedAt: new Date(),
-  };
+    const next = {
+        ...(parseRules(ctx.target.rules) as Record<string, unknown>),
+    };
 
-  await db.campaignSourceSync.upsert({ where: { campaignId: ctx.campaignId }, create: { campaignId: ctx.campaignId, ...data }, update: data });
+    for (const r of rules) next[r.key] = src[r.key];
+
+    await db.campaign.update({
+        where: { id: ctx.campaignId },
+        data: {
+            ...(rules.length > 0 && { rules: next as Prisma.InputJsonObject }),
+            ...(settings && settingsOf(ctx.sourceBundle.settings)),
+            ...(creditsChanged && { credits }),
+        },
+    });
+}
+
+async function saveState(
+    db: SyncDb,
+    ctx: SyncContext,
+    selected: SyncItem[],
+    ignored: SyncItem[]
+) {
+    const baseline = cloneState(ctx.baseline);
+
+    const ign = cloneState(ctx.ignored);
+
+    for (const i of selected) {
+        setEntry(
+            baseline,
+            i.scope,
+            i.key,
+            i.status === 'deletedInSource' ? undefined : i.sourceHash!
+        );
+        setEntry(ign, i.scope, i.key, undefined);
+    }
+
+    for (const i of ignored)
+        setEntry(ign, i.scope, i.key, i.sourceHash ?? IGNORED_DELETED);
+
+    // deleted on both sides: no S, no local row
+    const { sourceIds, sourceToLocal } = indexOf(ctx);
+
+    for (const t of BUNDLE_TABLES)
+        for (const k of Object.keys(baseline.tables[t.key] ?? {}))
+            if (!sourceIds.has(k) && !sourceToLocal.has(k))
+                delete baseline.tables[t.key]![k];
+
+    const data = {
+        sourceCampaignId: ctx.source.id,
+        sourceVersion: ctx.source.contentVersion,
+        baseline: baseline as Prisma.InputJsonObject,
+        ignored: ign as Prisma.InputJsonObject,
+        syncedAt: new Date(),
+    };
+
+    await db.campaignSourceSync.upsert({
+        where: { campaignId: ctx.campaignId },
+        create: { campaignId: ctx.campaignId, ...data },
+        update: data,
+    });
 }

@@ -1,293 +1,570 @@
-import { ABILITIES, array, effectiveEdition, object, str, unsupported } from "./adapters/shared";
-import { renderEntries } from "./entries";
-import { canonicalKey, nestedId } from "./identity";
-import { type Compendium, type JsonRecord, normalized } from "./parse";
-import { type AdapterContext, type Edition, type ImportIssue, issue } from "./types";
+import {
+    ABILITIES,
+    array,
+    effectiveEdition,
+    object,
+    str,
+    unsupported,
+} from './adapters/shared';
+import { renderEntries } from './entries';
+import { canonicalKey, nestedId } from './identity';
+import { type Compendium, type JsonRecord, normalized } from './parse';
+import {
+    type AdapterContext,
+    type Edition,
+    type ImportIssue,
+    issue,
+} from './types';
 
-import { CHOICE_LIMITS } from "@/lib/constants/choices";
-import type { Translator } from "@/lib/i18n/translator";
+import { CHOICE_LIMITS } from '@/lib/constants/choices';
+import type { Translator } from '@/lib/i18n/translator';
 
 export interface FeatureResolutionContext {
-  root: Compendium;
-  editionFallback: unknown;
-  issues: ImportIssue[];
-  embedded: Record<string, number>;
-  usedOptionals: Set<string>;
-  t: Translator;
+    root: Compendium;
+    editionFallback: unknown;
+    issues: ImportIssue[];
+    embedded: Record<string, number>;
+    usedOptionals: Set<string>;
+    t: Translator;
 }
 
-type Kind = "classFeature" | "subclassFeature";
+type Kind = 'classFeature' | 'subclassFeature';
 
 interface FeatureScope {
-  context: FeatureResolutionContext;
-  ownerPath: string;
-  featureContext: AdapterContext;
+    context: FeatureResolutionContext;
+    ownerPath: string;
+    featureContext: AdapterContext;
 }
 
 // 5etools: an empty class/subclass source in a UID means the edition's default source.
-const defaultSource = (edition: Edition) => edition === "one" ? "xphb" : "phb";
+const defaultSource = (edition: Edition) =>
+    edition === 'one' ? 'xphb' : 'phb';
 
-function findFeatureRows(root: Compendium, kind: Kind, parts: string[], edition: Edition): JsonRecord[] {
-  const fallback = defaultSource(edition);
+function findFeatureRows(
+    root: Compendium,
+    kind: Kind,
+    parts: string[],
+    edition: Edition
+): JsonRecord[] {
+    const fallback = defaultSource(edition);
 
-  const sourceOf = (part: string | undefined) => part ? normalized(part) : fallback;
+    const sourceOf = (part: string | undefined) =>
+        part ? normalized(part) : fallback;
 
-  const levelAt = kind === "classFeature" ? 3 : 5;
+    const levelAt = kind === 'classFeature' ? 3 : 5;
 
-  const sourceAt = kind === "classFeature" ? 4 : 6;
+    const sourceAt = kind === 'classFeature' ? 4 : 6;
 
-  return array(root[kind]).map(object).filter((r) =>
-    normalized(str(r.name)) === normalized(parts[0] ?? "") &&
-    normalized(str(r.className)) === normalized(parts[1] ?? "") &&
-    normalized(str(r.classSource)) === sourceOf(parts[2]) &&
-    (kind !== "subclassFeature" || (normalized(str(r.subclassShortName)) === normalized(parts[3] ?? "") && normalized(str(r.subclassSource)) === sourceOf(parts[4]))) &&
-    Number(r.level) === Number(parts[levelAt]) &&
-    (!parts[sourceAt] || normalized(str(r.source)) === normalized(parts[sourceAt])));
+    return array(root[kind])
+        .map(object)
+        .filter(
+            (r) =>
+                normalized(str(r.name)) === normalized(parts[0] ?? '') &&
+                normalized(str(r.className)) === normalized(parts[1] ?? '') &&
+                normalized(str(r.classSource)) === sourceOf(parts[2]) &&
+                (kind !== 'subclassFeature' ||
+                    (normalized(str(r.subclassShortName)) ===
+                        normalized(parts[3] ?? '') &&
+                        normalized(str(r.subclassSource)) ===
+                            sourceOf(parts[4]))) &&
+                Number(r.level) === Number(parts[levelAt]) &&
+                (!parts[sourceAt] ||
+                    normalized(str(r.source)) === normalized(parts[sourceAt]))
+        );
 }
 
 function prerequisiteText(raw: unknown, t: Translator): string {
-  return (Array.isArray(raw) ? raw : [raw]).map(object).map((alt) => {
-    const parts: string[] = [];
+    return (Array.isArray(raw) ? raw : [raw])
+        .map(object)
+        .map((alt) => {
+            const parts: string[] = [];
 
-    const level = alt.level;
+            const level = alt.level;
 
-    if (typeof level === "number") parts.push(t("derived.level", { level }));
-    else if (level && typeof level === "object") {
-      const l = object(level);
+            if (typeof level === 'number')
+                parts.push(t('derived.level', { level }));
+            else if (level && typeof level === 'object') {
+                const l = object(level);
 
-      const who = [str(object(l.class).name), str(object(l.subclass).name)].filter(Boolean).join(", ");
+                const who = [
+                    str(object(l.class).name),
+                    str(object(l.subclass).name),
+                ]
+                    .filter(Boolean)
+                    .join(', ');
 
-      parts.push([typeof l.level === "number" ? t("derived.level", { level: l.level }) : "", who].filter(Boolean).join(" "));
-    }
+                parts.push(
+                    [
+                        typeof l.level === 'number'
+                            ? t('derived.level', { level: l.level })
+                            : '',
+                        who,
+                    ]
+                        .filter(Boolean)
+                        .join(' ')
+                );
+            }
 
-    for (const row of array(alt.ability).map(object)) {
-      parts.push(Object.entries(row).map(([k, v]) => `${ABILITIES[k] ? t(`derived.ability.${ABILITIES[k]}`) : k} ${String(v)}+`).join(t("derived.or")));
-    }
+            for (const row of array(alt.ability).map(object)) {
+                parts.push(
+                    Object.entries(row)
+                        .map(
+                            ([k, v]) =>
+                                `${ABILITIES[k] ? t(`derived.ability.${ABILITIES[k]}`) : k} ${String(v)}+`
+                        )
+                        .join(t('derived.or'))
+                );
+            }
 
-    for (const o of array(alt.other)) if (typeof o === "string" && o) parts.push(o);
+            for (const o of array(alt.other))
+                if (typeof o === 'string' && o) parts.push(o);
 
-    const rest = Object.keys(alt).filter((k) => !["level", "ability", "other"].includes(k));
+            const rest = Object.keys(alt).filter(
+                (k) => !['level', 'ability', 'other'].includes(k)
+            );
 
-    if (rest.length > 0) parts.push(rest.join(", "));
+            if (rest.length > 0) parts.push(rest.join(', '));
 
-    return parts.filter(Boolean).join(", ");
-  }).filter(Boolean).join("; ");
+            return parts.filter(Boolean).join(', ');
+        })
+        .filter(Boolean)
+        .join('; ');
 }
 
-function optionFromRow(context: FeatureResolutionContext, featureContext: AdapterContext, row: JsonRecord): JsonRecord {
-  const name = str(row.name);
+function optionFromRow(
+    context: FeatureResolutionContext,
+    featureContext: AdapterContext,
+    row: JsonRecord
+): JsonRecord {
+    const name = str(row.name);
 
-  const source = str(row.source);
+    const source = str(row.source);
 
-  context.usedOptionals.add(canonicalKey("optionalfeature", name, source, effectiveEdition(row.edition, context.editionFallback)));
+    context.usedOptionals.add(
+        canonicalKey(
+            'optionalfeature',
+            name,
+            source,
+            effectiveEdition(row.edition, context.editionFallback)
+        )
+    );
 
-  return {
-    id: nestedId(`${name}|${source}`),
-    name,
-    description: [
-      renderEntries(row.entries).text,
-      unsupported(row, ["prerequisite", "featureType"], featureContext),
-      prerequisiteText(row.prerequisite, featureContext.t) ? featureContext.t("derived.prerequisite", { text: prerequisiteText(row.prerequisite, featureContext.t) }) : "",
-    ].filter(Boolean).join("\n"),
-    abilities: [],
-  };
+    return {
+        id: nestedId(`${name}|${source}`),
+        name,
+        description: [
+            renderEntries(row.entries).text,
+            unsupported(row, ['prerequisite', 'featureType'], featureContext),
+            prerequisiteText(row.prerequisite, featureContext.t)
+                ? featureContext.t('derived.prerequisite', {
+                      text: prerequisiteText(
+                          row.prerequisite,
+                          featureContext.t
+                      ),
+                  })
+                : '',
+        ]
+            .filter(Boolean)
+            .join('\n'),
+        abilities: [],
+    };
 }
 
-function resolveOptional({ context, ownerPath, featureContext }: FeatureScope, v: JsonRecord): JsonRecord | undefined {
-  const { root, issues } = context;
+function resolveOptional(
+    { context, ownerPath, featureContext }: FeatureScope,
+    v: JsonRecord
+): JsonRecord | undefined {
+    const { root, issues } = context;
 
-  const uid = str(v.optionalfeature);
+    const uid = str(v.optionalfeature);
 
-  const [name, source] = uid.split("|");
+    const [name, source] = uid.split('|');
 
-  const candidates = array(root.optionalfeature).map(object).filter((r) => normalized(str(r.name)) === normalized(name) && normalized(str(r.source)) === normalized(source ?? ""));
+    const candidates = array(root.optionalfeature)
+        .map(object)
+        .filter(
+            (r) =>
+                normalized(str(r.name)) === normalized(name) &&
+                normalized(str(r.source)) === normalized(source ?? '')
+        );
 
-  if (candidates.length !== 1) {
-    issues.push(issue("OPTIONAL_FEATURE_REF", ownerPath, "error"));
+    if (candidates.length !== 1) {
+        issues.push(issue('OPTIONAL_FEATURE_REF', ownerPath, 'error'));
 
-    return;
-  }
+        return;
+    }
 
-  return { ...optionFromRow(context, featureContext, candidates[0]), id: nestedId(uid) };
+    return {
+        ...optionFromRow(context, featureContext, candidates[0]),
+        id: nestedId(uid),
+    };
 }
 
-function collectChoices(scope: FeatureScope, entries: unknown, parts: string[]): JsonRecord[] {
-  const { ownerPath, context } = scope;
+function collectChoices(
+    scope: FeatureScope,
+    entries: unknown,
+    parts: string[]
+): JsonRecord[] {
+    const { ownerPath, context } = scope;
 
-  const choices: JsonRecord[] = [];
+    const choices: JsonRecord[] = [];
 
-  const visit = (v: unknown) => {
-    if (Array.isArray(v)) {
-      v.forEach(visit);
+    const visit = (v: unknown) => {
+        if (Array.isArray(v)) {
+            v.forEach(visit);
 
-      return;
-    }
+            return;
+        }
 
-    const o = object(v);
+        const o = object(v);
 
-    if (o.type === "options") {
-      const children = array(o.entries).map(object);
+        if (o.type === 'options') {
+            const children = array(o.entries).map(object);
 
-      if (children.length && children.every((child) => child.type === "refOptionalfeature") && Number.isInteger(o.count) && Number(o.count) > 0 && Number(o.count) <= children.length) {
-        const options = children.flatMap((child) => resolveOptional(scope, child) ?? []);
+            if (
+                children.length &&
+                children.every(
+                    (child) => child.type === 'refOptionalfeature'
+                ) &&
+                Number.isInteger(o.count) &&
+                Number(o.count) > 0 &&
+                Number(o.count) <= children.length
+            ) {
+                const options = children.flatMap(
+                    (child) => resolveOptional(scope, child) ?? []
+                );
 
-        if (options.length === children.length) choices.push({ id: nestedId(`${ownerPath}:${JSON.stringify(parts)}:${choices.length}`), label: context.t("derived.choice.optionalFeatures"), kind: "option", count: o.count, options });
-      } else context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", ownerPath, "warning", { variant: "ambiguous" }));
+                if (options.length === children.length)
+                    choices.push({
+                        id: nestedId(
+                            `${ownerPath}:${JSON.stringify(parts)}:${choices.length}`
+                        ),
+                        label: context.t('derived.choice.optionalFeatures'),
+                        kind: 'option',
+                        count: o.count,
+                        options,
+                    });
+            } else
+                context.issues.push(
+                    issue('MANUAL_OPTIONAL_PROGRESSION', ownerPath, 'warning', {
+                        variant: 'ambiguous',
+                    })
+                );
 
-      return;
-    }
+            return;
+        }
 
-    if (o.type === "refOptionalfeature") {
-      const option = resolveOptional(scope, o);
+        if (o.type === 'refOptionalfeature') {
+            const option = resolveOptional(scope, o);
 
-      if (option) choices.push({ id: nestedId(`${ownerPath}:${JSON.stringify(parts)}:${choices.length}:${str(o.optionalfeature)}`), label: option.name, kind: "option", count: 1, options: [option] });
+            if (option)
+                choices.push({
+                    id: nestedId(
+                        `${ownerPath}:${JSON.stringify(parts)}:${choices.length}:${str(o.optionalfeature)}`
+                    ),
+                    label: option.name,
+                    kind: 'option',
+                    count: 1,
+                    options: [option],
+                });
 
-      return;
-    }
+            return;
+        }
 
-    Object.values(o).forEach(visit);
-  };
+        Object.values(o).forEach(visit);
+    };
 
-  visit(entries);
+    visit(entries);
 
-  return choices;
+    return choices;
 }
 
-const REF_KEYS = { refSubclassFeature: "subclassFeature", refClassFeature: "classFeature" } as const;
+const REF_KEYS = {
+    refSubclassFeature: 'subclassFeature',
+    refClassFeature: 'classFeature',
+} as const;
 
 // A child feature that the parent only references by UID is rendered inline as a named block.
-function inlineFeatureRefs(context: FeatureResolutionContext, value: unknown, edition: Edition, depth = 0): unknown {
-  const { root, embedded } = context;
+function inlineFeatureRefs(
+    context: FeatureResolutionContext,
+    value: unknown,
+    edition: Edition,
+    depth = 0
+): unknown {
+    const { root, embedded } = context;
 
-  if (Array.isArray(value)) return value.map((v) => inlineFeatureRefs(context, v, edition, depth));
+    if (Array.isArray(value))
+        return value.map((v) => inlineFeatureRefs(context, v, edition, depth));
 
-  if (!value || typeof value !== "object") return value;
+    if (!value || typeof value !== 'object') return value;
 
-  const o = value as JsonRecord;
+    const o = value as JsonRecord;
 
-  const kind = REF_KEYS[str(o.type) as keyof typeof REF_KEYS];
+    const kind = REF_KEYS[str(o.type) as keyof typeof REF_KEYS];
 
-  if (kind && depth < 3) {
-    const [child] = findFeatureRows(root, kind, str(o[kind]).split("|"), edition);
+    if (kind && depth < 3) {
+        const [child] = findFeatureRows(
+            root,
+            kind,
+            str(o[kind]).split('|'),
+            edition
+        );
 
-    if (!child) return value;
+        if (!child) return value;
 
-    embedded[kind] = (embedded[kind] ?? 0) + 1;
+        embedded[kind] = (embedded[kind] ?? 0) + 1;
 
-    return { type: "entries", name: str(child.name), entries: inlineFeatureRefs(context, child.entries, edition, depth + 1) };
-  }
+        return {
+            type: 'entries',
+            name: str(child.name),
+            entries: inlineFeatureRefs(
+                context,
+                child.entries,
+                edition,
+                depth + 1
+            ),
+        };
+    }
 
-  return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, inlineFeatureRefs(context, v, edition, depth)]));
+    return Object.fromEntries(
+        Object.entries(o).map(([k, v]) => [
+            k,
+            inlineFeatureRefs(context, v, edition, depth),
+        ])
+    );
 }
 
-function resolveFeature(context: FeatureResolutionContext, kind: Kind, ownerPath: string, i: number, parts: string[], row: JsonRecord): JsonRecord {
-  const { root, editionFallback, issues, embedded } = context;
+function resolveFeature(
+    context: FeatureResolutionContext,
+    kind: Kind,
+    ownerPath: string,
+    i: number,
+    parts: string[],
+    row: JsonRecord
+): JsonRecord {
+    const { root, editionFallback, issues, embedded } = context;
 
-  embedded[kind] = (embedded[kind] ?? 0) + 1;
-  issues.push(issue("MANUAL_CLASS_FEATURE", ownerPath, "warning"));
+    embedded[kind] = (embedded[kind] ?? 0) + 1;
+    issues.push(issue('MANUAL_CLASS_FEATURE', ownerPath, 'warning'));
 
-  const rendered = renderEntries(inlineFeatureRefs(context, row.entries, effectiveEdition(row.edition, editionFallback)), `${kind}.${i}`);
+    const rendered = renderEntries(
+        inlineFeatureRefs(
+            context,
+            row.entries,
+            effectiveEdition(row.edition, editionFallback)
+        ),
+        `${kind}.${i}`
+    );
 
-  const featureContext: AdapterContext = { root, inputKind: kind, path: ownerPath, source: str(row.source), edition: effectiveEdition(row.edition, editionFallback), key: ownerPath, issues, t: context.t };
+    const featureContext: AdapterContext = {
+        root,
+        inputKind: kind,
+        path: ownerPath,
+        source: str(row.source),
+        edition: effectiveEdition(row.edition, editionFallback),
+        key: ownerPath,
+        issues,
+        t: context.t,
+    };
 
-  const featureNotes = unsupported(row, ["className", "classSource", "subclassShortName", "subclassSource", "level", "header"], featureContext);
+    const featureNotes = unsupported(
+        row,
+        [
+            'className',
+            'classSource',
+            'subclassShortName',
+            'subclassSource',
+            'level',
+            'header',
+        ],
+        featureContext
+    );
 
-  issues.push(...rendered.issues);
+    issues.push(...rendered.issues);
 
-  const choices = collectChoices({ context, ownerPath, featureContext }, row.entries, parts);
+    const choices = collectChoices(
+        { context, ownerPath, featureContext },
+        row.entries,
+        parts
+    );
 
-  return {
-    level: row.level,
-    description: [str(row.name), rendered.text, featureNotes].filter(Boolean).join("\n"),
-    abilities: [],
-    ...(choices.length && { choices }),
-  };
+    return {
+        level: row.level,
+        description: [str(row.name), rendered.text, featureNotes]
+            .filter(Boolean)
+            .join('\n'),
+        abilities: [],
+        ...(choices.length && { choices }),
+    };
 }
 
 // Explicit feature UIDs include parent identities. No guessing by first matching display name.
-export function resolveCompendiumFeatures(raw: unknown, kind: Kind, ownerPath: string, context: FeatureResolutionContext, ownerEdition?: Edition): JsonRecord[] {
-  const edition = effectiveEdition(ownerEdition, context.editionFallback);
+export function resolveCompendiumFeatures(
+    raw: unknown,
+    kind: Kind,
+    ownerPath: string,
+    context: FeatureResolutionContext,
+    ownerEdition?: Edition
+): JsonRecord[] {
+    const edition = effectiveEdition(ownerEdition, context.editionFallback);
 
-  const out: JsonRecord[] = [];
+    const out: JsonRecord[] = [];
 
-  for (const [i, ref] of array(raw).entries()) {
-    const parts = (typeof ref === "string" ? ref : str(object(ref)[kind])).split("|");
+    for (const [i, ref] of array(raw).entries()) {
+        const parts = (
+            typeof ref === 'string' ? ref : str(object(ref)[kind])
+        ).split('|');
 
-    const candidates = findFeatureRows(context.root, kind, parts, edition);
+        const candidates = findFeatureRows(context.root, kind, parts, edition);
 
-    if (candidates.length !== 1) {
-      context.issues.push(issue("FEATURE_REF_UNRESOLVED", `${ownerPath}[${i}]`, "error"));
-      continue;
+        if (candidates.length !== 1) {
+            context.issues.push(
+                issue('FEATURE_REF_UNRESOLVED', `${ownerPath}[${i}]`, 'error')
+            );
+            continue;
+        }
+
+        out.push(
+            resolveFeature(context, kind, ownerPath, i, parts, candidates[0])
+        );
     }
 
-    out.push(resolveFeature(context, kind, ownerPath, i, parts, candidates[0]));
-  }
-
-  return out;
+    return out;
 }
 
 export interface OptionalOwner {
-  kind: "class" | "subclass";
-  names: string[];
+    kind: 'class' | 'subclass';
+    names: string[];
 }
 
-const levelRefs = (prerequisite: unknown) => (Array.isArray(prerequisite) ? prerequisite : [prerequisite]).map((p) => object(object(p).level)).filter((l) => l.class !== undefined || l.subclass !== undefined);
+const levelRefs = (prerequisite: unknown) =>
+    (Array.isArray(prerequisite) ? prerequisite : [prerequisite])
+        .map((p) => object(object(p).level))
+        .filter((l) => l.class !== undefined || l.subclass !== undefined);
 
 // A prerequisite naming another class/subclass means the option belongs to that owner.
 function belongsTo(prerequisite: unknown, owner: OptionalOwner): boolean {
-  const named = (r: unknown) => normalized(str(object(r).name));
+    const named = (r: unknown) => normalized(str(object(r).name));
 
-  return levelRefs(prerequisite).every((l) => {
-    if (owner.kind === "subclass") return l.subclass === undefined || owner.names.some((n) => normalized(n) === named(l.subclass));
+    return levelRefs(prerequisite).every((l) => {
+        if (owner.kind === 'subclass')
+            return (
+                l.subclass === undefined ||
+                owner.names.some((n) => normalized(n) === named(l.subclass))
+            );
 
-    return l.class === undefined || named(l.class) === normalized(owner.names[0] ?? "");
-  });
+        return (
+            l.class === undefined ||
+            named(l.class) === normalized(owner.names[0] ?? '')
+        );
+    });
 }
 
 const progressionLevels = (progression: unknown): Array<[number, number]> =>
-  (Array.isArray(progression) ? progression.map((c, i): [number, number] => [i + 1, Number(c)]) : Object.entries(object(progression)).map(([level, c]): [number, number] => [Number(level), Number(c)]))
-    .filter(([level, count]) => Number.isInteger(level) && level >= 1 && level <= 20 && Number.isInteger(count) && count > 0)
-    .sort((a, b) => a[0] - b[0]);
+    (Array.isArray(progression)
+        ? progression.map((c, i): [number, number] => [i + 1, Number(c)])
+        : Object.entries(object(progression)).map(
+              ([level, c]): [number, number] => [Number(level), Number(c)]
+          )
+    )
+        .filter(
+            ([level, count]) =>
+                Number.isInteger(level) &&
+                level >= 1 &&
+                level <= 20 &&
+                Number.isInteger(count) &&
+                count > 0
+        )
+        .sort((a, b) => a[0] - b[0]);
 
 // 5etools `optionalfeatureProgression`: the owner picks N options of the matching `featureType`s by level; each increase becomes one choice feature.
-export function resolveOptionalProgression(raw: unknown, ownerPath: string, context: FeatureResolutionContext, owner: OptionalOwner, ownerEdition?: Edition): JsonRecord[] {
-  const edition = effectiveEdition(ownerEdition, context.editionFallback);
+export function resolveOptionalProgression(
+    raw: unknown,
+    ownerPath: string,
+    context: FeatureResolutionContext,
+    owner: OptionalOwner,
+    ownerEdition?: Edition
+): JsonRecord[] {
+    const edition = effectiveEdition(ownerEdition, context.editionFallback);
 
-  const featureContext: AdapterContext = { root: context.root, inputKind: "optionalfeature", path: ownerPath, source: "", edition, key: ownerPath, issues: context.issues, t: context.t };
+    const featureContext: AdapterContext = {
+        root: context.root,
+        inputKind: 'optionalfeature',
+        path: ownerPath,
+        source: '',
+        edition,
+        key: ownerPath,
+        issues: context.issues,
+        t: context.t,
+    };
 
-  const out: JsonRecord[] = [];
+    const out: JsonRecord[] = [];
 
-  for (const [p, entry] of array(raw).map(object).entries()) {
-    const at = `${ownerPath}.optionalfeatureProgression[${p}]`;
+    for (const [p, entry] of array(raw).map(object).entries()) {
+        const at = `${ownerPath}.optionalfeatureProgression[${p}]`;
 
-    const types = new Set(array(entry.featureType).map(str));
+        const types = new Set(array(entry.featureType).map(str));
 
-    const label = str(entry.name) || context.t("derived.choice.optionalFeatures");
+        const label =
+            str(entry.name) || context.t('derived.choice.optionalFeatures');
 
-    const rows = array(context.root.optionalfeature).map(object).filter((r) => array(r.featureType).some((t) => types.has(str(t))) && belongsTo(r.prerequisite, owner) && (edition === "unknown" || effectiveEdition(r.edition, context.editionFallback) === edition));
+        const rows = array(context.root.optionalfeature)
+            .map(object)
+            .filter(
+                (r) =>
+                    array(r.featureType).some((t) => types.has(str(t))) &&
+                    belongsTo(r.prerequisite, owner) &&
+                    (edition === 'unknown' ||
+                        effectiveEdition(r.edition, context.editionFallback) ===
+                            edition)
+            );
 
-    const levels = progressionLevels(entry.progression);
+        const levels = progressionLevels(entry.progression);
 
-    if (rows.length === 0 || levels.length === 0 || rows.length > CHOICE_LIMITS.options) {
-      context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", at, "warning"));
+        if (
+            rows.length === 0 ||
+            levels.length === 0 ||
+            rows.length > CHOICE_LIMITS.options
+        ) {
+            context.issues.push(
+                issue('MANUAL_OPTIONAL_PROGRESSION', at, 'warning')
+            );
 
-      continue;
+            continue;
+        }
+
+        context.issues.push(issue('MANUAL_OPTIONAL_FEATURE', at, 'warning'));
+
+        const options = rows.map((r) =>
+            optionFromRow(context, featureContext, r)
+        );
+
+        let previous = 0;
+
+        for (const [level, total] of levels) {
+            const count = Math.min(total - previous, options.length);
+
+            previous = Math.max(previous, total);
+
+            if (count > 0)
+                out.push({
+                    level,
+                    description: label,
+                    abilities: [],
+                    choices: [
+                        {
+                            id: nestedId(
+                                `${ownerPath}:progression:${p}:${level}`
+                            ),
+                            label,
+                            kind: 'option',
+                            count,
+                            options,
+                        },
+                    ],
+                });
+        }
     }
 
-    context.issues.push(issue("MANUAL_OPTIONAL_FEATURE", at, "warning"));
-
-    const options = rows.map((r) => optionFromRow(context, featureContext, r));
-
-    let previous = 0;
-
-    for (const [level, total] of levels) {
-      const count = Math.min(total - previous, options.length);
-
-      previous = Math.max(previous, total);
-
-      if (count > 0) out.push({ level, description: label, abilities: [], choices: [{ id: nestedId(`${ownerPath}:progression:${p}:${level}`), label, kind: "option", count, options }] });
-    }
-  }
-
-  return out;
+    return out;
 }

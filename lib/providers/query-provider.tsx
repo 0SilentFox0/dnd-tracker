@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect, useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { setGlobalApiErrorHandler } from "@/lib/api/client";
-import { handleApiError } from "@/lib/providers/api-error-handler";
+import { setGlobalApiErrorHandler } from '@/lib/api/client';
+import { handleApiError } from '@/lib/providers/api-error-handler';
 
 /** staleTime для довідкових даних (spells, units, races, main-skills) */
 export const REFERENCE_STALE_MS = 5 * 60 * 1000; // 5 хвилин
@@ -16,25 +16,27 @@ export const ENTITY_STALE_MS = 2 * 60 * 1000; // 2 хвилини
 const GC_TIME_MS = 10 * 60 * 1000; // 10 хвилин
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    setGlobalApiErrorHandler(handleApiError);
-  }, []);
+    useEffect(() => {
+        setGlobalApiErrorHandler(handleApiError);
+    }, []);
 
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000, // 1 хвилина (default)
-            gcTime: GC_TIME_MS,
-            refetchOnWindowFocus: false,
-            retry: 1,
-          },
-        },
-      })
-  );
+    const [queryClient] = useState(
+        () =>
+            new QueryClient({
+                defaultOptions: {
+                    queries: {
+                        staleTime: 60 * 1000, // 1 хвилина (default)
+                        gcTime: GC_TIME_MS,
+                        refetchOnWindowFocus: false,
+                        retry: 1,
+                    },
+                },
+            })
+    );
 
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+    return (
+        <QueryClientProvider client={queryClient}>
+            {children}
+        </QueryClientProvider>
+    );
 }

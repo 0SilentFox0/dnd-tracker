@@ -1,27 +1,92 @@
-import type { CompendiumBundle, CompendiumBundleDb } from "./bundle";
-import { remapCompendiumSection } from "./bundle";
-import { CompendiumError } from "./parse";
+import type { CompendiumBundle, CompendiumBundleDb } from './bundle';
+import { remapCompendiumSection } from './bundle';
+import { CompendiumError } from './parse';
 
-import { jsonContentInput } from "@/lib/utils/common/json";
+import { jsonContentInput } from '@/lib/utils/common/json';
 
 /** Selected native rows only; campaign source lineage and compendium identity remain independent. */
-export async function syncCompendiumProvenance(db: Pick<CompendiumBundleDb, "compendiumEntry" | "compendiumSource">, source: CompendiumBundle | undefined, campaignId: string, idMap: ReadonlyMap<string, string>, selectedSourceIds: ReadonlySet<string>): Promise<void> {
-  if (!source) return; // Native changes without source provenance leave the old baseline intact -> reimport conflict.
+export async function syncCompendiumProvenance(
+    db: Pick<CompendiumBundleDb, 'compendiumEntry' | 'compendiumSource'>,
+    source: CompendiumBundle | undefined,
+    campaignId: string,
+    idMap: ReadonlyMap<string, string>,
+    selectedSourceIds: ReadonlySet<string>
+): Promise<void> {
+    if (!source) return; // Native changes without source provenance leave the old baseline intact -> reimport conflict.
 
-  const selected = source.entries.filter((e) => selectedSourceIds.has(e.localId) && e.kind !== "scenarioPages");
+    const selected = source.entries.filter(
+        (e) => selectedSourceIds.has(e.localId) && e.kind !== 'scenarioPages'
+    );
 
-  const section = remapCompendiumSection({ ...source, entries: selected, pages: [] }, idMap);
+    const section = remapCompendiumSection(
+        { ...source, entries: selected, pages: [] },
+        idMap
+    );
 
-  const current = new Map((await db.compendiumEntry.findMany({ where: { campaignId, canonicalKey: { in: section.entries.map((r) => r.canonicalKey) } }, select: { canonicalKey: true, localId: true } })).map((r) => [r.canonicalKey, r.localId]));
+    const current = new Map(
+        (
+            await db.compendiumEntry.findMany({
+                where: {
+                    campaignId,
+                    canonicalKey: {
+                        in: section.entries.map((r) => r.canonicalKey),
+                    },
+                },
+                select: { canonicalKey: true, localId: true },
+            })
+        ).map((r) => [r.canonicalKey, r.localId])
+    );
 
-  for (const row of section.entries) if (current.has(row.canonicalKey) && current.get(row.canonicalKey) !== row.localId) throw new CompendiumError("PROVENANCE_CONFLICT", row.canonicalKey);
+    for (const row of section.entries)
+        if (
+            current.has(row.canonicalKey) &&
+            current.get(row.canonicalKey) !== row.localId
+        )
+            throw new CompendiumError('PROVENANCE_CONFLICT', row.canonicalKey);
 
-  const data = section.entries.map((row) => ({ ...row, locator: jsonContentInput(row.locator), baseline: jsonContentInput(row.baseline), issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.bindings), attribution: jsonContentInput(row.attribution) }));
+    const data = section.entries.map((row) => ({
+        ...row,
+        locator: jsonContentInput(row.locator),
+        baseline: jsonContentInput(row.baseline),
+        issues: jsonContentInput(row.issues),
+        bindings: jsonContentInput(row.bindings),
+        attribution: jsonContentInput(row.attribution),
+    }));
 
-  const fresh = data.filter((row) => !current.has(row.canonicalKey));
+    const fresh = data.filter((row) => !current.has(row.canonicalKey));
 
-  if (fresh.length) await db.compendiumEntry.createMany({ data: fresh.map((row) => ({ campaignId, ...row })) });
+    if (fresh.length)
+        await db.compendiumEntry.createMany({
+            data: fresh.map((row) => ({ campaignId, ...row })),
+        });
 
-  for (const row of data.filter((r) => current.has(r.canonicalKey))) await db.compendiumEntry.update({ where: { campaignId_canonicalKey: { campaignId, canonicalKey: row.canonicalKey } }, data: row });
-  for (const source of section.sources.filter((s) => selected.some((e) => e.sourceJson.toLowerCase() === s.sourceJson.toLowerCase()))) await db.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId, sourceJson: source.sourceJson } }, create: { campaignId, sourceJson: source.sourceJson, metadata: jsonContentInput(source.metadata) }, update: { metadata: jsonContentInput(source.metadata) } });
+    for (const row of data.filter((r) => current.has(r.canonicalKey)))
+        await db.compendiumEntry.update({
+            where: {
+                campaignId_canonicalKey: {
+                    campaignId,
+                    canonicalKey: row.canonicalKey,
+                },
+            },
+            data: row,
+        });
+    for (const source of section.sources.filter((s) =>
+        selected.some(
+            (e) => e.sourceJson.toLowerCase() === s.sourceJson.toLowerCase()
+        )
+    ))
+        await db.compendiumSource.upsert({
+            where: {
+                campaignId_sourceJson: {
+                    campaignId,
+                    sourceJson: source.sourceJson,
+                },
+            },
+            create: {
+                campaignId,
+                sourceJson: source.sourceJson,
+                metadata: jsonContentInput(source.metadata),
+            },
+            update: { metadata: jsonContentInput(source.metadata) },
+        });
 }

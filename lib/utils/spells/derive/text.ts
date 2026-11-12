@@ -1,16 +1,28 @@
+export function parseDiceExpr(
+    s: string | null | undefined
+): { count: number; sides: number } | null {
+    const m = /^(\d+)d(\d+)/.exec((s ?? '').trim());
 
-export function parseDiceExpr(s: string | null | undefined): { count: number; sides: number } | null {
-  const m = /^(\d+)d(\d+)/.exec((s ?? "").trim());
-
-  return m ? { count: Number(m[1]), sides: Number(m[2]) } : null;
+    return m ? { count: Number(m[1]), sides: Number(m[2]) } : null;
 }
 
-const NUMBER_WORDS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+const NUMBER_WORDS: Record<string, number> = {
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+    five: 5,
+    six: 6,
+    seven: 7,
+    eight: 8,
+    nine: 9,
+    ten: 10,
+};
 
 export function numberWord(s: string): number | null {
-  const lower = s.toLowerCase();
+    const lower = s.toLowerCase();
 
-  if (lower in NUMBER_WORDS) return NUMBER_WORDS[lower];
+    if (lower in NUMBER_WORDS) return NUMBER_WORDS[lower];
 
-  return /^\d+$/.test(s) ? Number(s) : null;
+    return /^\d+$/.test(s) ? Number(s) : null;
 }

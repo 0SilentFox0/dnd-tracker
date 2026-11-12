@@ -1,350 +1,626 @@
-import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
-import { textRef } from "@/lib/i18n/text-ref";
-import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
-import type { FlagEffect } from "@/lib/utils/abilities/schema";
-import { isFiveE } from "@/lib/utils/battle/attack/ability";
-import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
-import { isDying } from "@/lib/utils/battle/death-saves";
-import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
-import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
-import { isHostile,modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
-import { isReserved } from "@/lib/utils/battle/participant/reserve";
-import { findEffectMarker } from "@/lib/utils/battle/participant/state";
-import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
-import type { Ruleset } from "@/lib/utils/rules/schema";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
-import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import { DEFAULT_AREA_TARGETS } from '@/lib/constants/abilities';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { SKILL_AREA_RADIUS_FEET } from '@/lib/constants/battle';
+import { textRef } from '@/lib/i18n/text-ref';
+import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import {
+    findParticipant,
+    isActive,
+    isAirborne,
+    isTargetable,
+} from '@/lib/utils/abilities/engine/core/participants';
+import type { FlagEffect } from '@/lib/utils/abilities/schema';
+import { isFiveE } from '@/lib/utils/battle/attack/ability';
+import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
+import { isDying } from '@/lib/utils/battle/death-saves';
+import { footprintDistance, inBounds } from '@/lib/utils/battle/grid/geometry';
+import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
+import {
+    aimInRange,
+    feetToCells,
+    templateAimAllowed,
+    templateArea,
+    templateCentre,
+} from '@/lib/utils/battle/grid/template';
+import {
+    isHostile,
+    modeAimHiddenText,
+    modeSightedTargets,
+    modeTargetHiddenText,
+} from '@/lib/utils/battle/modes/engine';
+import { isReserved } from '@/lib/utils/battle/participant/reserve';
+import { findEffectMarker } from '@/lib/utils/battle/participant/state';
+import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
+import type {
+    BattleMapConfig,
+    BattleParticipant,
+    GridPoint,
+    SpellTemplate,
+} from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 export interface SpellRef {
-  id: string;
-  groupId: string | null;
-  level: number;
+    id: string;
+    groupId: string | null;
+    level: number;
 }
 
 export interface SkillSpellTargeting {
-  mode: "single" | "area" | "all";
-  maxTargets: number;
+    mode: 'single' | 'area' | 'all';
+    maxTargets: number;
 }
 
-type TargetingFlag = Extract<FlagEffect, { flag: "spellTargeting" }>;
+type TargetingFlag = Extract<FlagEffect, { flag: 'spellTargeting' }>;
 
 const fitsSpell = (f: TargetingFlag, spell: SpellRef) =>
-  (f.maxLevel === undefined || spell.level <= f.maxLevel) && (!f.spellIds || f.spellIds.includes(spell.id)) && (!f.school || f.school === spell.groupId);
+    (f.maxLevel === undefined || spell.level <= f.maxLevel) &&
+    (!f.spellIds || f.spellIds.includes(spell.id)) &&
+    (!f.school || f.school === spell.groupId);
 
 /** Найсильніше розширення заклинання разом із назвою вміння/артефакту, що його дало. */
-export function spellWideningOf(ps: BattleParticipant[], casterId: string, spell: SpellRef): SkillSpellTargeting & { source?: LogLine } {
-  const found = collectModifiers(ps, casterId, { flag: "spellTargeting" }).entries.flatMap((e) =>
-    e.flag?.flag === "spellTargeting" && fitsSpell(e.flag, spell) ? [{ flag: e.flag, source: e.source ?? e.label }] : [],
-  );
+export function spellWideningOf(
+    ps: BattleParticipant[],
+    casterId: string,
+    spell: SpellRef
+): SkillSpellTargeting & { source?: LogLine } {
+    const found = collectModifiers(ps, casterId, {
+        flag: 'spellTargeting',
+    }).entries.flatMap((e) =>
+        e.flag?.flag === 'spellTargeting' && fitsSpell(e.flag, spell)
+            ? [{ flag: e.flag, source: e.source ?? e.label }]
+            : []
+    );
 
-  const all = found.find((f) => f.flag.mode === "all");
+    const all = found.find((f) => f.flag.mode === 'all');
 
-  if (all) return { mode: "all", maxTargets: Infinity, source: all.source };
+    if (all) return { mode: 'all', maxTargets: Infinity, source: all.source };
 
-  const areas = found.map((f) => ({ maxTargets: f.flag.maxTargets ?? DEFAULT_AREA_TARGETS, source: f.source }));
+    const areas = found.map((f) => ({
+        maxTargets: f.flag.maxTargets ?? DEFAULT_AREA_TARGETS,
+        source: f.source,
+    }));
 
-  if (areas.length === 0) return { mode: "single", maxTargets: 1 };
+    if (areas.length === 0) return { mode: 'single', maxTargets: 1 };
 
-  const best = areas.reduce((a, b) => (b.maxTargets > a.maxTargets ? b : a));
+    const best = areas.reduce((a, b) => (b.maxTargets > a.maxTargets ? b : a));
 
-  return { mode: "area", ...best };
+    return { mode: 'area', ...best };
 }
 
-export function spellTargetingFor(ps: BattleParticipant[], casterId: string, spell: SpellRef): SkillSpellTargeting {
-  const { mode, maxTargets } = spellWideningOf(ps, casterId, spell);
+export function spellTargetingFor(
+    ps: BattleParticipant[],
+    casterId: string,
+    spell: SpellRef
+): SkillSpellTargeting {
+    const { mode, maxTargets } = spellWideningOf(ps, casterId, spell);
 
-  return { mode, maxTargets };
+    return { mode, maxTargets };
 }
 
 /** Режим «all»: уся сторона заклинання на полі — без вибору, наведення й дальності, з картою чи без. */
-export function skillAllTargets(ps: BattleParticipant[], caster: BattleParticipant, side: "ally" | "enemy", map?: BattleMapConfig | null): string[] {
-  return ps.filter((p) => isTargetable(p) && !isReserved(p) && !isHostile(map, caster, p) === (side === "ally")).map((p) => p.basicInfo.id);
+export function skillAllTargets(
+    ps: BattleParticipant[],
+    caster: BattleParticipant,
+    side: 'ally' | 'enemy',
+    map?: BattleMapConfig | null
+): string[] {
+    return ps
+        .filter(
+            (p) =>
+                isTargetable(p) &&
+                !isReserved(p) &&
+                !isHostile(map, caster, p) === (side === 'ally')
+        )
+        .map((p) => p.basicInfo.id);
 }
 
 export interface SkillRadius {
-  side: "ally" | "enemy";
-  maxTargets: number;
+    side: 'ally' | 'enemy';
+    maxTargets: number;
 }
 
 export interface AimScene {
-  map: BattleMapConfig;
-  participants: BattleParticipant[];
-  caster: BattleParticipant;
-  rules: Ruleset;
+    map: BattleMapConfig;
+    participants: BattleParticipant[];
+    caster: BattleParticipant;
+    rules: Ruleset;
 }
 
-export const SKILL_AREA_TEMPLATE: SpellTemplate = { shape: "circle", size: SKILL_AREA_RADIUS_FEET };
+export const SKILL_AREA_TEMPLATE: SpellTemplate = {
+    shape: 'circle',
+    size: SKILL_AREA_RADIUS_FEET,
+};
 
 /** Розширене вмінням одиночне заклинання не б'є своїх: лише сторона заклинання, найближчі до точки, до maxTargets. */
-export function skillRadiusArea({ map, participants, caster, rules }: AimScene, radius: SkillRadius, aim: GridPoint): { cells: string[]; targets: BattleParticipant[] } {
-  const { cells, targets } = templateArea(map, participants, caster, SKILL_AREA_TEMPLATE, aim, rules);
+export function skillRadiusArea(
+    { map, participants, caster, rules }: AimScene,
+    radius: SkillRadius,
+    aim: GridPoint
+): { cells: string[]; targets: BattleParticipant[] } {
+    const { cells, targets } = templateArea(
+        map,
+        participants,
+        caster,
+        SKILL_AREA_TEMPLATE,
+        aim,
+        rules
+    );
 
-  const sided = targets.filter((p) => !isHostile(map, caster, p) === (radius.side === "ally"));
+    const sided = targets.filter(
+        (p) => !isHostile(map, caster, p) === (radius.side === 'ally')
+    );
 
-  return { cells, targets: sided.slice(0, radius.maxTargets) };
+    return { cells, targets: sided.slice(0, radius.maxTargets) };
 }
 
 export interface SpellChain {
-  side: "ally" | "enemy";
-  maxTargets: number;
+    side: 'ally' | 'enemy';
+    maxTargets: number;
 }
 
 /** Ланцюг на карті: кожна наступна ціль — найближча до попередньої жива на карті зі сторони заклинання; рівні — за ініціативою. */
-export function spellChain({ participants, caster }: Omit<AimScene, "map" | "rules">, chain: SpellChain, first: BattleParticipant, map?: BattleMapConfig | null): BattleParticipant[] {
-  const pool = participants.filter((p) => p !== first && isActive(p) && isOnMap(p) && !isHostile(map, caster, p) === (chain.side === "ally"));
+export function spellChain(
+    { participants, caster }: Omit<AimScene, 'map' | 'rules'>,
+    chain: SpellChain,
+    first: BattleParticipant,
+    map?: BattleMapConfig | null
+): BattleParticipant[] {
+    const pool = participants.filter(
+        (p) =>
+            p !== first &&
+            isActive(p) &&
+            isOnMap(p) &&
+            !isHostile(map, caster, p) === (chain.side === 'ally')
+    );
 
-  const out = [first];
+    const out = [first];
 
-  while (out.length < chain.maxTargets && pool.length > 0 && isOnMap(out[out.length - 1])) {
-    const from = cellsOf(out[out.length - 1]);
+    while (
+        out.length < chain.maxTargets &&
+        pool.length > 0 &&
+        isOnMap(out[out.length - 1])
+    ) {
+        const from = cellsOf(out[out.length - 1]);
 
-    const next = pool.reduce((best, p) => (footprintDistance(from, cellsOf(p)) < footprintDistance(from, cellsOf(best)) ? p : best));
+        const next = pool.reduce((best, p) =>
+            footprintDistance(from, cellsOf(p)) <
+            footprintDistance(from, cellsOf(best))
+                ? p
+                : best
+        );
 
-    out.push(next);
-    pool.splice(pool.indexOf(next), 1);
-  }
+        out.push(next);
+        pool.splice(pool.indexOf(next), 1);
+    }
 
-  return out;
+    return out;
 }
 
-export function validateSpellTargetCount(targeting: SkillSpellTargeting, count: number): boolean {
-  return targeting.mode === "all" || count <= targeting.maxTargets;
+export function validateSpellTargetCount(
+    targeting: SkillSpellTargeting,
+    count: number
+): boolean {
+    return targeting.mode === 'all' || count <= targeting.maxTargets;
 }
 
-export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: string[]; centre?: GridPoint } | { ok: false; error: LogLine };
+export type SpellTargetResolution =
+    | { ok: true; targetIds: string[]; cells?: string[]; centre?: GridPoint }
+    | { ok: false; error: LogLine };
 
 export interface SpellMapContext {
-  map: BattleMapConfig | null;
-  rules: Ruleset;
-  targetCell?: GridPoint;
-  castLevel?: number;
-  upcastTargets?: number;
+    map: BattleMapConfig | null;
+    rules: Ruleset;
+    targetCell?: GridPoint;
+    castLevel?: number;
+    upcastTargets?: number;
 }
 
-const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef["kind"]> = new Set(["ally", "enemy", "allyDead", "area", "template"]);
+const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef['kind']> = new Set([
+    'ally',
+    'enemy',
+    'allyDead',
+    'area',
+    'template',
+]);
 
 const fail = (error: LogLine): SpellTargetResolution => ({ ok: false, error });
 
-type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
+type TemplateTargeting = Extract<SpellTargetingDef, { kind: 'template' }>;
 
 interface FilterLevel {
-  spellLevel: number;
-  castLevel?: number;
+    spellLevel: number;
+    castLevel?: number;
 }
 
-function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined, level: FilterLevel, rules: Ruleset): SpellTargetResolution {
-  const passing = (targets: BattleParticipant[]) => targets.filter((p) => matchesTargetFilter(p, targeting.filter, level)).map((p) => p.basicInfo.id);
+function resolveTemplate(
+    ps: BattleParticipant[],
+    caster: BattleParticipant,
+    targeting: TemplateTargeting,
+    map: BattleMapConfig,
+    aim: GridPoint | undefined,
+    level: FilterLevel,
+    rules: Ruleset
+): SpellTargetResolution {
+    const passing = (targets: BattleParticipant[]) =>
+        targets
+            .filter((p) => matchesTargetFilter(p, targeting.filter, level))
+            .map((p) => p.basicInfo.id);
 
-  if (targeting.shape === "emanation") {
-    const centre = cellsOf(caster)[0];
+    if (targeting.shape === 'emanation') {
+        const centre = cellsOf(caster)[0];
 
-    const { cells, targets } = templateArea(map, ps, caster, targeting, centre, rules);
+        const { cells, targets } = templateArea(
+            map,
+            ps,
+            caster,
+            targeting,
+            centre,
+            rules
+        );
 
-    return { ok: true, targetIds: passing(targets), cells, centre };
-  }
+        return { ok: true, targetIds: passing(targets), cells, centre };
+    }
 
-  if (!aim) return fail(textRef("battleActions.spell.target.pickPoint"));
+    if (!aim) return fail(textRef('battleActions.spell.target.pickPoint'));
 
-  if (!inBounds(map, aim)) return fail(textRef("battleActions.spell.target.pointOutOfMap"));
+    if (!inBounds(map, aim))
+        return fail(textRef('battleActions.spell.target.pointOutOfMap'));
 
-  if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range, rules)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
+    if (
+        !templateAimAllowed(
+            cellsOf(caster),
+            targeting,
+            aim,
+            targeting.range,
+            rules
+        )
+    )
+        return fail(textRef('battleActions.spell.target.pointOutOfRange'));
 
-  const hidden = modeAimHiddenText(map, caster, aim);
+    const hidden = modeAimHiddenText(map, caster, aim);
 
-  if (hidden) return fail(hidden);
+    if (hidden) return fail(hidden);
 
-  const { cells, targets } = templateArea(map, ps, caster, targeting, aim, rules);
+    const { cells, targets } = templateArea(
+        map,
+        ps,
+        caster,
+        targeting,
+        aim,
+        rules
+    );
 
-  // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
+    // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
 
-  if (cells.length === 0) return fail(textRef("battleActions.spell.target.pickDirection"));
+    if (cells.length === 0)
+        return fail(textRef('battleActions.spell.target.pickDirection'));
 
-  // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
+    // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
 
-  return { ok: true, targetIds: passing(targets), cells, centre: templateCentre(targeting, aim, cells) };
+    return {
+        ok: true,
+        targetIds: passing(targets),
+        cells,
+        centre: templateCentre(targeting, aim, cells),
+    };
 }
 
-function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: GridPoint; range?: number }): SpellTargetResolution {
-  if (!aim.cell) return fail(textRef("battleActions.spell.target.pickPoint"));
+function resolveSkillRadius(
+    scene: AimScene,
+    radius: SkillRadius,
+    aim: { cell?: GridPoint; range?: number }
+): SpellTargetResolution {
+    if (!aim.cell) return fail(textRef('battleActions.spell.target.pickPoint'));
 
-  if (!inBounds(scene.map, aim.cell)) return fail(textRef("battleActions.spell.target.pointOutOfMap"));
+    if (!inBounds(scene.map, aim.cell))
+        return fail(textRef('battleActions.spell.target.pointOutOfMap'));
 
-  if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range, scene.rules)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
+    if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range, scene.rules))
+        return fail(textRef('battleActions.spell.target.pointOutOfRange'));
 
-  const hidden = modeAimHiddenText(scene.map, scene.caster, aim.cell);
+    const hidden = modeAimHiddenText(scene.map, scene.caster, aim.cell);
 
-  if (hidden) return fail(hidden);
+    if (hidden) return fail(hidden);
 
-  const { cells, targets } = skillRadiusArea(scene, radius, aim.cell);
+    const { cells, targets } = skillRadiusArea(scene, radius, aim.cell);
 
-  return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: aim.cell };
+    return {
+        ok: true,
+        targetIds: targets.map((p) => p.basicInfo.id),
+        cells,
+        centre: aim.cell,
+    };
 }
 
-function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], range: number | undefined, rules: Ruleset): boolean {
-  if (range === undefined) return false;
+function outOfRange(
+    caster: BattleParticipant,
+    picked: BattleParticipant[],
+    range: number | undefined,
+    rules: Ruleset
+): boolean {
+    if (range === undefined) return false;
 
-  const max = feetToCells(range, rules);
+    const max = feetToCells(range, rules);
 
-  return picked.some((p) => p.battleData.position !== undefined && footprintDistance(cellsOf(caster), cellsOf(p)) > max);
+    return picked.some(
+        (p) =>
+            p.battleData.position !== undefined &&
+            footprintDistance(cellsOf(caster), cellsOf(p)) > max
+    );
 }
 
 function resolveRaw(
-  ps: BattleParticipant[],
-  caster: BattleParticipant,
-  spell: SpellRef,
-  targeting: SpellTargetingDef,
-  chosenIds: string[],
-  mapCtx?: SpellMapContext,
+    ps: BattleParticipant[],
+    caster: BattleParticipant,
+    spell: SpellRef,
+    targeting: SpellTargetingDef,
+    chosenIds: string[],
+    mapCtx?: SpellMapContext
 ): SpellTargetResolution {
-  const side = caster.basicInfo.side;
+    const side = caster.basicInfo.side;
 
-  const live = mapCtx?.map && isOnMap(caster) ? { map: mapCtx.map, rules: mapCtx.rules } : null;
+    const live =
+        mapCtx?.map && isOnMap(caster)
+            ? { map: mapCtx.map, rules: mapCtx.rules }
+            : null;
 
-  const map = live?.map ?? null;
+    const map = live?.map ?? null;
 
-  if (live && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, live.map, mapCtx?.targetCell, { spellLevel: spell.level, castLevel: mapCtx?.castLevel }, live.rules);
+    if (live && targeting.kind === 'template')
+        return resolveTemplate(
+            ps,
+            caster,
+            targeting,
+            live.map,
+            mapCtx?.targetCell,
+            { spellLevel: spell.level, castLevel: mapCtx?.castLevel },
+            live.rules
+        );
 
-  if (targeting.kind === "ally" || targeting.kind === "enemy") {
-    const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
+    if (targeting.kind === 'ally' || targeting.kind === 'enemy') {
+        const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
 
-    if (skill.mode === "all") {
-      const all = modeSightedTargets(map, ps, caster, skillAllTargets(ps, caster, targeting.kind, map));
+        if (skill.mode === 'all') {
+            const all = modeSightedTargets(
+                map,
+                ps,
+                caster,
+                skillAllTargets(ps, caster, targeting.kind, map)
+            );
 
-      return all.length > 0 ? { ok: true, targetIds: all } : fail(textRef("battleActions.spell.target.noTargets"));
+            return all.length > 0
+                ? { ok: true, targetIds: all }
+                : fail(textRef('battleActions.spell.target.noTargets'));
+        }
+
+        if (live && skill.mode === 'area') {
+            return resolveSkillRadius(
+                { map: live.map, participants: ps, caster, rules: live.rules },
+                { side: targeting.kind, maxTargets: skill.maxTargets },
+                { cell: mapCtx?.targetCell, range: targeting.range }
+            );
+        }
     }
 
-    if (live && skill.mode === "area") {
-      return resolveSkillRadius({ map: live.map, participants: ps, caster, rules: live.rules }, { side: targeting.kind, maxTargets: skill.maxTargets }, { cell: mapCtx?.targetCell, range: targeting.range });
+    const ids = (filter: (p: BattleParticipant) => boolean) =>
+        ps.filter(filter).map((p) => p.basicInfo.id);
+
+    const chosen = [...new Set(chosenIds)].map((id) => findParticipant(ps, id));
+
+    if (chosen.some((p) => !p))
+        return fail(textRef('battleActions.spell.target.targetMissing'));
+
+    const picked = chosen as BattleParticipant[];
+
+    if (picked.some(isAirborne))
+        return fail(textRef(API_ERRORS.TARGET_AIRBORNE));
+
+    if (
+        live &&
+        'range' in targeting &&
+        outOfRange(caster, picked, targeting.range, live.rules)
+    )
+        return fail(textRef('battleActions.spell.target.targetOutOfRange'));
+
+    const targetHidden =
+        map && SIGHTED_KINDS.has(targeting.kind)
+            ? modeTargetHiddenText(map, caster, picked)
+            : null;
+
+    if (targetHidden) return fail(targetHidden);
+
+    const sighted = (filter: (p: BattleParticipant) => boolean) =>
+        modeSightedTargets(map, ps, caster, ids(filter));
+
+    switch (targeting.kind) {
+        case 'self':
+            return { ok: true, targetIds: [caster.basicInfo.id] };
+        case 'allAllies':
+            return {
+                ok: true,
+                targetIds: ids(
+                    (p) => isTargetable(p) && p.basicInfo.side === side
+                ),
+            };
+        case 'allEnemies':
+            return {
+                ok: true,
+                targetIds: sighted(
+                    (p) => isTargetable(p) && isHostile(map, caster, p)
+                ),
+            };
+        case 'everyone':
+            return { ok: true, targetIds: sighted(isTargetable) };
+        case 'allAlliesDead': {
+            const fallen = ids(
+                (p) => !isActive(p) && p.basicInfo.side === side
+            );
+
+            return fallen.length > 0
+                ? { ok: true, targetIds: fallen }
+                : fail(textRef('battleActions.spell.target.noFallen'));
+        }
+        case 'allyDead': {
+            if (picked.length !== 1)
+                return fail(
+                    textRef('battleActions.spell.target.pickOneFallen')
+                );
+
+            return picked[0].basicInfo.side === side && !isActive(picked[0])
+                ? { ok: true, targetIds: [picked[0].basicInfo.id] }
+                : fail(textRef('battleActions.spell.target.mustBeFallen'));
+        }
+        case 'ally':
+        case 'enemy':
+        case 'area':
+        case 'template': {
+            const multi =
+                targeting.kind === 'area' || targeting.kind === 'template';
+
+            const wanted = multi ? targeting.side : targeting.kind;
+
+            if (picked.length === 0)
+                return fail(textRef('battleActions.spell.target.pickTarget'));
+
+            if (
+                picked.some(
+                    (p) =>
+                        !(isActive(p) || (wanted === 'ally' && isDying(p))) ||
+                        !isHostile(map, caster, p) !== (wanted === 'ally')
+                )
+            ) {
+                return fail(
+                    textRef(
+                        wanted === 'ally'
+                            ? 'battleActions.spell.target.mustBeAlly'
+                            : 'battleActions.spell.target.mustBeEnemy'
+                    )
+                );
+            }
+
+            if (
+                picked.some(
+                    (p) =>
+                        !matchesTargetFilter(p, targeting.filter, {
+                            spellLevel: spell.level,
+                            castLevel: mapCtx?.castLevel,
+                        })
+                )
+            )
+                return fail(API_ERRORS.BATTLE_SPELL_TARGET_FILTER);
+
+            if (map && targeting.kind === 'area' && targeting.chain) {
+                if (picked.length !== 1)
+                    return fail(
+                        textRef('battleActions.spell.target.pickChainFirst')
+                    );
+
+                return {
+                    ok: true,
+                    targetIds: spellChain(
+                        { participants: ps, caster },
+                        targeting,
+                        picked[0],
+                        map
+                    ).map((p) => p.basicInfo.id),
+                };
+            }
+
+            const base = multi
+                ? { mode: 'single' as const, maxTargets: targeting.maxTargets }
+                : spellTargetingFor(ps, caster.basicInfo.id, spell);
+
+            const skill = multi
+                ? base
+                : {
+                      ...base,
+                      maxTargets:
+                          base.maxTargets + upcastExtra(caster, spell, mapCtx),
+                  };
+
+            if (!validateSpellTargetCount(skill, picked.length))
+                return fail(textRef('battleActions.spell.target.tooMany'));
+
+            return { ok: true, targetIds: picked.map((p) => p.basicInfo.id) };
+        }
     }
-  }
-
-  const ids = (filter: (p: BattleParticipant) => boolean) => ps.filter(filter).map((p) => p.basicInfo.id);
-
-  const chosen = [...new Set(chosenIds)].map((id) => findParticipant(ps, id));
-
-  if (chosen.some((p) => !p)) return fail(textRef("battleActions.spell.target.targetMissing"));
-
-  const picked = chosen as BattleParticipant[];
-
-  if (picked.some(isAirborne)) return fail(textRef(API_ERRORS.TARGET_AIRBORNE));
-
-  if (live && "range" in targeting && outOfRange(caster, picked, targeting.range, live.rules)) return fail(textRef("battleActions.spell.target.targetOutOfRange"));
-
-  const targetHidden = map && SIGHTED_KINDS.has(targeting.kind) ? modeTargetHiddenText(map, caster, picked) : null;
-
-  if (targetHidden) return fail(targetHidden);
-
-  const sighted = (filter: (p: BattleParticipant) => boolean) => modeSightedTargets(map, ps, caster, ids(filter));
-
-  switch (targeting.kind) {
-    case "self":
-
-      return { ok: true, targetIds: [caster.basicInfo.id] };
-    case "allAllies":
-
-      return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side === side) };
-    case "allEnemies":
-
-      return { ok: true, targetIds: sighted((p) => isTargetable(p) && isHostile(map, caster, p)) };
-    case "everyone":
-
-      return { ok: true, targetIds: sighted(isTargetable) };
-    case "allAlliesDead": {
-      const fallen = ids((p) => !isActive(p) && p.basicInfo.side === side);
-
-      return fallen.length > 0 ? { ok: true, targetIds: fallen } : fail(textRef("battleActions.spell.target.noFallen"));
-    }
-    case "allyDead": {
-      if (picked.length !== 1) return fail(textRef("battleActions.spell.target.pickOneFallen"));
-
-      return picked[0].basicInfo.side === side && !isActive(picked[0]) ? { ok: true, targetIds: [picked[0].basicInfo.id] } : fail(textRef("battleActions.spell.target.mustBeFallen"));
-    }
-    case "ally":
-    case "enemy":
-    case "area":
-    case "template": {
-      const multi = targeting.kind === "area" || targeting.kind === "template";
-
-      const wanted = multi ? targeting.side : targeting.kind;
-
-      if (picked.length === 0) return fail(textRef("battleActions.spell.target.pickTarget"));
-
-      if (picked.some((p) => !(isActive(p) || (wanted === "ally" && isDying(p))) || !isHostile(map, caster, p) !== (wanted === "ally"))) {
-        return fail(textRef(wanted === "ally" ? "battleActions.spell.target.mustBeAlly" : "battleActions.spell.target.mustBeEnemy"));
-      }
-
-      if (picked.some((p) => !matchesTargetFilter(p, targeting.filter, { spellLevel: spell.level, castLevel: mapCtx?.castLevel }))) return fail(API_ERRORS.BATTLE_SPELL_TARGET_FILTER);
-
-      if (map && targeting.kind === "area" && targeting.chain) {
-        if (picked.length !== 1) return fail(textRef("battleActions.spell.target.pickChainFirst"));
-
-        return { ok: true, targetIds: spellChain({ participants: ps, caster }, targeting, picked[0], map).map((p) => p.basicInfo.id) };
-      }
-
-      const base = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
-
-      const skill = multi ? base : { ...base, maxTargets: base.maxTargets + upcastExtra(caster, spell, mapCtx) };
-
-      if (!validateSpellTargetCount(skill, picked.length)) return fail(textRef("battleActions.spell.target.tooMany"));
-
-      return { ok: true, targetIds: picked.map((p) => p.basicInfo.id) };
-    }
-  }
 }
 
-const upcastExtra = (caster: BattleParticipant, spell: SpellRef, mapCtx?: SpellMapContext): number =>
-  isFiveE(caster) && mapCtx?.castLevel !== undefined && mapCtx.upcastTargets ? mapCtx.upcastTargets * ruleSystemOf(mapCtx.rules).magic.upcast.steps(spell.level, mapCtx.castLevel) : 0;
+const upcastExtra = (
+    caster: BattleParticipant,
+    spell: SpellRef,
+    mapCtx?: SpellMapContext
+): number =>
+    isFiveE(caster) && mapCtx?.castLevel !== undefined && mapCtx.upcastTargets
+        ? mapCtx.upcastTargets *
+          ruleSystemOf(mapCtx.rules).magic.upcast.steps(
+              spell.level,
+              mapCtx.castLevel
+          )
+        : 0;
 
-const HOSTILE_KINDS = new Set(["enemy", "area", "template", "allEnemies"]);
+const HOSTILE_KINDS = new Set(['enemy', 'area', 'template', 'allEnemies']);
 
 function hostile(targeting: SpellTargetingDef): boolean {
-  if (targeting.kind === "area" || targeting.kind === "template") return targeting.side === "enemy";
+    if (targeting.kind === 'area' || targeting.kind === 'template')
+        return targeting.side === 'enemy';
 
-  return HOSTILE_KINDS.has(targeting.kind);
+    return HOSTILE_KINDS.has(targeting.kind);
 }
 
 /** Кастер зі станом «без ворожих заклинань»: ворожий шаблон або будь-яка ціль-ворог. */
-export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[], map?: BattleMapConfig | null): { state: string } | null {
-  const marker = findEffectMarker(caster, "no_hostile_spells");
+export function pacifiedBlock(
+    ps: BattleParticipant[],
+    caster: BattleParticipant,
+    targeting: SpellTargetingDef,
+    targetIds: string[],
+    map?: BattleMapConfig | null
+): { state: string } | null {
+    const marker = findEffectMarker(caster, 'no_hostile_spells');
 
-  if (!marker) return null;
+    if (!marker) return null;
 
-  const hitsEnemy = targetIds.some((id) => {
-    const t = ps.find((p) => p.basicInfo.id === id);
+    const hitsEnemy = targetIds.some((id) => {
+        const t = ps.find((p) => p.basicInfo.id === id);
 
-    return !!t && isHostile(map, caster, t);
-  });
+        return !!t && isHostile(map, caster, t);
+    });
 
-  return hostile(targeting) || hitsEnemy ? { state: marker.effect.name } : null;
+    return hostile(targeting) || hitsEnemy
+        ? { state: marker.effect.name }
+        : null;
 }
 
 export function resolveSpellTargets(
-  ps: BattleParticipant[],
-  caster: BattleParticipant,
-  spell: SpellRef,
-  targeting: SpellTargetingDef,
-  chosenIds: string[],
-  mapCtx?: SpellMapContext,
+    ps: BattleParticipant[],
+    caster: BattleParticipant,
+    spell: SpellRef,
+    targeting: SpellTargetingDef,
+    chosenIds: string[],
+    mapCtx?: SpellMapContext
 ): SpellTargetResolution {
-  const extra = upcastExtra(caster, spell, mapCtx);
+    const extra = upcastExtra(caster, spell, mapCtx);
 
-  const widened = extra > 0 && (targeting.kind === "area" || targeting.kind === "template") ? { ...targeting, maxTargets: targeting.maxTargets + extra } : targeting;
+    const widened =
+        extra > 0 &&
+        (targeting.kind === 'area' || targeting.kind === 'template')
+            ? { ...targeting, maxTargets: targeting.maxTargets + extra }
+            : targeting;
 
-  const res = resolveRaw(ps, caster, spell, widened, chosenIds, mapCtx);
+    const res = resolveRaw(ps, caster, spell, widened, chosenIds, mapCtx);
 
-  const charmers = conditionSourceIds(caster, "charmed");
+    const charmers = conditionSourceIds(caster, 'charmed');
 
-  if (!res.ok || !charmers.length || !hostile(targeting)) return res;
+    if (!res.ok || !charmers.length || !hostile(targeting)) return res;
 
-  const targetIds = res.targetIds.filter((id) => !charmers.includes(id));
+    const targetIds = res.targetIds.filter((id) => !charmers.includes(id));
 
-  if (targetIds.length === res.targetIds.length) return res;
+    if (targetIds.length === res.targetIds.length) return res;
 
-  return targetIds.length > 0 ? { ...res, targetIds } : fail(textRef("battleActions.spell.target.charmerHostile"));
+    return targetIds.length > 0
+        ? { ...res, targetIds }
+        : fail(textRef('battleActions.spell.target.charmerHostile'));
 }

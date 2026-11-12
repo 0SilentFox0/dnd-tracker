@@ -1,79 +1,143 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
-import { getTemplates } from "@/lib/api/templates";
-import { useTemplates, useTemplateSelection } from "@/lib/hooks/campaigns";
-import { campaignKeys } from "@/lib/hooks/campaigns/keys";
+import { getTemplates } from '@/lib/api/templates';
+import { useTemplates, useTemplateSelection } from '@/lib/hooks/campaigns';
+import { campaignKeys } from '@/lib/hooks/campaigns/keys';
 
-vi.mock("@/lib/api/templates", () => ({ getTemplates: vi.fn() }));
+vi.mock('@/lib/api/templates', () => ({ getTemplates: vi.fn() }));
 
-const list = { official: [{ id: "o1", name: "Heroes", description: null, visibility: "official", counts: {} }], mine: [] };
-
-const setup = () => {
-  const client = new QueryClient();
-
-  const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
-
-  return { client, wrapper };
+const list = {
+    official: [
+        {
+            id: 'o1',
+            name: 'Heroes',
+            description: null,
+            visibility: 'official',
+            counts: {},
+        },
+    ],
+    mine: [],
 };
 
-describe("useTemplates", () => {
-  it("кешує під campaignKeys.templates()", async () => {
-    vi.mocked(getTemplates).mockResolvedValue(list);
+const setup = () => {
+    const client = new QueryClient();
 
-    const { client, wrapper } = setup();
+    const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
 
-    const { result } = renderHook(() => useTemplates(), { wrapper });
+    return { client, wrapper };
+};
 
-    await waitFor(() => expect(result.current.data).toEqual(list));
-    expect(client.getQueryData(campaignKeys.templates())).toEqual(list);
-  });
+describe('useTemplates', () => {
+    it('кешує під campaignKeys.templates()', async () => {
+        vi.mocked(getTemplates).mockResolvedValue(list);
 
-  it("за замовчуванням — без шаблону", async () => {
-    vi.mocked(getTemplates).mockResolvedValue(list);
+        const { client, wrapper } = setup();
 
-    const { result } = renderHook(() => useTemplateSelection(), { wrapper: setup().wrapper });
+        const { result } = renderHook(() => useTemplates(), { wrapper });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.selection).toEqual({ templateId: null });
-    expect(result.current.name).toBeUndefined();
-  });
+        await waitFor(() => expect(result.current.data).toEqual(list));
+        expect(client.getQueryData(campaignKeys.templates())).toEqual(list);
+    });
 
-  it("якщо є офіційний порожній 5e — він вибраний за замовчуванням, явний вибір має пріоритет", async () => {
-    vi.mocked(getTemplates).mockResolvedValue({ ...list, official: [...list.official, { id: "e5", name: "5e (empty)", description: null, visibility: "official", counts: {} }] });
+    it('за замовчуванням — без шаблону', async () => {
+        vi.mocked(getTemplates).mockResolvedValue(list);
 
-    const { result } = renderHook(() => useTemplateSelection(), { wrapper: setup().wrapper });
+        const { result } = renderHook(() => useTemplateSelection(), {
+            wrapper: setup().wrapper,
+        });
 
-    await waitFor(() => expect(result.current.selection).toEqual({ templateId: "e5" }));
-    expect(result.current.name).toBe("5e (empty)");
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        expect(result.current.selection).toEqual({ templateId: null });
+        expect(result.current.name).toBeUndefined();
+    });
 
-    act(() => result.current.setSelection({ templateId: null }));
-    expect(result.current.selection).toEqual({ templateId: null });
-  });
+    it('якщо є офіційний порожній 5e — він вибраний за замовчуванням, явний вибір має пріоритет', async () => {
+        vi.mocked(getTemplates).mockResolvedValue({
+            ...list,
+            official: [
+                ...list.official,
+                {
+                    id: 'e5',
+                    name: '5e (empty)',
+                    description: null,
+                    visibility: 'official',
+                    counts: {},
+                },
+            ],
+        });
 
-  it("resolves SRD content language once and discards stale locale for private, empty and file sources", async () => {
-    const canonical = { ...list.official[0], id: "srd", kind: "template", templateKey: "srd-5.2", availableLocales: ["en", "uk"], locale: "en" };
+        const { result } = renderHook(() => useTemplateSelection(), {
+            wrapper: setup().wrapper,
+        });
 
-    vi.mocked(getTemplates).mockResolvedValue({ official: [canonical], mine: [{ ...canonical, id: "private", visibility: "private" }] });
+        await waitFor(() =>
+            expect(result.current.selection).toEqual({ templateId: 'e5' })
+        );
+        expect(result.current.name).toBe('5e (empty)');
 
-    const { result } = renderHook(() => useTemplateSelection(), { wrapper: setup().wrapper });
+        act(() => result.current.setSelection({ templateId: null }));
+        expect(result.current.selection).toEqual({ templateId: null });
+    });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    act(() => result.current.setSelection({ templateId: "srd" }));
-    expect(result.current.selection).toEqual({ templateId: "srd", contentLocale: "uk" });
-    act(() => result.current.setSelection({ templateId: "srd", contentLocale: "en" }));
-    expect(result.current.selection).toEqual({ templateId: "srd", contentLocale: "en" });
-    act(() => result.current.setSelection({ templateId: "private", contentLocale: "uk" }));
-    expect(result.current.selection).toEqual({ templateId: "private" });
-    act(() => result.current.setSelection({ templateId: null, contentLocale: "uk" }));
-    expect(result.current.selection).toEqual({ templateId: null });
+    it('resolves SRD content language once and discards stale locale for private, empty and file sources', async () => {
+        const canonical = {
+            ...list.official[0],
+            id: 'srd',
+            kind: 'template',
+            templateKey: 'srd-5.2',
+            availableLocales: ['en', 'uk'],
+            locale: 'en',
+        };
 
-    const file = { name: "campaign.json", bundle: {}, entities: 1 };
+        vi.mocked(getTemplates).mockResolvedValue({
+            official: [canonical],
+            mine: [{ ...canonical, id: 'private', visibility: 'private' }],
+        });
 
-    act(() => result.current.setSelection({ file, contentLocale: "uk" }));
-    expect(result.current.selection).toEqual({ file });
-  });
+        const { result } = renderHook(() => useTemplateSelection(), {
+            wrapper: setup().wrapper,
+        });
+
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        act(() => result.current.setSelection({ templateId: 'srd' }));
+        expect(result.current.selection).toEqual({
+            templateId: 'srd',
+            contentLocale: 'uk',
+        });
+        act(() =>
+            result.current.setSelection({
+                templateId: 'srd',
+                contentLocale: 'en',
+            })
+        );
+        expect(result.current.selection).toEqual({
+            templateId: 'srd',
+            contentLocale: 'en',
+        });
+        act(() =>
+            result.current.setSelection({
+                templateId: 'private',
+                contentLocale: 'uk',
+            })
+        );
+        expect(result.current.selection).toEqual({ templateId: 'private' });
+        act(() =>
+            result.current.setSelection({
+                templateId: null,
+                contentLocale: 'uk',
+            })
+        );
+        expect(result.current.selection).toEqual({ templateId: null });
+
+        const file = { name: 'campaign.json', bundle: {}, entities: 1 };
+
+        act(() => result.current.setSelection({ file, contentLocale: 'uk' }));
+        expect(result.current.selection).toEqual({ file });
+    });
 });

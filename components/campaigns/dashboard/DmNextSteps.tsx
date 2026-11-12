@@ -1,73 +1,120 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { ScrollText } from "lucide-react";
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { ScrollText } from 'lucide-react';
 
-import { SourceUpdateTile } from "@/components/campaigns/dashboard/SourceUpdateTile";
-import { HudSection } from "@/components/hud/form";
-import { HudPanel, HudPill } from "@/components/hud/page";
-import { Button } from "@/components/ui/button";
-import type { DmDashboardData } from "@/types/campaigns";
+import { SourceUpdateTile } from '@/components/campaigns/dashboard/SourceUpdateTile';
+import { HudSection } from '@/components/hud/form';
+import { HudPanel, HudPill } from '@/components/hud/page';
+import { Button } from '@/components/ui/button';
+import type { DmDashboardData } from '@/types/campaigns';
 
-const ROW = "flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm text-hud-ink hover:bg-white/5";
+const ROW =
+    'flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm text-hud-ink hover:bg-white/5';
 
-export function DmNextSteps({ campaignId, data }: { campaignId: string; data: DmDashboardData }) {
-  const t = useTranslations("dashboard");
+export function DmNextSteps({
+    campaignId,
+    data,
+}: {
+    campaignId: string;
+    data: DmDashboardData;
+}) {
+    const t = useTranslations('dashboard');
 
-  const base = `/campaigns/${campaignId}`;
+    const base = `/campaigns/${campaignId}`;
 
-  const hasPrep = data.pendingDrafts > 0 || data.scenarioPages.length > 0 || data.battles.length > 0;
+    const hasPrep =
+        data.pendingDrafts > 0 ||
+        data.scenarioPages.length > 0 ||
+        data.battles.length > 0;
 
-  return (
-    <HudPanel className="shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]">
-      <HudSection title={t("nextSteps.title")}>
-        {data.sourceUpdate && <SourceUpdateTile campaignId={campaignId} version={data.sourceUpdate.sourceVersion} />}
-        {hasPrep && (
-          <div className="mb-3">
-            <h3 className="hud-sc mb-1 text-xs text-hud-muted">{t("nextSteps.prep")}</h3>
-            <ul>
-              {data.pendingDrafts > 0 && (
-                <li>
-                  <Link href={`${base}/dm/characters`} className={ROW}>
-                    <span className="truncate">{t("nextSteps.pending", { count: data.pendingDrafts })}</span>
-                  </Link>
-                </li>
-              )}
-              {data.scenarioPages.map((p) => (
-                <li key={p.id}>
-                  <Link href={`${base}/dm/scenario/${p.id}`} className={ROW}>
-                    <ScrollText className="size-4 shrink-0 text-hud-gold" aria-hidden />
-                    <span className="min-w-0 truncate">{p.title}</span>
-                  </Link>
-                </li>
-              ))}
-              {data.battles.map((b) => (
-                <li key={b.id}>
-                  <Link href={`${base}/battles/${b.id}`} className={ROW}>
-                    <span className="min-w-0 flex-1 truncate">{b.name}</span>
-                    <HudPill tone="accent">{t(`battleStatus.${b.status}`)}</HudPill>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <div>
-          <h3 className="hud-sc mb-1 text-xs text-hud-muted">{t("nextSteps.session")}</h3>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline">
-              <Link href={`${base}/dm/show`}>{t("nextSteps.show")}</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`${base}/dm/world`}>{t("nextSteps.world")}</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`${base}/dm/music`}>{t("nextSteps.music")}</Link>
-            </Button>
-          </div>
-        </div>
-      </HudSection>
-    </HudPanel>
-  );
+    return (
+        <HudPanel className="shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]">
+            <HudSection title={t('nextSteps.title')}>
+                {data.sourceUpdate && (
+                    <SourceUpdateTile
+                        campaignId={campaignId}
+                        version={data.sourceUpdate.sourceVersion}
+                    />
+                )}
+                {hasPrep && (
+                    <div className="mb-3">
+                        <h3 className="hud-sc mb-1 text-xs text-hud-muted">
+                            {t('nextSteps.prep')}
+                        </h3>
+                        <ul>
+                            {data.pendingDrafts > 0 && (
+                                <li>
+                                    <Link
+                                        href={`${base}/dm/characters`}
+                                        className={ROW}
+                                    >
+                                        <span className="truncate">
+                                            {t('nextSteps.pending', {
+                                                count: data.pendingDrafts,
+                                            })}
+                                        </span>
+                                    </Link>
+                                </li>
+                            )}
+                            {data.scenarioPages.map((p) => (
+                                <li key={p.id}>
+                                    <Link
+                                        href={`${base}/dm/scenario/${p.id}`}
+                                        className={ROW}
+                                    >
+                                        <ScrollText
+                                            className="size-4 shrink-0 text-hud-gold"
+                                            aria-hidden
+                                        />
+                                        <span className="min-w-0 truncate">
+                                            {p.title}
+                                        </span>
+                                    </Link>
+                                </li>
+                            ))}
+                            {data.battles.map((b) => (
+                                <li key={b.id}>
+                                    <Link
+                                        href={`${base}/battles/${b.id}`}
+                                        className={ROW}
+                                    >
+                                        <span className="min-w-0 flex-1 truncate">
+                                            {b.name}
+                                        </span>
+                                        <HudPill tone="accent">
+                                            {t(`battleStatus.${b.status}`)}
+                                        </HudPill>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+                <div>
+                    <h3 className="hud-sc mb-1 text-xs text-hud-muted">
+                        {t('nextSteps.session')}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        <Button asChild variant="outline">
+                            <Link href={`${base}/dm/show`}>
+                                {t('nextSteps.show')}
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href={`${base}/dm/world`}>
+                                {t('nextSteps.world')}
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href={`${base}/dm/music`}>
+                                {t('nextSteps.music')}
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            </HudSection>
+        </HudPanel>
+    );
 }

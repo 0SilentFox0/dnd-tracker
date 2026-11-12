@@ -1,78 +1,184 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
-import { useBattleScene } from "./useBattleScene";
-import { useSendCoreAction } from "./useCoreActions";
+import { useBattleScene } from './useBattleScene';
+import { useSendCoreAction } from './useCoreActions';
 
-import { useSpellsByIds } from "@/lib/hooks/spells";
-import { textRef } from "@/lib/i18n/text-ref";
-import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
-import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
-import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
-import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/utils/battle/actions/legendary-options";
-import { isHostile } from "@/lib/utils/battle/modes/engine";
-import { abilityMaxTargets } from "@/lib/utils/battle/validation/ability-targets";
-import { bonusTargetCandidates, needsBonusTarget } from "@/lib/utils/battle/view";
-import type { BattleParticipant, LegendaryOption } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import { useSpellsByIds } from '@/lib/hooks/spells';
+import { textRef } from '@/lib/i18n/text-ref';
+import { isAttackable } from '@/lib/utils/abilities/engine/core/participants';
+import {
+    cooldownLeft,
+    withinCountLimits,
+} from '@/lib/utils/abilities/engine/core/usage';
+import { lairAbilities, lairBlocker } from '@/lib/utils/battle/actions/lair';
+import {
+    legendaryAbilities,
+    legendaryBlocker,
+    legendaryCostOf,
+} from '@/lib/utils/battle/actions/legendary-options';
+import { isHostile } from '@/lib/utils/battle/modes/engine';
+import { abilityMaxTargets } from '@/lib/utils/battle/validation/ability-targets';
+import {
+    bonusTargetCandidates,
+    needsBonusTarget,
+} from '@/lib/utils/battle/view';
+import type { BattleParticipant, LegendaryOption } from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 export interface LegendaryChoice {
-  id: string;
-  kind: "attack" | "ability" | "lair";
-  label: string;
-  cost: number;
-  spellId?: string;
-  attackIndex?: number;
-  abilityKey?: string;
-  needsTarget: boolean;
-  maxTargets: number;
-  candidates: BattleParticipant[];
-  blocked: LogLine | null;
+    id: string;
+    kind: 'attack' | 'ability' | 'lair';
+    label: string;
+    cost: number;
+    spellId?: string;
+    attackIndex?: number;
+    abilityKey?: string;
+    needsTarget: boolean;
+    maxTargets: number;
+    candidates: BattleParticipant[];
+    blocked: LogLine | null;
 }
 
 export function useLegendaryAction(participant: BattleParticipant) {
-  const { battle, turn, campaignId } = useBattleScene();
+    const { battle, turn, campaignId } = useBattleScene();
 
-  const order = battle.initiativeOrder;
+    const order = battle.initiativeOrder;
 
-  const current = turn.current ?? undefined;
+    const current = turn.current ?? undefined;
 
-  const spellIds = participant.battleData.resolvedAbilities.flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : []);
-
-  const spells = useSpellsByIds(campaignId, spellIds);
-
-  const choices = useMemo<LegendaryChoice[]>(() => {
-    const field = (order ?? []).filter((p) => !p.battleData.reserved);
-
-    const allies = field.filter((p) => !isHostile(battle.map, participant, p));
-
-    const enemies = field.filter((p) => isHostile(battle.map, participant, p));
-
-    const attacks = participant.battleData.attacks.flatMap((a, i): LegendaryChoice[] =>
-      a.hand === "off" ? [] : [{ id: `attack:${i}`, kind: "attack", label: a.name, cost: 1, attackIndex: i, needsTarget: true, maxTargets: 1, candidates: enemies.filter(isAttackable), blocked: legendaryBlocker(participant, current, 1) }],
+    const spellIds = participant.battleData.resolvedAbilities.flatMap((a) =>
+        a.perform?.kind === 'spell' ? [a.perform.spellId] : []
     );
 
-    const abilities = [...legendaryAbilities(participant), ...lairAbilities(participant)].map((a): LegendaryChoice => {
-      const cost = legendaryCostOf(a);
+    const spells = useSpellsByIds(campaignId, spellIds);
 
-      const perform = a.perform;
+    const choices = useMemo<LegendaryChoice[]>(() => {
+        const field = (order ?? []).filter((p) => !p.battleData.reserved);
 
-      const attack = perform?.kind === "attack" ? participant.battleData.attacks.find((at) => at.name.toLocaleLowerCase() === perform.attack.toLocaleLowerCase()) : undefined;
+        const allies = field.filter(
+            (p) => !isHostile(battle.map, participant, p)
+        );
 
-      const label = perform ? `${a.name} → ${perform.kind === "attack" ? perform.attack : spells.data?.find((s) => s.id === perform.spellId)?.name ?? perform.spellId}` : a.name;
+        const enemies = field.filter((p) =>
+            isHostile(battle.map, participant, p)
+        );
 
-      const blocked = (a.limits?.lair ? lairBlocker(participant, battle.currentRound, a.key) : legendaryBlocker(participant, current, cost)) ?? (!withinCountLimits(participant, a) ? textRef("battleDm.legendary.limitReached") : cooldownLeft(participant, a, battle.currentRound) > 0 ? textRef("battleDm.legendary.cooldown", { rounds: cooldownLeft(participant, a, battle.currentRound) }) : perform?.kind === "attack" && !attack ? textRef("battleDm.legendary.attackMissing") : null);
+        const attacks = participant.battleData.attacks.flatMap(
+            (a, i): LegendaryChoice[] =>
+                a.hand === 'off'
+                    ? []
+                    : [
+                          {
+                              id: `attack:${i}`,
+                              kind: 'attack',
+                              label: a.name,
+                              cost: 1,
+                              attackIndex: i,
+                              needsTarget: true,
+                              maxTargets: 1,
+                              candidates: enemies.filter(isAttackable),
+                              blocked: legendaryBlocker(
+                                  participant,
+                                  current,
+                                  1
+                              ),
+                          },
+                      ]
+        );
 
-      return { id: `ability:${a.key}`, kind: a.limits?.lair ? "lair" : "ability", label, cost, abilityKey: a.key, ...(perform?.kind === "spell" && { spellId: perform.spellId }), needsTarget: perform?.kind === "spell" ? false : perform?.kind === "attack" ? true : needsBonusTarget(a), maxTargets: perform?.kind === "attack" ? 1 : abilityMaxTargets(a), candidates: perform?.kind === "attack" ? enemies.filter(isAttackable) : bonusTargetCandidates(a, allies, enemies, participant, battle.map), blocked };
-    });
+        const abilities = [
+            ...legendaryAbilities(participant),
+            ...lairAbilities(participant),
+        ].map((a): LegendaryChoice => {
+            const cost = legendaryCostOf(a);
 
-    return [...attacks, ...abilities];
-  }, [order, participant, current, spells.data, battle.currentRound, battle.map]);
+            const perform = a.perform;
 
-  const { send, isPending } = useSendCoreAction();
+            const attack =
+                perform?.kind === 'attack'
+                    ? participant.battleData.attacks.find(
+                          (at) =>
+                              at.name.toLocaleLowerCase() ===
+                              perform.attack.toLocaleLowerCase()
+                      )
+                    : undefined;
 
-  const run = (option: LegendaryOption) => send({ action: "legendary", participantId: participant.basicInfo.id, option });
+            const label = perform
+                ? `${a.name} → ${perform.kind === 'attack' ? perform.attack : (spells.data?.find((s) => s.id === perform.spellId)?.name ?? perform.spellId)}`
+                : a.name;
 
-  return { legendary: participant.battleData.legendary, choices, run, isPending };
+            const blocked =
+                (a.limits?.lair
+                    ? lairBlocker(participant, battle.currentRound, a.key)
+                    : legendaryBlocker(participant, current, cost)) ??
+                (!withinCountLimits(participant, a)
+                    ? textRef('battleDm.legendary.limitReached')
+                    : cooldownLeft(participant, a, battle.currentRound) > 0
+                      ? textRef('battleDm.legendary.cooldown', {
+                            rounds: cooldownLeft(
+                                participant,
+                                a,
+                                battle.currentRound
+                            ),
+                        })
+                      : perform?.kind === 'attack' && !attack
+                        ? textRef('battleDm.legendary.attackMissing')
+                        : null);
+
+            return {
+                id: `ability:${a.key}`,
+                kind: a.limits?.lair ? 'lair' : 'ability',
+                label,
+                cost,
+                abilityKey: a.key,
+                ...(perform?.kind === 'spell' && { spellId: perform.spellId }),
+                needsTarget:
+                    perform?.kind === 'spell'
+                        ? false
+                        : perform?.kind === 'attack'
+                          ? true
+                          : needsBonusTarget(a),
+                maxTargets:
+                    perform?.kind === 'attack' ? 1 : abilityMaxTargets(a),
+                candidates:
+                    perform?.kind === 'attack'
+                        ? enemies.filter(isAttackable)
+                        : bonusTargetCandidates(
+                              a,
+                              allies,
+                              enemies,
+                              participant,
+                              battle.map
+                          ),
+                blocked,
+            };
+        });
+
+        return [...attacks, ...abilities];
+    }, [
+        order,
+        participant,
+        current,
+        spells.data,
+        battle.currentRound,
+        battle.map,
+    ]);
+
+    const { send, isPending } = useSendCoreAction();
+
+    const run = (option: LegendaryOption) =>
+        send({
+            action: 'legendary',
+            participantId: participant.basicInfo.id,
+            option,
+        });
+
+    return {
+        legendary: participant.battleData.legendary,
+        choices,
+        run,
+        isPending,
+    };
 }

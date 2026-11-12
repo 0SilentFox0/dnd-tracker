@@ -1,131 +1,168 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
-import "@/components/battle/fx/fx.css";
-import { preloadAnimation } from "@/components/battle/fx/animations";
-import { DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
-import { FX_LOAD_TIMEOUT_MS, playFx } from "@/components/battle/fx/runtime/play";
-import { cancelLayer } from "@/components/battle/fx/runtime/stage";
-import { useFxBadgeLabels } from "@/components/battle/fx/use-badge-labels";
-import { fireFxImpact, useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
-import { ARCHETYPE_FX, type FxSpec, MAX_FX_MS } from "@/lib/utils/battle/fx";
-import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
+import '@/components/battle/fx/fx.css';
+import { preloadAnimation } from '@/components/battle/fx/animations';
+import {
+    DiceStage,
+    type DiceStageHandle,
+} from '@/components/battle/fx/dice/DiceStage';
+import {
+    FX_LOAD_TIMEOUT_MS,
+    playFx,
+} from '@/components/battle/fx/runtime/play';
+import { cancelLayer } from '@/components/battle/fx/runtime/stage';
+import { useFxBadgeLabels } from '@/components/battle/fx/use-badge-labels';
+import {
+    fireFxImpact,
+    useBattleFxQueue,
+    useFxEnabled,
+} from '@/lib/hooks/battle';
+import { ARCHETYPE_FX, type FxSpec, MAX_FX_MS } from '@/lib/utils/battle/fx';
+import { DICE_TOTAL_MS } from '@/lib/utils/battle/fx/dice';
 
 const DICE_BUDGET_MS = FX_LOAD_TIMEOUT_MS + DICE_TOTAL_MS + 300;
 
-const NO_IMPACT = new Set(["dice", "death"]);
+const NO_IMPACT = new Set(['dice', 'death']);
 
 // таймер не скасовується: пізній сигнал нешкідливий, а ранній «done» його б загубив
 function impactStarter(spec: FxSpec): (() => void) | undefined {
-  const { actionId } = spec;
+    const { actionId } = spec;
 
-  if (!actionId || NO_IMPACT.has(spec.archetype)) return;
+    if (!actionId || NO_IMPACT.has(spec.archetype)) return;
 
-  return () => {
-    window.setTimeout(() => fireFxImpact(actionId), ARCHETYPE_FX[spec.archetype].impactMs);
-  };
+    return () => {
+        window.setTimeout(
+            () => fireFxImpact(actionId),
+            ARCHETYPE_FX[spec.archetype].impactMs
+        );
+    };
 }
 
 function withTimeout(run: Promise<void>, ms: number, onTimeout: () => void) {
-  let timer = 0;
+    let timer = 0;
 
-  const timeout = new Promise<void>((resolve) => {
-    timer = window.setTimeout(() => {
-      onTimeout();
-      resolve();
-    }, ms);
-  });
+    const timeout = new Promise<void>((resolve) => {
+        timer = window.setTimeout(() => {
+            onTimeout();
+            resolve();
+        }, ms);
+    });
 
-  return Promise.race([run, timeout]).finally(() => window.clearTimeout(timer));
+    return Promise.race([run, timeout]).finally(() =>
+        window.clearTimeout(timer)
+    );
 }
 
 export function BattleFxLayer() {
-  const layer = useRef<HTMLDivElement>(null);
+    const layer = useRef<HTMLDivElement>(null);
 
-  const dice = useRef<DiceStageHandle>(null);
+    const dice = useRef<DiceStageHandle>(null);
 
-  const { enabled } = useFxEnabled();
+    const { enabled } = useFxEnabled();
 
-  const labels = useFxBadgeLabels();
+    const labels = useFxBadgeLabels();
 
-  const { current, queue, done, active } = useBattleFxQueue(enabled);
+    const { current, queue, done, active } = useBattleFxQueue(enabled);
 
-  // Signatures load the moment they are queued, so they are ready by their turn.
-  useEffect(() => {
-    for (const spec of queue) if (spec.archetype !== "dice") preloadAnimation(spec.archetype);
-  }, [queue]);
+    // Signatures load the moment they are queued, so they are ready by their turn.
+    useEffect(() => {
+        for (const spec of queue)
+            if (spec.archetype !== 'dice') preloadAnimation(spec.archetype);
+    }, [queue]);
 
-  // Hidden tab, FX off or unmount: drop the running animation, so nothing stale resumes later.
-  useEffect(() => {
-    const el = layer.current;
+    // Hidden tab, FX off or unmount: drop the running animation, so nothing stale resumes later.
+    useEffect(() => {
+        const el = layer.current;
 
-    const stage = dice.current;
+        const stage = dice.current;
 
-    if (!active || !el) return;
+        if (!active || !el) return;
 
-    return () => {
-      cancelLayer(el);
-      stage?.cancel();
-    };
-  }, [active]);
+        return () => {
+            cancelLayer(el);
+            stage?.cancel();
+        };
+    }, [active]);
 
-  useEffect(() => {
-    const el = layer.current;
+    useEffect(() => {
+        const el = layer.current;
 
-    if (!current || !el) return;
+        if (!current || !el) return;
 
-    let finished = false;
+        let finished = false;
 
-    let cancelled = false;
+        let cancelled = false;
 
-    const finish = () => {
-      if (finished || cancelled) return;
+        const finish = () => {
+            if (finished || cancelled) return;
 
-      finished = true;
-      done(current.key);
-    };
+            finished = true;
+            done(current.key);
+        };
 
-    const play = () => {
-      if (current.archetype !== "dice") return playFx(el, current, document, FX_LOAD_TIMEOUT_MS, impactStarter(current), labels);
+        const play = () => {
+            if (current.archetype !== 'dice')
+                return playFx(
+                    el,
+                    current,
+                    document,
+                    FX_LOAD_TIMEOUT_MS,
+                    impactStarter(current),
+                    labels
+                );
 
-      if (!current.dice) return;
+            if (!current.dice) return;
 
-      return withTimeout(dice.current?.play(current.dice) ?? Promise.resolve(), DICE_BUDGET_MS, () => dice.current?.cancel());
-    };
+            return withTimeout(
+                dice.current?.play(current.dice) ?? Promise.resolve(),
+                DICE_BUDGET_MS,
+                () => dice.current?.cancel()
+            );
+        };
 
-    // The stuck animation is cancelled, or it would keep drawing over the next one on the same stage.
-    const guard = window.setTimeout(() => {
-      cancelLayer(el);
-      dice.current?.cancel();
-      finish();
-    }, (current.archetype === "dice" ? DICE_BUDGET_MS + 300 : MAX_FX_MS) + FX_LOAD_TIMEOUT_MS);
+        // The stuck animation is cancelled, or it would keep drawing over the next one on the same stage.
+        const guard = window.setTimeout(
+            () => {
+                cancelLayer(el);
+                dice.current?.cancel();
+                finish();
+            },
+            (current.archetype === 'dice' ? DICE_BUDGET_MS + 300 : MAX_FX_MS) +
+                FX_LOAD_TIMEOUT_MS
+        );
 
-    // async so done() never runs synchronously inside the effect
-    Promise.resolve()
-      .then(() => (cancelled ? undefined : play()))
-      .catch((e: unknown) => console.warn("battle fx", e))
-      .finally(() => {
-        window.clearTimeout(guard);
+        // async so done() never runs synchronously inside the effect
+        Promise.resolve()
+            .then(() => (cancelled ? undefined : play()))
+            .catch((e: unknown) => console.warn('battle fx', e))
+            .finally(() => {
+                window.clearTimeout(guard);
 
-        // play() міг повернутись без onStart (інша епоха шару, немає якорів): без сигналу декорації чекали б запобіжник
-        if (!cancelled && current.actionId && !NO_IMPACT.has(current.archetype)) fireFxImpact(current.actionId);
+                // play() міг повернутись без onStart (інша епоха шару, немає якорів): без сигналу декорації чекали б запобіжник
+                if (
+                    !cancelled &&
+                    current.actionId &&
+                    !NO_IMPACT.has(current.archetype)
+                )
+                    fireFxImpact(current.actionId);
 
-        finish();
-      });
+                finish();
+            });
 
-    // StrictMode's discarded pass must not start a second run on the same stage.
-    return () => {
-      cancelled = true;
-      window.clearTimeout(guard);
-    };
-  }, [current, done, labels]);
+        // StrictMode's discarded pass must not start a second run on the same stage.
+        return () => {
+            cancelled = true;
+            window.clearTimeout(guard);
+        };
+    }, [current, done, labels]);
 
-  return (
-    <>
-      {/* «fixed» обходить .battle-hud > :not(.fixed) { position: relative }, інакше шар стоїть під екраном */}
-      <div ref={layer} className="fx-layer fixed" aria-hidden />
-      <DiceStage ref={dice} />
-    </>
-  );
+    return (
+        <>
+            {/* «fixed» обходить .battle-hud > :not(.fixed) { position: relative }, інакше шар стоїть під екраном */}
+            <div ref={layer} className="fx-layer fixed" aria-hidden />
+            <DiceStage ref={dice} />
+        </>
+    );
 }

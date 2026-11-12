@@ -1,189 +1,262 @@
-import { armorFactors, type HitFn, unitSpellDpr } from "./hit-chance";
-import type { UnitStats } from "./stats";
+import { armorFactors, type HitFn, unitSpellDpr } from './hit-chance';
+import type { UnitStats } from './stats';
 
 import {
-  BALANCE_TOLERANCE,
-  HERO_EDGE,
-  HIGH_LEVEL_DPR_BOOST,
-  HIGH_LEVEL_FROM,
-  HIGH_LEVEL_HP_BOOST,
-  HIGH_LEVEL_MAX_STEPS,
-  HIGH_LEVEL_SPAN,
-  HINT_MAX_STEPS,
-  HIT_RATE,
-  MAX_UNIT_QUANTITY,
-  SCALE_MAX,
-  SCALE_MIN,
-  TARGET_ROUNDS,
-  TIER_CEILING_QUANTILE,
-} from "@/lib/constants/battle-balance";
+    BALANCE_TOLERANCE,
+    HERO_EDGE,
+    HIGH_LEVEL_DPR_BOOST,
+    HIGH_LEVEL_FROM,
+    HIGH_LEVEL_HP_BOOST,
+    HIGH_LEVEL_MAX_STEPS,
+    HIGH_LEVEL_SPAN,
+    HINT_MAX_STEPS,
+    HIT_RATE,
+    MAX_UNIT_QUANTITY,
+    SCALE_MAX,
+    SCALE_MIN,
+    TARGET_ROUNDS,
+    TIER_CEILING_QUANTILE,
+} from '@/lib/constants/battle-balance';
 
 export interface PartyPower {
-  dpr: number;
-  hp: number;
-  heroCount: number;
-  /** Average level of the heroes (allied units do not count). */
-  heroLevel?: number;
-  /** Weapon to-hit of the party, weighted by weapon DPR. */
-  toHit?: number;
-  ac?: number;
-  /** Share of party DPR that comes from weapon attacks (rolled against AC). */
-  weaponShare?: number;
-  /** Weapon DPR share of party DPR by `kind:damageType`. */
-  damageProfile?: Record<string, number>;
-  /** Average save modifier by ability (members that report saves). */
-  saves?: Partial<Record<string, number>>;
-  /** Average spell resistance percent by damage type (members that report it). */
-  spellResist?: Record<string, number>;
-  hit?: HitFn;
-  refHit?: number;
-  refHitUnit?: number;
+    dpr: number;
+    hp: number;
+    heroCount: number;
+    /** Average level of the heroes (allied units do not count). */
+    heroLevel?: number;
+    /** Weapon to-hit of the party, weighted by weapon DPR. */
+    toHit?: number;
+    ac?: number;
+    /** Share of party DPR that comes from weapon attacks (rolled against AC). */
+    weaponShare?: number;
+    /** Weapon DPR share of party DPR by `kind:damageType`. */
+    damageProfile?: Record<string, number>;
+    /** Average save modifier by ability (members that report saves). */
+    saves?: Partial<Record<string, number>>;
+    /** Average spell resistance percent by damage type (members that report it). */
+    spellResist?: Record<string, number>;
+    hit?: HitFn;
+    refHit?: number;
+    refHitUnit?: number;
 }
 
 export interface PartyMember {
-  dpr: number;
-  hp: number;
-  level?: number;
-  toHit?: number;
-  ac?: number;
-  weaponDpr?: number;
-  damageKey?: string;
-  saves?: Partial<Record<string, number>>;
-  spellResist?: Record<string, number>;
+    dpr: number;
+    hp: number;
+    level?: number;
+    toHit?: number;
+    ac?: number;
+    weaponDpr?: number;
+    damageKey?: string;
+    saves?: Partial<Record<string, number>>;
+    spellResist?: Record<string, number>;
 }
 
-export function unitMember(u: { dpr: number; hp: number; ac?: number; attackBonus?: number; damageKey?: string }): PartyMember {
-  return { dpr: u.dpr, hp: u.hp, ac: u.ac, toHit: u.attackBonus, weaponDpr: u.attackBonus === undefined ? 0 : u.dpr, damageKey: u.damageKey };
+export function unitMember(u: {
+    dpr: number;
+    hp: number;
+    ac?: number;
+    attackBonus?: number;
+    damageKey?: string;
+}): PartyMember {
+    return {
+        dpr: u.dpr,
+        hp: u.hp,
+        ac: u.ac,
+        toHit: u.attackBonus,
+        weaponDpr: u.attackBonus === undefined ? 0 : u.dpr,
+        damageKey: u.damageKey,
+    };
 }
 
-export function heroMember(s: { dpr: number; hp: number; level?: number; toHit: number; ac: number; weaponDpr: number; damageKey: string; saves?: Partial<Record<string, number>>; spellResist?: Record<string, number> }): PartyMember {
-  return { dpr: s.dpr, hp: s.hp, toHit: s.toHit, ac: s.ac, weaponDpr: s.weaponDpr, damageKey: s.damageKey, ...(s.level !== undefined && { level: s.level }), ...(s.saves && { saves: s.saves }), ...(s.spellResist && { spellResist: s.spellResist }) };
+export function heroMember(s: {
+    dpr: number;
+    hp: number;
+    level?: number;
+    toHit: number;
+    ac: number;
+    weaponDpr: number;
+    damageKey: string;
+    saves?: Partial<Record<string, number>>;
+    spellResist?: Record<string, number>;
+}): PartyMember {
+    return {
+        dpr: s.dpr,
+        hp: s.hp,
+        toHit: s.toHit,
+        ac: s.ac,
+        weaponDpr: s.weaponDpr,
+        damageKey: s.damageKey,
+        ...(s.level !== undefined && { level: s.level }),
+        ...(s.saves && { saves: s.saves }),
+        ...(s.spellResist && { spellResist: s.spellResist }),
+    };
 }
 
-function averageRecords(records: Array<{ values: Partial<Record<string, number>>; weight: number }>): Record<string, number> | undefined {
-  const total = records.reduce((a, r) => a + r.weight, 0);
+function averageRecords(
+    records: Array<{ values: Partial<Record<string, number>>; weight: number }>
+): Record<string, number> | undefined {
+    const total = records.reduce((a, r) => a + r.weight, 0);
 
-  if (total === 0) return undefined;
+    if (total === 0) return undefined;
 
-  const sum: Record<string, number> = {};
+    const sum: Record<string, number> = {};
 
-  for (const { values, weight } of records) for (const [k, v] of Object.entries(values)) sum[k] = (sum[k] ?? 0) + (v ?? 0) * weight;
+    for (const { values, weight } of records)
+        for (const [k, v] of Object.entries(values))
+            sum[k] = (sum[k] ?? 0) + (v ?? 0) * weight;
 
-  return Object.fromEntries(Object.entries(sum).map(([k, v]) => [k, v / total]));
+    return Object.fromEntries(
+        Object.entries(sum).map(([k, v]) => [k, v / total])
+    );
 }
 
-export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: number; hero: boolean }>, model?: { winChance: HitFn; refHit: number; refHitUnit?: number }): PartyPower {
-  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0, ...(model && { hit: model.winChance, refHit: model.refHit, refHitUnit: model.refHitUnit ?? model.refHit }) };
+export function buildPartyPower(
+    members: Array<{ stats: PartyMember; quantity?: number; hero: boolean }>,
+    model?: { winChance: HitFn; refHit: number; refHitUnit?: number }
+): PartyPower {
+    const party: PartyPower = {
+        dpr: 0,
+        hp: 0,
+        heroCount: 0,
+        ...(model && {
+            hit: model.winChance,
+            refHit: model.refHit,
+            refHitUnit: model.refHitUnit ?? model.refHit,
+        }),
+    };
 
-  let hitWeight = 0;
+    let hitWeight = 0;
 
-  let hitSum = 0;
+    let hitSum = 0;
 
-  let acCount = 0;
+    let acCount = 0;
 
-  let acSum = 0;
+    let acSum = 0;
 
-  const heroLevels: number[] = [];
+    const heroLevels: number[] = [];
 
-  const byKey: Record<string, number> = {};
+    const byKey: Record<string, number> = {};
 
-  for (const { stats, quantity = 1, hero } of members) {
-    party.dpr += stats.dpr * quantity;
-    party.hp += stats.hp * quantity;
+    for (const { stats, quantity = 1, hero } of members) {
+        party.dpr += stats.dpr * quantity;
+        party.hp += stats.hp * quantity;
 
-    if (hero) party.heroCount += 1;
+        if (hero) party.heroCount += 1;
 
-    if (hero && stats.level !== undefined) heroLevels.push(stats.level);
+        if (hero && stats.level !== undefined) heroLevels.push(stats.level);
 
-    const weaponDpr = (stats.weaponDpr ?? stats.dpr) * quantity;
+        const weaponDpr = (stats.weaponDpr ?? stats.dpr) * quantity;
 
-    if (stats.toHit !== undefined && weaponDpr > 0) {
-      hitWeight += weaponDpr;
-      hitSum += stats.toHit * weaponDpr;
+        if (stats.toHit !== undefined && weaponDpr > 0) {
+            hitWeight += weaponDpr;
+            hitSum += stats.toHit * weaponDpr;
 
-      if (stats.damageKey) byKey[stats.damageKey] = (byKey[stats.damageKey] ?? 0) + weaponDpr;
+            if (stats.damageKey)
+                byKey[stats.damageKey] =
+                    (byKey[stats.damageKey] ?? 0) + weaponDpr;
+        }
+
+        if (stats.ac !== undefined) {
+            acCount += quantity;
+            acSum += stats.ac * quantity;
+        }
     }
 
-    if (stats.ac !== undefined) {
-      acCount += quantity;
-      acSum += stats.ac * quantity;
+    if (hitWeight > 0) {
+        party.toHit = hitSum / hitWeight;
+        party.weaponShare =
+            party.dpr > 0 ? Math.min(1, hitWeight / party.dpr) : 1;
+
+        if (Object.keys(byKey).length > 0 && party.dpr > 0)
+            party.damageProfile = Object.fromEntries(
+                Object.entries(byKey).map(([k, v]) => [
+                    k,
+                    Math.min(1, v / party.dpr),
+                ])
+            );
     }
-  }
 
-  if (hitWeight > 0) {
-    party.toHit = hitSum / hitWeight;
-    party.weaponShare = party.dpr > 0 ? Math.min(1, hitWeight / party.dpr) : 1;
+    if (acCount > 0) party.ac = acSum / acCount;
 
-    if (Object.keys(byKey).length > 0 && party.dpr > 0) party.damageProfile = Object.fromEntries(Object.entries(byKey).map(([k, v]) => [k, Math.min(1, v / party.dpr)]));
-  }
+    if (heroLevels.length > 0)
+        party.heroLevel =
+            heroLevels.reduce((a, l) => a + l, 0) / heroLevels.length;
 
-  if (acCount > 0) party.ac = acSum / acCount;
+    const saves = averageRecords(
+        members.flatMap(({ stats, quantity = 1 }) =>
+            stats.saves ? [{ values: stats.saves, weight: quantity }] : []
+        )
+    );
 
-  if (heroLevels.length > 0) party.heroLevel = heroLevels.reduce((a, l) => a + l, 0) / heroLevels.length;
+    if (saves) party.saves = saves;
 
-  const saves = averageRecords(members.flatMap(({ stats, quantity = 1 }) => (stats.saves ? [{ values: stats.saves, weight: quantity }] : [])));
+    // опір рахується лише серед тих, хто його звітує (герої); відсутній тип — 0 %
+    const spellResist = averageRecords(
+        members.flatMap(({ stats, quantity = 1 }) =>
+            stats.spellResist
+                ? [{ values: stats.spellResist, weight: quantity }]
+                : []
+        )
+    );
 
-  if (saves) party.saves = saves;
+    if (spellResist && Object.keys(spellResist).length > 0)
+        party.spellResist = spellResist;
 
-  // опір рахується лише серед тих, хто його звітує (герої); відсутній тип — 0 %
-  const spellResist = averageRecords(members.flatMap(({ stats, quantity = 1 }) => (stats.spellResist ? [{ values: stats.spellResist, weight: quantity }] : [])));
-
-  if (spellResist && Object.keys(spellResist).length > 0) party.spellResist = spellResist;
-
-  return party;
+    return party;
 }
 
 /** The unit as this party feels it: HP scaled by how much party damage lands (AC, resistances), DPR by how easily it hits the party. */
 export function effectiveUnit(unit: UnitStats, party: PartyPower): UnitStats {
-  const f = armorFactors(unit, party);
+    const f = armorFactors(unit, party);
 
-  const dpr = unit.spell ? unitSpellDpr(unit.spell, party) : unit.dpr * f.dpr;
+    const dpr = unit.spell ? unitSpellDpr(unit.spell, party) : unit.dpr * f.dpr;
 
-  if (f.hp === 1 && dpr === unit.dpr) return unit;
+    if (f.hp === 1 && dpr === unit.dpr) return unit;
 
-  const hp = unit.hp * f.hp;
+    const hp = unit.hp * f.hp;
 
-  return { ...unit, hp, dpr, kpi: dpr / hp };
+    return { ...unit, hp, dpr, kpi: dpr / hp };
 }
 
 export interface RosterEntry {
-  unitId: string;
-  quantity: number;
+    unitId: string;
+    quantity: number;
 }
 
 export interface UnitScale {
-  hpMult: number;
-  dmgMult: number;
+    hpMult: number;
+    dmgMult: number;
 }
 
 export interface BalanceHintChange {
-  unitId: string;
-  name: string;
-  delta: number;
+    unitId: string;
+    name: string;
+    delta: number;
 }
 
 export interface BalanceHint {
-  kind: "weak" | "excess";
-  changes: BalanceHintChange[];
+    kind: 'weak' | 'excess';
+    changes: BalanceHintChange[];
 }
 
-export type BalanceVerdict = "even" | "weak" | "excess" | "empty";
+export type BalanceVerdict = 'even' | 'weak' | 'excess' | 'empty';
 
 export interface Power {
-  hp: number;
-  dpr: number;
+    hp: number;
+    dpr: number;
 }
 
 export interface FairScaling {
-  verdict: BalanceVerdict;
-  target: Power;
-  base: Power;
-  reached: Power;
-  hpScale: number;
-  dmgScale: number;
-  units: Record<string, UnitScale>;
-  fixed: Power;
-  hint: BalanceHint | null;
+    verdict: BalanceVerdict;
+    target: Power;
+    base: Power;
+    reached: Power;
+    hpScale: number;
+    dmgScale: number;
+    units: Record<string, UnitScale>;
+    fixed: Power;
+    hint: BalanceHint | null;
 }
 
 export type TierCeilings = Map<number, Power>;
@@ -191,208 +264,331 @@ export type TierCeilings = Map<number, Power>;
 const clampScale = (x: number) => Math.min(SCALE_MAX, Math.max(SCALE_MIN, x));
 
 function highLevelSteps(heroLevel: number | undefined): number {
-  if (heroLevel === undefined) return 0;
+    if (heroLevel === undefined) return 0;
 
-  return Math.min(HIGH_LEVEL_MAX_STEPS, Math.max(0, (heroLevel - HIGH_LEVEL_FROM) / HIGH_LEVEL_SPAN));
+    return Math.min(
+        HIGH_LEVEL_MAX_STEPS,
+        Math.max(0, (heroLevel - HIGH_LEVEL_FROM) / HIGH_LEVEL_SPAN)
+    );
 }
 
 export function targetEnemyPower(party: PartyPower): Power {
-  const t = highLevelSteps(party.heroLevel);
+    const t = highLevelSteps(party.heroLevel);
 
-  return { hp: party.dpr * HIT_RATE * TARGET_ROUNDS * (1 + HIGH_LEVEL_HP_BOOST * t), dpr: ((HERO_EDGE * party.hp) / TARGET_ROUNDS) * (1 + HIGH_LEVEL_DPR_BOOST * t) };
+    return {
+        hp:
+            party.dpr *
+            HIT_RATE *
+            TARGET_ROUNDS *
+            (1 + HIGH_LEVEL_HP_BOOST * t),
+        dpr:
+            ((HERO_EDGE * party.hp) / TARGET_ROUNDS) *
+            (1 + HIGH_LEVEL_DPR_BOOST * t),
+    };
 }
 
-const lowerQuantile = (values: number[]) => [...values].sort((a, b) => a - b)[Math.floor((values.length - 1) * TIER_CEILING_QUANTILE)];
+const lowerQuantile = (values: number[]) =>
+    [...values].sort((a, b) => a - b)[
+        Math.floor((values.length - 1) * TIER_CEILING_QUANTILE)
+    ];
 
 /** Слабкий край кожного тіру (за HP і за DPR окремо): нижній квартиль юнітів, яких ДМ виставляє сам, — без цілей прикликання. */
 export function weakestPerTier(library: UnitStats[]): TierCeilings {
-  const byTier = new Map<number, UnitStats[]>();
+    const byTier = new Map<number, UnitStats[]>();
 
-  for (const u of library) {
-    if (u.hp <= 0 || u.dpr <= 0 || u.summon) continue;
+    for (const u of library) {
+        if (u.hp <= 0 || u.dpr <= 0 || u.summon) continue;
 
-    byTier.set(u.level, [...(byTier.get(u.level) ?? []), u]);
-  }
+        byTier.set(u.level, [...(byTier.get(u.level) ?? []), u]);
+    }
 
-  return new Map([...byTier].map(([tier, units]) => [tier, { hp: lowerQuantile(units.map((u) => u.hp)), dpr: lowerQuantile(units.map((u) => u.dpr)) }]));
+    return new Map(
+        [...byTier].map(([tier, units]) => [
+            tier,
+            {
+                hp: lowerQuantile(units.map((u) => u.hp)),
+                dpr: lowerQuantile(units.map((u) => u.dpr)),
+            },
+        ])
+    );
 }
 
 /** Стеля для тіру `tier`: слабкий край найближчого вищого тіру, якщо він є. */
 function ceilingFor(tier: number, weakest: TierCeilings): Power | null {
-  let next: number | null = null;
+    let next: number | null = null;
 
-  for (const t of weakest.keys()) if (t > tier && (next === null || t < next)) next = t;
+    for (const t of weakest.keys())
+        if (t > tier && (next === null || t < next)) next = t;
 
-  return next === null ? null : (weakest.get(next) ?? null);
+    return next === null ? null : (weakest.get(next) ?? null);
 }
 
-function cappedScale(scale: number, unitValue: number, ceilValue: number | undefined): number {
-  if (scale <= 1 || ceilValue === undefined || unitValue <= 0) return scale;
+function cappedScale(
+    scale: number,
+    unitValue: number,
+    ceilValue: number | undefined
+): number {
+    if (scale <= 1 || ceilValue === undefined || unitValue <= 0) return scale;
 
-  return Math.min(scale, Math.max(1, ceilValue / unitValue));
+    return Math.min(scale, Math.max(1, ceilValue / unitValue));
 }
 
 export interface Entry {
-  unit: UnitStats;
-  quantity: number;
+    unit: UnitStats;
+    quantity: number;
 }
 
-export function scaleEntries(target: Power, entries: Entry[], weakest: TierCeilings) {
-  const base = entries.reduce<Power>((a, e) => ({ hp: a.hp + e.unit.hp * e.quantity, dpr: a.dpr + e.unit.dpr * e.quantity }), { hp: 0, dpr: 0 });
+export function scaleEntries(
+    target: Power,
+    entries: Entry[],
+    weakest: TierCeilings
+) {
+    const base = entries.reduce<Power>(
+        (a, e) => ({
+            hp: a.hp + e.unit.hp * e.quantity,
+            dpr: a.dpr + e.unit.dpr * e.quantity,
+        }),
+        { hp: 0, dpr: 0 }
+    );
 
-  const hpScale = base.hp > 0 ? clampScale(target.hp / base.hp) : 1;
+    const hpScale = base.hp > 0 ? clampScale(target.hp / base.hp) : 1;
 
-  const dmgScale = base.dpr > 0 ? clampScale(target.dpr / base.dpr) : 1;
+    const dmgScale = base.dpr > 0 ? clampScale(target.dpr / base.dpr) : 1;
 
-  const units: Record<string, UnitScale> = {};
+    const units: Record<string, UnitScale> = {};
 
-  const reached: Power = { hp: 0, dpr: 0 };
+    const reached: Power = { hp: 0, dpr: 0 };
 
-  for (const { unit, quantity } of entries) {
-    const ceil = ceilingFor(unit.level, weakest) ?? undefined;
+    for (const { unit, quantity } of entries) {
+        const ceil = ceilingFor(unit.level, weakest) ?? undefined;
 
-    const hpMult = cappedScale(hpScale, unit.hp, ceil?.hp);
+        const hpMult = cappedScale(hpScale, unit.hp, ceil?.hp);
 
-    const dmgMult = cappedScale(dmgScale, unit.dpr, ceil?.dpr);
+        const dmgMult = cappedScale(dmgScale, unit.dpr, ceil?.dpr);
 
-    units[unit.unitId] = { hpMult, dmgMult };
-    reached.hp += unit.hp * hpMult * quantity;
-    reached.dpr += unit.dpr * dmgMult * quantity;
-  }
+        units[unit.unitId] = { hpMult, dmgMult };
+        reached.hp += unit.hp * hpMult * quantity;
+        reached.dpr += unit.dpr * dmgMult * quantity;
+    }
 
-  return { base, hpScale, dmgScale, units, reached };
+    return { base, hpScale, dmgScale, units, reached };
 }
 
 function verdictOf(target: Power, reached: Power): BalanceVerdict {
-  const rh = target.hp > 0 ? reached.hp / target.hp : 1;
+    const rh = target.hp > 0 ? reached.hp / target.hp : 1;
 
-  const rd = target.dpr > 0 ? reached.dpr / target.dpr : 1;
+    const rd = target.dpr > 0 ? reached.dpr / target.dpr : 1;
 
-  if (rh < 1 - BALANCE_TOLERANCE || rd < 1 - BALANCE_TOLERANCE) return "weak";
+    if (rh < 1 - BALANCE_TOLERANCE || rd < 1 - BALANCE_TOLERANCE) return 'weak';
 
-  if (rh > 1 + BALANCE_TOLERANCE || rd > 1 + BALANCE_TOLERANCE) return "excess";
+    if (rh > 1 + BALANCE_TOLERANCE || rd > 1 + BALANCE_TOLERANCE)
+        return 'excess';
 
-  return "even";
+    return 'even';
 }
 
 function misfit(target: Power, reached: Power): number {
-  const l = (a: number, b: number) => (a > 0 && b > 0 ? Math.abs(Math.log(a / b)) : 0);
+    const l = (a: number, b: number) =>
+        a > 0 && b > 0 ? Math.abs(Math.log(a / b)) : 0;
 
-  return l(reached.hp, target.hp) + l(reached.dpr, target.dpr);
+    return l(reached.hp, target.hp) + l(reached.dpr, target.dpr);
 }
 
-function resolveEntries(roster: RosterEntry[], byId: Map<string, UnitStats>): Entry[] {
-  const merged = new Map<string, number>();
+function resolveEntries(
+    roster: RosterEntry[],
+    byId: Map<string, UnitStats>
+): Entry[] {
+    const merged = new Map<string, number>();
 
-  for (const r of roster) if (r.quantity > 0) merged.set(r.unitId, (merged.get(r.unitId) ?? 0) + r.quantity);
+    for (const r of roster)
+        if (r.quantity > 0)
+            merged.set(r.unitId, (merged.get(r.unitId) ?? 0) + r.quantity);
 
-  const out: Entry[] = [];
+    const out: Entry[] = [];
 
-  for (const [id, quantity] of merged) {
-    const unit = byId.get(id);
+    for (const [id, quantity] of merged) {
+        const unit = byId.get(id);
 
-    if (unit) out.push({ unit, quantity });
-  }
+        if (unit) out.push({ unit, quantity });
+    }
 
-  return out;
+    return out;
 }
 
 function withDelta(entries: Entry[], unit: UnitStats, delta: number): Entry[] {
-  const next = entries.map((e) => (e.unit.unitId === unit.unitId ? { ...e, quantity: e.quantity + delta } : e)).filter((e) => e.quantity > 0);
+    const next = entries
+        .map((e) =>
+            e.unit.unitId === unit.unitId
+                ? { ...e, quantity: e.quantity + delta }
+                : e
+        )
+        .filter((e) => e.quantity > 0);
 
-  if (!entries.some((e) => e.unit.unitId === unit.unitId) && delta > 0) next.push({ unit, quantity: delta });
+    if (!entries.some((e) => e.unit.unitId === unit.unitId) && delta > 0)
+        next.push({ unit, quantity: delta });
 
-  return next;
+    return next;
 }
 
 type ScaleFn = (entries: Entry[]) => ReturnType<typeof scaleEntries>;
 
-function suggestHint(kind: "weak" | "excess", target: Power, entries: Entry[], pool: UnitStats[], scale: ScaleFn): BalanceHint | null {
-  let current = entries;
+function suggestHint(
+    kind: 'weak' | 'excess',
+    target: Power,
+    entries: Entry[],
+    pool: UnitStats[],
+    scale: ScaleFn
+): BalanceHint | null {
+    let current = entries;
 
-  let fit = misfit(target, scale(current).reached);
+    let fit = misfit(target, scale(current).reached);
 
-  const changes = new Map<string, BalanceHintChange>();
+    const changes = new Map<string, BalanceHintChange>();
 
-  for (let step = 0; step < HINT_MAX_STEPS; step++) {
-    const verdict = verdictOf(target, scale(current).reached);
+    for (let step = 0; step < HINT_MAX_STEPS; step++) {
+        const verdict = verdictOf(target, scale(current).reached);
 
-    if (verdict !== kind) break;
+        if (verdict !== kind) break;
 
-    const delta = kind === "weak" ? 1 : -1;
+        const delta = kind === 'weak' ? 1 : -1;
 
-    const own = current.map((e) => e.unit).filter((u) => (kind === "excess" ? true : (current.find((e) => e.unit.unitId === u.unitId)?.quantity ?? 0) < MAX_UNIT_QUANTITY));
+        const own = current
+            .map((e) => e.unit)
+            .filter((u) =>
+                kind === 'excess'
+                    ? true
+                    : (current.find((e) => e.unit.unitId === u.unitId)
+                          ?.quantity ?? 0) < MAX_UNIT_QUANTITY
+            );
 
-    const tiers = new Set(current.map((e) => e.unit.level));
+        const tiers = new Set(current.map((e) => e.unit.level));
 
-    const neighbours = kind === "weak" ? pool.filter((u) => !current.some((e) => e.unit.unitId === u.unitId) && [...tiers].some((t) => Math.abs(t - u.level) <= 1)) : [];
+        const neighbours =
+            kind === 'weak'
+                ? pool.filter(
+                      (u) =>
+                          !current.some((e) => e.unit.unitId === u.unitId) &&
+                          [...tiers].some((t) => Math.abs(t - u.level) <= 1)
+                  )
+                : [];
 
-    let best: { unit: UnitStats; entries: Entry[]; fit: number } | null = null;
+        let best: { unit: UnitStats; entries: Entry[]; fit: number } | null =
+            null;
 
-    for (const group of [own, neighbours]) {
-      for (const unit of group) {
-        if (kind === "excess" && current.length === 1 && current[0].quantity <= 1) continue;
+        for (const group of [own, neighbours]) {
+            for (const unit of group) {
+                if (
+                    kind === 'excess' &&
+                    current.length === 1 &&
+                    current[0].quantity <= 1
+                )
+                    continue;
 
-        const entries = withDelta(current, unit, delta);
+                const entries = withDelta(current, unit, delta);
 
-        const f = misfit(target, scale(entries).reached);
+                const f = misfit(target, scale(entries).reached);
 
-        if (f < fit - 1e-9 && (!best || f < best.fit)) best = { unit, entries, fit: f };
-      }
+                if (f < fit - 1e-9 && (!best || f < best.fit))
+                    best = { unit, entries, fit: f };
+            }
 
-      if (best) break;
+            if (best) break;
+        }
+
+        if (!best) break;
+
+        current = best.entries;
+        fit = best.fit;
+
+        const prev = changes.get(best.unit.unitId);
+
+        changes.set(best.unit.unitId, {
+            unitId: best.unit.unitId,
+            name: best.unit.name,
+            delta: (prev?.delta ?? 0) + delta,
+        });
     }
 
-    if (!best) break;
+    const list = [...changes.values()].filter((c) => c.delta !== 0);
 
-    current = best.entries;
-    fit = best.fit;
-
-    const prev = changes.get(best.unit.unitId);
-
-    changes.set(best.unit.unitId, { unitId: best.unit.unitId, name: best.unit.name, delta: (prev?.delta ?? 0) + delta });
-  }
-
-  const list = [...changes.values()].filter((c) => c.delta !== 0);
-
-  return list.length > 0 ? { kind, changes: list } : null;
+    return list.length > 0 ? { kind, changes: list } : null;
 }
 
 const ZERO: Power = { hp: 0, dpr: 0 };
 
 /** `fixed` — сила ворогів, що не масштабуються (NPC-персонажі): входить у базу й досягнуту силу, а масштабовані юніти добирають решту цілі. */
-export function computeFairScaling(party: PartyPower, roster: RosterEntry[], rawLibrary: UnitStats[], rawHintPool: UnitStats[] = rawLibrary, fixed: Power = ZERO): FairScaling {
-  const target = targetEnemyPower(party);
+export function computeFairScaling(
+    party: PartyPower,
+    roster: RosterEntry[],
+    rawLibrary: UnitStats[],
+    rawHintPool: UnitStats[] = rawLibrary,
+    fixed: Power = ZERO
+): FairScaling {
+    const target = targetEnemyPower(party);
 
-  const felt = (list: UnitStats[]) => list.map((u) => effectiveUnit(u, party));
+    const felt = (list: UnitStats[]) =>
+        list.map((u) => effectiveUnit(u, party));
 
-  const library = felt(rawLibrary);
+    const library = felt(rawLibrary);
 
-  const hintPool = rawHintPool === rawLibrary ? library : felt(rawHintPool);
+    const hintPool = rawHintPool === rawLibrary ? library : felt(rawHintPool);
 
-  const byId = new Map(library.map((u) => [u.unitId, u]));
+    const byId = new Map(library.map((u) => [u.unitId, u]));
 
-  const entries = resolveEntries(roster, byId);
+    const entries = resolveEntries(roster, byId);
 
-  if (entries.length === 0 || party.dpr <= 0 || party.hp <= 0) {
-    return { verdict: "empty", target, base: { hp: 0, dpr: 0 }, reached: { hp: 0, dpr: 0 }, hpScale: 1, dmgScale: 1, units: {}, fixed, hint: null };
-  }
+    if (entries.length === 0 || party.dpr <= 0 || party.hp <= 0) {
+        return {
+            verdict: 'empty',
+            target,
+            base: { hp: 0, dpr: 0 },
+            reached: { hp: 0, dpr: 0 },
+            hpScale: 1,
+            dmgScale: 1,
+            units: {},
+            fixed,
+            hint: null,
+        };
+    }
 
-  const weakest = weakestPerTier(library);
+    const weakest = weakestPerTier(library);
 
-  const scalable: Power = { hp: Math.max(0, target.hp - fixed.hp), dpr: Math.max(0, target.dpr - fixed.dpr) };
+    const scalable: Power = {
+        hp: Math.max(0, target.hp - fixed.hp),
+        dpr: Math.max(0, target.dpr - fixed.dpr),
+    };
 
-  const scale: ScaleFn = (list) => {
-    const r = scaleEntries(scalable, list, weakest);
+    const scale: ScaleFn = (list) => {
+        const r = scaleEntries(scalable, list, weakest);
 
-    return { ...r, base: { hp: r.base.hp + fixed.hp, dpr: r.base.dpr + fixed.dpr }, reached: { hp: r.reached.hp + fixed.hp, dpr: r.reached.dpr + fixed.dpr } };
-  };
+        return {
+            ...r,
+            base: { hp: r.base.hp + fixed.hp, dpr: r.base.dpr + fixed.dpr },
+            reached: {
+                hp: r.reached.hp + fixed.hp,
+                dpr: r.reached.dpr + fixed.dpr,
+            },
+        };
+    };
 
-  const { base, hpScale, dmgScale, units, reached } = scale(entries);
+    const { base, hpScale, dmgScale, units, reached } = scale(entries);
 
-  const verdict = verdictOf(target, reached);
+    const verdict = verdictOf(target, reached);
 
-  const hint = verdict === "weak" || verdict === "excess" ? suggestHint(verdict, target, entries, hintPool, scale) : null;
+    const hint =
+        verdict === 'weak' || verdict === 'excess'
+            ? suggestHint(verdict, target, entries, hintPool, scale)
+            : null;
 
-  return { verdict, target, base, reached, hpScale, dmgScale, units, fixed, hint };
+    return {
+        verdict,
+        target,
+        base,
+        reached,
+        hpScale,
+        dmgScale,
+        units,
+        fixed,
+        hint,
+    };
 }

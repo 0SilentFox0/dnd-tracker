@@ -1,87 +1,177 @@
-import { NextResponse } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getResponseJson } from "./helpers";
+import { getResponseJson } from './helpers';
 
-import { prisma } from "@/lib/db";
-import * as apiAuth from "@/lib/utils/api/api-auth";
+import { prisma } from '@/lib/db';
+import * as apiAuth from '@/lib/utils/api/api-auth';
 
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
-vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn() } } }));
+vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
+vi.mock('@/lib/db', () => ({
+    prisma: { character: { findUnique: vi.fn(), update: vi.fn() } },
+}));
 
-const access = (userId: string, role: "dm" | "player") => ({ userId, isDM: role === "dm", campaign: { id: "camp", members: [{ userId, role }] } }) as never;
+const access = (userId: string, role: 'dm' | 'player') =>
+    ({
+        userId,
+        isDM: role === 'dm',
+        campaign: { id: 'camp', members: [{ userId, role }] },
+    }) as never;
 
-const DM_GOAL = { id: "d1", text: "Знайти брата", status: "active", author: "dm" };
-
-const put = async (goals: unknown, seen?: string[]) => {
-  const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/goals/route");
-
-  return mod.PUT(new Request("http://x", { method: "PUT", body: JSON.stringify({ goals, seen }) }), { params: Promise.resolve({ id: "camp", characterId: "ch" }) }) as Promise<NextResponse>;
+const DM_GOAL = {
+    id: 'd1',
+    text: 'Знайти брата',
+    status: 'active',
+    author: 'dm',
 };
 
-describe("PUT goals", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", controlledBy: "owner", goals: [DM_GOAL] } as never);
-    vi.mocked(prisma.character.update).mockImplementation(((args: { data: { goals: unknown } }) => Promise.resolve({ goals: args.data.goals })) as never);
-  });
+const put = async (goals: unknown, seen?: string[]) => {
+    const mod = await import(
+        '@/app/api/campaigns/[id]/characters/[characterId]/goals/route'
+    );
 
-  it("гравець: ціль ДМа незмінна, author ставить сервер", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
+    return mod.PUT(
+        new Request('http://x', {
+            method: 'PUT',
+            body: JSON.stringify({ goals, seen }),
+        }),
+        { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) }
+    ) as Promise<NextResponse>;
+};
 
-    const res = await put([{ ...DM_GOAL, text: "Зламано", author: "player" }, { id: "p1", text: "Моя", status: "active", author: "dm" }]);
+describe('PUT goals', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            id: 'ch',
+            campaignId: 'camp',
+            controlledBy: 'owner',
+            goals: [DM_GOAL],
+        } as never);
+        vi.mocked(prisma.character.update).mockImplementation(((args: {
+            data: { goals: unknown };
+        }) => Promise.resolve({ goals: args.data.goals })) as never);
+    });
 
-    expect(res.status).toBe(200);
-    expect(await getResponseJson(res)).toEqual({ goals: [DM_GOAL, { id: "p1", text: "Моя", status: "active", author: "player" }] });
-  });
+    it('гравець: ціль ДМа незмінна, author ставить сервер', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('owner', 'player')
+        );
 
-  it("чужий гравець — 403", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("other", "player"));
-    expect((await put([])).status).toBe(403);
-  });
+        const res = await put([
+            { ...DM_GOAL, text: 'Зламано', author: 'player' },
+            { id: 'p1', text: 'Моя', status: 'active', author: 'dm' },
+        ]);
 
-  it("ДМ пише все; без author — dm", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
+        expect(res.status).toBe(200);
+        expect(await getResponseJson(res)).toEqual({
+            goals: [
+                DM_GOAL,
+                { id: 'p1', text: 'Моя', status: 'active', author: 'player' },
+            ],
+        });
+    });
 
-    const res = await put([{ id: "n", text: "Нова", status: "done" }]);
+    it('чужий гравець — 403', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('other', 'player')
+        );
+        expect((await put([])).status).toBe(403);
+    });
 
-    expect(await getResponseJson(res)).toEqual({ goals: [{ id: "n", text: "Нова", status: "done", author: "dm" }] });
-  });
+    it('ДМ пише все; без author — dm', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('dm', 'dm')
+        );
 
-  it("текст понад 600 символів — 400", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
-    expect((await put([{ id: "x", text: "a".repeat(601), status: "active" }])).status).toBe(400);
-  });
+        const res = await put([{ id: 'n', text: 'Нова', status: 'done' }]);
 
-  it("ДМ зі старим кешем не стирає ціль гравця, якої ще не бачив", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
+        expect(await getResponseJson(res)).toEqual({
+            goals: [{ id: 'n', text: 'Нова', status: 'done', author: 'dm' }],
+        });
+    });
 
-    const fresh = { id: "p9", text: "Щойно додана", status: "active", author: "player" };
+    it('текст понад 600 символів — 400', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('owner', 'player')
+        );
+        expect(
+            (await put([{ id: 'x', text: 'a'.repeat(601), status: 'active' }]))
+                .status
+        ).toBe(400);
+    });
 
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", controlledBy: "owner", goals: [DM_GOAL, fresh] } as never);
+    it('ДМ зі старим кешем не стирає ціль гравця, якої ще не бачив', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('dm', 'dm')
+        );
 
-    const res = await put([{ ...DM_GOAL, status: "done" }], ["d1"]);
+        const fresh = {
+            id: 'p9',
+            text: 'Щойно додана',
+            status: 'active',
+            author: 'player',
+        };
 
-    expect(await getResponseJson(res)).toEqual({ goals: [{ ...DM_GOAL, status: "done" }, fresh] });
-  });
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            id: 'ch',
+            campaignId: 'camp',
+            controlledBy: 'owner',
+            goals: [DM_GOAL, fresh],
+        } as never);
 
-  it("ДМ видаляє ціль гравця, яку бачив", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", controlledBy: "owner", goals: [DM_GOAL, { id: "p1", text: "x", status: "active", author: "player" }] } as never);
+        const res = await put([{ ...DM_GOAL, status: 'done' }], ['d1']);
 
-    expect(await getResponseJson(await put([DM_GOAL], ["d1", "p1"]))).toEqual({ goals: [DM_GOAL] });
-  });
+        expect(await getResponseJson(res)).toEqual({
+            goals: [{ ...DM_GOAL, status: 'done' }, fresh],
+        });
+    });
 
-  it("не-JSON тіло — 400", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", "player"));
+    it('ДМ видаляє ціль гравця, яку бачив', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('dm', 'dm')
+        );
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            id: 'ch',
+            campaignId: 'camp',
+            controlledBy: 'owner',
+            goals: [
+                DM_GOAL,
+                { id: 'p1', text: 'x', status: 'active', author: 'player' },
+            ],
+        } as never);
 
-    const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/goals/route");
+        expect(
+            await getResponseJson(await put([DM_GOAL], ['d1', 'p1']))
+        ).toEqual({ goals: [DM_GOAL] });
+    });
 
-    const res = (await mod.PUT(new Request("http://x", { method: "PUT", body: "{oops" }), { params: Promise.resolve({ id: "camp", characterId: "ch" }) })) as NextResponse;
+    it('не-JSON тіло — 400', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('owner', 'player')
+        );
 
-    expect(res.status).toBe(400);
-  });
+        const mod = await import(
+            '@/app/api/campaigns/[id]/characters/[characterId]/goals/route'
+        );
+
+        const res = (await mod.PUT(
+            new Request('http://x', { method: 'PUT', body: '{oops' }),
+            { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) }
+        )) as NextResponse;
+
+        expect(res.status).toBe(400);
+    });
 });
 
 // Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }), withCampaignRuntimeWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
+vi.mock('@/lib/server/content/write', () => ({
+    withCampaignContentWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+    withCampaignRuntimeWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+}));

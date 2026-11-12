@@ -1,14 +1,30 @@
-export type Page<T> = { items: T[]; hasMore: boolean; nextOffset: number | null };
+export type Page<T> = {
+    items: T[];
+    hasMore: boolean;
+    nextOffset: number | null;
+};
 
 /** `rows` were fetched with `take: limit + 1`. */
 export function pageOf<T>(rows: T[], offset: number, limit: number): Page<T> {
-  const hasMore = rows.length > limit;
+    const hasMore = rows.length > limit;
 
-  return { items: rows.slice(0, limit), hasMore, nextOffset: hasMore ? offset + limit : null };
+    return {
+        items: rows.slice(0, limit),
+        hasMore,
+        nextOffset: hasMore ? offset + limit : null,
+    };
 }
 
-export function windowOf<T>(all: readonly T[], offset: number, limit: number): { offset: number; total: number; items: T[]; nextOffset: number | null } {
-  const { items, nextOffset } = pageOf(all.slice(offset, offset + limit + 1), offset, limit);
+export function windowOf<T>(
+    all: readonly T[],
+    offset: number,
+    limit: number
+): { offset: number; total: number; items: T[]; nextOffset: number | null } {
+    const { items, nextOffset } = pageOf(
+        all.slice(offset, offset + limit + 1),
+        offset,
+        limit
+    );
 
-  return { offset, total: all.length, items, nextOffset };
+    return { offset, total: all.length, items, nextOffset };
 }

@@ -1,47 +1,59 @@
-import type { RichNode, ScenarioContent } from "@/types/scenario";
+import type { RichNode, ScenarioContent } from '@/types/scenario';
 
-export interface FilledImages { content: ScenarioContent; found: Set<string>; changed: boolean }
+export interface FilledImages {
+    content: ScenarioContent;
+    found: Set<string>;
+    changed: boolean;
+}
 
-export function fillImageSources(content: ScenarioContent, urls: ReadonlyMap<string, string>): FilledImages {
-  const found = new Set<string>();
+export function fillImageSources(
+    content: ScenarioContent,
+    urls: ReadonlyMap<string, string>
+): FilledImages {
+    const found = new Set<string>();
 
-  let changed = false;
+    let changed = false;
 
-  const visit = (node: RichNode): RichNode => {
-    let next = node;
+    const visit = (node: RichNode): RichNode => {
+        let next = node;
 
-    const mediaId = node.type === "image" ? node.attrs?.mediaId : undefined;
+        const mediaId = node.type === 'image' ? node.attrs?.mediaId : undefined;
 
-    if (typeof mediaId === "string") {
-      found.add(mediaId);
+        if (typeof mediaId === 'string') {
+            found.add(mediaId);
 
-      const url = urls.get(mediaId);
+            const url = urls.get(mediaId);
 
-      if (url && !node.attrs?.src) {
-        next = { ...next, attrs: { ...node.attrs, src: url } };
-        changed = true;
-      }
-    }
+            if (url && !node.attrs?.src) {
+                next = { ...next, attrs: { ...node.attrs, src: url } };
+                changed = true;
+            }
+        }
 
-    const children = node.content;
+        const children = node.content;
 
-    if (children) {
-      const content = children.map(visit);
+        if (children) {
+            const content = children.map(visit);
 
-      if (content.some((child, i) => child !== children[i])) next = { ...next, content };
-    }
+            if (content.some((child, i) => child !== children[i]))
+                next = { ...next, content };
+        }
 
-    return next;
-  };
+        return next;
+    };
 
-  const sections = content.sections.map((section) => ({
-    ...section,
-    rows: section.rows.map((row) => ({
-      ...row,
-      story: { ...row.story, content: row.story.content.map(visit) },
-      notes: { ...row.notes, content: row.notes.content.map(visit) },
-    })),
-  }));
+    const sections = content.sections.map((section) => ({
+        ...section,
+        rows: section.rows.map((row) => ({
+            ...row,
+            story: { ...row.story, content: row.story.content.map(visit) },
+            notes: { ...row.notes, content: row.notes.content.map(visit) },
+        })),
+    }));
 
-  return { content: changed ? { ...content, sections } : content, found, changed };
+    return {
+        content: changed ? { ...content, sections } : content,
+        found,
+        changed,
+    };
 }

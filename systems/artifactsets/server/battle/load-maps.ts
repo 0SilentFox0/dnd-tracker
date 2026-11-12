@@ -1,54 +1,56 @@
-import { prisma } from "@/lib/db";
-import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import { prisma } from '@/lib/db';
+import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
 
 export type ArtifactSetBattleMaps = {
-  artifactSetsById: NonNullable<CampaignSpellContext["artifactSetsById"]>;
-  artifactSetMemberIds: NonNullable<CampaignSpellContext["artifactSetMemberIds"]>;
+    artifactSetsById: NonNullable<CampaignSpellContext['artifactSetsById']>;
+    artifactSetMemberIds: NonNullable<
+        CampaignSpellContext['artifactSetMemberIds']
+    >;
 };
 
 export async function loadArtifactSetBattleMaps(
-  campaignId: string,
-  setIds: string[],
+    campaignId: string,
+    setIds: string[]
 ): Promise<ArtifactSetBattleMaps> {
-  const empty: ArtifactSetBattleMaps = {
-    artifactSetsById: {},
-    artifactSetMemberIds: {},
-  };
-
-  if (setIds.length === 0) return empty;
-
-  const [sets, memberRows] = await Promise.all([
-    prisma.artifactSet.findMany({
-      where: { campaignId, id: { in: setIds } },
-    }),
-    prisma.artifact.findMany({
-      where: { campaignId, setId: { in: setIds } },
-      select: { id: true, setId: true },
-    }),
-  ]);
-
-  const artifactSetsById: ArtifactSetBattleMaps["artifactSetsById"] = {};
-
-  for (const s of sets) {
-    artifactSetsById[s.id] = {
-      id: s.id,
-      name: s.name,
-      setBonus: s.setBonus,
-      icon: s.icon ?? null,
-      abilities: s.abilities,
+    const empty: ArtifactSetBattleMaps = {
+        artifactSetsById: {},
+        artifactSetMemberIds: {},
     };
-  }
 
-  const artifactSetMemberIds: ArtifactSetBattleMaps["artifactSetMemberIds"] =
-    {};
+    if (setIds.length === 0) return empty;
 
-  for (const r of memberRows) {
-    if (!r.setId) continue;
+    const [sets, memberRows] = await Promise.all([
+        prisma.artifactSet.findMany({
+            where: { campaignId, id: { in: setIds } },
+        }),
+        prisma.artifact.findMany({
+            where: { campaignId, setId: { in: setIds } },
+            select: { id: true, setId: true },
+        }),
+    ]);
 
-    if (!artifactSetMemberIds[r.setId]) artifactSetMemberIds[r.setId] = [];
+    const artifactSetsById: ArtifactSetBattleMaps['artifactSetsById'] = {};
 
-    artifactSetMemberIds[r.setId].push(r.id);
-  }
+    for (const s of sets) {
+        artifactSetsById[s.id] = {
+            id: s.id,
+            name: s.name,
+            setBonus: s.setBonus,
+            icon: s.icon ?? null,
+            abilities: s.abilities,
+        };
+    }
 
-  return { artifactSetsById, artifactSetMemberIds };
+    const artifactSetMemberIds: ArtifactSetBattleMaps['artifactSetMemberIds'] =
+        {};
+
+    for (const r of memberRows) {
+        if (!r.setId) continue;
+
+        if (!artifactSetMemberIds[r.setId]) artifactSetMemberIds[r.setId] = [];
+
+        artifactSetMemberIds[r.setId].push(r.id);
+    }
+
+    return { artifactSetsById, artifactSetMemberIds };
 }

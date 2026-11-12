@@ -1,94 +1,141 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { Images } from "lucide-react";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Images } from 'lucide-react';
 
-import { EmptyState } from "@/components/common/states";
-import { HudForm, HudFormPage } from "@/components/hud/form";
-import { AddSlidesBar } from "@/components/show/editor/AddSlidesBar";
-import { DeckSceneSelect } from "@/components/show/editor/DeckSceneSelect";
-import { SlideDialog } from "@/components/show/editor/SlideDialog";
-import { SlideGrid } from "@/components/show/editor/SlideGrid";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { DECK_TITLE_MAX } from "@/lib/constants/show";
-import { useNotify } from "@/lib/hooks/common";
-import { useDeck, useDeckEditor, useShowControl } from "@/lib/hooks/show";
-import type { SlideDeck } from "@/types/show";
+import { EmptyState } from '@/components/common/states';
+import { HudForm, HudFormPage } from '@/components/hud/form';
+import { AddSlidesBar } from '@/components/show/editor/AddSlidesBar';
+import { DeckSceneSelect } from '@/components/show/editor/DeckSceneSelect';
+import { SlideDialog } from '@/components/show/editor/SlideDialog';
+import { SlideGrid } from '@/components/show/editor/SlideGrid';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { DECK_TITLE_MAX } from '@/lib/constants/show';
+import { useNotify } from '@/lib/hooks/common';
+import { useDeck, useDeckEditor, useShowControl } from '@/lib/hooks/show';
+import type { SlideDeck } from '@/types/show';
 
-export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string; deck: SlideDeck }) {
-  const t = useTranslations("show");
+export function DeckEditorPageClient({
+    campaignId,
+    deck,
+}: {
+    campaignId: string;
+    deck: SlideDeck;
+}) {
+    const t = useTranslations('show');
 
-  const tc = useTranslations("common");
+    const tc = useTranslations('common');
 
-  const router = useRouter();
+    const router = useRouter();
 
-  const notify = useNotify();
+    const notify = useNotify();
 
-  const { data: live = deck } = useDeck(campaignId, deck.id, { initial: deck });
+    const { data: live = deck } = useDeck(campaignId, deck.id, {
+        initial: deck,
+    });
 
-  const editor = useDeckEditor(campaignId, deck);
+    const editor = useDeckEditor(campaignId, deck);
 
-  const control = useShowControl(campaignId, notify);
+    const control = useShowControl(campaignId, notify);
 
-  const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
-  const { draft, dispatch, dirty, saving } = editor;
+    const { draft, dispatch, dirty, saving } = editor;
 
-  const base = `/campaigns/${campaignId}`;
+    const base = `/campaigns/${campaignId}`;
 
-  const editingIndex = draft.slides.findIndex((s) => s.id === editingId);
+    const editingIndex = draft.slides.findIndex((s) => s.id === editingId);
 
-  const editing = editingIndex === -1 ? null : { slide: draft.slides[editingIndex], index: editingIndex };
+    const editing =
+        editingIndex === -1
+            ? null
+            : { slide: draft.slides[editingIndex], index: editingIndex };
 
-  const startShow = async () => {
-    if (dirty && !(await editor.save())) return;
+    const startShow = async () => {
+        if (dirty && !(await editor.save())) return;
 
-    if (await control.send({ action: "open", deckId: deck.id })) router.push(`${base}/show`);
-  };
+        if (await control.send({ action: 'open', deckId: deck.id }))
+            router.push(`${base}/show`);
+    };
 
-  return (
-    <HudFormPage
-      title={t("deckEditor.title")}
-      aside={
-        <Link href={`${base}/dm/show`} className="underline">
-          {t("deckEditor.back")}
-        </Link>
-      }
-    >
-      <HudForm
-        id="deck-editor-form"
-        error={draft.title.trim() ? null : t("deckEditor.nameRequired")}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void editor.save();
-        }}
-        actions={
-          <>
-            <Button type="submit" disabled={!dirty || saving || !draft.title.trim()}>
-              {tc("actions.save")}
-            </Button>
-            <Button type="button" variant="outline" disabled={saving || control.pending || draft.slides.length === 0} onClick={() => void startShow()}>
-              {t("startShow")}
-            </Button>
-          </>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <Input aria-label={t("deckEditor.nameLabel")} placeholder={t("deckEditor.nameLabel")} maxLength={DECK_TITLE_MAX} value={draft.title} onChange={(e) => dispatch({ type: "rename", title: e.target.value })} />
-          <DeckSceneSelect campaignId={campaignId} deck={live} />
-          <AddSlidesBar campaignId={campaignId} upload={editor.upload} count={draft.slides.length} />
-          {draft.slides.length === 0 ? (
-            <EmptyState icon={Images} title={t("deckEditor.emptyTitle")} description={t("deckEditor.emptyDescription")} />
-          ) : (
-            <SlideGrid slides={draft.slides} actions={{ dispatch, edit: setEditingId }} />
-          )}
-        </div>
-      </HudForm>
-      <SlideDialog campaignId={campaignId} slide={editing} actions={{ dispatch, close: () => setEditingId(null) }} />
-    </HudFormPage>
-  );
+    return (
+        <HudFormPage
+            title={t('deckEditor.title')}
+            aside={
+                <Link href={`${base}/dm/show`} className="underline">
+                    {t('deckEditor.back')}
+                </Link>
+            }
+        >
+            <HudForm
+                id="deck-editor-form"
+                error={draft.title.trim() ? null : t('deckEditor.nameRequired')}
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    void editor.save();
+                }}
+                actions={
+                    <>
+                        <Button
+                            type="submit"
+                            disabled={!dirty || saving || !draft.title.trim()}
+                        >
+                            {tc('actions.save')}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={
+                                saving ||
+                                control.pending ||
+                                draft.slides.length === 0
+                            }
+                            onClick={() => void startShow()}
+                        >
+                            {t('startShow')}
+                        </Button>
+                    </>
+                }
+            >
+                <div className="flex flex-col gap-4">
+                    <Input
+                        aria-label={t('deckEditor.nameLabel')}
+                        placeholder={t('deckEditor.nameLabel')}
+                        maxLength={DECK_TITLE_MAX}
+                        value={draft.title}
+                        onChange={(e) =>
+                            dispatch({ type: 'rename', title: e.target.value })
+                        }
+                    />
+                    <DeckSceneSelect campaignId={campaignId} deck={live} />
+                    <AddSlidesBar
+                        campaignId={campaignId}
+                        upload={editor.upload}
+                        count={draft.slides.length}
+                    />
+                    {draft.slides.length === 0 ? (
+                        <EmptyState
+                            icon={Images}
+                            title={t('deckEditor.emptyTitle')}
+                            description={t('deckEditor.emptyDescription')}
+                        />
+                    ) : (
+                        <SlideGrid
+                            slides={draft.slides}
+                            actions={{ dispatch, edit: setEditingId }}
+                        />
+                    )}
+                </div>
+            </HudForm>
+            <SlideDialog
+                campaignId={campaignId}
+                slide={editing}
+                actions={{ dispatch, close: () => setEditingId(null) }}
+            />
+        </HudFormPage>
+    );
 }

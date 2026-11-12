@@ -1,43 +1,49 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from '@prisma/client';
 
-import "server-only";
-import { prisma } from "@/lib/db";
-import { toBookSpell } from "@/lib/utils/spells/to-book-spell";
-import type { BookSpell } from "@/types/spells";
+import 'server-only';
+import { prisma } from '@/lib/db';
+import { toBookSpell } from '@/lib/utils/spells/to-book-spell';
+import type { BookSpell } from '@/types/spells';
 
 export const BOOK_SPELL_SELECT = {
-  id: true,
-  name: true,
-  executionMode: true,
-  level: true,
-  description: true,
-  appearanceDescription: true,
-  icon: true,
-  dice: true,
-  cost: true,
-  casting: true,
-  targeting: true,
-  resolution: true,
-  spellEffects: true,
-  stackable: true,
-  maxStacks: true,
-  dieSides: true,
-  upcastDice: true,
-  upcastTargets: true,
-  addAbilityMod: true,
-  fixedDice: true,
-  damageBonus: true,
-  fx: true,
-  ingredients: true,
-  componentFlags: true,
-  components: true,
-  spellGroup: { select: { id: true, name: true, color: true, icon: true } },
+    id: true,
+    name: true,
+    executionMode: true,
+    level: true,
+    description: true,
+    appearanceDescription: true,
+    icon: true,
+    dice: true,
+    cost: true,
+    casting: true,
+    targeting: true,
+    resolution: true,
+    spellEffects: true,
+    stackable: true,
+    maxStacks: true,
+    dieSides: true,
+    upcastDice: true,
+    upcastTargets: true,
+    addAbilityMod: true,
+    fixedDice: true,
+    damageBonus: true,
+    fx: true,
+    ingredients: true,
+    componentFlags: true,
+    components: true,
+    spellGroup: { select: { id: true, name: true, color: true, icon: true } },
 } satisfies Prisma.SpellSelect;
 
-export async function loadBookSpellsByIds(campaignId: string, ids: string[]): Promise<BookSpell[]> {
-  if (ids.length === 0) return [];
+export async function loadBookSpellsByIds(
+    campaignId: string,
+    ids: string[]
+): Promise<BookSpell[]> {
+    if (ids.length === 0) return [];
 
-  const rows = await prisma.spell.findMany({ where: { campaignId, id: { in: ids } }, select: BOOK_SPELL_SELECT });
+    const rows = await prisma.spell.findMany({
+        where: { campaignId, id: { in: ids } },
+        select: BOOK_SPELL_SELECT,
+    });
 
-  return rows.map(toBookSpell);
+    return rows.map(toBookSpell);
 }

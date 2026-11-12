@@ -1,29 +1,65 @@
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
-import { Button } from "@/components/ui/button";
-import type { NodeState } from "@/lib/utils/skills/progression";
+import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { Button } from '@/components/ui/button';
+import type { NodeState } from '@/lib/utils/skills/progression';
 
-export function SlotButton({ state, label, icon, onSelect }: { state: NodeState; label: string; icon: string | null; onSelect: () => void }) {
-  const t = useTranslations("skillTree.slot");
+export function SlotButton({
+    state,
+    label,
+    icon,
+    onSelect,
+}: {
+    state: NodeState;
+    label: string;
+    icon: string | null;
+    onSelect: () => void;
+}) {
+    const t = useTranslations('skillTree.slot');
 
-  const aria = state.state === "learned" ? label : state.state === "available" ? t("learn", { label }) : t("locked", { label });
+    const aria =
+        state.state === 'learned'
+            ? label
+            : state.state === 'available'
+              ? t('learn', { label })
+              : t('locked', { label });
 
-  const tone = state.state === "learned" ? "skill-slot learned" : state.state === "available" ? "skill-slot available" : "skill-slot locked";
+    const tone =
+        state.state === 'learned'
+            ? 'skill-slot learned'
+            : state.state === 'available'
+              ? 'skill-slot available'
+              : 'skill-slot locked';
 
-  return (
-    <Button type="button" variant="ghost" aria-label={aria} onClick={onSelect} disabled={!state.nodeId} className="relative h-auto whitespace-normal rounded-none p-0 font-normal after:absolute after:-inset-1 after:content-[''] hover:bg-transparent dark:hover:bg-transparent flex items-center justify-center disabled:opacity-100">
-      <span className={tone}>
-        {state.state === "learned" ? (
-          icon ? (
-            <OptimizedImage src={icon} alt="" width={56} height={56} className="h-full w-full object-cover" fallback={<span className="hud-sc">{label[0]}</span>} />
-          ) : (
-            <span className="hud-sc">{label[0]}</span>
-          )
-        ) : (
-          <span className="hud-sc">?</span>
-        )}
-      </span>
-    </Button>
-  );
+    return (
+        <Button
+            type="button"
+            variant="ghost"
+            aria-label={aria}
+            onClick={onSelect}
+            disabled={!state.nodeId}
+            className="relative flex h-auto items-center justify-center rounded-none p-0 font-normal whitespace-normal after:absolute after:-inset-1 after:content-[''] hover:bg-transparent disabled:opacity-100 dark:hover:bg-transparent"
+        >
+            <span className={tone}>
+                {state.state === 'learned' ? (
+                    icon ? (
+                        <OptimizedImage
+                            src={icon}
+                            alt=""
+                            width={56}
+                            height={56}
+                            className="h-full w-full object-cover"
+                            fallback={
+                                <span className="hud-sc">{label[0]}</span>
+                            }
+                        />
+                    ) : (
+                        <span className="hud-sc">{label[0]}</span>
+                    )
+                ) : (
+                    <span className="hud-sc">?</span>
+                )}
+            </span>
+        </Button>
+    );
 }

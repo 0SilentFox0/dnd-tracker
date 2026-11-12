@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { usePathname } from "next/navigation";
+import { usePathname } from 'next/navigation';
 
-import { useActiveSessions } from "./useActiveSessions";
+import { useActiveSessions } from './useActiveSessions';
 
-import { pickWatchShow, showHref } from "@/lib/utils/campaigns/watch-show";
+import { pickWatchShow, showHref } from '@/lib/utils/campaigns/watch-show';
 
 export function useWatchShow(): { href: string | null } {
-  const pathname = usePathname();
+    const pathname = usePathname();
 
-  const { data } = useActiveSessions();
+    const { data } = useActiveSessions();
 
-  const target = pickWatchShow(data?.shows ?? [], pathname);
+    const target = pickWatchShow(data?.shows ?? [], pathname);
 
-  return { href: target ? showHref(target) : null };
+    return { href: target ? showHref(target) : null };
 }

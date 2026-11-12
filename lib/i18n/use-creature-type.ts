@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useTranslator } from "./use-translator";
+import { useTranslator } from './use-translator';
 
 export function useCreatureTypeLabel(): (type: string) => string {
-  const tg = useTranslator("gameTerms");
+    const tg = useTranslator('gameTerms');
 
-  return (type) => {
-    const key = `creatureType.${type.trim().toLowerCase()}`;
+    return (type) => {
+        const key = `creatureType.${type.trim().toLowerCase()}`;
 
-    return tg.has(key) ? tg(key) : type;
-  };
+        return tg.has(key) ? tg(key) : type;
+    };
 }

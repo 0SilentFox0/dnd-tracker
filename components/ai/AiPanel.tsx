@@ -1,244 +1,427 @@
-"use client";
+'use client';
 
-import { type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, useCallback, useRef, useState } from "react";
-import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
-import { KeyRound } from "lucide-react";
+import {
+    type CSSProperties,
+    type KeyboardEvent,
+    type PointerEvent,
+    type ReactNode,
+    useCallback,
+    useRef,
+    useState,
+} from 'react';
+import Link from 'next/link';
+import { useFormatter, useTranslations } from 'next-intl';
+import { KeyRound } from 'lucide-react';
 
-import { AiComposer } from "./AiComposer";
-import { AiMessageList } from "./AiMessageList";
-import { AiThreadHeader } from "./AiThreadHeader";
-import { AssistantContextDisclosure } from "./AssistantContextDisclosure";
+import { AiComposer } from './AiComposer';
+import { AiMessageList } from './AiMessageList';
+import { AiThreadHeader } from './AiThreadHeader';
+import { AssistantContextDisclosure } from './AssistantContextDisclosure';
 
-import { EmptyState, LoadingState } from "@/components/common/states";
-import { Button } from "@/components/ui/button";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { type AiProvider, type AiThreadMode, LEGACY_THREAD_TITLE } from "@/lib/constants/ai";
-import { AI_PANEL_WIDTH, useAiChat, useAiCredentials, useAiPanelWidth, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
-import { useAssistantContext } from "@/lib/hooks/ai/useAssistantContext";
-import { useAssistantEffects } from "@/lib/hooks/ai/useAssistantEffects";
-import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
-import { useTranslator } from "@/lib/i18n/use-translator";
-import { focusLabelOf } from "@/lib/utils/ai/focus";
-import type { AiChatMessage, AiFocus, AiThread } from "@/types/ai";
-import type { ScenarioPage } from "@/types/scenario";
+import { EmptyState, LoadingState } from '@/components/common/states';
+import { Button } from '@/components/ui/button';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import {
+    type AiProvider,
+    type AiThreadMode,
+    LEGACY_THREAD_TITLE,
+} from '@/lib/constants/ai';
+import {
+    AI_PANEL_WIDTH,
+    useAiChat,
+    useAiCredentials,
+    useAiPanelWidth,
+    useAiProposals,
+    useAiThreadMessages,
+    useAiThreads,
+} from '@/lib/hooks/ai';
+import { useAssistantContext } from '@/lib/hooks/ai/useAssistantContext';
+import { useAssistantEffects } from '@/lib/hooks/ai/useAssistantEffects';
+import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import { focusLabelOf } from '@/lib/utils/ai/focus';
+import type { AiChatMessage, AiFocus, AiThread } from '@/types/ai';
+import type { ScenarioPage } from '@/types/scenario';
 
-export type RenderProposal = (proposalId: string, helpers: { send?: (text: string) => void }) => ReactNode;
+export type RenderProposal = (
+    proposalId: string,
+    helpers: { send?: (text: string) => void }
+) => ReactNode;
 
 interface AiPanelProps {
-  campaignId: string;
-  mode: AiThreadMode;
-  focus: { value?: AiFocus; page?: ScenarioPage; onClear: () => void };
-  proposals?: { data?: ReturnType<typeof useAiProposals>; render?: RenderProposal; showPending?: boolean; review?: ReactNode };
-  campaignName?: string;
-  embedded?: boolean;
-  actions: { onClose: () => void };
+    campaignId: string;
+    mode: AiThreadMode;
+    focus: { value?: AiFocus; page?: ScenarioPage; onClear: () => void };
+    proposals?: {
+        data?: ReturnType<typeof useAiProposals>;
+        render?: RenderProposal;
+        showPending?: boolean;
+        review?: ReactNode;
+    };
+    campaignName?: string;
+    embedded?: boolean;
+    actions: { onClose: () => void };
 }
 
 interface ThreadChatProps {
-  campaignId: string;
-  thread: AiThread;
-  focus?: AiFocus;
-  focusLabel: string | null;
-  renderProposal?: RenderProposal;
-  actions: { onFinish: () => void; onClearFocus: () => void };
+    campaignId: string;
+    thread: AiThread;
+    focus?: AiFocus;
+    focusLabel: string | null;
+    renderProposal?: RenderProposal;
+    actions: { onFinish: () => void; onClearFocus: () => void };
 }
 
-function AiThreadChat({ campaignId, thread, focus, focusLabel, renderProposal, actions }: ThreadChatProps) {
-  const { query, messages } = useAiThreadMessages(campaignId, thread.id);
+function AiThreadChat({
+    campaignId,
+    thread,
+    focus,
+    focusLabel,
+    renderProposal,
+    actions,
+}: ThreadChatProps) {
+    const { query, messages } = useAiThreadMessages(campaignId, thread.id);
 
-  if (query.isError) return <p className="text-sm text-destructive">{query.error.message}</p>;
+    if (query.isError)
+        return (
+            <p className="text-sm text-destructive">{query.error.message}</p>
+        );
 
-  if (!messages) return <LoadingState rows={2} />;
+    if (!messages) return <LoadingState rows={2} />;
 
-  return <AiThreadChatBody key={thread.id} campaignId={campaignId} thread={thread} initialMessages={messages} focus={focus} focusLabel={focusLabel} renderProposal={renderProposal} actions={actions} />;
-}
-
-function AiThreadChatBody({ campaignId, thread, initialMessages, focus, focusLabel, renderProposal, actions }: ThreadChatProps & { initialMessages: AiChatMessage[] }) {
-  const t = useTranslations("ai");
-
-  const format = useFormatter();
-
-  const getFocus = useCallback(() => focus, [focus]);
-
-  const context = useAssistantContext(campaignId,thread.id,focus,`${thread.provider}:${thread.model}`);
-
-  const {consumeReceipt}=useAssistantEffects(campaignId);
-
-  const chat = useAiChat({ campaignId, thread, initialMessages, getFocus, getSessionContext:context.getSessionContext, onReceipt:consumeReceipt, onFinish: actions.onFinish });
-
-  const busy = chat.status === "streaming" || chat.status === "submitted";
-
-  const redo = () => { void chat.recover(); };
-
-  return (
-    <>
-      <div className="min-h-0 flex-1 overflow-y-auto py-2">
-        <AiMessageList campaignId={campaignId} messages={chat.messages} error={chat.error?.message} renderProposal={renderProposal && ((id) => renderProposal(id, { send: (text)=>void context.requestSend(text) }))} onRedo={redo} />
-      </div>
-      {chat.blockedUntil&&<p role="status" className="text-sm">{t("panel.blockedUntil", { time: format.dateTime(new Date(chat.blockedUntil), { timeStyle: "medium" }) })}</p>}
-      <AssistantContextDisclosure context={context} onSend={chat.send} />
-      <AiComposer mode={thread.mode} busy={busy} focusLabel={focusLabel} actions={{ onSend: (text)=>void context.requestSend(text), onStop: chat.stop, onClearFocus: actions.onClearFocus }} />
-    </>
-  );
-}
-
-function ResizeHandle({ panel }: { panel: ReturnType<typeof useAiPanelWidth> }) {
-  const t = useTranslations("ai");
-
-  const drag = useRef<{ startX: number; startWidth: number } | null>(null);
-
-  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-    drag.current = { startX: e.clientX, startWidth: panel.width };
-  };
-
-  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (drag.current) panel.setWidth(drag.current.startWidth + drag.current.startX - e.clientX);
-  };
-
-  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-
-    e.preventDefault();
-    panel.setWidth(panel.width + (e.key === "ArrowLeft" ? AI_PANEL_WIDTH.step : -AI_PANEL_WIDTH.step));
-  };
-
-  return (
-    <div
-      role="separator"
-      aria-orientation="vertical"
-      aria-label={t("panel.resizeLabel")}
-      aria-valuenow={panel.width}
-      aria-valuemin={AI_PANEL_WIDTH.min}
-      aria-valuemax={panel.max}
-      tabIndex={0}
-      className="absolute inset-y-0 -left-1 z-10 w-2 cursor-col-resize touch-none hover:bg-primary/30 focus-visible:bg-primary/40 focus-visible:outline-none"
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={() => (drag.current = null)}
-      onPointerCancel={() => (drag.current = null)}
-      onDoubleClick={panel.reset}
-      onKeyDown={onKeyDown}
-    />
-  );
-}
-
-export function AiPanel({ campaignId, campaignName, embedded = false, mode, focus, proposals, actions }: AiPanelProps) {
-  const t = useTranslations("ai");
-
-  const tr = useTranslator("ai");
-
-  const { value: focusValue, page, onClear: onClearFocus } = focus;
-
-  const { data: proposalData, render: renderProposal, showPending = false, review } = proposals ?? {};
-
-  const desktop = useMediaQuery(DESKTOP_QUERY);
-
-  const panel = useAiPanelWidth();
-
-  const { query: credentialsQuery, credentials } = useAiCredentials();
-
-  const { query: threadsQuery, threads: all, create, patch } = useAiThreads(campaignId, page?.id);
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const threads = all.filter((t) => t.mode === mode && (page || t.scenarioPageId === null));
-
-  const thread = threads.find((t) => t.id === selectedId) ?? threads[0] ?? null;
-
-  const providers = credentials.map((c) => c.provider);
-
-  const createThread = async () => {
-    const provider = providers[0];
-
-    if (!provider) return;
-
-    const created = await create({ mode, scenarioPageId: page?.id ?? null, provider });
-
-    if (created) setSelectedId(created.id);
-  };
-
-  const { refetch } = threadsQuery;
-
-  const onFinish = () => {
-    proposalData?.refresh();
-
-    if (thread && (!thread.title || thread.title === LEGACY_THREAD_TITLE)) void refetch();
-  };
-
-  let body: ReactNode;
-
-  if (credentialsQuery.isLoading || threadsQuery.isLoading) {
-    body = <LoadingState rows={2} />;
-  } else if (!providers.length && !thread) {
-    body = (
-      <EmptyState
-        icon={KeyRound}
-        title={t("panel.connect.title")}
-        description={t("panel.connect.description")}
-        action={
-          <Button asChild>
-            <Link href="/settings/ai">{t("panel.connect.action")}</Link>
-          </Button>
-        }
-      />
-    );
-  } else if (!thread) {
-    body = <EmptyState title={t("panel.noThreads", { mode: t(`modes.${mode}`) })} />;
-  } else {
-    body = <AiThreadChat campaignId={campaignId} thread={thread} focus={focusValue} focusLabel={focusLabelOf(tr, page, focusValue)} renderProposal={renderProposal} actions={{ onFinish, onClearFocus }} />;
-  }
-
-  const content = (
-    <div className="flex h-full min-h-0 flex-col gap-2">
-      {campaignName && <h1 className="font-semibold">{t("panel.heading", { name: campaignName })}</h1>}
-      {providers.length || thread ? (
-        <AiThreadHeader
-          campaignId={campaignId}
-          threads={threads}
-          thread={thread}
-          providers={providers}
-          actions={{
-            onSelect: setSelectedId,
-            onCreate: createThread,
-            onChangeModel: (provider: AiProvider, model?: string) => thread && patch(thread.id, { provider, model }),
-            onClose: actions.onClose,
-          }}
-        />
-      ) : null}
-      {showPending && !review && renderProposal && proposalData && proposalData.pending.length ? (
-        <section className="max-h-[40%] space-y-2 overflow-y-auto" aria-label={t("panel.proposals")}>
-          <h3 className="text-sm font-medium">{t("panel.proposals")}</h3>
-          {proposalData.pending.map((p) => (
-            <div key={p.id}>{renderProposal(p.id, {})}</div>
-          ))}
-        </section>
-      ) : null}
-      {review}
-      {body}
-    </div>
-  );
-
-  if (embedded) return <div className="@container flex h-full min-h-0 flex-col">{content}</div>;
-
-  if (!desktop) {
     return (
-      <ResponsiveDialog open onOpenChange={(open) => !open && actions.onClose()} title={t(`modes.${mode}`)} hud>
-        <div className="h-[70dvh]">{content}</div>
-      </ResponsiveDialog>
+        <AiThreadChatBody
+            key={thread.id}
+            campaignId={campaignId}
+            thread={thread}
+            initialMessages={messages}
+            focus={focus}
+            focusLabel={focusLabel}
+            renderProposal={renderProposal}
+            actions={actions}
+        />
     );
-  }
+}
 
-  return (
-    <aside
-      data-slot="ai-panel"
-      aria-label={t("panel.ariaLabel")}
-      style={{ "--ai-panel-w": `${panel.width}px`, width: "var(--ai-panel-w)" } as CSSProperties}
-      className="@container fixed bottom-0 right-0 top-[var(--app-header-h)] z-40 flex flex-col border-l bg-background p-3 shadow-xl"
-    >
-      <ResizeHandle panel={panel} />
-      {content}
-    </aside>
-  );
+function AiThreadChatBody({
+    campaignId,
+    thread,
+    initialMessages,
+    focus,
+    focusLabel,
+    renderProposal,
+    actions,
+}: ThreadChatProps & { initialMessages: AiChatMessage[] }) {
+    const t = useTranslations('ai');
+
+    const format = useFormatter();
+
+    const getFocus = useCallback(() => focus, [focus]);
+
+    const context = useAssistantContext(
+        campaignId,
+        thread.id,
+        focus,
+        `${thread.provider}:${thread.model}`
+    );
+
+    const { consumeReceipt } = useAssistantEffects(campaignId);
+
+    const chat = useAiChat({
+        campaignId,
+        thread,
+        initialMessages,
+        getFocus,
+        getSessionContext: context.getSessionContext,
+        onReceipt: consumeReceipt,
+        onFinish: actions.onFinish,
+    });
+
+    const busy = chat.status === 'streaming' || chat.status === 'submitted';
+
+    const redo = () => {
+        void chat.recover();
+    };
+
+    return (
+        <>
+            <div className="min-h-0 flex-1 overflow-y-auto py-2">
+                <AiMessageList
+                    campaignId={campaignId}
+                    messages={chat.messages}
+                    error={chat.error?.message}
+                    renderProposal={
+                        renderProposal &&
+                        ((id) =>
+                            renderProposal(id, {
+                                send: (text) => void context.requestSend(text),
+                            }))
+                    }
+                    onRedo={redo}
+                />
+            </div>
+            {chat.blockedUntil && (
+                <p role="status" className="text-sm">
+                    {t('panel.blockedUntil', {
+                        time: format.dateTime(new Date(chat.blockedUntil), {
+                            timeStyle: 'medium',
+                        }),
+                    })}
+                </p>
+            )}
+            <AssistantContextDisclosure context={context} onSend={chat.send} />
+            <AiComposer
+                mode={thread.mode}
+                busy={busy}
+                focusLabel={focusLabel}
+                actions={{
+                    onSend: (text) => void context.requestSend(text),
+                    onStop: chat.stop,
+                    onClearFocus: actions.onClearFocus,
+                }}
+            />
+        </>
+    );
+}
+
+function ResizeHandle({
+    panel,
+}: {
+    panel: ReturnType<typeof useAiPanelWidth>;
+}) {
+    const t = useTranslations('ai');
+
+    const drag = useRef<{ startX: number; startWidth: number } | null>(null);
+
+    const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+        e.currentTarget.setPointerCapture?.(e.pointerId);
+        drag.current = { startX: e.clientX, startWidth: panel.width };
+    };
+
+    const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+        if (drag.current)
+            panel.setWidth(
+                drag.current.startWidth + drag.current.startX - e.clientX
+            );
+    };
+
+    const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+
+        e.preventDefault();
+        panel.setWidth(
+            panel.width +
+                (e.key === 'ArrowLeft'
+                    ? AI_PANEL_WIDTH.step
+                    : -AI_PANEL_WIDTH.step)
+        );
+    };
+
+    return (
+        <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label={t('panel.resizeLabel')}
+            aria-valuenow={panel.width}
+            aria-valuemin={AI_PANEL_WIDTH.min}
+            aria-valuemax={panel.max}
+            tabIndex={0}
+            className="absolute inset-y-0 -left-1 z-10 w-2 cursor-col-resize touch-none hover:bg-primary/30 focus-visible:bg-primary/40 focus-visible:outline-none"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={() => (drag.current = null)}
+            onPointerCancel={() => (drag.current = null)}
+            onDoubleClick={panel.reset}
+            onKeyDown={onKeyDown}
+        />
+    );
+}
+
+export function AiPanel({
+    campaignId,
+    campaignName,
+    embedded = false,
+    mode,
+    focus,
+    proposals,
+    actions,
+}: AiPanelProps) {
+    const t = useTranslations('ai');
+
+    const tr = useTranslator('ai');
+
+    const { value: focusValue, page, onClear: onClearFocus } = focus;
+
+    const {
+        data: proposalData,
+        render: renderProposal,
+        showPending = false,
+        review,
+    } = proposals ?? {};
+
+    const desktop = useMediaQuery(DESKTOP_QUERY);
+
+    const panel = useAiPanelWidth();
+
+    const { query: credentialsQuery, credentials } = useAiCredentials();
+
+    const {
+        query: threadsQuery,
+        threads: all,
+        create,
+        patch,
+    } = useAiThreads(campaignId, page?.id);
+
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+
+    const threads = all.filter(
+        (t) => t.mode === mode && (page || t.scenarioPageId === null)
+    );
+
+    const thread =
+        threads.find((t) => t.id === selectedId) ?? threads[0] ?? null;
+
+    const providers = credentials.map((c) => c.provider);
+
+    const createThread = async () => {
+        const provider = providers[0];
+
+        if (!provider) return;
+
+        const created = await create({
+            mode,
+            scenarioPageId: page?.id ?? null,
+            provider,
+        });
+
+        if (created) setSelectedId(created.id);
+    };
+
+    const { refetch } = threadsQuery;
+
+    const onFinish = () => {
+        proposalData?.refresh();
+
+        if (thread && (!thread.title || thread.title === LEGACY_THREAD_TITLE))
+            void refetch();
+    };
+
+    let body: ReactNode;
+
+    if (credentialsQuery.isLoading || threadsQuery.isLoading) {
+        body = <LoadingState rows={2} />;
+    } else if (!providers.length && !thread) {
+        body = (
+            <EmptyState
+                icon={KeyRound}
+                title={t('panel.connect.title')}
+                description={t('panel.connect.description')}
+                action={
+                    <Button asChild>
+                        <Link href="/settings/ai">
+                            {t('panel.connect.action')}
+                        </Link>
+                    </Button>
+                }
+            />
+        );
+    } else if (!thread) {
+        body = (
+            <EmptyState
+                title={t('panel.noThreads', { mode: t(`modes.${mode}`) })}
+            />
+        );
+    } else {
+        body = (
+            <AiThreadChat
+                campaignId={campaignId}
+                thread={thread}
+                focus={focusValue}
+                focusLabel={focusLabelOf(tr, page, focusValue)}
+                renderProposal={renderProposal}
+                actions={{ onFinish, onClearFocus }}
+            />
+        );
+    }
+
+    const content = (
+        <div className="flex h-full min-h-0 flex-col gap-2">
+            {campaignName && (
+                <h1 className="font-semibold">
+                    {t('panel.heading', { name: campaignName })}
+                </h1>
+            )}
+            {providers.length || thread ? (
+                <AiThreadHeader
+                    campaignId={campaignId}
+                    threads={threads}
+                    thread={thread}
+                    providers={providers}
+                    actions={{
+                        onSelect: setSelectedId,
+                        onCreate: createThread,
+                        onChangeModel: (provider: AiProvider, model?: string) =>
+                            thread && patch(thread.id, { provider, model }),
+                        onClose: actions.onClose,
+                    }}
+                />
+            ) : null}
+            {showPending &&
+            !review &&
+            renderProposal &&
+            proposalData &&
+            proposalData.pending.length ? (
+                <section
+                    className="max-h-[40%] space-y-2 overflow-y-auto"
+                    aria-label={t('panel.proposals')}
+                >
+                    <h3 className="text-sm font-medium">
+                        {t('panel.proposals')}
+                    </h3>
+                    {proposalData.pending.map((p) => (
+                        <div key={p.id}>{renderProposal(p.id, {})}</div>
+                    ))}
+                </section>
+            ) : null}
+            {review}
+            {body}
+        </div>
+    );
+
+    if (embedded)
+        return (
+            <div className="@container flex h-full min-h-0 flex-col">
+                {content}
+            </div>
+        );
+
+    if (!desktop) {
+        return (
+            <ResponsiveDialog
+                open
+                onOpenChange={(open) => !open && actions.onClose()}
+                title={t(`modes.${mode}`)}
+                hud
+            >
+                <div className="h-[70dvh]">{content}</div>
+            </ResponsiveDialog>
+        );
+    }
+
+    return (
+        <aside
+            data-slot="ai-panel"
+            aria-label={t('panel.ariaLabel')}
+            style={
+                {
+                    '--ai-panel-w': `${panel.width}px`,
+                    width: 'var(--ai-panel-w)',
+                } as CSSProperties
+            }
+            className="@container fixed top-[var(--app-header-h)] right-0 bottom-0 z-40 flex flex-col border-l bg-background p-3 shadow-xl"
+        >
+            <ResizeHandle panel={panel} />
+            {content}
+        </aside>
+    );
 }

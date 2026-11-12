@@ -1,131 +1,177 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
 const impacts = vi.hoisted(() => ({ ids: new Set<string>() }));
 
-vi.mock("@/lib/hooks/battle/useFxImpacts", () => ({
-  useFxImpacts: () => (id: string) => (impacts.ids.has(id) ? { element: "physical", kind: "damage", delayMs: 0 } : null),
+vi.mock('@/lib/hooks/battle/useFxImpacts', () => ({
+    useFxImpacts: () => (id: string) =>
+        impacts.ids.has(id)
+            ? { element: 'physical', kind: 'damage', delayMs: 0 }
+            : null,
 }));
 
-import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ParticipantSide } from "@/lib/constants/battle";
-import { BattleSceneDataContext } from "@/lib/hooks/battle";
-import type { BattleSceneValue } from "@/lib/hooks/battle/types";
-import { render } from "@/lib/i18n/test/render-uk";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { buildDisplayEffects } from "@/lib/utils/battle/view";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { BattleScene } from "@/types/api";
+import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { ParticipantSide } from '@/lib/constants/battle';
+import { BattleSceneDataContext } from '@/lib/hooks/battle';
+import type { BattleSceneValue } from '@/lib/hooks/battle/types';
+import { render } from '@/lib/i18n/test/render-uk';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { buildDisplayEffects } from '@/lib/utils/battle/view';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleScene } from '@/types/api';
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
 const p = (id: string, hp: number) => {
-  const b = createMockParticipant();
+    const b = createMockParticipant();
 
-  return {
-    ...b,
-    basicInfo: { ...b.basicInfo, id, name: id, side: ParticipantSide.ALLY, controlledBy: "u" },
-    combatStats: { ...b.combatStats, currentHp: hp, maxHp: 50, armorClass: 15, status: "active" as const },
-  };
+    return {
+        ...b,
+        basicInfo: {
+            ...b.basicInfo,
+            id,
+            name: id,
+            side: ParticipantSide.ALLY,
+            controlledBy: 'u',
+        },
+        combatStats: {
+            ...b.combatStats,
+            currentHp: hp,
+            maxHp: 50,
+            armorClass: 15,
+            status: 'active' as const,
+        },
+    };
 };
 
 function sceneValue(participants: ReturnType<typeof p>[]) {
-  return {
-    battle: { initiativeOrder: participants, currentTurnIndex: 0, currentRound: 1, battleLog: [], rules: DEFAULT_RULES } as unknown as BattleScene,
-    viewer: { userId: "u", isDM: true, readOnly: false, canSeeEnemyHp: true },
-    effects: buildDisplayEffects(participants),
-  } as unknown as BattleSceneValue;
+    return {
+        battle: {
+            initiativeOrder: participants,
+            currentTurnIndex: 0,
+            currentRound: 1,
+            battleLog: [],
+            rules: DEFAULT_RULES,
+        } as unknown as BattleScene,
+        viewer: {
+            userId: 'u',
+            isDM: true,
+            readOnly: false,
+            canSeeEnemyHp: true,
+        },
+        effects: buildDisplayEffects(participants),
+    } as unknown as BattleSceneValue;
 }
 
 function wrap(participants: ReturnType<typeof p>[]) {
-  const value = sceneValue(participants);
+    const value = sceneValue(participants);
 
-  return function Wrapper({ children }: { children: ReactNode }) {
-    return <TooltipProvider><BattleSceneDataContext.Provider value={value}>{children}</BattleSceneDataContext.Provider></TooltipProvider>;
-  };
+    return function Wrapper({ children }: { children: ReactNode }) {
+        return (
+            <TooltipProvider>
+                <BattleSceneDataContext.Provider value={value}>
+                    {children}
+                </BattleSceneDataContext.Provider>
+            </TooltipProvider>
+        );
+    };
 }
 
 afterEach(() => {
-  cleanup();
-  impacts.ids.clear();
+    cleanup();
+    impacts.ids.clear();
 });
 
-describe("ParticipantDetails hit fx", () => {
-  it("floats the delta and anchors the portrait", () => {
-    impacts.ids.add("a");
+describe('ParticipantDetails hit fx', () => {
+    it('floats the delta and anchors the portrait', () => {
+        impacts.ids.add('a');
 
-    const Wrapper = wrap([p("a", 50)]);
+        const Wrapper = wrap([p('a', 50)]);
 
-    const { rerender, container } = render(<ParticipantDetails participant={p("a", 50)} />, { wrapper: Wrapper });
+        const { rerender, container } = render(
+            <ParticipantDetails participant={p('a', 50)} />,
+            { wrapper: Wrapper }
+        );
 
-    rerender(<ParticipantDetails participant={p("a", 40)} />);
+        rerender(<ParticipantDetails participant={p('a', 40)} />);
 
-    const float = screen.getByText("−10");
+        const float = screen.getByText('−10');
 
-    expect(float.className).toContain("animate-[hud-float");
+        expect(float.className).toContain('animate-[hud-float');
 
-    const anchor = container.querySelector('[data-fx-participant="a"]');
+        const anchor = container.querySelector('[data-fx-participant="a"]');
 
-    expect(anchor?.getAttribute("data-fx-anchor")).toBe("detail");
-  });
+        expect(anchor?.getAttribute('data-fx-anchor')).toBe('detail');
+    });
 
-  it("shows no delta after switching to another participant", () => {
-    impacts.ids.add("a");
+    it('shows no delta after switching to another participant', () => {
+        impacts.ids.add('a');
 
-    const Wrapper = wrap([p("a", 50), p("b", 30)]);
+        const Wrapper = wrap([p('a', 50), p('b', 30)]);
 
-    const { rerender } = render(<ParticipantDetails participant={p("a", 50)} />, { wrapper: Wrapper });
+        const { rerender } = render(
+            <ParticipantDetails participant={p('a', 50)} />,
+            { wrapper: Wrapper }
+        );
 
-    rerender(<ParticipantDetails participant={p("b", 30)} />);
+        rerender(<ParticipantDetails participant={p('b', 30)} />);
 
-    expect(screen.queryByText(/^[−+]\d+$/)).toBeNull();
-  });
+        expect(screen.queryByText(/^[−+]\d+$/)).toBeNull();
+    });
 
-  it("does not float when another participant is hit while this tile is shown", () => {
-    impacts.ids.add("b");
+    it('does not float when another participant is hit while this tile is shown', () => {
+        impacts.ids.add('b');
 
-    const tree = (b: ReturnType<typeof p>) => (
-      <TooltipProvider>
-        <BattleSceneDataContext.Provider value={sceneValue([p("a", 50), b])}>
-          <ParticipantDetails participant={p("a", 50)} />
-        </BattleSceneDataContext.Provider>
-      </TooltipProvider>
-    );
+        const tree = (b: ReturnType<typeof p>) => (
+            <TooltipProvider>
+                <BattleSceneDataContext.Provider
+                    value={sceneValue([p('a', 50), b])}
+                >
+                    <ParticipantDetails participant={p('a', 50)} />
+                </BattleSceneDataContext.Provider>
+            </TooltipProvider>
+        );
 
-    const { rerender } = render(tree(p("b", 30)));
+        const { rerender } = render(tree(p('b', 30)));
 
-    rerender(tree(p("b", 20)));
+        rerender(tree(p('b', 20)));
 
-    expect(screen.queryByText(/^[−+]\d+$/)).toBeNull();
-  });
+        expect(screen.queryByText(/^[−+]\d+$/)).toBeNull();
+    });
 
-  it("keeps the avatar zoom dialog open when the shown participant is hit", () => {
-    impacts.ids.add("a");
+    it('keeps the avatar zoom dialog open when the shown participant is hit', () => {
+        impacts.ids.add('a');
 
-    const withAvatar = (hp: number) => {
-      const a = p("a", hp);
+        const withAvatar = (hp: number) => {
+            const a = p('a', hp);
 
-      return { ...a, basicInfo: { ...a.basicInfo, avatar: "/a.png" } };
-    };
+            return { ...a, basicInfo: { ...a.basicInfo, avatar: '/a.png' } };
+        };
 
-    const Wrapper = wrap([withAvatar(50)]);
+        const Wrapper = wrap([withAvatar(50)]);
 
-    const { rerender } = render(<ParticipantDetails participant={withAvatar(50)} />, { wrapper: Wrapper });
+        const { rerender } = render(
+            <ParticipantDetails participant={withAvatar(50)} />,
+            { wrapper: Wrapper }
+        );
 
-    fireEvent.click(screen.getByRole("button", { name: /аватар у повний розмір/ }));
+        fireEvent.click(
+            screen.getByRole('button', { name: /аватар у повний розмір/ })
+        );
 
-    const dialogs = () => document.querySelectorAll('[role="dialog"]').length;
+        const dialogs = () =>
+            document.querySelectorAll('[role="dialog"]').length;
 
-    expect(dialogs()).toBeGreaterThan(0);
+        expect(dialogs()).toBeGreaterThan(0);
 
-    rerender(<ParticipantDetails participant={withAvatar(40)} />);
+        rerender(<ParticipantDetails participant={withAvatar(40)} />);
 
-    expect(screen.getByText("−10")).toBeTruthy();
-    expect(dialogs()).toBeGreaterThan(0);
-  });
+        expect(screen.getByText('−10')).toBeTruthy();
+        expect(dialogs()).toBeGreaterThan(0);
+    });
 });

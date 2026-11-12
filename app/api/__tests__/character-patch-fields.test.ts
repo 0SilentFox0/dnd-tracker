@@ -1,112 +1,227 @@
-import { NextResponse } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { prisma } from "@/lib/db";
-import { createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
-import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
-import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
-import * as apiAuth from "@/lib/utils/api/api-auth";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { prisma } from '@/lib/db';
+import { createCharacterSchema } from '@/lib/server/characters/core/create-character-schema';
+import { updateCharacterSchema } from '@/lib/server/characters/core/update-character-schema';
+import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
+import * as apiAuth from '@/lib/utils/api/api-auth';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireAuth: vi.fn(), requireDM: vi.fn() }));
-
-vi.mock("@/lib/db", () => ({
-  prisma: {
-    character: { findUnique: vi.fn(), update: vi.fn() },
-    campaign: { findUnique: vi.fn() },
-    race: { findFirst: vi.fn() },
-  },
+vi.mock('@/lib/server/notifications/notify', () => ({
+    notifyCharacterOwners: vi.fn().mockResolvedValue(0),
+}));
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireCampaignAccess: vi.fn(),
+    requireAuth: vi.fn(),
+    requireDM: vi.fn(),
 }));
 
-vi.mock("@/lib/supabase/avatar-storage", () => ({ resolveAvatarForPersistence: vi.fn(async (a: string | undefined) => ({ ok: true, avatar: a })) }));
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        character: { findUnique: vi.fn(), update: vi.fn() },
+        campaign: { findUnique: vi.fn() },
+        race: { findFirst: vi.fn() },
+    },
+}));
 
-describe("updateCharacterSchema", () => {
-  it("приймає primaryAbility і background", () => {
-    const parsed = updateCharacterSchema.parse({ primaryAbility: "dexterity", background: "Текст ==важливе==" });
+vi.mock('@/lib/supabase/avatar-storage', () => ({
+    resolveAvatarForPersistence: vi.fn(async (a: string | undefined) => ({
+        ok: true,
+        avatar: a,
+    })),
+}));
 
-    expect(parsed.primaryAbility).toBe("dexterity");
-    expect(parsed.background).toBe("Текст ==важливе==");
-  });
+describe('updateCharacterSchema', () => {
+    it('приймає primaryAbility і background', () => {
+        const parsed = updateCharacterSchema.parse({
+            primaryAbility: 'dexterity',
+            background: 'Текст ==важливе==',
+        });
 
-  it("цілі через PATCH не приймаються — лише через /goals з його правилами", () => {
-    const parsed = updateCharacterSchema.parse({ goals: [{ id: "g1", text: "Підробка", status: "active", author: "dm" }] }) as Record<string, unknown>;
+        expect(parsed.primaryAbility).toBe('dexterity');
+        expect(parsed.background).toBe('Текст ==важливе==');
+    });
 
-    expect(parsed.goals).toBeUndefined();
-  });
+    it('цілі через PATCH не приймаються — лише через /goals з його правилами', () => {
+        const parsed = updateCharacterSchema.parse({
+            goals: [
+                { id: 'g1', text: 'Підробка', status: 'active', author: 'dm' },
+            ],
+        }) as Record<string, unknown>;
 
-  it("null знімає основну характеристику, невідомий ключ — помилка", () => {
-    expect(updateCharacterSchema.parse({ primaryAbility: null }).primaryAbility).toBeNull();
-    expect(() => updateCharacterSchema.parse({ primaryAbility: "luck" })).toThrow();
-  });
+        expect(parsed.goals).toBeUndefined();
+    });
 
-  it("мертві поля відкидаються", () => {
-    const parsed = updateCharacterSchema.parse({ ideals: "x", hitDice: "1d8", proficiencyBonus: 2, maxHp: 30, currentHp: 20, tempHp: 5, spellcastingClass: "wizard" }) as Record<string, unknown>;
+    it('null знімає основну характеристику, невідомий ключ — помилка', () => {
+        expect(
+            updateCharacterSchema.parse({ primaryAbility: null }).primaryAbility
+        ).toBeNull();
+        expect(() =>
+            updateCharacterSchema.parse({ primaryAbility: 'luck' })
+        ).toThrow();
+    });
 
-    for (const key of ["ideals", "hitDice", "proficiencyBonus", "maxHp", "currentHp", "tempHp", "spellcastingClass"]) expect(parsed[key]).toBeUndefined();
-  });
+    it('мертві поля відкидаються', () => {
+        const parsed = updateCharacterSchema.parse({
+            ideals: 'x',
+            hitDice: '1d8',
+            proficiencyBonus: 2,
+            maxHp: 30,
+            currentHp: 20,
+            tempHp: 5,
+            spellcastingClass: 'wizard',
+        }) as Record<string, unknown>;
 
-  it("створення теж відкидає HP і клас заклинань", () => {
-    const parsed = createCharacterSchema.parse({ name: "Ліра", type: "player", controlledBy: "u", class: "Ranger", race: "Ельф", maxHp: 30, currentHp: 20, tempHp: 5, spellcastingClass: "wizard" }) as Record<string, unknown>;
+        for (const key of [
+            'ideals',
+            'hitDice',
+            'proficiencyBonus',
+            'maxHp',
+            'currentHp',
+            'tempHp',
+            'spellcastingClass',
+        ])
+            expect(parsed[key]).toBeUndefined();
+    });
 
-    for (const key of ["maxHp", "currentHp", "tempHp", "spellcastingClass"]) expect(parsed[key]).toBeUndefined();
-  });
+    it('створення теж відкидає HP і клас заклинань', () => {
+        const parsed = createCharacterSchema.parse({
+            name: 'Ліра',
+            type: 'player',
+            controlledBy: 'u',
+            class: 'Ranger',
+            race: 'Ельф',
+            maxHp: 30,
+            currentHp: 20,
+            tempHp: 5,
+            spellcastingClass: 'wizard',
+        }) as Record<string, unknown>;
 
-  it("порожні nullable-колонки з БД (null) не ламають збереження", () => {
-    const parsed = updateCharacterSchema.parse({ subclass: null, subrace: null, alignment: null, background: null, avatar: null });
+        for (const key of ['maxHp', 'currentHp', 'tempHp', 'spellcastingClass'])
+            expect(parsed[key]).toBeUndefined();
+    });
 
-    expect(parsed.subclass).toBeNull();
-    expect(parsed.background).toBeNull();
-  });
+    it('порожні nullable-колонки з БД (null) не ламають збереження', () => {
+        const parsed = updateCharacterSchema.parse({
+            subclass: null,
+            subrace: null,
+            alignment: null,
+            background: null,
+            avatar: null,
+        });
+
+        expect(parsed.subclass).toBeNull();
+        expect(parsed.background).toBeNull();
+    });
 });
 
-describe("PATCH archetype", () => {
-  const params = { params: Promise.resolve({ id: "camp", characterId: "ch" }) };
+describe('PATCH archetype', () => {
+    const params = {
+        params: Promise.resolve({ id: 'camp', characterId: 'ch' }),
+    };
 
-  const access = (userId: string, isDM: boolean) =>
-    ({ userId, isDM, campaign: { id: "camp", rules: DEFAULT_RULES, maxLevel: 20, allowPlayerEdit: true } }) as never;
+    const access = (userId: string, isDM: boolean) =>
+        ({
+            userId,
+            isDM,
+            campaign: {
+                id: 'camp',
+                rules: DEFAULT_RULES,
+                maxLevel: 20,
+                allowPlayerEdit: true,
+            },
+        }) as never;
 
-  const patch = async (body: unknown) => {
-    const { PATCH } = await import("@/app/api/campaigns/[id]/characters/[characterId]/route");
+    const patch = async (body: unknown) => {
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/characters/[characterId]/route'
+        );
 
-    return (await PATCH(new Request("http://x", { method: "PATCH", body: JSON.stringify(body) }), params)) as NextResponse;
-  };
+        return (await PATCH(
+            new Request('http://x', {
+                method: 'PATCH',
+                body: JSON.stringify(body),
+            }),
+            params
+        )) as NextResponse;
+    };
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ id: "ch", campaignId: "camp", level: 3, race: "Ельф", controlledBy: "owner", type: "player", archetype: "rogue" } as never);
-    vi.mocked(prisma.character.update).mockResolvedValue({ id: "ch" } as never);
-    vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ allowPlayerEdit: true } as never);
-    vi.mocked(prisma.race.findFirst).mockResolvedValue(null);
-  });
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            id: 'ch',
+            campaignId: 'camp',
+            level: 3,
+            race: 'Ельф',
+            controlledBy: 'owner',
+            type: 'player',
+            archetype: 'rogue',
+        } as never);
+        vi.mocked(prisma.character.update).mockResolvedValue({
+            id: 'ch',
+        } as never);
+        vi.mocked(prisma.campaign.findUnique).mockResolvedValue({
+            allowPlayerEdit: true,
+        } as never);
+        vi.mocked(prisma.race.findFirst).mockResolvedValue(null);
+    });
 
-  it("ДМ міняє архетип; невідомий ключ — 400", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", true));
+    it('ДМ міняє архетип; невідомий ключ — 400', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('dm', true)
+        );
 
-    expect((await patch({ archetype: "mage" })).status).toBe(200);
-    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).toMatchObject({ archetype: "mage" });
-    expect((await patch({ archetype: "bard" })).status).toBe(400);
-  });
+        expect((await patch({ archetype: 'mage' })).status).toBe(200);
+        expect(
+            vi.mocked(prisma.character.update).mock.calls[0][0].data
+        ).toMatchObject({ archetype: 'mage' });
+        expect((await patch({ archetype: 'bard' })).status).toBe(400);
+    });
 
-  it("власник не міняє архетип, решта правок проходить", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", false));
+    it('власник не міняє архетип, решта правок проходить', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('owner', false)
+        );
 
-    expect((await patch({ archetype: "mage", name: "Нове" })).status).toBe(200);
+        expect((await patch({ archetype: 'mage', name: 'Нове' })).status).toBe(
+            200
+        );
 
-    const data = vi.mocked(prisma.character.update).mock.calls[0][0].data as Record<string, unknown>;
+        const data = vi.mocked(prisma.character.update).mock.calls[0][0]
+            .data as Record<string, unknown>;
 
-    expect(data.name).toBe("Нове");
-    expect(data.archetype).toBeUndefined();
-  });
+        expect(data.name).toBe('Нове');
+        expect(data.archetype).toBeUndefined();
+    });
 
-  it("власник не міняє аватар: зовнішній URL не доходить до збереження", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("owner", false));
+    it('власник не міняє аватар: зовнішній URL не доходить до збереження', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('owner', false)
+        );
 
-    expect((await patch({ avatar: "http://169.254.169.254/x", name: "Нове" })).status).toBe(200);
-    expect(resolveAvatarForPersistence).toHaveBeenCalledWith(undefined, expect.anything());
-    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data.avatar).toBeUndefined();
-  });
+        expect(
+            (await patch({ avatar: 'http://169.254.169.254/x', name: 'Нове' }))
+                .status
+        ).toBe(200);
+        expect(resolveAvatarForPersistence).toHaveBeenCalledWith(
+            undefined,
+            expect.anything()
+        );
+        expect(
+            vi.mocked(prisma.character.update).mock.calls[0][0].data.avatar
+        ).toBeUndefined();
+    });
 });
 
 // Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }), withCampaignRuntimeWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
+vi.mock('@/lib/server/content/write', () => ({
+    withCampaignContentWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+    withCampaignRuntimeWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+}));
