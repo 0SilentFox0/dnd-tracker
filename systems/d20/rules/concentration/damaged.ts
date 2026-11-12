@@ -1,5 +1,7 @@
+import { concentrationCheck } from "./check";
+
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
+import { concentrationBroken, dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import type { DamagedHook } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";

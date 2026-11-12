@@ -5,7 +5,7 @@ import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { contest } from "@/lib/utils/battle/actions/grapple";
-import { beginConcentration, concentrationCheck } from "@/lib/utils/battle/concentration";
+import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { ABILITIES, byId, hp, MAP, percentOfAttack, perform, unit } from "@/lib/utils/battle/maneuvers/__tests__/fixtures";
@@ -14,6 +14,7 @@ import { rollSaveEnds } from "@/lib/utils/battle/saves/save-ends";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { concentrationCheck } from "@/systems/d20/rules/concentration/check";
 import type { BattleParticipant } from "@/types/battle";
 
 const legendaryOf = (p: BattleParticipant, resistLeft: number): BattleParticipant => ({ ...p, battleData: { ...p.battleData, legendary: { actions: 0, actionsLeft: 0, resistLeft } } });

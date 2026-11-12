@@ -4,7 +4,7 @@ import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/cons
 import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { beginConcentration, concentrationCheck, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive, uniqueCastId } from "@/lib/utils/battle/concentration";
+import { beginConcentration, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive, uniqueCastId } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { DEATH_SAVES_TIMED_KEY } from "@/lib/utils/battle/death-saves";
@@ -13,6 +13,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { concentrationCheck } from "@/systems/d20/rules/concentration/check";
 import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
